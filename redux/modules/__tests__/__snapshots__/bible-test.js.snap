@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bible Reducer should handle RESET_TEMP_SELECTED 1`] = `
+Object {
+  "highlightedVerses": Object {},
+  "selectedBook": Object {
+    "Chapitres": 50,
+    "Nom": "Genèse",
+    "Numero": 1,
+  },
+  "selectedChapter": 1,
+  "selectedVerse": 1,
+  "selectedVersion": "LSG",
+  "temp": Object {
+    "selectedBook": Object {
+      "Chapitres": 50,
+      "Nom": "Genèse",
+      "Numero": 1,
+    },
+    "selectedChapter": 1,
+    "selectedVerse": 1,
+  },
+}
+`;
+
+exports[`Bible Reducer should handle SET_ALL_AND_VALIDATE_SELECTED 1`] = `
+Object {
+  "highlightedVerses": Object {},
+  "selectedBook": Object {
+    "Chapitres": 34,
+    "Nom": "Deutéronome",
+    "Numero": 5,
+  },
+  "selectedChapter": 2,
+  "selectedVerse": 1,
+  "selectedVersion": "OST",
+  "temp": Object {
+    "selectedBook": Object {
+      "Chapitres": 34,
+      "Nom": "Deutéronome",
+      "Numero": 5,
+    },
+    "selectedChapter": 2,
+    "selectedVerse": 1,
+  },
+}
+`;
+
+exports[`Bible Reducer should handle VALIDATE_SELECTED 1`] = `
+Object {
+  "highlightedVerses": Object {},
+  "selectedBook": Object {
+    "Chapitres": 21,
+    "Nom": "Juges",
+    "Numero": 7,
+  },
+  "selectedChapter": 5,
+  "selectedVerse": 8,
+  "selectedVersion": "LSG",
+  "temp": Object {
+    "selectedBook": Object {
+      "Chapitres": 21,
+      "Nom": "Juges",
+      "Numero": 7,
+    },
+    "selectedChapter": 5,
+    "selectedVerse": 8,
+  },
+}
+`;
