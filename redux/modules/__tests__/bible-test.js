@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import reducer, * as BibleActions from '../bible'
 import booksDesc from '../../../assets/bible_versions/books-desc'
 

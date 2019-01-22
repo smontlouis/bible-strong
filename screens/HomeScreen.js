@@ -34,14 +34,10 @@ import * as BibleActions from '@modules/bible'
   BibleActions
 )
 class HomeScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Home'
-  }
-
   render () {
     return (
       <Container>
-        <StatusBar barStyle='light-content' />
+        <StatusBar barStyle='dark-content' />
         <Text>Test ici {this.props.app.chapter}</Text>
       </Container>
     )

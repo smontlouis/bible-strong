@@ -1,9 +1,12 @@
 import React from 'react'
 import { AppLoading, Font, Icon, FileSystem, Asset } from 'expo'
 import { Provider } from 'react-redux'
+import { ThemeProvider } from 'emotion-theming'
 
+import theme from './themes/default'
 import AppNavigator from './navigation/AppNavigator'
 import configureStore from './redux/store'
+import { initDB } from './helpers/database'
 
 export const store = configureStore()
 
@@ -31,6 +34,8 @@ export default class App extends React.Component {
       console.log(`Downloading ${dbUri} to ${dbPath}`)
       await FileSystem.downloadAsync(dbUri, dbPath)
     }
+
+    initDB()
 
     return Promise.all([
       Asset.loadAsync([
@@ -69,9 +74,11 @@ export default class App extends React.Component {
     }
 
     return (
-      <Provider store={store}>
-        <AppNavigator />
-      </Provider>
+      <ThemeProvider theme={theme}>
+        <Provider store={store}>
+          <AppNavigator />
+        </Provider>
+      </ThemeProvider>
     )
   }
 }
