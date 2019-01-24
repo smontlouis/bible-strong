@@ -1,53 +1,78 @@
 import React from 'react'
-import { View } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialIcons'
+import { Icon } from 'expo'
 import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
 import styled from '@emotion/native'
 
 import Box from '@ui/Box'
 import Link from '@components/Link'
+import Back from '@components/Back'
 
 const LinkBox = styled(Link)({
   flexDirection: 'row',
-  paddingLeft: 15
+  paddingRight: 15
 })
 
 const Text = styled.Text({
-  fontSize: 20
+  fontSize: 16,
+  fontWeight: 'bold'
 })
 
-const Header = ({ navigation, book, chapter, version }) => {
-  const { routeName } = navigation.state.routes[navigation.state.index]
+const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
+  height: 50,
+  alignItems: 'center',
+  borderBottomWidth: noBorder ? 0 : 1,
+  borderBottomColor: theme.colors.border,
+  paddingLeft: 15,
+  paddingRight: 15
+}))
 
-  if (routeName === 'Home') {
+const Header = ({
+  navigation,
+  hasBackButton,
+  isBible,
+  isModal,
+  title,
+  noBorder,
+  book,
+  chapter,
+  version
+}) => {
+  if (isBible) {
     return (
-      <Box flex row height='100%' alignItems='center'>
+      <HeaderBox noBorder={noBorder} row>
         <LinkBox route={'BibleSelect'}>
           <Text>
             {book.Nom} {chapter}
           </Text>
-          <Icon name='arrow-drop-down' size={20} />
+          <Icon.MaterialIcons name='arrow-drop-down' size={20} />
         </LinkBox>
-        <LinkBox route={'versionSelector'} params={{ version }}>
+        <LinkBox route={'VersionSelector'} params={{ version }}>
           <Text>{version}</Text>
-          <Icon name='arrow-drop-down' size={20} />
+          <Icon.MaterialIcons name='arrow-drop-down' size={20} />
         </LinkBox>
-      </Box>
+      </HeaderBox>
     )
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <Text>{routeName}</Text>
-    </View>
+    <HeaderBox noBorder={noBorder} row>
+      <Box flex justifyContent='center'>
+        {hasBackButton && (
+          <Back underlayColor='transparent' style={{ marginRight: 15 }}>
+            <Icon.AntDesign
+              name={isModal ? 'close' : 'arrowleft'}
+              size={isModal ? 20 : 20}
+              color='black'
+            />
+          </Back>
+        )}
+      </Box>
+      <Box flex center>
+        <Text>{title}</Text>
+      </Box>
+      <Box flex />
+    </HeaderBox>
   )
 }
 

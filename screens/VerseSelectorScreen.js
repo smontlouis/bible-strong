@@ -1,23 +1,11 @@
 import React, { Component } from 'react'
-import { ScrollView, StyleSheet } from 'react-native'
+import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
 import getDB from '@helpers/database'
 import * as BibleActions from '@modules/bible'
 import SelectorItem from '@components/SelectorItem'
-
-const styles: Object = StyleSheet.create({
-  container: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    padding: 20,
-    paddingLeft: 10,
-    paddingRight: 10
-  }
-})
 
 class VerseSelector extends Component {
   static navigationOptions = {
@@ -83,7 +71,17 @@ class VerseSelector extends Component {
     const array = Array(...Array(this.verses[0].count)).map((_, i) => i)
 
     return (
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          flexWrap: 'wrap',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          padding: 20,
+          paddingLeft: 10,
+          paddingRight: 10
+        }}
+      >
         {array.map(v => (
           <SelectorItem
             key={v}

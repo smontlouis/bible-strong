@@ -1,29 +1,30 @@
 import { createMaterialTopTabNavigator } from 'react-navigation'
-import BookSelector from '../screens/BookSelector'
-import ChapterSelector from '../screens/ChapterSelector'
-import VerseSelector from '../screens/VerseSelector'
+import BookSelectorScreen from '../screens/BookSelectorScreen'
+import ChapterSelectorScreen from '../screens/ChapterSelectorScreen'
+import VerseSelectorScreen from '../screens/VerseSelectorScreen'
+
+import theme from '../themes/default'
 
 const RouteConfigs = {
-  livres: { screen: BookSelector },
-  chapitre: { screen: ChapterSelector },
-  verset: { screen: VerseSelector }
+  Livres: { screen: BookSelectorScreen },
+  Chapitre: { screen: ChapterSelectorScreen },
+  Verset: { screen: VerseSelectorScreen }
 }
 
 const TabNavigatorConfig = {
+  optimizationsEnabled: true,
   swipeEnabled: true,
   animationEnabled: true,
   pressColor: 'black',
   tabBarOptions: {
-    activeTintColor: 'red',
-    inactiveTintColor: 'blue',
-    labelStyle: {
-      fontSize: 12
-    },
+    upperCaseLabel: false,
+    activeTintColor: theme.colors.primary,
+    inactiveTintColor: 'black',
     style: {
       backgroundColor: 'white'
     },
     indicatorStyle: {
-      backgroundColor: 'red'
+      backgroundColor: theme.colors.primary
     }
   }
 }

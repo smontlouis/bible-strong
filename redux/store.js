@@ -8,11 +8,13 @@ export default function configureStore () {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
   const store = composeEnhancers(applyMiddleware(thunk))(createStore)(reducer)
 
-  if (module.hot) {
-    module.hot.accept(() => {
-      const nextRootReducer = require('./modules/reducer').default
-      store.replaceReducer(nextRootReducer)
-    })
+  if (__DEV__) {
+    if (module.hot) {
+      module.hot.accept(() => {
+        const nextRootReducer = require('./modules/reducer').default
+        store.replaceReducer(nextRootReducer)
+      })
+    }
   }
 
   return store

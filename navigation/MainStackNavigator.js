@@ -1,9 +1,12 @@
-import { createStackNavigator } from 'react-navigation'
-
+import { createFluidNavigator } from 'react-navigation-fluid-transitions'
 import MainTabNavigator from './MainTabNavigator'
-import BibleSelect from '../screens/BibleSelect'
+import BibleSelectScreen from '../screens/BibleSelectScreen'
+import VersionSelectorScreen from '../screens/VersionSelectorScreen'
+import BibleVerseDetailScreen from '../screens/BibleVerseDetailScreen'
 
-export default createStackNavigator({
-  Main: { screen: MainTabNavigator },
-  BibleSelect: { screen: BibleSelect }
+export default createFluidNavigator({
+  MainTab: { screen: MainTabNavigator },
+  BibleSelect: { screen: BibleSelectScreen },
+  VersionSelector: { screen: VersionSelectorScreen },
+  BibleVerseDetail: { screen: BibleVerseDetailScreen }
 })

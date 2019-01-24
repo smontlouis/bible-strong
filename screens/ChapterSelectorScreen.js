@@ -1,23 +1,11 @@
 // @flow
 import React, { Component } from 'react'
 import { pure, compose } from 'recompose'
-import { ScrollView, StyleSheet } from 'react-native'
+import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import * as BibleActions from '@modules/bible'
 
 import SelectorItem from '@components/SelectorItem'
-
-const styles = StyleSheet.create({
-  container: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    padding: 20,
-    paddingLeft: 10,
-    paddingRight: 10
-  }
-})
 
 class ChapterSelector extends Component {
   static navigationOptions = {
@@ -25,7 +13,7 @@ class ChapterSelector extends Component {
   }
 
   onChapterChange = (chapter: number) => {
-    this.props.navigation.navigate('verset')
+    this.props.navigation.navigate('Verset')
     this.props.setTempSelectedChapter(chapter)
   }
 
@@ -35,7 +23,17 @@ class ChapterSelector extends Component {
     const array = Array(...Array(selectedBook.Chapitres)).map((_, i) => i)
 
     return (
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={{
+          flexWrap: 'wrap',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          padding: 20,
+          paddingLeft: 10,
+          paddingRight: 10
+        }}
+      >
         {array.map(c => (
           <SelectorItem
             key={c}

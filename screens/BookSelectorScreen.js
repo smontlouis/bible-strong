@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { FlatList, StyleSheet } from 'react-native'
+import { FlatList } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
@@ -8,21 +8,13 @@ import books from '@versions/books-desc'
 
 import BookSelectorItem from '@components/BookSelectorItem'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 10,
-    paddingBottom: 20
-  }
-})
-
 class BookSelector extends Component {
   static navigationOptions = {
     tabBarLabel: 'Livres'
   }
 
   onBookChange = book => {
-    this.props.navigation.navigate('chapitre')
+    this.props.navigation.navigate('Chapitre')
     this.props.setTempSelectedBook(book)
   }
 
@@ -40,7 +32,11 @@ class BookSelector extends Component {
             isSelected={book.Numero === selectedBook.Numero}
           />
         )}
-        style={styles.container}
+        style={{
+          flex: 1,
+          paddingTop: 10,
+          paddingBottom: 20
+        }}
       />
     )
   }
@@ -52,6 +48,6 @@ export default compose(
     state => ({
       selectedBook: state.bible.temp.selectedBook
     }),
-    { ...BibleActions }
+    BibleActions
   )
 )(BookSelector)

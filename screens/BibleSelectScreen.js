@@ -5,7 +5,7 @@ import * as BibleActions from '@modules/bible'
 import BibleSelectTabNavigator from '../navigation/BibleSelectTabNavigator'
 
 import Container from '@ui/Container'
-
+import Header from '@components/Header'
 @connect(
   null,
   BibleActions
@@ -22,7 +22,7 @@ class BibleSelect extends Component {
     const { navigation } = this.props
     return (
       <Container>
-        {/* <Header title='Livres' /> */}
+        <Header hasBackButton noBorder title='Références' />
         <BibleSelectTabNavigator
           screenProps={{ mainNavigation: navigation }}
           navigation={navigation}

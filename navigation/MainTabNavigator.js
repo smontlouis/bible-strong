@@ -2,18 +2,17 @@ import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 
 import TabBarIcon from '../components/TabBarIcon'
-import Header from '../components/Header'
 
-import HomeScreen from '../screens/HomeScreen'
+import BibleScreen from '../screens/BibleScreen'
 import LinksScreen from '../screens/LinksScreen'
 import SettingsScreen from '../screens/SettingsScreen'
 
 export default createMaterialBottomTabNavigator(
   {
-    Home: {
-      screen: HomeScreen,
+    Bible: {
+      screen: BibleScreen,
       navigationOptions: {
-        title: 'Home',
+        title: 'Bible',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='book-open' />
         )
@@ -39,20 +38,13 @@ export default createMaterialBottomTabNavigator(
     }
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Bible',
     shifting: true,
     activeColor: '#0ED3B9',
     barStyle: {
       backgroundColor: '#fff',
       borderTopWidth: 1,
       borderTopColor: 'rgb(230,230,230)'
-    },
-    navigationOptions: ({ navigation }) => ({
-      headerTitle: <Header navigation={navigation} />,
-      headerStyle: {
-        backgroundColor: '#fff'
-      },
-      headerTintColor: '#f00'
-    })
+    }
   }
 )
