@@ -4,8 +4,6 @@ import { ScrollView, View, StyleSheet, Button } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
-import getDB from '@helpers/database'
-
 import BibleVerse from '@components/BibleVerse'
 import Loading from '@components/Loading'
 // import BibleFooter from '@components/BibleFooter'
@@ -43,7 +41,6 @@ class BibleViewer extends Component {
   }
 
   componentWillMount () {
-    this.DB = getDB()
     setTimeout(() => this.loadVerses(), 500)
     this.props.clearSelectedVerses()
   }
@@ -95,40 +92,18 @@ class BibleViewer extends Component {
     let tempVerses
     this.versesMeasure = {}
 
-    if (version === 'STRONG') {
-      const part = book.Numero > 39 ? 'LSGSNT2' : 'LSGSAT2'
-      this.setState({ isLoading: true })
-      this.db.transaction(
-        tx => {
-          tx.executeSql(
-            `SELECT * FROM ${part} WHERE LIVRE = ${
-              book.Numero
-            } AND CHAPITRE  = ${chapter}`,
-            [],
-            (_, { rows: { _array } }) => {
-              tempVerses = _array
-              this.setState({ isLoading: false, verses: tempVerses })
-            },
-            (txObj, error) => console.log(error)
-          )
-        },
-        error => console.log('something went wrong:' + error),
-        () => console.log('db transaction is a success')
-      )
-    } else {
-      this.setState({ isLoading: true })
-      loadBible(version).then(res => {
-        const versesByChapter = res[book.Numero][chapter]
-        tempVerses = []
-        tempVerses = Object.keys(versesByChapter).map(v => ({
-          Verset: v,
-          Texte: versesByChapter[v],
-          Livre: book.Numero,
-          Chapitre: chapter
-        }))
-        this.setState({ isLoading: false, verses: tempVerses })
-      })
-    }
+    this.setState({ isLoading: true })
+    loadBible(version).then(res => {
+      const versesByChapter = res[book.Numero][chapter]
+      tempVerses = []
+      tempVerses = Object.keys(versesByChapter).map(v => ({
+        Verset: v,
+        Texte: versesByChapter[v],
+        Livre: book.Numero,
+        Chapitre: chapter
+      }))
+      this.setState({ isLoading: false, verses: tempVerses })
+    })
   }
 
   renderVerses = () => {

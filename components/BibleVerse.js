@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { Icon } from 'expo'
 import { Transition } from 'react-navigation-fluid-transitions'
 
+import Text from '@ui/Text'
 import * as BibleActions from '@modules/bible'
 
 const Container = styled.TouchableOpacity({
@@ -34,14 +35,14 @@ const VersetWrapper = styled.View(({ isHighlight, isSelected, theme }) => ({
   //   : {})
 }))
 
-const NumberText = styled.Text({
+const NumberText = styled(Text)({
   marginTop: 0,
   fontSize: 9,
   justifyContent: 'flex-end',
   marginRight: 3
 })
 
-const VerseText = styled.Text(({ isSelected, theme }) => ({
+const VerseText = styled(Text)(({ isSelected, theme }) => ({
   flex: 1,
   ...(isSelected
     ? {
@@ -58,22 +59,14 @@ const BookMarkIcon = styled(Icon)({
 })
 
 class BibleVerse extends Component {
-  state = {
-    element: ''
-  }
-
   componentWillMount () {
-    const { verse, getPosition, version } = this.props
-
-    this.formatVerse(verse, version)
-    if (getPosition) setTimeout(this.getVerseMeasure)
+    if (this.props.getPosition) setTimeout(this.getVerseMeasure)
   }
 
   onVersePress = () => {
     const { verse } = this.props
     this.props.navigation.navigate('BibleVerseDetail', {
-      verse,
-      text: this.state.element
+      verse
     })
     // const {
     //   verse: { Livre, Chapitre, Verset },
@@ -98,25 +91,16 @@ class BibleVerse extends Component {
     }
   }
 
-  formatVerse (verse, version) {
-    // if (version === 'LSG' || version === 'STRONG') {
-    //   verseToStrong(verse, version)
-    //     .then(element => this.setState({ element }))
-    //     .catch(err => console.log(err))
-    // } else {
-    this.setState({ element: verse.Texte })
-    // }
-  }
-
   render () {
     const {
-      verse: { Livre, Chapitre, Verset },
+      verse: { Livre, Chapitre, Verset, Texte },
       isSelected,
       isHighlighted,
       isFavorited
     } = this.props
+    // shared={`${Livre}-${Chapitre}-${Verset}`}
     return (
-      <Transition shared={`${Livre}-${Chapitre}-${Verset}`}>
+      <Transition appear='right'>
         <Container onPress={this.onVersePress} activeOpacity={0.8}>
           {Verset && (
             <VersetWrapper
@@ -139,7 +123,7 @@ class BibleVerse extends Component {
             </VersetWrapper>
           )}
           <VerseText isHighlight={isHighlighted} isSelected={isSelected}>
-            {this.state.element}
+            {Texte}
           </VerseText>
         </Container>
       </Transition>
