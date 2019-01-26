@@ -43,8 +43,11 @@ export default class App extends React.Component {
         require('./assets/images/robot-prod.png')
       ]),
       Font.loadAsync({
-        ...Icon.Ionicons.font
-        // 'alternate-gothic': require('./assets/fonts/alternategothic.ttf'),
+        ...Icon.Ionicons.font,
+        'meta-serif-bold-italic': require('./assets/fonts/metaserif_bold_italic.otf'),
+        'meta-serif-light-italic': require('./assets/fonts/metaserif_light_italic.otf'),
+        'meta-serif-light': require('./assets/fonts/metaserif_light.otf'),
+        'meta-serif': require('./assets/fonts/metaserif.otf')
       })
     ])
   }

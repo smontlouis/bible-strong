@@ -1,14 +1,25 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { Transition } from 'react-navigation-fluid-transitions'
+import Carousel from 'react-native-snap-carousel'
 
-import getDB from '@helpers/database'
 import verseToStrong from '@helpers/verseToStrong'
+import loadStrongReferences from '@helpers/loadStrongReferences'
+import loadStrongVerse from '@helpers/loadStrongVerse'
 
 import Container from '@ui/Container'
 import Box from '@ui/Box'
-import Text from '@ui/Text'
+import Paragraph from '@ui/Paragraph'
 import Header from '@components/Header'
+import StrongCard from '@components/StrongCard'
+import Loading from '@components/Loading'
+
+import { viewportWidth, wp } from '@helpers/utils'
+
+const slideWidth = wp(60)
+const itemHorizontalMargin = wp(2)
+const sliderWidth = viewportWidth
+const itemWidth = slideWidth + itemHorizontalMargin * 2
 
 const VerseText = styled.View(() => ({
   flex: 1,
@@ -25,7 +36,7 @@ const VersetWrapper = styled.View(({ isHighlight, isSelected, theme }) => ({
   alignItems: 'flex-end'
 }))
 
-const NumberText = styled(Text)({
+const NumberText = styled(Paragraph)({
   marginTop: 0,
   fontSize: 9,
   justifyContent: 'flex-end',
@@ -39,63 +50,83 @@ const StyledVerse = styled.View({
   flexDirection: 'row'
 })
 
-export default class LinksScreen extends React.Component {
-  state = { formattedVerse: '' }
-  componentWillMount () {
-    this.loadStrongVerse()
+export default class BibleVerseDetailScreen extends React.Component {
+  state = {
+    formattedVerse: '',
+    isCarouselLoading: true,
+    strongReferences: []
   }
 
-  loadStrongVerse = () => {
+  async componentDidMount () {
+    const { verse } = this.props.navigation.state.params
+    const strongVerse = await loadStrongVerse(verse)
+    this.formatVerse(strongVerse)
+  }
+
+  formatVerse = async strongVerse => {
     const {
-      verse: { Livre, Chapitre, Verset }
+      verse: { Livre }
     } = this.props.navigation.state.params
-
-    const part = Livre > 39 ? 'LSGSNT2' : 'LSGSAT2'
-    this.setState({ isLoading: true })
-    getDB().transaction(
-      tx => {
-        tx.executeSql(
-          `SELECT Texte 
-            FROM ${part}
-            WHERE LIVRE = ${Livre}
-            AND CHAPITRE  = ${Chapitre}
-            AND VERSET = ${Verset}`,
-          [],
-          (_, { rows: { _array } }) => {
-            this.formatVerse(_array[0])
-          },
-          (txObj, error) => console.log(error)
-        )
-      },
-      error => console.log('something went wrong:' + error),
-      () => console.log('db transaction is a success')
-    )
+    const { formattedTexte, references } = await verseToStrong(strongVerse)
+    this.setState({ formattedTexte }, async () => {
+      const strongReferences = await loadStrongReferences(references, Livre)
+      this.setState({ isCarouselLoading: false, strongReferences })
+    })
   }
 
-  formatVerse (verse) {
-    verseToStrong(verse)
-      .then(v => this.setState({ formattedVerse: v }))
-      .catch(err => console.log(err))
-  }
+  renderItem = ({ item, index }) => (
+    <StrongCard strongReference={item} index={index} />
+  )
 
   render () {
     const {
       verse: { Livre, Chapitre, Verset, Texte }
     } = this.props.navigation.state.params
+    const { isCarouselLoading } = this.state
+
     return (
       <Container>
         <Header hasBackButton isModal title='Détails' />
-        <Box paddingTop={20}>
-          <Transition appear='left'>
+        <Box paddingTop={20} flex>
+          <Transition shared={`${Livre}-${Chapitre}-${Verset}`}>
             <StyledVerse>
               <VersetWrapper>
                 <NumberText>{Verset}</NumberText>
               </VersetWrapper>
               <VerseText>
-                {this.state.formattedVerse || <Text>{Texte}</Text>}
+                {this.state.formattedTexte || <Paragraph>{Texte}</Paragraph>}
               </VerseText>
             </StyledVerse>
           </Transition>
+          <Box flex>
+            {isCarouselLoading && <Loading />}
+            {!isCarouselLoading && (
+              <Carousel
+                ref={c => {
+                  this._carousel = c
+                }}
+                data={this.state.strongReferences}
+                renderItem={this.renderItem}
+                activeSlideAlignment='start'
+                sliderWidth={sliderWidth}
+                itemWidth={itemWidth}
+                inactiveSlideScale={1}
+                inactiveSlideOpacity={0.3}
+                containerCustomStyle={{
+                  marginTop: 15,
+                  marginLeft: 20,
+                  overflow: 'visible',
+                  flex: 1
+                }}
+                contentContainerCustomStyle={{ paddingVertical: 10 }}
+                // slideStyle={{ flex: 1 }}
+                // enableMomentum
+                // decelerationRate={0.1}
+                useScrollView={false}
+                initialNumToRender={2}
+              />
+            )}
+          </Box>
         </Box>
       </Container>
     )

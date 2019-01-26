@@ -4,9 +4,9 @@ import { pure, compose } from 'recompose'
 import { withNavigation } from 'react-navigation'
 import styled from '@emotion/native'
 
-import Text from '@ui/Text'
+import Paragraph from '@ui/Paragraph'
 
-const StyledText = styled(Text)(({ isFromConcordance, theme }) => ({
+const StyledText = styled(Paragraph)(({ isFromConcordance, theme }) => ({
   backgroundColor: theme.colors.border,
   paddingLeft: 3,
   paddingRight: 3,

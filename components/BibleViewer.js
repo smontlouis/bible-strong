@@ -87,23 +87,23 @@ class BibleViewer extends Component {
     }
   }
 
-  loadVerses = () => {
+  loadVerses = async () => {
     const { book, chapter, version } = this.props
     let tempVerses
     this.versesMeasure = {}
 
     this.setState({ isLoading: true })
-    loadBible(version).then(res => {
-      const versesByChapter = res[book.Numero][chapter]
-      tempVerses = []
-      tempVerses = Object.keys(versesByChapter).map(v => ({
-        Verset: v,
-        Texte: versesByChapter[v],
-        Livre: book.Numero,
-        Chapitre: chapter
-      }))
-      this.setState({ isLoading: false, verses: tempVerses })
-    })
+
+    const res = await loadBible(version)
+    const versesByChapter = res[book.Numero][chapter]
+    tempVerses = []
+    tempVerses = Object.keys(versesByChapter).map(v => ({
+      Verset: v,
+      Texte: versesByChapter[v],
+      Livre: book.Numero,
+      Chapitre: chapter
+    }))
+    this.setState({ isLoading: false, verses: tempVerses })
   }
 
   renderVerses = () => {

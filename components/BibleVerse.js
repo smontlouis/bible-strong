@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { Icon } from 'expo'
 import { Transition } from 'react-navigation-fluid-transitions'
 
-import Text from '@ui/Text'
+import Paragraph from '@ui/Paragraph'
 import * as BibleActions from '@modules/bible'
 
 const Container = styled.TouchableOpacity({
@@ -35,14 +35,14 @@ const VersetWrapper = styled.View(({ isHighlight, isSelected, theme }) => ({
   //   : {})
 }))
 
-const NumberText = styled(Text)({
+const NumberText = styled(Paragraph)({
   marginTop: 0,
   fontSize: 9,
   justifyContent: 'flex-end',
   marginRight: 3
 })
 
-const VerseText = styled(Text)(({ isSelected, theme }) => ({
+const VerseText = styled(Paragraph)(({ isSelected, theme }) => ({
   flex: 1,
   ...(isSelected
     ? {
@@ -98,9 +98,8 @@ class BibleVerse extends Component {
       isHighlighted,
       isFavorited
     } = this.props
-    // shared={`${Livre}-${Chapitre}-${Verset}`}
     return (
-      <Transition appear='right'>
+      <Transition shared={`${Livre}-${Chapitre}-${Verset}`}>
         <Container onPress={this.onVersePress} activeOpacity={0.8}>
           {Verset && (
             <VersetWrapper

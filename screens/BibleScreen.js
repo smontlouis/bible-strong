@@ -25,13 +25,17 @@ class BibleScreen extends React.Component {
   }
 
   // If book, chapter, verse, version is received through params
-  componentDidMount () {
+  async componentDidMount () {
     const { book, chapter, verse, version } =
       this.props.navigation.state.params || {}
     if (book || chapter || verse) {
-      this.props
-        .setAllAndValidateSelected({ book, chapter, verse, version })
-        .then(() => this.setState({ isLoading: false }))
+      await this.props.setAllAndValidateSelected({
+        book,
+        chapter,
+        verse,
+        version
+      })
+      this.setState({ isLoading: false })
     } else {
       this.setState({ isLoading: false })
     }
