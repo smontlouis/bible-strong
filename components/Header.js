@@ -1,4 +1,5 @@
 import React from 'react'
+import { Platform } from 'react-native'
 import { Icon } from 'expo'
 import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
@@ -19,6 +20,7 @@ const Text = styled.Text({
 })
 
 const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
+  marginTop: Platform.OS === 'ios' ? 0 : 25,
   height: 50,
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
@@ -68,7 +70,7 @@ const Header = ({
           </Back>
         )}
       </Box>
-      <Box flex center>
+      <Box flex={2} center>
         <Text>{title}</Text>
       </Box>
       <Box flex />

@@ -4,6 +4,7 @@ import books from '@versions/books-desc'
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
 const SET_TEMP_SELECTED_CHAPTER = 'bible/SET_TEMP_SELECTED_CHAPTER'
 const SET_TEMP_SELECTED_VERSE = 'bible/SET_TEMP_SELECTED_VERSE'
+const SET_SELECTED_VERSE = 'bible/SET_SELECTED_VERSE'
 const VALIDATE_SELECTED = 'bible/VALIDATE_SELECTED'
 const SET_ALL_AND_VALIDATE_SELECTED = 'bible/SET_ALL_AND_VALIDATE_SELECTED'
 const RESET_TEMP_SELECTED = 'bible/RESET_TEMP_SELECTED'
@@ -48,6 +49,10 @@ export default produce((draft, action) => {
     }
     case SET_TEMP_SELECTED_VERSE: {
       draft.temp.selectedVerse = action.verse
+      return
+    }
+    case SET_SELECTED_VERSE: {
+      draft.selectedVerse = action.verse
       return
     }
     case SET_ALL_AND_VALIDATE_SELECTED: {
@@ -181,6 +186,13 @@ export function setTempSelectedChapter (chapter) {
 export function setTempSelectedVerse (verse) {
   return {
     type: SET_TEMP_SELECTED_VERSE,
+    verse
+  }
+}
+
+export function setSelectedVerse (verse) {
+  return {
+    type: SET_SELECTED_VERSE,
     verse
   }
 }

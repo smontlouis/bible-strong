@@ -21,25 +21,11 @@ const Container = styled(Box)({
   paddingBottom: 18
 })
 
-const Shadow = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: itemHorizontalMargin,
-  right: itemHorizontalMargin,
-  bottom: 18,
-  shadowColor: '#000',
-  shadowOpacity: 0.25,
-  shadowOffset: { width: 0, height: 10 },
-  shadowRadius: 10,
-  borderRadius: 8,
-  backgroundColor: 'white'
-})
-
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.secondary
+  backgroundColor: theme.colors.primary
 }))
 
 const ViewItem = styled.View(() => ({
@@ -61,14 +47,14 @@ class StrongCard extends React.Component {
   async componentDidMount () {}
   render () {
     const {
-      strongReference: { Mot, Phonetique, Definition, Type, LSG }
+      strongReference: { Code, Mot, Phonetique, Definition, LSG }
     } = this.props
     return (
       <Container overflow>
         {/* <Shadow overflow /> */}
         <ScrollView style={{ marginBottom: 15 }}>
-          <Box>
-            <Text title fontSize={22}>
+          <Box paddingTop={10}>
+            <Text title fontSize={18}>
               {capitalize(Mot)}
               {!!Phonetique && (
                 <Text title darkGrey fontSize={16}>
@@ -77,15 +63,10 @@ class StrongCard extends React.Component {
                 </Text>
               )}
             </Text>
-            {!!Type && (
-              <Text titleItalic darkGrey>
-                {Type}
-              </Text>
-            )}
             <TitleBorder />
             {!!Definition && (
               <ViewItem>
-                <SubTitle darkGrey>Définition</SubTitle>
+                <SubTitle darkGrey>Définition - {Code}</SubTitle>
                 <StylizedHTMLView
                   htmlStyle={{
                     p: {

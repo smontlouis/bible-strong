@@ -77,12 +77,12 @@ class BibleViewer extends Component {
     const { verse } = this.props
     if (this.versesMeasure[`verse${verse}`] && this.scrollView) {
       const scrollHeight = this.contentHeight - this.scrollViewHeight + 20
-      const y = verse === 1 ? 0 : this.versesMeasure[`verse${verse}`].py - 75
+      const y = verse === 1 ? 0 : this.versesMeasure[`verse${verse}`].py - 100
 
       this.scrollView.scrollTo({
         x: 0,
         y: y >= scrollHeight ? scrollHeight : y,
-        animated: false
+        animated: true
       })
     }
   }

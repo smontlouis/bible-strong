@@ -15,6 +15,8 @@ import StrongCard from '@components/StrongCard'
 import Loading from '@components/Loading'
 
 import { viewportWidth, wp } from '@helpers/utils'
+import formatVerseContent from '@helpers/formatVerseContent'
+import { CarouselProvider } from '@helpers/CarouselContext'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -43,18 +45,19 @@ const NumberText = styled(Paragraph)({
   marginRight: 3
 })
 
-const StyledVerse = styled.View({
+const StyledVerse = styled.View(({ theme }) => ({
   paddingLeft: 0,
   paddingRight: 10,
   marginBottom: 5,
   flexDirection: 'row'
-})
+}))
 
 export default class BibleVerseDetailScreen extends React.Component {
   state = {
     formattedVerse: '',
     isCarouselLoading: true,
-    strongReferences: []
+    strongReferences: [],
+    currentStrongReference: 0
   }
 
   async componentDidMount () {
@@ -70,7 +73,24 @@ export default class BibleVerseDetailScreen extends React.Component {
     const { formattedTexte, references } = await verseToStrong(strongVerse)
     this.setState({ formattedTexte }, async () => {
       const strongReferences = await loadStrongReferences(references, Livre)
-      this.setState({ isCarouselLoading: false, strongReferences })
+      this.setState({
+        isCarouselLoading: false,
+        strongReferences,
+        currentStrongReference: strongReferences[0]
+      })
+    })
+  }
+
+  findRefIndex = ref =>
+    this.state.strongReferences.findIndex(r => r.Code === Number(ref))
+
+  goToCarouselItem = ref => {
+    this._carousel.snapToItem(this.findRefIndex(ref))
+  }
+
+  onSnapToItem = index => {
+    this.setState({
+      currentStrongReference: this.state.strongReferences[index]
     })
   }
 
@@ -80,22 +100,32 @@ export default class BibleVerseDetailScreen extends React.Component {
 
   render () {
     const {
+      verse,
       verse: { Livre, Chapitre, Verset, Texte }
     } = this.props.navigation.state.params
     const { isCarouselLoading } = this.state
 
+    const { title: headerTitle } = formatVerseContent([verse])
+
     return (
       <Container>
-        <Header hasBackButton isModal title='Détails' />
-        <Box paddingTop={20} flex>
+        <Header noBorder hasBackButton isModal title={headerTitle} />
+        <Box paddingTop={6} flex>
           <Transition shared={`${Livre}-${Chapitre}-${Verset}`}>
             <StyledVerse>
               <VersetWrapper>
                 <NumberText>{Verset}</NumberText>
               </VersetWrapper>
-              <VerseText>
-                {this.state.formattedTexte || <Paragraph>{Texte}</Paragraph>}
-              </VerseText>
+              <CarouselProvider
+                value={{
+                  currentStrongReference: this.state.currentStrongReference,
+                  goToCarouselItem: this.goToCarouselItem
+                }}
+              >
+                <VerseText>
+                  {this.state.formattedTexte || <Paragraph>{Texte}</Paragraph>}
+                </VerseText>
+              </CarouselProvider>
             </StyledVerse>
           </Transition>
           <Box flex>
@@ -114,16 +144,23 @@ export default class BibleVerseDetailScreen extends React.Component {
                 inactiveSlideOpacity={0.3}
                 containerCustomStyle={{
                   marginTop: 15,
-                  marginLeft: 20,
+                  paddingLeft: 20,
                   overflow: 'visible',
-                  flex: 1
+                  flex: 1,
+                  borderTopColor: 'rgb(230,230,230)',
+                  borderTopWidth: 1
                 }}
-                contentContainerCustomStyle={{ paddingVertical: 10 }}
+                contentContainerCustomStyle={
+                  {
+                    // paddingVertical: 10
+                  }
+                }
+                onSnapToItem={this.onSnapToItem}
+                useScrollView={false}
+                initialNumToRender={2}
                 // slideStyle={{ flex: 1 }}
                 // enableMomentum
                 // decelerationRate={0.1}
-                useScrollView={false}
-                initialNumToRender={2}
               />
             )}
           </Box>
