@@ -6,7 +6,7 @@ import { pure, compose } from 'recompose'
 
 import BibleVerse from '@components/BibleVerse'
 import Loading from '@components/Loading'
-// import BibleFooter from '@components/BibleFooter'
+import BibleFooter from '@components/BibleFooter'
 // import SelectedVersesModal from '@components/SelectedVersesModal'
 
 import loadBible from '@helpers/loadBible'
@@ -176,8 +176,7 @@ class BibleViewer extends Component {
             />
           )}
         </ScrollView>
-        {/* {
-          !arrayVerses &&
+        {!arrayVerses && (
           <BibleFooter
             disabled={isLoading}
             book={book}
@@ -185,8 +184,8 @@ class BibleViewer extends Component {
             goToPrevChapter={goToPrevChapter}
             goToNextChapter={goToNextChapter}
           />
-        }
-        <SelectedVersesModal verses={this.state.verses} /> */}
+        )}
+        {/* <SelectedVersesModal verses={this.state.verses} /> */}
       </View>
     )
   }
