@@ -12,6 +12,7 @@ import StylizedHTMLView from '@components/StylizedHTMLView'
 
 import { wp, hp } from '@helpers/utils'
 import capitalize from '@helpers/capitalize'
+import truncate from '@helpers/truncate'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -56,6 +57,7 @@ class StrongCard extends React.Component {
   render () {
     const {
       navigation,
+      book,
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG },
       strongReference
     } = this.props
@@ -65,19 +67,20 @@ class StrongCard extends React.Component {
         <Box paddingTop={10}>
           <Transition shared={Code}>
             <Box>
-              <Box row alignItems='center'>
+              <Box row alignItems='flex-start'>
                 <Text title fontSize={22} flex>
-                  {capitalize(Mot)}
+                  {truncate(capitalize(Mot), 7)}
                   {!!Phonetique && (
                     <Text title darkGrey fontSize={16}>
                       {' '}
-                      {Phonetique}
+                      {truncate(Phonetique, 7)}
                     </Text>
                   )}
                 </Text>
                 <OpenStrongIcon
                   onPress={() =>
                     navigation.navigate('BibleStrongDetail', {
+                      book,
                       strongReference
                     })
                   }

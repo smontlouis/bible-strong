@@ -7,6 +7,7 @@ import { connect } from 'react-redux'
 import verseToStrong from '@helpers/verseToStrong'
 import loadStrongReferences from '@helpers/loadStrongReferences'
 import loadStrongVerse from '@helpers/loadStrongVerse'
+import * as BibleActions from '@modules/bible'
 
 import Container from '@ui/Container'
 import Box from '@ui/Box'
@@ -55,13 +56,16 @@ const StyledVerse = styled.View(({ theme }) => ({
   flexDirection: 'row'
 }))
 
-@connect(({ bible }, ownProps) => ({
-  verse: {
-    Livre: bible.selectedBook.Numero,
-    Chapitre: bible.selectedChapter,
-    Verset: bible.selectedVerse
-  }
-}))
+@connect(
+  ({ bible }, ownProps) => ({
+    verse: {
+      Livre: bible.selectedBook.Numero,
+      Chapitre: bible.selectedChapter,
+      Verset: bible.selectedVerse
+    }
+  }),
+  BibleActions
+)
 class BibleVerseDetailScreen extends React.Component {
   state = {
     formattedVerse: '',
@@ -70,13 +74,22 @@ class BibleVerseDetailScreen extends React.Component {
     currentStrongReference: 0
   }
 
-  async componentDidMount () {
+  componentDidMount () {
+    this.loadPage()
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.verse.Verset !== this.props.verse.Verset) {
+      this.loadPage()
+    }
+  }
+
+  loadPage = async () => {
     const { verse } = this.props
     const strongVerse = await loadStrongVerse(verse)
-    this.versesInCurrentChapter = await loadCountVerses(verse)
+    const { versesInCurrentChapter } = await loadCountVerses(verse)
+    this.versesInCurrentChapter = versesInCurrentChapter
     this.formatVerse(strongVerse)
-
-    console.log(this.versesInCurrentChapter)
   }
 
   formatVerse = async strongVerse => {
@@ -110,6 +123,7 @@ class BibleVerseDetailScreen extends React.Component {
   renderItem = ({ item, index }) => (
     <StrongCard
       navigation={this.props.navigation}
+      book={this.props.verse.Livre}
       strongReference={item}
       index={index}
     />
@@ -118,7 +132,7 @@ class BibleVerseDetailScreen extends React.Component {
   render () {
     const {
       verse,
-      verse: { Livre, Chapitre, Verset },
+      verse: { Verset },
       goToNextVerse,
       goToPrevVerse
     } = this.props
@@ -135,7 +149,7 @@ class BibleVerseDetailScreen extends React.Component {
       <Container>
         <Header noBorder hasBackButton title={headerTitle} />
         <Box paddingTop={6} flex>
-          <Transition shared={`${Livre}-${Chapitre}-${Verset}`}>
+          <Transition>
             <StyledVerse>
               <VersetWrapper>
                 <NumberText>{Verset}</NumberText>
@@ -153,11 +167,10 @@ class BibleVerseDetailScreen extends React.Component {
           <Transition>
             <BibleVerseDetailFooter
               {...{
-                book: Livre,
-                chapter: Chapitre,
-                verse: Verset,
+                verseNumber: Verset,
                 goToNextVerse,
-                goToPrevVerse
+                goToPrevVerse,
+                versesInCurrentChapter: this.versesInCurrentChapter
               }}
             />
           </Transition>

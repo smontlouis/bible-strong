@@ -10,8 +10,10 @@ import Box from '@ui/Box'
 import Paragraph from '@ui/Paragraph'
 
 import StylizedHTMLView from '@components/StylizedHTMLView'
+import OccurrencesFoundByBookList from '@components/OccurrencesFoundByBookList'
 
 import capitalize from '@helpers/capitalize'
+import loadStrongVersesCountByBook from '@helpers/loadStrongVersesCountByBook'
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -40,49 +42,66 @@ const CloseStrongIcon = styled.TouchableOpacity(() => ({
   paddingTop: 5
 }))
 
-const BibleStrongDetailScreen = ({ navigation }) => {
-  const {
-    strongReference: {
-      Code,
-      Hebreu,
-      Grec,
-      Mot,
-      Phonetique,
-      Definition,
-      Origine,
-      Type,
-      LSG
-    }
-  } = navigation.state.params
-  return (
-    <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
-      <Box padding={20} flex={1}>
-        <Transition shared={Code}>
-          <Box>
-            <Box row alignItems='center'>
-              <Text title fontSize={22} flex>
-                {capitalize(Mot)}
-                {!!Phonetique && (
-                  <Text title darkGrey fontSize={16}>
-                    {' '}
-                    {Phonetique}
-                  </Text>
-                )}
-              </Text>
-              <CloseStrongIcon onPress={() => navigation.goBack()}>
-                <Icon.AntDesign name='shrink' size={20} color='black' />
-              </CloseStrongIcon>
-            </Box>
-            {!!Type && (
-              <Text titleItalic darkGrey>
-                {Type}
-              </Text>
-            )}
+class BibleStrongDetailScreen extends React.Component {
+  state = {
+    versesCountByBook: []
+  }
 
-            <TitleBorder />
-          </Box>
-        </Transition>
-        <ScrollView flex={1}>
+  async componentDidMount () {
+    const {
+      book,
+      strongReference: { Code }
+    } = this.props.navigation.state.params
+
+    const versesCountByBook = await loadStrongVersesCountByBook(book, Code)
+    this.setState({ versesCountByBook })
+  }
+  render () {
+    const {
+      strongReference: {
+        Code,
+        Hebreu,
+        Grec,
+        Mot,
+        Phonetique,
+        Definition,
+        Origine,
+        Type,
+        LSG
+      }
+    } = this.props.navigation.state.params
+
+    console.log(this.state.versesCountByBook)
+    return (
+      <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
+        <Box padding={20}>
+          <Transition shared={Code}>
+            <Box>
+              <Box row alignItems='flex-start'>
+                <Text title fontSize={22} flex>
+                  {capitalize(Mot)}
+                  {!!Phonetique && (
+                    <Text title darkGrey fontSize={16}>
+                      {' '}
+                      {Phonetique}
+                    </Text>
+                  )}
+                </Text>
+                <CloseStrongIcon onPress={() => this.props.navigation.goBack()}>
+                  <Icon.AntDesign name='shrink' size={20} color='black' />
+                </CloseStrongIcon>
+              </Box>
+              {!!Type && (
+                <Text titleItalic darkGrey>
+                  {Type}
+                </Text>
+              )}
+
+              <TitleBorder />
+            </Box>
+          </Transition>
+        </Box>
+        <ScrollView flex={1} style={{ padding: 20 }}>
           <Transition anchor={Code}>
             <Box>
               {!!Hebreu && (
@@ -119,12 +138,17 @@ const BibleStrongDetailScreen = ({ navigation }) => {
                   <StylizedHTMLView value={Origine} onLinkPress={() => {}} />
                 </ViewItem>
               )}
+              {this.state.versesCountByBook.length > 0 && (
+                <OccurrencesFoundByBookList
+                  versesCountByBook={this.state.versesCountByBook}
+                />
+              )}
             </Box>
           </Transition>
         </ScrollView>
-      </Box>
-    </Container>
-  )
+      </Container>
+    )
+  }
 }
 
 export default BibleStrongDetailScreen

@@ -10,6 +10,7 @@ const Text = styled.Text(props => {
     fontSize: props.fontSize,
 
     // container
+    backgroundColor: props.backgroundColor,
     padding: props.padding,
     paddingLeft: props.paddingLeft,
     paddingRight: props.paddingRight,

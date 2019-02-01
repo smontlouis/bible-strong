@@ -65,7 +65,7 @@ class BibleVerse extends Component {
 
   onVersePress = () => {
     const { verse } = this.props
-    this.props.setSelectedVerse(verse.Verset)
+    this.props.setSelectedVerse(Number(verse.Verset))
     this.props.navigation.navigate('BibleVerseDetail')
     // const {
     //   verse: { Livre, Chapitre, Verset },

@@ -13,15 +13,17 @@ const IconButton = styled.TouchableOpacity({
 })
 
 const BibleVerseDetailFooter = ({
-  book,
-  chapter,
-  verse,
+  verseNumber,
   goToNextVerse,
-  goToPrevVerse
+  goToPrevVerse,
+  versesInCurrentChapter
 }) => (
   <Box row paddingLeft={20} paddingRight={20} marginTop={20}>
-    {!(book.Numero === 1 && chapter === 1) && (
-      <IconButton activeOpacity={0.5} onPress={goToPrevVerse}>
+    {!(verseNumber === 1) && (
+      <IconButton
+        activeOpacity={0.5}
+        onPress={() => goToPrevVerse(versesInCurrentChapter)}
+      >
         <Icon.AntDesign name={'leftcircleo'} size={20} />
         <Text paddingLeft={10} darkGrey>
           Verset précédent
@@ -29,8 +31,11 @@ const BibleVerseDetailFooter = ({
       </IconButton>
     )}
     <Box flex />
-    {!(book.Numero === 66 && chapter === 22) && (
-      <IconButton activeOpacity={0.5} onPress={goToNextVerse}>
+    {!(verseNumber === versesInCurrentChapter) && (
+      <IconButton
+        activeOpacity={0.5}
+        onPress={() => goToNextVerse(versesInCurrentChapter)}
+      >
         <Text paddingRight={10} darkGrey>
           Verset suivant
         </Text>

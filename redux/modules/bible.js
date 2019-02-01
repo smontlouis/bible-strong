@@ -243,6 +243,32 @@ export function goToNextChapter () {
   }
 }
 
+export function goToNextVerse (nbVerses) {
+  return (dispatch, getState) => {
+    let { selectedVerse } = getState().bible
+
+    console.log(nbVerses, selectedVerse)
+
+    if (selectedVerse === nbVerses) {
+      return null
+    }
+
+    dispatch(setSelectedVerse(++selectedVerse))
+  }
+}
+
+export function goToPrevVerse (nbVerses) {
+  return (dispatch, getState) => {
+    let { selectedVerse } = getState().bible
+
+    if (selectedVerse === 1) {
+      return null
+    }
+
+    dispatch(setSelectedVerse(--selectedVerse))
+  }
+}
+
 export function addSelectedVerse (id) {
   return {
     type: ADD_SELECTED_VERSE,
