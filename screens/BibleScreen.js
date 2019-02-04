@@ -4,61 +4,49 @@ import { StatusBar } from 'react-native'
 
 import Container from '@ui/Container'
 import BibleViewer from '@components/BibleViewer'
-import Header from '@components/Header'
+import BibleHeader from '@components/BibleHeader'
 import * as BibleActions from '@modules/bible'
 
 @connect(
-  (state, ownProps) => ({
-    hasBack: !!ownProps.navigation.state.params,
-    app: {
-      book: state.bible.selectedBook,
-      chapter: state.bible.selectedChapter,
-      verse: state.bible.selectedVerse,
-      version: state.bible.selectedVersion
+  ({ bible }, ownProps) => {
+    const params = ownProps.navigation.state.params
+    return {
+      isReadOnly: params && params.isReadOnly,
+      app: {
+        book: (params && params.book) || bible.selectedBook,
+        chapter: (params && params.chapter) || bible.selectedChapter,
+        verse: (params && params.verse) || bible.selectedVerse,
+        version: (params && params.version) || bible.selectedVersion
+      }
     }
-  }),
+  },
   BibleActions
 )
 class BibleScreen extends React.Component {
-  state = {
-    isLoading: true
-  }
-
-  // If book, chapter, verse, version is received through params
-  async componentDidMount () {
-    const { book, chapter, verse, version } =
-      this.props.navigation.state.params || {}
-    if (book || chapter || verse) {
-      await this.props.setAllAndValidateSelected({
-        book,
-        chapter,
-        verse,
-        version
-      })
-      this.setState({ isLoading: false })
-    } else {
-      this.setState({ isLoading: false })
-    }
-  }
   render () {
-    const { isLoading } = this.state
-    const { app, navigation } = this.props
+    const { app, navigation, isReadOnly } = this.props
     const { arrayVerses } = this.props.navigation.state.params || {}
 
     return (
       <Container>
         <StatusBar barStyle='dark-content' />
-        <Header isBible />
-        {!isLoading && (
-          <BibleViewer
-            arrayVerses={arrayVerses}
-            book={app.book}
-            chapter={app.chapter}
-            verse={app.verse}
-            version={app.version}
-            navigation={navigation}
-          />
-        )}
+        <BibleHeader
+          isReadOnly={isReadOnly}
+          book={app.book}
+          chapter={app.chapter}
+          verse={app.verse}
+          version={app.version}
+          isBible
+        />
+        <BibleViewer
+          isReadOnly={isReadOnly}
+          arrayVerses={arrayVerses}
+          book={app.book}
+          chapter={app.chapter}
+          verse={app.verse}
+          version={app.version}
+          navigation={navigation}
+        />
       </Container>
     )
   }

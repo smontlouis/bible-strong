@@ -1,18 +1,11 @@
 import React from 'react'
 import { Platform } from 'react-native'
 import { Icon } from 'expo'
-import { pure, compose } from 'recompose'
-import { connect } from 'react-redux'
+import { pure } from 'recompose'
 import styled from '@emotion/native'
 
 import Box from '@ui/Box'
-import Link from '@components/Link'
 import Back from '@components/Back'
-
-const LinkBox = styled(Link)({
-  flexDirection: 'row',
-  paddingRight: 15
-})
 
 const Text = styled.Text({
   fontSize: 16,
@@ -29,34 +22,7 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   paddingRight: 15
 }))
 
-const Header = ({
-  navigation,
-  hasBackButton,
-  isBible,
-  isModal,
-  title,
-  noBorder,
-  book,
-  chapter,
-  version
-}) => {
-  if (isBible) {
-    return (
-      <HeaderBox noBorder={noBorder} row>
-        <LinkBox route={'BibleSelect'}>
-          <Text>
-            {book.Nom} {chapter}
-          </Text>
-          <Icon.MaterialIcons name='arrow-drop-down' size={20} />
-        </LinkBox>
-        <LinkBox route={'VersionSelector'} params={{ version }}>
-          <Text>{version}</Text>
-          <Icon.MaterialIcons name='arrow-drop-down' size={20} />
-        </LinkBox>
-      </HeaderBox>
-    )
-  }
-
+const Header = ({ hasBackButton, isModal, title, noBorder }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
       <Box flex justifyContent='center'>
@@ -70,7 +36,7 @@ const Header = ({
           </Back>
         )}
       </Box>
-      <Box flex={2} center>
+      <Box grow center>
         <Text>{title}</Text>
       </Box>
       <Box flex />
@@ -78,11 +44,4 @@ const Header = ({
   )
 }
 
-export default compose(
-  connect(({ bible }) => ({
-    book: bible.selectedBook,
-    chapter: bible.selectedChapter,
-    version: bible.selectedVersion
-  })),
-  pure
-)(Header)
+export default pure(Header)

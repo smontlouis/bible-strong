@@ -18,19 +18,19 @@ export default createMaterialBottomTabNavigator(
         )
       }
     },
-    Links: {
+    Lexique: {
       screen: LinksScreen,
       navigationOptions: {
-        title: 'Links',
+        title: 'Lexique',
         tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='box' />
+          <TabBarIcon focused={focused} name='book' />
         )
       }
     },
     Settings: {
       screen: SettingsScreen,
       navigationOptions: {
-        title: 'Settings',
+        title: 'Paramètres',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='settings' />
         )

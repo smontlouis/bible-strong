@@ -58,6 +58,7 @@ class BibleStrongDetailScreen extends React.Component {
   }
   render () {
     const {
+      strongReference,
       strongReference: {
         Code,
         Hebreu,
@@ -71,7 +72,6 @@ class BibleStrongDetailScreen extends React.Component {
       }
     } = this.props.navigation.state.params
 
-    console.log(this.state.versesCountByBook)
     return (
       <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
         <Box padding={20}>
@@ -101,7 +101,7 @@ class BibleStrongDetailScreen extends React.Component {
             </Box>
           </Transition>
         </Box>
-        <ScrollView flex={1} style={{ padding: 20 }}>
+        <ScrollView flex={1} style={{ paddingLeft: 20, paddingRight: 20 }}>
           <Transition anchor={Code}>
             <Box>
               {!!Hebreu && (
@@ -140,6 +140,8 @@ class BibleStrongDetailScreen extends React.Component {
               )}
               {this.state.versesCountByBook.length > 0 && (
                 <OccurrencesFoundByBookList
+                  strongReference={strongReference}
+                  navigation={this.props.navigation}
                   versesCountByBook={this.state.versesCountByBook}
                 />
               )}

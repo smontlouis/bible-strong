@@ -247,8 +247,6 @@ export function goToNextVerse (nbVerses) {
   return (dispatch, getState) => {
     let { selectedVerse } = getState().bible
 
-    console.log(nbVerses, selectedVerse)
-
     if (selectedVerse === nbVerses) {
       return null
     }

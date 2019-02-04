@@ -55,8 +55,7 @@ class VerseSelector extends Component {
           (txObj, error) => console.log(error)
         )
       },
-      error => console.log('something went wrong:' + error),
-      () => console.log('db transaction is a success')
+      error => console.log('something went wrong:' + error)
     )
   }
 

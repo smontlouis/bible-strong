@@ -107,7 +107,14 @@ class BibleViewer extends Component {
   }
 
   renderVerses = () => {
-    const { version, arrayVerses, book, chapter, navigation } = this.props
+    const {
+      version,
+      arrayVerses,
+      book,
+      chapter,
+      navigation,
+      isReadOnly
+    } = this.props
     let array = this.state.verses
 
     if (
@@ -122,6 +129,7 @@ class BibleViewer extends Component {
 
     return array.map(verse => (
       <BibleVerse
+        isReadOnly={isReadOnly}
         navigation={navigation}
         version={version}
         verse={verse}
@@ -139,7 +147,8 @@ class BibleViewer extends Component {
       arrayVerses,
       navigation,
       goToPrevChapter,
-      goToNextChapter
+      goToNextChapter,
+      isReadOnly
     } = this.props
 
     if (isLoading) {
@@ -176,7 +185,7 @@ class BibleViewer extends Component {
             />
           )}
         </ScrollView>
-        {!arrayVerses && (
+        {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}
             book={book}

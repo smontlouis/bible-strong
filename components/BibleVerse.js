@@ -64,6 +64,10 @@ class BibleVerse extends Component {
   }
 
   onVersePress = () => {
+    if (this.props.isReadOnly) {
+      return null
+    }
+
     const { verse } = this.props
     this.props.setSelectedVerse(Number(verse.Verset))
     this.props.navigation.navigate('BibleVerseDetail')

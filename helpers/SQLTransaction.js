@@ -13,8 +13,7 @@ const SQLTransaction = sqlReq => {
           (txObj, error) => reject(error)
         )
       },
-      error => reject(error),
-      () => console.log('Database tx is a success')
+      error => reject(error)
     )
   })
 }
