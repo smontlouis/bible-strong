@@ -4,7 +4,7 @@ import { createMaterialBottomTabNavigator } from 'react-navigation-material-bott
 import TabBarIcon from '../components/TabBarIcon'
 
 import BibleScreen from '../screens/BibleScreen'
-import LinksScreen from '../screens/LinksScreen'
+import LexiqueScreen from '../screens/LexiqueScreen'
 import SettingsScreen from '../screens/SettingsScreen'
 
 export default createMaterialBottomTabNavigator(
@@ -19,7 +19,7 @@ export default createMaterialBottomTabNavigator(
       }
     },
     Lexique: {
-      screen: LinksScreen,
+      screen: LexiqueScreen,
       navigationOptions: {
         title: 'Lexique',
         tabBarIcon: ({ focused }) => (

@@ -14,6 +14,10 @@ export default {
     tertiaryLighten: 'rgba(99, 113, 122, 0.5)',
     quart: '#1A806F'
   },
+  measures: {
+    headerHeight: 50,
+    headerMarginTop: Platform.OS === 'ios' ? 0 : 25
+  },
   fontFamily: {
     text: Platform.OS === 'ios' ? 'System' : 'serif',
     title: 'meta-serif',
