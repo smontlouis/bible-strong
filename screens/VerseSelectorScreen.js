@@ -3,7 +3,7 @@ import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
-import getDB from '@helpers/database'
+import loadCountVerses from '@helpers/loadCountVerses'
 import * as BibleActions from '@modules/bible'
 import SelectorItem from '@components/SelectorItem'
 
@@ -13,20 +13,29 @@ class VerseSelector extends Component {
   }
 
   state = {
-    isLoaded: false
+    versesInCurrentChapter: undefined
   }
 
-  componentWillMount () {
-    this.db = getDB()
-    this.loadVerses()
+  async componentDidMount () {
+    const { selectedBook, selectedChapter } = this.props
+    const { versesInCurrentChapter } = await loadCountVerses(
+      selectedBook.Numero,
+      selectedChapter
+    )
+    this.setState({ versesInCurrentChapter })
   }
 
-  componentDidUpdate (oldProps) {
+  async componentDidUpdate (oldProps) {
     if (
       this.props.selectedChapter !== oldProps.selectedChapter ||
       this.props.selectedBook.Numero !== oldProps.selectedBook.Numero
     ) {
-      this.loadVerses()
+      const { selectedBook, selectedChapter } = this.props
+      const { versesInCurrentChapter } = await loadCountVerses(
+        selectedBook.Numero,
+        selectedChapter
+      )
+      this.setState({ versesInCurrentChapter })
     }
   }
 
@@ -36,38 +45,15 @@ class VerseSelector extends Component {
     setTimeout(() => this.props.screenProps.mainNavigation.goBack(), 0)
   }
 
-  loadVerses () {
-    const { selectedBook, selectedChapter } = this.props
-    const part = selectedBook.Numero > 39 ? 'LSGSNT2' : 'LSGSAT2'
-    this.verses = []
-    this.setState({ isLoaded: false })
-    this.db.transaction(
-      tx => {
-        tx.executeSql(
-          `SELECT count(*) as count FROM ${part} WHERE Livre = ${
-            selectedBook.Numero
-          } AND Chapitre = ${selectedChapter}`,
-          [],
-          (_, { rows: { _array } }) => {
-            this.verses = _array
-            this.setState({ isLoaded: true })
-          },
-          (txObj, error) => console.log(error)
-        )
-      },
-      error => console.log('something went wrong:' + error)
-    )
-  }
-
   render () {
-    const { isLoaded } = this.state
+    const { versesInCurrentChapter } = this.state
     const { selectedVerse } = this.props
 
-    if (!isLoaded) {
+    if (!versesInCurrentChapter) {
       return null
     }
 
-    const array = Array(...Array(this.verses[0].count)).map((_, i) => i)
+    const array = Array(...Array(versesInCurrentChapter)).map((_, i) => i)
 
     return (
       <ScrollView

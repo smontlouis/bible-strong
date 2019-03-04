@@ -9,6 +9,9 @@ import AppNavigator from './navigation/AppNavigator'
 import configureStore from './redux/store'
 import { initDB } from './helpers/database'
 
+// if (__DEV__) {
+//   Sentry.enableInExpoDevelopment = true
+// }
 Sentry.config(
   'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911'
 ).install()

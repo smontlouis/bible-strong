@@ -87,7 +87,10 @@ class BibleVerseDetailScreen extends React.Component {
   loadPage = async () => {
     const { verse } = this.props
     const strongVerse = await loadStrongVerse(verse)
-    const { versesInCurrentChapter } = await loadCountVerses(verse)
+    const { versesInCurrentChapter } = await loadCountVerses(
+      verse.Livre,
+      verse.Chapitre
+    )
     this.versesInCurrentChapter = versesInCurrentChapter
     this.formatVerse(strongVerse)
   }
@@ -200,9 +203,6 @@ class BibleVerseDetailScreen extends React.Component {
                 onSnapToItem={this.onSnapToItem}
                 useScrollView={false}
                 initialNumToRender={2}
-                // slideStyle={{ flex: 1 }}
-                // enableMomentum
-                // decelerationRate={0.1}
               />
             )}
           </Box>
