@@ -7,8 +7,11 @@
     "sdkVersion": "32.0.0",
     "primaryColor": "#0ED3B9",
     "githubUrl": "https://github.com/bulby97/bible-strong",
-    "platforms": ["ios", "android"],
-    "version": "0.1.1",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "version": "0.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -17,18 +20,24 @@
       "backgroundColor": "#ffffff"
     },
     "packagerOpts": {
-      "assetExts": ["db"]
+      "assetExts": [
+        "db"
+      ]
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.smontlouis.biblestrong"
+      "bundleIdentifier": "com.smontlouis.biblestrong",
+      "buildNumber": "1"
     },
     "android": {
-      "package": "com.smontlouis.biblestrong"
+      "package": "com.smontlouis.biblestrong",
+      "versionCode": 1
     },
     "hooks": {
       "postPublish": [
