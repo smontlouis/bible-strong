@@ -6,6 +6,7 @@ import TabBarIcon from '../components/TabBarIcon'
 import BibleScreen from '../screens/BibleScreen'
 import LexiqueScreen from '../screens/LexiqueScreen'
 import SettingsScreen from '../screens/SettingsScreen'
+import FeedbackScreen from '../screens/FeedbackScreen'
 
 export default createMaterialBottomTabNavigator(
   {
@@ -33,6 +34,15 @@ export default createMaterialBottomTabNavigator(
         title: 'Paramètres',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='settings' />
+        )
+      }
+    },
+    Feedback: {
+      screen: FeedbackScreen,
+      navigationOptions: {
+        title: 'Feedback',
+        tabBarIcon: ({ focused }) => (
+          <TabBarIcon focused={focused} name='alert-triangle' />
         )
       }
     }
