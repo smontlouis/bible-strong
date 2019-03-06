@@ -3,6 +3,7 @@ import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
+import { initDB } from '@helpers/database'
 import loadCountVerses from '@helpers/loadCountVerses'
 import * as BibleActions from '@modules/bible'
 import SelectorItem from '@components/SelectorItem'
@@ -16,27 +17,27 @@ class VerseSelector extends Component {
     versesInCurrentChapter: undefined
   }
 
-  async componentDidMount () {
+  componentDidMount () {
+    initDB() // Fix weird bug on iOS
+    this.loadVerses()
+  }
+
+  componentDidUpdate (oldProps) {
+    if (
+      this.props.selectedChapter !== oldProps.selectedChapter ||
+      this.props.selectedBook.Numero !== oldProps.selectedBook.Numero
+    ) {
+      this.loadVerses()
+    }
+  }
+
+  loadVerses = async () => {
     const { selectedBook, selectedChapter } = this.props
     const { versesInCurrentChapter } = await loadCountVerses(
       selectedBook.Numero,
       selectedChapter
     )
     this.setState({ versesInCurrentChapter })
-  }
-
-  async componentDidUpdate (oldProps) {
-    if (
-      this.props.selectedChapter !== oldProps.selectedChapter ||
-      this.props.selectedBook.Numero !== oldProps.selectedBook.Numero
-    ) {
-      const { selectedBook, selectedChapter } = this.props
-      const { versesInCurrentChapter } = await loadCountVerses(
-        selectedBook.Numero,
-        selectedChapter
-      )
-      this.setState({ versesInCurrentChapter })
-    }
   }
 
   onValidate = (verse: number) => {
