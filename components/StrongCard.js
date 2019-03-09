@@ -47,8 +47,9 @@ const SmallParagraph = styled(Paragraph)({
 })
 
 const OpenStrongIcon = styled.TouchableOpacity(() => ({
-  marginLeft: 15,
-  paddingTop: 5
+  paddingTop: 5,
+  flexDirection: 'row',
+  alignItems: 'center'
 }))
 
 class StrongCard extends React.Component {
@@ -65,7 +66,14 @@ class StrongCard extends React.Component {
         {/* <Shadow overflow /> */}
         <Box paddingTop={10}>
           <Box>
-            <Box row alignItems='flex-start'>
+            <OpenStrongIcon
+              onPress={() =>
+                navigation.navigate('BibleStrongDetail', {
+                  book,
+                  strongReference
+                })
+              }
+            >
               <Text title fontSize={22} flex>
                 {truncate(capitalize(Mot), 7)}
                 {!!Phonetique && (
@@ -75,17 +83,13 @@ class StrongCard extends React.Component {
                   </Text>
                 )}
               </Text>
-              <OpenStrongIcon
-                onPress={() =>
-                  navigation.navigate('BibleStrongDetail', {
-                    book,
-                    strongReference
-                  })
-                }
-              >
-                <Icon.AntDesign name='arrowsalt' size={20} color='black' />
-              </OpenStrongIcon>
-            </Box>
+              <Icon.AntDesign
+                style={{ paddingTop: 5 }}
+                name='arrowsalt'
+                size={20}
+                color='black'
+              />
+            </OpenStrongIcon>
             {!!Type && (
               <Text titleItalic darkGrey>
                 {Type}

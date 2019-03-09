@@ -36,9 +36,9 @@ const Word = styled(Text)({
   color: '#000'
 })
 
-const CloseStrongIcon = styled.TouchableOpacity(() => ({
-  marginLeft: 15,
-  paddingTop: 5
+const Touchable = styled.TouchableOpacity(() => ({
+  flexDirection: 'row',
+  alignItems: 'flex-start'
 }))
 
 class BibleStrongDetailScreen extends React.Component {
@@ -75,7 +75,7 @@ class BibleStrongDetailScreen extends React.Component {
       <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
         <Box padding={20}>
           <Box>
-            <Box row alignItems='flex-start'>
+            <Touchable onPress={() => this.props.navigation.goBack()}>
               <Text title fontSize={22} flex>
                 {capitalize(Mot)}
                 {!!Phonetique && (
@@ -85,10 +85,13 @@ class BibleStrongDetailScreen extends React.Component {
                   </Text>
                 )}
               </Text>
-              <CloseStrongIcon onPress={() => this.props.navigation.goBack()}>
-                <Icon.AntDesign name='shrink' size={20} color='black' />
-              </CloseStrongIcon>
-            </Box>
+              <Icon.AntDesign
+                style={{ paddingTop: 10 }}
+                name='shrink'
+                size={20}
+                color='black'
+              />
+            </Touchable>
             {!!Type && (
               <Text titleItalic darkGrey>
                 {Type}
