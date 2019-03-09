@@ -17,11 +17,11 @@ const FlatList = styled.FlatList({
 const versions = {
   LSG: {
     id: 'LSG',
-    name: 'Bible Second 1910'
+    name: 'Bible Segond 1910'
   },
-  FRDBY: {
-    id: 'FRDBY',
-    name: 'Bible Darby en français'
+  DBY: {
+    id: 'DBY',
+    name: 'Bible Darby'
   },
   OST: {
     id: 'OST',

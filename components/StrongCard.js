@@ -2,7 +2,6 @@ import React from 'react'
 import styled from '@emotion/native'
 import { ScrollView } from 'react-native'
 import { Icon } from 'expo'
-import { Transition } from 'react-navigation-fluid-transitions'
 
 import Box from '@ui/Box'
 import Text from '@ui/Text'
@@ -65,37 +64,35 @@ class StrongCard extends React.Component {
       <Container overflow>
         {/* <Shadow overflow /> */}
         <Box paddingTop={10}>
-          <Transition shared={Code}>
-            <Box>
-              <Box row alignItems='flex-start'>
-                <Text title fontSize={22} flex>
-                  {truncate(capitalize(Mot), 7)}
-                  {!!Phonetique && (
-                    <Text title darkGrey fontSize={16}>
-                      {' '}
-                      {truncate(Phonetique, 7)}
-                    </Text>
-                  )}
-                </Text>
-                <OpenStrongIcon
-                  onPress={() =>
-                    navigation.navigate('BibleStrongDetail', {
-                      book,
-                      strongReference
-                    })
-                  }
-                >
-                  <Icon.AntDesign name='arrowsalt' size={20} color='black' />
-                </OpenStrongIcon>
-              </Box>
-              {!!Type && (
-                <Text titleItalic darkGrey>
-                  {Type}
-                </Text>
-              )}
-              <TitleBorder />
+          <Box>
+            <Box row alignItems='flex-start'>
+              <Text title fontSize={22} flex>
+                {truncate(capitalize(Mot), 7)}
+                {!!Phonetique && (
+                  <Text title darkGrey fontSize={16}>
+                    {' '}
+                    {truncate(Phonetique, 7)}
+                  </Text>
+                )}
+              </Text>
+              <OpenStrongIcon
+                onPress={() =>
+                  navigation.navigate('BibleStrongDetail', {
+                    book,
+                    strongReference
+                  })
+                }
+              >
+                <Icon.AntDesign name='arrowsalt' size={20} color='black' />
+              </OpenStrongIcon>
             </Box>
-          </Transition>
+            {!!Type && (
+              <Text titleItalic darkGrey>
+                {Type}
+              </Text>
+            )}
+            <TitleBorder />
+          </Box>
         </Box>
 
         <ScrollView style={{ marginBottom: 15 }}>

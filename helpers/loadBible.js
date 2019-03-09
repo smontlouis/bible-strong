@@ -6,7 +6,7 @@ export default function loadBible (bible) {
   return new Promise((resolve, reject) => {
     try {
       switch (bible) {
-        case 'FRDBY': {
+        case 'DBY': {
           resolve(DarbyBible)
           break
         }

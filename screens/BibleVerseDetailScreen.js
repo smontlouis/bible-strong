@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { Transition } from 'react-navigation-fluid-transitions'
 import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
 
@@ -152,31 +151,27 @@ class BibleVerseDetailScreen extends React.Component {
       <Container>
         <Header noBorder hasBackButton title={headerTitle} />
         <Box paddingTop={6} flex>
-          <Transition>
-            <StyledVerse>
-              <VersetWrapper>
-                <NumberText>{Verset}</NumberText>
-              </VersetWrapper>
-              <CarouselProvider
-                value={{
-                  currentStrongReference: this.state.currentStrongReference,
-                  goToCarouselItem: this.goToCarouselItem
-                }}
-              >
-                <VerseText>{this.state.formattedTexte}</VerseText>
-              </CarouselProvider>
-            </StyledVerse>
-          </Transition>
-          <Transition>
-            <BibleVerseDetailFooter
-              {...{
-                verseNumber: Verset,
-                goToNextVerse,
-                goToPrevVerse,
-                versesInCurrentChapter: this.versesInCurrentChapter
+          <StyledVerse>
+            <VersetWrapper>
+              <NumberText>{Verset}</NumberText>
+            </VersetWrapper>
+            <CarouselProvider
+              value={{
+                currentStrongReference: this.state.currentStrongReference,
+                goToCarouselItem: this.goToCarouselItem
               }}
-            />
-          </Transition>
+            >
+              <VerseText>{this.state.formattedTexte}</VerseText>
+            </CarouselProvider>
+          </StyledVerse>
+          <BibleVerseDetailFooter
+            {...{
+              verseNumber: Verset,
+              goToNextVerse,
+              goToPrevVerse,
+              versesInCurrentChapter: this.versesInCurrentChapter
+            }}
+          />
           <Box flex>
             {isCarouselLoading && <Loading />}
             {!isCarouselLoading && (

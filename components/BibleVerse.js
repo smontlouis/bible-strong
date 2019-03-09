@@ -3,7 +3,6 @@ import styled from '@emotion/native'
 import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
 import { Icon } from 'expo'
-import { Transition } from 'react-navigation-fluid-transitions'
 
 import Paragraph from '@ui/Paragraph'
 import * as BibleActions from '@modules/bible'
@@ -102,33 +101,31 @@ class BibleVerse extends Component {
       isFavorited
     } = this.props
     return (
-      <Transition shared={`${Livre}-${Chapitre}-${Verset}`}>
-        <Container onPress={this.onVersePress} activeOpacity={0.8}>
-          {Verset && (
-            <VersetWrapper
-              ref={r => {
-                this.bibleVerse = r
-              }}
-              collapsable={false}
-              onLayout={() => {}}
-              isHighlight={isHighlighted}
-              isSelected={isSelected}
-            >
-              <NumberText>{Verset}</NumberText>
-              {isFavorited && (
-                <BookMarkIcon.Feather
-                  name={'bookmark'}
-                  size={15}
-                  color='#C22839'
-                />
-              )}
-            </VersetWrapper>
-          )}
-          <VerseText isHighlight={isHighlighted} isSelected={isSelected}>
-            {Texte}
-          </VerseText>
-        </Container>
-      </Transition>
+      <Container onPress={this.onVersePress} activeOpacity={0.8}>
+        {Verset && (
+          <VersetWrapper
+            ref={r => {
+              this.bibleVerse = r
+            }}
+            collapsable={false}
+            onLayout={() => {}}
+            isHighlight={isHighlighted}
+            isSelected={isSelected}
+          >
+            <NumberText>{Verset}</NumberText>
+            {isFavorited && (
+              <BookMarkIcon.Feather
+                name={'bookmark'}
+                size={15}
+                color='#C22839'
+              />
+            )}
+          </VersetWrapper>
+        )}
+        <VerseText isHighlight={isHighlighted} isSelected={isSelected}>
+          {Texte}
+        </VerseText>
+      </Container>
     )
   }
 }

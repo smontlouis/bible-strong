@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { FlatList } from 'react-native'
+import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
@@ -10,7 +10,7 @@ import BookSelectorItem from '@components/BookSelectorItem'
 
 class BookSelector extends Component {
   static navigationOptions = {
-    tabBarLabel: 'Livres'
+    tabBarLabel: 'LIVRE'
   }
 
   onBookChange = book => {
@@ -22,22 +22,25 @@ class BookSelector extends Component {
     const { selectedBook } = this.props
 
     return (
-      <FlatList
-        data={Object.values(books)}
-        keyExtractor={(item, index: number) => `${index}`}
-        renderItem={({ item: book }) => (
+      <ScrollView
+        contentContainerStyle={{
+          flexWrap: 'wrap',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          paddingTop: 10
+        }}
+      >
+        {Object.values(books).map(book => (
           <BookSelectorItem
+            isNT={book.Numero >= 40}
+            key={book.Numero}
             onChange={this.onBookChange}
             book={book}
             isSelected={book.Numero === selectedBook.Numero}
           />
-        )}
-        style={{
-          flex: 1,
-          paddingTop: 10,
-          paddingBottom: 20
-        }}
-      />
+        ))}
+      </ScrollView>
     )
   }
 }

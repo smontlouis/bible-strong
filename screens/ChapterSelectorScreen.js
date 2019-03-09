@@ -9,7 +9,7 @@ import SelectorItem from '@components/SelectorItem'
 
 class ChapterSelector extends Component {
   static navigationOptions = {
-    tabBarLabel: 'Chapitre'
+    tabBarLabel: 'CHAPITRE'
   }
 
   onChapterChange = (chapter: number) => {
@@ -29,9 +29,7 @@ class ChapterSelector extends Component {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          padding: 20,
-          paddingLeft: 10,
-          paddingRight: 10
+          paddingTop: 10
         }}
       >
         {array.map(c => (

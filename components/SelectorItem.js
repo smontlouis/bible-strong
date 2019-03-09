@@ -1,26 +1,25 @@
 import React from 'react'
 import styled from '@emotion/native'
+import { Dimensions } from 'react-native'
 import { pure } from 'recompose'
 
-const TouchableOpacity = styled.TouchableOpacity(({ isSelected, theme }) => ({
-  width: 50,
-  height: 50,
-  margin: 3,
-  borderRadius: 8,
+const { width: viewportWidth } = Dimensions.get('window')
+
+const TouchableOpacity = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
-  alignSelf: 'flex-start',
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.white
+  height: 45,
+  width: viewportWidth / 5
 }))
 
 const Text = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? 'white' : 'black',
-  fontSize: 16,
-  backgroundColor: 'transparent'
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontWeight: isSelected ? 'bold' : 'normal',
+  fontSize: 16
 }))
 
 const SelectorItem = ({ item, isSelected, onChange }) => (
-  <TouchableOpacity onPress={() => onChange(item)} isSelected={isSelected}>
+  <TouchableOpacity onPress={() => onChange(item)}>
     <Text isSelected={isSelected}>{item}</Text>
   </TouchableOpacity>
 )

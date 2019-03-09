@@ -1,13 +1,17 @@
 import React from 'react'
-import { AppLoading, Font, Icon, FileSystem, Asset } from 'expo'
+import { YellowBox } from 'react-native'
+import { AppLoading, Font, Icon, FileSystem, Asset, Updates } from 'expo'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'emotion-theming'
 import Sentry from 'sentry-expo'
+import SnackBar from './components/SnackBar'
 
 import theme from './themes/default'
 import AppNavigator from './navigation/AppNavigator'
 import configureStore from './redux/store'
 import { initDB } from './helpers/database'
+
+YellowBox.ignoreWarnings(['Require cycle:'])
 
 // if (__DEV__) {
 //   Sentry.enableInExpoDevelopment = true
@@ -63,6 +67,26 @@ export default class App extends React.Component {
 
   handleFinishLoading = () => {
     this.setState({ isLoadingComplete: true })
+  }
+
+  updateApp = async () => {
+    try {
+      SnackBar.show('Recherche de mise à jour...', { duration: 3000 })
+      const update = await Updates.checkForUpdateAsync()
+
+      if (update.isAvailable) {
+        SnackBar.show('Téléchargement...', { duration: 3000 })
+        await Updates.fetchUpdateAsync()
+
+        Updates.reloadFromCache()
+      }
+    } catch (e) {
+      // handle or log error
+    }
+  }
+
+  componentDidMount () {
+    this.updateApp()
   }
 
   render () {

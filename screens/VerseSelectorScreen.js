@@ -10,7 +10,7 @@ import SelectorItem from '@components/SelectorItem'
 
 class VerseSelector extends Component {
   static navigationOptions = {
-    tabBarLabel: 'Verset'
+    tabBarLabel: 'VERSET'
   }
 
   state = {
@@ -63,9 +63,7 @@ class VerseSelector extends Component {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          padding: 20,
-          paddingLeft: 10,
-          paddingRight: 10
+          paddingTop: 10
         }}
       >
         {array.map(v => (

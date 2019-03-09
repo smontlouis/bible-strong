@@ -12,7 +12,7 @@ export default {
     secondary: '#FFBC00',
     tertiary: 'rgb(98,113,122)',
     tertiaryLighten: 'rgba(99, 113, 122, 0.5)',
-    quart: '#1A806F'
+    quart: '#C22839'
   },
   measures: {
     headerHeight: 50,
