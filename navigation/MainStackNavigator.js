@@ -7,12 +7,17 @@ import BibleStrongDetailScreen from '../screens/BibleStrongDetailScreen'
 import ConcordanceByBookScreen from '../screens/ConcordanceByBookScreen'
 import BibleViewScreen from '../screens/BibleScreen'
 
-export default createStackNavigator({
-  MainTab: { screen: MainTabNavigator },
-  BibleSelect: { screen: BibleSelectScreen },
-  VersionSelector: { screen: VersionSelectorScreen },
-  BibleVerseDetail: { screen: BibleVerseDetailScreen },
-  BibleStrongDetail: { screen: BibleStrongDetailScreen },
-  ConcordanceByBook: { screen: ConcordanceByBookScreen },
-  BibleView: { screen: BibleViewScreen }
-})
+export default createStackNavigator(
+  {
+    MainTab: { screen: MainTabNavigator },
+    BibleSelect: { screen: BibleSelectScreen },
+    VersionSelector: { screen: VersionSelectorScreen },
+    BibleVerseDetail: { screen: BibleVerseDetailScreen },
+    BibleStrongDetail: { screen: BibleStrongDetailScreen },
+    ConcordanceByBook: { screen: ConcordanceByBookScreen },
+    BibleView: { screen: BibleViewScreen }
+  },
+  {
+    headerMode: 'none'
+  }
+)

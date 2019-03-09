@@ -95,7 +95,7 @@ class BibleVerse extends Component {
 
   render () {
     const {
-      verse: { Livre, Chapitre, Verset, Texte },
+      verse: { Verset, Texte },
       isSelected,
       isHighlighted,
       isFavorited

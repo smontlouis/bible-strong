@@ -2,7 +2,6 @@ import React from 'react'
 import styled from '@emotion/native'
 import { Icon } from 'expo'
 import { ScrollView, Platform } from 'react-native'
-import { Transition } from 'react-navigation-fluid-transitions'
 
 import Container from '@ui/Container'
 import Text from '@ui/Text'
@@ -75,78 +74,74 @@ class BibleStrongDetailScreen extends React.Component {
     return (
       <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
         <Box padding={20}>
-          <Transition shared={Code}>
-            <Box>
-              <Box row alignItems='flex-start'>
-                <Text title fontSize={22} flex>
-                  {capitalize(Mot)}
-                  {!!Phonetique && (
-                    <Text title darkGrey fontSize={16}>
-                      {' '}
-                      {Phonetique}
-                    </Text>
-                  )}
-                </Text>
-                <CloseStrongIcon onPress={() => this.props.navigation.goBack()}>
-                  <Icon.AntDesign name='shrink' size={20} color='black' />
-                </CloseStrongIcon>
-              </Box>
-              {!!Type && (
-                <Text titleItalic darkGrey>
-                  {Type}
-                </Text>
-              )}
-
-              <TitleBorder />
+          <Box>
+            <Box row alignItems='flex-start'>
+              <Text title fontSize={22} flex>
+                {capitalize(Mot)}
+                {!!Phonetique && (
+                  <Text title darkGrey fontSize={16}>
+                    {' '}
+                    {Phonetique}
+                  </Text>
+                )}
+              </Text>
+              <CloseStrongIcon onPress={() => this.props.navigation.goBack()}>
+                <Icon.AntDesign name='shrink' size={20} color='black' />
+              </CloseStrongIcon>
             </Box>
-          </Transition>
+            {!!Type && (
+              <Text titleItalic darkGrey>
+                {Type}
+              </Text>
+            )}
+
+            <TitleBorder />
+          </Box>
         </Box>
         <ScrollView flex={1} style={{ paddingLeft: 20, paddingRight: 20 }}>
-          <Transition anchor={Code}>
-            <Box>
-              {!!Hebreu && (
-                <ViewItem>
-                  <Paragraph darkGrey style={{ fontSize: 15 }}>
-                    Mot Hébreu:&nbsp;
-                    <Word>{Hebreu}</Word>
-                  </Paragraph>
-                </ViewItem>
-              )}
-              {!!Grec && (
-                <ViewItem>
-                  <Paragraph>
-                    Mot Grec:&nbsp;
-                    <Word>{Grec}</Word>
-                  </Paragraph>
-                </ViewItem>
-              )}
-              {!!Definition && (
-                <ViewItem>
-                  <SubTitle darkGrey>Définition - {Code}</SubTitle>
-                  <StylizedHTMLView value={Definition} onLinkPress={() => {}} />
-                </ViewItem>
-              )}
-              {!!LSG && (
-                <ViewItem>
-                  <SubTitle darkGrey>Généralement traduit par</SubTitle>
-                  <Paragraph>{LSG}</Paragraph>
-                </ViewItem>
-              )}
-              {!!Origine && (
-                <ViewItem>
-                  <SubTitle darkGrey>Origine du mot</SubTitle>
-                  <StylizedHTMLView value={Origine} onLinkPress={() => {}} />
-                </ViewItem>
-              )}
-              {this.state.versesCountByBook.length > 0 && (
-                <OccurrencesFoundByBookList
-                  strongReference={strongReference}
-                  navigation={this.props.navigation}
-                  versesCountByBook={this.state.versesCountByBook}
-                />
-              )}
-            </Box>
-          </Transition>
+          <Box>
+            {!!Hebreu && (
+              <ViewItem>
+                <Paragraph darkGrey style={{ fontSize: 15 }}>
+                  Mot Hébreu:&nbsp;
+                  <Word>{Hebreu}</Word>
+                </Paragraph>
+              </ViewItem>
+            )}
+            {!!Grec && (
+              <ViewItem>
+                <Paragraph>
+                  Mot Grec:&nbsp;
+                  <Word>{Grec}</Word>
+                </Paragraph>
+              </ViewItem>
+            )}
+            {!!Definition && (
+              <ViewItem>
+                <SubTitle darkGrey>Définition - {Code}</SubTitle>
+                <StylizedHTMLView value={Definition} onLinkPress={() => {}} />
+              </ViewItem>
+            )}
+            {!!LSG && (
+              <ViewItem>
+                <SubTitle darkGrey>Généralement traduit par</SubTitle>
+                <Paragraph>{LSG}</Paragraph>
+              </ViewItem>
+            )}
+            {!!Origine && (
+              <ViewItem>
+                <SubTitle darkGrey>Origine du mot</SubTitle>
+                <StylizedHTMLView value={Origine} onLinkPress={() => {}} />
+              </ViewItem>
+            )}
+            {this.state.versesCountByBook.length > 0 && (
+              <OccurrencesFoundByBookList
+                strongReference={strongReference}
+                navigation={this.props.navigation}
+                versesCountByBook={this.state.versesCountByBook}
+              />
+            )}
+          </Box>
         </ScrollView>
       </Container>
     )
