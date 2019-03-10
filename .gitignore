@@ -6,3 +6,5 @@ npm-debug.*
 *.key
 *.mobileprovision
 assets/db/**
+assets/bible_versions/**
+

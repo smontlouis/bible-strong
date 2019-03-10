@@ -21,6 +21,7 @@
     "@emotion/core": "^10.0.7",
     "@emotion/native": "^10.0.7",
     "@expo/samples": "2.1.1",
+    "debounce": "^1.2.0",
     "emotion-theming": "^10.0.7",
     "expo": "^32.0.6",
     "immer": "^2.1.0",

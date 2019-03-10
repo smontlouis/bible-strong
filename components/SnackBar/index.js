@@ -7,7 +7,9 @@ export default {
     SnackBar.show(label, {
       backgroundColor: theme.colors.tertiary,
       buttonColor: 'blue',
-      textColor: theme.colors.reverse
+      textColor: theme.colors.reverse,
+      tapToClose: true,
+      duraction: 2500
     })
   }
 }
