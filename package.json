@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "eject": "expo eject",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll",
-    "postversion": "react-native-version"
+    "postversion": "react-native-version",
+    "clean": "watchman watch-del-all && rm -rf package-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && yarn install && say I love react native"
   },
   "jest": {
     "preset": "jest-expo",
@@ -25,6 +26,8 @@
     "emotion-theming": "^10.0.7",
     "expo": "^32.0.6",
     "immer": "^2.1.0",
+    "lunr": "2.3.5",
+    "lunr-languages": "^1.1.0",
     "react": "16.5.0",
     "react-mixin": "^5.0.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
@@ -50,6 +53,8 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "babel-plugin-root-import": "^6.1.0",
     "babel-preset-expo": "^5.0.0",
     "jest-expo": "^32.0.0",
     "prettier-standard": "^8.0.1"

@@ -4,12 +4,12 @@ import { AppLoading, Font, Icon, FileSystem, Asset, Updates } from 'expo'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'emotion-theming'
 import Sentry from 'sentry-expo'
-import SnackBar from './components/SnackBar'
+import SnackBar from '~common/SnackBar'
 
-import theme from './themes/default'
-import AppNavigator from './navigation/AppNavigator'
-import configureStore from './redux/store'
-import { initDB } from './helpers/database'
+import theme from '~themes/default'
+import AppNavigator from '~navigation/AppNavigator'
+import configureStore from '~redux/store'
+import { initDB } from '~helpers/database'
 
 YellowBox.ignoreWarnings(['Require cycle:'])
 
@@ -41,7 +41,7 @@ export default class App extends React.Component {
     const dbFile = await FileSystem.getInfoAsync(dbPath)
 
     if (!dbFile.exists) {
-      const dbUri = Asset.fromModule(require(`./assets/db/strong.sqlite`)).uri
+      const dbUri = Asset.fromModule(require('~assets/db/strong.sqlite')).uri
       console.log(`Downloading ${dbUri} to ${dbPath}`)
       await FileSystem.downloadAsync(dbUri, dbPath)
     }
@@ -51,10 +51,10 @@ export default class App extends React.Component {
     return Promise.all([
       Font.loadAsync({
         ...Icon.Ionicons.font,
-        'meta-serif-bold-italic': require('./assets/fonts/metaserif_bold_italic.otf'),
-        'meta-serif-light-italic': require('./assets/fonts/metaserif_light_italic.otf'),
-        'meta-serif-light': require('./assets/fonts/metaserif_light.otf'),
-        'meta-serif': require('./assets/fonts/metaserif.otf')
+        'meta-serif-bold-italic': require('~assets/fonts/metaserif_bold_italic.otf'),
+        'meta-serif-light-italic': require('~assets/fonts/metaserif_light_italic.otf'),
+        'meta-serif-light': require('~assets/fonts/metaserif_light.otf'),
+        'meta-serif': require('~assets/fonts/metaserif.otf')
       })
     ])
   }
