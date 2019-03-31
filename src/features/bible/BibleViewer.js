@@ -1,9 +1,10 @@
 // @flow
 import React, { Component } from 'react'
-import { ScrollView, View, StyleSheet, Button } from 'react-native'
+import { ScrollView, View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { pure, compose } from 'recompose'
 
+import Button from '~common/ui/Button'
 import Loading from '~common/Loading'
 import BibleVerse from './BibleVerse'
 import BibleFooter from './BibleFooter'
@@ -18,19 +19,13 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     paddingTop: 20,
-    paddingBottom: 40
+    paddingBottom: 60
   },
-  button: {
-    marginTop: 10,
-    marginBottom: 30,
-    marginLeft: 20,
-    backgroundColor: 'white',
-    borderColor: 'red',
-    borderRadius: 5,
-    borderWidth: 2
-  },
-  buttonText: {
-    color: 'red'
+  fixedButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0
   }
 })
 
@@ -42,7 +37,7 @@ class BibleViewer extends Component {
 
   componentWillMount () {
     setTimeout(() => this.loadVerses(), 500)
-    this.props.clearSelectedVerses()
+    this.props.clearHighlightedVerses()
   }
 
   componentWillReceiveProps (oldProps) {
@@ -52,7 +47,7 @@ class BibleViewer extends Component {
       this.props.version !== oldProps.version
     ) {
       setTimeout(() => this.loadVerses(), 0)
-      this.props.clearSelectedVerses()
+      this.props.clearHighlightedVerses()
     }
 
     // Scroll ONLY when verse change ALONE
@@ -106,6 +101,22 @@ class BibleViewer extends Component {
     this.setState({ isLoading: false, verses: tempVerses })
   }
 
+  openInBibleTab = () => {
+    const {
+      book,
+      chapter,
+      verse,
+      navigation,
+      setAllAndValidateSelected
+    } = this.props
+    setAllAndValidateSelected({
+      book,
+      chapter,
+      verse
+    })
+    navigation.navigate('Bible')
+  }
+
   renderVerses = () => {
     const {
       version,
@@ -144,8 +155,6 @@ class BibleViewer extends Component {
     const {
       book,
       chapter,
-      arrayVerses,
-      navigation,
       goToPrevChapter,
       goToNextChapter,
       isReadOnly
@@ -171,20 +180,14 @@ class BibleViewer extends Component {
           contentContainerStyle={styles.scrollView}
         >
           {this.renderVerses()}
-          {!!arrayVerses && (
-            <Button
-              title='Lire le chapitre entier'
-              buttonStyle={styles.button}
-              textStyle={styles.buttonText}
-              onPress={() =>
-                navigation.navigate('bible', {
-                  hasBack: true,
-                  verse: arrayVerses.verses[0]
-                })
-              }
-            />
-          )}
         </ScrollView>
+        {isReadOnly && (
+          <Button
+            title='Ouvrir dans Bible'
+            onPress={this.openInBibleTab}
+            style={styles.fixedButton}
+          />
+        )}
         {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}

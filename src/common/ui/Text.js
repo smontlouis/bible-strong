@@ -9,6 +9,8 @@ const Text = styled.Text(props => {
     color: s.colors(props),
     fontSize: props.fontSize,
 
+    fontWeight: props.bold ? 'bold' : undefined,
+
     // container
     backgroundColor: props.backgroundColor,
     padding: props.padding,

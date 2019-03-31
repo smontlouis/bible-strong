@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native'
 import { pure } from 'recompose'
 
 import HTMLView from '~helpers/react-native-htmlview'
-import theme from '@themes/default'
+import theme from '~themes/default'
 
 const textStyle = {
   lineHeight: 27,

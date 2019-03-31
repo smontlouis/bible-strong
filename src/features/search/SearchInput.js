@@ -42,6 +42,10 @@ class SearchInput extends Component {
     hasText: false
   }
 
+  componentDidMount () {
+    this.input.focus()
+  }
+
   onChangeText = (value: string) => {
     if (value) this.setState({ hasText: true })
     else this.setState({ hasText: false })

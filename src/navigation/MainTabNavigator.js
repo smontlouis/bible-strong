@@ -22,7 +22,7 @@ export default createMaterialBottomTabNavigator(
       navigationOptions: {
         title: 'Recherche',
         tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='book' />
+          <TabBarIcon focused={focused} name='search' />
         )
       }
     },

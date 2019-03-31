@@ -74,7 +74,7 @@ const BibleStrongRef = ({
 }) => {
   if (concordanceFor) {
     const isConcordance =
-      `0${concordanceFor}` === reference || concordanceFor === reference
+      `0${concordanceFor}` === reference || `${concordanceFor}` === reference
 
     if (!word && !isConcordance) {
       return null

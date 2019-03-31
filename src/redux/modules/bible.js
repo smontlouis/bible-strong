@@ -9,9 +9,9 @@ const VALIDATE_SELECTED = 'bible/VALIDATE_SELECTED'
 const SET_ALL_AND_VALIDATE_SELECTED = 'bible/SET_ALL_AND_VALIDATE_SELECTED'
 const RESET_TEMP_SELECTED = 'bible/RESET_TEMP_SELECTED'
 const SET_VERSION = 'bible/SET_VERSION'
-const ADD_SELECTED_VERSE = 'bible/ADD_SELECTED_VERSE'
-const REMOVE_SELECTED_VERSE = 'bible/REMOVE_SELECTED_VERSE'
-const CLEAR_SELECTED_VERSES = 'bible/CLEAR_SELECTED_VERSES'
+const ADD_HIGHLIGHTED_VERSE = 'bible/ADD_HIGHLIGHTED_VERSE'
+const REMOVE_HIGHLIGHTED_VERSE = 'bible/REMOVE_HIGHLIGHTED_VERSE'
+const CLEAR_HIGHLIGHTED_VERSES = 'bible/CLEAR_HIGHLIGHTED_VERSES'
 const GO_TO_PREV_CHAPTER = 'bible/GO_TO_PREV_CHAPTER'
 const GO_TO_NEXT_CHAPTER = 'bible/GO_TO_NEXT_CHAPTER'
 
@@ -85,18 +85,18 @@ export default produce((draft, action) => {
       draft.selectedVersion = action.version
       return
     }
-    case ADD_SELECTED_VERSE: {
+    case ADD_HIGHLIGHTED_VERSE: {
       draft.highlightedVerses = {
         ...draft.highlightedVerses,
         [action.id]: true
       }
       return
     }
-    case REMOVE_SELECTED_VERSE: {
+    case REMOVE_HIGHLIGHTED_VERSE: {
       delete draft.highlightedVerses[action.id]
       return
     }
-    case CLEAR_SELECTED_VERSES: {
+    case CLEAR_HIGHLIGHTED_VERSES: {
       draft.highlightedVerses = {}
       return
     }
@@ -269,20 +269,20 @@ export function goToPrevVerse (nbVerses) {
 
 export function addSelectedVerse (id) {
   return {
-    type: ADD_SELECTED_VERSE,
+    type: ADD_HIGHLIGHTED_VERSE,
     id
   }
 }
 
 export function removeSelectedVerse (id) {
   return {
-    type: REMOVE_SELECTED_VERSE,
+    type: REMOVE_HIGHLIGHTED_VERSE,
     id
   }
 }
 
-export function clearSelectedVerses () {
+export function clearHighlightedVerses () {
   return {
-    type: CLEAR_SELECTED_VERSES
+    type: CLEAR_HIGHLIGHTED_VERSES
   }
 }

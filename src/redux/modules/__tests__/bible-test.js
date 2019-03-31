@@ -158,7 +158,7 @@ describe('Bible Reducer', () => {
           5: true
         }
       },
-      BibleActions.clearSelectedVerses()
+      BibleActions.clearHighlightedVerses()
     )
     expect(newState).toEqual({
       ...initialState,
