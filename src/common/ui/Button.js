@@ -1,8 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { TouchableOpacity } from 'react-native'
 
-const WrapperButton = styled.View(({ theme }) => ({
+const WrapperButton = styled.TouchableOpacity(({ theme }) => ({
   backgroundColor: theme.colors.primary,
   borderRadius: 5,
   height: 40,
@@ -19,11 +18,9 @@ const TextButton = styled.Text(({ theme }) => ({
 }))
 
 const Button = ({ title, onPress, style }) => (
-  <TouchableOpacity onPress={onPress}>
-    <WrapperButton style={style}>
-      <TextButton>{title}</TextButton>
-    </WrapperButton>
-  </TouchableOpacity>
+  <WrapperButton onPress={onPress} style={style}>
+    <TextButton>{title}</TextButton>
+  </WrapperButton>
 )
 
 export default Button
