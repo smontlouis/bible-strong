@@ -6,6 +6,7 @@ import Box from '~common/ui/Box'
 
 import Header from '~common/Header'
 import Loading from '~common/Loading'
+import waitForDB from '~common/WaitForDB'
 import ConcordanceVerse from './ConcordanceVerse'
 
 import books from '~assets/bible_versions/books-desc'
@@ -63,4 +64,4 @@ class ConcordanceByBook extends Component {
   }
 }
 
-export default ConcordanceByBook
+export default waitForDB(ConcordanceByBook)

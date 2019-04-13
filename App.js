@@ -1,6 +1,6 @@
 import React from 'react'
 import { YellowBox } from 'react-native'
-import { AppLoading, Font, Icon, FileSystem, Asset, Updates } from 'expo'
+import { AppLoading, Font, Icon, Updates } from 'expo'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'emotion-theming'
 import Sentry from 'sentry-expo'
@@ -9,7 +9,6 @@ import SnackBar from '~common/SnackBar'
 import theme from '~themes/default'
 import AppNavigator from '~navigation/AppNavigator'
 import configureStore from '~redux/store'
-import { initDB } from '~helpers/database'
 
 YellowBox.ignoreWarnings(['Require cycle:'])
 
@@ -27,27 +26,6 @@ export default class App extends React.Component {
   }
 
   loadResourcesAsync = async () => {
-    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-    const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
-
-    if (!sqliteDir.exists) {
-      await FileSystem.makeDirectoryAsync(sqliteDirPath)
-    } else if (!sqliteDir.isDirectory) {
-      throw new Error('SQLite dir is not a directory')
-    }
-
-    const dbPath = `${sqliteDirPath}/strong.sqlite`
-
-    const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-    if (!dbFile.exists) {
-      const dbUri = Asset.fromModule(require('~assets/db/strong.sqlite')).uri
-      console.log(`Downloading ${dbUri} to ${dbPath}`)
-      await FileSystem.downloadAsync(dbUri, dbPath)
-    }
-
-    initDB()
-
     return Promise.all([
       Font.loadAsync({
         ...Icon.Ionicons.font,

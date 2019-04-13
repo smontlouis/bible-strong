@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
-import { pure, compose } from 'recompose'
+import waitForDB from '~common/WaitForDB'
+import { compose } from 'recompose'
 
 import { initDB } from '~helpers/database'
 import loadCountVerses from '~helpers/loadCountVerses'
@@ -80,7 +81,7 @@ class VerseSelector extends Component {
 }
 
 export default compose(
-  pure,
+  waitForDB,
   connect(
     ({ bible: { temp } }) => ({
       selectedBook: temp.selectedBook,

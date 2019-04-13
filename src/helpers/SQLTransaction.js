@@ -1,4 +1,4 @@
-import getDB from '~helpers/database'
+import { getDB } from '~helpers/database'
 
 const SQLTransaction = sqlReq => {
   return new Promise((resolve, reject) => {

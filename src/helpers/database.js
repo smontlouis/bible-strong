@@ -4,8 +4,9 @@ let db
 
 export const initDB = () => {
   db = SQLite.openDatabase('strong.sqlite')
+  return db
 }
 
-export default function getDB () {
+export const getDB = () => {
   return db
 }

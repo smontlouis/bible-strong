@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
+import WaitForDB from '~common/WaitForDB'
 import * as BibleActions from '~redux/modules/bible'
 
 import Container from '~common/ui/Container'
@@ -65,6 +66,7 @@ const StyledVerse = styled.View(({ theme }) => ({
   }),
   BibleActions
 )
+@WaitForDB
 class BibleVerseDetailScreen extends React.Component {
   state = {
     formattedVerse: '',

@@ -9,6 +9,7 @@ import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
+import waitForDB from '~common/WaitForDB'
 import OccurrencesFoundByBookList from './OccurrencesFoundByBookList'
 
 import capitalize from '~helpers/capitalize'
@@ -151,4 +152,4 @@ class BibleStrongDetailScreen extends React.Component {
   }
 }
 
-export default BibleStrongDetailScreen
+export default waitForDB(BibleStrongDetailScreen)
