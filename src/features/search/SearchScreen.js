@@ -59,7 +59,8 @@ export default class SearchScreen extends React.Component {
     const { isLoading, results, value } = this.state
 
     if (isLoading) {
-      return <Loading message="Chargement de l'index..." />
+      return <Loading message={`Téléchargement de l'index...
+      Cela peut prendre un peu de temps la première fois.`} />
     }
 
     return (
