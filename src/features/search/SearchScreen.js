@@ -1,4 +1,5 @@
 import React from 'react'
+import { FileSystem, Asset } from 'expo'
 import debounce from 'debounce'
 
 import Container from '~common/ui/Container'
@@ -7,20 +8,31 @@ import Empty from '~common/Empty'
 import SearchHeader from './SearchHeader'
 import SearchResults from './SearchResults'
 
-const loadIndex = new Promise((resolve, reject) => {
-  try {
-    const lunr = require('lunr')
-    require('lunr-languages/lunr.stemmer.support')(lunr)
-    require('lunr-languages/lunr.fr')(lunr)
-    require('~helpers/lunr.unicodeNormalizer')(lunr)
+const loadIndex = async () => {
+  const lunr = require('lunr')
+  require('lunr-languages/lunr.stemmer.support')(lunr)
+  require('lunr-languages/lunr.fr')(lunr)
+  require('~helpers/lunr.unicodeNormalizer')(lunr)
 
-    const data = require('~assets/bible_versions/idx-light.json')
-    const idx = lunr.Index.load(data)
-    resolve(idx)
-  } catch (e) {
-    reject(e)
+  const idxPath = `${FileSystem.documentDirectory}idx-light.json`
+  let idxFile = await FileSystem.getInfoAsync(idxPath)
+
+  console.log('Index exists ?', idxFile.exists)
+
+  if (!idxFile.exists) {
+    const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
+    console.log(`Downloading ${idxUri} to ${idxPath}`)
+    await FileSystem.createDownloadResumable(idxUri, idxPath, null, ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+      console.log(totalBytesWritten, totalBytesExpectedToWrite)
+    }).downloadAsync()
+    console.log('Download finished')
+    idxFile = await FileSystem.getInfoAsync(idxPath)
   }
-})
+
+  const data = await FileSystem.readAsStringAsync(idxFile.uri)
+  const idx = lunr.Index.load(JSON.parse(data))
+  return idx
+}
 
 export default class SearchScreen extends React.Component {
   state = {
@@ -32,7 +44,7 @@ export default class SearchScreen extends React.Component {
     this.loadIndex()
   }
   loadIndex = async () => {
-    this.idx = await loadIndex
+    this.idx = await loadIndex()
     this.setState({ isLoading: false })
   }
   onChangeText = value => {

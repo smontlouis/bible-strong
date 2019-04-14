@@ -6,5 +6,6 @@ npm-debug.*
 *.key
 *.mobileprovision
 src/assets/db/**
-src/assets/bible_versions
+src/assets/bible_versions/**
+src/assets/lunr/**
 

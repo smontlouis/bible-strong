@@ -9,7 +9,8 @@ module.exports = {
       'png',
       'jpg',
       'jpeg',
-      'json'
+      'json',
+      'txt'
     ]
   }
 }
