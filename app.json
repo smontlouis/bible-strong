@@ -11,7 +11,7 @@
       "ios",
       "android"
     ],
-    "version": "0.2.2",
+    "version": "0.2.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -20,7 +20,10 @@
       "backgroundColor": "#ffffff"
     },
     "packagerOpts": {
-      "assetExts": ["sqlite", "txt"]
+      "assetExts": [
+        "sqlite",
+        "txt"
+      ]
     },
     "assetBundlePatterns": [
       "assets/images/*",
@@ -35,11 +38,11 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smontlouis.biblestrong",
-      "buildNumber": "6"
+      "buildNumber": "7"
     },
     "android": {
       "package": "com.smontlouis.biblestrong",
-      "versionCode": 6
+      "versionCode": 7
     },
     "hooks": {
       "postPublish": [
