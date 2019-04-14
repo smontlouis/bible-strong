@@ -21,16 +21,19 @@
     },
     "packagerOpts": {
       "assetExts": [
-        "db"
+        "db",
+        "json"
       ]
     },
+    "assetBundlePatterns": [
+      "assets/images/*",
+      "src/assets/bible_versions/*",
+      "src/assets/database/*"
+    ],
     "updates": {
       "fallbackToCacheTimeout": 0,
       "checkAutomatically": "ON_ERROR_RECOVERY"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smontlouis.biblestrong",

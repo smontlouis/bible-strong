@@ -1,5 +1,4 @@
 import React from 'react'
-import { KeyboardAvoidingView } from 'react-native'
 import { pure } from 'recompose'
 import { DangerZone } from 'expo'
 import styled from '@emotion/native'

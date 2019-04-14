@@ -29,9 +29,9 @@ export default class App extends React.Component {
     return Promise.all([
       Font.loadAsync({
         ...Icon.Ionicons.font,
-        'meta-serif-bold-italic': require('~assets/fonts/metaserif_bold_italic.otf'),
+        // 'meta-serif-bold-italic': require('~assets/fonts/metaserif_bold_italic.otf'),
+        // 'meta-serif-light': require('~assets/fonts/metaserif_light.otf'),
         'meta-serif-light-italic': require('~assets/fonts/metaserif_light_italic.otf'),
-        'meta-serif-light': require('~assets/fonts/metaserif_light.otf'),
         'meta-serif': require('~assets/fonts/metaserif.otf')
       })
     ])
