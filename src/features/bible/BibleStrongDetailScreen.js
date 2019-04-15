@@ -86,9 +86,9 @@ class BibleStrongDetailScreen extends React.Component {
                   </Text>
                 )}
               </Text>
-              <Icon.AntDesign
+              <Icon.Feather
                 style={{ paddingTop: 10 }}
-                name='shrink'
+                name='minimize-2'
                 size={20}
                 color='black'
               />

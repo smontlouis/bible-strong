@@ -41,7 +41,7 @@ const BibleFooter = ({
         activeOpacity={0.5}
         onPress={goToPrevChapter}
       >
-        <Icon.AntDesign name={'leftcircle'} size={30} color='rgb(98,113,122)' />
+        <Icon.Feather name={'arrow-left-circle'} size={30} color='rgb(98,113,122)' />
       </IconButton>
     )}
     <Box flex />
@@ -51,8 +51,8 @@ const BibleFooter = ({
         activeOpacity={0.5}
         onPress={goToNextChapter}
       >
-        <Icon.AntDesign
-          name={'rightcircle'}
+        <Icon.Feather
+          name={'arrow-right-circle'}
           size={30}
           color='rgb(98,113,122)'
         />

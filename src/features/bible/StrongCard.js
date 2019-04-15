@@ -83,9 +83,9 @@ class StrongCard extends React.Component {
                   </Text>
                 )}
               </Text>
-              <Icon.AntDesign
+              <Icon.Feather
                 style={{ paddingTop: 5 }}
-                name='arrowsalt'
+                name='maximize-2'
                 size={20}
                 color='black'
               />

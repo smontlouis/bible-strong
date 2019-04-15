@@ -10,12 +10,14 @@ import Back from '~common/Back'
 
 const LinkBox = styled(Link)({
   flexDirection: 'row',
+  alignItems: 'center',
   paddingRight: 15
 })
 
 const Text = styled.Text({
   fontSize: 16,
-  fontWeight: 'bold'
+  fontWeight: 'bold',
+  marginRight: 5
 })
 
 const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
@@ -34,7 +36,7 @@ const Header = ({ isReadOnly, noBorder, book, chapter, verse, version }) => {
       <HeaderBox noBorder={noBorder} row>
         <Box flex justifyContent='center'>
           <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <Icon.AntDesign name={'arrowleft'} size={20} color='black' />
+            <Icon.Feather name={'arrow-left'} size={20} color='black' />
           </Back>
         </Box>
         <Box grow center>
@@ -52,11 +54,11 @@ const Header = ({ isReadOnly, noBorder, book, chapter, verse, version }) => {
         <Text>
           {book.Nom} {chapter}
         </Text>
-        <Icon.MaterialIcons name='arrow-drop-down' size={20} />
+        <Icon.Feather name='chevron-down' size={15} />
       </LinkBox>
       <LinkBox route={'VersionSelector'} params={{ version }}>
         <Text>{version}</Text>
-        <Icon.MaterialIcons name='arrow-drop-down' size={20} />
+        <Icon.Feather name='chevron-down' size={15} />
       </LinkBox>
     </HeaderBox>
   )

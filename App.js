@@ -28,9 +28,7 @@ export default class App extends React.Component {
   loadResourcesAsync = async () => {
     return Promise.all([
       Font.loadAsync({
-        ...Icon.Ionicons.font,
-        // 'meta-serif-bold-italic': require('~assets/fonts/metaserif_bold_italic.otf'),
-        // 'meta-serif-light': require('~assets/fonts/metaserif_light.otf'),
+        ...Icon.Feather.font,
         'meta-serif-light-italic': require('~assets/fonts/metaserif_light_italic.otf'),
         'meta-serif': require('~assets/fonts/metaserif.otf')
       })
@@ -49,11 +47,10 @@ export default class App extends React.Component {
 
   updateApp = async () => {
     try {
-      SnackBar.show('Recherche de mise à jour...', { duration: 3000 })
       const update = await Updates.checkForUpdateAsync()
 
       if (update.isAvailable) {
-        SnackBar.show('Téléchargement...', { duration: 3000 })
+        SnackBar.show('Nouvelle mise à jour.', { duration: 3000 })
         await Updates.fetchUpdateAsync()
 
         Updates.reloadFromCache()

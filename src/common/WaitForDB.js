@@ -28,9 +28,11 @@ const WaitForDatabase = WrappedComponent =>
       const dbFile = await FileSystem.getInfoAsync(dbPath)
 
       if (!dbFile.exists) {
-        const dbUri = Asset.fromModule(require('~assets/db/strong.sqlite')).uri
-        console.log(`Downloading ${dbUri} to ${dbPath}`)
-        await FileSystem.downloadAsync(dbUri, dbPath)
+        const asset = Asset.fromModule(require('~assets/db/strong.sqlite'))
+        await asset.downloadAsync()
+
+        console.log(`Downloading ${asset.localUri} to ${dbPath}`)
+        await FileSystem.downloadAsync(asset.localUri, dbPath)
       }
 
       await initDB()

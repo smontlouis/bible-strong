@@ -27,9 +27,9 @@
     },
     "assetBundlePatterns": [
       "assets/images/*",
-      "src/assets/db/*",
       "src/assets/fonts/*",
       "src/assets/images/*",
+      "src/assets/db/strong.sqlite",
       "src/assets/bible_versions/bible-lsg-1910.json"
     ],
     "updates": {

@@ -24,7 +24,7 @@ const BibleVerseDetailFooter = ({
         activeOpacity={0.5}
         onPress={() => goToPrevVerse(versesInCurrentChapter)}
       >
-        <Icon.AntDesign name={'leftcircleo'} size={20} />
+        <Icon.Feather name={'arrow-left-circle'} size={20} />
         <Text paddingLeft={10} darkGrey>
           Verset précédent
         </Text>
@@ -39,7 +39,7 @@ const BibleVerseDetailFooter = ({
         <Text paddingRight={10} darkGrey>
           Verset suivant
         </Text>
-        <Icon.AntDesign name={'rightcircleo'} size={20} />
+        <Icon.Feather name={'arrow-right-circle'} size={20} />
       </IconButton>
     )}
   </Box>

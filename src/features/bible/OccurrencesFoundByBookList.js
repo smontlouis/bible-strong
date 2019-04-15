@@ -51,7 +51,7 @@ const OccurrencesFoundByBookList = ({
               <Text reverse>{item.versesCountByBook}</Text>
             </OccurencesNumber>
             <Box flex />
-            <Icon.Ionicons name={'ios-arrow-forward'} size={20} />
+            <Icon.Feather name='chevron-right' size={20} />
           </ListItem>
         </TouchableOpacity>
       )}

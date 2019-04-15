@@ -28,8 +28,8 @@ const Header = ({ hasBackButton, isModal, title, noBorder }) => {
       <Box flex justifyContent='center'>
         {hasBackButton && (
           <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <Icon.AntDesign
-              name={isModal ? 'close' : 'arrowleft'}
+            <Icon.Feather
+              name={isModal ? 'x' : 'arrow-left'}
               size={isModal ? 20 : 20}
               color='black'
             />
