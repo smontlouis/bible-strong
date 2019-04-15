@@ -2914,6 +2914,11 @@ expo-app-loader-provider@~1.0.0:
   dependencies:
     expo-core "~2.0.0"
 
+expo-asset-utils@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/expo-asset-utils/-/expo-asset-utils-1.0.0.tgz#f116667886e1e56d39430e3754321dcb48718379"
+  integrity sha512-nvG0HlZMLDx9BEin7CQpBuON/m/wxaX0fKllSbD62kpphKBoDe/hQj+xi5Yffld73uzNWgqE9+6wRK2WJchaxQ==
+
 expo-asset@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-2.0.0.tgz#c4a1d44ccf1d321b505e437d1582dd2d382995e2"

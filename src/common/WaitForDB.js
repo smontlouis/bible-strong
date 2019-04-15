@@ -1,5 +1,7 @@
 import React from 'react'
-import { FileSystem, Asset } from 'expo'
+import { FileSystem } from 'expo'
+import AssetUtils from 'expo-asset-utils'
+
 import { initDB, getDB } from '~helpers/database'
 import Loading from '~common/Loading'
 
@@ -25,14 +27,20 @@ const WaitForDatabase = WrappedComponent =>
       }
 
       const dbPath = `${sqliteDirPath}/strong.sqlite`
-      const dbFile = await FileSystem.getInfoAsync(dbPath)
+      let dbFile = await FileSystem.getInfoAsync(dbPath)
+
+      if (__DEV__) {
+        if (dbFile.exists) {
+          FileSystem.deleteAsync(dbFile.uri)
+          dbFile = await FileSystem.getInfoAsync(dbPath)
+        }
+      }
 
       if (!dbFile.exists) {
-        const asset = Asset.fromModule(require('~assets/db/strong.sqlite'))
-        await asset.downloadAsync()
+        const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
 
-        console.log(`Downloading ${asset.localUri} to ${dbPath}`)
-        await FileSystem.downloadAsync(asset.localUri, dbPath)
+        console.log(`Downloading ${sqliteDB.localUri} to ${dbPath}`)
+        await FileSystem.downloadAsync(sqliteDB.localUri, dbPath)
       }
 
       await initDB()
