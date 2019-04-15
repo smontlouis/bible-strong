@@ -21,7 +21,9 @@ const Box = styled.View(props => ({
   flexWrap:
     (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
   flexDirection:
-    (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : '')
+    (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+
+  opacity: props.disabled ? 0.3 : 1
 }))
 
 export default Box

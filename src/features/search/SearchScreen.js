@@ -1,41 +1,20 @@
 import React from 'react'
 import { FileSystem, Asset } from 'expo'
 import debounce from 'debounce'
+import { ProgressBar } from 'react-native-paper'
 
 import Container from '~common/ui/Container'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
 import SearchHeader from './SearchHeader'
 import SearchResults from './SearchResults'
+import theme from '~themes/default'
 
-const loadIndex = async () => {
-  const lunr = require('lunr')
-  require('lunr-languages/lunr.stemmer.support')(lunr)
-  require('lunr-languages/lunr.fr')(lunr)
-  require('~helpers/lunr.unicodeNormalizer')(lunr)
-
-  const idxPath = `${FileSystem.documentDirectory}idx-light.json`
-  let idxFile = await FileSystem.getInfoAsync(idxPath)
-
-  console.log('Index exists ?', idxFile.exists)
-
-  if (!idxFile.exists) {
-    const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
-    console.log(`Downloading ${idxUri} to ${idxPath}`)
-    await FileSystem.createDownloadResumable(idxUri, idxPath, null, ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-      console.log(totalBytesWritten, totalBytesExpectedToWrite)
-    }).downloadAsync()
-    console.log('Download finished')
-    idxFile = await FileSystem.getInfoAsync(idxPath)
-  }
-
-  const data = await FileSystem.readAsStringAsync(idxFile.uri)
-  const idx = lunr.Index.load(JSON.parse(data))
-  return idx
-}
+const IDX_LIGHT_FILE_SIZE = 16795170
 
 export default class SearchScreen extends React.Component {
   state = {
+    idxProgress: undefined,
     isLoading: true,
     value: '',
     results: []
@@ -44,9 +23,41 @@ export default class SearchScreen extends React.Component {
     this.loadIndex()
   }
   loadIndex = async () => {
-    this.idx = await loadIndex()
+    const lunr = require('lunr')
+    require('lunr-languages/lunr.stemmer.support')(lunr)
+    require('lunr-languages/lunr.fr')(lunr)
+    require('~helpers/lunr.unicodeNormalizer')(lunr)
+
+    const idxPath = `${FileSystem.documentDirectory}idx-light.json`
+    let idxFile = await FileSystem.getInfoAsync(idxPath)
+
+    // if (__DEV__) {
+    //   if (idxFile.exists) {
+    //     FileSystem.deleteAsync(idxFile.uri)
+    //     idxFile = await FileSystem.getInfoAsync(idxPath)
+    //   }
+    // }
+
+    if (!idxFile.exists) {
+      const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
+
+      console.log(`Downloading ${idxUri} to ${idxPath}`)
+      await FileSystem.createDownloadResumable(idxUri, idxPath, null, this.calculateProgress).downloadAsync()
+
+      console.log('Download finished')
+      idxFile = await FileSystem.getInfoAsync(idxPath)
+    }
+
+    const data = await FileSystem.readAsStringAsync(idxFile.uri)
+    this.idx = lunr.Index.load(JSON.parse(data))
     this.setState({ isLoading: false })
   }
+
+  calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+    const idxProgress = Math.floor(totalBytesWritten / IDX_LIGHT_FILE_SIZE * 100) / 100
+    this.setState({ idxProgress })
+  }
+
   onChangeText = value => {
     if (value !== '') {
       const results = this.idx.search(value)
@@ -56,11 +67,19 @@ export default class SearchScreen extends React.Component {
     }
   }
   render () {
-    const { isLoading, results, value } = this.state
+    const { isLoading, results, value, idxProgress } = this.state
+    const isProgressing = typeof idxProgress !== 'undefined'
+
+    if (isLoading && isProgressing) {
+      return (
+        <Loading message={`Téléchargement de l'index...`}>
+          <ProgressBar progress={idxProgress} color={theme.colors.tertiary} />
+        </Loading>
+      )
+    }
 
     if (isLoading) {
-      return <Loading message={`Téléchargement de l'index...
-      Cela peut prendre un peu de temps la première fois.`} />
+      return <Loading message={`Chargement de l'index...`} />
     }
 
     return (

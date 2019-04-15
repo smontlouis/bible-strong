@@ -1,14 +1,21 @@
-// @flow
 import React from 'react'
-import { pure } from 'recompose'
-
+import { FileSystem, Asset } from 'expo'
+import { TouchableOpacity } from 'react-native'
+import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 
-const TouchableOpacity = styled.TouchableOpacity({
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+
+const BIBLE_FILESIZE = 5000000
+
+const Container = styled.View({
   padding: 15,
   paddingTop: 10,
   paddingBottom: 10
 })
+
+const TouchableContainer = Container.withComponent(TouchableOpacity)
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : 'black',
@@ -21,11 +28,114 @@ const TextName = styled.Text(({ isSelected, theme }) => ({
   backgroundColor: 'transparent'
 }))
 
-const VersionSelectorItem = ({ version, isSelected, onChange }) => (
-  <TouchableOpacity onPress={() => onChange(version.id)}>
-    <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-    <TextName isSelected={isSelected}>{version.name}</TextName>
-  </TouchableOpacity>
-)
+class VersionSelectorItem extends React.Component {
+  state = {
+    versionNeedsDownload: undefined,
+    fileProgress: 0,
+    isLoading: false
+  }
 
-export default pure(VersionSelectorItem)
+  async componentDidMount () {
+    const versionNeedsDownload = await this.getIfVersionNeedsDownload()
+    this.setState({ versionNeedsDownload })
+  }
+
+  getIfVersionNeedsDownload = async () => {
+    const { version } = this.props
+    if (version.id === 'LSG') {
+      return false
+    }
+    const path = `${FileSystem.documentDirectory}bible-${version.id}.json`
+    let file = await FileSystem.getInfoAsync(path)
+
+    // if (__DEV__) {
+    //   if (file.exists) {
+    //     FileSystem.deleteAsync(file.uri)
+    //     file = await FileSystem.getInfoAsync(path)
+    //   }
+    // }
+
+    if (!file.exists) {
+      return true
+    }
+
+    return false
+  }
+
+  requireBibleFileUri = (id) => {
+    switch (id) {
+      case 'DBY': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-dby.txt')).uri
+      }
+      case 'OST': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-ost.txt')).uri
+      }
+    }
+  }
+
+  calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+    const fileProgress = Math.floor(totalBytesWritten / BIBLE_FILESIZE * 100) / 100
+    this.setState({ fileProgress })
+  }
+
+  startDownload = async () => {
+    const { version } = this.props
+
+    this.setState({ isLoading: true })
+
+    const path = `${FileSystem.documentDirectory}bible-${version.id}.json`
+    const uri = this.requireBibleFileUri(version.id)
+
+    console.log(`Downloading ${uri} to ${path}`)
+    await FileSystem.createDownloadResumable(uri, path, null, this.calculateProgress).downloadAsync()
+
+    console.log('Download finished')
+
+    this.setState({ versionNeedsDownload: false })
+  }
+
+  render () {
+    const { version, isSelected, onChange } = this.props
+    const { versionNeedsDownload, isLoading, fileProgress } = this.state
+
+    if (typeof versionNeedsDownload === 'undefined') {
+      return null
+    }
+
+    if (versionNeedsDownload) {
+      return (
+        <Container>
+          <Box flex row>
+            <Box disabled flex>
+              <TextVersion >{version.id}</TextVersion>
+              <TextName >{version.name}</TextName>
+            </Box>
+            { !isLoading &&
+            <Button
+              reverse
+              small
+              title='Télécharger'
+              onPress={this.startDownload}
+            />
+            }
+            {
+              isLoading &&
+              <Box width={100} justifyContent='center'>
+                <ProgressBar progress={fileProgress} color='black' />
+              </Box>
+            }
+          </Box>
+        </Container>
+      )
+    }
+
+    return (
+      <TouchableContainer onPress={() => onChange(version.id)}>
+        <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
+        <TextName isSelected={isSelected}>{version.name}</TextName>
+      </TouchableContainer>
+    )
+  }
+}
+
+export default VersionSelectorItem

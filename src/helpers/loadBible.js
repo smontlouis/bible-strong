@@ -1,15 +1,36 @@
+import { FileSystem } from 'expo'
+import bibleMemoize from '~helpers/bibleStupidMemoize'
+
 export default function loadBible (bible) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {
         case 'DBY': {
-          const DarbyBible = require('~assets/bible_versions/bible-darby.json')
-          resolve(DarbyBible)
+          if (bibleMemoize['DBY']) {
+            return resolve(bibleMemoize['DBY'])
+          }
+
+          const path = `${FileSystem.documentDirectory}bible-DBY.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize['DBY'] = JSON.parse(data)
+          resolve(bibleMemoize['DBY'])
+
           break
         }
         case 'OST': {
-          const OSTBible = require('~assets/bible_versions/bible-ostervald.json')
-          resolve(OSTBible)
+          if (bibleMemoize['OST']) {
+            return resolve(bibleMemoize['OST'])
+          }
+
+          const path = `${FileSystem.documentDirectory}bible-OST.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize['OST'] = JSON.parse(data)
+          resolve(bibleMemoize['OST'])
+
           break
         }
         case 'LSG': {
