@@ -39,8 +39,8 @@ const WaitForDatabase = WrappedComponent =>
       if (!dbFile.exists) {
         const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
 
-        console.log(`Downloading ${sqliteDB.localUri} to ${dbPath}`)
-        await FileSystem.downloadAsync(sqliteDB.localUri, dbPath)
+        console.log(`Copying ${sqliteDB.localUri} to ${dbPath}`)
+        await FileSystem.copyAsync({ from: sqliteDB.localUri, to: dbPath })
       }
 
       await initDB()
