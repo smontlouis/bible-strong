@@ -1,7 +1,8 @@
 // @flow
 import React, { Component } from 'react'
-import { ScrollView, View, StyleSheet } from 'react-native'
+import { ScrollView, View, StyleSheet, WebView } from 'react-native'
 import { connect } from 'react-redux'
+
 import { pure, compose } from 'recompose'
 
 import Button from '~common/ui/Button'
@@ -12,20 +13,33 @@ import BibleFooter from './BibleFooter'
 
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
+import Paragraph from '~common/ui/Paragraph'
+import theme from '~themes/default'
 
 const styles = StyleSheet.create({
   container: {
     flex: 1
   },
   scrollView: {
-    paddingTop: 20,
+    paddingTop: 30,
     paddingBottom: 60
+
+  },
+  textContainer: {
+    maxWidth: 320,
+    width: '100%'
   },
   fixedButton: {
     position: 'absolute',
     bottom: 20,
     left: 0,
     right: 0
+  },
+  WebViewWrapper: {
+    flex: 1
+  },
+  WebView: {
+
   }
 })
 
@@ -138,16 +152,36 @@ class BibleViewer extends Component {
       )
     }
 
-    return array.map(verse => (
-      <BibleVerse
-        isReadOnly={isReadOnly}
-        navigation={navigation}
-        version={version}
-        verse={verse}
-        key={`${verse.Verset}${verse.Livre}${verse.Chapitre}`}
-        getPosition={this.getPosition}
-      />
-    ))
+    // return array.reduce((accumulator, verset, i) => {
+    //   return accumulator.concat(<Text key={verset.Verset}>{verset.Verset}</Text>).concat(verset.Texte.split(' ').map((word, j) => <Text key={i + j + word + verset.Verset}>{' '}{word}</Text>))
+    // }, [])
+
+    return (
+      <View style={styles.WebViewWrapper}>
+        <WebView
+          style={styles.WebView}
+          scalesPageToFit={false}
+          source={{ html: "<p style='text-align: justify; font-size: 24px; font-family: literata-book; max-width: 320px;'>Justified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text here</p>" }}
+        />
+      </View>
+    )
+
+    return (
+      <View style={styles.textContainer}>
+        <Paragraph style={{ textAlign: 'justify' }}>
+          {array.map(verse => (
+            <BibleVerse
+              isReadOnly={isReadOnly}
+              navigation={navigation}
+              version={version}
+              verse={verse}
+              key={`${verse.Verset}${verse.Livre}${verse.Chapitre}`}
+              getPosition={this.getPosition}
+            />
+          ))}
+        </Paragraph>
+      </View>
+    )
   }
 
   render () {
@@ -166,7 +200,8 @@ class BibleViewer extends Component {
 
     return (
       <View style={styles.container}>
-        <ScrollView
+        {this.renderVerses()}
+        {/* <ScrollView
           ref={r => {
             this.scrollView = r
           }}
@@ -178,9 +213,7 @@ class BibleViewer extends Component {
           }}
           scrollEventThrottle={16}
           contentContainerStyle={styles.scrollView}
-        >
-          {this.renderVerses()}
-        </ScrollView>
+         />
         {isReadOnly && (
           <Button
             title='Ouvrir dans Bible'
@@ -196,7 +229,7 @@ class BibleViewer extends Component {
             goToPrevChapter={goToPrevChapter}
             goToNextChapter={goToNextChapter}
           />
-        )}
+        )} */}
         {/* <SelectedVersesModal verses={this.state.verses} /> */}
       </View>
     )

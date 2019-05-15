@@ -30,6 +30,7 @@ export default class App extends React.Component {
     return Promise.all([
       Font.loadAsync({
         ...Icon.Feather.font,
+        'literata-book': require('~assets/fonts/LiterataBook.otf'),
         'meta-serif-light-italic': require('~assets/fonts/metaserif_light_italic.otf'),
         'meta-serif': require('~assets/fonts/metaserif.otf')
       })

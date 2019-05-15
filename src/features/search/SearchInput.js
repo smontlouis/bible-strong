@@ -20,8 +20,8 @@ const IconButtonTouch = IconButton.withComponent(TouchableOpacity)
 
 const Container = styled.View(({ isLight }) => ({
   flex: 1,
-  paddingTop: 15,
-  paddingBottom: 15,
+  paddingTop: 10,
+  paddingBottom: 10,
   paddingLeft: 20,
   paddingRight: 35,
   overflow: 'hidden',

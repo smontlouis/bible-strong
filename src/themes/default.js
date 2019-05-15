@@ -16,10 +16,11 @@ export default {
   },
   measures: {
     headerHeight: 50,
-    headerMarginTop: Platform.OS === 'ios' ? 0 : 25
+    headerMarginTop: Platform.OS === 'ios' ? 0 : 25,
+    padding: 45
   },
   fontFamily: {
-    text: Platform.OS === 'ios' ? 'System' : 'serif',
+    text: Platform.OS === 'ios' ? 'System' : 'meta-serif-light-italic',
     title: 'meta-serif',
     titleItalic: 'meta-serif-light-italic'
   }

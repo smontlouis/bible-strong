@@ -5,7 +5,7 @@
     "slug": "bible-strong",
     "privacy": "unlisted",
     "sdkVersion": "32.0.0",
-    "primaryColor": "#0ED3B9",
+    "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
     "platforms": [
       "ios",
@@ -19,6 +19,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "packagerOpts": {
       "assetExts": [
         "sqlite",
