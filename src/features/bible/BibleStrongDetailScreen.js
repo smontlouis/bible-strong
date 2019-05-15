@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { Icon } from 'expo'
-import { ScrollView, Platform, Clipboard } from 'react-native'
+import { ScrollView, Platform, Share } from 'react-native'
 
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
@@ -86,7 +86,7 @@ class BibleStrongDetailScreen extends React.Component {
     }
     toCopy += LSG ? `Généralement traduit par:\n${LSG}` : ''
     // console.log({strongReference, toCopy})
-    Clipboard.setString(toCopy);
+    Share.share({message: toCopy})
   }
 
 
@@ -125,7 +125,7 @@ class BibleStrongDetailScreen extends React.Component {
               <Touchable onPress={() => this.copyContent()}>
                 <Icon.Feather
                   style={{ paddingTop: 10, paddingHorizontal: 5 }}
-                  name='copy'
+                  name='share-2'
                   size={20}
                   color='black'
                 />
