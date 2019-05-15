@@ -9,18 +9,17 @@ import Paragraph from '~common/ui/Paragraph'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 
-import { wp, hp } from '~helpers/utils'
+import { wp } from '~helpers/utils'
 import capitalize from '~helpers/capitalize'
 import truncate from '~helpers/truncate'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth
-const itemHeight = hp(45)
 
 const Container = styled(Box)({
   width: itemWidth,
-  height: itemHeight,
+  flex: 1,
   paddingHorizontal: itemHorizontalMargin,
   paddingBottom: 18
 })
