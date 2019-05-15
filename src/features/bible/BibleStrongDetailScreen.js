@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { Icon } from 'expo'
-import { ScrollView, Platform } from 'react-native'
+import { ScrollView, Platform, Share } from 'react-native'
 
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
@@ -56,6 +56,41 @@ class BibleStrongDetailScreen extends React.Component {
     const versesCountByBook = await loadStrongVersesCountByBook(book, Code)
     this.setState({ versesCountByBook })
   }
+
+  copyContent = () => {
+    const {
+      strongReference: {
+        Code,
+        Hebreu,
+        Grec,
+        Mot,
+        Phonetique,
+        Definition,
+        Type,
+        LSG
+      }
+    } = this.props.navigation.state.params
+
+    let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
+    toCopy += Type ? `${Type}\n---\n\n` : `---\n\n`
+    toCopy += Hebreu ? `Mot Hébreu: ${Hebreu}\n\n` : ''
+    toCopy += Grec ? `Mot Grec: ${Grec}\n\n` : ''
+    if (Definition) {
+      let def = Definition.replace('<p>', '')
+      def = def.replace('</p>', '')
+      def = def.replace(/<\/?[^>]+><\/?[^>]+>/ig, '\n')
+      def = def.replace(/<\/?[^>]+>/ig, '\n')
+      toCopy += `Définition - ${Code}\n${def}\n\n`
+    }
+    toCopy += LSG ? `Généralement traduit par:\n${LSG}` : ''
+
+    Share.share({ message: toCopy })
+  }
+
+  goBack = () => {
+    this.props.navigation.goBack()
+  }
+
   render () {
     const {
       strongReference,
@@ -76,23 +111,35 @@ class BibleStrongDetailScreen extends React.Component {
       <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
         <Box padding={20}>
           <Box>
-            <Touchable onPress={() => this.props.navigation.goBack()}>
-              <Text title fontSize={22} flex>
-                {capitalize(Mot)}
-                {!!Phonetique && (
-                  <Text title darkGrey fontSize={16}>
-                    {' '}
-                    {Phonetique}
-                  </Text>
-                )}
-              </Text>
-              <Icon.Feather
-                style={{ paddingTop: 10 }}
-                name='minimize-2'
-                size={20}
-                color='black'
-              />
-            </Touchable>
+            <Box style={{ flexDirection: 'row' }}>
+              <Touchable onPress={() => this.props.navigation.goBack()} style={{ flex: 1 }}>
+                <Text title fontSize={22} flex>
+                  {capitalize(Mot)}
+                  {!!Phonetique && (
+                    <Text title darkGrey fontSize={16}>
+                      {' '}
+                      {Phonetique}
+                    </Text>
+                  )}
+                </Text>
+              </Touchable>
+              <Touchable onPress={this.copyContent}>
+                <Icon.Feather
+                  style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
+                  name='share-2'
+                  size={20}
+                  color='black'
+                />
+              </Touchable>
+              <Touchable onPress={this.goBack}>
+                <Icon.Feather
+                  style={{ paddingTop: 10, paddingHorizontal: 5 }}
+                  name='minimize-2'
+                  size={20}
+                  color='black'
+                />
+              </Touchable>
+            </Box>
             {!!Type && (
               <Text titleItalic darkGrey>
                 {Type}
