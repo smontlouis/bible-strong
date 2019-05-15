@@ -5,6 +5,7 @@ import { Provider } from 'react-redux'
 import { ThemeProvider } from 'emotion-theming'
 import Sentry from 'sentry-expo'
 import SnackBar from '~common/SnackBar'
+import { PersistGate } from 'redux-persist/integration/react'
 
 import theme from '~themes/default'
 import AppNavigator from '~navigation/AppNavigator'
@@ -18,7 +19,7 @@ YellowBox.ignoreWarnings(['Require cycle:'])
 Sentry.config(
   'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911'
 ).install()
-export const store = configureStore()
+export const { store, persistor } = configureStore()
 
 export default class App extends React.Component {
   state = {
@@ -78,7 +79,9 @@ export default class App extends React.Component {
     return (
       <ThemeProvider theme={theme}>
         <Provider store={store}>
-          <AppNavigator />
+          <PersistGate loading={null} persistor={persistor}>
+            <AppNavigator />
+          </PersistGate>
         </Provider>
       </ThemeProvider>
     )
