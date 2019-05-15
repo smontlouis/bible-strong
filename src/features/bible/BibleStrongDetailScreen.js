@@ -57,9 +57,8 @@ class BibleStrongDetailScreen extends React.Component {
     this.setState({ versesCountByBook })
   }
 
-  copyContent() {
+  copyContent = () => {
     const {
-      strongReference,
       strongReference: {
         Code,
         Hebreu,
@@ -67,7 +66,6 @@ class BibleStrongDetailScreen extends React.Component {
         Mot,
         Phonetique,
         Definition,
-        Origine,
         Type,
         LSG
       }
@@ -77,7 +75,7 @@ class BibleStrongDetailScreen extends React.Component {
     toCopy += Type ? `${Type}\n---\n\n` : `---\n\n`
     toCopy += Hebreu ? `Mot Hébreu: ${Hebreu}\n\n` : ''
     toCopy += Grec ? `Mot Grec: ${Grec}\n\n` : ''
-    if(Definition) {
+    if (Definition) {
       let def = Definition.replace('<p>', '')
       def = def.replace('</p>', '')
       def = def.replace(/<\/?[^>]+><\/?[^>]+>/ig, '\n')
@@ -85,10 +83,13 @@ class BibleStrongDetailScreen extends React.Component {
       toCopy += `Définition - ${Code}\n${def}\n\n`
     }
     toCopy += LSG ? `Généralement traduit par:\n${LSG}` : ''
-    // console.log({strongReference, toCopy})
-    Share.share({message: toCopy})
+
+    Share.share({ message: toCopy })
   }
 
+  goBack = () => {
+    this.props.navigation.goBack()
+  }
 
   render () {
     const {
@@ -110,8 +111,8 @@ class BibleStrongDetailScreen extends React.Component {
       <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
         <Box padding={20}>
           <Box>
-            <Box style={{flexDirection: 'row'}}>
-              <Touchable onPress={() => this.props.navigation.goBack()} style={{flex:1}}>
+            <Box style={{ flexDirection: 'row' }}>
+              <Touchable onPress={() => this.props.navigation.goBack()} style={{ flex: 1 }}>
                 <Text title fontSize={22} flex>
                   {capitalize(Mot)}
                   {!!Phonetique && (
@@ -122,15 +123,15 @@ class BibleStrongDetailScreen extends React.Component {
                   )}
                 </Text>
               </Touchable>
-              <Touchable onPress={() => this.copyContent()}>
+              <Touchable onPress={this.copyContent}>
                 <Icon.Feather
-                  style={{ paddingTop: 10, paddingHorizontal: 5 }}
+                  style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
                   name='share-2'
                   size={20}
                   color='black'
                 />
               </Touchable>
-              <Touchable onPress={() => this.props.navigation.goBack()}>
+              <Touchable onPress={this.goBack}>
                 <Icon.Feather
                   style={{ paddingTop: 10, paddingHorizontal: 5 }}
                   name='minimize-2'
