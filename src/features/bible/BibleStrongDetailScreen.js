@@ -44,7 +44,8 @@ const Touchable = styled.TouchableOpacity(() => ({
 
 class BibleStrongDetailScreen extends React.Component {
   state = {
-    versesCountByBook: []
+    versesCountByBook: [],
+    concordanceLoading: true
   }
 
   async componentDidMount () {
@@ -54,7 +55,7 @@ class BibleStrongDetailScreen extends React.Component {
     } = this.props.navigation.state.params
 
     const versesCountByBook = await loadStrongVersesCountByBook(book, Code)
-    this.setState({ versesCountByBook })
+    this.setState({ versesCountByBook, concordanceLoading: false })
   }
 
   copyContent = () => {
@@ -185,11 +186,12 @@ class BibleStrongDetailScreen extends React.Component {
                 <StylizedHTMLView value={Origine} onLinkPress={() => {}} />
               </ViewItem>
             )}
-            {this.state.versesCountByBook.length > 0 && (
+            {(this.state.versesCountByBook.length > 0 || this.state.concordanceLoading) && (
               <OccurrencesFoundByBookList
                 strongReference={strongReference}
                 navigation={this.props.navigation}
                 versesCountByBook={this.state.versesCountByBook}
+                loading={this.state.concordanceLoading}
               />
             )}
           </Box>

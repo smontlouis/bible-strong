@@ -11,7 +11,8 @@ import Back from '~common/Back'
 const LinkBox = styled(Link)({
   flexDirection: 'row',
   alignItems: 'center',
-  paddingRight: 15
+  paddingRight: 15,
+  paddingVertical: 15
 })
 
 const Text = styled.Text({

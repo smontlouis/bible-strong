@@ -15,13 +15,13 @@ const Text = styled.Text({
   marginTop: 20
 })
 
-const Loading = ({ message = null, children }) => (
-  <Container>
-    <ActivityIndicator />
+const Loading = ({ message = null, style, children }) => (
+  <Container style={style}>
+    <ActivityIndicator color={'#333'} />
     {message && <Text>{message}</Text>}
-    <Box width={200} marginLeft='auto' marginRight='auto'>
+    {children && <Box width={200} marginLeft='auto' marginRight='auto'>
       { children }
-    </Box>
+    </Box>}
   </Container>
 )
 
