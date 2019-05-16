@@ -1,12 +1,15 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
+import Verse from './Verse'
 const styled = picostyle(h)
 
-const VerseText = styled('span')({
-  fontFamily: 'Literata Book'
+const Container = styled('div')({
+  maxWidth: '320px',
+  width: '100%',
+  margin: '0 auto',
+  textAlign: 'justify'
 })
-
 class VersesRenderer extends Component {
   constructor (props) {
     super(props)
@@ -28,16 +31,13 @@ class VersesRenderer extends Component {
     }
 
     return (
-      <div>
+      <Container>
         {
           state.verses.map(({ Verset, Texte }) => (
-            <span>
-              <span>{Verset}</span>
-              <VerseText>{Texte}</VerseText>
-            </span>
+            <Verse verset={Verset} texte={Texte} />
           ))
         }
-      </div>
+      </Container>
     )
   }
 }
