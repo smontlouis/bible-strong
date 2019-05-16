@@ -1,0 +1,10 @@
+@font-face {
+  font-family: "Literata Book";
+  src: url("../../../assets/fonts/LiterataBook.otf");
+}
+
+.verset {
+  font-size: 20px;
+  line-height: 34px;
+  font-family: 'Literata Book';
+}

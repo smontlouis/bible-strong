@@ -1,20 +1,17 @@
 // @flow
 import React, { Component } from 'react'
-import { ScrollView, View, StyleSheet, WebView } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 
 import { pure, compose } from 'recompose'
 
-import Button from '~common/ui/Button'
 import Loading from '~common/Loading'
-import BibleVerse from './BibleVerse'
 import BibleFooter from './BibleFooter'
+import BibleWebView from './BibleWebView'
 // import SelectedVersesModal from '~common/SelectedVersesModal'
 
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
-import Paragraph from '~common/ui/Paragraph'
-import theme from '~themes/default'
 
 const styles = StyleSheet.create({
   container: {
@@ -35,11 +32,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0
   },
-  WebViewWrapper: {
-    flex: 1
-  },
-  WebView: {
-
+  webView: {
+    alignItems: 'stretch'
   }
 })
 
@@ -71,28 +65,6 @@ class BibleViewer extends Component {
       this.props.book.Numero === oldProps.book.Numero
     ) {
       setTimeout(() => this.scrollToVerse(), 0)
-    }
-  }
-
-  getPosition = (numVerset: number, measures: Object) => {
-    this.versesMeasure[`verse${numVerset}`] = measures
-    // We need to wait 'til every Bible verse component get calculated
-    if (Object.keys(this.versesMeasure).length === this.state.verses.length) {
-      setTimeout(() => this.scrollToVerse(), 0)
-    }
-  }
-
-  scrollToVerse = () => {
-    const { verse } = this.props
-    if (this.versesMeasure[`verse${verse}`] && this.scrollView) {
-      const scrollHeight = this.contentHeight - this.scrollViewHeight + 20
-      const y = verse === 1 ? 0 : this.versesMeasure[`verse${verse}`].py - 100
-
-      this.scrollView.scrollTo({
-        x: 0,
-        y: y >= scrollHeight ? scrollHeight : y,
-        animated: true
-      })
     }
   }
 
@@ -133,12 +105,9 @@ class BibleViewer extends Component {
 
   renderVerses = () => {
     const {
-      version,
       arrayVerses,
       book,
-      chapter,
-      navigation,
-      isReadOnly
+      chapter
     } = this.props
     let array = this.state.verses
 
@@ -152,35 +121,10 @@ class BibleViewer extends Component {
       )
     }
 
-    // return array.reduce((accumulator, verset, i) => {
-    //   return accumulator.concat(<Text key={verset.Verset}>{verset.Verset}</Text>).concat(verset.Texte.split(' ').map((word, j) => <Text key={i + j + word + verset.Verset}>{' '}{word}</Text>))
-    // }, [])
-
     return (
-      <View style={styles.WebViewWrapper}>
-        <WebView
-          style={styles.WebView}
-          scalesPageToFit={false}
-          source={{ html: "<p style='text-align: justify; font-size: 24px; font-family: literata-book; max-width: 320px;'>Justified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text hereJustified text here</p>" }}
-        />
-      </View>
-    )
-
-    return (
-      <View style={styles.textContainer}>
-        <Paragraph style={{ textAlign: 'justify' }}>
-          {array.map(verse => (
-            <BibleVerse
-              isReadOnly={isReadOnly}
-              navigation={navigation}
-              version={version}
-              verse={verse}
-              key={`${verse.Verset}${verse.Livre}${verse.Chapitre}`}
-              getPosition={this.getPosition}
-            />
-          ))}
-        </Paragraph>
-      </View>
+      <BibleWebView
+        arrayVerses={array}
+      />
     )
   }
 
@@ -201,26 +145,6 @@ class BibleViewer extends Component {
     return (
       <View style={styles.container}>
         {this.renderVerses()}
-        {/* <ScrollView
-          ref={r => {
-            this.scrollView = r
-          }}
-          onContentSizeChange={(w, h) => {
-            this.contentHeight = h
-          }}
-          onLayout={ev => {
-            this.scrollViewHeight = ev.nativeEvent.layout.height
-          }}
-          scrollEventThrottle={16}
-          contentContainerStyle={styles.scrollView}
-         />
-        {isReadOnly && (
-          <Button
-            title='Ouvrir dans Bible'
-            onPress={this.openInBibleTab}
-            style={styles.fixedButton}
-          />
-        )}
         {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}
@@ -229,7 +153,7 @@ class BibleViewer extends Component {
             goToPrevChapter={goToPrevChapter}
             goToNextChapter={goToNextChapter}
           />
-        )} */}
+        )}
         {/* <SelectedVersesModal verses={this.state.verses} /> */}
       </View>
     )
