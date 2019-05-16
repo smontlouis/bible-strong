@@ -68,6 +68,11 @@ class BibleViewer extends Component {
     }
   }
 
+  // DEPECRATED, SCROLL IN WEBVIEW
+  scrollToVerse = () => {
+
+  }
+
   loadVerses = async () => {
     const { book, chapter, version } = this.props
     let tempVerses
@@ -107,7 +112,8 @@ class BibleViewer extends Component {
     const {
       arrayVerses,
       book,
-      chapter
+      chapter,
+      navigation
     } = this.props
     let array = this.state.verses
 
@@ -123,6 +129,7 @@ class BibleViewer extends Component {
 
     return (
       <BibleWebView
+        navigation={navigation}
         arrayVerses={array}
       />
     )
@@ -154,7 +161,6 @@ class BibleViewer extends Component {
             goToNextChapter={goToNextChapter}
           />
         )}
-        {/* <SelectedVersesModal verses={this.state.verses} /> */}
       </View>
     )
   }

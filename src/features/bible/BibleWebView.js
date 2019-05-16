@@ -1,23 +1,32 @@
 import React, { Component, createRef } from 'react'
 import { WebView } from 'react-native'
-import bibleWebView from './bibleWebView/dist/index.html'
+import { compose } from 'recompose'
+import { connect } from 'react-redux'
 
-export default class MyInlineWeb extends Component {
+import * as BibleActions from '~redux/modules/bible'
+import bibleWebView from './bibleWebView/dist/index.html'
+import { NAVIGATE_TO_BIBLE_VERSE_DETAIL } from './bibleWebView/src/dispatch'
+
+class BibleWebView extends Component {
   webViewRef = createRef();
 
   componentDidUpdate () {
-    this.loadData()
+    this.sendDataToWebView()
   }
 
-  handleLoad = () => {
-    this.loadData()
+  // Receives all data from webview
+  receiveDataFromWebView = (e) => {
+    const action = JSON.parse(e.nativeEvent.data)
+    switch (action.type) {
+      case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
+        console.log(action.payload)
+        this.props.setSelectedVerse(Number(action.payload))
+        this.props.navigation.navigate('BibleVerseDetail')
+      }
+    }
   }
 
-  onMessage = (e) => {
-    console.log(e.nativeEvent.data)
-  }
-
-  loadData = () => {
+  sendDataToWebView = () => {
     const { arrayVerses } = this.props
     const webView = this.webViewRef.current
 
@@ -25,6 +34,7 @@ export default class MyInlineWeb extends Component {
       return
     }
 
+    // Sending all data from webview
     const message = JSON.stringify({ arrayVerses })
     webView.postMessage(message)
   }
@@ -33,8 +43,8 @@ export default class MyInlineWeb extends Component {
     return (
       <WebView
         useWebKit
-        onLoad={this.handleLoad}
-        onMessage={this.onMessage}
+        onLoad={this.sendDataToWebView}
+        onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={this.webViewRef}
         source={bibleWebView}
@@ -42,3 +52,7 @@ export default class MyInlineWeb extends Component {
     )
   }
 }
+
+export default compose(
+  connect(null, { ...BibleActions })
+)(BibleWebView)
