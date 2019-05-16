@@ -25,6 +25,10 @@ class BibleWebView extends Component {
     webView.postMessage(JSON.stringify(message))
   }
 
+  componentDidUpdate () {
+    this.onLoadWebView()
+  }
+
   // Receives all data from webview
   receiveDataFromWebView = (e) => {
     const action = JSON.parse(e.nativeEvent.data)
@@ -37,21 +41,14 @@ class BibleWebView extends Component {
         break
       }
       case TOGGLE_SELECTED_VERSE: {
-        console.log('Toggle', action.payload)
         const verseId = action.payload
-        const { addSelectedVerse, removeSelectedVerse, highlightedVerses } = this.props
+        const { addSelectedVerse, removeSelectedVerse } = this.props
+
         if (this.isVerseSelected(verseId)) {
-          console.log('remove')
           removeSelectedVerse(verseId)
         } else {
-          console.log('add')
           addSelectedVerse(verseId)
         }
-
-        this.dispatchToWebView({
-          type: SEND_HIGHLIGHTED_VERSES,
-          highlightedVerses
-        })
         break
       }
     }
