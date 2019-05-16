@@ -5,45 +5,78 @@ import { connect } from 'react-redux'
 
 import * as BibleActions from '~redux/modules/bible'
 import bibleWebView from './bibleWebView/dist/index.html'
-import { NAVIGATE_TO_BIBLE_VERSE_DETAIL } from './bibleWebView/src/dispatch'
+import {
+  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  SEND_INITIAL_DATA,
+  TOGGLE_SELECTED_VERSE,
+  SEND_HIGHLIGHTED_VERSES
+} from './bibleWebView/src/dispatch'
 
 class BibleWebView extends Component {
   webViewRef = createRef();
 
-  componentDidUpdate () {
-    this.sendDataToWebView()
-  }
-
-  // Receives all data from webview
-  receiveDataFromWebView = (e) => {
-    const action = JSON.parse(e.nativeEvent.data)
-    switch (action.type) {
-      case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
-        console.log(action.payload)
-        this.props.setSelectedVerse(Number(action.payload))
-        this.props.navigation.navigate('BibleVerseDetail')
-      }
-    }
-  }
-
-  sendDataToWebView = () => {
-    const { arrayVerses } = this.props
+  dispatchToWebView = (message) => {
     const webView = this.webViewRef.current
 
     if (webView === null) {
       return
     }
 
-    // Sending all data from webview
-    const message = JSON.stringify({ arrayVerses })
-    webView.postMessage(message)
+    webView.postMessage(JSON.stringify(message))
+  }
+
+  // Receives all data from webview
+  receiveDataFromWebView = (e) => {
+    const action = JSON.parse(e.nativeEvent.data)
+
+    switch (action.type) {
+      case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
+        const { setSelectedVerse, navigation } = this.props
+        setSelectedVerse(Number(action.payload))
+        navigation.navigate('BibleVerseDetail')
+        break
+      }
+      case TOGGLE_SELECTED_VERSE: {
+        console.log('Toggle', action.payload)
+        const verseId = action.payload
+        const { addSelectedVerse, removeSelectedVerse, highlightedVerses } = this.props
+        if (this.isVerseSelected(verseId)) {
+          console.log('remove')
+          removeSelectedVerse(verseId)
+        } else {
+          console.log('add')
+          addSelectedVerse(verseId)
+        }
+
+        this.dispatchToWebView({
+          type: SEND_HIGHLIGHTED_VERSES,
+          highlightedVerses
+        })
+        break
+      }
+    }
+  }
+
+  isVerseSelected = (verseId) => {
+    const { highlightedVerses } = this.props
+    return !!highlightedVerses[verseId]
+  }
+
+  onLoadWebView = () => {
+    const { arrayVerses, highlightedVerses } = this.props
+
+    this.dispatchToWebView({
+      type: SEND_INITIAL_DATA,
+      arrayVerses,
+      highlightedVerses
+    })
   }
 
   render () {
     return (
       <WebView
         useWebKit
-        onLoad={this.sendDataToWebView}
+        onLoad={this.onLoadWebView}
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={this.webViewRef}
@@ -54,5 +87,10 @@ class BibleWebView extends Component {
 }
 
 export default compose(
-  connect(null, { ...BibleActions })
+  connect(
+    state => ({
+      highlightedVerses: state.bible.highlightedVerses
+    }),
+    { ...BibleActions }
+  )
 )(BibleWebView)

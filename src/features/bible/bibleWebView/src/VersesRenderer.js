@@ -1,6 +1,7 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
+import { SEND_INITIAL_DATA, SEND_HIGHLIGHTED_VERSES } from './dispatch'
 import Verse from './Verse'
 const styled = picostyle(h)
 
@@ -11,17 +12,36 @@ const Container = styled('div')({
   textAlign: 'justify'
 })
 class VersesRenderer extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state.verses = []
+  state = {
+    verses: [],
+    highlightedVerses: {}
   }
+
   componentDidMount () {
-    const self = this
     this.setState({ verses: this.props.verses })
+    this.receiveDataFromApp()
+    window.oncontextmenu = function (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      return false
+    }
+  }
+
+  receiveDataFromApp = () => {
+    const self = this
     document.addEventListener('message', (message) => {
-      const parsedMessage = JSON.parse(message.data)
-      self.setState({ verses: parsedMessage.arrayVerses })
+      const response = JSON.parse(message.data)
+
+      switch (response.type) {
+        case SEND_INITIAL_DATA: {
+          self.setState({ verses: response.arrayVerses, highlightedVerses: response.highlightedVerses })
+          break
+        }
+        case SEND_HIGHLIGHTED_VERSES: {
+          self.setState({ highlightedVerses: response.highlightedVerses })
+          break
+        }
+      }
     })
   }
 
@@ -33,9 +53,13 @@ class VersesRenderer extends Component {
     return (
       <Container>
         {
-          state.verses.map(({ Verset, Texte }) => (
-            <Verse verset={Verset} texte={Texte} />
-          ))
+          state.verses.map((verse) => {
+            const { Livre, Chapitre, Verset } = verse
+            const isSelected = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            return (
+              <Verse verse={verse} isSelected={isSelected} />
+            )
+          })
         }
       </Container>
     )

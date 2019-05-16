@@ -1,21 +1,30 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
-import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL } from './dispatch'
+import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL, TOGGLE_SELECTED_VERSE } from './dispatch'
 const styled = picostyle(h)
 
 const VerseText = styled('span')({
-  fontFamily: 'Literata Book',
   fontSize: '20px',
   lineHeight: '34px'
 })
 
 const NumberText = styled('span')({
-  fontFamily: 'Literata Book',
   fontSize: '28px',
   padding: '0 10px'
 })
 
+const ContainerText = styled('span')(({ isFocused, isSelected }) => ({
+  fontFamily: 'Literata Book',
+  background: isFocused ? 'rgba(0,0,0,0.2)' : 'transparent',
+  '-webkit-touch-callout': 'none',
+  padding: '4px',
+  borderBottom: isSelected ? '1px dashed blue' : 'none'
+}))
+
 class Verse extends Component {
+  state = {
+    focused: false
+  }
   navigateToBibleVerseDetail = () => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -23,12 +32,34 @@ class Verse extends Component {
     })
   }
 
-  render ({ verset, texte }, state) {
+  toggleSelectVerse = () => {
+    const { verse: { Livre, Chapitre, Verset } } = this.props
+    dispatch({
+      type: TOGGLE_SELECTED_VERSE,
+      payload: `${Livre}-${Chapitre}-${Verset}`
+    })
+  }
+
+  onTouchStart = () => {
+    this.setState({ isFocused: true })
+  }
+
+  onTouchEnd = () => {
+    this.setState({ isFocused: false })
+  }
+
+  render ({ verse, isSelected }, { isFocused }) {
     return (
-      <span onClick={this.navigateToBibleVerseDetail}>
-        <NumberText>{verset}</NumberText>
-        <VerseText>{texte}</VerseText>
-      </span>
+      <ContainerText
+        isFocused={isFocused}
+        isSelected={isSelected}
+        onClick={this.toggleSelectVerse}
+        onTouchStart={this.onTouchStart}
+        onTouchEnd={this.onTouchEnd}
+      >
+        <NumberText>{verse.Verset}</NumberText>
+        <VerseText>{verse.Texte}</VerseText>
+      </ContainerText>
     )
   }
 }

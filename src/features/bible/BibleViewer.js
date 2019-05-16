@@ -45,7 +45,7 @@ class BibleViewer extends Component {
 
   componentWillMount () {
     setTimeout(() => this.loadVerses(), 500)
-    this.props.clearHighlightedVerses()
+    // this.props.clearHighlightedVerses()
   }
 
   componentWillReceiveProps (oldProps) {
