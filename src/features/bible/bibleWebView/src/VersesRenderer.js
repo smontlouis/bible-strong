@@ -1,7 +1,7 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
-import { SEND_INITIAL_DATA, SEND_HIGHLIGHTED_VERSES } from './dispatch'
+import { SEND_INITIAL_DATA } from './dispatch'
 import Verse from './Verse'
 const styled = picostyle(h)
 
@@ -14,11 +14,13 @@ const Container = styled('div')({
 class VersesRenderer extends Component {
   state = {
     verses: [],
+    selectedVerses: {},
     highlightedVerses: {}
   }
 
   componentDidMount () {
     this.setState({ verses: this.props.verses })
+
     this.receiveDataFromApp()
     window.oncontextmenu = function (event) {
       event.preventDefault()
@@ -34,11 +36,12 @@ class VersesRenderer extends Component {
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
-          self.setState({ verses: response.arrayVerses, highlightedVerses: response.highlightedVerses })
-          break
-        }
-        case SEND_HIGHLIGHTED_VERSES: {
-          self.setState({ highlightedVerses: response.highlightedVerses })
+          const { verses, selectedVerses, highlightedVerses } = response
+          self.setState({
+            verses,
+            selectedVerses,
+            highlightedVerses
+          })
           break
         }
       }
@@ -55,9 +58,15 @@ class VersesRenderer extends Component {
         {
           state.verses.map((verse) => {
             const { Livre, Chapitre, Verset } = verse
-            const isSelected = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            const isSelected = !!state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+
             return (
-              <Verse verse={verse} isSelected={isSelected} />
+              <Verse
+                verse={verse}
+                isSelected={isSelected}
+                isHighlighted={isHighlighted}
+              />
             )
           })
         }

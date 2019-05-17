@@ -13,13 +13,22 @@ const NumberText = styled('span')({
   padding: '0 10px'
 })
 
-const ContainerText = styled('span')(({ isFocused, isSelected }) => ({
-  fontFamily: 'Literata Book',
-  background: isFocused ? 'rgba(0,0,0,0.2)' : 'transparent',
-  '-webkit-touch-callout': 'none',
-  padding: '4px',
-  borderBottom: isSelected ? '1px dashed blue' : 'none'
-}))
+const ContainerText = styled('span')(({ isFocused, isSelected, isHighlighted }) => {
+  let background = 'transparent'
+  if (isHighlighted && !isSelected) {
+    background = '#74b9ff'
+  }
+  if (isFocused) {
+    background = 'rgba(0,0,0,0.2)'
+  }
+  return {
+    fontFamily: 'Literata Book',
+    background,
+    '-webkit-touch-callout': 'none',
+    padding: '4px',
+    borderBottom: isSelected ? '2px dashed #34495e' : 'none'
+  }
+})
 
 class Verse extends Component {
   state = {
@@ -28,7 +37,7 @@ class Verse extends Component {
   navigateToBibleVerseDetail = () => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-      payload: this.props.verset
+      payload: this.props.verse.Verset
     })
   }
 
@@ -42,17 +51,22 @@ class Verse extends Component {
 
   onTouchStart = () => {
     this.setState({ isFocused: true })
+
+    // On long press
+    this.buttonPressTimer = setTimeout(this.navigateToBibleVerseDetail, 500)
   }
 
   onTouchEnd = () => {
     this.setState({ isFocused: false })
+    clearTimeout(this.buttonPressTimer)
   }
 
-  render ({ verse, isSelected }, { isFocused }) {
+  render ({ verse, isSelected, isHighlighted }, { isFocused }) {
     return (
       <ContainerText
         isFocused={isFocused}
         isSelected={isSelected}
+        isHighlighted={isHighlighted}
         onClick={this.toggleSelectVerse}
         onTouchStart={this.onTouchStart}
         onTouchEnd={this.onTouchEnd}

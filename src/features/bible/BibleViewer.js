@@ -45,7 +45,7 @@ class BibleViewer extends Component {
 
   componentWillMount () {
     setTimeout(() => this.loadVerses(), 500)
-    // this.props.clearHighlightedVerses()
+    this.props.clearSelectedVerses()
   }
 
   componentWillReceiveProps (oldProps) {
@@ -55,7 +55,7 @@ class BibleViewer extends Component {
       this.props.version !== oldProps.version
     ) {
       setTimeout(() => this.loadVerses(), 0)
-      this.props.clearHighlightedVerses()
+      this.props.clearSelectedVerses()
     }
 
     // Scroll ONLY when verse change ALONE
@@ -76,8 +76,6 @@ class BibleViewer extends Component {
   loadVerses = async () => {
     const { book, chapter, version } = this.props
     let tempVerses
-    this.versesMeasure = {}
-
     this.setState({ isLoading: true })
 
     const res = await loadBible(version)

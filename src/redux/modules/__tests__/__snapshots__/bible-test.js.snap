@@ -2,7 +2,7 @@
 
 exports[`Bible Reducer should handle RESET_TEMP_SELECTED 1`] = `
 Object {
-  "highlightedVerses": Object {},
+  "selectedVerses": Object {},
   "selectedBook": Object {
     "Chapitres": 50,
     "Nom": "Genèse",
@@ -25,7 +25,7 @@ Object {
 
 exports[`Bible Reducer should handle SET_ALL_AND_VALIDATE_SELECTED 1`] = `
 Object {
-  "highlightedVerses": Object {},
+  "selectedVerses": Object {},
   "selectedBook": Object {
     "Chapitres": 34,
     "Nom": "Deutéronome",
@@ -48,7 +48,7 @@ Object {
 
 exports[`Bible Reducer should handle VALIDATE_SELECTED 1`] = `
 Object {
-  "highlightedVerses": Object {},
+  "selectedVerses": Object {},
   "selectedBook": Object {
     "Chapitres": 21,
     "Nom": "Juges",

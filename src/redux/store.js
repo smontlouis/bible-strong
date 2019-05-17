@@ -13,6 +13,7 @@ export default function configureStore () {
   const persistedReducer = persistReducer(persistConfig, reducer)
   const store = composeEnhancers(applyMiddleware(thunk))(createStore)(persistedReducer)
   const persistor = persistStore(store)
+  persistor.purge() // Purge async storage
 
   if (__DEV__) {
     if (module.hot) {

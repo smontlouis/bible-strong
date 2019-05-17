@@ -25,7 +25,7 @@ const initialState = {
     selectedChapter: 1,
     selectedVerse: 1
   },
-  highlightedVerses: {} // highlighted verses
+  selectedVerses: {} // highlighted verses
 }
 
 // BibleReducer
@@ -86,18 +86,18 @@ export default produce((draft, action) => {
       return
     }
     case ADD_HIGHLIGHTED_VERSE: {
-      draft.highlightedVerses = {
-        ...draft.highlightedVerses,
+      draft.selectedVerses = {
+        ...draft.selectedVerses,
         [action.id]: true
       }
       return
     }
     case REMOVE_HIGHLIGHTED_VERSE: {
-      delete draft.highlightedVerses[action.id]
+      delete draft.selectedVerses[action.id]
       return
     }
     case CLEAR_HIGHLIGHTED_VERSES: {
-      draft.highlightedVerses = {}
+      draft.selectedVerses = {}
       return
     }
     case GO_TO_PREV_CHAPTER: {
@@ -281,7 +281,7 @@ export function removeSelectedVerse (id) {
   }
 }
 
-export function clearHighlightedVerses () {
+export function clearSelectedVerses () {
   return {
     type: CLEAR_HIGHLIGHTED_VERSES
   }

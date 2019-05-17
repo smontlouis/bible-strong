@@ -122,7 +122,7 @@ export default compose(
   pure,
   connect(
     (state, { verse: { Livre, Chapitre, Verset } }) => ({
-      isSelected: !!state.bible.highlightedVerses[
+      isSelected: !!state.bible.selectedVerses[
         `${Livre}-${Chapitre}-${Verset}`
       ]
       // isHighlighted: !!state.getIn(['user', 'bible', 'highlights', `${Livre}-${Chapitre}-${Verset}`]),

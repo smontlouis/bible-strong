@@ -2,7 +2,9 @@
 import { render, h } from 'preact'
 
 import './index.css'
-import mockVerses from './mockVerses'
 import VersesRenderer from './VersesRenderer'
+import mockVerses from './mockVerses'
 
-render(<VersesRenderer verses={mockVerses} />, document.getElementById('app'))
+const desktopMode = false
+
+render(<VersesRenderer verses={desktopMode ? mockVerses : []} />, document.getElementById('app'))

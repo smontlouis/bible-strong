@@ -8,8 +8,7 @@ import bibleWebView from './bibleWebView/dist/index.html'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   SEND_INITIAL_DATA,
-  TOGGLE_SELECTED_VERSE,
-  SEND_HIGHLIGHTED_VERSES
+  TOGGLE_SELECTED_VERSE
 } from './bibleWebView/src/dispatch'
 
 class BibleWebView extends Component {
@@ -26,7 +25,7 @@ class BibleWebView extends Component {
   }
 
   componentDidUpdate () {
-    this.onLoadWebView()
+    this.sendDataToWebView()
   }
 
   // Receives all data from webview
@@ -55,16 +54,17 @@ class BibleWebView extends Component {
   }
 
   isVerseSelected = (verseId) => {
-    const { highlightedVerses } = this.props
-    return !!highlightedVerses[verseId]
+    const { selectedVerses } = this.props
+    return !!selectedVerses[verseId]
   }
 
-  onLoadWebView = () => {
-    const { arrayVerses, highlightedVerses } = this.props
+  sendDataToWebView = () => {
+    const { arrayVerses, selectedVerses, highlightedVerses } = this.props
 
     this.dispatchToWebView({
       type: SEND_INITIAL_DATA,
-      arrayVerses,
+      verses: arrayVerses,
+      selectedVerses,
       highlightedVerses
     })
   }
@@ -73,7 +73,7 @@ class BibleWebView extends Component {
     return (
       <WebView
         useWebKit
-        onLoad={this.onLoadWebView}
+        onLoad={this.sendDataToWebView}
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={this.webViewRef}
@@ -86,7 +86,8 @@ class BibleWebView extends Component {
 export default compose(
   connect(
     state => ({
-      highlightedVerses: state.bible.highlightedVerses
+      selectedVerses: state.bible.selectedVerses,
+      highlightedVerses: state.user.bible.highlights
     }),
     { ...BibleActions }
   )
