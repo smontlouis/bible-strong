@@ -107,6 +107,8 @@ class BibleVerseDetailScreen extends React.Component {
         isCarouselLoading: false,
         strongReferences,
         currentStrongReference: strongReferences[0]
+      }, () => {
+        this._carousel.snapToItem(0, false)
       })
     })
   }
@@ -169,8 +171,14 @@ class BibleVerseDetailScreen extends React.Component {
           <BibleVerseDetailFooter
             {...{
               verseNumber: Verset,
-              goToNextVerse,
-              goToPrevVerse,
+              goToNextVerse: () => {
+                goToNextVerse()
+                this.setState({ isCarouselLoading: true })
+              },
+              goToPrevVerse: () => {
+                goToPrevVerse()
+                this.setState({ isCarouselLoading: true })
+              },
               versesInCurrentChapter: this.versesInCurrentChapter
             }}
           />
