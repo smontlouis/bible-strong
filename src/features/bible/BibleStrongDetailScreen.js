@@ -58,7 +58,7 @@ class BibleStrongDetailScreen extends React.Component {
     this.setState({ versesCountByBook, concordanceLoading: false })
   }
 
-  copyContent = () => {
+  shareContent = () => {
     const {
       strongReference: {
         Code,
@@ -124,7 +124,7 @@ class BibleStrongDetailScreen extends React.Component {
                   )}
                 </Text>
               </Touchable>
-              <Touchable onPress={this.copyContent}>
+              <Touchable onPress={this.shareContent}>
                 <Icon.Feather
                   style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
                   name='share-2'

@@ -55,7 +55,7 @@ class Verse extends Component {
     this.setState({ isFocused: true })
 
     // On long press
-    this.buttonPressTimer = setTimeout(this.navigateToBibleVerseDetail, 500)
+    // this.buttonPressTimer = setTimeout(this.navigateToBibleVerseDetail, 500)
   }
 
   onTouchEnd = () => {

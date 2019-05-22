@@ -1,8 +1,10 @@
 import React from 'react'
+import { Share } from 'react-native'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
 
 import theme from '~themes/default'
+import getVersesRef from '~helpers/getVersesRef'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 
@@ -29,8 +31,8 @@ const Container = styled.View({
 })
 
 const HalfContainer = styled.View(({ border, theme }) => ({
-  borderBottomColor: border ? theme.colors.border : null,
-  borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
+  borderBottomWidth: border ? 1 : 0,
   flexDirection: 'row',
   justifyContent: 'space-around',
   alignItems: 'center',
@@ -42,8 +44,28 @@ const VersesModal = ({
   isSelectedVerseHighlighted,
   addHighlight,
   removeHighlight,
-  clearSelectedVerses
+  clearSelectedVerses,
+  navigation,
+  selectedVerses,
+  setSelectedVerse,
+  version
 }) => {
+  const shareVerse = async () => {
+    const message = await getVersesRef(selectedVerses, version)
+    const result = await Share.share({ message })
+    // Clear selectedverses only if succeed
+    if (result.action === Share.sharedAction) {
+      clearSelectedVerses()
+    }
+  }
+
+  const showStrongDetail = () => {
+    clearSelectedVerses()
+    let verse = Object.keys(selectedVerses)[0].split('-')[2]
+    setSelectedVerse(verse)
+    navigation.navigate('BibleVerseDetail')
+  }
+
   return (
     <StylizedModal
       isOpen={isVisible}
@@ -64,9 +86,12 @@ const VersesModal = ({
           }
         </HalfContainer>
         <HalfContainer>
-          <TouchableIcon name='eye' />
+          {
+            Object.keys(selectedVerses).length <= 1 &&
+            <TouchableIcon name='eye' onPress={showStrongDetail} />
+          }
           <TouchableIcon name='file' />
-          <TouchableIcon name='share-2' />
+          <TouchableIcon name='share-2' onPress={shareVerse} />
           <TouchableIcon name='arrow-right' onPress={clearSelectedVerses} />
         </HalfContainer>
 
