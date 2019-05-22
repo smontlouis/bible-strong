@@ -1,31 +1,40 @@
 // @flow
 import React, { Component } from 'react'
-import { ScrollView, View, StyleSheet } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
 
-import Button from '~common/ui/Button'
 import Loading from '~common/Loading'
-import BibleVerse from './BibleVerse'
 import BibleFooter from './BibleFooter'
-// import SelectedVersesModal from '~common/SelectedVersesModal'
+import BibleWebView from './BibleWebView'
+import SelectedVersesModal from './SelectedVersesModal'
 
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
+import * as UserActions from '~redux/modules/user'
 
 const styles = StyleSheet.create({
   container: {
     flex: 1
   },
   scrollView: {
-    paddingTop: 20,
+    paddingTop: 30,
     paddingBottom: 60
+
+  },
+  textContainer: {
+    maxWidth: 320,
+    width: '100%'
   },
   fixedButton: {
     position: 'absolute',
     bottom: 20,
     left: 0,
     right: 0
+  },
+  webView: {
+    alignItems: 'stretch'
   }
 })
 
@@ -37,7 +46,7 @@ class BibleViewer extends Component {
 
   componentWillMount () {
     setTimeout(() => this.loadVerses(), 500)
-    this.props.clearHighlightedVerses()
+    this.props.clearSelectedVerses()
   }
 
   componentWillReceiveProps (oldProps) {
@@ -47,7 +56,7 @@ class BibleViewer extends Component {
       this.props.version !== oldProps.version
     ) {
       setTimeout(() => this.loadVerses(), 0)
-      this.props.clearHighlightedVerses()
+      this.props.clearSelectedVerses()
     }
 
     // Scroll ONLY when verse change ALONE
@@ -60,33 +69,14 @@ class BibleViewer extends Component {
     }
   }
 
-  getPosition = (numVerset: number, measures: Object) => {
-    this.versesMeasure[`verse${numVerset}`] = measures
-    // We need to wait 'til every Bible verse component get calculated
-    if (Object.keys(this.versesMeasure).length === this.state.verses.length) {
-      setTimeout(() => this.scrollToVerse(), 0)
-    }
-  }
-
+  // DEPECRATED, SCROLL IN WEBVIEW
   scrollToVerse = () => {
-    const { verse } = this.props
-    if (this.versesMeasure[`verse${verse}`] && this.scrollView) {
-      const scrollHeight = this.contentHeight - this.scrollViewHeight + 20
-      const y = verse === 1 ? 0 : this.versesMeasure[`verse${verse}`].py - 100
 
-      this.scrollView.scrollTo({
-        x: 0,
-        y: y >= scrollHeight ? scrollHeight : y,
-        animated: true
-      })
-    }
   }
 
   loadVerses = async () => {
     const { book, chapter, version } = this.props
     let tempVerses
-    this.versesMeasure = {}
-
     this.setState({ isLoading: true })
 
     const res = await loadBible(version)
@@ -119,12 +109,15 @@ class BibleViewer extends Component {
 
   renderVerses = () => {
     const {
-      version,
       arrayVerses,
       book,
       chapter,
       navigation,
-      isReadOnly
+      addSelectedVerse,
+      removeSelectedVerse,
+      setSelectedVerse,
+      selectedVerses,
+      highlightedVerses
     } = this.props
     let array = this.state.verses
 
@@ -138,16 +131,17 @@ class BibleViewer extends Component {
       )
     }
 
-    return array.map(verse => (
-      <BibleVerse
-        isReadOnly={isReadOnly}
+    return (
+      <BibleWebView
         navigation={navigation}
-        version={version}
-        verse={verse}
-        key={`${verse.Verset}${verse.Livre}${verse.Chapitre}`}
-        getPosition={this.getPosition}
+        arrayVerses={array}
+        addSelectedVerse={addSelectedVerse}
+        removeSelectedVerse={removeSelectedVerse}
+        setSelectedVerse={setSelectedVerse}
+        selectedVerses={selectedVerses}
+        highlightedVerses={highlightedVerses}
       />
-    ))
+    )
   }
 
   render () {
@@ -157,7 +151,12 @@ class BibleViewer extends Component {
       chapter,
       goToPrevChapter,
       goToNextChapter,
-      isReadOnly
+      isReadOnly,
+      modalIsVisible,
+      isSelectedVerseHighlighted,
+      addHighlight,
+      removeHighlight,
+      clearSelectedVerses
     } = this.props
 
     if (isLoading) {
@@ -166,28 +165,7 @@ class BibleViewer extends Component {
 
     return (
       <View style={styles.container}>
-        <ScrollView
-          ref={r => {
-            this.scrollView = r
-          }}
-          onContentSizeChange={(w, h) => {
-            this.contentHeight = h
-          }}
-          onLayout={ev => {
-            this.scrollViewHeight = ev.nativeEvent.layout.height
-          }}
-          scrollEventThrottle={16}
-          contentContainerStyle={styles.scrollView}
-        >
-          {this.renderVerses()}
-        </ScrollView>
-        {isReadOnly && (
-          <Button
-            title='Ouvrir dans Bible'
-            onPress={this.openInBibleTab}
-            style={styles.fixedButton}
-          />
-        )}
+        {this.renderVerses()}
         {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}
@@ -197,16 +175,35 @@ class BibleViewer extends Component {
             goToNextChapter={goToNextChapter}
           />
         )}
-        {/* <SelectedVersesModal verses={this.state.verses} /> */}
+        <SelectedVersesModal
+          isVisible={modalIsVisible}
+          isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+          addHighlight={addHighlight}
+          removeHighlight={removeHighlight}
+          clearSelectedVerses={clearSelectedVerses}
+        />
       </View>
     )
   }
 }
 
+const getSelectedVerses = state => state.bible.selectedVerses
+const getHighlightedVerses = state => state.user.bible.highlights
+
+const getHighlightInSelected = createSelector(
+  [getSelectedVerses, getHighlightedVerses],
+  (selected, highlighted) => Object.keys(selected).find(s => highlighted[s])
+)
+
 export default compose(
   pure,
   connect(
-    null,
-    BibleActions
+    state => ({
+      modalIsVisible: !!Object.keys(state.bible.selectedVerses).length,
+      selectedVerses: state.bible.selectedVerses,
+      highlightedVerses: state.user.bible.highlights,
+      isSelectedVerseHighlighted: !!getHighlightInSelected(state)
+    }),
+    { ...BibleActions, ...UserActions }
   )
 )(BibleViewer)

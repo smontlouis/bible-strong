@@ -27,8 +27,8 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border,
-  paddingLeft: 15,
-  paddingRight: 15
+  paddingLeft: theme.measures.padding,
+  paddingRight: theme.measures.padding
 }))
 
 const Header = ({ isReadOnly, noBorder, book, chapter, verse, version }) => {

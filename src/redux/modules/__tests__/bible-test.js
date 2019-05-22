@@ -13,7 +13,7 @@ let initialState = {
     selectedChapter: 1,
     selectedVerse: 1
   },
-  highlightedVerses: {} // highlighted verses
+  selectedVerses: {} // highlighted verses
 }
 
 describe('Bible Reducer', () => {
@@ -108,7 +108,7 @@ describe('Bible Reducer', () => {
     const newState = reducer(
       {
         ...initialState,
-        highlightedVerses: {
+        selectedVerses: {
           1: true,
           3: true,
           5: true
@@ -118,7 +118,7 @@ describe('Bible Reducer', () => {
     )
     expect(newState).toEqual({
       ...initialState,
-      highlightedVerses: {
+      selectedVerses: {
         1: true,
         3: true,
         5: true,
@@ -131,7 +131,7 @@ describe('Bible Reducer', () => {
     const newState = reducer(
       {
         ...initialState,
-        highlightedVerses: {
+        selectedVerses: {
           1: true,
           3: true,
           5: true
@@ -141,7 +141,7 @@ describe('Bible Reducer', () => {
     )
     expect(newState).toEqual({
       ...initialState,
-      highlightedVerses: {
+      selectedVerses: {
         1: true,
         5: true
       }
@@ -152,17 +152,17 @@ describe('Bible Reducer', () => {
     const newState = reducer(
       {
         ...initialState,
-        highlightedVerses: {
+        selectedVerses: {
           1: true,
           3: true,
           5: true
         }
       },
-      BibleActions.clearHighlightedVerses()
+      BibleActions.clearSelectedVerses()
     )
     expect(newState).toEqual({
       ...initialState,
-      highlightedVerses: {}
+      selectedVerses: {}
     })
   })
 

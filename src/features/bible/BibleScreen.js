@@ -30,7 +30,7 @@ class BibleScreen extends React.Component {
 
     return (
       <Container>
-        <StatusBar barStyle='dark-content' />
+        <StatusBar translucent backgroundColor='white' barStyle='dark-content' />
         <BibleHeader
           isReadOnly={isReadOnly}
           book={app.book}

@@ -10,7 +10,8 @@ module.exports = {
       'jpg',
       'jpeg',
       'json',
-      'txt'
+      'txt',
+      'html'
     ]
   }
 }
