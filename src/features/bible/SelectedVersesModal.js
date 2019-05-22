@@ -41,7 +41,8 @@ const VersesModal = ({
   isVisible,
   isSelectedVerseHighlighted,
   addHighlight,
-  removeHighlight
+  removeHighlight,
+  clearSelectedVerses
 }) => {
   return (
     <StylizedModal
@@ -66,7 +67,7 @@ const VersesModal = ({
           <TouchableIcon name='eye' />
           <TouchableIcon name='file' />
           <TouchableIcon name='share-2' />
-          <TouchableIcon name='arrow-right' />
+          <TouchableIcon name='arrow-right' onPress={clearSelectedVerses} />
         </HalfContainer>
 
       </Container>
