@@ -20,8 +20,12 @@ const getVersesRef = (versesList) => {
       if (!isListing) { versesRef += '-'; isListing = true }
       if (versesList.slice(1).length - 1 === index) versesRef += verse
     } else {
-      if (isListing) { versesRef += `${previousVerse}, ${verse}`; isListing = false }
-      else versesRef += `, ${verse}`
+      if (isListing) {
+        versesRef += `${previousVerse}, ${verse}`
+        isListing = false
+      } else {
+        versesRef += `, ${verse}`
+      }
     }
     previousVerse = verse
   })
@@ -36,8 +40,7 @@ export default async (selectedVerses, version) => {
   let versesList = []
   let previousVerse = null
   let bible = null
-  await loadBible(version)
-    .then((loadedBible) => { bible = loadedBible })
+  bible = await loadBible(version)
   if (!bible) bible = BibleLSG
 
   selectedVerses.map(async (key, index) => {
@@ -45,7 +48,7 @@ export default async (selectedVerses, version) => {
     if (parseInt(previousVerse) !== parseInt(verse) - 1 && index !== 0) toShare += ' [...] '
     if (index === 0) reference = `${books[book - 1].Nom} ${chapter}:`
     else toShare += ' '
-    toShare += bible[book][chapter][verse]
+    toShare += `${verse} ${bible[book][chapter][verse]}`
     versesList.push(verse)
     previousVerse = verse
   })

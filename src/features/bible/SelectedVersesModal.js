@@ -50,6 +50,22 @@ const VersesModal = ({
   setSelectedVerse,
   version
 }) => {
+  const shareVerse = async () => {
+    const message = await getVersesRef(selectedVerses, version)
+    const result = await Share.share({ message })
+    // Clear selectedverses only if succeed
+    if (result.action === Share.sharedAction) {
+      clearSelectedVerses()
+    }
+  }
+
+  const showStrongDetail = () => {
+    clearSelectedVerses()
+    let verse = Object.keys(selectedVerses)[0].split('-')[2]
+    setSelectedVerse(verse)
+    navigation.navigate('BibleVerseDetail')
+  }
+
   return (
     <StylizedModal
       isOpen={isVisible}
@@ -70,21 +86,13 @@ const VersesModal = ({
           }
         </HalfContainer>
         <HalfContainer>
-          <TouchableIcon name='eye' />
-          <TouchableIcon name='file' />
-          <TouchableIcon name='share-2' onPress={async () => {
-            const message = await getVersesRef(selectedVerses, version)
-            Share.share({ message })
-          }} />
           {
             Object.keys(selectedVerses).length <= 1 &&
-            <TouchableIcon name='arrow-right' onPress={() => {
-              clearSelectedVerses()
-              let verse = Object.keys(selectedVerses)[0].split('-')[2]
-              setSelectedVerse(verse)
-              navigation.navigate('BibleVerseDetail')
-            }} />
+            <TouchableIcon name='eye' onPress={showStrongDetail} />
           }
+          <TouchableIcon name='file' />
+          <TouchableIcon name='share-2' onPress={shareVerse} />
+          <TouchableIcon name='arrow-right' onPress={clearSelectedVerses} />
         </HalfContainer>
 
       </Container>
