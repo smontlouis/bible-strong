@@ -158,7 +158,8 @@ class BibleViewer extends Component {
       removeHighlight,
       clearSelectedVerses,
       navigation,
-      selectedVerses
+      selectedVerses,
+      version
     } = this.props
 
     if (isLoading) {
@@ -178,14 +179,15 @@ class BibleViewer extends Component {
           />
         )}
         <SelectedVersesModal
-          navigation={navigation}
-          selectedVerses={selectedVerses}
           setSelectedVerse={this.props.setSelectedVerse}
           isVisible={modalIsVisible}
           isSelectedVerseHighlighted={isSelectedVerseHighlighted}
           addHighlight={addHighlight}
           removeHighlight={removeHighlight}
           clearSelectedVerses={clearSelectedVerses}
+          navigation={navigation}
+          selectedVerses={selectedVerses}
+          version={version}
         />
       </View>
     )

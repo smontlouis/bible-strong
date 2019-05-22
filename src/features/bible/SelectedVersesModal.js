@@ -47,7 +47,8 @@ const VersesModal = ({
   clearSelectedVerses,
   navigation,
   selectedVerses,
-  setSelectedVerse
+  setSelectedVerse,
+  version
 }) => {
   return (
     <StylizedModal
@@ -71,7 +72,10 @@ const VersesModal = ({
         <HalfContainer>
           <TouchableIcon name='eye' />
           <TouchableIcon name='file' />
-          <TouchableIcon name='share-2' onPress={() => Share.share({ message: getVersesRef(selectedVerses) })} />
+          <TouchableIcon name='share-2' onPress={async () => {
+            const message = await getVersesRef(selectedVerses, version)
+            Share.share({ message })
+          }} />
           {
             Object.keys(selectedVerses).length <= 1 &&
             <TouchableIcon name='arrow-right' onPress={() => {

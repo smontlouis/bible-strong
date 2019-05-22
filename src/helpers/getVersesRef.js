@@ -1,5 +1,6 @@
 import books from '~assets/bible_versions/books-desc'
 import BibleLSG from '~assets/bible_versions/bible-lsg-1910.json'
+import loadBible from '~helpers/loadBible'
 
 const orderVerses = (selectedVerses) => {
   let orderedVersesList = Object.keys(selectedVerses).sort((key1, key2) => {
@@ -11,7 +12,6 @@ const orderVerses = (selectedVerses) => {
 }
 
 const getVersesRef = (versesList) => {
-  console.log('getVersesRef', { versesList })
   let versesRef = `${versesList[0]}`
   let previousVerse = versesList[0]
   let isListing = false
@@ -28,23 +28,28 @@ const getVersesRef = (versesList) => {
   return versesRef
 }
 
-export default (selectedVerses) => {
+export default async (selectedVerses, version) => {
   selectedVerses = orderVerses(selectedVerses)
 
   let toShare = ''
   let reference = ''
   let versesList = []
   let previousVerse = null
-  selectedVerses.map((key, index) => {
+  let bible = null
+  await loadBible(version)
+    .then((loadedBible) => { bible = loadedBible })
+  if (!bible) bible = BibleLSG
+
+  selectedVerses.map(async (key, index) => {
     const [book, chapter, verse] = key.split('-')
     if (parseInt(previousVerse) !== parseInt(verse) - 1 && index !== 0) toShare += ' [...] '
     if (index === 0) reference = `${books[book - 1].Nom} ${chapter}:`
     else toShare += ' '
-    toShare += BibleLSG[book][chapter][verse]
+    toShare += bible[book][chapter][verse]
     versesList.push(verse)
     previousVerse = verse
   })
   reference += getVersesRef(versesList)
-  toShare += `\n${reference} LSG`
+  toShare += `\n${reference} ${version}`
   return toShare
 }
