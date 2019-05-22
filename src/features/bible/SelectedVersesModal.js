@@ -88,11 +88,15 @@ const VersesModal = ({
         <HalfContainer>
           {
             Object.keys(selectedVerses).length <= 1 &&
-            <TouchableIcon name='eye' onPress={showStrongDetail} />
+            <TouchableIcon
+              name='eye'
+              color={theme.colors.default}
+              onPress={showStrongDetail}
+            />
           }
-          <TouchableIcon name='file' />
+          <TouchableIcon name='file-plus' />
           <TouchableIcon name='share-2' onPress={shareVerse} />
-          <TouchableIcon name='arrow-right' onPress={clearSelectedVerses} />
+          <TouchableIcon name='arrow-down' onPress={clearSelectedVerses} />
         </HalfContainer>
 
       </Container>
