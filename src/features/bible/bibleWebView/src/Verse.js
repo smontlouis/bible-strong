@@ -1,6 +1,8 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
+
 import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL, TOGGLE_SELECTED_VERSE } from './dispatch'
+import colors from '../../../../themes/colors'
 const styled = picostyle(h)
 
 const VerseText = styled('span')({
@@ -13,10 +15,10 @@ const NumberText = styled('span')({
   padding: '0 10px'
 })
 
-const ContainerText = styled('span')(({ isFocused, isSelected, isHighlighted }) => {
+const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor }) => {
   let background = 'transparent'
-  if (isHighlighted && !isSelected) {
-    background = '#74b9ff'
+  if (highlightedColor && !isSelected) {
+    background = colors[highlightedColor]
   }
   if (isFocused) {
     background = 'rgba(0,0,0,0.2)'
@@ -61,12 +63,12 @@ class Verse extends Component {
     clearTimeout(this.buttonPressTimer)
   }
 
-  render ({ verse, isSelected, isHighlighted }, { isFocused }) {
+  render ({ verse, isSelected, highlightedColor }, { isFocused }) {
     return (
       <ContainerText
         isFocused={isFocused}
         isSelected={isSelected}
-        isHighlighted={isHighlighted}
+        highlightedColor={highlightedColor}
         onClick={this.toggleSelectVerse}
         onTouchStart={this.onTouchStart}
         onTouchEnd={this.onTouchEnd}

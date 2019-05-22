@@ -60,12 +60,13 @@ class VersesRenderer extends Component {
             const { Livre, Chapitre, Verset } = verse
             const isSelected = !!state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
             const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
 
             return (
               <Verse
                 verse={verse}
                 isSelected={isSelected}
-                isHighlighted={isHighlighted}
+                highlightedColor={highlightedColor}
               />
             )
           })

@@ -2,16 +2,17 @@
 import React, { Component } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
-
+import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
 
 import Loading from '~common/Loading'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
-// import SelectedVersesModal from '~common/SelectedVersesModal'
+import SelectedVersesModal from './SelectedVersesModal'
 
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
+import * as UserActions from '~redux/modules/user'
 
 const styles = StyleSheet.create({
   container: {
@@ -111,7 +112,12 @@ class BibleViewer extends Component {
       arrayVerses,
       book,
       chapter,
-      navigation
+      navigation,
+      addSelectedVerse,
+      removeSelectedVerse,
+      setSelectedVerse,
+      selectedVerses,
+      highlightedVerses
     } = this.props
     let array = this.state.verses
 
@@ -129,6 +135,11 @@ class BibleViewer extends Component {
       <BibleWebView
         navigation={navigation}
         arrayVerses={array}
+        addSelectedVerse={addSelectedVerse}
+        removeSelectedVerse={removeSelectedVerse}
+        setSelectedVerse={setSelectedVerse}
+        selectedVerses={selectedVerses}
+        highlightedVerses={highlightedVerses}
       />
     )
   }
@@ -140,7 +151,11 @@ class BibleViewer extends Component {
       chapter,
       goToPrevChapter,
       goToNextChapter,
-      isReadOnly
+      isReadOnly,
+      modalIsVisible,
+      isSelectedVerseHighlighted,
+      addHighlight,
+      removeHighlight
     } = this.props
 
     if (isLoading) {
@@ -159,15 +174,34 @@ class BibleViewer extends Component {
             goToNextChapter={goToNextChapter}
           />
         )}
+        <SelectedVersesModal
+          isVisible={modalIsVisible}
+          isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+          addHighlight={addHighlight}
+          removeHighlight={removeHighlight}
+        />
       </View>
     )
   }
 }
 
+const getSelectedVerses = state => state.bible.selectedVerses
+const getHighlightedVerses = state => state.user.bible.highlights
+
+const getHighlightInSelected = createSelector(
+  [getSelectedVerses, getHighlightedVerses],
+  (selected, highlighted) => Object.keys(selected).find(s => highlighted[s])
+)
+
 export default compose(
   pure,
   connect(
-    null,
-    BibleActions
+    state => ({
+      modalIsVisible: !!Object.keys(state.bible.selectedVerses).length,
+      selectedVerses: state.bible.selectedVerses,
+      highlightedVerses: state.user.bible.highlights,
+      isSelectedVerseHighlighted: !!getHighlightInSelected(state)
+    }),
+    { ...BibleActions, ...UserActions }
   )
 )(BibleViewer)

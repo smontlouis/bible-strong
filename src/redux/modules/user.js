@@ -18,18 +18,18 @@ const initialState = {
   lastSeen: 0,
   emailVerified: false,
   bible: {
-    highlights: {
-      '1-1-1': 'lorem',
-      '1-1-4': 'ipsum'
-    },
+    highlights: {},
     notes: {}
   }
 }
 
-const addDateToVerses = (verses, now = Date.now()) => {
+const addDateAndColorToVerses = (verses, color) => {
   const formattedObj = Object.keys(verses).reduce((obj, verse) => ({
     ...obj,
-    [verse]: now
+    [verse]: {
+      color,
+      date: Date.now()
+    }
   }), {})
 
   return formattedObj
@@ -41,28 +41,32 @@ export default produce((draft, action) => {
     case ADD_HIGHLIGHT: {
       draft.bible.highlights = {
         ...draft.bible.highlights,
-        ...addDateToVerses(action.selectedVerses)
+        ...action.selectedVerses
       }
       return
     }
     case REMOVE_HIGHLIGHT: {
-      action.selectedVerses.forEach(function (item, key) {
+      Object.keys(action.selectedVerses).forEach((key) => {
         delete draft.bible.highlights[key]
       })
     }
   }
 }, initialState)
 
-export function toggleHighlight (hasHighlighted) {
+export function addHighlight (color) {
   return (dispatch, getState) => {
     const selectedVerses = getState().bible.selectedVerses
 
     dispatch(clearSelectedVerses())
+    return dispatch({ type: ADD_HIGHLIGHT, selectedVerses: addDateAndColorToVerses(selectedVerses, color) })
+  }
+}
 
-    if (hasHighlighted) {
-      return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
-    } else {
-      return dispatch({ type: ADD_HIGHLIGHT, selectedVerses })
-    }
+export function removeHighlight () {
+  return (dispatch, getState) => {
+    const selectedVerses = getState().bible.selectedVerses
+
+    dispatch(clearSelectedVerses())
+    return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
   }
 }

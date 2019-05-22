@@ -1,9 +1,6 @@
 import React, { Component, createRef } from 'react'
 import { WebView } from 'react-native'
-import { compose } from 'recompose'
-import { connect } from 'react-redux'
 
-import * as BibleActions from '~redux/modules/bible'
 import bibleWebView from './bibleWebView/dist/index.html'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -83,12 +80,4 @@ class BibleWebView extends Component {
   }
 }
 
-export default compose(
-  connect(
-    state => ({
-      selectedVerses: state.bible.selectedVerses,
-      highlightedVerses: state.user.bible.highlights
-    }),
-    { ...BibleActions }
-  )
-)(BibleWebView)
+export default BibleWebView
