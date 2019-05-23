@@ -40,15 +40,22 @@ const alignContentToString = {
   justify: 'Justifier'
 }
 
+const textDisplayToString = {
+  inline: 'Continu',
+  block: 'À la ligne'
+}
+
 const BibleParamsModal = ({
   isOpen,
   onClosed,
   setSettingsAlignContent,
+  setSettingsTextDisplay,
   increaseSettingsFontSizeScale,
   decreaseSettingsFontSizeScale,
   settings: {
     alignContent,
-    fontSizeScale
+    fontSizeScale,
+    textDisplay
   }
 }) => {
   return (
@@ -87,7 +94,19 @@ const BibleParamsModal = ({
             onPress={() => increaseSettingsFontSizeScale()}
           />
         </HalfContainer>
-        <HalfContainer />
+        <HalfContainer>
+          <TouchableIcon
+            isSelected={textDisplay === 'inline'}
+            name='menu'
+            onPress={() => setSettingsTextDisplay('inline')}
+          />
+          <Text bold>{textDisplayToString[textDisplay]}</Text>
+          <TouchableIcon
+            isSelected={textDisplay === 'block'}
+            name='list'
+            onPress={() => setSettingsTextDisplay('block')}
+          />
+        </HalfContainer>
 
       </Container>
     </StylizedModal>
