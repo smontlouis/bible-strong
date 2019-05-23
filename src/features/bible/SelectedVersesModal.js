@@ -2,8 +2,8 @@ import React from 'react'
 import { Share } from 'react-native'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 
-import theme from '~themes/default'
 import getVersesRef from '~helpers/getVersesRef'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
@@ -16,19 +16,19 @@ const StylizedModal = styled(Modal)({
   paddingBottom: 20
 })
 
-const Container = styled.View({
+const Container = styled.View(({ theme }) => ({
   width: 200,
   height: 120,
-  backgroundColor: 'white',
+  backgroundColor: theme.colors.reverse,
   borderRadius: 10,
-  shadowColor: '#000',
+  shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
   alignItems: 'stretch',
   justifyContent: 'space-between'
-})
+}))
 
 const HalfContainer = styled.View(({ border, theme }) => ({
   borderBottomColor: theme.colors.border,
@@ -47,7 +47,8 @@ const VersesModal = ({
   navigation,
   selectedVerses,
   setSelectedVerse,
-  version
+  version,
+  theme
 }) => {
   const shareVerse = async () => {
     const message = await getVersesRef(selectedVerses, version)
@@ -104,4 +105,4 @@ const VersesModal = ({
   )
 }
 
-export default VersesModal
+export default withTheme(VersesModal)

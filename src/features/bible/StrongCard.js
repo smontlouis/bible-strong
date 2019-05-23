@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import { ScrollView } from 'react-native'
 import { Icon } from 'expo'
+import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -51,6 +52,11 @@ const OpenStrongIcon = styled.TouchableOpacity(() => ({
   alignItems: 'center'
 }))
 
+const IconFeather = styled(Icon.Feather)(({ theme }) => ({
+  paddingTop: 5,
+  color: theme.colors.default
+}))
+
 class StrongCard extends React.Component {
   async componentDidMount () {}
   render () {
@@ -58,7 +64,8 @@ class StrongCard extends React.Component {
       navigation,
       book,
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG },
-      strongReference
+      strongReference,
+      theme
     } = this.props
     return (
       <Container overflow>
@@ -76,21 +83,19 @@ class StrongCard extends React.Component {
               <Text title fontSize={22} flex>
                 {truncate(capitalize(Mot), 7)}
                 {!!Phonetique && (
-                  <Text title darkGrey fontSize={16}>
+                  <Text title color='darkGrey' fontSize={16}>
                     {' '}
                     {truncate(Phonetique, 7)}
                   </Text>
                 )}
               </Text>
-              <Icon.Feather
-                style={{ paddingTop: 5 }}
+              <IconFeather
                 name='maximize-2'
                 size={20}
-                color='black'
               />
             </OpenStrongIcon>
             {!!Type && (
-              <Text titleItalic darkGrey>
+              <Text titleItalic color='darkGrey'>
                 {Type}
               </Text>
             )}
@@ -101,12 +106,13 @@ class StrongCard extends React.Component {
         <ScrollView style={{ marginBottom: 15 }}>
           {!!Definition && (
             <ViewItem>
-              <SubTitle darkGrey>Définition - {Code}</SubTitle>
+              <SubTitle color='darkGrey'>Définition - {Code}</SubTitle>
               <StylizedHTMLView
                 htmlStyle={{
                   p: {
                     lineHeight: 18,
-                    fontSize: 12
+                    fontSize: 12,
+                    color: theme.colors.default
                   }
                 }}
                 value={Definition}
@@ -116,7 +122,7 @@ class StrongCard extends React.Component {
           )}
           {!!LSG && (
             <ViewItem>
-              <SubTitle darkGrey>Généralement traduit par</SubTitle>
+              <SubTitle color='darkGrey'>Généralement traduit par</SubTitle>
               <SmallParagraph>{LSG}</SmallParagraph>
             </ViewItem>
           )}
@@ -126,4 +132,4 @@ class StrongCard extends React.Component {
   }
 }
 
-export default StrongCard
+export default withTheme(StrongCard)

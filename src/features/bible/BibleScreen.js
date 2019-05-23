@@ -41,6 +41,7 @@ class BibleScreen extends React.Component {
       isReadOnly,
       setSettingsAlignContent,
       setSettingsTextDisplay,
+      setSettingsTheme,
       increaseSettingsFontSizeScale,
       decreaseSettingsFontSizeScale,
       settings
@@ -75,6 +76,7 @@ class BibleScreen extends React.Component {
           isOpen={this.state.isBibleParamsOpen}
           setSettingsAlignContent={setSettingsAlignContent}
           setSettingsTextDisplay={setSettingsTextDisplay}
+          setSettingsTheme={setSettingsTheme}
           increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
           decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
           settings={settings}

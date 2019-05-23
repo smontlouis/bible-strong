@@ -5,44 +5,50 @@ import SearchScreen from '~features/search/SearchScreen'
 import SettingsScreen from '~features/settings/SettingsScreen'
 import FeedbackScreen from '~features/settings/FeedbackScreen'
 import TabBarIcon from '~common/TabBarIcon'
-
+import getTheme from '~themes'
 export default createMaterialBottomTabNavigator(
   {
     Bible: {
       screen: BibleScreen,
-      navigationOptions: {
-        title: 'Bible',
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='book-open' />
-        )
+      navigationOptions: ({ screenProps }) => {
+        return {
+          title: 'Bible',
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} name='book-open' />
+          ),
+          tabBarColor: getTheme[screenProps.theme].colors.reverse
+        }
       }
     },
     Search: {
       screen: SearchScreen,
-      navigationOptions: {
+      navigationOptions: ({ screenProps }) => ({
         title: 'Recherche',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='search' />
-        )
-      }
+        ),
+        tabBarColor: getTheme[screenProps.theme].colors.reverse
+      })
     },
     Settings: {
       screen: SettingsScreen,
-      navigationOptions: {
+      navigationOptions: ({ screenProps }) => ({
         title: 'Paramètres',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='settings' />
-        )
-      }
+        ),
+        tabBarColor: getTheme[screenProps.theme].colors.reverse
+      })
     },
     Feedback: {
       screen: FeedbackScreen,
-      navigationOptions: {
+      navigationOptions: ({ screenProps }) => ({
         title: 'Feedback',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='alert-triangle' />
-        )
-      }
+        ),
+        tabBarColor: getTheme[screenProps.theme].colors.reverse
+      })
     }
   },
   {

@@ -8,6 +8,7 @@ import {
   TOGGLE_SELECTED_VERSE
 } from './bibleWebView/src/dispatch'
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
   webViewRef = createRef();
 
@@ -19,6 +20,19 @@ class BibleWebView extends Component {
     }
 
     webView.postMessage(JSON.stringify(message))
+  }
+
+  state = {
+    webViewOpacity: 0
+  }
+
+  componentDidMount () {
+    this.enableWebViewOpacity()
+  }
+
+  enableWebViewOpacity = async () => {
+    await sleep(500)
+    this.setState({ webViewOpacity: 1 })
   }
 
   componentDidUpdate () {
@@ -81,6 +95,7 @@ class BibleWebView extends Component {
         originWhitelist={['*']}
         ref={this.webViewRef}
         source={bibleWebView}
+        style={{ opacity: this.state.webViewOpacity }}
       />
     )
   }

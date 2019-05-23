@@ -3,6 +3,7 @@ import picostyle from 'picostyle'
 
 import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL, TOGGLE_SELECTED_VERSE } from './dispatch'
 import colors from '../../../../themes/colors'
+import hexTransarency from '../../../../helpers/hexTransarency'
 const styled = picostyle(h)
 
 const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
@@ -20,7 +21,7 @@ const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
 const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor }) => {
   let background = 'transparent'
   if (highlightedColor && !isSelected) {
-    background = colors[highlightedColor]
+    background = `${colors[highlightedColor]}${hexTransarency[50]}`
   }
   if (isFocused) {
     background = 'rgba(0,0,0,0.1)'

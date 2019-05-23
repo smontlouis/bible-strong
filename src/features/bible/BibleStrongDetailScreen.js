@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import { Icon } from 'expo'
 import { ScrollView, Platform, Share } from 'react-native'
+import compose from 'recompose/compose'
 
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
@@ -31,15 +32,19 @@ const SubTitle = styled(Text)({
   marginBottom: 3
 })
 
-const Word = styled(Text)({
+const Word = styled(Text)(({ theme }) => ({
   fontSize: 18,
   fontWeight: 'bold',
-  color: '#000'
-})
+  color: theme.colors.default
+}))
 
 const Touchable = styled.TouchableOpacity(() => ({
   flexDirection: 'row',
   alignItems: 'flex-start'
+}))
+
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
 }))
 
 class BibleStrongDetailScreen extends React.Component {
@@ -117,7 +122,7 @@ class BibleStrongDetailScreen extends React.Component {
                 <Text title fontSize={22} flex>
                   {capitalize(Mot)}
                   {!!Phonetique && (
-                    <Text title darkGrey fontSize={16}>
+                    <Text title color='darkGrey' fontSize={16}>
                       {' '}
                       {Phonetique}
                     </Text>
@@ -125,24 +130,22 @@ class BibleStrongDetailScreen extends React.Component {
                 </Text>
               </Touchable>
               <Touchable onPress={this.shareContent}>
-                <Icon.Feather
+                <FeatherIcon
                   style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
                   name='share-2'
                   size={20}
-                  color='black'
                 />
               </Touchable>
               <Touchable onPress={this.goBack}>
-                <Icon.Feather
+                <FeatherIcon
                   style={{ paddingTop: 10, paddingHorizontal: 5 }}
                   name='minimize-2'
                   size={20}
-                  color='black'
                 />
               </Touchable>
             </Box>
             {!!Type && (
-              <Text titleItalic darkGrey>
+              <Text titleItalic color='darkGrey'>
                 {Type}
               </Text>
             )}
@@ -154,7 +157,7 @@ class BibleStrongDetailScreen extends React.Component {
           <Box>
             {!!Hebreu && (
               <ViewItem>
-                <Paragraph darkGrey style={{ fontSize: 15 }}>
+                <Paragraph color='darkGrey' style={{ fontSize: 15 }}>
                   Mot Hébreu:&nbsp;
                   <Word>{Hebreu}</Word>
                 </Paragraph>
@@ -171,7 +174,10 @@ class BibleStrongDetailScreen extends React.Component {
             {!!Definition && (
               <ViewItem>
                 <SubTitle darkGrey>Définition - {Code}</SubTitle>
-                <StylizedHTMLView value={Definition} onLinkPress={() => {}} />
+                <StylizedHTMLView
+                  value={Definition}
+                  onLinkPress={() => {}}
+                />
               </ViewItem>
             )}
             {!!LSG && (
@@ -183,7 +189,10 @@ class BibleStrongDetailScreen extends React.Component {
             {!!Origine && (
               <ViewItem>
                 <SubTitle darkGrey>Origine du mot</SubTitle>
-                <StylizedHTMLView value={Origine} onLinkPress={() => {}} />
+                <StylizedHTMLView
+                  value={Origine}
+                  onLinkPress={() => {}}
+                />
               </ViewItem>
             )}
             {(this.state.versesCountByBook.length > 0 || this.state.concordanceLoading) && (
@@ -201,4 +210,4 @@ class BibleStrongDetailScreen extends React.Component {
   }
 }
 
-export default waitForDB(BibleStrongDetailScreen)
+export default compose(waitForDB)(BibleStrongDetailScreen)

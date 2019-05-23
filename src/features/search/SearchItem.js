@@ -9,7 +9,7 @@ const formatText = (sentence, array) => {
     ({ offset, result, phrase }, [position, range], i) => {
       const before = phrase.substr(0, position - offset)
       const highlighted = (
-        <Text bold primary key={i}>
+        <Text bold color='darkGrey' key={i}>
           {phrase.substr(position - offset, range)}
         </Text>
       )

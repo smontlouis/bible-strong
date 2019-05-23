@@ -2,14 +2,11 @@ import React from 'react'
 import { YellowBox } from 'react-native'
 import { AppLoading, Font, Icon, Updates } from 'expo'
 import { Provider } from 'react-redux'
-import { ThemeProvider } from 'emotion-theming'
 import Sentry from 'sentry-expo'
 import SnackBar from '~common/SnackBar'
-import { PersistGate } from 'redux-persist/integration/react'
-
-import theme from '~themes/default'
-import AppNavigator from '~navigation/AppNavigator'
 import configureStore from '~redux/store'
+
+import InitApp from './InitApp'
 
 YellowBox.ignoreWarnings(['Require cycle:'])
 
@@ -78,13 +75,9 @@ export default class App extends React.Component {
     }
 
     return (
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <AppNavigator />
-          </PersistGate>
-        </Provider>
-      </ThemeProvider>
+      <Provider store={store}>
+        <InitApp persistor={persistor} />
+      </Provider>
     )
   }
 }

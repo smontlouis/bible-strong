@@ -2,6 +2,7 @@ import { createMaterialTopTabNavigator } from 'react-navigation'
 import BookSelectorScreen from '~features/bible/BookSelectorScreen'
 import ChapterSelectorScreen from '~features/bible/ChapterSelectorScreen'
 import VerseSelectorScreen from '~features/bible/VerseSelectorScreen'
+import BibleSelectTabBar from '~features/bible/BibleSelectTabBar'
 
 import theme from '~themes/default'
 
@@ -16,6 +17,7 @@ const TabNavigatorConfig = {
   swipeEnabled: true,
   animationEnabled: true,
   pressColor: 'black',
+  tabBarComponent: BibleSelectTabBar,
   tabBarOptions: {
     upperCaseLabel: false,
     activeTintColor: theme.colors.primary,

@@ -3,6 +3,7 @@ import { FileSystem, Asset } from 'expo'
 import { TouchableOpacity } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -18,12 +19,12 @@ const Container = styled.View({
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : 'black',
+  color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 12
 }))
 
 const TextName = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : 'black',
+  color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   backgroundColor: 'transparent'
 }))
@@ -95,7 +96,7 @@ class VersionSelectorItem extends React.Component {
   }
 
   render () {
-    const { version, isSelected, onChange } = this.props
+    const { version, isSelected, onChange, theme } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
     if (typeof versionNeedsDownload === 'undefined') {
@@ -121,7 +122,7 @@ class VersionSelectorItem extends React.Component {
             {
               isLoading &&
               <Box width={100} justifyContent='center'>
-                <ProgressBar progress={fileProgress} color='black' />
+                <ProgressBar progress={fileProgress} color={theme.colors.default} />
               </Box>
             }
           </Box>
@@ -138,4 +139,4 @@ class VersionSelectorItem extends React.Component {
   }
 }
 
-export default VersionSelectorItem
+export default withTheme(VersionSelectorItem)

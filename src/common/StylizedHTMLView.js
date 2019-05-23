@@ -1,36 +1,35 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
-import { pure } from 'recompose'
+import { withTheme } from 'emotion-theming'
 
 import HTMLView from '~helpers/react-native-htmlview'
-import theme from '~themes/default'
 
 const textStyle = {
   lineHeight: 27,
   fontSize: 18
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
   h1: {
     fontWeight: 'bold',
     fontSize: 24,
     lineHeight: 25,
-    color: theme.colors.black
+    color: theme.colors.default
   },
   h2: {
     fontWeight: 'bold',
     fontSize: 24,
     lineHeight: 25,
-    color: theme.colors.black
+    color: theme.colors.default
   },
   h3: {
     fontWeight: 'bold',
     fontSize: 24,
     lineHeight: 25,
-    color: theme.colors.black
+    color: theme.colors.default
   },
   p: {
-    color: theme.colors.black,
+    color: theme.colors.default,
     ...textStyle
   },
   em: {
@@ -40,7 +39,7 @@ const styles = StyleSheet.create({
   },
   a: {
     // fontWeight: 'bold',
-    color: theme.colors.black,
+    color: theme.colors.default,
     borderStyle: 'solid',
     borderWidth: 2,
     borderColor: theme.colors.primary,
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
   },
   strong: {
     fontWeight: 'bold',
-    color: theme.colors.black,
+    color: theme.colors.default,
     ...textStyle
   },
   li: {
@@ -59,8 +58,8 @@ const styles = StyleSheet.create({
   }
 })
 
-const StylizedHTMLView = ({ htmlStyle, ...props }) => (
-  <HTMLView stylesheet={{ ...styles, ...htmlStyle }} {...props} />
+const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => (
+  <HTMLView stylesheet={{ ...styles(theme), ...htmlStyle }} {...props} />
 )
 
-export default pure(StylizedHTMLView)
+export default withTheme(StylizedHTMLView)

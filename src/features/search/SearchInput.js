@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import { TouchableOpacity } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import { pure } from 'recompose'
+import { withTheme } from 'emotion-theming'
 import styled from '@emotion/native'
 
-const StyledTextInput = styled.TextInput((hasNoIcon, isRounded, isLight) => ({
+const StyledTextInput = styled.TextInput(({ theme }) => ({
   fontSize: 16,
-  color: 'black'
+  color: theme.colors.default
 }))
 
 const IconButton = styled.View({
@@ -18,17 +18,16 @@ const IconButton = styled.View({
 
 const IconButtonTouch = IconButton.withComponent(TouchableOpacity)
 
-const Container = styled.View(({ isLight }) => ({
+const Container = styled.View(({ theme }) => ({
   flex: 1,
   paddingTop: 10,
   paddingBottom: 10,
   paddingLeft: 20,
   paddingRight: 35,
   overflow: 'hidden',
-  backgroundColor: 'rgba(0,0,0,0.1)',
+  backgroundColor: theme.colors.lightGrey,
   borderBottomWidth: 0,
-  borderRadius: 40,
-  ...(isLight && { backgroundColor: 'rgba(0,0,0,0.05)', color: 'black' })
+  borderRadius: 40
 }))
 
 class SearchInput extends Component {
@@ -66,7 +65,7 @@ class SearchInput extends Component {
       iconName,
       hasNoIcon,
       isRounded,
-      isLight,
+      theme,
       ...props
     } = this.props
     return (
@@ -79,16 +78,16 @@ class SearchInput extends Component {
           autoCapitalize='none'
           autoCorrect={false}
           onChangeText={this.onChangeText}
-          placeholderTextColor={isLight ? 'black' : 'white'}
+          placeholderTextColor={theme.colors.default}
           underlineColorAndroid='transparent'
-          {...{ hasNoIcon, isRounded, isLight }}
+          {...{ hasNoIcon, isRounded }}
         />
         {!this.state.hasText && (
           <IconButton>
             <Icon
               size={20}
               name={iconName || 'search'}
-              color={isLight ? 'black' : 'white'}
+              color={theme.colors.default}
             />
           </IconButton>
         )}
@@ -97,7 +96,7 @@ class SearchInput extends Component {
             <Icon
               size={20}
               name={'close'}
-              color={isLight ? 'black' : 'white'}
+              color={theme.colors.default}
             />
           </IconButtonTouch>
         )}
@@ -106,4 +105,4 @@ class SearchInput extends Component {
   }
 }
 
-export default pure(SearchInput)
+export default withTheme(SearchInput)

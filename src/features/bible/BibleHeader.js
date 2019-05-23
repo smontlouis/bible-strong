@@ -4,6 +4,7 @@ import { Icon } from 'expo'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
 
+import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Back from '~common/Back'
@@ -15,7 +16,7 @@ const LinkBox = styled(Link)({
   paddingVertical: 15
 })
 
-const Text = styled.Text({
+const StyledText = styled(Text)({
   fontSize: 16,
   fontWeight: 'bold',
   marginRight: 5
@@ -39,6 +40,10 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   marginRight: 'auto'
 }))
 
+const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
+
 const Header = ({
   isReadOnly,
   noBorder,
@@ -53,13 +58,13 @@ const Header = ({
       <HeaderBox noBorder={noBorder} row>
         <Box flex justifyContent='center'>
           <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <Icon.Feather name={'arrow-left'} size={20} color='black' />
+            <StyledIcon name={'arrow-left'} size={20} />
           </Back>
         </Box>
         <Box grow center>
-          <Text>
+          <StyledText>
             {book.Nom} {chapter}:{verse} - {version}
-          </Text>
+          </StyledText>
         </Box>
         <Box flex />
       </HeaderBox>
@@ -68,19 +73,19 @@ const Header = ({
   return (
     <HeaderBox noBorder={noBorder} row>
       <LinkBox route={'BibleSelect'}>
-        <Text>
+        <StyledText>
           {book.Nom} {chapter}
-        </Text>
-        <Icon.Feather name='chevron-down' size={15} />
+        </StyledText>
+        <StyledIcon name='chevron-down' size={15} />
       </LinkBox>
       <LinkBox route={'VersionSelector'} params={{ version }}>
-        <Text>{version}</Text>
-        <Icon.Feather name='chevron-down' size={15} />
+        <StyledText>{version}</StyledText>
+        <StyledIcon name='chevron-down' size={15} />
       </LinkBox>
       <BibleParameters onPress={onBibleParamsClick}>
-        <Text>
+        <StyledText>
           Aa
-        </Text>
+        </StyledText>
       </BibleParameters>
     </HeaderBox>
   )

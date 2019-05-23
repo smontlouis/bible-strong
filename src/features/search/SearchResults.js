@@ -65,44 +65,6 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
       }}
     />
   )
-
-  // return (
-  //   <Box flex paddingBottom={30}>
-  //     <Box marginLeft={20} marginRight={20} marginBottom={10}>
-  //       <Text title fontSize={20}>
-  //         {nbResults} occurences trouvées
-  //       </Text>
-  //     </Box>
-  //     {results.slice(0, resultsToDisplay).map(result => {
-  //       const [book, chapter, verse] = result.ref.split('-')
-  //       const { title } = formatVerseContent([
-  //         { Livre: book, Chapitre: chapter, Verset: verse }
-  //       ])
-  //       const metaData = result.matchData.metadata
-  //       const positions = Object.keys(metaData).reduce(
-  //         (acc, item) => acc.concat(metaData[item].LSG.position),
-  //         []
-  //       )
-  //       positions.sort((a, b) => a[0] - b[0])
-  //       return (
-  //         <SearchItem
-  //           key={result.ref}
-  //           positions={positions}
-  //           reference={title}
-  //           text={BibleLSG[book][chapter][verse]}
-  //           onPress={() =>
-  //             navigation.navigate('BibleView', {
-  //               isReadOnly: true,
-  //               book: books[book - 1],
-  //               chapter: Number(chapter),
-  //               verse: Number(verse)
-  //             })
-  //           }
-  //         />
-  //       )
-  //     })}
-  //   </Box>
-  // )
 }
 
 export default compose(withNavigation)(SearchResults)

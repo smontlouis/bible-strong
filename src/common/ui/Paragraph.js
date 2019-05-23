@@ -2,10 +2,10 @@ import styled from '@emotion/native'
 
 import Text from './Text'
 
-const Paragraph = styled(Text)(({ small }) => ({
+const Paragraph = styled(Text)(({ small, color, theme }) => ({
   fontFamily: 'literata-book',
   fontSize: small ? 14 : 20,
-  lineHeight: small ? 22 : 34
+  lineHeight: small ? 22 : 34,
 }))
 
 export default Paragraph

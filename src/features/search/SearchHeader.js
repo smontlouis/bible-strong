@@ -1,8 +1,8 @@
 // @flow
 import React from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { pure } from 'recompose'
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 
 import Back from '~common/Back'
 import SearchInput from './SearchInput'
@@ -15,19 +15,18 @@ const Container = styled.View(({ theme }) => ({
   flexDirection: 'row'
 }))
 
-const SearchHeader = ({ onChangeText, placeholder, hasBackButton }) => (
+const SearchHeader = ({ onChangeText, placeholder, hasBackButton, theme }) => (
   <Container>
     {hasBackButton && (
       <Back underlayColor='transparent'>
-        <Icon name='chevron-left' size={28} color='white' />
+        <Icon name='chevron-left' size={28} color={theme.colors.reverse} />
       </Back>
     )}
     <SearchInput
-      isLight
       placeholder={placeholder}
       onChangeText={onChangeText}
     />
   </Container>
 )
 
-export default pure(SearchHeader)
+export default withTheme(SearchHeader)

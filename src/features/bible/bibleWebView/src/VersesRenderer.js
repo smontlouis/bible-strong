@@ -1,15 +1,18 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
+import { getColors } from '../../../../themes/getColors'
 import { SEND_INITIAL_DATA } from './dispatch'
 import Verse from './Verse'
 const styled = picostyle(h)
 
-const Container = styled('div')(({ alignContent }) => ({
+const Container = styled('div')(({ settings: { alignContent, theme } }) => ({
   maxWidth: '320px',
   width: '100%',
   margin: '0 auto',
-  textAlign: alignContent
+  textAlign: alignContent,
+  background: getColors[theme].reverse,
+  color: getColors[theme].default
 }))
 class VersesRenderer extends Component {
   state = {
@@ -20,13 +23,12 @@ class VersesRenderer extends Component {
   }
 
   componentDidMount () {
-    this.setState({ verses: this.props.verses })
-
     this.receiveDataFromApp()
-    window.oncontextmenu = function (event) {
-      event.preventDefault()
-      event.stopPropagation()
-      return false
+  }
+
+  componentDidUpdate (prevProps, prevState) {
+    if (prevState && prevState.settings.theme !== this.state.settings.theme) {
+      document.body.style.backgroundColor = getColors[this.state.settings.theme].reverse
     }
   }
 
@@ -56,7 +58,7 @@ class VersesRenderer extends Component {
     }
 
     return (
-      <Container alignContent={state.settings.alignContent}>
+      <Container settings={state.settings}>
         {
           state.verses.map((verse) => {
             const { Livre, Chapitre, Verset } = verse

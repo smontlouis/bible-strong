@@ -1,28 +1,26 @@
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
-import { pure } from 'recompose'
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 
-const Container = styled.View({
+const Container = styled.View(({ theme }) => ({
   flex: 1,
   alignItems: 'center',
-  justifyContent: 'center'
-})
+  justifyContent: 'center',
+  backgroundColor: theme.colors.reverse
+}))
 
-const Text = styled.Text({
-  marginTop: 20
-})
-
-const Loading = ({ message = null, style, children }) => (
+const Loading = ({ message = null, style, children, theme }) => (
   <Container style={style}>
-    <ActivityIndicator color={'#333'} />
-    {message && <Text>{message}</Text>}
+    <ActivityIndicator color={theme.colors.grey} />
+    {message && <Text marginTop={20}>{message}</Text>}
     {children && <Box width={200} marginLeft='auto' marginRight='auto'>
       { children }
     </Box>}
   </Container>
 )
 
-export default pure(Loading)
+export default withTheme(Loading)
