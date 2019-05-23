@@ -35,6 +35,10 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor 
   }
 })
 
+const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
+  display: textDisplay
+}))
+
 class Verse extends Component {
   state = {
     focused: false
@@ -68,17 +72,20 @@ class Verse extends Component {
 
   render ({ verse, isSelected, highlightedColor, settings }, { isFocused }) {
     return (
-      <ContainerText
-        isFocused={isFocused}
-        isSelected={isSelected}
-        highlightedColor={highlightedColor}
-        onClick={this.toggleSelectVerse}
-        onTouchStart={this.onTouchStart}
-        onTouchEnd={this.onTouchEnd}
-      >
-        <NumberText settings={settings}>{verse.Verset}</NumberText>
-        <VerseText settings={settings}>{verse.Texte}</VerseText>
-      </ContainerText>
+      <Wrapper settings={settings}>
+        <ContainerText
+          isFocused={isFocused}
+          isSelected={isSelected}
+          highlightedColor={highlightedColor}
+          onClick={this.toggleSelectVerse}
+          onTouchStart={this.onTouchStart}
+          onTouchEnd={this.onTouchEnd}
+        >
+          <NumberText settings={settings}>{verse.Verset}</NumberText>
+          <VerseText settings={settings}>{verse.Texte}</VerseText>
+        </ContainerText>
+      </Wrapper>
+
     )
   }
 }

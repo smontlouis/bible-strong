@@ -9,6 +9,8 @@ export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
 export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
+export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
+
 // export const SAVE_NOTE = 'user/SAVE_NOTE'
 // export const EDIT_NOTE = 'user/EDIT_NOTE'
 // export const REMOVE_NOTE = 'user/REMOVE_NOTE'
@@ -25,7 +27,8 @@ const initialState = {
     notes: {},
     settings: {
       alignContent: 'justify',
-      fontSizeScale: 0
+      fontSizeScale: 0,
+      textDisplay: 'inline'
     }
   }
 }
@@ -60,6 +63,10 @@ export default produce((draft, action) => {
     }
     case SET_SETTINGS_ALIGN_CONTENT: {
       draft.bible.settings.alignContent = action.payload
+      break
+    }
+    case SET_SETTINGS_TEXT_DISPLAY: {
+      draft.bible.settings.textDisplay = action.payload
       break
     }
     case INCREASE_SETTINGS_FONTSIZE_SCALE: {
@@ -98,6 +105,13 @@ export function removeHighlight () {
 export function setSettingsAlignContent (payload) {
   return {
     type: SET_SETTINGS_ALIGN_CONTENT,
+    payload
+  }
+}
+
+export function setSettingsTextDisplay (payload) {
+  return {
+    type: SET_SETTINGS_TEXT_DISPLAY,
     payload
   }
 }
