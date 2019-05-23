@@ -44,8 +44,11 @@ const BibleParamsModal = ({
   isOpen,
   onClosed,
   setSettingsAlignContent,
+  increaseSettingsFontSizeScale,
+  decreaseSettingsFontSizeScale,
   settings: {
-    alignContent
+    alignContent,
+    fontSizeScale
   }
 }) => {
   return (
@@ -55,23 +58,35 @@ const BibleParamsModal = ({
       animationDuration={200}
       position='top'
       entry='top'
+      swipeToClose={false}
       backdropOpacity={0.1}
     >
       <Container>
         <HalfContainer border>
           <TouchableIcon
-            isSelected={alignContent === 'left'}
-            name='align-left'
-            onPress={() => setSettingsAlignContent('left')}
-          />
-          <Text>{alignContentToString[alignContent]}</Text>
-          <TouchableIcon
             isSelected={alignContent === 'justify'}
             name='align-justify'
             onPress={() => setSettingsAlignContent('justify')}
           />
+          <Text bold>{alignContentToString[alignContent]}</Text>
+          <TouchableIcon
+            isSelected={alignContent === 'left'}
+            name='align-left'
+            onPress={() => setSettingsAlignContent('left')}
+          />
         </HalfContainer>
-        <HalfContainer border />
+        <HalfContainer border>
+          <TouchableIcon
+            name='type'
+            size={15}
+            onPress={() => decreaseSettingsFontSizeScale()}
+          />
+          <Text bold>{`${100 + fontSizeScale * 10}%`}</Text>
+          <TouchableIcon
+            name='type'
+            onPress={() => increaseSettingsFontSizeScale()}
+          />
+        </HalfContainer>
         <HalfContainer />
 
       </Container>

@@ -7,6 +7,8 @@ import { clearSelectedVerses } from './bible'
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
+export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
+export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 // export const SAVE_NOTE = 'user/SAVE_NOTE'
 // export const EDIT_NOTE = 'user/EDIT_NOTE'
 // export const REMOVE_NOTE = 'user/REMOVE_NOTE'
@@ -22,7 +24,8 @@ const initialState = {
     highlights: {},
     notes: {},
     settings: {
-      alignContent: 'justify'
+      alignContent: 'justify',
+      fontSizeScale: 0
     }
   }
 }
@@ -47,16 +50,29 @@ export default produce((draft, action) => {
         ...draft.bible.highlights,
         ...action.selectedVerses
       }
-      return
+      break
     }
     case REMOVE_HIGHLIGHT: {
       Object.keys(action.selectedVerses).forEach((key) => {
         delete draft.bible.highlights[key]
       })
-      return
+      break
     }
     case SET_SETTINGS_ALIGN_CONTENT: {
       draft.bible.settings.alignContent = action.payload
+      break
+    }
+    case INCREASE_SETTINGS_FONTSIZE_SCALE: {
+      if (draft.bible.settings.fontSizeScale < 3) {
+        draft.bible.settings.fontSizeScale += 1
+      }
+      break
+    }
+    case DECREASE_SETTINGS_FONTSIZE_SCALE: {
+      if (draft.bible.settings.fontSizeScale > -3) {
+        draft.bible.settings.fontSizeScale -= 1
+      }
+      break
     }
   }
 }, initialState)
@@ -83,5 +99,17 @@ export function setSettingsAlignContent (payload) {
   return {
     type: SET_SETTINGS_ALIGN_CONTENT,
     payload
+  }
+}
+
+export function increaseSettingsFontSizeScale () {
+  return {
+    type: INCREASE_SETTINGS_FONTSIZE_SCALE
+  }
+}
+
+export function decreaseSettingsFontSizeScale () {
+  return {
+    type: DECREASE_SETTINGS_FONTSIZE_SCALE
   }
 }

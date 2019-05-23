@@ -67,6 +67,7 @@ class VersesRenderer extends Component {
             return (
               <Verse
                 verse={verse}
+                settings={state.settings}
                 isSelected={isSelected}
                 highlightedColor={highlightedColor}
               />
