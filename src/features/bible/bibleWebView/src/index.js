@@ -7,4 +7,8 @@ import mockVerses from './mockVerses'
 
 const desktopMode = false
 
-render(<VersesRenderer verses={desktopMode ? mockVerses : []} />, document.getElementById('app'))
+try {
+  render(<VersesRenderer verses={desktopMode ? mockVerses : []} />, document.getElementById('app'))
+} catch (e) {
+  window.postMessage(e)
+}

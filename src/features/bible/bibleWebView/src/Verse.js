@@ -5,15 +5,17 @@ import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL, TOGGLE_SELECTED_VERSE } from 
 import colors from '../../../../themes/colors'
 const styled = picostyle(h)
 
-const VerseText = styled('span')({
-  fontSize: '20px',
-  lineHeight: '34px'
-})
+const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
 
-const NumberText = styled('span')({
-  fontSize: '28px',
+const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
+  fontSize: scaleFontSize(20, fontSizeScale),
+  lineHeight: scaleFontSize(34, fontSizeScale)
+}))
+
+const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
+  fontSize: scaleFontSize(28, fontSizeScale),
   padding: '0 10px'
-})
+}))
 
 const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor }) => {
   let background = 'transparent'
@@ -64,7 +66,7 @@ class Verse extends Component {
     clearTimeout(this.buttonPressTimer)
   }
 
-  render ({ verse, isSelected, highlightedColor }, { isFocused }) {
+  render ({ verse, isSelected, highlightedColor, settings }, { isFocused }) {
     return (
       <ContainerText
         isFocused={isFocused}
@@ -74,8 +76,8 @@ class Verse extends Component {
         onTouchStart={this.onTouchStart}
         onTouchEnd={this.onTouchEnd}
       >
-        <NumberText>{verse.Verset}</NumberText>
-        <VerseText>{verse.Texte}</VerseText>
+        <NumberText settings={settings}>{verse.Verset}</NumberText>
+        <VerseText settings={settings}>{verse.Texte}</VerseText>
       </ContainerText>
     )
   }

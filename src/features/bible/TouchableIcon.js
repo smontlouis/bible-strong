@@ -17,12 +17,12 @@ const StyledIcon = styled(Icon.Feather)(({ color, isSelected, theme }) => ({
 
 export default class TabBarIcon extends React.Component {
   render () {
-    const { onPress, color, isSelected } = this.props
+    const { onPress, color, isSelected, size = 20 } = this.props
     return (
       <Touchable onPress={onPress}>
         <StyledIcon
           name={this.props.name}
-          size={20}
+          size={size}
           color={color}
           isSelected={isSelected}
         />
