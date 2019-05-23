@@ -5,17 +5,18 @@ import { SEND_INITIAL_DATA } from './dispatch'
 import Verse from './Verse'
 const styled = picostyle(h)
 
-const Container = styled('div')({
+const Container = styled('div')(({ alignContent }) => ({
   maxWidth: '320px',
   width: '100%',
   margin: '0 auto',
-  textAlign: 'justify'
-})
+  textAlign: alignContent
+}))
 class VersesRenderer extends Component {
   state = {
     verses: [],
     selectedVerses: {},
-    highlightedVerses: {}
+    highlightedVerses: {},
+    settings: {}
   }
 
   componentDidMount () {
@@ -36,11 +37,12 @@ class VersesRenderer extends Component {
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
-          const { verses, selectedVerses, highlightedVerses } = response
+          const { verses, selectedVerses, highlightedVerses, settings } = response
           self.setState({
             verses,
             selectedVerses,
-            highlightedVerses
+            highlightedVerses,
+            settings
           })
           break
         }
@@ -54,7 +56,7 @@ class VersesRenderer extends Component {
     }
 
     return (
-      <Container>
+      <Container alignContent={state.settings.alignContent}>
         {
           state.verses.map((verse) => {
             const { Livre, Chapitre, Verset } = verse

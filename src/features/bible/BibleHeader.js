@@ -21,17 +21,33 @@ const Text = styled.Text({
   marginRight: 5
 })
 
+const BibleParameters = styled.TouchableOpacity(({ theme }) => ({
+  fontSize: 16,
+  fontWeight: 'bold',
+  marginLeft: 'auto',
+  color: theme.colors.darkGrey
+}))
+
 const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   marginTop: Platform.OS === 'ios' ? 0 : 25,
   height: 50,
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border,
-  paddingLeft: theme.measures.padding,
-  paddingRight: theme.measures.padding
+  width: theme.measures.maxWidth,
+  marginLeft: 'auto',
+  marginRight: 'auto'
 }))
 
-const Header = ({ isReadOnly, noBorder, book, chapter, verse, version }) => {
+const Header = ({
+  isReadOnly,
+  noBorder,
+  book,
+  chapter,
+  verse,
+  version,
+  onBibleParamsClick
+}) => {
   if (isReadOnly) {
     return (
       <HeaderBox noBorder={noBorder} row>
@@ -61,6 +77,11 @@ const Header = ({ isReadOnly, noBorder, book, chapter, verse, version }) => {
         <Text>{version}</Text>
         <Icon.Feather name='chevron-down' size={15} />
       </LinkBox>
+      <BibleParameters onPress={onBibleParamsClick}>
+        <Text>
+          Aa
+        </Text>
+      </BibleParameters>
     </HeaderBox>
   )
 }

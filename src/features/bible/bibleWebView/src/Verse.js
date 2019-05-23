@@ -21,10 +21,11 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor 
     background = colors[highlightedColor]
   }
   if (isFocused) {
-    background = 'rgba(0,0,0,0.2)'
+    background = 'rgba(0,0,0,0.1)'
   }
   return {
     fontFamily: 'Literata Book',
+    transition: 'background 0.3s ease',
     background,
     '-webkit-touch-callout': 'none',
     padding: '4px',
