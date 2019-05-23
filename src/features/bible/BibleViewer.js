@@ -16,25 +16,8 @@ import * as UserActions from '~redux/modules/user'
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
-  },
-  scrollView: {
-    paddingTop: 30,
-    paddingBottom: 60
-
-  },
-  textContainer: {
-    maxWidth: 320,
-    width: '100%'
-  },
-  fixedButton: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0
-  },
-  webView: {
-    alignItems: 'stretch'
+    flex: 1,
+    overflow: 'hidden'
   }
 })
 
@@ -117,7 +100,8 @@ class BibleViewer extends Component {
       removeSelectedVerse,
       setSelectedVerse,
       selectedVerses,
-      highlightedVerses
+      highlightedVerses,
+      settings
     } = this.props
     let array = this.state.verses
 
@@ -134,12 +118,14 @@ class BibleViewer extends Component {
     return (
       <BibleWebView
         navigation={navigation}
-        arrayVerses={array}
         addSelectedVerse={addSelectedVerse}
         removeSelectedVerse={removeSelectedVerse}
         setSelectedVerse={setSelectedVerse}
+
+        arrayVerses={array}
         selectedVerses={selectedVerses}
         highlightedVerses={highlightedVerses}
+        settings={settings}
       />
     )
   }

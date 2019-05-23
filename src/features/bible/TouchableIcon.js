@@ -1,20 +1,32 @@
 import React from 'react'
-import { TouchableOpacity } from 'react-native'
+import styled from '@emotion/native'
 import { Icon } from 'expo'
 
-import theme from '~themes/default'
+const Touchable = styled.TouchableOpacity(() => ({
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center'
+}))
+
+const StyledIcon = styled(Icon.Feather)(({ color, isSelected, theme }) => ({
+  color: color || theme.colors.grey,
+  ...isSelected && {
+    color: theme.colors.primary
+  }
+}))
 
 export default class TabBarIcon extends React.Component {
   render () {
-    const { onPress, color } = this.props
+    const { onPress, color, isSelected } = this.props
     return (
-      <TouchableOpacity onPress={onPress}>
-        <Icon.Feather
+      <Touchable onPress={onPress}>
+        <StyledIcon
           name={this.props.name}
           size={20}
-          color={color || theme.colors.grey}
+          color={color}
+          isSelected={isSelected}
         />
-      </TouchableOpacity>
+      </Touchable>
     )
   }
 }

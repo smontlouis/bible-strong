@@ -1,7 +1,13 @@
 import React from 'react'
 import styled from '@emotion/native'
 
-const Container = styled.TouchableOpacity(({ color }) => ({
+const Touchable = styled.TouchableOpacity(() => ({
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center'
+}))
+
+const Container = styled.View(({ color }) => ({
   width: 16,
   height: 16,
   borderRadius: 8,
@@ -10,7 +16,9 @@ const Container = styled.TouchableOpacity(({ color }) => ({
 
 const TouchableCircle = ({ color, onPress }) => {
   return (
-    <Container color={color} onPress={onPress} />
+    <Touchable onPress={onPress}>
+      <Container color={color} />
+    </Touchable>
   )
 }
 

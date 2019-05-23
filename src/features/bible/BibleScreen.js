@@ -5,14 +5,17 @@ import { StatusBar } from 'react-native'
 import Container from '~common/ui/Container'
 import BibleViewer from './BibleViewer'
 import BibleHeader from './BibleHeader'
+import BibleParamsModal from './BibleParamsModal'
 
 import * as BibleActions from '~redux/modules/bible'
+import * as UserActions from '~redux/modules/user'
 
 @connect(
-  ({ bible }, ownProps) => {
+  ({ bible, user }, ownProps) => {
     const params = ownProps.navigation.state.params
     return {
       isReadOnly: params && params.isReadOnly,
+      settings: user.bible.settings,
       app: {
         book: (params && params.book) || bible.selectedBook,
         chapter: (params && params.chapter) || bible.selectedChapter,
@@ -21,11 +24,25 @@ import * as BibleActions from '~redux/modules/bible'
       }
     }
   },
-  BibleActions
+  { ...BibleActions, ...UserActions }
 )
 class BibleScreen extends React.Component {
+  state = {
+    isBibleParamsOpen: false
+  }
+
+  toggleBibleParamsOpen = () => {
+    this.setState({ isBibleParamsOpen: !this.state.isBibleParamsOpen })
+  }
   render () {
-    const { app, navigation, isReadOnly } = this.props
+    const {
+      app,
+      navigation,
+      isReadOnly,
+      setSettingsAlignContent,
+      settings
+    } = this.props
+
     const { arrayVerses } = this.props.navigation.state.params || {}
 
     return (
@@ -37,6 +54,7 @@ class BibleScreen extends React.Component {
           chapter={app.chapter}
           verse={app.verse}
           version={app.version}
+          onBibleParamsClick={this.toggleBibleParamsOpen}
           isBible
         />
         <BibleViewer
@@ -47,6 +65,13 @@ class BibleScreen extends React.Component {
           verse={app.verse}
           version={app.version}
           navigation={navigation}
+          settings={settings}
+        />
+        <BibleParamsModal
+          onClosed={this.toggleBibleParamsOpen}
+          isOpen={this.state.isBibleParamsOpen}
+          setSettingsAlignContent={setSettingsAlignContent}
+          settings={settings}
         />
       </Container>
     )

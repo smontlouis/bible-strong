@@ -34,8 +34,7 @@ const HalfContainer = styled.View(({ border, theme }) => ({
   borderBottomColor: theme.colors.border,
   borderBottomWidth: border ? 1 : 0,
   flexDirection: 'row',
-  justifyContent: 'space-around',
-  alignItems: 'center',
+  alignItems: 'stretch',
   height: 60
 }))
 
@@ -72,6 +71,7 @@ const VersesModal = ({
       animationDuration={200}
       position='bottom'
       backdrop={false}
+      backdropPressToClose={false}
       swipeToClose={false}
     >
       <Container>

@@ -6,6 +6,7 @@ import { clearSelectedVerses } from './bible'
 // export const USER_LOGOUT = 'USER_LOGOUT'
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
+export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 // export const SAVE_NOTE = 'user/SAVE_NOTE'
 // export const EDIT_NOTE = 'user/EDIT_NOTE'
 // export const REMOVE_NOTE = 'user/REMOVE_NOTE'
@@ -19,7 +20,10 @@ const initialState = {
   emailVerified: false,
   bible: {
     highlights: {},
-    notes: {}
+    notes: {},
+    settings: {
+      alignContent: 'justify'
+    }
   }
 }
 
@@ -49,6 +53,10 @@ export default produce((draft, action) => {
       Object.keys(action.selectedVerses).forEach((key) => {
         delete draft.bible.highlights[key]
       })
+      return
+    }
+    case SET_SETTINGS_ALIGN_CONTENT: {
+      draft.bible.settings.alignContent = action.payload
     }
   }
 }, initialState)
@@ -68,5 +76,12 @@ export function removeHighlight () {
 
     dispatch(clearSelectedVerses())
     return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
+  }
+}
+
+export function setSettingsAlignContent (payload) {
+  return {
+    type: SET_SETTINGS_ALIGN_CONTENT,
+    payload
   }
 }
