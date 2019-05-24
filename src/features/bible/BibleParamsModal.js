@@ -13,18 +13,18 @@ const StylizedModal = styled(Modal)({
   paddingTop: 100
 })
 
-const Container = styled.View({
+const Container = styled.View(({ theme }) => ({
   width: 200,
-  backgroundColor: 'white',
+  backgroundColor: theme.colors.reverse,
   borderRadius: 10,
-  shadowColor: '#000',
+  shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
   alignItems: 'stretch',
   justifyContent: 'space-between'
-})
+}))
 
 const HalfContainer = styled.View(({ border, theme }) => ({
   borderBottomColor: theme.colors.border,
@@ -45,6 +45,11 @@ const textDisplayToString = {
   block: 'À la ligne'
 }
 
+const themeToString = {
+  default: 'Mode jour',
+  dark: 'Mode nuit'
+}
+
 const BibleParamsModal = ({
   isOpen,
   onClosed,
@@ -52,10 +57,12 @@ const BibleParamsModal = ({
   setSettingsTextDisplay,
   increaseSettingsFontSizeScale,
   decreaseSettingsFontSizeScale,
+  setSettingsTheme,
   settings: {
     alignContent,
     fontSizeScale,
-    textDisplay
+    textDisplay,
+    theme
   }
 }) => {
   return (
@@ -105,6 +112,19 @@ const BibleParamsModal = ({
             isSelected={textDisplay === 'block'}
             name='list'
             onPress={() => setSettingsTextDisplay('block')}
+          />
+        </HalfContainer>
+        <HalfContainer>
+          <TouchableIcon
+            isSelected={theme === 'default'}
+            name='sun'
+            onPress={() => setSettingsTheme('default')}
+          />
+          <Text bold>{themeToString[theme]}</Text>
+          <TouchableIcon
+            isSelected={theme === 'dark'}
+            name='moon'
+            onPress={() => setSettingsTheme('dark')}
           />
         </HalfContainer>
 

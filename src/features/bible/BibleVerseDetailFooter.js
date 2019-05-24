@@ -12,6 +12,10 @@ const IconButton = styled.TouchableOpacity({
   flexDirection: 'row'
 })
 
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
+
 const BibleVerseDetailFooter = ({
   verseNumber,
   goToNextVerse,
@@ -24,8 +28,8 @@ const BibleVerseDetailFooter = ({
         activeOpacity={0.5}
         onPress={() => goToPrevVerse(versesInCurrentChapter)}
       >
-        <Icon.Feather name={'arrow-left-circle'} size={20} />
-        <Text paddingLeft={10} darkGrey>
+        <FeatherIcon name={'arrow-left-circle'} size={20} />
+        <Text paddingLeft={10} color='darkGrey'>
           Verset précédent
         </Text>
       </IconButton>
@@ -36,10 +40,10 @@ const BibleVerseDetailFooter = ({
         activeOpacity={0.5}
         onPress={() => goToNextVerse(versesInCurrentChapter)}
       >
-        <Text paddingRight={10} darkGrey>
+        <Text paddingRight={10} color='darkGrey'>
           Verset suivant
         </Text>
-        <Icon.Feather name={'arrow-right-circle'} size={20} />
+        <FeatherIcon name={'arrow-right-circle'} size={20} />
       </IconButton>
     )}
   </Box>

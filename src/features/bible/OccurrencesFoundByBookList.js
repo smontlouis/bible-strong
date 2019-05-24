@@ -15,7 +15,7 @@ const OccurencesNumber = styled.View(({ theme }) => ({
   paddingTop: 2,
   paddingBottom: 2,
   borderRadius: 3,
-  backgroundColor: theme.colors.primary
+  backgroundColor: theme.colors.lightPrimary
 }))
 
 const ListItem = styled(Box)(({ theme }) => ({
@@ -32,14 +32,14 @@ const OccurrencesFoundByBookList = ({
   <Box marginTop={20}>
     {loading ? (
       <Box style={{ flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10 }}>
-        <Text darkGrey fontSize={16} marginRight={10}>
+        <Text color='darkGrey' fontSize={16} marginRight={10}>
           Concordance
         </Text>
         <Loading style={{ flex: 0 }} />
       </Box>
     ) : (
       <Box>
-        <Text darkGrey fontSize={16} marginBottom={3}>
+        <Text color='darkGrey' fontSize={16} marginBottom={3}>
           Concordance
         </Text>
         <FlatList
@@ -59,7 +59,7 @@ const OccurrencesFoundByBookList = ({
               <ListItem row alignItems='center' height={50}>
                 <Text fontSize={16}>{books[item.Livre - 1].Nom}</Text>
                 <OccurencesNumber>
-                  <Text reverse>{item.versesCountByBook}</Text>
+                  <Text>{item.versesCountByBook}</Text>
                 </OccurencesNumber>
                 <Box flex />
                 <Icon.Feather name='chevron-right' size={20} />

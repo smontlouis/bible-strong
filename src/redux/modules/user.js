@@ -10,6 +10,7 @@ export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
 export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
+export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
 
 // export const SAVE_NOTE = 'user/SAVE_NOTE'
 // export const EDIT_NOTE = 'user/EDIT_NOTE'
@@ -28,7 +29,8 @@ const initialState = {
     settings: {
       alignContent: 'justify',
       fontSizeScale: 0,
-      textDisplay: 'inline'
+      textDisplay: 'inline',
+      theme: 'default'
     }
   }
 }
@@ -67,6 +69,10 @@ export default produce((draft, action) => {
     }
     case SET_SETTINGS_TEXT_DISPLAY: {
       draft.bible.settings.textDisplay = action.payload
+      break
+    }
+    case SET_SETTINGS_THEME: {
+      draft.bible.settings.theme = action.payload
       break
     }
     case INCREASE_SETTINGS_FONTSIZE_SCALE: {
@@ -112,6 +118,13 @@ export function setSettingsAlignContent (payload) {
 export function setSettingsTextDisplay (payload) {
   return {
     type: SET_SETTINGS_TEXT_DISPLAY,
+    payload
+  }
+}
+
+export function setSettingsTheme (payload) {
+  return {
+    type: SET_SETTINGS_THEME,
     payload
   }
 }

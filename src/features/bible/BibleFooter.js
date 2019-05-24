@@ -14,8 +14,8 @@ const Container = styled.View({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
-  marginLeft: 20,
-  marginRight: 20
+  marginLeft: 10,
+  marginRight: 10
 })
 
 const IconButton = styled.TouchableOpacity({
@@ -23,9 +23,12 @@ const IconButton = styled.TouchableOpacity({
   height: 30,
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: 30,
-  backgroundColor: 'white'
+  borderRadius: 30
 })
+
+const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.tertiary
+}))
 
 const BibleFooter = ({
   book,
@@ -41,7 +44,7 @@ const BibleFooter = ({
         activeOpacity={0.5}
         onPress={goToPrevChapter}
       >
-        <Icon.Feather name={'arrow-left-circle'} size={30} color='rgb(98,113,122)' />
+        <StyledIcon name={'arrow-left-circle'} size={30} />
       </IconButton>
     )}
     <Box flex />
@@ -51,10 +54,9 @@ const BibleFooter = ({
         activeOpacity={0.5}
         onPress={goToNextChapter}
       >
-        <Icon.Feather
+        <StyledIcon
           name={'arrow-right-circle'}
           size={30}
-          color='rgb(98,113,122)'
         />
       </IconButton>
     )}

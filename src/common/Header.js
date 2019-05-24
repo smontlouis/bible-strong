@@ -5,12 +5,8 @@ import { pure } from 'recompose'
 import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import Back from '~common/Back'
-
-const Text = styled.Text({
-  fontSize: 16,
-  fontWeight: 'bold'
-})
 
 const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   marginTop: Platform.OS === 'ios' ? 0 : 25,
@@ -22,22 +18,25 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   paddingRight: 15
 }))
 
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
+
 const Header = ({ hasBackButton, isModal, title, noBorder }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
       <Box flex justifyContent='center'>
         {hasBackButton && (
           <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <Icon.Feather
+            <FeatherIcon
               name={isModal ? 'x' : 'arrow-left'}
-              size={isModal ? 20 : 20}
-              color='black'
+              size={20}
             />
           </Back>
         )}
       </Box>
       <Box grow center>
-        <Text>{title}</Text>
+        <Text fontSize={16} bold>{title}</Text>
       </Box>
       <Box flex />
     </HeaderBox>

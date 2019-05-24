@@ -6,9 +6,9 @@ const Text = styled.Text(props => {
   const s = bindStyles(theme)
   return {
     fontFamily: s.fontFamily(props),
-    color: s.colors(props),
-    fontSize: props.fontSize,
 
+    color: props.color ? props.theme.colors[props.color] : props.theme.colors.default,
+    fontSize: props.fontSize,
     fontWeight: props.bold ? 'bold' : undefined,
 
     // container

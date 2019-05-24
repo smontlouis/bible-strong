@@ -32,7 +32,7 @@ class Empty extends React.Component {
             }}
             source={source}
           />
-          {message && <Text tertiary>{message}</Text>}
+          {message && <Text color='tertiary'>{message}</Text>}
         </Box>
       </Container>
     )
