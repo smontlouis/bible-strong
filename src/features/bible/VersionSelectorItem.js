@@ -7,6 +7,7 @@ import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 
 const BIBLE_FILESIZE = 5000000
 
@@ -37,30 +38,9 @@ class VersionSelectorItem extends React.Component {
   }
 
   async componentDidMount () {
-    const versionNeedsDownload = await this.getIfVersionNeedsDownload()
-    this.setState({ versionNeedsDownload })
-  }
-
-  getIfVersionNeedsDownload = async () => {
     const { version } = this.props
-    if (version.id === 'LSG') {
-      return false
-    }
-    const path = `${FileSystem.documentDirectory}bible-${version.id}.json`
-    let file = await FileSystem.getInfoAsync(path)
-
-    // if (__DEV__) {
-    //   if (file.exists) {
-    //     FileSystem.deleteAsync(file.uri)
-    //     file = await FileSystem.getInfoAsync(path)
-    //   }
-    // }
-
-    if (!file.exists) {
-      return true
-    }
-
-    return false
+    const versionNeedsDownload = await getIfVersionNeedsDownload(version.id)
+    this.setState({ versionNeedsDownload })
   }
 
   requireBibleFileUri = (id) => {
