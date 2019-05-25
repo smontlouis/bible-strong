@@ -6,6 +6,7 @@ import BibleVerseDetailScreen from '~features/bible/BibleVerseDetailScreen'
 import BibleStrongDetailScreen from '~features/bible/BibleStrongDetailScreen'
 import ConcordanceByBookScreen from '~features/bible/ConcordanceByBookScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
+import BibleCompareVerses from '~features/bible/BibleCompareVerses'
 
 export default createStackNavigator(
   {
@@ -15,7 +16,8 @@ export default createStackNavigator(
     BibleVerseDetail: { screen: BibleVerseDetailScreen },
     BibleStrongDetail: { screen: BibleStrongDetailScreen },
     ConcordanceByBook: { screen: ConcordanceByBookScreen },
-    BibleView: { screen: BibleViewScreen }
+    BibleView: { screen: BibleViewScreen },
+    BibleCompareVerses: { screen: BibleCompareVerses }
   },
   {
     headerMode: 'none'

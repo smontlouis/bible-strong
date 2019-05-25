@@ -17,7 +17,7 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  width: 200,
+  width: 230,
   height: 120,
   backgroundColor: theme.colors.reverse,
   borderRadius: 10,
@@ -51,7 +51,7 @@ const VersesModal = ({
   theme
 }) => {
   const shareVerse = async () => {
-    const message = await getVersesRef(selectedVerses, version)
+    const { all: message } = await getVersesRef(selectedVerses, version)
     const result = await Share.share({ message })
     // Clear selectedverses only if succeed
     if (result.action === Share.sharedAction) {
@@ -64,6 +64,13 @@ const VersesModal = ({
     let verse = Object.keys(selectedVerses)[0].split('-')[2]
     setSelectedVerse(verse)
     navigation.navigate('BibleVerseDetail')
+  }
+
+  const compareVerses = () => {
+    clearSelectedVerses()
+    navigation.navigate('BibleCompareVerses', {
+      selectedVerses
+    })
   }
 
   return (
@@ -95,6 +102,7 @@ const VersesModal = ({
               onPress={showStrongDetail}
             />
           }
+          <TouchableIcon name='layers' onPress={compareVerses} />
           <TouchableIcon name='file-plus' />
           <TouchableIcon name='share-2' onPress={shareVerse} />
           <TouchableIcon name='arrow-down' onPress={clearSelectedVerses} />

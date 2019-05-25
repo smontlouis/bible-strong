@@ -39,7 +39,7 @@ export default function loadBible (bible) {
           break
         }
         default: {
-          reject('Erreur')
+          reject('Erreur', bible)
         }
       }
     } catch (e) {

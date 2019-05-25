@@ -4,30 +4,16 @@ import styled from '@emotion/native'
 
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
-import VersionSelectorItem from './VersionSelectorItem'
-
 import * as BibleActions from '~redux/modules/bible'
+import { versions } from '~helpers/bibleVersions'
+
+import VersionSelectorItem from './VersionSelectorItem'
 
 const FlatList = styled.FlatList({
   flex: 1,
   paddingTop: 10,
   paddingBottom: 20
 })
-
-const versions = {
-  LSG: {
-    id: 'LSG',
-    name: 'Bible Segond 1910'
-  },
-  DBY: {
-    id: 'DBY',
-    name: 'Bible Darby'
-  },
-  OST: {
-    id: 'OST',
-    name: 'Ostervald'
-  }
-}
 
 const setAndClose = (setVersion, navigation, vers) => {
   setVersion(vers)
