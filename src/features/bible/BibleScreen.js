@@ -57,7 +57,7 @@ class BibleScreen extends React.Component {
 
     return (
       <Container>
-        <StatusBar translucent backgroundColor='white' barStyle='dark-content' />
+        <StatusBar translucent backgroundColor='white' />
         <BibleHeader
           isReadOnly={isReadOnly}
           book={app.book}

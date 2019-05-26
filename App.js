@@ -1,5 +1,5 @@
 import React from 'react'
-import { YellowBox } from 'react-native'
+import { YellowBox, StatusBar } from 'react-native'
 import { AppLoading, Font, Icon, Updates } from 'expo'
 import { Provider } from 'react-redux'
 import Sentry from 'sentry-expo'
@@ -57,6 +57,10 @@ export default class App extends React.Component {
     } catch (e) {
       // handle or log error
     }
+
+    const theme = store.getState().user.bible.settings.theme
+    if (theme === 'dark') StatusBar.setBarStyle('light-content')
+    else StatusBar.setBarStyle('dark-content')
   }
 
   componentDidMount () {
