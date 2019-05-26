@@ -1,4 +1,5 @@
 import produce from 'immer'
+import { StatusBar } from 'react-native'
 import { clearSelectedVerses } from './bible'
 
 // export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
@@ -123,6 +124,9 @@ export function setSettingsTextDisplay (payload) {
 }
 
 export function setSettingsTheme (payload) {
+  if (payload === 'dark') StatusBar.setBarStyle('light-content')
+  else StatusBar.setBarStyle('dark-content')
+
   return {
     type: SET_SETTINGS_THEME,
     payload
