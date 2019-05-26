@@ -102,7 +102,6 @@ export function addNote (note) {
     const selectedVerses = getState().bible.selectedVerses
 
     let key = Object.keys(selectedVerses).join('/')
-    console.log({ selectedVerses, key, note })
     dispatch(clearSelectedVerses())
     return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
   }

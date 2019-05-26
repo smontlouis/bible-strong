@@ -1,7 +1,8 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
-import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL, TOGGLE_SELECTED_VERSE } from './dispatch'
+import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
 import colors from '../../../../themes/colors'
 import hexTransarency from '../../../../helpers/hexTransarency'
 const styled = picostyle(h)
@@ -56,6 +57,14 @@ class Verse extends Component {
     })
   }
 
+  navigateToVerseNotes = () => {
+    const { verse: { Livre, Chapitre, Verset } } = this.props
+    dispatch({
+      type: NAVIGATE_TO_VERSE_NOTES,
+      payload: `${Livre}-${Chapitre}-${Verset}`
+    })
+  }
+
   toggleSelectVerse = () => {
     const { verse: { Livre, Chapitre, Verset } } = this.props
     dispatch({
@@ -88,7 +97,12 @@ class Verse extends Component {
           onTouchEnd={this.onTouchEnd}
         >
           <NumberText settings={settings}>{verse.Verset}</NumberText>
-          <NotesCount settings={settings}>{notesCount}</NotesCount>
+          <NotesCount
+            settings={settings}
+            onClick={this.navigateToVerseNotes}
+          >
+            {notesCount}
+          </NotesCount>
           <VerseText settings={settings}>{verse.Texte}</VerseText>
         </ContainerText>
       </Wrapper>
