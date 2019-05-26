@@ -27,22 +27,19 @@ class BibleVerseNotes extends Component {
   state = {
     title: '',
     verse: {},
-    notes: {}
+    notes: []
   }
 
   loadPage = async (props) => {
-    const { verse } = props.navigation.state.params || {}
-    const { Livre, Chapitre, Verset } = verse
-    let notes = []
     let { title } = await getVersesRef({ [Object.keys(props.notes)[0].split('/')[0]]: true })
+    const { verse } = props.navigation.state.params || {}
+    let notes = []
+
     await Object.entries(props.notes).map(async (note, index) => {
       let firstVerseRef = note[0].split('/')[0]
-      let bookNumber = parseInt(firstVerseRef.split('-')[0])
-      let chapterNumber = parseInt(firstVerseRef.split('-')[1])
-      let verseNumber = firstVerseRef.split('-')[2]
       let verseNumbers = {}
       note[0].split('/').map(ref => { verseNumbers[ref] = true })
-      if (bookNumber === Livre && chapterNumber === Chapitre && verseNumber === Verset) {
+      if (firstVerseRef === verse) {
         const { title } = await getVersesRef(verseNumbers)
         notes.push({ reference: title, notes: note[1] })
       }
