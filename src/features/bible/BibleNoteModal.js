@@ -78,7 +78,7 @@ class BibleParamsModal extends React.Component {
 
   onSaveNote = () => {
     const { title, description } = this.state
-    this.props.addNote({ title, description })
+    this.props.addNote({ title, description, date: Date.now() })
     this.props.onClosed()
   }
 
