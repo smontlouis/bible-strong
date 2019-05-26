@@ -18,6 +18,11 @@ const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
   padding: '0 10px'
 }))
 
+const NotesCount = styled('span')(({ settings: { fontSizeScale } }) => ({
+  fontSize: scaleFontSize(20, fontSizeScale),
+  padding: '0 10px'
+}))
+
 const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor }) => {
   let background = 'transparent'
   if (highlightedColor && !isSelected) {
@@ -71,7 +76,7 @@ class Verse extends Component {
     clearTimeout(this.buttonPressTimer)
   }
 
-  render ({ verse, isSelected, highlightedColor, settings }, { isFocused }) {
+  render ({ verse, isSelected, highlightedColor, notesCount, settings }, { isFocused }) {
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
@@ -83,6 +88,7 @@ class Verse extends Component {
           onTouchEnd={this.onTouchEnd}
         >
           <NumberText settings={settings}>{verse.Verset}</NumberText>
+          <NotesCount settings={settings}>{notesCount}</NotesCount>
           <VerseText settings={settings}>{verse.Texte}</VerseText>
         </ContainerText>
       </Wrapper>

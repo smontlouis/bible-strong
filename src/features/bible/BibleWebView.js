@@ -78,6 +78,7 @@ class BibleWebView extends Component {
       arrayVerses,
       selectedVerses,
       highlightedVerses,
+      notedVerses,
       settings,
       verseToScroll
     } = this.props
@@ -87,6 +88,7 @@ class BibleWebView extends Component {
       verses: arrayVerses,
       selectedVerses,
       highlightedVerses,
+      notedVerses,
       settings,
       verseToScroll
     })

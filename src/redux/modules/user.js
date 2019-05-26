@@ -4,6 +4,7 @@ import { clearSelectedVerses } from './bible'
 // export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
 // export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
 // export const USER_LOGOUT = 'USER_LOGOUT'
+export const ADD_NOTE = 'user/ADD_NOTE'
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
@@ -49,6 +50,13 @@ const addDateAndColorToVerses = (verses, color) => {
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case ADD_NOTE: {
+      draft.bible.notes = {
+        ...draft.bible.notes,
+        ...action.payload
+      }
+      break
+    }
     case ADD_HIGHLIGHT: {
       draft.bible.highlights = {
         ...draft.bible.highlights,
@@ -88,6 +96,17 @@ export default produce((draft, action) => {
     }
   }
 }, initialState)
+
+export function addNote (note) {
+  return (dispatch, getState) => {
+    const selectedVerses = getState().bible.selectedVerses
+
+    let key = Object.keys(selectedVerses).join('/')
+    console.log({ selectedVerses, key, note })
+    dispatch(clearSelectedVerses())
+    return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
+  }
+}
 
 export function addHighlight (color) {
   return (dispatch, getState) => {

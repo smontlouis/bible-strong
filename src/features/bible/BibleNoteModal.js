@@ -38,11 +38,14 @@ const TextArea = styled(TextInput)(() => ({
 
 class BibleParamsModal extends React.Component {
   componentDidMount () {
-    this.loadTitle()
+    this.loadTitle(this.props.selectedVerses)
+  }
+  componentWillReceiveProps (nextProps) {
+    this.loadTitle(nextProps.selectedVerses)
+    if (nextProps.isOpen !== this.props.isOpen) this.setState({ title: '', description: '' })
   }
 
-  loadTitle = async () => {
-    const { selectedVerses } = this.props
+  loadTitle = async (selectedVerses) => {
     const { title: reference } = await getVersesRef(selectedVerses)
     this.setState({ reference })
   }
@@ -59,6 +62,12 @@ class BibleParamsModal extends React.Component {
 
   onDescriptionChange = (text) => {
     this.setState({ description: text })
+  }
+
+  onSaveNote = () => {
+    const { title, description } = this.state
+    this.props.addNote({ title, description })
+    this.props.onClosed()
   }
 
   render () {
@@ -107,7 +116,7 @@ class BibleParamsModal extends React.Component {
             <Button
               mode='contained'
               disabled={submitIsDisabled}
-              onPress={() => console.log('Pressed')}
+              onPress={this.onSaveNote}
             >
               Sauvegarder
             </Button>

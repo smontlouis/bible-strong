@@ -87,6 +87,7 @@ class BibleViewer extends Component {
       setSelectedVerse,
       selectedVerses,
       highlightedVerses,
+      notedVerses,
       settings,
       verse
     } = this.props
@@ -113,6 +114,7 @@ class BibleViewer extends Component {
         arrayVerses={array}
         selectedVerses={selectedVerses}
         highlightedVerses={highlightedVerses}
+        notedVerses={notedVerses}
         settings={settings}
         verseToScroll={verse}
       />
@@ -186,6 +188,7 @@ export default compose(
       modalIsVisible: !!Object.keys(state.bible.selectedVerses).length,
       selectedVerses: state.bible.selectedVerses,
       highlightedVerses: state.user.bible.highlights,
+      notedVerses: state.user.bible.notes,
       isSelectedVerseHighlighted: !!getHighlightInSelected(state)
     }),
     { ...BibleActions, ...UserActions }

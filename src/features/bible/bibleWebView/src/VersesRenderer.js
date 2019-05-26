@@ -22,6 +22,7 @@ class VersesRenderer extends Component {
     verses: [],
     selectedVerses: {},
     highlightedVerses: {},
+    notedVerses: {},
     settings: {},
     verseToScroll: null
   }
@@ -48,6 +49,25 @@ class VersesRenderer extends Component {
     }
   }
 
+  getNotedVerses = (verses, notedVerses) => {
+    let newNotedVerses = {}
+    if (verses.length) {
+      const { Livre, Chapitre } = verses[0]
+      Object.keys(notedVerses).map(key => {
+        let firstVerseRef = key.split('/')[0]
+        let bookNumber = parseInt(firstVerseRef.split('-')[0])
+        let chapterNumber = parseInt(firstVerseRef.split('-')[1])
+        let verseNumber = firstVerseRef.split('-')[2]
+        if (bookNumber === Livre && chapterNumber === Chapitre) {
+          if (newNotedVerses[verseNumber]) newNotedVerses[verseNumber] = newNotedVerses[verseNumber] + 1
+          else newNotedVerses[verseNumber] = 1
+        }
+      })
+    }
+    // dispatch({ type: CONSOLE_LOG, payload: { verses, newNotedVerses } })
+    return newNotedVerses
+  }
+
   receiveDataFromApp = () => {
     const self = this
     document.addEventListener('message', (message) => {
@@ -55,11 +75,12 @@ class VersesRenderer extends Component {
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
-          const { verses, selectedVerses, highlightedVerses, settings, verseToScroll } = response
+          const { verses, selectedVerses, highlightedVerses, notedVerses, settings, verseToScroll } = response
           self.setState({
             verses,
             selectedVerses,
             highlightedVerses,
+            notedVerses: this.getNotedVerses(verses, notedVerses),
             settings,
             verseToScroll
           })
@@ -82,6 +103,7 @@ class VersesRenderer extends Component {
             const isSelected = !!state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
             const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
             const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
+            const notesCount = state.notedVerses[`${Verset}`]
 
             return (
               <Verse
@@ -89,6 +111,7 @@ class VersesRenderer extends Component {
                 settings={state.settings}
                 isSelected={isSelected}
                 highlightedColor={highlightedColor}
+                notesCount={notesCount}
               />
             )
           })
