@@ -5,7 +5,8 @@ import bibleWebView from './bibleWebView/dist/index.html'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   SEND_INITIAL_DATA,
-  TOGGLE_SELECTED_VERSE
+  TOGGLE_SELECTED_VERSE,
+  CONSOLE_LOG
 } from './bibleWebView/src/dispatch'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
@@ -61,6 +62,9 @@ class BibleWebView extends Component {
         }
         break
       }
+      case CONSOLE_LOG: {
+        console.log(action.payload)
+      }
     }
   }
 
@@ -74,7 +78,8 @@ class BibleWebView extends Component {
       arrayVerses,
       selectedVerses,
       highlightedVerses,
-      settings
+      settings,
+      verseToScroll
     } = this.props
 
     this.dispatchToWebView({
@@ -82,7 +87,8 @@ class BibleWebView extends Component {
       verses: arrayVerses,
       selectedVerses,
       highlightedVerses,
-      settings
+      settings,
+      verseToScroll
     })
   }
 

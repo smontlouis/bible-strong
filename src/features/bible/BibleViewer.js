@@ -41,20 +41,6 @@ class BibleViewer extends Component {
       setTimeout(() => this.loadVerses(), 0)
       this.props.clearSelectedVerses()
     }
-
-    // Scroll ONLY when verse change ALONE
-    if (
-      this.props.verse !== oldProps.verse &&
-      this.props.chapter === oldProps.chapter &&
-      this.props.book.Numero === oldProps.book.Numero
-    ) {
-      setTimeout(() => this.scrollToVerse(), 0)
-    }
-  }
-
-  // DEPECRATED, SCROLL IN WEBVIEW
-  scrollToVerse = () => {
-
   }
 
   loadVerses = async () => {
@@ -101,10 +87,12 @@ class BibleViewer extends Component {
       setSelectedVerse,
       selectedVerses,
       highlightedVerses,
-      settings
+      settings,
+      verse
     } = this.props
     let array = this.state.verses
 
+    // When opening some verses, not whole chapter
     if (
       arrayVerses &&
       book.Numero === arrayVerses.book.Numero &&
@@ -126,6 +114,7 @@ class BibleViewer extends Component {
         selectedVerses={selectedVerses}
         highlightedVerses={highlightedVerses}
         settings={settings}
+        verseToScroll={verse}
       />
     )
   }

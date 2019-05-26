@@ -2,3 +2,7 @@
   font-family: "Literata Book";
   src: url("../../../../assets/fonts/LiterataBook.otf");
 }
+
+html {
+  scroll-behavior: smooth;
+}

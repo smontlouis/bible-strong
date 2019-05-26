@@ -1,6 +1,6 @@
 const colors = {
   default: '#c8c8c8',
-  reverse: '#000',
+  reverse: '#122d42',
   border: '#323232',
   lightGrey: '#ffffff1a',
   grey: '#969696',
