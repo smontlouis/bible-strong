@@ -11,10 +11,9 @@ export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE
 export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
-
-// export const SAVE_NOTE = 'user/SAVE_NOTE'
-// export const EDIT_NOTE = 'user/EDIT_NOTE'
-// export const REMOVE_NOTE = 'user/REMOVE_NOTE'
+export const SAVE_NOTE = 'user/SAVE_NOTE'
+export const EDIT_NOTE = 'user/EDIT_NOTE'
+export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 
 const initialState = {
   email: '',
