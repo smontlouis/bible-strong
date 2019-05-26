@@ -1,5 +1,6 @@
 import produce from 'immer'
 import { clearSelectedVerses } from './bible'
+import orderVerses from '~helpers/orderVerses'
 
 // export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
 // export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
@@ -99,8 +100,8 @@ export default produce((draft, action) => {
 
 export function addNote (note) {
   return (dispatch, getState) => {
-    const selectedVerses = getState().bible.selectedVerses
-
+    let selectedVerses = getState().bible.selectedVerses
+    selectedVerses = orderVerses(selectedVerses)
     let key = Object.keys(selectedVerses).join('/')
     dispatch(clearSelectedVerses())
     return dispatch({ type: ADD_NOTE, payload: { [key]: note } })

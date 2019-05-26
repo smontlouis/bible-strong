@@ -9,6 +9,8 @@ import getVersesRef from '~helpers/getVersesRef'
 import * as UserActions from '~redux/modules/user'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import orderVerses from '~helpers/orderVerses'
+import { store } from '../../../App.js'
 
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
@@ -38,16 +40,26 @@ const TextArea = styled(TextInput)(() => ({
 
 class BibleParamsModal extends React.Component {
   componentDidMount () {
-    this.loadTitle(this.props.selectedVerses)
+    this.loadPage(this.props.selectedVerses)
   }
   componentWillReceiveProps (nextProps) {
-    this.loadTitle(nextProps.selectedVerses)
-    if (nextProps.isOpen !== this.props.isOpen) this.setState({ title: '', description: '' })
+    this.loadPage(nextProps.selectedVerses)
+    if (!nextProps.isOpen && this.props.isOpen) this.setState({ title: '', description: '' })
   }
 
-  loadTitle = async (selectedVerses) => {
+  checkIfExistingNote (notes, selectedVerses) {
+    let orderedVerses = orderVerses(selectedVerses)
+    let key = Object.keys(orderedVerses).join('/')
+    if (notes[key]) return notes[key]
+    else return null
+  }
+
+  loadPage = async (selectedVerses) => {
+    const notes = store.getState().user.bible.notes
+    const existingNote = this.checkIfExistingNote(notes, selectedVerses)
     const { title: reference } = await getVersesRef(selectedVerses)
-    this.setState({ reference })
+    if (existingNote) this.setState({ reference, title: existingNote.title, description: existingNote.description })
+    else this.setState({ reference, title: '', description: '' })
   }
 
   state = {

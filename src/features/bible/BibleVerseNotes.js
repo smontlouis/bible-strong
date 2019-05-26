@@ -31,19 +31,19 @@ class BibleVerseNotes extends Component {
   }
 
   loadPage = async (props) => {
-    let { title } = await getVersesRef({ [Object.keys(props.notes)[0].split('/')[0]]: true })
     const { verse } = props.navigation.state.params || {}
+    let { title } = await getVersesRef({ [verse]: true })
     let notes = []
 
-    await Object.entries(props.notes).map(async (note, index) => {
+    await Promise.all(Object.entries(props.notes).map(async (note, index) => {
       let firstVerseRef = note[0].split('/')[0]
       let verseNumbers = {}
       note[0].split('/').map(ref => { verseNumbers[ref] = true })
       if (firstVerseRef === verse) {
-        const { title } = await getVersesRef(verseNumbers)
-        notes.push({ reference: title, notes: note[1] })
+        const { title: reference } = await getVersesRef(verseNumbers)
+        notes.push({ reference, notes: note[1] })
       }
-    })
+    }))
     this.setState({ title, verse, notes })
   }
 
@@ -55,12 +55,12 @@ class BibleVerseNotes extends Component {
             {item.reference}
           </Text>
         </Box>
-        <Paragraph scale={-2} style={{ fontWeight: 'bold' }}>
+        {!!item.notes.title && <Paragraph scale={-2} style={{ fontWeight: 'bold' }}>
           {item.notes.title}
-        </Paragraph>
-        <Paragraph scale={-3} scaleLineHeight={-2}>
+        </Paragraph>}
+        {!!item.notes.description && <Paragraph scale={-3} scaleLineHeight={-2}>
           {item.notes.description}
-        </Paragraph>
+        </Paragraph>}
       </NoteContainer>
     )
   }
