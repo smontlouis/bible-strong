@@ -73,7 +73,7 @@ class Verse extends Component {
 
   render ({ verse, isSelected, highlightedColor, settings }, { isFocused }) {
     return (
-      <Wrapper settings={settings}>
+      <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
           isFocused={isFocused}
           isSelected={isSelected}

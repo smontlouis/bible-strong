@@ -2,8 +2,10 @@ import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
 import { getColors } from '../../../../themes/getColors'
-import { SEND_INITIAL_DATA } from './dispatch'
+import { SEND_INITIAL_DATA, dispatch, CONSOLE_LOG } from './dispatch'
 import Verse from './Verse'
+import { desktopMode } from './env'
+
 const styled = picostyle(h)
 
 const Container = styled('div')(({ settings: { alignContent, theme } }) => ({
@@ -14,21 +16,35 @@ const Container = styled('div')(({ settings: { alignContent, theme } }) => ({
   background: getColors[theme].reverse,
   color: getColors[theme].default
 }))
+
 class VersesRenderer extends Component {
   state = {
     verses: [],
     selectedVerses: {},
     highlightedVerses: {},
-    settings: {}
+    settings: {},
+    verseToScroll: null
   }
 
   componentDidMount () {
+    if (desktopMode) {
+      this.setState({
+        verses: this.props.verses,
+        settings: this.props.settings,
+        verseToScroll: this.props.verseToScroll
+      })
+    }
     this.receiveDataFromApp()
   }
 
   componentDidUpdate (prevProps, prevState) {
     if (prevState && prevState.settings.theme !== this.state.settings.theme) {
       document.body.style.backgroundColor = getColors[this.state.settings.theme].reverse
+    }
+    if (prevState && prevState.verseToScroll !== this.state.verseToScroll) {
+      setTimeout(() => {
+        document.querySelector(`#verset-${this.state.verseToScroll}`).scrollIntoView()
+      }, 200)
     }
   }
 
@@ -39,12 +55,13 @@ class VersesRenderer extends Component {
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
-          const { verses, selectedVerses, highlightedVerses, settings } = response
+          const { verses, selectedVerses, highlightedVerses, settings, verseToScroll } = response
           self.setState({
             verses,
             selectedVerses,
             highlightedVerses,
-            settings
+            settings,
+            verseToScroll
           })
           break
         }

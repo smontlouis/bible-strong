@@ -49,7 +49,7 @@ export default class SearchScreen extends React.Component {
     }
 
     const data = await FileSystem.readAsStringAsync(idxFile.uri)
-    this.idx = lunr.Index.load(JSON.parse(data))
+    this.idx = await lunr.Index.load(JSON.parse(data))
     this.setState({ isLoading: false })
   }
 
