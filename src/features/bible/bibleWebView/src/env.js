@@ -1,1 +1,1 @@
-export const desktopMode = false
+export const desktopMode = true

@@ -89,7 +89,6 @@ class Verse extends Component {
           isFocused={isFocused}
           isSelected={isSelected}
           highlightedColor={highlightedColor}
-          onClick={this.toggleSelectVerse}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
         >
@@ -102,7 +101,12 @@ class Verse extends Component {
               count={notesCount}
             />
           }
-          <VerseText settings={settings}>{verse.Texte}</VerseText>
+          <VerseText
+            settings={settings}
+            onClick={this.toggleSelectVerse}
+          >
+            {verse.Texte}
+          </VerseText>
         </ContainerText>
       </Wrapper>
 
