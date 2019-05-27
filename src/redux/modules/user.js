@@ -1,10 +1,12 @@
 import produce from 'immer'
 import { StatusBar } from 'react-native'
 import { clearSelectedVerses } from './bible'
+import orderVerses from '~helpers/orderVerses'
 
 // export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
 // export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
 // export const USER_LOGOUT = 'USER_LOGOUT'
+export const ADD_NOTE = 'user/ADD_NOTE'
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
@@ -12,10 +14,9 @@ export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE
 export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
-
-// export const SAVE_NOTE = 'user/SAVE_NOTE'
-// export const EDIT_NOTE = 'user/EDIT_NOTE'
-// export const REMOVE_NOTE = 'user/REMOVE_NOTE'
+export const SAVE_NOTE = 'user/SAVE_NOTE'
+export const EDIT_NOTE = 'user/EDIT_NOTE'
+export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 
 const initialState = {
   email: '',
@@ -51,6 +52,13 @@ const addDateAndColorToVerses = (verses, color) => {
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case ADD_NOTE: {
+      draft.bible.notes = {
+        ...draft.bible.notes,
+        ...action.payload
+      }
+      break
+    }
     case ADD_HIGHLIGHT: {
       draft.bible.highlights = {
         ...draft.bible.highlights,
@@ -90,6 +98,16 @@ export default produce((draft, action) => {
     }
   }
 }, initialState)
+
+export function addNote (note) {
+  return (dispatch, getState) => {
+    let selectedVerses = getState().bible.selectedVerses
+    selectedVerses = orderVerses(selectedVerses)
+    let key = Object.keys(selectedVerses).join('/')
+    dispatch(clearSelectedVerses())
+    return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
+  }
+}
 
 export function addHighlight (color) {
   return (dispatch, getState) => {

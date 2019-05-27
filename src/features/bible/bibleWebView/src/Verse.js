@@ -1,9 +1,12 @@
 import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
-import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL, TOGGLE_SELECTED_VERSE } from './dispatch'
+import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
 import colors from '../../../../themes/colors'
 import hexTransarency from '../../../../helpers/hexTransarency'
+import NotesCount from './NotesCount'
+
 const styled = picostyle(h)
 
 const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
@@ -51,6 +54,14 @@ class Verse extends Component {
     })
   }
 
+  navigateToVerseNotes = () => {
+    const { verse: { Livre, Chapitre, Verset } } = this.props
+    dispatch({
+      type: NAVIGATE_TO_VERSE_NOTES,
+      payload: `${Livre}-${Chapitre}-${Verset}`
+    })
+  }
+
   toggleSelectVerse = () => {
     const { verse: { Livre, Chapitre, Verset } } = this.props
     dispatch({
@@ -71,19 +82,31 @@ class Verse extends Component {
     clearTimeout(this.buttonPressTimer)
   }
 
-  render ({ verse, isSelected, highlightedColor, settings }, { isFocused }) {
+  render ({ verse, isSelected, highlightedColor, notesCount, settings }, { isFocused }) {
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
           isFocused={isFocused}
           isSelected={isSelected}
           highlightedColor={highlightedColor}
-          onClick={this.toggleSelectVerse}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
         >
           <NumberText settings={settings}>{verse.Verset}</NumberText>
-          <VerseText settings={settings}>{verse.Texte}</VerseText>
+          {
+            notesCount &&
+            <NotesCount
+              settings={settings}
+              onClick={this.navigateToVerseNotes}
+              count={notesCount}
+            />
+          }
+          <VerseText
+            settings={settings}
+            onClick={this.toggleSelectVerse}
+          >
+            {verse.Texte}
+          </VerseText>
         </ContainerText>
       </Wrapper>
 

@@ -4,6 +4,7 @@ import { WebView } from 'react-native'
 import bibleWebView from './bibleWebView/dist/index.html'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_VERSE_NOTES,
   SEND_INITIAL_DATA,
   TOGGLE_SELECTED_VERSE,
   CONSOLE_LOG
@@ -51,6 +52,11 @@ class BibleWebView extends Component {
         navigation.navigate('BibleVerseDetail')
         break
       }
+      case NAVIGATE_TO_VERSE_NOTES: {
+        const { navigation } = this.props
+        navigation.navigate('BibleVerseNotes', { verse: action.payload })
+        break
+      }
       case TOGGLE_SELECTED_VERSE: {
         const verseId = action.payload
         const { addSelectedVerse, removeSelectedVerse } = this.props
@@ -78,6 +84,7 @@ class BibleWebView extends Component {
       arrayVerses,
       selectedVerses,
       highlightedVerses,
+      notedVerses,
       settings,
       verseToScroll
     } = this.props
@@ -87,6 +94,7 @@ class BibleWebView extends Component {
       verses: arrayVerses,
       selectedVerses,
       highlightedVerses,
+      notedVerses,
       settings,
       verseToScroll
     })

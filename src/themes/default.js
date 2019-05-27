@@ -1,4 +1,6 @@
 import { Platform } from 'react-native'
+import { DefaultTheme } from 'react-native-paper'
+
 import colors from './colors'
 
 export default {
@@ -12,5 +14,13 @@ export default {
     text: Platform.OS === 'ios' ? 'System' : 'meta-serif-light-italic',
     title: 'meta-serif',
     titleItalic: 'meta-serif-light-italic'
+  }
+}
+
+export const paperTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: colors.primary
   }
 }
