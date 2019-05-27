@@ -5,6 +5,8 @@ import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
 import colors from '../../../../themes/colors'
 import hexTransarency from '../../../../helpers/hexTransarency'
+import NotesCount from './NotesCount'
+
 const styled = picostyle(h)
 
 const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
@@ -16,11 +18,6 @@ const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
 
 const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(28, fontSizeScale),
-  padding: '0 10px'
-}))
-
-const NotesCount = styled('span')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(20, fontSizeScale),
   padding: '0 10px'
 }))
 
@@ -97,12 +94,14 @@ class Verse extends Component {
           onTouchEnd={this.onTouchEnd}
         >
           <NumberText settings={settings}>{verse.Verset}</NumberText>
-          <NotesCount
-            settings={settings}
-            onClick={this.navigateToVerseNotes}
-          >
-            {notesCount}
-          </NotesCount>
+          {
+            notesCount &&
+            <NotesCount
+              settings={settings}
+              onClick={this.navigateToVerseNotes}
+              count={notesCount}
+            />
+          }
           <VerseText settings={settings}>{verse.Texte}</VerseText>
         </ContainerText>
       </Wrapper>

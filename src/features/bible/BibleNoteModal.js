@@ -10,7 +10,6 @@ import * as UserActions from '~redux/modules/user'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import orderVerses from '~helpers/orderVerses'
-import { store } from '../../../App.js'
 
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
@@ -55,7 +54,7 @@ class BibleParamsModal extends React.Component {
   }
 
   loadPage = async (selectedVerses) => {
-    const notes = store.getState().user.bible.notes
+    const { notes } = this.props
     const existingNote = this.checkIfExistingNote(notes, selectedVerses)
     const { title: reference } = await getVersesRef(selectedVerses)
     if (existingNote) this.setState({ reference, title: existingNote.title, description: existingNote.description })
@@ -143,7 +142,8 @@ export default compose(
   pure,
   connect(
     state => ({
-      selectedVerses: state.bible.selectedVerses
+      selectedVerses: state.bible.selectedVerses,
+      notes: state.user.bible.notes
     }),
     { ...UserActions }
   )
