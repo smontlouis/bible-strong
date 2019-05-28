@@ -16,7 +16,8 @@ export default createMaterialBottomTabNavigator(
           tabBarIcon: ({ focused }) => (
             <TabBarIcon focused={focused} name='book-open' />
           ),
-          tabBarColor: getTheme[screenProps.theme].colors.reverse
+          tabBarColor: getTheme[screenProps.theme].colors.reverse,
+          activeColor: getTheme[screenProps.theme].colors.primary
         }
       }
     },
@@ -27,7 +28,8 @@ export default createMaterialBottomTabNavigator(
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='search' />
         ),
-        tabBarColor: getTheme[screenProps.theme].colors.reverse
+        tabBarColor: getTheme[screenProps.theme].colors.reverse,
+        activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
     Settings: {
@@ -37,7 +39,8 @@ export default createMaterialBottomTabNavigator(
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='settings' />
         ),
-        tabBarColor: getTheme[screenProps.theme].colors.reverse
+        tabBarColor: getTheme[screenProps.theme].colors.reverse,
+        activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
     Feedback: {
@@ -47,7 +50,8 @@ export default createMaterialBottomTabNavigator(
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='alert-triangle' />
         ),
-        tabBarColor: getTheme[screenProps.theme].colors.reverse
+        tabBarColor: getTheme[screenProps.theme].colors.reverse,
+        activeColor: getTheme[screenProps.theme].colors.primary
       })
     }
   },

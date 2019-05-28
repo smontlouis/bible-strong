@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
+import { withTheme } from 'emotion-theming'
 
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
@@ -139,6 +140,7 @@ class BibleVerseDetailScreen extends React.Component {
     const {
       verse,
       verse: { Verset },
+      theme,
       goToNextVerse,
       goToPrevVerse
     } = this.props
@@ -201,7 +203,7 @@ class BibleVerseDetailScreen extends React.Component {
                   paddingLeft: 20,
                   overflow: 'visible',
                   flex: 1,
-                  borderTopColor: 'rgb(230,230,230)',
+                  borderTopColor: theme.colors.border,
                   borderTopWidth: 1
                 }}
                 contentContainerCustomStyle={{}}
@@ -217,4 +219,4 @@ class BibleVerseDetailScreen extends React.Component {
   }
 }
 
-export default BibleVerseDetailScreen
+export default withTheme(BibleVerseDetailScreen)

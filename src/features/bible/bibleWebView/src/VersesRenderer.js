@@ -2,7 +2,7 @@ import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
 import { getColors } from '../../../../themes/getColors'
-import { SEND_INITIAL_DATA, dispatch, CONSOLE_LOG } from './dispatch'
+import { SEND_INITIAL_DATA } from './dispatch'
 import Verse from './Verse'
 import { desktopMode } from './env'
 
