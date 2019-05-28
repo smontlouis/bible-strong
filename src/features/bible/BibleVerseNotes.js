@@ -1,24 +1,14 @@
 import React, { Component } from 'react'
 import { FlatList, Alert } from 'react-native'
 import { connect } from 'react-redux'
-import styled from '@emotion/native'
-import { Icon } from 'expo'
-import { Provider, Menu } from 'react-native-paper'
 
 import BibleNoteModal from './BibleNoteModal'
+import BibleNoteItem from './BibleNoteItem'
 import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
-import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Header from '~common/Header'
-import theme from '~themes/default'
-
-const NoteContainer = styled.View(({ theme }) => ({
-  padding: 20,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
-}))
+import * as BibleActions from '~redux/modules/bible'
+import * as UserActions from '~redux/modules/user'
 
 class BibleVerseNotes extends Component {
   componentDidMount () {
@@ -32,8 +22,8 @@ class BibleVerseNotes extends Component {
     title: '',
     verse: {},
     notes: [],
-    isModalOpen: [],
-    isEditNoteOpen: false
+    isEditNoteOpen: false,
+    noteVerses: {}
   }
 
   loadPage = async (props) => {
@@ -47,86 +37,57 @@ class BibleVerseNotes extends Component {
       note[0].split('/').map(ref => { verseNumbers[ref] = true })
       if (firstVerseRef === verse) {
         const { title: reference } = await getVersesRef(verseNumbers)
-        notes.push({ reference, notes: note[1] })
+        notes.push({ noteId: note[0], reference, notes: note[1] })
       }
     }))
-    const isModalOpen = Array(notes.length).fill(false)
-    this.setState({ title, verse, notes, isModalOpen })
+    if (!notes.length) props.navigation.goBack()
+    else this.setState({ title, verse, notes })
   }
 
-  openModal = (index) => {
-    let { isModalOpen } = this.state
-    isModalOpen[index] = true
-    this.setState({ isModalOpen })
+  openNoteEditor = (noteId) => {
+    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
+      accuRefs[key] = true
+      return accuRefs
+    }, {})
+    this.setState({ isEditNoteOpen: true, noteVerses })
   }
 
-  closeModal = (index) => {
-    let { isModalOpen } = this.state
-    isModalOpen[index] = false
-    this.setState({ isModalOpen })
-  }
+  closeNoteEditor = () => { this.setState({ isEditNoteOpen: false }) }
 
-  toggleEditNote = () => { this.setState({ isEditNoteOpen: !this.state.isEditNoteOpen }) }
-
-  deleteNote = () => {
+  deleteNote = (noteId) => {
     Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?',
       [ { text: 'Non', onPress: () => null, style: 'cancel' },
-        { text: 'Oui', onPress: () => null }
+        { text: 'Oui', onPress: () => this.props.deleteNote(noteId) }
       ])
   }
 
-  renderNote ({ item, index }) {
+  renderNote = ({ item, index }) => {
     return (
-      <NoteContainer style={{ marginBottom: 10 }}>
-        <Box row style={{ justifyContent: 'space-between' }}>
-          <Text color='darkGrey' bold fontSize={14}>
-            {item.reference}
-          </Text>
-          <Menu
-            visible={this.state.isModalOpen[index]}
-            onDismiss={() => this.closeModal(index)}
-            anchor={
-              <Icon.Feather
-                name={'more-vertical'}
-                size={19}
-                style={{ paddingHorizontal: 10, paddingBottom: 5 }}
-                color={theme.colors.tertiary}
-                onPress={() => this.openModal(index)}
-              />
-            }
-          >
-            <Menu.Item onPress={this.toggleEditNote} title='Éditer' />
-            <Menu.Item onPress={this.deleteNote} title='Supprimer' />
-          </Menu>
-        </Box>
-        {!!item.notes.title && <Paragraph scale={-2} style={{ fontWeight: 'bold' }}>
-          {item.notes.title}
-        </Paragraph>}
-        {!!item.notes.description && <Paragraph scale={-3} scaleLineHeight={-2}>
-          {item.notes.description}
-        </Paragraph>}
-      </NoteContainer>
+      <BibleNoteItem
+        key={index}
+        item={item}
+        openNoteEditor={this.openNoteEditor}
+        deleteNote={this.deleteNote}
+      />
     )
   }
 
   render () {
-    const { title, notes, isModalOpen } = this.state
-    console.log({isModalOpen})
+    const { title, notes } = this.state
     return (
-      <Provider>
-        <Container>
-          <Header hasBackButton noBorder title={title ? `Notes sur ${title}` : 'Chargement...'} />
-          <FlatList data={notes}
-            renderItem={this.renderNote.bind(this)}
-            keyExtractor={(item, index) => index.toString()}
-            style={{ paddingBottom: 30 }}
-          />
-          <BibleNoteModal
-            onClosed={this.toggleEditNote}
-            isOpen={this.state.isEditNoteOpen}
-          />
-        </Container>
-      </Provider>
+      <Container>
+        <Header hasBackButton noBorder title={title ? `Notes sur ${title}` : 'Chargement...'} />
+        <FlatList data={notes}
+          renderItem={this.renderNote}
+          keyExtractor={(item, index) => index.toString()}
+          style={{ paddingBottom: 30 }}
+        />
+        <BibleNoteModal
+          onClosed={this.closeNoteEditor}
+          isOpen={this.state.isEditNoteOpen}
+          noteVerses={this.state.noteVerses}
+        />
+      </Container>
     )
   }
 }
@@ -134,5 +95,6 @@ class BibleVerseNotes extends Component {
 export default connect(
   (state) => ({
     notes: state.user.bible.notes
-  })
+  }),
+  { ...BibleActions, ...UserActions }
 )(BibleVerseNotes)

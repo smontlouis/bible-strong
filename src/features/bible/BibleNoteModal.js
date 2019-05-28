@@ -37,12 +37,12 @@ const TextArea = styled(TextInput)(() => ({
   height: 200
 }))
 
-class BibleParamsModal extends React.Component {
+class BibleNoteModal extends React.Component {
   componentDidMount () {
-    this.loadPage(this.props.selectedVerses)
+    this.loadPage(this.props.noteVerses || this.props.selectedVerses)
   }
   componentWillReceiveProps (nextProps) {
-    this.loadPage(nextProps.selectedVerses)
+    this.loadPage(nextProps.noteVerses || nextProps.selectedVerses)
     if (!nextProps.isOpen && this.props.isOpen) this.setState({ title: '', description: '' })
   }
 
@@ -147,4 +147,4 @@ export default compose(
     }),
     { ...UserActions }
   )
-)(BibleParamsModal)
+)(BibleNoteModal)
