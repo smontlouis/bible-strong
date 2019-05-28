@@ -1,10 +1,9 @@
 import React from 'react'
 import { Icon } from 'expo'
-
-import theme from '~themes/default'
-
-export default class TabBarIcon extends React.Component {
+import { withTheme } from 'emotion-theming'
+class TabBarIcon extends React.Component {
   render () {
+    const { theme } = this.props
     return (
       <Icon.Feather
         name={this.props.name}
@@ -17,3 +16,5 @@ export default class TabBarIcon extends React.Component {
     )
   }
 }
+
+export default withTheme(TabBarIcon)
