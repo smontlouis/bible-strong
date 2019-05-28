@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, FlatList, Alert } from 'react-native'
+import { FlatList, Alert } from 'react-native'
 import { connect } from 'react-redux'
 import styled from '@emotion/native'
 import { Icon } from 'expo'
@@ -32,7 +32,7 @@ class BibleVerseNotes extends Component {
     title: '',
     verse: {},
     notes: [],
-    isModalOpen: false,
+    isModalOpen: [],
     isEditNoteOpen: false
   }
 
@@ -50,12 +50,21 @@ class BibleVerseNotes extends Component {
         notes.push({ reference, notes: note[1] })
       }
     }))
-    this.setState({ title, verse, notes })
+    const isModalOpen = Array(notes.length).fill(false)
+    this.setState({ title, verse, notes, isModalOpen })
   }
 
-  openModal = () => { this.setState({ isModalOpen: true }) }
+  openModal = (index) => {
+    let { isModalOpen } = this.state
+    isModalOpen[index] = true
+    this.setState({ isModalOpen })
+  }
 
-  closeModal = () => { this.setState({ isModalOpen: false }) }
+  closeModal = (index) => {
+    let { isModalOpen } = this.state
+    isModalOpen[index] = false
+    this.setState({ isModalOpen })
+  }
 
   toggleEditNote = () => { this.setState({ isEditNoteOpen: !this.state.isEditNoteOpen }) }
 
@@ -73,13 +82,22 @@ class BibleVerseNotes extends Component {
           <Text color='darkGrey' bold fontSize={14}>
             {item.reference}
           </Text>
-          <Icon.Feather
-            name={'more-vertical'}
-            size={19}
-            style={{ paddingHorizontal: 10, paddingBottom: 5 }}
-            color={theme.colors.tertiary}
-            onPress={this.openModal}
-          />
+          <Menu
+            visible={this.state.isModalOpen[index]}
+            onDismiss={() => this.closeModal(index)}
+            anchor={
+              <Icon.Feather
+                name={'more-vertical'}
+                size={19}
+                style={{ paddingHorizontal: 10, paddingBottom: 5 }}
+                color={theme.colors.tertiary}
+                onPress={() => this.openModal(index)}
+              />
+            }
+          >
+            <Menu.Item onPress={this.toggleEditNote} title='Éditer' />
+            <Menu.Item onPress={this.deleteNote} title='Supprimer' />
+          </Menu>
         </Box>
         {!!item.notes.title && <Paragraph scale={-2} style={{ fontWeight: 'bold' }}>
           {item.notes.title}
@@ -92,19 +110,12 @@ class BibleVerseNotes extends Component {
   }
 
   render () {
-    const { title, notes, isModalOpen, isEditNoteOpen } = this.state
+    const { title, notes, isModalOpen } = this.state
+    console.log({isModalOpen})
     return (
       <Provider>
         <Container>
           <Header hasBackButton noBorder title={title ? `Notes sur ${title}` : 'Chargement...'} />
-          <Menu
-            visible={isModalOpen}
-            onDismiss={this.closeModal}
-            anchor={<View />}
-          >
-            <Menu.Item onPress={this.toggleEditNote} title='Éditer' />
-            <Menu.Item onPress={this.deleteNote} title='Supprimer' />
-          </Menu>
           <FlatList data={notes}
             renderItem={this.renderNote.bind(this)}
             keyExtractor={(item, index) => index.toString()}
@@ -112,7 +123,7 @@ class BibleVerseNotes extends Component {
           />
           <BibleNoteModal
             onClosed={this.toggleEditNote}
-            isOpen={isEditNoteOpen}
+            isOpen={this.state.isEditNoteOpen}
           />
         </Container>
       </Provider>
