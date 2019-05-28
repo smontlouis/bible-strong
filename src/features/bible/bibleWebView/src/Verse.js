@@ -92,7 +92,12 @@ class Verse extends Component {
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
         >
-          <NumberText settings={settings}>{verse.Verset}</NumberText>
+          <NumberText
+            settings={settings}
+            onClick={this.navigateToBibleVerseDetail}
+          >
+            {verse.Verset}
+          </NumberText>
           {
             notesCount &&
             <NotesCount
