@@ -1,21 +1,22 @@
 import { h } from 'preact'
 import picostyle from 'picostyle'
-import colors from '../../../../themes/colors'
+
+import { getColors } from '../../../../themes/getColors'
 
 const styled = picostyle(h)
 
 const SvgContainer = styled('svg')(({ settings: { fontSizeScale } }) => ({
 }))
 
-const Div = styled('div')({
+const Div = styled('div')(({ settings: { theme } }) => ({
   position: 'relative',
   display: 'inline-block',
   transform: 'translateY(5px)',
   marginRight: '10px'
-})
+}))
 
-const Count = styled('div')({
-  background: colors.primary,
+const Count = styled('div')(({ settings: { theme } }) => ({
+  background: getColors[theme].primary,
   position: 'absolute',
   width: '15px',
   height: '15px',
@@ -29,10 +30,10 @@ const Count = styled('div')({
   color: 'white',
   bottom: '0',
   right: '0px'
-})
+}))
 
 const NotesCount = ({ count, settings, onClick }) => (
-  <Div>
+  <Div settings={settings}>
     <SvgContainer
       width='24'
       height='24'
@@ -51,7 +52,7 @@ const NotesCount = ({ count, settings, onClick }) => (
       <line x1='16' y1='17' x2='8' y2='17' />
       <polyline points='10 9 9 9 8 9' />
     </SvgContainer>
-    <Count>
+    <Count settings={settings}>
       {count}
     </Count>
   </Div>
