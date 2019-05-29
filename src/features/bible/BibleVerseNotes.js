@@ -23,7 +23,7 @@ class BibleVerseNotes extends Component {
     verse: {},
     notes: [],
     isEditNoteOpen: false,
-    noteVerses: {}
+    noteVerses: null
   }
 
   loadPage = async (props) => {

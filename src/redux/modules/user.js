@@ -103,9 +103,9 @@ export default produce((draft, action) => {
   }
 }, initialState)
 
-export function addNote (note) {
+export function addNote (note, noteVerses) {
   return (dispatch, getState) => {
-    let selectedVerses = getState().bible.selectedVerses
+    let selectedVerses = noteVerses || getState().bible.selectedVerses
     selectedVerses = orderVerses(selectedVerses)
     let key = Object.keys(selectedVerses).join('/')
     dispatch(clearSelectedVerses())

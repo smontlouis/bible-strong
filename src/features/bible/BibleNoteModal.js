@@ -77,7 +77,8 @@ class BibleNoteModal extends React.Component {
 
   onSaveNote = () => {
     const { title, description } = this.state
-    this.props.addNote({ title, description, date: Date.now() })
+    const { noteVerses } = this.props
+    this.props.addNote({ title, description, date: Date.now() }, noteVerses)
     this.props.onClosed()
   }
 
