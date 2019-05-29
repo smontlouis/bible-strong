@@ -1,20 +1,14 @@
 import React, { Component } from 'react'
-import { FlatList } from 'react-native'
+import { FlatList, Alert } from 'react-native'
 import { connect } from 'react-redux'
-import styled from '@emotion/native'
 
+import BibleNoteModal from './BibleNoteModal'
+import BibleNoteItem from './BibleNoteItem'
 import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
-import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Header from '~common/Header'
-
-const NoteContainer = styled.View(({ theme }) => ({
-  padding: 20,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
-}))
+import * as BibleActions from '~redux/modules/bible'
+import * as UserActions from '~redux/modules/user'
 
 class BibleVerseNotes extends Component {
   componentDidMount () {
@@ -27,7 +21,9 @@ class BibleVerseNotes extends Component {
   state = {
     title: '',
     verse: {},
-    notes: []
+    notes: [],
+    isEditNoteOpen: false,
+    noteVerses: null
   }
 
   loadPage = async (props) => {
@@ -41,27 +37,38 @@ class BibleVerseNotes extends Component {
       note[0].split('/').map(ref => { verseNumbers[ref] = true })
       if (firstVerseRef === verse) {
         const { title: reference } = await getVersesRef(verseNumbers)
-        notes.push({ reference, notes: note[1] })
+        notes.push({ noteId: note[0], reference, notes: note[1] })
       }
     }))
-    this.setState({ title, verse, notes })
+    if (!notes.length) props.navigation.goBack()
+    else this.setState({ title, verse, notes })
   }
 
-  renderNote ({ item, index }) {
+  openNoteEditor = (noteId) => {
+    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
+      accuRefs[key] = true
+      return accuRefs
+    }, {})
+    this.setState({ isEditNoteOpen: true, noteVerses })
+  }
+
+  closeNoteEditor = () => { this.setState({ isEditNoteOpen: false }) }
+
+  deleteNote = (noteId) => {
+    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?',
+      [ { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: 'Oui', onPress: () => this.props.deleteNote(noteId) }
+      ])
+  }
+
+  renderNote = ({ item, index }) => {
     return (
-      <NoteContainer style={{ marginBottom: 10 }}>
-        <Box row>
-          <Text color='darkGrey' bold fontSize={14}>
-            {item.reference}
-          </Text>
-        </Box>
-        {!!item.notes.title && <Paragraph scale={-2} style={{ fontWeight: 'bold' }}>
-          {item.notes.title}
-        </Paragraph>}
-        {!!item.notes.description && <Paragraph scale={-3} scaleLineHeight={-2}>
-          {item.notes.description}
-        </Paragraph>}
-      </NoteContainer>
+      <BibleNoteItem
+        key={index}
+        item={item}
+        openNoteEditor={this.openNoteEditor}
+        deleteNote={this.deleteNote}
+      />
     )
   }
 
@@ -71,9 +78,14 @@ class BibleVerseNotes extends Component {
       <Container>
         <Header hasBackButton noBorder title={title ? `Notes sur ${title}` : 'Chargement...'} />
         <FlatList data={notes}
-          renderItem={this.renderNote.bind(this)}
+          renderItem={this.renderNote}
           keyExtractor={(item, index) => index.toString()}
           style={{ paddingBottom: 30 }}
+        />
+        <BibleNoteModal
+          onClosed={this.closeNoteEditor}
+          isOpen={this.state.isEditNoteOpen}
+          noteVerses={this.state.noteVerses}
         />
       </Container>
     )
@@ -83,5 +95,6 @@ class BibleVerseNotes extends Component {
 export default connect(
   (state) => ({
     notes: state.user.bible.notes
-  })
+  }),
+  { ...BibleActions, ...UserActions }
 )(BibleVerseNotes)
