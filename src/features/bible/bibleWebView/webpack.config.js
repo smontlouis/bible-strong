@@ -25,7 +25,7 @@ module.exports = {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader']
       },
-      { test: /\.(png|woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader?limit=100000'] }
+      { test: /\.(png|woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader?limit=250000'] }
     ]
   },
   plugins: [
