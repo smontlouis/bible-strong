@@ -21,8 +21,7 @@ const itemWidth = slideWidth
 const Container = styled(Box)({
   width: itemWidth,
   flex: 1,
-  paddingHorizontal: itemHorizontalMargin,
-  paddingBottom: 18
+  paddingHorizontal: itemHorizontalMargin
 })
 
 const TitleBorder = styled.View(({ theme }) => ({
@@ -103,7 +102,7 @@ class StrongCard extends React.Component {
           </Box>
         </Box>
 
-        <ScrollView style={{ marginBottom: 15 }}>
+        <ScrollView>
           {!!Definition && (
             <ViewItem>
               <SubTitle color='darkGrey'>Définition - {Code}</SubTitle>
@@ -126,6 +125,7 @@ class StrongCard extends React.Component {
               <SmallParagraph>{LSG}</SmallParagraph>
             </ViewItem>
           )}
+          <Box height={15} />
         </ScrollView>
       </Container>
     )
