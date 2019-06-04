@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { Icon } from 'expo'
-import { ScrollView, Platform, Share } from 'react-native'
+import { ScrollView, Share, StatusBar } from 'react-native'
 import compose from 'recompose/compose'
 
 import Container from '~common/ui/Container'
@@ -114,8 +114,9 @@ class BibleStrongDetailScreen extends React.Component {
     } = this.props.navigation.state.params
 
     return (
-      <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
-        <Box padding={20}>
+      <Container>
+        <StatusBar translucent backgroundColor={'transparent'} />
+        <Box padding={20} marginTop={20}>
           <Box>
             <Box style={{ flexDirection: 'row' }}>
               <Touchable onPress={() => this.props.navigation.goBack()} style={{ flex: 1 }}>
