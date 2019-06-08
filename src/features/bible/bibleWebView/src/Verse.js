@@ -44,7 +44,7 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor,
     background,
     '-webkit-touch-callout': 'none',
     padding: '4px',
-    borderBottom: isSelected ? '2px dashed #34495e' : 'none'
+    borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none'
   }
 })
 
