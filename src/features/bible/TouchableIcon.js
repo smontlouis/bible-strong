@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { Icon } from 'expo'
+import * as Icon from '@expo/vector-icons'
 
 const Touchable = styled.TouchableOpacity(() => ({
   flex: 1,

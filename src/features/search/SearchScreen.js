@@ -1,5 +1,6 @@
 import React from 'react'
-import { FileSystem, Asset } from 'expo'
+import * as FileSystem from 'expo-file-system'
+import { Asset } from 'expo-asset'
 import debounce from 'debounce'
 import { ProgressBar } from 'react-native-paper'
 

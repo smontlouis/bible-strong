@@ -1,10 +1,9 @@
 import React from 'react'
 import { pure } from 'recompose'
-import { DangerZone } from 'expo'
+import Lottie from 'lottie-react-native'
 import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-let { Lottie } = DangerZone
 
 const Container = styled.View({
   flex: 1,

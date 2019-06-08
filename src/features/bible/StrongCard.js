@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { ScrollView } from 'react-native'
-import { Icon } from 'expo'
+import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'

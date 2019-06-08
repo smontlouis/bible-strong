@@ -1,7 +1,7 @@
 import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
-import { Icon } from 'expo'
+import * as Icon from '@expo/vector-icons'
 
 import books from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileSystem } from 'expo'
+import * as FileSystem from 'expo-file-system'
 import AssetUtils from 'expo-asset-utils'
 
 import { initDB, getDB } from '~helpers/database'

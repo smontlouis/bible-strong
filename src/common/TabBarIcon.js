@@ -1,5 +1,5 @@
 import React from 'react'
-import { Icon } from 'expo'
+import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 class TabBarIcon extends React.Component {
   render () {
