@@ -5,7 +5,7 @@ const loadStrongReference = async (reference, book) => {
   const result = await SQLTransaction(
     `SELECT * FROM ${part} WHERE Code = ${reference}`
   )
-  return result
+  return result[0]
 }
 
 export default loadStrongReference

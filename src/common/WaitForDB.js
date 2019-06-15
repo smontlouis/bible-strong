@@ -49,7 +49,7 @@ const WaitForDatabase = WrappedComponent =>
     }
     render () {
       if (this.state.isLoading) {
-        return <Loading message='Chargement de la base de données...' />
+        return <Loading message='Téléchargement de la base de données...' />
       }
       return <WrappedComponent {...this.props} />
     }

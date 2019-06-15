@@ -15,6 +15,7 @@ import OccurrencesFoundByBookList from './OccurrencesFoundByBookList'
 
 import capitalize from '~helpers/capitalize'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
+import loadStrongReference from '~helpers/loadStrongReference'
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -49,17 +50,28 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 
 class BibleStrongDetailScreen extends React.Component {
   state = {
+    strongReference: null,
     versesCountByBook: [],
     concordanceLoading: true
   }
 
-  async componentDidMount () {
+  componentDidMount () {
+    this.loadData()
+  }
+
+  loadData = async () => {
     const {
       book,
-      strongReference: { Code }
+      reference
     } = this.props.navigation.state.params
 
-    const versesCountByBook = await loadStrongVersesCountByBook(book, Code)
+    let strongReference = this.props.navigation.state.params.strongReference
+    if (reference) {
+      strongReference = await loadStrongReference(reference, book)
+    }
+
+    this.setState({ strongReference })
+    const versesCountByBook = await loadStrongVersesCountByBook(book, strongReference.Code)
     this.setState({ versesCountByBook, concordanceLoading: false })
   }
 
@@ -75,7 +87,7 @@ class BibleStrongDetailScreen extends React.Component {
         Type,
         LSG
       }
-    } = this.props.navigation.state.params
+    } = this.state
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
     toCopy += Type ? `${Type}\n---\n\n` : `---\n\n`
@@ -97,7 +109,21 @@ class BibleStrongDetailScreen extends React.Component {
     this.props.navigation.goBack()
   }
 
+  linkToStrong = (url, reference) => {
+    const {
+      navigation,
+      navigation: { state: { params: { book } } }
+    } = this.props
+
+    navigation.navigate({
+      routeName: 'BibleStrongDetail', params: { book, reference }, key: reference
+    })
+  }
+
   render () {
+    if (!this.state.strongReference) {
+      return null
+    }
     const {
       strongReference,
       strongReference: {
@@ -111,7 +137,7 @@ class BibleStrongDetailScreen extends React.Component {
         Type,
         LSG
       }
-    } = this.props.navigation.state.params
+    } = this.state
 
     return (
       <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
@@ -176,7 +202,7 @@ class BibleStrongDetailScreen extends React.Component {
                 <SubTitle darkGrey>Définition - {Code}</SubTitle>
                 <StylizedHTMLView
                   value={Definition}
-                  onLinkPress={() => {}}
+                  onLinkPress={this.linkToStrong}
                 />
               </ViewItem>
             )}
@@ -191,7 +217,7 @@ class BibleStrongDetailScreen extends React.Component {
                 <SubTitle darkGrey>Origine du mot</SubTitle>
                 <StylizedHTMLView
                   value={Origine}
-                  onLinkPress={() => {}}
+                  onLinkPress={this.linkToStrong}
                 />
               </ViewItem>
             )}
