@@ -11,22 +11,6 @@ import BibleNoteModal from './BibleNoteModal'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
-@connect(
-  ({ bible, user }, ownProps) => {
-    const params = ownProps.navigation.state.params
-    return {
-      isReadOnly: params && params.isReadOnly,
-      settings: user.bible.settings,
-      app: {
-        book: (params && params.book) || bible.selectedBook,
-        chapter: (params && params.chapter) || bible.selectedChapter,
-        verse: (params && params.verse) || bible.selectedVerse,
-        version: (params && params.version) || bible.selectedVersion
-      }
-    }
-  },
-  { ...BibleActions, ...UserActions }
-)
 class BibleScreen extends React.Component {
   state = {
     isBibleParamsOpen: false,
@@ -97,4 +81,19 @@ class BibleScreen extends React.Component {
   }
 }
 
-export default BibleScreen
+export default connect(
+  ({ bible, user }, ownProps) => {
+    const params = ownProps.navigation.state.params
+    return {
+      isReadOnly: params && params.isReadOnly,
+      settings: user.bible.settings,
+      app: {
+        book: (params && params.book) || bible.selectedBook,
+        chapter: (params && params.chapter) || bible.selectedChapter,
+        verse: (params && params.verse) || bible.selectedVerse,
+        version: (params && params.version) || bible.selectedVersion
+      }
+    }
+  },
+  { ...BibleActions, ...UserActions }
+)(BibleScreen)

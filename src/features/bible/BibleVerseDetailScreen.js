@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
+import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
 
 import verseToStrong from '~helpers/verseToStrong'
@@ -57,17 +58,6 @@ const StyledVerse = styled.View(({ theme }) => ({
   flexDirection: 'row'
 }))
 
-@connect(
-  ({ bible }, ownProps) => ({
-    verse: {
-      Livre: bible.selectedBook.Numero,
-      Chapitre: bible.selectedChapter,
-      Verset: bible.selectedVerse
-    }
-  }),
-  BibleActions
-)
-@WaitForDB
 class BibleVerseDetailScreen extends React.Component {
   state = {
     formattedVerse: '',
@@ -219,4 +209,17 @@ class BibleVerseDetailScreen extends React.Component {
   }
 }
 
-export default withTheme(BibleVerseDetailScreen)
+export default compose(
+  withTheme,
+  connect(
+    ({ bible }, ownProps) => ({
+      verse: {
+        Livre: bible.selectedBook.Numero,
+        Chapitre: bible.selectedChapter,
+        Verset: bible.selectedVerse
+      }
+    }),
+    BibleActions
+  ),
+  WaitForDB
+)(BibleVerseDetailScreen)

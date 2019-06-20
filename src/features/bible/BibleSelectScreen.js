@@ -6,10 +6,7 @@ import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
-@connect(
-  null,
-  BibleActions
-)
+
 class BibleSelect extends Component {
   static router = BibleSelectTabNavigator.router
 
@@ -33,4 +30,7 @@ class BibleSelect extends Component {
   }
 }
 
-export default BibleSelect
+export default connect(
+  null,
+  BibleActions
+)(BibleSelect)

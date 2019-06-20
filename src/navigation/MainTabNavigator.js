@@ -3,7 +3,7 @@ import { createMaterialBottomTabNavigator } from 'react-navigation-material-bott
 import BibleScreen from '~features/bible/BibleScreen'
 import SearchScreen from '~features/search/SearchScreen'
 import SettingsScreen from '~features/settings/SettingsScreen'
-import FeedbackScreen from '~features/settings/FeedbackScreen'
+import ProfileScreen from '~features/settings/ProfileScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import getTheme from '~themes'
 export default createMaterialBottomTabNavigator(
@@ -32,8 +32,8 @@ export default createMaterialBottomTabNavigator(
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
-    Feedback: {
-      screen: FeedbackScreen,
+    Profile: {
+      screen: ProfileScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Profil',
         tabBarIcon: ({ focused }) => (
