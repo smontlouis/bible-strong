@@ -1,5 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
+import distanceInWords from 'date-fns/distance_in_words'
+import frLocale from 'date-fns/locale/fr'
 import * as Icon from '@expo/vector-icons'
 
 import Box from '~common/ui/Box'
@@ -26,12 +28,13 @@ class BibleNoteItem extends React.Component {
 
   render () {
     const { item, openNoteEditor, deleteNote } = this.props
+    const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), { locale: frLocale })
 
     return (
       <NoteContainer>
         <Box row justifyContent='space-between'>
           <Text color='darkGrey' bold fontSize={14}>
-            {item.reference}
+            {item.reference} - Il y a {formattedDate}
           </Text>
           <Box row>
             <Icon.Feather

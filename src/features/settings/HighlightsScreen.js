@@ -9,7 +9,7 @@ const HighlightsScreen = () => {
   const verseIds = useSelector(state => state.user.bible.highlights)
   return (
     <Container>
-      <Header hasBackButton noBorder title='Surbrillances' />
+      <Header hasBackButton title='Surbrillances' />
       <VersesList
         verseIds={verseIds}
       />

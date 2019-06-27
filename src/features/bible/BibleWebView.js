@@ -86,7 +86,8 @@ class BibleWebView extends Component {
       highlightedVerses,
       notedVerses,
       settings,
-      verseToScroll
+      verseToScroll,
+      isReadOnly
     } = this.props
 
     this.dispatchToWebView({
@@ -96,7 +97,8 @@ class BibleWebView extends Component {
       highlightedVerses,
       notedVerses,
       settings,
-      verseToScroll
+      verseToScroll,
+      isReadOnly
     })
   }
 

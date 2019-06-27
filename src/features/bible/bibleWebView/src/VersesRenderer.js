@@ -8,13 +8,14 @@ import { desktopMode } from './env'
 
 const styled = picostyle(h)
 
-const Container = styled('div')(({ settings: { alignContent, theme } }) => ({
+const Container = styled('div')(({ settings: { alignContent, theme }, isReadOnly }) => ({
   maxWidth: '320px',
   width: '100%',
   margin: '0 auto',
   textAlign: alignContent,
   background: getColors[theme].reverse,
-  color: getColors[theme].default
+  color: getColors[theme].default,
+  pointerEvents: isReadOnly ? 'none' : 'auto'
 }))
 
 class VersesRenderer extends Component {
@@ -24,7 +25,8 @@ class VersesRenderer extends Component {
     highlightedVerses: {},
     notedVerses: {},
     settings: {},
-    verseToScroll: null
+    verseToScroll: null,
+    isReadOnly: false
   }
 
   componentDidMount () {
@@ -75,14 +77,15 @@ class VersesRenderer extends Component {
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
-          const { verses, selectedVerses, highlightedVerses, notedVerses, settings, verseToScroll } = response
+          const { verses, selectedVerses, highlightedVerses, notedVerses, settings, verseToScroll, isReadOnly } = response
           self.setState({
             verses,
             selectedVerses,
             highlightedVerses,
             notedVerses: this.getNotedVerses(verses, notedVerses),
             settings,
-            verseToScroll
+            verseToScroll,
+            isReadOnly
           })
           break
         }
@@ -96,7 +99,7 @@ class VersesRenderer extends Component {
     }
 
     return (
-      <Container settings={state.settings}>
+      <Container settings={state.settings} isReadOnly={state.isReadOnly}>
         {
           state.verses.map((verse) => {
             const { Livre, Chapitre, Verset } = verse

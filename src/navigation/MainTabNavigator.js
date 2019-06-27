@@ -37,23 +37,23 @@ export default createMaterialBottomTabNavigator(
       navigationOptions: ({ screenProps }) => ({
         title: 'Profil',
         tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='user' />
-        ),
-        tabBarColor: getTheme[screenProps.theme].colors.reverse,
-        activeColor: getTheme[screenProps.theme].colors.primary
-      })
-    },
-    Settings: {
-      screen: SettingsScreen,
-      navigationOptions: ({ screenProps }) => ({
-        title: 'Paramètres',
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='settings' />
+          <TabBarIcon focused={focused} name='menu' />
         ),
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     }
+    // Settings: {
+    //   screen: SettingsScreen,
+    //   navigationOptions: ({ screenProps }) => ({
+    //     title: 'Paramètres',
+    //     tabBarIcon: ({ focused }) => (
+    //       <TabBarIcon focused={focused} name='settings' />
+    //     ),
+    //     tabBarColor: getTheme[screenProps.theme].colors.reverse,
+    //     activeColor: getTheme[screenProps.theme].colors.primary
+    //   })
+    // }
   },
   {
     initialRouteName: 'Bible',

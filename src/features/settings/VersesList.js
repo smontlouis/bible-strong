@@ -27,16 +27,16 @@ const sortVersesByDate = (p) => (
     }, [])
 )
 
-const VersesList = ({ verseIds, isHighlight, isFavorite }) => {
+const VersesList = ({ verseIds }) => {
   const sortedVersesByDate = sortVersesByDate(verseIds)
 
   return (
-    <Container grey>
+    <Container>
       <FlatList
         data={sortedVersesByDate}
         keyExtractor={(item, index) => item.date.toString()}
-        renderItem={({ item: { date, verseIds } }) => (
-          <VerseComponent {...{ date, verseIds }} />
+        renderItem={({ item: { color, date, verseIds } }) => (
+          <VerseComponent {...{ color, date, verseIds }} />
         )}
       />
     </Container>

@@ -49,7 +49,6 @@ class BibleScreen extends React.Component {
           verse={app.verse}
           version={app.version}
           onBibleParamsClick={this.toggleBibleParamsOpen}
-          isBible
         />
         <BibleViewer
           isReadOnly={isReadOnly}

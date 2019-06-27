@@ -28,18 +28,30 @@ class BibleVerseNotes extends Component {
 
   loadPage = async (props) => {
     const { verse } = props.navigation.state.params || {}
-    let { title } = await getVersesRef({ [verse]: true })
+    let title
     let notes = []
 
-    await Promise.all(Object.entries(props.notes).map(async (note, index) => {
-      let firstVerseRef = note[0].split('/')[0]
-      let verseNumbers = {}
-      note[0].split('/').map(ref => { verseNumbers[ref] = true })
-      if (firstVerseRef === verse) {
+    if (verse) {
+      title = (await getVersesRef({ [verse]: true })).title
+      title = `Notes sur ${title}...`
+    } else {
+      title = 'Notes'
+    }
+
+    await Promise.all(Object.entries(props.notes)
+      .filter(note => {
+        if (verse) {
+          const firstVerseRef = note[0].split('/')[0]
+          return firstVerseRef === verse
+        }
+        return true
+      })
+      .map(async (note, index) => {
+        let verseNumbers = {}
+        note[0].split('/').map(ref => { verseNumbers[ref] = true })
         const { title: reference } = await getVersesRef(verseNumbers)
         notes.push({ noteId: note[0], reference, notes: note[1] })
-      }
-    }))
+      }))
     if (!notes.length) props.navigation.goBack()
     else this.setState({ title, verse, notes })
   }
@@ -76,7 +88,7 @@ class BibleVerseNotes extends Component {
     const { title, notes } = this.state
     return (
       <Container>
-        <Header hasBackButton noBorder title={title ? `Notes sur ${title}` : 'Chargement...'} />
+        <Header hasBackButton noBorder title={title || 'Chargement...'} />
         <FlatList data={notes}
           renderItem={this.renderNote}
           keyExtractor={(item, index) => index.toString()}

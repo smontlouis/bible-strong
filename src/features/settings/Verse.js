@@ -3,6 +3,7 @@ import { TouchableOpacity } from 'react-native'
 import distanceInWords from 'date-fns/distance_in_words'
 import frLocale from 'date-fns/locale/fr'
 import styled from '@emotion/native'
+import { withNavigation } from 'react-navigation'
 
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
@@ -25,7 +26,14 @@ const Circle = styled(Box)(({ theme }) => ({
   marginTop: 5
 }))
 
-const VerseComponent = ({ date, verseIds, navigation }) => {
+const Container = styled(Box)(({ theme }) => ({
+  padding: 20,
+  marginBottom: 10,
+  borderBottomColor: theme.colors.border,
+  borderBottomWidth: 1
+}))
+
+const VerseComponent = ({ color, date, verseIds, navigation }) => {
   const verses = useBibleVerses(verseIds)
 
   if (!verses.length) {
@@ -34,30 +42,26 @@ const VerseComponent = ({ date, verseIds, navigation }) => {
 
   const { title, content } = formatVerseContent(verses)
   const formattedDate = distanceInWords(Number(date), Date.now(), { locale: frLocale })
-  const { Livre, Chapitre } = verses[0]
-  const params = {
-    book: books[Number(Livre) - 1],
-    chapter: Chapitre,
-    arrayVerses: {
-      book: books[Number(Livre) - 1],
-      chapter: Chapitre,
-      verses: verses.map(v => Number(v.Verset))
-    }
-  }
+  const { Livre, Chapitre, Verset } = verses[0]
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('bible', params)}>
-      <Box>
+    <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('BibleView', {
+      isReadOnly: true,
+      book: books[Livre - 1],
+      chapter: Chapitre,
+      verse: Verset
+    })}>
+      <Container>
         <Box row style={{ marginBottom: 10 }}>
           <Box flex row>
-            <Circle />
-            <Text secondaryFont style={{ fontSize: 18, lineHeight: 20 }}>{title}</Text>
+            <Circle color={color} />
+            <Text style={{ fontSize: 12, lineHeight: 20 }}>{title}</Text>
           </Box>
           <DateText style={{ fontSize: 10 }}>Il y a {formattedDate}</DateText>
         </Box>
         <Text medium>{truncate(content, 200)}</Text>
-      </Box>
+      </Container>
     </TouchableOpacity>
   )
 }
 
-export default VerseComponent
+export default withNavigation(VerseComponent)
