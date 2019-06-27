@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react'
 import { WebView } from 'react-native'
 
-import bibleWebView from './bibleWebView/dist/index.html'
+import bibleWebView from './bibleWebView/dist/index.js'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
@@ -110,8 +110,9 @@ class BibleWebView extends Component {
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={this.webViewRef}
-        source={bibleWebView}
+        source={{ html: bibleWebView }}
         style={{ opacity: this.state.webViewOpacity }}
+        allowFileAccess
       />
     )
   }
