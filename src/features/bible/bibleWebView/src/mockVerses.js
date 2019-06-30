@@ -1,188 +1,326 @@
 export default [
   {
     'Verset': '1',
-    'Texte': 'Au commencement, Dieu créa les cieux et la terre.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Jésus priait un jour en un certain lieu. Lorsqu’il eut achevé, un de ses disciples lui dit: Seigneur, enseigne-nous à prier, comme Jean l’a enseigné à ses disciples.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '2',
-    'Texte': 'La terre était informe et vide: il y avait des ténèbres à la surface de l’abîme, et l’esprit de Dieu se mouvait au-dessus des eaux.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Il leur dit:Quand vous priez, dites: Père! Que ton nom soit sanctifié; que ton règne vienne.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '3',
-    'Texte': 'Dieu dit: Que la lumière soit! Et la lumière fut.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Donne-nous chaque jour notre pain quotidien;',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '4',
-    'Texte': 'Dieu vit que la lumière était bonne; et Dieu sépara la lumière d’avec les ténèbres.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'pardonne-nous nos péchés, car nous aussi nous pardonnons à quiconque nous offense; et ne nous induis pas en tentation.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '5',
-    'Texte': 'Dieu appela la lumière jour, et il appela les ténèbres nuit. Ainsi, il y eut un soir, et il y eut un matin: ce fut le premier jour.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Il leur dit encore:Si l’un de vous a un ami, et qu’il aille le trouver au milieu de la nuit pour lui dire: Ami, prête-moi trois pains,',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '6',
-    'Texte': 'Dieu dit: Qu’il y ait une étendue entre les eaux, et qu’elle sépare les eaux d’avec les eaux.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'car un de mes amis est arrivé de voyage chez moi, et je n’ai rien à lui offrir,',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '7',
-    'Texte': 'Et Dieu fit l’étendue, et il sépara les eaux qui sont au-dessous de l’étendue d’avec les eaux qui sont au-dessus de l’étendue. Et cela fut ainsi.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'et si, de l’intérieur de sa maison, cet ami lui répond: Ne m’importune pas, la porte est déjà fermée, mes enfants et moi sommes au lit, je ne puis me lever pour te donner des pains,',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '8',
-    'Texte': 'Dieu appela l’étendue ciel. Ainsi, il y eut un soir, et il y eut un matin: ce fut le second jour.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'je vous le dis, même s’il ne se levait pas pour les lui donner parce que c’est son ami, il se lèverait à cause de son importunité et lui donnerait tout ce dont il a besoin.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '9',
-    'Texte': 'Dieu dit: Que les eaux qui sont au-dessous du ciel se rassemblent en un seul lieu, et que le sec paraisse. Et cela fut ainsi.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Et moi, je vous dis:Demandez, et l’on vous donnera; cherchez, et vous trouverez; frappez, et l’on vous ouvrira.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '10',
-    'Texte': 'Dieu appela le sec terre, et il appela l’amas des eaux mers. Dieu vit que cela était bon.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Car quiconque demande reçoit, celui qui cherche trouve, et l’on ouvre à celui qui frappe.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '11',
-    'Texte': 'Puis Dieu dit: Que la terre produise de la verdure, de l’herbe portant de la semence, des arbres fruitiers donnant du fruit selon leur espèce et ayant en eux leur semence sur la terre. Et cela fut ainsi.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Quel est parmi vous le père qui donnera une pierre à son fils, s’il lui demande du pain? Ou, s’il demande un poisson, lui donnera-t-il un serpent au lieu d’un poisson?',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '12',
-    'Texte': 'La terre produisit de la verdure, de l’herbe portant de la semence selon son espèce, et des arbres donnant du fruit et ayant en eux leur semence selon leur espèce. Dieu vit que cela était bon.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Ou, s’il demande un œuf, lui donnera-t-il un scorpion?',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '13',
-    'Texte': 'Ainsi, il y eut un soir, et il y eut un matin: ce fut le troisième jour.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Si donc, méchants comme vous l’êtes, vous savez donner de bonnes choses à vos enfants, à combien plus forte raison le Père céleste donnera-t-il le Saint-Esprit à ceux qui le lui demandent.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '14',
-    'Texte': 'Dieu dit: Qu’il y ait des luminaires dans l’étendue du ciel, pour séparer le jour d’avec la nuit; que ce soient des signes pour marquer les époques, les jours et les années;',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Jésus chassa un démon qui était muet. Lorsque le démon fut sorti, le muet parla, et la foule fut dans l’admiration.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '15',
-    'Texte': 'et qu’ils servent de luminaires dans l’étendue du ciel, pour éclairer la terre. Et cela fut ainsi.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Mais quelques-uns dirent: c’est par Béelzébul, le prince des démons, qu’il chasse les démons.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '16',
-    'Texte': 'Dieu fit les deux grands luminaires, le plus grand luminaire pour présider au jour, et le plus petit luminaire pour présider à la nuit; il fit aussi les étoiles.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Et d’autres, pour l’éprouver, lui demandèrent un signe venant du ciel.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '17',
-    'Texte': 'Dieu les plaça dans l’étendue du ciel, pour éclairer la terre,',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Comme Jésus connaissait leurs pensées, il leur dit:Tout royaume divisé contre lui-même est dévasté, et une maison s’écroule sur une autre.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '18',
-    'Texte': 'pour présider au jour et à la nuit, et pour séparer la lumière d’avec les ténèbres. Dieu vit que cela était bon.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Si donc Satan est divisé contre lui-même, comment son royaume subsistera-t-il, puisque vous dites que je chasse les démons par Béelzébul?',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '19',
-    'Texte': 'Ainsi, il y eut un soir, et il y eut un matin: ce fut le quatrième jour.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Et si moi, je chasse les démons par Béelzébul, vos fils, par qui les chassent-ils? C’est pourquoi ils seront eux-mêmes vos juges.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '20',
-    'Texte': 'Dieu dit: Que les eaux produisent en abondance des animaux vivants, et que des oiseaux volent sur la terre vers l’étendue du ciel.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Mais, si c’est par le doigt de Dieu que je chasse les démons, le royaume de Dieu est donc venu vers vous.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '21',
-    'Texte': 'Dieu créa les grands poissons et tous les animaux vivants qui se meuvent, et que les eaux produisirent en abondance selon leur espèce; il créa aussi tout oiseau ailé selon son espèce. Dieu vit que cela était bon.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Lorsqu’un homme fort et bien armé garde sa maison, ce qu’il possède est en sûreté.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '22',
-    'Texte': 'Dieu les bénit, en disant: Soyez féconds, multipliez, et remplissez les eaux des mers; et que les oiseaux multiplient sur la terre.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Mais, si un plus fort que lui survient et le dompte, il lui enlève toutes les armes dans lesquelles il se confiait, et il distribue ses dépouilles.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '23',
-    'Texte': 'Ainsi, il y eut un soir, et il y eut un matin: ce fut le cinquième jour.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Celui qui n’est pas avec moi est contre moi, et celui qui n’assemble pas avec moi disperse.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '24',
-    'Texte': 'Dieu dit: Que la terre produise des animaux vivants selon leur espèce, du bétail, des reptiles et des animaux terrestres, selon leur espèce. Et cela fut ainsi.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Lorsque l’esprit impur est sorti d’un homme, il va dans des lieux arides, pour chercher du repos. N’en trouvant point, il dit: Je retournerai dans ma maison d’où je suis sorti;',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '25',
-    'Texte': 'Dieu fit les animaux de la terre selon leur espèce, le bétail selon son espèce, et tous les reptiles de la terre selon leur espèce. Dieu vit que cela était bon.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'et, quand il arrive, il la trouve balayée et ornée.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '26',
-    'Texte': 'Puis Dieu dit: Faisons l’homme à notre image, selon notre ressemblance, et qu’il domine sur les poissons de la mer, sur les oiseaux du ciel, sur le bétail, sur toute la terre, et sur tous les reptiles qui rampent sur la terre.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Alors il s’en va, et il prend sept autres esprits plus méchants que lui; ils entrent dans la maison, s’y établissent,et la dernière condition de cet homme est pire que la première.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '27',
-    'Texte': 'Dieu créa l’homme à son image, il le créa à l’image de Dieu, il créa l’homme et la femme.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Tandis que Jésus parlait ainsi, une femme, élevant la voix du milieu de la foule, lui dit: Heureux le sein qui t’a porté! Heureuses les mamelles qui t’ont allaité!',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '28',
-    'Texte': 'Dieu les bénit, et Dieu leur dit: Soyez féconds, multipliez, remplissez la terre, et l’assujettissez; et dominez sur les poissons de la mer, sur les oiseaux du ciel, et sur tout animal qui se meut sur la terre.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Et il répondit:Heureux plutôt ceux qui écoutent la parole de Dieu, et qui la gardent!',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '29',
-    'Texte': 'Et Dieu dit: Voici, je vous donne toute herbe portant de la semence et qui est à la surface de toute la terre, et tout arbre ayant en lui du fruit d’arbre et portant de la semence: ce sera votre nourriture.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Comme le peuple s’amassait en foule, il se mit à dire:Cette génération est une génération méchante; elle demande un miracle; il ne lui sera donné d’autre miracle quecelui de Jonas.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '30',
-    'Texte': 'Et à tout animal de la terre, à tout oiseau du ciel, et à tout ce qui se meut sur la terre, ayant en soi un souffle de vie, je donne toute herbe verte pour nourriture. Et cela fut ainsi.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'Car, de même que Jonas fut un signe pour les Ninivites, de même le Fils de l’homme en sera un pour cette génération.',
+    'Livre': 42,
+    'Chapitre': 11
   },
   {
     'Verset': '31',
-    'Texte': 'Dieu vit tout ce qu’il avait fait et voici, cela était très bon. Ainsi, il y eut un soir, et il y eut un matin: ce fut le sixième jour.',
-    'Livre': 1,
-    'Chapitre': 1
+    'Texte': 'La reine du Midi se lèvera, au jour du jugement, avec les hommes de cette génération et les condamnera,parce qu’elle vint des extrémités de la terre pour entendre la sagesse de Salomon; et voici, il y a ici plus que Salomon.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '32',
+    'Texte': 'Les hommes de Ninive se lèveront, au jour du jugement, avec cette génération et la condamneront,parce qu’ils se repentirent à la prédication de Jonas; et voici, il y a ici plus que Jonas.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '33',
+    'Texte': 'Personne n’allume une lampe pour la mettre dans un lieu caché ou sous le boisseau, mais on la met sur le chandelier, afin que ceux qui entrent voient la lumière.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '34',
+    'Texte': 'Ton œil est la lampe de ton corps. Lorsque ton œil est en bon état, tout ton corps est éclairé; mais lorsque ton œil est en mauvais état, ton corps est dans les ténèbres.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '35',
+    'Texte': 'Prends donc garde que la lumière qui est en toi ne soit ténèbres.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '36',
+    'Texte': 'Si donc tout ton corps est éclairé, n’ayant aucune partie dans les ténèbres, il sera entièrement éclairé, comme lorsque la lampe t’éclaire de sa lumière.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '37',
+    'Texte': 'Pendant que Jésus parlait, un pharisien le pria de dîner chez lui. Il entra, et se mit à table.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '38',
+    'Texte': 'Le pharisien vit avec étonnement qu’il ne s’était pas lavé avant le repas.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '39',
+    'Texte': 'Mais le Seigneur lui dit:Vous, pharisiens, vous nettoyez le dehors de la coupe et du plat,et à l’intérieur vous êtes pleins de rapine et de méchanceté.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '40',
+    'Texte': 'Insensés! Celui qui a fait le dehors n’a-t-il pas fait aussi le dedans?',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '41',
+    'Texte': 'Donnez plutôt en aumônes ce qui est dedans, et voici, toutes choses seront pures pour vous.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '42',
+    'Texte': 'Mais malheur à vous, pharisiens! Parce que vous payez la dîme de la menthe, de la rue, et de toutes les herbes, etque vous négligez la justice et l’amour de Dieu: c’est là ce qu’il fallait pratiquer, sans omettre les autres choses.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '43',
+    'Texte': 'Malheur à vous, pharisiens! Parce que vous aimez les premiers sièges dans les synagogues, et les salutations dans les places publiques.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '44',
+    'Texte': 'Malheur à vous! Parce que vous êtes comme les sépulcres qui ne paraissent pas, et sur lesquels on marche sans le savoir.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '45',
+    'Texte': 'Un des docteurs de la loi prit la parole, et lui dit: Maître, en parlant de la sorte, c’est aussi nous que tu outrages.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '46',
+    'Texte': 'Et Jésus répondit:Malheur à vous aussi, docteurs de la loi! Parce que vous chargez les hommes de fardeaux difficiles à porter, et que vous ne touchez pas vous-mêmes de l’un de vos doigts.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '47',
+    'Texte': 'Malheur à vous! Parce que vous bâtissez les tombeaux des prophètes, que vos pères ont tués.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '48',
+    'Texte': 'Vous rendez donc témoignage aux œuvres de vos pères, et vous les approuvez; car eux, ils ont tué les prophètes, et vous, vous bâtissez leurs tombeaux.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '49',
+    'Texte': 'C’est pourquoi la sagesse de Dieu a dit:Je leur enverrai des prophètes et des apôtres; ils tueront les uns et persécuteront les autres,',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '50',
+    'Texte': 'afin qu’il soit demandé compte à cette génération du sang de tous les prophètes qui a été répandu depuis la création du monde,',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '51',
+    'Texte': 'depuis le sang d’Abeljusqu’au sang de Zacharie, tué entre l’autel et le temple; oui, je vous le dis, il en sera demandé compte à cette génération.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '52',
+    'Texte': 'Malheur à vous, docteurs de la loi! Parce que vous avez enlevé la clef de la science; vous n’êtes pas entrés vous-mêmes, et vous avez empêché d’entrer ceux qui le voulaient.',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '53',
+    'Texte': 'Quand il fut sorti de là, les scribes et les pharisiens commencèrent à le presser violemment, et à le faire parler sur beaucoup de choses,',
+    'Livre': 42,
+    'Chapitre': 11
+  },
+  {
+    'Verset': '54',
+    'Texte': 'lui tendant des pièges, pour surprendre quelque parole sortie de sa bouche.',
+    'Livre': 42,
+    'Chapitre': 11
   }
 ]

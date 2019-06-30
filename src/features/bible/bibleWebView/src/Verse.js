@@ -26,8 +26,7 @@ const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
 }))
 
 const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(28, fontSizeScale),
-  padding: '0 10px'
+  fontSize: scaleFontSize(14, fontSizeScale)
 }))
 
 const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor, settings: { theme } }) => {
@@ -107,6 +106,7 @@ class Verse extends Component {
             onClick={this.navigateToBibleVerseDetail}
           >
             {verse.Verset}
+            {' '}
           </NumberText>
           {
             notesCount &&
