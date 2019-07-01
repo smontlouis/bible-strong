@@ -30,6 +30,7 @@
     "expo-asset-utils": "^1.0.0",
     "expo-constants": "~5.0.1",
     "expo-font": "~5.0.1",
+    "expo-haptics": "~5.0.1",
     "immer": "^2.1.4",
     "lottie-react-native": "~2.6.1",
     "lunr": "2.3.6",

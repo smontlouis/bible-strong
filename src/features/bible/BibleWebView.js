@@ -1,5 +1,6 @@
 import React, { Component, createRef } from 'react'
-import { WebView } from 'react-native'
+import * as Haptics from 'expo-haptics'
+import { WebView, Platform, Vibration } from 'react-native'
 
 import bibleWebView from './bibleWebView/dist/index.js'
 import {
@@ -58,6 +59,7 @@ class BibleWebView extends Component {
         break
       }
       case TOGGLE_SELECTED_VERSE: {
+        Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
         const verseId = action.payload
         const { addSelectedVerse, removeSelectedVerse } = this.props
 

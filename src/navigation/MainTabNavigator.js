@@ -2,7 +2,6 @@ import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
 import SearchScreen from '~features/search/SearchScreen'
-import SettingsScreen from '~features/settings/SettingsScreen'
 import ProfileScreen from '~features/settings/ProfileScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import getTheme from '~themes'
@@ -35,7 +34,7 @@ export default createMaterialBottomTabNavigator(
     Profile: {
       screen: ProfileScreen,
       navigationOptions: ({ screenProps }) => ({
-        title: 'Profil',
+        title: 'Plus',
         tabBarIcon: ({ focused }) => (
           <TabBarIcon focused={focused} name='menu' />
         ),

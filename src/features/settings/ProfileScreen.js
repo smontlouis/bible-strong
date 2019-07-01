@@ -24,7 +24,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 const ProfileScreen = () => (
   (
     <Container>
-      <Header hasBackButton noBorder title='Paramêtres' />
+      <Header hasBackButton noBorder title='Plus' />
       <ScrollView>
         <LinkItem route={'Highlights'}>
           <StyledIcon name={'edit-3'} size={30} />

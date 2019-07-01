@@ -2,7 +2,7 @@ import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
 import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE, CONSOLE_LOG } from './dispatch'
+  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
 import { getColors } from '../../../../themes/getColors'
 import NotesCount from './NotesCount'
 
