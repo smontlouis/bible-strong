@@ -13,6 +13,10 @@ const mockSettings = {
   theme: 'default'
 }
 
+const mockSelectedVerses = {
+  '42-11-1': true
+}
+
 const verseToScroll = 4
 
 render(
@@ -20,6 +24,7 @@ render(
     verses={desktopMode ? mockVerses : undefined}
     settings={desktopMode ? mockSettings : undefined}
     verseToScroll={desktopMode ? verseToScroll : undefined}
+    selectedVerses={desktopMode ? mockSelectedVerses : undefined}
   />,
   document.getElementById('app')
 )

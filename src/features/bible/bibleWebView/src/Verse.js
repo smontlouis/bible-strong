@@ -2,7 +2,7 @@ import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
 import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
+  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE, CONSOLE_LOG } from './dispatch'
 import { getColors } from '../../../../themes/getColors'
 import NotesCount from './NotesCount'
 
@@ -43,7 +43,11 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor,
     background,
     '-webkit-touch-callout': 'none',
     padding: '4px',
-    borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none'
+    borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none',
+    '-moz-user-select': 'none',
+    '-ms-user-select': 'none',
+    '-khtml-user-select': 'none',
+    '-webkit-user-select': 'none'
   }
 })
 
@@ -55,11 +59,24 @@ class Verse extends Component {
   state = {
     focused: false
   }
+
+  disableOnClick = false
+
   navigateToBibleVerseDetail = () => {
-    dispatch({
-      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-      payload: this.props.verse.Verset
-    })
+    const { isSelectedMode } = this.props
+
+    if (this.disableOnClick) {
+      return
+    }
+
+    if (isSelectedMode) {
+      this.toggleSelectVerse()
+    } else {
+      dispatch({
+        type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+        payload: this.props.verse.Verset
+      })
+    }
   }
 
   navigateToVerseNotes = () => {
@@ -72,23 +89,40 @@ class Verse extends Component {
 
   toggleSelectVerse = () => {
     const { verse: { Livre, Chapitre, Verset } } = this.props
+    this.disableOnClick = true
+
     dispatch({
       type: TOGGLE_SELECTED_VERSE,
       payload: `${Livre}-${Chapitre}-${Verset}`
     })
   }
 
-  onTouchStart = () => {
+  onTouchStart = (e) => {
     this.setState({ isFocused: true })
 
+    this.startX = e.touches[0].clientX
+    this.startY = e.touches[0].clientY
+
     // On long press
-    // this.buttonPressTimer = setTimeout(this.navigateToBibleVerseDetail, 500)
+    this.buttonPressTimer = setTimeout(this.toggleSelectVerse, 500)
   }
 
   onTouchEnd = () => {
     this.setState({ isFocused: false })
+    setTimeout(() => {
+      this.disableOnClick = false
+    }, 200)
     clearTimeout(this.buttonPressTimer)
   }
+
+  onTouchMove = (e) => {
+    // if finger moves more than 10px flag to cancel
+    // code.google.com/mobile/articles/fast_buttons.html
+    if (Math.abs(e.touches[0].clientX - this.startX) > 10 ||
+        Math.abs(e.touches[0].clientY - this.startY) > 10) {
+      if (this.buttonPressTimer) clearTimeout(this.buttonPressTimer)
+    }
+  };
 
   render ({ verse, isSelected, highlightedColor, notesCount, settings }, { isFocused }) {
     return (
@@ -100,10 +134,10 @@ class Verse extends Component {
           highlightedColor={highlightedColor}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
+          onTouchMove={this.onTouchMove}
         >
           <NumberText
             settings={settings}
-            onClick={this.navigateToBibleVerseDetail}
           >
             {verse.Verset}
             {' '}
@@ -118,7 +152,7 @@ class Verse extends Component {
           }
           <VerseText
             settings={settings}
-            onClick={this.toggleSelectVerse}
+            onClick={this.navigateToBibleVerseDetail}
           >
             {verse.Texte}
           </VerseText>

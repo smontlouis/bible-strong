@@ -34,7 +34,8 @@ class VersesRenderer extends Component {
       this.setState({
         verses: this.props.verses,
         settings: this.props.settings,
-        verseToScroll: this.props.verseToScroll
+        verseToScroll: this.props.verseToScroll,
+        selectedVerses: this.props.selectedVerses
       })
     }
     this.receiveDataFromApp()
@@ -104,6 +105,7 @@ class VersesRenderer extends Component {
           state.verses.map((verse) => {
             const { Livre, Chapitre, Verset } = verse
             const isSelected = !!state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            const isSelectedMode = !!Object.keys(state.selectedVerses).length
             const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
             const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
             const notesCount = state.notedVerses[`${Verset}`]
@@ -113,6 +115,7 @@ class VersesRenderer extends Component {
                 verse={verse}
                 settings={state.settings}
                 isSelected={isSelected}
+                isSelectedMode={isSelectedMode}
                 highlightedColor={highlightedColor}
                 notesCount={notesCount}
               />
