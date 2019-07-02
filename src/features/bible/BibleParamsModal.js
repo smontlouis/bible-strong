@@ -54,8 +54,8 @@ const themeToString = {
 }
 
 const pressToString = {
-  shortPress: 'Appui court',
-  longPress: 'Appui long'
+  shortPress: 'Menu appui long',
+  longPress: 'Menu appui court'
 }
 
 const BibleParamsModal = ({
