@@ -5,31 +5,25 @@ export default function loadBible (bible) {
   return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {
-        case 'DBY': {
-          if (bibleMemoize['DBY']) {
-            return resolve(bibleMemoize['DBY'])
-          }
-
-          const path = `${FileSystem.documentDirectory}bible-DBY.json`
-          const file = await FileSystem.getInfoAsync(path)
-          const data = await FileSystem.readAsStringAsync(file.uri)
-
-          bibleMemoize['DBY'] = JSON.parse(data)
-          resolve(bibleMemoize['DBY'])
-
-          break
-        }
+        case 'BDS':
+        case 'FMAR':
+        case 'DBY':
+        case 'FRC97':
+        case 'NBS':
+        case 'NEG79':
+        case 'NVS78P':
+        case 'S21':
         case 'OST': {
-          if (bibleMemoize['OST']) {
-            return resolve(bibleMemoize['OST'])
+          if (bibleMemoize[bible]) {
+            return resolve(bibleMemoize[bible])
           }
 
-          const path = `${FileSystem.documentDirectory}bible-OST.json`
+          const path = `${FileSystem.documentDirectory}bible-${bible}.json`
           const file = await FileSystem.getInfoAsync(path)
           const data = await FileSystem.readAsStringAsync(file.uri)
 
-          bibleMemoize['OST'] = JSON.parse(data)
-          resolve(bibleMemoize['OST'])
+          bibleMemoize[bible] = JSON.parse(data)
+          resolve(bibleMemoize[bible])
 
           break
         }
@@ -39,7 +33,7 @@ export default function loadBible (bible) {
           break
         }
         default: {
-          reject('Erreur', bible)
+          reject('Bible non prise en charge')
         }
       }
     } catch (e) {

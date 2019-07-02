@@ -52,6 +52,27 @@ class VersionSelectorItem extends React.Component {
       case 'OST': {
         return Asset.fromModule(require('~assets/bible_versions/bible-ost.txt')).uri
       }
+      case 'BDS': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-bds.txt')).uri
+      }
+      case 'FMAR': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-fmar.txt')).uri
+      }
+      case 'FRC97': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-frc97.txt')).uri
+      }
+      case 'NBS': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-nbs.txt')).uri
+      }
+      case 'NEG79': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-neg79.txt')).uri
+      }
+      case 'NVS78P': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-nvs78p.txt')).uri
+      }
+      case 'S21': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-s21.txt')).uri
+      }
     }
   }
 

@@ -33,5 +33,33 @@ export const versions = {
   OST: {
     id: 'OST',
     name: 'Ostervald'
+  },
+  BDS: {
+    id: 'BDS',
+    name: 'Bible du Semeur'
+  },
+  FMAR: {
+    id: 'FMAR',
+    name: 'Martin 1744'
+  },
+  FRC97: {
+    id: 'FRC97',
+    name: 'Français courant'
+  },
+  NBS: {
+    id: 'NBS',
+    name: 'Nouvelle Bible Segond'
+  },
+  NEG79: {
+    id: 'NEG79',
+    name: 'Nouvelle Edition de Genève 1979'
+  },
+  NBS78P: {
+    id: 'NVS78P',
+    name: 'Nouvelle Segond révisée'
+  },
+  S21: {
+    id: 'S21',
+    name: 'Bible Segond 21'
   }
 }
