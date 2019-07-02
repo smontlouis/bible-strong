@@ -111,7 +111,7 @@ const BibleParamsModal = ({
             onPress={() => increaseSettingsFontSizeScale()}
           />
         </HalfContainer>
-        <HalfContainer>
+        <HalfContainer border>
           <TouchableIcon
             isSelected={textDisplay === 'inline'}
             name='menu'
@@ -124,7 +124,7 @@ const BibleParamsModal = ({
             onPress={() => setSettingsTextDisplay('block')}
           />
         </HalfContainer>
-        <HalfContainer>
+        <HalfContainer border>
           <TouchableIcon
             isSelected={theme === 'default'}
             name='sun'
@@ -137,7 +137,7 @@ const BibleParamsModal = ({
             onPress={() => setSettingsTheme('dark')}
           />
         </HalfContainer>
-        <HalfContainer>
+        <HalfContainer border>
           <TouchableSvgIcon
             icon={IconShortPress}
             isSelected={press === 'shortPress'}
