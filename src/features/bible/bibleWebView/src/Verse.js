@@ -62,23 +62,6 @@ class Verse extends Component {
 
   disableOnClick = false
 
-  navigateToBibleVerseDetail = () => {
-    const { isSelectedMode } = this.props
-
-    if (this.disableOnClick) {
-      return
-    }
-
-    if (isSelectedMode) {
-      this.toggleSelectVerse()
-    } else {
-      dispatch({
-        type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-        payload: this.props.verse.Verset
-      })
-    }
-  }
-
   navigateToVerseNotes = () => {
     const { verse: { Livre, Chapitre, Verset } } = this.props
     dispatch({
@@ -87,13 +70,44 @@ class Verse extends Component {
     })
   }
 
-  toggleSelectVerse = () => {
-    const { verse: { Livre, Chapitre, Verset } } = this.props
+  onPress = () => {
+    const { isSelectedMode, settings: { press } } = this.props
+
+    if (this.disableOnClick) {
+      return
+    }
+
+    if (isSelectedMode || press === 'longPress') {
+      this.toggleSelectVerse()
+    } else {
+      this.navigateToBibleVerseDetail()
+    }
+  }
+
+  onLongPress = () => {
+    const { settings: { press } } = this.props
+
     this.disableOnClick = true
 
+    if (press === 'shortPress') {
+      this.toggleSelectVerse()
+    } else {
+      this.navigateToBibleVerseDetail()
+    }
+  }
+
+  toggleSelectVerse = () => {
+    const { verse: { Livre, Chapitre, Verset } } = this.props
     dispatch({
       type: TOGGLE_SELECTED_VERSE,
       payload: `${Livre}-${Chapitre}-${Verset}`
+    })
+  }
+
+  navigateToBibleVerseDetail= () => {
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+      payload: this.props.verse.Verset
     })
   }
 
@@ -104,7 +118,7 @@ class Verse extends Component {
     this.startY = e.touches[0].clientY
 
     // On long press
-    this.buttonPressTimer = setTimeout(this.toggleSelectVerse, 500)
+    this.buttonPressTimer = setTimeout(this.onLongPress, 500)
   }
 
   onTouchEnd = () => {
@@ -118,8 +132,8 @@ class Verse extends Component {
   onTouchMove = (e) => {
     // if finger moves more than 10px flag to cancel
     // code.google.com/mobile/articles/fast_buttons.html
-    if (Math.abs(e.touches[0].clientX - this.startX) > 10 ||
-        Math.abs(e.touches[0].clientY - this.startY) > 10) {
+    if (Math.abs(e.touches[0].clientX - this.startX) > 3 ||
+        Math.abs(e.touches[0].clientY - this.startY) > 3) {
       if (this.buttonPressTimer) clearTimeout(this.buttonPressTimer)
     }
   };
@@ -152,7 +166,7 @@ class Verse extends Component {
           }
           <VerseText
             settings={settings}
-            onClick={this.navigateToBibleVerseDetail}
+            onClick={this.onPress}
           >
             {verse.Texte}
           </VerseText>

@@ -3,7 +3,10 @@ import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
+import IconShortPress from '~assets/images/IconShortPress'
+import IconLongPress from '~assets/images/IconLongPress'
 import TouchableIcon from './TouchableIcon'
+import TouchableSvgIcon from './TouchableSvgIcon'
 
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
@@ -50,11 +53,17 @@ const themeToString = {
   dark: 'Mode nuit'
 }
 
+const pressToString = {
+  shortPress: 'Appui court',
+  longPress: 'Appui long'
+}
+
 const BibleParamsModal = ({
   isOpen,
   onClosed,
   setSettingsAlignContent,
   setSettingsTextDisplay,
+  setSettingsPress,
   increaseSettingsFontSizeScale,
   decreaseSettingsFontSizeScale,
   setSettingsTheme,
@@ -62,7 +71,8 @@ const BibleParamsModal = ({
     alignContent,
     fontSizeScale,
     textDisplay,
-    theme
+    theme,
+    press
   }
 }) => {
   return (
@@ -125,6 +135,21 @@ const BibleParamsModal = ({
             isSelected={theme === 'dark'}
             name='moon'
             onPress={() => setSettingsTheme('dark')}
+          />
+        </HalfContainer>
+        <HalfContainer>
+          <TouchableSvgIcon
+            icon={IconShortPress}
+            isSelected={press === 'shortPress'}
+            onPress={() => setSettingsPress('shortPress')}
+            size={25}
+          />
+          <Text bold>{pressToString[press]}</Text>
+          <TouchableSvgIcon
+            icon={IconLongPress}
+            isSelected={press === 'longPress'}
+            onPress={() => setSettingsPress('longPress')}
+            size={25}
           />
         </HalfContainer>
 

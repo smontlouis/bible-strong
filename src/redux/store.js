@@ -1,6 +1,6 @@
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
-import { persistStore, persistReducer } from 'redux-persist'
+import { persistStore, persistReducer, createMigrate } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 
@@ -10,7 +10,34 @@ export default function configureStore () {
   const composeEnhancers =
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
-  const persistConfig = { key: 'root', storage, stateReconciler: autoMergeLevel2 }
+  const migrations = {
+    // Added 'press' in 'settings'
+    0: (state) => {
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          bible: {
+            ...state.user.bible,
+            settings: {
+              ...state.user.bible.settings,
+              press: 'shortPress'
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const persistConfig = {
+    key: 'root',
+    storage,
+    stateReconciler: autoMergeLevel2,
+    version: 0,
+    debug: true,
+    migrate: createMigrate(migrations, { debug: true })
+  }
+
   const persistedReducer = persistReducer(persistConfig, reducer)
   const store = composeEnhancers(applyMiddleware(thunk))(createStore)(persistedReducer)
   const persistor = persistStore(store)

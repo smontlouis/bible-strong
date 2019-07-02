@@ -99,7 +99,7 @@ const VersesModal = ({
             Object.keys(selectedVerses).length <= 1 &&
             <TouchableIcon
               name='eye'
-              color={theme.colors.default}
+              color={theme.colors.primary}
               onPress={showStrongDetail}
             />
           }

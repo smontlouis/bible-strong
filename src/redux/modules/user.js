@@ -14,6 +14,7 @@ export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE
 export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
+export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SAVE_NOTE = 'user/SAVE_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
@@ -26,13 +27,16 @@ const initialState = {
   lastSeen: 0,
   emailVerified: false,
   bible: {
-    highlights: {},
+    highlights: {
+
+    },
     notes: {},
     settings: {
       alignContent: 'justify',
       fontSizeScale: 0,
       textDisplay: 'inline',
-      theme: 'default'
+      theme: 'default',
+      press: 'shortPress'
     }
   }
 }
@@ -86,6 +90,10 @@ export default produce((draft, action) => {
     }
     case SET_SETTINGS_THEME: {
       draft.bible.settings.theme = action.payload
+      break
+    }
+    case SET_SETTINGS_PRESS: {
+      draft.bible.settings.press = action.payload
       break
     }
     case INCREASE_SETTINGS_FONTSIZE_SCALE: {
@@ -169,5 +177,12 @@ export function increaseSettingsFontSizeScale () {
 export function decreaseSettingsFontSizeScale () {
   return {
     type: DECREASE_SETTINGS_FONTSIZE_SCALE
+  }
+}
+
+export function setSettingsPress (payload) {
+  return {
+    type: SET_SETTINGS_PRESS,
+    payload
   }
 }

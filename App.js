@@ -7,9 +7,10 @@ import { Provider } from 'react-redux'
 import Sentry from 'sentry-expo'
 import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
-
+import { setAutoFreeze } from 'immer'
 import InitApp from './InitApp'
 
+setAutoFreeze(false)
 YellowBox.ignoreWarnings(['Require cycle:'])
 
 // if (__DEV__) {
