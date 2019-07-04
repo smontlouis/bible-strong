@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { pure, compose } from 'recompose'
-import { TouchableOpacity, Linking } from 'react-native'
+import { TouchableOpacity, Linking, Share } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 class Link extends Component {
@@ -11,12 +11,16 @@ class Link extends Component {
   }
 
   handlePress = () => {
-    const { navigation, route, href, params } = this.props
+    const { navigation, route, href, share, params } = this.props
     if (route) {
       navigation.navigate(route, params)
     }
     if (href) {
       Linking.openURL(href)
+    }
+
+    if (share) {
+      Share.share({ message: share })
     }
   }
 

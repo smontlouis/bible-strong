@@ -21,6 +21,11 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   marginRight: 15
 }))
 
+const shareMessage = () => {
+  const appUrl = Platform.OS === 'ios' ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8' : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
+  return `Bible Strong App ${appUrl}`
+}
+
 const ProfileScreen = () => (
   (
     <Container>
@@ -41,6 +46,10 @@ const ProfileScreen = () => (
         <LinkItem href={Platform.OS === 'ios' ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8' : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'}>
           <StyledIcon name={'star'} size={30} />
           <Text bold fontSize={15}>Noter l'application</Text>
+        </LinkItem>
+        <LinkItem share={shareMessage()}>
+          <StyledIcon name={'share-2'} size={30} />
+          <Text bold fontSize={15}>Partager l'application</Text>
         </LinkItem>
         <LinkItem href='mailto:s.montlouis.calixte@gmail.com'>
           <StyledIcon name={'send'} size={30} />
