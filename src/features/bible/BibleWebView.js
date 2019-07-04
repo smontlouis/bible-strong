@@ -55,7 +55,7 @@ class BibleWebView extends Component {
       }
       case NAVIGATE_TO_VERSE_NOTES: {
         const { navigation } = this.props
-        navigation.navigate('BibleVerseNotes', { verse: action.payload })
+        navigation.navigate('BibleVerseNotes', { verse: action.payload, withBack: true })
         break
       }
       case TOGGLE_SELECTED_VERSE: {

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { pure, compose } from 'recompose'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, Linking } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 class Link extends Component {
@@ -11,8 +11,13 @@ class Link extends Component {
   }
 
   handlePress = () => {
-    const { navigation, route, params } = this.props
-    navigation.navigate(route, params)
+    const { navigation, route, href, params } = this.props
+    if (route) {
+      navigation.navigate(route, params)
+    }
+    if (href) {
+      Linking.openURL(href)
+    }
   }
 
   render () {

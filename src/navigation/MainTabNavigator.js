@@ -1,8 +1,10 @@
 import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
-import SearchScreen from '~features/search/SearchScreen'
+// import SearchScreen from '~features/search/SearchScreen'
 import ProfileScreen from '~features/settings/ProfileScreen'
+import HighlightsScreen from '~features/settings/HighlightsScreen'
+import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import getTheme from '~themes'
 export default createMaterialBottomTabNavigator(
@@ -20,12 +22,23 @@ export default createMaterialBottomTabNavigator(
         }
       }
     },
-    Search: {
-      screen: SearchScreen,
+    Highlights: {
+      screen: HighlightsScreen,
       navigationOptions: ({ screenProps }) => ({
-        title: 'Recherche',
+        title: 'Surbrillances',
         tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='search' />
+          <TabBarIcon focused={focused} name='edit-3' />
+        ),
+        tabBarColor: getTheme[screenProps.theme].colors.reverse,
+        activeColor: getTheme[screenProps.theme].colors.primary
+      })
+    },
+    Notes: {
+      screen: BibleVerseNotesScreen,
+      navigationOptions: ({ screenProps }) => ({
+        title: 'Notes',
+        tabBarIcon: ({ focused }) => (
+          <TabBarIcon focused={focused} name='file-text' />
         ),
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary

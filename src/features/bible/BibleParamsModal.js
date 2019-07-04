@@ -2,6 +2,7 @@ import React from 'react'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
 
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import IconShortPress from '~assets/images/IconShortPress'
 import IconLongPress from '~assets/images/IconLongPress'
@@ -54,8 +55,8 @@ const themeToString = {
 }
 
 const pressToString = {
-  shortPress: 'Menu appui long',
-  longPress: 'Menu appui court'
+  shortPress: 'Strong appui court',
+  longPress: 'Strong appui long'
 }
 
 const BibleParamsModal = ({
@@ -144,7 +145,9 @@ const BibleParamsModal = ({
             onPress={() => setSettingsPress('shortPress')}
             size={25}
           />
-          <Text bold>{pressToString[press]}</Text>
+          <Box width={80} center>
+            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>{pressToString[press]}</Text>
+          </Box>
           <TouchableSvgIcon
             icon={IconLongPress}
             isSelected={press === 'longPress'}

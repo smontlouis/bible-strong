@@ -7,6 +7,7 @@ import BibleNoteItem from './BibleNoteItem'
 import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
+import Empty from '~common/Empty'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
@@ -52,8 +53,7 @@ class BibleVerseNotes extends Component {
         const { title: reference } = await getVersesRef(verseNumbers)
         notes.push({ noteId: note[0], reference, notes: note[1] })
       }))
-    if (!notes.length) props.navigation.goBack()
-    else this.setState({ title, verse, notes })
+    this.setState({ title, verse, notes })
   }
 
   openNoteEditor = (noteId) => {
@@ -69,7 +69,7 @@ class BibleVerseNotes extends Component {
   deleteNote = (noteId) => {
     Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?',
       [ { text: 'Non', onPress: () => null, style: 'cancel' },
-        { text: 'Oui', onPress: () => this.props.deleteNote(noteId) }
+        { text: 'Oui', onPress: () => this.props.deleteNote(noteId), style: 'destructive' }
       ])
   }
 
@@ -85,15 +85,23 @@ class BibleVerseNotes extends Component {
   }
 
   render () {
+    const { withBack } = this.props.navigation.state.params || {}
     const { title, notes } = this.state
     return (
       <Container>
-        <Header hasBackButton noBorder title={title || 'Chargement...'} />
-        <FlatList data={notes}
-          renderItem={this.renderNote}
-          keyExtractor={(item, index) => index.toString()}
-          style={{ paddingBottom: 30 }}
-        />
+        <Header hasBackButton={withBack} title={title || 'Chargement...'} />
+        {
+          notes.length
+            ? <FlatList data={notes}
+              renderItem={this.renderNote}
+              keyExtractor={(item, index) => index.toString()}
+              style={{ paddingBottom: 30 }}
+            />
+            : <Empty
+              source={require('~assets/images/empty.json')}
+              message="Vous n'avez pas encore de notes..."
+            />
+        }
         <BibleNoteModal
           onClosed={this.closeNoteEditor}
           isOpen={this.state.isEditNoteOpen}
