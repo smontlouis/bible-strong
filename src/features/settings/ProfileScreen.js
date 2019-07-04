@@ -2,6 +2,7 @@ import React from 'react'
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import { ScrollView, Platform } from 'react-native'
+import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
@@ -16,8 +17,8 @@ const LinkItem = styled(Link)(({ theme }) => ({
   borderBottomColor: theme.colors.border
 }))
 
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.grey,
+const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
+  color: color || theme.colors.grey,
   marginRight: 15
 }))
 
@@ -26,7 +27,7 @@ const shareMessage = () => {
   return `Bible Strong App ${appUrl}`
 }
 
-const ProfileScreen = () => (
+const ProfileScreen = ({ theme }) => (
   (
     <Container>
       <Header title='Plus' />
@@ -53,11 +54,15 @@ const ProfileScreen = () => (
         </LinkItem>
         <LinkItem href='mailto:s.montlouis.calixte@gmail.com'>
           <StyledIcon name={'send'} size={30} />
-          <Text bold fontSize={15}>Contacter le développeur</Text>
+          <Text bold fontSize={15} >Contacter le développeur</Text>
+        </LinkItem>
+        <LinkItem href='https://fr.tipeee.com/smontlouis'>
+          <StyledIcon name={'thumbs-up'} size={30} color={theme.colors.primary} />
+          <Text bold fontSize={15} color='primary'>Soutenir le développeur</Text>
         </LinkItem>
       </ScrollView>
     </Container>
   )
 )
 
-export default ProfileScreen
+export default withTheme(ProfileScreen)
