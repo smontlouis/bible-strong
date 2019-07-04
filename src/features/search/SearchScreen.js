@@ -1,8 +1,8 @@
 import React from 'react'
-import * as FileSystem from 'expo-file-system'
-import { Asset } from 'expo-asset'
 import debounce from 'debounce'
 import { ProgressBar } from 'react-native-paper'
+import * as FileSystem from 'expo-file-system'
+import { Asset } from 'expo-asset'
 
 import Container from '~common/ui/Container'
 import Loading from '~common/Loading'
@@ -10,6 +10,7 @@ import Empty from '~common/Empty'
 import SearchHeader from './SearchHeader'
 import SearchResults from './SearchResults'
 import theme from '~themes/default'
+import loadIndexCache from './loadIndex'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
@@ -24,11 +25,6 @@ export default class SearchScreen extends React.Component {
     this.loadIndex()
   }
   loadIndex = async () => {
-    const lunr = require('lunr')
-    require('lunr-languages/lunr.stemmer.support')(lunr)
-    require('lunr-languages/lunr.fr')(lunr)
-    require('~helpers/lunr.unicodeNormalizer')(lunr)
-
     const idxPath = `${FileSystem.documentDirectory}idx-light.json`
     let idxFile = await FileSystem.getInfoAsync(idxPath)
 
@@ -49,8 +45,7 @@ export default class SearchScreen extends React.Component {
       idxFile = await FileSystem.getInfoAsync(idxPath)
     }
 
-    const data = await FileSystem.readAsStringAsync(idxFile.uri)
-    this.idx = await lunr.Index.load(JSON.parse(data))
+    this.idx = await loadIndexCache(idxFile)
     this.setState({ isLoading: false })
   }
 
@@ -79,23 +74,24 @@ export default class SearchScreen extends React.Component {
       )
     }
 
-    if (isLoading) {
-      return <Loading message={`Chargement de l'index...`} />
-    }
-
     return (
       <Container>
         <SearchHeader
+          hasBackButton
           placeholder='Recherche'
           onChangeText={debounce(this.onChangeText, 500)}
         />
-        {!value && (
+        {
+          isLoading &&
+          <Loading message={`Chargement de l'index...`} />
+        }
+        {!isLoading && !value && (
           <Empty
             source={require('~assets/images/search-loop.json')}
             message='Fais une recherche dans la Bible !'
           />
         )}
-        {!!value && <SearchResults results={results} />}
+        {!isLoading && !!value && <SearchResults results={results} />}
       </Container>
     )
   }

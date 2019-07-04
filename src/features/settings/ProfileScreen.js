@@ -26,14 +26,10 @@ const ProfileScreen = () => (
     <Container>
       <Header title='Plus' />
       <ScrollView>
-        {/* <LinkItem route={'BibleHighlights'}>
-          <StyledIcon name={'edit-3'} size={30} />
-          <Text bold fontSize={15}>Surbrillances</Text>
+        <LinkItem route={'Search'}>
+          <StyledIcon name={'search'} size={30} />
+          <Text bold fontSize={15}>Recherche (bêta)</Text>
         </LinkItem>
-        <LinkItem route={'BibleVerseNotes'}>
-          <StyledIcon name={'file-text'} size={30} />
-          <Text bold fontSize={15}>Notes</Text>
-        </LinkItem> */}
         <LinkItem href='https://bible-strong.canny.io/fonctionnalites'>
           <StyledIcon name={'sun'} size={30} />
           <Text bold fontSize={15}>Idées de fonctionnalités</Text>

@@ -1,7 +1,6 @@
 import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
-// import SearchScreen from '~features/search/SearchScreen'
 import ProfileScreen from '~features/settings/ProfileScreen'
 import HighlightsScreen from '~features/settings/HighlightsScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
@@ -55,17 +54,6 @@ export default createMaterialBottomTabNavigator(
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     }
-    // Settings: {
-    //   screen: SettingsScreen,
-    //   navigationOptions: ({ screenProps }) => ({
-    //     title: 'Paramètres',
-    //     tabBarIcon: ({ focused }) => (
-    //       <TabBarIcon focused={focused} name='settings' />
-    //     ),
-    //     tabBarColor: getTheme[screenProps.theme].colors.reverse,
-    //     activeColor: getTheme[screenProps.theme].colors.primary
-    //   })
-    // }
   },
   {
     initialRouteName: 'Bible',

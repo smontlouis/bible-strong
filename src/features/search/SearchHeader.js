@@ -1,6 +1,6 @@
 // @flow
 import React from 'react'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 
@@ -15,11 +15,19 @@ const Container = styled.View(({ theme }) => ({
   flexDirection: 'row'
 }))
 
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default,
+  marginTop: 10
+}))
+
 const SearchHeader = ({ onChangeText, placeholder, hasBackButton, theme }) => (
   <Container>
     {hasBackButton && (
-      <Back underlayColor='transparent'>
-        <Icon name='chevron-left' size={28} color={theme.colors.reverse} />
+      <Back underlayColor='transparent' style={{ marginRight: 15 }}>
+        <FeatherIcon
+          name={'arrow-left'}
+          size={20}
+        />
       </Back>
     )}
     <SearchInput
