@@ -45,7 +45,8 @@
     },
     "android": {
       "package": "com.smontlouis.biblestrong",
-      "versionCode": 29
+      "versionCode": 29,
+      "permissions": []
     },
     "hooks": {
       "postPublish": [
@@ -59,6 +60,5 @@
         }
       ]
     },
-    "permissions": []
   }
 }
