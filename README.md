@@ -1,4 +1,6 @@
-# Règles de confidentialités
+# Bible Strong App
 
-Nous nous engageons à ne collecter aucun renseignement personnel, d'aucune sorte que ce soit.
-
+## TODO :
+- Ajouter bible KJF
+- Ajouter notes/références croisées
+- Ajouter péricopes
