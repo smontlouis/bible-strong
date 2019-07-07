@@ -11,7 +11,7 @@ export default {
     maxWidth: 320
   },
   fontFamily: {
-    text: Platform.OS === 'ios' ? 'System' : 'meta-serif-light-italic',
+    text: Platform.OS === 'ios' ? 'System' : 'normal',
     title: 'meta-serif',
     titleItalic: 'meta-serif-light-italic'
   }
