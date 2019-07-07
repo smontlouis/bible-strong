@@ -6,6 +6,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1562470112286',
+    type: logTypes.BUG,
+    title: 'Texte italique sur Android',
+    description: "Dans certains endroits de l'App, le texte était italique. Ce bug a été réglé"
+  },
+  {
     date: '1562469387018',
     type: logTypes.NEW,
     title: 'Ajout de "Quoi de neuf ?"',
