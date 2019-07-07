@@ -6,6 +6,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 
 import AppNavigator from '~navigation/AppNavigator'
+import Changelog from '~common/Changelog'
 import getTheme from '~themes'
 import { paperTheme } from '~themes/default'
 
@@ -30,7 +31,10 @@ class InitApp extends React.Component {
       <ThemeProvider theme={getTheme[theme]}>
         <PaperProvider theme={paperTheme}>
           <PersistGate loading={null} persistor={persistor}>
-            <AppNavigator screenProps={{ theme }} />
+            <>
+              <AppNavigator screenProps={{ theme }} />
+              <Changelog />
+            </>
           </PersistGate>
         </PaperProvider>
       </ThemeProvider>

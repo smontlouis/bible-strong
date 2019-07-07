@@ -18,6 +18,7 @@ export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SAVE_NOTE = 'user/SAVE_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
+export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
 const initialState = {
   email: '',
@@ -27,9 +28,8 @@ const initialState = {
   lastSeen: 0,
   emailVerified: false,
   bible: {
-    highlights: {
-
-    },
+    changelog: {},
+    highlights: {},
     notes: {},
     settings: {
       alignContent: 'justify',
@@ -108,6 +108,12 @@ export default produce((draft, action) => {
       }
       break
     }
+    case SAVE_ALL_LOGS_AS_SEEN: {
+      action.payload.map(log => {
+        draft.bible.changelog[log.date] = true
+      })
+      break
+    }
   }
 }, initialState)
 
@@ -183,6 +189,13 @@ export function decreaseSettingsFontSizeScale () {
 export function setSettingsPress (payload) {
   return {
     type: SET_SETTINGS_PRESS,
+    payload
+  }
+}
+
+export function saveAllLogsAsSeen (payload) {
+  return {
+    type: SAVE_ALL_LOGS_AS_SEEN,
     payload
   }
 }

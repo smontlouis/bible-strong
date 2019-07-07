@@ -26,6 +26,18 @@ export default function configureStore () {
           }
         }
       }
+    },
+    1: (state) => {
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          bible: {
+            ...state.user.bible,
+            changelog: {}
+          }
+        }
+      }
     }
   }
 
@@ -33,7 +45,7 @@ export default function configureStore () {
     key: 'root',
     storage,
     stateReconciler: autoMergeLevel2,
-    version: 0,
+    version: 1,
     debug: true,
     migrate: createMigrate(migrations, { debug: true })
   }
