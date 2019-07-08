@@ -2,7 +2,6 @@ import { Component, h } from 'preact'
 import picostyle from 'picostyle'
 
 import { getColors } from '../../../../themes/getColors'
-import getBiblePericope from '../../../../helpers/getBiblePericope'
 import { SEND_INITIAL_DATA, CONSOLE_LOG, dispatch } from './dispatch'
 import Verse from './Verse'
 import { desktopMode } from './env'
@@ -43,9 +42,9 @@ const H3 = styled('h3')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(20, fontSizeScale)
 }))
 
-const getPericopeVerse = (pericope, book, chapter, verse) => {
-  if (pericope[book] && pericope[book][chapter] && pericope[book][chapter][verse]) {
-    return pericope[book][chapter][verse]
+const getPericopeVerse = (pericopeChapter, verse) => {
+  if (pericopeChapter && pericopeChapter[verse]) {
+    return pericopeChapter[verse]
   }
 
   return {}
@@ -60,7 +59,9 @@ class VersesRenderer extends Component {
     settings: {},
     verseToScroll: null,
     isReadOnly: false,
-    version: 'LSG'
+    version: 'LSG',
+    pericopeChapter: {},
+    chapter: ''
   }
 
   componentDidMount () {
@@ -71,18 +72,24 @@ class VersesRenderer extends Component {
         verseToScroll: this.props.verseToScroll,
         selectedVerses: this.props.selectedVerses,
         version: this.props.version,
-        pericope: getBiblePericope(this.props.version)
+        pericopeChapter: this.props.pericopeChapter
       })
     }
     this.receiveDataFromApp()
   }
 
   componentDidUpdate (prevProps, prevState) {
+    if (prevState && prevState.chapter !== this.state.chapter && this.state.verseToScroll === 1) {
+      window.scrollTo(0, 0)
+    }
     if (prevState && prevState.settings.theme !== this.state.settings.theme) {
       document.body.style.backgroundColor = getColors[this.state.settings.theme].reverse
     }
-    if (prevState.verseToScroll && prevState.verseToScroll !== this.state.verseToScroll) {
-      dispatch({ type: CONSOLE_LOG, payload: `${prevState} ${prevState.verseToScroll}, ${this.state.verseToScroll}` })
+    if (prevState && prevState.verseToScroll !== this.state.verseToScroll) {
+      if (!prevState.verseToScroll && this.state.verseToScroll === 1) {
+        return
+      }
+      // dispatch({ type: CONSOLE_LOG, payload: `${prevState} ${prevState.verseToScroll}, ${this.state.verseToScroll}` })
       setTimeout(() => {
         document.querySelector(`#verset-${this.state.verseToScroll}`).scrollIntoView()
       }, 200)
@@ -114,7 +121,19 @@ class VersesRenderer extends Component {
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
-          const { verses, selectedVerses, highlightedVerses, notedVerses, settings, verseToScroll, isReadOnly, version } = response
+          const {
+            verses,
+            selectedVerses,
+            highlightedVerses,
+            notedVerses,
+            settings,
+            verseToScroll,
+            isReadOnly,
+            version,
+            pericopeChapter,
+            chapter
+          } = response
+
           self.setState({
             verses,
             selectedVerses,
@@ -124,7 +143,8 @@ class VersesRenderer extends Component {
             verseToScroll,
             isReadOnly,
             version,
-            pericope: getBiblePericope(version)
+            pericopeChapter,
+            chapter
           })
           break
         }
@@ -148,7 +168,7 @@ class VersesRenderer extends Component {
             const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
             const notesCount = state.notedVerses[`${Verset}`]
 
-            const { h1, h2, h3 } = getPericopeVerse(state.pericope, Livre, Chapitre, Verset)
+            const { h1, h2, h3 } = getPericopeVerse(state.pericopeChapter, Verset)
 
             return (
               <span>

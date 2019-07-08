@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
+import getBiblePericope from '~helpers/getBiblePericope'
 
 import Loading from '~common/Loading'
 import BibleFooter from './BibleFooter'
@@ -21,14 +22,24 @@ const styles = StyleSheet.create({
   }
 })
 
+const getPericopeChapter = (pericope, book, chapter) => {
+  if (pericope[book] && pericope[book][chapter] && pericope[book][chapter]) {
+    return pericope[book][chapter]
+  }
+
+  return {}
+}
+
 class BibleViewer extends Component {
   state = {
     isLoading: true,
     verses: []
   }
 
+  pericope = getBiblePericope('LSG')
+
   componentWillMount () {
-    setTimeout(() => this.loadVerses(), 500)
+    setTimeout(() => this.loadVerses(), 200)
     this.props.clearSelectedVerses()
   }
 
@@ -45,6 +56,7 @@ class BibleViewer extends Component {
 
   loadVerses = async () => {
     const { book, chapter, version } = this.props
+    this.pericope = getBiblePericope(version)
     let tempVerses
     this.setState({ isLoading: true })
 
@@ -76,55 +88,6 @@ class BibleViewer extends Component {
     navigation.navigate('Bible')
   }
 
-  renderVerses = () => {
-    const {
-      arrayVerses,
-      book,
-      chapter,
-      navigation,
-      addSelectedVerse,
-      removeSelectedVerse,
-      setSelectedVerse,
-      selectedVerses,
-      highlightedVerses,
-      notedVerses,
-      settings,
-      verse,
-      version,
-      isReadOnly
-    } = this.props
-    let array = this.state.verses
-
-    // When opening some verses, not whole chapter
-    if (
-      arrayVerses &&
-      book.Numero === arrayVerses.book.Numero &&
-      chapter === arrayVerses.chapter
-    ) {
-      array = array.filter(v =>
-        arrayVerses.verses.find(aV => aV === Number(v.Verset))
-      )
-    }
-
-    return (
-      <BibleWebView
-        navigation={navigation}
-        addSelectedVerse={addSelectedVerse}
-        removeSelectedVerse={removeSelectedVerse}
-        setSelectedVerse={setSelectedVerse}
-
-        version={version}
-        isReadOnly={isReadOnly}
-        arrayVerses={array}
-        selectedVerses={selectedVerses}
-        highlightedVerses={highlightedVerses}
-        notedVerses={notedVerses}
-        settings={settings}
-        verseToScroll={verse}
-      />
-    )
-  }
-
   render () {
     const { isLoading } = this.state
     const {
@@ -141,16 +104,49 @@ class BibleViewer extends Component {
       navigation,
       selectedVerses,
       version,
-      onCreateNoteClick
+      onCreateNoteClick,
+      addSelectedVerse,
+      removeSelectedVerse,
+      setSelectedVerse,
+      highlightedVerses,
+      notedVerses,
+      settings,
+      verse,
+      arrayVerses
     } = this.props
 
-    if (isLoading) {
-      return <Loading />
+    let array = this.state.verses
+
+    // When opening some verses, not whole chapter
+    if (
+      arrayVerses &&
+      book.Numero === arrayVerses.book.Numero &&
+      chapter === arrayVerses.chapter
+    ) {
+      array = array.filter(v =>
+        arrayVerses.verses.find(aV => aV === Number(v.Verset))
+      )
     }
 
     return (
       <View style={styles.container}>
-        {this.renderVerses()}
+        <BibleWebView
+          isLoading={isLoading}
+          navigation={navigation}
+          addSelectedVerse={addSelectedVerse}
+          removeSelectedVerse={removeSelectedVerse}
+          setSelectedVerse={setSelectedVerse}
+          version={version}
+          isReadOnly={isReadOnly}
+          arrayVerses={array}
+          selectedVerses={selectedVerses}
+          highlightedVerses={highlightedVerses}
+          notedVerses={notedVerses}
+          settings={settings}
+          verseToScroll={verse}
+          chapter={chapter}
+          pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
+        />
         {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}

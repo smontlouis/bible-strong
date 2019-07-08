@@ -6,8 +6,14 @@ export const logTypes = {
 
 export default [
   {
+    date: '1562621003832',
+    type: logTypes.BUG,
+    title: 'Meilleures performances entre les chapitres',
+    description: "Quand on changeait de chapitre, ça pouvait prendre un certain temps. Maintenant c'est quasiment instantané."
+  },
+  {
     date: '1562583055833',
-    type: logTypes.NEW,
+    type: logTypes.FEATURE,
     title: 'Ajout de péricopes - titres de sections',
     description: "J'ai appris ce mot il y a deux jours, je l'avoue. Péricope vient du mot 'découpage'. En résumé vous avez maintenant les titres ou sections des différentes parties d'un texte biblique."
   },
