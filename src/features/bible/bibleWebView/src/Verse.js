@@ -21,8 +21,8 @@ const styled = picostyle(h)
 const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
 
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(20, fontSizeScale),
-  lineHeight: scaleFontSize(34, fontSizeScale)
+  fontSize: scaleFontSize(19, fontSizeScale),
+  lineHeight: scaleFontSize(30, fontSizeScale)
 }))
 
 const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({

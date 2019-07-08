@@ -35,9 +35,11 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border,
-  width: theme.measures.maxWidth,
-  marginLeft: 'auto',
-  marginRight: 'auto'
+  paddingLeft: 15,
+  paddingRight: 15
+  // width: theme.measures.maxWidth,
+  // marginLeft: 'auto',
+  // marginRight: 'auto'
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({

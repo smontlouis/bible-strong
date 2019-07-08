@@ -6,10 +6,16 @@ export const logTypes = {
 
 export default [
   {
+    date: '1562583055833',
+    type: logTypes.NEW,
+    title: 'Ajout de péricopes - titres de sections',
+    description: "J'ai appris ce mot il y a deux jours, je l'avoue. Péricope vient du mot 'découpage'. En résumé vous avez maintenant les titres ou sections des différentes parties d'un texte biblique."
+  },
+  {
     date: '1562470112286',
     type: logTypes.BUG,
     title: 'Texte italique sur Android',
-    description: "Dans certains endroits de l'App, le texte était italique. Ce bug a été réglé"
+    description: "Dans certains endroits de l'App, le texte était italique. Ce bug a été réglé."
   },
   {
     date: '1562469387018',

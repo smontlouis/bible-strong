@@ -84,8 +84,8 @@ const Changelog = () => {
               {
                 newLogs.map((log, i) => (
                   <Box key={i} marginTop={10} marginBottom={10}>
-                    <Box row>
-                      <Text fontSize={16} bold>
+                    <Box row alignItems='flex-start'>
+                      <Text fontSize={16} bold flex>
                         {log.title}
                       </Text>
                       <Tag type={log.type}>

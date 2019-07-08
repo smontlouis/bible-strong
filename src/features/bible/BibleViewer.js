@@ -90,6 +90,7 @@ class BibleViewer extends Component {
       notedVerses,
       settings,
       verse,
+      version,
       isReadOnly
     } = this.props
     let array = this.state.verses
@@ -112,6 +113,7 @@ class BibleViewer extends Component {
         removeSelectedVerse={removeSelectedVerse}
         setSelectedVerse={setSelectedVerse}
 
+        version={version}
         isReadOnly={isReadOnly}
         arrayVerses={array}
         selectedVerses={selectedVerses}

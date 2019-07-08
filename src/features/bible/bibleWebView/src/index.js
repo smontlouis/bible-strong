@@ -19,12 +19,15 @@ const mockSelectedVerses = {
 
 const verseToScroll = 4
 
+const version = 'LSG'
+
 render(
   <VersesRenderer
     verses={desktopMode ? mockVerses : undefined}
     settings={desktopMode ? mockSettings : undefined}
     verseToScroll={desktopMode ? verseToScroll : undefined}
     selectedVerses={desktopMode ? mockSelectedVerses : undefined}
+    version={desktopMode ? version : undefined}
   />,
   document.getElementById('app')
 )
