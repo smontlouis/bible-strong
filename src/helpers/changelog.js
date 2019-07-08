@@ -9,7 +9,7 @@ export default [
     date: '1562621003832',
     type: logTypes.BUG,
     title: 'Meilleures performances entre les chapitres',
-    description: "Quand on changeait de chapitre, ça pouvait prendre un certain temps. Maintenant c'est quasiment instantané."
+    description: "Au changement de chapitre, il était possible de voir un écran blanc entre les transitions. C'est maintenant quasi-instantané."
   },
   {
     date: '1562583055833',
