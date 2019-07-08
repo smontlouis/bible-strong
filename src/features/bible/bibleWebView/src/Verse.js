@@ -92,6 +92,7 @@ class Verse extends Component {
     if (press === 'shortPress') {
       this.toggleSelectVerse()
     } else {
+      this.setState({ isFocused: false })
       this.navigateToBibleVerseDetail()
     }
   }
