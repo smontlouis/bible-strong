@@ -132,6 +132,7 @@ class Verse extends Component {
   onTouchMove = (e) => {
     // if finger moves more than 10px flag to cancel
     // code.google.com/mobile/articles/fast_buttons.html
+    this.setState({ isFocused: false })
     if (Math.abs(e.touches[0].clientX - this.startX) > 1 ||
         Math.abs(e.touches[0].clientY - this.startY) > 1) {
       if (this.buttonPressTimer) clearTimeout(this.buttonPressTimer)
