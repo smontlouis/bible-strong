@@ -17,7 +17,7 @@ La seule traduction basée sur le Texte Massorétique Hébreu Ben Chayyim pour l
     
 La raison primordiale de cette traduction était de justement donner aux francophones une Bible vraiment basée sur les manuscrits dont se sont servis les traducteurs de la King James anglaise. Cette Bible est unique en son genre. Une refonte totale était devenue nécessaire afin de mettre en valeur cette spécificité pour les lecteurs francophones.
     
-C'est pourquoi ce travail est : mot pour mot, verset par verset la traduction intégrale - au plus près possible - du vocabulaire de la King James Bible anglaise. Rendez-vous sur http://www.kingjamesfrancaise.net/ pour plus de détails.
+C'est pourquoi ce travail est : mot pour mot, verset par verset la traduction intégrale - au plus près possible - du vocabulaire de la King James Bible anglaise.
     
 Traduction N. Stratford.
 http://www.kingjamesfrancaise.net/
