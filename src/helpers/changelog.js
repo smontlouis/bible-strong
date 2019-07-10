@@ -6,6 +6,24 @@ export const logTypes = {
 
 export default [
   {
+    date: '1562753462096',
+    type: logTypes.NEW,
+    title: 'Ajout de la Bible King James Française (KJF)!',
+    description: `🎉Bonne nouvelle !🎉
+    
+La bible King James Française a été ajoutée à l'application ! 
+
+La seule traduction basée sur le Texte Massorétique Hébreu Ben Chayyim pour l’Ancien Testament, (édition correcte de Ben Chayyim), qui est sans équivoque la copie exacte des textes “ originaux” .Ce texte n’est malheureusement plus imprimé, étant erronément édité par Christian Ginsburg.. Pour le Nouveau Testament, c’est le texte (Texte Majoritaire) Byzantin Grec ou Textus Receptus d’Érasme . Les traducteurs de la Bible King James se sont appuyés sur de précédentes éditions anglaises et étrangères de la Bible, aussi bien que sur de plus pures éditions en hébreu et en grec, qui ne nous sont plus disponibles aujourd’hui.
+    
+La raison primordiale de cette traduction était de justement donner aux francophones une Bible vraiment basée sur les manuscrits dont se sont servis les traducteurs de la King James anglaise. Cette Bible est unique en son genre. Une refonte totale était devenue nécessaire afin de mettre en valeur cette spécificité pour les lecteurs francophones.
+    
+C'est pourquoi ce travail est : mot pour mot, verset par verset la traduction intégrale - au plus près possible - du vocabulaire de la King James Bible anglaise. Rendez-vous sur http://www.kingjamesfrancaise.net/ pour plus de détails.
+    
+Traduction N. Stratford.
+http://www.kingjamesfrancaise.net/
+    `
+  },
+  {
     date: '1562621003832',
     type: logTypes.BUG,
     title: 'Meilleures performances entre les chapitres',

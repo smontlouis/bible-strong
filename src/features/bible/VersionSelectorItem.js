@@ -73,6 +73,9 @@ class VersionSelectorItem extends React.Component {
       case 'S21': {
         return Asset.fromModule(require('~assets/bible_versions/bible-s21.txt')).uri
       }
+      case 'KJF': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-kjf.txt')).uri
+      }
     }
   }
 

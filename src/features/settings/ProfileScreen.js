@@ -34,7 +34,7 @@ const ProfileScreen = ({ theme }) => (
       <ScrollView>
         <LinkItem route={'Search'}>
           <StyledIcon name={'search'} size={30} />
-          <Text bold fontSize={15}>Recherche (bêta)</Text>
+          <Text bold fontSize={15}>Recherche</Text>
         </LinkItem>
         <LinkItem href='https://bible-strong.canny.io/fonctionnalites'>
           <StyledIcon name={'sun'} size={30} />

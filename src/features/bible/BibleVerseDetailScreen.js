@@ -145,7 +145,7 @@ class BibleVerseDetailScreen extends React.Component {
 
     return (
       <Container>
-        <Header noBorder hasBackButton title={headerTitle} />
+        <Header noBorder hasBackButton title={`${headerTitle} - Strong LSG`} />
         <Box paddingTop={6} flex>
           <StyledVerse>
             <VersetWrapper>

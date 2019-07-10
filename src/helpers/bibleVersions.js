@@ -26,6 +26,10 @@ export const versions = {
     id: 'LSG',
     name: 'Bible Segond 1910'
   },
+  KJF: {
+    id: 'KJF',
+    name: 'King James Française'
+  },
   DBY: {
     id: 'DBY',
     name: 'Bible Darby'
