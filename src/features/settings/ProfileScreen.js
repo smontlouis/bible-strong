@@ -8,6 +8,8 @@ import styled from '@emotion/native'
 
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
+import Box from '~common/ui/Box'
+import app from '../../../app.json'
 
 const LinkItem = styled(Link)(({ theme }) => ({
   flexDirection: 'row',
@@ -31,7 +33,7 @@ const ProfileScreen = ({ theme }) => (
   (
     <Container>
       <Header title='Plus' />
-      <ScrollView>
+      <ScrollView flex={1}>
         <LinkItem route={'Search'}>
           <StyledIcon name={'search'} size={30} />
           <Text bold fontSize={15}>Recherche</Text>
@@ -61,6 +63,9 @@ const ProfileScreen = ({ theme }) => (
           <Text bold fontSize={15} color='primary'>Soutenir le développeur</Text>
         </LinkItem>
       </ScrollView>
+      <Box margin={10} alignItems='flex-end'>
+        <Text color='grey' fontSize={12}>Version: {app.expo.version}</Text>
+      </Box>
     </Container>
   )
 )
