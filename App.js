@@ -5,9 +5,11 @@ import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
 import Sentry from 'sentry-expo'
+import { setAutoFreeze } from 'immer'
+
 import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
-import { setAutoFreeze } from 'immer'
+import FireAuth from '~helpers/FireAuth'
 import InitApp from './InitApp'
 
 setAutoFreeze(false)
@@ -16,6 +18,7 @@ YellowBox.ignoreWarnings(['Require cycle:'])
 // if (__DEV__) {
 //   Sentry.enableInExpoDevelopment = true
 // }
+
 Sentry.config(
   'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911'
 ).install()
@@ -63,6 +66,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
+    FireAuth.init()
     this.updateApp()
   }
 

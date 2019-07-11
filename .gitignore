@@ -9,4 +9,5 @@ src/assets/db/**
 src/assets/bible_versions/**
 src/assets/lunr/**
 project/*
+config.js
 
