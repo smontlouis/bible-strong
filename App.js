@@ -1,6 +1,7 @@
 import React from 'react'
 import { YellowBox } from 'react-native'
 import { AppLoading, Updates } from 'expo'
+import * as Segment from 'expo-analytics-segment'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
@@ -11,6 +12,7 @@ import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
 import FireAuth from '~helpers/FireAuth'
 import InitApp from './InitApp'
+import { segmentConfig } from './config'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings(['Require cycle:'])
@@ -66,6 +68,10 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
+    if (!__DEV__) {
+      Segment.initialize(segmentConfig)
+      Segment.screen('Bible')
+    }
     FireAuth.init()
     this.updateApp()
   }

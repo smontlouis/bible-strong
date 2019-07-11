@@ -27,6 +27,7 @@
     "debounce": "^1.2.0",
     "emotion-theming": "^10.0.10",
     "expo": "^33.0.0",
+    "expo-analytics-segment": "~5.0.1",
     "expo-asset-utils": "^1.0.0",
     "expo-constants": "~5.0.1",
     "expo-font": "~5.0.1",

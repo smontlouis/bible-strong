@@ -1,4 +1,5 @@
 import produce from 'immer'
+import * as Segment from 'expo-analytics-segment'
 import books from '~assets/bible_versions/books-desc'
 
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
@@ -225,6 +226,11 @@ export function resetTempSelected () {
 }
 
 export function setVersion (version) {
+  if (!__DEV__) {
+    Segment.trackWithProperties('Bible version', {
+      version
+    })
+  }
   return {
     type: SET_VERSION,
     version

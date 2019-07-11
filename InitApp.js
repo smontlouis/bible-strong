@@ -2,6 +2,7 @@ import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { StatusBar } from 'react-native'
+import * as Segment from 'expo-analytics-segment'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 
@@ -25,6 +26,29 @@ class InitApp extends React.Component {
     else StatusBar.setBarStyle('dark-content')
   }
 
+  getActiveRouteName = (navigationState) => {
+    if (!navigationState) {
+      return null
+    }
+    const route = navigationState.routes[navigationState.index]
+    // dive into nested navigators
+    if (route.routes) {
+      return this.getActiveRouteName(route)
+    }
+    return route.routeName
+  }
+
+  onNavigationStateChange = (prevState, currentState, action) => {
+    const currentScreen = this.getActiveRouteName(currentState)
+    const prevScreen = this.getActiveRouteName(prevState)
+
+    if (prevScreen !== currentScreen) {
+      if (!__DEV__) {
+        Segment.screen(currentScreen)
+      }
+    }
+  }
+
   render () {
     const { theme, persistor } = this.props
     return (
@@ -32,7 +56,10 @@ class InitApp extends React.Component {
         <PaperProvider theme={paperTheme}>
           <PersistGate loading={null} persistor={persistor}>
             <>
-              <AppNavigator screenProps={{ theme }} />
+              <AppNavigator
+                screenProps={{ theme }}
+                onNavigationStateChange={this.onNavigationStateChange}
+              />
               <Changelog />
             </>
           </PersistGate>
