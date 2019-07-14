@@ -58,10 +58,10 @@ const ProfileScreen = ({ theme }) => (
           <StyledIcon name={'send'} size={30} />
           <Text bold fontSize={15} >Contacter le développeur</Text>
         </LinkItem>
-        <LinkItem href='https://fr.tipeee.com/smontlouis'>
+        {/* <LinkItem href='https://fr.tipeee.com/smontlouis'>
           <StyledIcon name={'thumbs-up'} size={30} color={theme.colors.primary} />
           <Text bold fontSize={15} color='primary'>Soutenir le développeur</Text>
-        </LinkItem>
+        </LinkItem> */}
       </ScrollView>
       <Box margin={10} alignItems='flex-end'>
         <Text color='grey' fontSize={12}>Version: {app.expo.version}</Text>
