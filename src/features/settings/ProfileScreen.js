@@ -1,11 +1,11 @@
 import React from 'react'
-import Container from '~common/ui/Container'
-import Header from '~common/Header'
 import { ScrollView, Platform } from 'react-native'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
+import Container from '~common/ui/Container'
+import Header from '~common/Header'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
