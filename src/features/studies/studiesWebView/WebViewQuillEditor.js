@@ -8,7 +8,6 @@ import React from 'react'
 import {
   View,
   ActivityIndicator,
-  StyleSheet,
   WebView,
   Alert
 } from 'react-native'

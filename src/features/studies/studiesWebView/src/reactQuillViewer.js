@@ -2,7 +2,6 @@ import Quill from './quill.js'
 import './quill.bubble.css'
 import React from 'react'
 import PropTypes from 'prop-types'
-import renderIf from 'render-if'
 
 const util = require('util')
 const MESSAGE_PREFIX = 'react-native-webview-quilljs'
@@ -41,13 +40,8 @@ export default class ReactQuillViewer extends React.Component {
   }
 
   componentDidMount () {
-    if (document) {
-      document.addEventListener('message', this.handleMessage), false
-    } else if (window) {
-      window.addEventListener('message', this.handleMessage), false
-    } else {
-      console.log('unable to add event listener')
-    }
+    document.addEventListener('message', this.handleMessage)
+
     this.printElement(`component mounted`)
     console.log('mounted')
     if (BROWSER_TESTING_ENABLED) {
@@ -198,7 +192,7 @@ export default class ReactQuillViewer extends React.Component {
             }}
           />
         </div>
-        {renderIf(SHOW_DEBUG_INFORMATION)(
+        {SHOW_DEBUG_INFORMATION && (
           <div
             style={{
               backgroundColor: 'rgba(50, 50, 200, 1)',

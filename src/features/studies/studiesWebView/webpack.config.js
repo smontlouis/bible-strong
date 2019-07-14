@@ -7,14 +7,13 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 let pathsToClean = ['build/*.*']
 module.exports = {
   entry: {
-    viewer: './web/componentViewer.js',
-    editor: './web/componentEditor.js'
+    viewer: './src/componentViewer.js',
+    editor: './src/componentEditor.js'
   },
   output: {
     path: path.join(__dirname, './build'),
     filename: '[name].bundle.js'
   },
-  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -23,7 +22,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        include: [path.resolve(__dirname, 'web')],
+        include: [path.resolve(__dirname, 'src')],
         exclude: /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',
@@ -47,18 +46,17 @@ module.exports = {
       }
     ]
   },
-  mode: 'development',
   plugins: [
     new CleanWebpackPlugin(pathsToClean),
     new HtmlWebpackPlugin({
-      template: './web/reactNativeComponentTemplate.html',
+      template: './src/reactNativeComponentTemplate.html',
       inject: 'body',
       filename: './reactQuillViewer-index.html',
       inlineSource: 'viewer.bundle.js',
       chunks: ['viewer']
     }),
     new HtmlWebpackPlugin({
-      template: './web/reactNativeComponentTemplate.html',
+      template: './src/reactNativeComponentTemplate.html',
       inject: 'body',
       filename: './reactQuillEditor-index.html',
       inlineSource: 'editor.bundle.js',

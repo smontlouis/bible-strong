@@ -1,10 +1,11 @@
 import Quill from './quill.js'
 import './quill.snow.css'
 import React from 'react'
+import debounce from 'debounce'
 
 const util = require('util')
 
-const BROWSER_TESTING_ENABLED = false // flag to enable testing directly in browser
+const BROWSER_TESTING_ENABLED = true
 const SHOW_DEBUG_INFORMATION = true
 
 export default class ReactQuillEditor extends React.Component {
@@ -43,17 +44,18 @@ export default class ReactQuillEditor extends React.Component {
     }
   }
 
-  addTextChangeEventToEditor = () => {
-    let that = this
-    this.state.editor.on('text-change', (delta, oldDelta, source) => {
-      that.addMessageToQueue('TEXT_CHANGED', {
-        type: 'success',
-        deltaChange: delta,
-        delta: this.state.editor.getContents(),
-        deltaOld: oldDelta,
-        changeSource: source
-      })
+  onChangeText = (delta, oldDelta, source) => {
+    this.addMessageToQueue('TEXT_CHANGED', {
+      type: 'success',
+      deltaChange: delta,
+      delta: this.state.editor.getContents(),
+      deltaOld: oldDelta,
+      changeSource: source
     })
+  }
+
+  addTextChangeEventToEditor = () => {
+    this.state.editor.on('text-change', debounce(this.onChangeText, 500))
   }
 
   loadEditor = theme => {
@@ -63,7 +65,16 @@ export default class ReactQuillEditor extends React.Component {
       {
         editor: new Quill('#editor', {
           theme: theme || 'snow',
-          bounds: '#Quill-Editor-Container'
+          bounds: '#Quill-Editor-Container',
+          modules: {
+            toolbar: [
+              [{ header: [1, 2, false] }],
+              [{ 'color': [] }, { 'background': [] }],
+              ['bold', 'italic', 'underline'],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }]
+            ]
+          },
+          placeholder: 'Créer votre étude...'
         })
       },
       () => {
@@ -182,7 +193,7 @@ export default class ReactQuillEditor extends React.Component {
           />
         </div>
         {
-          SHOW_DEBUG_INFORMATION &&
+          (SHOW_DEBUG_INFORMATION && !BROWSER_TESTING_ENABLED) &&
           <div
             style={{
               backgroundColor: 'rgba(200, 200, 200, 1)',

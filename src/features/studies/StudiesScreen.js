@@ -3,7 +3,7 @@ import React from 'react'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Header from '~common/Header'
-import WebViewQuillEditor from '~features/studies/react-native-webview-quilljs/WebViewQuillEditor'
+import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEditor'
 
 export default class App extends React.Component {
   state = {
