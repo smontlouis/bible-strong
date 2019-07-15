@@ -1,6 +1,11 @@
-import Quill from './quill.js'
-import './quill.snow.css'
+import Quill from '../quill.js'
+import './InlineVerse'
+import './ModuleInlineVerse'
+
+import '../quill.snow.css'
+
 import React from 'react'
+import Toolbar from './Toolbar'
 import debounce from 'debounce'
 
 const util = require('util')
@@ -9,15 +14,14 @@ const BROWSER_TESTING_ENABLED = true
 const SHOW_DEBUG_INFORMATION = true
 
 export default class ReactQuillEditor extends React.Component {
-  constructor (props) {
-    super(props)
-    this.messageQueue = []
-    this.state = {
-      editor: null,
-      debugMessages: [],
-      readyToSendNextMessage: true
-    }
+  state = {
+    editor: null,
+    debugMessages: [],
+    readyToSendNextMessage: true
   }
+
+  messageQueue = []
+
   // print passed information in an html element; useful for debugging
   // since console.log and debug statements won't work in a conventional way
   printElement = data => {
@@ -38,6 +42,23 @@ export default class ReactQuillEditor extends React.Component {
   componentDidMount () {
     document.addEventListener('message', this.handleMessage)
     this.printElement(`component mounted`)
+
+    this.quill = new Quill('#editor', {
+      theme: 'snow',
+      modules: {
+        toolbar: {
+          container: '#toolbar'
+        },
+        'inline-verse': true
+      },
+      placeholder: 'Créer votre étude...'
+    })
+
+    this.quill.setContents([
+      { insert: 'Change the ' },
+      { insert: 'World!', attributes: { bold: true } },
+      { insert: '\n' }
+    ])
 
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
@@ -63,19 +84,7 @@ export default class ReactQuillEditor extends React.Component {
     this.printElement(`loading editor`)
     this.setState(
       {
-        editor: new Quill('#editor', {
-          theme: theme || 'snow',
-          bounds: '#Quill-Editor-Container',
-          modules: {
-            toolbar: [
-              [{ header: [1, 2, false] }],
-              [{ 'color': [] }, { 'background': [] }],
-              ['bold', 'italic', 'underline'],
-              [{ 'list': 'ordered' }, { 'list': 'bullet' }]
-            ]
-          },
-          placeholder: 'Créer votre étude...'
-        })
+        editor: this.quill
       },
       () => {
         that.printElement(`editor initialized`)
@@ -89,11 +98,7 @@ export default class ReactQuillEditor extends React.Component {
   }
 
   componentWillUnmount () {
-    if (document) {
-      document.removeEventListener('message', this.handleMessage)
-    } else if (window) {
-      window.removeEventListener('message', this.handleMessage)
-    }
+    document.removeEventListener('message', this.handleMessage)
   }
 
   addMessageToQueue = (type, payload) => {
@@ -168,39 +173,28 @@ export default class ReactQuillEditor extends React.Component {
 
   render () {
     return (
-      <div
-        id='Quill-Editor-Container'
-        style={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
+      <React.Fragment>
+        <Toolbar />
         <div
+          id='editor'
           style={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            paddingVertical: 5
+            fontSize: '20px',
+            height: '100%'
           }}
-        >
-          <div
-            id='editor'
-            style={{
-              fontSize: '20px',
-              height: 'calc(100% - 42px)'
-            }}
-          />
-        </div>
+        />
         {
-          (SHOW_DEBUG_INFORMATION && !BROWSER_TESTING_ENABLED) &&
+          (SHOW_DEBUG_INFORMATION && BROWSER_TESTING_ENABLED) &&
           <div
             style={{
               backgroundColor: 'rgba(200, 200, 200, 1)',
               fontFamily: 'arial',
               maxHeight: 200,
               overflow: 'auto',
-              padding: 5
+              padding: 5,
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0
             }}
             id='messages'
           >
@@ -211,7 +205,7 @@ export default class ReactQuillEditor extends React.Component {
             </ul>
           </div>
         }
-      </div>
+      </React.Fragment>
     )
   }
 }

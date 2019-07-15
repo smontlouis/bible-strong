@@ -49,14 +49,14 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(pathsToClean),
     new HtmlWebpackPlugin({
-      template: './src/reactNativeComponentTemplate.html',
+      template: './src/index.html',
       inject: 'body',
       filename: './reactQuillViewer-index.html',
       inlineSource: 'viewer.bundle.js',
       chunks: ['viewer']
     }),
     new HtmlWebpackPlugin({
-      template: './src/reactNativeComponentTemplate.html',
+      template: './src/index.html',
       inject: 'body',
       filename: './reactQuillEditor-index.html',
       inlineSource: 'editor.bundle.js',
