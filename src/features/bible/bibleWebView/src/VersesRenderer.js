@@ -62,7 +62,8 @@ class VersesRenderer extends Component {
     isReadOnly: false,
     version: 'LSG',
     pericopeChapter: {},
-    chapter: ''
+    chapter: '',
+    isSelectionMode: ''
   }
 
   componentDidMount () {
@@ -170,7 +171,8 @@ class VersesRenderer extends Component {
             isReadOnly,
             version,
             pericopeChapter,
-            chapter
+            chapter,
+            isSelectionMode
           } = response
 
           self.setState({
@@ -185,7 +187,8 @@ class VersesRenderer extends Component {
             isReadOnly,
             version,
             pericopeChapter,
-            chapter
+            chapter,
+            isSelectionMode
           })
           break
         }
@@ -230,6 +233,7 @@ class VersesRenderer extends Component {
                     settings={this.state.settings}
                     isSelected={isSelected}
                     isSelectedMode={isSelectedMode}
+                    isSelectionMode={this.state.isSelectionMode}
                     highlightedColor={highlightedColor}
                     notesCount={notesCount}
                     notesText={notesText}

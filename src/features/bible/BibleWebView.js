@@ -77,12 +77,13 @@ class BibleWebView extends Component {
   // Receives all data from webview
   receiveDataFromWebView = (e) => {
     const action = JSON.parse(e.nativeEvent.data)
+    console.log(action)
 
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         const { setSelectedVerse, navigation } = this.props
         setSelectedVerse(Number(action.payload))
-        navigation.navigate('BibleVerseDetail')
+        navigation.navigate('BibleVerseDetail', action.params)
         break
       }
       case NAVIGATE_TO_VERSE_NOTES: {
@@ -132,7 +133,8 @@ class BibleWebView extends Component {
       isReadOnly,
       version,
       pericopeChapter,
-      chapter
+      chapter,
+      isSelectionMode
     } = this.props
 
     this.dispatchToWebView({
@@ -146,7 +148,8 @@ class BibleWebView extends Component {
       isReadOnly,
       version,
       pericopeChapter,
-      chapter
+      chapter,
+      isSelectionMode
     })
   }
 

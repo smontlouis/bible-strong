@@ -51,7 +51,7 @@ export default async (selectedVerses, version = 'LSG') => {
   reference += getVersesRef(versesList)
 
   return {
-    title: reference,
+    title: reference || '',
     version,
     content: toShare,
     all: `${toShare} \n${reference} ${version}`

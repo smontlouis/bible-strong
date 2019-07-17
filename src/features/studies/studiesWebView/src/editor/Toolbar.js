@@ -29,6 +29,8 @@ const Toolbar = () => (
     <span className='ql-formats'>
       <button className='ql-inline-verse' />
       <button className='ql-inline-strong' />
+      <button className='ql-block-verse'>vers</button>
+      <button className='ql-block-strong'>stron</button>
     </span>
   </div>
 )

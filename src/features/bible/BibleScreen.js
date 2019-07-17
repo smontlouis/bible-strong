@@ -40,6 +40,7 @@ class BibleScreen extends React.Component {
       app,
       navigation,
       isReadOnly,
+      isSelectionMode,
       setSettingsAlignContent,
       setSettingsTextDisplay,
       setSettingsPress,
@@ -57,6 +58,7 @@ class BibleScreen extends React.Component {
         <StatusBar translucent backgroundColor='white' />
         <BibleHeader
           isReadOnly={isReadOnly}
+          isSelectionMode={isSelectionMode}
           book={app.book}
           chapter={app.chapter}
           verse={app.verse}
@@ -65,6 +67,7 @@ class BibleScreen extends React.Component {
         />
         <BibleViewer
           isReadOnly={isReadOnly}
+          isSelectionMode={isSelectionMode}
           arrayVerses={arrayVerses}
           book={app.book}
           chapter={app.chapter}
@@ -108,6 +111,7 @@ export default connect(
     const params = ownProps.navigation.state.params
     return {
       isReadOnly: params && params.isReadOnly,
+      isSelectionMode: params && params.isSelectionMode,
       settings: user.bible.settings,
       app: {
         book: (params && params.book) || bible.selectedBook,

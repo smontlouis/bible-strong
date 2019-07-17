@@ -129,14 +129,18 @@ class BibleVerseDetailScreen extends React.Component {
     })
   }
 
-  renderItem = ({ item, index }) => (
-    <StrongCard
-      navigation={this.props.navigation}
-      book={this.props.verse.Livre}
-      strongReference={item}
-      index={index}
-    />
-  )
+  renderItem = ({ item, index }) => {
+    const params = this.props.navigation.state.params || {}
+    return (
+      <StrongCard
+        isSelectionMode={params.isSelectionMode}
+        navigation={this.props.navigation}
+        book={this.props.verse.Livre}
+        strongReference={item}
+        index={index}
+      />
+    )
+  }
 
   render () {
     const {

@@ -113,6 +113,7 @@ class BibleViewer extends Component {
       goToPrevChapter,
       goToNextChapter,
       isReadOnly,
+      isSelectionMode,
       modalIsVisible,
       isSelectedVerseHighlighted,
       addHighlight,
@@ -166,6 +167,7 @@ class BibleViewer extends Component {
             setSelectedVerse={setSelectedVerse}
             version={version}
             isReadOnly={isReadOnly}
+            isSelectionMode={isSelectionMode}
             arrayVerses={array}
             selectedVerses={selectedVerses}
             highlightedVerses={highlightedVerses}
@@ -195,6 +197,7 @@ class BibleViewer extends Component {
         {
           modalIsVisible &&
           <SelectedVersesModal
+            isSelectionMode={isSelectionMode}
             setSelectedVerse={this.props.setSelectedVerse}
             onCreateNoteClick={onCreateNoteClick}
             isVisible={modalIsVisible}

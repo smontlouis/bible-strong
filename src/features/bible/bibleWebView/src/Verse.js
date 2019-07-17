@@ -97,8 +97,35 @@ class Verse extends Component {
     })
   }
 
+  navigateToBibleVerseDetail= (params = {}) => {
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+      payload: this.props.verse.Verset,
+      params
+    })
+  }
+
+  navigateToNote = (id) => {
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_NOTE,
+      payload: id
+    })
+  }
+
   onPress = () => {
-    const { isSelectedMode, settings: { press } } = this.props
+    const { isSelectedMode, isSelectionMode, settings: { press } } = this.props
+
+    // If selection mode verse, always toggle on press
+    if (isSelectionMode && isSelectionMode.includes('verse')) {
+      this.toggleSelectVerse()
+      return
+    }
+
+    // If selection mode verse, always toggle on press
+    if (isSelectionMode && isSelectionMode.includes('strong')) {
+      this.navigateToBibleVerseDetail({ isSelectionMode })
+      return
+    }
 
     console.log('shortpress')
 
@@ -110,7 +137,12 @@ class Verse extends Component {
   }
 
   onLongPress = () => {
-    const { settings: { press } } = this.props
+    const { settings: { press }, isSelectionMode } = this.props
+
+    // If selection mode, do nothing on long press
+    if (isSelectionMode) {
+      return
+    }
 
     this.shouldShortPress = false
     console.log('longpress, moved: ', this.moved)
@@ -130,20 +162,6 @@ class Verse extends Component {
     dispatch({
       type: TOGGLE_SELECTED_VERSE,
       payload: `${Livre}-${Chapitre}-${Verset}`
-    })
-  }
-
-  navigateToBibleVerseDetail= () => {
-    dispatch({
-      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-      payload: this.props.verse.Verset
-    })
-  }
-
-  navigateToNote = (id) => {
-    dispatch({
-      type: NAVIGATE_TO_BIBLE_NOTE,
-      payload: id
     })
   }
 
@@ -180,6 +198,7 @@ class Verse extends Component {
     const { isFocused } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
+
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText

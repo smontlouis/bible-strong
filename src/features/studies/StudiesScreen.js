@@ -8,8 +8,19 @@ import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEdi
 export default class App extends React.Component {
   state = {
     editorMessageDelta: [
-      { insert: 'Hello World' },
-      { insert: '!', attributes: { bold: true } }
+      { insert: 'Hello World\n' },
+      { insert: "I'm " },
+      { insert: 'bold\n\n', attributes: { bold: true, 'inline-verse': { title: 'Genèse 1:1', verses: ['1-1-1'] } } },
+      { insert: 'Dude :)' },
+      {
+        insert: {
+          'block-verse': {
+            title: 'bla',
+            verses: '[1-1-1]'
+          }
+        }
+      },
+      { insert: { divider: true } }
     ]
   }
 
@@ -22,7 +33,6 @@ export default class App extends React.Component {
   };
 
   onDeltaChangeCallback = (delta, deltaChange, deltaOld, changeSource) => {
-    console.log('text changed')
   };
 
   render () {
@@ -35,6 +45,7 @@ export default class App extends React.Component {
             getDeltaCallback={this.getDeltaCallback}
             onDeltaChangeCallback={this.onDeltaChangeCallback}
             contentToDisplay={this.state.editorMessageDelta}
+            params={this.props.navigation.state.params}
           />
         </Box>
       </Container>

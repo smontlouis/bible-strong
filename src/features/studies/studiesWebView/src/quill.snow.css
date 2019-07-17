@@ -820,11 +820,7 @@
     padding: 5px 12px;
     white-space: nowrap;
   }
-  .ql-snow .ql-tooltip::before {
-    content: "Visit URL:";
-    line-height: 26px;
-    margin-right: 8px;
-  }
+
   .ql-snow .ql-tooltip input[type=text] {
     display: none;
     border: 1px solid #ccc;
@@ -834,7 +830,7 @@
     padding: 3px 5px;
     width: 170px;
   }
-  .ql-snow .ql-tooltip a.ql-preview {
+  .ql-snow .ql-tooltip .ql-preview {
     display: inline-block;
     max-width: 200px;
     overflow-x: hidden;
@@ -854,7 +850,7 @@
   .ql-snow .ql-tooltip a {
     line-height: 26px;
   }
-  .ql-snow .ql-tooltip.ql-editing a.ql-preview,
+  .ql-snow .ql-tooltip.ql-editing .ql-preview,
   .ql-snow .ql-tooltip.ql-editing a.ql-remove {
     display: none;
   }

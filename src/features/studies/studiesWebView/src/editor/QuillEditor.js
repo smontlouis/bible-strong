@@ -1,47 +1,29 @@
 import Quill from '../quill.js'
 import './InlineVerse'
-import './ModuleInlineVerse'
+import './InlineStrong'
+import './VerseBlock'
+import './StrongBlock'
 
+import './ModuleInlineVerse'
+import './ModuleBlockVerse'
+import './DividerBlock'
+import Toolbar from './Toolbar'
 import '../quill.snow.css'
 
 import React from 'react'
-import Toolbar from './Toolbar'
 import debounce from 'debounce'
-
-const util = require('util')
+import { dispatch, dispatchConsole } from '../dispatch'
 
 const BROWSER_TESTING_ENABLED = true
-const SHOW_DEBUG_INFORMATION = true
 
 export default class ReactQuillEditor extends React.Component {
   state = {
-    editor: null,
-    debugMessages: [],
-    readyToSendNextMessage: true
-  }
-
-  messageQueue = []
-
-  // print passed information in an html element; useful for debugging
-  // since console.log and debug statements won't work in a conventional way
-  printElement = data => {
-    if (SHOW_DEBUG_INFORMATION) {
-      let message = ''
-      if (typeof data === 'object') {
-        message = util.inspect(data, { showHidden: false, depth: null })
-      } else if (typeof data === 'string') {
-        message = data
-      }
-      this.setState({
-        debugMessages: this.state.debugMessages.concat([message])
-      })
-      console.log(message)
-    }
+    editor: null
   }
 
   componentDidMount () {
     document.addEventListener('message', this.handleMessage)
-    this.printElement(`component mounted`)
+    dispatchConsole(`component mounted`)
 
     this.quill = new Quill('#editor', {
       theme: 'snow',
@@ -49,15 +31,27 @@ export default class ReactQuillEditor extends React.Component {
         toolbar: {
           container: '#toolbar'
         },
-        'inline-verse': true
+        'inline-verse': true,
+        'block-verse': true
       },
       placeholder: 'Créer votre étude...'
     })
 
     this.quill.setContents([
-      { insert: 'Change the ' },
-      { insert: 'World!', attributes: { bold: true } },
-      { insert: '\n' }
+      { insert: 'Hello World\n' },
+      { insert: "I'm " },
+      { insert: 'bold\n\n', attributes: { bold: true, 'inline-verse': { title: 'Genèse 1:1', verses: ['1-1-1'] } } },
+      { insert: 'Dude :)' },
+      {
+        insert: {
+          'block-verse': {
+            title: 'Genèse 1:1',
+            verses: '[1-1-1]',
+            content: 'lorem ipsum'
+          }
+        }
+      },
+      { insert: { divider: true } }
     ])
 
     if (BROWSER_TESTING_ENABLED) {
@@ -66,7 +60,7 @@ export default class ReactQuillEditor extends React.Component {
   }
 
   onChangeText = (delta, oldDelta, source) => {
-    this.addMessageToQueue('TEXT_CHANGED', {
+    dispatch('TEXT_CHANGED', {
       type: 'success',
       deltaChange: delta,
       delta: this.state.editor.getContents(),
@@ -81,14 +75,14 @@ export default class ReactQuillEditor extends React.Component {
 
   loadEditor = theme => {
     let that = this
-    this.printElement(`loading editor`)
+    dispatchConsole(`loading editor`)
     this.setState(
       {
         editor: this.quill
       },
       () => {
-        that.printElement(`editor initialized`)
-        that.addMessageToQueue('EDITOR_LOADED', {
+        dispatchConsole(`editor initialized`)
+        dispatch('EDITOR_LOADED', {
           type: 'success',
           delta: this.state.editor.getContents()
         })
@@ -101,47 +95,20 @@ export default class ReactQuillEditor extends React.Component {
     document.removeEventListener('message', this.handleMessage)
   }
 
-  addMessageToQueue = (type, payload) => {
-    this.messageQueue.push(
-      JSON.stringify({
-        type,
-        payload
-      })
-    )
-    if (this.state.readyToSendNextMessage) {
-      this.sendNextMessage()
-    }
-  }
-
-  sendNextMessage = () => {
-    if (this.messageQueue.length > 0) {
-      const nextMessage = this.messageQueue.shift()
-      window.postMessage(nextMessage, '*')
-      this.setState({ readyToSendNextMessage: false })
-    }
-  }
-
   handleMessage = event => {
-    this.printElement(
-      util.inspect(event.data, {
-        showHidden: false,
-        depth: null
-      })
-    )
-
-    let msgData
     try {
-      msgData = JSON.parse(event.data)
+      const msgData = JSON.parse(event.data)
+      dispatchConsole(msgData.type)
 
       switch (msgData.type) {
         case 'LOAD_EDITOR':
           this.loadEditor()
           break
         case 'SEND_EDITOR':
-          this.addMessageToQueue('EDITOR_SENT', { editor: this.state.editor })
+          this.dispatch('EDITOR_SENT', { editor: this.state.editor })
           break
         case 'GET_DELTA':
-          this.addMessageToQueue('RECEIVE_DELTA', {
+          this.dispatch('RECEIVE_DELTA', {
             type: 'success',
             delta: this.state.editor.getContents()
           })
@@ -154,20 +121,31 @@ export default class ReactQuillEditor extends React.Component {
             msgData.payload.html
           )
           break
-        case 'MESSAGE_ACKNOWLEDGED':
-          this.setState({ readyToSendNextMessage: true }, () => {
-            this.sendNextMessage()
-          })
+        case 'GET_BIBLE_VERSES':
+          this.inlineVerseModule = this.quill.getModule('inline-verse')
+          this.inlineVerseModule.receiveVerseLink(msgData.payload)
+          break
+        case 'GET_BIBLE_STRONG':
+          this.inlineVerseModule = this.quill.getModule('inline-verse')
+          this.inlineVerseModule.receiveStrongLink(msgData.payload)
+          break
+        case 'GET_BIBLE_VERSES_BLOCK':
+          this.blockVerseModule = this.quill.getModule('block-verse')
+          this.blockVerseModule.receiveVerseBlock(msgData.payload)
+          break
+        case 'GET_BIBLE_STRONG_BLOCK':
+          this.blockVerseModule = this.quill.getModule('block-verse')
+          this.blockVerseModule.receiveStrongBlock(msgData.payload)
           break
         default:
-          this.printElement(
+          dispatchConsole(
             `reactQuillEditor Error: Unhandled message type received "${
               msgData.type
             }"`
           )
       }
     } catch (err) {
-      this.printElement(`reactQuillEditor error: ${err}`)
+      dispatchConsole(`reactQuillEditor error: ${err}`)
     }
   }
 
@@ -182,29 +160,6 @@ export default class ReactQuillEditor extends React.Component {
             height: '100%'
           }}
         />
-        {
-          (SHOW_DEBUG_INFORMATION && BROWSER_TESTING_ENABLED) &&
-          <div
-            style={{
-              backgroundColor: 'rgba(200, 200, 200, 1)',
-              fontFamily: 'arial',
-              maxHeight: 200,
-              overflow: 'auto',
-              padding: 5,
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0
-            }}
-            id='messages'
-          >
-            <ul>
-              {this.state.debugMessages.map((message, index) => {
-                return <li key={index}>{message}</li>
-              })}
-            </ul>
-          </div>
-        }
       </React.Fragment>
     )
   }

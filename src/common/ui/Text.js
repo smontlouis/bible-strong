@@ -10,6 +10,7 @@ const Text = styled.Text(props => {
     color: props.color ? props.theme.colors[props.color] : props.theme.colors.default,
     fontSize: props.fontSize,
     fontWeight: props.bold ? 'bold' : undefined,
+    textAlign: props.textAlign,
 
     // container
     backgroundColor: props.backgroundColor,

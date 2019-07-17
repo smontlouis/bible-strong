@@ -48,6 +48,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 
 const Header = ({
   isReadOnly,
+  isSelectionMode,
   noBorder,
   book,
   chapter,
@@ -74,6 +75,14 @@ const Header = ({
   }
   return (
     <HeaderBox noBorder={noBorder} row>
+      {
+        isSelectionMode &&
+        <Box justifyContent='center'>
+          <Back underlayColor='transparent' style={{ marginRight: 15 }}>
+            <StyledIcon name={'arrow-left'} size={20} />
+          </Back>
+        </Box>
+      }
       <LinkBox route={'BibleSelect'}>
         <StyledText>
           {book.Nom} {chapter}
@@ -84,11 +93,14 @@ const Header = ({
         <StyledText>{version}</StyledText>
         <StyledIcon name='chevron-down' size={15} />
       </LinkBox>
-      <BibleParameters onPress={onBibleParamsClick}>
-        <StyledText>
+      {
+        !isSelectionMode &&
+        <BibleParameters onPress={onBibleParamsClick}>
+          <StyledText>
           Aa
-        </StyledText>
-      </BibleParameters>
+          </StyledText>
+        </BibleParameters>
+      }
     </HeaderBox>
   )
 }

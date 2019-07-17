@@ -10,7 +10,7 @@ import Paragraph from '~common/ui/Paragraph'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 
-import { wp } from '~helpers/utils'
+import { wp, cleanParams } from '~helpers/utils'
 import capitalize from '~helpers/capitalize'
 import truncate from '~helpers/truncate'
 
@@ -58,13 +58,37 @@ const IconFeather = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 class StrongCard extends React.Component {
-  async componentDidMount () {}
+  openStrong = () => {
+    const {
+      book,
+      strongReference,
+      navigation,
+      isSelectionMode,
+      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG }
+    } = this.props
+
+    if (isSelectionMode) {
+      navigation.navigate('Studies', {
+        ...cleanParams(),
+        type: isSelectionMode,
+        title: Mot,
+        code: Code,
+        strongType: Type,
+        phonetique: Phonetique,
+        definition: Definition,
+        translatedBy: LSG
+      })
+    } else {
+      navigation.navigate('BibleStrongDetail', {
+        book,
+        strongReference
+      })
+    }
+  }
   render () {
     const {
-      navigation,
-      book,
+      isSelectionMode,
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG },
-      strongReference,
       theme
     } = this.props
 
@@ -74,12 +98,7 @@ class StrongCard extends React.Component {
         <Box paddingTop={10}>
           <Box>
             <OpenStrongIcon
-              onPress={() =>
-                navigation.navigate('BibleStrongDetail', {
-                  book,
-                  strongReference
-                })
-              }
+              onPress={this.openStrong}
             >
               <Text title fontSize={22} flex>
                 {truncate(capitalize(Mot), 7)}
@@ -90,10 +109,17 @@ class StrongCard extends React.Component {
                   </Text>
                 )}
               </Text>
-              <IconFeather
-                name='maximize-2'
-                size={20}
-              />
+              {
+                isSelectionMode
+                  ? <IconFeather
+                    name='share'
+                    size={20}
+                  />
+                  : <IconFeather
+                    name='maximize-2'
+                    size={20}
+                  />
+              }
             </OpenStrongIcon>
             {!!Type && (
               <Text titleItalic color='darkGrey'>
