@@ -8,7 +8,11 @@ const Module = Quill.import('core/module')
 
 class ModuleInlineVerse extends Module {
   static DEFAULTS = {
-    buttonIcon: '<svg viewbox="0 0 18 18"><circle class="ql-fill" cx="7" cy="7" r="1"></circle><circle class="ql-fill" cx="11" cy="7" r="1"></circle><path class="ql-stroke" d="M7,10a2,2,0,0,0,4,0H7Z"></path><circle class="ql-stroke" cx="9" cy="9" r="6"></circle></svg>'
+    buttonIcon: `<svg viewbox="0 0 18 18">
+    <line class="ql-stroke" x1="7" x2="11" y1="7" y2="11"></line>
+    <path class="ql-even ql-stroke" d="M8.9,4.577a3.476,3.476,0,0,1,.36,4.679A3.476,3.476,0,0,1,4.577,8.9C3.185,7.5,2.035,6.4,4.217,4.217S7.5,3.185,8.9,4.577Z"></path>
+    <path class="ql-even ql-stroke" d="M13.423,9.1a3.476,3.476,0,0,0-4.679-.36,3.476,3.476,0,0,0,.36,4.679c1.392,1.392,2.5,2.542,4.679.36S14.815,10.5,13.423,9.1Z"></path>
+  </svg>`
   }
 
   constructor (quill, options) {
@@ -35,7 +39,7 @@ class ModuleInlineVerse extends Module {
   }
 
   openVerseLink = (value) => {
-    const range = this.quill.getSelection()
+    const range = this.quill.getSelection(true)
 
     if (!range.length) {
       return
@@ -66,10 +70,11 @@ class ModuleInlineVerse extends Module {
       title,
       verses
     })
+    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
   }
 
   openStrongLink = (value) => {
-    const range = this.quill.getSelection()
+    const range = this.quill.getSelection(true)
 
     if (!range.length) {
       return
@@ -100,6 +105,7 @@ class ModuleInlineVerse extends Module {
       title,
       code
     })
+    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
   }
 }
 

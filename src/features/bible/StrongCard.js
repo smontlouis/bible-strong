@@ -68,7 +68,7 @@ class StrongCard extends React.Component {
     } = this.props
 
     if (isSelectionMode) {
-      navigation.navigate('Studies', {
+      navigation.navigate('EditStudy', {
         ...cleanParams(),
         type: isSelectionMode,
         title: Mot,

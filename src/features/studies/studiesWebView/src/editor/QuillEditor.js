@@ -13,8 +13,9 @@ import '../quill.snow.css'
 import React from 'react'
 import debounce from 'debounce'
 import { dispatch, dispatchConsole } from '../dispatch'
+import MockContent from './MockContent.js'
 
-const BROWSER_TESTING_ENABLED = true
+const BROWSER_TESTING_ENABLED = false
 
 export default class ReactQuillEditor extends React.Component {
   state = {
@@ -37,22 +38,7 @@ export default class ReactQuillEditor extends React.Component {
       placeholder: 'Créer votre étude...'
     })
 
-    this.quill.setContents([
-      { insert: 'Hello World\n' },
-      { insert: "I'm " },
-      { insert: 'bold\n\n', attributes: { bold: true, 'inline-verse': { title: 'Genèse 1:1', verses: ['1-1-1'] } } },
-      { insert: 'Dude :)' },
-      {
-        insert: {
-          'block-verse': {
-            title: 'Genèse 1:1',
-            verses: '[1-1-1]',
-            content: 'lorem ipsum'
-          }
-        }
-      },
-      { insert: { divider: true } }
-    ])
+    this.quill.setContents(MockContent)
 
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
@@ -152,14 +138,8 @@ export default class ReactQuillEditor extends React.Component {
   render () {
     return (
       <React.Fragment>
+        <div id='editor' />
         <Toolbar />
-        <div
-          id='editor'
-          style={{
-            fontSize: '20px',
-            height: '100%'
-          }}
-        />
       </React.Fragment>
     )
   }

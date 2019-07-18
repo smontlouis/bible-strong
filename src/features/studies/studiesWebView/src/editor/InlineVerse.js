@@ -4,12 +4,12 @@ const Inline = Quill.import('blots/inline')
 class InlineVerse extends Inline {
   static blotName = 'inline-verse'
   static tagName = 'a'
+  static className = 'inline-verse'
 
   static create ({ title, verses }) {
     let node = super.create()
     node.setAttribute('data-title', title)
     node.setAttribute('data-verses', JSON.stringify(verses))
-    node.classList.add('inline-verse')
     return node
   }
 

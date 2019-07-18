@@ -1,0 +1,52 @@
+.block-verse {
+}
+
+.block-verse hr {
+  border: none;
+  color: #111;
+  letter-spacing: 1em;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.block-verse hr::before {
+  content: '...';
+}
+
+.block-verse--content {
+  quotes: "“" "”" "‘" "’";
+  font-size: 15px;
+  font-style: italic
+}
+
+.block-verse--content:before {  
+  content: open-quote;
+  margin-right: 10px;
+}
+
+.block-verse--content:after {
+  content: close-quote;
+  margin-left: 10px;
+}
+
+.block-verse--content:before,
+.block-verse--content:after {
+  font-size: 35px;
+  font-weight: bold;
+  line-height: 0px;
+  position: relative;
+  top: 14px;
+}
+
+.block-verse--bottom {
+  display: flex;
+  margin-top: 20px;
+}
+
+.block-verse--verse {
+  flex: 1;
+}
+
+.block-verse--version {
+  font-weight: bold;  
+}

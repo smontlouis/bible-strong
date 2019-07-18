@@ -19,6 +19,7 @@ class WebViewQuillEditor extends React.Component {
     const oldParams = prevProps.params || {}
     const newParams = this.props.params || {}
     console.log(newParams)
+    // TODO: ERROR HERE - dispatch correctly
     if (oldParams.title !== newParams.title) {
       if (newParams.type.includes('verse')) {
         const isBlock = newParams.type.includes('block')
@@ -177,8 +178,7 @@ class WebViewQuillEditor extends React.Component {
           renderLoading={this.showLoadingIndicator}
           renderError={this.renderError}
           onError={this.onError}
-          mixedContentMode={'always'}
-          domStorageEnabled
+          allowFileAccess
         />
       </View>
     )

@@ -15,14 +15,14 @@ export const hp = percentage => {
 }
 
 export const cleanParams = () => ({
-  type: null,
-  title: null,
-  code: null,
-  strongType: null,
-  phonetique: null,
-  definition: null,
-  translatedBy: null,
-  content: null,
-  version: null,
-  verses: null
+  type: undefined,
+  title: undefined,
+  code: undefined,
+  strongType: undefined,
+  phonetique: undefined,
+  definition: undefined,
+  translatedBy: undefined,
+  content: undefined,
+  version: undefined,
+  verses: undefined
 })

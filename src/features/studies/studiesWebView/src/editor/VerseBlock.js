@@ -13,12 +13,11 @@ class VerseBlock extends BlockEmbed {
   static create (data) {
     let node = super.create(data)
     node.setAttribute('contenteditable', false)
+    const { title, content, version, verses } = data
+    node.setAttribute('data', JSON.stringify(data))
 
     ReactDOM.render(
-      <Verse
-        title={data.title}
-        verses={data.verses}
-        content={data.content}
+      <Verse {...{ title, content, version, verses }}
       />, node
     )
 
@@ -26,14 +25,13 @@ class VerseBlock extends BlockEmbed {
   }
 
   static formats (domNode) {
-    return {
-      title: domNode.getAttribute('data-title'),
-      verses: JSON.parse(domNode.getAttribute('data-verses'))
-    }
+    const data = domNode.getAttribute('data')
+    return JSON.parse(data)
   }
 
   static value (domNode) {
-    return JSON.parse(domNode.getAttribute('data-verses'))
+    const data = domNode.getAttribute('data')
+    return JSON.parse(data)
   }
 }
 

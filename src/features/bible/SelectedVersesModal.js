@@ -103,7 +103,7 @@ const VersesModal = ({
 
   const sendVerseData = async () => {
     const { title, content } = await getVersesRef(selectedVerses, version)
-    navigation.navigate('Studies', {
+    navigation.navigate('EditStudy', {
       ...cleanParams(),
       type: isSelectionMode,
       title,
@@ -111,6 +111,7 @@ const VersesModal = ({
       version,
       verses: Object.keys(selectedVerses)
     })
+    clearSelectedVerses()
   }
 
   return (

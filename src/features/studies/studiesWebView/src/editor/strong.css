@@ -1,0 +1,11 @@
+.block-strong {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.block-strong--title {
+  font-size: 16px;
+  font-weight: bold;
+}

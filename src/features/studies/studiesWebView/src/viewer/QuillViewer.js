@@ -1,5 +1,4 @@
 import Quill from '../quill.js'
-import '../quill.bubble.css'
 import React from 'react'
 import PropTypes from 'prop-types'
 
