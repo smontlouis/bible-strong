@@ -53,6 +53,19 @@ export default function configureStore () {
           }
         }
       }
+    },
+    3: (state) => {
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          bible: {
+            ...state.user.bible,
+            studies: {},
+            tags: {}
+          }
+        }
+      }
     }
   }
 

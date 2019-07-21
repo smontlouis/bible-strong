@@ -7,7 +7,6 @@ import {
   WebView
 } from 'react-native'
 // import { WebView } from 'react-native-webview'
-import PropTypes from 'prop-types'
 
 // path to the file that the webview will load
 import reactQuillEditorHTML from './build/reactQuillEditor-index.html'
@@ -18,9 +17,8 @@ class WebViewQuillEditor extends React.Component {
   componentDidUpdate (prevProps, prevState) {
     const oldParams = prevProps.params || {}
     const newParams = this.props.params || {}
-    console.log(newParams)
-    // TODO: ERROR HERE - dispatch correctly
-    if (oldParams.title !== newParams.title) {
+
+    if (JSON.stringify(oldParams) !== JSON.stringify(newParams)) {
       if (newParams.type.includes('verse')) {
         const isBlock = newParams.type.includes('block')
         this.dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', newParams)

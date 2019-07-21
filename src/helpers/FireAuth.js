@@ -11,7 +11,7 @@ const FireAuth = class {
 
     firebase.auth().onAuthStateChanged((user) => {
       if (user && user.isAnonymous) {
-        console.log('User exists and is anonymous')
+        console.log('User exists and is anonymous: ', user.uid)
 
         const uid = user.uid
 

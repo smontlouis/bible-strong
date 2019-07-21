@@ -31,6 +31,10 @@ const initialState = {
     changelog: {},
     highlights: {},
     notes: {},
+    studies: {
+      categories: {},
+      studies: {}
+    },
     settings: {
       alignContent: 'justify',
       fontSizeScale: 0,
