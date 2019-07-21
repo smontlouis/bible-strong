@@ -9,7 +9,7 @@ const {
 
 const LINE_BREAK = '\n'
 const PARAGRAPH_BREAK = '\n'
-const BULLET = '\n\u2022 '
+const BULLET = '\n'
 
 function htmlToElement (rawHtml, opts, done) {
   function domToElement (dom, parent) {

@@ -4,9 +4,10 @@ import { View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
-import getBiblePericope from '~helpers/getBiblePericope'
+import styled from '@emotion/native'
 
-import Loading from '~common/Loading'
+import getBiblePericope from '~helpers/getBiblePericope'
+import Button from '~common/ui/Button'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
 import SelectedVersesModal from './SelectedVersesModal'
@@ -15,11 +16,13 @@ import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    overflow: 'hidden'
-  }
+const Container = styled.View({
+  flex: 1,
+  overflow: 'hidden'
+})
+
+const ReadMeButton = styled(Button)({
+
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -129,7 +132,7 @@ class BibleViewer extends Component {
     }
 
     return (
-      <View style={styles.container}>
+      <Container>
         <BibleWebView
           isLoading={isLoading}
           navigation={navigation}
@@ -156,6 +159,12 @@ class BibleViewer extends Component {
             goToNextChapter={goToNextChapter}
           />
         )}
+        {isReadOnly && (
+          <ReadMeButton
+            title='Ouvrir dans Bible'
+            onPress={this.openInBibleTab}
+          />
+        )}
         <SelectedVersesModal
           setSelectedVerse={this.props.setSelectedVerse}
           onCreateNoteClick={onCreateNoteClick}
@@ -168,7 +177,7 @@ class BibleViewer extends Component {
           selectedVerses={selectedVerses}
           version={version}
         />
-      </View>
+      </Container>
     )
   }
 }

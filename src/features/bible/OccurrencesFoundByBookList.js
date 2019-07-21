@@ -23,6 +23,10 @@ const ListItem = styled(Box)(({ theme }) => ({
   borderBottomColor: theme.colors.border
 }))
 
+const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
+
 const OccurrencesFoundByBookList = ({
   strongReference,
   navigation,
@@ -62,7 +66,7 @@ const OccurrencesFoundByBookList = ({
                   <Text>{item.versesCountByBook}</Text>
                 </OccurencesNumber>
                 <Box flex />
-                <Icon.Feather name='chevron-right' size={20} />
+                <StyledIcon name='chevron-right' size={20} />
               </ListItem>
             </TouchableOpacity>
           )}

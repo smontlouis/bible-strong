@@ -1,10 +1,23 @@
 export const logTypes = {
   BUG: 'bug',
   FEATURE: 'fonctionnalité',
-  NEW: 'nouveauté'
+  NEW: 'nouveauté',
+  INFO: 'info'
 }
 
 export default [
+  {
+    date: '1563749584258',
+    type: logTypes.NEW,
+    title: 'Ouvrir dans Bible',
+    description: "Quand vous accédez à vos subrillances, un verset trouvé dans une concordance, ou des résultats de recherche, la Bible s'ouvre dans une nouvelle page en lecture seule, pour ne pas vous sortir de votre contexte. J'ai ajouté un bouton 'Ouvrir dans Bible' pour vous permettre de retourner à l'accueil."
+  },
+  {
+    date: '1563746444270',
+    type: logTypes.BUG,
+    title: 'Mode sombre - définition',
+    description: 'En mode sombre, les définitions des strongs apparaissaient parfois en noir. Ce bug a été réglé'
+  },
   {
     date: '1562753462096',
     type: logTypes.NEW,

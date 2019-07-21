@@ -1,5 +1,4 @@
 import React from 'react'
-import { StyleSheet } from 'react-native'
 import { withTheme } from 'emotion-theming'
 
 import HTMLView from '~helpers/react-native-htmlview'
@@ -9,7 +8,7 @@ const textStyle = {
   fontSize: 18
 }
 
-const styles = (theme) => StyleSheet.create({
+const styles = (theme) => ({
   h1: {
     fontWeight: 'bold',
     fontSize: 24,
@@ -54,8 +53,16 @@ const styles = (theme) => StyleSheet.create({
     ...textStyle
   },
   li: {
-    lineHeight: 18
+    lineHeight: 18,
+    color: theme.colors.default
+  },
+  ol: {
+    color: theme.colors.default
+  },
+  ul: {
+    color: theme.colors.default
   }
+
 })
 
 const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => (

@@ -167,6 +167,7 @@ class VersesRenderer extends Component {
             const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
             const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
             const notesCount = state.notedVerses[`${Verset}`]
+            const isVerseToScroll = this.state.verseToScroll == Verset
 
             const { h1, h2, h3 } = getPericopeVerse(state.pericopeChapter, Verset)
 
@@ -188,6 +189,7 @@ class VersesRenderer extends Component {
                   isSelectedMode={isSelectedMode}
                   highlightedColor={highlightedColor}
                   notesCount={notesCount}
+                  isVerseToScroll={isVerseToScroll}
                 />
               </span>
             )

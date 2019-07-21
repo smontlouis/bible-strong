@@ -1,1 +1,1 @@
-export const desktopMode = false
+export const desktopMode = process.env.NODE_ENV !== 'production'

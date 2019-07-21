@@ -67,6 +67,7 @@ class StrongCard extends React.Component {
       strongReference,
       theme
     } = this.props
+
     return (
       <Container overflow>
         {/* <Shadow overflow /> */}

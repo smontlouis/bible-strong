@@ -1,5 +1,5 @@
 import { Component, h } from 'preact'
-import picostyle from 'picostyle'
+import picostyle, { keyframes } from 'picostyle'
 
 import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
@@ -29,7 +29,16 @@ const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(14, fontSizeScale)
 }))
 
-const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor, settings: { theme } }) => {
+const zoom = keyframes({
+  from: {
+    opacity: '0.2'
+  },
+  to: {
+    opacity: '1'
+  }
+})
+
+const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme } }) => {
   let background = 'transparent'
   if (highlightedColor && !isSelected) {
     background = `${convertHex(getColors[theme][highlightedColor], 50)}`
@@ -47,7 +56,10 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor,
     '-moz-user-select': 'none',
     '-ms-user-select': 'none',
     '-khtml-user-select': 'none',
-    '-webkit-user-select': 'none'
+    '-webkit-user-select': 'none',
+    ...isVerseToScroll ? {
+      animation: `1s ease 0s 3 normal none running ${zoom}`
+    } : {}
   }
 })
 
@@ -140,13 +152,14 @@ class Verse extends Component {
     }
   };
 
-  render ({ verse, isSelected, highlightedColor, notesCount, settings }, { isFocused }) {
+  render ({ verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll }, { isFocused }) {
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
           settings={settings}
           isFocused={isFocused}
           isSelected={isSelected}
+          isVerseToScroll={isVerseToScroll}
           highlightedColor={highlightedColor}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
