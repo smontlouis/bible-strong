@@ -37,6 +37,9 @@ const getTagColor = (type) => {
     case logTypes.NEW: {
       return '#2ecc71'
     }
+    case logTypes.INFO: {
+      return '#2c3e50'
+    }
   }
 }
 

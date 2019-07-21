@@ -7,6 +7,18 @@ export const logTypes = {
 
 export default [
   {
+    date: '1563752259891',
+    type: logTypes.INFO,
+    title: 'Vous remarquez des bugs ?',
+    description: "S'il vous plaît, n'hésitez surtout pas à reporter les bugs dans l'application! Dans les paramètres, vous pouvez directement me joindre par mon mail ou reporter un bug. Merci :) !"
+  },
+  {
+    date: '1563752166214',
+    type: logTypes.NEW,
+    title: 'Verset sélectionné',
+    description: 'Quand vous choisissez un verset vous aurez dorénavant une légère animation pour trouver facilement le verset sélectionné.'
+  },
+  {
     date: '1563749584258',
     type: logTypes.NEW,
     title: 'Ouvrir dans Bible',
