@@ -1,9 +1,8 @@
 import React from 'react'
-import { Platform, StyleSheet, ScrollView } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
-import { Dialog, Portal } from 'react-native-paper'
 
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
@@ -38,28 +37,15 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ noBorder }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+const Header = ({ noBorder, setIsOpen, isOpen }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
-      <TouchableBox onPress={() => setIsOpen(true)}>
+      <TouchableBox onPress={() => setIsOpen(!isOpen)}>
         <StyledText>
           Toutes les notes
         </StyledText>
         <StyledIcon name='chevron-down' size={15} />
       </TouchableBox>
-      <Portal>
-        <Dialog
-          visible={isOpen}
-          onDismiss={() => setIsOpen(false)}>
-          <Dialog.Title>Alert</Dialog.Title>
-          <Dialog.ScrollArea>
-            <ScrollView>
-              <Text>This is a scrollable area</Text>
-            </ScrollView>
-          </Dialog.ScrollArea>
-        </Dialog>
-      </Portal>
     </HeaderBox>
   )
 }
