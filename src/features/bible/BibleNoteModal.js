@@ -45,6 +45,7 @@ const Container = styled.View(({ theme }) => ({
   borderRadius: 3,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
+  alignItems: 'flex-start',
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
