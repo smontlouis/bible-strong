@@ -1,6 +1,7 @@
 import React from 'react'
-import Modal from 'react-native-modalbox'
+import Modal from 'react-native-modal'
 import * as Icon from '@expo/vector-icons'
+
 import styled from '@emotion/native'
 import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
@@ -15,7 +16,6 @@ import Button from '~common/ui/Button'
 import orderVerses from '~helpers/orderVerses'
 
 const StylizedModal = styled(Modal)({
-  backgroundColor: 'transparent',
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'center'
@@ -35,7 +35,7 @@ const StyledTextArea = styled.TextInput(({ theme }) => ({
   borderBottomWidth: 2,
   paddingBottom: 10,
   marginTop: 20,
-  height: 200
+  maxHeight: 200
 }))
 
 const Container = styled.View(({ theme }) => ({
@@ -45,7 +45,6 @@ const Container = styled.View(({ theme }) => ({
   borderRadius: 3,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
-  alignItems: 'flex-start',
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
@@ -160,13 +159,9 @@ class BibleNoteModal extends React.Component {
 
     return (
       <StylizedModal
-        isOpen={isOpen}
-        animationDuration={200}
-        position='top'
-        entry='center'
-        backdropPressToClose={false}
-        swipeToClose={false}
-        backdropOpacity={0.1}
+        isVisible={isOpen}
+        animationInTiming={300}
+        avoidKeyboard
       >
         <Container>
           <Text fontSize={16} bold color='darkGrey' marginBottom={10}>
