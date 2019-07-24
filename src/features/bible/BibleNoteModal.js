@@ -182,7 +182,6 @@ class BibleNoteModal extends React.Component {
               <StyledTextArea
                 placeholder='Description'
                 multiline
-                numberOfLines={5}
                 onChangeText={this.onDescriptionChange}
                 value={description}
               />
