@@ -141,11 +141,16 @@ class BibleWebView extends Component {
         useWebKit
         onLoad={this.sendDataToWebView}
         onMessage={this.receiveDataFromWebView}
+        onError={(e) => console.log(e)}
         originWhitelist={['*']}
         ref={ref => (this.webview = ref)}
         source={bibleWebView}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}
+        domStorageEnabled
+        allowUniversalAccessFromFileURLs
+        allowFileAccessFromFileURLs
+        allowFileAccess
       />
     )
   }

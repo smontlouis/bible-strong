@@ -67,6 +67,10 @@ class VersesRenderer extends Component {
   }
 
   componentDidMount () {
+    dispatch({
+      type: CONSOLE_LOG,
+      payload: 'I did mount'
+    })
     // ONLY FOR DEV MODE ON DESKTOP
     if (desktopMode) {
       this.setState({
@@ -192,7 +196,7 @@ class VersesRenderer extends Component {
 
   render (props, state) {
     if (!state.verses.length) {
-      return null
+      return <div>coucou</div>
     }
 
     return (
