@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
+import { Asset } from 'expo-asset'
 import * as Haptics from 'expo-haptics'
 import { Vibration, Platform } from 'react-native'
 import { WebView } from 'react-native-webview'
-
-import bibleWebView from './bibleWebView/dist/index.html'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -141,10 +140,9 @@ class BibleWebView extends Component {
         useWebKit
         onLoad={this.sendDataToWebView}
         onMessage={this.receiveDataFromWebView}
-        onError={(e) => console.log(e)}
         originWhitelist={['*']}
         ref={ref => (this.webview = ref)}
-        source={bibleWebView}
+        source={{ uri: Asset.fromModule(require('./bibleWebView/dist/index.html')).uri }}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}
         domStorageEnabled
