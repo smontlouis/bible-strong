@@ -67,11 +67,6 @@ class VersesRenderer extends Component {
   }
 
   componentDidMount () {
-    dispatch({
-      type: CONSOLE_LOG,
-      payload: `I did mount`
-    })
-
     // ONLY FOR DEV MODE ON DESKTOP
     if (desktopMode) {
       this.setState({
@@ -158,16 +153,6 @@ class VersesRenderer extends Component {
   receiveDataFromApp = () => {
     const self = this
     document.addEventListener('messages', (event) => {
-      dispatch({
-        type: CONSOLE_LOG,
-        payload: 'I RECEIVED DATA'
-      })
-
-      dispatch({
-        type: CONSOLE_LOG,
-        payload: event.detail
-      })
-
       const response = event.detail
 
       switch (response.type) {
@@ -207,7 +192,7 @@ class VersesRenderer extends Component {
 
   render (props, state) {
     if (!state.verses.length) {
-      return <div>Chargement...</div>
+      return null
     }
 
     return (
