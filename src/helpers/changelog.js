@@ -7,6 +7,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1563995302301',
+    type: logTypes.FEATURE,
+    title: 'Notes intégrées 🎉',
+    description: "Il est maintenant possible de voir vos notes directement dans la Bible, à la suite des versets. Il est toujours possible de retourner à l'affichage classique en allant dans les paramètres de mise en forme."
+  },
+  {
     date: '1563752259891',
     type: logTypes.INFO,
     title: 'Vous remarquez des bugs ?',
