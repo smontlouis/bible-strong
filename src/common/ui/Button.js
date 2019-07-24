@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 
-const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type }) => ({
+const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type, disabled }) => ({
   backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
   borderWidth: reverse ? 1 : 0,
   borderColor: theme.colors.darkGrey,
@@ -13,6 +13,10 @@ const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type }) 
   marginRight: 20,
   paddingLeft: 10,
   paddingRight: 10,
+
+  ...disabled && {
+    opacity: 0.5
+  },
 
   ...small && {
     height: 30,
@@ -38,7 +42,7 @@ const TextButton = styled.Text(({ theme, small, reverse }) => ({
 }))
 
 const Button = ({ title, onPress, style, small, reverse, disabled, type }) => (
-  <WrapperButton onPress={!disabled ? onPress : () => {}} style={style} small={small} reverse={reverse} type={type}>
+  <WrapperButton disabled={disabled} onPress={!disabled ? onPress : () => {}} style={style} small={small} reverse={reverse} type={type}>
     <TextButton small={small} reverse={reverse}>{title}</TextButton>
   </WrapperButton>
 )

@@ -48,7 +48,6 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  alignItems: 'stretch',
   padding: 20
 }))
 
@@ -156,7 +155,7 @@ class BibleNoteModal extends React.Component {
   render () {
     const { isOpen, onClosed } = this.props
     const { title, description, isEditing, id } = this.state
-    const submitIsDisabled = !title
+    const submitIsDisabled = !title || !description
 
     return (
       <StylizedModal
