@@ -87,6 +87,7 @@ class BibleVerseNotes extends Component {
   render () {
     const { withBack } = this.props.navigation.state.params || {}
     const { title, notes } = this.state
+
     return (
       <Container>
         <Header hasBackButton={withBack} title={title || 'Chargement...'} />
@@ -102,11 +103,14 @@ class BibleVerseNotes extends Component {
               message="Vous n'avez pas encore de notes..."
             />
         }
-        <BibleNoteModal
-          onClosed={this.closeNoteEditor}
-          isOpen={this.state.isEditNoteOpen}
-          noteVerses={this.state.noteVerses}
-        />
+        {
+          this.state.isEditNoteOpen &&
+          <BibleNoteModal
+            onClosed={this.closeNoteEditor}
+            isOpen={this.state.isEditNoteOpen}
+            noteVerses={this.state.noteVerses}
+          />
+        }
       </Container>
     )
   }

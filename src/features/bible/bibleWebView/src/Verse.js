@@ -1,10 +1,17 @@
 import { Component, h } from 'preact'
 import picostyle, { keyframes } from 'picostyle'
 
-import { dispatch, NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_NOTES, TOGGLE_SELECTED_VERSE } from './dispatch'
+import {
+  dispatch,
+  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_VERSE_NOTES,
+  TOGGLE_SELECTED_VERSE,
+  NAVIGATE_TO_BIBLE_NOTE
+} from './dispatch'
+
 import { getColors } from '../../../../themes/getColors'
 import NotesCount from './NotesCount'
+import NotesText from './NotesText'
 
 function convertHex (hex, opacity) {
   hex = hex.replace('#', '')
@@ -18,7 +25,7 @@ function convertHex (hex, opacity) {
 
 const styled = picostyle(h)
 
-const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
+export const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
 
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(19, fontSizeScale),
@@ -64,15 +71,16 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor,
 })
 
 const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
-  display: textDisplay
+  display: textDisplay,
+  ...textDisplay === 'block' && {
+    marginBottom: '5px'
+  }
 }))
 
 class Verse extends Component {
   state = {
     focused: false
   }
-
-  disableOnClick = false
 
   navigateToVerseNotes = () => {
     const { verse: { Livre, Chapitre, Verset } } = this.props
@@ -85,10 +93,6 @@ class Verse extends Component {
   onPress = () => {
     const { isSelectedMode, settings: { press } } = this.props
 
-    if (this.disableOnClick) {
-      return
-    }
-
     if (isSelectedMode || press === 'longPress') {
       this.toggleSelectVerse()
     } else {
@@ -99,13 +103,15 @@ class Verse extends Component {
   onLongPress = () => {
     const { settings: { press } } = this.props
 
-    this.disableOnClick = true
+    this.shouldShortPress = false
 
-    if (press === 'shortPress') {
-      this.toggleSelectVerse()
-    } else {
-      this.setState({ isFocused: false })
-      this.navigateToBibleVerseDetail()
+    if (this.moved === false) {
+      if (press === 'shortPress') {
+        this.toggleSelectVerse()
+      } else {
+        this.setState({ isFocused: false })
+        this.navigateToBibleVerseDetail()
+      }
     }
   }
 
@@ -124,35 +130,43 @@ class Verse extends Component {
     })
   }
 
+  navigateToNote = (id) => {
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_NOTE,
+      payload: id
+    })
+  }
+
   onTouchStart = (e) => {
+    this.shouldShortPress = true
+    this.moved = false
+
     this.setState({ isFocused: true })
 
-    this.startX = e.touches[0].clientX
-    this.startY = e.touches[0].clientY
-
     // On long press
-    this.buttonPressTimer = setTimeout(this.onLongPress, 500)
+    this.buttonPressTimer = setTimeout(this.onLongPress, 600)
   }
 
   onTouchEnd = () => {
     this.setState({ isFocused: false })
-    setTimeout(() => {
-      this.disableOnClick = false
-    }, 200)
+    clearTimeout(this.buttonPressTimer)
+
+    if (this.shouldShortPress && this.moved === false) {
+      this.onPress()
+    }
+  }
+
+  onTouchCancel = e => {
     clearTimeout(this.buttonPressTimer)
   }
 
   onTouchMove = (e) => {
-    // if finger moves more than 10px flag to cancel
-    // code.google.com/mobile/articles/fast_buttons.html
-    if (Math.abs(e.touches[0].clientX - this.startX) > 1 ||
-        Math.abs(e.touches[0].clientY - this.startY) > 1) {
-      if (this.state.isFocused) this.setState({ isFocused: false })
-      if (this.buttonPressTimer) clearTimeout(this.buttonPressTimer)
-    }
+    this.moved = true
+    if (this.state.isFocused) this.setState({ isFocused: false })
   };
 
-  render ({ verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll }, { isFocused }) {
+  render ({ verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll, notesText }, { isFocused }) {
+    const inlineNotedVerses = settings.notesDisplay === 'inline'
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
@@ -161,9 +175,6 @@ class Verse extends Component {
           isSelected={isSelected}
           isVerseToScroll={isVerseToScroll}
           highlightedColor={highlightedColor}
-          onTouchStart={this.onTouchStart}
-          onTouchEnd={this.onTouchEnd}
-          onTouchMove={this.onTouchMove}
         >
           <NumberText
             settings={settings}
@@ -172,7 +183,7 @@ class Verse extends Component {
             {' '}
           </NumberText>
           {
-            notesCount &&
+            (notesCount && !inlineNotedVerses) &&
             <NotesCount
               settings={settings}
               onClick={this.navigateToVerseNotes}
@@ -181,11 +192,22 @@ class Verse extends Component {
           }
           <VerseText
             settings={settings}
-            onClick={this.onPress}
+            onTouchStart={this.onTouchStart}
+            onTouchEnd={this.onTouchEnd}
+            onTouchMove={this.onTouchMove}
+            onTouchCancel={this.onTouchCancel}
           >
             {verse.Texte}
           </VerseText>
         </ContainerText>
+        {
+          (notesText && inlineNotedVerses) &&
+            <NotesText
+              settings={settings}
+              onClick={this.navigateToNote}
+              notesText={notesText}
+            />
+        }
       </Wrapper>
 
     )

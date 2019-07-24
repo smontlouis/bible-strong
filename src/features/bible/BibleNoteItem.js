@@ -7,10 +7,11 @@ import * as Icon from '@expo/vector-icons'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
+import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
 import theme from '~themes/default'
 
-const NoteContainer = styled.View(({ theme }) => ({
+const NoteContainer = styled.TouchableOpacity(({ theme }) => ({
   padding: 20,
   marginBottom: 10,
   borderBottomColor: theme.colors.border,
@@ -31,19 +32,12 @@ class BibleNoteItem extends React.Component {
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), { locale: frLocale })
 
     return (
-      <NoteContainer>
+      <NoteContainer onPress={() => openNoteEditor(item.noteId)}>
         <Box row justifyContent='space-between'>
           <Text color='darkGrey' bold fontSize={14}>
             {item.reference} - Il y a {formattedDate}
           </Text>
           <Box row>
-            <Icon.Feather
-              name={'edit-2'}
-              size={15}
-              style={{ paddingHorizontal: 10, paddingBottom: 5 }}
-              color={theme.colors.tertiary}
-              onPress={() => openNoteEditor(item.noteId)}
-            />
             <Icon.Feather
               name={'trash-2'}
               size={15}
@@ -62,7 +56,7 @@ class BibleNoteItem extends React.Component {
         {
           !!item.notes.description &&
           <Paragraph scale={-3} scaleLineHeight={-2}>
-            {item.notes.description}
+            {truncate(item.notes.description, 100)}
           </Paragraph>
         }
       </NoteContainer>

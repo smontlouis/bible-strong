@@ -7498,6 +7498,14 @@ react-native-webview@5.8.1:
     escape-string-regexp "1.0.5"
     invariant "2.2.4"
 
+react-native-webview@~5.8.1:
+  version "5.8.2"
+  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-5.8.2.tgz#dcc9c802f145183cfc828944350bd43f968aa72c"
+  integrity sha512-WvB5vH3xaxwXbk0RFGDIkM+MEeMfrfkhXdgYW1qj/xUuioeH5lduCpR+sID8+OR35zx+pBuamQ9jSlRGuREJrw==
+  dependencies:
+    escape-string-regexp "1.0.5"
+    invariant "2.2.4"
+
 "react-native@https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz":
   version "0.59.8"
   resolved "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz#970a32631977dbe7158f024abc23e4c0c0975058"

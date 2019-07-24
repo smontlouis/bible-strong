@@ -1,30 +1,45 @@
-import React, { Component, createRef } from 'react'
-// import * as Haptics from 'expo-haptics'
-import { WebView } from 'react-native'
+import React, { Component } from 'react'
+import * as Haptics from 'expo-haptics'
+import { Vibration, Platform } from 'react-native'
+import { WebView } from 'react-native-webview'
 
-import bibleWebView from './bibleWebView/dist/index.js'
-// import bibleWebView from './bibleWebView/dist/index.html' // DEV
+import bibleWebView from './bibleWebView/dist/index.html'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
   SEND_INITIAL_DATA,
   TOGGLE_SELECTED_VERSE,
+  NAVIGATE_TO_BIBLE_NOTE,
   CONSOLE_LOG
 } from './bibleWebView/src/dispatch'
 
+const INJECTED_JAVASCRIPT = `(function() {
+  // This is the important part!
+  if (!window.ReactNativeWebView) {
+    window.ReactNativeWebView = window['ReactABI33_0_0NativeWebView'];
+  }
+  // End of the important part! Now continue using it as usual
+})();`
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
-  webViewRef = createRef();
+  webview = null
 
   dispatchToWebView = (message) => {
-    const webView = this.webViewRef.current
-
-    if (webView === null) {
+    if (this.webview === null) {
       return
     }
 
-    webView.postMessage(JSON.stringify(message))
+    this.webview.injectJavaScript(`
+    (function() {
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent("messages", {
+          detail: ${JSON.stringify(message)}
+        }));
+      }, 0)
+    })()
+    `)
   }
 
   state = {
@@ -61,7 +76,11 @@ class BibleWebView extends Component {
         break
       }
       case TOGGLE_SELECTED_VERSE: {
-        // Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
+        try {
+          Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
+        } catch (e) {
+          console.log('No vibration')
+        }
         const verseId = action.payload
         const { addSelectedVerse, removeSelectedVerse } = this.props
 
@@ -72,8 +91,12 @@ class BibleWebView extends Component {
         }
         break
       }
+      case NAVIGATE_TO_BIBLE_NOTE: {
+        this.props.openNoteModal(action.payload)
+        break
+      }
       case CONSOLE_LOG: {
-        console.log(action.payload)
+        console.log('WEBVIEW: ', action.payload)
       }
     }
   }
@@ -119,11 +142,10 @@ class BibleWebView extends Component {
         onLoad={this.sendDataToWebView}
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
-        ref={this.webViewRef}
-        source={{ html: bibleWebView }}
-        // source={bibleWebView} // DEV
+        ref={ref => (this.webview = ref)}
+        source={bibleWebView}
         style={{ opacity: this.state.webViewOpacity }}
-        allowFileAccess
+        injectedJavaScript={INJECTED_JAVASCRIPT}
       />
     )
   }

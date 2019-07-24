@@ -14,7 +14,8 @@ import * as UserActions from '~redux/modules/user'
 class BibleScreen extends React.Component {
   state = {
     isBibleParamsOpen: false,
-    isCreateNoteOpen: false
+    isCreateNoteOpen: false,
+    noteVerses: null
   }
 
   toggleBibleParamsOpen = () => {
@@ -22,8 +23,17 @@ class BibleScreen extends React.Component {
   }
 
   toggleCreateNote = () => {
-    this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen })
+    this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen, noteVerses: null })
   }
+
+  openNoteModal = (noteId) => {
+    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
+      accuRefs[key] = true
+      return accuRefs
+    }, {})
+    this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen, noteVerses })
+  }
+
   render () {
     const {
       app,
@@ -33,6 +43,7 @@ class BibleScreen extends React.Component {
       setSettingsTextDisplay,
       setSettingsPress,
       setSettingsTheme,
+      setSettingsNotesDisplay,
       increaseSettingsFontSizeScale,
       decreaseSettingsFontSizeScale,
       settings
@@ -61,22 +72,31 @@ class BibleScreen extends React.Component {
           navigation={navigation}
           settings={settings}
           onCreateNoteClick={this.toggleCreateNote}
+          openNoteModal={this.openNoteModal}
         />
-        <BibleParamsModal
-          onClosed={this.toggleBibleParamsOpen}
-          isOpen={this.state.isBibleParamsOpen}
-          setSettingsAlignContent={setSettingsAlignContent}
-          setSettingsTextDisplay={setSettingsTextDisplay}
-          setSettingsTheme={setSettingsTheme}
-          setSettingsPress={setSettingsPress}
-          increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
-          decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
-          settings={settings}
-        />
-        <BibleNoteModal
-          onClosed={this.toggleCreateNote}
-          isOpen={this.state.isCreateNoteOpen}
-        />
+        {
+          this.state.isBibleParamsOpen &&
+          <BibleParamsModal
+            onClosed={this.toggleBibleParamsOpen}
+            isOpen={this.state.isBibleParamsOpen}
+            setSettingsAlignContent={setSettingsAlignContent}
+            setSettingsTextDisplay={setSettingsTextDisplay}
+            setSettingsTheme={setSettingsTheme}
+            setSettingsNotesDisplay={setSettingsNotesDisplay}
+            setSettingsPress={setSettingsPress}
+            increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
+            decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
+            settings={settings}
+          />
+        }
+        {
+          this.state.isCreateNoteOpen &&
+          <BibleNoteModal
+            onClosed={this.toggleCreateNote}
+            isOpen={this.state.isCreateNoteOpen}
+            noteVerses={this.state.noteVerses}
+          />
+        }
       </Container>
     )
   }

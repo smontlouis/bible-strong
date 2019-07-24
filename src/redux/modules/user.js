@@ -6,7 +6,6 @@ import orderVerses from '~helpers/orderVerses'
 // export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
 // export const USER_LOGOUT = 'USER_LOGOUT'
 export const ADD_NOTE = 'user/ADD_NOTE'
-export const SET_NOTES = 'user/SET_NOTES'
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
@@ -15,6 +14,7 @@ export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
+export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
 export const SAVE_NOTE = 'user/SAVE_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
@@ -36,7 +36,8 @@ const initialState = {
       fontSizeScale: 0,
       textDisplay: 'inline',
       theme: 'default',
-      press: 'shortPress'
+      press: 'shortPress',
+      notesDisplay: 'inline'
     }
   }
 }
@@ -63,8 +64,8 @@ export default produce((draft, action) => {
       }
       break
     }
-    case SET_NOTES: {
-      draft.bible.notes = action.payload
+    case REMOVE_NOTE: {
+      delete draft.bible.notes[action.payload]
       break
     }
     case ADD_HIGHLIGHT: {
@@ -94,6 +95,10 @@ export default produce((draft, action) => {
     }
     case SET_SETTINGS_PRESS: {
       draft.bible.settings.press = action.payload
+      break
+    }
+    case SET_SETTINGS_NOTES_DISPLAY: {
+      draft.bible.settings.notesDisplay = action.payload
       break
     }
     case INCREASE_SETTINGS_FONTSIZE_SCALE: {
@@ -128,10 +133,9 @@ export function addNote (note, noteVerses) {
 }
 
 export function deleteNote (noteId) {
-  return (dispatch, getState) => {
-    let notes = Object.assign({}, getState().user.bible.notes)
-    delete notes[noteId]
-    return dispatch({ type: SET_NOTES, payload: notes })
+  return {
+    type: REMOVE_NOTE,
+    payload: noteId
   }
 }
 
@@ -170,6 +174,13 @@ export function setSettingsTextDisplay (payload) {
 export function setSettingsTheme (payload) {
   return {
     type: SET_SETTINGS_THEME,
+    payload
+  }
+}
+
+export function setSettingsNotesDisplay (payload) {
+  return {
+    type: SET_SETTINGS_NOTES_DISPLAY,
     payload
   }
 }

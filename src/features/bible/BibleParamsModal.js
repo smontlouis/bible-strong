@@ -59,6 +59,11 @@ const pressToString = {
   longPress: 'Strong appui long'
 }
 
+const notesDisplayToString = {
+  inline: 'Note à la ligne',
+  block: 'Note en icone'
+}
+
 const BibleParamsModal = ({
   isOpen,
   onClosed,
@@ -68,12 +73,14 @@ const BibleParamsModal = ({
   increaseSettingsFontSizeScale,
   decreaseSettingsFontSizeScale,
   setSettingsTheme,
+  setSettingsNotesDisplay,
   settings: {
     alignContent,
     fontSizeScale,
     textDisplay,
     theme,
-    press
+    press,
+    notesDisplay
   }
 }) => {
   return (
@@ -136,6 +143,21 @@ const BibleParamsModal = ({
             isSelected={theme === 'dark'}
             name='moon'
             onPress={() => setSettingsTheme('dark')}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <TouchableIcon
+            isSelected={notesDisplay === 'inline'}
+            name='align-left'
+            onPress={() => setSettingsNotesDisplay('inline')}
+          />
+          <Box width={80} center>
+            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>{notesDisplayToString[notesDisplay]}</Text>
+          </Box>
+          <TouchableIcon
+            isSelected={notesDisplay === 'block'}
+            name='file-text'
+            onPress={() => setSettingsNotesDisplay('block')}
           />
         </HalfContainer>
         <HalfContainer border>

@@ -1,9 +1,13 @@
 export const dispatch = (obj) => {
-  window.postMessage(JSON.stringify(obj))
+  if (!window.ReactNativeWebView) {
+    window.ReactNativeWebView = window['ReactABI33_0_0NativeWebView']
+  }
+  window.ReactNativeWebView.postMessage(JSON.stringify(obj))
 }
 
 export const SEND_INITIAL_DATA = 'SEND_INITIAL_DATA'
 
+export const NAVIGATE_TO_BIBLE_NOTE = 'NAVIGATE_TO_BIBLE_NOTE'
 export const NAVIGATE_TO_BIBLE_VERSE_DETAIL = 'NAVIGATE_TO_BIBLE_VERSE_DETAIL'
 export const NAVIGATE_TO_VERSE_NOTES = 'NAVIGATE_TO_VERSE_NOTES'
 export const TOGGLE_SELECTED_VERSE = 'TOGGLE_SELECTED_VERSE'

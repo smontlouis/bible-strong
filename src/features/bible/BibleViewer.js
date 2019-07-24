@@ -1,6 +1,5 @@
 // @flow
 import React, { Component } from 'react'
-import { View, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
@@ -22,7 +21,7 @@ const Container = styled.View({
 })
 
 const ReadMeButton = styled(Button)({
-
+  marginBottom: 10
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -115,7 +114,8 @@ class BibleViewer extends Component {
       notedVerses,
       settings,
       verse,
-      arrayVerses
+      arrayVerses,
+      openNoteModal
     } = this.props
 
     let array = this.state.verses
@@ -131,6 +131,7 @@ class BibleViewer extends Component {
       )
     }
 
+    // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
       <Container>
         <BibleWebView
@@ -149,6 +150,7 @@ class BibleViewer extends Component {
           verseToScroll={verse}
           chapter={chapter}
           pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
+          openNoteModal={openNoteModal}
         />
         {!isReadOnly && (
           <BibleFooter
@@ -165,18 +167,20 @@ class BibleViewer extends Component {
             onPress={this.openInBibleTab}
           />
         )}
-        <SelectedVersesModal
-          setSelectedVerse={this.props.setSelectedVerse}
-          onCreateNoteClick={onCreateNoteClick}
-          isVisible={modalIsVisible}
-          isSelectedVerseHighlighted={isSelectedVerseHighlighted}
-          addHighlight={addHighlight}
-          removeHighlight={removeHighlight}
-          clearSelectedVerses={clearSelectedVerses}
-          navigation={navigation}
-          selectedVerses={selectedVerses}
-          version={version}
-        />
+        {
+          modalIsVisible &&
+          <SelectedVersesModal
+            setSelectedVerse={this.props.setSelectedVerse}
+            onCreateNoteClick={onCreateNoteClick}
+            isVisible={modalIsVisible}
+            isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+            addHighlight={addHighlight}
+            removeHighlight={removeHighlight}
+            clearSelectedVerses={clearSelectedVerses}
+            navigation={navigation}
+            selectedVerses={selectedVerses}
+            version={version}
+          />}
       </Container>
     )
   }

@@ -104,7 +104,7 @@ const VersesModal = ({
             />
           }
           <TouchableIcon name='layers' onPress={compareVerses} />
-          <TouchableIcon name='file-text' onPress={onCreateNoteClick} />
+          <TouchableIcon name='file-plus' onPress={onCreateNoteClick} />
           <TouchableIcon name='share-2' onPress={shareVerse} />
           <TouchableIcon name='arrow-down' onPress={clearSelectedVerses} />
         </HalfContainer>

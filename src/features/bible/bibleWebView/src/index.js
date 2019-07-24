@@ -10,7 +10,9 @@ const mockSettings = {
   alignContent: 'justify',
   fontSizeScale: 0,
   textDisplay: 'inline',
-  theme: 'default'
+  theme: 'default',
+  press: 'shortPress',
+  notesDisplay: 'inline'
 }
 
 const mockSelectedVerses = {
@@ -21,9 +23,23 @@ const verseToScroll = 4
 
 const version = 'LSG'
 
+const mockNotedVerses = {
+  '42-11-1': {
+    title: 'Le ciel et la terre',
+    description: 'Informe et vide signifient ici « Tohu bohu », c’est exactemement le même mot que Jérémie utilise dans sa vision quand il décrit la terre dans [Jérémie 4:23]',
+    date: 1563909941027
+  },
+  '42-11-7/42-11-8': {
+    title: 'Ceci est une note sur 2 versets',
+    description: 'Cool !',
+    date: 1563912012088
+  }
+}
+
 render(
   <VersesRenderer
     verses={desktopMode ? mockVerses : undefined}
+    notedVerses={desktopMode ? mockNotedVerses : undefined}
     settings={desktopMode ? mockSettings : undefined}
     verseToScroll={desktopMode ? verseToScroll : undefined}
     selectedVerses={desktopMode ? mockSelectedVerses : undefined}

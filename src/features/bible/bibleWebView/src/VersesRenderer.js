@@ -56,6 +56,8 @@ class VersesRenderer extends Component {
     selectedVerses: {},
     highlightedVerses: {},
     notedVerses: {},
+    notedVersesCount: {},
+    notedVersesText: {},
     settings: {},
     verseToScroll: null,
     isReadOnly: false,
@@ -65,16 +67,26 @@ class VersesRenderer extends Component {
   }
 
   componentDidMount () {
+    dispatch({
+      type: CONSOLE_LOG,
+      payload: `I did mount`
+    })
+
+    // ONLY FOR DEV MODE ON DESKTOP
     if (desktopMode) {
       this.setState({
         verses: this.props.verses,
+        notedVerses: this.props.notedVerses,
         settings: this.props.settings,
         verseToScroll: this.props.verseToScroll,
+        notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
+        notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
         selectedVerses: this.props.selectedVerses,
         version: this.props.version,
         pericopeChapter: this.props.pericopeChapter
       })
     }
+
     this.receiveDataFromApp()
   }
 
@@ -96,7 +108,7 @@ class VersesRenderer extends Component {
     }
   }
 
-  getNotedVerses = (verses, notedVerses) => {
+  getNotedVersesCount = (verses, notedVerses) => {
     let newNotedVerses = {}
     if (verses.length) {
       const { Livre, Chapitre } = verses[0]
@@ -114,10 +126,49 @@ class VersesRenderer extends Component {
     return newNotedVerses
   }
 
+  getNotedVersesText = (verses, notedVerses) => {
+    let newNotedVerses = {}
+    if (verses.length) {
+      const { Livre, Chapitre } = verses[0]
+      Object.entries(notedVerses).map(([key, value]) => {
+        const versesInArray = key.split('/')
+
+        const lastVerseRef = versesInArray[versesInArray.length - 1]
+        const bookNumber = parseInt(lastVerseRef.split('-')[0])
+        const chapterNumber = parseInt(lastVerseRef.split('-')[1])
+        const verseNumber = lastVerseRef.split('-')[2]
+
+        if (bookNumber === Livre && chapterNumber === Chapitre) {
+          const verseToPush = {
+            key: key,
+            verses: (versesInArray.length > 1) ? `${versesInArray[0].split('-')[2]}-${versesInArray[versesInArray.length - 1].split('-')[2]}` : versesInArray[0].split('-')[2],
+            ...value
+          }
+          if (newNotedVerses[verseNumber]) {
+            newNotedVerses[verseNumber].push(verseToPush)
+          } else {
+            newNotedVerses[verseNumber] = [verseToPush]
+          }
+        }
+      })
+    }
+    return newNotedVerses
+  }
+
   receiveDataFromApp = () => {
     const self = this
-    document.addEventListener('message', (message) => {
-      const response = JSON.parse(message.data)
+    document.addEventListener('messages', (event) => {
+      dispatch({
+        type: CONSOLE_LOG,
+        payload: 'I RECEIVED DATA'
+      })
+
+      dispatch({
+        type: CONSOLE_LOG,
+        payload: event.detail
+      })
+
+      const response = event.detail
 
       switch (response.type) {
         case SEND_INITIAL_DATA: {
@@ -138,7 +189,9 @@ class VersesRenderer extends Component {
             verses,
             selectedVerses,
             highlightedVerses,
-            notedVerses: this.getNotedVerses(verses, notedVerses),
+            notedVerses,
+            notedVersesCount: this.getNotedVersesCount(verses, notedVerses),
+            notedVersesText: this.getNotedVersesText(verses, notedVerses),
             settings,
             verseToScroll,
             isReadOnly,
@@ -154,7 +207,7 @@ class VersesRenderer extends Component {
 
   render (props, state) {
     if (!state.verses.length) {
-      return null
+      return <div>Chargement...</div>
     }
 
     return (
@@ -166,7 +219,8 @@ class VersesRenderer extends Component {
             const isSelectedMode = !!Object.keys(state.selectedVerses).length
             const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
             const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
-            const notesCount = state.notedVerses[`${Verset}`]
+            const notesCount = state.notedVersesCount[`${Verset}`]
+            const notesText = state.notedVersesText[`${Verset}`]
             const isVerseToScroll = this.state.verseToScroll == Verset
 
             const { h1, h2, h3 } = getPericopeVerse(state.pericopeChapter, Verset)
@@ -189,6 +243,7 @@ class VersesRenderer extends Component {
                   isSelectedMode={isSelectedMode}
                   highlightedColor={highlightedColor}
                   notesCount={notesCount}
+                  notesText={notesText}
                   isVerseToScroll={isVerseToScroll}
                 />
               </span>
