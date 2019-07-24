@@ -78,17 +78,6 @@ class BibleNoteModal extends React.Component {
     this.loadPage(noteVerses || selectedVerses)
   }
 
-  componentDidUpdate (prevProps, prevState) {
-    if (prevProps.isOpen !== this.props.isOpen) {
-      if (this.props.isOpen) {
-        this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.props.onClosed)
-      } else {
-        this.setState({ isEditing: false })
-        this.backHandler && this.backHandler.remove()
-      }
-    }
-  }
-
   checkIfExistingNote (notes, selectedVerses) {
     let orderedVerses = orderVerses(selectedVerses)
     let key = Object.keys(orderedVerses).join('/')
@@ -162,6 +151,7 @@ class BibleNoteModal extends React.Component {
         isVisible={isOpen}
         animationInTiming={300}
         avoidKeyboard
+        onBackButtonPress={onClosed}
       >
         <Container>
           <Text fontSize={16} bold color='darkGrey' marginBottom={10}>

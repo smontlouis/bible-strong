@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
 
+import truncate from '~helpers/truncate'
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
@@ -145,7 +146,7 @@ class BibleVerseDetailScreen extends React.Component {
 
     return (
       <Container>
-        <Header noBorder hasBackButton title={`${headerTitle} - Strong LSG`} />
+        <Header noBorder hasBackButton title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`} />
         <Box paddingTop={6} flex>
           <StyledVerse>
             <VersetWrapper>
