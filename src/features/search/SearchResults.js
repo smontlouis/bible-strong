@@ -2,6 +2,7 @@ import React from 'react'
 import { withNavigation } from 'react-navigation'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 import compose from 'recompose/compose'
+
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleLSG from '~assets/bible_versions/bible-lsg-1910.json'
@@ -9,6 +10,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
 import SearchItem from './SearchItem'
 import Empty from '~common/Empty'
+import getBibleVerseText from '~helpers/getBibleVerseText'
 
 const SearchResults = ({ results, navigation, page, setPage }) => {
   if (!results.length) {
@@ -35,7 +37,7 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
         </Box>
       }
       keyExtractor={result => result.ref}
-      renderItem={({ item: result }) => {
+      renderItem={({ item: result, index }) => {
         const [book, chapter, verse] = result.ref.split('-')
         const { title } = formatVerseContent([
           { Livre: book, Chapitre: chapter, Verset: verse }
@@ -46,12 +48,19 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
           []
         )
         positions.sort((a, b) => a[0] - b[0])
+
+        const text = getBibleVerseText(BibleLSG, book, chapter, verse)
+
+         if (!text) {
+           return null
+         }
+
         return (
           <SearchItem
             key={result.ref}
             positions={positions}
             reference={title}
-            text={BibleLSG[book][chapter][verse]}
+            text={text}
             onPress={() =>
               navigation.navigate('BibleView', {
                 isReadOnly: true,

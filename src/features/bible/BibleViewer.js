@@ -63,7 +63,7 @@ class BibleViewer extends Component {
     this.setState({ isLoading: true })
 
     const res = await loadBible(version)
-    const versesByChapter = res[book.Numero][chapter]
+    const versesByChapter = res[book.Numero] ? res[book.Numero][chapter] : []
     tempVerses = []
     tempVerses = Object.keys(versesByChapter).map(v => ({
       Verset: v,
