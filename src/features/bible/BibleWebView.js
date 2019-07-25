@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Asset } from 'expo-asset'
-import * as Haptics from 'expo-haptics'
-import { Vibration, Platform } from 'react-native'
+// import * as Haptics from 'expo-haptics'
+// import { Vibration, Platform } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import {
@@ -75,11 +75,11 @@ class BibleWebView extends Component {
         break
       }
       case TOGGLE_SELECTED_VERSE: {
-        try {
-          Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
-        } catch (e) {
-          console.log('No vibration')
-        }
+        // try {
+        //   Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
+        // } catch (e) {
+        //   console.log('No vibration')
+        // }
         const verseId = action.payload
         const { addSelectedVerse, removeSelectedVerse } = this.props
 
