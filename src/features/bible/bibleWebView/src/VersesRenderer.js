@@ -196,7 +196,7 @@ class VersesRenderer extends Component {
 
   render (props, state) {
     if (!state.verses.length) {
-      return <div>coucou</div>
+      return null
     }
 
     return (
