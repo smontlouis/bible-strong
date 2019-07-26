@@ -10,7 +10,7 @@ export default [
     date: '1564107002776',
     type: logTypes.BUG,
     title: 'Malachie 4 - Bug sur la recherche et dans la Bible',
-    description: "La LSG est la seule à avoir Malachie 4. De ce fait l'application plantait sur tout ce qui concernait Malachie 4."
+    description: "Certaines versions n'ont pas Malachie 4. De ce fait l'application plantait quand on essayait d'y accéder."
   },
   {
     date: '1563995302301',
