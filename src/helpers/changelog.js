@@ -7,6 +7,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1564107002776',
+    type: logTypes.BUG,
+    title: 'Malachie 4 - Bug sur la recherche et dans la Bible',
+    description: "La LSG est la seule à avoir Malachie 4. De ce fait l'application plantait sur tout ce qui concernait Malachie 4."
+  },
+  {
     date: '1563995302301',
     type: logTypes.FEATURE,
     title: 'Notes intégrées 🎉',
