@@ -10,6 +10,7 @@ import BibleNoteModal from './BibleNoteModal'
 
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
+import ErrorBoundary from '../../common/ErrorBoundary'
 
 class BibleScreen extends React.Component {
   state = {

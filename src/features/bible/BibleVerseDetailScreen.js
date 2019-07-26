@@ -18,6 +18,8 @@ import Paragraph from '~common/ui/Paragraph'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import StrongCard from './StrongCard'
+import Empty from '~common/Empty'
+
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { viewportWidth, wp } from '~helpers/utils'
@@ -61,6 +63,7 @@ const StyledVerse = styled.View(({ theme }) => ({
 
 class BibleVerseDetailScreen extends React.Component {
   state = {
+    error: false,
     formattedVerse: '',
     isCarouselLoading: true,
     strongReferences: [],
@@ -80,12 +83,20 @@ class BibleVerseDetailScreen extends React.Component {
   loadPage = async () => {
     const { verse } = this.props
     const strongVerse = await loadStrongVerse(verse)
+
+    if (!strongVerse) {
+      this.setState({ error: true })
+      return
+    }
+
     const { versesInCurrentChapter } = await loadCountVerses(
       verse.Livre,
       verse.Chapitre
     )
     this.versesInCurrentChapter = versesInCurrentChapter
     this.formatVerse(strongVerse)
+
+
   }
 
   formatVerse = async strongVerse => {
@@ -139,6 +150,18 @@ class BibleVerseDetailScreen extends React.Component {
     const { isCarouselLoading } = this.state
 
     const { title: headerTitle } = formatVerseContent([verse])
+
+    if (this.state.error) {
+      return (
+        <Container>
+          <Header noBorder hasBackButton title='Désolé...' />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Impossible de charger la strong pour ce verset..."
+          />
+      </Container>
+      )
+    }
 
     if (!this.state.formattedTexte) {
       return <Loading />

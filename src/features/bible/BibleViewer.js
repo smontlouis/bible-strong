@@ -5,6 +5,7 @@ import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
 import styled from '@emotion/native'
 
+import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import Button from '~common/ui/Button'
 import BibleFooter from './BibleFooter'
@@ -14,6 +15,7 @@ import SelectedVersesModal from './SelectedVersesModal'
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
+import ErrorBoundary from '../../common/ErrorBoundary'
 
 const Container = styled.View({
   flex: 1,
@@ -34,6 +36,7 @@ const getPericopeChapter = (pericope, book, chapter) => {
 
 class BibleViewer extends Component {
   state = {
+    error: false,
     isLoading: true,
     verses: []
   }
@@ -41,7 +44,11 @@ class BibleViewer extends Component {
   pericope = getBiblePericope('LSG')
 
   componentWillMount () {
-    setTimeout(() => this.loadVerses(), 200)
+    setTimeout(() => {
+      this.loadVerses().catch(e => {
+        this.setState({ error: true, isLoading: false })
+      })
+    }, 200)
     this.props.clearSelectedVerses()
   }
 
@@ -51,7 +58,11 @@ class BibleViewer extends Component {
       this.props.book.Numero !== oldProps.book.Numero ||
       this.props.version !== oldProps.version
     ) {
-      setTimeout(() => this.loadVerses(), 0)
+      setTimeout(() => {
+        this.loadVerses().catch(e => {
+          this.setState({ error: true, isLoading: false })
+        })
+      }, 0)
       this.props.clearSelectedVerses()
     }
   }
@@ -63,7 +74,12 @@ class BibleViewer extends Component {
     this.setState({ isLoading: true })
 
     const res = await loadBible(version)
-    const versesByChapter = res[book.Numero] ? res[book.Numero][chapter] : []
+    const versesByChapter = res[book.Numero][chapter]
+
+    if (!versesByChapter) {
+      throw new Error('I crashed!')
+    }
+
     tempVerses = []
     tempVerses = Object.keys(versesByChapter).map(v => ({
       Verset: v,
@@ -71,7 +87,7 @@ class BibleViewer extends Component {
       Livre: book.Numero,
       Chapitre: chapter
     }))
-    this.setState({ isLoading: false, verses: tempVerses })
+    this.setState({ isLoading: false, verses: tempVerses, error: false })
   }
 
   openInBibleTab = () => {
@@ -91,7 +107,7 @@ class BibleViewer extends Component {
   }
 
   render () {
-    const { isLoading } = this.state
+    const { isLoading, error } = this.state
     const {
       book,
       chapter,
@@ -134,24 +150,34 @@ class BibleViewer extends Component {
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
       <Container>
-        <BibleWebView
-          isLoading={isLoading}
-          navigation={navigation}
-          addSelectedVerse={addSelectedVerse}
-          removeSelectedVerse={removeSelectedVerse}
-          setSelectedVerse={setSelectedVerse}
-          version={version}
-          isReadOnly={isReadOnly}
-          arrayVerses={array}
-          selectedVerses={selectedVerses}
-          highlightedVerses={highlightedVerses}
-          notedVerses={notedVerses}
-          settings={settings}
-          verseToScroll={verse}
-          chapter={chapter}
-          pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
-          openNoteModal={openNoteModal}
-        />
+        {
+          error &&
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Désolé ! Ce chapitre n'existe pas dans cette version"
+          />
+        }
+        {
+          !error &&
+          <BibleWebView
+            isLoading={isLoading}
+            navigation={navigation}
+            addSelectedVerse={addSelectedVerse}
+            removeSelectedVerse={removeSelectedVerse}
+            setSelectedVerse={setSelectedVerse}
+            version={version}
+            isReadOnly={isReadOnly}
+            arrayVerses={array}
+            selectedVerses={selectedVerses}
+            highlightedVerses={highlightedVerses}
+            notedVerses={notedVerses}
+            settings={settings}
+            verseToScroll={verse}
+            chapter={chapter}
+            pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
+            openNoteModal={openNoteModal}
+          />
+        }
         {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}
