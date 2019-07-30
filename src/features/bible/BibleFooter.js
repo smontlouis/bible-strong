@@ -15,7 +15,8 @@ const Container = styled.View({
   alignItems: 'center',
   justifyContent: 'space-between',
   marginLeft: 10,
-  marginRight: 10
+  marginRight: 10,
+  pointerEvents: 'box-none'
 })
 
 const IconButton = styled.TouchableOpacity({

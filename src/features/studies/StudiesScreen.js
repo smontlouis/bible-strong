@@ -2,27 +2,35 @@ import React from 'react'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
+import FloatingButton from '~common/ui/FloatingButton'
+import TagsModal from '~common/TagsModal'
 
 import StudiesHeader from './StudiesHeader'
-import SelectCategories from './SelectCategories'
 
 const StudiesScreen = () => {
   const [isOpen, setIsOpen] = React.useState(false)
+  const [selectedChip, setSelectedChip] = React.useState(null)
+
+  const onClosed = () => setIsOpen(false)
+  const onSelectedChip = (chip) => setSelectedChip(chip)
 
   return (
 
     <Container>
-      <StudiesHeader setIsOpen={setIsOpen} isOpen={isOpen} />
+      <StudiesHeader
+        setIsOpen={setIsOpen}
+        isOpen={isOpen}
+        selectedChip={selectedChip}
+      />
+      <TagsModal
+        isVisible={isOpen}
+        onClosed={onClosed}
+        onSelected={onSelectedChip}
+        selectedChip={selectedChip}
+      />
       <Box flex>
-        <SelectCategories isOpen={isOpen} setIsOpen={setIsOpen} />
-        <Link route='EditStudy'>
-          <Text>
-        Edit Study
-          </Text>
-        </Link>
 
+        <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' />
       </Box>
     </Container>
   )

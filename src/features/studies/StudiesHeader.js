@@ -37,12 +37,12 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ noBorder, setIsOpen, isOpen }) => {
+const Header = ({ noBorder, setIsOpen, isOpen, selectedChip }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
         <StyledText>
-          Toutes les notes
+          {selectedChip ? selectedChip.name : 'Tout'}
         </StyledText>
         <StyledIcon name='chevron-down' size={15} />
       </TouchableBox>

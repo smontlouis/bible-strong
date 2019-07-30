@@ -1,6 +1,8 @@
 import produce from 'immer'
 import { clearSelectedVerses } from './bible'
+
 import orderVerses from '~helpers/orderVerses'
+import generateUUID from '~helpers/generateUUID'
 
 // export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
 // export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
@@ -19,6 +21,8 @@ export const SAVE_NOTE = 'user/SAVE_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
+export const ADD_TAG = 'ADD_TAG'
+export const REMOVE_TAG = 'REMOVE_TAG'
 
 const initialState = {
   email: '',
@@ -31,10 +35,8 @@ const initialState = {
     changelog: {},
     highlights: {},
     notes: {},
-    studies: {
-      categories: {},
-      studies: {}
-    },
+    studies: {},
+    tags: {},
     settings: {
       alignContent: 'justify',
       fontSizeScale: 0,
@@ -121,6 +123,19 @@ export default produce((draft, action) => {
       action.payload.map(log => {
         draft.bible.changelog[log.date] = true
       })
+      break
+    }
+    case ADD_TAG: {
+      const tagId = generateUUID()
+      draft.bible.tags[tagId] = {
+        id: tagId,
+        date: Date.now(),
+        name: action.payload
+      }
+      break
+    }
+    case REMOVE_TAG: {
+      delete draft.bible.tags[action.payload]
       break
     }
   }
@@ -211,6 +226,20 @@ export function setSettingsPress (payload) {
 export function saveAllLogsAsSeen (payload) {
   return {
     type: SAVE_ALL_LOGS_AS_SEEN,
+    payload
+  }
+}
+
+export function addTag (payload) {
+  return {
+    type: ADD_TAG,
+    payload
+  }
+}
+
+export function removeTag (payload) {
+  return {
+    type: REMOVE_TAG,
     payload
   }
 }

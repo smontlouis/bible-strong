@@ -10,6 +10,7 @@ const colors = {
   secondary: 'rgb(255,188,0)',
   tertiary: 'rgb(166,190,204)',
   quart: 'rgb(194,40,57)',
+  success: '#2ecc71',
 
   color1: '#81ecec',
   color2: '#ff7675',

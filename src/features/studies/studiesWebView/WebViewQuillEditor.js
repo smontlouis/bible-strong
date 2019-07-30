@@ -6,13 +6,17 @@ import {
   Alert,
   WebView
 } from 'react-native'
+
 // import { WebView } from 'react-native-webview'
 
-// path to the file that the webview will load
 import reactQuillEditorHTML from './build/reactQuillEditor-index.html'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef();
+
+  componentDidMount () {
+    this.props.shareMethods(this.dispatchToWebView)
+  }
 
   componentDidUpdate (prevProps, prevState) {
     const oldParams = prevProps.params || {}
@@ -102,6 +106,11 @@ class WebViewQuillEditor extends React.Component {
           })
           return
         }
+        case 'ACTIVE_FORMATS': {
+          console.log(msgData.payload)
+          this.props.setActiveFormats(msgData.payload)
+          return
+        }
         case 'CONSOLE_LOG': {
           console.log(`%c${msgData.payload}`, 'color:black;background-color:#81ecec')
           return
@@ -165,7 +174,7 @@ class WebViewQuillEditor extends React.Component {
 
   render = () => {
     return (
-      <View style={{ flex: 1, overflow: 'hidden' }}>
+      <View style={{ flex: 1 }}>
         <WebView
           useWebKit
           originWhitelist={['*']}

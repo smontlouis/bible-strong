@@ -48,7 +48,6 @@ class ModuleInlineVerse extends Module {
     if (value) {
       // OPEN BIBLE SELECT THERE
       dispatch('SELECT_BIBLE_VERSE')
-      this.range = range // Save section
     } else {
       const [link, offset] = this.quill.scroll.descendant(
         InlineVerseBlot,
@@ -62,7 +61,7 @@ class ModuleInlineVerse extends Module {
   }
 
   receiveVerseLink = ({ title, verses }) => {
-    this.quill.setSelection(this.range)
+    const range = this.quill.getSelection(true)
 
     dispatchConsole(`Receive verses ${title}`)
     this.quill.format('inline-strong', false) // Disable inline-strong in case
@@ -70,7 +69,7 @@ class ModuleInlineVerse extends Module {
       title,
       verses
     })
-    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
+    this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
   }
 
   openStrongLink = (value) => {
@@ -83,7 +82,6 @@ class ModuleInlineVerse extends Module {
     if (value) {
       // OPEN BIBLE SELECT THERE
       dispatch('SELECT_BIBLE_STRONG')
-      this.range = range // Save section
     } else {
       const [link, offset] = this.quill.scroll.descendant(
         InlineStrongBlot,
@@ -97,7 +95,7 @@ class ModuleInlineVerse extends Module {
   }
 
   receiveStrongLink = ({ title, code }) => {
-    this.quill.setSelection(this.range)
+    const range = this.quill.getSelection(true)
 
     dispatchConsole(`Receive strong ${title}`)
     this.quill.format('inline-verse', false) // Disable inline-verse in case
@@ -105,7 +103,7 @@ class ModuleInlineVerse extends Module {
       title,
       code
     })
-    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
+    this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
   }
 }
 

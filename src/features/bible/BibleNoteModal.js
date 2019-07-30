@@ -5,12 +5,14 @@ import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
-import { BackHandler, ScrollView, Alert } from 'react-native'
+import { ScrollView, Alert } from 'react-native'
 
 import getVersesRef from '~helpers/getVersesRef'
 import * as UserActions from '~redux/modules/user'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import TextInput from '~common/ui/TextInput'
+import TextArea from '~common/ui/TextArea'
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 import orderVerses from '~helpers/orderVerses'
@@ -20,23 +22,6 @@ const StylizedModal = styled(Modal)({
   alignItems: 'center',
   justifyContent: 'center'
 })
-
-const StyledTextInput = styled.TextInput(({ theme }) => ({
-  color: theme.colors.default,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 2,
-  paddingBottom: 10,
-  marginTop: 20
-}))
-
-const StyledTextArea = styled.TextInput(({ theme }) => ({
-  color: theme.colors.default,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 2,
-  paddingBottom: 10,
-  marginTop: 20,
-  maxHeight: 200
-}))
 
 const Container = styled.View(({ theme }) => ({
   width: 300,
@@ -160,12 +145,13 @@ class BibleNoteModal extends React.Component {
           {
             isEditing &&
             <>
-              <StyledTextInput
+              <TextInput
                 placeholder='Titre'
                 onChangeText={this.onTitleChange}
                 value={title}
+                style={{ marginTop: 20 }}
               />
-              <StyledTextArea
+              <TextArea
                 placeholder='Description'
                 multiline
                 onChangeText={this.onDescriptionChange}

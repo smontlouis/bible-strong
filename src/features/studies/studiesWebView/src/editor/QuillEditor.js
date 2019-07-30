@@ -4,6 +4,7 @@ import './InlineStrong'
 import './VerseBlock'
 import './StrongBlock'
 
+import './ModuleFormat'
 import './ModuleInlineVerse'
 import './ModuleBlockVerse'
 import './DividerBlock'
@@ -29,16 +30,16 @@ export default class ReactQuillEditor extends React.Component {
     this.quill = new Quill('#editor', {
       theme: 'snow',
       modules: {
-        toolbar: {
-          container: '#toolbar'
-        },
+        toolbar: false,
         'inline-verse': true,
-        'block-verse': true
+        'block-verse': true,
+        'format': true
       },
       placeholder: 'Créer votre étude...'
     })
 
-    this.quill.setContents(MockContent)
+    this.quill.setContents(MockContent, Quill.sources.SILENT)
+    this.quill.focus()
 
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
@@ -123,6 +124,49 @@ export default class ReactQuillEditor extends React.Component {
           this.blockVerseModule = this.quill.getModule('block-verse')
           this.blockVerseModule.receiveStrongBlock(msgData.payload)
           break
+        case 'BLOCK_DIVIDER':
+          const range = this.quill.getSelection(true)
+          this.quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER)
+          this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
+          break
+        case 'TOGGLE_FORMAT': {
+          this.formatModule = this.quill.getModule('format')
+          const type = msgData.payload.type
+          const value = msgData.payload.value
+
+          dispatchConsole(`${type} ${value}`)
+
+          switch (type) {
+            case 'UNDO':
+              this.quill.history.undo()
+              break
+            case 'REDO':
+              this.quill.history.redo()
+              break
+            case 'BOLD':
+              this.formatModule.format('bold', value)
+              break
+            case 'ITALIC':
+              this.formatModule.format('italic', value)
+              break
+            case 'UNDERLINE':
+              this.formatModule.format('underline', value)
+              break
+            case 'BLOCKQUOTE':
+              this.formatModule.format('blockquote', value)
+              break
+            case 'LIST':
+              this.formatModule.format('list', value)
+              break
+            case 'HEADER':
+              this.formatModule.format('header', value)
+              break
+            case 'BACKGROUND':
+              this.formatModule.format('background', value)
+              break
+          }
+          break
+        }
         default:
           dispatchConsole(
             `reactQuillEditor Error: Unhandled message type received "${
@@ -139,7 +183,7 @@ export default class ReactQuillEditor extends React.Component {
     return (
       <React.Fragment>
         <div id='editor' />
-        <Toolbar />
+        {/* <Toolbar /> */}
       </React.Fragment>
     )
   }

@@ -73,7 +73,7 @@ export default function configureStore () {
     key: 'root',
     storage,
     stateReconciler: autoMergeLevel2,
-    version: 2,
+    version: 3,
     debug: true,
     migrate: createMigrate(migrations, { debug: true })
   }
