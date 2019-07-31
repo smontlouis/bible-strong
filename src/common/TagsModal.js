@@ -49,6 +49,8 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   return (
     <StylizedModal
       isVisible={isVisible}
+      animationIn='fadeInDown'
+      animationOut='fadeOutUp'
       animationInTiming={300}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}

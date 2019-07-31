@@ -59,9 +59,6 @@ class WebViewQuillEditor extends React.Component {
         case 'EDITOR_LOADED':
           this.editorLoaded()
           break
-        case 'EDITOR_SENT':
-          this.props.getEditorCallback(msgData.payload.editor)
-          break
         case 'TEXT_CHANGED':
           if (this.props.onDeltaChangeCallback) {
             delete msgData.payload.type
@@ -78,9 +75,6 @@ class WebViewQuillEditor extends React.Component {
               changeSource
             )
           }
-          break
-        case 'RECEIVE_DELTA':
-          if (this.props.getDeltaCallback) { this.props.getDeltaCallback(msgData.payload) }
           break
         case 'SELECT_BIBLE_VERSE': {
           navigation.navigate('BibleView', {
@@ -132,24 +126,12 @@ class WebViewQuillEditor extends React.Component {
   };
 
   editorLoaded = () => {
-    // send the content to the editor if we have it
-    if (this.props.hasOwnProperty('contentToDisplay')) {
+    if (this.props.contentToDisplay) {
       console.log('Content to Display: ', this.props.contentToDisplay)
       this.dispatchToWebView('SET_CONTENTS', {
         delta: this.props.contentToDisplay
       })
     }
-    if (this.props.hasOwnProperty('htmlContentToDisplay')) {
-      this.dispatchToWebView('SET_HTML_CONTENTS', {
-        html: this.props.htmlContentToDisplay
-      })
-    }
-  };
-
-  // get the contents of the editor.  The contents will be in the Delta format
-  // defined here: https://quilljs.com/docs/delta/
-  getDelta = () => {
-    this.dispatchToWebView('GET_DELTA')
   };
 
   showLoadingIndicator = () => {

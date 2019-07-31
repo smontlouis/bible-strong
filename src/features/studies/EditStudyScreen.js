@@ -1,20 +1,52 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { withNavigation } from 'react-navigation'
+import compose from 'recompose/compose'
+import { useDispatch, connect } from 'react-redux'
+import generateUUID from '~helpers/generateUUID'
 
+import { createStudy, updateStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
 import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEditor'
 
 import EditStudyHeader from './EditStudyHeader'
-import MockContent from './studiesWebView/src/editor/MockContent'
-import ChooseHeaderModal from './ChooseHeaderModal'
+import SelectHeaderModal from './SelectHeaderModal'
 import SelectBlockModal from './SelectBlockModal'
+import SelectColorModal from './SelectColorModal'
+
+const withStudy = (Component) => props => {
+  const dispatch = useDispatch()
+  const [studyId, setStudyId] = useState(null)
+
+  let { studyId: studyIdParam } = props.navigation.state.params || {}
+
+  useEffect(() => {
+    if (studyIdParam) {
+      // Update modification_date
+      setStudyId(studyIdParam)
+    } else {
+      // Create Study
+      const studyId = generateUUID()
+      dispatch(createStudy(studyId))
+      setStudyId(studyId)
+      console.log('Loaded true: ', +studyId)
+    }
+  }, [])
+
+  if (!studyId) {
+    return null
+  }
+
+  return (
+    <Component studyId={studyId} {...props} />
+  )
+}
 
 class EditStudyScreen extends React.Component {
   state = {
-    editorMessageDelta: MockContent,
     activeFormats: {},
     isHeaderModalOpen: false,
-    isBlockModalOpen: false
+    isBlockModalOpen: false,
+    isColorModalOpen: false
   }
 
   webViewQuillEditor = React.createRef()
@@ -24,12 +56,9 @@ class EditStudyScreen extends React.Component {
     this.forceUpdate()
   }
 
-  getDeltaCallback = response => {
-    console.log('get delta')
-  };
-
   onDeltaChangeCallback = (delta, deltaChange, deltaOld, changeSource) => {
-    console.log(delta)
+    const { dispatch, currentStudy } = this.props
+    dispatch(updateStudy({ id: currentStudy.id, content: delta }))
   };
 
   setActiveFormats = (formats = {}) => {
@@ -41,6 +70,9 @@ class EditStudyScreen extends React.Component {
 
   openBlockModal = () => this.setState({ isBlockModalOpen: true })
   closeBlockModal = () => this.setState({ isBlockModalOpen: false })
+
+  openColorModal = (value = true) => this.setState({ isColorModalOpen: value })
+  closeColorModal = () => this.setState({ isColorModalOpen: false })
 
   navigateBibleView = (type) => {
     this.props.navigation.navigate('BibleView', {
@@ -57,16 +89,16 @@ class EditStudyScreen extends React.Component {
           dispatchToWebView={this.dispatchToWebView}
           openHeaderModal={this.openHeaderModal}
           openBlockModal={this.openBlockModal}
+          openColorModal={this.openColorModal}
         />
         <WebViewQuillEditor
           setActiveFormats={this.setActiveFormats}
           shareMethods={this.acceptMethods}
-          getDeltaCallback={this.getDeltaCallback}
           onDeltaChangeCallback={this.onDeltaChangeCallback}
-          contentToDisplay={this.state.editorMessageDelta}
+          contentToDisplay={this.props.currentStudy.content}
           params={this.props.navigation.state.params}
         />
-        <ChooseHeaderModal
+        <SelectHeaderModal
           dispatchToWebView={this.dispatchToWebView}
           activeFormats={this.state.activeFormats}
           isOpen={this.state.isHeaderModalOpen}
@@ -78,9 +110,23 @@ class EditStudyScreen extends React.Component {
           onClosed={this.closeBlockModal}
           navigateBibleView={this.navigateBibleView}
         />
+        <SelectColorModal
+          dispatchToWebView={this.dispatchToWebView}
+          activeFormats={this.state.activeFormats}
+          isOpen={this.state.isColorModalOpen}
+          onClosed={this.closeColorModal}
+        />
       </Container>
     )
   }
 }
 
-export default withNavigation(EditStudyScreen)
+export default compose(
+  withNavigation,
+  withStudy,
+  connect(({ user }, ownProps) => {
+    return {
+      currentStudy: user.bible.studies[ownProps.studyId]
+    }
+  })
+)(EditStudyScreen)

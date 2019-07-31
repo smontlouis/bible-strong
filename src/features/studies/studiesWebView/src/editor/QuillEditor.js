@@ -8,7 +8,6 @@ import './ModuleFormat'
 import './ModuleInlineVerse'
 import './ModuleBlockVerse'
 import './DividerBlock'
-import Toolbar from './Toolbar'
 import '../quill.snow.css'
 
 import React from 'react'
@@ -19,14 +18,31 @@ import MockContent from './MockContent.js'
 const BROWSER_TESTING_ENABLED = false
 
 export default class ReactQuillEditor extends React.Component {
-  state = {
-    editor: null
-  }
-
   componentDidMount () {
     document.addEventListener('message', this.handleMessage)
     dispatchConsole(`component mounted`)
 
+    if (BROWSER_TESTING_ENABLED) {
+      this.loadEditor()
+      this.quill.setContents(MockContent, Quill.sources.SILENT)
+    }
+  }
+
+  onChangeText = (delta, oldDelta, source) => {
+    dispatch('TEXT_CHANGED', {
+      type: 'success',
+      delta: this.quill.getContents(),
+      deltaChange: delta,
+      deltaOld: oldDelta,
+      changeSource: source
+    })
+  }
+
+  addTextChangeEventToEditor = () => {
+    this.quill.on('text-change', debounce(this.onChangeText, 500))
+  }
+
+  loadEditor = theme => {
     this.quill = new Quill('#editor', {
       theme: 'snow',
       modules: {
@@ -38,44 +54,15 @@ export default class ReactQuillEditor extends React.Component {
       placeholder: 'Créer votre étude...'
     })
 
-    this.quill.setContents(MockContent, Quill.sources.SILENT)
+    dispatchConsole(`loading editor`)
     this.quill.focus()
 
-    if (BROWSER_TESTING_ENABLED) {
-      this.loadEditor()
-    }
-  }
-
-  onChangeText = (delta, oldDelta, source) => {
-    dispatch('TEXT_CHANGED', {
+    dispatchConsole(`editor initialized`)
+    dispatch('EDITOR_LOADED', {
       type: 'success',
-      deltaChange: delta,
-      delta: this.state.editor.getContents(),
-      deltaOld: oldDelta,
-      changeSource: source
+      delta: this.quill.getContents()
     })
-  }
-
-  addTextChangeEventToEditor = () => {
-    this.state.editor.on('text-change', debounce(this.onChangeText, 500))
-  }
-
-  loadEditor = theme => {
-    let that = this
-    dispatchConsole(`loading editor`)
-    this.setState(
-      {
-        editor: this.quill
-      },
-      () => {
-        dispatchConsole(`editor initialized`)
-        dispatch('EDITOR_LOADED', {
-          type: 'success',
-          delta: this.state.editor.getContents()
-        })
-        that.addTextChangeEventToEditor()
-      }
-    )
+    this.addTextChangeEventToEditor()
   }
 
   componentWillUnmount () {
@@ -91,20 +78,11 @@ export default class ReactQuillEditor extends React.Component {
         case 'LOAD_EDITOR':
           this.loadEditor()
           break
-        case 'SEND_EDITOR':
-          this.dispatch('EDITOR_SENT', { editor: this.state.editor })
-          break
-        case 'GET_DELTA':
-          this.dispatch('RECEIVE_DELTA', {
-            type: 'success',
-            delta: this.state.editor.getContents()
-          })
-          break
         case 'SET_CONTENTS':
-          this.state.editor.setContents(msgData.payload.delta)
+          this.quill.setContents(msgData.payload.delta, Quill.sources.SILENT)
           break
         case 'SET_HTML_CONTENTS':
-          this.state.editor.clipboard.dangerouslyPasteHTML(
+          this.quill.clipboard.dangerouslyPasteHTML(
             msgData.payload.html
           )
           break
@@ -163,6 +141,9 @@ export default class ReactQuillEditor extends React.Component {
               break
             case 'BACKGROUND':
               this.formatModule.format('background', value)
+              break
+            case 'COLOR':
+              this.formatModule.format('color', value)
               break
           }
           break

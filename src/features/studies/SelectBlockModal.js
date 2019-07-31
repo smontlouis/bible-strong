@@ -47,15 +47,18 @@ const SelectBlockModal = ({
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={isOpen}
-      animationIn='slideInDown'
-      animationOut='slideOutUp'
+      animationIn='fadeInDown'
+      animationOut='fadeOutUp'
       animationInTiming={300}
       avoidKeyboard
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
     >
       <Container>
-        <Touchy onPress={() => dispatchToWebView('BLOCK_DIVIDER')}>
+        <Touchy onPress={() => {
+          dispatchToWebView('BLOCK_DIVIDER')
+          onClosed()
+        }}>
           <Text>Séparateur</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('verse')}>

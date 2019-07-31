@@ -21,8 +21,11 @@ export const SAVE_NOTE = 'user/SAVE_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
-export const ADD_TAG = 'ADD_TAG'
-export const REMOVE_TAG = 'REMOVE_TAG'
+export const ADD_TAG = 'user/ADD_TAG'
+export const REMOVE_TAG = 'user/REMOVE_TAG'
+export const CREATE_STUDY = 'user/CREATE_STUDY'
+export const UPDATE_STUDY = 'user/UPDATE_STUDY'
+export const DELETE_STUDY = 'user/DELETE_STUDY'
 
 const initialState = {
   email: '',
@@ -138,8 +141,35 @@ export default produce((draft, action) => {
       delete draft.bible.tags[action.payload]
       break
     }
+    case CREATE_STUDY: {
+      draft.bible.studies[action.payload] = {
+        id: action.payload,
+        created_at: Date.now(),
+        modified_at: Date.now(),
+        title: 'Document sans titre',
+        content: null
+      }
+      break
+    }
+    case UPDATE_STUDY: {
+      const study = draft.bible.studies[action.payload.id]
+      if (study) {
+        study.modified_at = Date.now()
+        if (action.payload.content) study.content = action.payload.content
+        if (action.payload.title) study.title = action.payload.title
+      } else {
+        throw new Error('Cannot find study: ' + action.payload.id)
+      }
+      break
+    }
+    case DELETE_STUDY: {
+      delete draft.bible.studies[action.payload]
+      break
+    }
   }
 }, initialState)
+
+// NOTES
 
 export function addNote (note, noteVerses) {
   return (dispatch, getState) => {
@@ -158,6 +188,8 @@ export function deleteNote (noteId) {
   }
 }
 
+// HIGHLIGHTS
+
 export function addHighlight (color) {
   return (dispatch, getState) => {
     const selectedVerses = getState().bible.selectedVerses
@@ -175,6 +207,8 @@ export function removeHighlight () {
     return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
   }
 }
+
+// SETTINGS
 
 export function setSettingsAlignContent (payload) {
   return {
@@ -230,6 +264,8 @@ export function saveAllLogsAsSeen (payload) {
   }
 }
 
+// TAGS
+
 export function addTag (payload) {
   return {
     type: ADD_TAG,
@@ -241,5 +277,28 @@ export function removeTag (payload) {
   return {
     type: REMOVE_TAG,
     payload
+  }
+}
+
+// STUDIES
+
+export function createStudy (id) {
+  return {
+    type: CREATE_STUDY,
+    payload: id
+  }
+}
+
+export function updateStudy ({ id, content, title }) {
+  return {
+    type: UPDATE_STUDY,
+    payload: { id, content, title }
+  }
+}
+
+export function deleteStudy (id) {
+  return {
+    type: DELETE_STUDY,
+    payload: id
   }
 }

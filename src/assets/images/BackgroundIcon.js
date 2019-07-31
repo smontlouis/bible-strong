@@ -1,9 +1,10 @@
 import React from 'react'
 import Svg, { G, Polygon, Rect, Path, Polyline, Line } from 'react-native-svg'
+import { withTheme } from 'emotion-theming'
 
-const SvgComponent = props => (
+const SvgComponent = ({ color, theme, ...props }) => (
   <Svg width={25} height={25} viewBox='0 0 18 18' {...props}>
-    <G>
+    <G fill={color || 'black'}>
       <Polygon points='6 6.868 6 6 5 6 5 7 5.942 7 6 6.868' />
       <Rect height={1} width={1} x={4} y={4} />
       <Polygon points='6.817 5 6 5 6 6 6.38 6 6.817 5' />
@@ -55,18 +56,18 @@ const SvgComponent = props => (
       strokeLinecap='round'
       strokeLinejoin='round'
       strokeWidth='2'
-      stroke='black'
+      stroke={color ? theme.colors.primary : 'black'}
       fill='none'
       points='5.5 13 9 5 12.5 13'
     />
     <Line
       strokeLinecap='round'
       strokeLinejoin='round'
-      strokeWidth='1'
-      stroke='black'
+      strokeWidth='2'
+      stroke={color ? theme.colors.primary : 'black'}
       fill='none'
       x1={11.63} x2={6.38} y1={11} y2={11} />
   </Svg>
 )
 
-export default SvgComponent
+export default withTheme(SvgComponent)

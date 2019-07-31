@@ -52,8 +52,8 @@ const ChooseHeaderModal = ({
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={isOpen}
-      animationIn='slideInDown'
-      animationOut='slideOutUp'
+      animationIn='fadeInDown'
+      animationOut='fadeOutUp'
       animationInTiming={300}
       avoidKeyboard
       onBackButtonPress={onClosed}

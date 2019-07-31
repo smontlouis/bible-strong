@@ -13,7 +13,6 @@ import theme from '~themes/default'
 
 const NoteContainer = styled.TouchableOpacity(({ theme }) => ({
   padding: 20,
-  marginBottom: 10,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1
 }))

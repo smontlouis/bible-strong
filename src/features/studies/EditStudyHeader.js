@@ -10,6 +10,7 @@ import Back from '~common/Back'
 import IconDropDown from '~assets/images/IconDropDown'
 import QuoteIcon from '~assets/images/QuoteIcon'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
+import ColorIcon from '~assets/images/ColorIcon'
 
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
@@ -42,12 +43,6 @@ const PlusIcon = styled(Icon.Feather)(({ theme }) => ({
   marginRight: 0
 }))
 
-// { label: 'Normal', value: undefined },
-// { label: 'Titre', value: 1 },
-// { label: 'Sous-titre', value: 2 }
-
-// (value) => dispatchToWebView('TOGGLE_FORMAT', { type: 'HEADER', value: activeFormats['header'] ? false : value })
-
 const headerTitle = {
   0: 'Normal',
   1: 'Titre',
@@ -58,7 +53,8 @@ const Header = ({
   activeFormats,
   dispatchToWebView,
   openHeaderModal,
-  openBlockModal
+  openBlockModal,
+  openColorModal
 }) => {
   const getHeaderTitle = () => {
     if (!activeFormats['header']) {
@@ -112,10 +108,18 @@ const Header = ({
         />
         <TouchableOpacity
           style={{ borderRadius: 2 }}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'BACKGROUND', value: 'red' })}
+          onPress={() => openColorModal('background')}
         >
           <BackgroundIcon
-            color={activeFormats['blockquote'] || 'black'}
+            color={activeFormats['background']}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ borderRadius: 2 }}
+          onPress={() => openColorModal('color')}
+        >
+          <ColorIcon
+            color={activeFormats['color']}
           />
         </TouchableOpacity>
         <TouchableOpacity

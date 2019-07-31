@@ -137,6 +137,8 @@ class BibleNoteModal extends React.Component {
         animationInTiming={300}
         avoidKeyboard
         onBackButtonPress={onClosed}
+        animationIn='fadeInDown'
+        animationOut='fadeOutUp'
       >
         <Container>
           <Text fontSize={16} bold color='darkGrey' marginBottom={10}>
