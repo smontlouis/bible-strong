@@ -43,21 +43,23 @@ class ConcordanceByBook extends Component {
           </Box>
         )}
         {!!this.state.verses.length && (
-          <FlatList
-            style={{ padding: 20 }}
-            removeClippedSubviews
-            data={this.state.verses}
-            keyExtractor={item =>
-              `${item.Livre}-${item.Chapitre}-${item.Verset}`
-            }
-            renderItem={({ item }) => (
-              <ConcordanceVerse
-                navigation={this.props.navigation}
-                concordanceFor={Code}
-                verse={item}
-              />
-            )}
-          />
+          <Box flex>
+            <FlatList
+              contentContainerStyle={{ padding: 20 }}
+              removeClippedSubviews
+              data={this.state.verses}
+              keyExtractor={item =>
+                `${item.Livre}-${item.Chapitre}-${item.Verset}`
+              }
+              renderItem={({ item }) => (
+                <ConcordanceVerse
+                  navigation={this.props.navigation}
+                  concordanceFor={Code}
+                  verse={item}
+                />
+              )}
+            />
+          </Box>
         )}
       </Container>
     )

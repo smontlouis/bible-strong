@@ -82,6 +82,14 @@ class Verse extends Component {
     focused: false
   }
 
+  componentDidMount () {
+    this.detectScroll = window.addEventListener('scroll', () => { if (!this.moved) this.moved = true })
+  }
+
+  componentWillUnmount () {
+    this.detectScroll = window.removeEventListener('scroll')
+  }
+
   navigateToVerseNotes = () => {
     const { verse: { Livre, Chapitre, Verset } } = this.props
     dispatch({
@@ -92,6 +100,8 @@ class Verse extends Component {
 
   onPress = () => {
     const { isSelectedMode, settings: { press } } = this.props
+
+    console.log('shortpress')
 
     if (isSelectedMode || press === 'longPress') {
       this.toggleSelectVerse()
@@ -104,6 +114,7 @@ class Verse extends Component {
     const { settings: { press } } = this.props
 
     this.shouldShortPress = false
+    console.log('longpress, moved: ', this.moved)
 
     if (this.moved === false) {
       if (press === 'shortPress') {
@@ -144,7 +155,7 @@ class Verse extends Component {
     this.setState({ isFocused: true })
 
     // On long press
-    this.buttonPressTimer = setTimeout(this.onLongPress, 600)
+    this.buttonPressTimer = setTimeout(this.onLongPress, 700)
   }
 
   onTouchEnd = () => {
