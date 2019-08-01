@@ -1,4 +1,4 @@
-import Quill from '../quill.js'
+import Quill from './quill.js'
 const Inline = Quill.import('blots/inline')
 
 class InlineVerse extends Inline {

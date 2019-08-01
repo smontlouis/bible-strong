@@ -9,7 +9,7 @@ import {
 
 // import { WebView } from 'react-native-webview'
 
-import reactQuillEditorHTML from './build/reactQuillEditor-index.html'
+import reactQuillEditorHTML from './dist/index.html'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef();
@@ -30,6 +30,14 @@ class WebViewQuillEditor extends React.Component {
         const isBlock = newParams.type.includes('block')
         this.dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', newParams)
       }
+    }
+
+    if (prevProps.isReadOnly !== this.props.isReadOnly && !this.props.isReadOnly) {
+      this.dispatchToWebView('CAN_EDIT')
+    }
+
+    if (prevProps.isReadOnly !== this.props.isReadOnly && this.props.isReadOnly) {
+      this.dispatchToWebView('READ_ONLY')
     }
   }
 
@@ -131,6 +139,10 @@ class WebViewQuillEditor extends React.Component {
       this.dispatchToWebView('SET_CONTENTS', {
         delta: this.props.contentToDisplay
       })
+    }
+
+    if (!this.props.isReadOnly) {
+      this.dispatchToWebView('CAN_EDIT')
     }
   };
 

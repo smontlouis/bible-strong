@@ -1,23 +1,24 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Strong from './Strong'
+import Verse from './Verse'
 
-import Quill from '../quill.js'
+import Quill from './quill.js'
 const BlockEmbed = Quill.import('blots/block/embed')
 
-class StrongBlock extends BlockEmbed {
-  static blotName = 'block-strong'
+class VerseBlock extends BlockEmbed {
+  static blotName = 'block-verse'
   static tagName = 'div'
-  static className = 'block-strong'
+  static className = 'block-verse'
 
   static create (data) {
     let node = super.create(data)
     node.setAttribute('contenteditable', false)
-    const { title, code, strongType, phonetique, definition, translatedBy } = data
+    const { title, content, version, verses } = data
     node.setAttribute('data', JSON.stringify(data))
 
     ReactDOM.render(
-      <Strong {...{ title, code, strongType, phonetique, definition, translatedBy }} />, node
+      <Verse {...{ title, content, version, verses }}
+      />, node
     )
 
     return node
@@ -30,9 +31,8 @@ class StrongBlock extends BlockEmbed {
 
   static value (domNode) {
     const data = domNode.getAttribute('data')
-    console.log(data)
     return JSON.parse(data)
   }
 }
 
-Quill.register(StrongBlock)
+Quill.register(VerseBlock)

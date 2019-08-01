@@ -11,9 +11,9 @@ class Link extends Component {
   }
 
   handlePress = () => {
-    const { navigation, route, href, share, params } = this.props
+    const { navigation, route, href, share, params, replace, onPress } = this.props
     if (route) {
-      navigation.navigate(route, params)
+      replace ? navigation.replace(route, params) : navigation.navigate(route, params)
     }
     if (href) {
       Linking.openURL(href)
@@ -21,6 +21,10 @@ class Link extends Component {
 
     if (share) {
       Share.share({ message: share })
+    }
+
+    if (onPress) {
+      onPress()
     }
   }
 

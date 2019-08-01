@@ -1,68 +1,50 @@
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebPackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
-// the path(s) that should be cleaned
-let pathsToClean = ['build/*.*']
 module.exports = {
-  entry: {
-    viewer: './src/componentViewer.js',
-    editor: './src/componentEditor.js'
-  },
-  output: {
-    path: path.join(__dirname, './build'),
-    filename: '[name].bundle.js'
-  },
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
       },
       {
-        test: /\.js$/,
-        include: [path.resolve(__dirname, 'src')],
-        exclude: /(node_modules|bower_components)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                'env',
-                {
-                  targets: {
-                    browsers: ['last 2 versions', 'safari >= 7']
-                  }
-                }
-              ],
-              'react',
-              'stage-2'
-            ],
-            plugins: ['babel-plugin-transform-object-rest-spread'],
-            babelrc: false
+        test: /\.html$/,
+        use: [
+          {
+            loader: 'html-loader',
+            options: { minimize: true }
           }
-        }
-      }
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader']
+      },
+      { test: /\.(png|woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader?limit=250000'] }
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(pathsToClean),
-    new HtmlWebpackPlugin({
-      template: './src/index.html',
-      inject: 'body',
-      filename: './reactQuillViewer-index.html',
-      inlineSource: 'viewer.bundle.js',
-      chunks: ['viewer']
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
     }),
-    new HtmlWebpackPlugin({
-      template: './src/index.html',
-      inject: 'body',
-      filename: './reactQuillEditor-index.html',
-      inlineSource: 'editor.bundle.js',
-      chunks: ['editor']
+    new OptimizeCssAssetsPlugin({
+      cssProcessorPluginOptions: {
+        preset: ['default', { discardComments: { removeAll: true } }]
+      }
     }),
-
+    new HtmlWebPackPlugin({
+      template: './src/index.html',
+      filename: './index.html',
+      inlineSource: '.(js|css)$',
+      minify: true
+    }),
     new HtmlWebpackInlineSourcePlugin()
   ]
 }

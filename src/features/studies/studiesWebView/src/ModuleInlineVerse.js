@@ -1,6 +1,6 @@
-import Quill from '../quill.js'
+import Quill from './quill.js'
 import InlineTooltip from './InlineTooltip'
-import { dispatch, dispatchConsole } from '../dispatch'
+import { dispatch, dispatchConsole } from './dispatch'
 const InlineVerseBlot = Quill.import('formats/inline-verse')
 const InlineStrongBlot = Quill.import('formats/inline-strong')
 

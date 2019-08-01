@@ -6,7 +6,8 @@ import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Back from '~common/Back'
+import Link from '~common/Link'
+import Header from '~common/Header'
 import IconDropDown from '~assets/images/IconDropDown'
 import QuoteIcon from '~assets/images/QuoteIcon'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
@@ -49,13 +50,20 @@ const headerTitle = {
   2: 'Sous-titre'
 }
 
-const Header = ({
+const EditHeader = ({
+  isReadOnly,
+  setReadOnly,
+  title,
   activeFormats,
   dispatchToWebView,
   openHeaderModal,
   openBlockModal,
   openColorModal
 }) => {
+  if (isReadOnly) {
+    return <Header hasBackButton title={title} />
+  }
+
   const getHeaderTitle = () => {
     if (!activeFormats['header']) {
       return headerTitle[0]
@@ -67,12 +75,12 @@ const Header = ({
     <HeaderBox>
       <Box row height={50} center>
         <Box flex justifyContent='center'>
-          <Back underlayColor='transparent' style={{ marginRight: 15 }}>
+          <Link onPress={setReadOnly} underlayColor='transparent' style={{ marginRight: 15 }}>
             <ValidateIcon
               name={'check'}
               size={25}
             />
-          </Back>
+          </Link>
         </Box>
         <TouchableOpacity onPress={openHeaderModal}>
           <Box row center width={100}>
@@ -148,4 +156,4 @@ const Header = ({
   )
 }
 
-export default pure(Header)
+export default pure(EditHeader)

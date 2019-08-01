@@ -1,4 +1,4 @@
-import Quill from '../quill.js'
+import Quill from './quill.js'
 import './InlineVerse'
 import './InlineStrong'
 import './VerseBlock'
@@ -8,14 +8,14 @@ import './ModuleFormat'
 import './ModuleInlineVerse'
 import './ModuleBlockVerse'
 import './DividerBlock'
-import '../quill.snow.css'
+import './quill.snow.css'
 
 import React from 'react'
 import debounce from 'debounce'
-import { dispatch, dispatchConsole } from '../dispatch'
+import { dispatch, dispatchConsole } from './dispatch'
 import MockContent from './MockContent.js'
 
-const BROWSER_TESTING_ENABLED = false
+const BROWSER_TESTING_ENABLED = process.env.NODE_ENV !== 'production'
 
 export default class ReactQuillEditor extends React.Component {
   componentDidMount () {
@@ -51,7 +51,8 @@ export default class ReactQuillEditor extends React.Component {
         'block-verse': true,
         'format': true
       },
-      placeholder: 'Créer votre étude...'
+      placeholder: 'Créer votre étude...',
+      readOnly: true
     })
 
     dispatchConsole(`loading editor`)
@@ -85,6 +86,14 @@ export default class ReactQuillEditor extends React.Component {
           this.quill.clipboard.dangerouslyPasteHTML(
             msgData.payload.html
           )
+          break
+        case 'CAN_EDIT':
+          this.quill.enable()
+          this.quill.focus()
+          break
+        case 'READ_ONLY':
+          this.quill.blur()
+          this.quill.enable(false)
           break
         case 'GET_BIBLE_VERSES':
           this.inlineVerseModule = this.quill.getModule('inline-verse')

@@ -6,6 +6,7 @@ import generateUUID from '~helpers/generateUUID'
 
 import { createStudy, updateStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
+import FabButton from '~common/ui/FabButton'
 import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEditor'
 
 import EditStudyHeader from './EditStudyHeader'
@@ -17,18 +18,19 @@ const withStudy = (Component) => props => {
   const dispatch = useDispatch()
   const [studyId, setStudyId] = useState(null)
 
-  let { studyId: studyIdParam } = props.navigation.state.params || {}
+  let { studyId: studyIdParam, canEdit } = props.navigation.state.params || {}
 
   useEffect(() => {
     if (studyIdParam) {
       // Update modification_date
+      console.log('Study Exists')
       setStudyId(studyIdParam)
     } else {
       // Create Study
       const studyId = generateUUID()
       dispatch(createStudy(studyId))
       setStudyId(studyId)
-      console.log('Loaded true: ', +studyId)
+      console.log('Loaded true: ' + studyId)
     }
   }, [])
 
@@ -37,7 +39,7 @@ const withStudy = (Component) => props => {
   }
 
   return (
-    <Component studyId={studyId} {...props} />
+    <Component studyId={studyId} canEdit={canEdit} {...props} />
   )
 }
 
@@ -46,7 +48,16 @@ class EditStudyScreen extends React.Component {
     activeFormats: {},
     isHeaderModalOpen: false,
     isBlockModalOpen: false,
-    isColorModalOpen: false
+    isColorModalOpen: false,
+    isReadOnly: true
+  }
+
+  componentDidMount () {
+    const { canEdit } = this.props
+
+    if (canEdit) {
+      this.setState({ isReadOnly: false })
+    }
   }
 
   webViewQuillEditor = React.createRef()
@@ -82,9 +93,14 @@ class EditStudyScreen extends React.Component {
   }
 
   render () {
+    const { isReadOnly } = this.state
+
     return (
       <Container>
         <EditStudyHeader
+          isReadOnly={isReadOnly}
+          setReadOnly={() => this.setState({ isReadOnly: true })}
+          title={this.props.currentStudy.title}
           activeFormats={this.state.activeFormats}
           dispatchToWebView={this.dispatchToWebView}
           openHeaderModal={this.openHeaderModal}
@@ -92,6 +108,7 @@ class EditStudyScreen extends React.Component {
           openColorModal={this.openColorModal}
         />
         <WebViewQuillEditor
+          isReadOnly={isReadOnly}
           setActiveFormats={this.setActiveFormats}
           shareMethods={this.acceptMethods}
           onDeltaChangeCallback={this.onDeltaChangeCallback}
@@ -116,6 +133,14 @@ class EditStudyScreen extends React.Component {
           isOpen={this.state.isColorModalOpen}
           onClosed={this.closeColorModal}
         />
+        {
+          isReadOnly &&
+          <FabButton
+            icon='edit-2'
+            onPress={() => this.setState({ isReadOnly: false })}
+            align='flex-end'
+          />
+        }
       </Container>
     )
   }

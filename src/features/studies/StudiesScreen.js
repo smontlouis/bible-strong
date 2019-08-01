@@ -49,7 +49,7 @@ const StudiesScreen = () => {
             />
           )}
         />
-        <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' />
+        <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' params={{ canEdit: true }} />
       </Box>
       <StudySettingsModal
         isOpen={isStudySettingsOpen}

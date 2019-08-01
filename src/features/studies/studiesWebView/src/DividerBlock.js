@@ -1,4 +1,4 @@
-import Quill from '../quill.js'
+import Quill from './quill.js'
 const BlockEmbed = Quill.import('blots/block/embed')
 
 class DividerBlock extends BlockEmbed {

@@ -1,5 +1,5 @@
-import Quill from '../quill.js'
-import { dispatch, dispatchConsole } from '../dispatch'
+import Quill from './quill.js'
+import { dispatch } from './dispatch'
 
 const Module = Quill.import('core/module')
 

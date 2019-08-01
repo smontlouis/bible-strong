@@ -19,7 +19,7 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), { locale: frLocale })
 
   return (
-    <StudyLink key={study.id} route='ViewStudy' params={{ studyId: study.id }}>
+    <StudyLink key={study.id} route='EditStudy' params={{ studyId: study.id }}>
       <Box row justifyContent='space-between'>
         <Text color='darkGrey' fontSize={12}>
             Modifié il y a {formattedDate}

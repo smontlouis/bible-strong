@@ -41,13 +41,15 @@ const TextButton = styled.Text(({ theme }) => ({
   fontWeight: 'bold'
 }))
 
-const FloatingButton = ({ label, icon, onPress, route }) => (
-  <Wrapper>
-    <StyledLink route='EditStudy'>
-      <StyledIcon name={icon} size={20} />
-      <TextButton>{label}</TextButton>
-    </StyledLink>
-  </Wrapper>
-)
+const FloatingButton = ({ label, icon, onPress, route, params }) => {
+  return (
+    <Wrapper>
+      <StyledLink route={route} params={params} onPress={onPress}>
+        <StyledIcon name={icon} size={20} />
+        <TextButton>{label}</TextButton>
+      </StyledLink>
+    </Wrapper>
+  )
+}
 
 export default FloatingButton

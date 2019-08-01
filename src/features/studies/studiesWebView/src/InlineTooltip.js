@@ -1,4 +1,4 @@
-import Quill from '../quill.js'
+import Quill from './quill.js'
 const Tooltip = Quill.import('ui/tooltip')
 const InlineVerseBlot = Quill.import('formats/inline-verse')
 const InlineStrongBlot = Quill.import('formats/inline-strong')
