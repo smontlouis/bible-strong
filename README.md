@@ -1,6 +1,3 @@
 # Bible Strong App
 
-## TODO :
-- Ajouter bible KJF
-- Ajouter notes/références croisées
-- Ajouter péricopes
+Un jour je ferai un readme potable
