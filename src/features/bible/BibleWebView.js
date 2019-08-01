@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
+import { Platform } from 'react-native'
 import { Asset } from 'expo-asset'
 // import * as Haptics from 'expo-haptics'
-import { Platform } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import {
@@ -46,7 +46,8 @@ class BibleWebView extends Component {
   }
 
   state = {
-    webViewOpacity: 0
+    webViewOpacity: 0,
+    isHTMLFileLoaded: false
   }
 
   componentDidMount () {

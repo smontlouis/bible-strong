@@ -1,21 +1,35 @@
 import React, { createRef } from 'react'
+import { Asset } from 'expo-asset'
 import { withNavigation } from 'react-navigation'
 import {
   View,
   ActivityIndicator,
   Alert,
-  WebView
+  WebView,
+  Platform
 } from 'react-native'
 
 // import { WebView } from 'react-native-webview'
 
-import reactQuillEditorHTML from './dist/index.html'
-
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef();
 
+  state = {
+    isHTMLFileLoaded: false
+  }
+
   componentDidMount () {
     this.props.shareMethods(this.dispatchToWebView)
+
+    this.HTMLFile = Asset.fromModule(require('./dist/index.html'))
+    if (!this.HTMLFile.localUri) {
+      Asset.loadAsync(require('./dist/index.html')).then(() => {
+        this.HTMLFile = Asset.fromModule(require('./dist/index.html'))
+        this.setState({ isHTMLFileLoaded: true })
+      })
+    } else {
+      this.setState({ isHTMLFileLoaded: true })
+    }
   }
 
   componentDidUpdate (prevProps, prevState) {
@@ -167,13 +181,25 @@ class WebViewQuillEditor extends React.Component {
   };
 
   render = () => {
+    if (!this.state.isHTMLFileLoaded) {
+      return null
+    }
+
+    const { localUri } = this.HTMLFile
     return (
       <View style={{ flex: 1 }}>
         <WebView
           useWebKit
           originWhitelist={['*']}
           ref={this.webViewRef}
-          source={reactQuillEditorHTML}
+          source={
+            Platform.OS === 'android'
+              ? {
+                uri: localUri.includes('ExponentAsset')
+                  ? localUri
+                  : 'file:///android_asset/' + localUri.substr(9)
+              }
+              : require('./dist/index.html')}
           onLoadEnd={this.onWebViewLoaded}
           onMessage={this.handleMessage}
           renderLoading={this.showLoadingIndicator}
