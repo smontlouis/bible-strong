@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom'
 import Verse from './Verse'
 
 import Quill from './quill.js'
-const BlockEmbed = Quill.import('blots/block/embed')
+const Embed = Quill.import('blots/embed')
 
-class VerseBlock extends BlockEmbed {
+class VerseBlock extends Embed {
   static blotName = 'block-verse'
   static tagName = 'div'
   static className = 'block-verse'
 
   static create (data) {
     let node = super.create(data)
-    node.setAttribute('contenteditable', false)
+    // node.setAttribute('contenteditable', false)
     const { title, content, version, verses } = data
     node.setAttribute('data', JSON.stringify(data))
 

@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom'
 import Strong from './Strong'
 
 import Quill from './quill.js'
-const BlockEmbed = Quill.import('blots/block/embed')
+const Embed = Quill.import('blots/embed')
 
-class StrongBlock extends BlockEmbed {
+class StrongBlock extends Embed {
   static blotName = 'block-strong'
   static tagName = 'div'
   static className = 'block-strong'
 
   static create (data) {
     let node = super.create(data)
-    node.setAttribute('contenteditable', false)
+    // node.setAttribute('contenteditable', false)
     const { title, code, strongType, phonetique, definition, translatedBy } = data
     node.setAttribute('data', JSON.stringify(data))
 
