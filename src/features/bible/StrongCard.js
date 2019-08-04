@@ -76,7 +76,8 @@ class StrongCard extends React.Component {
         strongType: Type,
         phonetique: Phonetique,
         definition: Definition,
-        translatedBy: LSG
+        translatedBy: LSG,
+        book
       })
     } else {
       navigation.navigate('BibleStrongDetail', {

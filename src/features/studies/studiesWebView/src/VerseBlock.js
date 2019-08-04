@@ -1,20 +1,35 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Verse from './Verse'
+import { dispatch } from './dispatch'
 
 import Quill from './quill.js'
-const Embed = Quill.import('blots/embed')
+const Block = Quill.import('blots/block/embed')
 
-class VerseBlock extends Embed {
+class VerseBlock extends Block {
   static blotName = 'block-verse'
   static tagName = 'div'
   static className = 'block-verse'
 
   static create (data) {
     let node = super.create(data)
-    // node.setAttribute('contenteditable', false)
     const { title, content, version, verses } = data
     node.setAttribute('data', JSON.stringify(data))
+
+    node.addEventListener('click', () => {
+      const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
+      if (isReadOnly) {
+        const [book, chapter, verse] = verses[0].split('-')
+
+        dispatch('VIEW_BIBLE_VERSE', {
+          isReadOnly: true,
+          arrayVerses: verses,
+          book,
+          chapter,
+          verse
+        })
+      }
+    })
 
     ReactDOM.render(
       <Verse {...{ title, content, version, verses }}

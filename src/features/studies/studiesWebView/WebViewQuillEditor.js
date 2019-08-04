@@ -9,6 +9,8 @@ import {
   Platform
 } from 'react-native'
 
+import books from '~assets/bible_versions/books-desc'
+
 // import { WebView } from 'react-native-webview'
 
 class WebViewQuillEditor extends React.Component {
@@ -98,6 +100,17 @@ class WebViewQuillEditor extends React.Component {
             )
           }
           break
+        case 'VIEW_BIBLE_VERSE': {
+          navigation.navigate('BibleView', {
+            ...msgData.payload,
+            book: books[msgData.payload.book - 1]
+          })
+          return
+        }
+        case 'VIEW_BIBLE_STRONG': {
+          navigation.navigate('BibleStrongDetail', msgData.payload)
+          return
+        }
         case 'SELECT_BIBLE_VERSE': {
           navigation.navigate('BibleView', {
             isSelectionMode: 'verse'
@@ -123,7 +136,6 @@ class WebViewQuillEditor extends React.Component {
           return
         }
         case 'ACTIVE_FORMATS': {
-          console.log(msgData.payload)
           this.props.setActiveFormats(msgData.payload)
           return
         }

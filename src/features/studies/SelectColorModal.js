@@ -34,7 +34,7 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const colors = ['#cc0000', '#f1c232', '#6aa84f', '#45818e', '#3d85c6', '#674ea7', '#a64d79']
-const lighten = ['0', '0.2', '0.5', '0.7']
+const lighten = ['0.3', '0.5', '0.7', '0.9']
 
 const SelectColorModal = ({
   isOpen,
@@ -69,7 +69,7 @@ const SelectColorModal = ({
         </TouchableOpacity>
         {
           lighten.map((l) => (
-            <Box key={l} row marginBottom={l === '0.7' ? 0 : 10}>
+            <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
               {
                 colors.map(c => (
                   <TouchableCircle key={c} size={27} color={Color(c).lighten(l).string()} onPress={() => setColor(Color(c).lighten(l).string())} />

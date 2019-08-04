@@ -70,14 +70,15 @@ class ModuleInlineVerse extends Module {
     }
   }
 
-  receiveStrongLink = ({ title, code }) => {
+  receiveStrongLink = ({ title, code, book }) => {
     const range = this.quill.getSelection(true)
 
     dispatchConsole(`Receive strong ${title}`)
     this.quill.format('inline-verse', false) // Disable inline-verse in case
     this.quill.format('inline-strong', {
       title,
-      code
+      code,
+      book
     })
     this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
   }

@@ -138,12 +138,10 @@ class BibleViewer extends Component {
 
     // When opening some verses, not whole chapter
     if (
-      arrayVerses &&
-      book.Numero === arrayVerses.book.Numero &&
-      chapter === arrayVerses.chapter
+      arrayVerses
     ) {
       array = array.filter(v =>
-        arrayVerses.verses.find(aV => aV === Number(v.Verset))
+        arrayVerses.find(aV => aV === `${v.Livre}-${v.Chapitre}-${v.Verset}`)
       )
     }
 

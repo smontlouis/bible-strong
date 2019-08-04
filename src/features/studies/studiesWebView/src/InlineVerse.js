@@ -1,4 +1,5 @@
 import Quill from './quill.js'
+import { dispatch } from './dispatch'
 const Inline = Quill.import('blots/inline')
 
 class InlineVerse extends Inline {
@@ -10,6 +11,22 @@ class InlineVerse extends Inline {
     let node = super.create()
     node.setAttribute('data-title', title)
     node.setAttribute('data-verses', JSON.stringify(verses))
+
+    node.addEventListener('click', () => {
+      const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
+      if (isReadOnly) {
+        const [book, chapter, verse] = verses[0].split('-')
+
+        dispatch('VIEW_BIBLE_VERSE', {
+          isReadOnly: true,
+          arrayVerses: verses,
+          book,
+          chapter,
+          verse
+        })
+      }
+    })
+
     return node
   }
 

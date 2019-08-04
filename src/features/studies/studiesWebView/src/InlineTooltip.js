@@ -1,4 +1,6 @@
 import Quill from './quill.js'
+import { dispatch, dispatchConsole } from './dispatch'
+
 const Tooltip = Quill.import('ui/tooltip')
 const InlineVerseBlot = Quill.import('formats/inline-verse')
 const InlineStrongBlot = Quill.import('formats/inline-strong')
@@ -22,8 +24,14 @@ class InlineTooltip extends Tooltip {
     })
 
     this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
+      const isReadOnly = this.quill.container.classList.contains('ql-disabled')
+
       if (type === Quill.events.SELECTION_CHANGE) {
         if (!range) return
+
+        if (isReadOnly) {
+          return
+        }
 
         const [linkVerse, offsetVerse] = this.quill.scroll.descendant(
           InlineVerseBlot,
@@ -47,7 +55,7 @@ class InlineTooltip extends Tooltip {
         // IF STRONG
         } else if (this.quill.getFormat(range)['inline-strong'] && linkStrong) {
           this.linkRange = [range.index - offsetStrong, linkStrong.length()]
-          const data = InlineVerseBlot.formats(linkStrong.domNode)
+          const data = InlineStrongBlot.formats(linkStrong.domNode)
           this.title.textContent = data.title
 
           this.show()

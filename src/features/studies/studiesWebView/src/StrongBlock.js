@@ -1,20 +1,31 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Strong from './Strong'
+import { dispatch, dispatchConsole } from './dispatch'
 
 import Quill from './quill.js'
-const Embed = Quill.import('blots/embed')
+const Block = Quill.import('blots/block/embed')
 
-class StrongBlock extends Embed {
+class StrongBlock extends Block {
   static blotName = 'block-strong'
   static tagName = 'div'
   static className = 'block-strong'
 
   static create (data) {
     let node = super.create(data)
-    // node.setAttribute('contenteditable', false)
-    const { title, code, strongType, phonetique, definition, translatedBy } = data
+    const { title, code, strongType, phonetique, definition, translatedBy, book } = data
     node.setAttribute('data', JSON.stringify(data))
+
+    node.addEventListener('click', () => {
+      const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
+      if (isReadOnly) {
+        dispatchConsole(`${code} ${book}`)
+        dispatch('VIEW_BIBLE_STRONG', {
+          reference: code,
+          book
+        })
+      }
+    })
 
     ReactDOM.render(
       <Strong {...{ title, code, strongType, phonetique, definition, translatedBy }} />, node

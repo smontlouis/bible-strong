@@ -1,18 +1,6 @@
 .block-verse {
 }
 
-.block-verse hr {
-  border: none;
-  color: #111;
-  letter-spacing: 1em;
-  text-align: center;
-  margin: 20px 0;
-}
-
-.block-verse hr::before {
-  content: '...';
-}
-
 .block-verse--content {
   quotes: "“" "”" "‘" "’";
   font-size: 15px;

@@ -1,97 +1,73 @@
 export default [
   {
-    insert: 'Bonjour je suis une étude'
+    insert: 'Lorem ipsum dolor sit amet'
   },
   {
     attributes: {
+      align: 'justify',
       header: 1
     },
     insert: '\n'
   },
   {
     attributes: {
-      background: '#fffbf1'
+      align: 'justify'
     },
-    insert: 'Lorem'
+    insert: '\n'
   },
   {
-    insert: ' '
+    insert: 'consectetur '
   },
   {
     attributes: {
-      underline: true
-    },
-    insert: 'ipsum'
-  },
-  {
-    insert: ' dolor sit '
-  },
-  {
-    attributes: {
-      'inline-strong': {
-        title: 'Suria',
-        code: '4947'
-      }
-    },
-    insert: 'amet'
-  },
-  {
-    insert: ', consectetur '
-  },
-  {
-    attributes: {
-      underline: true
+      italic: true
     },
     insert: 'adipiscing'
   },
   {
-    insert: ' elit. Nullam efficitur lobortis nisl '
+    insert: ' elit. Sed augue arcu, interdum quis ex eu, tincidunt molestie '
   },
   {
     attributes: {
-      bold: true
+      background: '#f2f7fb'
     },
-    insert: 'non'
+    insert: 'turpis'
   },
   {
-    insert: ' '
-  },
-  {
-    attributes: {
-      background: '#ff3333'
-    },
-    insert: 'pharetra'
-  },
-  {
-    insert: '. Aenean laoreet tempor '
-  },
-  {
-    attributes: {
-      background: '#45818e'
-    },
-    insert: 'felis'
-  },
-  {
-    insert: ', sit amet feugiat justo '
+    insert: '. '
   },
   {
     attributes: {
       underline: true,
-      italic: true
+      bold: true
     },
-    insert: 'varius'
+    insert: 'Nullam'
   },
   {
-    insert: ' ac. Nullam nec '
+    insert: ' consequat, nibh eget '
   },
   {
     attributes: {
-      underline: true
+      background: '#afd3a0'
     },
-    insert: 'libero'
+    insert: 'consequat'
   },
   {
-    insert: ' est. '
+    insert: ' malesuada, sapien sapien accumsan nunc, eget imperdiet quam '
+  },
+  {
+    attributes: {
+      'inline-verse': {
+        title: 'Genèse 4:1',
+        verses: [
+          '1-4-1'
+        ]
+      }
+    },
+    insert: 'arcu'
+  },
+  {
+    insert: ' sit amet arcu. '
   },
   {
     attributes: {
@@ -101,21 +77,21 @@ export default [
   },
   {
     attributes: {
-      title: 'Luc 2:1',
-      content: '1 Et il arriva en ces jours-là, qu’on publia un décret de César Auguste, que tout le monde devait être recensé.',
-      version: 'KJF',
-      verses: [
-        '42-2-1'
-      ]
+      title: 'Chanowk',
+      code: 2585,
+      strongType: 'Nom propre masculin',
+      phonetique: '(khan-oke\')',
+      definition: '<p>Hénoc (Enoch) = "dédié, initié, consacré "<br />1) fils aîné de Caïn<br />2) fils de Jéred et père de Metuschélah que Dieu rappela aux cieuxsans qu\'il connaisse la mort<br />n pr loc 3) la ville que Caïn construisit<br />n pr m 4) un fils de Madian, le troisième enfant<br />5) le fils aîné de Ruben</p>',
+      translatedBy: 'Hénoc  16'
     },
     insert: {
-      'block-verse': {
-        title: 'Luc 2:1',
-        content: '1 Et il arriva en ces jours-là, qu’on publia un décret de César Auguste, que tout le monde devait être recensé.',
-        version: 'KJF',
-        verses: [
-          '42-2-1'
-        ]
+      'block-strong': {
+        title: 'Chanowk',
+        code: 2585,
+        strongType: 'Nom propre masculin',
+        phonetique: '(khan-oke\')',
+        definition: '<p>Hénoc (Enoch) = "dédié, initié, consacré "<br />1) fils aîné de Caïn<br />2) fils de Jéred et père de Metuschélah que Dieu rappela aux cieuxsans qu\'il connaisse la mort<br />n pr loc 3) la ville que Caïn construisit<br />n pr m 4) un fils de Madian, le troisième enfant<br />5) le fils aîné de Ruben</p>',
+        translatedBy: 'Hénoc  16'
       }
     }
   },
@@ -126,35 +102,7 @@ export default [
     insert: '\n\n'
   },
   {
-    insert: 'Morbi nec turpis dictum, auctor lorem et, sodales mauris. Ut vitae '
-  },
-  {
-    attributes: {
-      italic: true,
-      bold: true
-    },
-    insert: 'massa'
-  },
-  {
-    insert: ' ut lacus '
-  },
-  {
-    attributes: {
-      background: '#fbebba'
-    },
-    insert: 'imperdiet'
-  },
-  {
-    insert: ' aliquet. '
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n\n'
-  },
-  {
-    insert: 'Nunc ultrices lorem at magna laoreet, ac condimentum arcu rhoncus. '
+    insert: 'Pellentesque scelerisque ac libero '
   },
   {
     attributes: {
@@ -167,96 +115,33 @@ export default [
     attributes: {
       align: 'justify'
     },
-    insert: '\n\n\n'
+    insert: '\n'
   },
   {
-    attributes: {
-      title: 'apographe',
-      code: 582,
-      strongType: 'Nom féminin',
-      phonetique: '(ap-og-raf-ay\')',
-      definition: '<ol><li>un écrit, une transcription (d\'après un modèle).</li><li>enregistrement public de ceux qui vivent ensemble, de leurs biens et de leurs propriétés, pour recenser, évaluer, donc déterminer les impôts et taxes qui pourront être prélevés.</li></ol>',
-      translatedBy: 'recensement 2; 2'
-    },
-    insert: {
-      'block-strong': {
-        title: 'apographe',
-        code: 582,
-        strongType: 'Nom féminin',
-        phonetique: '(ap-og-raf-ay\')',
-        definition: '<ol><li>un écrit, une transcription (d\'après un modèle).</li><li>enregistrement public de ceux qui vivent ensemble, de leurs biens et de leurs propriétés, pour recenser, évaluer, donc déterminer les impôts et taxes qui pourront être prélevés.</li></ol>',
-        translatedBy: 'recensement 2; 2'
-      }
-    }
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n\n'
-  },
-  {
-    insert: 'Quisque consequat '
-  },
-  {
-    attributes: {
-      bold: true
-    },
-    insert: 'iaculis'
-  },
-  {
-    insert: ' dui, eget '
+    insert: 'eu fermentum. Integer sed hendrerit ligula. Donec placerat lacinia mi '
   },
   {
     attributes: {
       'inline-verse': {
-        title: 'Luc 2:1',
+        title: 'Genèse 4:5',
         verses: [
-          '42-2-1'
+          '1-4-5'
         ]
       }
     },
-    insert: 'accumsan'
+    insert: 'quis'
   },
   {
-    insert: ' nunc '
-  },
-  {
-    attributes: {
-      underline: true,
-      bold: true
-    },
-    insert: 'aliquet'
-  },
-  {
-    insert: ' ut. Donec hendrerit elit '
+    insert: ' '
   },
   {
     attributes: {
-      background: '#afd3a0'
+      background: '#c9ddf0'
     },
-    insert: 'erat'
+    insert: 'pellentesque'
   },
   {
-    insert: ', non pharetra lacus ultricies eu. Morbi accumsan sem lorem, ac gravida ligula '
-  },
-  {
-    attributes: {
-      background: '#99c4ce'
-    },
-    insert: 'egestas'
-  },
-  {
-    insert: ' nec. Duis ac pharetra augue. '
-  },
-  {
-    attributes: {
-      background: '#e1bdcf'
-    },
-    insert: 'Fusce'
-  },
-  {
-    insert: ' egestas, felis a pharetra pharetra, augue metus finibus odio, id porta erat lectus et lacus. Proin elementum diam eget nunc hendrerit pulvinar. Aenean lobortis efficitur erat in rhoncus. '
+    insert: '. In tincidunt nec nibh at pretium. '
   },
   {
     attributes: {
@@ -265,26 +150,7 @@ export default [
     insert: '\n\n'
   },
   {
-    insert: 'Morbi '
-  },
-  {
-    attributes: {
-      italic: true
-    },
-    insert: 'lacinia'
-  },
-  {
-    insert: ' velit tellus, '
-  },
-  {
-    attributes: {
-      background: '#c9ddf0',
-      underline: true
-    },
-    insert: 'molestie'
-  },
-  {
-    insert: ' imperdiet mi placerat a. '
+    insert: 'Nam bibendum ac ante id pharetra. Nulla quis ligula vulputate, tristique leo in, ullamcorper lacus. '
   },
   {
     attributes: {
@@ -300,7 +166,129 @@ export default [
     insert: '\n'
   },
   {
-    insert: 'Curabitur a mattis orci. Morbi ultrices est ex, vitae condimentum ex euismod a. Aenean faucibus ut nisl a volutpat.'
+    insert: 'Pellentesque nec ipsum in odio tincidunt commodo. Etiam viverra libero sed massa '
+  },
+  {
+    attributes: {
+      'inline-strong': {
+        title: 'yalad',
+        code: '3205'
+      }
+    },
+    insert: 'hendrerit'
+  },
+  {
+    insert: ', id eleifend risus '
+  },
+  {
+    attributes: {
+      background: '#e1bdcf'
+    },
+    insert: 'aliquam'
+  },
+  {
+    insert: '. Donec facilisis sit amet quam eu dapibus. Nulla eu velit '
+  },
+  {
+    attributes: {
+      'inline-strong': {
+        title: 'nuwd',
+        code: '5110'
+      }
+    },
+    insert: 'rhoncus'
+  },
+  {
+    insert: ', viverra nulla tincidunt, mollis nulla.'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    attributes: {
+      title: 'Genèse 4:13',
+      content: '13 Caïn dit à l’Éternel: Mon châtiment est trop grand pour être supporté.',
+      version: 'LSG',
+      verses: [
+        '1-4-13'
+      ]
+    },
+    insert: {
+      'block-verse': {
+        title: 'Genèse 4:13',
+        content: '13 Caïn dit à l’Éternel: Mon châtiment est trop grand pour être supporté.',
+        version: 'LSG',
+        verses: [
+          '1-4-13'
+        ]
+      }
+    }
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n\n'
+  },
+  {
+    insert: 'Quisque laoreet nulla ut leo auctor'
+  },
+  {
+    attributes: {
+      align: 'justify',
+      header: 2
+    },
+    insert: '\n'
+  },
+  {
+    insert: ' '
+  },
+  {
+    attributes: {
+      align: 'justify',
+      header: 2
+    },
+    insert: '\n'
+  },
+  {
+    insert: 'nec luctus neque viverra. Donec dapibus turpis lectus, sed mattis ante auctor vel. Vivamus consectetur faucibus varius. Morbi porttitor pulvinar mi, a ultricies ex fermentum sed. '
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    insert: 'Ut varius sit amet erat in consequat. Donec posuere lorem ac purus vestibulum tincidunt. Mauris rutrum diam tincidunt mauris finibus, ut porttitor lorem aliquam. '
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    insert: 'Aenean non magna ves'
+  },
+  {
+    attributes: {
+      align: 'justify',
+      header: 1
+    },
+    insert: '\n'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n'
+  },
+  {
+    insert: 'ultrices condimentum. Vivamus rhoncus magna eu velit pharetra volutpat. Praesent vel turpis et felis hendrerit viverra.'
   },
   {
     attributes: {

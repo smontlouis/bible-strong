@@ -25,7 +25,7 @@ export default class ReactQuillEditor extends React.Component {
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
       this.quill.setContents(MockContent, Quill.sources.SILENT)
-      this.quill.enable()
+      // this.quill.enable()
     }
   }
 

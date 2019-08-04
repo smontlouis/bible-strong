@@ -528,13 +528,11 @@
     font-weight: normal;
     font-size: 2em;
     margin: 0;
-    height: 50px;
   }
   .ql-snow .ql-editor h2 {
     font-weight: normal;
     font-size: 1.5em;
     margin: 0;
-    height: 48px;
   }
   .ql-snow .ql-editor h3 {
     font-size: 1.17em;
@@ -938,4 +936,28 @@
 
   .ql-block-strong path{
     fill: rgb(194,40,57)!important;
+  }
+
+  .ql-editor h1 {
+    font-weight: normal;
+    font-size: 2em;
+    margin: 0;
+  }
+  
+  .ql-editor h2 {
+    font-weight: normal;
+    font-size: 1.5em;
+    margin: 0;
+  }
+
+ hr {
+    border: none;
+    color: #111;
+    letter-spacing: 1em;
+    text-align: center;
+    margin: 10px 0;
+  }
+  
+  hr::before {
+    content: '...';
   }
