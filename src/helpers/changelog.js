@@ -7,6 +7,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1564895816518',
+    type: logTypes.BUG,
+    title: 'ERR_INTERNET_DISCONNECTED',
+    description: "Il y avait un bug 'Error loading page - ERR_INTERNET_DISCONNECTED' à l'affiche de la Bible. Ce bug a été théoriquement réglé. N'hésitez à me donner des retours si ça continue."
+  },
+  {
     date: '1564107002776',
     type: logTypes.BUG,
     title: 'Malachie 4 - Bug sur la recherche et dans la Bible',
