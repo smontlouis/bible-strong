@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Asset } from 'expo-asset'
 // import * as Haptics from 'expo-haptics'
-// import { Vibration, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import {
@@ -25,6 +25,10 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
   webview = null
 
+  state = {
+    isHTMLFileLoaded: false
+  }
+
   dispatchToWebView = (message) => {
     if (this.webview === null) {
       return
@@ -47,6 +51,18 @@ class BibleWebView extends Component {
 
   componentDidMount () {
     this.enableWebViewOpacity()
+
+    this.HTMLFile = Asset.fromModule(require('./bibleWebView/dist/index.html'))
+
+    // We never know, but localUri should always be there
+    if (!this.HTMLFile.localUri) {
+      Asset.loadAsync(require('./bibleWebView/dist/index.html')).then(() => {
+        this.HTMLFile = Asset.fromModule(require('./bibleWebView/dist/index.html'))
+        this.setState({ isHTMLFileLoaded: true })
+      })
+    } else {
+      this.setState({ isHTMLFileLoaded: true })
+    }
   }
 
   enableWebViewOpacity = async () => {
@@ -135,6 +151,12 @@ class BibleWebView extends Component {
   }
 
   render () {
+    if (!this.state.isHTMLFileLoaded) {
+      return null
+    }
+
+    const { localUri } = this.HTMLFile
+
     return (
       <WebView
         useWebKit
@@ -142,7 +164,14 @@ class BibleWebView extends Component {
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={ref => (this.webview = ref)}
-        source={{ uri: Asset.fromModule(require('./bibleWebView/dist/index.html')).uri }}
+        source={
+          Platform.OS === 'android'
+            ? {
+              uri: localUri.includes('ExponentAsset')
+                ? localUri
+                : 'file:///android_asset/' + localUri.substr(9)
+            }
+            : require('./bibleWebView/dist/index.html')}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}
         domStorageEnabled

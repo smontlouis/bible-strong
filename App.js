@@ -4,6 +4,7 @@ import { AppLoading, Updates } from 'expo'
 import * as Segment from 'expo-analytics-segment'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
+import { Asset } from 'expo-asset'
 import { Provider } from 'react-redux'
 import Sentry from 'sentry-expo'
 import { setAutoFreeze } from 'immer'
@@ -33,6 +34,9 @@ export default class App extends React.Component {
 
   loadResourcesAsync = async () => {
     return Promise.all([
+      Asset.loadAsync([
+        require('./src/features/bible/bibleWebView/dist/index.html')
+      ]),
       Font.loadAsync({
         ...Icon.Feather.font,
         'literata-book': require('~assets/fonts/LiterataBook.otf'),
