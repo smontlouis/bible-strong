@@ -53,7 +53,7 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor,
     background = 'rgba(0,0,0,0.1)'
   }
   return {
-    fontFamily: 'Literata Book',
+    fontFamily: 'LiterataBook',
     transition: 'background 0.3s ease',
     background,
     padding: '4px',

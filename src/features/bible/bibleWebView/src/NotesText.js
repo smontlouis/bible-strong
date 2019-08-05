@@ -6,7 +6,7 @@ import { getColors } from '../../../../themes/getColors'
 import truncate from '../../../../helpers/truncate'
 
 const Div = styled('span')(({ settings: { fontSizeScale, theme } }) => ({
-  fontFamily: 'Literata Book',
+  fontFamily: 'LiterataBook',
   WebkitTouchCallout: 'none',
   MozUserSelect: 'none',
   msUserSelect: 'none',

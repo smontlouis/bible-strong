@@ -12,8 +12,20 @@ class ModuleInlineVerse extends Module {
 
     this.quill = quill
     this.tooltip = new InlineTooltip(this.quill, this.quill.container)
+    this.range = null
+
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
+      if (type === Quill.events.SELECTION_CHANGE) {
+        // Only save the whole selection. on Android, text selection changes when selecting verse.
+        if (range && range.length) {
+          this.range = range
+          dispatchConsole(`RANGE TO BE SAVED : ${JSON.stringify(this.range)}`)
+        }
+      }
+    })
   }
 
+  // OBSOLETE
   openVerseLink = (value) => {
     const range = this.quill.getSelection(true)
 
@@ -23,6 +35,8 @@ class ModuleInlineVerse extends Module {
 
     if (value) {
       // OPEN BIBLE SELECT THERE
+      this.range = range
+      dispatchConsole(`Range is ${JSON.stringify(this.range)}`)
       dispatch('SELECT_BIBLE_VERSE')
     } else {
       const [link, offset] = this.quill.scroll.descendant(
@@ -37,17 +51,17 @@ class ModuleInlineVerse extends Module {
   }
 
   receiveVerseLink = ({ title, verses }) => {
-    const range = this.quill.getSelection(true)
+    this.quill.setSelection(this.range, Quill.sources.SILENT)
 
-    dispatchConsole(`Receive verses ${title}`)
     this.quill.format('inline-strong', false) // Disable inline-strong in case
     this.quill.format('inline-verse', {
       title,
       verses
     })
-    this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
+    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
   }
 
+  // OBSOLETE
   openStrongLink = (value) => {
     const range = this.quill.getSelection(true)
 
@@ -71,7 +85,7 @@ class ModuleInlineVerse extends Module {
   }
 
   receiveStrongLink = ({ title, code, book }) => {
-    const range = this.quill.getSelection(true)
+    this.quill.setSelection(this.range, Quill.sources.SILENT)
 
     dispatchConsole(`Receive strong ${title}`)
     this.quill.format('inline-verse', false) // Disable inline-verse in case
@@ -80,7 +94,7 @@ class ModuleInlineVerse extends Module {
       code,
       book
     })
-    this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
+    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
   }
 }
 

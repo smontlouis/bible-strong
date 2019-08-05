@@ -22,7 +22,7 @@ const Container = styled('div')(({ settings: { alignContent, theme }, isReadOnly
 const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
 
 const headingStyle = {
-  fontFamily: 'Literata Book',
+  fontFamily: 'LiterataBook',
   textAlign: 'left'
 }
 

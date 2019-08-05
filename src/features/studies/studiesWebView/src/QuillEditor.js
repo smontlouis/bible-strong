@@ -19,13 +19,13 @@ const BROWSER_TESTING_ENABLED = process.env.NODE_ENV !== 'production'
 
 export default class ReactQuillEditor extends React.Component {
   componentDidMount () {
-    document.addEventListener('message', this.handleMessage)
+    document.addEventListener('messages', this.handleMessage)
     dispatchConsole(`component mounted`)
 
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
       this.quill.setContents(MockContent, Quill.sources.SILENT)
-      // this.quill.enable()
+      this.quill.enable()
     }
   }
 
@@ -41,6 +41,25 @@ export default class ReactQuillEditor extends React.Component {
 
   addTextChangeEventToEditor = () => {
     this.quill.on('text-change', debounce(this.onChangeText, 500))
+
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
+      const isReadOnly = this.quill.container.classList.contains('ql-disabled')
+
+      if (isReadOnly) return
+
+      if (range) {
+        const selectedBottom = this.quill.getBounds(range).bottom
+
+        setTimeout(() => {
+          const windowHeight = document.body.getBoundingClientRect().height
+
+          if (selectedBottom > windowHeight) {
+            dispatchConsole(`BEFORE: ${window.scrollY}, AFTER:  ${window.scrollY + selectedBottom - windowHeight}`)
+            document.querySelector('.ql-editor').scrollTo(0, document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30)
+          }
+        }, 300)
+      }
+    })
   }
 
   loadEditor = theme => {
@@ -68,12 +87,13 @@ export default class ReactQuillEditor extends React.Component {
   }
 
   componentWillUnmount () {
-    document.removeEventListener('message', this.handleMessage)
+    document.removeEventListener('messages', this.handleMessage)
   }
 
   handleMessage = event => {
     try {
-      const msgData = JSON.parse(event.data)
+      const msgData = event.detail
+
       dispatchConsole(msgData.type)
 
       switch (msgData.type) {

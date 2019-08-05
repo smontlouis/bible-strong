@@ -23,7 +23,9 @@
       "assetExts": [
         "sqlite",
         "txt",
-        "html"
+        "html",
+        "otf",
+        "woff"
       ]
     },
     "assetBundlePatterns": [

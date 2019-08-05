@@ -3,15 +3,23 @@ import { Asset } from 'expo-asset'
 import { withNavigation } from 'react-navigation'
 import {
   View,
-  ActivityIndicator,
   Alert,
-  WebView,
   Platform
+
 } from 'react-native'
 
 import books from '~assets/bible_versions/books-desc'
+import KeyboardSpacer from '~common/KeyboardSpacer'
 
-// import { WebView } from 'react-native-webview'
+import { WebView } from 'react-native-webview'
+
+const INJECTED_JAVASCRIPT = `(function() {
+  // This is the important part!
+  if (!window.ReactNativeWebView) {
+    window.ReactNativeWebView = window['ReactABI33_0_0NativeWebView'];
+  }
+  // End of the important part! Now continue using it as usual
+})();`
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef();
@@ -62,13 +70,16 @@ class WebViewQuillEditor extends React.Component {
 
     if (webView) {
       console.log('RN DISPATCH: ', type)
-      webView.postMessage(
-        JSON.stringify({
-          type,
-          payload
-        }),
-        '*'
-      )
+
+      webView.injectJavaScript(`
+        (function() {
+          setTimeout(() => {
+            document.dispatchEvent(new CustomEvent("messages", {
+              detail: ${JSON.stringify({ type, payload })}
+            }));
+          }, 0)
+        })()
+      `)
     }
   };
 
@@ -77,7 +88,7 @@ class WebViewQuillEditor extends React.Component {
     let msgData
     try {
       msgData = JSON.parse(event.nativeEvent.data)
-      // console.log('RN RECEIVE: ', msgData.type)
+      console.log('RN RECEIVE: ', msgData.type)
 
       switch (msgData.type) {
         case 'EDITOR_LOADED':
@@ -172,14 +183,6 @@ class WebViewQuillEditor extends React.Component {
     }
   };
 
-  showLoadingIndicator = () => {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator color='green' />
-      </View>
-    )
-  };
-
   onError = (error) => {
     Alert.alert('WebView onError', error, [
       { text: 'OK', onPress: () => console.log('OK Pressed') }
@@ -202,23 +205,24 @@ class WebViewQuillEditor extends React.Component {
       <View style={{ flex: 1 }}>
         <WebView
           useWebKit
+          onLoad={this.onWebViewLoaded}
+          onMessage={this.handleMessage}
           originWhitelist={['*']}
           ref={this.webViewRef}
-          source={
-            Platform.OS === 'android'
-              ? {
-                uri: localUri.includes('ExponentAsset')
-                  ? localUri
-                  : 'file:///android_asset/' + localUri.substr(9)
-              }
-              : require('./dist/index.html')}
-          onLoadEnd={this.onWebViewLoaded}
-          onMessage={this.handleMessage}
-          renderLoading={this.showLoadingIndicator}
+          source={{ uri: localUri }}
+          injectedJavaScript={INJECTED_JAVASCRIPT}
+          domStorageEnabled
+          allowUniversalAccessFromFileURLs
+          allowFileAccessFromFileURLs
+          allowFileAccess
+
           renderError={this.renderError}
           onError={this.onError}
-          allowFileAccess
         />
+        {
+          Platform.OS === 'android' &&
+          <KeyboardSpacer />
+        }
       </View>
     )
   };

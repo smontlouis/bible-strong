@@ -1,8 +1,13 @@
-@font-face {
+/* @font-face {
   font-family: "Literata Book";
   src: url("../../../../assets/fonts/LiterataBook-Regular-light.otf");
+<<<<<<< HEAD
 }
 /* 
+=======
+} */
+
+>>>>>>> Webview with RNW
 html {
   scroll-behavior: smooth;
 } */

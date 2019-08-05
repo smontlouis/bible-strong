@@ -66,6 +66,27 @@ class BibleWebView extends Component {
     }
   }
 
+  injectFont = async () => {
+    let { localUri } = Asset.fromModule(require('~assets/fonts/LiterataBook.otf'))
+
+    if (!localUri) {
+      await Asset.loadAsync(require('~assets/fonts/LiterataBook.otf'))
+      localUri = Asset.fromModule(require('~assets/fonts/LiterataBook.otf')).localUri
+    }
+
+    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
+
+    this.webview.injectJavaScript(`
+    (function() {
+      setTimeout(() => {
+        var style = document.createElement("style");
+        style.innerHTML = "${fontRule}";
+        document.head.appendChild(style);
+      }, 0)
+    })()
+    `)
+  }
+
   enableWebViewOpacity = async () => {
     await sleep(500)
     this.setState({ webViewOpacity: 1 })
@@ -165,17 +186,11 @@ class BibleWebView extends Component {
       <WebView
         useWebKit
         onLoad={this.sendDataToWebView}
+        onLoadEnd={this.injectFont}
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={ref => (this.webview = ref)}
-        source={
-          Platform.OS === 'android'
-            ? {
-              uri: localUri.includes('ExponentAsset')
-                ? localUri
-                : 'file:///android_asset/' + localUri.substr(9)
-            }
-            : require('./bibleWebView/dist/index.html')}
+        source={{ uri: localUri }}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}
         domStorageEnabled
