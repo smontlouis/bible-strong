@@ -3,7 +3,6 @@ import './verse.css'
 
 const Verse = ({ title, content, version }) => (
   <React.Fragment>
-    <hr />
     <div className='block-verse--content'>
       { content }
     </div>
@@ -15,7 +14,6 @@ const Verse = ({ title, content, version }) => (
         { version }
       </div>
     </div>
-    <hr />
   </React.Fragment>
 )
 

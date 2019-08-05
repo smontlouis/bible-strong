@@ -83,12 +83,35 @@ class WebViewQuillEditor extends React.Component {
     }
   };
 
+  injectFont = async () => {
+    const webView = this.webViewRef.current
+
+    let { localUri } = Asset.fromModule(require('~assets/fonts/LiterataBook.otf'))
+
+    if (!localUri) {
+      await Asset.loadAsync(require('~assets/fonts/LiterataBook.otf'))
+      localUri = Asset.fromModule(require('~assets/fonts/LiterataBook.otf')).localUri
+    }
+
+    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
+
+    webView.injectJavaScript(`
+    (function() {
+      setTimeout(() => {
+        var style = document.createElement("style");
+        style.innerHTML = "${fontRule}";
+        document.head.appendChild(style);
+      }, 0)
+    })()
+    `)
+  }
+
   handleMessage = (event) => {
     const { navigation } = this.props
     let msgData
     try {
       msgData = JSON.parse(event.nativeEvent.data)
-      console.log('RN RECEIVE: ', msgData.type)
+      // console.log('RN RECEIVE: ', msgData.type)
 
       switch (msgData.type) {
         case 'EDITOR_LOADED':
@@ -206,6 +229,7 @@ class WebViewQuillEditor extends React.Component {
         <WebView
           useWebKit
           onLoad={this.onWebViewLoaded}
+          onLoadEnd={this.injectFont}
           onMessage={this.handleMessage}
           originWhitelist={['*']}
           ref={this.webViewRef}

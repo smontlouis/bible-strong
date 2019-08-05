@@ -16,190 +16,44 @@ export default [
     insert: '\n'
   },
   {
-    insert: 'consectetur '
-  },
-  {
-    attributes: {
-      italic: true
-    },
-    insert: 'adipiscing'
-  },
-  {
-    insert: ' elit. Sed augue arcu, interdum quis ex eu, tincidunt molestie '
-  },
-  {
-    attributes: {
-      background: '#f2f7fb'
-    },
-    insert: 'turpis'
-  },
-  {
-    insert: '. '
-  },
-  {
-    attributes: {
-      underline: true,
-      bold: true
-    },
-    insert: 'Nullam'
-  },
-  {
-    insert: ' consequat, nibh eget '
-  },
-  {
-    attributes: {
-      background: '#afd3a0'
-    },
-    insert: 'consequat'
-  },
-  {
-    insert: ' malesuada, sapien sapien accumsan nunc, eget imperdiet quam '
+    insert: 'consectetur adipiscing elit. '
   },
   {
     attributes: {
       'inline-verse': {
-        title: 'Genèse 4:1',
+        title: 'Éphésiens 5:20',
         verses: [
-          '1-4-1'
+          '49-5-20'
         ]
       }
     },
-    insert: 'arcu'
-  },
-  {
-    insert: ' sit amet arcu. '
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n\n'
-  },
-  {
-    attributes: {
-      title: 'Chanowk',
-      code: 2585,
-      strongType: 'Nom propre masculin',
-      phonetique: '(khan-oke\')',
-      definition: '<p>Hénoc (Enoch) = "dédié, initié, consacré "<br />1) fils aîné de Caïn<br />2) fils de Jéred et père de Metuschélah que Dieu rappela aux cieuxsans qu\'il connaisse la mort<br />n pr loc 3) la ville que Caïn construisit<br />n pr m 4) un fils de Madian, le troisième enfant<br />5) le fils aîné de Ruben</p>',
-      translatedBy: 'Hénoc  16'
-    },
-    insert: {
-      'block-strong': {
-        title: 'Chanowk',
-        code: 2585,
-        strongType: 'Nom propre masculin',
-        phonetique: '(khan-oke\')',
-        definition: '<p>Hénoc (Enoch) = "dédié, initié, consacré "<br />1) fils aîné de Caïn<br />2) fils de Jéred et père de Metuschélah que Dieu rappela aux cieuxsans qu\'il connaisse la mort<br />n pr loc 3) la ville que Caïn construisit<br />n pr m 4) un fils de Madian, le troisième enfant<br />5) le fils aîné de Ruben</p>',
-        translatedBy: 'Hénoc  16'
-      }
-    }
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n\n'
-  },
-  {
-    insert: 'Pellentesque scelerisque ac libero '
-  },
-  {
-    attributes: {
-      align: 'justify',
-      header: 2
-    },
-    insert: '\n'
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n'
-  },
-  {
-    insert: 'eu fermentum. Integer sed hendrerit ligula. Donec placerat lacinia mi '
-  },
-  {
-    attributes: {
-      'inline-verse': {
-        title: 'Genèse 4:5',
-        verses: [
-          '1-4-5'
-        ]
-      }
-    },
-    insert: 'quis'
+    insert: 'Integer'
   },
   {
     insert: ' '
   },
   {
     attributes: {
-      background: '#c9ddf0'
-    },
-    insert: 'pellentesque'
-  },
-  {
-    insert: '. In tincidunt nec nibh at pretium. '
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n\n'
-  },
-  {
-    insert: 'Nam bibendum ac ante id pharetra. Nulla quis ligula vulputate, tristique leo in, ullamcorper lacus. '
-  },
-  {
-    attributes: {
-      align: 'justify',
-      blockquote: true
-    },
-    insert: '\n'
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n'
-  },
-  {
-    insert: 'Pellentesque nec ipsum in odio tincidunt commodo. Etiam viverra libero sed massa '
-  },
-  {
-    attributes: {
-      'inline-strong': {
-        title: 'yalad',
-        code: '3205'
+      'inline-verse': {
+        title: 'Éphésiens 5:24',
+        verses: [
+          '49-5-24'
+        ]
       }
     },
-    insert: 'hendrerit'
+    insert: 'feugiat'
   },
   {
-    insert: ', id eleifend risus '
+    insert: ' at lectus eu aliquet. Donec vitae leo vel orci luctus semper. Curabitur condimentum nisl leo, sed faucibus nibh imperdiet nec. Sed '
   },
   {
     attributes: {
       background: '#e1bdcf'
     },
-    insert: 'aliquam'
+    insert: 'hendrerit'
   },
   {
-    insert: '. Donec facilisis sit amet quam eu dapibus. Nulla eu velit '
-  },
-  {
-    attributes: {
-      'inline-strong': {
-        title: 'nuwd',
-        code: '5110'
-      }
-    },
-    insert: 'rhoncus'
-  },
-  {
-    insert: ', viverra nulla tincidunt, mollis nulla.'
+    insert: ' consequat eros. '
   },
   {
     attributes: {
@@ -209,20 +63,101 @@ export default [
   },
   {
     attributes: {
-      title: 'Genèse 4:13',
-      content: '13 Caïn dit à l’Éternel: Mon châtiment est trop grand pour être supporté.',
+      title: 'Christos',
+      code: 5547,
+      strongType: 'Adjectif',
+      phonetique: '(khris-tos\')',
+      definition: '<p>Christ = "oint"</p><ol><li>Christ était le Messie, le Fils de Dieu.</li><li>l\'Oint.</li></ol>',
+      translatedBy: 'Christ 535; 535',
+      book: 49,
+      original: 'Χριστός, οῦ, ὁ'
+    },
+    insert: {
+      'block-strong': {
+        title: 'Christos',
+        code: 5547,
+        strongType: 'Adjectif',
+        phonetique: '(khris-tos\')',
+        definition: '<p>Christ = "oint"</p><ol><li>Christ était le Messie, le Fils de Dieu.</li><li>l\'Oint.</li></ol>',
+        translatedBy: 'Christ 535; 535',
+        book: 49,
+        original: 'Χριστός, οῦ, ὁ'
+      }
+    }
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    insert: 'Curabitur porta suscipit pretium'
+  },
+  {
+    attributes: {
+      align: 'justify',
+      header: 2
+    },
+    insert: '\n'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n'
+  },
+  {
+    insert: 'Mauris '
+  },
+  {
+    attributes: {
+      'inline-strong': {
+        title: 'kurios',
+        code: '2962',
+        book: '49'
+      }
+    },
+    insert: 'accumsan'
+  },
+  {
+    insert: ' leo at blandit aliquet. Fusce ac venenatis lorem, vitae convallis libero. '
+  },
+  {
+    attributes: {
+      'inline-strong': {
+        title: 'gune',
+        code: '1135',
+        book: '49'
+      }
+    },
+    insert: 'Praesent'
+  },
+  {
+    insert: ' vel massa sit amet massa bibendum ultricies a non tortor. Donec eget posuere elit. Aliquam erat volutpat.'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    attributes: {
+      title: 'Éphésiens 5:25',
+      content: '25 Maris, aimez vos femmes, comme Christ a aimé l’Église, et s’est livré lui-même pour elle,',
       version: 'LSG',
       verses: [
-        '1-4-13'
+        '49-5-25'
       ]
     },
     insert: {
       'block-verse': {
-        title: 'Genèse 4:13',
-        content: '13 Caïn dit à l’Éternel: Mon châtiment est trop grand pour être supporté.',
+        title: 'Éphésiens 5:25',
+        content: '25 Maris, aimez vos femmes, comme Christ a aimé l’Église, et s’est livré lui-même pour elle,',
         version: 'LSG',
         verses: [
-          '1-4-13'
+          '49-5-25'
         ]
       }
     }
@@ -231,10 +166,19 @@ export default [
     attributes: {
       align: 'justify'
     },
-    insert: '\n\n\n'
+    insert: '\n\n'
   },
   {
-    insert: 'Quisque laoreet nulla ut leo auctor'
+    insert: 'Integer pulvinar mi odio, sit amet tincidunt erat scelerisque vitae. Praesent ac nunc velit. Aenean ut ligula luctus, ultrices erat consectetur, vestibulum tortor.'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    insert: 'Aliquam suscipit'
   },
   {
     attributes: {
@@ -244,7 +188,31 @@ export default [
     insert: '\n'
   },
   {
-    insert: ' '
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n'
+  },
+  {
+    insert: 'metus eget consectetur auctor, neque est sollicitudin lacus, non placerat lorem eros vel ligula. Ut commodo elit et ipsum elementum ullamcorper. Suspendisse congue scelerisque dolor quis pharetra. Suspendisse vel urna eu neque fringilla rutrum. Nunc in turpis eu libero ornare commodo. Morbi ultrices magna et magna eleifend eleifend. Morbi tristique, ligula id congue porta, ex massa ultrices ante, sodales tincidunt magna nunc eu leo. Donec eget pretium justo.'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n'
+  },
+  {
+    insert: 'Etiam vel turpis quam.'
+  },
+  {
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n\n'
+  },
+  {
+    insert: 'Fusce ex augue, laoreet eget'
   },
   {
     attributes: {
@@ -254,49 +222,24 @@ export default [
     insert: '\n'
   },
   {
-    insert: 'nec luctus neque viverra. Donec dapibus turpis lectus, sed mattis ante auctor vel. Vivamus consectetur faucibus varius. Morbi porttitor pulvinar mi, a ultricies ex fermentum sed. '
+    attributes: {
+      align: 'justify'
+    },
+    insert: '\n'
+  },
+  {
+    insert: 'nulla sed, lobortis facilisis ante. Sed varius, eros ac facilisis ultricies, lectus sem porta purus, eget condimentum nibh nulla sit amet metus. Aliquam nec orci vitae ex ullamcorper elementum nec tempus mauris. Praesent vulputate nibh quis dolor tempor, sed tristique mi sollicitudin. Aenean blandit sit amet risus a imperdiet. Suspendisse vitae consectetur eros. Donec biben'
   },
   {
     attributes: {
       align: 'justify'
     },
-    insert: '\n\n'
-  },
-  {
-    insert: 'Ut varius sit amet erat in consequat. Donec posuere lorem ac purus vestibulum tincidunt. Mauris rutrum diam tincidunt mauris finibus, ut porttitor lorem aliquam. '
+    insert: '\n'
   },
   {
     attributes: {
-      align: 'justify'
-    },
-    insert: '\n\n'
-  },
-  {
-    insert: 'Aenean non magna ves'
-  },
-  {
-    attributes: {
-      align: 'justify',
       header: 1
     },
-    insert: '\n'
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n'
-  },
-  {
-    insert: 'ultrices condimentum. Vivamus rhoncus magna eu velit pharetra volutpat. Praesent vel turpis et felis hendrerit viverra.'
-  },
-  {
-    attributes: {
-      align: 'justify'
-    },
-    insert: '\n'
-  },
-  {
     insert: '\n'
   }
 ]

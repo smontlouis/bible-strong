@@ -25,7 +25,13 @@ export default class ReactQuillEditor extends React.Component {
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
       this.quill.setContents(MockContent, Quill.sources.SILENT)
-      this.quill.enable()
+      // this.quill.enable()
+
+      // Load font
+      const literate = require('./literata').default
+      const style = document.createElement('style')
+      style.innerHTML = literate
+      document.head.appendChild(style)
     }
   }
 
@@ -46,6 +52,7 @@ export default class ReactQuillEditor extends React.Component {
       const isReadOnly = this.quill.container.classList.contains('ql-disabled')
 
       if (isReadOnly) return
+      if (type !== Quill.events.SELECTION_CHANGE) return
 
       if (range) {
         const selectedBottom = this.quill.getBounds(range).bottom

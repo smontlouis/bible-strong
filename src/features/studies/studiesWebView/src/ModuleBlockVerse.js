@@ -30,9 +30,9 @@ class ModuleBlockVerse extends Module {
   receiveStrongBlock = (data) => {
     dispatchConsole(`STRONG RECEIVED: ${JSON.stringify(data)}`)
 
-    const { title, code, strongType, phonetique, definition, translatedBy, book } = data
+    const { title, code, strongType, phonetique, definition, translatedBy, book, original } = data
     const range = this.quill.getSelection(true)
-    this.quill.insertEmbed(range.index, 'block-strong', { title, code, strongType, phonetique, definition, translatedBy, book }, Quill.sources.USER)
+    this.quill.insertEmbed(range.index, 'block-strong', { title, code, strongType, phonetique, definition, translatedBy, book, original }, Quill.sources.USER)
     this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
   }
 }

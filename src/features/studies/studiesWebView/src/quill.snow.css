@@ -6,8 +6,8 @@
  */
 .ql-container {
     box-sizing: border-box;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 14px;
+    font-family: 'LiterataBook', Helvetica, Arial, sans-serif;
+    font-size: 18px;
     margin: 0px;
     position: relative;
   }
@@ -914,39 +914,26 @@
   }
 
   .inline-verse {
-    color: rgb(9,132,227);
+    color: rgba(44, 62, 80,1.0);
   }
 
   .inline-strong {
-    color: rgb(194,40,57);
-  }
-
-  .ql-inline-verse path, .ql-inline-verse line{
-    stroke: rgb(9,132,227)!important;
-  }
-
-  .ql-block-verse path{
-    fill: rgb(9,132,227)!important;
+    color: rgb(9,132,227);
   }
 
 
-  .ql-inline-strong path, .ql-inline-strong line{
-    stroke: rgb(194,40,57)!important;
-  }
-
-  .ql-block-strong path{
-    fill: rgb(194,40,57)!important;
-  }
 
   .ql-editor h1 {
     font-weight: normal;
-    font-size: 2em;
+    font-size: 1.8em;
+    line-height: 1.3em;
     margin: 0;
   }
   
   .ql-editor h2 {
     font-weight: normal;
     font-size: 1.5em;
+    line-height: 1.1em;
     margin: 0;
   }
 

@@ -64,7 +64,7 @@ class StrongCard extends React.Component {
       strongReference,
       navigation,
       isSelectionMode,
-      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG }
+      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec }
     } = this.props
 
     if (isSelectionMode) {
@@ -77,6 +77,7 @@ class StrongCard extends React.Component {
         phonetique: Phonetique,
         definition: Definition,
         translatedBy: LSG,
+        original: Hebreu || Grec,
         book
       })
     } else {

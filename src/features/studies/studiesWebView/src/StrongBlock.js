@@ -13,7 +13,7 @@ class StrongBlock extends Block {
 
   static create (data) {
     let node = super.create(data)
-    const { title, code, strongType, phonetique, definition, translatedBy, book } = data
+    const { title, code, strongType, phonetique, definition, translatedBy, book, original } = data
     node.setAttribute('data', JSON.stringify(data))
 
     node.addEventListener('click', () => {
@@ -28,7 +28,7 @@ class StrongBlock extends Block {
     })
 
     ReactDOM.render(
-      <Strong {...{ title, code, strongType, phonetique, definition, translatedBy }} />, node
+      <Strong {...{ title, code, strongType, phonetique, definition, translatedBy, original }} />, node
     )
 
     return node
