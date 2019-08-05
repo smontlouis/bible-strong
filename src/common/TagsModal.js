@@ -57,7 +57,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       avoidKeyboard
     >
       <Container>
-        <ScrollView flex padding={20}>
+        <ScrollView style={{ flex: 1, padding: 20 }}>
           <Box row wrap>
             <Chip
               label='Tout'
