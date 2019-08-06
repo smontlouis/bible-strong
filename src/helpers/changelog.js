@@ -7,6 +7,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1565126162912',
+    type: logTypes.BUG,
+    title: 'Mélange de chapitres',
+    description: "En changeant de chapitre, certains versets du chapitre précédent se retrouvaient dans le chapitre suivant. Merci à Lysiane d'avoir remonté le bug."
+  },
+  {
     date: '1564895816518',
     type: logTypes.BUG,
     title: 'ERR_INTERNET_DISCONNECTED',
