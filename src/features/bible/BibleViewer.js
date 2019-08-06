@@ -15,7 +15,6 @@ import SelectedVersesModal from './SelectedVersesModal'
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
-import ErrorBoundary from '../../common/ErrorBoundary'
 
 const Container = styled.View({
   flex: 1,

@@ -1,9 +1,7 @@
-import { h } from 'preact'
-import picostyle from 'picostyle'
+import React from 'react'
+import styled from '@emotion/styled'
 
 import { getColors } from '../../../../themes/getColors'
-
-const styled = picostyle(h)
 
 const SvgContainer = styled('svg')(({ settings: { fontSizeScale } }) => ({
 }))

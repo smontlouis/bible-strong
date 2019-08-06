@@ -1,5 +1,6 @@
 // eslint-disable-next-line
-import { render, h } from 'preact'
+import React from 'react'
+import { render } from 'react-dom'
 
 import './index.css'
 import VersesRenderer from './VersesRenderer'
@@ -35,18 +36,15 @@ const mockNotedVerses = {
     date: 1563912012088
   }
 }
-try {
-  render(
-    <VersesRenderer
-      verses={desktopMode ? mockVerses : undefined}
-      notedVerses={desktopMode ? mockNotedVerses : undefined}
-      settings={desktopMode ? mockSettings : undefined}
-      verseToScroll={desktopMode ? verseToScroll : undefined}
-      selectedVerses={desktopMode ? mockSelectedVerses : undefined}
-      version={desktopMode ? version : undefined}
-    />,
-    document.getElementById('app')
-  )
-} catch (e) {
-  document.write(e)
-}
+
+render(
+  <VersesRenderer
+    verses={desktopMode ? mockVerses : undefined}
+    notedVerses={desktopMode ? mockNotedVerses : undefined}
+    settings={desktopMode ? mockSettings : undefined}
+    verseToScroll={desktopMode ? verseToScroll : undefined}
+    selectedVerses={desktopMode ? mockSelectedVerses : undefined}
+    version={desktopMode ? version : undefined}
+  />,
+  document.getElementById('app')
+)

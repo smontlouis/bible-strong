@@ -1,5 +1,6 @@
-import { Component, h } from 'preact'
-import picostyle, { keyframes } from 'picostyle'
+import React, { Component } from 'react'
+import { keyframes } from '@emotion/core'
+import styled from '@emotion/styled'
 
 import {
   dispatch,
@@ -22,8 +23,6 @@ function convertHex (hex, opacity) {
   const result = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity / 100 + ')'
   return result
 }
-
-const styled = picostyle(h)
 
 export const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
 
@@ -57,15 +56,15 @@ const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor,
     fontFamily: 'Literata Book',
     transition: 'background 0.3s ease',
     background,
-    '-webkit-touch-callout': 'none',
     padding: '4px',
     borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none',
-    '-moz-user-select': 'none',
-    '-ms-user-select': 'none',
-    '-khtml-user-select': 'none',
-    '-webkit-user-select': 'none',
+    WebkitTouchCallout: 'none',
+    MozUserSelect: 'none',
+    msUserSelect: 'none',
+    KhtmlUserSelect: 'none',
+    WebkitUserSelect: 'none',
     ...isVerseToScroll ? {
-      animation: `1s ease 0s 3 normal none running ${zoom}`
+      animation: `1s ease 0s 2 normal none running ${zoom}`
     } : {}
   }
 })
@@ -176,7 +175,10 @@ class Verse extends Component {
     if (this.state.isFocused) this.setState({ isFocused: false })
   };
 
-  render ({ verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll, notesText }, { isFocused }) {
+  render () {
+    const { verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll, notesText } = this.props
+    const { isFocused } = this.state
+
     const inlineNotedVerses = settings.notesDisplay === 'inline'
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>

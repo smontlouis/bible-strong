@@ -1,12 +1,11 @@
-import { Component, h } from 'preact'
-import picostyle from 'picostyle'
+import React, { Component } from 'react'
+import styled from '@emotion/styled'
 
 import { getColors } from '../../../../themes/getColors'
 import { SEND_INITIAL_DATA, CONSOLE_LOG, dispatch } from './dispatch'
 import Verse from './Verse'
+import ErrorBoundary from './ErrorBoundary'
 import { desktopMode } from './env'
-
-const styled = picostyle(h)
 
 const Container = styled('div')(({ settings: { alignContent, theme }, isReadOnly }) => ({
   // maxWidth: '320px',
@@ -194,47 +193,49 @@ class VersesRenderer extends Component {
     })
   }
 
-  render (props, state) {
-    if (!state.verses.length) {
+  render () {
+    if (!this.state.verses.length) {
       return null
     }
 
     return (
-      <Container settings={state.settings} isReadOnly={state.isReadOnly}>
+      <Container settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
         {
-          state.verses.map((verse) => {
+          this.state.verses.map((verse) => {
             const { Livre, Chapitre, Verset } = verse
-            const isSelected = !!state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
-            const isSelectedMode = !!Object.keys(state.selectedVerses).length
-            const isHighlighted = !!state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
-            const highlightedColor = isHighlighted && state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
-            const notesCount = state.notedVersesCount[`${Verset}`]
-            const notesText = state.notedVersesText[`${Verset}`]
+            const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            const isSelectedMode = !!Object.keys(this.state.selectedVerses).length
+            const isHighlighted = !!this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+            const highlightedColor = isHighlighted && this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
+            const notesCount = this.state.notedVersesCount[`${Verset}`]
+            const notesText = this.state.notedVersesText[`${Verset}`]
             const isVerseToScroll = this.state.verseToScroll == Verset
 
-            const { h1, h2, h3 } = getPericopeVerse(state.pericopeChapter, Verset)
+            const { h1, h2, h3 } = getPericopeVerse(this.state.pericopeChapter, Verset)
 
             return (
-              <span>
+              <span key={`${Livre}-${Chapitre}-${Verset}`}>
                 {
-                  h1 && <H1 settings={state.settings}>{h1}</H1>
+                  h1 && <H1 settings={this.state.settings}>{h1}</H1>
                 }
                 {
-                  h2 && <H2 settings={state.settings}>{h2}</H2>
+                  h2 && <H2 settings={this.state.settings}>{h2}</H2>
                 }
                 {
-                  h3 && <H3 settings={state.settings}>{h3}</H3>
+                  h3 && <H3 settings={this.state.settings}>{h3}</H3>
                 }
-                <Verse
-                  verse={verse}
-                  settings={state.settings}
-                  isSelected={isSelected}
-                  isSelectedMode={isSelectedMode}
-                  highlightedColor={highlightedColor}
-                  notesCount={notesCount}
-                  notesText={notesText}
-                  isVerseToScroll={isVerseToScroll}
-                />
+                <ErrorBoundary>
+                  <Verse
+                    verse={verse}
+                    settings={this.state.settings}
+                    isSelected={isSelected}
+                    isSelectedMode={isSelectedMode}
+                    highlightedColor={highlightedColor}
+                    notesCount={notesCount}
+                    notesText={notesText}
+                    isVerseToScroll={isVerseToScroll}
+                  />
+                </ErrorBoundary>
               </span>
             )
           })

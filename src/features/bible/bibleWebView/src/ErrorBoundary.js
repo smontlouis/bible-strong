@@ -1,6 +1,4 @@
 import React from 'react'
-import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
 
 class ErrorBoundary extends React.Component {
   constructor (props) {
@@ -21,9 +19,9 @@ class ErrorBoundary extends React.Component {
     if (this.state.errorInfo) {
       // Error path
       return (
-        <Container>
-          <Text>Error: {this.state.errorInfo}</Text>
-        </Container>
+        <div>
+          Error: {this.state.errorInfo}
+        </div>
       )
     }
     // Normally, just render children

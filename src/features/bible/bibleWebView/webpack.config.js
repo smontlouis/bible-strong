@@ -39,11 +39,5 @@ module.exports = {
       inlineSource: '.(js|css)$'
     }),
     new HtmlWebpackInlineSourcePlugin()
-  ],
-  resolve: {
-    alias: {
-      'react': 'preact-compat',
-      'react-dom': 'preact-compat'
-    }
-  }
+  ]
 }

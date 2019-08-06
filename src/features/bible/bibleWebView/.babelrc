@@ -4,7 +4,7 @@
   ],
   "plugins": [
     "@babel/plugin-proposal-class-properties",
-    ["@babel/transform-react-jsx", { "pragma": "h" }]
+    ["@babel/transform-react-jsx"]
   ],
   "env": {
     "production": {
