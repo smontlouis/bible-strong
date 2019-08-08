@@ -8,13 +8,15 @@ import styled from '@emotion/native'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import Button from '~common/ui/Button'
-import BibleFooter from './BibleFooter'
-import BibleWebView from './BibleWebView'
-import SelectedVersesModal from './SelectedVersesModal'
-
+import MultipleTagsModal from '~common/MultipleTagsModal'
+import QuickTagsModal from '~common/QuickTagsModal'
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
+
+import BibleFooter from './BibleFooter'
+import BibleWebView from './BibleWebView'
+import SelectedVersesModal from './SelectedVersesModal'
 
 const Container = styled.View({
   flex: 1,
@@ -37,7 +39,9 @@ class BibleViewer extends Component {
   state = {
     error: false,
     isLoading: true,
-    verses: []
+    verses: [],
+    multipleTagsItem: false,
+    quickTagsModal: false
   }
 
   pericope = getBiblePericope('LSG')
@@ -105,8 +109,21 @@ class BibleViewer extends Component {
     navigation.navigate('Bible')
   }
 
+  addHiglightAndOpenQuickTags = (color) => {
+    const { addHighlight, selectedVerses } = this.props
+
+    setTimeout(() => {
+      this.setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
+    }, 300)
+
+    addHighlight(color)
+  }
+
+  setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
+  setQuickTagsModal = value => this.setState({ quickTagsModal: value })
+
   render () {
-    const { isLoading, error } = this.state
+    const { isLoading, error, quickTagsModal, multipleTagsItem } = this.state
     const {
       book,
       chapter,
@@ -116,7 +133,6 @@ class BibleViewer extends Component {
       isSelectionMode,
       modalIsVisible,
       isSelectedVerseHighlighted,
-      addHighlight,
       removeHighlight,
       clearSelectedVerses,
       navigation,
@@ -200,13 +216,23 @@ class BibleViewer extends Component {
             onCreateNoteClick={onCreateNoteClick}
             isVisible={modalIsVisible}
             isSelectedVerseHighlighted={isSelectedVerseHighlighted}
-            addHighlight={addHighlight}
+            addHighlight={this.addHiglightAndOpenQuickTags}
             removeHighlight={removeHighlight}
             clearSelectedVerses={clearSelectedVerses}
             navigation={navigation}
             selectedVerses={selectedVerses}
             version={version}
           />}
+        <QuickTagsModal
+          item={quickTagsModal}
+          onClosed={() => this.setQuickTagsModal(false)}
+          setMultipleTagsItem={this.setMultipleTagsItem}
+        />
+        <MultipleTagsModal
+          multiple
+          item={multipleTagsItem}
+          onClosed={() => this.setMultipleTagsItem(false)}
+        />
       </Container>
     )
   }

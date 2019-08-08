@@ -58,10 +58,11 @@ const EditHeader = ({
   dispatchToWebView,
   openHeaderModal,
   openBlockModal,
-  openColorModal
+  openColorModal,
+  setTitlePrompt
 }) => {
   if (isReadOnly) {
-    return <Header hasBackButton title={title} />
+    return <Header hasBackButton title={title} onTitlePress={setTitlePrompt} />
   }
 
   const getHeaderTitle = () => {

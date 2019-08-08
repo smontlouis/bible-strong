@@ -41,7 +41,6 @@ class StrongBlock extends Block {
 
   static value (domNode) {
     const data = domNode.getAttribute('data')
-    console.log(data)
     return JSON.parse(data)
   }
 }

@@ -2,6 +2,7 @@ import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
 import ProfileScreen from '~features/settings/ProfileScreen'
+import HighlightScreen from '~features/settings/HighlightsScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
 import TabBarIcon from '~common/TabBarIcon'
@@ -26,7 +27,18 @@ export default createMaterialBottomTabNavigator(
       navigationOptions: ({ screenProps }) => ({
         title: 'Études',
         tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='edit' />
+          <TabBarIcon focused={focused} name='feather' />
+        ),
+        tabBarColor: getTheme[screenProps.theme].colors.reverse,
+        activeColor: getTheme[screenProps.theme].colors.primary
+      })
+    },
+    Highlights: {
+      screen: HighlightScreen,
+      navigationOptions: ({ screenProps }) => ({
+        title: 'Surbrillances',
+        tabBarIcon: ({ focused }) => (
+          <TabBarIcon focused={focused} name='edit-3' />
         ),
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary

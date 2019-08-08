@@ -8,11 +8,14 @@ import { createStudy, updateStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEditor'
+import MultipleTagsModal from '~common/MultipleTagsModal'
+import QuickTagsModal from '~common/QuickTagsModal'
 
 import EditStudyHeader from './EditStudyHeader'
 import SelectHeaderModal from './SelectHeaderModal'
 import SelectBlockModal from './SelectBlockModal'
 import SelectColorModal from './SelectColorModal'
+import StudyTitlePrompt from './StudyTitlePrompt'
 
 const withStudy = (Component) => props => {
   const dispatch = useDispatch()
@@ -23,14 +26,12 @@ const withStudy = (Component) => props => {
   useEffect(() => {
     if (studyIdParam) {
       // Update modification_date
-      console.log('Study Exists')
       setStudyId(studyIdParam)
     } else {
       // Create Study
       const studyId = generateUUID()
       dispatch(createStudy(studyId))
       setStudyId(studyId)
-      console.log('Loaded true: ' + studyId)
     }
   }, [])
 
@@ -49,7 +50,10 @@ class EditStudyScreen extends React.Component {
     isHeaderModalOpen: false,
     isBlockModalOpen: false,
     isColorModalOpen: false,
-    isReadOnly: true
+    isReadOnly: true,
+    titlePrompt: '',
+    multipleTagsItem: false,
+    quickTagsModal: false
   }
 
   componentDidMount () {
@@ -92,14 +96,26 @@ class EditStudyScreen extends React.Component {
     this.closeBlockModal()
   }
 
+  setTitlePrompt = (value) => this.setState({ titlePrompt: value })
+  setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
+  setQuickTagsModal = value => this.setState({ quickTagsModal: value })
+
   render () {
-    const { isReadOnly } = this.state
+    const {
+      isReadOnly,
+      titlePrompt,
+      multipleTagsItem,
+      quickTagsModal
+    } = this.state
 
     return (
       <Container>
         <EditStudyHeader
           isReadOnly={isReadOnly}
-          setReadOnly={() => this.setState({ isReadOnly: true })}
+          setTitlePrompt={() => this.setTitlePrompt({ id: this.props.currentStudy.id, title: this.props.currentStudy.title })}
+          setReadOnly={() => {
+            this.setState({ isReadOnly: true, quickTagsModal: { id: this.props.currentStudy.id, entity: 'studies' } })
+          }}
           title={this.props.currentStudy.title}
           activeFormats={this.state.activeFormats}
           dispatchToWebView={this.dispatchToWebView}
@@ -132,6 +148,21 @@ class EditStudyScreen extends React.Component {
           activeFormats={this.state.activeFormats}
           isOpen={this.state.isColorModalOpen}
           onClosed={this.closeColorModal}
+        />
+        <StudyTitlePrompt
+          titlePrompt={titlePrompt}
+          onClosed={() => this.setTitlePrompt(false)}
+          onSave={(id, title) => this.props.dispatch(updateStudy({ id, title }))}
+        />
+        <QuickTagsModal
+          item={quickTagsModal}
+          onClosed={() => this.setQuickTagsModal(false)}
+          setMultipleTagsItem={this.setMultipleTagsItem}
+        />
+        <MultipleTagsModal
+          multiple
+          item={multipleTagsItem}
+          onClosed={() => this.setMultipleTagsItem(false)}
         />
         {
           isReadOnly &&

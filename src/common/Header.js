@@ -22,7 +22,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ hasBackButton, isModal, title, noBorder }) => {
+const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
       <Box flex justifyContent='center'>
@@ -36,7 +36,7 @@ const Header = ({ hasBackButton, isModal, title, noBorder }) => {
         )}
       </Box>
       <Box grow center>
-        <Text fontSize={16} bold>{title}</Text>
+        <Text fontSize={16} onPress={onTitlePress} bold>{title}</Text>
       </Box>
       <Box flex />
     </HeaderBox>

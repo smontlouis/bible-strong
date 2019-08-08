@@ -22,6 +22,7 @@ export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 export const ADD_TAG = 'user/ADD_TAG'
+export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
 export const REMOVE_TAG = 'user/REMOVE_TAG'
 export const CREATE_STUDY = 'user/CREATE_STUDY'
 export const UPDATE_STUDY = 'user/UPDATE_STUDY'
@@ -51,12 +52,15 @@ const initialState = {
   }
 }
 
-const addDateAndColorToVerses = (verses, color) => {
+const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
   const formattedObj = Object.keys(verses).reduce((obj, verse) => ({
     ...obj,
     [verse]: {
       color,
-      date: Date.now()
+      date: Date.now(),
+      ...highlightedVerses[verse] && {
+        tags: highlightedVerses[verse].tags
+      }
     }
   }), {})
 
@@ -141,6 +145,44 @@ export default produce((draft, action) => {
       delete draft.bible.tags[action.payload]
       break
     }
+    case TOGGLE_TAG_ENTITY: {
+      const { item, tagId } = action.payload
+
+      if (item.ids) {
+        const hasTag = draft.bible[item.entity][Object.keys(item.ids)[0]].tags && draft.bible[item.entity][Object.keys(item.ids)[0]].tags[tagId]
+
+        Object.keys(item.ids).forEach((id) => {
+          // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
+          if (hasTag) {
+            delete draft.bible.tags[tagId][item.entity][id]
+            delete draft.bible[item.entity][id].tags[tagId]
+
+            // ADD OPERATION
+          } else {
+            if (!draft.bible.tags[tagId][item.entity]) draft.bible.tags[tagId][item.entity] = {}
+            draft.bible.tags[tagId][item.entity][id] = true
+
+            if (!draft.bible[item.entity][id].tags) draft.bible[item.entity][id].tags = {}
+            draft.bible[item.entity][id].tags[tagId] = { id: tagId, name: draft.bible.tags[tagId].name }
+          }
+        })
+      } else {
+        // DELETE OPERATION
+        if (draft.bible[item.entity][item.id].tags && draft.bible[item.entity][item.id].tags[tagId]) {
+          delete draft.bible.tags[tagId][item.entity][item.id]
+          delete draft.bible[item.entity][item.id].tags[tagId]
+        // ADD OPERATION
+        } else {
+          if (!draft.bible.tags[tagId][item.entity]) draft.bible.tags[tagId][item.entity] = {}
+          draft.bible.tags[tagId][item.entity][item.id] = true
+
+          if (!draft.bible[item.entity][item.id].tags) draft.bible[item.entity][item.id].tags = {}
+          draft.bible[item.entity][item.id].tags[tagId] = { id: tagId, name: draft.bible.tags[tagId].name }
+        }
+      }
+
+      break
+    }
     case CREATE_STUDY: {
       draft.bible.studies[action.payload] = {
         id: action.payload,
@@ -193,9 +235,10 @@ export function deleteNote (noteId) {
 export function addHighlight (color) {
   return (dispatch, getState) => {
     const selectedVerses = getState().bible.selectedVerses
+    const highlightedVerses = getState().user.bible.highlights
 
     dispatch(clearSelectedVerses())
-    return dispatch({ type: ADD_HIGHLIGHT, selectedVerses: addDateAndColorToVerses(selectedVerses, color) })
+    return dispatch({ type: ADD_HIGHLIGHT, selectedVerses: addDateAndColorToVerses(selectedVerses, highlightedVerses, color) })
   }
 }
 
@@ -277,6 +320,13 @@ export function removeTag (payload) {
   return {
     type: REMOVE_TAG,
     payload
+  }
+}
+
+export function toggleTagEntity ({ item, tagId }) {
+  return {
+    type: TOGGLE_TAG_ENTITY,
+    payload: { item, tagId }
   }
 }
 

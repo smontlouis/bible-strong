@@ -18,7 +18,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
   position: 'absolute',
-  bottom: 60,
+  bottom: 30,
   right: 30
 }))
 

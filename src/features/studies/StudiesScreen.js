@@ -2,13 +2,15 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { FlatList } from 'react-native'
 
+import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import FloatingButton from '~common/ui/FloatingButton'
+import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
+import MultipleTagsModal from '~common/MultipleTagsModal'
 import { updateStudy } from '~redux/modules/user'
 
-import StudiesHeader from './StudiesHeader'
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import StudyItem from './StudyItem'
@@ -22,11 +24,15 @@ const StudiesScreen = () => {
   const [selectedChip, setSelectedChip] = React.useState(null)
   const studies = useSelector(state => Object.values(state.user.bible.studies))
 
-  studies.sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
+  const [multipleTagsItem, setMultipleTagsItem] = React.useState(false)
+
+  const filteredStudies = studies.filter(s => (selectedChip) ? s.tags && s.tags[selectedChip.id] : true)
+  filteredStudies.sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
 
   return (
     <Container>
-      <StudiesHeader
+      <TagsHeader
+        title='Études'
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
         selectedChip={selectedChip}
@@ -37,24 +43,37 @@ const StudiesScreen = () => {
         onSelected={(chip) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
+      <MultipleTagsModal
+        multiple
+        item={multipleTagsItem}
+        onClosed={() => setMultipleTagsItem(false)}
+      />
       <Box flex>
-        <FlatList data={studies}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <StudyItem
-              key={item.id}
-              study={item}
-              setStudySettings={setStudySettings}
+        {
+          filteredStudies.length
+            ? <FlatList data={filteredStudies}
+              contentContainerStyle={{ paddingBottom: 100 }}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <StudyItem
+                  key={item.id}
+                  study={item}
+                  setStudySettings={setStudySettings}
+                />
+              )}
             />
-          )}
-        />
+            : <Empty
+              source={require('~assets/images/empty.json')}
+              message='Aucune étude...'
+            />
+        }
         <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' params={{ canEdit: true }} />
       </Box>
       <StudySettingsModal
         isOpen={isStudySettingsOpen}
         onClosed={() => setStudySettings(false)}
         setTitlePrompt={setTitlePrompt}
+        setMultipleTagsItem={setMultipleTagsItem}
       />
       <StudyTitlePrompt
         titlePrompt={titlePrompt}

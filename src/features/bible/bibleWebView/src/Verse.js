@@ -127,8 +127,6 @@ class Verse extends Component {
       return
     }
 
-    console.log('shortpress')
-
     if (isSelectedMode || press === 'longPress') {
       this.toggleSelectVerse()
     } else {
@@ -145,7 +143,6 @@ class Verse extends Component {
     }
 
     this.shouldShortPress = false
-    console.log('longpress, moved: ', this.moved)
 
     if (this.moved === false) {
       if (press === 'shortPress') {

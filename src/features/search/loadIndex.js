@@ -4,7 +4,6 @@ let loadedIndex = null
 
 const loadIndexCache = (idxFile) => new Promise(async resolve => {
   if (loadedIndex) {
-    console.log('return loaded Index')
     return resolve(loadedIndex)
   }
 

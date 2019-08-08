@@ -1,5 +1,5 @@
 import React from 'react'
-import { Platform, ScrollView } from 'react-native'
+import { Platform } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
@@ -37,9 +37,12 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ noBorder, setIsOpen, isOpen, selectedChip }) => {
+const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
+      <Box flex justifyContent='center'>
+        <Text fontSize={16} bold>{title} </Text>
+      </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
         <StyledText>
           {selectedChip ? selectedChip.name : 'Tout'}

@@ -99,7 +99,6 @@ class BibleWebView extends Component {
   // Receives all data from webview
   receiveDataFromWebView = (e) => {
     const action = JSON.parse(e.nativeEvent.data)
-    console.log(action)
 
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {

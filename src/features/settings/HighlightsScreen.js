@@ -1,6 +1,7 @@
 import React from 'react'
 import Container from '~common/ui/Container'
-import Header from '~common/Header'
+import TagsHeader from '~common/TagsHeader'
+import TagsModal from '~common/TagsModal'
 import Empty from '~common/Empty'
 import { useSelector } from 'react-redux'
 
@@ -8,14 +9,31 @@ import VersesList from './VersesList'
 
 const HighlightsScreen = () => {
   const verseIds = useSelector(state => state.user.bible.highlights)
+  const [isTagsOpen, setTagsIsOpen] = React.useState(false)
+  const [selectedChip, setSelectedChip] = React.useState(null)
+
+  const filteredHighlights = Object.keys(verseIds)
+    .filter(vId => (selectedChip) ? verseIds[vId].tags && verseIds[vId].tags[selectedChip.id] : true)
+    .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
 
   return (
     <Container>
-      <Header title='Surbrillances' />
+      <TagsHeader
+        title='Subrillances'
+        setIsOpen={setTagsIsOpen}
+        isOpen={isTagsOpen}
+        selectedChip={selectedChip}
+      />
+      <TagsModal
+        isVisible={isTagsOpen}
+        onClosed={() => setTagsIsOpen(false)}
+        onSelected={(chip) => setSelectedChip(chip)}
+        selectedChip={selectedChip}
+      />
       {
-        Object.keys(verseIds).length
+        Object.keys(filteredHighlights).length
           ? <VersesList
-            verseIds={verseIds}
+            verseIds={filteredHighlights}
           />
           : <Empty
             source={require('~assets/images/empty.json')}

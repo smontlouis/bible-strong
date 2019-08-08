@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Modal from 'react-native-modal'
 import { TouchableOpacity } from 'react-native'
 import * as Icon from '@expo/vector-icons'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import { withTheme } from 'emotion-theming'
 import styled from '@emotion/native'
@@ -10,22 +11,20 @@ import Box from '~common/ui/Box'
 import TextInput from '~common/ui/TextInput'
 
 const StylizedModal = styled(Modal)({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'flex-end',
+  margin: 0
 })
 
 const Container = styled.View(({ theme }) => ({
-  width: 290,
   display: 'flex',
   backgroundColor: theme.colors.reverse,
-  borderRadius: 3,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  padding: 10
+  padding: 10,
+  paddingBottom: getBottomSpace()
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
@@ -55,9 +54,6 @@ const StudyTitlePrompt = ({
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={!!titlePrompt}
-      animationIn='fadeInDown'
-      animationOut='fadeOutUp'
-      animationInTiming={300}
       avoidKeyboard
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}

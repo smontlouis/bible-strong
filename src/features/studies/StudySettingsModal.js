@@ -2,6 +2,7 @@ import React from 'react'
 import Modal from 'react-native-modal'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from 'react-native'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import { withTheme } from 'emotion-theming'
 import styled from '@emotion/native'
@@ -10,21 +11,19 @@ import Text from '~common/ui/Text'
 import { deleteStudy } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'flex-end',
+  margin: 0
 })
 
 const Container = styled.View(({ theme }) => ({
-  width: 290,
   display: 'flex',
   backgroundColor: theme.colors.reverse,
-  borderRadius: 3,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
-  elevation: 2
+  elevation: 2,
+  paddingBottom: getBottomSpace()
 }))
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
@@ -40,7 +39,8 @@ const StudySettingsModal = ({
   isOpen,
   onClosed,
   theme,
-  setTitlePrompt
+  setTitlePrompt,
+  setMultipleTagsItem
 }) => {
   const dispatch = useDispatch()
   const studyId = isOpen
@@ -57,21 +57,26 @@ const StudySettingsModal = ({
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={!!isOpen}
-      animationIn='fadeInDown'
-      animationOut='fadeOutUp'
-      animationInTiming={200}
       avoidKeyboard
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
     >
       <Container>
-        <Touchy>
-          <Text onPress={() => {
-            onClosed()
-            setTimeout(() => {
-              setTitlePrompt({ id: study.id, title: study.title })
-            }, 500)
-          }} fontSize={16} bold>Renommer</Text>
+        <Touchy onPress={() => {
+          onClosed()
+          setTimeout(() => {
+            setMultipleTagsItem({ ...study, entity: 'studies' })
+          }, 500)
+        }}>
+          <Text fontSize={16} bold>Tags</Text>
+        </Touchy>
+        <Touchy onPress={() => {
+          onClosed()
+          setTimeout(() => {
+            setTitlePrompt({ id: study.id, title: study.title })
+          }, 500)
+        }}>
+          <Text fontSize={16} bold>Renommer</Text>
         </Touchy>
         <Touchy onPress={() => deleteStudyConfirmation(studyId)}>
           <Text fontSize={16} bold color='quart'>Supprimer</Text>
