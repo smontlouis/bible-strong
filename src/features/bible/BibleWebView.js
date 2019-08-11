@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
+import { Platform } from 'react-native'
 import { Asset } from 'expo-asset'
 // import * as Haptics from 'expo-haptics'
-import { Platform } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import {
@@ -46,7 +46,8 @@ class BibleWebView extends Component {
   }
 
   state = {
-    webViewOpacity: 0
+    webViewOpacity: 0,
+    isHTMLFileLoaded: false
   }
 
   componentDidMount () {
@@ -63,6 +64,27 @@ class BibleWebView extends Component {
     } else {
       this.setState({ isHTMLFileLoaded: true })
     }
+  }
+
+  injectFont = async () => {
+    let { localUri } = Asset.fromModule(require('~assets/fonts/LiterataBook.otf'))
+
+    if (!localUri) {
+      await Asset.loadAsync(require('~assets/fonts/LiterataBook.otf'))
+      localUri = Asset.fromModule(require('~assets/fonts/LiterataBook.otf')).localUri
+    }
+
+    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
+
+    this.webview.injectJavaScript(`
+    (function() {
+      setTimeout(() => {
+        var style = document.createElement("style");
+        style.innerHTML = "${fontRule}";
+        document.head.appendChild(style);
+      }, 0)
+    })()
+    `)
   }
 
   enableWebViewOpacity = async () => {
@@ -82,7 +104,7 @@ class BibleWebView extends Component {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         const { setSelectedVerse, navigation } = this.props
         setSelectedVerse(Number(action.payload))
-        navigation.navigate('BibleVerseDetail')
+        navigation.navigate('BibleVerseDetail', action.params)
         break
       }
       case NAVIGATE_TO_VERSE_NOTES: {
@@ -132,7 +154,8 @@ class BibleWebView extends Component {
       isReadOnly,
       version,
       pericopeChapter,
-      chapter
+      chapter,
+      isSelectionMode
     } = this.props
 
     this.dispatchToWebView({
@@ -146,7 +169,8 @@ class BibleWebView extends Component {
       isReadOnly,
       version,
       pericopeChapter,
-      chapter
+      chapter,
+      isSelectionMode
     })
   }
 
@@ -161,17 +185,11 @@ class BibleWebView extends Component {
       <WebView
         useWebKit
         onLoad={this.sendDataToWebView}
+        onLoadEnd={this.injectFont}
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
         ref={ref => (this.webview = ref)}
-        source={
-          Platform.OS === 'android'
-            ? {
-              uri: localUri.includes('ExponentAsset')
-                ? localUri
-                : 'file:///android_asset/' + localUri.substr(9)
-            }
-            : require('./bibleWebView/dist/index.html')}
+        source={{ uri: localUri }}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}
         domStorageEnabled
