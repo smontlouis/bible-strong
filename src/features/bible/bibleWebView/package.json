@@ -7,7 +7,9 @@
     "dev": "webpack-dev-server --mode development --open",
     "build": "webpack --mode production"
   },
-  "keywords": [],
+  "keywords": [
+    
+  ],
   "author": "“Stéphane <s.montlouis.calixte@gmail.com> (https://github.com/bulby97)",
   "license": "ISC",
   "devDependencies": {
@@ -27,9 +29,6 @@
     "webpack-dev-server": "^3.3.1"
   },
   "dependencies": {
-    "@emotion/core": "^10.0.10",
-    "@emotion/styled": "^10.0.11",
-    "babel-plugin-emotion": "^10.0.9",
     "file-loader": "^3.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
