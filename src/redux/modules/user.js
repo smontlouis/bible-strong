@@ -1,15 +1,17 @@
 import produce from 'immer'
 import { clearSelectedVerses } from './bible'
+import deepmerge from 'deepmerge'
 
 import orderVerses from '~helpers/orderVerses'
 import generateUUID from '~helpers/generateUUID'
 
-// export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
-// export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
-// export const USER_LOGOUT = 'USER_LOGOUT'
-export const ADD_NOTE = 'user/ADD_NOTE'
+export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
+export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
+export const USER_LOGOUT = 'USER_LOGOUT'
+
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
+
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
 export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
@@ -17,15 +19,20 @@ export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
-export const SAVE_NOTE = 'user/SAVE_NOTE'
+
+export const ADD_NOTE = 'user/ADD_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
+
 export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
+
 export const ADD_TAG = 'user/ADD_TAG'
 export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
 export const REMOVE_TAG = 'user/REMOVE_TAG'
+
 export const CREATE_STUDY = 'user/CREATE_STUDY'
 export const UPDATE_STUDY = 'user/UPDATE_STUDY'
+export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
 export const DELETE_STUDY = 'user/DELETE_STUDY'
 
 const initialState = {
@@ -70,6 +77,21 @@ const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case USER_UPDATE_PROFILE:
+    case USER_LOGIN_SUCCESS: {
+      // DEEP MERGE HERE ?
+      return deepmerge(draft, action.payload)
+    }
+    case USER_LOGOUT: {
+      return {
+        ...initialState,
+        bible: {
+          ...initialState.bible,
+          // Keep changelog
+          changelog: draft.bible.changelog
+        }
+      }
+    }
     case ADD_NOTE: {
       draft.bible.notes = {
         ...draft.bible.notes,
@@ -189,7 +211,12 @@ export default produce((draft, action) => {
         created_at: Date.now(),
         modified_at: Date.now(),
         title: 'Document sans titre',
-        content: null
+        content: null,
+        user: {
+          id: draft.id,
+          displayName: draft.displayName,
+          photoUrl: draft.photoURL
+        }
       }
       break
     }
@@ -212,13 +239,14 @@ export default produce((draft, action) => {
 }, initialState)
 
 // NOTES
-
 export function addNote (note, noteVerses) {
   return (dispatch, getState) => {
     let selectedVerses = noteVerses || getState().bible.selectedVerses
     selectedVerses = orderVerses(selectedVerses)
     let key = Object.keys(selectedVerses).join('/')
     dispatch(clearSelectedVerses())
+
+    if (!key) return
     return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
   }
 }
@@ -346,9 +374,38 @@ export function updateStudy ({ id, content, title }) {
   }
 }
 
+export function uploadStudy (id) {
+  return {
+    type: UPLOAD_STUDY,
+    payload: id
+  }
+}
+
 export function deleteStudy (id) {
   return {
     type: DELETE_STUDY,
     payload: id
+  }
+}
+
+// USERS
+
+export function onUserLoginSuccess (profile) {
+  return {
+    type: USER_LOGIN_SUCCESS,
+    payload: profile
+  }
+}
+
+export function onUserLogout () {
+  return {
+    type: USER_LOGOUT
+  }
+}
+
+export function onUserUpdateProfile (profile) {
+  return {
+    type: USER_UPDATE_PROFILE,
+    payload: profile
   }
 }

@@ -5,11 +5,11 @@ const SnackBar = new SnackBarManager()
 export default {
   show (label) {
     SnackBar.show(label, {
-      backgroundColor: theme.colors.tertiary,
+      backgroundColor: theme.colors.lightPrimary,
       buttonColor: 'blue',
-      textColor: theme.colors.reverse,
+      textColor: theme.colors.default,
       tapToClose: true,
-      duraction: 2500
+      duration: 2500
     })
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { FlatList } from 'react-native'
+import compose from 'recompose/compose'
 
 import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
@@ -9,7 +10,8 @@ import FloatingButton from '~common/ui/FloatingButton'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import MultipleTagsModal from '~common/MultipleTagsModal'
-import { updateStudy } from '~redux/modules/user'
+import { updateStudy, uploadStudy } from '~redux/modules/user'
+import withLogin from '~common/withLogin'
 
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
@@ -78,10 +80,15 @@ const StudiesScreen = () => {
       <StudyTitlePrompt
         titlePrompt={titlePrompt}
         onClosed={() => setTitlePrompt(false)}
-        onSave={(id, title) => dispatch(updateStudy({ id, title }))}
+        onSave={(id, title) => {
+          dispatch(updateStudy({ id, title }))
+          dispatch(uploadStudy(id))
+        }}
       />
     </Container>
   )
 }
 
-export default StudiesScreen
+export default compose(
+  withLogin
+)(StudiesScreen)

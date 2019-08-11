@@ -203,12 +203,15 @@ class BibleNoteModal extends React.Component {
                     />
                   </StyledDeleteIcon>
                 }
-                <Button
-                  small
-                  onPress={() => this.setState({ isEditing: true })}
-                  style={{ marginRight: 10 }}
-                  title='Editer'
-                />
+                {
+                  id &&
+                  <Button
+                    small
+                    onPress={() => this.setState({ isEditing: true })}
+                    style={{ marginRight: 10 }}
+                    title='Editer'
+                  />
+                }
                 <Button
                   small
                   reverse

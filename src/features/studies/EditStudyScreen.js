@@ -4,7 +4,7 @@ import compose from 'recompose/compose'
 import { useDispatch, connect } from 'react-redux'
 import generateUUID from '~helpers/generateUUID'
 
-import { createStudy, updateStudy } from '~redux/modules/user'
+import { createStudy, updateStudy, uploadStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEditor'
@@ -115,6 +115,7 @@ class EditStudyScreen extends React.Component {
           setTitlePrompt={() => this.setTitlePrompt({ id: this.props.currentStudy.id, title: this.props.currentStudy.title })}
           setReadOnly={() => {
             this.setState({ isReadOnly: true, quickTagsModal: { id: this.props.currentStudy.id, entity: 'studies' } })
+            this.props.dispatch(uploadStudy(this.props.currentStudy.id))
           }}
           title={this.props.currentStudy.title}
           activeFormats={this.state.activeFormats}
@@ -152,7 +153,10 @@ class EditStudyScreen extends React.Component {
         <StudyTitlePrompt
           titlePrompt={titlePrompt}
           onClosed={() => this.setTitlePrompt(false)}
-          onSave={(id, title) => this.props.dispatch(updateStudy({ id, title }))}
+          onSave={(id, title) => {
+            this.props.dispatch(updateStudy({ id, title }))
+            this.props.dispatch(uploadStudy(id))
+          }}
         />
         <QuickTagsModal
           item={quickTagsModal}

@@ -11,7 +11,6 @@ import { setAutoFreeze } from 'immer'
 
 import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
-import FireAuth from '~helpers/FireAuth'
 import InitApp from './InitApp'
 import { segmentConfig } from './config'
 
@@ -27,7 +26,7 @@ Sentry.config(
 ).install()
 export const { store, persistor } = configureStore()
 
-export default class App extends React.Component {
+class App extends React.Component {
   state = {
     isLoadingComplete: false
   }
@@ -76,7 +75,6 @@ export default class App extends React.Component {
       Segment.initialize(segmentConfig)
       Segment.screen('Bible')
     }
-    FireAuth.init()
     this.updateApp()
   }
 
@@ -98,3 +96,5 @@ export default class App extends React.Component {
     )
   }
 }
+
+export default App

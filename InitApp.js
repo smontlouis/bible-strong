@@ -5,7 +5,9 @@ import { StatusBar } from 'react-native'
 import * as Segment from 'expo-analytics-segment'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
+import compose from 'recompose/compose'
 
+import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import Changelog from '~common/Changelog'
 import getTheme from '~themes'
@@ -69,10 +71,13 @@ class InitApp extends React.Component {
   }
 }
 
-export default connect(
-  (state) => ({
-    theme: state.user.bible.settings.theme
-  })
+export default compose(
+  connect(
+    (state) => ({
+      theme: state.user.bible.settings.theme
+    })
+  ),
+  withFireAuth
 )(
   InitApp
 )

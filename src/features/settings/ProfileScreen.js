@@ -1,6 +1,5 @@
 import React from 'react'
 import { ScrollView, Platform } from 'react-native'
-import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
@@ -9,6 +8,9 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
+import useLogin from '~helpers/useLogin'
+import FireAuth from '~helpers/FireAuth'
+
 import app from '../../../app.json'
 
 const LinkItem = styled(Link)(({ theme }) => ({
@@ -20,7 +22,7 @@ const LinkItem = styled(Link)(({ theme }) => ({
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
-  color: color || theme.colors.grey,
+  color: theme.colors[color] || theme.colors.grey,
   marginRight: 15
 }))
 
@@ -29,8 +31,10 @@ const shareMessage = () => {
   return `Bible Strong App ${appUrl}`
 }
 
-const ProfileScreen = ({ theme }) => (
-  (
+const ProfileScreen = () => {
+  const isLogged = useLogin()
+
+  return (
     <Container>
       <Header title='Plus' />
       <ScrollView flex={1}>
@@ -54,20 +58,35 @@ const ProfileScreen = ({ theme }) => (
           <StyledIcon name={'share-2'} size={30} />
           <Text bold fontSize={15}>Partager l'application</Text>
         </LinkItem>
+        <LinkItem href='https://fr.tipeee.com/smontlouis'>
+          <StyledIcon name={'thumbs-up'} size={30} color='secondary' />
+          <Text bold fontSize={15}>Soutenir le développeur</Text>
+        </LinkItem>
         <LinkItem href='mailto:s.montlouis.calixte@gmail.com'>
           <StyledIcon name={'send'} size={30} />
           <Text bold fontSize={15} >Contacter le développeur</Text>
         </LinkItem>
-        {/* <LinkItem href='https://fr.tipeee.com/smontlouis'>
-          <StyledIcon name={'thumbs-up'} size={30} color={theme.colors.primary} />
-          <Text bold fontSize={15} color='primary'>Soutenir le développeur</Text>
-        </LinkItem> */}
+        {
+          isLogged // TODO - CONFIRM FOR LOGOUT
+            ? (
+              <LinkItem onPress={() => FireAuth.logout()}>
+                <StyledIcon color='quart' name={'log-out'} size={30} />
+                <Text bold color='quart' fontSize={15} >Se déconnecter</Text>
+              </LinkItem>
+            )
+            : (
+              <LinkItem onPress={() => {}}>
+                <StyledIcon color='primary' name={'log-in'} size={30} />
+                <Text bold color='primary' fontSize={15} >Se connecter</Text>
+              </LinkItem>
+            )
+        }
+
       </ScrollView>
       <Box margin={10} alignItems='flex-end'>
         <Text color='grey' fontSize={12}>Version: {app.expo.version}</Text>
       </Box>
     </Container>
   )
-)
-
-export default withTheme(ProfileScreen)
+}
+export default ProfileScreen
