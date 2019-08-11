@@ -128,6 +128,7 @@ export function addNote (note, noteVerses) {
     selectedVerses = orderVerses(selectedVerses)
     let key = Object.keys(selectedVerses).join('/')
     dispatch(clearSelectedVerses())
+    if (!key) return
     return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
   }
 }
