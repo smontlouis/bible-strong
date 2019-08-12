@@ -63,6 +63,9 @@
           }
         }
       ]
-    }
+    },
+    "facebookAppId": "312719079612015",
+    "facebookDisplayName": "Bible Strong App",
+    "facebookScheme": "fb312719079612015"
   }
 }

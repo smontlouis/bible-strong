@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import Login from './Login'
 
 const withLogin = (Component) => props => {
-  const isLogged = useSelector(state => !!state.user.email)
+  const isLogged = useSelector(state => !!state.user.id)
 
   if (!isLogged) {
     return <Login />

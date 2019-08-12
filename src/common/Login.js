@@ -35,9 +35,15 @@ const ButtonText = styled(Text)(() => ({
 const Login = () => {
   const [isLoading, setLoading] = useState(false)
 
-  const onPressLogin = async () => {
+  const onGoogleLogin = async () => {
     setLoading(true)
     await FireAuth.googleLogin()
+    setLoading(false)
+  }
+
+  const onFacebookLogin = async () => {
+    setLoading(true)
+    await FireAuth.facebookLogin()
     setLoading(false)
   }
 
@@ -54,11 +60,11 @@ const Login = () => {
   return (
     <Container>
       <Box flex center>
-        <Button onPress={onPressLogin}>
+        <Button onPress={onGoogleLogin}>
           <ButtonIcon size={30} name='google' />
           <ButtonText>Connexion avec google</ButtonText>
         </Button>
-        <Button>
+        <Button onPress={onFacebookLogin}>
           <ButtonIcon size={30} name='facebook' />
           <ButtonText>Connexion avec facebook</ButtonText>
         </Button>

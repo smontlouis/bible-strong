@@ -1,5 +1,6 @@
 import * as firebase from 'firebase'
 import * as Google from 'expo-google-app-auth'
+import * as Facebook from 'expo-facebook'
 import 'firebase/firestore'
 import * as Segment from 'expo-analytics-segment'
 import Sentry from 'sentry-expo'
@@ -66,6 +67,8 @@ const FireAuth = class {
 
             const data = doc.data()
 
+            console.log('HEY: ', data)
+
             if (!this.user) {
               // Get studies - TODO: DO IT BETTER
               let studies = {}
@@ -74,11 +77,10 @@ const FireAuth = class {
                 .then((querySnapshot) => {
                   querySnapshot.forEach(doc => {
                     const study = doc.data()
-                    console.log(study)
                     studies[study.id] = study
                   })
 
-                  data.bible.studies = studies
+                  if (data.bible && studies) data.bible.studies = studies
 
                   this.onLogin && this.onLogin(data) // On login
                 })
@@ -104,6 +106,24 @@ const FireAuth = class {
     })
   }
 
+  facebookLogin = () => new Promise(async (resolve, reject) => {
+    try {
+      const { type, token } = await Facebook.logInWithReadPermissionsAsync(
+        '312719079612015',
+        { permissions: ['public_profile', 'email'] }
+      )
+
+      if (type === 'success' && token) {
+        // Build Firebase credential with the Facebook access token.
+        const credential = firebase.auth.FacebookAuthProvider.credential(token)
+        this.onCredentialSuccess(credential, resolve)
+      }
+    } catch (e) {
+      SnackBar.show('Une erreur est survenue.', e)
+      resolve(false)
+    }
+  })
+
   googleLogin = () => new Promise(async (resolve, reject) => {
     try {
       const result = await Google.logInAsync({
@@ -120,23 +140,7 @@ const FireAuth = class {
           googleUser.accessToken
         )
 
-        firebase.auth().currentUser.linkWithCredential(credential).then((usercred) => {
-          console.log('First connexion - Anonymous account successfully upgraded', usercred)
-          SnackBar.show('Connexion réussie')
-          resolve(true)
-        }, (error) => {
-          console.log('Error upgrading anonymous account', error)
-          if (error.code === 'auth/credential-already-in-use' || error.code === 'auth/provider-already-linked') {
-            firebase
-              .auth()
-              .signInWithCredential(credential)
-              .then(user => {
-                console.log('user signed in ', user)
-                SnackBar.show('Connexion réussie')
-                resolve(true)
-              })
-          }
-        })
+        this.onCredentialSuccess(credential, resolve)
       } else {
         SnackBar.show('Connexion annulée.')
         resolve(false)
@@ -146,6 +150,35 @@ const FireAuth = class {
       resolve(false)
     }
   })
+
+  onCredentialSuccess = (credential, resolve) => {
+    firebase.auth().currentUser.linkWithCredential(credential).then((usercred) => {
+      console.log('First connexion - Anonymous account successfully upgraded', usercred)
+      SnackBar.show('Connexion réussie')
+      resolve(true)
+    }, (error) => {
+      console.log('Error upgrading anonymous account', error)
+      if (
+        error.code === 'auth/credential-already-in-use' ||
+        error.code === 'auth/provider-already-linked'
+      ) {
+        firebase
+          .auth()
+          .signInWithCredential(credential)
+          .then(user => {
+            console.log('user signed in ', user)
+            SnackBar.show('Connexion réussie')
+            resolve(true)
+          })
+      } else if (error.code === 'auth/email-already-in-use') {
+        SnackBar.show('Un utilisateur existe déjà avec un autre compte. Connectez-vous !')
+        resolve(true)
+      } else {
+        SnackBar.show('Une erreur est survenue.')
+        resolve(true)
+      }
+    })
+  }
 
   logout = () => {
     firebase.auth().signOut()

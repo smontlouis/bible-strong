@@ -31,6 +31,7 @@
     "expo-analytics-segment": "~5.0.1",
     "expo-asset-utils": "^1.0.0",
     "expo-constants": "~5.0.1",
+    "expo-facebook": "~5.0.1",
     "expo-font": "~5.0.1",
     "expo-google-app-auth": "^6.0.0",
     "expo-haptics": "~5.0.1",
