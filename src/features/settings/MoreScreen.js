@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, Platform } from 'react-native'
+import { ScrollView, Platform, Alert } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
@@ -10,6 +10,7 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import useLogin from '~helpers/useLogin'
 import FireAuth from '~helpers/FireAuth'
+import SnackBar from '~common/SnackBar'
 
 import app from '../../../app.json'
 
@@ -31,8 +32,15 @@ const shareMessage = () => {
   return `Bible Strong App ${appUrl}`
 }
 
-const ProfileScreen = () => {
+const MoreScreen = () => {
   const isLogged = useLogin()
+
+  const promptLogout = () => {
+    Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?',
+      [ { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: 'Oui', onPress: () => FireAuth.logout(), style: 'destructive' }
+      ])
+  }
 
   return (
     <Container>
@@ -67,17 +75,11 @@ const ProfileScreen = () => {
           <Text bold fontSize={15} >Contacter le développeur</Text>
         </LinkItem>
         {
-          isLogged // TODO - CONFIRM FOR LOGOUT
-            ? (
-              <LinkItem onPress={() => FireAuth.logout()}>
+          isLogged &&
+            (
+              <LinkItem onPress={promptLogout}>
                 <StyledIcon color='quart' name={'log-out'} size={30} />
                 <Text bold color='quart' fontSize={15} >Se déconnecter</Text>
-              </LinkItem>
-            )
-            : (
-              <LinkItem onPress={() => {}}>
-                <StyledIcon color='primary' name={'log-in'} size={30} />
-                <Text bold color='primary' fontSize={15} >Se connecter</Text>
               </LinkItem>
             )
         }
@@ -89,4 +91,4 @@ const ProfileScreen = () => {
     </Container>
   )
 }
-export default ProfileScreen
+export default MoreScreen

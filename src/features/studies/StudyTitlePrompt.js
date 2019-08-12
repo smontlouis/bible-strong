@@ -24,7 +24,7 @@ const Container = styled.View(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
   padding: 10,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace() || 10
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({

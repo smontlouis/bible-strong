@@ -8,28 +8,29 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
 
-const Button = styled.TouchableOpacity(({ theme }) => ({
+const Button = styled.TouchableOpacity(({ theme, color }) => ({
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: 4,
-  backgroundColor: theme.colors.reverse,
+  backgroundColor: color || theme.colors.reverse,
   shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
+  shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
+  shadowRadius: 3,
+  elevation: 1,
   padding: 10,
-  width: 300,
+  width: 160,
   marginBottom: 20
 }))
 
 const ButtonIcon = styled(Icon.FontAwesome)(() => ({
-  marginRight: 25
+  marginRight: 15
 }))
 
-const ButtonText = styled(Text)(() => ({
-  fontSize: 16
+const ButtonText = styled(Text)(({ theme, color }) => ({
+  fontSize: 16,
+  color: color || theme.colors.defaut
 }))
 
 const Login = () => {
@@ -49,27 +50,23 @@ const Login = () => {
 
   if (isLoading) {
     return (
-      <Container>
-        <Box flex center>
-          <Loading />
-        </Box>
-      </Container>
+      <Box height={60} center>
+        <Loading />
+      </Box>
     )
   }
 
   return (
-    <Container>
-      <Box flex center>
-        <Button onPress={onGoogleLogin}>
-          <ButtonIcon size={30} name='google' />
-          <ButtonText>Connexion avec google</ButtonText>
-        </Button>
-        <Button onPress={onFacebookLogin}>
-          <ButtonIcon size={30} name='facebook' />
-          <ButtonText>Connexion avec facebook</ButtonText>
-        </Button>
-      </Box>
-    </Container>
+    <Box height={60} row justifyContent='space-between'>
+      <Button onPress={onGoogleLogin} color='#D14C3E'>
+        <ButtonIcon size={20} name='google' color='white' />
+        <ButtonText color='white'>Google</ButtonText>
+      </Button>
+      <Button onPress={onFacebookLogin} color='#3b5998'>
+        <ButtonIcon size={20} name='facebook' color='white' />
+        <ButtonText color='white'>Facebook</ButtonText>
+      </Button>
+    </Box>
   )
 }
 

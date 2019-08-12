@@ -1,16 +1,17 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-import Login from './Login'
+import LoginModal from './LoginModal'
 
 const withLogin = (Component) => props => {
   const isLogged = useSelector(state => !!state.user.id)
 
-  if (!isLogged) {
-    return <Login />
-  }
-
-  return <Component {...props} />
+  return (
+    <>
+      <Component {...props} />
+      <LoginModal isVisible={!isLogged} />
+    </>
+  )
 }
 
 export default withLogin

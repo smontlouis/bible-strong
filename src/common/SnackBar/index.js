@@ -1,13 +1,13 @@
 import SnackBarManager from './SnackBarManager'
-import theme from '~themes/default'
+// import theme from '~themes/default'
 const SnackBar = new SnackBarManager()
 
 export default {
   show (label) {
     SnackBar.show(label, {
-      backgroundColor: theme.colors.lightPrimary,
+      backgroundColor: '#2E302E',
       buttonColor: 'blue',
-      textColor: theme.colors.default,
+      textColor: 'white',
       tapToClose: true,
       duration: 2500
     })

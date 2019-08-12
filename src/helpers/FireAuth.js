@@ -185,6 +185,7 @@ const FireAuth = class {
     // Sign-out successful.
     this.user = null
     this.onLogout && this.onLogout()
+    SnackBar.show('Vous êtes déconnecté.')
   }
 }
 

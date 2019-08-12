@@ -1,7 +1,7 @@
 import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
-import ProfileScreen from '~features/settings/ProfileScreen'
+import MoreScreen from '~features/settings/MoreScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
@@ -55,8 +55,8 @@ export default createMaterialBottomTabNavigator(
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
-    Profile: {
-      screen: ProfileScreen,
+    More: {
+      screen: MoreScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Plus',
         tabBarIcon: ({ focused }) => (

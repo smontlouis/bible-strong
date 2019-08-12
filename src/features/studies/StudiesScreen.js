@@ -11,13 +11,14 @@ import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import { updateStudy, uploadStudy } from '~redux/modules/user'
-import withLogin from '~common/withLogin'
+import withLoginModal from '~common/withLoginModal'
 
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import StudyItem from './StudyItem'
 
 const StudiesScreen = () => {
+  const isLogged = useSelector(state => !!state.user.id)
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isStudySettingsOpen, setStudySettings] = React.useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
@@ -69,7 +70,10 @@ const StudiesScreen = () => {
               message='Aucune étude...'
             />
         }
-        <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' params={{ canEdit: true }} />
+        {
+          isLogged &&
+          <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' params={{ canEdit: true }} />
+        }
       </Box>
       <StudySettingsModal
         isOpen={isStudySettingsOpen}
@@ -90,5 +94,5 @@ const StudiesScreen = () => {
 }
 
 export default compose(
-  withLogin
+  withLoginModal
 )(StudiesScreen)
