@@ -67,8 +67,6 @@ const FireAuth = class {
 
             const data = doc.data()
 
-            console.log('HEY: ', data)
-
             if (!this.user) {
               // Get studies - TODO: DO IT BETTER
               let studies = {}

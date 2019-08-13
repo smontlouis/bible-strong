@@ -21,7 +21,6 @@ const TagList = ({ tags }) => {
     return null
   }
 
-  console.log(tags)
   return (
     <Box row>
       {

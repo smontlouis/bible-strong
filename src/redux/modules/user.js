@@ -66,12 +66,20 @@ const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
       color,
       date: Date.now(),
       ...highlightedVerses[verse] && {
-        tags: highlightedVerses[verse].tags
+        tags: highlightedVerses[verse].tags || {}
       }
     }
   }), {})
 
   return formattedObj
+}
+
+const removeEntityInTags = (draft, entity, key) => {
+  for (const tag in draft.bible.tags) {
+    if (draft.bible.tags[tag][entity]) {
+      delete draft.bible.tags[tag][entity][key]
+    }
+  }
 }
 
 // UserReducer
@@ -113,6 +121,7 @@ export default produce((draft, action) => {
     case REMOVE_HIGHLIGHT: {
       Object.keys(action.selectedVerses).forEach((key) => {
         delete draft.bible.highlights[key]
+        removeEntityInTags(draft, 'highlights', key)
       })
       break
     }
@@ -240,6 +249,7 @@ export default produce((draft, action) => {
     }
     case DELETE_STUDY: {
       delete draft.bible.studies[action.payload]
+      removeEntityInTags(draft, 'studies', action.payload)
       break
     }
   }

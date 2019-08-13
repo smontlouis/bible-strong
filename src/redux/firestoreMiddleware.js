@@ -46,8 +46,11 @@ export default store => next => action => {
     case ADD_HIGHLIGHT:
     case REMOVE_HIGHLIGHT: {
       const highlights = user.bible.highlights
-      console.log(highlights)
-      userDoc.update({ 'bible.highlights': highlights })
+      const tags = user.bible.tags
+      userDoc.update({
+        'bible.highlights': highlights,
+        'bible.tags': tags
+      })
       break
     }
     case SET_SETTINGS_ALIGN_CONTENT:
@@ -66,7 +69,11 @@ export default store => next => action => {
     case EDIT_NOTE:
     case REMOVE_NOTE: {
       const notes = user.bible.notes
-      userDoc.update({ 'bible.notes': notes })
+      const tags = user.bible.tags
+      userDoc.update({
+        'bible.notes': notes,
+        'bible.tags': tags
+      })
       break
     }
     case ADD_TAG:
@@ -98,6 +105,10 @@ export default store => next => action => {
     case DELETE_STUDY: {
       const studyId = action.payload
       studyCollection.doc(studyId).delete()
+      const tags = user.bible.tags
+      userDoc.update({
+        'bible.tags': tags
+      })
       break
     }
     case USER_UPDATE_PROFILE:
