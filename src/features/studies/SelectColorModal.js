@@ -59,10 +59,8 @@ const SelectColorModal = ({
     >
       <Container>
         <Box row marginBottom={15} padding={5} alignItems='center'>
-          <TouchableOpacity onPress={() => setColor(false)}>
-            <Icon.Feather name='x-circle' size={23} style={{ marginRight: 10 }} />
-          </TouchableOpacity>
-          <Text fontSize={18}>Aucune</Text>
+          <Icon.Feather onPress={() => setColor(false)} name='x-circle' size={23} style={{ marginRight: 10 }} />
+          <Text onPress={() => setColor(false)} fontSize={18}>Aucune</Text>
         </Box>
         {
           lighten.map((l) => (
