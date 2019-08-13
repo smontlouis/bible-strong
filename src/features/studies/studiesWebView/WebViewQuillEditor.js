@@ -49,19 +49,23 @@ class WebViewQuillEditor extends React.Component {
     if (JSON.stringify(oldParams) !== JSON.stringify(newParams)) {
       if (newParams.type.includes('verse')) {
         const isBlock = newParams.type.includes('block')
+        this.dispatchToWebView('FOCUS_EDITOR')
         this.dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', newParams)
       } else {
         const isBlock = newParams.type.includes('block')
+        this.dispatchToWebView('FOCUS_EDITOR')
         this.dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', newParams)
       }
     }
 
     if (prevProps.isReadOnly !== this.props.isReadOnly && !this.props.isReadOnly) {
       this.dispatchToWebView('CAN_EDIT')
+      this.dispatchToWebView('FOCUS_EDITOR')
     }
 
     if (prevProps.isReadOnly !== this.props.isReadOnly && this.props.isReadOnly) {
       this.dispatchToWebView('READ_ONLY')
+      this.dispatchToWebView('BLUR_EDITOR')
     }
   }
 
@@ -239,7 +243,7 @@ class WebViewQuillEditor extends React.Component {
           allowUniversalAccessFromFileURLs
           allowFileAccessFromFileURLs
           allowFileAccess
-
+          keyboardDisplayRequiresUserAction={false}
           renderError={this.renderError}
           onError={this.onError}
         />

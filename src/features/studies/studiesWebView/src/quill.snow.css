@@ -35,7 +35,13 @@
     text-align: left;
     white-space: pre-wrap;
     word-wrap: break-word;
+    padding-top: 50px;
   }
+
+  .ql-container.ql-disabled  .ql-editor {
+    padding-top: 12px;
+  }
+
   .ql-editor p,
   .ql-editor ol,
   .ql-editor ul,
@@ -75,7 +81,8 @@
     margin-right: 0.3em;
     text-align: right;
     white-space: nowrap;
-    width: 1.2em;
+    width: 10px;
+    font-size: 12px;
   }
   .ql-editor li:not(.ql-direction-rtl)::before {
     margin-left: -1.5em;

@@ -16,11 +16,8 @@ class ModuleInlineVerse extends Module {
 
     this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
       if (type === Quill.events.SELECTION_CHANGE) {
-        // Only save the whole selection. on Android, text selection changes when selecting verse.
-        if (range && range.length) {
-          this.range = range
-          dispatchConsole(`RANGE TO BE SAVED : ${JSON.stringify(this.range)}`)
-        }
+        this.range = range
+        dispatchConsole(`RANGE TO BE SAVED : ${JSON.stringify(this.range)}`)
       }
     })
   }
@@ -53,12 +50,23 @@ class ModuleInlineVerse extends Module {
   receiveVerseLink = ({ title, verses }) => {
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
-    this.quill.format('inline-strong', false) // Disable inline-strong in case
-    this.quill.format('inline-verse', {
-      title,
-      verses
-    })
-    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
+    // dispatchConsole(`Range: ${JSON.stringify(this.range)}`)
+
+    if (this.range) {
+      if (this.range.length) {
+        this.quill.format('inline-strong', false) // Disable inline-strong in case
+        this.quill.format('inline-verse', {
+          title,
+          verses
+        })
+        this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
+      } else {
+        this.quill.insertText(this.range.index, title, 'inline-verse', {
+          title,
+          verses
+        })
+      }
+    }
   }
 
   // OBSOLETE
@@ -87,14 +95,25 @@ class ModuleInlineVerse extends Module {
   receiveStrongLink = ({ title, code, book }) => {
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
-    dispatchConsole(`Receive strong ${title}`)
-    this.quill.format('inline-verse', false) // Disable inline-verse in case
-    this.quill.format('inline-strong', {
-      title,
-      code,
-      book
-    })
-    this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
+    // dispatchConsole(`Receive strong ${title}`)
+
+    if (this.range) {
+      if (this.range.length) {
+        this.quill.format('inline-verse', false) // Disable inline-verse in case
+        this.quill.format('inline-strong', {
+          title,
+          code,
+          book
+        })
+        this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
+      } else {
+        this.quill.insertText(this.range.index, title, 'inline-strong', {
+          title,
+          code,
+          book
+        })
+      }
+    }
   }
 }
 

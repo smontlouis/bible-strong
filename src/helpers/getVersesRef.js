@@ -45,7 +45,7 @@ export default async (selectedVerses, version = 'LSG') => {
     const [book, chapter, verse] = key.split('-')
     if (index === 0) reference = `${books[book - 1].Nom} ${chapter}:`
     else toShare += ' '
-    toShare += `${verse} ${bible[book][chapter][verse]}`
+    toShare += `${bible[book][chapter][verse]}`
     versesList.push(verse)
   })
   reference += getVersesRef(versesList)
@@ -54,6 +54,6 @@ export default async (selectedVerses, version = 'LSG') => {
     title: reference || '',
     version,
     content: toShare,
-    all: `${toShare} \n${reference} ${version}`
+    all: `${toShare} \n${reference} ${version} \n\n https://bible-strong.app`
   }
 }

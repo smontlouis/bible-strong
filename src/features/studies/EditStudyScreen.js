@@ -83,8 +83,8 @@ class EditStudyScreen extends React.Component {
   openHeaderModal = () => this.setState({ isHeaderModalOpen: true })
   closeHeaderModal = () => this.setState({ isHeaderModalOpen: false })
 
-  openBlockModal = () => this.setState({ isBlockModalOpen: true })
-  closeBlockModal = () => this.setState({ isBlockModalOpen: false })
+  openBlockModal = () => { this.dispatchToWebView('BLUR_EDITOR'); this.setState({ isBlockModalOpen: true }) }
+  closeBlockModal = () => { this.setState({ isBlockModalOpen: false }) }
 
   openColorModal = (value = true) => this.setState({ isColorModalOpen: value })
   closeColorModal = () => this.setState({ isColorModalOpen: false })

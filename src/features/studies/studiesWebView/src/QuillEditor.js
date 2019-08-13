@@ -25,7 +25,7 @@ export default class ReactQuillEditor extends React.Component {
     if (BROWSER_TESTING_ENABLED) {
       this.loadEditor()
       this.quill.setContents(MockContent, Quill.sources.SILENT)
-      // this.quill.enable()
+      this.quill.enable()
 
       // Load font
       const literate = require('./literata').default
@@ -61,10 +61,9 @@ export default class ReactQuillEditor extends React.Component {
           const windowHeight = document.body.getBoundingClientRect().height
 
           if (selectedBottom > windowHeight) {
-            dispatchConsole(`BEFORE: ${window.scrollY}, AFTER:  ${window.scrollY + selectedBottom - windowHeight}`)
             document.querySelector('.ql-editor').scrollTo(0, document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30)
           }
-        }, 300)
+        }, 700)
       }
     })
   }
@@ -73,7 +72,7 @@ export default class ReactQuillEditor extends React.Component {
     this.quill = new Quill('#editor', {
       theme: 'snow',
       modules: {
-        toolbar: false,
+        toolbar: BROWSER_TESTING_ENABLED,
         'inline-verse': true,
         'block-verse': true,
         'format': true
@@ -122,6 +121,15 @@ export default class ReactQuillEditor extends React.Component {
         case 'READ_ONLY':
           this.quill.blur()
           this.quill.enable(false)
+          break
+        case 'FOCUS_EDITOR':
+          this.quill.focus()
+          setTimeout(() => {
+            document.querySelector('.ql-editor').focus()
+          }, 0)
+          break
+        case 'BLUR_EDITOR':
+          this.quill.blur()
           break
         case 'GET_BIBLE_VERSES':
           this.inlineVerseModule = this.quill.getModule('inline-verse')
