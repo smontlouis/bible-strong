@@ -8,8 +8,14 @@ import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
+import MultipleTagsModal from '~common/MultipleTagsModal'
+
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
+
+import TagsHeader from '~common/TagsHeader'
+import TagsModal from '~common/TagsModal'
+import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 
 class BibleVerseNotes extends Component {
   componentDidMount () {
@@ -24,8 +30,17 @@ class BibleVerseNotes extends Component {
     verse: {},
     notes: [],
     isEditNoteOpen: false,
-    noteVerses: null
+    noteVerses: null,
+    isTagsOpen: false,
+    selectedChip: null,
+    isNoteSettingsOpen: false,
+    multipleTagsItem: false
   }
+
+  setTagsIsOpen = (value) => this.setState({ isTagsOpen: value })
+  setSelectedChip = (value) => this.setState({ selectedChip: value })
+  setNoteSettings = (value) => this.setState({ isNoteSettingsOpen: value })
+  setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
 
   loadPage = async (props) => {
     const { verse } = props.navigation.state.params || {}
@@ -79,21 +94,33 @@ class BibleVerseNotes extends Component {
         key={index}
         item={item}
         openNoteEditor={this.openNoteEditor}
+        setNoteSettings={this.setNoteSettings}
         deleteNote={this.deleteNote}
       />
     )
   }
 
   render () {
-    const { withBack } = this.props.navigation.state.params || {}
-    const { title, notes } = this.state
+    const { withBack, verse } = this.props.navigation.state.params || {}
+    const { title, notes, isTagsOpen, selectedChip, isNoteSettingsOpen, multipleTagsItem } = this.state
+
+    const filteredNotes = notes.filter(s => (selectedChip) ? s.notes.tags && s.notes.tags[selectedChip.id] : true)
 
     return (
       <Container>
-        <Header hasBackButton={withBack} title={title || 'Chargement...'} />
         {
-          notes.length
-            ? <FlatList data={notes}
+          verse
+            ? <Header hasBackButton={withBack} title={title || 'Chargement...'} />
+            : <TagsHeader
+              title='Notes'
+              setIsOpen={this.setTagsIsOpen}
+              isOpen={isTagsOpen}
+              selectedChip={selectedChip}
+            />
+        }
+        {
+          filteredNotes.length
+            ? <FlatList data={filteredNotes}
               renderItem={this.renderNote}
               keyExtractor={(item, index) => index.toString()}
               style={{ paddingBottom: 30 }}
@@ -111,6 +138,22 @@ class BibleVerseNotes extends Component {
             noteVerses={this.state.noteVerses}
           />
         }
+        <TagsModal
+          isVisible={isTagsOpen}
+          onClosed={() => this.setTagsIsOpen(false)}
+          onSelected={(chip) => this.setSelectedChip(chip)}
+          selectedChip={selectedChip}
+        />
+        <BibleNotesSettingsModal
+          isOpen={isNoteSettingsOpen}
+          onClosed={() => this.setNoteSettings(false)}
+          setMultipleTagsItem={this.setMultipleTagsItem}
+        />
+        <MultipleTagsModal
+          multiple
+          item={multipleTagsItem}
+          onClosed={() => this.setMultipleTagsItem(false)}
+        />
       </Container>
     )
   }

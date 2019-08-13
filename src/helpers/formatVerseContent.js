@@ -5,7 +5,7 @@ export default verses => {
     return { title: '', content: '' }
   }
 
-  const content: string = verses.map(v => `(${v.Verset}) ${v.Texte}`).join(' ')
+  const content: string = verses.map(v => `${v.Texte}`).join(' ')
 
   const title: string = verses
     .map(v => Number(v.Verset))

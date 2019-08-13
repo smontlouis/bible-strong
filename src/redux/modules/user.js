@@ -109,6 +109,7 @@ export default produce((draft, action) => {
     }
     case REMOVE_NOTE: {
       delete draft.bible.notes[action.payload]
+      removeEntityInTags(draft, 'notes', action.payload)
       break
     }
     case ADD_HIGHLIGHT: {

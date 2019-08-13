@@ -6,6 +6,7 @@ import * as Icon from '@expo/vector-icons'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import TagList from '~common/TagList'
 
 import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
@@ -27,37 +28,37 @@ class BibleNoteItem extends React.Component {
   }
 
   render () {
-    const { item, openNoteEditor, deleteNote } = this.props
+    const { item, openNoteEditor, setNoteSettings } = this.props
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), { locale: frLocale })
 
     return (
       <NoteContainer onPress={() => openNoteEditor(item.noteId)}>
         <Box row justifyContent='space-between'>
-          <Text color='darkGrey' bold fontSize={14}>
+          <Text color='darkGrey' bold fontSize={11}>
             {item.reference} - Il y a {formattedDate}
           </Text>
           <Box row>
             <Icon.Feather
-              name={'trash-2'}
-              size={15}
-              style={{ paddingHorizontal: 10, paddingBottom: 5 }}
+              name={'more-vertical'}
+              size={20}
               color={theme.colors.tertiary}
-              onPress={() => deleteNote(item.noteId)}
+              onPress={() => setNoteSettings(item.noteId)}
             />
           </Box>
         </Box>
         {
           !!item.notes.title &&
-          <Text bold scale={-2}>
+          <Text title fontSize={16} scale={-2}>
             {item.notes.title}
           </Text>
         }
         {
           !!item.notes.description &&
-          <Paragraph scale={-3} scaleLineHeight={-2}>
+          <Paragraph scale={-3} scaleLineHeight={-1}>
             {truncate(item.notes.description, 100)}
           </Paragraph>
         }
+        <TagList tags={item.notes.tags} />
       </NoteContainer>
     )
   }
