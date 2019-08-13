@@ -4,8 +4,8 @@
  * Extension for lunr.js <http://lunrjs.com/>
  * Includes code from https://github.com/dodo/node-slug/blob/master/slug.js
  */
-function unicodeNormalizer (lunr) {
-  var charmap = {
+function unicodeNormalizer(lunr) {
+  const charmap = {
     // Latin
     À: 'A',
     Á: 'A',
@@ -349,37 +349,31 @@ function unicodeNormalizer (lunr) {
     '<': 'less',
     '>': 'greater'
   }
-  var charmapPattern = Object.keys(charmap)
-    .map(function (char) {
+  const charmapPattern = Object.keys(charmap)
+    .map(function(char) {
       // Update this with every normalized character that is also a unicode
       // operator.
       return char.replace(/[\|\$]/g, '\\$&') // `$&` -> returns matched text
     })
     .join('|')
-  var charmapRegExp = new RegExp('(' + charmapPattern + ')', 'g')
+  const charmapRegExp = new RegExp(`(${charmapPattern})`, 'g')
 
-  lunr.unicodeNormalizer = function () {
+  lunr.unicodeNormalizer = function() {
     // Add the pipeline function to both the indexing pipeline and the
     // searching pipeline
     this.pipeline.before(lunr.fr.stemmer, lunr.unicodeNormalizer.transform)
-    this.searchPipeline.before(
-      lunr.fr.stemmer,
-      lunr.unicodeNormalizer.transform
-    )
+    this.searchPipeline.before(lunr.fr.stemmer, lunr.unicodeNormalizer.transform)
   }
 
-  lunr.unicodeNormalizer.transform = function (token) {
-    return token.update(function (str) {
-      return str.replace(charmapRegExp, function (char) {
+  lunr.unicodeNormalizer.transform = function(token) {
+    return token.update(function(str) {
+      return str.replace(charmapRegExp, function(char) {
         return charmap[char]
       })
     })
   }
 
-  lunr.Pipeline.registerFunction(
-    lunr.unicodeNormalizer.transform,
-    'unicodeNormalizer'
-  )
+  lunr.Pipeline.registerFunction(lunr.unicodeNormalizer.transform, 'unicodeNormalizer')
 }
 
 module.exports = unicodeNormalizer

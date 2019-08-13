@@ -59,9 +59,9 @@ const Header = ({
   if (isReadOnly) {
     return (
       <HeaderBox noBorder={noBorder} row>
-        <Box flex justifyContent='center'>
-          <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <StyledIcon name={'arrow-left'} size={20} />
+        <Box flex justifyContent="center">
+          <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+            <StyledIcon name="arrow-left" size={20} />
           </Back>
         </Box>
         <Box grow center>
@@ -75,32 +75,28 @@ const Header = ({
   }
   return (
     <HeaderBox noBorder={noBorder} row>
-      {
-        isSelectionMode &&
-        <Box justifyContent='center'>
-          <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <StyledIcon name={'arrow-left'} size={20} />
+      {isSelectionMode && (
+        <Box justifyContent="center">
+          <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+            <StyledIcon name="arrow-left" size={20} />
           </Back>
         </Box>
-      }
-      <LinkBox route={'BibleSelect'}>
+      )}
+      <LinkBox route="BibleSelect">
         <StyledText>
           {book.Nom} {chapter}
         </StyledText>
-        <StyledIcon name='chevron-down' size={15} />
+        <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route={'VersionSelector'} params={{ version }}>
+      <LinkBox route="VersionSelector" params={{ version }}>
         <StyledText>{version}</StyledText>
-        <StyledIcon name='chevron-down' size={15} />
+        <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      {
-        !isSelectionMode &&
+      {!isSelectionMode && (
         <BibleParameters onPress={onBibleParamsClick}>
-          <StyledText>
-          Aa
-          </StyledText>
+          <StyledText>Aa</StyledText>
         </BibleParameters>
-      }
+      )}
     </HeaderBox>
   )
 }

@@ -13,14 +13,8 @@ const TabItem = styled.TouchableOpacity(({ theme, isRouteActive }) => ({
   borderBottomWidth: isRouteActive ? 3 : 1
 }))
 
-const BibleSelectTabBar = (props) => {
-  const {
-    getLabelText,
-    onTabPress,
-    onTabLongPress,
-    getAccessibilityLabel,
-    navigation
-  } = props
+const BibleSelectTabBar = props => {
+  const { getLabelText, onTabPress, onTabLongPress, getAccessibilityLabel, navigation } = props
 
   const { routes, index: activeRouteIndex } = navigation.state
 
@@ -39,8 +33,7 @@ const BibleSelectTabBar = (props) => {
             onLongPress={() => {
               onTabLongPress({ route })
             }}
-            accessibilityLabel={getAccessibilityLabel({ route })}
-          >
+            accessibilityLabel={getAccessibilityLabel({ route })}>
             <Text bold>{getLabelText({ route })}</Text>
           </TabItem>
         )

@@ -19,10 +19,10 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   alignItems: 'flex-end',
   paddingBottom: 20,
 
-  ...isSelectionMode && {
+  ...(isSelectionMode && {
     height: 70,
     width: 250
-  }
+  })
 }))
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
@@ -38,7 +38,7 @@ const Container = styled.View(({ theme, isSelectionMode }) => ({
   alignItems: 'stretch',
   justifyContent: 'space-between',
 
-  ...isSelectionMode && {
+  ...(isSelectionMode && {
     width: 250,
     backgroundColor: theme.colors.primary,
     flexDirection: 'row',
@@ -46,7 +46,7 @@ const Container = styled.View(({ theme, isSelectionMode }) => ({
     justifyContent: 'center',
     paddingLeft: 10,
     paddingRight: 10
-  }
+  })
 }))
 
 const HalfContainer = styled.View(({ border, theme }) => ({
@@ -74,8 +74,7 @@ const VersesModal = ({
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
 
   useEffect(() => {
-    getVersesRef(selectedVerses, version)
-      .then(({ title }) => setSelectedVersesTitle(title))
+    getVersesRef(selectedVerses, version).then(({ title }) => setSelectedVersesTitle(title))
   }, [selectedVerses])
 
   const shareVerse = async () => {
@@ -89,7 +88,7 @@ const VersesModal = ({
 
   const showStrongDetail = () => {
     clearSelectedVerses()
-    let verse = Object.keys(selectedVerses)[0].split('-')[2]
+    const verse = Object.keys(selectedVerses)[0].split('-')[2]
     setSelectedVerse(verse)
     navigation.navigate('BibleVerseDetail')
   }
@@ -118,68 +117,51 @@ const VersesModal = ({
     <StylizedModal
       isOpen={isVisible}
       animationDuration={200}
-      position='bottom'
+      position="bottom"
       backdrop={false}
       backdropPressToClose={false}
       swipeToClose={false}
-      isSelectionMode={isSelectionMode}
-    >
-      {
-        isSelectionMode
-          ? (
-            <Container isSelectionMode={isSelectionMode}>
-              <TouchableIcon
-                name='x'
-                onPress={clearSelectedVerses}
-                color={theme.colors.reverse}
-                noFlex
-              />
-              <Text
-                flex
-                bold
-                fontSize={15}
-                textAlign='center'
-                color='reverse'
-              >
-                {selectedVersesTitle.toUpperCase()}
-              </Text>
-              <TouchableIcon
-                name='arrow-right'
-                color={theme.colors.reverse}
-                onPress={sendVerseData}
-                noFlex
-              />
-            </Container>
-          )
-          : (
-            <Container>
-              <HalfContainer border>
-                <TouchableCircle color={theme.colors.color1} onPress={() => addHighlight('color1')} />
-                <TouchableCircle color={theme.colors.color2} onPress={() => addHighlight('color2')} />
-                <TouchableCircle color={theme.colors.color3} onPress={() => addHighlight('color3')} />
-                <TouchableCircle color={theme.colors.color4} onPress={() => addHighlight('color4')} />
-                {
-                  isSelectedVerseHighlighted &&
-                  <TouchableIcon name='x-circle' onPress={removeHighlight} />
-                }
-              </HalfContainer>
-              <HalfContainer>
-                {
-                  Object.keys(selectedVerses).length <= 1 &&
-                  <TouchableIcon
-                    name='eye'
-                    color={theme.colors.primary}
-                    onPress={showStrongDetail}
-                  />
-                }
-                <TouchableIcon name='layers' onPress={compareVerses} />
-                <TouchableIcon name='file-plus' onPress={onCreateNoteClick} />
-                <TouchableIcon name='share-2' onPress={shareVerse} />
-                <TouchableIcon name='arrow-down' onPress={clearSelectedVerses} />
-              </HalfContainer>
-
-            </Container>
-          )}
+      isSelectionMode={isSelectionMode}>
+      {isSelectionMode ? (
+        <Container isSelectionMode={isSelectionMode}>
+          <TouchableIcon
+            name="x"
+            onPress={clearSelectedVerses}
+            color={theme.colors.reverse}
+            noFlex
+          />
+          <Text flex bold fontSize={15} textAlign="center" color="reverse">
+            {selectedVersesTitle.toUpperCase()}
+          </Text>
+          <TouchableIcon
+            name="arrow-right"
+            color={theme.colors.reverse}
+            onPress={sendVerseData}
+            noFlex
+          />
+        </Container>
+      ) : (
+        <Container>
+          <HalfContainer border>
+            <TouchableCircle color={theme.colors.color1} onPress={() => addHighlight('color1')} />
+            <TouchableCircle color={theme.colors.color2} onPress={() => addHighlight('color2')} />
+            <TouchableCircle color={theme.colors.color3} onPress={() => addHighlight('color3')} />
+            <TouchableCircle color={theme.colors.color4} onPress={() => addHighlight('color4')} />
+            {isSelectedVerseHighlighted && (
+              <TouchableIcon name="x-circle" onPress={removeHighlight} />
+            )}
+          </HalfContainer>
+          <HalfContainer>
+            {Object.keys(selectedVerses).length <= 1 && (
+              <TouchableIcon name="eye" color={theme.colors.primary} onPress={showStrongDetail} />
+            )}
+            <TouchableIcon name="layers" onPress={compareVerses} />
+            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} />
+            <TouchableIcon name="share-2" onPress={shareVerse} />
+            <TouchableIcon name="arrow-down" onPress={clearSelectedVerses} />
+          </HalfContainer>
+        </Container>
+      )}
     </StylizedModal>
   )
 }

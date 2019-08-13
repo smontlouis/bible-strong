@@ -19,45 +19,48 @@ const NoteContainer = styled.TouchableOpacity(({ theme }) => ({
 }))
 
 class BibleNoteItem extends React.Component {
-  openModal = () => { this.setState({ isModalOpen: true }) }
-  closeModal = () => { this.setState({ isMenuOpen: false }) }
+  openModal = () => {
+    this.setState({ isModalOpen: true })
+  }
+
+  closeModal = () => {
+    this.setState({ isMenuOpen: false })
+  }
 
   state = {
     isModalOpen: false,
     isMenuOpen: false
   }
 
-  render () {
+  render() {
     const { item, openNoteEditor, setNoteSettings } = this.props
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), { locale: frLocale })
 
     return (
       <NoteContainer onPress={() => openNoteEditor(item.noteId)}>
-        <Box row justifyContent='space-between'>
-          <Text color='darkGrey' bold fontSize={11}>
+        <Box row justifyContent="space-between">
+          <Text color="darkGrey" bold fontSize={11}>
             {item.reference} - Il y a {formattedDate}
           </Text>
           <Box row>
             <Icon.Feather
-              name={'more-vertical'}
+              name="more-vertical"
               size={20}
               color={theme.colors.tertiary}
               onPress={() => setNoteSettings(item.noteId)}
             />
           </Box>
         </Box>
-        {
-          !!item.notes.title &&
+        {!!item.notes.title && (
           <Text title fontSize={16} scale={-2}>
             {item.notes.title}
           </Text>
-        }
-        {
-          !!item.notes.description &&
+        )}
+        {!!item.notes.description && (
           <Paragraph scale={-3} scaleLineHeight={-1}>
             {truncate(item.notes.description, 100)}
           </Paragraph>
-        }
+        )}
         <TagList tags={item.notes.tags} />
       </NoteContainer>
     )

@@ -35,22 +35,20 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden'
 }))
 
-const NotesSettingsModal = ({
-  isOpen,
-  onClosed,
-  theme,
-  setTitlePrompt,
-  setMultipleTagsItem
-}) => {
+const NotesSettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultipleTagsItem }) => {
   const dispatch = useDispatch()
   const noteId = isOpen
   const note = useSelector(state => state.user.bible.notes[noteId])
 
-  const deleteNoteConfirmation = (noteId) => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?',
-      [ { text: 'Non', onPress: () => null, style: 'cancel' },
-        { text: 'Oui', onPress: () => dispatch(deleteNote(noteId), onClosed()), style: 'destructive' }
-      ])
+  const deleteNoteConfirmation = id => {
+    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
+      { text: 'Non', onPress: () => null, style: 'cancel' },
+      {
+        text: 'Oui',
+        onPress: () => dispatch(deleteNote(id), onClosed()),
+        style: 'destructive'
+      }
+    ])
   }
 
   return (
@@ -59,19 +57,23 @@ const NotesSettingsModal = ({
       isVisible={!!isOpen}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-    >
+      onBackdropPress={onClosed}>
       <Container>
-        <Touchy onPress={() => {
-          onClosed()
-          setTimeout(() => {
-            setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
-          }, 500)
-        }}>
-          <Text fontSize={16} bold>Tags</Text>
+        <Touchy
+          onPress={() => {
+            onClosed()
+            setTimeout(() => {
+              setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
+            }, 500)
+          }}>
+          <Text fontSize={16} bold>
+            Tags
+          </Text>
         </Touchy>
         <Touchy onPress={() => deleteNoteConfirmation(noteId)}>
-          <Text fontSize={16} bold color='quart'>Supprimer</Text>
+          <Text fontSize={16} bold color="quart">
+            Supprimer
+          </Text>
         </Touchy>
       </Container>
     </StylizedModal>

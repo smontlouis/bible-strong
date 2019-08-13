@@ -9,9 +9,7 @@ import { CarouselConsumer } from '~helpers/CarouselContext'
 import Paragraph from '~common/ui/Paragraph'
 
 const StyledView = styled.TouchableOpacity(({ isSelected, theme }) => ({
-  backgroundColor: isSelected
-    ? theme.colors.primary
-    : theme.colors.lightPrimary,
+  backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
   borderRadius: 2,
   paddingLeft: 3,
   paddingRight: 3,
@@ -28,53 +26,38 @@ const StyledCircle = styled.TouchableOpacity(({ theme, isSelected }) => ({
   justifyContent: 'center'
 }))
 
-const StyledInsideCircle = styled.View(
-  ({ theme, isSelected, isConcordance }) => ({
-    width: 15,
-    height: 15,
-    borderRadius: 15 / 2,
-    backgroundColor:
-      isSelected || isConcordance
-        ? theme.colors.primary
-        : theme.colors.lightPrimary,
-    alignItems: 'center',
-    justifyContent: 'center'
-  })
-)
+const StyledInsideCircle = styled.View(({ theme, isSelected, isConcordance }) => ({
+  width: 15,
+  height: 15,
+  borderRadius: 15 / 2,
+  backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
+  alignItems: 'center',
+  justifyContent: 'center'
+}))
 
-const StyledText = styled(Paragraph)(
-  ({ isFromConcordance, isSelected, theme }) => ({
-    color: isSelected ? theme.colors.reverse : theme.colors.default,
-    ...(isFromConcordance
-      ? {
+const StyledText = styled(Paragraph)(({ isFromConcordance, isSelected, theme }) => ({
+  color: isSelected ? theme.colors.reverse : theme.colors.default,
+  ...(isFromConcordance
+    ? {
         color: 'red',
         fontWeight: 'bold',
         fontSize: 12
       }
-      : {})
-  })
-)
+    : {})
+}))
 
 const ConcordanceText = styled(Paragraph)(({ isConcordance, theme }) => ({
   ...(isConcordance
     ? {
-      color: theme.colors.primary,
-      fontWeight: 'bold'
-    }
+        color: theme.colors.primary,
+        fontWeight: 'bold'
+      }
     : {})
 }))
 
-const BibleStrongRef = ({
-  small,
-  navigation,
-  reference,
-  word,
-  book,
-  concordanceFor
-}) => {
+const BibleStrongRef = ({ small, navigation, reference, word, book, concordanceFor }) => {
   if (concordanceFor) {
-    const isConcordance =
-      `0${concordanceFor}` === reference || `${concordanceFor}` === reference
+    const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
 
     if (!word && !isConcordance) {
       return null
@@ -94,15 +77,13 @@ const BibleStrongRef = ({
     <CarouselConsumer>
       {({ currentStrongReference, goToCarouselItem }) => {
         const isSelected =
-          currentStrongReference &&
-          currentStrongReference.Code === Number(reference)
+          currentStrongReference && currentStrongReference.Code === Number(reference)
         if (!word) {
           return (
             <StyledCircle
               activeOpacity={0.5}
               onPress={() => goToCarouselItem(reference)}
-              isSelected={isSelected}
-            >
+              isSelected={isSelected}>
               <StyledInsideCircle isSelected={isSelected} />
             </StyledCircle>
           )
@@ -112,8 +93,7 @@ const BibleStrongRef = ({
           <StyledView
             activeOpacity={0.5}
             onPress={() => goToCarouselItem(reference)}
-            isSelected={isSelected}
-          >
+            isSelected={isSelected}>
             <StyledText isSelected={isSelected}>{word}</StyledText>
           </StyledView>
         )

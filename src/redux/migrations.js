@@ -1,6 +1,6 @@
 export default {
   // Added 'press' in 'settings'
-  0: (state) => {
+  0: state => {
     return {
       ...state,
       user: {
@@ -15,7 +15,7 @@ export default {
       }
     }
   },
-  1: (state) => {
+  1: state => {
     return {
       ...state,
       user: {
@@ -27,7 +27,7 @@ export default {
       }
     }
   },
-  2: (state) => {
+  2: state => {
     return {
       ...state,
       user: {
@@ -42,7 +42,7 @@ export default {
       }
     }
   },
-  3: (state) => {
+  3: state => {
     return {
       ...state,
       user: {
@@ -55,7 +55,7 @@ export default {
       }
     }
   },
-  4: (state) => {
+  4: state => {
     return {
       ...state,
       user: {

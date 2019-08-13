@@ -46,7 +46,7 @@ class BibleViewer extends Component {
 
   pericope = getBiblePericope('LSG')
 
-  componentWillMount () {
+  componentWillMount() {
     setTimeout(() => {
       this.loadVerses().catch(e => {
         this.setState({ error: true, isLoading: false })
@@ -55,7 +55,7 @@ class BibleViewer extends Component {
     this.props.clearSelectedVerses()
   }
 
-  componentWillReceiveProps (oldProps) {
+  componentWillReceiveProps(oldProps) {
     if (
       this.props.chapter !== oldProps.chapter ||
       this.props.book.Numero !== oldProps.book.Numero ||
@@ -94,13 +94,7 @@ class BibleViewer extends Component {
   }
 
   openInBibleTab = () => {
-    const {
-      book,
-      chapter,
-      verse,
-      navigation,
-      setAllAndValidateSelected
-    } = this.props
+    const { book, chapter, verse, navigation, setAllAndValidateSelected } = this.props
     setAllAndValidateSelected({
       book,
       chapter,
@@ -109,7 +103,7 @@ class BibleViewer extends Component {
     navigation.navigate('Bible')
   }
 
-  addHiglightAndOpenQuickTags = (color) => {
+  addHiglightAndOpenQuickTags = color => {
     const { addHighlight, selectedVerses } = this.props
 
     setTimeout(() => {
@@ -120,9 +114,10 @@ class BibleViewer extends Component {
   }
 
   setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
+
   setQuickTagsModal = value => this.setState({ quickTagsModal: value })
 
-  render () {
+  render() {
     const { isLoading, error, quickTagsModal, multipleTagsItem } = this.state
     const {
       book,
@@ -153,9 +148,7 @@ class BibleViewer extends Component {
     let array = this.state.verses
 
     // When opening some verses, not whole chapter
-    if (
-      arrayVerses
-    ) {
+    if (arrayVerses) {
       array = array.filter(v =>
         arrayVerses.find(aV => aV === `${v.Livre}-${v.Chapitre}-${v.Verset}`)
       )
@@ -164,15 +157,13 @@ class BibleViewer extends Component {
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
       <Container>
-        {
-          error &&
+        {error && (
           <Empty
             source={require('~assets/images/empty.json')}
             message="Désolé ! Ce chapitre n'existe pas dans cette version"
           />
-        }
-        {
-          !error &&
+        )}
+        {!error && (
           <BibleWebView
             isLoading={isLoading}
             navigation={navigation}
@@ -192,7 +183,7 @@ class BibleViewer extends Component {
             pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
             openNoteModal={openNoteModal}
           />
-        }
+        )}
         {!isReadOnly && (
           <BibleFooter
             disabled={isLoading}
@@ -202,14 +193,8 @@ class BibleViewer extends Component {
             goToNextChapter={goToNextChapter}
           />
         )}
-        {isReadOnly && (
-          <ReadMeButton
-            title='Ouvrir dans Bible'
-            onPress={this.openInBibleTab}
-          />
-        )}
-        {
-          modalIsVisible &&
+        {isReadOnly && <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />}
+        {modalIsVisible && (
           <SelectedVersesModal
             isSelectionMode={isSelectionMode}
             setSelectedVerse={this.props.setSelectedVerse}
@@ -222,7 +207,8 @@ class BibleViewer extends Component {
             navigation={navigation}
             selectedVerses={selectedVerses}
             version={version}
-          />}
+          />
+        )}
         <QuickTagsModal
           item={quickTagsModal}
           onClosed={() => this.setQuickTagsModal(false)}

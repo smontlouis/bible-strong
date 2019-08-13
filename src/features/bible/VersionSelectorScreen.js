@@ -22,7 +22,7 @@ const setAndClose = (setVersion, navigation, vers) => {
 
 const VersionSelector = ({ setVersion, navigation }) => (
   <Container>
-    <Header hasBackButton title='Version' />
+    <Header hasBackButton title="Version" />
     <FlatList
       data={Object.values(versions)}
       keyExtractor={(item, index) => item.id}

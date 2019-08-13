@@ -26,7 +26,7 @@ class BibleScreen extends React.Component {
     this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen, noteVerses: null })
   }
 
-  openNoteModal = (noteId) => {
+  openNoteModal = noteId => {
     const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
       return accuRefs
@@ -34,7 +34,7 @@ class BibleScreen extends React.Component {
     this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen, noteVerses })
   }
 
-  render () {
+  render() {
     const {
       app,
       navigation,
@@ -54,7 +54,7 @@ class BibleScreen extends React.Component {
 
     return (
       <Container>
-        <StatusBar translucent backgroundColor='white' />
+        <StatusBar translucent backgroundColor="white" />
         <BibleHeader
           isReadOnly={isReadOnly}
           isSelectionMode={isSelectionMode}
@@ -77,8 +77,7 @@ class BibleScreen extends React.Component {
           onCreateNoteClick={this.toggleCreateNote}
           openNoteModal={this.openNoteModal}
         />
-        {
-          this.state.isBibleParamsOpen &&
+        {this.state.isBibleParamsOpen && (
           <BibleParamsModal
             onClosed={this.toggleBibleParamsOpen}
             isOpen={this.state.isBibleParamsOpen}
@@ -91,15 +90,14 @@ class BibleScreen extends React.Component {
             decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
             settings={settings}
           />
-        }
-        {
-          this.state.isCreateNoteOpen &&
+        )}
+        {this.state.isCreateNoteOpen && (
           <BibleNoteModal
             onClosed={this.toggleCreateNote}
             isOpen={this.state.isCreateNoteOpen}
             noteVerses={this.state.noteVerses}
           />
-        }
+        )}
       </Container>
     )
   }
@@ -107,7 +105,7 @@ class BibleScreen extends React.Component {
 
 export default connect(
   ({ bible, user }, ownProps) => {
-    const params = ownProps.navigation.state.params
+    const { params } = ownProps.navigation.state
     return {
       isReadOnly: params && params.isReadOnly,
       isSelectionMode: params && params.isSelectionMode,

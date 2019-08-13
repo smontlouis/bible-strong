@@ -1,8 +1,6 @@
 import { Dimensions } from 'react-native'
 
-export const { width: viewportWidth, height: viewportHeight } = Dimensions.get(
-  'window'
-)
+export const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window')
 
 export const wp = percentage => {
   const value = (percentage * viewportWidth) / 100

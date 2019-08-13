@@ -5,7 +5,7 @@ import Paragraph from '~common/ui/Paragraph'
 const verseToStrong = ({ Texte, Livre }, concordanceFor, isSmall) =>
   new Promise(resolve => {
     let formattedTexte
-    let references = []
+    const references = []
 
     // STRONG -- We don't want what is in parentheses
     const splittedTexte = Texte.split(/\s*(\(?\d+[^{.|\s}]?\d+(?!\.?\d)\)?)/g)
@@ -17,9 +17,7 @@ const verseToStrong = ({ Texte, Livre }, concordanceFor, isSmall) =>
         const prevItem = splittedTexte[i - 1].split(' ')
         return (
           <Fragment key={i}>
-            {(i - 1 !== 0 || prevItem.length > 1) && (
-              <Paragraph small={isSmall}>&nbsp;</Paragraph>
-            )}
+            {(i - 1 !== 0 || prevItem.length > 1) && <Paragraph small={isSmall}>&nbsp;</Paragraph>}
             <BibleStrongReference
               small={isSmall}
               concordanceFor={concordanceFor}

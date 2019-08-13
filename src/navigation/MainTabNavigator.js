@@ -7,6 +7,7 @@ import StudiesScreen from '~features/studies/StudiesScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import getTheme from '~themes'
+
 export default createMaterialBottomTabNavigator(
   {
     Bible: {
@@ -14,9 +15,7 @@ export default createMaterialBottomTabNavigator(
       navigationOptions: ({ screenProps }) => {
         return {
           title: 'Bible',
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name='book-open' />
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="book-open" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary
         }
@@ -26,9 +25,7 @@ export default createMaterialBottomTabNavigator(
       screen: StudiesScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Études',
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='feather' />
-        ),
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="feather" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
@@ -37,9 +34,7 @@ export default createMaterialBottomTabNavigator(
       screen: HighlightScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Surbrillances',
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='edit-3' />
-        ),
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="edit-3" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
@@ -48,9 +43,7 @@ export default createMaterialBottomTabNavigator(
       screen: BibleVerseNotesScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Notes',
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='file-text' />
-        ),
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="file-text" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
@@ -59,9 +52,7 @@ export default createMaterialBottomTabNavigator(
       screen: MoreScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Plus',
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} name='menu' />
-        ),
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="menu" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })

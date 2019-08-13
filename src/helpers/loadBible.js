@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 
-export default function loadBible (bible) {
+export default function loadBible(bible) {
   return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {

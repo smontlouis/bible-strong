@@ -55,17 +55,14 @@ class BibleStrongDetailScreen extends React.Component {
     concordanceLoading: true
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadData()
   }
 
   loadData = async () => {
-    const {
-      book,
-      reference
-    } = this.props.navigation.state.params
+    const { book, reference } = this.props.navigation.state.params
 
-    let strongReference = this.props.navigation.state.params.strongReference
+    let { strongReference } = this.props.navigation.state.params
     if (reference) {
       try {
         strongReference = await loadStrongReference(reference, book)
@@ -81,27 +78,18 @@ class BibleStrongDetailScreen extends React.Component {
 
   shareContent = () => {
     const {
-      strongReference: {
-        Code,
-        Hebreu,
-        Grec,
-        Mot,
-        Phonetique,
-        Definition,
-        Type,
-        LSG
-      }
+      strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG }
     } = this.state
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
-    toCopy += Type ? `${Type}\n---\n\n` : `---\n\n`
+    toCopy += Type ? `${Type}\n---\n\n` : '---\n\n'
     toCopy += Hebreu ? `Mot Hébreu: ${Hebreu}\n\n` : ''
     toCopy += Grec ? `Mot Grec: ${Grec}\n\n` : ''
     if (Definition) {
       let def = Definition.replace('<p>', '')
       def = def.replace('</p>', '')
-      def = def.replace(/<\/?[^>]+><\/?[^>]+>/ig, '\n')
-      def = def.replace(/<\/?[^>]+>/ig, '\n')
+      def = def.replace(/<\/?[^>]+><\/?[^>]+>/gi, '\n')
+      def = def.replace(/<\/?[^>]+>/gi, '\n')
       toCopy += `Définition - ${Code}\n${def}\n\n`
     }
     toCopy += LSG ? `Généralement traduit par:\n${LSG}` : ''
@@ -116,31 +104,27 @@ class BibleStrongDetailScreen extends React.Component {
   linkToStrong = (url, reference) => {
     const {
       navigation,
-      navigation: { state: { params: { book } } }
+      navigation: {
+        state: {
+          params: { book }
+        }
+      }
     } = this.props
 
     navigation.navigate({
-      routeName: 'BibleStrongDetail', params: { book, reference }, key: reference
+      routeName: 'BibleStrongDetail',
+      params: { book, reference },
+      key: reference
     })
   }
 
-  render () {
+  render() {
     if (!this.state.strongReference) {
       return null
     }
     const {
       strongReference,
-      strongReference: {
-        Code,
-        Hebreu,
-        Grec,
-        Mot,
-        Phonetique,
-        Definition,
-        Origine,
-        Type,
-        LSG
-      }
+      strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG }
     } = this.state
 
     return (
@@ -152,7 +136,7 @@ class BibleStrongDetailScreen extends React.Component {
                 <Text title fontSize={22} flex>
                   {capitalize(Mot)}
                   {!!Phonetique && (
-                    <Text title color='darkGrey' fontSize={16}>
+                    <Text title color="darkGrey" fontSize={16}>
                       {' '}
                       {Phonetique}
                     </Text>
@@ -162,20 +146,20 @@ class BibleStrongDetailScreen extends React.Component {
               <Touchable onPress={this.shareContent}>
                 <FeatherIcon
                   style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
-                  name='share-2'
+                  name="share-2"
                   size={20}
                 />
               </Touchable>
               <Touchable onPress={this.goBack}>
                 <FeatherIcon
                   style={{ paddingTop: 10, paddingHorizontal: 5 }}
-                  name='minimize-2'
+                  name="minimize-2"
                   size={20}
                 />
               </Touchable>
             </Box>
             {!!Type && (
-              <Text titleItalic color='darkGrey'>
+              <Text titleItalic color="darkGrey">
                 {Type}
               </Text>
             )}
@@ -187,7 +171,7 @@ class BibleStrongDetailScreen extends React.Component {
           <Box>
             {!!Hebreu && (
               <ViewItem>
-                <Paragraph color='darkGrey' style={{ fontSize: 15 }}>
+                <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
                   Mot Hébreu:&nbsp;
                   <Word>{Hebreu}</Word>
                 </Paragraph>
@@ -204,10 +188,7 @@ class BibleStrongDetailScreen extends React.Component {
             {!!Definition && (
               <ViewItem>
                 <SubTitle darkGrey>Définition - {Code}</SubTitle>
-                <StylizedHTMLView
-                  value={Definition}
-                  onLinkPress={this.linkToStrong}
-                />
+                <StylizedHTMLView value={Definition} onLinkPress={this.linkToStrong} />
               </ViewItem>
             )}
             {!!LSG && (
@@ -219,10 +200,7 @@ class BibleStrongDetailScreen extends React.Component {
             {!!Origine && (
               <ViewItem>
                 <SubTitle darkGrey>Origine du mot</SubTitle>
-                <StylizedHTMLView
-                  value={Origine}
-                  onLinkPress={this.linkToStrong}
-                />
+                <StylizedHTMLView value={Origine} onLinkPress={this.linkToStrong} />
               </ViewItem>
             )}
             {(this.state.versesCountByBook.length > 0 || this.state.concordanceLoading) && (

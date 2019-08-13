@@ -3,7 +3,7 @@
 import reducer, * as BibleActions from '../bible'
 import booksDesc from '~assets/bible_versions/books-desc'
 
-let initialState = {
+const initialState = {
   selectedVersion: 'LSG',
   selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
   selectedChapter: 1,
@@ -18,10 +18,7 @@ let initialState = {
 
 describe('Bible Reducer', () => {
   it('should handle SET_TEMP_SELECTED_BOOK', () => {
-    const newState = reducer(
-      undefined,
-      BibleActions.setTempSelectedBook(booksDesc[2])
-    )
+    const newState = reducer(undefined, BibleActions.setTempSelectedBook(booksDesc[2]))
     expect(newState).toEqual({
       ...initialState,
       temp: {

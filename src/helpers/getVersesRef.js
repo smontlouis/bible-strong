@@ -1,8 +1,8 @@
 import books from '~assets/bible_versions/books-desc'
 import loadBible from '~helpers/loadBible'
 
-const orderVerses = (selectedVerses) => {
-  let orderedVersesList = Object.keys(selectedVerses).sort((key1, key2) => {
+const orderVerses = selectedVerses => {
+  const orderedVersesList = Object.keys(selectedVerses).sort((key1, key2) => {
     const verse1 = key1.split('-')[2]
     const verse2 = key2.split('-')[2]
     return verse2 < verse1
@@ -10,21 +10,22 @@ const orderVerses = (selectedVerses) => {
   return orderedVersesList
 }
 
-const getVersesRef = (versesList) => {
+const getVersesRef = versesList => {
   let versesRef = `${versesList[0]}`
   let previousVerse = versesList[0]
   let isListing = false
   versesList.slice(1).map((verse, index) => {
     if (parseInt(previousVerse) === parseInt(verse) - 1) {
-      if (!isListing) { versesRef += '-'; isListing = true }
-      if (versesList.slice(1).length - 1 === index) versesRef += verse
-    } else {
-      if (isListing) {
-        versesRef += `${previousVerse}, ${verse}`
-        isListing = false
-      } else {
-        versesRef += `, ${verse}`
+      if (!isListing) {
+        versesRef += '-'
+        isListing = true
       }
+      if (versesList.slice(1).length - 1 === index) versesRef += verse
+    } else if (isListing) {
+      versesRef += `${previousVerse}, ${verse}`
+      isListing = false
+    } else {
+      versesRef += `, ${verse}`
     }
     previousVerse = verse
   })
@@ -36,7 +37,7 @@ export default async (selectedVerses, version = 'LSG') => {
 
   let toShare = ''
   let reference = ''
-  let versesList = []
+  const versesList = []
   let bible = null
 
   bible = await loadBible(version)

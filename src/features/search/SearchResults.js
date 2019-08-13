@@ -39,9 +39,7 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
       keyExtractor={result => result.ref}
       renderItem={({ item: result, index }) => {
         const [book, chapter, verse] = result.ref.split('-')
-        const { title } = formatVerseContent([
-          { Livre: book, Chapitre: chapter, Verset: verse }
-        ])
+        const { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
         const metaData = result.matchData.metadata
         const positions = Object.keys(metaData).reduce(
           (acc, item) => acc.concat(metaData[item].LSG.position),
@@ -51,9 +49,9 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
 
         const text = getBibleVerseText(BibleLSG, book, chapter, verse)
 
-         if (!text) {
-           return null
-         }
+        if (!text) {
+          return null
+        }
 
         return (
           <SearchItem

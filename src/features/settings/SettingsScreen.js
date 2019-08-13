@@ -1,9 +1,9 @@
 import React from 'react'
-import Container from '~common/ui/Container'
-import Header from '~common/Header'
 import { ScrollView } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
+import Header from '~common/Header'
+import Container from '~common/ui/Container'
 
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
@@ -22,21 +22,23 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 const SettingsScreen = () => (
-  (
-    <Container>
-      <Header hasBackButton noBorder title='Paramêtres' />
-      <ScrollView>
-        <LinkItem route={'Highlights'}>
-          <StyledIcon name={'edit-3'} size={30} />
-          <Text bold fontSize={15}>SURBRILLANCES</Text>
-        </LinkItem>
-        <LinkItem route={'BibleVerseNotes'}>
-          <StyledIcon name={'file-text'} size={30} />
-          <Text bold fontSize={15}>NOTES</Text>
-        </LinkItem>
-      </ScrollView>
-    </Container>
-  )
+  <Container>
+    <Header hasBackButton noBorder title="Paramêtres" />
+    <ScrollView>
+      <LinkItem route="Highlights">
+        <StyledIcon name="edit-3" size={30} />
+        <Text bold fontSize={15}>
+          SURBRILLANCES
+        </Text>
+      </LinkItem>
+      <LinkItem route="BibleVerseNotes">
+        <StyledIcon name="file-text" size={30} />
+        <Text bold fontSize={15}>
+          NOTES
+        </Text>
+      </LinkItem>
+    </ScrollView>
+  </Container>
 )
 
 export default SettingsScreen

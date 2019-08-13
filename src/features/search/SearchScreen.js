@@ -21,9 +21,11 @@ export default class SearchScreen extends React.Component {
     value: '',
     results: []
   }
-  componentDidMount () {
+
+  componentDidMount() {
     this.loadIndex()
   }
+
   loadIndex = async () => {
     const idxPath = `${FileSystem.documentDirectory}idx-light.json`
     let idxFile = await FileSystem.getInfoAsync(idxPath)
@@ -39,7 +41,12 @@ export default class SearchScreen extends React.Component {
       const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
 
       console.log(`Downloading ${idxUri} to ${idxPath}`)
-      await FileSystem.createDownloadResumable(idxUri, idxPath, null, this.calculateProgress).downloadAsync()
+      await FileSystem.createDownloadResumable(
+        idxUri,
+        idxPath,
+        null,
+        this.calculateProgress
+      ).downloadAsync()
 
       console.log('Download finished')
       idxFile = await FileSystem.getInfoAsync(idxPath)
@@ -50,7 +57,7 @@ export default class SearchScreen extends React.Component {
   }
 
   calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-    const idxProgress = Math.floor(totalBytesWritten / IDX_LIGHT_FILE_SIZE * 100) / 100
+    const idxProgress = Math.floor((totalBytesWritten / IDX_LIGHT_FILE_SIZE) * 100) / 100
     this.setState({ idxProgress })
   }
 
@@ -62,13 +69,14 @@ export default class SearchScreen extends React.Component {
       this.setState({ results: [], value })
     }
   }
-  render () {
+
+  render() {
     const { isLoading, results, value, idxProgress } = this.state
     const isProgressing = typeof idxProgress !== 'undefined'
 
     if (isLoading && isProgressing) {
       return (
-        <Loading message={`Téléchargement de l'index...`}>
+        <Loading message={"Téléchargement de l'index..."}>
           <ProgressBar progress={idxProgress} color={theme.colors.tertiary} />
         </Loading>
       )
@@ -78,17 +86,14 @@ export default class SearchScreen extends React.Component {
       <Container>
         <SearchHeader
           hasBackButton
-          placeholder='Recherche'
+          placeholder="Recherche"
           onChangeText={debounce(this.onChangeText, 500)}
         />
-        {
-          isLoading &&
-          <Loading message={`Chargement de l'index...`} />
-        }
+        {isLoading && <Loading message={"Chargement de l'index..."} />}
         {!isLoading && !value && (
           <Empty
             source={require('~assets/images/search-loop.json')}
-            message='Fais une recherche dans la Bible !'
+            message="Fais une recherche dans la Bible !"
           />
         )}
         {!isLoading && !!value && <SearchResults results={results} />}

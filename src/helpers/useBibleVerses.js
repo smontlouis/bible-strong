@@ -1,7 +1,7 @@
 import React from 'react'
 import loadBible from '~helpers/loadBible'
 
-const useBibleVerses = (verseIds) => {
+const useBibleVerses = verseIds => {
   const [verses, setVerses] = React.useState([])
 
   React.useEffect(() => {
@@ -10,7 +10,12 @@ const useBibleVerses = (verseIds) => {
       const response = await loadBible('LSG')
       const versesByChapter = response[Livre][Chapitre]
       const versesWithText = Object.keys(versesByChapter)
-        .map((v: string) => ({ Verset: Number(v), Texte: versesByChapter[v], Livre: Number(Livre), Chapitre: Number(Chapitre) }))
+        .map((v: string) => ({
+          Verset: Number(v),
+          Texte: versesByChapter[v],
+          Livre: Number(Livre),
+          Chapitre: Number(Chapitre)
+        }))
         .filter(v => verseIds.find(vI => vI.Verset === v.Verset))
       setVerses(versesWithText)
     }

@@ -9,7 +9,7 @@ const Touchable = styled.TouchableOpacity(() => ({
 }))
 
 class TouchableSvgIcon extends React.Component {
-  render () {
+  render() {
     const { onPress, isSelected, size = 20, icon: Icon, theme } = this.props
     return (
       <Touchable onPress={onPress}>

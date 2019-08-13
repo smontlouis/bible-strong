@@ -18,10 +18,11 @@ import TagsModal from '~common/TagsModal'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 
 class BibleVerseNotes extends Component {
-  componentDidMount () {
+  componentDidMount() {
     this.loadPage(this.props)
   }
-  componentWillReceiveProps (nextProps) {
+
+  componentWillReceiveProps(nextProps) {
     this.loadPage(nextProps)
   }
 
@@ -37,15 +38,18 @@ class BibleVerseNotes extends Component {
     multipleTagsItem: false
   }
 
-  setTagsIsOpen = (value) => this.setState({ isTagsOpen: value })
-  setSelectedChip = (value) => this.setState({ selectedChip: value })
-  setNoteSettings = (value) => this.setState({ isNoteSettingsOpen: value })
+  setTagsIsOpen = value => this.setState({ isTagsOpen: value })
+
+  setSelectedChip = value => this.setState({ selectedChip: value })
+
+  setNoteSettings = value => this.setState({ isNoteSettingsOpen: value })
+
   setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
 
-  loadPage = async (props) => {
+  loadPage = async props => {
     const { verse } = props.navigation.state.params || {}
     let title
-    let notes = []
+    const notes = []
 
     if (verse) {
       title = (await getVersesRef({ [verse]: true })).title
@@ -54,24 +58,28 @@ class BibleVerseNotes extends Component {
       title = 'Notes'
     }
 
-    await Promise.all(Object.entries(props.notes)
-      .filter(note => {
-        if (verse) {
-          const firstVerseRef = note[0].split('/')[0]
-          return firstVerseRef === verse
-        }
-        return true
-      })
-      .map(async (note, index) => {
-        let verseNumbers = {}
-        note[0].split('/').map(ref => { verseNumbers[ref] = true })
-        const { title: reference } = await getVersesRef(verseNumbers)
-        notes.push({ noteId: note[0], reference, notes: note[1] })
-      }))
+    await Promise.all(
+      Object.entries(props.notes)
+        .filter(note => {
+          if (verse) {
+            const firstVerseRef = note[0].split('/')[0]
+            return firstVerseRef === verse
+          }
+          return true
+        })
+        .map(async (note, index) => {
+          const verseNumbers = {}
+          note[0].split('/').map(ref => {
+            verseNumbers[ref] = true
+          })
+          const { title: reference } = await getVersesRef(verseNumbers)
+          notes.push({ noteId: note[0], reference, notes: note[1] })
+        })
+    )
     this.setState({ title, verse, notes })
   }
 
-  openNoteEditor = (noteId) => {
+  openNoteEditor = noteId => {
     const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
       return accuRefs
@@ -79,13 +87,15 @@ class BibleVerseNotes extends Component {
     this.setState({ isEditNoteOpen: true, noteVerses })
   }
 
-  closeNoteEditor = () => { this.setState({ isEditNoteOpen: false }) }
+  closeNoteEditor = () => {
+    this.setState({ isEditNoteOpen: false })
+  }
 
-  deleteNote = (noteId) => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?',
-      [ { text: 'Non', onPress: () => null, style: 'cancel' },
-        { text: 'Oui', onPress: () => this.props.deleteNote(noteId), style: 'destructive' }
-      ])
+  deleteNote = noteId => {
+    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
+      { text: 'Non', onPress: () => null, style: 'cancel' },
+      { text: 'Oui', onPress: () => this.props.deleteNote(noteId), style: 'destructive' }
+    ])
   }
 
   renderNote = ({ item, index }) => {
@@ -100,48 +110,57 @@ class BibleVerseNotes extends Component {
     )
   }
 
-  render () {
+  render() {
     const { withBack, verse } = this.props.navigation.state.params || {}
-    const { title, notes, isTagsOpen, selectedChip, isNoteSettingsOpen, multipleTagsItem } = this.state
+    const {
+      title,
+      notes,
+      isTagsOpen,
+      selectedChip,
+      isNoteSettingsOpen,
+      multipleTagsItem
+    } = this.state
 
-    const filteredNotes = notes.filter(s => (selectedChip) ? s.notes.tags && s.notes.tags[selectedChip.id] : true)
+    const filteredNotes = notes.filter(s =>
+      selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true
+    )
 
     return (
       <Container>
-        {
-          verse
-            ? <Header hasBackButton={withBack} title={title || 'Chargement...'} />
-            : <TagsHeader
-              title='Notes'
-              setIsOpen={this.setTagsIsOpen}
-              isOpen={isTagsOpen}
-              selectedChip={selectedChip}
-            />
-        }
-        {
-          filteredNotes.length
-            ? <FlatList data={filteredNotes}
-              renderItem={this.renderNote}
-              keyExtractor={(item, index) => index.toString()}
-              style={{ paddingBottom: 30 }}
-            />
-            : <Empty
-              source={require('~assets/images/empty.json')}
-              message="Vous n'avez pas encore de notes..."
-            />
-        }
-        {
-          this.state.isEditNoteOpen &&
+        {verse ? (
+          <Header hasBackButton={withBack} title={title || 'Chargement...'} />
+        ) : (
+          <TagsHeader
+            title="Notes"
+            setIsOpen={this.setTagsIsOpen}
+            isOpen={isTagsOpen}
+            selectedChip={selectedChip}
+          />
+        )}
+        {filteredNotes.length ? (
+          <FlatList
+            data={filteredNotes}
+            renderItem={this.renderNote}
+            keyExtractor={(item, index) => index.toString()}
+            style={{ paddingBottom: 30 }}
+          />
+        ) : (
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Vous n'avez pas encore de notes..."
+          />
+        )}
+        {this.state.isEditNoteOpen && (
           <BibleNoteModal
             onClosed={this.closeNoteEditor}
             isOpen={this.state.isEditNoteOpen}
             noteVerses={this.state.noteVerses}
           />
-        }
+        )}
         <TagsModal
           isVisible={isTagsOpen}
           onClosed={() => this.setTagsIsOpen(false)}
-          onSelected={(chip) => this.setSelectedChip(chip)}
+          onSelected={chip => this.setSelectedChip(chip)}
           selectedChip={selectedChip}
         />
         <BibleNotesSettingsModal
@@ -160,7 +179,7 @@ class BibleVerseNotes extends Component {
 }
 
 export default connect(
-  (state) => ({
+  state => ({
     notes: state.user.bible.notes
   }),
   { ...BibleActions, ...UserActions }

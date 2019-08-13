@@ -21,7 +21,7 @@ const INJECTED_JAVASCRIPT = `(function() {
   // End of the important part! Now continue using it as usual
 })();`
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
   webview = null
 
@@ -29,7 +29,7 @@ class BibleWebView extends Component {
     isHTMLFileLoaded: false
   }
 
-  dispatchToWebView = (message) => {
+  dispatchToWebView = message => {
     if (this.webview === null) {
       return
     }
@@ -50,7 +50,7 @@ class BibleWebView extends Component {
     isHTMLFileLoaded: false
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.enableWebViewOpacity()
 
     this.HTMLFile = Asset.fromModule(require('./bibleWebView/dist/index.html'))
@@ -92,12 +92,12 @@ class BibleWebView extends Component {
     this.setState({ webViewOpacity: 1 })
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     this.sendDataToWebView()
   }
 
   // Receives all data from webview
-  receiveDataFromWebView = (e) => {
+  receiveDataFromWebView = e => {
     const action = JSON.parse(e.nativeEvent.data)
 
     switch (action.type) {
@@ -138,7 +138,7 @@ class BibleWebView extends Component {
     }
   }
 
-  isVerseSelected = (verseId) => {
+  isVerseSelected = verseId => {
     const { selectedVerses } = this.props
     return !!selectedVerses[verseId]
   }
@@ -174,7 +174,7 @@ class BibleWebView extends Component {
     })
   }
 
-  render () {
+  render() {
     if (!this.state.isHTMLFileLoaded) {
       return null
     }

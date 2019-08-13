@@ -38,13 +38,13 @@ class VersionSelectorItem extends React.Component {
     isLoading: false
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     const { version } = this.props
     const versionNeedsDownload = await getIfVersionNeedsDownload(version.id)
     this.setState({ versionNeedsDownload })
   }
 
-  requireBibleFileUri = (id) => {
+  requireBibleFileUri = id => {
     switch (id) {
       case 'DBY': {
         return Asset.fromModule(require('~assets/bible_versions/bible-dby.txt')).uri
@@ -80,7 +80,7 @@ class VersionSelectorItem extends React.Component {
   }
 
   calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-    const fileProgress = Math.floor(totalBytesWritten / BIBLE_FILESIZE * 100) / 100
+    const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
     this.setState({ fileProgress })
   }
 
@@ -93,14 +93,19 @@ class VersionSelectorItem extends React.Component {
     const uri = this.requireBibleFileUri(version.id)
 
     console.log(`Downloading ${uri} to ${path}`)
-    await FileSystem.createDownloadResumable(uri, path, null, this.calculateProgress).downloadAsync()
+    await FileSystem.createDownloadResumable(
+      uri,
+      path,
+      null,
+      this.calculateProgress
+    ).downloadAsync()
 
     console.log('Download finished')
 
     this.setState({ versionNeedsDownload: false })
   }
 
-  render () {
+  render() {
     const { version, isSelected, onChange, theme } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
@@ -113,23 +118,17 @@ class VersionSelectorItem extends React.Component {
         <Container>
           <Box flex row>
             <Box disabled flex>
-              <TextVersion >{version.id}</TextVersion>
-              <TextName >{version.name}</TextName>
+              <TextVersion>{version.id}</TextVersion>
+              <TextName>{version.name}</TextName>
             </Box>
-            { !isLoading &&
-            <Button
-              reverse
-              small
-              title='Télécharger'
-              onPress={this.startDownload}
-            />
-            }
-            {
-              isLoading &&
-              <Box width={100} justifyContent='center'>
+            {!isLoading && (
+              <Button reverse small title="Télécharger" onPress={this.startDownload} />
+            )}
+            {isLoading && (
+              <Box width={100} justifyContent="center">
                 <ProgressBar progress={fileProgress} color={theme.colors.default} />
               </Box>
-            }
+            )}
           </Box>
         </Container>
       )

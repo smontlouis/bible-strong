@@ -41,7 +41,7 @@ class SearchInput extends Component {
     hasText: false
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.input.focus()
   }
 
@@ -58,7 +58,7 @@ class SearchInput extends Component {
     this.input.clear()
   }
 
-  render () {
+  render() {
     const {
       containerStyle,
       inputStyle,
@@ -75,29 +75,21 @@ class SearchInput extends Component {
           ref={c => {
             this.input = c
           }}
-          autoCapitalize='none'
+          autoCapitalize="none"
           autoCorrect={false}
           onChangeText={this.onChangeText}
           placeholderTextColor={theme.colors.default}
-          underlineColorAndroid='transparent'
+          underlineColorAndroid="transparent"
           {...{ hasNoIcon, isRounded }}
         />
         {!this.state.hasText && (
           <IconButton>
-            <Icon
-              size={20}
-              name={iconName || 'search'}
-              color={theme.colors.default}
-            />
+            <Icon size={20} name={iconName || 'search'} color={theme.colors.default} />
           </IconButton>
         )}
         {this.state.hasText && (
           <IconButtonTouch onPress={this.onClear}>
-            <Icon
-              size={20}
-              name={'close'}
-              color={theme.colors.default}
-            />
+            <Icon size={20} name="close" color={theme.colors.default} />
           </IconButtonTouch>
         )}
       </Container>

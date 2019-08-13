@@ -17,7 +17,7 @@ class ChapterSelector extends Component {
     this.props.setTempSelectedChapter(chapter)
   }
 
-  render () {
+  render() {
     const { selectedBook, selectedChapter } = this.props
 
     const array = Array(...Array(selectedBook.Chapitres)).map((_, i) => i)
@@ -30,8 +30,7 @@ class ChapterSelector extends Component {
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
           paddingTop: 10
-        }}
-      >
+        }}>
         {array.map(c => (
           <SelectorItem
             key={c}

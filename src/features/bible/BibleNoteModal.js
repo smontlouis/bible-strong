@@ -58,23 +58,24 @@ class BibleNoteModal extends React.Component {
 
   backHandler
 
-  componentDidMount () {
+  componentDidMount() {
     const { noteVerses, selectedVerses } = this.props
     this.loadPage(noteVerses || selectedVerses)
   }
 
-  checkIfExistingNote (notes, selectedVerses) {
-    let orderedVerses = orderVerses(selectedVerses)
-    let key = Object.keys(orderedVerses).join('/')
+  checkIfExistingNote(notes, selectedVerses) {
+    const orderedVerses = orderVerses(selectedVerses)
+    const key = Object.keys(orderedVerses).join('/')
     if (notes[key]) {
       return {
         key,
         ...notes[key]
       }
-    } else return null
+    }
+    return null
   }
 
-  loadPage = async (selectedVerses) => {
+  loadPage = async selectedVerses => {
     const { notes } = this.props
     const existingNote = this.checkIfExistingNote(notes, selectedVerses)
     const { title: reference } = await getVersesRef(selectedVerses)
@@ -97,11 +98,11 @@ class BibleNoteModal extends React.Component {
     }
   }
 
-  onTitleChange = (text) => {
+  onTitleChange = text => {
     this.setState({ title: text })
   }
 
-  onDescriptionChange = (text) => {
+  onDescriptionChange = text => {
     this.setState({ description: text })
   }
 
@@ -112,11 +113,18 @@ class BibleNoteModal extends React.Component {
     this.setState({ title, description, isEditing: false })
   }
 
-  deleteNote = (noteId) => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?',
-      [ { text: 'Non', onPress: () => null, style: 'cancel' },
-        { text: 'Oui', onPress: () => { this.props.deleteNote(noteId); this.props.onClosed() }, style: 'destructive' }
-      ])
+  deleteNote = noteId => {
+    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
+      { text: 'Non', onPress: () => null, style: 'cancel' },
+      {
+        text: 'Oui',
+        onPress: () => {
+          this.props.deleteNote(noteId)
+          this.props.onClosed()
+        },
+        style: 'destructive'
+      }
+    ])
   }
 
   cancelEditing = () => {
@@ -126,7 +134,7 @@ class BibleNoteModal extends React.Component {
     this.setState({ isEditing: false })
   }
 
-  render () {
+  render() {
     const { isOpen, onClosed } = this.props
     const { title, description, isEditing, id } = this.state
     const submitIsDisabled = !title || !description
@@ -137,91 +145,69 @@ class BibleNoteModal extends React.Component {
         animationInTiming={300}
         avoidKeyboard
         onBackButtonPress={onClosed}
-        animationIn='fadeInDown'
-        animationOut='fadeOutUp'
-      >
+        animationIn="fadeInDown"
+        animationOut="fadeOutUp">
         <Container>
-          <Text fontSize={16} bold color='darkGrey' marginBottom={10}>
+          <Text fontSize={16} bold color="darkGrey" marginBottom={10}>
             Note pour {this.state.reference}
           </Text>
-          {
-            isEditing &&
+          {isEditing && (
             <>
               <TextInput
-                placeholder='Titre'
+                placeholder="Titre"
                 onChangeText={this.onTitleChange}
                 value={title}
                 style={{ marginTop: 20 }}
               />
               <TextArea
-                placeholder='Description'
+                placeholder="Description"
                 multiline
                 onChangeText={this.onDescriptionChange}
                 value={description}
               />
-              <Box
-                row
-                marginTop={'auto'}
-                justifyContent='flex-end'
-              >
+              <Box row marginTop="auto" justifyContent="flex-end">
                 <Button
                   small
                   reverse
                   onPress={this.cancelEditing}
-                  title='Annuler'
+                  title="Annuler"
                   style={{ marginRight: 10 }}
                 />
                 <Button
                   small
                   disabled={submitIsDisabled}
                   onPress={this.onSaveNote}
-                  title='Sauvegarder'
+                  title="Sauvegarder"
                 />
-
               </Box>
             </>
-          }
-          {
-            !isEditing &&
+          )}
+          {!isEditing && (
             <>
-              <Text title fontSize={20} marginBottom={10}>{title}</Text>
+              <Text title fontSize={20} marginBottom={10}>
+                {title}
+              </Text>
               <ScrollView flex={1}>
                 <Paragraph small>{description}</Paragraph>
               </ScrollView>
-              <Box
-                row
-                marginTop={10}
-                justifyContent='flex-end'
-              >
-                {
-                  id &&
+              <Box row marginTop={10} justifyContent="flex-end">
+                {id && (
                   <StyledDeleteIcon onPress={() => this.deleteNote(id)}>
-                    <Icon.Feather
-                      name={'trash-2'}
-                      size={15}
-                      color='white'
-                    />
+                    <Icon.Feather name="trash-2" size={15} color="white" />
                   </StyledDeleteIcon>
-                }
-                {
-                  id &&
+                )}
+                {id && (
                   <Button
                     small
                     onPress={() => this.setState({ isEditing: true })}
                     style={{ marginRight: 10 }}
-                    title='Editer'
+                    title="Editer"
                   />
-                }
-                <Button
-                  small
-                  reverse
-                  onPress={onClosed}
-                  title='Fermer'
-                />
-
+                )}
+                <Button small reverse onPress={onClosed} title="Fermer" />
               </Box>
             </>
-          }
+          )}
         </Container>
       </StylizedModal>
     )

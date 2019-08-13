@@ -74,89 +74,76 @@ const BibleParamsModal = ({
   decreaseSettingsFontSizeScale,
   setSettingsTheme,
   setSettingsNotesDisplay,
-  settings: {
-    alignContent,
-    fontSizeScale,
-    textDisplay,
-    theme,
-    press,
-    notesDisplay
-  }
+  settings: { alignContent, fontSizeScale, textDisplay, theme, press, notesDisplay }
 }) => {
   return (
     <StylizedModal
       isOpen={isOpen}
       onClosed={onClosed}
       animationDuration={200}
-      position='top'
-      entry='top'
+      position="top"
+      entry="top"
       swipeToClose={false}
-      backdropOpacity={0.1}
-    >
+      backdropOpacity={0.1}>
       <Container>
         <HalfContainer border>
           <TouchableIcon
             isSelected={alignContent === 'justify'}
-            name='align-justify'
+            name="align-justify"
             onPress={() => setSettingsAlignContent('justify')}
           />
           <Text bold>{alignContentToString[alignContent]}</Text>
           <TouchableIcon
             isSelected={alignContent === 'left'}
-            name='align-left'
+            name="align-left"
             onPress={() => setSettingsAlignContent('left')}
           />
         </HalfContainer>
         <HalfContainer border>
-          <TouchableIcon
-            name='type'
-            size={15}
-            onPress={() => decreaseSettingsFontSizeScale()}
-          />
+          <TouchableIcon name="type" size={15} onPress={() => decreaseSettingsFontSizeScale()} />
           <Text bold>{`${100 + fontSizeScale * 10}%`}</Text>
-          <TouchableIcon
-            name='type'
-            onPress={() => increaseSettingsFontSizeScale()}
-          />
+          <TouchableIcon name="type" onPress={() => increaseSettingsFontSizeScale()} />
         </HalfContainer>
         <HalfContainer border>
           <TouchableIcon
             isSelected={textDisplay === 'inline'}
-            name='menu'
+            name="menu"
             onPress={() => setSettingsTextDisplay('inline')}
           />
           <Text bold>{textDisplayToString[textDisplay]}</Text>
           <TouchableIcon
             isSelected={textDisplay === 'block'}
-            name='list'
+            name="list"
             onPress={() => setSettingsTextDisplay('block')}
           />
         </HalfContainer>
         <HalfContainer border>
           <TouchableIcon
             isSelected={theme === 'default'}
-            name='sun'
+            name="sun"
             onPress={() => setSettingsTheme('default')}
           />
           <Text bold>{themeToString[theme]}</Text>
           <TouchableIcon
             isSelected={theme === 'dark'}
-            name='moon'
+            name="moon"
             onPress={() => setSettingsTheme('dark')}
           />
         </HalfContainer>
         <HalfContainer border>
           <TouchableIcon
             isSelected={notesDisplay === 'inline'}
-            name='align-left'
+            name="align-left"
             onPress={() => setSettingsNotesDisplay('inline')}
           />
           <Box width={80} center>
-            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>{notesDisplayToString[notesDisplay]}</Text>
+            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>
+              {notesDisplayToString[notesDisplay]}
+            </Text>
           </Box>
           <TouchableIcon
             isSelected={notesDisplay === 'block'}
-            name='file-text'
+            name="file-text"
             onPress={() => setSettingsNotesDisplay('block')}
           />
         </HalfContainer>
@@ -168,7 +155,9 @@ const BibleParamsModal = ({
             size={25}
           />
           <Box width={80} center>
-            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>{pressToString[press]}</Text>
+            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>
+              {pressToString[press]}
+            </Text>
           </Box>
           <TouchableSvgIcon
             icon={IconLongPress}
@@ -177,7 +166,6 @@ const BibleParamsModal = ({
             size={25}
           />
         </HalfContainer>
-
       </Container>
     </StylizedModal>
   )

@@ -87,7 +87,8 @@ class StrongCard extends React.Component {
       })
     }
   }
-  render () {
+
+  render() {
     const {
       isSelectionMode,
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG },
@@ -99,32 +100,24 @@ class StrongCard extends React.Component {
         {/* <Shadow overflow /> */}
         <Box paddingTop={10}>
           <Box>
-            <OpenStrongIcon
-              onPress={this.openStrong}
-            >
+            <OpenStrongIcon onPress={this.openStrong}>
               <Text title fontSize={22} flex>
                 {truncate(capitalize(Mot), 7)}
                 {!!Phonetique && (
-                  <Text title color='darkGrey' fontSize={16}>
+                  <Text title color="darkGrey" fontSize={16}>
                     {' '}
                     {truncate(Phonetique, 7)}
                   </Text>
                 )}
               </Text>
-              {
-                isSelectionMode
-                  ? <IconFeather
-                    name='share'
-                    size={20}
-                  />
-                  : <IconFeather
-                    name='maximize-2'
-                    size={20}
-                  />
-              }
+              {isSelectionMode ? (
+                <IconFeather name="share" size={20} />
+              ) : (
+                <IconFeather name="maximize-2" size={20} />
+              )}
             </OpenStrongIcon>
             {!!Type && (
-              <Text titleItalic color='darkGrey'>
+              <Text titleItalic color="darkGrey">
                 {Type}
               </Text>
             )}
@@ -135,7 +128,7 @@ class StrongCard extends React.Component {
         <ScrollView style={{ marginBottom: 15 }}>
           {!!Definition && (
             <ViewItem>
-              <SubTitle color='darkGrey'>Définition - {Code}</SubTitle>
+              <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
               <StylizedHTMLView
                 htmlStyle={{
                   p: {
@@ -151,7 +144,7 @@ class StrongCard extends React.Component {
           )}
           {!!LSG && (
             <ViewItem>
-              <SubTitle color='darkGrey'>Généralement traduit par</SubTitle>
+              <SubTitle color="darkGrey">Généralement traduit par</SubTitle>
               <SmallParagraph>{LSG}</SmallParagraph>
             </ViewItem>
           )}

@@ -1,6 +1,6 @@
 import produce from 'immer'
-import { clearSelectedVerses } from './bible'
 import deepmerge from 'deepmerge'
+import { clearSelectedVerses } from './bible'
 
 import orderVerses from '~helpers/orderVerses'
 import generateUUID from '~helpers/generateUUID'
@@ -60,16 +60,19 @@ const initialState = {
 }
 
 const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
-  const formattedObj = Object.keys(verses).reduce((obj, verse) => ({
-    ...obj,
-    [verse]: {
-      color,
-      date: Date.now(),
-      ...highlightedVerses[verse] && {
-        tags: highlightedVerses[verse].tags || {}
+  const formattedObj = Object.keys(verses).reduce(
+    (obj, verse) => ({
+      ...obj,
+      [verse]: {
+        color,
+        date: Date.now(),
+        ...(highlightedVerses[verse] && {
+          tags: highlightedVerses[verse].tags || {}
+        })
       }
-    }
-  }), {})
+    }),
+    {}
+  )
 
   return formattedObj
 }
@@ -120,7 +123,7 @@ export default produce((draft, action) => {
       break
     }
     case REMOVE_HIGHLIGHT: {
-      Object.keys(action.selectedVerses).forEach((key) => {
+      Object.keys(action.selectedVerses).forEach(key => {
         delete draft.bible.highlights[key]
         removeEntityInTags(draft, 'highlights', key)
       })
@@ -181,9 +184,11 @@ export default produce((draft, action) => {
       const { item, tagId } = action.payload
 
       if (item.ids) {
-        const hasTag = draft.bible[item.entity][Object.keys(item.ids)[0]].tags && draft.bible[item.entity][Object.keys(item.ids)[0]].tags[tagId]
+        const hasTag =
+          draft.bible[item.entity][Object.keys(item.ids)[0]].tags &&
+          draft.bible[item.entity][Object.keys(item.ids)[0]].tags[tagId]
 
-        Object.keys(item.ids).forEach((id) => {
+        Object.keys(item.ids).forEach(id => {
           // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
           if (hasTag) {
             delete draft.bible.tags[tagId][item.entity][id]
@@ -195,21 +200,30 @@ export default produce((draft, action) => {
             draft.bible.tags[tagId][item.entity][id] = true
 
             if (!draft.bible[item.entity][id].tags) draft.bible[item.entity][id].tags = {}
-            draft.bible[item.entity][id].tags[tagId] = { id: tagId, name: draft.bible.tags[tagId].name }
+            draft.bible[item.entity][id].tags[tagId] = {
+              id: tagId,
+              name: draft.bible.tags[tagId].name
+            }
           }
         })
       } else {
         // DELETE OPERATION
-        if (draft.bible[item.entity][item.id].tags && draft.bible[item.entity][item.id].tags[tagId]) {
+        if (
+          draft.bible[item.entity][item.id].tags &&
+          draft.bible[item.entity][item.id].tags[tagId]
+        ) {
           delete draft.bible.tags[tagId][item.entity][item.id]
           delete draft.bible[item.entity][item.id].tags[tagId]
-        // ADD OPERATION
+          // ADD OPERATION
         } else {
           if (!draft.bible.tags[tagId][item.entity]) draft.bible.tags[tagId][item.entity] = {}
           draft.bible.tags[tagId][item.entity][item.id] = true
 
           if (!draft.bible[item.entity][item.id].tags) draft.bible[item.entity][item.id].tags = {}
-          draft.bible[item.entity][item.id].tags[tagId] = { id: tagId, name: draft.bible.tags[tagId].name }
+          draft.bible[item.entity][item.id].tags[tagId] = {
+            id: tagId,
+            name: draft.bible.tags[tagId].name
+          }
         }
       }
 
@@ -244,7 +258,7 @@ export default produce((draft, action) => {
           photoUrl: draft.photoURL
         }
       } else {
-        throw new Error('Cannot find study: ' + action.payload.id)
+        throw new Error(`Cannot find study: ${action.payload.id}`)
       }
       break
     }
@@ -257,11 +271,11 @@ export default produce((draft, action) => {
 }, initialState)
 
 // NOTES
-export function addNote (note, noteVerses) {
+export function addNote(note, noteVerses) {
   return (dispatch, getState) => {
     let selectedVerses = noteVerses || getState().bible.selectedVerses
     selectedVerses = orderVerses(selectedVerses)
-    let key = Object.keys(selectedVerses).join('/')
+    const key = Object.keys(selectedVerses).join('/')
     dispatch(clearSelectedVerses())
 
     if (!key) return
@@ -269,7 +283,7 @@ export function addNote (note, noteVerses) {
   }
 }
 
-export function deleteNote (noteId) {
+export function deleteNote(noteId) {
   return {
     type: REMOVE_NOTE,
     payload: noteId
@@ -278,19 +292,22 @@ export function deleteNote (noteId) {
 
 // HIGHLIGHTS
 
-export function addHighlight (color) {
+export function addHighlight(color) {
   return (dispatch, getState) => {
-    const selectedVerses = getState().bible.selectedVerses
+    const { selectedVerses } = getState().bible
     const highlightedVerses = getState().user.bible.highlights
 
     dispatch(clearSelectedVerses())
-    return dispatch({ type: ADD_HIGHLIGHT, selectedVerses: addDateAndColorToVerses(selectedVerses, highlightedVerses, color) })
+    return dispatch({
+      type: ADD_HIGHLIGHT,
+      selectedVerses: addDateAndColorToVerses(selectedVerses, highlightedVerses, color)
+    })
   }
 }
 
-export function removeHighlight () {
+export function removeHighlight() {
   return (dispatch, getState) => {
-    const selectedVerses = getState().bible.selectedVerses
+    const { selectedVerses } = getState().bible
 
     dispatch(clearSelectedVerses())
     return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
@@ -299,54 +316,54 @@ export function removeHighlight () {
 
 // SETTINGS
 
-export function setSettingsAlignContent (payload) {
+export function setSettingsAlignContent(payload) {
   return {
     type: SET_SETTINGS_ALIGN_CONTENT,
     payload
   }
 }
 
-export function setSettingsTextDisplay (payload) {
+export function setSettingsTextDisplay(payload) {
   return {
     type: SET_SETTINGS_TEXT_DISPLAY,
     payload
   }
 }
 
-export function setSettingsTheme (payload) {
+export function setSettingsTheme(payload) {
   return {
     type: SET_SETTINGS_THEME,
     payload
   }
 }
 
-export function setSettingsNotesDisplay (payload) {
+export function setSettingsNotesDisplay(payload) {
   return {
     type: SET_SETTINGS_NOTES_DISPLAY,
     payload
   }
 }
 
-export function increaseSettingsFontSizeScale () {
+export function increaseSettingsFontSizeScale() {
   return {
     type: INCREASE_SETTINGS_FONTSIZE_SCALE
   }
 }
 
-export function decreaseSettingsFontSizeScale () {
+export function decreaseSettingsFontSizeScale() {
   return {
     type: DECREASE_SETTINGS_FONTSIZE_SCALE
   }
 }
 
-export function setSettingsPress (payload) {
+export function setSettingsPress(payload) {
   return {
     type: SET_SETTINGS_PRESS,
     payload
   }
 }
 
-export function saveAllLogsAsSeen (payload) {
+export function saveAllLogsAsSeen(payload) {
   return {
     type: SAVE_ALL_LOGS_AS_SEEN,
     payload
@@ -355,21 +372,21 @@ export function saveAllLogsAsSeen (payload) {
 
 // TAGS
 
-export function addTag (payload) {
+export function addTag(payload) {
   return {
     type: ADD_TAG,
     payload
   }
 }
 
-export function removeTag (payload) {
+export function removeTag(payload) {
   return {
     type: REMOVE_TAG,
     payload
   }
 }
 
-export function toggleTagEntity ({ item, tagId }) {
+export function toggleTagEntity({ item, tagId }) {
   return {
     type: TOGGLE_TAG_ENTITY,
     payload: { item, tagId }
@@ -378,28 +395,28 @@ export function toggleTagEntity ({ item, tagId }) {
 
 // STUDIES
 
-export function createStudy (id) {
+export function createStudy(id) {
   return {
     type: CREATE_STUDY,
     payload: id
   }
 }
 
-export function updateStudy ({ id, content, title }) {
+export function updateStudy({ id, content, title }) {
   return {
     type: UPDATE_STUDY,
     payload: { id, content, title }
   }
 }
 
-export function uploadStudy (id) {
+export function uploadStudy(id) {
   return {
     type: UPLOAD_STUDY,
     payload: id
   }
 }
 
-export function deleteStudy (id) {
+export function deleteStudy(id) {
   return {
     type: DELETE_STUDY,
     payload: id
@@ -408,20 +425,20 @@ export function deleteStudy (id) {
 
 // USERS
 
-export function onUserLoginSuccess (profile) {
+export function onUserLoginSuccess(profile) {
   return {
     type: USER_LOGIN_SUCCESS,
     payload: profile
   }
 }
 
-export function onUserLogout () {
+export function onUserLogout() {
   return {
     type: USER_LOGOUT
   }
 }
 
-export function onUserUpdateProfile (profile) {
+export function onUserUpdateProfile(profile) {
   return {
     type: USER_UPDATE_PROFILE,
     payload: profile

@@ -18,7 +18,7 @@ class BookSelector extends Component {
     this.props.setTempSelectedBook(book)
   }
 
-  render () {
+  render() {
     const { selectedBook } = this.props
 
     return (
@@ -29,8 +29,7 @@ class BookSelector extends Component {
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
           paddingTop: 10
-        }}
-      >
+        }}>
         {Object.values(books).map(book => (
           <BookSelectorItem
             isNT={book.Numero >= 40}

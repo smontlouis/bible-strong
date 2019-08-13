@@ -70,11 +70,11 @@ class BibleVerseDetailScreen extends React.Component {
     currentStrongReference: 0
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.loadPage()
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     if (prevProps.verse.Verset !== this.props.verse.Verset) {
       this.loadPage()
     }
@@ -89,14 +89,9 @@ class BibleVerseDetailScreen extends React.Component {
       return
     }
 
-    const { versesInCurrentChapter } = await loadCountVerses(
-      verse.Livre,
-      verse.Chapitre
-    )
+    const { versesInCurrentChapter } = await loadCountVerses(verse.Livre, verse.Chapitre)
     this.versesInCurrentChapter = versesInCurrentChapter
     this.formatVerse(strongVerse)
-
-
   }
 
   formatVerse = async strongVerse => {
@@ -106,18 +101,20 @@ class BibleVerseDetailScreen extends React.Component {
     const { formattedTexte, references } = await verseToStrong(strongVerse)
     this.setState({ formattedTexte }, async () => {
       const strongReferences = await loadStrongReferences(references, Livre)
-      this.setState({
-        isCarouselLoading: false,
-        strongReferences,
-        currentStrongReference: strongReferences[0]
-      }, () => {
-        this._carousel.snapToItem(0, false)
-      })
+      this.setState(
+        {
+          isCarouselLoading: false,
+          strongReferences,
+          currentStrongReference: strongReferences[0]
+        },
+        () => {
+          this._carousel.snapToItem(0, false)
+        }
+      )
     })
   }
 
-  findRefIndex = ref =>
-    this.state.strongReferences.findIndex(r => r.Code === Number(ref))
+  findRefIndex = ref => this.state.strongReferences.findIndex(r => r.Code === Number(ref))
 
   goToCarouselItem = ref => {
     this._carousel.snapToItem(this.findRefIndex(ref))
@@ -142,7 +139,7 @@ class BibleVerseDetailScreen extends React.Component {
     )
   }
 
-  render () {
+  render() {
     const {
       verse,
       verse: { Verset },
@@ -158,12 +155,12 @@ class BibleVerseDetailScreen extends React.Component {
     if (this.state.error) {
       return (
         <Container>
-          <Header noBorder hasBackButton title='Désolé...' />
+          <Header noBorder hasBackButton title="Désolé..." />
           <Empty
             source={require('~assets/images/empty.json')}
             message="Impossible de charger la strong pour ce verset..."
           />
-      </Container>
+        </Container>
       )
     }
 
@@ -173,7 +170,11 @@ class BibleVerseDetailScreen extends React.Component {
 
     return (
       <Container>
-        <Header noBorder hasBackButton title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`} />
+        <Header
+          noBorder
+          hasBackButton
+          title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`}
+        />
         <Box paddingTop={6} flex>
           <StyledVerse>
             <VersetWrapper>
@@ -183,8 +184,7 @@ class BibleVerseDetailScreen extends React.Component {
               value={{
                 currentStrongReference: this.state.currentStrongReference,
                 goToCarouselItem: this.goToCarouselItem
-              }}
-            >
+              }}>
               <VerseText>{this.state.formattedTexte}</VerseText>
             </CarouselProvider>
           </StyledVerse>
@@ -211,7 +211,7 @@ class BibleVerseDetailScreen extends React.Component {
                 }}
                 data={this.state.strongReferences}
                 renderItem={this.renderItem}
-                activeSlideAlignment='start'
+                activeSlideAlignment="start"
                 sliderWidth={sliderWidth}
                 itemWidth={itemWidth}
                 inactiveSlideScale={1}

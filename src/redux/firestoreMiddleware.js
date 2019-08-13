@@ -1,10 +1,8 @@
 import {
   ADD_HIGHLIGHT,
   REMOVE_HIGHLIGHT,
-
   USER_LOGIN_SUCCESS,
   USER_UPDATE_PROFILE,
-
   SET_SETTINGS_ALIGN_CONTENT,
   INCREASE_SETTINGS_FONTSIZE_SCALE,
   DECREASE_SETTINGS_FONTSIZE_SCALE,
@@ -12,15 +10,12 @@ import {
   SET_SETTINGS_THEME,
   SET_SETTINGS_PRESS,
   SET_SETTINGS_NOTES_DISPLAY,
-
   ADD_NOTE,
   EDIT_NOTE,
   REMOVE_NOTE,
-
   ADD_TAG,
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
-
   UPLOAD_STUDY,
   DELETE_STUDY
 } from './modules/user'
@@ -38,15 +33,15 @@ export default store => next => action => {
     return result
   }
 
-  const user = state.user
+  const { user } = state
   const userDoc = firebaseDb.collection('users').doc(user.id)
   const studyCollection = firebaseDb.collection('studies')
 
   switch (action.type) {
     case ADD_HIGHLIGHT:
     case REMOVE_HIGHLIGHT: {
-      const highlights = user.bible.highlights
-      const tags = user.bible.tags
+      const { highlights } = user.bible
+      const { tags } = user.bible
       userDoc.update({
         'bible.highlights': highlights,
         'bible.tags': tags
@@ -59,17 +54,16 @@ export default store => next => action => {
     case SET_SETTINGS_TEXT_DISPLAY:
     case SET_SETTINGS_THEME:
     case SET_SETTINGS_PRESS:
-    case SET_SETTINGS_NOTES_DISPLAY:
-    {
-      const settings = user.bible.settings
+    case SET_SETTINGS_NOTES_DISPLAY: {
+      const { settings } = user.bible
       userDoc.update({ 'bible.settings': settings })
       break
     }
     case ADD_NOTE:
     case EDIT_NOTE:
     case REMOVE_NOTE: {
-      const notes = user.bible.notes
-      const tags = user.bible.tags
+      const { notes } = user.bible
+      const { tags } = user.bible
       userDoc.update({
         'bible.notes': notes,
         'bible.tags': tags
@@ -78,12 +72,12 @@ export default store => next => action => {
     }
     case ADD_TAG:
     case REMOVE_TAG: {
-      const tags = user.bible.tags
+      const { tags } = user.bible
       userDoc.update({ 'bible.tags': tags })
       break
     }
     case TOGGLE_TAG_ENTITY: {
-      const tags = user.bible.tags
+      const { tags } = user.bible
       userDoc.update({ 'bible.tags': tags })
 
       // Maybe refacto this ? For now firestore is free we don't care
@@ -105,7 +99,7 @@ export default store => next => action => {
     case DELETE_STUDY: {
       const studyId = action.payload
       studyCollection.doc(studyId).delete()
-      const tags = user.bible.tags
+      const { tags } = user.bible
       userDoc.update({
         'bible.tags': tags
       })

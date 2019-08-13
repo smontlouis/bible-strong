@@ -108,9 +108,7 @@ export default produce((draft, action) => {
 
       if (currentChapter === 1) {
         const currentBook = draft.selectedBook
-        const currentBookIndex = books.findIndex(
-          b => b.Numero === currentBook.Numero
-        )
+        const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
 
         const prevBook = books[currentBookIndex - 1]
         draft.selectedBook = prevBook
@@ -144,9 +142,7 @@ export default produce((draft, action) => {
       const currentBook = draft.selectedBook
 
       if (currentChapter === currentBook.Chapitres) {
-        const currentBookIndex = books.findIndex(
-          b => b.Numero === currentBook.Numero
-        )
+        const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
 
         const nextBook = books[currentBookIndex + 1]
 
@@ -170,48 +166,48 @@ export default produce((draft, action) => {
   }
 }, initialState)
 
-export function setTempSelectedBook (book) {
+export function setTempSelectedBook(book) {
   return {
     type: SET_TEMP_SELECTED_BOOK,
     book
   }
 }
 
-export function setTempSelectedChapter (chapter) {
+export function setTempSelectedChapter(chapter) {
   return {
     type: SET_TEMP_SELECTED_CHAPTER,
     chapter
   }
 }
 
-export function setTempSelectedVerse (verse) {
+export function setTempSelectedVerse(verse) {
   return {
     type: SET_TEMP_SELECTED_VERSE,
     verse
   }
 }
 
-export function setSelectedVerse (verse) {
+export function setSelectedVerse(verse) {
   return {
     type: SET_SELECTED_VERSE,
     verse
   }
 }
 
-export function validateSelected () {
+export function validateSelected() {
   return {
     type: VALIDATE_SELECTED
   }
 }
 
-export function setAllAndValidateSelected (selected) {
+export function setAllAndValidateSelected(selected) {
   return {
     type: SET_ALL_AND_VALIDATE_SELECTED,
     selected
   }
 }
 
-export function setAllAndValidateSelectedAsync (selected) {
+export function setAllAndValidateSelectedAsync(selected) {
   return dispatch =>
     new Promise(resolve => {
       dispatch(setAllAndValidateSelected(selected))
@@ -219,13 +215,13 @@ export function setAllAndValidateSelectedAsync (selected) {
     })
 }
 
-export function resetTempSelected () {
+export function resetTempSelected() {
   return {
     type: RESET_TEMP_SELECTED
   }
 }
 
-export function setVersion (version) {
+export function setVersion(version) {
   if (!__DEV__) {
     Segment.trackWithProperties('Bible version', {
       version
@@ -237,19 +233,19 @@ export function setVersion (version) {
   }
 }
 
-export function goToPrevChapter () {
+export function goToPrevChapter() {
   return {
     type: GO_TO_PREV_CHAPTER
   }
 }
 
-export function goToNextChapter () {
+export function goToNextChapter() {
   return {
     type: GO_TO_NEXT_CHAPTER
   }
 }
 
-export function goToNextVerse (nbVerses) {
+export function goToNextVerse(nbVerses) {
   return (dispatch, getState) => {
     let { selectedVerse } = getState().bible
 
@@ -261,7 +257,7 @@ export function goToNextVerse (nbVerses) {
   }
 }
 
-export function goToPrevVerse (nbVerses) {
+export function goToPrevVerse(nbVerses) {
   return (dispatch, getState) => {
     let { selectedVerse } = getState().bible
 
@@ -273,21 +269,21 @@ export function goToPrevVerse (nbVerses) {
   }
 }
 
-export function addSelectedVerse (id) {
+export function addSelectedVerse(id) {
   return {
     type: ADD_HIGHLIGHTED_VERSE,
     id
   }
 }
 
-export function removeSelectedVerse (id) {
+export function removeSelectedVerse(id) {
   return {
     type: REMOVE_HIGHLIGHTED_VERSE,
     id
   }
 }
 
-export function clearSelectedVerses () {
+export function clearSelectedVerses() {
   return {
     type: CLEAR_HIGHLIGHTED_VERSES
   }

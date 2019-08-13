@@ -9,9 +9,8 @@ import migrations from './migrations'
 
 import reducer from '~redux/modules/reducer'
 
-export default function configureStore () {
-  const composeEnhancers =
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+export default function configureStore() {
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
   const persistConfig = {
     key: 'root',

@@ -13,11 +13,7 @@ const TouchableOpacity = styled.TouchableOpacity(() => ({
 }))
 
 const Text = styled.Text(({ isSelected, isNT, theme }) => ({
-  color: isSelected
-    ? theme.colors.primary
-    : isNT
-      ? theme.colors.quart
-      : theme.colors.default,
+  color: isSelected ? theme.colors.primary : isNT ? theme.colors.quart : theme.colors.default,
   fontWeight: isSelected ? 'bold' : 'normal',
   fontSize: 16
 }))

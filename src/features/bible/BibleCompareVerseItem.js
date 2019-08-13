@@ -14,7 +14,7 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 class CompareVerseItem extends React.Component {
-  async componentDidMount () {
+  async componentDidMount() {
     const { selectedVerses, versionId } = this.props
     const versionNeedsDownload = await getIfVersionNeedsDownload(versionId)
 
@@ -29,21 +29,23 @@ class CompareVerseItem extends React.Component {
     versionNeedsDownload: true
   }
 
-  render () {
+  render() {
     const { content, versionNeedsDownload } = this.state
     const { versionId, name } = this.props
 
-    if (!content && versionNeedsDownload) { return null }
+    if (!content && versionNeedsDownload) {
+      return null
+    }
 
     return (
       <Container>
         <Box row>
-          <Text color='darkGrey' bold fontSize={14}>
+          <Text color="darkGrey" bold fontSize={14}>
             {versionId} - {name}
           </Text>
         </Box>
         <Paragraph scale={-1} scaleLineHeight={-2}>
-          { content }
+          {content}
         </Paragraph>
       </Container>
     )

@@ -8,30 +8,29 @@ import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import { versions } from '~helpers/bibleVersions'
 
 class BibleCompareVerses extends Component {
-  async componentDidMount () {
+  async componentDidMount() {
     const { selectedVerses } = this.props.navigation.state.params || {}
     const { title } = await getVersesRef(selectedVerses)
     this.setState({ title })
   }
 
   state = { title: '' }
-  render () {
+
+  render() {
     const { selectedVerses } = this.props.navigation.state.params || {}
     const { title } = this.state
     return (
       <Container>
         <Header hasBackButton noBorder title={title ? `Comparer ${title}` : 'Chargement...'} />
         <ScrollView>
-          {
-            Object.entries(versions).map(([versionId, obj]) => (
-              <BibleCompareVerseItem
-                key={versionId}
-                versionId={versionId}
-                name={obj.name}
-                selectedVerses={selectedVerses}
-              />
-            ))
-          }
+          {Object.entries(versions).map(([versionId, obj]) => (
+            <BibleCompareVerseItem
+              key={versionId}
+              versionId={versionId}
+              name={obj.name}
+              selectedVerses={selectedVerses}
+            />
+          ))}
         </ScrollView>
       </Container>
     )

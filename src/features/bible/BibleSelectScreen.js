@@ -10,16 +10,16 @@ import Header from '~common/Header'
 class BibleSelect extends Component {
   static router = BibleSelectTabNavigator.router
 
-  componentDidMount () {
+  componentDidMount() {
     const { resetTempSelected } = this.props
     resetTempSelected()
   }
 
-  render () {
+  render() {
     const { navigation } = this.props
     return (
       <Container>
-        <Header hasBackButton noBorder title='Références' />
+        <Header hasBackButton noBorder title="Références" />
         <BibleSelectTabNavigator
           screenProps={{ mainNavigation: navigation }}
           navigation={navigation}

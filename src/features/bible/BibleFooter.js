@@ -31,34 +31,17 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.tertiary
 }))
 
-const BibleFooter = ({
-  book,
-  chapter,
-  goToNextChapter,
-  goToPrevChapter,
-  disabled
-}) => (
+const BibleFooter = ({ book, chapter, goToNextChapter, goToPrevChapter, disabled }) => (
   <Container>
     {!(book.Numero === 1 && chapter === 1) && (
-      <IconButton
-        disabled={disabled}
-        activeOpacity={0.5}
-        onPress={goToPrevChapter}
-      >
-        <StyledIcon name={'arrow-left-circle'} size={30} />
+      <IconButton disabled={disabled} activeOpacity={0.5} onPress={goToPrevChapter}>
+        <StyledIcon name="arrow-left-circle" size={30} />
       </IconButton>
     )}
     <Box flex />
     {!(book.Numero === 66 && chapter === 22) && (
-      <IconButton
-        disabled={disabled}
-        activeOpacity={0.5}
-        onPress={goToNextChapter}
-      >
-        <StyledIcon
-          name={'arrow-right-circle'}
-          size={30}
-        />
+      <IconButton disabled={disabled} activeOpacity={0.5} onPress={goToNextChapter}>
+        <StyledIcon name="arrow-right-circle" size={30} />
       </IconButton>
     )}
   </Container>

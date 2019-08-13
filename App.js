@@ -21,9 +21,7 @@ YellowBox.ignoreWarnings(['Require cycle:', 'LottieAnimation'])
 //   Sentry.enableInExpoDevelopment = true
 // }
 
-Sentry.config(
-  'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911'
-).install()
+Sentry.config('https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911').install()
 export const { store, persistor } = configureStore()
 
 class App extends React.Component {
@@ -33,9 +31,7 @@ class App extends React.Component {
 
   loadResourcesAsync = async () => {
     return Promise.all([
-      Asset.loadAsync([
-        require('./src/features/bible/bibleWebView/dist/index.html')
-      ]),
+      Asset.loadAsync([require('./src/features/bible/bibleWebView/dist/index.html')]),
       Font.loadAsync({
         ...Icon.Feather.font,
         'literata-book': require('~assets/fonts/LiterataBook.otf'),
@@ -70,7 +66,7 @@ class App extends React.Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     if (!__DEV__) {
       Segment.initialize(segmentConfig)
       Segment.screen('Bible')
@@ -78,7 +74,7 @@ class App extends React.Component {
     this.updateApp()
   }
 
-  render () {
+  render() {
     if (!this.state.isLoadingComplete) {
       return (
         <AppLoading

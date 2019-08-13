@@ -1,11 +1,11 @@
 import * as FileSystem from 'expo-file-system'
 
-export const getIfVersionNeedsDownload = async (versionId) => {
+export const getIfVersionNeedsDownload = async versionId => {
   if (versionId === 'LSG') {
     return false
   }
   const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
-  let file = await FileSystem.getInfoAsync(path)
+  const file = await FileSystem.getInfoAsync(path)
 
   // if (__DEV__) {
   //   if (file.exists) {

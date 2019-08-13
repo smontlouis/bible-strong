@@ -24,21 +24,17 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
 class ConcordanceVerse extends React.Component {
   state = { formattedTexte: '' }
 
-  componentDidMount () {
+  componentDidMount() {
     const { verse, concordanceFor } = this.props
     this.formatVerse(verse, concordanceFor)
   }
 
   formatVerse = async (strongVerse, concordanceFor) => {
-    const { formattedTexte } = await verseToStrong(
-      strongVerse,
-      concordanceFor,
-      true
-    )
+    const { formattedTexte } = await verseToStrong(strongVerse, concordanceFor, true)
     this.setState({ formattedTexte })
   }
 
-  render () {
+  render() {
     const { verse, navigation } = this.props
 
     if (!this.state.formattedTexte) {
@@ -54,8 +50,7 @@ class ConcordanceVerse extends React.Component {
             chapter: verse.Chapitre,
             verse: verse.Verset
           })
-        }
-      >
+        }>
         <Text title fontSize={16} marginBottom={5}>
           {books[verse.Livre - 1].Nom} {verse.Chapitre}:{verse.Verset}
         </Text>

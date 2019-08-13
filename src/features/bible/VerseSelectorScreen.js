@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
-import waitForDB from '~common/WaitForDB'
 import { compose } from 'recompose'
+import waitForDB from '~common/WaitForDB'
 
 import { initDB } from '~helpers/database'
 import loadCountVerses from '~helpers/loadCountVerses'
@@ -18,12 +18,12 @@ class VerseSelector extends Component {
     versesInCurrentChapter: undefined
   }
 
-  componentDidMount () {
+  componentDidMount() {
     initDB() // Fix weird bug on iOS
     this.loadVerses()
   }
 
-  componentDidUpdate (oldProps) {
+  componentDidUpdate(oldProps) {
     if (
       this.props.selectedChapter !== oldProps.selectedChapter ||
       this.props.selectedBook.Numero !== oldProps.selectedBook.Numero
@@ -34,10 +34,7 @@ class VerseSelector extends Component {
 
   loadVerses = async () => {
     const { selectedBook, selectedChapter } = this.props
-    const { versesInCurrentChapter } = await loadCountVerses(
-      selectedBook.Numero,
-      selectedChapter
-    )
+    const { versesInCurrentChapter } = await loadCountVerses(selectedBook.Numero, selectedChapter)
     this.setState({ versesInCurrentChapter })
   }
 
@@ -47,7 +44,7 @@ class VerseSelector extends Component {
     setTimeout(() => this.props.screenProps.mainNavigation.goBack(), 0)
   }
 
-  render () {
+  render() {
     const { versesInCurrentChapter } = this.state
     const { selectedVerse } = this.props
 
@@ -65,8 +62,7 @@ class VerseSelector extends Component {
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
           paddingTop: 10
-        }}
-      >
+        }}>
         {array.map(v => (
           <SelectorItem
             key={v}

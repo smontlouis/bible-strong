@@ -7,7 +7,7 @@ const PericopeNEG79 = require('../assets/bible_versions/bible-neg79-pericope.jso
 const PericopeNVS78P = require('../assets/bible_versions/bible-nvs78p-pericope.json')
 const PericopeS21 = require('../assets/bible_versions/bible-s21-pericope.json')
 
-const getBiblePericope = (version) => {
+const getBiblePericope = version => {
   switch (version) {
     case 'BDS': {
       return PericopeBDS
