@@ -191,7 +191,7 @@ class Verse extends Component {
   };
 
   render () {
-    const { verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll, notesText } = this.props
+    const { verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll, notesText, isSelectionMode } = this.props
     const { isFocused } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
@@ -212,7 +212,7 @@ class Verse extends Component {
             {' '}
           </NumberText>
           {
-            (notesCount && !inlineNotedVerses) &&
+            (notesCount && !inlineNotedVerses) && !isSelectionMode &&
             <NotesCount
               settings={settings}
               onClick={this.navigateToVerseNotes}
@@ -230,7 +230,7 @@ class Verse extends Component {
           </VerseText>
         </ContainerText>
         {
-          (notesText && inlineNotedVerses) &&
+          (notesText && inlineNotedVerses) && !isSelectionMode &&
             <NotesText
               settings={settings}
               onClick={this.navigateToNote}

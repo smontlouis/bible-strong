@@ -13,16 +13,18 @@ const sortVersesByDate = (p) => (
       const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
 
       if (!arr.find(a => a.date === p[verse].date)) {
-        arr.push({ date: p[verse].date, color: p[verse].color, verseIds: [] })
+        arr.push({ date: p[verse].date, color: p[verse].color, verseIds: [], tags: {} })
       }
 
       const dateInArray = arr.find(a => a.date === p[verse].date)
       if (dateInArray) {
         dateInArray.verseIds.push(formattedVerse)
         dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
+        dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
       }
 
       arr.sort((a, b) => Number(b.date) - Number(a.date))
+
       return arr
     }, [])
 )
@@ -35,8 +37,8 @@ const VersesList = ({ verseIds }) => {
       <FlatList
         data={sortedVersesByDate}
         keyExtractor={(item, index) => item.date.toString()}
-        renderItem={({ item: { color, date, verseIds } }) => (
-          <VerseComponent {...{ color, date, verseIds }} />
+        renderItem={({ item: { color, date, verseIds, tags } }) => (
+          <VerseComponent {...{ color, date, verseIds, tags }} />
         )}
       />
     </Container>

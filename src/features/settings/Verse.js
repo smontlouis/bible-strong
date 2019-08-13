@@ -5,7 +5,7 @@ import frLocale from 'date-fns/locale/fr'
 import styled from '@emotion/native'
 import { withNavigation } from 'react-navigation'
 
-import Loading from '~common/Loading'
+import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import truncate from '~helpers/truncate'
@@ -33,11 +33,11 @@ const Container = styled(Box)(({ theme }) => ({
   borderBottomWidth: 1
 }))
 
-const VerseComponent = ({ color, date, verseIds, navigation }) => {
+const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
   const verses = useBibleVerses(verseIds)
 
   if (!verses.length) {
-    return <Loading />
+    return null
   }
 
   const { title, content } = formatVerseContent(verses)
@@ -58,7 +58,8 @@ const VerseComponent = ({ color, date, verseIds, navigation }) => {
           </Box>
           <DateText style={{ fontSize: 10 }}>Il y a {formattedDate}</DateText>
         </Box>
-        <Text medium>{truncate(content, 200)}</Text>
+        <Text medium marginBottom={15}>{truncate(content, 200)}</Text>
+        <TagList tags={tags} />
       </Container>
     </TouchableOpacity>
   )

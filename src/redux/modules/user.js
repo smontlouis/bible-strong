@@ -226,6 +226,13 @@ export default produce((draft, action) => {
         study.modified_at = Date.now()
         if (action.payload.content) study.content = action.payload.content
         if (action.payload.title) study.title = action.payload.title
+
+        // Just in case
+        study.user = {
+          id: draft.id,
+          displayName: draft.displayName,
+          photoUrl: draft.photoURL
+        }
       } else {
         throw new Error('Cannot find study: ' + action.payload.id)
       }

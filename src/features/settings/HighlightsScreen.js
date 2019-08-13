@@ -19,7 +19,7 @@ const HighlightsScreen = () => {
   return (
     <Container>
       <TagsHeader
-        title='Subrillances'
+        title='Surbrillances'
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
         selectedChip={selectedChip}

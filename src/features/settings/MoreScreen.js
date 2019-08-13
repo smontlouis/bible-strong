@@ -10,7 +10,6 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import useLogin from '~helpers/useLogin'
 import FireAuth from '~helpers/FireAuth'
-import SnackBar from '~common/SnackBar'
 
 import app from '../../../app.json'
 

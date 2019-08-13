@@ -8,6 +8,7 @@ import { withTheme } from 'emotion-theming'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
+import TagList from '~common/TagList'
 
 const StudyLink = styled(Link)(({ theme }) => ({
   padding: 20,
@@ -37,6 +38,7 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
         <Text bold scale={-2}>
           {study.title}
         </Text>
+        <TagList tags={study.tags} />
       </Box>
     </StudyLink>
   )

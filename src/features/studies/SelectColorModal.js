@@ -13,15 +13,14 @@ import Text from '~common/ui/Text'
 
 import Color from 'color'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const StylizedModal = styled(Modal)({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'flex-end',
+  margin: 0
 })
 
 const Container = styled.View(({ theme }) => ({
-  width: 290,
   display: 'flex',
   backgroundColor: theme.colors.reverse,
   borderRadius: 3,
@@ -30,7 +29,8 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  padding: 15
+  padding: 15,
+  paddingBottom: getBottomSpace() || 15
 }))
 
 const colors = ['#cc0000', '#f1c232', '#6aa84f', '#45818e', '#3d85c6', '#674ea7', '#a64d79']
@@ -53,20 +53,17 @@ const SelectColorModal = ({
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={!!isOpen}
-      animationIn='fadeInDown'
-      animationOut='fadeOutUp'
-      animationInTiming={300}
       avoidKeyboard
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
     >
       <Container>
-        <TouchableOpacity onPress={() => setColor(false)}>
-          <Box row marginBottom={15} padding={5} alignItems='center'>
+        <Box row marginBottom={15} padding={5} alignItems='center'>
+          <TouchableOpacity onPress={() => setColor(false)}>
             <Icon.Feather name='x-circle' size={23} style={{ marginRight: 10 }} />
-            <Text fontSize={18}>Aucune</Text>
-          </Box>
-        </TouchableOpacity>
+          </TouchableOpacity>
+          <Text fontSize={18}>Aucune</Text>
+        </Box>
         {
           lighten.map((l) => (
             <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>

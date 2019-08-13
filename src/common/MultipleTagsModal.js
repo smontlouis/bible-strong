@@ -77,7 +77,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
     >
       <Container>
         <Box padding={20} paddingBottom={0}>
-          <Text bold>{item.entity !== 'highlights' ? `Tags pour "${currentItems[0].title}"` : highlightTitle }</Text>
+          <Text bold>{item.entity !== 'highlights' ? `Tags pour "${currentItems[0].title || ''}"` : highlightTitle }</Text>
         </Box>
         <Box flex>
           <ScrollView style={{ padding: 20, flex: 1 }}>

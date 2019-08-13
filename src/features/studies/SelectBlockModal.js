@@ -4,16 +4,15 @@ import Modal from 'react-native-modal'
 import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const StylizedModal = styled(Modal)({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'flex-end',
+  margin: 0
 })
 
 const Container = styled.View(({ theme }) => ({
-  width: 200,
-  height: 230,
+  height: 230 + getBottomSpace(),
   display: 'flex',
   backgroundColor: theme.colors.reverse,
   borderRadius: 3,
@@ -21,7 +20,8 @@ const Container = styled.View(({ theme }) => ({
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
-  elevation: 2
+  elevation: 2,
+  paddingBottom: getBottomSpace()
 }))
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
@@ -47,9 +47,6 @@ const SelectBlockModal = ({
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={isOpen}
-      animationIn='fadeInDown'
-      animationOut='fadeOutUp'
-      animationInTiming={300}
       avoidKeyboard
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}

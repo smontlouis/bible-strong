@@ -46,6 +46,7 @@ export default store => next => action => {
     case ADD_HIGHLIGHT:
     case REMOVE_HIGHLIGHT: {
       const highlights = user.bible.highlights
+      console.log(highlights)
       userDoc.update({ 'bible.highlights': highlights })
       break
     }
