@@ -47,34 +47,28 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
       backdropOpacity={0.1}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard
-    >
-
+      avoidKeyboard>
       <AnimatedCircularProgress
         ref={progressRef}
         size={60}
         width={5}
         fill={100}
-        tintColor='#46DF4C'
+        tintColor="#46DF4C"
         onAnimationComplete={onClosed}
-        lineCap='round'
+        lineCap="round"
       >
-        {
-          () => (
-            <WrapperIcon
-              onPress={() => {
-                onClosed()
-                setTimeout(() => {
-                  setMultipleTagsItem(item)
-                }, 500)
-              }}
-            >
-              <StyledIcon size={20} name='tags' />
-            </WrapperIcon>
-          )
-        }
+        {() => (
+          <WrapperIcon
+            onPress={() => {
+              onClosed()
+              setTimeout(() => {
+                setMultipleTagsItem(item)
+              }, 500)
+            }}>
+            <StyledIcon size={20} name="tags" />
+          </WrapperIcon>
+        )}
       </AnimatedCircularProgress>
-
     </StylizedModal>
   )
 }

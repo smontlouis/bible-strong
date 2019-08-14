@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { FlatList } from 'react-native'
 import compose from 'recompose/compose'
 
+import useLogin from '~helpers/useLogin'
 import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -18,7 +19,7 @@ import StudyTitlePrompt from './StudyTitlePrompt'
 import StudyItem from './StudyItem'
 
 const StudiesScreen = () => {
-  const isLogged = useSelector(state => !!state.user.id)
+  const { isLogged } = useLogin()
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isStudySettingsOpen, setStudySettings] = React.useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
@@ -29,13 +30,15 @@ const StudiesScreen = () => {
 
   const [multipleTagsItem, setMultipleTagsItem] = React.useState(false)
 
-  const filteredStudies = studies.filter(s => (selectedChip) ? s.tags && s.tags[selectedChip.id] : true)
+  const filteredStudies = studies.filter(s =>
+    selectedChip ? s.tags && s.tags[selectedChip.id] : true
+  )
   filteredStudies.sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
 
   return (
     <Container>
       <TagsHeader
-        title='Études'
+        title="Études"
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
         selectedChip={selectedChip}
@@ -43,7 +46,7 @@ const StudiesScreen = () => {
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={() => setTagsIsOpen(false)}
-        onSelected={(chip) => setSelectedChip(chip)}
+        onSelected={chip => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <MultipleTagsModal
@@ -52,28 +55,26 @@ const StudiesScreen = () => {
         onClosed={() => setMultipleTagsItem(false)}
       />
       <Box flex>
-        {
-          filteredStudies.length
-            ? <FlatList data={filteredStudies}
-              contentContainerStyle={{ paddingBottom: 100 }}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <StudyItem
-                  key={item.id}
-                  study={item}
-                  setStudySettings={setStudySettings}
-                />
-              )}
-            />
-            : <Empty
-              source={require('~assets/images/empty.json')}
-              message='Aucune étude...'
-            />
-        }
-        {
-          isLogged &&
-          <FloatingButton label='Nouvelle étude' icon='edit-2' route='EditStudy' params={{ canEdit: true }} />
-        }
+        {filteredStudies.length ? (
+          <FlatList
+            data={filteredStudies}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <StudyItem key={item.id} study={item} setStudySettings={setStudySettings} />
+            )}
+          />
+        ) : (
+          <Empty source={require('~assets/images/empty.json')} message="Aucune étude..." />
+        )}
+        {isLogged && (
+          <FloatingButton
+            label="Nouvelle étude"
+            icon="edit-2"
+            route="EditStudy"
+            params={{ canEdit: true }}
+          />
+        )}
       </Box>
       <StudySettingsModal
         isOpen={isStudySettingsOpen}
@@ -93,6 +94,4 @@ const StudiesScreen = () => {
   )
 }
 
-export default compose(
-  withLoginModal
-)(StudiesScreen)
+export default compose(withLoginModal)(StudiesScreen)

@@ -6,9 +6,14 @@
     "jsx-a11y",
     "import",
     "eslint-plugin-prettier",
-    "eslint-plugin-react"
+    "eslint-plugin-react",
+    "react-hooks"
   ],
   "rules": {
+    "react/jsx-props-no-spreading": "off",
+    "global-require": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     "class-methods-use-this": "off",
     "import/no-unresolved": "off",
     "react/prop-types": "off",

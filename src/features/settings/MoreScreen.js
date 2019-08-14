@@ -9,7 +9,6 @@ import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import useLogin from '~helpers/useLogin'
-import FireAuth from '~helpers/FireAuth'
 
 import app from '../../../app.json'
 
@@ -35,12 +34,12 @@ const shareMessage = () => {
 }
 
 const MoreScreen = () => {
-  const isLogged = useLogin()
+  const { isLogged, logout } = useLogin()
 
   const promptLogout = () => {
     Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?', [
       { text: 'Non', onPress: () => null, style: 'cancel' },
-      { text: 'Oui', onPress: () => FireAuth.logout(), style: 'destructive' }
+      { text: 'Oui', onPress: () => logout(), style: 'destructive' }
     ])
   }
 

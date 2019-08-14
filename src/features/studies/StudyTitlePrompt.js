@@ -32,11 +32,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   color: isDisabled ? theme.colors.border : theme.colors.primary
 }))
 
-const StudyTitlePrompt = ({
-  titlePrompt,
-  onClosed,
-  onSave
-}) => {
+const StudyTitlePrompt = ({ titlePrompt, onClosed, onSave }) => {
   const { id, title } = titlePrompt
   const [value, setValue] = useState('')
 
@@ -56,26 +52,21 @@ const StudyTitlePrompt = ({
       isVisible={!!titlePrompt}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-    >
+      onBackdropPress={onClosed}>
       <Container>
         <Box row center>
           <TextInput
             placeholder="Nom de l'étude"
             onChangeText={setValue}
             onSubmitEditing={onSaveTitle}
-            returnKeyType='send'
+            returnKeyType="send"
             style={{ flex: 1 }}
             value={value}
             autoFocus
             selectTextOnFocus
           />
           <TouchableOpacity onPress={onSaveTitle}>
-            <StyledIcon
-              isDisabled={!value}
-              name={'check'}
-              size={30}
-            />
+            <StyledIcon isDisabled={!value} name="check" size={30} />
           </TouchableOpacity>
         </Box>
       </Container>

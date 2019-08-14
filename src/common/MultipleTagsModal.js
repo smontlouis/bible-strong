@@ -44,13 +44,23 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
 
   currentItems = useSelector(state => {
     if (item.ids) {
-      return Object.keys(item.ids).map(id => ({ id, ...state.user.bible[item.entity][id] }))
+      return Object.keys(item.ids).map(id => ({
+        id,
+        ...state.user.bible[item.entity][id]
+      }))
     }
 
-    return [state.user.bible[item.entity] ? { id: item.id, ...state.user.bible[item.entity][item.id] } : {}]
+    return [
+      state.user.bible[item.entity]
+        ? { id: item.id, ...state.user.bible[item.entity][item.id] }
+        : {}
+    ]
   })
 
-  const selectedChips = currentItems.reduce((acc, curr) => ({ ...acc, ...curr.tags && curr.tags }), {})
+  const selectedChips = currentItems.reduce(
+    (acc, curr) => ({ ...acc, ...(curr.tags && curr.tags) }),
+    {}
+  )
 
   const saveTag = () => {
     if (!newTag.trim()) {
@@ -62,8 +72,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
 
   useEffect(() => {
     if (item.ids) {
-      getVersesRef(item.ids)
-        .then(({ title }) => setHighlightTitle(title))
+      getVersesRef(item.ids).then(({ title }) => setHighlightTitle(title))
     }
   }, [item])
 
@@ -73,43 +82,40 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
       isVisible={!!item}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard
-    >
+      avoidKeyboard>
       <Container>
         <Box padding={20} paddingBottom={0}>
-          <Text bold>{item.entity !== 'highlights' ? `Tags pour "${currentItems[0].title || ''}"` : highlightTitle }</Text>
+          <Text bold>
+            {item.entity !== 'highlights'
+              ? `Tags pour "${currentItems[0].title || ''}"`
+              : highlightTitle}
+          </Text>
         </Box>
         <Box flex>
           <ScrollView style={{ padding: 20, flex: 1 }}>
             <Box row wrap>
-              {
-                tags.map(chip =>
-                  <Chip
-                    key={chip.id}
-                    label={chip.name}
-                    isSelected={selectedChips && selectedChips[chip.id]}
-                    onPress={() => dispatch(toggleTagEntity({ item, tagId: chip.id }))}
-                  />
-                )
-              }
+              {tags.map(chip => (
+                <Chip
+                  key={chip.id}
+                  label={chip.name}
+                  isSelected={selectedChips && selectedChips[chip.id]}
+                  onPress={() => dispatch(toggleTagEntity({ item, tagId: chip.id }))}
+                />
+              ))}
             </Box>
           </ScrollView>
         </Box>
         <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
           <TextInput
-            placeholder='Créer un nouveau tag'
+            placeholder="Créer un nouveau tag"
             onChangeText={setNewTag}
             onSubmitEditing={saveTag}
-            returnKeyType='send'
+            returnKeyType="send"
             style={{ flex: 1 }}
             value={newTag}
           />
           <TouchableOpacity onPress={saveTag}>
-            <StyledIcon
-              isDisabled={!newTag}
-              name={'check'}
-              size={30}
-            />
+            <StyledIcon isDisabled={!newTag} name="check" size={30} />
           </TouchableOpacity>
         </Box>
       </Container>
