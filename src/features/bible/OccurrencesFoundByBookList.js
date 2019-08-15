@@ -53,11 +53,16 @@ const OccurrencesFoundByBookList = ({
           keyExtractor={item => `book${item.Livre}`}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('ConcordanceByBook', {
-                  book: item.Livre,
-                  strongReference
+              onPress={() => {
+                navigation.navigate({
+                  routeName: 'ConcordanceByBook',
+                  params: {
+                    book: item.Livre,
+                    strongReference
+                  },
+                  key: `concordance-${strongReference.Code}-${item.Livre}`
                 })
+              }
               }>
               <ListItem row alignItems="center" height={50}>
                 <Text fontSize={16}>{books[item.Livre - 1].Nom}</Text>

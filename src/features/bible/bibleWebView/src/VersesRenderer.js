@@ -15,11 +15,11 @@ const Container = styled('div')(({ settings: { alignContent, theme }, isReadOnly
   // margin: '0 auto',
   textAlign: alignContent,
   background: getColors[theme].reverse,
-  color: getColors[theme].default,
-  pointerEvents: isReadOnly ? 'none' : 'auto'
+  color: getColors[theme].default
+  // pointerEvents: isReadOnly ? 'none' : 'auto'
 }))
 
-const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
+const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
 
 const headingStyle = {
   fontFamily: 'LiterataBook',
@@ -66,7 +66,7 @@ class VersesRenderer extends Component {
     isSelectionMode: ''
   }
 
-  componentDidMount () {
+  componentDidMount() {
     dispatch({
       type: CONSOLE_LOG,
       payload: 'I did mount'
@@ -89,7 +89,7 @@ class VersesRenderer extends Component {
     this.receiveDataFromApp()
   }
 
-  componentDidUpdate (prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if (prevState && prevState.chapter !== this.state.chapter && this.state.verseToScroll === 1) {
       window.scrollTo(0, 0)
     }
@@ -108,16 +108,17 @@ class VersesRenderer extends Component {
   }
 
   getNotedVersesCount = (verses, notedVerses) => {
-    let newNotedVerses = {}
+    const newNotedVerses = {}
     if (verses.length) {
       const { Livre, Chapitre } = verses[0]
       Object.keys(notedVerses).map(key => {
-        let firstVerseRef = key.split('/')[0]
-        let bookNumber = parseInt(firstVerseRef.split('-')[0])
-        let chapterNumber = parseInt(firstVerseRef.split('-')[1])
-        let verseNumber = firstVerseRef.split('-')[2]
+        const firstVerseRef = key.split('/')[0]
+        const bookNumber = parseInt(firstVerseRef.split('-')[0])
+        const chapterNumber = parseInt(firstVerseRef.split('-')[1])
+        const verseNumber = firstVerseRef.split('-')[2]
         if (bookNumber === Livre && chapterNumber === Chapitre) {
-          if (newNotedVerses[verseNumber]) newNotedVerses[verseNumber] = newNotedVerses[verseNumber] + 1
+          if (newNotedVerses[verseNumber])
+            newNotedVerses[verseNumber] = newNotedVerses[verseNumber] + 1
           else newNotedVerses[verseNumber] = 1
         }
       })
@@ -126,7 +127,7 @@ class VersesRenderer extends Component {
   }
 
   getNotedVersesText = (verses, notedVerses) => {
-    let newNotedVerses = {}
+    const newNotedVerses = {}
     if (verses.length) {
       const { Livre, Chapitre } = verses[0]
       Object.entries(notedVerses).map(([key, value]) => {
@@ -139,8 +140,13 @@ class VersesRenderer extends Component {
 
         if (bookNumber === Livre && chapterNumber === Chapitre) {
           const verseToPush = {
-            key: key,
-            verses: (versesInArray.length > 1) ? `${versesInArray[0].split('-')[2]}-${versesInArray[versesInArray.length - 1].split('-')[2]}` : versesInArray[0].split('-')[2],
+            key,
+            verses:
+              versesInArray.length > 1
+                ? `${versesInArray[0].split('-')[2]}-${
+                    versesInArray[versesInArray.length - 1].split('-')[2]
+                  }`
+                : versesInArray[0].split('-')[2],
             ...value
           }
           if (newNotedVerses[verseNumber]) {
@@ -156,7 +162,7 @@ class VersesRenderer extends Component {
 
   receiveDataFromApp = () => {
     const self = this
-    document.addEventListener('messages', (event) => {
+    document.addEventListener('messages', event => {
       const response = event.detail
 
       switch (response.type) {
@@ -196,54 +202,47 @@ class VersesRenderer extends Component {
     })
   }
 
-  render () {
+  render() {
     if (!this.state.verses.length) {
       return null
     }
 
     return (
       <Container settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
-        {
-          this.state.verses.map((verse) => {
-            const { Livre, Chapitre, Verset } = verse
-            const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
-            const isSelectedMode = !!Object.keys(this.state.selectedVerses).length
-            const isHighlighted = !!this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
-            const highlightedColor = isHighlighted && this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
-            const notesCount = this.state.notedVersesCount[`${Verset}`]
-            const notesText = this.state.notedVersesText[`${Verset}`]
-            const isVerseToScroll = this.state.verseToScroll == Verset
+        {this.state.verses.map(verse => {
+          const { Livre, Chapitre, Verset } = verse
+          const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
+          const isSelectedMode = !!Object.keys(this.state.selectedVerses).length
+          const isHighlighted = !!this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+          const highlightedColor =
+            isHighlighted && this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
+          const notesCount = this.state.notedVersesCount[`${Verset}`]
+          const notesText = this.state.notedVersesText[`${Verset}`]
+          const isVerseToScroll = this.state.verseToScroll == Verset
 
-            const { h1, h2, h3 } = getPericopeVerse(this.state.pericopeChapter, Verset)
+          const { h1, h2, h3 } = getPericopeVerse(this.state.pericopeChapter, Verset)
 
-            return (
-              <span key={`${Livre}-${Chapitre}-${Verset}`}>
-                {
-                  h1 && <H1 settings={this.state.settings}>{h1}</H1>
-                }
-                {
-                  h2 && <H2 settings={this.state.settings}>{h2}</H2>
-                }
-                {
-                  h3 && <H3 settings={this.state.settings}>{h3}</H3>
-                }
-                <ErrorBoundary>
-                  <Verse
-                    verse={verse}
-                    settings={this.state.settings}
-                    isSelected={isSelected}
-                    isSelectedMode={isSelectedMode}
-                    isSelectionMode={this.state.isSelectionMode}
-                    highlightedColor={highlightedColor}
-                    notesCount={notesCount}
-                    notesText={notesText}
-                    isVerseToScroll={isVerseToScroll}
-                  />
-                </ErrorBoundary>
-              </span>
-            )
-          })
-        }
+          return (
+            <span key={`${Livre}-${Chapitre}-${Verset}`}>
+              {h1 && <H1 settings={this.state.settings}>{h1}</H1>}
+              {h2 && <H2 settings={this.state.settings}>{h2}</H2>}
+              {h3 && <H3 settings={this.state.settings}>{h3}</H3>}
+              <ErrorBoundary>
+                <Verse
+                  verse={verse}
+                  settings={this.state.settings}
+                  isSelected={isSelected}
+                  isSelectedMode={isSelectedMode}
+                  isSelectionMode={this.state.isSelectionMode}
+                  highlightedColor={highlightedColor}
+                  notesCount={notesCount}
+                  notesText={notesText}
+                  isVerseToScroll={isVerseToScroll}
+                />
+              </ErrorBoundary>
+            </span>
+          )
+        })}
       </Container>
     )
   }

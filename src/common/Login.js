@@ -13,7 +13,7 @@ const Button = styled.TouchableOpacity(({ theme, color }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: 4,
-  backgroundColor: color || theme.colors.reverse,
+  backgroundColor: color || theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.3,
@@ -30,7 +30,7 @@ const ButtonIcon = styled(Icon.FontAwesome)(() => ({
 
 const ButtonText = styled(Text)(({ theme, color }) => ({
   fontSize: 16,
-  color: color || theme.colors.defaut
+  color: color || theme.colors.defaut
 }))
 
 const Login = () => {
@@ -38,14 +38,14 @@ const Login = () => {
 
   const onGoogleLogin = async () => {
     setLoading(true)
-    await FireAuth.googleLogin()
-    setLoading(false)
+    const isStillLoading = await FireAuth.googleLogin()
+    setLoading(isStillLoading)
   }
 
   const onFacebookLogin = async () => {
     setLoading(true)
-    await FireAuth.facebookLogin()
-    setLoading(false)
+    const isStillLoading = await FireAuth.facebookLogin()
+    setLoading(isStillLoading)
   }
 
   if (isLoading) {
@@ -57,14 +57,14 @@ const Login = () => {
   }
 
   return (
-    <Box height={60} row justifyContent='space-between'>
-      <Button onPress={onGoogleLogin} color='#D14C3E'>
-        <ButtonIcon size={20} name='google' color='white' />
-        <ButtonText color='white'>Google</ButtonText>
+    <Box height={60} row justifyContent="space-between">
+      <Button onPress={onGoogleLogin} color="#D14C3E">
+        <ButtonIcon size={20} name="google" color="white" />
+        <ButtonText color="white">Google</ButtonText>
       </Button>
-      <Button onPress={onFacebookLogin} color='#3b5998'>
-        <ButtonIcon size={20} name='facebook' color='white' />
-        <ButtonText color='white'>Facebook</ButtonText>
+      <Button onPress={onFacebookLogin} color="#3b5998">
+        <ButtonIcon size={20} name="facebook" color="white" />
+        <ButtonText color="white">Facebook</ButtonText>
       </Button>
     </Box>
   )

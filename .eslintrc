@@ -9,6 +9,10 @@
     "eslint-plugin-react",
     "react-hooks"
   ],
+  "globals": {
+    "document": "readonly",
+    "__DEV__": "readonly"
+  },
   "rules": {
     "react/jsx-props-no-spreading": "off",
     "global-require": "off",

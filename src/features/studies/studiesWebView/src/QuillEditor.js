@@ -1,4 +1,3 @@
-import Quill from './quill.js'
 import './InlineVerse'
 import './InlineStrong'
 import './VerseBlock'
@@ -12,26 +11,26 @@ import './quill.snow.css'
 
 import React from 'react'
 import debounce from 'debounce'
+import Quill from './quill'
 import { dispatch, dispatchConsole } from './dispatch'
-import MockContent from './MockContent.js'
 
 const BROWSER_TESTING_ENABLED = process.env.NODE_ENV !== 'production'
 
 export default class ReactQuillEditor extends React.Component {
-  componentDidMount () {
+  componentDidMount() {
     document.addEventListener('messages', this.handleMessage)
-    dispatchConsole(`component mounted`)
+    dispatchConsole('component mounted')
 
     if (BROWSER_TESTING_ENABLED) {
-      this.loadEditor()
-      this.quill.setContents(MockContent, Quill.sources.SILENT)
-      this.quill.enable()
-
+      // this.loadEditor()
+      // const MockContent = require('./MockContent')
+      // this.quill.setContents(MockContent, Quill.sources.SILENT)
+      // this.quill.enable()
       // Load font
-      const literate = require('./literata').default
-      const style = document.createElement('style')
-      style.innerHTML = literate
-      document.head.appendChild(style)
+      // const literate = require('./literata').default
+      // const style = document.createElement('style')
+      // style.innerHTML = literate
+      // document.head.appendChild(style)
     }
   }
 
@@ -61,30 +60,35 @@ export default class ReactQuillEditor extends React.Component {
           const windowHeight = document.body.getBoundingClientRect().height
 
           if (selectedBottom > windowHeight) {
-            document.querySelector('.ql-editor').scrollTo(0, document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30)
+            document
+              .querySelector('.ql-editor')
+              .scrollTo(
+                0,
+                document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30
+              )
           }
         }, 700)
       }
     })
   }
 
-  loadEditor = theme => {
+  loadEditor = () => {
     this.quill = new Quill('#editor', {
       theme: 'snow',
       modules: {
         toolbar: BROWSER_TESTING_ENABLED,
         'inline-verse': true,
         'block-verse': true,
-        'format': true
+        format: true
       },
       placeholder: 'Créer votre étude...',
       readOnly: true
     })
 
-    dispatchConsole(`loading editor`)
+    dispatchConsole('loading editor')
     this.quill.focus()
 
-    dispatchConsole(`editor initialized`)
+    dispatchConsole('editor initialized')
     dispatch('EDITOR_LOADED', {
       type: 'success',
       delta: this.quill.getContents()
@@ -92,7 +96,7 @@ export default class ReactQuillEditor extends React.Component {
     this.addTextChangeEventToEditor()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     document.removeEventListener('messages', this.handleMessage)
   }
 
@@ -110,9 +114,7 @@ export default class ReactQuillEditor extends React.Component {
           this.quill.setContents(msgData.payload.delta, Quill.sources.SILENT)
           break
         case 'SET_HTML_CONTENTS':
-          this.quill.clipboard.dangerouslyPasteHTML(
-            msgData.payload.html
-          )
+          this.quill.clipboard.dangerouslyPasteHTML(msgData.payload.html)
           break
         case 'CAN_EDIT':
           this.quill.enable()
@@ -147,15 +149,16 @@ export default class ReactQuillEditor extends React.Component {
           this.blockVerseModule = this.quill.getModule('block-verse')
           this.blockVerseModule.receiveStrongBlock(msgData.payload)
           break
-        case 'BLOCK_DIVIDER':
+        case 'BLOCK_DIVIDER': {
           const range = this.quill.getSelection(true)
           this.quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER)
           this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
           break
+        }
         case 'TOGGLE_FORMAT': {
           this.formatModule = this.quill.getModule('format')
-          const type = msgData.payload.type
-          const value = msgData.payload.value
+          const { type } = msgData.payload
+          const { value } = msgData.payload
 
           dispatchConsole(`${type} ${value}`)
 
@@ -190,14 +193,14 @@ export default class ReactQuillEditor extends React.Component {
             case 'COLOR':
               this.formatModule.format('color', value)
               break
+            default:
+              break
           }
           break
         }
         default:
           dispatchConsole(
-            `reactQuillEditor Error: Unhandled message type received "${
-              msgData.type
-            }"`
+            `reactQuillEditor Error: Unhandled message type received "${msgData.type}"`
           )
       }
     } catch (err) {
@@ -205,12 +208,12 @@ export default class ReactQuillEditor extends React.Component {
     }
   }
 
-  render () {
+  render() {
     return (
-      <React.Fragment>
-        <div id='editor' />
+      <>
+        <div id="editor" />
         {/* <Toolbar /> */}
-      </React.Fragment>
+      </>
     )
   }
 }

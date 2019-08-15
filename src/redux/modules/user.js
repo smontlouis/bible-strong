@@ -28,6 +28,7 @@ export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
 export const ADD_TAG = 'user/ADD_TAG'
 export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
+export const UPDATE_TAG = 'user/UPDATE_TAG'
 export const REMOVE_TAG = 'user/REMOVE_TAG'
 
 export const CREATE_STUDY = 'user/CREATE_STUDY'
@@ -176,8 +177,36 @@ export default produce((draft, action) => {
       }
       break
     }
+    case UPDATE_TAG: {
+      draft.bible.tags[action.id].name = action.value
+      const entitiesArray = ['highlights', 'notes', 'studies']
+
+      entitiesArray.forEach(ent => {
+        const entities = draft.bible[ent]
+        Object.values(entities).forEach(entity => {
+          const entityTags = entity.tags
+          if (entityTags && entityTags[action.id]) {
+            entityTags[action.id].name = action.value
+          }
+        })
+      })
+
+      break
+    }
     case REMOVE_TAG: {
       delete draft.bible.tags[action.payload]
+
+      const entitiesArray = ['highlights', 'notes', 'studies']
+
+      entitiesArray.forEach(ent => {
+        const entities = draft.bible[ent]
+        Object.values(entities).forEach(entity => {
+          const entityTags = entity.tags
+          if (entityTags && entityTags[action.payload]) {
+            delete entityTags[action.payload]
+          }
+        })
+      })
       break
     }
     case TOGGLE_TAG_ENTITY: {
@@ -196,10 +225,14 @@ export default produce((draft, action) => {
 
             // ADD OPERATION
           } else {
-            if (!draft.bible.tags[tagId][item.entity]) draft.bible.tags[tagId][item.entity] = {}
+            if (!draft.bible.tags[tagId][item.entity]) {
+              draft.bible.tags[tagId][item.entity] = {}
+            }
             draft.bible.tags[tagId][item.entity][id] = true
 
-            if (!draft.bible[item.entity][id].tags) draft.bible[item.entity][id].tags = {}
+            if (!draft.bible[item.entity][id].tags) {
+              draft.bible[item.entity][id].tags = {}
+            }
             draft.bible[item.entity][id].tags[tagId] = {
               id: tagId,
               name: draft.bible.tags[tagId].name
@@ -216,10 +249,14 @@ export default produce((draft, action) => {
           delete draft.bible[item.entity][item.id].tags[tagId]
           // ADD OPERATION
         } else {
-          if (!draft.bible.tags[tagId][item.entity]) draft.bible.tags[tagId][item.entity] = {}
+          if (!draft.bible.tags[tagId][item.entity]) {
+            draft.bible.tags[tagId][item.entity] = {}
+          }
           draft.bible.tags[tagId][item.entity][item.id] = true
 
-          if (!draft.bible[item.entity][item.id].tags) draft.bible[item.entity][item.id].tags = {}
+          if (!draft.bible[item.entity][item.id].tags) {
+            draft.bible[item.entity][item.id].tags = {}
+          }
           draft.bible[item.entity][item.id].tags[tagId] = {
             id: tagId,
             name: draft.bible.tags[tagId].name
@@ -265,6 +302,9 @@ export default produce((draft, action) => {
     case DELETE_STUDY: {
       delete draft.bible.studies[action.payload]
       removeEntityInTags(draft, 'studies', action.payload)
+      break
+    }
+    default: {
       break
     }
   }
@@ -376,6 +416,14 @@ export function addTag(payload) {
   return {
     type: ADD_TAG,
     payload
+  }
+}
+
+export function updateTag(id, value) {
+  return {
+    type: UPDATE_TAG,
+    id,
+    value
   }
 }
 

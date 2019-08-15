@@ -1,22 +1,23 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import * as FileSystem from 'expo-file-system'
 import AssetUtils from 'expo-asset-utils'
 
-import { initDB, getDB } from '~helpers/database'
+import { initDB, getStrongDB } from '~helpers/database'
 import Loading from '~common/Loading'
+import { setStrongDatabaseHash } from '~redux/modules/bible'
 
-const WaitForDatabase = WrappedComponent =>
-  class WaitForDB extends React.Component {
-    state = {
-      isLoading: true
+const useWaitForDatabase = () => {
+  const [isLoading, setLoading] = useState(true)
+  const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (getStrongDB()) {
+      setLoading(false)
     }
-    componentDidMount () {
-      if (getDB()) {
-        return this.setState({ isLoading: false })
-      }
-      this.loadDBAsync()
-    }
-    loadDBAsync = async () => {
+
+    const loadDBAsync = async () => {
       const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
       const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
@@ -27,32 +28,40 @@ const WaitForDatabase = WrappedComponent =>
       }
 
       const dbPath = `${sqliteDirPath}/strong.sqlite`
-      let dbFile = await FileSystem.getInfoAsync(dbPath)
+      const dbFile = await FileSystem.getInfoAsync(dbPath)
 
-      if (__DEV__) {
-        if (dbFile.exists) {
-          FileSystem.deleteAsync(dbFile.uri)
-          dbFile = await FileSystem.getInfoAsync(dbPath)
-        }
-      }
+      // if (__DEV__) {
+      //   if (dbFile.exists) {
+      //     FileSystem.deleteAsync(dbFile.uri)
+      //     dbFile = await FileSystem.getInfoAsync(dbPath)
+      //   }
+      // }
 
-      if (!dbFile.exists) {
-        const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
+      const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
 
+      if (!dbFile.exists || sqliteDB.hash !== strongDatabaseHash) {
+        dispatch(setStrongDatabaseHash(sqliteDB.hash))
         console.log(`Copying ${sqliteDB.localUri} to ${dbPath}`)
         await FileSystem.copyAsync({ from: sqliteDB.localUri, to: dbPath })
       }
 
       await initDB()
+      setLoading(false)
+    }
 
-      this.setState({ isLoading: false })
-    }
-    render () {
-      if (this.state.isLoading) {
-        return <Loading message='Téléchargement de la base de données...' />
-      }
-      return <WrappedComponent {...this.props} />
-    }
+    loadDBAsync()
+  }, [strongDatabaseHash, dispatch])
+
+  return isLoading
+}
+
+const waitForDatabase = WrappedComponent => props => {
+  const isLoading = useWaitForDatabase()
+
+  if (isLoading) {
+    return <Loading message="Téléchargement de la base de données..." />
   }
+  return <WrappedComponent {...props} />
+}
 
-export default WaitForDatabase
+export default waitForDatabase

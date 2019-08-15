@@ -1,13 +1,14 @@
 import Quill from './quill.js'
 import InlineTooltip from './InlineTooltip'
 import { dispatch, dispatchConsole } from './dispatch'
+
 const InlineVerseBlot = Quill.import('formats/inline-verse')
 const InlineStrongBlot = Quill.import('formats/inline-strong')
 
 const Module = Quill.import('core/module')
 
 class ModuleInlineVerse extends Module {
-  constructor (quill, options) {
+  constructor(quill, options) {
     super(quill, options)
 
     this.quill = quill
@@ -23,7 +24,7 @@ class ModuleInlineVerse extends Module {
   }
 
   // OBSOLETE
-  openVerseLink = (value) => {
+  openVerseLink = value => {
     const range = this.quill.getSelection(true)
 
     if (!range.length) {
@@ -36,10 +37,7 @@ class ModuleInlineVerse extends Module {
       dispatchConsole(`Range is ${JSON.stringify(this.range)}`)
       dispatch('SELECT_BIBLE_VERSE')
     } else {
-      const [link, offset] = this.quill.scroll.descendant(
-        InlineVerseBlot,
-        range.index
-      )
+      const [link, offset] = this.quill.scroll.descendant(InlineVerseBlot, range.index)
 
       this.quill.setSelection(range.index - offset, link.length())
       this.quill.format('inline-verse', false)
@@ -65,12 +63,13 @@ class ModuleInlineVerse extends Module {
           title,
           verses
         })
+        this.quill.insertText(this.range.index, ' ')
       }
     }
   }
 
   // OBSOLETE
-  openStrongLink = (value) => {
+  openStrongLink = value => {
     const range = this.quill.getSelection(true)
 
     if (!range.length) {
@@ -81,10 +80,7 @@ class ModuleInlineVerse extends Module {
       // OPEN BIBLE SELECT THERE
       dispatch('SELECT_BIBLE_STRONG')
     } else {
-      const [link, offset] = this.quill.scroll.descendant(
-        InlineStrongBlot,
-        range.index
-      )
+      const [link, offset] = this.quill.scroll.descendant(InlineStrongBlot, range.index)
 
       this.quill.setSelection(range.index - offset, link.length())
       this.quill.format('inline-strong', false)
@@ -112,11 +108,15 @@ class ModuleInlineVerse extends Module {
           code,
           book
         })
+        this.quill.insertText(this.range.index, ' ')
       }
     }
   }
 }
 
-Quill.register({
-  'modules/inline-verse': ModuleInlineVerse
-}, true)
+Quill.register(
+  {
+    'modules/inline-verse': ModuleInlineVerse
+  },
+  true
+)

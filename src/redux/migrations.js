@@ -63,5 +63,15 @@ export default {
         id: ''
       }
     }
+  },
+  5: state => {
+    return {
+      ...state,
+      bible: {
+        ...state.bible,
+        strongDatabaseHash: '',
+        dictionnaireDatabaseHash: ''
+      }
+    }
   }
 }

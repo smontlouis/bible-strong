@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Platform } from 'react-native'
 import { Asset } from 'expo-asset'
-// import * as Haptics from 'expo-haptics'
 import { WebView } from 'react-native-webview'
+// import { Platform } from 'react-native'
+// import * as Haptics from 'expo-haptics'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -59,6 +59,7 @@ class BibleWebView extends Component {
     if (!this.HTMLFile.localUri) {
       Asset.loadAsync(require('./bibleWebView/dist/index.html')).then(() => {
         this.HTMLFile = Asset.fromModule(require('./bibleWebView/dist/index.html'))
+
         this.setState({ isHTMLFileLoaded: true })
       })
     } else {
@@ -102,14 +103,22 @@ class BibleWebView extends Component {
 
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
-        const { setSelectedVerse, navigation } = this.props
-        setSelectedVerse(Number(action.payload))
-        navigation.navigate('BibleVerseDetail', action.params)
+        const { navigation } = this.props
+        const { Livre, Chapitre, Verset } = action.params.verse
+        navigation.navigate({
+          routeName: 'BibleVerseDetail', 
+          params: action.params,
+          key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`
+        })
+
         break
       }
       case NAVIGATE_TO_VERSE_NOTES: {
         const { navigation } = this.props
-        navigation.navigate('BibleVerseNotes', { verse: action.payload, withBack: true })
+        navigation.navigate('BibleVerseNotes', {
+          verse: action.payload,
+          withBack: true
+        })
         break
       }
       case TOGGLE_SELECTED_VERSE: {
@@ -126,14 +135,20 @@ class BibleWebView extends Component {
         } else {
           addSelectedVerse(verseId)
         }
+
         break
       }
+
       case NAVIGATE_TO_BIBLE_NOTE: {
         this.props.openNoteModal(action.payload)
         break
       }
       case CONSOLE_LOG: {
         console.log('WEBVIEW: ', action.payload)
+        break
+      }
+      default: {
+        break
       }
     }
   }
@@ -188,7 +203,9 @@ class BibleWebView extends Component {
         onLoadEnd={this.injectFont}
         onMessage={this.receiveDataFromWebView}
         originWhitelist={['*']}
-        ref={ref => (this.webview = ref)}
+        ref={ref => {
+          this.webview = ref
+        }}
         source={{ uri: localUri }}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}

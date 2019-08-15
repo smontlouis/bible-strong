@@ -115,6 +115,7 @@ const FireAuth = class {
       console.log('No user, need to sign in')
       this.user = null
 
+      // TODO - DO WE REALLY NEED THIS ?
       firebase
         .auth()
         .signInAnonymously()
@@ -197,10 +198,10 @@ const FireAuth = class {
               })
           } else if (error.code === 'auth/email-already-in-use') {
             SnackBar.show('Un utilisateur existe déjà avec un autre compte. Connectez-vous !')
-            resolve(true)
+            resolve(false)
           } else {
             SnackBar.show('Une erreur est survenue.')
-            resolve(true)
+            resolve(false)
           }
         }
       )

@@ -15,6 +15,8 @@ const REMOVE_HIGHLIGHTED_VERSE = 'bible/REMOVE_HIGHLIGHTED_VERSE'
 const CLEAR_HIGHLIGHTED_VERSES = 'bible/CLEAR_HIGHLIGHTED_VERSES'
 const GO_TO_PREV_CHAPTER = 'bible/GO_TO_PREV_CHAPTER'
 const GO_TO_NEXT_CHAPTER = 'bible/GO_TO_NEXT_CHAPTER'
+const SET_STRONG_DATABASE_HASH = 'bible/SET_STRONG_DATABASE_HASH'
+const SET_DICTIONNAIRE_DATABASE_HASH = 'bible/SET_DICTIONNAIRE_DATABASE_HASH'
 
 const initialState = {
   selectedVersion: 'LSG',
@@ -26,7 +28,9 @@ const initialState = {
     selectedChapter: 1,
     selectedVerse: 1
   },
-  selectedVerses: {} // highlighted verses
+  selectedVerses: {}, // highlighted verses,
+  strongDatabaseHash: '',
+  dictionnaireDatabaseHash: ''
 }
 
 // BibleReducer
@@ -162,9 +166,33 @@ export default produce((draft, action) => {
       draft.selectedVerse = 1
       draft.temp.selectedChapter = currentChapter + 1
       draft.temp.selectedVerse = 1
+
+      return
+    }
+    case SET_DICTIONNAIRE_DATABASE_HASH: {
+      draft.dictionnaireDatabaseHash = action.hash
+      return
+    }
+    case SET_STRONG_DATABASE_HASH: {
+      draft.strongDatabaseHash = action.hash
+      break
+    }
+    default: {
+      break
     }
   }
 }, initialState)
+
+export function setStrongDatabaseHash(hash) {
+  return {
+    type: SET_STRONG_DATABASE_HASH,
+    hash
+  }
+}
+
+export function setDictionnaireDatabaseHash(hash) {
+  return { type: SET_DICTIONNAIRE_DATABASE_HASH, hash }
+}
 
 export function setTempSelectedBook(book) {
   return {

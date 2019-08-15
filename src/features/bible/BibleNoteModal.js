@@ -9,6 +9,7 @@ import { ScrollView, Alert } from 'react-native'
 
 import getVersesRef from '~helpers/getVersesRef'
 import * as UserActions from '~redux/modules/user'
+import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
@@ -53,6 +54,7 @@ class BibleNoteModal extends React.Component {
     reference: '',
     title: '',
     description: '',
+    tags: {},
     isEditing: false
   }
 
@@ -86,6 +88,7 @@ class BibleNoteModal extends React.Component {
         reference,
         title: existingNote.title,
         description: existingNote.description,
+        tags: existingNote.tags,
         isEditing: false
       })
     } else {
@@ -136,7 +139,7 @@ class BibleNoteModal extends React.Component {
 
   render() {
     const { isOpen, onClosed } = this.props
-    const { title, description, isEditing, id } = this.state
+    const { title, description, isEditing, id, tags } = this.state
     const submitIsDisabled = !title || !description
 
     return (
@@ -189,6 +192,7 @@ class BibleNoteModal extends React.Component {
               </Text>
               <ScrollView flex={1}>
                 <Paragraph small>{description}</Paragraph>
+                <TagList tags={tags} />
               </ScrollView>
               <Box row marginTop={10} justifyContent="flex-end">
                 {id && (

@@ -1,8 +1,8 @@
-import { getDB } from '~helpers/database'
+import { getStrongDB } from '~helpers/database'
 
 const SQLTransaction = sqlReq => {
   return new Promise((resolve, reject) => {
-    getDB().transaction(
+    getStrongDB().transaction(
       tx => {
         tx.executeSql(
           sqlReq,

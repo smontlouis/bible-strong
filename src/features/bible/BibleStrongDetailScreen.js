@@ -114,7 +114,7 @@ class BibleStrongDetailScreen extends React.Component {
     navigation.navigate({
       routeName: 'BibleStrongDetail',
       params: { book, reference },
-      key: reference
+      key: `bible-strong-detail-${reference}`
     })
   }
 

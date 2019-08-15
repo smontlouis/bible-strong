@@ -75,7 +75,7 @@ const VersesModal = ({
 
   useEffect(() => {
     getVersesRef(selectedVerses, version).then(({ title }) => setSelectedVersesTitle(title))
-  }, [selectedVerses])
+  }, [selectedVerses, version])
 
   const shareVerse = async () => {
     const { all: message } = await getVersesRef(selectedVerses, version)
@@ -88,9 +88,18 @@ const VersesModal = ({
 
   const showStrongDetail = () => {
     clearSelectedVerses()
-    const verse = Object.keys(selectedVerses)[0].split('-')[2]
-    setSelectedVerse(verse)
-    navigation.navigate('BibleVerseDetail')
+    const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
+    navigation.navigate({
+      routeName: 'BibleVerseDetail', 
+      params: {
+        verse: {
+          Livre,
+          Chapitre,
+          Verset
+        }
+      },
+      key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`
+    })
   }
 
   const compareVerses = () => {

@@ -64,24 +64,34 @@ const StyledVerse = styled.View(({ theme }) => ({
 class BibleVerseDetailScreen extends React.Component {
   state = {
     error: false,
-    formattedVerse: '',
     isCarouselLoading: true,
     strongReferences: [],
-    currentStrongReference: 0
+    currentStrongReference: 0,
+    verse: this.props.verse,
+    versesInCurrentChapter: null
   }
 
   componentDidMount() {
     this.loadPage()
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.verse.Verset !== this.props.verse.Verset) {
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.verse.Verset !== this.state.verse.Verset) {
       this.loadPage()
     }
   }
 
+  updateVerse = value => {
+    this.setState(state => ({
+      verse: {
+        ...state.verse,
+        Verset: Number(state.verse.Verset) + value
+      }
+    }))
+  }
+
   loadPage = async () => {
-    const { verse } = this.props
+    const { verse } = this.state
     const strongVerse = await loadStrongVerse(verse)
 
     if (!strongVerse) {
@@ -90,7 +100,7 @@ class BibleVerseDetailScreen extends React.Component {
     }
 
     const { versesInCurrentChapter } = await loadCountVerses(verse.Livre, verse.Chapitre)
-    this.versesInCurrentChapter = versesInCurrentChapter
+    this.setState({ versesInCurrentChapter })
     this.formatVerse(strongVerse)
   }
 
@@ -127,10 +137,10 @@ class BibleVerseDetailScreen extends React.Component {
   }
 
   renderItem = ({ item, index }) => {
-    const params = this.props.navigation.state.params || {}
+    const { isSelectionMode } = this.props.navigation.state.params || {}
     return (
       <StrongCard
-        isSelectionMode={params.isSelectionMode}
+        isSelectionMode={isSelectionMode}
         navigation={this.props.navigation}
         book={this.props.verse.Livre}
         strongReference={item}
@@ -143,12 +153,11 @@ class BibleVerseDetailScreen extends React.Component {
     const {
       verse,
       verse: { Verset },
-      theme,
-      goToNextVerse,
-      goToPrevVerse
-    } = this.props
+      isCarouselLoading,
+      versesInCurrentChapter
+    } = this.state
 
-    const { isCarouselLoading } = this.state
+    const { theme } = this.props
 
     const { title: headerTitle } = formatVerseContent([verse])
 
@@ -192,14 +201,14 @@ class BibleVerseDetailScreen extends React.Component {
             {...{
               verseNumber: Verset,
               goToNextVerse: () => {
-                goToNextVerse()
+                this.updateVerse(+1)
                 this.setState({ isCarouselLoading: true })
               },
               goToPrevVerse: () => {
-                goToPrevVerse()
+                this.updateVerse(-1)
                 this.setState({ isCarouselLoading: true })
               },
-              versesInCurrentChapter: this.versesInCurrentChapter
+              versesInCurrentChapter
             }}
           />
           <Box flex>
@@ -240,13 +249,12 @@ class BibleVerseDetailScreen extends React.Component {
 export default compose(
   withTheme,
   connect(
-    ({ bible }, ownProps) => ({
-      verse: {
-        Livre: bible.selectedBook.Numero,
-        Chapitre: bible.selectedChapter,
-        Verset: bible.selectedVerse
+    (state, ownProps) => {
+      const { verse } = ownProps.navigation.state.params || {}
+      return {
+        verse
       }
-    }),
+    },
     BibleActions
   ),
   WaitForDB

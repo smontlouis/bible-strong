@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { pure } from 'recompose'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -32,7 +31,7 @@ const BibleVerseDetailFooter = ({
       </IconButton>
     )}
     <Box flex />
-    {!(verseNumber === versesInCurrentChapter) && (
+    {!(verseNumber == versesInCurrentChapter) && (
       <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
         <Text paddingRight={10} color="darkGrey">
           Verset suivant
@@ -43,4 +42,4 @@ const BibleVerseDetailFooter = ({
   </Box>
 )
 
-export default pure(BibleVerseDetailFooter)
+export default BibleVerseDetailFooter

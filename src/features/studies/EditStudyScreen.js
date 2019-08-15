@@ -7,7 +7,7 @@ import generateUUID from '~helpers/generateUUID'
 import { createStudy, updateStudy, uploadStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
-import WebViewQuillEditor from '~features/studies/studiesWebView/WebViewQuillEditor'
+import WebViewQuillEditor from '~features/studies/WebViewQuillEditor'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
 
@@ -17,11 +17,11 @@ import SelectBlockModal from './SelectBlockModal'
 import SelectColorModal from './SelectColorModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
 
-const withStudy = (Component) => props => {
+const withStudy = Component => props => {
   const dispatch = useDispatch()
   const [studyId, setStudyId] = useState(null)
 
-  let { studyId: studyIdParam, canEdit } = props.navigation.state.params || {}
+  const { studyId: studyIdParam, canEdit } = props.navigation.state.params || {}
 
   useEffect(() => {
     if (studyIdParam) {
@@ -33,15 +33,13 @@ const withStudy = (Component) => props => {
       dispatch(createStudy(studyId))
       setStudyId(studyId)
     }
-  }, [])
+  }, [dispatch, studyIdParam])
 
   if (!studyId) {
     return null
   }
 
-  return (
-    <Component studyId={studyId} canEdit={canEdit} {...props} />
-  )
+  return <Component studyId={studyId} canEdit={canEdit} {...props} />
 }
 
 class EditStudyScreen extends React.Component {
@@ -56,7 +54,7 @@ class EditStudyScreen extends React.Component {
     quickTagsModal: false
   }
 
-  componentDidMount () {
+  componentDidMount() {
     const { canEdit } = this.props
 
     if (canEdit) {
@@ -66,7 +64,7 @@ class EditStudyScreen extends React.Component {
 
   webViewQuillEditor = React.createRef()
 
-  acceptMethods = (dispatchToWebView) => {
+  acceptMethods = dispatchToWebView => {
     this.dispatchToWebView = dispatchToWebView
     this.forceUpdate()
   }
@@ -74,47 +72,63 @@ class EditStudyScreen extends React.Component {
   onDeltaChangeCallback = (delta, deltaChange, deltaOld, changeSource) => {
     const { dispatch, currentStudy } = this.props
     dispatch(updateStudy({ id: currentStudy.id, content: delta }))
-  };
+  }
 
   setActiveFormats = (formats = {}) => {
     this.setState({ activeFormats: JSON.parse(formats) })
   }
 
   openHeaderModal = () => this.setState({ isHeaderModalOpen: true })
+
   closeHeaderModal = () => this.setState({ isHeaderModalOpen: false })
 
-  openBlockModal = () => { this.dispatchToWebView('BLUR_EDITOR'); this.setState({ isBlockModalOpen: true }) }
-  closeBlockModal = () => { this.setState({ isBlockModalOpen: false }) }
+  openBlockModal = () => {
+    this.dispatchToWebView('BLUR_EDITOR')
+    this.setState({ isBlockModalOpen: true })
+  }
+
+  closeBlockModal = () => {
+    this.setState({ isBlockModalOpen: false })
+  }
 
   openColorModal = (value = true) => this.setState({ isColorModalOpen: value })
+
   closeColorModal = () => this.setState({ isColorModalOpen: false })
 
-  navigateBibleView = (type) => {
+  navigateBibleView = type => {
     this.props.navigation.navigate('BibleView', {
       isSelectionMode: type
     })
     this.closeBlockModal()
   }
 
-  setTitlePrompt = (value) => this.setState({ titlePrompt: value })
+  setTitlePrompt = value => this.setState({ titlePrompt: value })
+
   setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
+
   setQuickTagsModal = value => this.setState({ quickTagsModal: value })
 
-  render () {
-    const {
-      isReadOnly,
-      titlePrompt,
-      multipleTagsItem,
-      quickTagsModal
-    } = this.state
+  render() {
+    const { isReadOnly, titlePrompt, multipleTagsItem, quickTagsModal } = this.state
 
     return (
       <Container>
         <EditStudyHeader
           isReadOnly={isReadOnly}
-          setTitlePrompt={() => this.setTitlePrompt({ id: this.props.currentStudy.id, title: this.props.currentStudy.title })}
+          setTitlePrompt={() =>
+            this.setTitlePrompt({
+              id: this.props.currentStudy.id,
+              title: this.props.currentStudy.title
+            })
+          }
           setReadOnly={() => {
-            this.setState({ isReadOnly: true, quickTagsModal: { id: this.props.currentStudy.id, entity: 'studies' } })
+            this.setState({
+              isReadOnly: true,
+              quickTagsModal: {
+                id: this.props.currentStudy.id,
+                entity: 'studies'
+              }
+            })
             this.props.dispatch(uploadStudy(this.props.currentStudy.id))
           }}
           title={this.props.currentStudy.title}
@@ -168,14 +182,13 @@ class EditStudyScreen extends React.Component {
           item={multipleTagsItem}
           onClosed={() => this.setMultipleTagsItem(false)}
         />
-        {
-          isReadOnly &&
+        {isReadOnly && (
           <FabButton
-            icon='edit-2'
+            icon="edit-2"
             onPress={() => this.setState({ isReadOnly: false })}
-            align='flex-end'
+            align="flex-end"
           />
-        }
+        )}
       </Container>
     )
   }

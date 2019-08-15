@@ -1,12 +1,12 @@
 import { SQLite } from 'expo-sqlite'
 
-let db
+let dbStrong
 
 export const initDB = () => {
-  db = SQLite.openDatabase('strong.sqlite')
-  return db
+  dbStrong = SQLite.openDatabase('strong.sqlite')
+  return dbStrong
 }
 
-export const getDB = () => {
-  return db
+export const getStrongDB = () => {
+  return dbStrong
 }

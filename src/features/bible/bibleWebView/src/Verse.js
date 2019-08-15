@@ -14,17 +14,17 @@ import { getColors } from '../../../../themes/getColors'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 
-function convertHex (hex, opacity) {
+function convertHex(hex, opacity) {
   hex = hex.replace('#', '')
   const r = parseInt(hex.substring(0, 2), 16)
   const g = parseInt(hex.substring(2, 4), 16)
   const b = parseInt(hex.substring(4, 6), 16)
 
-  const result = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity / 100 + ')'
+  const result = `rgba(${r},${g},${b},${opacity / 100})`
   return result
 }
 
-export const scaleFontSize = (value, scale) => `${value + (scale * 0.1 * value)}px` // Scale
+export const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
 
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(19, fontSizeScale),
@@ -44,36 +44,40 @@ const zoom = keyframes({
   }
 })
 
-const ContainerText = styled('span')(({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme } }) => {
-  let background = 'transparent'
-  if (highlightedColor && !isSelected) {
-    background = `${convertHex(getColors[theme][highlightedColor], 50)}`
+const ContainerText = styled('span')(
+  ({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme } }) => {
+    let background = 'transparent'
+    if (highlightedColor && !isSelected) {
+      background = `${convertHex(getColors[theme][highlightedColor], 50)}`
+    }
+    if (isFocused) {
+      background = 'rgba(0,0,0,0.1)'
+    }
+    return {
+      fontFamily: 'LiterataBook',
+      transition: 'background 0.3s ease',
+      background,
+      padding: '4px',
+      borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none',
+      WebkitTouchCallout: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
+      KhtmlUserSelect: 'none',
+      WebkitUserSelect: 'none',
+      ...(isVerseToScroll
+        ? {
+            animation: `1s ease 0s 2 normal none running ${zoom}`
+          }
+        : {})
+    }
   }
-  if (isFocused) {
-    background = 'rgba(0,0,0,0.1)'
-  }
-  return {
-    fontFamily: 'LiterataBook',
-    transition: 'background 0.3s ease',
-    background,
-    padding: '4px',
-    borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none',
-    WebkitTouchCallout: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-    ...isVerseToScroll ? {
-      animation: `1s ease 0s 2 normal none running ${zoom}`
-    } : {}
-  }
-})
+)
 
 const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
   display: textDisplay,
-  ...textDisplay === 'block' && {
+  ...(textDisplay === 'block' && {
     marginBottom: '5px'
-  }
+  })
 }))
 
 class Verse extends Component {
@@ -81,31 +85,37 @@ class Verse extends Component {
     focused: false
   }
 
-  componentDidMount () {
-    this.detectScroll = window.addEventListener('scroll', () => { if (!this.moved) this.moved = true })
+  componentDidMount() {
+    this.detectScroll = window.addEventListener('scroll', () => {
+      if (!this.moved) this.moved = true
+    })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.detectScroll = window.removeEventListener('scroll')
   }
 
   navigateToVerseNotes = () => {
-    const { verse: { Livre, Chapitre, Verset } } = this.props
+    const {
+      verse: { Livre, Chapitre, Verset }
+    } = this.props
     dispatch({
       type: NAVIGATE_TO_VERSE_NOTES,
       payload: `${Livre}-${Chapitre}-${Verset}`
     })
   }
 
-  navigateToBibleVerseDetail= (params = {}) => {
+  navigateToBibleVerseDetail = (additionnalParams = {}) => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-      payload: this.props.verse.Verset,
-      params
+      params: {
+        ...additionnalParams,
+        verse: this.props.verse
+      }
     })
   }
 
-  navigateToNote = (id) => {
+  navigateToNote = id => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_NOTE,
       payload: id
@@ -113,7 +123,11 @@ class Verse extends Component {
   }
 
   onPress = () => {
-    const { isSelectedMode, isSelectionMode, settings: { press } } = this.props
+    const {
+      isSelectedMode,
+      isSelectionMode,
+      settings: { press }
+    } = this.props
 
     // If selection mode verse, always toggle on press
     if (isSelectionMode && isSelectionMode.includes('verse')) {
@@ -135,7 +149,10 @@ class Verse extends Component {
   }
 
   onLongPress = () => {
-    const { settings: { press }, isSelectionMode } = this.props
+    const {
+      settings: { press },
+      isSelectionMode
+    } = this.props
 
     // If selection mode, do nothing on long press
     if (isSelectionMode) {
@@ -155,14 +172,16 @@ class Verse extends Component {
   }
 
   toggleSelectVerse = () => {
-    const { verse: { Livre, Chapitre, Verset } } = this.props
+    const {
+      verse: { Livre, Chapitre, Verset }
+    } = this.props
     dispatch({
       type: TOGGLE_SELECTED_VERSE,
       payload: `${Livre}-${Chapitre}-${Verset}`
     })
   }
 
-  onTouchStart = (e) => {
+  onTouchStart = e => {
     this.shouldShortPress = true
     this.moved = false
 
@@ -185,13 +204,22 @@ class Verse extends Component {
     clearTimeout(this.buttonPressTimer)
   }
 
-  onTouchMove = (e) => {
+  onTouchMove = e => {
     this.moved = true
     if (this.state.isFocused) this.setState({ isFocused: false })
-  };
+  }
 
-  render () {
-    const { verse, isSelected, highlightedColor, notesCount, settings, isVerseToScroll, notesText, isSelectionMode } = this.props
+  render() {
+    const {
+      verse,
+      isSelected,
+      highlightedColor,
+      notesCount,
+      settings,
+      isVerseToScroll,
+      notesText,
+      isSelectionMode
+    } = this.props
     const { isFocused } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
@@ -203,42 +231,28 @@ class Verse extends Component {
           isFocused={isFocused}
           isSelected={isSelected}
           isVerseToScroll={isVerseToScroll}
-          highlightedColor={highlightedColor}
-        >
-          <NumberText
-            settings={settings}
-          >
-            {verse.Verset}
-            {' '}
-          </NumberText>
-          {
-            (notesCount && !inlineNotedVerses) && !isSelectionMode &&
+          highlightedColor={highlightedColor}>
+          <NumberText settings={settings}>{verse.Verset} </NumberText>
+          {notesCount && !inlineNotedVerses && !isSelectionMode && (
             <NotesCount
               settings={settings}
               onClick={this.navigateToVerseNotes}
               count={notesCount}
             />
-          }
+          )}
           <VerseText
             settings={settings}
             onTouchStart={this.onTouchStart}
             onTouchEnd={this.onTouchEnd}
             onTouchMove={this.onTouchMove}
-            onTouchCancel={this.onTouchCancel}
-          >
+            onTouchCancel={this.onTouchCancel}>
             {verse.Texte}
           </VerseText>
         </ContainerText>
-        {
-          (notesText && inlineNotedVerses) && !isSelectionMode &&
-            <NotesText
-              settings={settings}
-              onClick={this.navigateToNote}
-              notesText={notesText}
-            />
-        }
+        {notesText && inlineNotedVerses && !isSelectionMode && (
+          <NotesText settings={settings} onClick={this.navigateToNote} notesText={notesText} />
+        )}
       </Wrapper>
-
     )
   }
 }

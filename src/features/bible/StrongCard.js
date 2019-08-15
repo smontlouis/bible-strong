@@ -81,9 +81,10 @@ class StrongCard extends React.Component {
         book
       })
     } else {
-      navigation.navigate('BibleStrongDetail', {
-        book,
-        strongReference
+      navigation.navigate({
+        routeName: 'BibleStrongDetail',
+        params: { book, strongReference },
+        key: `bible-strong-detail-${strongReference.Code}`
       })
     }
   }

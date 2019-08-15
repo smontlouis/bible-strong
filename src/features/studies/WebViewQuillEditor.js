@@ -1,17 +1,11 @@
 import React, { createRef } from 'react'
 import { Asset } from 'expo-asset'
 import { withNavigation } from 'react-navigation'
-import {
-  View,
-  Alert,
-  Platform
-
-} from 'react-native'
-
-import books from '~assets/bible_versions/books-desc'
-import KeyboardSpacer from '~common/KeyboardSpacer'
+import { View, Alert, Platform } from 'react-native'
 
 import { WebView } from 'react-native-webview'
+import books from '~assets/bible_versions/books-desc'
+import KeyboardSpacer from '~common/KeyboardSpacer'
 
 const INJECTED_JAVASCRIPT = `(function() {
   // This is the important part!
@@ -22,19 +16,21 @@ const INJECTED_JAVASCRIPT = `(function() {
 })();`
 
 class WebViewQuillEditor extends React.Component {
-  webViewRef = createRef();
+  webViewRef = createRef()
 
   state = {
     isHTMLFileLoaded: false
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.shareMethods(this.dispatchToWebView)
 
-    this.HTMLFile = Asset.fromModule(require('./dist/index.html'))
+    this.HTMLFile = Asset.fromModule(require('~features/studies/studiesWebView/dist/index.html'))
     if (!this.HTMLFile.localUri) {
-      Asset.loadAsync(require('./dist/index.html')).then(() => {
-        this.HTMLFile = Asset.fromModule(require('./dist/index.html'))
+      Asset.loadAsync(require('~features/studies/studiesWebView/dist/index.html')).then(() => {
+        this.HTMLFile = Asset.fromModule(
+          require('~features/studies/studiesWebView/dist/index.html')
+        )
         this.setState({ isHTMLFileLoaded: true })
       })
     } else {
@@ -42,7 +38,7 @@ class WebViewQuillEditor extends React.Component {
     }
   }
 
-  componentDidUpdate (prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     const oldParams = prevProps.params || {}
     const newParams = this.props.params || {}
 
@@ -85,7 +81,7 @@ class WebViewQuillEditor extends React.Component {
         })()
       `)
     }
-  };
+  }
 
   injectFont = async () => {
     const webView = this.webViewRef.current
@@ -110,7 +106,7 @@ class WebViewQuillEditor extends React.Component {
     `)
   }
 
-  handleMessage = (event) => {
+  handleMessage = event => {
     const { navigation } = this.props
     let msgData
     try {
@@ -124,18 +120,8 @@ class WebViewQuillEditor extends React.Component {
         case 'TEXT_CHANGED':
           if (this.props.onDeltaChangeCallback) {
             delete msgData.payload.type
-            const {
-              delta,
-              deltaChange,
-              deltaOld,
-              changeSource
-            } = msgData.payload
-            this.props.onDeltaChangeCallback(
-              delta,
-              deltaChange,
-              deltaOld,
-              changeSource
-            )
+            const { delta, deltaChange, deltaOld, changeSource } = msgData.payload
+            this.props.onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
           }
           break
         case 'VIEW_BIBLE_VERSE': {
@@ -181,21 +167,20 @@ class WebViewQuillEditor extends React.Component {
           console.log(`%c${msgData.payload}`, 'color:black;background-color:#81ecec')
           return
         }
+
         default:
           console.warn(
-            `WebViewQuillEditor Error: Unhandled message type received "${
-              msgData.type
-            }"`
+            `WebViewQuillEditor Error: Unhandled message type received "${msgData.type}"`
           )
       }
     } catch (err) {
       console.warn(err)
     }
-  };
+  }
 
   onWebViewLoaded = () => {
     this.dispatchToWebView('LOAD_EDITOR')
-  };
+  }
 
   editorLoaded = () => {
     if (this.props.contentToDisplay) {
@@ -208,19 +193,19 @@ class WebViewQuillEditor extends React.Component {
     if (!this.props.isReadOnly) {
       this.dispatchToWebView('CAN_EDIT')
     }
-  };
+  }
 
-  onError = (error) => {
+  onError = error => {
     Alert.alert('WebView onError', error, [
       { text: 'OK', onPress: () => console.log('OK Pressed') }
     ])
-  };
+  }
 
-  renderError = (error) => {
+  renderError = error => {
     Alert.alert('WebView renderError', error, [
       { text: 'OK', onPress: () => console.log('OK Pressed') }
     ])
-  };
+  }
 
   render = () => {
     if (!this.state.isHTMLFileLoaded) {
@@ -247,13 +232,10 @@ class WebViewQuillEditor extends React.Component {
           renderError={this.renderError}
           onError={this.onError}
         />
-        {
-          Platform.OS === 'android' &&
-          <KeyboardSpacer />
-        }
+        {Platform.OS === 'android' && <KeyboardSpacer />}
       </View>
     )
-  };
+  }
 }
 
 // Specifies the default values for props:

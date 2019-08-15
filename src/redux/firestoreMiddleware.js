@@ -17,7 +17,8 @@ import {
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
   UPLOAD_STUDY,
-  DELETE_STUDY
+  DELETE_STUDY,
+  UPDATE_TAG
 } from './modules/user'
 
 import { firebaseDb } from '../helpers/firebaseDb'
@@ -46,6 +47,23 @@ export default store => next => action => {
         'bible.highlights': highlights,
         'bible.tags': tags
       })
+      break
+    }
+    case UPDATE_TAG:
+    case REMOVE_TAG: {
+      const { tags, notes, highlights, studies } = user.bible
+      userDoc.update({
+        'bible.tags': tags,
+        'bible.notes': notes,
+        'bible.highlights': highlights
+      })
+
+      const batch = firebaseDb.batch()
+      Object.keys(studies).forEach(studyId => {
+        const studyDoc = firebaseDb.collection('studies').doc(studyId)
+        batch.update(studyDoc, { tags: studies[studyId].tags || {} })
+      })
+      batch.commit().then(() => console.log('Batch studies success'))
       break
     }
     case SET_SETTINGS_ALIGN_CONTENT:
