@@ -8,7 +8,7 @@ import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import { setDictionnaireDatabaseHash } from '~redux/modules/bible'
 
-const DICTIONNAIRE_FILE_SIZE = 38705152
+const DICTIONNAIRE_FILE_SIZE = 22532096
 
 export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
