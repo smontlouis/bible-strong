@@ -6,25 +6,29 @@ import { viewportWidth } from '~helpers/utils'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { alphabet } from '~helpers/alphabet'
 
-const StyledItem = styled(Box)(({ theme, isSelected }) => ({
+const StyledItem = styled(Box)(({ theme, isSelected }) => ({}))
+
+const StyledText = styled(Text)(({ theme, isSelected }) => ({
   fontWeight: isSelected ? 'bold' : 'normal'
 }))
 
-const AlphabetList = ({ onPress, sectionIndex }) => {
-  const CarouselAlphabet = useRef()
+const StyledUnderline = styled(Box)(({ theme }) => ({
+  marginTop: 5,
+  height: 8,
+  width: 30,
+  borderRadius: 5,
+  backgroundColor: theme.colors.primary
+}))
 
-  useEffect(() => {
-    CarouselAlphabet.current.snapToItem(sectionIndex)
-  }, [sectionIndex])
+const AlphabetList = ({ onPress, sectionIndex, alphabet }) => {
+  const CarouselAlphabet = useRef()
 
   return (
     <Box paddingTop={15} paddingBottom={15}>
       <Carousel
         ref={CarouselAlphabet}
-        // loop
-        // loopClonesPerSide={100}
+        firstItem={sectionIndex}
         data={alphabet}
         renderItem={({ item: section }) => (
           <TouchableOpacity
@@ -32,22 +36,28 @@ const AlphabetList = ({ onPress, sectionIndex }) => {
               onPress(alphabet.findIndex(l => l === section))
             }}>
             <StyledItem isSelected={sectionIndex === alphabet.findIndex(l => l === section)}>
-              <Text textAlign="center" fontSize={23}>
+              <StyledText
+                isSelected={sectionIndex === alphabet.findIndex(l => l === section)}
+                textAlign="center"
+                fontSize={23}>
                 {section}
-              </Text>
+              </StyledText>
             </StyledItem>
           </TouchableOpacity>
         )}
         sliderWidth={viewportWidth}
         itemWidth={25}
         itemHeight={25}
-        inactiveSlideScale={0.6}
+        inactiveSlideScale={0.7}
         inactiveSlideOpacity={0.8}
-        // onSnapToItem={index => console.log('COUCOU', index)}
+        onSnapToItem={index => onPress(index)}
         activeSlideOffset={2}
         enableMomentum
         decelerationRate={0.9}
       />
+      <Box center>
+        <StyledUnderline />
+      </Box>
     </Box>
   )
 }

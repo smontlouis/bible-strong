@@ -51,7 +51,6 @@ export const useWaitForDatabase = () => {
 
     loadDBAsync()
   }, [dictionnaireDatabaseHash, dispatch])
-
   return isLoading
 }
 

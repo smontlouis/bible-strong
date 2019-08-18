@@ -16,12 +16,10 @@ const Box = styled.View(props => ({
   justifyContent: props.justifyContent || (props.center && 'center'),
   alignItems: props.alignItems || (props.center && 'center'),
   alignContent: props.alignContent || 'flex-start',
-  alignSelf: props.alignSelf || 'stretch',
+  alignSelf: props.alignSelf,
   // shorthands
-  flexWrap:
-    (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
-  flexDirection:
-    (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+  flexWrap: (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
+  flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
 
   opacity: props.disabled ? 0.3 : 1
 }))

@@ -9,8 +9,8 @@ const SectionItem = styled(Box)(({ theme }) => ({
   paddingLeft: 20,
   paddingRight: 20,
   backgroundColor: theme.colors.reverse,
-  // borderBottomColor: theme.colors.border,
-  // borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
+  borderBottomWidth: 1,
   alignItems: 'flex-start',
   justifyContent: 'center'
 }))

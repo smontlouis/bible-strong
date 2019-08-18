@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React from 'react'
 import { SectionList } from 'react-native'
 import styled from '@emotion/native'
-import debounce from 'debounce'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import Container from '~common/ui/Container'
@@ -13,8 +12,15 @@ import Loading from '~common/Loading'
 import loadLexique from '~helpers/loadLexique'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
-import useDebounce from '~helpers/useDebounce'
-import { alphabet, getFirstLetterFrom } from '~helpers/alphabet'
+
+import {
+  useSectionIndex,
+  useSearchValue,
+  useResults,
+  useSectionResults,
+  useAlphabet
+} from './useUtilities'
+
 import { useWaitForDatabase } from '~common/waitForStrongDB'
 
 import LexiqueItem from './LexiqueItem'
@@ -25,62 +31,24 @@ const SectionTitle = styled(Box)(({ theme }) => ({
   paddingRight: 20,
   height: 50,
   backgroundColor: theme.colors.border,
-  // borderBottomColor: theme.colors.border,
-  // borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
+  borderBottomWidth: 1,
   justifyContent: 'center'
 }))
 
 const LexiqueScreen = () => {
   const isLoading = useWaitForDatabase()
-  const [results, setResults] = useState([])
-  const [sectionResults, setSectionResults] = useState(null)
-  const [searchValue, setSearchValue] = useState('')
-  const [sectionIndex, setSectionIndex] = useState(0)
-
-  const section = useRef()
-  const debouncedSearchValue = useDebounce(searchValue, 100)
-
-  useEffect(() => {
-    if (!isLoading) {
-      loadLexique().then(results => setResults(results))
-    }
-  }, [isLoading])
-
-  useEffect(() => {
-    if (!debouncedSearchValue) {
-      setSectionIndex(0)
-    }
-  }, [debouncedSearchValue])
-
-  useEffect(() => {
-    if (!results.length) return
-
-    let filteredResults = debouncedSearchValue
-      ? (filteredResults = results.filter(
-          c =>
-            c.Code == debouncedSearchValue ||
-            c.Mot.toLowerCase().includes(debouncedSearchValue.toLowerCase())
-        ))
-      : results
-
-    const sectionResults = filteredResults.reduce((list, name) => {
-      const listItem = list.find(item => item.title && item.title === getFirstLetterFrom(name.Mot))
-      if (!listItem) {
-        list.push({ title: getFirstLetterFrom(name.Mot), data: [name] })
-      } else {
-        listItem.data.push(name)
-      }
-
-      return list
-    }, [])
-    setSectionResults(debouncedSearchValue ? sectionResults : [sectionResults[sectionIndex]])
-  }, [results, debouncedSearchValue, sectionIndex])
+  const { section, sectionIndex, setSectionIndex, resetSectionIndex } = useSectionIndex()
+  const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue({
+    onDebouncedValue: resetSectionIndex
+  })
+  const results = useResults(isLoading, loadLexique)
+  const sectionResults = useSectionResults(results, debouncedSearchValue, sectionIndex)
+  const alphabet = useAlphabet(results)
 
   if (isLoading) {
     return <Loading message="Téléchargement du dictionnaire..." />
   }
-
-  // console.log(sectionResults)
 
   if (!sectionResults) {
     return <Loading message="Chargement..." />
@@ -123,8 +91,10 @@ const LexiqueScreen = () => {
         ) : (
           <Empty source={require('~assets/images/empty.json')} message="Aucune strong trouvée..." />
         )}
-        {!searchValue && <AlphabetList sectionIndex={sectionIndex} onPress={setSectionIndex} />}
       </Box>
+      {!searchValue && (
+        <AlphabetList alphabet={alphabet} sectionIndex={sectionIndex} onPress={setSectionIndex} />
+      )}
     </Container>
   )
 }
