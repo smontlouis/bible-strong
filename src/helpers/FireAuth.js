@@ -72,8 +72,6 @@ const FireAuth = class {
 
           if (data) unsubscribe()
 
-          console.log('This snapshot', doc.data(), this.user)
-
           if (!this.user) {
             // Get studies - TODO: DO IT BETTER
             const studies = {}
