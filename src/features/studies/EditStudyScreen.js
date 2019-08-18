@@ -72,6 +72,9 @@ class EditStudyScreen extends React.Component {
   onDeltaChangeCallback = (delta, deltaChange, deltaOld, changeSource) => {
     const { dispatch, currentStudy } = this.props
     dispatch(updateStudy({ id: currentStudy.id, content: delta }))
+
+    // TODO: See if it's soo expensive
+    dispatch(uploadStudy(this.props.currentStudy.id))
   }
 
   setActiveFormats = (formats = {}) => {

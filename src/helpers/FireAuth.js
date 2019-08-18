@@ -32,24 +32,7 @@ const FireAuth = class {
 
     firebase.auth().onAuthStateChanged(user => {
       if (user && user.isAnonymous) {
-        console.log('User exists and is anonymous: ', user.uid)
-
-        const { uid } = user
-
-        firebaseDb
-          .collection('users')
-          .doc(uid)
-          .set(
-            {
-              id: user.uid,
-              lastSeen: Date.now()
-            },
-            { merge: true }
-          )
-        if (!__DEV__) {
-          Segment.identify(uid)
-        }
-
+        console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
       }
 
@@ -74,13 +57,22 @@ const FireAuth = class {
         }
 
         const userDoc = firebaseDb.collection('users').doc(user.uid)
-
-        userDoc.update(profile)
+        userDoc.get().then(u => {
+          if (u.data()) {
+            console.log('Update profile')
+            userDoc.update(profile)
+          } else {
+            console.log('Set profile')
+            userDoc.set(profile)
+          }
+        })
 
         const unsubscribe = userDoc.onSnapshot(doc => {
-          unsubscribe()
-
           const data = doc.data()
+
+          if (data) unsubscribe()
+
+          console.log('This snapshot', doc.data(), this.user)
 
           if (!this.user) {
             // Get studies - TODO: DO IT BETTER
@@ -95,33 +87,28 @@ const FireAuth = class {
                   studies[study.id] = study
                 })
 
-                if (data.bible && studies) data.bible.studies = studies
+                if (data && studies) {
+                  if (!data.bible) data.bible = {}
+                  data.bible.studies = studies
+                }
 
-                this.onLogin && this.onLogin(data) // On login
+                this.onLogin && this.onLogin(data || {}) // On login
               })
           } else if (data) {
-            this.onUserChange && this.onUserChange(data) // On updated
+            this.onLogin && this.onLogin(data || {}) // On updated
           }
 
           this.user = user // Store user
         })
 
         if (!__DEV__) {
-          Segment.identify(user.uid)
+          Segment.identifyWithTraits(user.uid, profile)
         }
         return
       }
 
-      console.log('No user, need to sign in')
+      console.log('No user, do nothing...')
       this.user = null
-
-      // TODO - DO WE REALLY NEED THIS ?
-      firebase
-        .auth()
-        .signInAnonymously()
-        .catch(error => {
-          Sentry.captureException(error)
-        })
     })
   }
 
@@ -135,10 +122,11 @@ const FireAuth = class {
         if (type === 'success' && token) {
           // Build Firebase credential with the Facebook access token.
           const credential = firebase.auth.FacebookAuthProvider.credential(token)
-          this.onCredentialSuccess(credential, resolve)
+          return this.onCredentialSuccess(credential, resolve)
         }
       } catch (e) {
-        SnackBar.show('Une erreur est survenue.', e)
+        SnackBar.show('Une erreur est survenue.')
+        console.log(e)
         return resolve(false)
       }
     })
@@ -165,46 +153,28 @@ const FireAuth = class {
         }
 
         SnackBar.show('Connexion annulée.')
-        resolve(false)
+        return resolve(false)
       } catch (e) {
-        SnackBar.show('Une erreur est survenue.', e)
-        resolve(false)
+        SnackBar.show('Une erreur est survenue')
+        console.log(e)
+        return resolve(false)
       }
     })
 
-  onCredentialSuccess = (credential, resolve) => {
-    firebase
-      .auth()
-      .currentUser.linkWithCredential(credential)
-      .then(
-        usercred => {
-          console.log('First connexion - Anonymous account successfully upgraded', usercred)
-          SnackBar.show('Connexion réussie')
-          return resolve(true)
-        },
-        error => {
-          console.log('Error upgrading anonymous account', error)
-          if (
-            error.code === 'auth/credential-already-in-use' ||
-            error.code === 'auth/provider-already-linked'
-          ) {
-            firebase
-              .auth()
-              .signInWithCredential(credential)
-              .then(user => {
-                console.log('user signed in ', user)
-                SnackBar.show('Connexion réussie')
-                return resolve(true)
-              })
-          } else if (error.code === 'auth/email-already-in-use') {
-            SnackBar.show('Un utilisateur existe déjà avec un autre compte. Connectez-vous !')
-            return resolve(false)
-          }
+  onCredentialSuccess = async (credential, resolve) => {
+    try {
+      const user = await firebase.auth().signInWithCredential(credential)
 
-          SnackBar.show('Une erreur est survenue.')
-          return resolve(false)
-        }
-      )
+      console.log('user signed in ', user)
+      SnackBar.show('Connexion réussie')
+      return resolve(true)
+    } catch (e) {
+      console.log(e.code)
+      if (e.code === 'auth/account-exists-with-different-credential') {
+        SnackBar.show('Cet utilisateur existe déjà avec un autre compte.', 'danger')
+      }
+      return resolve(false)
+    }
   }
 
   logout = () => {

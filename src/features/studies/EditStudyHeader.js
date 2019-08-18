@@ -1,5 +1,5 @@
 import React from 'react'
-import { Platform } from 'react-native'
+import { Platform, TouchableOpacity } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
@@ -12,8 +12,6 @@ import IconDropDown from '~assets/images/IconDropDown'
 import QuoteIcon from '~assets/images/QuoteIcon'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
-
-import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   marginTop: Platform.OS === 'ios' ? 0 : 25,
@@ -35,7 +33,8 @@ const MUIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
 }))
 
 const FormatIcon = styled(Icon.Feather)(({ theme, isSelected }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  flex: 1
 }))
 
 const PlusIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -66,91 +65,112 @@ const EditHeader = ({
   }
 
   const getHeaderTitle = () => {
-    if (!activeFormats['header']) {
+    if (!activeFormats.header) {
       return headerTitle[0]
-    } else {
-      return headerTitle[activeFormats['header']]
     }
+    return headerTitle[activeFormats.header]
   }
   return (
     <HeaderBox>
       <Box row height={50} center>
-        <Box flex justifyContent='center'>
-          <Link onPress={setReadOnly} underlayColor='transparent' style={{ marginRight: 15 }}>
-            <ValidateIcon
-              name={'check'}
-              size={25}
-            />
+        <Box flex justifyContent="center">
+          <Link onPress={setReadOnly} underlayColor="transparent" style={{ marginRight: 15 }}>
+            <ValidateIcon name="check" size={25} />
           </Link>
         </Box>
         <TouchableOpacity onPress={openHeaderModal}>
           <Box row center width={100}>
-            <Text fontSize={16} flex bold color={activeFormats['header'] ? 'primary' : 'default'}>{getHeaderTitle()}</Text>
-            <IconDropDown color={activeFormats['header'] ? 'primary' : 'default'} />
+            <Text fontSize={16} flex bold color={activeFormats.header ? 'primary' : 'default'}>
+              {getHeaderTitle()}
+            </Text>
+            <IconDropDown color={activeFormats.header ? 'primary' : 'default'} />
           </Box>
         </TouchableOpacity>
         <Box flex />
-        <Box row alignItems='center'>
-          <MUIcon name='undo' size={25} onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })} />
-          <MUIcon name='redo' size={25} onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })} />
-          <PlusIcon name='plus' size={25} onPress={openBlockModal} />
+        <Box row alignItems="center">
+          <MUIcon
+            name="undo"
+            size={25}
+            onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}
+          />
+          <MUIcon
+            name="redo"
+            size={25}
+            onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}
+          />
+          <PlusIcon name="plus" size={25} onPress={openBlockModal} />
         </Box>
       </Box>
-      <Box row justifyContent='space-between' height={50} center>
+      <Box row justifyContent="space-between" height={50} center>
         <FormatIcon
-          isSelected={activeFormats['bold']}
-          name='bold'
+          isSelected={activeFormats.bold}
+          name="bold"
           size={20}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'BOLD', value: !activeFormats['bold'] })}
+          onPress={() =>
+            dispatchToWebView('TOGGLE_FORMAT', { type: 'BOLD', value: !activeFormats.bold })
+          }
         />
         <FormatIcon
-          isSelected={activeFormats['italic']}
-          name='italic'
+          isSelected={activeFormats.italic}
+          name="italic"
           size={20}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'ITALIC', value: !activeFormats['italic'] })}
+          onPress={() =>
+            dispatchToWebView('TOGGLE_FORMAT', { type: 'ITALIC', value: !activeFormats.italic })
+          }
         />
         <FormatIcon
-          isSelected={activeFormats['underline']}
-          name='underline'
+          isSelected={activeFormats.underline}
+          name="underline"
           size={20}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDERLINE', value: !activeFormats['underline'] })}
+          onPress={() =>
+            dispatchToWebView('TOGGLE_FORMAT', {
+              type: 'UNDERLINE',
+              value: !activeFormats.underline
+            })
+          }
         />
         <TouchableOpacity
-          style={{ borderRadius: 2 }}
-          onPress={() => openColorModal('background')}
-        >
-          <BackgroundIcon
-            color={activeFormats['background']}
-          />
+          style={{ borderRadius: 2, flex: 1 }}
+          onPress={() => openColorModal('background')}>
+          <BackgroundIcon color={activeFormats.background} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ borderRadius: 2 }}
-          onPress={() => openColorModal('color')}
-        >
-          <ColorIcon
-            color={activeFormats['color']}
-          />
+          style={{ borderRadius: 2, flex: 1 }}
+          onPress={() => openColorModal('color')}>
+          <ColorIcon color={activeFormats.color} />
         </TouchableOpacity>
         <TouchableOpacity
-          underlayColor={'rgba(0,0,0,0.25)'}
-          style={{ borderRadius: 2 }}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'BLOCKQUOTE', value: !activeFormats['blockquote'] })}
-        >
-          <QuoteIcon
-            color={activeFormats['blockquote'] ? 'primary' : 'default'}
-          />
+          underlayColor="rgba(0,0,0,0.25)"
+          style={{ borderRadius: 2, flex: 1 }}
+          onPress={() =>
+            dispatchToWebView('TOGGLE_FORMAT', {
+              type: 'BLOCKQUOTE',
+              value: !activeFormats.blockquote
+            })
+          }>
+          <QuoteIcon color={activeFormats.blockquote ? 'primary' : 'default'} />
         </TouchableOpacity>
         <FormatIcon
-          isSelected={activeFormats['list'] === 'bullet'}
-          name='list'
+          isSelected={activeFormats.list === 'bullet'}
+          name="list"
           size={20}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'LIST', value: activeFormats['list'] === 'bullet' ? false : 'bullet' })}
+          onPress={() =>
+            dispatchToWebView('TOGGLE_FORMAT', {
+              type: 'LIST',
+              value: activeFormats.list === 'bullet' ? false : 'bullet'
+            })
+          }
         />
         <FormatIcon
-          isSelected={activeFormats['list'] === 'ordered'}
-          name='list'
+          isSelected={activeFormats.list === 'ordered'}
+          name="list"
           size={20}
-          onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'LIST', value: activeFormats['list'] === 'ordered' ? false : 'ordered' })}
+          onPress={() =>
+            dispatchToWebView('TOGGLE_FORMAT', {
+              type: 'LIST',
+              value: activeFormats.list === 'ordered' ? false : 'ordered'
+            })
+          }
         />
       </Box>
     </HeaderBox>

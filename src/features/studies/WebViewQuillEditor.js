@@ -231,6 +231,7 @@ class WebViewQuillEditor extends React.Component {
           keyboardDisplayRequiresUserAction={false}
           renderError={this.renderError}
           onError={this.onError}
+          bounces={false}
         />
         {Platform.OS === 'android' && <KeyboardSpacer />}
       </View>
