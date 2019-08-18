@@ -21,7 +21,7 @@ import {
   useAlphabet
 } from '../lexique/useUtilities'
 
-import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
+import waitForDatabase from '~common/waitForDictionnaireDB'
 
 import DictionnaireItem from './DictionnaireItem'
 
@@ -37,23 +37,19 @@ const SectionTitle = styled(Box)(({ theme }) => ({
 }))
 
 const DictionnaireScreen = () => {
-  const isLoading = useWaitForDatabase()
   const { section, sectionIndex, setSectionIndex, resetSectionIndex } = useSectionIndex()
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue({
     onDebouncedValue: resetSectionIndex
   })
-  const results = useResults(isLoading, loadDictionnaire)
+  const results = useResults(loadDictionnaire)
   const sectionResults = useSectionResults(
     results,
     debouncedSearchValue,
     sectionIndex,
     'sanitized_word'
   )
-  const alphabet = useAlphabet(results, 'sanitized_word')
 
-  if (isLoading) {
-    return <Loading message="Téléchargement du dictionnaire..." />
-  }
+  const alphabet = useAlphabet(results, 'sanitized_word')
 
   if (!sectionResults) {
     return <Loading message="Chargement..." />
@@ -71,7 +67,7 @@ const DictionnaireScreen = () => {
         {sectionResults.length ? (
           <SectionList
             ref={section}
-            renderItem={({ item: { word } }) => <DictionnaireItem key={word} {...{ word }} />}
+            renderItem={({ item: { id, word } }) => <DictionnaireItem key={id} {...{ word }} />}
             removeClippedSubviews
             maxToRenderPerBatch={100}
             getItemLayout={sectionListGetItemLayout({
@@ -89,7 +85,7 @@ const DictionnaireScreen = () => {
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={item => item.word}
+            keyExtractor={item => item.id}
           />
         ) : (
           <Empty source={require('~assets/images/empty.json')} message="Aucune strong trouvée..." />
@@ -102,4 +98,4 @@ const DictionnaireScreen = () => {
   )
 }
 
-export default DictionnaireScreen
+export default waitForDatabase(DictionnaireScreen)

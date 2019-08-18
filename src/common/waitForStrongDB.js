@@ -46,7 +46,7 @@ export const useWaitForDatabase = () => {
       }
 
       await initStrongDB()
-      console.log('DB loaded')
+      console.log('DB strong loaded')
       setLoading(false)
     }
 

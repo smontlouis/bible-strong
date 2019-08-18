@@ -64,13 +64,11 @@ export const useSearchValue = ({ onDebouncedValue }) => {
   return { searchValue, debouncedSearchValue, setSearchValue }
 }
 
-export const useResults = (isLoading, asyncFunc) => {
+export const useResults = asyncFunc => {
   const [results, setResults] = useState([])
   useEffect(() => {
-    if (!isLoading) {
-      asyncFunc().then(results => setResults(results))
-    }
-  }, [asyncFunc, isLoading])
+    asyncFunc().then(results => setResults(results))
+  }, [asyncFunc])
 
   return results
 }

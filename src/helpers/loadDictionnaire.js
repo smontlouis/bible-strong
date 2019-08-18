@@ -1,8 +1,8 @@
-import SQLTransaction from '~helpers/SQLTransaction'
+import SQLDTransaction from '~helpers/SQLDTransaction'
 
 const loadDictionnaire = async () => {
-  const result = await SQLTransaction(
-    `SELECT word, sanitized_word
+  const result = await SQLDTransaction(
+    `SELECT rowid, word, sanitized_word
     FROM dictionnaire 
     ORDER BY sanitized_word ASC
     `

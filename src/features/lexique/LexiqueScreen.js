@@ -21,7 +21,7 @@ import {
   useAlphabet
 } from './useUtilities'
 
-import { useWaitForDatabase } from '~common/waitForStrongDB'
+import waitForDatabase from '~common/waitForStrongDB'
 
 import LexiqueItem from './LexiqueItem'
 
@@ -37,18 +37,13 @@ const SectionTitle = styled(Box)(({ theme }) => ({
 }))
 
 const LexiqueScreen = () => {
-  const isLoading = useWaitForDatabase()
   const { section, sectionIndex, setSectionIndex, resetSectionIndex } = useSectionIndex()
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue({
     onDebouncedValue: resetSectionIndex
   })
-  const results = useResults(isLoading, loadLexique)
+  const results = useResults(loadLexique)
   const sectionResults = useSectionResults(results, debouncedSearchValue, sectionIndex)
   const alphabet = useAlphabet(results)
-
-  if (isLoading) {
-    return <Loading message="Téléchargement du dictionnaire..." />
-  }
 
   if (!sectionResults) {
     return <Loading message="Chargement..." />
@@ -99,4 +94,4 @@ const LexiqueScreen = () => {
   )
 }
 
-export default LexiqueScreen
+export default waitForDatabase(LexiqueScreen)

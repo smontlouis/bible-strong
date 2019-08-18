@@ -9,8 +9,8 @@ export const initStrongDB = () => {
 }
 
 export const initDictionnaireDB = () => {
-  dbStrong = SQLite.openDatabase('dictionnaire.sqlite')
-  return dbStrong
+  dbDictionnaire = SQLite.openDatabase('dictionnaire.sqlite')
+  return dbDictionnaire
 }
 
 export const getStrongDB = () => {
