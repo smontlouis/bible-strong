@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import * as FileSystem from 'expo-file-system'
 import AssetUtils from 'expo-asset-utils'
 
-import { initDB, getStrongDB } from '~helpers/database'
+import { initStrongDB, getStrongDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import { setStrongDatabaseHash } from '~redux/modules/bible'
 
-const useWaitForDatabase = () => {
+export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
   const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
   const dispatch = useDispatch()
@@ -45,7 +45,8 @@ const useWaitForDatabase = () => {
         await FileSystem.copyAsync({ from: sqliteDB.localUri, to: dbPath })
       }
 
-      await initDB()
+      await initStrongDB()
+      console.log('DB loaded')
       setLoading(false)
     }
 

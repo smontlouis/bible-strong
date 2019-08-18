@@ -6,6 +6,7 @@ import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
+import Back from '~common/Back'
 
 const TouchableBox = styled.TouchableOpacity({
   flexDirection: 'row',
@@ -37,17 +38,26 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip }) => {
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
+
+const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
-      <Box flex justifyContent='center'>
-        <Text fontSize={16} bold>{title} </Text>
+      {hasBackButton && (
+        <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+          <FeatherIcon name="arrow-left" size={20} />
+        </Back>
+      )}
+      <Box flex justifyContent="center">
+        <Text fontSize={16} bold>
+          {title}{' '}
+        </Text>
       </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
-        <StyledText>
-          {selectedChip ? selectedChip.name : 'Tout'}
-        </StyledText>
-        <StyledIcon name='chevron-down' size={15} />
+        <StyledText>{selectedChip ? selectedChip.name : 'Tout'}</StyledText>
+        <StyledIcon name="chevron-down" size={15} />
       </TouchableBox>
     </HeaderBox>
   )

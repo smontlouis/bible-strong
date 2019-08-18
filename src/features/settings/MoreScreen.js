@@ -61,6 +61,18 @@ const MoreScreen = () => {
             Mes tags
           </Text>
         </LinkItem>
+        <LinkItem route="Highlights">
+          <StyledIcon name="edit-3" size={25} />
+          <Text bold fontSize={15}>
+            Surbillances
+          </Text>
+        </LinkItem>
+        <LinkItem route="BibleVerseNotes">
+          <StyledIcon name="file-text" size={25} />
+          <Text bold fontSize={15}>
+            Notes
+          </Text>
+        </LinkItem>
         <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
           <StyledIcon name="sun" size={25} />
           <Text bold fontSize={15}>

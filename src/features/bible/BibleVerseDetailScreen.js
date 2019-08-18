@@ -9,7 +9,7 @@ import truncate from '~helpers/truncate'
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
-import WaitForDB from '~common/WaitForDB'
+import waitForStrongDB from '~common/waitForStrongDB'
 import * as BibleActions from '~redux/modules/bible'
 
 import Container from '~common/ui/Container'
@@ -257,5 +257,5 @@ export default compose(
     },
     BibleActions
   ),
-  WaitForDB
+  waitForStrongDB
 )(BibleVerseDetailScreen)

@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { compose } from 'recompose'
-import waitForDB from '~common/WaitForDB'
+import waitForStrongDB from '~common/waitForStrongDB'
 
-import { initDB } from '~helpers/database'
+import { initStrongDB } from '~helpers/database'
 import loadCountVerses from '~helpers/loadCountVerses'
 import * as BibleActions from '~redux/modules/bible'
 import SelectorItem from './SelectorItem'
@@ -19,7 +19,7 @@ class VerseSelector extends Component {
   }
 
   componentDidMount() {
-    initDB() // Fix weird bug on iOS
+    initStrongDB() // Fix weird bug on iOS
     this.loadVerses()
   }
 
@@ -77,7 +77,7 @@ class VerseSelector extends Component {
 }
 
 export default compose(
-  waitForDB,
+  waitForStrongDB,
   connect(
     ({ bible: { temp } }) => ({
       selectedBook: temp.selectedBook,

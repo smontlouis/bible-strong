@@ -10,6 +10,7 @@ import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleCompareVerses from '~features/bible/BibleCompareVerses'
 import SearchScreen from '~features/search/SearchScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
+import HighlightScreen from '~features/settings/HighlightsScreen'
 
 export default createStackNavigator(
   {
@@ -18,6 +19,7 @@ export default createStackNavigator(
     VersionSelector: { screen: VersionSelectorScreen },
     BibleVerseDetail: { screen: BibleVerseDetailScreen },
     BibleVerseNotes: { screen: BibleVerseNotesScreen },
+    Highlights: { screen: HighlightScreen },
     BibleStrongDetail: { screen: BibleStrongDetailScreen },
     ConcordanceByBook: { screen: ConcordanceByBookScreen },
     BibleView: { screen: BibleViewScreen },

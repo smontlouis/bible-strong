@@ -135,6 +135,7 @@ class BibleVerseNotes extends Component {
             setIsOpen={this.setTagsIsOpen}
             isOpen={isTagsOpen}
             selectedChip={selectedChip}
+            hasBackButton
           />
         )}
         {filteredNotes.length ? (

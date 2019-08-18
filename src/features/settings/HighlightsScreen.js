@@ -25,6 +25,7 @@ const HighlightsScreen = () => {
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
         selectedChip={selectedChip}
+        hasBackButton
       />
       <TagsModal
         isVisible={isTagsOpen}

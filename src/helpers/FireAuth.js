@@ -139,7 +139,7 @@ const FireAuth = class {
         }
       } catch (e) {
         SnackBar.show('Une erreur est survenue.', e)
-        resolve(false)
+        return resolve(false)
       }
     })
 
@@ -161,11 +161,11 @@ const FireAuth = class {
             googleUser.accessToken
           )
 
-          this.onCredentialSuccess(credential, resolve)
-        } else {
-          SnackBar.show('Connexion annulée.')
-          resolve(false)
+          return this.onCredentialSuccess(credential, resolve)
         }
+
+        SnackBar.show('Connexion annulée.')
+        resolve(false)
       } catch (e) {
         SnackBar.show('Une erreur est survenue.', e)
         resolve(false)
@@ -180,7 +180,7 @@ const FireAuth = class {
         usercred => {
           console.log('First connexion - Anonymous account successfully upgraded', usercred)
           SnackBar.show('Connexion réussie')
-          resolve(true)
+          return resolve(true)
         },
         error => {
           console.log('Error upgrading anonymous account', error)
@@ -194,15 +194,15 @@ const FireAuth = class {
               .then(user => {
                 console.log('user signed in ', user)
                 SnackBar.show('Connexion réussie')
-                resolve(true)
+                return resolve(true)
               })
           } else if (error.code === 'auth/email-already-in-use') {
             SnackBar.show('Un utilisateur existe déjà avec un autre compte. Connectez-vous !')
-            resolve(false)
-          } else {
-            SnackBar.show('Une erreur est survenue.')
-            resolve(false)
+            return resolve(false)
           }
+
+          SnackBar.show('Une erreur est survenue.')
+          return resolve(false)
         }
       )
   }

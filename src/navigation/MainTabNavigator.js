@@ -2,9 +2,9 @@ import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
 import MoreScreen from '~features/settings/MoreScreen'
-import HighlightScreen from '~features/settings/HighlightsScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
-import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
+import LexiqueScreen from '~features/lexique/LexiqueScreen'
+import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import getTheme from '~themes'
 
@@ -30,20 +30,20 @@ export default createMaterialBottomTabNavigator(
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
-    Highlights: {
-      screen: HighlightScreen,
+    Lexique: {
+      screen: LexiqueScreen,
       navigationOptions: ({ screenProps }) => ({
-        title: 'Surbrillances',
-        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="edit-3" />,
+        title: 'Lexique',
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="book" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
-    Notes: {
-      screen: BibleVerseNotesScreen,
+    Dictionnary: {
+      screen: DictionnaryScreen,
       navigationOptions: ({ screenProps }) => ({
-        title: 'Notes',
-        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="file-text" />,
+        title: 'Dictionnaire',
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="book" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
