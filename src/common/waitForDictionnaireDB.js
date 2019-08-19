@@ -71,7 +71,7 @@ export const useWaitForDatabase = () => {
 
 const waitForDatabase = WrappedComponent => props => {
   const { isLoading, progress } = useWaitForDatabase()
-  const isProgressing = typeof idxProgress !== 'undefined'
+  const isProgressing = typeof progress !== 'undefined'
 
   if (isLoading && isProgressing) {
     return (
