@@ -79,7 +79,7 @@ class StrongCard extends React.Component {
         ...cleanParams(),
         type: isSelectionMode,
         title: Mot,
-        code: Code,
+        codeStrong: Code,
         strongType: Type,
         phonetique: Phonetique,
         definition: Definition,

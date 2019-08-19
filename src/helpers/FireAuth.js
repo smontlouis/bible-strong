@@ -96,7 +96,7 @@ const FireAuth = class {
 
         if (!__DEV__) {
           Segment.identifyWithTraits(user.uid, profile)
-          Sentry.setUser(profile)
+          Sentry.setUserContext(profile)
         }
         return
       }

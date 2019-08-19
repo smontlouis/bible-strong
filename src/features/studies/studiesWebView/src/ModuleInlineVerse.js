@@ -88,7 +88,7 @@ class ModuleInlineVerse extends Module {
     }
   }
 
-  receiveStrongLink = ({ title, code, book }) => {
+  receiveStrongLink = ({ title, codeStrong, book }) => {
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
     // dispatchConsole(`Receive strong ${title}`)
@@ -98,14 +98,14 @@ class ModuleInlineVerse extends Module {
         this.quill.format('inline-verse', false) // Disable inline-verse in case
         this.quill.format('inline-strong', {
           title,
-          code,
+          codeStrong,
           book
         })
         this.quill.setSelection(this.range.index + 1, Quill.sources.SILENT)
       } else {
         this.quill.insertText(this.range.index, title, 'inline-strong', {
           title,
-          code,
+          codeStrong,
           book
         })
         this.quill.insertText(this.range.index, ' ')

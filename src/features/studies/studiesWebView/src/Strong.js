@@ -2,7 +2,7 @@ import React from 'react'
 import ArrowRight from './ArrowRight'
 import './strong.css'
 
-const Strong = ({ title, code, strongType, phonetique, definition, translatedBy, original }) => (
+const Strong = ({ title, code, phonetique, original }) => (
   <React.Fragment>
     <div className='block-strong--content'>
       <div className='block-strong--title'>
@@ -18,6 +18,7 @@ const Strong = ({ title, code, strongType, phonetique, definition, translatedBy,
         <ArrowRight />
       </div>
     </div>
+    {/* <div className='block-delete' /> */}
   </React.Fragment>
 )
 

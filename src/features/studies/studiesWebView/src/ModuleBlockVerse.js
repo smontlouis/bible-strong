@@ -18,9 +18,13 @@ class ModuleBlockVerse extends Module {
 
     const { title, content, version, verses } = data
 
-    const range = this.quill.getSelection(true)
-    this.quill.insertEmbed(range.index, 'block-verse', { title, content, version, verses }, Quill.sources.USER)
-    this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
+    const range = this.quill.selection.savedRange;
+    if (!range || range.length != 0) return;
+    const cursorPosition = range.index;
+
+    this.quill.insertEmbed(cursorPosition, 'block-verse', { title, content, version, verses }, Quill.sources.API);
+    this.quill.insertText(cursorPosition + 1, ' ', Quill.sources.API);
+    this.quill.setSelection(cursorPosition + 2, Quill.sources.API);
   }
 
   openStrongBlock = (value) => {
@@ -30,10 +34,15 @@ class ModuleBlockVerse extends Module {
   receiveStrongBlock = (data) => {
     dispatchConsole(`STRONG RECEIVED: ${JSON.stringify(data)}`)
 
-    const { title, code, strongType, phonetique, definition, translatedBy, book, original } = data
-    const range = this.quill.getSelection(true)
-    this.quill.insertEmbed(range.index, 'block-strong', { title, code, strongType, phonetique, definition, translatedBy, book, original }, Quill.sources.USER)
-    this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
+    const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } = data
+
+    const range = this.quill.selection.savedRange;
+    if (!range || range.length != 0) return;
+    const cursorPosition = range.index;
+
+    this.quill.insertEmbed(cursorPosition, 'block-strong', { title, codeStrong, phonetique, book, original }, Quill.sources.API);
+    this.quill.insertText(cursorPosition + 1, ' ', Quill.sources.API);
+    this.quill.setSelection(cursorPosition + 2, Quill.sources.API);
   }
 }
 

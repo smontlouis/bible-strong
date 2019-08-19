@@ -64,22 +64,16 @@ export default [
   {
     attributes: {
       title: 'Christos',
-      code: 5547,
-      strongType: 'Adjectif',
+      codeStrong: '5547',
       phonetique: '(khris-tos\')',
-      definition: '<p>Christ = "oint"</p><ol><li>Christ était le Messie, le Fils de Dieu.</li><li>l\'Oint.</li></ol>',
-      translatedBy: 'Christ 535; 535',
-      book: 49,
+      book: '49',
       original: 'Χριστός, οῦ, ὁ'
     },
     insert: {
       'block-strong': {
         title: 'Christos',
-        code: 5547,
-        strongType: 'Adjectif',
+        codeStrong: 5547,
         phonetique: '(khris-tos\')',
-        definition: '<p>Christ = "oint"</p><ol><li>Christ était le Messie, le Fils de Dieu.</li><li>l\'Oint.</li></ol>',
-        translatedBy: 'Christ 535; 535',
         book: 49,
         original: 'Χριστός, οῦ, ὁ'
       }

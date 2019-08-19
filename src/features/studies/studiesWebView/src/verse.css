@@ -1,4 +1,4 @@
-.block-verse {
+.block-verse--wrapper {
   margin: 10px 0;
   padding: 13px 18px;
   background: linear-gradient(50deg, rgba(44, 62, 80,0.8) 0%,rgba(44, 62, 80,1.0) 100%);
@@ -8,6 +8,7 @@
   position: relative;
   overflow: hidden;
   padding-bottom: 30px;
+  z-index: 10;
 }
 
 .block-verse--content {
@@ -53,4 +54,26 @@
 
 .block-verse--version {
   font-weight: bold;  
+}
+
+.block-delete {
+    height: 30px;
+    background-color: rgb(194,40,57);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-family: arial;
+    color: white;
+    border-radius: 0 0 8px 8px;
+    position: relative;
+    bottom: 13px;
+}
+
+
+.block-delete:before {
+  content:"Supprimer le bloc";
+  font-size: 13px;
+  font-family: arial;
+  display:block;
 }

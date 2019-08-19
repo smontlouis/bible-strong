@@ -7,18 +7,18 @@ class InlineStrong extends Inline {
   static tagName = 'a'
   static className = 'inline-strong'
 
-  static create ({ title, code, book }) {
+  static create ({ title, codeStrong, book }) {
     let node = super.create()
     node.setAttribute('data-title', title)
-    node.setAttribute('data-code', code)
+    node.setAttribute('data-codeStrong', codeStrong)
     node.setAttribute('data-book', book)
 
     node.addEventListener('click', () => {
       const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
       if (isReadOnly) {
-        dispatchConsole(`${code} ${book}`)
+        dispatchConsole(`${codeStrong} ${book}`)
         dispatch('VIEW_BIBLE_STRONG', {
-          reference: code,
+          reference: codeStrong,
           book
         })
       }
@@ -29,7 +29,7 @@ class InlineStrong extends Inline {
   static formats (domNode) {
     return {
       title: domNode.getAttribute('data-title'),
-      code: domNode.getAttribute('data-code'),
+      codeStrong: domNode.getAttribute('data-codeStrong'),
       book: domNode.getAttribute('data-book')
     }
   }
