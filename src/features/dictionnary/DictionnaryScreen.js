@@ -88,7 +88,7 @@ const DictionnaireScreen = () => {
             keyExtractor={item => item.id}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message="Aucune strong trouvée..." />
+          <Empty source={require('~assets/images/empty.json')} message="Aucun mot trouvé..." />
         )}
       </Box>
       {!searchValue && (
