@@ -50,45 +50,34 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       isVisible={isVisible}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard
-    >
+      avoidKeyboard>
       <Container>
         <Box flex>
           <ScrollView style={{ padding: 20, flex: 1 }}>
             <Box row wrap>
-              <Chip
-                label='Tout'
-                isSelected={!selectedChip}
-                onPress={() => onSelected(null)}
-              />
-              {
-                tags.map(chip =>
-                  <Chip
-                    key={chip.id}
-                    label={chip.name}
-                    isSelected={selectedChip && chip.name === selectedChip.name}
-                    onPress={() => onSelected(chip)}
-                  />
-                )
-              }
+              <Chip label="Tout" isSelected={!selectedChip} onPress={() => onSelected(null)} />
+              {tags.map(chip => (
+                <Chip
+                  key={chip.id}
+                  label={chip.name}
+                  isSelected={selectedChip && chip.name === selectedChip.name}
+                  onPress={() => onSelected(chip)}
+                />
+              ))}
             </Box>
           </ScrollView>
         </Box>
         <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
           <TextInput
-            placeholder='Créer un nouveau tag'
+            placeholder="Créer un nouveau tag"
             onChangeText={setNewTag}
             onSubmitEditing={saveTag}
-            returnKeyType='send'
+            returnKeyType="send"
             style={{ flex: 1 }}
             value={newTag}
           />
           <TouchableOpacity onPress={saveTag}>
-            <StyledIcon
-              isDisabled={!newTag}
-              name={'check'}
-              size={30}
-            />
+            <StyledIcon isDisabled={!newTag} name="check" size={30} />
           </TouchableOpacity>
         </Box>
       </Container>

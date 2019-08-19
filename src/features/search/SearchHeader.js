@@ -23,7 +23,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 const SearchHeader = ({ onChangeText, placeholder, hasBackButton, theme }) => (
   <Container>
     {hasBackButton && (
-      <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+      <Back style={{ marginRight: 15 }}>
         <FeatherIcon name="arrow-left" size={20} />
       </Back>
     )}

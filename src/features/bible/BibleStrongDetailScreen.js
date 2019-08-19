@@ -93,6 +93,7 @@ class BibleStrongDetailScreen extends React.Component {
       toCopy += `Définition - ${Code}\n${def}\n\n`
     }
     toCopy += LSG ? `Généralement traduit par:\n${LSG}` : ''
+    toCopy += '\n\n https://bible-strong.app'
 
     Share.share({ message: toCopy })
   }
@@ -187,19 +188,19 @@ class BibleStrongDetailScreen extends React.Component {
             )}
             {!!Definition && (
               <ViewItem>
-                <SubTitle darkGrey>Définition - {Code}</SubTitle>
+                <SubTitle color="tertiary">Définition - {Code}</SubTitle>
                 <StylizedHTMLView value={Definition} onLinkPress={this.linkToStrong} />
               </ViewItem>
             )}
             {!!LSG && (
               <ViewItem>
-                <SubTitle darkGrey>Généralement traduit par</SubTitle>
+                <SubTitle color="tertiary">Généralement traduit par</SubTitle>
                 <Paragraph>{LSG}</Paragraph>
               </ViewItem>
             )}
             {!!Origine && (
               <ViewItem>
-                <SubTitle darkGrey>Origine du mot</SubTitle>
+                <SubTitle color="tertiary">Origine du mot</SubTitle>
                 <StylizedHTMLView value={Origine} onLinkPress={this.linkToStrong} />
               </ViewItem>
             )}

@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react'
 import { pure, compose } from 'recompose'
-import { TouchableHighlight } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 class Back extends Component {
@@ -10,8 +10,8 @@ class Back extends Component {
     navigation.goBack()
   }
 
-  render () {
-    return <TouchableHighlight {...this.props} onPress={this.handlePress} />
+  render() {
+    return <TouchableOpacity {...this.props} onPress={this.handlePress} />
   }
 }
 

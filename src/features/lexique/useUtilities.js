@@ -12,7 +12,7 @@ export const useSectionResults = (results, debouncedSearchValue, sectionIndex, p
     let filteredResults = debouncedSearchValue
       ? (filteredResults = results.filter(
           c =>
-            c.Code == debouncedSearchValue ||
+            (c && c.Code && c.Code == debouncedSearchValue) ||
             c[prop].toLowerCase().includes(debouncedSearchValue.toLowerCase())
         ))
       : results

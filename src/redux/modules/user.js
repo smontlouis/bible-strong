@@ -1,5 +1,7 @@
 import produce from 'immer'
 import deepmerge from 'deepmerge'
+import Sentry from 'sentry-expo'
+
 import { clearSelectedVerses } from './bible'
 
 import orderVerses from '~helpers/orderVerses'
@@ -86,13 +88,15 @@ const removeEntityInTags = (draft, entity, key) => {
   }
 }
 
+const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
+
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       // DEEP MERGE HERE ?
-      return deepmerge(draft, action.payload)
+      return deepmerge(draft, action.payload, { arrayMerge: overwriteMerge })
     }
     case USER_LOGOUT: {
       return {
@@ -220,8 +224,12 @@ export default produce((draft, action) => {
         Object.keys(item.ids).forEach(id => {
           // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
           if (hasTag) {
-            delete draft.bible.tags[tagId][item.entity][id]
-            delete draft.bible[item.entity][id].tags[tagId]
+            try {
+              delete draft.bible.tags[tagId][item.entity][id]
+              delete draft.bible[item.entity][id].tags[tagId]
+            } catch (e) {
+              Sentry.captureException(e)
+            }
 
             // ADD OPERATION
           } else {

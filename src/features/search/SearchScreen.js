@@ -62,11 +62,13 @@ export default class SearchScreen extends React.Component {
   }
 
   onChangeText = value => {
-    if (value !== '') {
-      const results = this.idx.search(value)
-      this.setState({ results, value })
-    } else {
-      this.setState({ results: [], value })
+    if (this.idx) {
+      if (value !== '') {
+        const results = this.idx.search(value)
+        this.setState({ results, value })
+      } else {
+        this.setState({ results: [], value })
+      }
     }
   }
 

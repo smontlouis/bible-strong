@@ -19,51 +19,52 @@ export const useWaitForDatabase = () => {
   useEffect(() => {
     if (getDictionnaireDB()) {
       setLoading(false)
-    }
+    } else {
+      const loadDBAsync = async () => {
+        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-    const loadDBAsync = async () => {
-      const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-      const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
+        if (!sqliteDir.exists) {
+          await FileSystem.makeDirectoryAsync(sqliteDirPath)
+        } else if (!sqliteDir.isDirectory) {
+          throw new Error('SQLite dir is not a directory')
+        }
 
-      if (!sqliteDir.exists) {
-        await FileSystem.makeDirectoryAsync(sqliteDirPath)
-      } else if (!sqliteDir.isDirectory) {
-        throw new Error('SQLite dir is not a directory')
+        const dbPath = `${sqliteDirPath}/dictionnaire.sqlite`
+        const dbFile = await FileSystem.getInfoAsync(dbPath)
+
+        // if (__DEV__) {
+        //   if (dbFile.exists) {
+        //     FileSystem.deleteAsync(dbFile.uri)
+        //     dbFile = await FileSystem.getInfoAsync(dbPath)
+        //   }
+        // }
+
+        const sqliteDB = await Asset.fromModule(require('~assets/db/dictionnaire.sqlite'))
+
+        if (!dbFile.exists || sqliteDB.hash !== dictionnaireDatabaseHash) {
+          console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+          await FileSystem.createDownloadResumable(
+            sqliteDB.uri,
+            dbPath,
+            null,
+            ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+              const idxProgress =
+                Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
+              setProgress(idxProgress)
+            }
+          ).downloadAsync()
+
+          dispatch(setDictionnaireDatabaseHash(sqliteDB.hash))
+        }
+
+        await initDictionnaireDB()
+        console.log('DB dictionnaire loaded')
+        setLoading(false)
       }
 
-      const dbPath = `${sqliteDirPath}/dictionnaire.sqlite`
-      const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-      // if (__DEV__) {
-      //   if (dbFile.exists) {
-      //     FileSystem.deleteAsync(dbFile.uri)
-      //     dbFile = await FileSystem.getInfoAsync(dbPath)
-      //   }
-      // }
-
-      const sqliteDB = await Asset.fromModule(require('~assets/db/dictionnaire.sqlite'))
-
-      if (!dbFile.exists || sqliteDB.hash !== dictionnaireDatabaseHash) {
-        console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
-        await FileSystem.createDownloadResumable(
-          sqliteDB.uri,
-          dbPath,
-          null,
-          ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-            const idxProgress = Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
-            setProgress(idxProgress)
-          }
-        ).downloadAsync()
-
-        dispatch(setDictionnaireDatabaseHash(sqliteDB.hash))
-      }
-
-      await initDictionnaireDB()
-      console.log('DB dictionnaire loaded')
-      setLoading(false)
+      loadDBAsync()
     }
-
-    loadDBAsync()
   }, [dictionnaireDatabaseHash, dispatch])
   return { isLoading, progress }
 }

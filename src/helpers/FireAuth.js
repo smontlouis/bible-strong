@@ -101,6 +101,7 @@ const FireAuth = class {
 
         if (!__DEV__) {
           Segment.identifyWithTraits(user.uid, profile)
+          Sentry.setUser(profile)
         }
         return
       }
@@ -125,6 +126,7 @@ const FireAuth = class {
       } catch (e) {
         SnackBar.show('Une erreur est survenue.')
         console.log(e)
+        Sentry.captureException(e)
         return resolve(false)
       }
     })
@@ -155,6 +157,7 @@ const FireAuth = class {
       } catch (e) {
         SnackBar.show('Une erreur est survenue')
         console.log(e)
+        Sentry.captureException(e)
         return resolve(false)
       }
     })

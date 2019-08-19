@@ -1,11 +1,12 @@
 import React, { memo } from 'react'
 import styled from '@emotion/native'
 
+import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 const SectionItem = styled(Box)(({ theme }) => ({
-  height: 80,
+  height: 60,
   paddingLeft: 20,
   paddingRight: 20,
   backgroundColor: theme.colors.reverse,
@@ -16,13 +17,15 @@ const SectionItem = styled(Box)(({ theme }) => ({
 }))
 
 const DictionnaireItem = memo(({ word }) => (
-  <SectionItem>
-    <Box row>
-      <Text title fontSize={18} color="default" flex paddingRight={20}>
-        {word}
-      </Text>
-    </Box>
-  </SectionItem>
+  <Link route="DictionnaryDetail" params={{ word }}>
+    <SectionItem>
+      <Box row>
+        <Text title fontSize={18} color="default" flex paddingRight={20}>
+          {word}
+        </Text>
+      </Box>
+    </SectionItem>
+  </Link>
 ))
 
 export default DictionnaireItem

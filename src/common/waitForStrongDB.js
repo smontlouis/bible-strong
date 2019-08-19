@@ -15,42 +15,42 @@ export const useWaitForDatabase = () => {
   useEffect(() => {
     if (getStrongDB()) {
       setLoading(false)
-    }
+    } else {
+      const loadDBAsync = async () => {
+        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-    const loadDBAsync = async () => {
-      const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-      const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
+        if (!sqliteDir.exists) {
+          await FileSystem.makeDirectoryAsync(sqliteDirPath)
+        } else if (!sqliteDir.isDirectory) {
+          throw new Error('SQLite dir is not a directory')
+        }
 
-      if (!sqliteDir.exists) {
-        await FileSystem.makeDirectoryAsync(sqliteDirPath)
-      } else if (!sqliteDir.isDirectory) {
-        throw new Error('SQLite dir is not a directory')
+        const dbPath = `${sqliteDirPath}/strong.sqlite`
+        const dbFile = await FileSystem.getInfoAsync(dbPath)
+
+        // if (__DEV__) {
+        //   if (dbFile.exists) {
+        //     FileSystem.deleteAsync(dbFile.uri)
+        //     dbFile = await FileSystem.getInfoAsync(dbPath)
+        //   }
+        // }
+
+        const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
+
+        if (!dbFile.exists || sqliteDB.hash !== strongDatabaseHash) {
+          dispatch(setStrongDatabaseHash(sqliteDB.hash))
+          console.log(`Copying ${sqliteDB.localUri} to ${dbPath}`)
+          await FileSystem.copyAsync({ from: sqliteDB.localUri, to: dbPath })
+        }
+
+        await initStrongDB()
+        console.log('DB strong loaded')
+        setLoading(false)
       }
 
-      const dbPath = `${sqliteDirPath}/strong.sqlite`
-      const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-      // if (__DEV__) {
-      //   if (dbFile.exists) {
-      //     FileSystem.deleteAsync(dbFile.uri)
-      //     dbFile = await FileSystem.getInfoAsync(dbPath)
-      //   }
-      // }
-
-      const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
-
-      if (!dbFile.exists || sqliteDB.hash !== strongDatabaseHash) {
-        dispatch(setStrongDatabaseHash(sqliteDB.hash))
-        console.log(`Copying ${sqliteDB.localUri} to ${dbPath}`)
-        await FileSystem.copyAsync({ from: sqliteDB.localUri, to: dbPath })
-      }
-
-      await initStrongDB()
-      console.log('DB strong loaded')
-      setLoading(false)
+      loadDBAsync()
     }
-
-    loadDBAsync()
   }, [strongDatabaseHash, dispatch])
 
   return isLoading

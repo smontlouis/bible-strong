@@ -1,6 +1,6 @@
 import React from 'react'
+import { Linking, StyleSheet, Text, View } from 'react-native'
 import htmlToElement from './htmlToElement'
-import { Linking, StyleSheet, Text } from 'react-native'
 
 class HTMLView extends React.Component {
   static defaultProps = {
@@ -12,22 +12,22 @@ class HTMLView extends React.Component {
     element: null
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (this.props.value !== nextProps.value) {
       this.startHtmlRender(nextProps.value)
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.startHtmlRender(this.props.value)
   }
 
   startHtmlRender = value => {
     if (!value) return this.setState({ element: null })
 
-    var opts = {
+    const opts = {
       linkHandler: this.props.onLinkPress,
-      styles: Object.assign({}, baseStyles, this.props.stylesheet),
+      styles: { ...baseStyles, ...this.props.stylesheet },
       customRenderer: this.props.renderNode
     }
 
@@ -37,9 +37,9 @@ class HTMLView extends React.Component {
     })
   }
 
-  render () {
+  render() {
     if (this.state.element) {
-      return <Text children={this.state.element} />
+      return <View children={this.state.element} />
     }
     return <Text />
   }

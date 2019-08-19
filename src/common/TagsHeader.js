@@ -46,7 +46,7 @@ const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButto
   return (
     <HeaderBox noBorder={noBorder} row>
       {hasBackButton && (
-        <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+        <Back style={{ marginRight: 15 }}>
           <FeatherIcon name="arrow-left" size={20} />
         </Back>
       )}

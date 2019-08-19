@@ -11,6 +11,7 @@ import BibleCompareVerses from '~features/bible/BibleCompareVerses'
 import SearchScreen from '~features/search/SearchScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
+import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
 
 export default createStackNavigator(
   {
@@ -25,7 +26,8 @@ export default createStackNavigator(
     BibleView: { screen: BibleViewScreen },
     BibleCompareVerses: { screen: BibleCompareVerses },
     Search: { screen: SearchScreen },
-    EditStudy: { screen: EditStudyScreen }
+    EditStudy: { screen: EditStudyScreen },
+    DictionnaryDetail: { screen: DictionnaryDetailScreen }
   },
   {
     headerMode: 'none'

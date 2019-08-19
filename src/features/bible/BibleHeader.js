@@ -60,7 +60,7 @@ const Header = ({
     return (
       <HeaderBox noBorder={noBorder} row>
         <Box flex justifyContent="center">
-          <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+          <Back style={{ marginRight: 15 }}>
             <StyledIcon name="arrow-left" size={20} />
           </Back>
         </Box>
@@ -77,7 +77,7 @@ const Header = ({
     <HeaderBox noBorder={noBorder} row>
       {isSelectionMode && (
         <Box justifyContent="center">
-          <Back underlayColor="transparent" style={{ marginRight: 15 }}>
+          <Back style={{ marginRight: 15 }}>
             <StyledIcon name="arrow-left" size={20} />
           </Back>
         </Box>

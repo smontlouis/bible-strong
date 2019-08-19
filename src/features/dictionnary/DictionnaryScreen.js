@@ -71,7 +71,7 @@ const DictionnaireScreen = () => {
             removeClippedSubviews
             maxToRenderPerBatch={100}
             getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 80,
+              getItemHeight: () => 60,
               getSectionHeaderHeight: () => 50,
               getSeparatorHeight: () => 0,
               getSectionFooterHeight: () => 0

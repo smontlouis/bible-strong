@@ -53,7 +53,7 @@ const TagsModal = ({ isVisible, onClosed }) => {
   }
 
   useEffect(() => {
-    setNewTag(selectedChip && selectedChip.name)
+    setNewTag(selectedChip ? selectedChip.name : '')
   }, [selectedChip])
 
   const promptLogout = () => {

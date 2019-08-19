@@ -25,18 +25,17 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
-      <Box flex justifyContent='center'>
+      <Box flex justifyContent="center">
         {hasBackButton && (
-          <Back underlayColor='transparent' style={{ marginRight: 15 }}>
-            <FeatherIcon
-              name={isModal ? 'x' : 'arrow-left'}
-              size={20}
-            />
+          <Back style={{ marginRight: 15 }}>
+            <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
           </Back>
         )}
       </Box>
       <Box grow center>
-        <Text fontSize={16} onPress={onTitlePress} bold>{title}</Text>
+        <Text fontSize={16} onPress={onTitlePress} bold>
+          {title}
+        </Text>
       </Box>
       <Box flex />
     </HeaderBox>

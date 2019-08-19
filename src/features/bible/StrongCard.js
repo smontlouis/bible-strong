@@ -135,7 +135,8 @@ class StrongCard extends React.Component {
                   p: {
                     lineHeight: 18,
                     fontSize: 12,
-                    color: theme.colors.default
+                    color: theme.colors.default,
+                    fontFamily: 'literata-book'
                   }
                 }}
                 value={Definition}
