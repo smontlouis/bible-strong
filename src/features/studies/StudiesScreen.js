@@ -38,6 +38,7 @@ const StudiesScreen = () => {
   return (
     <Container>
       <TagsHeader
+        hasBackButton
         title="Études"
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}

@@ -8,7 +8,8 @@ import BibleStrongDetailScreen from '~features/bible/BibleStrongDetailScreen'
 import ConcordanceByBookScreen from '~features/bible/ConcordanceByBookScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleCompareVerses from '~features/bible/BibleCompareVerses'
-import SearchScreen from '~features/search/SearchScreen'
+// import SearchScreen from '~features/search/SearchScreen'
+import StudiesScreen from '~features/studies/StudiesScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
@@ -25,7 +26,8 @@ export default createStackNavigator(
     ConcordanceByBook: { screen: ConcordanceByBookScreen },
     BibleView: { screen: BibleViewScreen },
     BibleCompareVerses: { screen: BibleCompareVerses },
-    Search: { screen: SearchScreen },
+    Studies: { screen: StudiesScreen },
+    // Search: { screen: SearchScreen },
     EditStudy: { screen: EditStudyScreen },
     DictionnaryDetail: { screen: DictionnaryDetailScreen }
   },

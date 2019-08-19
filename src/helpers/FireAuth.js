@@ -5,6 +5,7 @@ import 'firebase/firestore'
 import * as Segment from 'expo-analytics-segment'
 import Sentry from 'sentry-expo'
 
+import { firebaseConfig } from '../../config'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebaseDb'
 
@@ -130,9 +131,8 @@ const FireAuth = class {
     new Promise(async (resolve, reject) => {
       try {
         const result = await Google.logInAsync({
-          androidClientId:
-            '204116128917-95eiop5au3ftj8h87234f0ga0jpg29g1.apps.googleusercontent.com',
-          iosClientId: '204116128917-q1pl4f4pt4tflfetgb905e9b4e34pu61.apps.googleusercontent.com',
+          androidClientId: firebaseConfig.androidClientId,
+          iosClientId: firebaseConfig.iosClientId,
           scopes: ['profile', 'email', 'openid']
         })
 

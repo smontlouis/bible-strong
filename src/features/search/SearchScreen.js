@@ -87,7 +87,7 @@ export default class SearchScreen extends React.Component {
     return (
       <Container>
         <SearchHeader
-          hasBackButton
+          // hasBackButton
           placeholder="Recherche"
           onChangeText={debounce(this.onChangeText, 500)}
         />

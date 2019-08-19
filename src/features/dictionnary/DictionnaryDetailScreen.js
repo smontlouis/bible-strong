@@ -35,6 +35,8 @@ const DictionnaryDetailScreen = ({ navigation }) => {
     loadDictionnaireItem(word).then(result => setDictionnaireItem(result))
   }, [word])
 
+  console.log(dictionnaireItem)
+
   const openLink = (href, content, type) => {
     if (type === 'verse') {
       try {

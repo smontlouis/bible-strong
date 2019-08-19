@@ -30,7 +30,6 @@ export default store => next => action => {
   const isLogged = !!state.user.id
 
   if (!isLogged) {
-    console.log('User is not logged, skip firestore')
     return result
   }
 
@@ -88,8 +87,7 @@ export default store => next => action => {
       })
       break
     }
-    case ADD_TAG:
-    case REMOVE_TAG: {
+    case ADD_TAG: {
       const { tags } = user.bible
       userDoc.update({ 'bible.tags': tags })
       break

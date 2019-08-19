@@ -39,6 +39,7 @@ export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
 export const DELETE_STUDY = 'user/DELETE_STUDY'
 
 const initialState = {
+  id: '',
   email: '',
   displayName: '',
   photoURL: '',
@@ -96,6 +97,7 @@ export default produce((draft, action) => {
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const {
+        id,
         email,
         displayName,
         photoURL,
@@ -105,6 +107,7 @@ export default produce((draft, action) => {
         bible
       } = action.profile
 
+      draft.id = id
       draft.email = email
       draft.displayName = displayName
       draft.photoURL = photoURL

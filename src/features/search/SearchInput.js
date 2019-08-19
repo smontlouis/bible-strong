@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { TouchableOpacity } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialIcons'
+import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 import styled from '@emotion/native'
 
@@ -13,7 +13,7 @@ const IconButton = styled.View({
   backgroundColor: 'transparent',
   position: 'absolute',
   right: 16,
-  top: 13
+  top: 9
 })
 
 const IconButtonTouch = IconButton.withComponent(TouchableOpacity)
@@ -84,12 +84,12 @@ class SearchInput extends Component {
         />
         {!this.state.hasText && (
           <IconButton>
-            <Icon size={20} name={iconName || 'search'} color={theme.colors.default} />
+            <Icon.Feather size={20} name={iconName || 'search'} color={theme.colors.default} />
           </IconButton>
         )}
         {this.state.hasText && (
           <IconButtonTouch onPress={this.onClear}>
-            <Icon size={20} name="close" color={theme.colors.default} />
+            <Icon.Feather size={20} name="x" color={theme.colors.default} />
           </IconButtonTouch>
         )}
       </Container>

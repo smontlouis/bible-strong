@@ -33,9 +33,11 @@ const styles = theme => ({
     ...textStyle
   },
   em: {
-    // fontStyle: 'italic',
     // color: '$color.primaryLighten',
-    ...textStyle
+    ...textStyle,
+    color: theme.colors.tertiary,
+    fontStyle: 'italic',
+    fontWeight: 'bold'
   },
   a: {
     // fontWeight: 'bold',

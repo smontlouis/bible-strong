@@ -1,9 +1,13 @@
-import React, { useState } from 'React'
+import React from 'react'
 import styled from '@emotion/native'
 import Modal from 'react-native-modal'
+import * as Icon from '@expo/vector-icons'
 
 import Login from './Login'
 import Paragraph from '~common/ui/Paragraph'
+import Box from '~common/ui/Box'
+import Back from '~common/Back'
+
 import Text from '~common/ui/Text'
 
 const StylizedModal = styled(Modal)({
@@ -27,7 +31,14 @@ const LoginModal = ({ isVisible }) => {
   return (
     <StylizedModal isVisible={isVisible} coverScreen={false}>
       <Container>
-        <Text title fontSize={30} marginBottom={30}>Études bibliques</Text>
+        <Box row alignItems="center" marginBottom={30}>
+          <Back style={{ marginRight: 15 }}>
+            <Icon.Feather name="arrow-left" size={25} />
+          </Back>
+          <Text title fontSize={30}>
+            Études bibliques
+          </Text>
+        </Box>
         <Paragraph scaleLineHeight={-2}>
           Rédigez vos études, sauvegardez-les dans le cloud.
         </Paragraph>
