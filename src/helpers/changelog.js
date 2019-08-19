@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1566246046551',
+    type: logTypes.FEATURE,
+    title: 'Tags, Lexique, Dictionnaire',
+    description:
+      "Je suis un peu occupé ces temps-ci à travailler sur la fonctionnalité Études. En attendant, voici quelques nouveautés: vous pouvez désormais regrouper vos surbrillances et notes par tags / catégories afin de mieux les organiser. Merci à Sylvia M. pour l'idée. J'ai également ajouté la possibilité de rechercher une strong directement par lexique. Enfin, la plus grosse nouveauté est l'ajout du Dictionnaire. Assurez-vous d'avoir de la place ! Le dictionnaire pèse 25Mo. "
+  },
+  {
     date: '1565126162912',
     type: logTypes.BUG,
     title: 'Mélange de chapitres',
