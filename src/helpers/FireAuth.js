@@ -85,12 +85,7 @@ const FireAuth = class {
                   studies[study.id] = study
                 })
 
-                if (data && studies) {
-                  if (!data.bible) data.bible = {}
-                  data.bible.studies = studies
-                }
-
-                this.onLogin && this.onLogin(data || {}) // On login
+                this.onLogin && this.onLogin(data || {}, studies) // On login
               })
           } else if (data) {
             this.onLogin && this.onLogin(data || {}) // On updated

@@ -57,6 +57,13 @@ const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
+const smallTextStyle = theme => ({
+  lineHeight: 18,
+  fontSize: 12,
+  color: theme.colors.default,
+  fontFamily: 'literata-book'
+})
+
 class StrongCard extends React.Component {
   openStrong = () => {
     const {
@@ -132,12 +139,12 @@ class StrongCard extends React.Component {
               <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
               <StylizedHTMLView
                 htmlStyle={{
-                  p: {
-                    lineHeight: 18,
-                    fontSize: 12,
-                    color: theme.colors.default,
-                    fontFamily: 'literata-book'
-                  }
+                  p: { ...smallTextStyle(theme) },
+                  em: { ...smallTextStyle(theme) },
+                  a: { ...smallTextStyle(theme) },
+                  li: { ...smallTextStyle(theme) },
+                  ol: { ...smallTextStyle(theme) },
+                  ul: { ...smallTextStyle(theme) }
                 }}
                 value={Definition}
                 onLinkPress={() => {}}

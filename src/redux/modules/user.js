@@ -95,8 +95,52 @@ export default produce((draft, action) => {
   switch (action.type) {
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
-      // DEEP MERGE HERE ?
-      return deepmerge(draft, action.payload, { arrayMerge: overwriteMerge })
+      const {
+        email,
+        displayName,
+        photoURL,
+        provider,
+        lastSeen,
+        emailVerified,
+        bible
+      } = action.profile
+
+      draft.email = email
+      draft.displayName = displayName
+      draft.photoURL = photoURL
+      draft.provider = provider
+      draft.lastSeen = lastSeen
+      draft.emailVerified = emailVerified
+
+      if (bible) {
+        draft.bible = deepmerge(draft.bible, bible)
+
+        // Now take care of studies
+        if (action.studies && Object.keys(action.studies).length) {
+          if (draft.bible.studies) {
+            Object.keys(action.studies).forEach(remoteStudyId => {
+              if (draft.bible.studies[remoteStudyId]) {
+                // We have a conflict here
+                console.log(`We have a conflict with ${remoteStudyId}, pick by modified_date`)
+                const localModificationDate = draft.bible.studies[remoteStudyId].modified_at
+                const remoteModificationDate = action.studies[remoteStudyId].modified_at
+                if (remoteModificationDate > localModificationDate) {
+                  console.log('Remote date is recent')
+                  draft.bible.studies[remoteStudyId] = action.studies[remoteStudyId]
+                }
+              } else {
+                // No conflicts, just put that study in there
+                console.log(`No conflicts for ${remoteStudyId}, just put that story in there`)
+                draft.bible.studies[remoteStudyId] = action.studies[remoteStudyId]
+              }
+            })
+          } else {
+            draft.bible.studies = {}
+            draft.bible.studies = bible.studies
+          }
+        }
+      }
+      break
     }
     case USER_LOGOUT: {
       return {
@@ -481,10 +525,11 @@ export function deleteStudy(id) {
 
 // USERS
 
-export function onUserLoginSuccess(profile) {
+export function onUserLoginSuccess(profile, studies) {
   return {
     type: USER_LOGIN_SUCCESS,
-    payload: profile
+    profile,
+    studies
   }
 }
 

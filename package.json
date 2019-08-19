@@ -61,6 +61,7 @@
     "react-native-section-list-get-item-layout": "^2.2.3",
     "react-native-snackbar-dialog": "^1.4.1",
     "react-native-snap-carousel": "^3.7.5",
+    "react-native-svg": "~9.4.0",
     "react-native-webview": "~5.8.1",
     "react-navigation": "^3.11.0",
     "react-navigation-material-bottom-tabs": "^1.0.0",

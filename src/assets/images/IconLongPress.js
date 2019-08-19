@@ -1,5 +1,5 @@
 import React from 'react'
-import { Svg } from 'expo'
+import Svg from 'react-native-svg'
 
 const SvgComponent = props => (
   <Svg width={30} height={30} viewBox="0 0 1000 1000" {...props}>

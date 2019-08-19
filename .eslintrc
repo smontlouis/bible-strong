@@ -15,6 +15,7 @@
   },
   "rules": {
     "no-shadow": "off",
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["draft"] }],
     "jsx-a11y/anchor-is-valid": "off",
     "react/jsx-props-no-spreading": "off",
     "global-require": "off",
