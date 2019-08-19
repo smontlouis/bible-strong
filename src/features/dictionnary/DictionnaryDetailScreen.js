@@ -24,7 +24,7 @@ const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.primary
+  backgroundColor: theme.colors.secondary
 }))
 
 const DictionnaryDetailScreen = ({ navigation }) => {

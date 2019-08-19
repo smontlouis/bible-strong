@@ -14,15 +14,15 @@ const StyledText = styled(Text)(({ theme, isSelected }) => ({
   fontWeight: isSelected ? 'bold' : 'normal'
 }))
 
-const StyledUnderline = styled(Box)(({ theme }) => ({
+const StyledUnderline = styled(Box)(({ theme, color }) => ({
   marginTop: 5,
   height: 8,
   width: 30,
   borderRadius: 5,
-  backgroundColor: theme.colors.primary
+  backgroundColor: color ? theme.colors[color] : theme.colors.primary
 }))
 
-const AlphabetList = ({ onPress, sectionIndex, alphabet }) => {
+const AlphabetList = ({ color, onPress, sectionIndex, alphabet }) => {
   const CarouselAlphabet = useRef()
 
   return (
@@ -59,7 +59,7 @@ const AlphabetList = ({ onPress, sectionIndex, alphabet }) => {
           decelerationRate={0.9}
         />
         <Box center>
-          <StyledUnderline />
+          <StyledUnderline color={color} />
         </Box>
       </Box>
     </Box>

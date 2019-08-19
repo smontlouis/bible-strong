@@ -126,7 +126,7 @@ export default store => next => action => {
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-
+      // TODO: Update studies there
       userDoc.update({
         ...user,
         bible: sanitizeUserBible(user.bible)

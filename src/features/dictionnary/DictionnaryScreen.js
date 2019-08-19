@@ -92,7 +92,12 @@ const DictionnaireScreen = () => {
         )}
       </Box>
       {!searchValue && (
-        <AlphabetList alphabet={alphabet} sectionIndex={sectionIndex} onPress={setSectionIndex} />
+        <AlphabetList
+          color="secondary"
+          alphabet={alphabet}
+          sectionIndex={sectionIndex}
+          onPress={setSectionIndex}
+        />
       )}
     </Container>
   )
