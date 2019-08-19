@@ -49,12 +49,12 @@ const MoreScreen = () => {
     <Container>
       <Header title="Plus" />
       <ScrollView flex={1}>
-        <LinkItem route="Studies">
+        {/* <LinkItem route="Studies">
           <StyledIcon name="feather" size={25} color="quart" />
           <Text bold fontSize={15} color="quart">
             Études (bêta)
           </Text>
-        </LinkItem>
+        </LinkItem> */}
         <LinkItem onPress={() => setEditTagsOpen(true)}>
           <StyledIcon name="tag" size={25} />
           <Text bold fontSize={15}>
