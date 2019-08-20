@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1566295101677',
+    type: logTypes.BUG,
+    title: 'Base de données corrompue',
+    description:
+      "Certains utilisateurs ont rencontré des problèmes d'accès à la base de données strong depuis la dernière mise à jour. Des données ont pu malencontreusement être corrompues lors du téléchargement. Pour régler ce problème, vous pouvez soit vider les données et le cache de l'application, ou la réinstaller. Toutes mes excuses pour le désagrément. \n\n Contactez-moi si le problème persiste."
+  },
+  {
     date: '1566246046551',
     type: logTypes.FEATURE,
     title: 'Tags, Lexique, Dictionnaire',
