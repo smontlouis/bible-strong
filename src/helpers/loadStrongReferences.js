@@ -1,4 +1,5 @@
 import SQLTransaction from '~helpers/SQLTransaction'
+import SnackBar from '~common/SnackBar'
 
 const updateReferencesOrder = (result, references) => {
   const updatedResult = []
@@ -15,17 +16,24 @@ const updateReferencesOrder = (result, references) => {
 }
 
 const loadStrongReferences = async (references, book) => {
-  const part = book > 39 ? 'Grec' : 'Hebreu'
-  const sqlReq = references.reduce((sqlString, reference, index) => {
-    sqlString += `Code = ${reference} `
-    if (references.length - 1 !== index) {
-      sqlString += 'OR '
-    }
-    return sqlString
-  }, `SELECT * FROM ${part} WHERE `)
+  try {
+    const part = book > 39 ? 'Grec' : 'Hebreu'
+    const sqlReq = references.reduce((sqlString, reference, index) => {
+      sqlString += `Code = ${reference} `
+      if (references.length - 1 !== index) {
+        sqlString += 'OR '
+      }
+      return sqlString
+    }, `SELECT * FROM ${part} WHERE `)
 
-  const result = await SQLTransaction(sqlReq)
-  return updateReferencesOrder(result, references)
+    const result = await SQLTransaction(sqlReq)
+    return updateReferencesOrder(result, references)
+  } catch (e) {
+    SnackBar.show(
+      "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
+      'danger'
+    )
+  }
 }
 
 export default loadStrongReferences
