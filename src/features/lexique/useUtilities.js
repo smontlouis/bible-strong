@@ -53,7 +53,7 @@ export const useAlphabet = (results, prop = 'Mot') => {
 
 export const useSearchValue = ({ onDebouncedValue }) => {
   const [searchValue, setSearchValue] = useState('')
-  const debouncedSearchValue = useDebounce(searchValue, 100)
+  const debouncedSearchValue = useDebounce(searchValue, 300)
 
   useEffect(() => {
     if (!debouncedSearchValue) {

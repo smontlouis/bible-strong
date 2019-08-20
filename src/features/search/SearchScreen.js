@@ -1,105 +1,72 @@
-import React from 'react'
-import debounce from 'debounce'
-import { ProgressBar } from 'react-native-paper'
-import * as FileSystem from 'expo-file-system'
-import { Asset } from 'expo-asset'
+import React, { useState, useEffect, useRef } from 'react'
+import Sentry from 'sentry-expo'
 
+import Header from '~common/Header'
+import SearchInput from '~common/SearchInput'
 import Container from '~common/ui/Container'
-import Loading from '~common/Loading'
 import Empty from '~common/Empty'
-import SearchHeader from './SearchHeader'
 import SearchResults from './SearchResults'
-import theme from '~themes/default'
-import loadIndexCache from './loadIndex'
+import waitForIndex from './waitForIndex'
+import useDebounce from '~helpers/useDebounce'
+import loadIndexCache from './loadIndexCache'
+import Loading from '~common/Loading'
+import SnackBar from '~common/SnackBar'
 
-const IDX_LIGHT_FILE_SIZE = 16795170
+const SearchScreen = ({ idxFile }) => {
+  const index = useRef()
+  const [isLoading, setLoading] = useState(true)
+  const [searchValue, setSearchValue] = useState('')
+  const [results, setResults] = useState(null)
+  const debouncedSearchValue = useDebounce(searchValue, 300)
 
-export default class SearchScreen extends React.Component {
-  state = {
-    idxProgress: undefined,
-    isLoading: true,
-    value: '',
-    results: []
-  }
-
-  componentDidMount() {
-    this.loadIndex()
-  }
-
-  loadIndex = async () => {
-    const idxPath = `${FileSystem.documentDirectory}idx-light.json`
-    let idxFile = await FileSystem.getInfoAsync(idxPath)
-
-    // if (__DEV__) {
-    //   if (idxFile.exists) {
-    //     FileSystem.deleteAsync(idxFile.uri)
-    //     idxFile = await FileSystem.getInfoAsync(idxPath)
-    //   }
-    // }
-
-    if (!idxFile.exists) {
-      const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
-
-      console.log(`Downloading ${idxUri} to ${idxPath}`)
-      await FileSystem.createDownloadResumable(
-        idxUri,
-        idxPath,
-        null,
-        this.calculateProgress
-      ).downloadAsync()
-
-      console.log('Download finished')
-      idxFile = await FileSystem.getInfoAsync(idxPath)
+  useEffect(() => {
+    const setIndexCache = async () => {
+      index.current = await loadIndexCache(idxFile)
+      setLoading(false)
     }
+    setIndexCache()
+  }, [idxFile])
 
-    this.idx = await loadIndexCache(idxFile)
-    this.setState({ isLoading: false })
-  }
-
-  calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-    const idxProgress = Math.floor((totalBytesWritten / IDX_LIGHT_FILE_SIZE) * 100) / 100
-    this.setState({ idxProgress })
-  }
-
-  onChangeText = value => {
-    if (this.idx) {
-      if (value !== '') {
-        const results = this.idx.search(value)
-        this.setState({ results, value })
+  useEffect(() => {
+    if (index.current) {
+      if (debouncedSearchValue) {
+        try {
+          const results = index.current.search(debouncedSearchValue)
+          setResults(results)
+        } catch (e) {
+          Sentry.captureException(e)
+          Sentry.captureMessage(`User tried to search for ${searchValue}`)
+          SnackBar.show('Une erreur est survenue.', 'danger')
+        }
       } else {
-        this.setState({ results: [], value })
+        setResults(null)
       }
     }
+  }, [debouncedSearchValue, index, searchValue, setResults])
+
+  if (isLoading) {
+    return <Loading message="Chargement de l'index..." />
   }
 
-  render() {
-    const { isLoading, results, value, idxProgress } = this.state
-    const isProgressing = typeof idxProgress !== 'undefined'
-
-    if (isLoading && isProgressing) {
-      return (
-        <Loading message={"Téléchargement de l'index..."}>
-          <ProgressBar progress={idxProgress} color={theme.colors.tertiary} />
-        </Loading>
-      )
-    }
-
-    return (
-      <Container>
-        <SearchHeader
-          // hasBackButton
-          placeholder="Recherche"
-          onChangeText={debounce(this.onChangeText, 500)}
+  return (
+    <Container>
+      <Header title="Recherche" />
+      <SearchInput
+        placeholder="Recherche par code ou par mot"
+        onChangeText={setSearchValue}
+        value={searchValue}
+        onDelete={() => setSearchValue('')}
+      />
+      {debouncedSearchValue && Array.isArray(results) ? (
+        <SearchResults results={results} />
+      ) : (
+        <Empty
+          source={require('~assets/images/search-loop.json')}
+          message="Fais une recherche dans la Bible !"
         />
-        {isLoading && <Loading message={"Chargement de l'index..."} />}
-        {!isLoading && !value && (
-          <Empty
-            source={require('~assets/images/search-loop.json')}
-            message="Fais une recherche dans la Bible !"
-          />
-        )}
-        {!isLoading && !!value && <SearchResults results={results} />}
-      </Container>
-    )
-  }
+      )}
+    </Container>
+  )
 }
+
+export default waitForIndex(SearchScreen)

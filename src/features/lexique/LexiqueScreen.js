@@ -56,6 +56,7 @@ const LexiqueScreen = () => {
         placeholder="Recherche par code ou par mot"
         onChangeText={setSearchValue}
         value={searchValue}
+        onDelete={() => setSearchValue('')}
       />
       <Box flex>
         {sectionResults.length ? (

@@ -20,14 +20,14 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   marginTop: 10
 }))
 
-const SearchHeader = ({ onChangeText, placeholder, hasBackButton, theme }) => (
+const SearchHeader = ({ onChangeText, placeholder, hasBackButton, onDelete }) => (
   <Container>
     {hasBackButton && (
       <Back style={{ marginRight: 15 }}>
         <FeatherIcon name="arrow-left" size={20} />
       </Back>
     )}
-    <SearchInput placeholder={placeholder} onChangeText={onChangeText} />
+    <SearchInput placeholder={placeholder} onChangeText={onChangeText} onDelete={onDelete} />
   </Container>
 )
 
