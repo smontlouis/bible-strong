@@ -14,7 +14,7 @@ const SQLDTransaction = sqlReq => {
             },
             (txObj, error) => {
               SnackBar.show(
-                "Base de données corrompue. Veuillez contactez le développeur. Ou réinstallez l'application",
+                "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
                 'danger'
               )
               reject(error)
@@ -23,7 +23,7 @@ const SQLDTransaction = sqlReq => {
         },
         error => {
           SnackBar.show(
-            "Base de données corrompue. Veuillez contactez le développeur. Ou réinstallez l'application",
+            "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
             'danger'
           )
           reject(error)
@@ -31,7 +31,7 @@ const SQLDTransaction = sqlReq => {
       )
     } catch (e) {
       SnackBar.show(
-        "Base de données corrompue. Veuillez contactez le développeur. Ou réinstallez l'application",
+        "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
         'danger'
       )
     }
