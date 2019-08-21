@@ -1,11 +1,13 @@
 import styled from '@emotion/native'
 
-const StyledTextInput = styled.TextInput(({ theme }) => ({
+const StyledTextInput = styled.TextInput(({ theme, noBorder }) => ({
   color: theme.colors.default,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 2,
   paddingBottom: 10,
-  marginTop: 10
+  marginTop: 10,
+  ...(!noBorder && {
+    borderBottomColor: theme.colors.border,
+    borderBottomWidth: 2
+  })
 }))
 
 export default StyledTextInput

@@ -1,8 +1,11 @@
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 
 const Box = styled.View(props => ({
   // container
   padding: props.padding,
+  paddingVertical: props.paddingVertical,
+  paddingHorizontal: props.paddingHorizontal,
   margin: props.margin,
   borderWidth: props.borderWidth,
   overflow: props.overflow ? 'visible' : 'hidden',
@@ -21,7 +24,17 @@ const Box = styled.View(props => ({
   flexWrap: (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
   flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
 
-  opacity: props.disabled ? 0.3 : 1
+  opacity: props.disabled ? 0.3 : 1,
+
+  ...(props.shadow && {
+    backgroundColor: props.theme.colors.reverse,
+    shadowColor: props.theme.colors.default,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 2,
+    borderRadius: 5
+  })
 }))
 
-export default Box
+export default withTheme(Box)

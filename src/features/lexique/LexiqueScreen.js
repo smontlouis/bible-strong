@@ -27,13 +27,20 @@ import LexiqueItem from './LexiqueItem'
 
 const SectionTitle = styled(Box)(({ theme }) => ({
   fontSize: 20,
-  paddingLeft: 20,
-  paddingRight: 20,
-  height: 50,
-  backgroundColor: theme.colors.border,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-  justifyContent: 'center'
+  marginLeft: 20,
+  marginTop: 10,
+  height: 30,
+  width: 30,
+  borderRadius: 15,
+  backgroundColor: theme.colors.primary,
+  justifyContent: 'center',
+  alignItems: 'center',
+  overflow: 'visible',
+  shadowColor: theme.colors.default,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 3,
+  elevation: 2
 }))
 
 const LexiqueScreen = () => {
@@ -51,7 +58,7 @@ const LexiqueScreen = () => {
 
   return (
     <Container>
-      <Header title="Lexique" />
+      <Header title="Lexique" noBorder />
       <SearchInput
         placeholder="Recherche par code ou par mot"
         onChangeText={setSearchValue}
@@ -75,7 +82,7 @@ const LexiqueScreen = () => {
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle>
-                <Text title fontWeight="bold" fontSize={18} color="default">
+                <Text title fontWeight="bold" fontSize={16} color="reverse">
                   {title}
                 </Text>
               </SectionTitle>

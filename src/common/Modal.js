@@ -1,4 +1,5 @@
 import React from 'react'
+import { ScrollView } from 'react-native'
 import Modal from 'react-native-modal'
 
 import styled from '@emotion/native'
@@ -12,8 +13,8 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  height: 230 + getBottomSpace(),
   display: 'flex',
+  maxHeight: 300,
   backgroundColor: theme.colors.reverse,
   borderRadius: 3,
   shadowColor: theme.colors.default,
@@ -25,17 +26,15 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
-  flex: 1,
   alignItems: 'flex-start',
   justifyContent: 'center',
-  paddingLeft: 20,
-  paddingRight: 20,
+  padding: 20,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
   overflow: 'hidden'
 }))
 
-const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleView }) => {
+const Menu = ({ isOpen, onClosed, children }) => {
   return (
     <StylizedModal
       backdropOpacity={0.3}
@@ -44,28 +43,19 @@ const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleVi
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}>
       <Container>
-        <Touchy
-          onPress={() => {
-            dispatchToWebView('BLOCK_DIVIDER')
-            onClosed()
-          }}>
-          <Text>Séparateur</Text>
-        </Touchy>
-        <Touchy onPress={() => navigateBibleView('verse')}>
-          <Text>Insérer un lien verset</Text>
-        </Touchy>
-        <Touchy onPress={() => navigateBibleView('verse-block')}>
-          <Text>Insérer un bloc verset</Text>
-        </Touchy>
-        <Touchy onPress={() => navigateBibleView('strong')}>
-          <Text>Insérer un lien strong</Text>
-        </Touchy>
-        <Touchy onPress={() => navigateBibleView('strong-block')}>
-          <Text>Insérer un bloc strong</Text>
-        </Touchy>
+        <ScrollView>{children}</ScrollView>
       </Container>
     </StylizedModal>
   )
 }
 
-export default SelectBlockModal
+const Item = ({ children, onPress }) => (
+  <Touchy onPress={onPress}>
+    <Text>{children}</Text>
+  </Touchy>
+)
+
+export default {
+  Menu,
+  Item
+}

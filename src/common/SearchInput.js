@@ -12,25 +12,32 @@ const CloseIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 const SearchInput = ({ onChangeText, value, placeholder, theme, onDelete }) => (
-  <Box>
-    <Box row center padding={10}>
-      <Icon.Feather
-        color={theme.colors.default}
-        name="search"
-        size={20}
-        style={{ marginRight: 10 }}
-      />
-      <TextInput
-        placeholder={placeholder}
-        placeholderTextColor={theme.colors.default}
-        onChangeText={onChangeText}
-        returnKeyType="send"
-        style={{ flex: 1 }}
-        value={value}
-      />
-      <CloseIcon name="x" size={20} onPress={onDelete} />
-    </Box>
-    <Border />
+  <Box
+    row
+    center
+    paddingVertical={5}
+    paddingHorizontal={10}
+    shadow
+    margin={10}
+    marginTop={0}
+    marginBottom={5}
+    overflow="visible">
+    <Icon.Feather
+      color={theme.colors.default}
+      name="search"
+      size={20}
+      style={{ marginRight: 10 }}
+    />
+    <TextInput
+      noBorder
+      placeholder={placeholder}
+      placeholderTextColor={theme.colors.tertiary}
+      onChangeText={onChangeText}
+      returnKeyType="send"
+      style={{ flex: 1 }}
+      value={value}
+    />
+    <CloseIcon name="x" size={20} onPress={onDelete} />
   </Box>
 )
 
