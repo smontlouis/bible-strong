@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1566358697045',
+    type: logTypes.NEW,
+    title: 'Filtres de recherche',
+    description:
+      'Voici les filtres de recherche. Vous pouvez trier par pertinence ou ordre alphabétique, et filtrer par section ou par livre. Enjoy !'
+  },
+  {
     date: '1566295101677',
     type: logTypes.BUG,
     title: 'Base de données corrompue',
