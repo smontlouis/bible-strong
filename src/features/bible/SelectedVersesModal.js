@@ -4,12 +4,15 @@ import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 
+import LexiqueIcon from '~common/LexiqueIcon'
+import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
 import getVersesRef from '~helpers/getVersesRef'
 import { cleanParams } from '~helpers/utils'
 
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
+import TouchableSvgIcon from './TouchableSvgIcon'
 
 const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   backgroundColor: 'transparent',
@@ -26,7 +29,7 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
 }))
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
-  width: 230,
+  width: 260,
   height: isSelectionMode ? 40 : 120,
   backgroundColor: theme.colors.reverse,
   borderRadius: 10,
@@ -65,7 +68,6 @@ const VersesModal = ({
   clearSelectedVerses,
   navigation,
   selectedVerses,
-  setSelectedVerse,
   version,
   theme,
   onCreateNoteClick,
@@ -90,7 +92,7 @@ const VersesModal = ({
     clearSelectedVerses()
     const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
     navigation.navigate({
-      routeName: 'BibleVerseDetail', 
+      routeName: 'BibleVerseDetail',
       params: {
         verse: {
           Livre,
@@ -99,6 +101,22 @@ const VersesModal = ({
         }
       },
       key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`
+    })
+  }
+
+  const showDictionnaryDetail = () => {
+    clearSelectedVerses()
+    const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
+    navigation.navigate({
+      routeName: 'DictionnaireVerseDetail',
+      params: {
+        verse: {
+          Livre,
+          Chapitre,
+          Verset
+        }
+      },
+      key: `dictionnaire-verse-detail-${Livre}-${Chapitre}-${Verset}`
     })
   }
 
@@ -162,7 +180,14 @@ const VersesModal = ({
           </HalfContainer>
           <HalfContainer>
             {Object.keys(selectedVerses).length <= 1 && (
-              <TouchableIcon name="eye" color={theme.colors.primary} onPress={showStrongDetail} />
+              <>
+                <TouchableSvgIcon icon={LexiqueIcon} color="primary" onPress={showStrongDetail} />
+                <TouchableSvgIcon
+                  icon={DictionnaireIcon}
+                  color="secondary"
+                  onPress={showDictionnaryDetail}
+                />
+              </>
             )}
             <TouchableIcon name="layers" onPress={compareVerses} />
             <TouchableIcon name="file-plus" onPress={onCreateNoteClick} />

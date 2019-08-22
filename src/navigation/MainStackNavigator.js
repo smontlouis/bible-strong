@@ -13,6 +13,7 @@ import StudiesScreen from '~features/studies/StudiesScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
+import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
 
 export default createStackNavigator(
   {
@@ -23,6 +24,7 @@ export default createStackNavigator(
     BibleVerseNotes: { screen: BibleVerseNotesScreen },
     Highlights: { screen: HighlightScreen },
     BibleStrongDetail: { screen: BibleStrongDetailScreen },
+    DictionnaireVerseDetail: { screen: DictionnaireVerseDetailScreen },
     ConcordanceByBook: { screen: ConcordanceByBookScreen },
     BibleView: { screen: BibleViewScreen },
     BibleCompareVerses: { screen: BibleCompareVerses },

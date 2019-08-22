@@ -129,14 +129,14 @@ const SearchScreen = ({ idxFile }) => {
     <Container>
       <Header noBorder title="Recherche dans la Bible" />
       <SearchInput
-        placeholder="Recherche par code ou par mot"
+        placeholder="Recherche par mot ou phrase"
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
       <ScrollView
         horizontal
-        style={{ maxHeight: 55 }}
+        style={{ maxHeight: 55, paddingHorizontal: 10 }}
         contentContainerStyle={{
           flexDirection: 'row'
         }}>

@@ -5,15 +5,18 @@ import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
 
-import truncate from '~helpers/truncate'
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
 import waitForStrongDB from '~common/waitForStrongDB'
 import * as BibleActions from '~redux/modules/bible'
+import DictionnaryIcon from '~common/DictionnaryIcon'
+import dictionnaireWordsInBible from '~assets/bible_versions/dictionnaire-bible-lsg.json'
+import Link from '~common/Link'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -39,7 +42,7 @@ const VerseText = styled.View(() => ({
   flexDirection: 'row'
 }))
 
-const VersetWrapper = styled.View(({ isHighlight, isSelected, theme }) => ({
+const VersetWrapper = styled.View(() => ({
   width: 25,
   marginRight: 5,
   borderRightWidth: 3,
@@ -59,6 +62,18 @@ const StyledVerse = styled.View(({ theme }) => ({
   paddingRight: 10,
   marginBottom: 5,
   flexDirection: 'row'
+}))
+
+const CountChip = styled.View(({ theme }) => ({
+  width: 14,
+  height: 14,
+  borderRadius: 7,
+  backgroundColor: theme.colors.border,
+  position: 'absolute',
+  justifyContent: 'center',
+  alignItems: 'center',
+  bottom: -5,
+  right: -5
 }))
 
 class BibleVerseDetailScreen extends React.Component {
@@ -149,6 +164,15 @@ class BibleVerseDetailScreen extends React.Component {
     )
   }
 
+  countDictionnaireWords = () => {
+    const { Livre, Chapitre, Verset } = this.state.verse
+    return (
+      dictionnaireWordsInBible[Livre] &&
+      dictionnaireWordsInBible[Livre][Chapitre] &&
+      dictionnaireWordsInBible[Livre][Chapitre][Verset].length
+    )
+  }
+
   render() {
     const {
       verse,
@@ -177,12 +201,25 @@ class BibleVerseDetailScreen extends React.Component {
       return <Loading />
     }
 
+    const countWords = this.countDictionnaireWords()
     return (
       <Container>
         <Header
           noBorder
           hasBackButton
           title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`}
+          rightComponent={
+            <Link route="DictionnaireVerseDetail" params={{ verse }} replace>
+              <Box marginRight={10} position="relative" overflow="visibility">
+                <DictionnaryIcon color={theme.colors.secondary} />
+                <CountChip>
+                  <Text bold fontSize={8}>
+                    {countWords}
+                  </Text>
+                </CountChip>
+              </Box>
+            </Link>
+          }
         />
         <Box paddingTop={6} flex>
           <StyledVerse>

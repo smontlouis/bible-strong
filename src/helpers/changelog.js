@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1566445889323',
+    type: logTypes.NEW,
+    title: 'Dictionnaire dans les versets',
+    description:
+      "3 mises à jours en 3 jours ? C'est Noël avant l'heure ;) \n Vous avez maintenant un accès direct aux mots du dictionnaire depuis un verset ! Si vous accédez à une strong / sélectionnez un verset, vous verrez apparaître la petite icône jaune du dictionnaire !"
+  },
+  {
     date: '1566358697045',
     type: logTypes.NEW,
     title: 'Filtres de recherche',

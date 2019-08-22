@@ -3,6 +3,7 @@ import { withTheme } from 'emotion-theming'
 
 const Box = styled.View(props => ({
   // container
+  position: props.position,
   padding: props.padding,
   paddingVertical: props.paddingVertical,
   paddingHorizontal: props.paddingHorizontal,

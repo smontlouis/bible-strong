@@ -1,9 +1,8 @@
+import Text from '~common/ui/Text'
+
 const React = require('react')
-const ReactNative = require('react-native')
 const htmlparser = require('./vendor/htmlparser2')
 const entities = require('./vendor/entities')
-
-const { Text } = ReactNative
 
 const LINE_BREAK = '\n'
 const PARAGRAPH_BREAK = '\n'

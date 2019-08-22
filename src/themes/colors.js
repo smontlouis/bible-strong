@@ -8,6 +8,7 @@ const colors = {
   primary: 'rgb(9,132,227)',
   lightPrimary: 'rgba(9, 132, 227, 0.15)',
   secondary: 'rgb(255,188,0)',
+  lightSecondary: 'rgba(255,188,0, 0.25)',
   tertiary: 'rgb(98,113,122)',
   quart: 'rgb(194,40,57)',
   success: '#2ecc71',

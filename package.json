@@ -71,7 +71,8 @@
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0",
-    "sentry-expo": "~1.11.2"
+    "sentry-expo": "~1.11.2",
+    "trunc-html": "^1.1.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.2",

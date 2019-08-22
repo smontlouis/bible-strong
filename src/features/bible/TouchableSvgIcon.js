@@ -10,12 +10,13 @@ const Touchable = styled.TouchableOpacity(() => ({
 
 class TouchableSvgIcon extends React.Component {
   render() {
-    const { onPress, isSelected, size = 20, icon: Icon, theme } = this.props
+    const { onPress, isSelected, color, size = 20, icon: Icon, theme } = this.props
     return (
       <Touchable onPress={onPress}>
         <Icon
           width={size}
           height={size}
+          color={theme.colors[color]}
           fill={isSelected ? theme.colors.primary : theme.colors.grey}
         />
       </Touchable>

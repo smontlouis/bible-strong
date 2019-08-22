@@ -88,7 +88,10 @@ const DictionnaryDetailScreen = ({ navigation }) => {
       </Box>
       <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
         {dictionnaireItem && dictionnaireItem.definition && (
-          <StylizedHTMLView value={dictionnaireItem.definition} onLinkPress={openLink} />
+          <StylizedHTMLView
+            value={dictionnaireItem.definition.replace(/\n/gi, '')}
+            onLinkPress={openLink}
+          />
         )}
       </ScrollView>
     </Container>
