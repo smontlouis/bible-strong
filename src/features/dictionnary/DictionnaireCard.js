@@ -74,11 +74,16 @@ class StrongCard extends React.Component {
   }
 
   render() {
-    const {
-      isSelectionMode,
-      dictionnaireRef: { word, definition },
-      theme
-    } = this.props
+    const { isSelectionMode, dictionnaireRef: { word, definition } = {}, theme } = this.props
+
+    if (!word) {
+      return (
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Impossible de charger ce mot..."
+        />
+      )
+    }
 
     if (!word) {
       return (
@@ -90,7 +95,6 @@ class StrongCard extends React.Component {
     }
 
     const { html } = truncHTML(definition.replace(/\n/gi, ''), 500)
-
     return (
       <Container overflow>
         {/* <Shadow overflow /> */}
