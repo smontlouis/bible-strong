@@ -64,7 +64,7 @@ const MoreScreen = () => {
         <LinkItem route="Highlights">
           <StyledIcon name="edit-3" size={25} />
           <Text bold fontSize={15}>
-            Surbillances
+            Surbrillances
           </Text>
         </LinkItem>
         <LinkItem route="BibleVerseNotes">
