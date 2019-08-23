@@ -35,7 +35,6 @@
     "expo-analytics-segment": "~6.0.0",
     "expo-asset": "^6.0.0",
     "expo-asset-utils": "^1.2.0",
-    "expo-cli": "^3.0.10",
     "expo-constants": "~6.0.0",
     "expo-facebook": "~6.0.0",
     "expo-file-system": "~6.0.0",
