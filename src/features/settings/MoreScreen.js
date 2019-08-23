@@ -127,21 +127,21 @@ const MoreScreen = () => {
           </LinkItem>
         )}
       </ScrollView>
-      <TouchableOpacity
-        onLongPress={() => {
-          showStudies(true)
-          SnackBar.show(
-            "Vous avez maintenant accès aux études ! Chut ! C'est un secret !",
-            'info',
-            { duration: 4000 }
-          )
-        }}>
-        <Box position="absolute" bottom={10} right={10}>
-          <Text color="grey" fontSize={12}>
-            Version: {app.expo.version}
-          </Text>
-        </Box>
-      </TouchableOpacity>
+      <Box position="absolute" bottom={10} right={10}>
+        <Text
+          color="grey"
+          fontSize={12}
+          onPress={() => {
+            showStudies(true)
+            SnackBar.show(
+              "Vous avez maintenant accès aux études ! Chut ! C'est un secret !",
+              'info',
+              { duration: 4000 }
+            )
+          }}>
+          Version: {app.expo.version}
+        </Text>
+      </Box>
       <TagsEditModal isVisible={isEditTagsOpen} onClosed={() => setEditTagsOpen(false)} />
     </Container>
   )

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { Asset } from 'expo-asset'
+import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
+import AssetUtils from 'expo-asset-utils'
 // import { Platform } from 'react-native'
 // import * as Haptics from 'expo-haptics'
 
@@ -52,28 +53,17 @@ class BibleWebView extends Component {
 
   componentDidMount() {
     this.enableWebViewOpacity()
+    this.loadHTMLFile()
+  }
 
-    this.HTMLFile = Asset.fromModule(require('./bibleWebView/dist/index.html'))
-
-    // We never know, but localUri should always be there
-    if (!this.HTMLFile.localUri) {
-      Asset.loadAsync(require('./bibleWebView/dist/index.html')).then(() => {
-        this.HTMLFile = Asset.fromModule(require('./bibleWebView/dist/index.html'))
-
-        this.setState({ isHTMLFileLoaded: true })
-      })
-    } else {
-      this.setState({ isHTMLFileLoaded: true })
-    }
+  loadHTMLFile = async () => {
+    const { localUri } = await AssetUtils.resolveAsync(require('./bibleWebView/dist/index.html'))
+    this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+    this.setState({ isHTMLFileLoaded: true })
   }
 
   injectFont = async () => {
-    let { localUri } = Asset.fromModule(require('~assets/fonts/LiterataBook.otf'))
-
-    if (!localUri) {
-      await Asset.loadAsync(require('~assets/fonts/LiterataBook.otf'))
-      localUri = Asset.fromModule(require('~assets/fonts/LiterataBook.otf')).localUri
-    }
+    const { localUri } = await AssetUtils.resolveAsync(require('~assets/fonts/LiterataBook.otf'))
 
     const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
 
@@ -106,7 +96,7 @@ class BibleWebView extends Component {
         const { navigation } = this.props
         const { Livre, Chapitre, Verset } = action.params.verse
         navigation.navigate({
-          routeName: 'BibleVerseDetail', 
+          routeName: 'BibleVerseDetail',
           params: action.params,
           key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`
         })
@@ -194,8 +184,6 @@ class BibleWebView extends Component {
       return null
     }
 
-    const { localUri } = this.HTMLFile
-
     return (
       <WebView
         useWebKit
@@ -206,7 +194,7 @@ class BibleWebView extends Component {
         ref={ref => {
           this.webview = ref
         }}
-        source={{ uri: localUri }}
+        source={{ html: this.HTMLFile }}
         style={{ opacity: this.state.webViewOpacity }}
         injectedJavaScript={INJECTED_JAVASCRIPT}
         domStorageEnabled
