@@ -56,7 +56,7 @@ class App extends React.Component {
       const update = await Updates.checkForUpdateAsync()
 
       if (update.isAvailable) {
-        SnackBar.show('Nouvelle mise à jour.', { duration: 3000 })
+        SnackBar.show('Nouvelle mise à jour.')
         await Updates.fetchUpdateAsync()
 
         Updates.reloadFromCache()

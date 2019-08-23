@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { ScrollView, Platform, Alert } from 'react-native'
+import { ScrollView, Platform, Alert, TouchableOpacity } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
+import SnackBar from '~common/SnackBar'
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -37,6 +38,7 @@ const shareMessage = () => {
 const MoreScreen = () => {
   const { isLogged, logout } = useLogin()
   const [isEditTagsOpen, setEditTagsOpen] = useState(false)
+  const [canShowStudy, showStudies] = useState(false)
 
   const promptLogout = () => {
     Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?', [
@@ -49,12 +51,14 @@ const MoreScreen = () => {
     <Container>
       <Header title="Plus" />
       <ScrollView flex={1}>
-        {/* <LinkItem route="Studies">
-          <StyledIcon name="feather" size={25} color="quart" />
-          <Text bold fontSize={15} color="quart">
-            Études (bêta)
-          </Text>
-        </LinkItem> */}
+        {(canShowStudy || isLogged) && (
+          <LinkItem route="Studies">
+            <StyledIcon name="feather" size={25} color="quart" />
+            <Text bold fontSize={15} color="quart">
+              Études (bêta)
+            </Text>
+          </LinkItem>
+        )}
         <LinkItem onPress={() => setEditTagsOpen(true)}>
           <StyledIcon name="tag" size={25} />
           <Text bold fontSize={15}>
@@ -123,11 +127,21 @@ const MoreScreen = () => {
           </LinkItem>
         )}
       </ScrollView>
-      <Box position="absolute" bottom={10} right={10}>
-        <Text color="grey" fontSize={12}>
-          Version: {app.expo.version}
-        </Text>
-      </Box>
+      <TouchableOpacity
+        onLongPress={() => {
+          showStudies(true)
+          SnackBar.show(
+            "Vous avez maintenant accès aux études ! Chut ! C'est un secret !",
+            'info',
+            { duration: 4000 }
+          )
+        }}>
+        <Box position="absolute" bottom={10} right={10}>
+          <Text color="grey" fontSize={12}>
+            Version: {app.expo.version}
+          </Text>
+        </Box>
+      </TouchableOpacity>
       <TagsEditModal isVisible={isEditTagsOpen} onClosed={() => setEditTagsOpen(false)} />
     </Container>
   )

@@ -7,6 +7,7 @@ import Login from './Login'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Back from '~common/Back'
+import app from '../../app.json'
 
 import Text from '~common/ui/Text'
 
@@ -28,6 +29,7 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const LoginModal = ({ isVisible }) => {
+  const isUpdated = app.expo.sdkVersion.includes('34')
   return (
     <StylizedModal isVisible={isVisible} coverScreen={false}>
       <Container>
@@ -42,10 +44,19 @@ const LoginModal = ({ isVisible }) => {
         <Paragraph scaleLineHeight={-2}>
           Rédigez vos études, sauvegardez-les dans le cloud.
         </Paragraph>
-        <Paragraph scaleLineHeight={-2} marginTop={10} marginBottom={20}>
+        <Paragraph scaleLineHeight={-2} marginTop={10}>
           Rejoignez la communauté !
         </Paragraph>
-        <Login />
+        <Paragraph scale={-3} scaleLineHeight={-1} marginTop={10} marginBottom={20}>
+          Cette version est en bêta test. Merci de me donner le plus de retours possibles 😉.
+        </Paragraph>
+        {isUpdated ? (
+          <Login />
+        ) : (
+          <Paragraph scale={-2} scaleLineHeight={-2}>
+            Merci de mettre à jour votre application pour utiliser les études.
+          </Paragraph>
+        )}
       </Container>
     </StylizedModal>
   )
