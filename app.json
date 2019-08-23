@@ -11,7 +11,7 @@
       "ios",
       "android"
     ],
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon-2.png",
     "splash": {
@@ -45,11 +45,11 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smontlouis.biblestrong",
-      "buildNumber": "46"
+      "buildNumber": "47"
     },
     "android": {
       "package": "com.smontlouis.biblestrong",
-      "versionCode": 46,
+      "versionCode": 47,
       "permissions": []
     },
     "hooks": {
