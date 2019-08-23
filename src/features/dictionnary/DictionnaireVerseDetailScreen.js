@@ -65,7 +65,7 @@ const verseToDictionnary = ({ Livre, Chapitre, Verset }, dictionnaryWordsInVerse
       return <Paragraph>{verseText}</Paragraph>
     }
 
-    const regExpString = `\\W(${dictionnaryWordsInVerse.join('|')})`
+    const regExpString = `\\W(${dictionnaryWordsInVerse.join('|')})\\W`
     const regExp = new RegExp(regExpString, 'gmi')
     const splittedVerseText = verseText.split(regExp)
 
