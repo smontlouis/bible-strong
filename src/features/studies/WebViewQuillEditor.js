@@ -1,9 +1,10 @@
 import React, { createRef } from 'react'
-import { Asset } from 'expo-asset'
 import { withNavigation } from 'react-navigation'
 import { View, Alert, Platform } from 'react-native'
-
+import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
+import AssetUtils from 'expo-asset-utils'
+
 import books from '~assets/bible_versions/books-desc'
 import KeyboardSpacer from '~common/KeyboardSpacer'
 
@@ -25,17 +26,15 @@ class WebViewQuillEditor extends React.Component {
   componentDidMount() {
     this.props.shareMethods(this.dispatchToWebView)
 
-    this.HTMLFile = Asset.fromModule(require('~features/studies/studiesWebView/dist/index.html'))
-    if (!this.HTMLFile.localUri) {
-      Asset.loadAsync(require('~features/studies/studiesWebView/dist/index.html')).then(() => {
-        this.HTMLFile = Asset.fromModule(
-          require('~features/studies/studiesWebView/dist/index.html')
-        )
-        this.setState({ isHTMLFileLoaded: true })
-      })
-    } else {
-      this.setState({ isHTMLFileLoaded: true })
-    }
+    this.loadHTMLFile()
+  }
+
+  loadHTMLFile = async () => {
+    const { localUri } = await AssetUtils.resolveAsync(
+      require('~features/studies/studiesWebView/dist/index.html')
+    )
+    this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+    this.setState({ isHTMLFileLoaded: true })
   }
 
   componentDidUpdate(prevProps) {
@@ -86,13 +85,7 @@ class WebViewQuillEditor extends React.Component {
   injectFont = async () => {
     const webView = this.webViewRef.current
 
-    let { localUri } = Asset.fromModule(require('~assets/fonts/LiterataBook.otf'))
-
-    if (!localUri) {
-      await Asset.loadAsync(require('~assets/fonts/LiterataBook.otf'))
-      localUri = Asset.fromModule(require('~assets/fonts/LiterataBook.otf')).localUri
-    }
-
+    const { localUri } = await AssetUtils.resolveAsync(require('~assets/fonts/LiterataBook.otf'))
     const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
 
     webView.injectJavaScript(`
@@ -212,7 +205,6 @@ class WebViewQuillEditor extends React.Component {
       return null
     }
 
-    const { localUri } = this.HTMLFile
     return (
       <View style={{ flex: 1 }}>
         <WebView
@@ -222,7 +214,7 @@ class WebViewQuillEditor extends React.Component {
           onMessage={this.handleMessage}
           originWhitelist={['*']}
           ref={this.webViewRef}
-          source={{ uri: localUri }}
+          source={{ html: this.HTMLFile }}
           injectedJavaScript={INJECTED_JAVASCRIPT}
           domStorageEnabled
           allowUniversalAccessFromFileURLs
