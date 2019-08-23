@@ -13,13 +13,14 @@ const getBackgroundColor = type => {
   }
 }
 export default {
-  show(label, type = 'info') {
+  show(label, type = 'info', params = {}) {
     SnackBar.show(label, {
       backgroundColor: getBackgroundColor(type),
       buttonColor: 'blue',
       textColor: 'white',
       tapToClose: true,
-      duration: 2500
+      duration: 2500,
+      ...params
     })
   }
 }
