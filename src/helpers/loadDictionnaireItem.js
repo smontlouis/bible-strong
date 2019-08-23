@@ -6,7 +6,9 @@ const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1)
 const loadDictionnaireItem = async word => {
   try {
     const result = await SQLDTransaction(
-      `SELECT word, definition FROM dictionnaire WHERE word = "${capitalize(word)}"`
+      `SELECT word, definition FROM dictionnaire WHERE word = "${capitalize(
+        word
+      )}" OR sanitized_word = "${word}"`
     )
     return result[0]
   } catch (e) {

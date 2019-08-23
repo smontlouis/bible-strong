@@ -5,6 +5,7 @@ import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 import truncHTML from 'trunc-html'
 
+import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
@@ -78,6 +79,15 @@ class StrongCard extends React.Component {
       dictionnaireRef: { word, definition },
       theme
     } = this.props
+
+    if (!word) {
+      return (
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Impossible de charger ce mot..."
+        />
+      )
+    }
 
     const { html } = truncHTML(definition.replace(/\n/gi, ''), 500)
 
