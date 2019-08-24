@@ -45,17 +45,23 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smontlouis.biblestrong",
+      "buildNumber": "47",
       "config": {
         "googleSignIn": {
           "reservedClientId": "com.googleusercontent.apps.204116128917-q1pl4f4pt4tflfetgb905e9b4e34pu61"
-        },
-      "buildNumber": "48"
+        }
       }
     },
     "android": {
       "package": "com.smontlouis.biblestrong",
       "versionCode": 48,
-      "permissions": []
+      "permissions": [],
+      "config":{
+        "googleSignIn":{
+          "apiKey": "AIzaSyB1NjCx7Vkq6PhAc3iM9sjzURoXazOIhoM",
+          "certificateHash": "99678CDF858F41FBC994920A9B21FA90E861FCDA"
+        }
+      }
     },
     "hooks": {
       "postPublish": [
