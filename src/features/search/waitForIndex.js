@@ -18,14 +18,15 @@ export const useWaitForIndex = () => {
     const loadIndex = async () => {
       const idxPath = `${FileSystem.documentDirectory}idx-light.json`
       let idxFile = await FileSystem.getInfoAsync(idxPath)
-      setIdxFile(idxFile)
-
       // if (__DEV__) {
       //   if (idxFile.exists) {
       //     FileSystem.deleteAsync(idxFile.uri)
       //     idxFile = await FileSystem.getInfoAsync(idxPath)
+      //     return
       //   }
       // }
+
+      setIdxFile(idxFile)
 
       if (!idxFile.exists) {
         const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
@@ -44,7 +45,7 @@ export const useWaitForIndex = () => {
 
         console.log('Download finished')
         idxFile = await FileSystem.getInfoAsync(idxPath)
-        setIdxFile(setIdxFile)
+        setIdxFile(idxFile)
       }
 
       setLoading(false)
@@ -59,7 +60,7 @@ const waitForIndex = WrappedComponent => props => {
   const { isLoading, idxFile, progress } = useWaitForIndex()
   const isProgressing = typeof progress !== 'undefined'
 
-  if ((isLoading && isProgressing) || !idxFile) {
+  if ((isLoading && isProgressing) || !idxFile || !idxFile.exists) {
     return (
       <Loading message="Téléchargement de l'index..">
         <ProgressBar progress={progress} color="blue" />
