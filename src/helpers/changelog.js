@@ -7,6 +7,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1566639586810',
+    type: logTypes.BUG,
+    title: "Chargement de l'index...",
+    description: "Au premier chargement de l'index, l'écran restait bloqué. Ce bug est résolu."
+  },
+  {
     date: '1566445889323',
     type: logTypes.NEW,
     title: 'Dictionnaire dans les versets',
