@@ -133,9 +133,9 @@ const FireAuth = class {
       try {
         const result = await Google.logInAsync({
           androidClientId: firebaseConfig.androidClientId,
-          androidStandaloneAppClientId: firebaseConfig.androidClientId,
+          androidStandaloneAppClientId: firebaseConfig.androidStandaloneAppClientId,
           iosClientId: firebaseConfig.iosClientId,
-          iosStandaloneAppClientId: firebaseConfig.iosClientId,
+          iosStandaloneAppClientId: firebaseConfig.iosStandaloneAppClientId,
           scopes: ['profile', 'email', 'openid'],
           redirectUrl: `${AppAuth.OAuthRedirect}:/oauth2redirect/google`
         })

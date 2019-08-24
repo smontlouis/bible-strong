@@ -45,7 +45,12 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smontlouis.biblestrong",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.204116128917-q1pl4f4pt4tflfetgb905e9b4e34pu61"
+        },
       "buildNumber": "47"
+      }
     },
     "android": {
       "package": "com.smontlouis.biblestrong",
