@@ -132,7 +132,9 @@ const FireAuth = class {
       try {
         const result = await Google.logInAsync({
           androidClientId: firebaseConfig.androidClientId,
+          androidStandaloneAppClientId: firebaseConfig.androidClientId,
           iosClientId: firebaseConfig.iosClientId,
+          iosStandaloneAppClientId: firebaseConfig.iosClientId,
           scopes: ['profile', 'email', 'openid']
         })
 
