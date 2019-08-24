@@ -1,11 +1,7 @@
 {
   "main": "node_modules/expo/AppEntry.js",
   "name": "bible-strong",
-<<<<<<< HEAD
-  "version": "1.1.3",
-=======
-  "version": "2.0.0",
->>>>>>> 2.0.0
+  "version": "2.0.1",
   "scripts": {
     "start": "open -a Simulator; expo start",
     "android": "expo start --android",
