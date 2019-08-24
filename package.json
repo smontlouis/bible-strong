@@ -29,6 +29,7 @@
     "emotion-theming": "^10.0.10",
     "expo": "^34.0.4",
     "expo-analytics-segment": "~6.0.0",
+    "expo-app-auth": "~6.0.0",
     "expo-asset": "^6.0.0",
     "expo-asset-utils": "^1.2.0",
     "expo-constants": "~6.0.0",
