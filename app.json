@@ -32,7 +32,6 @@
       "assets/images/*",
       "src/assets/fonts/*",
       "src/assets/images/*",
-      "src/assets/db/strong.sqlite",
       "src/assets/bible_versions/bible-lsg-1910.json",
       "node_modules/@expo/vector-icons/fonts/Feather.ttf",
       "src/features/bible/bibleWebView/dist/index.html",

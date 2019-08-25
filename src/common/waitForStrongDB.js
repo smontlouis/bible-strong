@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
 import AssetUtils from 'expo-asset-utils'
 
@@ -9,6 +10,7 @@ import { setStrongDatabaseHash } from '~redux/modules/bible'
 
 export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
+  const [progress, setProgress] = useState(undefined)
   const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
   const dispatch = useDispatch()
 
@@ -39,9 +41,18 @@ export const useWaitForDatabase = () => {
         const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
 
         if (!dbFile.exists || sqliteDB.hash !== strongDatabaseHash) {
+          console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+          await FileSystem.createDownloadResumable(
+            sqliteDB.uri,
+            dbPath,
+            null,
+            ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+              const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+              setProgress(idxProgress)
+            }
+          ).downloadAsync()
+
           dispatch(setStrongDatabaseHash(sqliteDB.hash))
-          console.log(`Copying ${sqliteDB.localUri} to ${dbPath}`)
-          await FileSystem.copyAsync({ from: sqliteDB.localUri, to: dbPath })
         }
 
         await initStrongDB()
@@ -53,14 +64,23 @@ export const useWaitForDatabase = () => {
     }
   }, [strongDatabaseHash, dispatch])
 
-  return isLoading
+  return { isLoading, progress }
 }
 
 const waitForDatabase = WrappedComponent => props => {
-  const isLoading = useWaitForDatabase()
+  const { isLoading, progress } = useWaitForDatabase()
+  const isProgressing = typeof progress !== 'undefined'
+
+  if (isLoading && isProgressing) {
+    return (
+      <Loading message="Téléchargement de la base strong...">
+        <ProgressBar progress={progress} color="blue" />
+      </Loading>
+    )
+  }
 
   if (isLoading) {
-    return <Loading message="Téléchargement de la base de données..." />
+    return <Loading message="Chargement de la base strong..." />
   }
   return <WrappedComponent {...props} />
 }
