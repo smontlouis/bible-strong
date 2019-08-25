@@ -8,6 +8,8 @@ import { initStrongDB, getStrongDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import { setStrongDatabaseHash } from '~redux/modules/bible'
 
+const STRONG_FILE_SIZE = 34941952
+
 export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
   const [progress, setProgress] = useState(undefined)
@@ -35,6 +37,7 @@ export const useWaitForDatabase = () => {
         //   if (dbFile.exists) {
         //     FileSystem.deleteAsync(dbFile.uri)
         //     dbFile = await FileSystem.getInfoAsync(dbPath)
+        //     return
         //   }
         // }
 
