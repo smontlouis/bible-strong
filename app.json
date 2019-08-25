@@ -42,7 +42,7 @@
       "checkAutomatically": "ON_ERROR_RECOVERY"
     },
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.smontlouis.biblestrong",
       "buildNumber": "49",
       "config": {
