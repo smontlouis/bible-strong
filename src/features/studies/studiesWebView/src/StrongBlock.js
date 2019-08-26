@@ -32,6 +32,10 @@ class StrongBlock extends Embed {
       }
     })
 
+    node.querySelector('.block-delete').addEventListener('click', () => {
+      node.remove()
+    })
+
     return node
   }
 
@@ -68,6 +72,7 @@ class StrongBlock extends Embed {
   }
   
   _remove() {
+    console.log('hé')
     // NOTE: call this function as:
     // setTimeout(() => this._remove(), 0);
     // otherwise you'll get the error: "The given range isn't in document."

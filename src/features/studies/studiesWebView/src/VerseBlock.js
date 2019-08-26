@@ -36,6 +36,10 @@ class VerseBlock extends Embed {
       }
     })
 
+    node.querySelector('.block-delete').addEventListener('click', () => {
+      node.remove()
+    })
+
     return node
   }
 

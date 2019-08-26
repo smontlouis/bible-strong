@@ -3,23 +3,18 @@ import ArrowRight from './ArrowRight'
 import './strong.css'
 
 const Strong = ({ title, code, phonetique, original }) => (
-  <React.Fragment>
-    <div className='block-strong--content'>
-      <div className='block-strong--title'>
-        {title}
+  <>
+    <div className="block-strong--content">
+      <div className="block-strong--title">{title}</div>
+      <div className="block-strong--desc">
+        [{phonetique}] - {code} - {original}
       </div>
-      <div className='block-strong--desc'>
-        [{phonetique}] - {code}
+      <div className="block-strong--arrow">
+        <ArrowRight color='rgb(9,132,227)' />
       </div>
-      <div className='block-strong--original'>
-        {original}
-      </div>
-      <div className='block-strong--arrow'>
-        <ArrowRight />
-      </div>
+    <div className='block-delete' />
     </div>
-    {/* <div className='block-delete' /> */}
-  </React.Fragment>
+  </>
 )
 
 export default Strong

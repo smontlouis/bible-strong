@@ -1,35 +1,50 @@
 .block-verse--wrapper {
-  color: rgba(44, 62, 80,1.0);
+  margin: 10px 0;
+  padding: 13px 18px;
+  background: linear-gradient(50deg, rgba(44, 62, 80,0.8) 0%,rgba(44, 62, 80,1.0) 100%);
+  box-shadow: 0 3px 6px 0px rgba(44, 62, 80,0.44);
+  border-radius: 4px;
+  color: white;
   position: relative;
+  overflow: hidden;
+  padding-bottom: 30px;
   z-index: 10;
 }
 
 .block-verse--content {
   quotes: "“" "”" "‘" "’";
+  font-size: 20px;
   font-style: italic;
+  text-align: center
 }
 
 .block-verse--content:before {  
   content: open-quote;
+  top: 56px;
+  left: -17px;
 }
 
 .block-verse--content:after {
   content: close-quote;
+  bottom: -30px;
+  right: 35px;
 }
 
 .block-verse--content:before,
 .block-verse--content:after {
-  font-size: 20px;
+  font-size: 150px;
   font-weight: bold;
   line-height: 0px;
-  color: rgba(44, 62, 80,1.0);
+  position: absolute;
+  color: white;
   opacity: 0.2;
 }
 
 .block-verse--bottom {
-  margin-top: 10px;
+  margin-top: 20px;
   display: flex;
-  font-size: 14px;
+  justify-content: center;
+  font-size: 16px;
   opacity: 0.7;
 }
 
@@ -41,35 +56,24 @@
   font-weight: bold;  
 }
 
-.block-verse--arrow {
-  position: absolute;
-  bottom: -4px;
-  right: 15px;
-}
-
 .block-delete {
-    height: 20px;
+    height: 30px;
     background-color: rgb(194,40,57);
-    padding: 0 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 17px;
     font-family: arial;
     color: white;
-    border-radius: 20px;
-    position: absolute;
-    bottom: -25px;
-    right: 0;
+    border-radius: 0 0 8px 8px;
+    position: relative;
+    bottom: 13px;
 }
 
 
 .block-delete:before {
-  content:"Effacer";
-  font-size: 11px;
+  content:"Supprimer le bloc";
+  font-size: 13px;
+  font-family: arial;
   display:block;
-}
-
-.ql-disabled .block-delete {
-  display: none;
 }

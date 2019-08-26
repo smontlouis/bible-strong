@@ -1,13 +1,7 @@
 .block-strong--content {
-  margin: 10px 0;
-  padding: 13px 18px;
-  background: linear-gradient(50deg, rgba(9,132,227,0.8) 0%,rgb(9,132,227) 100%);
-  box-shadow: 0 3px 6px 0px rgba(9, 132, 227, 0.44);
-  border-radius: 4px;
-  color: white;
-  position: relative;
-  overflow: hidden;
+  color: rgb(9,132,227);
   z-index: 10;
+  position: relative;
 }
 
 .block-strong--title {
@@ -19,17 +13,8 @@
   font-size: 12px;
 }
 
-.block-strong--original {
-  position: absolute;
-  top: -12px;
-  right: 0;
-  font-size: 30px;
-  opacity: 0.3;
-}
-
 .block-strong--arrow {
   position: absolute;
-  bottom: -17px;
+  bottom: 5px;
   right: 15px;
-  opacity: 0.3;
 }

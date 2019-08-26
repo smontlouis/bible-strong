@@ -63,7 +63,7 @@ class ModuleInlineVerse extends Module {
           title,
           verses
         })
-        this.quill.insertText(this.range.index, ' ')
+        this.quill.insertText(this.range.index, ' ', 'inline-verse', false)
       }
     }
   }
@@ -108,7 +108,7 @@ class ModuleInlineVerse extends Module {
           codeStrong,
           book
         })
-        this.quill.insertText(this.range.index, ' ')
+        this.quill.insertText(this.range.index, ' ', 'inline-strong', false)
       }
     }
   }

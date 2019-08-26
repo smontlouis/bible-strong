@@ -1,4 +1,5 @@
 import React from 'react'
+import ArrowRight from './ArrowRight'
 import './verse.css'
 
 const Verse = ({ title, content, version }) => (
@@ -15,8 +16,11 @@ const Verse = ({ title, content, version }) => (
           { version }
         </div>
       </div>
+      <div className="block-verse--arrow">
+        <ArrowRight color='rgba(44, 62, 80,1.0)' />
+      </div>
+    <div className='block-delete' />
     </div>
-    {/* <div className='block-delete' /> */}
   </React.Fragment>
 )
 

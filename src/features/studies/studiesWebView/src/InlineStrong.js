@@ -23,6 +23,7 @@ class InlineStrong extends Inline {
         })
       }
     })
+
     return node
   }
 
