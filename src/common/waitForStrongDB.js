@@ -6,12 +6,16 @@ import AssetUtils from 'expo-asset-utils'
 
 import { initStrongDB, getStrongDB } from '~helpers/database'
 import Loading from '~common/Loading'
+import DownloadRequired from '~common/DownloadRequired'
+
 import { setStrongDatabaseHash } from '~redux/modules/bible'
 
 const STRONG_FILE_SIZE = 34941952
 
 export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
+  const [proposeDownload, setProposeDownload] = useState(false)
+  const [startDownload, setStartDownload] = useState(false)
   const [progress, setProgress] = useState(undefined)
   const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
   const dispatch = useDispatch()
@@ -37,13 +41,18 @@ export const useWaitForDatabase = () => {
         //   if (dbFile.exists) {
         //     FileSystem.deleteAsync(dbFile.uri)
         //     dbFile = await FileSystem.getInfoAsync(dbPath)
-        //     return
         //   }
         // }
 
         const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
 
         if (!dbFile.exists || sqliteDB.hash !== strongDatabaseHash) {
+          // Waiting for user to accept to download
+          if (!startDownload) {
+            setProposeDownload(true)
+            return
+          }
+
           console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
           await FileSystem.createDownloadResumable(
             sqliteDB.uri,
@@ -65,13 +74,13 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [strongDatabaseHash, dispatch])
+  }, [strongDatabaseHash, dispatch, startDownload])
 
-  return { isLoading, progress }
+  return { isLoading, progress, proposeDownload, setStartDownload }
 }
 
 const waitForDatabase = WrappedComponent => props => {
-  const { isLoading, progress } = useWaitForDatabase()
+  const { isLoading, progress, proposeDownload, setStartDownload } = useWaitForDatabase()
   const isProgressing = typeof progress !== 'undefined'
 
   if (isLoading && isProgressing) {
@@ -82,9 +91,21 @@ const waitForDatabase = WrappedComponent => props => {
     )
   }
 
+  if (isLoading && proposeDownload) {
+    return (
+      <DownloadRequired
+        hasBackButton
+        title="La base de données strong est requise pour accéder à cette page."
+        setStartDownload={setStartDownload}
+        fileSize={35}
+      />
+    )
+  }
+
   if (isLoading) {
     return <Loading message="Chargement de la base strong..." />
   }
+
   return <WrappedComponent {...props} />
 }
 

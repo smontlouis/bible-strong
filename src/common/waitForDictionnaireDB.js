@@ -6,12 +6,16 @@ import { Asset } from 'expo-asset'
 
 import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
 import Loading from '~common/Loading'
+import DownloadRequired from '~common/DownloadRequired'
+
 import { setDictionnaireDatabaseHash } from '~redux/modules/bible'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
 export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
+  const [proposeDownload, setProposeDownload] = useState(false)
+  const [startDownload, setStartDownload] = useState(false)
   const [progress, setProgress] = useState(undefined)
   const dictionnaireDatabaseHash = useSelector(state => state.bible.dictionnaireDatabaseHash)
   const dispatch = useDispatch()
@@ -43,6 +47,12 @@ export const useWaitForDatabase = () => {
         const sqliteDB = await Asset.fromModule(require('~assets/db/dictionnaire.sqlite'))
 
         if (!dbFile.exists || sqliteDB.hash !== dictionnaireDatabaseHash) {
+          // Waiting for user to accept to download
+          if (!startDownload) {
+            setProposeDownload(true)
+            return
+          }
+
           console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
           await FileSystem.createDownloadResumable(
             sqliteDB.uri,
@@ -65,12 +75,12 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [dictionnaireDatabaseHash, dispatch])
-  return { isLoading, progress }
+  }, [dictionnaireDatabaseHash, dispatch, startDownload])
+  return { isLoading, progress, proposeDownload, setStartDownload }
 }
 
 const waitForDatabase = WrappedComponent => props => {
-  const { isLoading, progress } = useWaitForDatabase()
+  const { isLoading, progress, proposeDownload, setStartDownload } = useWaitForDatabase()
   const isProgressing = typeof progress !== 'undefined'
 
   if (isLoading && isProgressing) {
@@ -78,6 +88,16 @@ const waitForDatabase = WrappedComponent => props => {
       <Loading message="Téléchargement du dictionnaire...">
         <ProgressBar progress={progress} color="blue" />
       </Loading>
+    )
+  }
+
+  if (isLoading && proposeDownload) {
+    return (
+      <DownloadRequired
+        title="La base de données dictionnaire est requise pour accéder à cette page."
+        setStartDownload={setStartDownload}
+        fileSize={22}
+      />
     )
   }
 
