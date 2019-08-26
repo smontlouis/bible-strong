@@ -4,12 +4,15 @@ import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
 import { Asset } from 'expo-asset'
 
+import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
 export const useWaitForIndex = () => {
   const [isLoading, setLoading] = useState(true)
+  const [proposeDownload, setProposeDownload] = useState(false)
+  const [startDownload, setStartDownload] = useState(false)
   const [progress, setProgress] = useState(undefined)
   const [idxFile, setIdxFile] = useState(null)
   const dispatch = useDispatch()
@@ -18,19 +21,24 @@ export const useWaitForIndex = () => {
     const loadIndex = async () => {
       const idxPath = `${FileSystem.documentDirectory}idx-light.json`
       let idxFile = await FileSystem.getInfoAsync(idxPath)
+
       // if (__DEV__) {
       //   if (idxFile.exists) {
       //     FileSystem.deleteAsync(idxFile.uri)
       //     idxFile = await FileSystem.getInfoAsync(idxPath)
-      //     return
       //   }
       // }
 
       setIdxFile(idxFile)
 
       if (!idxFile.exists) {
-        const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
+        // Waiting for user to accept to download
+        if (!startDownload) {
+          setProposeDownload(true)
+          return
+        }
 
+        const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
         console.log(`Downloading ${idxUri} to ${idxPath}`)
 
         await FileSystem.createDownloadResumable(
@@ -52,15 +60,15 @@ export const useWaitForIndex = () => {
     }
 
     loadIndex()
-  }, [dispatch])
-  return { isLoading, idxFile, progress }
+  }, [dispatch, startDownload])
+  return { isLoading, idxFile, progress, proposeDownload, setStartDownload }
 }
 
 const waitForIndex = WrappedComponent => props => {
-  const { isLoading, idxFile, progress } = useWaitForIndex()
+  const { isLoading, idxFile, progress, proposeDownload, setStartDownload } = useWaitForIndex()
   const isProgressing = typeof progress !== 'undefined'
 
-  if ((isLoading && isProgressing) || !idxFile || !idxFile.exists) {
+  if (isLoading && isProgressing) {
     return (
       <Loading message="Téléchargement de l'index..">
         <ProgressBar progress={progress} color="blue" />
@@ -68,7 +76,21 @@ const waitForIndex = WrappedComponent => props => {
     )
   }
 
-  return <WrappedComponent idxFile={idxFile} {...props} />
+  if (isLoading && proposeDownload) {
+    return (
+      <DownloadRequired
+        title="L'index de recherche est requis pour accéder à cette page."
+        setStartDownload={setStartDownload}
+        fileSize={16}
+      />
+    )
+  }
+
+  if (idxFile && idxFile.exists) {
+    return <WrappedComponent idxFile={idxFile} {...props} />
+  }
+
+  return <Loading message="Chargement..." />
 }
 
 export default waitForIndex

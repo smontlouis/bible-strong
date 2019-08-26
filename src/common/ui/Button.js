@@ -5,7 +5,7 @@ const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type, di
   backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
   borderWidth: reverse ? 1 : 0,
   borderColor: theme.colors.darkGrey,
-  borderRadius: 5,
+  borderRadius: 3,
   height: 40,
   alignItems: 'center',
   justifyContent: 'center',
@@ -14,21 +14,19 @@ const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type, di
   paddingLeft: 10,
   paddingRight: 10,
 
-  ...disabled && {
+  ...(disabled && {
     opacity: 0.5
-  },
+  }),
 
-  ...small && {
+  ...(small && {
     height: 30,
     minWidth: 100,
     paddingLeft: 5,
     paddingRight: 5,
     marginRight: 0,
     marginLeft: 0
-  },
-  ...type === 'secondary' && {
-
-  }
+  }),
+  ...(type === 'secondary' && {})
 }))
 
 const TextButton = styled.Text(({ theme, small, reverse }) => ({
@@ -36,14 +34,22 @@ const TextButton = styled.Text(({ theme, small, reverse }) => ({
   fontWeight: 'bold',
   fontSize: 16,
 
-  ...small && {
+  ...(small && {
     fontSize: 14
-  }
+  })
 }))
 
 const Button = ({ title, onPress, style, small, reverse, disabled, type }) => (
-  <WrapperButton disabled={disabled} onPress={!disabled ? onPress : () => {}} style={style} small={small} reverse={reverse} type={type}>
-    <TextButton small={small} reverse={reverse}>{title}</TextButton>
+  <WrapperButton
+    disabled={disabled}
+    onPress={!disabled ? onPress : () => {}}
+    style={style}
+    small={small}
+    reverse={reverse}
+    type={type}>
+    <TextButton small={small} reverse={reverse}>
+      {title}
+    </TextButton>
   </WrapperButton>
 )
 
