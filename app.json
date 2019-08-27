@@ -54,7 +54,11 @@
     "android": {
       "package": "com.smontlouis.biblestrong",
       "versionCode": 52,
-      "permissions": [],
+      "permissions": [
+        "VIBRATE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ],
       "config": {
         "googleSignIn": {
           "apiKey": "AIzaSyB1NjCx7Vkq6PhAc3iM9sjzURoXazOIhoM",
