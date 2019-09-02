@@ -89,6 +89,12 @@ const MoreScreen = () => {
             Bugs
           </Text>
         </LinkItem>
+        <LinkItem href="https://www.facebook.com/fr.bible.strong">
+          <StyledIcon name="facebook" size={25} />
+          <Text bold fontSize={15}>
+            Nous suivre sur facebook
+          </Text>
+        </LinkItem>
         <LinkItem
           href={
             Platform.OS === 'ios'

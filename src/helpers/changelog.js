@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1567396884383',
+    type: logTypes.NEW,
+    title: 'Connexion et études (cachées) !',
+    description:
+      "En résumé : La fonctionnalité est cachée pour l'instant. Pour y accéder, suivez-nous sur Facebook, j'ai mis les indications dans le premier post ! 😉. Le lien est dans le menu.\n \nVersion plus longue: Vous avez maintenant accès aux études et pouvez sauvegarder vos données dans le cloud. J'ai été obligé de \"cacher\" la fonctionnalité, Apple et Google n'aiment pas les fonctionnalités en phase de test. D'ailleurs s'ils voient ce message, je vais surement me faire taper sur les doigts. Les études sont donc en bêta ouverte. J'ai besoin de votre aide ! Merci de me donner vos retours et vos avis. "
+  },
+  {
     date: '1566639586810',
     type: logTypes.BUG,
     title: "Chargement de l'index...",

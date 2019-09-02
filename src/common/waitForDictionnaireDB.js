@@ -102,7 +102,12 @@ const waitForDatabase = WrappedComponent => props => {
   }
 
   if (isLoading) {
-    return <Loading message="Chargement du dictionnaire..." />
+    return (
+      <Loading
+        message="Chargement du dictionnaire..."
+        subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes..."
+      />
+    )
   }
   return <WrappedComponent {...props} />
 }
