@@ -106,7 +106,7 @@ const waitForDatabase = WrappedComponent => props => {
     return (
       <Loading
         message="Chargement de la base strong..."
-        subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes..."
+        subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
       />
     )
   }

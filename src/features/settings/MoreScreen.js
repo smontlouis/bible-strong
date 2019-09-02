@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { ScrollView, Platform, Alert, TouchableOpacity } from 'react-native'
+import { ScrollView, Platform, Alert } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
 import SnackBar from '~common/SnackBar'
 import Container from '~common/ui/Container'
+import Border from '~common/ui/Border'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
@@ -14,12 +15,13 @@ import useLogin from '~helpers/useLogin'
 
 import app from '../../../app.json'
 
-const LinkItem = styled(Link)(({ theme }) => ({
+const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
-  padding: 20,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border
+  paddingHorizontal: 20,
+  paddingVertical: 15
+  // borderBottomWidth: 1,
+  // borderBottomColor: theme.colors.border
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
@@ -51,87 +53,88 @@ const MoreScreen = () => {
     <Container>
       <Header title="Plus" />
       <ScrollView flex={1}>
-        {(canShowStudy || isLogged) && (
-          <LinkItem route="Studies">
-            <StyledIcon name="feather" size={25} color="quart" />
-            <Text bold fontSize={15} color="quart">
-              Études (bêta)
+        <Box paddingVertical={10}>
+          {canShowStudy && (
+            <LinkItem route="Studies">
+              <StyledIcon name="feather" size={25} color="quart" />
+              <Text bold fontSize={15} color="quart">
+                Études (bêta)
+              </Text>
+            </LinkItem>
+          )}
+          <LinkItem onPress={() => setEditTagsOpen(true)}>
+            <StyledIcon name="tag" size={25} />
+            <Text bold fontSize={15}>
+              Mes tags
             </Text>
           </LinkItem>
-        )}
-        <LinkItem onPress={() => setEditTagsOpen(true)}>
-          <StyledIcon name="tag" size={25} />
-          <Text bold fontSize={15}>
-            Mes tags
-          </Text>
-        </LinkItem>
-        <LinkItem route="Highlights">
-          <StyledIcon name="edit-3" size={25} />
-          <Text bold fontSize={15}>
-            Surbrillances
-          </Text>
-        </LinkItem>
-        <LinkItem route="BibleVerseNotes">
-          <StyledIcon name="file-text" size={25} />
-          <Text bold fontSize={15}>
-            Notes
-          </Text>
-        </LinkItem>
-        <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
-          <StyledIcon name="sun" size={25} />
-          <Text bold fontSize={15}>
-            Idées de fonctionnalités
-          </Text>
-        </LinkItem>
-        <LinkItem href="https://bible-strong.canny.io/bugs">
-          <StyledIcon name="alert-circle" size={25} />
-          <Text bold fontSize={15}>
-            Bugs
-          </Text>
-        </LinkItem>
-        <LinkItem href="https://www.facebook.com/fr.bible.strong">
-          <StyledIcon name="facebook" size={25} />
-          <Text bold fontSize={15}>
-            Nous suivre sur facebook
-          </Text>
-        </LinkItem>
-        <LinkItem
-          href={
-            Platform.OS === 'ios'
-              ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
-              : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
-          }>
-          <StyledIcon name="star" size={25} />
-          <Text bold fontSize={15}>
-            Noter l'application
-          </Text>
-        </LinkItem>
-        <LinkItem share={shareMessage()}>
-          <StyledIcon name="share-2" size={25} />
-          <Text bold fontSize={15}>
-            Partager l'application
-          </Text>
-        </LinkItem>
-        <LinkItem href="mailto:s.montlouis.calixte@gmail.com">
-          <StyledIcon name="send" size={25} />
-          <Text bold fontSize={15}>
-            Contacter le développeur
-          </Text>
-        </LinkItem>
-        <LinkItem href="https://fr.tipeee.com/smontlouis">
-          <StyledIcon name="thumbs-up" size={25} color="primary" />
-          <Text bold fontSize={15} color="primary">
-            Soutenir le développeur
-          </Text>
-        </LinkItem>
-        {isLogged && (
-          <LinkItem onPress={promptLogout}>
-            <StyledIcon color="quart" name="log-out" size={25} />
-            <Text bold color="quart" fontSize={15}>
-              Se déconnecter
+          <LinkItem route="Highlights">
+            <StyledIcon name="edit-3" size={25} />
+            <Text bold fontSize={15}>
+              Surbrillances
             </Text>
           </LinkItem>
-        )}
+          <LinkItem route="BibleVerseNotes">
+            <StyledIcon name="file-text" size={25} />
+            <Text bold fontSize={15}>
+              Notes
+            </Text>
+          </LinkItem>
+        </Box>
+        <Border />
+        <Box paddingVertical={10}>
+          <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
+            <StyledIcon name="sun" size={25} />
+            <Text fontSize={15}>Idées de fonctionnalités</Text>
+          </LinkItem>
+          <LinkItem href="https://bible-strong.canny.io/bugs">
+            <StyledIcon name="alert-circle" size={25} />
+            <Text fontSize={15}>Bugs</Text>
+          </LinkItem>
+          <LinkItem href="https://www.facebook.com/fr.bible.strong">
+            <StyledIcon name="facebook" size={25} />
+            <Text fontSize={15}>Nous suivre sur facebook</Text>
+          </LinkItem>
+          <LinkItem
+            href={
+              Platform.OS === 'ios'
+                ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
+                : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
+            }>
+            <StyledIcon name="star" size={25} />
+            <Text fontSize={15}>Noter l'application</Text>
+          </LinkItem>
+          <LinkItem share={shareMessage()}>
+            <StyledIcon name="share-2" size={25} />
+            <Text fontSize={15}>Partager l'application</Text>
+          </LinkItem>
+          <LinkItem href="mailto:s.montlouis.calixte@gmail.com">
+            <StyledIcon name="send" size={25} />
+            <Text fontSize={15}>Contacter le développeur</Text>
+          </LinkItem>
+          <LinkItem route="Support">
+            <StyledIcon name="thumbs-up" size={25} color="secondary" />
+            <Text bold color="secondary" fontSize={15}>
+              Soutenir le développeur
+            </Text>
+          </LinkItem>
+          {!isLogged && (
+            <LinkItem route="Login">
+              <StyledIcon color="primary" name="log-in" size={25} />
+              <Text color="primary" fontSize={15} bold>
+                Se connecter
+              </Text>
+            </LinkItem>
+          )}
+          {isLogged && (
+            <LinkItem onPress={promptLogout}>
+              <StyledIcon color="quart" name="log-out" size={25} />
+              <Text bold color="quart" fontSize={15}>
+                Se déconnecter
+              </Text>
+            </LinkItem>
+          )}
+        </Box>
       </ScrollView>
       <Box position="absolute" bottom={10} right={10}>
         <Text

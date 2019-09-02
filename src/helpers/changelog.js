@@ -7,8 +7,15 @@ export const logTypes = {
 
 export default [
   {
-    date: '1567396884383',
+    date: '1567457171763',
     type: logTypes.NEW,
+    title: 'Bouton de connexion et soutien financier',
+    description:
+      "J'ai ajouté un bouton de connexion dans les paramètres. Concernant le lien 'Soutenir le développeur', certains d'entres vous désireux de m'aider ne comprennent pas comment le faire. J'ai donc ajouté plus d'informations dans le lien."
+  },
+  {
+    date: '1567396884383',
+    type: logTypes.FEATURE,
     title: 'Connexion et études (cachées) !',
     description:
       "En résumé : La fonctionnalité est cachée pour l'instant. Pour y accéder, suivez-nous sur Facebook, j'ai mis les indications dans le premier post ! 😉. Le lien est dans le menu.\n \nVersion plus longue: Vous avez maintenant accès aux études et pouvez sauvegarder vos données dans le cloud. J'ai été obligé de \"cacher\" la fonctionnalité, Apple et Google n'aiment pas les fonctionnalités en phase de test. D'ailleurs s'ils voient ce message, je vais surement me faire taper sur les doigts. Les études sont donc en bêta ouverte. J'ai besoin de votre aide ! Merci de me donner vos retours et vos avis. "

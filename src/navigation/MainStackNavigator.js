@@ -14,6 +14,8 @@ import EditStudyScreen from '~features/studies/EditStudyScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
 import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
+import LoginScreen from '~features/settings/LoginScreen'
+import SupportScreen from '~features/settings/SupportScreen'
 
 export default createStackNavigator(
   {
@@ -31,7 +33,9 @@ export default createStackNavigator(
     Studies: { screen: StudiesScreen },
     // Search: { screen: SearchScreen },
     EditStudy: { screen: EditStudyScreen },
-    DictionnaryDetail: { screen: DictionnaryDetailScreen }
+    DictionnaryDetail: { screen: DictionnaryDetailScreen },
+    Login: { screen: LoginScreen },
+    Support: { screen: SupportScreen }
   },
   {
     headerMode: 'none'
