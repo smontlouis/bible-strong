@@ -56,10 +56,10 @@ class App extends React.Component {
       const update = await Updates.checkForUpdateAsync()
 
       if (update.isAvailable) {
-        SnackBar.show('Nouvelle mise à jour.')
+        SnackBar.show('Une mise à jour est disponible, téléchargement...')
         await Updates.fetchUpdateAsync()
 
-        Updates.reloadFromCache()
+        SnackBar.show("L'app est à jour. Redémarrez l'application.")
       }
     } catch (e) {
       // handle or log error

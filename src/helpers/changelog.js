@@ -7,6 +7,19 @@ export const logTypes = {
 
 export default [
   {
+    date: '1567539661219',
+    type: logTypes.NEW,
+    title: 'Mise à jour silencieuses',
+    description:
+      "L'application ne redémarrera plus lorsqu'une mise à jour aura été effectuée, pour ne pas être coupé dans votre lecture. Lorsque vous êtes prêts, redémarrer simplement l'application pour utiliser la dernière version."
+  },
+  {
+    date: '1567539661219',
+    type: logTypes.NEW,
+    title: 'Changelog',
+    description: "L'accès au changelog a été ajouté au menu."
+  },
+  {
     date: '1567514591426',
     type: logTypes.NEW,
     title: 'Personnalisation des couleurs',
@@ -35,14 +48,14 @@ export default [
   },
   {
     date: '1566445889323',
-    type: logTypes.NEW,
+    type: logTypes.FEATURE,
     title: 'Dictionnaire dans les versets',
     description:
       "3 mises à jours en 3 jours ? C'est Noël avant l'heure ;) \n Vous avez maintenant un accès direct aux mots du dictionnaire depuis un verset ! Si vous accédez à une strong / sélectionnez un verset, vous verrez apparaître la petite icône jaune du dictionnaire !"
   },
   {
     date: '1566358697045',
-    type: logTypes.NEW,
+    type: logTypes.FEATURE,
     title: 'Filtres de recherche',
     description:
       'Voici les filtres de recherche. Vous pouvez trier par pertinence ou ordre alphabétique, et filtrer par section ou par livre. Enjoy !'

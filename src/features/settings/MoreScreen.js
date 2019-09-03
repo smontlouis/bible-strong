@@ -112,6 +112,10 @@ const MoreScreen = () => {
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>Contacter le développeur</Text>
           </LinkItem>
+          <LinkItem route="Changelog">
+            <StyledIcon name="terminal" size={25} />
+            <Text fontSize={15}>Changelog</Text>
+          </LinkItem>
           <LinkItem route="Support">
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
             <Text bold color="secondary" fontSize={15}>
