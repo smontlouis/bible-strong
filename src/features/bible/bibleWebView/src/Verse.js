@@ -47,10 +47,10 @@ const ContainerText = styled('span')(
   ({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme, colors } }) => {
     let background = 'transparent'
     if (highlightedColor && !isSelected) {
-      background = `linear-gradient(180deg, rgba(255,255,255,0) 55%, ${convertHex(
+      background = `linear-gradient(180deg, rgba(255,255,255,0) 60%, ${convertHex(
         colors[theme][highlightedColor],
         50
-      )} 55%)`
+      )} 60%)`
     }
     if (isFocused) {
       background = 'rgba(0,0,0,0.1)'
