@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
+import { Alert } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
 // import { Platform } from 'react-native'
 // import * as Haptics from 'expo-haptics'
+import Sentry from 'sentry-expo'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -11,7 +13,8 @@ import {
   SEND_INITIAL_DATA,
   TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
-  CONSOLE_LOG
+  CONSOLE_LOG,
+  THROW_ERROR
 } from './bibleWebView/src/dispatch'
 
 const INJECTED_JAVASCRIPT = `(function() {
@@ -137,6 +140,14 @@ class BibleWebView extends Component {
         console.log('WEBVIEW: ', action.payload)
         break
       }
+      case THROW_ERROR: {
+        Alert.alert(
+          `Une erreur est survenue, impossible de charger la bible: ${action.payload} \n Le développeur en a été informé.`
+        )
+        console.log('WEBVIEW: ', action.payload)
+        Sentry.captureMessage(action.payload)
+        break
+      }
       default: {
         break
       }
@@ -193,6 +204,10 @@ class BibleWebView extends Component {
         originWhitelist={['*']}
         ref={ref => {
           this.webview = ref
+        }}
+        onError={syntheticEvent => {
+          const { nativeEvent } = syntheticEvent
+          console.warn('WebView error: ', nativeEvent)
         }}
         source={{ html: this.HTMLFile }}
         style={{ opacity: this.state.webViewOpacity }}

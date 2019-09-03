@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from '@emotion/styled'
 
-import { SEND_INITIAL_DATA, CONSOLE_LOG, dispatch } from './dispatch'
+import { SEND_INITIAL_DATA, CONSOLE_LOG, THROW_ERROR, dispatch } from './dispatch'
 import Verse from './Verse'
 import ErrorBoundary from './ErrorBoundary'
 import { desktopMode } from './env'
@@ -164,41 +164,50 @@ class VersesRenderer extends Component {
   receiveDataFromApp = () => {
     const self = this
     document.addEventListener('messages', event => {
-      const response = event.detail
+      try {
+        const response = event.detail
 
-      switch (response.type) {
-        case SEND_INITIAL_DATA: {
-          const {
-            verses,
-            selectedVerses,
-            highlightedVerses,
-            notedVerses,
-            settings,
-            verseToScroll,
-            isReadOnly,
-            version,
-            pericopeChapter,
-            chapter,
-            isSelectionMode
-          } = response
+        switch (response.type) {
+          case SEND_INITIAL_DATA: {
+            const {
+              verses,
+              selectedVerses,
+              highlightedVerses,
+              notedVerses,
+              settings,
+              verseToScroll,
+              isReadOnly,
+              version,
+              pericopeChapter,
+              chapter,
+              isSelectionMode
+            } = response
 
-          self.setState({
-            verses,
-            selectedVerses,
-            highlightedVerses,
-            notedVerses,
-            notedVersesCount: this.getNotedVersesCount(verses, notedVerses),
-            notedVersesText: this.getNotedVersesText(verses, notedVerses),
-            settings,
-            verseToScroll,
-            isReadOnly,
-            version,
-            pericopeChapter,
-            chapter,
-            isSelectionMode
-          })
-          break
+            self.setState({
+              verses,
+              selectedVerses,
+              highlightedVerses,
+              notedVerses,
+              notedVersesCount: this.getNotedVersesCount(verses, notedVerses),
+              notedVersesText: this.getNotedVersesText(verses, notedVerses),
+              settings,
+              verseToScroll,
+              isReadOnly,
+              version,
+              pericopeChapter,
+              chapter,
+              isSelectionMode
+            })
+            break
+          }
+          default:
+            break
         }
+      } catch (err) {
+        dispatch({
+          type: THROW_ERROR,
+          payload: `${err}`
+        })
       }
     })
   }

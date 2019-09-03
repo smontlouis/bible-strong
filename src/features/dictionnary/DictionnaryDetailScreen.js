@@ -3,7 +3,7 @@ import { Platform, ScrollView } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 
-import Sentry from 'react-native-sentry'
+import Sentry from 'sentry-expo'
 import books from '~assets/bible_versions/books-desc'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Back from '~common/Back'
