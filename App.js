@@ -59,7 +59,7 @@ class App extends React.Component {
         SnackBar.show('Une mise à jour est disponible, téléchargement...')
         await Updates.fetchUpdateAsync()
 
-        SnackBar.show("L'app est à jour. Redémarrez l'application.")
+        SnackBar.show("Mise à jour installée. Redémarrez l'app.")
       }
     } catch (e) {
       // handle or log error

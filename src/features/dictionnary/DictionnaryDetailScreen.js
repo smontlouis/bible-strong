@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Platform, ScrollView } from 'react-native'
+import { Platform, ScrollView, Share } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import truncHTML from 'trunc-html'
 
 import Sentry from 'sentry-expo'
 import books from '~assets/bible_versions/books-desc'
@@ -59,6 +60,22 @@ const DictionnaryDetailScreen = ({ navigation }) => {
     }
   }
 
+  const shareDefinition = () => {
+    try {
+      const message = `${word} \n\n${truncHTML(dictionnaireItem.definition, 4000)
+        .text.replace(/&#/g, '\\')
+        .replace(/\\x([0-9A-F]+);/gi, function() {
+          return String.fromCharCode(parseInt(arguments[1], 16))
+        })} \n\nLa suite sur https://bible-strong.app`
+
+      Share.share({ message })
+    } catch (e) {
+      Snackbar.show('Erreur lors du partage.')
+      console.log(e)
+      Sentry.captureException(e)
+    }
+  }
+
   return (
     <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
       <Box padding={20}>
@@ -73,6 +90,7 @@ const DictionnaryDetailScreen = ({ navigation }) => {
               style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
               name="share-2"
               size={20}
+              onPress={shareDefinition}
             />
           </Link>
           <Back>

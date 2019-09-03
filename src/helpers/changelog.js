@@ -7,9 +7,15 @@ export const logTypes = {
 
 export default [
   {
-    date: '1567539661219',
+    date: '1567550380556',
+    type: logTypes.BUG,
+    title: 'Partage dictionnaire',
+    description: "Le partage d'un mot du dictionnaire est maintenant possible."
+  },
+  {
+    date: '1567540356582',
     type: logTypes.NEW,
-    title: 'Mise à jour silencieuses',
+    title: 'Mises à jour silencieuses',
     description:
       "L'application ne redémarrera plus lorsqu'une mise à jour aura été effectuée, pour ne pas être coupé dans votre lecture. Lorsque vous êtes prêts, redémarrer simplement l'application pour utiliser la dernière version."
   },

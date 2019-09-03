@@ -35,11 +35,14 @@ const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
 }))
 
 const zoom = keyframes({
-  from: {
-    opacity: '0.2'
+  '0%': {
+    background: convertHex('#95afc0', 0)
   },
-  to: {
-    opacity: '1'
+  '50%': {
+    background: convertHex('#95afc0', 30)
+  },
+  '100%': {
+    background: convertHex('#95afc0', 0)
   }
 })
 
@@ -68,7 +71,7 @@ const ContainerText = styled('span')(
       WebkitUserSelect: 'none',
       ...(isVerseToScroll
         ? {
-            animation: `1s ease 0s 2 normal none running ${zoom}`
+            animation: `0.75s ease 0s 3 normal none running ${zoom}`
           }
         : {})
     }
@@ -232,7 +235,7 @@ class Verse extends Component {
           settings={settings}
           isFocused={isFocused}
           isSelected={isSelected}
-          isVerseToScroll={isVerseToScroll}
+          isVerseToScroll={isVerseToScroll && verse.Verset != 1}
           highlightedColor={highlightedColor}>
           <NumberText settings={settings}>{verse.Verset} </NumberText>
           {notesCount && !inlineNotedVerses && !isSelectionMode && (
