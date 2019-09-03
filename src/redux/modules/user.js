@@ -4,6 +4,9 @@ import Sentry from 'sentry-expo'
 
 import { clearSelectedVerses } from './bible'
 
+import defaultColors from '~themes/colors'
+import darkColors from '~themes/darkColors'
+
 import orderVerses from '~helpers/orderVerses'
 import generateUUID from '~helpers/generateUUID'
 
@@ -38,6 +41,8 @@ export const UPDATE_STUDY = 'user/UPDATE_STUDY'
 export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
 export const DELETE_STUDY = 'user/DELETE_STUDY'
 
+export const CHANGE_COLOR = 'user/CHANGE_COLOR'
+
 const initialState = {
   id: '',
   email: '',
@@ -58,7 +63,11 @@ const initialState = {
       textDisplay: 'inline',
       theme: 'default',
       press: 'shortPress',
-      notesDisplay: 'inline'
+      notesDisplay: 'inline',
+      colors: {
+        default: defaultColors,
+        dark: darkColors
+      }
     }
   }
 }
@@ -359,6 +368,14 @@ export default produce((draft, action) => {
       removeEntityInTags(draft, 'studies', action.payload)
       break
     }
+    case CHANGE_COLOR: {
+      const currentTheme = draft.bible.settings.theme
+      const color =
+        action.color ||
+        (currentTheme === 'dark' ? darkColors[action.name] : defaultColors[action.name])
+      draft.bible.settings.colors[currentTheme][action.name] = color
+      break
+    }
     default: {
       break
     }
@@ -546,5 +563,13 @@ export function onUserUpdateProfile(profile) {
   return {
     type: USER_UPDATE_PROFILE,
     payload: profile
+  }
+}
+
+export function changeColor({ name, color }) {
+  return {
+    type: CHANGE_COLOR,
+    name,
+    color
   }
 }

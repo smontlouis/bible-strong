@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Share } from 'react-native'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import { useSelector } from 'react-redux'
 
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -69,11 +69,14 @@ const VersesModal = ({
   navigation,
   selectedVerses,
   version,
-  theme,
   onCreateNoteClick,
   isSelectionMode
 }) => {
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
+
+  const { colors } = useSelector(state => ({
+    colors: state.user.bible.settings.colors[state.user.bible.settings.theme]
+  }))
 
   useEffect(() => {
     getVersesRef(selectedVerses, version).then(({ title }) => setSelectedVersesTitle(title))
@@ -151,29 +154,20 @@ const VersesModal = ({
       isSelectionMode={isSelectionMode}>
       {isSelectionMode ? (
         <Container isSelectionMode={isSelectionMode}>
-          <TouchableIcon
-            name="x"
-            onPress={clearSelectedVerses}
-            color={theme.colors.reverse}
-            noFlex
-          />
+          <TouchableIcon name="x" onPress={clearSelectedVerses} color={colors.reverse} noFlex />
           <Text flex bold fontSize={15} textAlign="center" color="reverse">
             {selectedVersesTitle.toUpperCase()}
           </Text>
-          <TouchableIcon
-            name="arrow-right"
-            color={theme.colors.reverse}
-            onPress={sendVerseData}
-            noFlex
-          />
+          <TouchableIcon name="arrow-right" color={colors.reverse} onPress={sendVerseData} noFlex />
         </Container>
       ) : (
         <Container>
           <HalfContainer border>
-            <TouchableCircle color={theme.colors.color1} onPress={() => addHighlight('color1')} />
-            <TouchableCircle color={theme.colors.color2} onPress={() => addHighlight('color2')} />
-            <TouchableCircle color={theme.colors.color3} onPress={() => addHighlight('color3')} />
-            <TouchableCircle color={theme.colors.color4} onPress={() => addHighlight('color4')} />
+            <TouchableCircle color={colors.color1} onPress={() => addHighlight('color1')} />
+            <TouchableCircle color={colors.color2} onPress={() => addHighlight('color2')} />
+            <TouchableCircle color={colors.color3} onPress={() => addHighlight('color3')} />
+            <TouchableCircle color={colors.color4} onPress={() => addHighlight('color4')} />
+            <TouchableCircle color={colors.color5} onPress={() => addHighlight('color5')} />
             {isSelectedVerseHighlighted && (
               <TouchableIcon name="x-circle" onPress={removeHighlight} />
             )}
@@ -200,4 +194,4 @@ const VersesModal = ({
   )
 }
 
-export default withTheme(VersesModal)
+export default VersesModal

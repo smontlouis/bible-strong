@@ -12,7 +12,7 @@ import { setAutoFreeze } from 'immer'
 import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
-import { segmentConfig } from './config'
+import { segmentConfig, sentryConfig } from './config'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings(['Require cycle:', 'LottieAnimation', 'LottieAnimationView'])
@@ -21,7 +21,7 @@ YellowBox.ignoreWarnings(['Require cycle:', 'LottieAnimation', 'LottieAnimationV
 //   Sentry.enableInExpoDevelopment = true
 // }
 
-Sentry.config('https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911').install()
+Sentry.config(sentryConfig.url).install()
 export const { store, persistor } = configureStore()
 
 class App extends React.Component {

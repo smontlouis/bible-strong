@@ -1,21 +1,20 @@
 import React, { Component } from 'react'
 import styled from '@emotion/styled'
 
-import { getColors } from '../../../../themes/getColors'
 import { SEND_INITIAL_DATA, CONSOLE_LOG, dispatch } from './dispatch'
 import Verse from './Verse'
 import ErrorBoundary from './ErrorBoundary'
 import { desktopMode } from './env'
 
-const Container = styled('div')(({ settings: { alignContent, theme }, isReadOnly }) => ({
+const Container = styled('div')(({ settings: { alignContent, theme, colors }, isReadOnly }) => ({
   // maxWidth: '320px',
   padding: '10px 15px',
   paddingBottom: '40px',
   // width: '100%',
   // margin: '0 auto',
   textAlign: alignContent,
-  background: getColors[theme].reverse,
-  color: getColors[theme].default
+  background: colors[theme].reverse,
+  color: colors[theme].default
   // pointerEvents: isReadOnly ? 'none' : 'auto'
 }))
 
@@ -94,7 +93,9 @@ class VersesRenderer extends Component {
       window.scrollTo(0, 0)
     }
     if (prevState && prevState.settings.theme !== this.state.settings.theme) {
-      document.body.style.backgroundColor = getColors[this.state.settings.theme].reverse
+      document.body.style.backgroundColor = this.state.settings.colors[
+        this.state.settings.theme
+      ].reverse
     }
     if (prevState && prevState.verseToScroll !== this.state.verseToScroll) {
       if (!prevState.verseToScroll && this.state.verseToScroll === 1) {

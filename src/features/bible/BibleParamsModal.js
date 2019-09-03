@@ -4,10 +4,13 @@ import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import Link from '~common/Link'
 import IconShortPress from '~assets/images/IconShortPress'
 import IconLongPress from '~assets/images/IconLongPress'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import SvgIcon from './SvgIcon'
+import ColorWheelIcon from '~common/ColorWheelIcon'
 
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
@@ -165,6 +168,16 @@ const BibleParamsModal = ({
             onPress={() => setSettingsPress('longPress')}
             size={25}
           />
+        </HalfContainer>
+        <HalfContainer>
+          <Link route="ModifyColors" style={{ flexDirection: 'row' }}>
+            <SvgIcon icon={ColorWheelIcon} />
+            <Box width={135}>
+              <Text bold style={{ fontSize: 13 }}>
+                Surbrillances
+              </Text>
+            </Box>
+          </Link>
         </HalfContainer>
       </Container>
     </StylizedModal>

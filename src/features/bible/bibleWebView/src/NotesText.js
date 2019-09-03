@@ -2,10 +2,9 @@ import React from 'react'
 import styled from '@emotion/styled'
 
 import { scaleFontSize } from './Verse'
-import { getColors } from '../../../../themes/getColors'
 import truncate from '../../../../helpers/truncate'
 
-const Div = styled('span')(({ settings: { fontSizeScale, theme } }) => ({
+const Div = styled('span')(({ settings: { fontSizeScale, theme, colors } }) => ({
   fontFamily: 'LiterataBook',
   WebkitTouchCallout: 'none',
   MozUserSelect: 'none',
@@ -14,7 +13,7 @@ const Div = styled('span')(({ settings: { fontSizeScale, theme } }) => ({
   WebkitUserSelect: 'none',
   fontSize: scaleFontSize(19, fontSizeScale),
   lineHeight: scaleFontSize(30, fontSizeScale),
-  color: getColors[theme].quart
+  color: colors[theme].quart
 }))
 
 const Verse = styled('span')(({ settings: { fontSizeScale } }) => ({

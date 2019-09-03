@@ -21,6 +21,8 @@ import {
   UPDATE_TAG
 } from './modules/user'
 
+// TODO - DO IT FOR COLOR SETTINGS ?
+
 import { firebaseDb } from '../helpers/firebaseDb'
 
 export default store => next => action => {

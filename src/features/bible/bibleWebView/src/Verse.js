@@ -10,7 +10,6 @@ import {
   NAVIGATE_TO_BIBLE_NOTE
 } from './dispatch'
 
-import { getColors } from '../../../../themes/getColors'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 
@@ -45,10 +44,13 @@ const zoom = keyframes({
 })
 
 const ContainerText = styled('span')(
-  ({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme } }) => {
+  ({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme, colors } }) => {
     let background = 'transparent'
     if (highlightedColor && !isSelected) {
-      background = `${convertHex(getColors[theme][highlightedColor], 50)}`
+      background = `linear-gradient(180deg, rgba(255,255,255,0) 55%, ${convertHex(
+        colors[theme][highlightedColor],
+        50
+      )} 55%)`
     }
     if (isFocused) {
       background = 'rgba(0,0,0,0.1)'

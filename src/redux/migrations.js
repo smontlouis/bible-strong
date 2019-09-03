@@ -1,3 +1,6 @@
+import defaultColors from '~themes/colors'
+import darkColors from '~themes/darkColors'
+
 export default {
   // Added 'press' in 'settings'
   0: state => {
@@ -71,6 +74,24 @@ export default {
         ...state.bible,
         strongDatabaseHash: '',
         dictionnaireDatabaseHash: ''
+      }
+    }
+  },
+  6: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            colors: {
+              default: defaultColors,
+              dark: darkColors
+            }
+          }
+        }
       }
     }
   }
