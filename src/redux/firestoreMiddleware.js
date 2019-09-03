@@ -18,7 +18,8 @@ import {
   TOGGLE_TAG_ENTITY,
   UPLOAD_STUDY,
   DELETE_STUDY,
-  UPDATE_TAG
+  UPDATE_TAG,
+  CHANGE_COLOR
 } from './modules/user'
 
 // TODO - DO IT FOR COLOR SETTINGS ?
@@ -67,6 +68,7 @@ export default store => next => action => {
       batch.commit().then(() => console.log('Batch studies success'))
       break
     }
+    case CHANGE_COLOR:
     case SET_SETTINGS_ALIGN_CONTENT:
     case INCREASE_SETTINGS_FONTSIZE_SCALE:
     case DECREASE_SETTINGS_FONTSIZE_SCALE:

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Modal from 'react-native-modal'
 import colorsys from 'colorsys'
 import { useDispatch } from 'react-redux'
@@ -38,9 +38,15 @@ const ColorSquare = styled.View(({ color, size }) => ({
   marginRight: 10
 }))
 
-const SelectBlockModal = ({ currentColor, onClosed }) => {
-  const [chosenColor, setChosenColor] = useState(currentColor)
+const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
+  const [chosenColor, setChosenColor] = useState(null)
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (currentColor) {
+      setChosenColor(currentColor.color)
+    }
+  }, [currentColor])
 
   return (
     <StylizedModal
@@ -50,7 +56,7 @@ const SelectBlockModal = ({ currentColor, onClosed }) => {
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}>
       <Container>
-        {currentColor && (
+        {!!chosenColor && (
           <>
             <Box height={200} center>
               <ColorWheel
