@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1567514591426',
+    type: logTypes.NEW,
+    title: 'Personnalisation des couleurs',
+    description:
+      'Vous pouvez maintenant modifier jusqu\'à 5 couleurs pour vos surbrillances. Pour accéder à l\'option, rendez-vous dans les paramêtres de mise en forme "Aa".'
+  },
+  {
     date: '1567457171763',
     type: logTypes.NEW,
     title: 'Bouton de connexion et soutien financier',
