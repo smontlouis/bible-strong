@@ -56,6 +56,7 @@ export const useWaitForIndex = () => {
           console.log('Download finished')
           idxFile = await FileSystem.getInfoAsync(idxPath)
           setIdxFile(idxFile)
+          setLoading(false)
         } catch (e) {
           SnackBar.show(
             "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
@@ -65,8 +66,6 @@ export const useWaitForIndex = () => {
           setStartDownload(false)
         }
       }
-
-      setLoading(false)
     }
 
     loadIndex()

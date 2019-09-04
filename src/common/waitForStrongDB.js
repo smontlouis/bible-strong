@@ -68,6 +68,10 @@ export const useWaitForDatabase = () => {
             ).downloadAsync()
 
             dispatch(setStrongDatabaseHash(sqliteDB.hash))
+
+            await initStrongDB()
+            console.log('DB strong loaded')
+            setLoading(false)
           } catch (e) {
             SnackBar.show(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
@@ -77,10 +81,6 @@ export const useWaitForDatabase = () => {
             setStartDownload(false)
           }
         }
-
-        await initStrongDB()
-        console.log('DB strong loaded')
-        setLoading(false)
       }
 
       loadDBAsync()
