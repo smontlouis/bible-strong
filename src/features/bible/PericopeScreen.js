@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
 import PericopeHeader from './PericopeHeader'
@@ -12,6 +13,7 @@ import Text from '~common/ui/Text'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
+import SnackBar from '~common/SnackBar'
 
 const H1 = styled(Text)(() => ({
   fontSize: 24,
@@ -63,9 +65,20 @@ const PericopeScreen = ({ navigation }) => {
   }))
   const [version, setVersion] = useState(initialVersion)
   const [book, setBook] = useState(initialBook)
+  const [versionNeedsDownload, setVersionNeedsDownload] = useState(false)
 
   const pericope = getBiblePericope(version)
   const pericopeBook = clearEmpties(pericope[book.Numero])
+
+  useEffect(() => {
+    if (version) {
+      const check = async () => {
+        const versionNeedsDownload = await getIfVersionNeedsDownload(version)
+        setVersionNeedsDownload(versionNeedsDownload)
+      }
+      check()
+    }
+  }, [version])
 
   return (
     <Container>
@@ -103,16 +116,18 @@ const PericopeScreen = ({ navigation }) => {
                       <TouchableOpacity
                         key={verseKey}
                         onPress={() =>
-                          navigation.navigate({
-                            routeName: 'BibleView',
-                            params: {
-                              isReadOnly: true,
-                              book,
-                              chapter: chapterKey,
-                              version,
-                              verse: 1
-                            }
-                          })
+                          versionNeedsDownload
+                            ? SnackBar.show('Vous devez télécharger cette version de la Bible.')
+                            : navigation.navigate({
+                                routeName: 'BibleView',
+                                params: {
+                                  isReadOnly: true,
+                                  book,
+                                  chapter: Number(chapterKey),
+                                  version,
+                                  verse: 1
+                                }
+                              })
                         }>
                         {h1 && (
                           <H1 title scaleLineHeight={-2}>

@@ -101,9 +101,9 @@ const Header = ({
       </LinkBox>
 
       {!isSelectionMode && (
-        <BibleParameters onPress={onBibleParamsClick}>
+        <LinkBox onPress={onBibleParamsClick} style={{ marginLeft: 'auto', paddingRight: 0 }}>
           <StyledText>Aa</StyledText>
-        </BibleParameters>
+        </LinkBox>
       )}
     </HeaderBox>
   )
