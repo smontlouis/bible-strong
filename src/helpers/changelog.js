@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1567579490720',
+    type: logTypes.BUG,
+    title: 'Bible écran blanc',
+    description:
+      'Pour certaines personnes, la Bible affichait un écran blanc. Le bug a été en parti identifié et réglé.'
+  },
+  {
     date: '1567569873652',
     type: logTypes.FEATURE,
     title: 'Sommaire des péricopes',

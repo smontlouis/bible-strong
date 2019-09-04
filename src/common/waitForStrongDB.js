@@ -76,14 +76,19 @@ export const useWaitForDatabase = () => {
     }
   }, [strongDatabaseHash, dispatch, startDownload])
 
-  return { isLoading, progress, proposeDownload, setStartDownload }
+  return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
 }
 
 const waitForDatabase = WrappedComponent => props => {
-  const { isLoading, progress, proposeDownload, setStartDownload } = useWaitForDatabase()
-  const isProgressing = typeof progress !== 'undefined'
+  const {
+    isLoading,
+    progress,
+    proposeDownload,
+    startDownload,
+    setStartDownload
+  } = useWaitForDatabase()
 
-  if (isLoading && isProgressing) {
+  if (isLoading && startDownload) {
     return (
       <Loading message="Téléchargement de la base strong...">
         <ProgressBar progress={progress} color="blue" />

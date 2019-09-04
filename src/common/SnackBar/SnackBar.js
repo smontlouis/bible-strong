@@ -101,7 +101,7 @@ export default class SnackBar extends Component {
     position: 'bottom'
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -111,29 +111,23 @@ export default class SnackBar extends Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.show()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     if (this.props.isStatic) {
       this.hide()
     }
   }
 
   show = () => {
-    const {
-      transformOpacity,
-      transformOffsetYTop,
-      transformOffsetYBottom
-    } = this.state
+    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } = this.state
 
     const { fadeOutDuration, isStatic, duration, position } = this.props
 
-    const initialPosition =
-      position === 'top' ? INITIAL_POSITION_TOP : INITIAL_POSITION_BOTTOM
-    const transformOffsetY =
-      position === 'top' ? transformOffsetYTop : transformOffsetYBottom
+    const initialPosition = position === 'top' ? INITIAL_POSITION_TOP : INITIAL_POSITION_BOTTOM
+    const transformOffsetY = position === 'top' ? transformOffsetYTop : transformOffsetYBottom
 
     Animated.parallel([
       Animated.timing(transformOpacity, {
@@ -162,16 +156,11 @@ export default class SnackBar extends Component {
   }
 
   hide = () => {
-    const {
-      transformOpacity,
-      transformOffsetYTop,
-      transformOffsetYBottom
-    } = this.state
+    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } = this.state
 
     const { fadeOutDuration, onAutoDismiss, position } = this.props
 
-    const transformOffsetY =
-      position === 'top' ? transformOffsetYTop : transformOffsetYBottom
+    const transformOffsetY = position === 'top' ? transformOffsetYTop : transformOffsetYBottom
     const toPosition = position === 'top' ? TO_POSITION_TOP : TO_POSITION_BOTTOM
 
     Animated.parallel([
@@ -197,29 +186,15 @@ export default class SnackBar extends Component {
 
     return (
       <TouchableOpacity style={styles.buttonContainer} onPress={onPress}>
-        <Text style={[styles.button, style, { color: buttonColor }]}>
-          {text}
-        </Text>
+        <Text style={[styles.button, style, { color: buttonColor }]}>{text}</Text>
       </TouchableOpacity>
     )
   }
 
   renderContent = () => {
-    const {
-      confirmText,
-      onConfirm,
-      cancelText,
-      onCancel,
-      title,
-      textColor,
-      textStyle
-    } = this.props
+    const { confirmText, onConfirm, cancelText, onCancel, title, textColor, textStyle } = this.props
 
-    const titleElement = (
-      <Text style={[styles.text, { color: textColor }, textStyle]}>
-        {title}
-      </Text>
-    )
+    const titleElement = <Text style={[styles.text, { color: textColor }, textStyle]}>{title}</Text>
 
     if (confirmText && cancelText) {
       return (
@@ -245,14 +220,8 @@ export default class SnackBar extends Component {
     return titleElement
   }
 
-  render () {
-    const {
-      style,
-      renderContent,
-      backgroundColor,
-      position,
-      tapToClose
-    } = this.props
+  render() {
+    const { style, renderContent, backgroundColor, position, tapToClose } = this.props
 
     const isTop = position === 'top'
     const transformOffsetY = isTop
@@ -262,16 +231,14 @@ export default class SnackBar extends Component {
       <TouchableWithoutFeedback onPress={() => tapToClose && this.hide()}>
         <Animated.View
           style={[
-            (isTop && styles.containerTop) ||
-              (!isTop && styles.containerBottom),
+            (isTop && styles.containerTop) || (!isTop && styles.containerBottom),
             {
               opacity: this.state.transformOpacity,
               transform: [{ translateY: transformOffsetY }],
               backgroundColor
             },
             style
-          ]}
-        >
+          ]}>
           {renderContent ? renderContent() : this.renderContent()}
         </Animated.View>
       </TouchableWithoutFeedback>

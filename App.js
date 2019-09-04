@@ -15,7 +15,12 @@ import InitApp from './InitApp'
 import { segmentConfig, sentryConfig } from './config'
 
 setAutoFreeze(false)
-YellowBox.ignoreWarnings(['Require cycle:', 'LottieAnimation', 'LottieAnimationView'])
+YellowBox.ignoreWarnings([
+  'Require cycle:',
+  'LottieAnimation',
+  'LottieAnimationView',
+  'Setting a timer'
+])
 
 // if (__DEV__) {
 //   Sentry.enableInExpoDevelopment = true

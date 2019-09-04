@@ -61,14 +61,20 @@ export const useWaitForIndex = () => {
 
     loadIndex()
   }, [dispatch, startDownload])
-  return { isLoading, idxFile, progress, proposeDownload, setStartDownload }
+  return { isLoading, idxFile, progress, proposeDownload, startDownload, setStartDownload }
 }
 
 const waitForIndex = WrappedComponent => props => {
-  const { isLoading, idxFile, progress, proposeDownload, setStartDownload } = useWaitForIndex()
-  const isProgressing = typeof progress !== 'undefined'
+  const {
+    isLoading,
+    idxFile,
+    progress,
+    proposeDownload,
+    startDownload,
+    setStartDownload
+  } = useWaitForIndex()
 
-  if (isLoading && isProgressing) {
+  if (isLoading && startDownload) {
     return (
       <Loading message="Téléchargement de l'index..">
         <ProgressBar progress={progress} color="blue" />
