@@ -6,6 +6,17 @@ import Verse from './Verse'
 import ErrorBoundary from './ErrorBoundary'
 import { desktopMode } from './env'
 
+if (!Object.entries) {
+  Object.entries = function(obj) {
+    let ownProps = Object.keys(obj);
+        var i = ownProps.length;
+        var resArray = new Array(i) // preallocate the Array
+    while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]]
+
+    return resArray
+  }
+}
+
 const Container = styled('div')(({ settings: { alignContent, theme, colors }, isReadOnly }) => ({
   // maxWidth: '320px',
   padding: '10px 15px',
