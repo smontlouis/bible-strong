@@ -40,6 +40,11 @@ const H3 = styled('h3')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(20, fontSizeScale)
 }))
 
+const H4 = styled('h4')(({ settings: { fontSizeScale } }) => ({
+  ...headingStyle,
+  fontSize: scaleFontSize(18, fontSizeScale)
+}))
+
 const getPericopeVerse = (pericopeChapter, verse) => {
   if (pericopeChapter && pericopeChapter[verse]) {
     return pericopeChapter[verse]
@@ -230,13 +235,14 @@ class VersesRenderer extends Component {
           const notesText = this.state.notedVersesText[`${Verset}`]
           const isVerseToScroll = this.state.verseToScroll == Verset
 
-          const { h1, h2, h3 } = getPericopeVerse(this.state.pericopeChapter, Verset)
+          const { h1, h2, h3, h4 } = getPericopeVerse(this.state.pericopeChapter, Verset)
 
           return (
             <span key={`${Livre}-${Chapitre}-${Verset}`}>
               {h1 && <H1 settings={this.state.settings}>{h1}</H1>}
               {h2 && <H2 settings={this.state.settings}>{h2}</H2>}
               {h3 && <H3 settings={this.state.settings}>{h3}</H3>}
+              {h4 && <H4 settings={this.state.settings}>{h4}</H4>}
               <ErrorBoundary>
                 <Verse
                   verse={verse}

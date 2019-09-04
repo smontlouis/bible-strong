@@ -94,11 +94,12 @@ class BibleViewer extends Component {
   }
 
   openInBibleTab = () => {
-    const { book, chapter, verse, navigation, setAllAndValidateSelected } = this.props
+    const { book, chapter, verse, navigation, setAllAndValidateSelected, version } = this.props
     setAllAndValidateSelected({
       book,
       chapter,
-      verse
+      verse,
+      version
     })
     navigation.navigate('Bible')
   }

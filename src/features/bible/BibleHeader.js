@@ -46,6 +46,10 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
+const MaterialCommunityIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
+  color: theme.colors.default
+}))
+
 const Header = ({
   isReadOnly,
   isSelectionMode,
@@ -92,6 +96,10 @@ const Header = ({
         <StyledText>{version}</StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
+      <LinkBox route="Pericope">
+        <MaterialCommunityIcon name="subtitles" size={20} />
+      </LinkBox>
+
       {!isSelectionMode && (
         <BibleParameters onPress={onBibleParamsClick}>
           <StyledText>Aa</StyledText>

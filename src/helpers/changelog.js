@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1567569873652',
+    type: logTypes.FEATURE,
+    title: 'Sommaire des péricopes',
+    description:
+      "Je pense que c'est ma fonctionnalité favorite. L'idée est de découvrir la Bible au travers de sommaires. Chaque version de la Bible (à part deux ou trois) possède ses propres sommaires. L'icône des péricopes est juste à côté de la version."
+  },
+  {
     date: '1567550380556',
     type: logTypes.BUG,
     title: 'Partage dictionnaire',

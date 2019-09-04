@@ -18,6 +18,7 @@ import LoginScreen from '~features/settings/LoginScreen'
 import SupportScreen from '~features/settings/SupportScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
+import PericopeScreen from '../features/bible/PericopeScreen'
 
 export default createStackNavigator(
   {
@@ -39,7 +40,8 @@ export default createStackNavigator(
     Login: { screen: LoginScreen },
     Support: { screen: SupportScreen },
     ModifyColors: { screen: ModifyColorsScreen },
-    Changelog: { screen: ChangelogScreen }
+    Changelog: { screen: ChangelogScreen },
+    Pericope: { screen: PericopeScreen }
   },
   {
     headerMode: 'none'

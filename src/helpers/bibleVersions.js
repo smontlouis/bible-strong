@@ -58,7 +58,7 @@ export const versions = {
     id: 'NEG79',
     name: 'Nouvelle Edition de Genève 1979'
   },
-  NBS78P: {
+  NVS78P: {
     id: 'NVS78P',
     name: 'Nouvelle Segond révisée'
   },
