@@ -148,10 +148,8 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
         hasBackButton
         title={`${headerTitle} ${headerTitle.length < 20 ? '- Dict. LSG' : ''}`}
         rightComponent={
-          <Link route="BibleVerseDetail" params={{ verse }} replace>
-            <Box marginRight={10}>
-              <LexiqueIcon color={theme.colors.primary} />
-            </Box>
+          <Link route="BibleVerseDetail" params={{ verse }} replace padding>
+            <LexiqueIcon color={theme.colors.primary} />
           </Link>
         }
       />

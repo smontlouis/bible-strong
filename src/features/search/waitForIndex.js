@@ -6,6 +6,7 @@ import { Asset } from 'expo-asset'
 
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
+import SnackBar from '~common/SnackBar'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
@@ -41,19 +42,28 @@ export const useWaitForIndex = () => {
         const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
         console.log(`Downloading ${idxUri} to ${idxPath}`)
 
-        await FileSystem.createDownloadResumable(
-          idxUri,
-          idxPath,
-          null,
-          ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-            const idxProgress = Math.floor((totalBytesWritten / IDX_LIGHT_FILE_SIZE) * 100) / 100
-            setProgress(idxProgress)
-          }
-        ).downloadAsync()
+        try {
+          await FileSystem.createDownloadResumable(
+            idxUri,
+            idxPath,
+            null,
+            ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+              const idxProgress = Math.floor((totalBytesWritten / IDX_LIGHT_FILE_SIZE) * 100) / 100
+              setProgress(idxProgress)
+            }
+          ).downloadAsync()
 
-        console.log('Download finished')
-        idxFile = await FileSystem.getInfoAsync(idxPath)
-        setIdxFile(idxFile)
+          console.log('Download finished')
+          idxFile = await FileSystem.getInfoAsync(idxPath)
+          setIdxFile(idxFile)
+        } catch (e) {
+          SnackBar.show(
+            "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+            'danger'
+          )
+          setProposeDownload(true)
+          setStartDownload(false)
+        }
       }
 
       setLoading(false)

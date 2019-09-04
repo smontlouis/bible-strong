@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
 import AssetUtils from 'expo-asset-utils'
+import SnackBar from '~common/SnackBar'
 
 import { initStrongDB, getStrongDB } from '~helpers/database'
 import Loading from '~common/Loading'
@@ -54,17 +55,27 @@ export const useWaitForDatabase = () => {
           }
 
           console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
-          await FileSystem.createDownloadResumable(
-            sqliteDB.uri,
-            dbPath,
-            null,
-            ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-              const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
-              setProgress(idxProgress)
-            }
-          ).downloadAsync()
 
-          dispatch(setStrongDatabaseHash(sqliteDB.hash))
+          try {
+            await FileSystem.createDownloadResumable(
+              sqliteDB.uri,
+              dbPath,
+              null,
+              ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+                const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+                setProgress(idxProgress)
+              }
+            ).downloadAsync()
+
+            dispatch(setStrongDatabaseHash(sqliteDB.hash))
+          } catch (e) {
+            SnackBar.show(
+              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+              'danger'
+            )
+            setProposeDownload(true)
+            setStartDownload(false)
+          }
         }
 
         await initStrongDB()

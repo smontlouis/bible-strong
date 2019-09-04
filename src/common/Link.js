@@ -7,7 +7,7 @@ class Link extends Component {
   props: {
     navigation: Object,
     params?: Object,
-    route: string,
+    route: string
   }
 
   handlePress = () => {
@@ -28,8 +28,23 @@ class Link extends Component {
     }
   }
 
-  render () {
-    return <TouchableOpacity {...this.props} onPress={this.handlePress} />
+  render() {
+    const { padding, style } = this.props
+    return (
+      <TouchableOpacity
+        {...this.props}
+        onPress={this.handlePress}
+        style={{
+          ...style,
+          ...(padding && {
+            width: 60,
+            height: 50,
+            alignItems: 'center',
+            justifyContent: 'center'
+          })
+        }}
+      />
+    )
   }
 }
 

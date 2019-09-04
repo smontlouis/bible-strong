@@ -14,9 +14,7 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   height: 50,
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
-  borderBottomColor: theme.colors.border,
-  paddingLeft: 15,
-  paddingRight: 15
+  borderBottomColor: theme.colors.border
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -33,9 +31,9 @@ const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, version
   const [prevVersion, nextVersion] = getPrevNextVersions(versionsArray, version)
   return (
     <HeaderBox noBorder={noBorder} row overflow="visibility">
-      <Box justifyContent="center" width={30}>
+      <Box justifyContent="center">
         {hasBackButton && (
-          <Back style={{ marginRight: 15 }}>
+          <Back padding>
             <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
           </Back>
         )}

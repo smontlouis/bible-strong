@@ -26,12 +26,7 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   height: 50,
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
-  borderBottomColor: theme.colors.border,
-  paddingLeft: 15,
-  paddingRight: 15
-  // width: theme.measures.maxWidth,
-  // marginLeft: 'auto',
-  // marginRight: 'auto'
+  borderBottomColor: theme.colors.border
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -46,7 +41,7 @@ const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButto
   return (
     <HeaderBox noBorder={noBorder} row>
       {hasBackButton && (
-        <Back style={{ marginRight: 15 }}>
+        <Back padding>
           <FeatherIcon name="arrow-left" size={20} />
         </Back>
       )}

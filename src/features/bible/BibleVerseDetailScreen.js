@@ -209,8 +209,8 @@ class BibleVerseDetailScreen extends React.Component {
           hasBackButton
           title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`}
           rightComponent={
-            <Link route="DictionnaireVerseDetail" params={{ verse }} replace>
-              <Box marginRight={10} position="relative" overflow="visibility">
+            <Link route="DictionnaireVerseDetail" params={{ verse }} replace padding>
+              <Box position="relative" overflow="visibility">
                 <DictionnaryIcon color={theme.colors.secondary} />
                 <CountChip>
                   <Text bold fontSize={8}>

@@ -11,7 +11,23 @@ class Back extends Component {
   }
 
   render() {
-    return <TouchableOpacity {...this.props} onPress={this.handlePress} />
+    const { padding, style } = this.props
+
+    return (
+      <TouchableOpacity
+        {...this.props}
+        onPress={this.handlePress}
+        style={{
+          ...style,
+          ...(padding && {
+            width: 60,
+            height: 50,
+            alignItems: 'center',
+            justifyContent: 'center'
+          })
+        }}
+      />
+    )
   }
 }
 

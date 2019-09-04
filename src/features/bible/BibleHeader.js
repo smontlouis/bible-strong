@@ -12,7 +12,9 @@ import Back from '~common/Back'
 const LinkBox = styled(Link)({
   flexDirection: 'row',
   alignItems: 'center',
-  paddingRight: 15,
+  justifyContent: 'center',
+  paddingLeft: 10,
+  paddingRight: 10,
   paddingVertical: 15
 })
 
@@ -22,24 +24,12 @@ const StyledText = styled(Text)({
   marginRight: 5
 })
 
-const BibleParameters = styled.TouchableOpacity(({ theme }) => ({
-  fontSize: 16,
-  fontWeight: 'bold',
-  marginLeft: 'auto',
-  color: theme.colors.darkGrey
-}))
-
 const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   marginTop: Platform.OS === 'ios' ? 0 : 25,
   height: 50,
   alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
-  borderBottomColor: theme.colors.border,
-  paddingLeft: 15,
-  paddingRight: 15
-  // width: theme.measures.maxWidth,
-  // marginLeft: 'auto',
-  // marginRight: 'auto'
+  borderBottomColor: theme.colors.border
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -64,7 +54,7 @@ const Header = ({
     return (
       <HeaderBox noBorder={noBorder} row>
         <Box flex justifyContent="center">
-          <Back style={{ marginRight: 15 }}>
+          <Back padding>
             <StyledIcon name="arrow-left" size={20} />
           </Back>
         </Box>
@@ -81,12 +71,12 @@ const Header = ({
     <HeaderBox noBorder={noBorder} row>
       {isSelectionMode && (
         <Box justifyContent="center">
-          <Back style={{ marginRight: 15 }}>
+          <Back padding>
             <StyledIcon name="arrow-left" size={20} />
           </Back>
         </Box>
       )}
-      <LinkBox route="BibleSelect">
+      <LinkBox route="BibleSelect" style={{ paddingLeft: 15 }}>
         <StyledText>
           {book.Nom} {chapter}
         </StyledText>
@@ -96,12 +86,21 @@ const Header = ({
         <StyledText>{version}</StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route="Pericope">
+      <LinkBox route="Pericope" style={{ width: 50 }}>
         <MaterialCommunityIcon name="subtitles" size={20} />
       </LinkBox>
 
       {!isSelectionMode && (
-        <LinkBox onPress={onBibleParamsClick} style={{ marginLeft: 'auto', paddingRight: 0 }}>
+        <LinkBox
+          onPress={onBibleParamsClick}
+          style={{
+            marginLeft: 'auto',
+            width: 50,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingLeft: 0,
+            paddingRight: 0
+          }}>
           <StyledText>Aa</StyledText>
         </LinkBox>
       )}

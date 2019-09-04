@@ -11,11 +11,9 @@ import Back from '~common/Back'
 const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   marginTop: Platform.OS === 'ios' ? 0 : 25,
   height: 50,
-  alignItems: 'center',
   borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border,
-  paddingLeft: 15,
-  paddingRight: 15
+  alignItems: 'stretch'
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -25,9 +23,9 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, rightComponent }) => {
   return (
     <HeaderBox noBorder={noBorder} row overflow="visibility">
-      <Box flex justifyContent="center">
+      <Box flex>
         {hasBackButton && (
-          <Back style={{ marginRight: 15 }}>
+          <Back padding>
             <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
           </Back>
         )}
@@ -38,7 +36,7 @@ const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, rightCo
         </Text>
       </Box>
       {rightComponent ? (
-        <Box flex alignItems="flex-end" overflow="visibility">
+        <Box minWidth={60} center overflow="visibility">
           {rightComponent}
         </Box>
       ) : (
