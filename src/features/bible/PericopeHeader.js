@@ -4,6 +4,7 @@ import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
 
+import Link from '~common/Link'
 import { versions } from '~helpers/bibleVersions'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -17,6 +18,15 @@ const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
   borderBottomColor: theme.colors.border
 }))
 
+const LinkBox = styled(Link)({
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingLeft: 10,
+  paddingRight: 10,
+  paddingVertical: 15
+})
+
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
@@ -26,7 +36,7 @@ const getPrevNextVersions = (versionsArray, version) => {
   return [versionsArray[index - 1], versionsArray[index + 1]]
 }
 
-const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, version, setVersion }) => {
+const Header = ({ hasBackButton, isModal, title, noBorder, version, setVersion }) => {
   const versionsArray = Object.keys(versions)
   const [prevVersion, nextVersion] = getPrevNextVersions(versionsArray, version)
   return (
@@ -39,21 +49,25 @@ const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, version
         )}
       </Box>
       <Box center row flex>
-        <Box center width={50}>
+        <Box center width={70}>
           {prevVersion && (
-            <Text color="tertiary" fontSize={12} onPress={() => setVersion(prevVersion)} bold>
-              {prevVersion}
-            </Text>
+            <LinkBox onPress={() => setVersion(prevVersion)}>
+              <Text color="tertiary" fontSize={12} bold>
+                {prevVersion}
+              </Text>
+            </LinkBox>
           )}
         </Box>
-        <Text fontSize={16} onPress={onTitlePress} bold marginLeft={10} marginRight={10}>
+        <Text fontSize={16} bold marginLeft={10} marginRight={10}>
           {title}
         </Text>
-        <Box center width={50}>
+        <Box center width={70}>
           {nextVersion && (
-            <Text color="tertiary" fontSize={12} onPress={() => setVersion(nextVersion)} bold>
-              {nextVersion}
-            </Text>
+            <LinkBox onPress={() => setVersion(nextVersion)}>
+              <Text color="tertiary" fontSize={12} bold>
+                {nextVersion}
+              </Text>
+            </LinkBox>
           )}
         </Box>
       </Box>
