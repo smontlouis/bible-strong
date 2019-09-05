@@ -13,7 +13,7 @@ import Empty from '~common/Empty'
 import getBibleVerseText from '~helpers/getBibleVerseText'
 
 const SearchResults = ({ results, navigation, page, setPage }) => {
-  if (!results.length) {
+  if (!results || !results.length) {
     return (
       <Empty
         source={require('~assets/images/empty.json')}

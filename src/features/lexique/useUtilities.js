@@ -7,7 +7,7 @@ export const useSectionResults = (results, debouncedSearchValue, sectionIndex, p
   const [sectionResults, setSectionResults] = useState(null)
 
   useEffect(() => {
-    if (!results.length) return
+    if (!results || !results.length) return
 
     let filteredResults = debouncedSearchValue
       ? (filteredResults = results.filter(
