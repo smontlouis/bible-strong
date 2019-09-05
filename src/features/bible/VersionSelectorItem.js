@@ -6,6 +6,7 @@ import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 
+import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
@@ -93,16 +94,24 @@ class VersionSelectorItem extends React.Component {
     const uri = this.requireBibleFileUri(version.id)
 
     console.log(`Downloading ${uri} to ${path}`)
-    await FileSystem.createDownloadResumable(
-      uri,
-      path,
-      null,
-      this.calculateProgress
-    ).downloadAsync()
+    try {
+      await FileSystem.createDownloadResumable(
+        uri,
+        path,
+        null,
+        this.calculateProgress
+      ).downloadAsync()
 
-    console.log('Download finished')
+      console.log('Download finished')
 
-    this.setState({ versionNeedsDownload: false })
+      this.setState({ versionNeedsDownload: false })
+    } catch (e) {
+      SnackBar.show(
+        "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+        'danger'
+      )
+      this.setState({ isLoading: true })
+    }
   }
 
   render() {

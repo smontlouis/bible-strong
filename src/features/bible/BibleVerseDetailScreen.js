@@ -4,6 +4,7 @@ import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
+import Sentry from 'sentry-expo'
 
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
@@ -13,6 +14,7 @@ import * as BibleActions from '~redux/modules/bible'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import dictionnaireWordsInBible from '~assets/bible_versions/dictionnaire-bible-lsg.json'
 import Link from '~common/Link'
+import SnackBar from '~common/SnackBar'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -114,8 +116,16 @@ class BibleVerseDetailScreen extends React.Component {
       return
     }
 
-    const { versesInCurrentChapter } = await loadCountVerses(verse.Livre, verse.Chapitre)
-    this.setState({ versesInCurrentChapter })
+    try {
+      const { versesInCurrentChapter } = await loadCountVerses(verse.Livre, verse.Chapitre)
+      this.setState({ versesInCurrentChapter })
+    } catch (e) {
+      SnackBar.show('Une erreur est survenue avec ce verset. Le développeur en a été informé')
+      Sentry.captureMessage(
+        `Something went wrong with verse ${verse.Livre} ${verse.Chapitre} ${verse.Verset} ${e}`
+      )
+    }
+
     this.formatVerse(strongVerse)
   }
 
