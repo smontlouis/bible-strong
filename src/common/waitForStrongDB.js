@@ -80,6 +80,10 @@ export const useWaitForDatabase = () => {
             setProposeDownload(true)
             setStartDownload(false)
           }
+        } else {
+          await initStrongDB()
+          console.log('DB strong loaded')
+          setLoading(false)
         }
       }
 

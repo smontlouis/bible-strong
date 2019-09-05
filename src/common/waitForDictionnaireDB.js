@@ -80,6 +80,10 @@ export const useWaitForDatabase = () => {
             setProposeDownload(true)
             setStartDownload(false)
           }
+        } else {
+          await initDictionnaireDB()
+          console.log('DB dictionnaire loaded')
+          setLoading(false)
         }
       }
 

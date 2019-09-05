@@ -65,6 +65,8 @@ export const useWaitForIndex = () => {
           setProposeDownload(true)
           setStartDownload(false)
         }
+      } else {
+        setLoading(false)
       }
     }
 
