@@ -110,7 +110,7 @@ class VersionSelectorItem extends React.Component {
         "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
         'danger'
       )
-      this.setState({ isLoading: true })
+      this.setState({ isLoading: false })
     }
   }
 
