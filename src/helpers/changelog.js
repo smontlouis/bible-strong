@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1567897439396',
+    type: logTypes.FEATURE,
+    title: 'Historique',
+    description:
+      "Vous avez maintenant accès à l'historique de vos versets, strongs et mots de dictionnaire. L'îcone se trouve en haut à droite de l'écran Bible."
+  },
+  {
     date: '1567579490720',
     type: logTypes.BUG,
     title: 'Bible écran blanc',
