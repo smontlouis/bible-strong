@@ -19,6 +19,7 @@ import SupportScreen from '~features/settings/SupportScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
 import PericopeScreen from '../features/bible/PericopeScreen'
+import HistoryScreen from '~features/bible/HistoryScreen'
 
 export default createStackNavigator(
   {
@@ -41,7 +42,8 @@ export default createStackNavigator(
     Support: { screen: SupportScreen },
     ModifyColors: { screen: ModifyColorsScreen },
     Changelog: { screen: ChangelogScreen },
-    Pericope: { screen: PericopeScreen }
+    Pericope: { screen: PericopeScreen },
+    History: { screen: HistoryScreen }
   },
   {
     headerMode: 'none'

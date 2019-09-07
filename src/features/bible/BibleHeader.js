@@ -4,10 +4,12 @@ import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
 
+import truncate from '~helpers/truncate'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Back from '~common/Back'
+import useDimensions from '~helpers/useDimensions'
 
 const LinkBox = styled(Link)({
   flexDirection: 'row',
@@ -50,6 +52,9 @@ const Header = ({
   version,
   onBibleParamsClick
 }) => {
+  const dimensions = useDimensions()
+  const isSmall = dimensions.screen.width < 400
+
   if (isReadOnly) {
     return (
       <HeaderBox noBorder={noBorder} row>
@@ -76,26 +81,28 @@ const Header = ({
           </Back>
         </Box>
       )}
-      <LinkBox route="BibleSelect" style={{ paddingLeft: 15 }}>
+      <LinkBox route="BibleSelect" style={{ paddingLeft: 15, paddingRight: 0 }}>
         <StyledText>
-          {book.Nom} {chapter}
+          {isSmall ? truncate(`${book.Nom} ${chapter}`, 10) : `${book.Nom} ${chapter}`}
         </StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route="VersionSelector" params={{ version }}>
+      <LinkBox route="VersionSelector" params={{ version }} style={{ paddingRight: 0 }}>
         <StyledText>{version}</StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route="Pericope" style={{ width: 50 }}>
+      <LinkBox route="Pericope" style={{ width: 40 }}>
         <MaterialCommunityIcon name="subtitles" size={20} />
       </LinkBox>
 
+      <LinkBox route="History" style={{ width: 40, marginLeft: 'auto' }}>
+        <MaterialCommunityIcon name="history" size={20} />
+      </LinkBox>
       {!isSelectionMode && (
         <LinkBox
           onPress={onBibleParamsClick}
           style={{
-            marginLeft: 'auto',
-            width: 50,
+            width: 40,
             justifyContent: 'center',
             alignItems: 'center',
             paddingLeft: 0,

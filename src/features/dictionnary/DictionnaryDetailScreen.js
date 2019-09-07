@@ -3,6 +3,7 @@ import { Platform, ScrollView, Share } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
+import { useDispatch } from 'react-redux'
 
 import Sentry from 'sentry-expo'
 import books from '~assets/bible_versions/books-desc'
@@ -12,6 +13,7 @@ import Link from '~common/Link'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
+import { setHistory } from '~redux/modules/user'
 
 import waitForDatabase from '~common/waitForDictionnaireDB'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
@@ -30,11 +32,20 @@ const TitleBorder = styled.View(({ theme }) => ({
 
 const DictionnaryDetailScreen = ({ navigation }) => {
   const { word } = navigation.state.params || {}
+  const dispatch = useDispatch()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
 
   useEffect(() => {
-    loadDictionnaireItem(word).then(result => setDictionnaireItem(result))
-  }, [word])
+    loadDictionnaireItem(word).then(result => {
+      setDictionnaireItem(result)
+      dispatch(
+        setHistory({
+          word,
+          type: 'word'
+        })
+      )
+    })
+  }, [dispatch, word])
 
   const openLink = (href, content, type) => {
     if (type === 'verse') {

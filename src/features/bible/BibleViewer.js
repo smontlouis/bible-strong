@@ -71,7 +71,7 @@ class BibleViewer extends Component {
   }
 
   loadVerses = async () => {
-    const { book, chapter, version } = this.props
+    const { book, chapter, version, verse } = this.props
     this.pericope = getBiblePericope(version)
     let tempVerses
     this.setState({ isLoading: true })
@@ -91,6 +91,13 @@ class BibleViewer extends Component {
       Chapitre: chapter
     }))
     this.setState({ isLoading: false, verses: tempVerses, error: false })
+    this.props.setHistory({
+      book: book.Numero,
+      chapter,
+      verse,
+      version,
+      type: 'verse'
+    })
   }
 
   openInBibleTab = () => {

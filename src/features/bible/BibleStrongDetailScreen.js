@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
+import { connect } from 'react-redux'
 import * as Icon from '@expo/vector-icons'
 import { ScrollView, Platform, Share } from 'react-native'
 import compose from 'recompose/compose'
@@ -16,6 +17,7 @@ import OccurrencesFoundByBookList from './OccurrencesFoundByBookList'
 import capitalize from '~helpers/capitalize'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import loadStrongReference from '~helpers/loadStrongReference'
+import { setHistory } from '~redux/modules/user'
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -71,6 +73,13 @@ class BibleStrongDetailScreen extends React.Component {
       }
     }
 
+    this.props.dispatch(
+      setHistory({
+        ...strongReference,
+        book,
+        type: 'strong'
+      })
+    )
     this.setState({ strongReference })
     const versesCountByBook = await loadStrongVersesCountByBook(book, strongReference.Code)
     this.setState({ versesCountByBook, concordanceLoading: false })
@@ -219,4 +228,7 @@ class BibleStrongDetailScreen extends React.Component {
   }
 }
 
-export default compose(waitForStrongDB)(BibleStrongDetailScreen)
+export default compose(
+  waitForStrongDB,
+  connect()
+)(BibleStrongDetailScreen)

@@ -36,7 +36,7 @@ const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, rightCo
         </Text>
       </Box>
       {rightComponent ? (
-        <Box minWidth={60} center overflow="visibility">
+        <Box flex justifyContent="center" alignItems="flex-end" overflow="visibility">
           {rightComponent}
         </Box>
       ) : (

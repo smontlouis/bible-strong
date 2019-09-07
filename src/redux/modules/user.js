@@ -43,6 +43,10 @@ export const DELETE_STUDY = 'user/DELETE_STUDY'
 
 export const CHANGE_COLOR = 'user/CHANGE_COLOR'
 
+export const SET_HISTORY = 'SET_HISTORY'
+export const DELETE_HISTORY = 'DELETE_HISTORY'
+export const UPDATE_USER_DATA = 'UPDATE_USER_DATA'
+
 const initialState = {
   id: '',
   email: '',
@@ -57,6 +61,7 @@ const initialState = {
     notes: {},
     studies: {},
     tags: {},
+    history: [],
     settings: {
       alignContent: 'justify',
       fontSizeScale: 0,
@@ -125,7 +130,7 @@ export default produce((draft, action) => {
       draft.emailVerified = emailVerified
 
       if (bible) {
-        draft.bible = deepmerge(draft.bible, bible)
+        draft.bible = deepmerge(draft.bible, bible, { arrayMerge: overwriteMerge })
 
         // Now take care of studies
         if (action.studies && Object.keys(action.studies).length) {
@@ -376,6 +381,41 @@ export default produce((draft, action) => {
       draft.bible.settings.colors[currentTheme][action.name] = color
       break
     }
+    case DELETE_HISTORY: {
+      draft.bible.history = []
+      break
+    }
+    case SET_HISTORY: {
+      const item = action.payload
+      if (draft.bible.history.length) {
+        const prevItem = draft.bible.history[0]
+        if (prevItem.type === item.type) {
+          if (
+            item.type === 'verse' &&
+            item.book == prevItem.book &&
+            item.chapter == prevItem.chapter &&
+            item.version == prevItem.version
+          ) {
+            return draft
+          }
+
+          if (item.type === 'strong' && item.Code == prevItem.Code) {
+            return draft
+          }
+
+          if (item.type === 'word' && item.word == prevItem.word) {
+            return draft
+          }
+        }
+      }
+
+      draft.bible.history.unshift({
+        ...action.payload,
+        date: Date.now()
+      })
+      draft.bible.history = draft.bible.history.slice(0, 50)
+      break
+    }
     default: {
       break
     }
@@ -571,5 +611,26 @@ export function changeColor({ name, color }) {
     type: CHANGE_COLOR,
     name,
     color
+  }
+}
+
+// HISTORY
+
+export function setHistory(item) {
+  return {
+    type: SET_HISTORY,
+    payload: item
+  }
+}
+
+export function deleteHistory() {
+  return {
+    type: DELETE_HISTORY
+  }
+}
+
+export function updateUserData() {
+  return {
+    type: UPDATE_USER_DATA
   }
 }

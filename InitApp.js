@@ -1,12 +1,13 @@
 import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
 import { Provider as PaperProvider } from 'react-native-paper'
-import { StatusBar } from 'react-native'
+import { StatusBar, AppState } from 'react-native'
 import * as Segment from 'expo-analytics-segment'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 
+import { updateUserData } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import Changelog from '~common/Changelog'
@@ -14,10 +15,23 @@ import getTheme from '~themes'
 import { paperTheme } from '~themes/default'
 
 class InitApp extends React.Component {
-  componentDidMount () {
+  componentDidMount() {
     this.changeStatusBarStyle()
+    AppState.addEventListener('change', this.handleAppStateChange)
   }
-  componentDidUpdate (prevProps) {
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange)
+  }
+
+  handleAppStateChange = nextAppState => {
+    if (nextAppState.match(/inactive|background/)) {
+      console.log('App is in background!')
+      this.props.dispatch(updateUserData())
+    }
+  }
+
+  componentDidUpdate(prevProps) {
     if (prevProps.theme !== this.props.theme) {
       this.changeStatusBarStyle()
     }
@@ -28,7 +42,7 @@ class InitApp extends React.Component {
     else StatusBar.setBarStyle('dark-content')
   }
 
-  getActiveRouteName = (navigationState) => {
+  getActiveRouteName = navigationState => {
     if (!navigationState) {
       return null
     }
@@ -51,7 +65,7 @@ class InitApp extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const { theme, persistor } = this.props
     return (
       <ThemeProvider theme={getTheme[theme]}>
@@ -72,12 +86,8 @@ class InitApp extends React.Component {
 }
 
 export default compose(
-  connect(
-    (state) => ({
-      theme: state.user.bible.settings.theme
-    })
-  ),
+  connect(state => ({
+    theme: state.user.bible.settings.theme
+  })),
   withFireAuth
-)(
-  InitApp
-)
+)(InitApp)

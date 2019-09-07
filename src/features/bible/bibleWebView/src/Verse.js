@@ -193,7 +193,7 @@ class Verse extends Component {
     this.setState({ isFocused: true })
 
     // On long press
-    this.buttonPressTimer = setTimeout(this.onLongPress, 700)
+    this.buttonPressTimer = setTimeout(this.onLongPress, 400)
   }
 
   onTouchEnd = () => {

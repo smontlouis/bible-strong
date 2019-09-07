@@ -19,7 +19,10 @@ import {
   UPLOAD_STUDY,
   DELETE_STUDY,
   UPDATE_TAG,
-  CHANGE_COLOR
+  CHANGE_COLOR,
+  SET_HISTORY,
+  DELETE_HISTORY,
+  UPDATE_USER_DATA
 } from './modules/user'
 
 // TODO - DO IT FOR COLOR SETTINGS ?
@@ -66,18 +69,6 @@ export default store => next => action => {
         batch.update(studyDoc, { tags: studies[studyId].tags || {} })
       })
       batch.commit().then(() => console.log('Batch studies success'))
-      break
-    }
-    case CHANGE_COLOR:
-    case SET_SETTINGS_ALIGN_CONTENT:
-    case INCREASE_SETTINGS_FONTSIZE_SCALE:
-    case DECREASE_SETTINGS_FONTSIZE_SCALE:
-    case SET_SETTINGS_TEXT_DISPLAY:
-    case SET_SETTINGS_THEME:
-    case SET_SETTINGS_PRESS:
-    case SET_SETTINGS_NOTES_DISPLAY: {
-      const { settings } = user.bible
-      userDoc.update({ 'bible.settings': settings })
       break
     }
     case ADD_NOTE:
@@ -128,11 +119,22 @@ export default store => next => action => {
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-      // TODO: Update studies there
       userDoc.update({
         ...user,
         bible: sanitizeUserBible(user.bible)
       })
+      break
+    }
+
+    // TODO: When there will be too much data to update.
+    case UPDATE_USER_DATA: {
+      const { changelog, highlights, notes, studies, tags, history, settings } = user.bible
+
+      userDoc.update({
+        'bible.history': history,
+        'bible.settings': settings
+      })
+
       break
     }
     default:
