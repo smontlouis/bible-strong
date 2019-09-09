@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
 import styled from '@emotion/native'
+import Sentry from 'sentry-expo'
 
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
@@ -97,6 +98,11 @@ class BibleViewer extends Component {
       verse,
       version,
       type: 'verse'
+    })
+    Sentry.captureBreadcrumb({
+      category: 'bible viewer',
+      message: 'Load verses',
+      data: { book: book.Numero, chapter, verse, version }
     })
   }
 

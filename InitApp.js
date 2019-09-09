@@ -6,6 +6,7 @@ import * as Segment from 'expo-analytics-segment'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
+import Sentry from 'sentry-expo'
 
 import { updateUserData } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
@@ -51,17 +52,29 @@ class InitApp extends React.Component {
     if (route.routes) {
       return this.getActiveRouteName(route)
     }
-    return route.routeName
+    return {
+      route: route.routeName,
+      params: route.params
+    }
   }
 
   onNavigationStateChange = (prevState, currentState, action) => {
-    const currentScreen = this.getActiveRouteName(currentState)
-    const prevScreen = this.getActiveRouteName(prevState)
+    const { route: currentScreen, params: currentParams } = this.getActiveRouteName(currentState)
+    const { route: prevScreen, params: prevParams } = this.getActiveRouteName(prevState)
 
     if (prevScreen !== currentScreen) {
       if (!__DEV__) {
         Segment.screen(currentScreen)
       }
+
+      Sentry.captureBreadcrumb({
+        category: 'screen',
+        message: `From: ${prevScreen} To: ${currentScreen}`,
+        data: {
+          prevRoute: { prevScreen, prevParams },
+          currentRoute: { currentScreen, currentParams }
+        }
+      })
     }
   }
 

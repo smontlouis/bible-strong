@@ -91,11 +91,11 @@ const Header = ({
         <StyledText>{version}</StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route="Pericope" style={{ width: 40 }}>
+      <LinkBox route="Pericope" style={{ width: 50 }}>
         <MaterialCommunityIcon name="subtitles" size={20} />
       </LinkBox>
 
-      <LinkBox route="History" style={{ width: 40, marginLeft: 'auto' }}>
+      <LinkBox route="History" style={{ width: 50, marginLeft: 'auto' }}>
         <MaterialCommunityIcon name="history" size={20} />
       </LinkBox>
       {!isSelectionMode && (
