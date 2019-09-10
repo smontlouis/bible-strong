@@ -1,8 +1,8 @@
 .block-verse--wrapper {
   margin: 10px 0;
   padding: 13px 18px;
-  background: linear-gradient(50deg, rgba(44, 62, 80,0.8) 0%,rgba(44, 62, 80,1.0) 100%);
-  box-shadow: 0 3px 6px 0px rgba(44, 62, 80,0.44);
+  background: linear-gradient(50deg, rgba(48, 51, 107, .8) 0%,rgba(48, 51, 107,1.0) 100%);
+  box-shadow: 0 3px 6px 0px rgba(48, 51, 107,0.44);
   border-radius: 4px;
   color: white;
   position: relative;

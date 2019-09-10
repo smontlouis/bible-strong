@@ -8,6 +8,7 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import TextInput from '~common/ui/TextInput'
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import Chip from '~common/ui/Chip'
 import { addTag } from '~redux/modules/user'
 
@@ -17,7 +18,7 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  height: 200,
+  height: 230,
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
@@ -53,7 +54,10 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       avoidKeyboard>
       <Container>
         <Box flex>
-          <ScrollView style={{ padding: 20, flex: 1 }}>
+          <Box padding={20} paddingBottom={0}>
+            <Text bold>Étiquettes</Text>
+          </Box>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
             <Box row wrap>
               <Chip label="Tout" isSelected={!selectedChip} onPress={() => onSelected(null)} />
               {tags.map(chip => (

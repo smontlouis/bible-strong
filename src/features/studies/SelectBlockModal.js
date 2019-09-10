@@ -1,6 +1,8 @@
 import React from 'react'
 import Modal from 'react-native-modal'
+import * as Icon from '@expo/vector-icons'
 
+import { withTheme } from 'emotion-theming'
 import styled from '@emotion/native'
 
 import { getBottomSpace } from 'react-native-iphone-x-helper'
@@ -26,8 +28,9 @@ const Container = styled.View(({ theme }) => ({
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   flex: 1,
-  alignItems: 'flex-start',
-  justifyContent: 'center',
+  flexDirection: "row",
+  alignItems: 'center',
+  justifyContent: 'flex-start',
   paddingLeft: 20,
   paddingRight: 20,
   borderBottomColor: theme.colors.border,
@@ -35,7 +38,7 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden'
 }))
 
-const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleView }) => {
+const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleView, theme }) => {
   return (
     <StylizedModal
       backdropOpacity={0.3}
@@ -49,23 +52,28 @@ const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleVi
             dispatchToWebView('BLOCK_DIVIDER')
             onClosed()
           }}>
+          <Icon.Feather size={24} name="minus" style={{ marginRight: 15 }} />
           <Text>Séparateur</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('verse')}>
-          <Text>Insérer un lien verset</Text>
+          <Icon.Feather color={theme.colors.quint} size={24} name="link-2" style={{ marginRight: 15 }} />
+          <Text>Insérer un lien de verset</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('verse-block')}>
-          <Text>Insérer un bloc verset</Text>
+        <Icon.MaterialCommunityIcons color={theme.colors.quint} size={24} name="text" style={{ marginRight: 15 }} />
+          <Text>Insérer un texte de verset</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('strong')}>
-          <Text>Insérer un lien strong</Text>
+          <Icon.Feather color={theme.colors.primary} size={24} name="link-2" style={{ marginRight: 15 }} />
+          <Text>Insérer un lien de strong</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('strong-block')}>
-          <Text>Insérer un bloc strong</Text>
+          <Icon.MaterialCommunityIcons color={theme.colors.primary} size={24} name="text" style={{ marginRight: 15 }} />
+          <Text>Insérer un texte de strong</Text>
         </Touchy>
       </Container>
     </StylizedModal>
   )
 }
 
-export default SelectBlockModal
+export default withTheme(SelectBlockModal)

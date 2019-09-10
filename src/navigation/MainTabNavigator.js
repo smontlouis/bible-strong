@@ -2,13 +2,11 @@ import React from 'react'
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
 import BibleScreen from '~features/bible/BibleScreen'
 import MoreScreen from '~features/settings/MoreScreen'
-// import StudiesScreen from '~features/studies/StudiesScreen'
-import LexiqueScreen from '~features/lexique/LexiqueScreen'
+import StudiesScreen from '~features/studies/StudiesScreen'
 import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
 import SearchScreen from '~features/search/SearchScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
-import LexiqueIcon from '~common/LexiqueIcon'
 import getTheme from '~themes'
 
 export default createMaterialBottomTabNavigator(
@@ -24,6 +22,15 @@ export default createMaterialBottomTabNavigator(
         }
       }
     },
+    Studies: {
+      screen: StudiesScreen,
+      navigationOptions: ({ screenProps }) => ({
+        title: 'Études',
+        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="feather" />,
+        tabBarColor: getTheme[screenProps.theme].colors.reverse,
+        activeColor: getTheme[screenProps.theme].colors.primary
+      })
+    },
     Search: {
       screen: SearchScreen,
       navigationOptions: ({ screenProps }) => {
@@ -34,24 +41,6 @@ export default createMaterialBottomTabNavigator(
           activeColor: getTheme[screenProps.theme].colors.primary
         }
       }
-    },
-    // Studies: {
-    //   screen: StudiesScreen,
-    //   navigationOptions: ({ screenProps }) => ({
-    //     title: 'Études',
-    //     tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="feather" />,
-    //     tabBarColor: getTheme[screenProps.theme].colors.reverse,
-    //     activeColor: getTheme[screenProps.theme].colors.primary
-    //   })
-    // },
-    Lexique: {
-      screen: LexiqueScreen,
-      navigationOptions: ({ screenProps }) => ({
-        title: 'Lexique',
-        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} component={LexiqueIcon} />,
-        tabBarColor: getTheme[screenProps.theme].colors.reverse,
-        activeColor: getTheme[screenProps.theme].colors.primary
-      })
     },
     Dictionnary: {
       screen: DictionnaryScreen,

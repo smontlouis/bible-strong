@@ -17,7 +17,7 @@ const Verse = ({ title, content, version }) => (
         </div>
       </div>
       <div className="block-verse--arrow">
-        <ArrowRight color='rgba(44, 62, 80,1.0)' />
+        <ArrowRight color='rgba(48, 51, 107,1.0)' />
       </div>
     <div className='block-delete' />
     </div>

@@ -1,5 +1,5 @@
 .block-verse--wrapper {
-  color: rgba(44, 62, 80,1.0);
+  color: rgba(48, 51, 107,1.0);
   position: relative;
   z-index: 10;
 }
@@ -22,7 +22,7 @@
   font-size: 20px;
   font-weight: bold;
   line-height: 0px;
-  color: rgba(44, 62, 80,1.0);
+  color: rgba(48, 51, 107,1.0);
   opacity: 0.2;
 }
 

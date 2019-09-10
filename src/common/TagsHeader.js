@@ -16,8 +16,7 @@ const TouchableBox = styled.TouchableOpacity({
 })
 
 const StyledText = styled(Text)({
-  fontSize: 16,
-  fontWeight: 'bold',
+  fontSize: 14,
   marginRight: 5
 })
 
@@ -40,10 +39,12 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
   return (
     <HeaderBox noBorder={noBorder} row>
-      {hasBackButton && (
+      {hasBackButton ? (
         <Back padding>
           <FeatherIcon name="arrow-left" size={20} />
         </Back>
+      ) : (
+        <Box width={15} />
       )}
       <Box flex justifyContent="center">
         <Text fontSize={16} bold>
@@ -51,7 +52,7 @@ const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButto
         </Text>
       </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
-        <StyledText>{selectedChip ? selectedChip.name : 'Tout'}</StyledText>
+        <StyledText>{selectedChip ? selectedChip.name : 'Filtrer'}</StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </TouchableBox>
     </HeaderBox>

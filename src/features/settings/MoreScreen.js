@@ -3,7 +3,7 @@ import { ScrollView, Platform, Alert } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
-import SnackBar from '~common/SnackBar'
+import LexiqueIcon from '~common/LexiqueIcon'
 import Container from '~common/ui/Container'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
@@ -40,7 +40,6 @@ const shareMessage = () => {
 const MoreScreen = () => {
   const { isLogged, logout } = useLogin()
   const [isEditTagsOpen, setEditTagsOpen] = useState(false)
-  const [canShowStudy, showStudies] = useState(false)
 
   const promptLogout = () => {
     Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?', [
@@ -54,14 +53,12 @@ const MoreScreen = () => {
       <Header title="Plus" />
       <ScrollView flex={1}>
         <Box paddingVertical={10}>
-          {canShowStudy && (
-            <LinkItem route="Studies">
-              <StyledIcon name="feather" size={25} color="quart" />
-              <Text bold fontSize={15} color="quart">
-                Études (bêta)
-              </Text>
-            </LinkItem>
-          )}
+          <LinkItem route="Lexique">
+            <LexiqueIcon style={{ marginRight: 15 }} size={25} />
+            <Text bold fontSize={15}>
+              Lexique
+            </Text>
+          </LinkItem>
           <LinkItem onPress={() => setEditTagsOpen(true)}>
             <StyledIcon name="tag" size={25} />
             <Text bold fontSize={15}>
@@ -118,9 +115,7 @@ const MoreScreen = () => {
           </LinkItem>
           <LinkItem route="Support">
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
-            <Text bold color="secondary" fontSize={15}>
-              Soutenir le développeur
-            </Text>
+            <Text fontSize={15}>Soutenir le développeur</Text>
           </LinkItem>
           {!isLogged && (
             <LinkItem route="Login">
@@ -141,17 +136,7 @@ const MoreScreen = () => {
         </Box>
       </ScrollView>
       <Box position="absolute" bottom={10} right={10}>
-        <Text
-          color="grey"
-          fontSize={12}
-          onPress={() => {
-            showStudies(true)
-            SnackBar.show(
-              "Vous avez maintenant accès aux études ! Chut ! C'est un secret !",
-              'info',
-              { duration: 4000 }
-            )
-          }}>
+        <Text color="grey" fontSize={12}>
           Version: {app.expo.version}
         </Text>
       </Box>

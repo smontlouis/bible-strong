@@ -38,7 +38,6 @@ const StudiesScreen = () => {
   return (
     <Container>
       <TagsHeader
-        hasBackButton
         title="Études"
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
@@ -71,7 +70,7 @@ const StudiesScreen = () => {
         {isLogged && (
           <FloatingButton
             label="Nouvelle étude"
-            icon="edit-2"
+            icon="feather"
             route="EditStudy"
             params={{ canEdit: true }}
           />

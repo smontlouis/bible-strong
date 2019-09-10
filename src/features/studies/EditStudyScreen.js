@@ -10,7 +10,7 @@ import FabButton from '~common/ui/FabButton'
 import WebViewQuillEditor from '~features/studies/WebViewQuillEditor'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
-
+import PenToolIcon from '~common/PenToolIcon'
 import EditStudyHeader from './EditStudyHeader'
 import SelectHeaderModal from './SelectHeaderModal'
 import SelectBlockModal from './SelectBlockModal'
@@ -187,7 +187,7 @@ class EditStudyScreen extends React.Component {
         />
         {isReadOnly && (
           <FabButton
-            icon="edit-2"
+            icon="feather"
             onPress={() => this.setState({ isReadOnly: false })}
             align="flex-end"
           />

@@ -4,6 +4,7 @@ import { View, Alert, Platform } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
+import Sentry from 'sentry-expo'
 
 import books from '~assets/bible_versions/books-desc'
 import KeyboardSpacer from '~common/KeyboardSpacer'
@@ -33,7 +34,7 @@ class WebViewQuillEditor extends React.Component {
     const { localUri } = await AssetUtils.resolveAsync(
       require('~features/studies/studiesWebView/dist/index.html')
     )
-    this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+    this.HTMLFile = await FileSystem.getContentUriAsync(localUri)
     this.setState({ isHTMLFileLoaded: true })
   }
 
@@ -86,7 +87,9 @@ class WebViewQuillEditor extends React.Component {
     const webView = this.webViewRef.current
 
     const { localUri } = await AssetUtils.resolveAsync(require('~assets/fonts/LiterataBook.otf'))
-    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
+    const fileUri = await FileSystem.getContentUriAsync(localUri)
+
+    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${fileUri}') format('opentype');}`
 
     webView.injectJavaScript(`
     (function() {
@@ -120,6 +123,7 @@ class WebViewQuillEditor extends React.Component {
         case 'VIEW_BIBLE_VERSE': {
           navigation.navigate('BibleView', {
             ...msgData.payload,
+            arrayVerses: null, // Remove arrayVerses
             book: books[msgData.payload.book - 1]
           })
           return
@@ -160,6 +164,14 @@ class WebViewQuillEditor extends React.Component {
           console.log(`%c${msgData.payload}`, 'color:black;background-color:#81ecec')
           return
         }
+        case 'THROW_ERROR': {
+          console.log(`%c${msgData.payload}`, 'color:black;background-color:#81ecec')
+          Alert.alert(
+            `Une erreur est survenue, impossible de charger la page: ${msgData.payload} \n Le développeur en a été informé.`
+          )
+          Sentry.captureMessage(msgData.payload)
+          return
+        }
 
         default:
           console.warn(
@@ -177,7 +189,6 @@ class WebViewQuillEditor extends React.Component {
 
   editorLoaded = () => {
     if (this.props.contentToDisplay) {
-      console.log('Content to Display: ', this.props.contentToDisplay)
       this.dispatchToWebView('SET_CONTENTS', {
         delta: this.props.contentToDisplay
       })
@@ -214,7 +225,7 @@ class WebViewQuillEditor extends React.Component {
           onMessage={this.handleMessage}
           originWhitelist={['*']}
           ref={this.webViewRef}
-          source={{ html: this.HTMLFile }}
+          source={{ uri: this.HTMLFile }}
           injectedJavaScript={INJECTED_JAVASCRIPT}
           domStorageEnabled
           allowUniversalAccessFromFileURLs

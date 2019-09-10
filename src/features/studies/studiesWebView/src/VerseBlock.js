@@ -1,25 +1,29 @@
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Verse from './Verse'
-import { dispatch } from './dispatch' 
+import { dispatch } from './dispatch'
 import Quill from './quill'
 
 const Embed = Quill.import('blots/embed')
 
 class VerseBlock extends Embed {
   static blotName = 'block-verse'
+
   static tagName = 'div'
+
   static className = 'block-verse'
 
-  static create (data) {
-    let node = super.create(data)
+  static create(data) {
+    const node = super.create(data)
     const { title, content, version, verses } = data
-    node.innerHTML = ReactDOMServer.renderToString(<Verse {...{ title, content, version, verses }} />)
+    node.innerHTML = ReactDOMServer.renderToString(
+      <Verse {...{ title, content, version, verses }} />
+    )
     node.setAttribute('data', JSON.stringify(data))
-    node.setAttribute('spellcheck', "false");
-    node.setAttribute('autocomplete', "off");
-    node.setAttribute('autocorrect', "off");
-    node.setAttribute('autocapitalize', "off");
+    node.setAttribute('spellcheck', 'false')
+    node.setAttribute('autocomplete', 'off')
+    node.setAttribute('autocorrect', 'off')
+    node.setAttribute('autocapitalize', 'off')
 
     node.addEventListener('click', () => {
       const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
@@ -43,12 +47,12 @@ class VerseBlock extends Embed {
     return node
   }
 
-  static formats (domNode) {
+  static formats(domNode) {
     const data = domNode.getAttribute('data')
     return JSON.parse(data)
   }
 
-  static value (domNode) {
+  static value(domNode) {
     const data = domNode.getAttribute('data')
     return JSON.parse(data)
   }
@@ -65,28 +69,28 @@ class VerseBlock extends Embed {
     // https://github.com/quilljs/quill/blob/master/blots/embed.js
 
     mutations.forEach(mutation => {
-      if (mutation.type != 'childList') return;
-      if (mutation.removedNodes.length == 0) return;
+      if (mutation.type != 'childList') return
+      if (mutation.removedNodes.length == 0) return
 
-      setTimeout(() => this._remove(), 0);
-    });
+      setTimeout(() => this._remove(), 0)
+    })
 
     const unhandledMutations = mutations.filter(m => m.type != 'childList')
-    super.update(unhandledMutations, context);
+    super.update(unhandledMutations, context)
   }
-  
+
   _remove() {
     // NOTE: call this function as:
     // setTimeout(() => this._remove(), 0);
     // otherwise you'll get the error: "The given range isn't in document."
-    const cursorPosition = quill.getSelection().index - 1;
+    const cursorPosition = quill.getSelection().index - 1
 
     // see `remove` implementation on:
     // https://github.com/quilljs/parchment/blob/master/src/blot/abstract/shadow.ts
-    this.remove();
+    this.remove()
     
     // schedule cursor positioning after quill is done with whatever has scheduled
-    setTimeout(() => quill.setSelection(cursorPosition, Quill.sources.API), 0);
+    setTimeout(() => quill.setSelection(cursorPosition, Quill.sources.API), 0)
   }
 }
 

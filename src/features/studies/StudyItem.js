@@ -7,39 +7,43 @@ import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import TagList from '~common/TagList'
+import { deltaToPlainText } from '~helpers/deltaToPlainText'
+import truncate from '~helpers/truncate'
 
 const StudyLink = styled(Link)(({ theme }) => ({
   padding: 20,
+  paddingRight: 0,
   borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
+  borderBottomWidth: 1,
+  position: 'relative',
+  flexDirection: 'row'
 }))
 
 const StudyItem = ({ study, theme, setStudySettings }) => {
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), { locale: frLocale })
 
   return (
-    <StudyLink key={study.id} route='EditStudy' params={{ studyId: study.id }}>
-      <Box row justifyContent='space-between'>
-        <Text color='darkGrey' fontSize={12}>
-            Modifié il y a {formattedDate}
+    <StudyLink key={study.id} route="EditStudy" params={{ studyId: study.id }}>
+      <Box flex>
+        <Text color="darkGrey" fontSize={12}>
+          Modifié il y a {formattedDate}
         </Text>
-        <Box row>
-          <Icon.Feather
-            name={'more-vertical'}
-            size={20}
-            color={theme.colors.tertiary}
-            onPress={() => setStudySettings(study.id)}
-          />
-        </Box>
-      </Box>
-      <Box>
-        <Text bold scale={-2}>
+        <Text bold scale={-2} marginTop={4}>
           {study.title}
         </Text>
+        {study.content && (
+          <Paragraph marginTop={10} scaleLineHeight={-1} scale={-4}>
+            {truncate(deltaToPlainText(study.content.ops), 180)}
+          </Paragraph>
+        )}
         <TagList tags={study.tags} />
       </Box>
+      <Link onPress={() => setStudySettings(study.id)} padding>
+        <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
+      </Link>
     </StudyLink>
   )
 }

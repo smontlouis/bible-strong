@@ -38,7 +38,7 @@ const FormatIcon = styled(Icon.Feather)(({ theme, isSelected }) => ({
 }))
 
 const PlusIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
+  color: theme.colors.primary,
   marginLeft: 10,
   marginRight: 0
 }))
@@ -98,7 +98,7 @@ const EditHeader = ({
             size={25}
             onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}
           />
-          <PlusIcon name="plus" size={25} onPress={openBlockModal} />
+          <PlusIcon name="plus-circle" size={25} onPress={openBlockModal} />
         </Box>
       </Box>
       <Box row justifyContent="space-between" height={50} center>

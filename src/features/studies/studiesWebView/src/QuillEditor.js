@@ -12,7 +12,7 @@ import './quill.snow.css'
 import React from 'react'
 import debounce from 'debounce'
 import Quill from './quill'
-import { dispatch, dispatchConsole } from './dispatch'
+import { dispatch, dispatchConsole, dispatchThrow } from './dispatch'
 
 const BROWSER_TESTING_ENABLED = process.env.NODE_ENV !== 'production'
 
@@ -103,8 +103,6 @@ export default class ReactQuillEditor extends React.Component {
   handleMessage = event => {
     try {
       const msgData = event.detail
-
-      dispatchConsole(msgData.type)
 
       switch (msgData.type) {
         case 'LOAD_EDITOR':
@@ -204,7 +202,7 @@ export default class ReactQuillEditor extends React.Component {
           )
       }
     } catch (err) {
-      dispatchConsole(`reactQuillEditor error: ${err}`)
+      dispatchThrow(`reactQuillEditor error: ${err}`)
     }
   }
 

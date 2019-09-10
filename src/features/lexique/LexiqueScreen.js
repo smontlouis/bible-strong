@@ -58,7 +58,7 @@ const LexiqueScreen = () => {
 
   return (
     <Container>
-      <Header title="Lexique" noBorder />
+      <Header hasBackButton title="Lexique" noBorder />
       <SearchInput
         placeholder="Recherche par code ou par mot"
         onChangeText={setSearchValue}

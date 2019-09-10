@@ -11,14 +11,14 @@ const Wrapper = styled.View(({ theme }) => ({
   right: 0,
   justifyContent: 'center',
   alignItems: 'center',
-  height: 45,
+  height: 40,
   pointerEvents: 'box-none'
 }))
 
 const StyledLink = styled(Link)(({ theme }) => ({
   backgroundColor: theme.colors.primary,
-  width: 200,
-  height: 45,
+  paddingHorizontal: 15,
+  height: 40,
   borderRadius: 30,
   justifyContent: 'center',
   alignItems: 'center',
@@ -36,9 +36,8 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 const TextButton = styled.Text(({ theme }) => ({
-  fontSize: 17,
-  color: 'white',
-  fontWeight: 'bold'
+  fontSize: 15,
+  color: 'white'
 }))
 
 const FloatingButton = ({ label, icon, onPress, route, params }) => {

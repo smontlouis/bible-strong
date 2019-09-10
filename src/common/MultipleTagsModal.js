@@ -87,8 +87,8 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
         <Box padding={20} paddingBottom={0}>
           <Text bold>
             {item.entity !== 'highlights'
-              ? `Tags pour "${currentItems[0].title || ''}"`
-              : highlightTitle}
+              ? `Étiquettes pour "${currentItems[0].title || ''}"`
+              : `Étiquettes pour ${highlightTitle}`}
           </Text>
         </Box>
         <Box flex>
