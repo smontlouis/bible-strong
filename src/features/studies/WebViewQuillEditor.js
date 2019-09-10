@@ -34,7 +34,8 @@ class WebViewQuillEditor extends React.Component {
     const { localUri } = await AssetUtils.resolveAsync(
       require('~features/studies/studiesWebView/dist/index.html')
     )
-    this.HTMLFile = await FileSystem.getContentUriAsync(localUri)
+    this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+
     this.setState({ isHTMLFileLoaded: true })
   }
 
@@ -87,9 +88,9 @@ class WebViewQuillEditor extends React.Component {
     const webView = this.webViewRef.current
 
     const { localUri } = await AssetUtils.resolveAsync(require('~assets/fonts/LiterataBook.otf'))
-    const fileUri = await FileSystem.getContentUriAsync(localUri)
+    const { uri } = await FileSystem.getInfoAsync(localUri)
 
-    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${fileUri}') format('opentype');}`
+    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${uri}') format('opentype');}`
 
     webView.injectJavaScript(`
     (function() {
@@ -225,7 +226,7 @@ class WebViewQuillEditor extends React.Component {
           onMessage={this.handleMessage}
           originWhitelist={['*']}
           ref={this.webViewRef}
-          source={{ uri: this.HTMLFile }}
+          source={{ html: this.HTMLFile }}
           injectedJavaScript={INJECTED_JAVASCRIPT}
           domStorageEnabled
           allowUniversalAccessFromFileURLs

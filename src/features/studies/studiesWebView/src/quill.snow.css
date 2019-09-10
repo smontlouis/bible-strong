@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "LiterataBook";
+  src: url("../../../../assets/fonts/LiterataBook-Regular-light.otf");
+}
+
+
 /*!
  * Quill Editor v1.0.0
  * https://quilljs.com/
