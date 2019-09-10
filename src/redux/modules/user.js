@@ -130,6 +130,7 @@ export default produce((draft, action) => {
       draft.emailVerified = emailVerified
 
       if (bible) {
+        // TODO: Merge basing on lastSeen from firebase ?
         draft.bible = deepmerge(draft.bible, bible, { arrayMerge: overwriteMerge })
 
         // Now take care of studies

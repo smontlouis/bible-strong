@@ -41,9 +41,11 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
         )}
         <TagList tags={study.tags} />
       </Box>
-      <Link onPress={() => setStudySettings(study.id)} padding>
-        <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
-      </Link>
+      {setStudySettings && (
+        <Link onPress={() => setStudySettings(study.id)} padding>
+          <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
+        </Link>
+      )}
     </StudyLink>
   )
 }

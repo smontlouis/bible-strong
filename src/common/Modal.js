@@ -49,9 +49,9 @@ const Menu = ({ isOpen, onClosed, children }) => {
   )
 }
 
-const Item = ({ children, onPress }) => (
+const Item = ({ children, onPress, ...props }) => (
   <Touchy onPress={onPress}>
-    <Text>{children}</Text>
+    <Text {...props}>{children}</Text>
   </Touchy>
 )
 

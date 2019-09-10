@@ -6,7 +6,7 @@ import { FlatList } from 'react-native'
 import Container from '~common/ui/Container'
 import VerseComponent from './Verse'
 
-const sortVersesByDate = p =>
+export const sortVersesByDate = p =>
   Object.keys(p).reduce((arr, verse, i) => {
     const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
     const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}

@@ -15,6 +15,7 @@ import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
+import BibleNoteModal from './BibleNoteModal'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
 import SelectedVersesModal from './SelectedVersesModal'
@@ -42,14 +43,16 @@ class BibleViewer extends Component {
     isLoading: true,
     verses: [],
     multipleTagsItem: false,
-    quickTagsModal: false
+    quickTagsModal: false,
+    isCreateNoteOpen: false,
+    noteVerses: null
   }
 
   pericope = getBiblePericope('LSG')
 
   componentWillMount() {
     setTimeout(() => {
-      this.loadVerses().catch(e => {
+      this.loadVerses().catch(() => {
         this.setState({ error: true, isLoading: false })
       })
     }, 200)
@@ -63,7 +66,7 @@ class BibleViewer extends Component {
       this.props.version !== oldProps.version
     ) {
       setTimeout(() => {
-        this.loadVerses().catch(e => {
+        this.loadVerses().catch(() => {
           this.setState({ error: true, isLoading: false })
         })
       }, 0)
@@ -127,9 +130,27 @@ class BibleViewer extends Component {
     addHighlight(color)
   }
 
+  toggleCreateNote = () => {
+    this.setState(state => ({ isCreateNoteOpen: !state.isCreateNoteOpen, noteVerses: null }))
+  }
+
+  openNoteModal = noteId => {
+    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
+      accuRefs[key] = true
+      return accuRefs
+    }, {})
+    this.setState(state => ({ isCreateNoteOpen: !state.isCreateNoteOpen, noteVerses }))
+  }
+
   setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
 
   setQuickTagsModal = value => this.setState({ quickTagsModal: value })
+
+  onSaveNote = id => {
+    setTimeout(() => {
+      this.setQuickTagsModal({ id, entity: 'notes' })
+    }, 300)
+  }
 
   render() {
     const { isLoading, error, quickTagsModal, multipleTagsItem } = this.state
@@ -147,7 +168,6 @@ class BibleViewer extends Component {
       navigation,
       selectedVerses,
       version,
-      onCreateNoteClick,
       addSelectedVerse,
       removeSelectedVerse,
       setSelectedVerse,
@@ -155,8 +175,7 @@ class BibleViewer extends Component {
       notedVerses,
       settings,
       verse,
-      arrayVerses,
-      openNoteModal
+      arrayVerses
     } = this.props
 
     let array = this.state.verses
@@ -195,7 +214,7 @@ class BibleViewer extends Component {
             verseToScroll={verse}
             chapter={chapter}
             pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
-            openNoteModal={openNoteModal}
+            openNoteModal={this.openNoteModal}
           />
         )}
         {!isReadOnly && (
@@ -212,7 +231,7 @@ class BibleViewer extends Component {
           <SelectedVersesModal
             isSelectionMode={isSelectionMode}
             setSelectedVerse={this.props.setSelectedVerse}
-            onCreateNoteClick={onCreateNoteClick}
+            onCreateNoteClick={this.toggleCreateNote}
             isVisible={modalIsVisible}
             isSelectedVerseHighlighted={isSelectedVerseHighlighted}
             addHighlight={this.addHiglightAndOpenQuickTags}
@@ -233,6 +252,14 @@ class BibleViewer extends Component {
           item={multipleTagsItem}
           onClosed={() => this.setMultipleTagsItem(false)}
         />
+        {this.state.isCreateNoteOpen && (
+          <BibleNoteModal
+            onClosed={this.toggleCreateNote}
+            isOpen={this.state.isCreateNoteOpen}
+            noteVerses={this.state.noteVerses}
+            onSaveNote={this.onSaveNote}
+          />
+        )}
       </Container>
     )
   }

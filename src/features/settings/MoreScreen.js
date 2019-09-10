@@ -59,12 +59,6 @@ const MoreScreen = () => {
               Lexique
             </Text>
           </LinkItem>
-          <LinkItem onPress={() => setEditTagsOpen(true)}>
-            <StyledIcon name="tag" size={25} />
-            <Text bold fontSize={15}>
-              Mes tags
-            </Text>
-          </LinkItem>
           <LinkItem route="Highlights">
             <StyledIcon name="edit-3" size={25} />
             <Text bold fontSize={15}>
@@ -75,6 +69,12 @@ const MoreScreen = () => {
             <StyledIcon name="file-text" size={25} />
             <Text bold fontSize={15}>
               Notes
+            </Text>
+          </LinkItem>
+          <LinkItem route="Tags">
+            <StyledIcon name="tag" size={25} />
+            <Text bold fontSize={15}>
+              Étiquettes
             </Text>
           </LinkItem>
         </Box>

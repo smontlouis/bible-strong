@@ -18,7 +18,7 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  height: 230,
+  height: 260,
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },

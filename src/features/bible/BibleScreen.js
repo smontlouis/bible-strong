@@ -6,32 +6,17 @@ import Container from '~common/ui/Container'
 import BibleViewer from './BibleViewer'
 import BibleHeader from './BibleHeader'
 import BibleParamsModal from './BibleParamsModal'
-import BibleNoteModal from './BibleNoteModal'
 
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
 class BibleScreen extends React.Component {
   state = {
-    isBibleParamsOpen: false,
-    isCreateNoteOpen: false,
-    noteVerses: null
+    isBibleParamsOpen: false
   }
 
   toggleBibleParamsOpen = () => {
-    this.setState({ isBibleParamsOpen: !this.state.isBibleParamsOpen })
-  }
-
-  toggleCreateNote = () => {
-    this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen, noteVerses: null })
-  }
-
-  openNoteModal = noteId => {
-    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
-      accuRefs[key] = true
-      return accuRefs
-    }, {})
-    this.setState({ isCreateNoteOpen: !this.state.isCreateNoteOpen, noteVerses })
+    this.setState(state => ({ isBibleParamsOpen: !state.isBibleParamsOpen }))
   }
 
   render() {
@@ -74,8 +59,6 @@ class BibleScreen extends React.Component {
           version={app.version}
           navigation={navigation}
           settings={settings}
-          onCreateNoteClick={this.toggleCreateNote}
-          openNoteModal={this.openNoteModal}
         />
         {this.state.isBibleParamsOpen && (
           <BibleParamsModal
@@ -89,13 +72,6 @@ class BibleScreen extends React.Component {
             increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
             decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
             settings={settings}
-          />
-        )}
-        {this.state.isCreateNoteOpen && (
-          <BibleNoteModal
-            onClosed={this.toggleCreateNote}
-            isOpen={this.state.isCreateNoteOpen}
-            noteVerses={this.state.noteVerses}
           />
         )}
       </Container>

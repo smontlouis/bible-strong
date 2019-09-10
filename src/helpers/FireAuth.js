@@ -59,15 +59,21 @@ const FireAuth = class {
         }
 
         const userDoc = firebaseDb.collection('users').doc(user.uid)
-        userDoc.get().then(u => {
-          if (u.data()) {
-            console.log('Update profile')
-            userDoc.update(profile)
-          } else {
-            console.log('Set profile')
-            userDoc.set(profile)
-          }
-        })
+        userDoc
+          .get()
+          .then(u => {
+            if (u.data()) {
+              console.log('Update profile')
+              userDoc.update(profile)
+            } else {
+              console.log('Set profile')
+              userDoc.set(profile)
+            }
+          })
+          .catch(e => {
+            console.log(e)
+            console.log('Coucou')
+          })
 
         const unsubscribe = userDoc.onSnapshot(doc => {
           const data = doc.data()

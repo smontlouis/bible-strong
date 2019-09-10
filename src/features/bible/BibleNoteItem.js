@@ -7,62 +7,59 @@ import * as Icon from '@expo/vector-icons'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import TagList from '~common/TagList'
+import Link from '~common/Link'
+import books from '~assets/bible_versions/books-desc'
 
 import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
 import theme from '~themes/default'
 
-const NoteContainer = styled.TouchableOpacity(({ theme }) => ({
+const NoteLink = styled(Link)(({ theme }) => ({
   padding: 20,
+  paddingRight: 0,
   borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
+  borderBottomWidth: 1,
+  flexDirection: 'row'
 }))
 
 class BibleNoteItem extends React.Component {
-  openModal = () => {
-    this.setState({ isModalOpen: true })
-  }
-
-  closeModal = () => {
-    this.setState({ isMenuOpen: false })
-  }
-
-  state = {
-    isModalOpen: false,
-    isMenuOpen: false
-  }
-
   render() {
-    const { item, openNoteEditor, setNoteSettings } = this.props
+    const { item, setNoteSettings } = this.props
+
+    const [Livre, Chapitre, Verset] = item.noteId.split('-')
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), { locale: frLocale })
 
     return (
-      <NoteContainer onPress={() => openNoteEditor(item.noteId)}>
-        <Box row justifyContent="space-between">
-          <Text color="darkGrey" bold fontSize={11}>
-            {item.reference} - Il y a {formattedDate}
-          </Text>
-          <Box row>
-            <Icon.Feather
-              name="more-vertical"
-              size={20}
-              color={theme.colors.tertiary}
-              onPress={() => setNoteSettings(item.noteId)}
-            />
+      <NoteLink
+        route="BibleView"
+        params={{
+          isReadOnly: true,
+          book: books[Livre - 1],
+          chapter: Number(Chapitre),
+          verse: Number(Verset)
+        }}>
+        <Box flex>
+          <Box row justifyContent="space-between">
+            <Text color="darkGrey" bold fontSize={11}>
+              {item.reference} - Il y a {formattedDate}
+            </Text>
           </Box>
+          {!!item.notes.title && (
+            <Text title fontSize={16} scale={-2}>
+              {item.notes.title}
+            </Text>
+          )}
+          {!!item.notes.description && (
+            <Paragraph scale={-3} scaleLineHeight={-1}>
+              {truncate(item.notes.description, 100)}
+            </Paragraph>
+          )}
+          <TagList tags={item.notes.tags} />
         </Box>
-        {!!item.notes.title && (
-          <Text title fontSize={16} scale={-2}>
-            {item.notes.title}
-          </Text>
-        )}
-        {!!item.notes.description && (
-          <Paragraph scale={-3} scaleLineHeight={-1}>
-            {truncate(item.notes.description, 100)}
-          </Paragraph>
-        )}
-        <TagList tags={item.notes.tags} />
-      </NoteContainer>
+        <Link padding onPress={() => setNoteSettings(item.noteId)}>
+          <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
+        </Link>
+      </NoteLink>
     )
   }
 }

@@ -19,7 +19,7 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  height: 230,
+  height: 260,
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
@@ -93,7 +93,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
         </Box>
         <Box flex>
           {tags.length ? (
-            <ScrollView style={{ padding: 20, flex: 1 }}>
+            <ScrollView contentContainerStyle={{ padding: 20 }} style={{ flex: 1 }}>
               <Box row wrap>
                 {tags.map(chip => (
                   <Chip

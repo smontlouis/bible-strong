@@ -27,7 +27,7 @@ class InitApp extends React.Component {
 
   handleAppStateChange = nextAppState => {
     if (nextAppState.match(/inactive|background/)) {
-      console.log('App is in background!')
+      console.log('App mode - background!')
       this.props.dispatch(updateUserData())
     }
   }

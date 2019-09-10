@@ -77,10 +77,10 @@ class BibleNoteModal extends React.Component {
     return null
   }
 
-  loadPage = async selectedVerses => {
+  loadPage = async verses => {
     const { notes } = this.props
-    const existingNote = this.checkIfExistingNote(notes, selectedVerses)
-    const { title: reference } = await getVersesRef(selectedVerses)
+    const existingNote = this.checkIfExistingNote(notes, verses)
+    const { title: reference } = await getVersesRef(verses)
 
     if (existingNote) {
       this.setState({
@@ -110,10 +110,15 @@ class BibleNoteModal extends React.Component {
   }
 
   onSaveNote = () => {
-    const { title, description } = this.state
-    const { noteVerses } = this.props
-    this.props.addNote({ title, description, date: Date.now() }, noteVerses)
-    this.setState({ title, description, isEditing: false })
+    const { title, description, tags } = this.state
+    const { noteVerses, selectedVerses } = this.props
+    this.props.addNote({ title, description, date: Date.now(), ...(tags && { tags }) }, noteVerses)
+    this.props.onClosed()
+
+    const orderedVerses = orderVerses(noteVerses || selectedVerses)
+    const key = Object.keys(orderedVerses).join('/')
+
+    this.props.onSaveNote && this.props.onSaveNote(key)
   }
 
   deleteNote = noteId => {

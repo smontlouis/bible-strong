@@ -12,7 +12,7 @@ const Tag = styled(Box)(({ theme }) => ({
   paddingLeft: 7,
   paddingRight: 7,
   marginRight: 5,
-  marginBottom: 5,
+  marginBottom: 2,
   marginTop: 5
 }))
 
@@ -22,16 +22,14 @@ const TagList = ({ tags }) => {
   }
 
   return (
-    <Box row>
-      {
-        Object.values(tags).map(
-          tag => (
-            <Tag key={tag.id}>
-              <Text fontSize={10} color='primary'>{tag.name}</Text>
-            </Tag>
-          )
-        )
-      }
+    <Box wrap row>
+      {Object.values(tags).map(tag => (
+        <Tag key={tag.id}>
+          <Text fontSize={10} color="primary">
+            {tag.name}
+          </Text>
+        </Tag>
+      ))}
     </Box>
   )
 }

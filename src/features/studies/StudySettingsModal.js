@@ -35,22 +35,20 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden'
 }))
 
-const StudySettingsModal = ({
-  isOpen,
-  onClosed,
-  theme,
-  setTitlePrompt,
-  setMultipleTagsItem
-}) => {
+const StudySettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultipleTagsItem }) => {
   const dispatch = useDispatch()
   const studyId = isOpen
   const study = useSelector(state => state.user.bible.studies[studyId])
 
-  const deleteStudyConfirmation = (studyId) => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette étude?',
-      [ { text: 'Non', onPress: () => null, style: 'cancel' },
-        { text: 'Oui', onPress: () => dispatch(deleteStudy(studyId), onClosed()), style: 'destructive' }
-      ])
+  const deleteStudyConfirmation = studyId => {
+    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette étude?', [
+      { text: 'Non', onPress: () => null, style: 'cancel' },
+      {
+        text: 'Oui',
+        onPress: () => dispatch(deleteStudy(studyId), onClosed()),
+        style: 'destructive'
+      }
+    ])
   }
 
   return (
@@ -59,27 +57,34 @@ const StudySettingsModal = ({
       isVisible={!!isOpen}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-    >
+      onBackdropPress={onClosed}>
       <Container>
-        <Touchy onPress={() => {
-          onClosed()
-          setTimeout(() => {
-            setMultipleTagsItem({ ...study, entity: 'studies' })
-          }, 500)
-        }}>
-          <Text fontSize={16} bold>Tags</Text>
+        <Touchy
+          onPress={() => {
+            onClosed()
+            setTimeout(() => {
+              setMultipleTagsItem({ ...study, entity: 'studies' })
+            }, 500)
+          }}>
+          <Text fontSize={16} bold>
+            Tags
+          </Text>
         </Touchy>
-        <Touchy onPress={() => {
-          onClosed()
-          setTimeout(() => {
-            setTitlePrompt({ id: study.id, title: study.title })
-          }, 500)
-        }}>
-          <Text fontSize={16} bold>Renommer</Text>
+        <Touchy
+          onPress={() => {
+            onClosed()
+            setTimeout(() => {
+              setTitlePrompt({ id: study.id, title: study.title })
+            }, 500)
+          }}>
+          <Text fontSize={16} bold>
+            Renommer
+          </Text>
         </Touchy>
         <Touchy onPress={() => deleteStudyConfirmation(studyId)}>
-          <Text fontSize={16} bold color='quart'>Supprimer</Text>
+          <Text fontSize={16} bold color="quart">
+            Supprimer
+          </Text>
         </Touchy>
       </Container>
     </StylizedModal>

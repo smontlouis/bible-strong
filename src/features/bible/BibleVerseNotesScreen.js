@@ -168,6 +168,7 @@ class BibleVerseNotes extends Component {
           isOpen={isNoteSettingsOpen}
           onClosed={() => this.setNoteSettings(false)}
           setMultipleTagsItem={this.setMultipleTagsItem}
+          openNoteEditor={this.openNoteEditor}
         />
         <MultipleTagsModal
           multiple

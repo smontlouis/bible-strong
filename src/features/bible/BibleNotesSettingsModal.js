@@ -35,7 +35,14 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden'
 }))
 
-const NotesSettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultipleTagsItem }) => {
+const NotesSettingsModal = ({
+  isOpen,
+  onClosed,
+  theme,
+  setTitlePrompt,
+  setMultipleTagsItem,
+  openNoteEditor
+}) => {
   const dispatch = useDispatch()
   const noteId = isOpen
   const note = useSelector(state => state.user.bible.notes[noteId])
@@ -59,6 +66,17 @@ const NotesSettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultip
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}>
       <Container>
+        <Touchy
+          onPress={() => {
+            onClosed()
+            setTimeout(() => {
+              openNoteEditor(noteId)
+            }, 500)
+          }}>
+          <Text fontSize={16} bold>
+            Éditer
+          </Text>
+        </Touchy>
         <Touchy
           onPress={() => {
             onClosed()
