@@ -6,7 +6,8 @@ import FireAuth from '~helpers/FireAuth'
 const withFireAuth = WrappedComponent => props => {
   const dispatch = useDispatch()
   useEffect(() => {
-    const onLogin = (profile, studies) => dispatch(UserActions.onUserLoginSuccess(profile, studies))
+    const onLogin = (profile, remoteLastSeen, studies) =>
+      dispatch(UserActions.onUserLoginSuccess(profile, remoteLastSeen, studies))
     const emailVerified = () => console.log('email has been verified')
     const onUserChange = profile => console.log('user changed')
     const onLogout = () => dispatch(UserActions.onUserLogout())

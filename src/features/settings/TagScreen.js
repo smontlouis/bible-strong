@@ -66,6 +66,7 @@ const NoteItem = ({ item }) => {
 const TagScreen = ({ navigation }) => {
   const { item } = navigation.state.params
   const dispatch = useDispatch()
+
   const { highlights, notes, studies, tag } = useSelector(state => ({
     highlights: item.highlights
       ? sortVersesByDate(
@@ -113,6 +114,7 @@ const TagScreen = ({ navigation }) => {
             })}
           </Box>
         )}
+
         {!!notes.length && (
           <Box>
             <Text padding={20} fontSize={25} title>
@@ -123,6 +125,7 @@ const TagScreen = ({ navigation }) => {
             })}
           </Box>
         )}
+
         {!!studies.length && (
           <Box>
             <Text padding={20} fontSize={25} title>
