@@ -43,9 +43,11 @@ export const DELETE_STUDY = 'user/DELETE_STUDY'
 
 export const CHANGE_COLOR = 'user/CHANGE_COLOR'
 
-export const SET_HISTORY = 'SET_HISTORY'
-export const DELETE_HISTORY = 'DELETE_HISTORY'
-export const UPDATE_USER_DATA = 'UPDATE_USER_DATA'
+export const SET_HISTORY = 'user/SET_HISTORY'
+export const DELETE_HISTORY = 'user/DELETE_HISTORY'
+export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
+
+export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
 const initialState = {
   id: '',
@@ -108,6 +110,10 @@ const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case SET_LAST_SEEN: {
+      draft.lastSeen = Date.now()
+      break
+    }
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const {
@@ -121,6 +127,10 @@ export default produce((draft, action) => {
         bible
       } = action.profile
 
+      const isLogged = !!draft.id
+      const { remoteLastSeen } = action
+      const { lastSeen: localLastSeen } = draft
+
       draft.id = id
       draft.email = email
       draft.displayName = displayName
@@ -130,8 +140,19 @@ export default produce((draft, action) => {
       draft.emailVerified = emailVerified
 
       if (bible) {
-        // TODO: Merge basing on lastSeen from firebase ?
-        draft.bible = deepmerge(draft.bible, bible, { arrayMerge: overwriteMerge })
+        if (!isLogged) {
+          console.log('User was not logged, merge data')
+          draft.bible = deepmerge(draft.bible, bible, { arrayMerge: overwriteMerge })
+        } else if (remoteLastSeen > localLastSeen) {
+          // Remote wins
+          console.log('Remote wins')
+          draft.bible = { ...draft.bible, ...bible }
+        } else if (remoteLastSeen < localLastSeen) {
+          console.log('Local wins')
+          // Local wins - do nothing
+        } else {
+          console.log('Last seen equals remote last seen, do nothing')
+        }
 
         // Now take care of studies
         if (action.studies && Object.keys(action.studies).length) {
@@ -586,10 +607,11 @@ export function deleteStudy(id) {
 
 // USERS
 
-export function onUserLoginSuccess(profile, studies) {
+export function onUserLoginSuccess(profile, remoteLastSeen, studies) {
   return {
     type: USER_LOGIN_SUCCESS,
     profile,
+    remoteLastSeen,
     studies
   }
 }

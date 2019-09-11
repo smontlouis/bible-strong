@@ -120,7 +120,6 @@ export default store => next => action => {
     case USER_LOGIN_SUCCESS: {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
       userDoc.update({
-        ...user,
         bible: sanitizeUserBible(user.bible)
       })
       break

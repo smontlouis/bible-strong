@@ -32,7 +32,7 @@ const FireAuth = class {
     this.onLogin = onLogin
     this.onError = onError
 
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(async user => {
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
@@ -58,49 +58,43 @@ const FireAuth = class {
           emailVerified
         }
 
+        let remoteLastSeen = null
+
         const userDoc = firebaseDb.collection('users').doc(user.uid)
-        userDoc
-          .get()
-          .then(u => {
-            if (u.data()) {
-              console.log('Update profile')
-              userDoc.update(profile)
-            } else {
-              console.log('Set profile')
-              userDoc.set(profile)
-            }
-          })
-          .catch(e => {
-            console.log(e)
-            console.log('Coucou')
-          })
+        let userData = await userDoc.get()
+        let data = userData.data()
 
-        const unsubscribe = userDoc.onSnapshot(doc => {
-          const data = doc.data()
+        if (data) {
+          console.log('Update profile, last seen:', data.lastSeen)
+          remoteLastSeen = data.lastSeen
 
-          if (data) unsubscribe()
+          await userDoc.update(profile)
+        } else {
+          console.log('Set profile')
+          await userDoc.set(profile)
+        }
 
-          if (!this.user) {
-            // Get studies - TODO: DO IT BETTER
-            const studies = {}
-            firebaseDb
-              .collection('studies')
-              .where('user.id', '==', user.uid)
-              .get()
-              .then(querySnapshot => {
-                querySnapshot.forEach(doc => {
-                  const study = doc.data()
-                  studies[study.id] = study
-                })
+        userData = await userDoc.get()
+        data = userData.data()
 
-                this.onLogin && this.onLogin(data || {}, studies) // On login
+        if (!this.user) {
+          // Get studies - TODO: DO IT BETTER
+          const studies = {}
+          firebaseDb
+            .collection('studies')
+            .where('user.id', '==', user.uid)
+            .get()
+            .then(querySnapshot => {
+              querySnapshot.forEach(doc => {
+                const study = doc.data()
+                studies[study.id] = study
               })
-          } else if (data) {
-            this.onLogin && this.onLogin(data || {}) // On updated
-          }
 
-          this.user = user // Store user
-        })
+              this.onLogin && this.onLogin(data || {}, remoteLastSeen, studies) // On login
+            })
+        }
+
+        this.user = user // Store user
 
         if (!__DEV__) {
           Segment.identifyWithTraits(user.uid, profile)

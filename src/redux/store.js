@@ -6,6 +6,7 @@ import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
+import lastSeenMiddleware from './lastSeenMiddleware'
 import migrations from './migrations'
 
 import reducer from '~redux/modules/reducer'
@@ -22,7 +23,7 @@ export default function configureStore() {
     migrate: createMigrate(migrations, { debug: true })
   }
 
-  const middleware = [logger, crashReporter, firestoreMiddleware, thunk]
+  const middleware = [logger, lastSeenMiddleware, crashReporter, firestoreMiddleware, thunk]
 
   const persistedReducer = persistReducer(persistConfig, reducer)
   const store = composeEnhancers(applyMiddleware(...middleware))(createStore)(persistedReducer)
