@@ -103,7 +103,7 @@ const TagScreen = ({ navigation }) => {
         )}
         {!!highlights.length && (
           <Box>
-            <Text padding={20} fontSize={25} bold title>
+            <Text padding={20} fontSize={25} title>
               Surbrillances
             </Text>
 
@@ -115,7 +115,7 @@ const TagScreen = ({ navigation }) => {
         )}
         {!!notes.length && (
           <Box>
-            <Text padding={20} fontSize={25} bold title>
+            <Text padding={20} fontSize={25} title>
               Notes
             </Text>
             {notes.map(n => {
@@ -125,7 +125,7 @@ const TagScreen = ({ navigation }) => {
         )}
         {!!studies.length && (
           <Box>
-            <Text padding={20} fontSize={25} bold title>
+            <Text padding={20} fontSize={25} title>
               Études
             </Text>
             {studies.map(item => {

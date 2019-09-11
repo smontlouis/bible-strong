@@ -30,15 +30,6 @@ const LoginScreen = ({ navigation }) => {
         <Paragraph scaleLineHeight={-2} marginBottom={20}>
           Connectez-vous pour sauvegarder toutes vos données sur le cloud !
         </Paragraph>
-        <Paragraph scaleLineHeight={-2} marginBottom={40}>
-          Pour savoir comment accéder aux études en phase de test,{' '}
-          <Paragraph
-            color="primary"
-            onPress={() => Linking.openURL('https://www.facebook.com/fr.bible.strong')}
-            bold>
-            suivez-nous sur Facebook !
-          </Paragraph>
-        </Paragraph>
         <Login />
       </Box>
     </Container>
