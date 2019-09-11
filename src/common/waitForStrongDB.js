@@ -47,7 +47,8 @@ export const useWaitForDatabase = () => {
 
         const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
 
-        if (!dbFile.exists || sqliteDB.hash !== strongDatabaseHash) {
+        if (!dbFile.exists) {
+          //  || sqliteDB.hash !== strongDatabaseHash
           // Waiting for user to accept to download
           if (!startDownload) {
             setProposeDownload(true)

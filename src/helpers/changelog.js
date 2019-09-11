@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1568227761704',
+    type: logTypes.BUG,
+    title: 'Téléchargement de la base de données',
+    description:
+      'Certaines personnes devaient télécharger à nouveau la base de données à chaque mise à jour. Ce bug est (théoriquement) réglé.'
+  },
+  {
     date: '1568159596682',
     type: logTypes.FEATURE,
     title: 'Études et étiquettes',

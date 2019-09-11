@@ -47,7 +47,8 @@ export const useWaitForDatabase = () => {
 
         const sqliteDB = await Asset.fromModule(require('~assets/db/dictionnaire.sqlite'))
 
-        if (!dbFile.exists || sqliteDB.hash !== dictionnaireDatabaseHash) {
+        if (!dbFile.exists) {
+          // || sqliteDB.hash !== dictionnaireDatabaseHash
           // Waiting for user to accept to download
           if (!startDownload) {
             setProposeDownload(true)
