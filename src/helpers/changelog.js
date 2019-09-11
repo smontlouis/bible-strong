@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1568159596682',
+    type: logTypes.FEATURE,
+    title: 'Études et étiquettes',
+    description:
+      'Bonne nouvelle, vous avez maintenant accès aux études :). Vous pouvez créer vos études, mettre en lien des versets, des mots strong et les organiser par étiquettes. La fonctionnalité tags a également été renommée en "étiquettes" et a été retravaillée.'
+  },
+  {
     date: '1567897439396',
     type: logTypes.FEATURE,
     title: 'Historique',

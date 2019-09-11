@@ -38,7 +38,7 @@ const LoginModal = ({ isVisible }) => {
             <Icon.Feather name="arrow-left" size={25} />
           </Back>
           <Text title fontSize={30}>
-            Études bibliques
+            Études bibliques (bêta)
           </Text>
         </Box>
         <Paragraph scaleLineHeight={-2}>
