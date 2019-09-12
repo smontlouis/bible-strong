@@ -112,7 +112,6 @@ const SearchScreen = ({ idxFile }) => {
           setResults(filterResults(results))
         } catch (e) {
           Sentry.captureException(e)
-          Sentry.captureMessage(`User tried to search for ${searchValue}`)
           SnackBar.show('Une erreur est survenue.', 'danger')
         }
       } else {
