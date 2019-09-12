@@ -38,7 +38,7 @@ const StudiesScreen = () => {
   return (
     <Container>
       <TagsHeader
-        title="Études (bêta)"
+        title="Études"
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
         selectedChip={selectedChip}

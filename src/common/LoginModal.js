@@ -38,7 +38,7 @@ const LoginModal = ({ isVisible }) => {
             <Icon.Feather name="arrow-left" size={25} />
           </Back>
           <Text title fontSize={30}>
-            Études bibliques (bêta)
+            Études bibliques
           </Text>
         </Box>
         <Paragraph scaleLineHeight={-2}>
@@ -46,9 +46,6 @@ const LoginModal = ({ isVisible }) => {
         </Paragraph>
         <Paragraph scaleLineHeight={-2} marginTop={10}>
           Rejoignez la communauté !
-        </Paragraph>
-        <Paragraph scale={-3} scaleLineHeight={-1} marginTop={10} marginBottom={20}>
-          Cette version est en bêta test. Merci de me donner le plus de retours possibles 😉.
         </Paragraph>
         {isUpdated ? (
           <Login />
