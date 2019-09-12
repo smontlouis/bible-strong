@@ -1,3 +1,4 @@
+import Sentry from 'sentry-expo'
 import SQLTransaction from '~helpers/SQLTransaction'
 import SnackBar from '~common/SnackBar'
 
@@ -21,10 +22,8 @@ const loadFoundVersesByBook = async (book, reference) => {
     )
     return result
   } catch (e) {
-    SnackBar.show(
-      "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
-      'danger'
-    )
+    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
+    Sentry.captureException(e)
   }
 }
 

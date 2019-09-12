@@ -1,5 +1,7 @@
-import SQLDTransaction from '~helpers/SQLDTransaction'
+import Sentry from 'sentry-expo'
 import SnackBar from '~common/SnackBar'
+
+import SQLDTransaction from '~helpers/SQLDTransaction'
 
 const loadDictionnaire = async () => {
   try {
@@ -12,10 +14,8 @@ const loadDictionnaire = async () => {
 
     return result
   } catch (e) {
-    SnackBar.show(
-      "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
-      'danger'
-    )
+    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
+    Sentry.captureException(e)
   }
 }
 

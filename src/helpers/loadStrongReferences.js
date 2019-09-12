@@ -1,3 +1,4 @@
+import Sentry from 'sentry-expo'
 import SQLTransaction from '~helpers/SQLTransaction'
 import SnackBar from '~common/SnackBar'
 
@@ -17,6 +18,7 @@ const updateReferencesOrder = (result, references) => {
 
 const loadStrongReferences = async (references, book) => {
   try {
+    references = references.filter(n => n.trim())
     const part = book > 39 ? 'Grec' : 'Hebreu'
     const sqlReq = references.reduce((sqlString, reference, index) => {
       sqlString += `Code = ${reference} `
@@ -29,10 +31,8 @@ const loadStrongReferences = async (references, book) => {
     const result = await SQLTransaction(sqlReq)
     return updateReferencesOrder(result, references)
   } catch (e) {
-    SnackBar.show(
-      "Base de données corrompue. Veuillez contacter le développeur ou réinstaller l'application",
-      'danger'
-    )
+    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
+    Sentry.captureException(e)
   }
 }
 

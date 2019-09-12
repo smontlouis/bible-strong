@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import Sentry from 'sentry-expo'
 
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import useDebounce from '~helpers/useDebounce'
@@ -7,7 +8,16 @@ export const useSectionResults = (results, debouncedSearchValue, sectionIndex, p
   const [sectionResults, setSectionResults] = useState(null)
 
   useEffect(() => {
-    if (!results || !results.length) return
+    if (!results || !results.length) {
+      Sentry.captureMessage('useSectionResults: Results is undefined', {
+        extra: {
+          debouncedSearchValue,
+          sectionIndex,
+          prop
+        }
+      })
+      return
+    }
 
     let filteredResults = debouncedSearchValue
       ? (filteredResults = results.filter(
@@ -35,7 +45,7 @@ export const useSectionResults = (results, debouncedSearchValue, sectionIndex, p
   return sectionResults
 }
 
-export const useAlphabet = (results, prop = 'Mot') => {
+export const useAlphabet = (results = [], prop = 'Mot') => {
   const [alphabet, setAlphabet] = useState([])
   useEffect(() => {
     const alphabet = results.reduce((list, name) => {
@@ -67,7 +77,16 @@ export const useSearchValue = ({ onDebouncedValue }) => {
 export const useResults = asyncFunc => {
   const [results, setResults] = useState([])
   useEffect(() => {
-    asyncFunc().then(results => setResults(results))
+    asyncFunc().then(results => {
+      if (!results) {
+        Sentry.captureMessage('useResults: Results is undefined', {
+          extra: {
+            asyncFunc
+          }
+        })
+      }
+      setResults(results)
+    })
   }, [asyncFunc])
 
   return results

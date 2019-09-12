@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1568315345953',
+    type: logTypes.BUG,
+    title: 'Bug strong & dictionaire',
+    description:
+      "L'affichage strong plantait sur certains versets, comme par exemple Phillipiens 1:9. Ce bug est réglé."
+  },
+  {
     date: '1568227761704',
     type: logTypes.BUG,
     title: 'Téléchargement de la base de données',

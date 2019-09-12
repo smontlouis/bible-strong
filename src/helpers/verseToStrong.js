@@ -9,7 +9,9 @@ const verseToStrong = ({ Texte, Livre }, concordanceFor, isSmall) =>
 
     // STRONG -- We don't want what is in parentheses
     const splittedTexte = Texte.split(/\s*(\(?\d+[^{.|\s}]?\d+(?!\.?\d)\)?)/g)
-
+    if (!splittedTexte[splittedTexte.length - 1].trim()) {
+      splittedTexte.pop()
+    }
     formattedTexte = splittedTexte.map((item, i) => {
       // For every number, replace it with last word of previous item
       if (Number.isInteger(Number(item)) && item) {
