@@ -9,13 +9,15 @@ export const useSectionResults = (results, debouncedSearchValue, sectionIndex, p
 
   useEffect(() => {
     if (!results || !results.length) {
-      Sentry.captureMessage('useSectionResults: Results is undefined', {
-        extra: {
-          debouncedSearchValue,
-          sectionIndex,
-          prop
-        }
-      })
+      if (!results) {
+        Sentry.captureMessage('useSectionResults: Results is undefined', {
+          extra: {
+            debouncedSearchValue,
+            sectionIndex,
+            prop
+          }
+        })
+      }
       return
     }
 
