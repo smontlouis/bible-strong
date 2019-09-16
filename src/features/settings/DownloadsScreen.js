@@ -17,13 +17,13 @@ const DLScreen = () => {
     <Container>
       <Header hasBackButton title="Gestion des téléchargements" />
       <ScrollView>
-        <Text padding={10} title fontSize={25}>
+        <Text padding={20} title fontSize={25}>
           Bases de données
         </Text>
         <DBSelectorItem database="STRONG" name="Lexique hébreu & grec" fileSize={34941952} />
         <DBSelectorItem database="DICTIONNAIRE" name="Dictionnaire Westphal" fileSize={22532096} />
         <DBSelectorItem database="SEARCH" name="Index de recherche" fileSize={16795170} />
-        <Text padding={10} title fontSize={25}>
+        <Text padding={20} title fontSize={25}>
           Bibles
         </Text>
         {Object.values(versions)

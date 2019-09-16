@@ -10,20 +10,12 @@ import * as Icon from '@expo/vector-icons'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Link from '~common/Link'
-
-const BIBLE_FILESIZE = 5000000
 
 const Container = styled.View({
-  padding: 15,
+  paddingHorizontal: 20,
   paddingTop: 10,
   paddingBottom: 10
 })
-
-const TextVersion = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12
-}))
 
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,

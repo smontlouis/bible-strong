@@ -10,13 +10,12 @@ import * as Icon from '@expo/vector-icons'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Link from '~common/Link'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 
 const BIBLE_FILESIZE = 5000000
 
 const Container = styled.View({
-  padding: 15,
+  paddingHorizontal: 20,
   paddingTop: 10,
   paddingBottom: 10
 })
