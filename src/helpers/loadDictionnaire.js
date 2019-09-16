@@ -1,10 +1,8 @@
-import Sentry from 'sentry-expo'
-import SnackBar from '~common/SnackBar'
-
 import SQLDTransaction from '~helpers/SQLDTransaction'
+import catchDatabaseError from '~helpers/catchDatabaseError'
 
-const loadDictionnaire = async () => {
-  try {
+const loadDictionnaire = () =>
+  catchDatabaseError(async () => {
     const result = await SQLDTransaction(
       `SELECT rowid, word, sanitized_word
     FROM dictionnaire 
@@ -13,10 +11,6 @@ const loadDictionnaire = async () => {
     )
 
     return result
-  } catch (e) {
-    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
-    Sentry.captureException(e)
-  }
-}
+  })
 
 export default loadDictionnaire

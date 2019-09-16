@@ -95,6 +95,7 @@ const verseToDictionnary = ({ Livre, Chapitre, Verset }, dictionnaryWordsInVerse
 
 const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   const carousel = useRef()
+  const [error, setError] = useState(false)
   const [formattedText, setFormattedText] = useState('')
   const [words, setWords] = useState([])
   const [currentWord, setCurrentWord] = useState(null)
@@ -118,6 +119,11 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   }
 
   useEffect(() => {
+    if (!dictionnaryWordsInVerse) {
+      setError(true)
+      return
+    }
+
     const verseToDictionnaryText = verseToDictionnary(verse, dictionnaryWordsInVerse)
     setFormattedText(verseToDictionnaryText)
 
@@ -128,6 +134,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
           return word
         })
       )
+
       setWords(words)
       setCurrentWord(dictionnaryWordsInVerse[0])
     }
@@ -136,6 +143,18 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
       loadAsyncWords()
     }
   }, [Chapitre, Livre, dictionnaryWordsInVerse, verse])
+
+  if (error) {
+    return (
+      <Container>
+        <Header noBorder hasBackButton title="Désolé..." />
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Impossible de charger le dictionnaire pour ce verset..."
+        />
+      </Container>
+    )
+  }
 
   if (!formattedText) {
     return <Loading />

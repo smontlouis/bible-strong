@@ -1,6 +1,5 @@
-import Sentry from 'sentry-expo'
 import SQLTransaction from '~helpers/SQLTransaction'
-import SnackBar from '~common/SnackBar'
+import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const updateReferencesOrder = (result, references) => {
   const updatedResult = []
@@ -16,8 +15,8 @@ const updateReferencesOrder = (result, references) => {
   return updatedResult
 }
 
-const loadStrongReferences = async (references, book) => {
-  try {
+const loadStrongReferences = async (references, book) =>
+  catchDatabaseError(async () => {
     references = references.filter(n => n.trim())
     const part = book > 39 ? 'Grec' : 'Hebreu'
     const sqlReq = references.reduce((sqlString, reference, index) => {
@@ -30,10 +29,6 @@ const loadStrongReferences = async (references, book) => {
 
     const result = await SQLTransaction(sqlReq)
     return updateReferencesOrder(result, references)
-  } catch (e) {
-    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
-    Sentry.captureException(e)
-  }
-}
+  })
 
 export default loadStrongReferences

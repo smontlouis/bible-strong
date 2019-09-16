@@ -1,9 +1,8 @@
-import Sentry from 'sentry-expo'
 import SQLTransaction from '~helpers/SQLTransaction'
-import SnackBar from '~common/SnackBar'
+import catchDatabaseError from '~helpers/catchDatabaseError'
 
-const loadStrongVerse = async ({ Livre, Chapitre, Verset }) => {
-  try {
+const loadStrongVerse = ({ Livre, Chapitre, Verset }) =>
+  catchDatabaseError(async () => {
     const part = Livre > 39 ? 'LSGSNT2' : 'LSGSAT2'
     const result = await SQLTransaction(
       `SELECT Texte 
@@ -13,10 +12,6 @@ const loadStrongVerse = async ({ Livre, Chapitre, Verset }) => {
             AND VERSET = ${Verset}`
     )
     return result[0]
-  } catch (e) {
-    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
-    Sentry.captureException(e)
-  }
-}
+  })
 
 export default loadStrongVerse

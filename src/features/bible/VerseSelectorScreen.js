@@ -4,6 +4,10 @@ import { connect } from 'react-redux'
 import { compose } from 'recompose'
 import waitForStrongDB from '~common/waitForStrongDB'
 
+import Container from '~common/ui/Container'
+import Header from '~common/Header'
+import Empty from '~common/Empty'
+
 import { initStrongDB } from '~helpers/database'
 import loadCountVerses from '~helpers/loadCountVerses'
 import * as BibleActions from '~redux/modules/bible'
@@ -15,7 +19,8 @@ class VerseSelector extends Component {
   }
 
   state = {
-    versesInCurrentChapter: undefined
+    versesInCurrentChapter: undefined,
+    error: false
   }
 
   componentDidMount() {
@@ -34,7 +39,14 @@ class VerseSelector extends Component {
 
   loadVerses = async () => {
     const { selectedBook, selectedChapter } = this.props
-    const { versesInCurrentChapter } = await loadCountVerses(selectedBook.Numero, selectedChapter)
+    const { versesInCurrentChapter, error } = await loadCountVerses(
+      selectedBook.Numero,
+      selectedChapter
+    )
+    if (error) {
+      this.setState({ error })
+      return
+    }
     this.setState({ versesInCurrentChapter })
   }
 
@@ -47,6 +59,21 @@ class VerseSelector extends Component {
   render() {
     const { versesInCurrentChapter } = this.state
     const { selectedVerse } = this.props
+
+    if (this.state.error) {
+      return (
+        <Container>
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={`Impossible de charger cette page...${
+              this.state.error === 'CORRUPTED_DATABASE'
+                ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                : ''
+            }`}
+          />
+        </Container>
+      )
+    }
 
     if (!versesInCurrentChapter) {
       return null

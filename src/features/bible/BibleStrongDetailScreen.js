@@ -6,6 +6,8 @@ import { ScrollView, Platform, Share } from 'react-native'
 import compose from 'recompose/compose'
 
 import Container from '~common/ui/Container'
+import Header from '~common/Header'
+import Empty from '~common/Empty'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
@@ -52,6 +54,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 
 class BibleStrongDetailScreen extends React.Component {
   state = {
+    error: false,
     strongReference: null,
     versesCountByBook: [],
     concordanceLoading: true
@@ -66,10 +69,11 @@ class BibleStrongDetailScreen extends React.Component {
 
     let { strongReference } = this.props.navigation.state.params
     if (reference) {
-      try {
-        strongReference = await loadStrongReference(reference, book)
-      } catch (e) {
-        console.log('Error')
+      strongReference = await loadStrongReference(reference, book)
+      console.log(strongReference)
+      if (strongReference.error) {
+        this.setState({ error: strongReference.error })
+        return
       }
     }
 
@@ -129,9 +133,26 @@ class BibleStrongDetailScreen extends React.Component {
   }
 
   render() {
+    if (this.state.error) {
+      return (
+        <Container>
+          <Header noBorder hasBackButton title="Désolé..." />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={`Impossible de charger la strong pour ce verset...${
+              this.state.error === 'CORRUPTED_DATABASE'
+                ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                : ''
+            }`}
+          />
+        </Container>
+      )
+    }
+
     if (!this.state.strongReference) {
       return null
     }
+
     const {
       strongReference,
       strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG }

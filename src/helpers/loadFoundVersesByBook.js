@@ -1,9 +1,8 @@
-import Sentry from 'sentry-expo'
 import SQLTransaction from '~helpers/SQLTransaction'
-import SnackBar from '~common/SnackBar'
+import catchDatabaseError from '~helpers/catchDatabaseError'
 
-const loadFoundVersesByBook = async (book, reference) => {
-  try {
+const loadFoundVersesByBook = (book, reference) =>
+  catchDatabaseError(async () => {
     const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
     const result = await SQLTransaction(
       `SELECT *
@@ -21,10 +20,6 @@ const loadFoundVersesByBook = async (book, reference) => {
     `
     )
     return result
-  } catch (e) {
-    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
-    Sentry.captureException(e)
-  }
-}
+  })
 
 export default loadFoundVersesByBook

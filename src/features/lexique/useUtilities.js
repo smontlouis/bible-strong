@@ -50,6 +50,9 @@ export const useSectionResults = (results, debouncedSearchValue, sectionIndex, p
 export const useAlphabet = (results = [], prop = 'Mot') => {
   const [alphabet, setAlphabet] = useState([])
   useEffect(() => {
+    if (!results || !results.length) {
+      return
+    }
     const alphabet = results.reduce((list, name) => {
       const listItem = list.find(item => item === getFirstLetterFrom(name[prop]))
       if (!listItem) {

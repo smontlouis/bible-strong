@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { SectionList } from 'react-native'
 import styled from '@emotion/native'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
@@ -44,6 +44,7 @@ const SectionTitle = styled(Box)(({ theme }) => ({
 }))
 
 const LexiqueScreen = () => {
+  const [error, setError] = useState(false)
   const { section, sectionIndex, setSectionIndex, resetSectionIndex } = useSectionIndex()
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue({
     onDebouncedValue: resetSectionIndex
@@ -51,6 +52,28 @@ const LexiqueScreen = () => {
   const results = useResults(loadLexique)
   const sectionResults = useSectionResults(results, debouncedSearchValue, sectionIndex)
   const alphabet = useAlphabet(results)
+
+  useEffect(() => {
+    if (results.error) {
+      setError(results.error)
+    }
+  }, [results])
+
+  if (error) {
+    return (
+      <Container>
+        <Header noBorder hasBackButton title="Désolé..." />
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message={`Impossible de charger la strong pour ce verset...${
+            error === 'CORRUPTED_DATABASE'
+              ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+              : ''
+          }`}
+        />
+      </Container>
+    )
+  }
 
   if (!sectionResults) {
     return <Loading message="Chargement..." />

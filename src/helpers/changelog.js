@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1568622541052',
+    type: logTypes.FEATURE,
+    title: 'Gestionnaire de téléchargements',
+    description:
+      "Un gestionnaire de téléchargements dans le menu a été ajouté. Si vous avez des soucis avec les bases de données, n'hésitez pas à les télécharger à nouveau."
+  },
+  {
     date: '1568315345953',
     type: logTypes.BUG,
     title: 'Bug strong & dictionaire',

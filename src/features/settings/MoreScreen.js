@@ -80,6 +80,10 @@ const MoreScreen = () => {
         </Box>
         <Border />
         <Box paddingVertical={10}>
+          <LinkItem route="Downloads">
+            <StyledIcon name="download" size={25} />
+            <Text fontSize={15}>Gestion des téléchargements</Text>
+          </LinkItem>
           <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
             <StyledIcon name="sun" size={25} />
             <Text fontSize={15}>Idées de fonctionnalités</Text>

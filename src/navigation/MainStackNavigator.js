@@ -22,6 +22,7 @@ import PericopeScreen from '../features/bible/PericopeScreen'
 import HistoryScreen from '~features/bible/HistoryScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import TagScreen from '../features/settings/TagScreen'
+import DownloadsScreen from '../features/settings/DownloadsScreen'
 
 export default createStackNavigator(
   {
@@ -47,7 +48,8 @@ export default createStackNavigator(
     Pericope: { screen: PericopeScreen },
     History: { screen: HistoryScreen },
     Tags: { screen: TagsScreen },
-    Tag: { screen: TagScreen }
+    Tag: { screen: TagScreen },
+    Downloads: { screen: DownloadsScreen }
   },
   {
     headerMode: 'none'

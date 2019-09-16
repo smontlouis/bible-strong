@@ -1,9 +1,8 @@
-import Sentry from 'sentry-expo'
 import SQLTransaction from '~helpers/SQLTransaction'
-import SnackBar from '~common/SnackBar'
+import catchDatabaseError from '~helpers/catchDatabaseError'
 
-const loadLexique = async () => {
-  try {
+const loadLexique = () =>
+  catchDatabaseError(async () => {
     const resultGrec = await SQLTransaction(
       `SELECT Code, Grec, Mot, 'Grec' as lexiqueType
     FROM Grec 
@@ -27,10 +26,6 @@ const loadLexique = async () => {
         if (nameA > nameB) return 1
         return 0
       })
-  } catch (e) {
-    SnackBar.show('Une erreur est survenue. Le développeur en a été informé.', 'danger')
-    Sentry.captureException(e)
-  }
-}
+  })
 
 export default loadLexique

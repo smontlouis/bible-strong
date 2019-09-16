@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { SectionList } from 'react-native'
 import styled from '@emotion/native'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
@@ -44,6 +44,7 @@ const SectionTitle = styled(Box)(({ theme }) => ({
 }))
 
 const DictionnaireScreen = () => {
+  const [error, setError] = useState(false)
   const { section, sectionIndex, setSectionIndex, resetSectionIndex } = useSectionIndex()
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue({
     onDebouncedValue: resetSectionIndex
@@ -55,8 +56,29 @@ const DictionnaireScreen = () => {
     sectionIndex,
     'sanitized_word'
   )
-
   const alphabet = useAlphabet(results, 'sanitized_word')
+
+  useEffect(() => {
+    if (results.error) {
+      setError(results.error)
+    }
+  }, [results])
+
+  if (error) {
+    return (
+      <Container>
+        <Header noBorder title="Désolé..." />
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message={`Impossible de charger le dictionnaire...${
+            error === 'CORRUPTED_DATABASE'
+              ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+              : ''
+          }`}
+        />
+      </Container>
+    )
+  }
 
   if (!sectionResults) {
     return <Loading message="Chargement..." />

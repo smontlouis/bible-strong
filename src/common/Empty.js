@@ -11,15 +11,16 @@ const Container = styled.View({
 })
 
 class Empty extends React.Component {
-  componentDidMount () {
+  componentDidMount() {
     this.animation.reset()
     this.animation.play()
   }
-  render () {
+
+  render() {
     const { message, source } = this.props
     return (
       <Container>
-        <Box alignItems='center' marginTop={100}>
+        <Box alignItems="center" marginTop={100} paddingHorizontal={20}>
           <Lottie
             ref={animation => {
               this.animation = animation
@@ -31,7 +32,11 @@ class Empty extends React.Component {
             }}
             source={source}
           />
-          {message && <Text color='tertiary'>{message}</Text>}
+          {message && (
+            <Text textAlign="center" color="tertiary">
+              {message}
+            </Text>
+          )}
         </Box>
       </Container>
     )

@@ -4,7 +4,6 @@ import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
-import Sentry from 'sentry-expo'
 
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
@@ -14,7 +13,6 @@ import * as BibleActions from '~redux/modules/bible'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import dictionnaireWordsInBible from '~assets/bible_versions/dictionnaire-bible-lsg.json'
 import Link from '~common/Link'
-import SnackBar from '~common/SnackBar'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -116,15 +114,12 @@ class BibleVerseDetailScreen extends React.Component {
       return
     }
 
-    try {
-      const { versesInCurrentChapter } = await loadCountVerses(verse.Livre, verse.Chapitre)
-      this.setState({ versesInCurrentChapter })
-    } catch (e) {
-      SnackBar.show('Une erreur est survenue avec ce verset. Le développeur en a été informé')
-      Sentry.captureMessage(
-        `Something went wrong with verse ${verse.Livre} ${verse.Chapitre} ${verse.Verset} ${e}`
-      )
+    const { versesInCurrentChapter, error } = await loadCountVerses(verse.Livre, verse.Chapitre)
+    if (error) {
+      this.setState({ error })
+      return
     }
+    this.setState({ versesInCurrentChapter })
 
     this.formatVerse(strongVerse)
   }
@@ -201,7 +196,11 @@ class BibleVerseDetailScreen extends React.Component {
           <Header noBorder hasBackButton title="Désolé..." />
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Impossible de charger la strong pour ce verset..."
+            message={`Impossible de charger la strong pour ce verset...${
+              this.state.error === 'CORRUPTED_DATABASE'
+                ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                : ''
+            }`}
           />
         </Container>
       )
