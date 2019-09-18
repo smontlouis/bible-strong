@@ -12,26 +12,35 @@ const Container = styled.View({
 
 class Empty extends React.Component {
   componentDidMount() {
-    this.animation.reset()
-    this.animation.play()
+    if (this.animation) {
+      this.animation.reset()
+      this.animation.play()
+    }
   }
 
   render() {
-    const { message, source } = this.props
+    const { message, source, ...props } = this.props
     return (
-      <Container>
-        <Box alignItems="center" marginTop={100} paddingHorizontal={20}>
-          <Lottie
-            ref={animation => {
-              this.animation = animation
-            }}
-            style={{
-              width: '100%',
-              height: 200,
-              marginBottom: 20
-            }}
-            source={source}
-          />
+      <Container {...props}>
+        <Box
+          alignItems="center"
+          justifyContent="center"
+          marginTop={source ? 100 : 0}
+          flex
+          paddingHorizontal={20}>
+          {source && (
+            <Lottie
+              ref={animation => {
+                this.animation = animation
+              }}
+              style={{
+                width: '100%',
+                height: 200,
+                marginBottom: 20
+              }}
+              source={source}
+            />
+          )}
           {message && (
             <Text textAlign="center" color="tertiary">
               {message}

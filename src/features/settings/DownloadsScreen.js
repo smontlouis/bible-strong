@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react'
-import { Linking, ScrollView } from 'react-native'
-import * as Icon from '@expo/vector-icons'
-import styled from '@emotion/native'
+import React from 'react'
+import { ScrollView } from 'react-native'
 
 import { versions } from '~helpers/bibleVersions'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
 import Header from '~common/Header'
 import DBSelectorItem from './DatabaseSelectorItem'
 import VersionSelectorItem from './VersionSelectorItem'
@@ -20,6 +17,10 @@ const DLScreen = () => {
         <Text padding={20} title fontSize={25}>
           Bases de données
         </Text>
+        <Paragraph padding={20} paddingTop={0} scale={-3}>
+          Si votre base de données a été corrompue, pensez à redémarrer l'application une fois les
+          fichiers téléchargés.
+        </Paragraph>
         <DBSelectorItem database="STRONG" name="Lexique hébreu & grec" fileSize={34941952} />
         <DBSelectorItem database="DICTIONNAIRE" name="Dictionnaire Westphal" fileSize={22532096} />
         <DBSelectorItem database="SEARCH" name="Index de recherche" fileSize={16795170} />

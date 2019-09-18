@@ -57,7 +57,7 @@ const Login = () => {
   }
 
   return (
-    <Box height={60} row justifyContent="space-between">
+    <Box marginTop={20} height={60} row justifyContent="space-between">
       <Button onPress={onGoogleLogin} color="#D14C3E">
         <ButtonIcon size={20} name="google" color="white" />
         <ButtonText color="white">Google</ButtonText>

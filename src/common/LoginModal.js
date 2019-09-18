@@ -29,14 +29,13 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const LoginModal = ({ isVisible }) => {
-  const isUpdated = app.expo.sdkVersion.includes('34')
   return (
     <StylizedModal isVisible={isVisible} coverScreen={false}>
       <Container>
         <Box row alignItems="center" marginBottom={30}>
-          <Back style={{ marginRight: 15 }}>
+          {/* <Back style={{ marginRight: 15 }}>
             <Icon.Feather name="arrow-left" size={25} />
-          </Back>
+          </Back> */}
           <Text title fontSize={30}>
             Études bibliques
           </Text>
@@ -47,13 +46,7 @@ const LoginModal = ({ isVisible }) => {
         <Paragraph scaleLineHeight={-2} marginTop={10}>
           Rejoignez la communauté !
         </Paragraph>
-        {isUpdated ? (
-          <Login />
-        ) : (
-          <Paragraph scale={-2} scaleLineHeight={-2}>
-            Merci de mettre à jour votre application pour utiliser les études.
-          </Paragraph>
-        )}
+        <Login />
       </Container>
     </StylizedModal>
   )

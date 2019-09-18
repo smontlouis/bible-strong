@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { StatusBar } from 'react-native'
 
+import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
 import BibleViewer from './BibleViewer'
 import BibleHeader from './BibleHeader'
@@ -36,6 +37,10 @@ class BibleScreen extends React.Component {
     } = this.props
 
     const { arrayVerses } = this.props.navigation.state.params || {}
+
+    if (Number.isInteger(app.book)) {
+      app.book = books[app.book - 1]
+    }
 
     return (
       <Container>

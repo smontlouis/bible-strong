@@ -23,6 +23,7 @@ import HistoryScreen from '~features/bible/HistoryScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
+import SearchScreen from '~features/search/SearchScreen'
 
 export default createStackNavigator(
   {
@@ -49,7 +50,8 @@ export default createStackNavigator(
     History: { screen: HistoryScreen },
     Tags: { screen: TagsScreen },
     Tag: { screen: TagScreen },
-    Downloads: { screen: DownloadsScreen }
+    Downloads: { screen: DownloadsScreen },
+    Search: { screen: SearchScreen }
   },
   {
     headerMode: 'none'

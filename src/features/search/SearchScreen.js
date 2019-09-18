@@ -5,7 +5,6 @@ import Sentry from 'sentry-expo'
 import Header from '~common/Header'
 import SearchInput from '~common/SearchInput'
 import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
 import Empty from '~common/Empty'
 import SearchResults from './SearchResults'
 import waitForIndex from './waitForIndex'
@@ -126,7 +125,7 @@ const SearchScreen = ({ idxFile }) => {
 
   return (
     <Container>
-      <Header noBorder title="Recherche dans la Bible" />
+      <Header hasBackButton noBorder title="Recherche dans la Bible" />
       <SearchInput
         placeholder="Recherche par mot ou phrase"
         onChangeText={setSearchValue}

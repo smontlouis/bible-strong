@@ -13,6 +13,7 @@ const Box = styled.View(props => ({
   width: props.width,
   maxWidth: props.maxWidth,
   minWidth: props.minWidth,
+  minHeight: props.minHeight,
   height: props.height,
   // flex props
   flexGrow: props.grow === true ? 1 : props.grow,
@@ -36,7 +37,8 @@ const Box = styled.View(props => ({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 2,
-    borderRadius: 5
+    borderRadius: 5,
+    overflow: 'visible'
   })
 }))
 

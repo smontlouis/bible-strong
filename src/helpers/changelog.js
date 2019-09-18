@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1568848874924',
+    type: logTypes.FEATURE,
+    title: "Page d'accueil, verset du jour, strong...",
+    description:
+      "Une nouvelle page d'accueil est disponible avec le verset du jour, des strongs et un mot du dictionnaire au hasard. La recherche a été déplacée dans le menu. \n\nJe ne sais pas encore ce que deviendra cette page dans le futur, plein de widgets pourraient y être ajoutés ! Si vous avez des idées, je suis tout ouïe ;)."
+  },
+  {
     date: '1568622541052',
     type: logTypes.FEATURE,
     title: 'Gestionnaire de téléchargements',

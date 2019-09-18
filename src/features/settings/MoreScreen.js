@@ -55,8 +55,14 @@ const MoreScreen = () => {
         <Box paddingVertical={10}>
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
-            <Text bold fontSize={15}>
+            <Text color="primary" bold fontSize={15}>
               Lexique
+            </Text>
+          </LinkItem>
+          <LinkItem route="Search">
+            <StyledIcon name="search" size={25} />
+            <Text bold fontSize={15}>
+              Recherche
             </Text>
           </LinkItem>
           <LinkItem route="Highlights">

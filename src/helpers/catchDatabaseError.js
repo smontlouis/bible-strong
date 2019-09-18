@@ -8,7 +8,7 @@ const catchDBError = async fn => {
     const corruptedDBError = e.toString().includes('no such table')
     if (corruptedDBError) {
       SnackBar.show(
-        'Une error est survenue, la base de données est peut-être corrompue.',
+        'Une error est survenue, la base de données est peut-être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.',
         'danger',
         { duration: 5000 }
       )

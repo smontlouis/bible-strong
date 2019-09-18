@@ -32,7 +32,13 @@ const getVersesRef = versesList => {
   return versesRef
 }
 
-export default async (selectedVerses, version = 'LSG') => {
+export default async (verses, version = 'LSG') => {
+  let selectedVerses = verses
+
+  // if 1-1_1
+  if (typeof verses === 'string') {
+    selectedVerses = { [verses]: true }
+  }
   selectedVerses = orderVerses(selectedVerses)
 
   let toShare = ''

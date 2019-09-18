@@ -7,21 +7,29 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 
-const DownloadRequired = ({ title, fileSize, setStartDownload, hasBackButton }) => {
+const DownloadRequired = ({
+  title,
+  fileSize,
+  setStartDownload,
+  hasBackButton,
+  size = 100,
+  small,
+  noHeader
+}) => {
+  const padding = small ? 10 : 30
+  const iconSize = small ? 40 : size
   return (
     <Container>
-      <Header title="Téléchargement nécessaire" hasBackButton={hasBackButton} />
-      <Box flex center padding={30}>
+      {!noHeader && <Header title="Téléchargement nécessaire" hasBackButton={hasBackButton} />}
+      <Box flex center padding={padding}>
         <Box center maxWidth={300}>
-          <Icon.Feather name="download-cloud" size={100} color="rgb(98,113,122)" />
-          <Text textAlign="center" marginBottom={30} marginTop={30}>
+          <Icon.Feather name="download-cloud" size={iconSize} color="rgb(98,113,122)" />
+          <Text textAlign="center" marginBottom={padding} marginTop={padding}>
             {title}
           </Text>
-          <Button
-            small
-            title={`Télécharger (${fileSize}Mo)`}
-            onPress={() => setStartDownload(true)}
-          />
+          <Text bold color="primary" onPress={() => setStartDownload(true)}>
+            {`Télécharger (${fileSize}Mo)`}
+          </Text>
         </Box>
       </Box>
     </Container>

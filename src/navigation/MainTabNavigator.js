@@ -4,13 +4,25 @@ import BibleScreen from '~features/bible/BibleScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
 import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
-import SearchScreen from '~features/search/SearchScreen'
+// import SearchScreen from '~features/search/SearchScreen'
+import HomeScreen from '~features/home/HomeScreen'
 import TabBarIcon from '~common/TabBarIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import getTheme from '~themes'
 
 export default createMaterialBottomTabNavigator(
   {
+    Home: {
+      screen: HomeScreen,
+      navigationOptions: ({ screenProps }) => {
+        return {
+          title: 'Accueil',
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
+          tabBarColor: getTheme[screenProps.theme].colors.reverse,
+          activeColor: getTheme[screenProps.theme].colors.primary
+        }
+      }
+    },
     Bible: {
       screen: BibleScreen,
       navigationOptions: ({ screenProps }) => {
@@ -31,17 +43,17 @@ export default createMaterialBottomTabNavigator(
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
-    Search: {
-      screen: SearchScreen,
-      navigationOptions: ({ screenProps }) => {
-        return {
-          title: 'Recherche',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
-          tabBarColor: getTheme[screenProps.theme].colors.reverse,
-          activeColor: getTheme[screenProps.theme].colors.primary
-        }
-      }
-    },
+    // Search: {
+    //   screen: SearchScreen,
+    //   navigationOptions: ({ screenProps }) => {
+    //     return {
+    //       title: 'Recherche',
+    //       tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
+    //       tabBarColor: getTheme[screenProps.theme].colors.reverse,
+    //       activeColor: getTheme[screenProps.theme].colors.primary
+    //     }
+    //   }
+    // },
     Dictionnary: {
       screen: DictionnaryScreen,
       navigationOptions: ({ screenProps }) => ({
@@ -62,7 +74,7 @@ export default createMaterialBottomTabNavigator(
     }
   },
   {
-    initialRouteName: 'Bible',
+    initialRouteName: 'Home',
     shifting: true,
     activeColor: '#0ED3B9',
     barStyle: {

@@ -39,6 +39,8 @@
     "expo-font": "~6.0.1",
     "expo-google-app-auth": "^6.0.0",
     "expo-haptics": "~6.0.0",
+    "expo-linear-gradient": "~6.0.0",
+    "expo-sharing": "~6.0.0",
     "expo-sqlite": "~6.0.0",
     "firebase": "^6.4.0",
     "global": "^4.4.0",
@@ -76,6 +78,7 @@
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0",
+    "rn-placeholder": "^3.0.0",
     "sentry-expo": "~1.13.0",
     "trunc-html": "^1.1.2"
   },

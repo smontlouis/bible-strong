@@ -3,26 +3,24 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 
 class ErrorBoundary extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = { error: null, errorInfo: null }
+  state = { error: null, hasError: false }
+
+  static getDerivedStateFromError(error) {
+    return { error, hasError: true }
   }
 
-  componentDidCatch (error, errorInfo) {
-    // Catch errors in any components below and re-render with error message
-    this.setState({
-      error: error,
-      errorInfo: errorInfo
-    })
-    // You can also log error messages to an error reporting service here
+  componentDidCatch(error, info) {
+    if (typeof this.props.onError === 'function') {
+      this.props.onError.call(this, error, info.componentStack)
+    }
   }
 
-  render () {
-    if (this.state.errorInfo) {
+  render() {
+    if (this.state.hasError) {
       // Error path
       return (
         <Container>
-          <Text>Error: {this.state.errorInfo}</Text>
+          <Text>Error: {this.state.error}</Text>
         </Container>
       )
     }
