@@ -38,19 +38,19 @@ const DLScreen = () => {
           <Text title fontSize={20} flex>
             {'Mot grec aléatoire'}
           </Text>
-          <Box marginTop={20} />
+          <Box marginTop={10} />
           <StrongOfTheDay type="grec" />
           <Box marginTop={20} />
           <Text title fontSize={20} flex>
             {'Mot hébreu aléatoire'}
           </Text>
-          <Box marginTop={20} />
+          <Box marginTop={10} />
           <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
           <Box marginTop={20} />
           <Text title fontSize={20} flex>
             {'Mot du dictionnaire aléatoire'}
           </Text>
-          <Box marginTop={20} />
+          <Box marginTop={10} />
           <WordOfTheDay color1="rgba(255,197,61,0.7)" color2="rgb(255,188,0)" />
         </Box>
       </ScrollView>

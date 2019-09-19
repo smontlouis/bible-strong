@@ -32,7 +32,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   if (error) {
     return (
-      <Box center shadow height={150} padding={30}>
+      <Box center shadow height={100} padding={30}>
         <FeatherIcon name="x" size={30} color="quart" />
         <Text marginTop={5}>Une erreur est survenue.</Text>
         <Text fontSize={12}>La base de données semble être corrompue.</Text>
@@ -42,7 +42,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   if (!strongReference) {
     return (
-      <Box height={150} center>
+      <Box height={100} center>
         <Text>Chargement...</Text>
       </Box>
     )
@@ -52,17 +52,17 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   return (
     <Link route="DictionnaryDetail" params={{ word }}>
-      <Box center shadow height={150}>
+      <Box center shadow height={100}>
         <Box
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             top: 0,
-            height: 150,
+            height: 100,
             borderRadius: 3
           }}>
-          <LinearGradient start={[0, 0]} style={{ height: 150 }} colors={[color1, color2]} />
+          <LinearGradient start={[0.1, 0.2]} style={{ height: 100 }} colors={[color1, color2]} />
         </Box>
         <Paragraph style={{ color: 'white' }} scale={3} scaleLineHeight={-2}>
           {word}

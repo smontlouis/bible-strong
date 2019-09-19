@@ -3,6 +3,7 @@ import * as Animatable from 'react-native-animatable'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
+import { useSelector } from 'react-redux'
 
 import useDimensions from '~helpers/useDimensions'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -30,6 +31,7 @@ const ShowMoreImage = ({ imageUrls }) => {
     screen: { width }
   } = useDimensions()
   const [expandImage, setExpandImage] = useState(false)
+  const theme = useSelector(state => state.user.bible.settings.theme)
 
   if (!imageUrls) {
     return (
@@ -46,6 +48,8 @@ const ShowMoreImage = ({ imageUrls }) => {
       </Box>
     )
   }
+
+  const linearGradientColor = theme === 'default' ? '255, 255, 255' : '18,45,66'
 
   return (
     <>
@@ -72,7 +76,10 @@ const ShowMoreImage = ({ imageUrls }) => {
           </Box>
         </Link>
         <LinearGradient
-          colors={['rgba(255,255,255,0)', `rgba(255,255,255,${expandImage ? 0 : 1})`]}
+          colors={[
+            `rgba(${linearGradientColor},0)`,
+            `rgba(${linearGradientColor},${expandImage ? 0 : 1})`
+          ]}
           style={{
             position: 'absolute',
             left: 0,

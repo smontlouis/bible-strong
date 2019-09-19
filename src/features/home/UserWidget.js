@@ -11,9 +11,9 @@ const ProfileImage = styled.Image({
   width: 60,
   height: 60,
   borderRadius: 30,
-  backgroundColor: 'rgba(0,0,0,0.1)'
-  // borderWidth: 2,
-  // borderColor: 'rgba(0, 0, 0, 0.1)'
+  backgroundColor: 'rgba(0,0,0,0.1)',
+  borderWidth: 2,
+  borderColor: 'rgba(0, 0, 0, 0.1)'
 })
 
 const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
@@ -38,7 +38,7 @@ const UserWidget = ({ user }) => {
   return (
     <>
       <Box flex>
-        <Box>
+        <Box marginTop={20}>
           <ProfileImage source={{ uri: user.photoURL }} />
         </Box>
         <Box marginTop={10}>
