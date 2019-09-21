@@ -13,6 +13,11 @@ const verseToStrong = ({ Texte, Livre }, concordanceFor, isSmall) =>
       splittedTexte.pop()
     }
     formattedTexte = splittedTexte.map((item, i) => {
+      // IF YOU WANT RADICALdb
+      // if (item.match(/\(\d+\)/)) {
+      //   item = item.substring(1, item.length - 1)
+      // }
+
       // For every number, replace it with last word of previous item
       if (Number.isInteger(Number(item)) && item) {
         references.push(item)

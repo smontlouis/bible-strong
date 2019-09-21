@@ -7,6 +7,24 @@ export const logTypes = {
 
 export default [
   {
+    date: '1569090124005',
+    type: logTypes.INFO,
+    title: '⚠️ Message très important',
+    description: `Plus l'application grandit et plus je suis sensiblisé par des tiers que je dois être dans la légalité. Par là je veux dire: avoir les bonnes autorisations pour certaines versions de la Bible. 
+
+Jusqu’à maintenant je prenais les versions que j’estimais intéressantes sans m’intéresser aux droits d’auteur, règle de partage etc.
+    
+Par exemple, certaines versions n’autorisent que la diffusion en ligne (je n’ai donc pas le droit de faire l’utilisateur télécharger la Français courant hors-ligne par exemple). D’autres ne donnent simplement pas d’autorisations.
+    
+J’ai beaucoup de mal avec ce concept, car je me dis que la Bible devrait être gratuite en termes de droits et partagées à tout le monde, mais je comprends que des personnes ont travaillé dessus et ont été payées pour le faire.
+    
+Tout cela pour vous dire que dans quelques semaines près de la moitié des versions bibliques disparaitra 🤕.
+    
+Mais ne désespérez pas! Je vais essayer de trouver une solution 🤓!
+Sur ce, je m’en vais demander de la sagesse à Dieu et je reviendrai vers vous !
+`
+  },
+  {
     date: '1568848874924',
     type: logTypes.FEATURE,
     title: "Page d'accueil, verset du jour, strong...",
