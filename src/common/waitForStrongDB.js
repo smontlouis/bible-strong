@@ -36,12 +36,6 @@ export const useWaitForDatabase = () => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-        if (!sqliteDir.exists) {
-          await FileSystem.makeDirectoryAsync(sqliteDirPath)
-        } else if (!sqliteDir.isDirectory) {
-          throw new Error('SQLite dir is not a directory')
-        }
-
         const dbPath = `${sqliteDirPath}/strong.sqlite`
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
@@ -69,6 +63,12 @@ export const useWaitForDatabase = () => {
             if (!window.strongDownloadHasStarted) {
               window.strongDownloadHasStarted = true
               console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+
+              if (!sqliteDir.exists) {
+                await FileSystem.makeDirectoryAsync(sqliteDirPath)
+              } else if (!sqliteDir.isDirectory) {
+                throw new Error('SQLite dir is not a directory')
+              }
 
               await FileSystem.createDownloadResumable(
                 sqliteDB.uri,
