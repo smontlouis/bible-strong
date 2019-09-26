@@ -1,6 +1,5 @@
 import React from 'react'
-import { ScrollView , Platform } from 'react-native'
-
+import { ScrollView, Platform } from 'react-native'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -19,7 +18,7 @@ const DLScreen = () => {
   return (
     <Container>
       <ScrollView>
-        <Box padding={Platform.OS === 'ios' ? 20 : 45} paddingBottom={0}>
+        <Box padding={25} paddingTop={Platform.OS === 'ios' ? 20 : 45} paddingBottom={0}>
           {isLogged ? (
             <UserWidget user={user} />
           ) : (
