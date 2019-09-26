@@ -135,6 +135,13 @@ class DBSelectorItem extends React.Component {
       console.log('Download finished')
 
       this.setState({ versionNeedsDownload: false, isLoading: false })
+      if (this.props.database !== 'SEARCH') {
+        if (this.props.database === 'STRONG') {
+          await initStrongDB()
+        } else {
+          await initDictionnaireDB()
+        }
+      }
     } catch (e) {
       SnackBar.show(
         "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",

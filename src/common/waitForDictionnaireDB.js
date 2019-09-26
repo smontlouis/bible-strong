@@ -65,30 +65,35 @@ export const useWaitForDatabase = () => {
             return
           }
 
-          console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
           try {
-            await FileSystem.createDownloadResumable(
-              sqliteDB.uri,
-              dbPath,
-              null,
-              ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                const idxProgress =
-                  Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
-                dispatch({
-                  type: 'dictionnaire.setProgress',
-                  payload: idxProgress
-                })
-              }
-            ).downloadAsync()
+            if (!window.dictionnaireDownloadHasStarted) {
+              window.dictionnaireDownloadHasStarted = true
+              console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
 
-            dispatchRedux(setDictionnaireDatabaseHash(sqliteDB.hash))
+              await FileSystem.createDownloadResumable(
+                sqliteDB.uri,
+                dbPath,
+                null,
+                ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+                  const idxProgress =
+                    Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
+                  dispatch({
+                    type: 'dictionnaire.setProgress',
+                    payload: idxProgress
+                  })
+                }
+              ).downloadAsync()
 
-            await initDictionnaireDB()
-            console.log('DB dictionnaire loaded')
-            dispatch({
-              type: 'dictionnaire.setLoading',
-              payload: false
-            })
+              dispatchRedux(setDictionnaireDatabaseHash(sqliteDB.hash))
+
+              await initDictionnaireDB()
+              console.log('DB dictionnaire loaded')
+              dispatch({
+                type: 'dictionnaire.setLoading',
+                payload: false
+              })
+              window.dictionnaireDownloadHasStarted = false
+            }
           } catch (e) {
             SnackBar.show(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",

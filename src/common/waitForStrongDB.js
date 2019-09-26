@@ -65,33 +65,35 @@ export const useWaitForDatabase = () => {
             return
           }
 
-          console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
-
           try {
-            await FileSystem.createDownloadResumable(
-              sqliteDB.uri,
-              dbPath,
-              null,
-              ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
-                dispatch({
-                  type: 'strong.setProgress',
-                  payload: idxProgress
-                })
-              }
-            ).downloadAsync()
+            if (!window.strongDownloadHasStarted) {
+              window.strongDownloadHasStarted = true
+              console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
 
-            await timeout(500)
+              await FileSystem.createDownloadResumable(
+                sqliteDB.uri,
+                dbPath,
+                null,
+                ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+                  const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+                  dispatch({
+                    type: 'strong.setProgress',
+                    payload: idxProgress
+                  })
+                }
+              ).downloadAsync()
 
-            dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
+              dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
 
-            await initStrongDB()
-            console.log('DB strong loaded')
-            await timeout(500)
-            dispatch({
-              type: 'strong.setLoading',
-              payload: false
-            })
+              await initStrongDB()
+              console.log('DB strong loaded')
+
+              dispatch({
+                type: 'strong.setLoading',
+                payload: false
+              })
+              window.strongDownloadHasStarted = false
+            }
           } catch (e) {
             SnackBar.show(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
