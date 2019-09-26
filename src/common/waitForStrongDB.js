@@ -10,6 +10,7 @@ import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
 import { setStrongDatabaseHash } from '~redux/modules/bible'
+import { timeout } from '~helpers/timeout'
 
 const STRONG_FILE_SIZE = 34941952
 
@@ -80,10 +81,13 @@ export const useWaitForDatabase = () => {
               }
             ).downloadAsync()
 
+            await timeout(500)
+
             dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
 
             await initStrongDB()
             console.log('DB strong loaded')
+            await timeout(500)
             dispatch({
               type: 'strong.setLoading',
               payload: false
