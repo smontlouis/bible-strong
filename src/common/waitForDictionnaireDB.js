@@ -7,6 +7,7 @@ import { Asset } from 'expo-asset'
 import SnackBar from '~common/SnackBar'
 import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
 import Loading from '~common/Loading'
+import { useDBStateValue } from '~helpers/databaseState'
 import DownloadRequired from '~common/DownloadRequired'
 
 import { setDictionnaireDatabaseHash } from '~redux/modules/bible'
@@ -14,16 +15,22 @@ import { setDictionnaireDatabaseHash } from '~redux/modules/bible'
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
 export const useWaitForDatabase = () => {
-  const [isLoading, setLoading] = useState(true)
-  const [proposeDownload, setProposeDownload] = useState(false)
-  const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState(undefined)
+  const [
+    {
+      dictionnaire: { isLoading, proposeDownload, startDownload, progress }
+    },
+    dispatch
+  ] = useDBStateValue()
+
   const dictionnaireDatabaseHash = useSelector(state => state.bible.dictionnaireDatabaseHash)
-  const dispatch = useDispatch()
+  const dispatchRedux = useDispatch()
 
   useEffect(() => {
     if (getDictionnaireDB()) {
-      setLoading(false)
+      dispatch({
+        type: 'dictionnaire.setLoading',
+        payload: false
+      })
     } else {
       const loadDBAsync = async () => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
@@ -51,7 +58,10 @@ export const useWaitForDatabase = () => {
           // || sqliteDB.hash !== dictionnaireDatabaseHash
           // Waiting for user to accept to download
           if (!startDownload) {
-            setProposeDownload(true)
+            dispatch({
+              type: 'dictionnaire.setProposeDownload',
+              payload: true
+            })
             return
           }
 
@@ -64,33 +74,55 @@ export const useWaitForDatabase = () => {
               ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
                 const idxProgress =
                   Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
-                setProgress(idxProgress)
+                dispatch({
+                  type: 'dictionnaire.setProgress',
+                  payload: idxProgress
+                })
               }
             ).downloadAsync()
 
-            dispatch(setDictionnaireDatabaseHash(sqliteDB.hash))
+            dispatchRedux(setDictionnaireDatabaseHash(sqliteDB.hash))
 
             await initDictionnaireDB()
             console.log('DB dictionnaire loaded')
-            setLoading(false)
+            dispatch({
+              type: 'dictionnaire.setLoading',
+              payload: false
+            })
           } catch (e) {
             SnackBar.show(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
               'danger'
             )
-            setProposeDownload(true)
-            setStartDownload(false)
+            dispatch({
+              type: 'dictionnaire.setProposeDownload',
+              payload: true
+            })
+            dispatch({
+              type: 'dictionnaire.setStartDownload',
+              payload: false
+            })
           }
         } else {
           await initDictionnaireDB()
           console.log('DB dictionnaire loaded')
-          setLoading(false)
+          dispatch({
+            type: 'dictionnaire.setLoading',
+            payload: false
+          })
         }
       }
 
       loadDBAsync()
     }
-  }, [dictionnaireDatabaseHash, dispatch, startDownload])
+  }, [dictionnaireDatabaseHash, dispatch, dispatchRedux, startDownload])
+
+  const setStartDownload = value =>
+    dispatch({
+      type: 'dictionnaire.setStartDownload',
+      payload: value
+    })
+
   return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
@@ -8,22 +8,28 @@ import SnackBar from '~common/SnackBar'
 import { initStrongDB, getStrongDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
-
+import { useDBStateValue } from '~helpers/databaseState'
 import { setStrongDatabaseHash } from '~redux/modules/bible'
 
 const STRONG_FILE_SIZE = 34941952
 
 export const useWaitForDatabase = () => {
-  const [isLoading, setLoading] = useState(true)
-  const [proposeDownload, setProposeDownload] = useState(false)
-  const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState(undefined)
+  const [
+    {
+      strong: { isLoading, proposeDownload, startDownload, progress }
+    },
+    dispatch
+  ] = useDBStateValue()
+
   const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
-  const dispatch = useDispatch()
+  const dispatchRedux = useDispatch()
 
   useEffect(() => {
     if (getStrongDB()) {
-      setLoading(false)
+      dispatch({
+        type: 'strong.setLoading',
+        payload: false
+      })
     } else {
       const loadDBAsync = async () => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
@@ -51,7 +57,10 @@ export const useWaitForDatabase = () => {
           //  || sqliteDB.hash !== strongDatabaseHash
           // Waiting for user to accept to download
           if (!startDownload) {
-            setProposeDownload(true)
+            dispatch({
+              type: 'strong.setProposeDownload',
+              payload: true
+            })
             return
           }
 
@@ -64,33 +73,54 @@ export const useWaitForDatabase = () => {
               null,
               ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
                 const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
-                setProgress(idxProgress)
+                dispatch({
+                  type: 'strong.setProgress',
+                  payload: idxProgress
+                })
               }
             ).downloadAsync()
 
-            dispatch(setStrongDatabaseHash(sqliteDB.hash))
+            dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
 
             await initStrongDB()
             console.log('DB strong loaded')
-            setLoading(false)
+            dispatch({
+              type: 'strong.setLoading',
+              payload: false
+            })
           } catch (e) {
             SnackBar.show(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
               'danger'
             )
-            setProposeDownload(true)
-            setStartDownload(false)
+            dispatch({
+              type: 'strong.setProposeDownload',
+              payload: true
+            })
+            dispatch({
+              type: 'strong.setStartDownload',
+              payload: false
+            })
           }
         } else {
           await initStrongDB()
           console.log('DB strong loaded')
-          setLoading(false)
+          dispatch({
+            type: 'strong.setLoading',
+            payload: false
+          })
         }
       }
 
       loadDBAsync()
     }
-  }, [strongDatabaseHash, dispatch, startDownload])
+  }, [strongDatabaseHash, dispatch, startDownload, dispatchRedux])
+
+  const setStartDownload = value =>
+    dispatch({
+      type: 'strong.setStartDownload',
+      payload: value
+    })
 
   return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
 }

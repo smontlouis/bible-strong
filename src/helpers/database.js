@@ -20,3 +20,11 @@ export const getStrongDB = () => {
 export const getDictionnaireDB = () => {
   return dbDictionnaire
 }
+
+export const deleteStrongDB = () => {
+  dbStrong = undefined
+}
+
+export const deleteDictionnaireDB = () => {
+  dbDictionnaire = undefined
+}

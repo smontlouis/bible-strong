@@ -30,7 +30,7 @@ const ShowMoreImage = ({ imageUrls }) => {
   const {
     screen: { width }
   } = useDimensions()
-  const [expandImage, setExpandImage] = useState(false)
+  const [expandImage, setExpandImage] = useState(true)
   const theme = useSelector(state => state.user.bible.settings.theme)
 
   if (!imageUrls) {
@@ -57,24 +57,24 @@ const ShowMoreImage = ({ imageUrls }) => {
         transition="height"
         position="relative"
         style={{ height: expandImage ? width : 100 }}>
-        <Link onPress={() => shareImage(imageUrls.large)}>
-          <Image
-            thumbnailSource={{ uri: imageUrls.small }}
-            source={{ uri: imageUrls.large, cache: 'force-cache' }}
-            style={{ width, height: width, overflow: 'visible' }}
-            resizeMode="cover"
-          />
-          <Box
-            style={{
-              position: 'absolute',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              bottom: 0,
-              right: 0,
-              padding: 3
-            }}>
-            <Text fontSize={8}>copyright bible.com</Text>
-          </Box>
-        </Link>
+        {/* <Link onPress={() => shareImage(imageUrls.large)}> */}
+        <Image
+          thumbnailSource={{ uri: imageUrls.small }}
+          source={{ uri: imageUrls.large, cache: 'force-cache' }}
+          style={{ width, height: width, overflow: 'visible' }}
+          resizeMode="cover"
+        />
+        <Box
+          style={{
+            position: 'absolute',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            bottom: 0,
+            right: 0,
+            padding: 3
+          }}>
+          <Text fontSize={8}>copyright bible.com</Text>
+        </Box>
+        {/* </Link> */}
         <LinearGradient
           colors={[
             `rgba(${linearGradientColor},0)`,

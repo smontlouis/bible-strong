@@ -6,7 +6,14 @@ import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
+import {
+  deleteStrongDB,
+  deleteDictionnaireDB,
+  initStrongDB,
+  initDictionnaireDB
+} from '~helpers/database'
 
+import { DBStateContext } from '~helpers/databaseState'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -28,6 +35,8 @@ const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 class DBSelectorItem extends React.Component {
+  static contextType = DBStateContext
+
   state = {
     versionNeedsDownload: undefined,
     fileProgress: 0,
@@ -109,6 +118,7 @@ class DBSelectorItem extends React.Component {
 
   startDownload = async () => {
     this.setState({ isLoading: true })
+    const [, dispatch] = this.context
 
     const path = this.getPath()
     const uri = this.requireFileUri()
@@ -140,6 +150,18 @@ class DBSelectorItem extends React.Component {
       {
         text: 'Oui',
         onPress: async () => {
+          const [, dispatch] = this.context
+          if (this.props.database !== 'SEARCH') {
+            dispatch({
+              type: this.props.database === 'STRONG' ? 'strong.reset' : 'dictionnaire.reset'
+            })
+            if (this.props.database === 'STRONG') {
+              deleteStrongDB()
+            } else {
+              deleteDictionnaireDB()
+            }
+          }
+
           const path = this.getPath()
           const file = await FileSystem.getInfoAsync(path)
           FileSystem.deleteAsync(file.uri)

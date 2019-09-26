@@ -14,6 +14,7 @@ import AppNavigator from '~navigation/AppNavigator'
 import Changelog from '~common/Changelog'
 import getTheme from '~themes'
 import { paperTheme } from '~themes/default'
+import { DBStateProvider } from '~helpers/databaseState'
 
 class InitApp extends React.Component {
   componentDidMount() {
@@ -84,13 +85,15 @@ class InitApp extends React.Component {
       <ThemeProvider theme={getTheme[theme]}>
         <PaperProvider theme={paperTheme}>
           <PersistGate loading={null} persistor={persistor}>
-            <>
-              <AppNavigator
-                screenProps={{ theme }}
-                onNavigationStateChange={this.onNavigationStateChange}
-              />
-              <Changelog />
-            </>
+            <DBStateProvider>
+              <>
+                <AppNavigator
+                  screenProps={{ theme }}
+                  onNavigationStateChange={this.onNavigationStateChange}
+                />
+                <Changelog />
+              </>
+            </DBStateProvider>
           </PersistGate>
         </PaperProvider>
       </ThemeProvider>
