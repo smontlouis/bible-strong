@@ -49,6 +49,11 @@
         "googleSignIn": {
           "reservedClientId": "com.googleusercontent.apps.204116128917-q1pl4f4pt4tflfetgb905e9b4e34pu61"
         }
+      },
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "android": {

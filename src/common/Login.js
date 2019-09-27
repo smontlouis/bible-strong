@@ -20,7 +20,7 @@ const Button = styled.TouchableOpacity(({ theme, color }) => ({
   shadowRadius: 3,
   elevation: 1,
   padding: 10,
-  width: 160,
+  width: 150,
   marginBottom: 20
 }))
 

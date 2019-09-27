@@ -14,6 +14,7 @@ import QuickTagsModal from '~common/QuickTagsModal'
 import loadBible from '~helpers/loadBible'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
+import { zeroFill } from '~helpers/zeroFill'
 
 import BibleNoteModal from './BibleNoteModal'
 import BibleFooter from './BibleFooter'
@@ -45,10 +46,17 @@ class BibleViewer extends Component {
     multipleTagsItem: false,
     quickTagsModal: false,
     isCreateNoteOpen: false,
-    noteVerses: null
+    noteVerses: null,
+    audioChapterUrl: '',
+    audioMode: false,
+    isPlaying: false
   }
 
   pericope = getBiblePericope('LSG')
+
+  setAudioMode = value => this.setState({ audioMode: value })
+
+  setIsPlaying = value => this.setState({ isPlaying: value })
 
   componentWillMount() {
     setTimeout(() => {
@@ -94,7 +102,15 @@ class BibleViewer extends Component {
       Livre: book.Numero,
       Chapitre: chapter
     }))
-    this.setState({ isLoading: false, verses: tempVerses, error: false })
+    this.setState({
+      isLoading: false,
+      verses: tempVerses,
+      error: false,
+      audioChapterUrl: `https://s.topchretien.com/media/topbible/bible_v2/${zeroFill(
+        book.Numero,
+        2
+      )}_${zeroFill(chapter, 2)}.mp3`
+    })
     this.props.setHistory({
       book: book.Numero,
       chapter,
@@ -153,7 +169,16 @@ class BibleViewer extends Component {
   }
 
   render() {
-    const { isLoading, error, quickTagsModal, multipleTagsItem } = this.state
+    const {
+      isLoading,
+      error,
+      quickTagsModal,
+      multipleTagsItem,
+      audioChapterUrl,
+      audioMode,
+      isPlaying
+    } = this.state
+
     const {
       book,
       chapter,
@@ -224,6 +249,12 @@ class BibleViewer extends Component {
             chapter={chapter}
             goToPrevChapter={goToPrevChapter}
             goToNextChapter={goToNextChapter}
+            audioUrl={audioChapterUrl}
+            version={version}
+            audioMode={audioMode}
+            isPlaying={isPlaying}
+            setAudioMode={this.setAudioMode}
+            setIsPlaying={this.setIsPlaying}
           />
         )}
         {isReadOnly && <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />}

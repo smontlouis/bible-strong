@@ -77,10 +77,11 @@ export default createMaterialBottomTabNavigator(
     initialRouteName: 'Home',
     shifting: true,
     activeColor: '#0ED3B9',
-    barStyle: {
-      backgroundColor: '#fff',
-      borderTopWidth: 1,
-      borderTopColor: 'rgb(230,230,230)'
-    }
+    lazy: false
+    // barStyle: {
+    //   backgroundColor: '#fff',
+    //   borderTopWidth: 1,
+    //   borderTopColor: 'rgb(230,230,230)'
+    // }
   }
 )

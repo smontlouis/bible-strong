@@ -33,6 +33,7 @@
     "expo-app-auth": "~6.0.0",
     "expo-asset": "^6.0.0",
     "expo-asset-utils": "^1.2.0",
+    "expo-av": "~6.0.0",
     "expo-constants": "~6.0.0",
     "expo-facebook": "~6.0.0",
     "expo-file-system": "~6.0.0",
@@ -83,6 +84,7 @@
     "trunc-html": "^1.1.2"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-optional-chaining": "^7.6.0",
     "babel-eslint": "^10.0.2",
     "babel-plugin-module-resolver": "^3.2.0",
     "babel-plugin-root-import": "^6.1.0",
