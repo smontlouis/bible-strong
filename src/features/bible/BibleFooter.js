@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react'
-import { Platform, ActivityIndicator } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator } from 'react-native'
 
 import { Audio } from 'expo-av'
 import styled from '@emotion/native'
@@ -37,11 +37,11 @@ const Container = styled.View(({ audioMode, theme }) => ({
 }))
 
 const IconButton = styled.TouchableOpacity(({ theme, big, noShadow, color }) => ({
-  width: 36,
-  height: 36,
+  width: 40,
+  height: 40,
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: 18,
+  borderRadius: 20,
   backgroundColor: color ? theme.colors[color] : theme.colors.reverse,
 
   ...(!noShadow && {
@@ -257,6 +257,25 @@ const PlayButton = ({ disabled, isPlaying, setIsPlaying, error, isLoading, isBuf
   )
 }
 
+const OpenAudioModeButton = ({ error, isPlaying, isBuffering, isLoading }) => {
+  if (error) {
+    return <StyledIcon name="x" size={20} color={isPlaying || isBuffering ? 'reverse' : ''} />
+  }
+
+  if (isPlaying && (isLoading || isBuffering)) {
+    return <ActivityIndicator color="white" />
+  }
+
+  return (
+    <StyledIcon
+      name={isPlaying || isBuffering ? 'volume-2' : 'volume-1'}
+      style={{ marginLeft: 3 }}
+      size={20}
+      color={isPlaying || isBuffering ? 'reverse' : ''}
+    />
+  )
+}
+
 const BibleFooter = ({
   book,
   chapter,
@@ -315,18 +334,20 @@ const BibleFooter = ({
         </>
       )}
       <Box flex row overflow="visible" center>
-        {hasPreviousChapter && (
-          <IconButton
-            noShadow={audioMode}
-            disabled={disabled || (isLoading && audioMode) || (isLoading && isPlaying)}
-            activeOpacity={0.5}
-            onPress={() => {
-              setIsLoading(true)
-              goToPrevChapter()
-            }}>
-            <StyledIcon name="arrow-left" size={20} />
-          </IconButton>
-        )}
+        <Box width={40} height={40} overflow="visible">
+          {hasPreviousChapter && (
+            <IconButton
+              noShadow={audioMode}
+              disabled={disabled || (isLoading && audioMode) || (isLoading && isPlaying)}
+              activeOpacity={0.5}
+              onPress={() => {
+                setIsLoading(true)
+                goToPrevChapter()
+              }}>
+              <StyledIcon name="arrow-left" size={20} />
+            </IconButton>
+          )}
+        </Box>
         <Box flex center overflow="visible" row>
           {canPlayAudio && !audioMode && (
             <IconButton
@@ -335,16 +356,7 @@ const BibleFooter = ({
               activeOpacity={0.5}
               onPress={() => setAudioMode(true)}
               color={isPlaying ? 'primary' : ''}>
-              {isPlaying && (isLoading || isBuffering) ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <StyledIcon
-                  name={isPlaying || isBuffering ? 'volume-2' : 'volume-1'}
-                  size={20}
-                  color={isPlaying || isBuffering ? 'reverse' : ''}
-                  style={{ marginLeft: 3 }}
-                />
-              )}
+              <OpenAudioModeButton {...{ error, isPlaying, isBuffering, isLoading }} />
             </IconButton>
           )}
           {audioMode && (
@@ -377,18 +389,20 @@ const BibleFooter = ({
             </>
           )}
         </Box>
-        {hasNextChapter && (
-          <IconButton
-            noShadow={audioMode}
-            disabled={disabled || (isLoading && audioMode) || (isLoading && isPlaying)}
-            activeOpacity={0.5}
-            onPress={() => {
-              setIsLoading(true)
-              goToNextChapter()
-            }}>
-            <StyledIcon name="arrow-right" size={20} />
-          </IconButton>
-        )}
+        <Box width={40} height={40} overflow="visible">
+          {hasNextChapter && (
+            <IconButton
+              noShadow={audioMode}
+              disabled={disabled || (isLoading && audioMode) || (isLoading && isPlaying)}
+              activeOpacity={0.5}
+              onPress={() => {
+                setIsLoading(true)
+                goToNextChapter()
+              }}>
+              <StyledIcon name="arrow-right" size={20} />
+            </IconButton>
+          )}
+        </Box>
       </Box>
     </Container>
   )
