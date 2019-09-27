@@ -3962,10 +3962,12 @@ expect@^24.8.0:
     jest-message-util "^24.8.0"
     jest-regex-util "^24.3.0"
 
-expo-analytics-segment@~6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-analytics-segment/-/expo-analytics-segment-6.0.0.tgz#68c962848598c4e92e105039d3048ddf2d8cd220"
-  integrity sha512-M18fRUh0diGOCt7vzMu74ZLrXBbOap6ugY4pJBur2B2ZpIWkis/5FyU+vO9p0X3b+zpIbCKQfq6/S5xkE+Vd6g==
+expo-analytics@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/expo-analytics/-/expo-analytics-1.0.11.tgz#1a2e475f21183008e0e9ed4f584ae5a9e3103ddf"
+  integrity sha512-pSG7u/HFKo/jplBexXlXDasONfCU1Wqi2weKN3a9hZROOnbWy8ZzXxqKA2CZS6P41uygbSAyCr9jBBXfBxS34g==
+  dependencies:
+    expo-constants "^5.0.1"
 
 expo-app-auth@~6.0.0:
   version "6.0.0"
@@ -3992,6 +3994,13 @@ expo-asset@^6.0.0, expo-asset@~6.0.0:
     blueimp-md5 "^2.10.0"
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
+
+expo-constants@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-5.0.1.tgz#597263397f269d7fe37d9cd6b30e305c16635a00"
+  integrity sha512-Ny3teALKaE/jFzBg6DHr2GOoHpwQ/OLs3q3VugZOoR6hXCeVcCEP9MyNvhgn/cheeBDAa6UIgarv2Yufb5RMqQ==
+  dependencies:
+    ua-parser-js "^0.7.19"
 
 expo-constants@~6.0.0:
   version "6.0.0"
