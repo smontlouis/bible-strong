@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'

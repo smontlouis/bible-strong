@@ -6,13 +6,13 @@ import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Asset } from 'expo-asset'
 import { Provider } from 'react-redux'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 import { setAutoFreeze } from 'immer'
 
 import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
-import { segmentConfig, sentryConfig } from './config'
+import { segmentConfig } from './config'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings([
@@ -22,11 +22,11 @@ YellowBox.ignoreWarnings([
   'Setting a timer'
 ])
 
-// if (__DEV__) {
-//   Sentry.enableInExpoDevelopment = true
-// }
+Sentry.init({
+  dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
+  enableInExpoDevelopment: false
+})
 
-Sentry.config(sentryConfig.url).install()
 export const { store, persistor } = configureStore()
 
 class App extends React.Component {

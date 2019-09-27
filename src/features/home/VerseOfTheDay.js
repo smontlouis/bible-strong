@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 import { Share } from 'react-native'
 import { Placeholder, PlaceholderMedia, PlaceholderLine, Fade } from 'rn-placeholder'
 

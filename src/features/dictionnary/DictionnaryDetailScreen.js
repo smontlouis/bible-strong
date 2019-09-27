@@ -5,7 +5,7 @@ import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
 import { useDispatch } from 'react-redux'
 
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 import books from '~assets/bible_versions/books-desc'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Back from '~common/Back'

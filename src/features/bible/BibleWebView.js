@@ -5,7 +5,7 @@ import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
 // import { Platform } from 'react-native'
 // import * as Haptics from 'expo-haptics'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,

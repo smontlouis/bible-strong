@@ -1,6 +1,6 @@
 import produce from 'immer'
 import deepmerge from 'deepmerge'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 import { clearSelectedVerses } from './bible'
 

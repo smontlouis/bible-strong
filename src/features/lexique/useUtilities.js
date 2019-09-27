@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import useDebounce from '~helpers/useDebounce'

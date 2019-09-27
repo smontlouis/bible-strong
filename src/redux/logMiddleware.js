@@ -1,7 +1,7 @@
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 export const logger = store => next => action => {
-  Sentry.captureBreadcrumb({
+  Sentry.addBreadcrumb({
     category: 'Dispatch',
     message: action.type,
     data: action

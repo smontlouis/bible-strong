@@ -4,7 +4,7 @@ import { View, Alert, Platform } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 import books from '~assets/bible_versions/books-desc'
 import KeyboardSpacer from '~common/KeyboardSpacer'

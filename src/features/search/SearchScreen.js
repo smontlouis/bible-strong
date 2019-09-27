@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ScrollView } from 'react-native'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 import Header from '~common/Header'
 import SearchInput from '~common/SearchInput'

@@ -6,7 +6,7 @@ import * as Segment from 'expo-analytics-segment'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
-import Sentry from 'sentry-expo'
+import * as Sentry from 'sentry-expo'
 
 import { updateUserData } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
@@ -68,7 +68,7 @@ class InitApp extends React.Component {
         Segment.screen(currentScreen)
       }
 
-      Sentry.captureBreadcrumb({
+      Sentry.addBreadcrumb({
         category: 'screen',
         message: `From: ${prevScreen} To: ${currentScreen}`,
         data: {
