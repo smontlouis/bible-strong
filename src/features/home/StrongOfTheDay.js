@@ -43,7 +43,6 @@ const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       <Box center shadow height={100} padding={30}>
         <FeatherIcon name="x" size={30} color="quart" />
         <Text marginTop={5}>Une erreur est survenue.</Text>
-        <Text fontSize={12}>La base de données semble être corrompue.</Text>
       </Box>
     )
   }
