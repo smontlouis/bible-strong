@@ -3,8 +3,7 @@ import * as Google from 'expo-google-app-auth'
 import * as Facebook from 'expo-facebook'
 import * as AppAuth from 'expo-app-auth'
 import 'firebase/firestore'
-import * as Segment from 'expo-analytics-segment'
-import * as Sentry from 'sentry-expo'
+import Sentry from 'sentry-expo'
 
 import { firebaseConfig } from '../../config'
 import SnackBar from '~common/SnackBar'
@@ -95,10 +94,6 @@ const FireAuth = class {
         }
 
         this.user = user // Store user
-
-        if (!__DEV__) {
-          Segment.identifyWithTraits(user.uid, profile)
-        }
 
         Sentry.configureScope(scope => {
           scope.setUser(profile)

@@ -1,7 +1,6 @@
 import React from 'react'
 import { YellowBox } from 'react-native'
 import { AppLoading, Updates } from 'expo'
-import * as Segment from 'expo-analytics-segment'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Asset } from 'expo-asset'
@@ -9,10 +8,10 @@ import { Provider } from 'react-redux'
 import * as Sentry from 'sentry-expo'
 import { setAutoFreeze } from 'immer'
 
+import Analytics, { screen } from '~helpers/analytics'
 import SnackBar from '~common/SnackBar'
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
-import { segmentConfig } from './config'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings([
@@ -73,8 +72,7 @@ class App extends React.Component {
 
   componentDidMount() {
     if (!__DEV__) {
-      Segment.initialize(segmentConfig)
-      Segment.screen('Bible')
+      Analytics.hit(screen('Bible'))
     }
     this.updateApp()
   }
