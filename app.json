@@ -88,7 +88,6 @@
     "facebookScheme": "fb312719079612015",
     "notification": {
       "icon": "./assets/images/icon_notification.png",
-      "iosDisplayInForeground": true,
       "androidMode": "default"
     }
   }
