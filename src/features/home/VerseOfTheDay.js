@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import Sentry from 'sentry-expo'
 import { Share } from 'react-native'
-import { Placeholder, PlaceholderMedia, PlaceholderLine, Fade } from 'rn-placeholder'
+import * as Permissions from 'expo-permissions'
+import { Placeholder, PlaceholderLine, Fade } from 'rn-placeholder'
+import { Notifications } from 'expo'
+import addDays from 'date-fns/addDays'
+import setHours from 'date-fns/setHours'
 
 import LexiqueIcon from '~common/LexiqueIcon'
 import { FeatherIcon } from '~common/ui/Icon'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
-import Loading from '~common/Loading'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import VOD from '~assets/bible_versions/bible-vod'
@@ -58,6 +61,63 @@ const useVerseOfTheDay = () => {
     }
     loadVerse()
   }, [version])
+
+  useEffect(() => {
+    const askPermissions = async () => {
+      const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS)
+      let finalStatus = existingStatus
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+        finalStatus = status
+      }
+      if (finalStatus !== 'granted') {
+        return false
+      }
+      return true
+    }
+
+    const scheduleNotification = async () => {
+      const vodHour = 7
+      const nowDate = new Date(Date.now())
+      const nowHour = nowDate.getHours()
+
+      nowDate.setMinutes(0, 0)
+
+      const addDay = nowHour > vodHour ? 1 : 0
+      const date = addDays(setHours(nowDate, vodHour), addDay)
+
+      const notificationId = Notifications.scheduleLocalNotificationAsync(
+        {
+          title: 'Verset du jour',
+          body: 'Wow, I can show up even when app is closed',
+          ios: {
+            sound: true
+          },
+          android: {
+            sound: true
+          }
+        },
+        {
+          time: new Date().getTime() + 20000
+        }
+      )
+      console.log(notificationId)
+    }
+
+    const initNotifications = async () => {
+      const canSendNotification = await askPermissions()
+
+      Notifications.addListener(a => {
+        console.log('notifications launched', a)
+      })
+
+      if (canSendNotification) {
+        scheduleNotification()
+      }
+    }
+
+    initNotifications()
+  }, [])
 
   return verseOfTheDay
 }

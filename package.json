@@ -24,7 +24,7 @@
     "@expo/samples": "2.1.1",
     "@expo/vector-icons": "^10.0.0",
     "colorsys": "^1.0.22",
-    "date-fns": "^1.30.1",
+    "date-fns": "^2.4.1",
     "debounce": "^1.2.0",
     "deepmerge": "^4.0.0",
     "emotion-theming": "^10.0.10",

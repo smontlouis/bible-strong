@@ -6,8 +6,6 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import Sentry from 'sentry-expo'
-import { Notifications } from 'expo'
-import * as Permissions from 'expo-permissions'
 
 import Analytics, { screen } from '~helpers/analytics'
 import { updateUserData } from '~redux/modules/user'
@@ -22,64 +20,10 @@ class InitApp extends React.Component {
   componentDidMount() {
     this.changeStatusBarStyle()
     AppState.addEventListener('change', this.handleAppStateChange)
-
-    this.runNotifications()
-    Notifications.addListener(a => {
-      console.log('notifications launched', a)
-    })
   }
 
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange)
-  }
-
-  runNotifications = async () => {
-    const canSendNotification = await this.askPermissions()
-
-    if (canSendNotification) {
-      this.sendNotificationImmediately()
-      this.scheduleNotification()
-    }
-  }
-
-  askPermissions = async () => {
-    const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS)
-    let finalStatus = existingStatus
-    if (existingStatus !== 'granted') {
-      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-      finalStatus = status
-    }
-    if (finalStatus !== 'granted') {
-      return false
-    }
-    return true
-  }
-
-  sendNotificationImmediately = async () => {
-    const notificationId = await Notifications.presentLocalNotificationAsync({
-      title: 'This is crazy',
-      body: 'Your mind will blow after reading this'
-    })
-    console.log(notificationId) // can be saved in AsyncStorage or send to server
-  }
-
-  scheduleNotification = async () => {
-    const notificationId = Notifications.scheduleLocalNotificationAsync(
-      {
-        title: "I'm Scheduled",
-        body: 'Wow, I can show up even when app is closed',
-        ios: {
-          sound: true
-        },
-        android: {
-          sound: true
-        }
-      },
-      {
-        time: new Date().getTime() + 20000
-      }
-    )
-    console.log(notificationId)
   }
 
   handleAppStateChange = nextAppState => {

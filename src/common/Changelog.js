@@ -2,7 +2,7 @@ import React from 'react'
 import { ScrollView } from 'react-native'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
-import distanceInWords from 'date-fns/distance_in_words'
+import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
 import { useSelector, useDispatch } from 'react-redux'
 
