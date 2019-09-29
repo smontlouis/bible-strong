@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import distanceInWords from 'date-fns/distance_in_words'
+import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
 import * as Icon from '@expo/vector-icons'
 

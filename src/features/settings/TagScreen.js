@@ -2,7 +2,7 @@ import React from 'react'
 import { ScrollView } from 'react-native'
 import styled from '@emotion/native'
 import { useSelector, useDispatch } from 'react-redux'
-import distanceInWords from 'date-fns/distance_in_words'
+import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
 
 import * as Icon from '@expo/vector-icons'
