@@ -40,11 +40,7 @@ const VerseOfTheDay = () => {
   }
 
   const openTimePicker = () => {
-    if (isLogged) {
-      setTimePicker(true)
-    } else {
-      SnackBar.show('Vous devez être connecté pour paramêtrer vos notifications.')
-    }
+    setTimePicker(true)
   }
 
   if (!verseOfTheDay) {

@@ -8,6 +8,7 @@ import { Notifications } from 'expo'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
+import Snackbar from '~common/SnackBar'
 
 import useLogin from '~helpers/useLogin'
 import VOD from '~assets/bible_versions/bible-vod'
@@ -16,7 +17,7 @@ import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
 
 export const useVerseOfTheDay = () => {
-  const { isLogged, user } = useLogin()
+  const { user } = useLogin()
   const [verseOfTheDay, setVOD] = useState(false)
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(state => state.user.notifications.verseOfTheDay)
@@ -67,7 +68,7 @@ export const useVerseOfTheDay = () => {
       try {
         await Notifications.cancelAllScheduledNotificationsAsync()
 
-        if (!verseOfTheDayTime || !isLogged) {
+        if (!verseOfTheDayTime) {
           console.log(
             "User is not logged or there is not verse of the day timeset, don't do anything"
           )
@@ -103,7 +104,7 @@ export const useVerseOfTheDay = () => {
 
         const notificationId = await Notifications.scheduleLocalNotificationAsync(
           {
-            title: `Bonjour $${user.displayName} !`,
+            title: `Bonjour ${user.displayName}`,
             body: 'Découvre ton verset du jour !',
             ios: {
               sound: true
@@ -121,7 +122,9 @@ export const useVerseOfTheDay = () => {
 
         console.log(`Notification ${notificationId} set at ${verseOfTheDayTime} on ${date}`)
       } catch (e) {
-        console.log('Erreur', e)
+        Snackbar.show('Erreur de notification.')
+        console.log(e)
+        Sentry.captureException(e)
       }
     }
     const initNotifications = async () => {
@@ -135,6 +138,6 @@ export const useVerseOfTheDay = () => {
       }
     }
     initNotifications()
-  }, [isLogged, user.displayName, verseOfTheDayTime])
+  }, [user.displayName, verseOfTheDayTime])
   return verseOfTheDay
 }

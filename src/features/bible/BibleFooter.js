@@ -129,11 +129,8 @@ const useLoadSound = (
         )
 
         setIsLoading(false)
-
-        if (isPlaying) {
-          s.playAsync()
-        }
-
+        setIsPlaying(true)
+        s.playAsync()
         setError(false)
         setSoundObject(s)
       } catch (error) {
@@ -354,7 +351,9 @@ const BibleFooter = ({
               big={isPlaying}
               disabled={disabled}
               activeOpacity={0.5}
-              onPress={() => setAudioMode(true)}
+              onPress={() => {
+                setAudioMode(true)
+              }}
               color={isPlaying ? 'primary' : ''}>
               <OpenAudioModeButton {...{ error, isPlaying, isBuffering, isLoading }} />
             </IconButton>

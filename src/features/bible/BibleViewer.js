@@ -6,6 +6,7 @@ import { pure, compose } from 'recompose'
 import styled from '@emotion/native'
 import * as Sentry from 'sentry-expo'
 
+import oldAudioBooks from '~helpers/topBibleOldAudioBook'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import Button from '~common/ui/Button'
@@ -102,14 +103,16 @@ class BibleViewer extends Component {
       Livre: book.Numero,
       Chapitre: chapter
     }))
+
+    const audioBaseUrl = oldAudioBooks.find(a => a == book.Numero)
+      ? 'https://s.topchretien.com/media/topbible/bible/'
+      : 'https://s.topchretien.com/media/topbible/bible_v2/'
+
     this.setState({
       isLoading: false,
       verses: tempVerses,
       error: false,
-      audioChapterUrl: `https://s.topchretien.com/media/topbible/bible_v2/${zeroFill(
-        book.Numero,
-        2
-      )}_${zeroFill(chapter, 2)}.mp3`
+      audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(chapter, 2)}.mp3`
     })
     this.props.setHistory({
       book: book.Numero,
