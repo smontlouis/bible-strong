@@ -29,7 +29,7 @@
     "deepmerge": "^4.0.0",
     "emotion-theming": "^10.0.10",
     "expo": "^35.0.0",
-    "expo-analytics-segment": "~7.0.0",
+    "expo-analytics": "^1.0.11",
     "expo-app-auth": "~7.0.0",
     "expo-asset": "^7.0.0",
     "expo-asset-utils": "^1.2.0",

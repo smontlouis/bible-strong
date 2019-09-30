@@ -4103,19 +4103,12 @@ expect@^24.8.0:
     jest-message-util "^24.8.0"
     jest-regex-util "^24.3.0"
 
-<<<<<<< HEAD
-expo-analytics-segment@~7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/expo-analytics-segment/-/expo-analytics-segment-7.0.0.tgz#571b62b00164047e6a6129529f1ac576df1dcc96"
-  integrity sha512-efoS3Bgq/ecqnId3adxGnEMMeHDZymAKb+nagu0Whjy0RuCtOv5OZZu/gGNLT7EzoJ9mMobat62PcB2W6E9TQA==
-=======
 expo-analytics@^1.0.11:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/expo-analytics/-/expo-analytics-1.0.11.tgz#1a2e475f21183008e0e9ed4f584ae5a9e3103ddf"
   integrity sha512-pSG7u/HFKo/jplBexXlXDasONfCU1Wqi2weKN3a9hZROOnbWy8ZzXxqKA2CZS6P41uygbSAyCr9jBBXfBxS34g==
   dependencies:
     expo-constants "^5.0.1"
->>>>>>> Remove segment analytics and add google analytics
 
 expo-app-auth@~6.0.0:
   version "6.0.0"
@@ -4150,7 +4143,6 @@ expo-asset@^7.0.0, expo-asset@~7.0.0:
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
 
-<<<<<<< HEAD
 expo-av@~7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-7.0.1.tgz#c25cb66f20333157ae65110aa9faef68b34cc7a8"
@@ -4163,12 +4155,13 @@ expo-constants@*, expo-constants@~7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-7.0.0.tgz#668c3ec0100e219522ffd9515ec47fadfccd443d"
   integrity sha512-oLINuMtGcAwfHGInSVhq6xGojp3atUpSIp7KImo9rqXhWwD5FNmqA5Jflo4J0ODPq590kN5ieiYCCqwls2/u0w==
-=======
+  dependencies:
+    ua-parser-js "^0.7.19"
+
 expo-constants@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-5.0.1.tgz#597263397f269d7fe37d9cd6b30e305c16635a00"
   integrity sha512-Ny3teALKaE/jFzBg6DHr2GOoHpwQ/OLs3q3VugZOoR6hXCeVcCEP9MyNvhgn/cheeBDAa6UIgarv2Yufb5RMqQ==
->>>>>>> Remove segment analytics and add google analytics
   dependencies:
     ua-parser-js "^0.7.19"
 

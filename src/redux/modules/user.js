@@ -49,6 +49,8 @@ export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
 
 export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
+export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
+
 const initialState = {
   id: '',
   email: '',
@@ -113,6 +115,10 @@ const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case SET_NOTIFICATION_VOD: {
+      draft.notifications.verseOfTheDay = action.payload
+      break
+    }
     case SET_LAST_SEEN: {
       draft.lastSeen = Date.now()
       break
@@ -658,5 +664,14 @@ export function deleteHistory() {
 export function updateUserData() {
   return {
     type: UPDATE_USER_DATA
+  }
+}
+
+// Notifications
+
+export function setNotificationVOD(payload) {
+  return {
+    type: SET_NOTIFICATION_VOD,
+    payload
   }
 }

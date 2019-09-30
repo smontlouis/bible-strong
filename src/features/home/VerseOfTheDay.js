@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { Platform, Share } from 'react-native'
-import * as Sentry from 'sentry-expo'
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Share } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'
-import * as Permissions from 'expo-permissions'
 import { Placeholder, PlaceholderLine, Fade } from 'rn-placeholder'
-import { Notifications } from 'expo'
-import addDays from 'date-fns/addDays'
-import setHours from 'date-fns/setHours'
 
+import { setNotificationVOD } from '~redux/modules/user'
+import { zeroFill } from '~helpers/zeroFill'
 import LexiqueIcon from '~common/LexiqueIcon'
 import { FeatherIcon } from '~common/ui/Icon'
 import Link from '~common/Link'
@@ -16,164 +13,25 @@ import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
-import VOD from '~assets/bible_versions/bible-vod'
-import booksDesc2 from '~assets/bible_versions/books-desc-2'
-import getVersesRef from '~helpers/getVersesRef'
 import ShowMoreImage from './ShowMoreImage'
-
-const getDayOfTheYear = () => {
-  const now = new Date()
-  const start = new Date(now.getFullYear(), 0, 0)
-  const diff = now - start + (start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000
-  const oneDay = 1000 * 60 * 60 * 24
-  const day = Math.floor(diff / oneDay)
-  return day
-}
-
-const useVerseOfTheDay = () => {
-  const [verseOfTheDay, setVOD] = useState(false)
-  const version = useSelector(state => state.bible.selectedVersion)
-
-  useEffect(() => {
-    const dayOfTheYear =
-      getDayOfTheYear() + 1 < 1 || getDayOfTheYear() + 1 > 366 ? 1 : getDayOfTheYear() + 1
-
-    const loadVerse = async () => {
-      try {
-        const [bookName, chapter, verse] = VOD[dayOfTheYear].split('.')
-        const book = booksDesc2.find(b => b[1] === bookName)[0]
-        const vod = await getVersesRef(`${book}-${chapter}-${verse}`, version)
-        setVOD({
-          v: VOD[dayOfTheYear],
-          book: Number(book),
-          chapter: Number(chapter),
-          verse: Number(verse),
-          ...vod
-        })
-      } catch (e) {
-        Sentry.captureMessage('Error in verse of the day', {
-          extra: {
-            error: e.toString(),
-            doy: dayOfTheYear
-          }
-        })
-        setVOD({ error: true })
-      }
-    }
-    loadVerse()
-  }, [version])
-
-  useEffect(() => {
-    const askPermissions = async () => {
-      const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS)
-      let finalStatus = existingStatus
-      if (existingStatus !== 'granted') {
-        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-        finalStatus = status
-      }
-      if (finalStatus !== 'granted') {
-        return false
-      }
-      return true
-    }
-
-    const scheduleNotification = async () => {
-      if (Platform.OS === 'android') {
-        await Notifications.createChannelAndroidAsync('verset-du-jour', {
-          name: 'Versets du jour',
-          sound: true,
-          priority: 'max',
-          vibrate: [0, 250, 250, 250]
-        })
-      }
-
-      const vodHour = 7
-      const nowDate = new Date(Date.now())
-      const nowHour = nowDate.getHours()
-
-      nowDate.setMinutes(0, 0)
-
-      const addDay = nowHour > vodHour ? 1 : 0
-      const date = addDays(setHours(nowDate, vodHour), addDay)
-
-      const notificationId = Notifications.scheduleLocalNotificationAsync(
-        {
-          title: 'Verset du jour',
-          body: 'Bonjour *****, découvre ton verset du jour !',
-          ios: {
-            sound: true
-          },
-          android: {
-            channelId: 'verset-du-jour',
-            color: '#0984e3'
-          }
-        },
-        {
-          time: new Date().getTime() + 20000
-        }
-      )
-      console.log(notificationId)
-    }
-
-    const initNotifications = async () => {
-      const canSendNotification = await askPermissions()
-
-      Notifications.addListener(a => {
-        console.log('notifications launched', a)
-      })
-
-      if (canSendNotification) {
-        scheduleNotification()
-      }
-    }
-
-    initNotifications()
-  }, [])
-
-  return verseOfTheDay
-}
-
-const useImageUrls = verseOfTheDay => {
-  const [imageUrls, setImageUrls] = useState(null)
-
-  useEffect(() => {
-    const loadImageUrls = async () => {
-      try {
-        const imageRes = await fetch(
-          `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseOfTheDay.v}&language_tag=fr`
-        )
-        const imageJSON = await imageRes.json()
-
-        setImageUrls({
-          small: `https:${imageJSON.images[imageJSON.images.length - 1].renditions[0].url}`,
-          large: `https:${imageJSON.images[imageJSON.images.length - 1].renditions[2].url}`
-        })
-      } catch (e) {
-        setImageUrls({
-          error: true
-        })
-      }
-    }
-
-    if (verseOfTheDay.v) {
-      loadImageUrls()
-    }
-  }, [verseOfTheDay.v])
-
-  return imageUrls
-}
+import { useImageUrls } from './useImageUrls'
+import { useVerseOfTheDay } from './useVerseOfTheDay'
 
 const VerseOfTheDay = () => {
   const verseOfTheDay = useVerseOfTheDay()
   const imageUrls = useImageUrls(verseOfTheDay)
   const [timerPickerOpen, setTimePicker] = useState(false)
+  const dispatch = useDispatch()
+  const verseOfTheDayTime = useSelector(state => state.user.notifications.verseOfTheDay)
+  const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
+  const initialDate = new Date(1, 1, 1, initialHour, initialMinutes)
 
   const onConfirmTimePicker = date => {
     const dateObject = new Date(date)
-    const hours = dateObject.getHours()
-    const minutes = dateObject.getMinutes()
-    console.log(hours, minutes)
+    const hours = zeroFill(dateObject.getHours())
+    const minutes = zeroFill(dateObject.getMinutes())
 
+    dispatch(setNotificationVOD(`${hours}:${minutes}`))
     setTimePicker(false)
   }
 
@@ -212,14 +70,14 @@ const VerseOfTheDay = () => {
   return (
     <>
       <Box padding={20}>
-        <Box row>
+        <Box row alignItems="center">
           <Text title fontSize={30} flex>
             Verset du jour
           </Text>
-          <Link padding onPress={() => setTimePicker(true)}>
+          <Link paddingSmall onPress={() => setTimePicker(true)}>
             <FeatherIcon size={20} name="bell" />
           </Link>
-          <Link padding onPress={shareVerse}>
+          <Link paddingSmall onPress={shareVerse}>
             <FeatherIcon size={20} name="share-2" />
           </Link>
         </Box>
@@ -252,6 +110,7 @@ const VerseOfTheDay = () => {
       </Box>
       <ShowMoreImage imageUrls={imageUrls} />
       <DateTimePicker
+        date={initialDate}
         mode="time"
         locale="en_GB"
         isVisible={timerPickerOpen}

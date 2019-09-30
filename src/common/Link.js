@@ -4,12 +4,6 @@ import { TouchableOpacity, Linking, Share } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 class Link extends Component {
-  props: {
-    navigation: Object,
-    params?: Object,
-    route: string
-  }
-
   handlePress = () => {
     const { navigation, route, href, share, params, replace, onPress } = this.props
     if (route) {
@@ -29,7 +23,7 @@ class Link extends Component {
   }
 
   render() {
-    const { padding, style } = this.props
+    const { padding, paddingSmall, style } = this.props
     return (
       <TouchableOpacity
         {...this.props}
@@ -39,6 +33,12 @@ class Link extends Component {
           ...(padding && {
             width: 60,
             height: 50,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }),
+          ...(paddingSmall && {
+            width: 50,
+            height: 40,
             alignItems: 'center',
             justifyContent: 'center'
           })
