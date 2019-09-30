@@ -8,15 +8,19 @@ import { Notifications } from 'expo'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
+
+import useLogin from '~helpers/useLogin'
 import VOD from '~assets/bible_versions/bible-vod'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
 
 export const useVerseOfTheDay = () => {
+  const { isLogged, user } = useLogin()
   const [verseOfTheDay, setVOD] = useState(false)
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(state => state.user.notifications.verseOfTheDay)
+
   useEffect(() => {
     const dayOfTheYear =
       getDayOfTheYear() + 1 < 1 || getDayOfTheYear() + 1 > 366 ? 1 : getDayOfTheYear() + 1
@@ -44,9 +48,8 @@ export const useVerseOfTheDay = () => {
     }
     loadVerse()
   }, [version])
-  useEffect(() => {
-    console.log(verseOfTheDayTime)
 
+  useEffect(() => {
     const askPermissions = async () => {
       const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS)
       let finalStatus = existingStatus
@@ -62,9 +65,12 @@ export const useVerseOfTheDay = () => {
 
     const scheduleNotification = async () => {
       try {
-        // await Notifications.cancelAllScheduledNotificationsAsync()
+        await Notifications.cancelAllScheduledNotificationsAsync()
 
-        if (!verseOfTheDayTime) {
+        if (!verseOfTheDayTime || !isLogged) {
+          console.log(
+            "User is not logged or there is not verse of the day timeset, don't do anything"
+          )
           return
         }
 
@@ -95,19 +101,10 @@ export const useVerseOfTheDay = () => {
           addDays(addDay)
         )(nowDate)
 
-        console.log('hey')
-
-        await Notifications.presentLocalNotificationAsync({
-          title: 'Verset du jour',
-          body: 'Bonjour *****, découvre ton verset du jour !'
-        })
-
-        console.log('present notif launched')
-
         const notificationId = await Notifications.scheduleLocalNotificationAsync(
           {
-            title: 'Verset du jour',
-            body: 'Bonjour *****, découvre ton verset du jour !',
+            title: `Bonjour $${user.displayName} !`,
+            body: 'Découvre ton verset du jour !',
             ios: {
               sound: true
             },
@@ -117,10 +114,11 @@ export const useVerseOfTheDay = () => {
             }
           },
           {
-            // repeat: 'day',
-            time: new Date().getTime() + 10000
+            repeat: 'day',
+            time: date.getTime()
           }
         )
+
         console.log(`Notification ${notificationId} set at ${verseOfTheDayTime} on ${date}`)
       } catch (e) {
         console.log('Erreur', e)
@@ -131,11 +129,12 @@ export const useVerseOfTheDay = () => {
       Notifications.addListener(a => {
         console.log('notifications launched', a)
       })
+
       if (canSendNotification) {
         scheduleNotification()
       }
     }
     initNotifications()
-  }, [verseOfTheDayTime])
+  }, [isLogged, user.displayName, verseOfTheDayTime])
   return verseOfTheDay
 }

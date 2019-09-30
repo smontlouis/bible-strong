@@ -4,6 +4,8 @@ import { Share } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'
 import { Placeholder, PlaceholderLine, Fade } from 'rn-placeholder'
 
+import SnackBar from '~common/SnackBar'
+import useLogin from '~helpers/useLogin'
 import { setNotificationVOD } from '~redux/modules/user'
 import { zeroFill } from '~helpers/zeroFill'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -18,6 +20,7 @@ import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
 
 const VerseOfTheDay = () => {
+  const { isLogged } = useLogin()
   const verseOfTheDay = useVerseOfTheDay()
   const imageUrls = useImageUrls(verseOfTheDay)
   const [timerPickerOpen, setTimePicker] = useState(false)
@@ -33,6 +36,15 @@ const VerseOfTheDay = () => {
 
     dispatch(setNotificationVOD(`${hours}:${minutes}`))
     setTimePicker(false)
+    SnackBar.show(`Le verset du jour vous sera notifié à ${hours}:${minutes}.`)
+  }
+
+  const openTimePicker = () => {
+    if (isLogged) {
+      setTimePicker(true)
+    } else {
+      SnackBar.show('Vous devez être connecté pour paramêtrer vos notifications.')
+    }
   }
 
   if (!verseOfTheDay) {
@@ -74,7 +86,7 @@ const VerseOfTheDay = () => {
           <Text title fontSize={30} flex>
             Verset du jour
           </Text>
-          <Link paddingSmall onPress={() => setTimePicker(true)}>
+          <Link paddingSmall onPress={openTimePicker}>
             <FeatherIcon size={20} name="bell" />
           </Link>
           <Link paddingSmall onPress={shareVerse}>
