@@ -57,6 +57,9 @@ const initialState = {
   provider: '',
   lastSeen: 0,
   emailVerified: false,
+  notifications: {
+    verseOfTheDay: '07:00'
+  },
   bible: {
     changelog: {},
     highlights: {},

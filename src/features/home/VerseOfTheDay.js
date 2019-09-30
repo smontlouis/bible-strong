@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
+import { Platform, Share } from 'react-native'
 import * as Sentry from 'sentry-expo'
-import { Share } from 'react-native'
+import DateTimePicker from 'react-native-modal-datetime-picker'
 import * as Permissions from 'expo-permissions'
 import { Placeholder, PlaceholderLine, Fade } from 'rn-placeholder'
 import { Notifications } from 'expo'
@@ -77,6 +78,15 @@ const useVerseOfTheDay = () => {
     }
 
     const scheduleNotification = async () => {
+      if (Platform.OS === 'android') {
+        await Notifications.createChannelAndroidAsync('verset-du-jour', {
+          name: 'Versets du jour',
+          sound: true,
+          priority: 'max',
+          vibrate: [0, 250, 250, 250]
+        })
+      }
+
       const vodHour = 7
       const nowDate = new Date(Date.now())
       const nowHour = nowDate.getHours()
@@ -89,12 +99,13 @@ const useVerseOfTheDay = () => {
       const notificationId = Notifications.scheduleLocalNotificationAsync(
         {
           title: 'Verset du jour',
-          body: 'Wow, I can show up even when app is closed',
+          body: 'Bonjour *****, découvre ton verset du jour !',
           ios: {
             sound: true
           },
           android: {
-            sound: true
+            channelId: 'verset-du-jour',
+            color: '#0984e3'
           }
         },
         {
@@ -155,6 +166,16 @@ const useImageUrls = verseOfTheDay => {
 const VerseOfTheDay = () => {
   const verseOfTheDay = useVerseOfTheDay()
   const imageUrls = useImageUrls(verseOfTheDay)
+  const [timerPickerOpen, setTimePicker] = useState(false)
+
+  const onConfirmTimePicker = date => {
+    const dateObject = new Date(date)
+    const hours = dateObject.getHours()
+    const minutes = dateObject.getMinutes()
+    console.log(hours, minutes)
+
+    setTimePicker(false)
+  }
 
   if (!verseOfTheDay) {
     return (
@@ -195,6 +216,9 @@ const VerseOfTheDay = () => {
           <Text title fontSize={30} flex>
             Verset du jour
           </Text>
+          <Link padding onPress={() => setTimePicker(true)}>
+            <FeatherIcon size={20} name="bell" />
+          </Link>
           <Link padding onPress={shareVerse}>
             <FeatherIcon size={20} name="share-2" />
           </Link>
@@ -227,6 +251,13 @@ const VerseOfTheDay = () => {
         </Box>
       </Box>
       <ShowMoreImage imageUrls={imageUrls} />
+      <DateTimePicker
+        mode="time"
+        locale="en_GB"
+        isVisible={timerPickerOpen}
+        onConfirm={onConfirmTimePicker}
+        onCancel={() => setTimePicker(false)}
+      />
     </>
   )
 }

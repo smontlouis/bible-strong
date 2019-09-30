@@ -106,5 +106,16 @@ export default {
         }
       }
     }
+  },
+  8: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        notifications: {
+          verseOfTheDay: '07:00'
+        }
+      }
+    }
   }
 }
