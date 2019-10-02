@@ -43,6 +43,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.smontlouis.biblestrong",
       "buildNumber": "72",
       "config": {

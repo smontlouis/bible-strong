@@ -44,7 +44,7 @@ const Text = styled.Text(props => {
     ...(props.underline && {
       textDecorationLine: 'underline',
       textDecorationStyle: 'solid',
-      textDecorationColor: 'black'
+      textDecorationColor: props.theme.colors.default
     })
   }
 })

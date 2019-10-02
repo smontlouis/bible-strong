@@ -104,7 +104,7 @@ export const useVerseOfTheDay = () => {
 
         const notificationId = await Notifications.scheduleLocalNotificationAsync(
           {
-            title: `Bonjour ${user.displayName}`,
+            title: `Bonjour ${user.displayName.split(' ')[0]}`,
             body: 'Découvre ton verset du jour !',
             ios: {
               sound: true

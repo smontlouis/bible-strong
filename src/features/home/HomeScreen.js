@@ -1,12 +1,12 @@
 import React from 'react'
 import { ScrollView, Platform } from 'react-native'
+import * as Icon from '@expo/vector-icons'
 
 import Container from '~common/ui/Container'
-import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
-import Login from '~common/Login'
+import Button from '~common/ui/Button'
 import useLogin from '~helpers/useLogin'
 
 import VerseOfTheDay from './VerseOfTheDay'
@@ -24,15 +24,24 @@ const DLScreen = () => {
             <UserWidget user={user} />
           ) : (
             <Box>
-              <Text title fontSize={30} flex>
-                Bienvenue.
+              <Text title fontSize={25} flex>
+                Bienvenue
               </Text>
-              <Paragraph marginTop={20}>
+              <Paragraph marginTop={20} marginBottom={20}>
                 Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !
               </Paragraph>
-              <Link route="Login">
-                <Text fontSize={22}>Je me connecte</Text>
-              </Link>
+              <Button
+                route="Login"
+                title="Je me connecte"
+                rightIcon={
+                  <Icon.Feather
+                    name="arrow-right"
+                    size={20}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                }
+              />
             </Box>
           )}
         </Box>

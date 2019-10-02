@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 import Box from '~common/ui/Box'
 
 const TextInput = styled.TextInput(({ theme, noBorder, leftIcon }) => ({
@@ -21,9 +22,12 @@ const LeftIcon = styled(Box)(() => ({
   bottom: 13
 }))
 
-export default props => (
+export default withTheme(props => (
   <Box position="relative">
     {props.leftIcon && <LeftIcon>{props.leftIcon}</LeftIcon>}
-    <TextInput {...props} />
+    <TextInput
+      placeholderTextColor={props.placeholderTextColor || props.theme.colors.default}
+      {...props}
+    />
   </Box>
-)
+))

@@ -79,7 +79,7 @@ const VerseOfTheDay = () => {
     <>
       <Box padding={20}>
         <Box row alignItems="center">
-          <Text title fontSize={30} flex>
+          <Text title fontSize={25} flex>
             Verset du jour
           </Text>
           <Link paddingSmall onPress={openTimePicker}>
