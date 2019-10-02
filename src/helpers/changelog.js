@@ -7,6 +7,18 @@ export const logTypes = {
 
 export default [
   {
+    date: '1570051566526',
+    type: logTypes.NEW,
+    title: 'Bible audio, notifications, connexion par email',
+    description: `Bonjour à tous !
+
+Voici la bible audio pour la version LSG uniquement (pour l'instant). Vous pouvez également vous connecter avec votre email/mot de passe si vous ne souhaitez pas le faire par google / facebook. 
+
+Vous avez également maintenant accès aux notifications journalières du verset du jour. Il est possible de changer l'heure de notification sur la petite cloche dans le widget.
+
+Si vous appréciez ce que je fais, n'hésitez pas à me soutenir. Même à 1€/mois cela m'aide à payer les serveurs qui hébergent l'application. Merci !`
+  },
+  {
     date: '1569090124005',
     type: logTypes.INFO,
     title: '⚠️ Message très important',
