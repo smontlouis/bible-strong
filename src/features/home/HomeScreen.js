@@ -2,6 +2,7 @@ import React from 'react'
 import { ScrollView, Platform } from 'react-native'
 
 import Container from '~common/ui/Container'
+import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
@@ -29,7 +30,9 @@ const DLScreen = () => {
               <Paragraph marginTop={20}>
                 Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !
               </Paragraph>
-              <Login />
+              <Link route="Login">
+                <Text fontSize={22}>Je me connecte</Text>
+              </Link>
             </Box>
           )}
         </Box>

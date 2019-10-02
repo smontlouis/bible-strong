@@ -50,7 +50,9 @@ const FireAuth = class {
         const profile = {
           id: user.uid,
           email: user.email,
-          displayName: user.providerData[0].displayName,
+          ...(user.providerData[0].displayName && {
+            displayName: user.providerData[0].displayName
+          }),
           photoURL: user.providerData[0].photoURL,
           provider: user.providerData[0].providerId,
           lastSeen: Date.now(),
@@ -89,7 +91,7 @@ const FireAuth = class {
                 studies[study.id] = study
               })
 
-              this.onLogin && this.onLogin(data || {}, remoteLastSeen, studies) // On login
+              if (this.onLogin) this.onLogin(data || {}, remoteLastSeen, studies) // On login
             })
         }
 
@@ -107,7 +109,7 @@ const FireAuth = class {
   }
 
   facebookLogin = () =>
-    new Promise(async (resolve, reject) => {
+    new Promise(async resolve => {
       try {
         const { type, token } = await Facebook.logInWithReadPermissionsAsync('312719079612015', {
           permissions: ['public_profile', 'email']
@@ -118,6 +120,9 @@ const FireAuth = class {
           const credential = firebase.auth.FacebookAuthProvider.credential(token)
           return this.onCredentialSuccess(credential, resolve)
         }
+
+        SnackBar.show('Connexion annulée.')
+        return resolve(false)
       } catch (e) {
         SnackBar.show('Une erreur est survenue.')
         console.log(e)
@@ -127,7 +132,7 @@ const FireAuth = class {
     })
 
   googleLogin = () =>
-    new Promise(async (resolve, reject) => {
+    new Promise(async resolve => {
       try {
         const result = await Google.logInAsync({
           androidClientId: firebaseConfig.androidClientId,
@@ -175,11 +180,54 @@ const FireAuth = class {
     }
   }
 
+  login = (email, password) =>
+    new Promise(async resolve => {
+      try {
+        firebase
+          .auth()
+          .signInWithEmailAndPassword(email, password)
+          .then(() => {
+            resolve(true)
+          })
+          .catch(err => {
+            if (this.onError) this.onError(err)
+            resolve(false)
+          })
+      } catch (e) {
+        if (this.onError) this.onError(e)
+        resolve(false)
+      }
+    })
+
+  register = (username, email, password) =>
+    new Promise(async resolve => {
+      try {
+        firebase
+          .auth()
+          .createUserWithEmailAndPassword(email, password)
+          .then(({ user }) => {
+            firebaseDb
+              .collection('users')
+              .doc(user.uid)
+              .set({ displayName: username })
+            user.sendEmailVerification()
+            return resolve(true)
+          })
+          .catch(err => {
+            if (this.onError) this.onError(err)
+            return resolve(false)
+          })
+      } catch (e) {
+        if (this.onError) this.onError(e)
+        return resolve(false)
+      }
+    })
+
   logout = () => {
     firebase.auth().signOut()
     // Sign-out successful.
     this.user = null
-    this.onLogout && this.onLogout()
+    if (this.onLogout) this.onLogout()
     SnackBar.show('Vous êtes déconnecté.')
   }
 }

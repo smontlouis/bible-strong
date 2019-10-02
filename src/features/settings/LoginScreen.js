@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { Linking } from 'react-native'
+import { ScrollView, Linking } from 'react-native'
+
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
@@ -23,15 +24,17 @@ const LoginScreen = ({ navigation }) => {
   return (
     <Container>
       <Header hasBackButton title="Se connecter" />
-      <Box padding={20}>
-        <Text title fontSize={30} marginBottom={30}>
-          Bienvenue !
-        </Text>
-        <Paragraph scaleLineHeight={-2} marginBottom={20}>
-          Connectez-vous pour sauvegarder toutes vos données sur le cloud !
-        </Paragraph>
-        <Login />
-      </Box>
+      <ScrollView>
+        <Box padding={20}>
+          <Text title fontSize={30} marginBottom={30}>
+            Bienvenue !
+          </Text>
+          <Paragraph scaleLineHeight={-2} marginBottom={20}>
+            Connectez-vous pour sauvegarder toutes vos données sur le cloud !
+          </Paragraph>
+          <Login />
+        </Box>
+      </ScrollView>
     </Container>
   )
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
+import { ActivityIndicator } from 'react-native'
 
 const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type, disabled }) => ({
   backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
@@ -9,8 +10,6 @@ const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type, di
   height: 40,
   alignItems: 'center',
   justifyContent: 'center',
-  marginLeft: 20,
-  marginRight: 20,
   paddingLeft: 10,
   paddingRight: 10,
 
@@ -39,17 +38,21 @@ const TextButton = styled.Text(({ theme, small, reverse }) => ({
   })
 }))
 
-const Button = ({ title, onPress, style, small, reverse, disabled, type }) => (
+const Button = ({ title, onPress, style, small, reverse, disabled, type, isLoading }) => (
   <WrapperButton
-    disabled={disabled}
+    disabled={disabled || isLoading}
     onPress={!disabled ? onPress : () => {}}
     style={style}
     small={small}
     reverse={reverse}
     type={type}>
-    <TextButton small={small} reverse={reverse}>
-      {title}
-    </TextButton>
+    {isLoading ? (
+      <ActivityIndicator color="white" />
+    ) : (
+      <TextButton small={small} reverse={reverse}>
+        {title}
+      </TextButton>
+    )}
   </WrapperButton>
 )
 

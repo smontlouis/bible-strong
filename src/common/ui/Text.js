@@ -38,12 +38,14 @@ const Text = styled.Text(props => {
     alignContent: props.alignContent || 'flex-start',
     alignSelf: props.alignSelf,
     // shorthands
-    flexWrap:
-      (props.wrap && 'wrap') ||
-      (props.wrapReverse && 'wrap-reverse') ||
-      'nowrap',
-    flexDirection:
-      (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : '')
+    flexWrap: (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
+    flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+
+    ...(props.underline && {
+      textDecorationLine: 'underline',
+      textDecorationStyle: 'solid',
+      textDecorationColor: 'black'
+    })
   }
 })
 

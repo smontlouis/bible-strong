@@ -7,14 +7,29 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
 
-const ProfileImage = styled.Image({
+const ProfileImage = styled.Image(({ theme }) => ({
   width: 60,
   height: 60,
   borderRadius: 30,
-  backgroundColor: 'rgba(0,0,0,0.1)',
+  backgroundColor: theme.colors.tertiary,
   borderWidth: 2,
-  borderColor: 'rgba(0, 0, 0, 0.1)'
-})
+  borderColor: 'rgba(0, 0, 0, 0.1)',
+  alignItems: 'center',
+  justifyContent: 'center'
+}))
+
+const GenerateImageContainer = ProfileImage.withComponent(Box)
+
+const GenerateImage = ({ name }) => (
+  <GenerateImageContainer>
+    <Text color="reverse" bold fontSize={24}>
+      {name
+        .split(' ')
+        .map(n => n.substring(0, 1))
+        .slice(0, 2)}
+    </Text>
+  </GenerateImageContainer>
+)
 
 const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
 
@@ -39,13 +54,22 @@ const UserWidget = ({ user }) => {
     <>
       <Box flex>
         <Box marginTop={20}>
-          <ProfileImage source={{ uri: user.photoURL }} />
+          {user.photoURL ? (
+            <ProfileImage source={{ uri: user.photoURL }} />
+          ) : (
+            <GenerateImage name={user.displayName} />
+          )}
         </Box>
         <Box marginTop={10}>
           <Text bold fontSize={16}>
             {user.displayName}
           </Text>
         </Box>
+        {!user.emailVerified && (
+          <Box marginTop={10}>
+            <Text color="quart">Un email vous a été envoyé, merci de vérifier votre adresse.</Text>
+          </Box>
+        )}
       </Box>
       <ScrollView
         horizontal

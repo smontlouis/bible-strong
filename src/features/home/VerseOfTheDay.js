@@ -36,7 +36,7 @@ const VerseOfTheDay = () => {
 
     dispatch(setNotificationVOD(`${hours}:${minutes}`))
     setTimePicker(false)
-    SnackBar.show(`Le verset du jour vous sera notifié à ${hours}:${minutes}.`)
+    SnackBar.show(`Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`)
   }
 
   const openTimePicker = () => {

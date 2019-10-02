@@ -1,27 +1,26 @@
-import React, { useState } from 'React'
+import React, { useState } from 'react'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
+import { withTheme } from 'emotion-theming'
 
+import { ActivityIndicator } from 'react-native-paper'
 import Loading from '~common/Loading'
-import Container from '~common/ui/Container'
+import Link from '~common/Link'
+import TextInput from '~common/ui/TextInput'
+import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
+import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
 
-const Button = styled.TouchableOpacity(({ theme, color }) => ({
+const SocialButton = styled.TouchableOpacity(({ theme, color }) => ({
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'center',
-  borderRadius: 4,
+  borderRadius: 3,
   backgroundColor: color || theme.colors.reverse,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 3,
-  elevation: 1,
   padding: 10,
-  width: 150,
-  marginBottom: 20
+  flex: 1
 }))
 
 const ButtonIcon = styled(Icon.FontAwesome)(() => ({
@@ -33,8 +32,10 @@ const ButtonText = styled(Text)(({ theme, color }) => ({
   color: color || theme.colors.defaut
 }))
 
-const Login = () => {
+const Login = ({ theme }) => {
   const [isLoading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   const onGoogleLogin = async () => {
     setLoading(true)
@@ -48,26 +49,56 @@ const Login = () => {
     setLoading(isStillLoading)
   }
 
-  if (isLoading) {
-    return (
-      <Box height={60} center>
-        <Loading />
-      </Box>
-    )
+  const onLogin = async () => {
+    setLoading(true)
+    const isStillLoading = await FireAuth.login(email, password)
+    setLoading(isStillLoading)
   }
 
   return (
-    <Box marginTop={20} height={60} row justifyContent="space-between">
-      <Button onPress={onGoogleLogin} color="#D14C3E">
-        <ButtonIcon size={20} name="google" color="white" />
-        <ButtonText color="white">Google</ButtonText>
-      </Button>
-      <Button onPress={onFacebookLogin} color="#3b5998">
-        <ButtonIcon size={20} name="facebook" color="white" />
-        <ButtonText color="white">Facebook</ButtonText>
-      </Button>
+    <Box>
+      <Box>
+        <TextInput
+          placeholder="Email"
+          leftIcon={<Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />}
+          onChangeText={setEmail}
+        />
+        <Spacer />
+        <TextInput
+          placeholder="Mot de passe"
+          leftIcon={<Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />}
+          secureTextEntry
+          onChangeText={setPassword}
+        />
+        <Spacer size={2} />
+        <Button title="Connexion" isLoading={isLoading} onPress={onLogin} />
+      </Box>
+      <Spacer />
+      <Box center>
+        <Text titleItalic fontSize={16}>
+          - ou -
+        </Text>
+      </Box>
+      <Spacer />
+      <Box row>
+        <SocialButton disabled={isLoading} onPress={onGoogleLogin} color="#D14C3E">
+          <ButtonIcon size={20} name="google" color="white" />
+          <ButtonText color="white">Google</ButtonText>
+        </SocialButton>
+        <Box width={20} />
+        <SocialButton disabled={isLoading} onPress={onFacebookLogin} color="#3b5998">
+          <ButtonIcon size={20} name="facebook" color="white" />
+          <ButtonText color="white">Facebook</ButtonText>
+        </SocialButton>
+      </Box>
+      <Spacer size={2} />
+      <Box center>
+        <Link route="Register">
+          <Text underline>Pas de compte ? Inscrivez-vous.</Text>
+        </Link>
+      </Box>
     </Box>
   )
 }
 
-export default Login
+export default withTheme(Login)

@@ -15,6 +15,7 @@ import HighlightScreen from '~features/settings/HighlightsScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
 import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
 import LoginScreen from '~features/settings/LoginScreen'
+import RegisterScreen from '~features/settings/RegisterScreen'
 import SupportScreen from '~features/settings/SupportScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
@@ -51,7 +52,8 @@ export default createStackNavigator(
     Tags: { screen: TagsScreen },
     Tag: { screen: TagScreen },
     Downloads: { screen: DownloadsScreen },
-    Search: { screen: SearchScreen }
+    Search: { screen: SearchScreen },
+    Register: { screen: RegisterScreen }
   },
   {
     headerMode: 'none'
