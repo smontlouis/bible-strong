@@ -16,11 +16,12 @@ const catchDBError = async fn => {
         'danger',
         { duration: 5000 }
       )
-      Sentry.captureMessage('Database corrupted', {
-        extra: {
-          error: e
-        }
+
+      Sentry.withScope(scope => {
+        scope.setExtra('Error', e.toString())
+        Sentry.captureMessage('Database corrupted')
       })
+
       return { error: 'CORRUPTED_DATABASE' }
     }
 
@@ -35,6 +36,8 @@ const catchDBError = async fn => {
     SnackBar.show('Une error est survenue, le développeur en a été informé.', 'danger', {
       duration: 5000
     })
+
+    console.log(e)
     Sentry.captureException(e)
 
     return { error: 'UNKNOWN_ERROR' }
