@@ -14,11 +14,13 @@ import FireAuth from '~helpers/FireAuth'
 
 const SocialButton = styled.TouchableOpacity(({ theme, color }) => ({
   flexDirection: 'row',
-  justifyContent: 'center',
+  borderRadius: 48,
+  height: 48,
   alignItems: 'center',
-  borderRadius: 5,
+  justifyContent: 'center',
+  paddingLeft: 10,
+  paddingRight: 10,
   backgroundColor: color || theme.colors.reverse,
-  padding: 10,
   flex: 1
 }))
 

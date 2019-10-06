@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
+import { wp } from '~helpers/utils'
 import Link from '~common/Link'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -8,6 +9,9 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
+
+const itemHeight = 130
+const itemWidth = wp(60)
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -32,7 +36,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   if (error) {
     return (
-      <Box center shadow height={100} padding={30}>
+      <Box center shadow height={itemHeight} padding={30}>
         <FeatherIcon name="x" size={30} color="quart" />
         <Text marginTop={5}>Une erreur est survenue.</Text>
       </Box>
@@ -41,7 +45,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   if (!strongReference) {
     return (
-      <Box height={100} center>
+      <Box height={itemHeight} center>
         <Text>Chargement...</Text>
       </Box>
     )
@@ -51,19 +55,28 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   return (
     <Link route="DictionnaryDetail" params={{ word }}>
-      <Box center shadow height={100}>
+      <Box center rounded height={itemHeight} width={itemWidth}>
         <Box
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             top: 0,
-            height: 100,
+            height: itemHeight,
             borderRadius: 3
           }}>
-          <LinearGradient start={[0.1, 0.2]} style={{ height: 100 }} colors={[color1, color2]} />
+          <LinearGradient
+            start={[0.1, 0.2]}
+            style={{ height: itemHeight }}
+            colors={[color1, color2]}
+          />
         </Box>
-        <Paragraph style={{ color: 'white' }} scale={3} scaleLineHeight={-2}>
+        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
+          <Text fontSize={10} style={{ color: 'white' }}>
+            Dictionnaire
+          </Text>
+        </Box>
+        <Paragraph style={{ color: 'white' }} scale={1} scaleLineHeight={-2}>
           {word}
         </Paragraph>
       </Box>

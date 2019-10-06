@@ -39,8 +39,7 @@ class App extends React.Component {
       Font.loadAsync({
         ...Icon.Feather.font,
         'literata-book': require('~assets/fonts/LiterataBook.otf'),
-        'meta-serif-light-italic': require('~assets/fonts/metaserif_light_italic.otf'),
-        'meta-serif': require('~assets/fonts/metaserif.otf')
+        'eina-03-bold': require('~assets/fonts/eina-03-bold.otf')
       })
     ])
   }

@@ -30,6 +30,14 @@ const Box = styled.View(props => ({
 
   opacity: props.disabled ? 0.3 : 1,
 
+  ...(props.grey && {
+    backgroundColor: props.theme.colors.lightGrey
+  }),
+
+  ...(props.rounded && {
+    borderRadius: 10
+  }),
+
   ...(props.shadow && {
     backgroundColor: props.theme.colors.reverse,
     shadowColor: props.theme.colors.default,

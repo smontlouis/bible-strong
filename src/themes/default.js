@@ -12,8 +12,8 @@ export default {
   },
   fontFamily: {
     text: Platform.OS === 'ios' ? 'System' : 'normal',
-    title: 'meta-serif',
-    titleItalic: 'meta-serif-light-italic'
+    title: 'eina-03-bold',
+    titleItalic: Platform.OS === 'ios' ? 'System' : 'normal'
   }
 }
 

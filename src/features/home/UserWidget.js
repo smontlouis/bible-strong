@@ -1,16 +1,25 @@
 import React from 'react'
+import { ScrollView, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
-import { ScrollView } from 'react-native'
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
 
+import Paragraph from '~common/ui/Paragraph'
+import Button from '~common/ui/Button'
+import useLogin from '~helpers/useLogin'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
 
+const Container = styled.View(() => ({
+  paddingTop: Platform.OS === 'ios' ? 20 : 45,
+  paddingBottom: 0
+}))
+
 const ProfileImage = styled.Image(({ theme }) => ({
-  width: 60,
-  height: 60,
-  borderRadius: 30,
+  width: 40,
+  height: 40,
+  borderRadius: 20,
   backgroundColor: theme.colors.tertiary,
   borderWidth: 2,
   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -35,36 +44,72 @@ const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
 
 const Chip = styled(Link)(({ theme }) => ({
   borderRadius: 10,
-  backgroundColor: theme.colors.lightPrimary,
-  paddingTop: 2,
-  paddingBottom: 2,
-  paddingLeft: 5,
-  paddingRight: 5,
-  marginRight: 10
+  backgroundColor: theme.colors.reverse,
+  paddingVertical: 10,
+  paddingHorizontal: 13,
+  marginRight: 10,
+  shadowColor: theme.colors.default,
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 1,
+  overflow: 'visible'
 }))
 
-const UserWidget = ({ user }) => {
+const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
+  color: theme.colors[color] || theme.colors.grey,
+  marginRight: 5
+}))
+
+const UserWidget = () => {
+  const { isLogged, user } = useLogin()
   const { highlights, notes, studies, tags } = useSelector(({ user: { bible } }) => ({
     highlights: Object.keys(bible.highlights).length,
     notes: Object.keys(bible.notes).length,
     studies: Object.keys(bible.studies).length,
     tags: Object.keys(bible.tags).length
   }))
-  return (
-    <>
-      <Box flex>
-        <Box marginTop={20}>
-          {user.photoURL ? (
-            <ProfileImage source={{ uri: user.photoURL }} />
-          ) : (
-            <GenerateImage name={user.displayName} />
-          )}
-        </Box>
-        <Box marginTop={10}>
-          <Text bold fontSize={16}>
-            {user.displayName}
+
+  if (!isLogged) {
+    return (
+      <Container>
+        <Box paddingHorizontal={25}>
+          <Text title fontSize={25} flex>
+            Bienvenue
           </Text>
+          <Paragraph marginTop={20} marginBottom={20}>
+            Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !
+          </Paragraph>
+          <Button
+            route="Login"
+            title="Je me connecte"
+            rightIcon={
+              <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
+            }
+          />
         </Box>
+      </Container>
+    )
+  }
+
+  return (
+    <Container>
+      <Box flex paddingHorizontal={20}>
+        <Box row alignItems="flex-end" marginBottom={20}>
+          <Box flex>
+            <Text title fontSize={24}>
+              {`Bonjour ${user.displayName.split(' ')[0]},`}
+            </Text>
+          </Box>
+          <Box>
+            {user.photoURL ? (
+              <ProfileImage source={{ uri: user.photoURL }} />
+            ) : (
+              <GenerateImage name={user.displayName} />
+            )}
+          </Box>
+        </Box>
+
         {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart">Un email vous a été envoyé, merci de vérifier votre adresse.</Text>
@@ -73,32 +118,52 @@ const UserWidget = ({ user }) => {
       </Box>
       <ScrollView
         horizontal
-        style={{ maxHeight: 55, paddingVertical: 10 }}
+        style={{ maxHeight: 95, overflow: 'visible' }}
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
-          flexDirection: 'row'
+          flexDirection: 'row',
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          overflow: 'visible'
         }}>
         <Chip route="Highlights">
-          <Text fontSize={12}>
-            {highlights} {getPluriel('surbrillance', highlights)}
-          </Text>
+          <Box row marginBottom={5}>
+            <ChipIcon name="edit-3" size={20} />
+            <Text bold fontSize={20}>
+              {highlights}
+            </Text>
+          </Box>
+          <Text fontSize={12}>{getPluriel('surbrillance', highlights)}</Text>
         </Chip>
         <Chip route="BibleVerseNotes">
-          <Text fontSize={12}>
-            {notes} {getPluriel('note', notes)}
-          </Text>
+          <Box row marginBottom={5}>
+            <ChipIcon name="file-text" size={20} />
+            <Text bold fontSize={20}>
+              {notes}
+            </Text>
+          </Box>
+          <Text fontSize={12}>{getPluriel('note', notes)}</Text>
         </Chip>
         <Chip route="Studies">
-          <Text fontSize={12}>
-            {studies} {getPluriel('étude', studies)}
-          </Text>
+          <Box row marginBottom={5}>
+            <ChipIcon name="feather" size={20} />
+            <Text bold fontSize={20}>
+              {studies}
+            </Text>
+          </Box>
+          <Text fontSize={12}>{getPluriel('étude', studies)}</Text>
         </Chip>
         <Chip route="Tags">
-          <Text fontSize={12}>
-            {tags} {getPluriel('étiquette', tags)}
-          </Text>
+          <Box row marginBottom={5}>
+            <ChipIcon name="tag" size={20} />
+            <Text bold fontSize={20}>
+              {tags}
+            </Text>
+          </Box>
+          <Text fontSize={12}>{getPluriel('étiquette', tags)}</Text>
         </Chip>
       </ScrollView>
-    </>
+    </Container>
   )
 }
 

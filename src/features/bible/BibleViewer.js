@@ -28,6 +28,7 @@ const Container = styled.View({
 })
 
 const ReadMeButton = styled(Button)({
+  marginHorizontal: 20,
   marginBottom: 10
 })
 

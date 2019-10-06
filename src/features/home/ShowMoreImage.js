@@ -4,9 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import { useSelector } from 'react-redux'
+import { withTheme } from 'emotion-theming'
 
 import useDimensions from '~helpers/useDimensions'
-import { FeatherIcon } from '~common/ui/Icon'
 import Image from '~common/ui/Image'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -26,16 +26,16 @@ const shareImage = async source => {
   Sharing.shareAsync(uri)
 }
 
-const ShowMoreImage = ({ imageUrls }) => {
+const ShowMoreImage = ({ imageUrls, theme }) => {
   const {
     screen: { width }
   } = useDimensions()
   const [expandImage, setExpandImage] = useState(true)
-  const theme = useSelector(state => state.user.bible.settings.theme)
+  const themeDefault = useSelector(state => state.user.bible.settings.theme)
 
   if (!imageUrls) {
     return (
-      <Box height={100}>
+      <Box height={300} grey>
         <Loading />
       </Box>
     )
@@ -49,19 +49,32 @@ const ShowMoreImage = ({ imageUrls }) => {
     )
   }
 
-  const linearGradientColor = theme === 'default' ? '255, 255, 255' : '18,45,66'
+  const linearGradientColor = themeDefault === 'default' ? '255, 255, 255' : '18,45,66'
 
   return (
-    <>
+    <Box grey>
       <AnimatableBox
         transition="height"
         position="relative"
-        style={{ height: expandImage ? width : 100 }}>
+        style={{
+          height: width - 40,
+          backgroundColor: theme.colors.lightGrey,
+          borderRadius: 10,
+          shadowColor: theme.colors.reverse,
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.1,
+          shadowRadius: 5,
+          elevation: 1,
+          marginHorizontal: 20
+        }}>
         {/* <Link onPress={() => shareImage(imageUrls.large)}> */}
         <Image
           thumbnailSource={{ uri: imageUrls.small }}
           source={{ uri: imageUrls.large, cache: 'force-cache' }}
-          style={{ width, height: width, overflow: 'visible' }}
+          style={{
+            width: width - 40,
+            height: width - 40
+          }}
           resizeMode="cover"
         />
         <Box
@@ -89,13 +102,13 @@ const ShowMoreImage = ({ imageUrls }) => {
           }}
         />
       </AnimatableBox>
-      <Link onPress={() => setExpandImage(e => !e)}>
+      {/* <Link onPress={() => setExpandImage(e => !e)}>
         <Box padding={10} center>
           <FeatherIcon name={`chevron-${expandImage ? 'up' : 'down'}`} size={35} />
         </Box>
-      </Link>
-    </>
+      </Link> */}
+    </Box>
   )
 }
 
-export default ShowMoreImage
+export default withTheme(ShowMoreImage)

@@ -45,7 +45,7 @@ const VerseOfTheDay = () => {
 
   if (!verseOfTheDay) {
     return (
-      <Box padding={20}>
+      <Box padding={20} grey>
         <Text title fontSize={30} flex>
           Verset du jour
         </Text>
@@ -77,7 +77,7 @@ const VerseOfTheDay = () => {
 
   return (
     <>
-      <Box padding={20}>
+      <Box padding={20} grey>
         <Box row alignItems="center">
           <Text title fontSize={25} flex>
             Verset du jour
@@ -90,7 +90,7 @@ const VerseOfTheDay = () => {
           </Link>
         </Box>
         <Link route="BibleView" params={{ isReadOnly: true, book, chapter, verse }}>
-          <Paragraph marginTop={20}>{content}</Paragraph>
+          <Paragraph marginTop={5}>{content}</Paragraph>
         </Link>
         <Box marginTop={20} row>
           <Box flex>

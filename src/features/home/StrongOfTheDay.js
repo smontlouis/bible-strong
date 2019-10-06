@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Sentry from 'sentry-expo'
+
+import { wp } from '~helpers/utils'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -8,6 +10,9 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import loadRandomStrongReference from '~helpers/loadRandomStrongReference'
 import waitForStrongWidget from './waitForStrongWidget'
+
+const itemWidth = wp(60)
+const itemHeight = 130
 
 const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const [error, setError] = useState(false)
@@ -39,7 +44,7 @@ const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   if (error) {
     return (
-      <Box center shadow height={100} padding={30}>
+      <Box center shadow height={itemHeight} padding={30} width={itemWidth}>
         {error === 'NOT_FOUND' ? (
           <>
             <FeatherIcon name="slash" size={30} color="quart" />
@@ -57,7 +62,7 @@ const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   if (!strongReference) {
     return (
-      <Box height={100} center>
+      <Box height={itemHeight} center width={itemWidth}>
         <Text>Chargement...</Text>
       </Box>
     )
@@ -66,20 +71,28 @@ const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const { Grec, Hebreu, Mot } = strongReference
 
   return (
-    <Link route="BibleStrongDetail" params={{ book: 40, strongReference }} style={{ flex: 1 }}>
-      <Box center shadow height={100}>
+    <Link
+      route="BibleStrongDetail"
+      params={{ book: 40, strongReference }}
+      style={{ width: itemWidth }}>
+      <Box center rounded marginRight={20} height={itemHeight}>
         <Box
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             top: 0,
-            height: 100,
+            height: itemHeight,
             borderRadius: 3
           }}>
-          <LinearGradient start={[0.1, 0.2]} style={{ height: 100 }} colors={[color1, color2]} />
+          <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
-        <Paragraph style={{ color: 'white' }} scale={2} scaleLineHeight={-2}>
+        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
+          <Text fontSize={10} style={{ color: 'white' }}>
+            {type === 'grec' ? 'Grec' : 'Hébreu'}
+          </Text>
+        </Box>
+        <Paragraph style={{ color: 'white' }} scale={1} scaleLineHeight={-2} marginBottom={3}>
           {Grec || Hebreu}
         </Paragraph>
         <Text title fontSize={16} style={{ color: 'white' }}>

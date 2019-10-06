@@ -1,13 +1,10 @@
 import React from 'react'
-import { ScrollView, Platform } from 'react-native'
-import * as Icon from '@expo/vector-icons'
+import { ScrollView } from 'react-native'
 
 import Container from '~common/ui/Container'
+import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import Button from '~common/ui/Button'
-import useLogin from '~helpers/useLogin'
 
 import VerseOfTheDay from './VerseOfTheDay'
 import StrongOfTheDay from './StrongOfTheDay'
@@ -15,55 +12,34 @@ import WordOfTheDay from './WordOfTheDay'
 import UserWidget from './UserWidget'
 
 const DLScreen = () => {
-  const { isLogged, user } = useLogin()
   return (
     <Container>
       <ScrollView>
-        <Box padding={25} paddingTop={Platform.OS === 'ios' ? 20 : 45} paddingBottom={0}>
-          {isLogged ? (
-            <UserWidget user={user} />
-          ) : (
-            <Box>
-              <Text title fontSize={25} flex>
-                Bienvenue
-              </Text>
-              <Paragraph marginTop={20} marginBottom={20}>
-                Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !
-              </Paragraph>
-              <Button
-                route="Login"
-                title="Je me connecte"
-                rightIcon={
-                  <Icon.Feather
-                    name="arrow-right"
-                    size={20}
-                    color="white"
-                    style={{ marginLeft: 10 }}
-                  />
-                }
-              />
-            </Box>
-          )}
+        <UserWidget />
+        <Box grey>
+          <RoundedCorner />
         </Box>
         <VerseOfTheDay />
-        <Box padding={20}>
-          <Text title fontSize={20} flex>
-            {'Mot grec aléatoire'}
+        <Box padding={20} paddingBottom={0} grey>
+          <Text title fontSize={25}>
+            Au hasard
           </Text>
-          <Box marginTop={10} />
-          <StrongOfTheDay type="grec" />
-          <Box marginTop={20} />
-          <Text title fontSize={20} flex>
-            {'Mot hébreu aléatoire'}
-          </Text>
-          <Box marginTop={10} />
-          <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
-          <Box marginTop={20} />
-          <Text title fontSize={20} flex>
-            {'Mot du dictionnaire aléatoire'}
-          </Text>
-          <Box marginTop={10} />
-          <WordOfTheDay color1="rgba(255,197,61,0.7)" color2="rgb(255,188,0)" />
+        </Box>
+        <Box grey>
+          <ScrollView
+            horizontal
+            style={{ overflow: 'visible' }}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              flexDirection: 'row',
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+              overflow: 'visible'
+            }}>
+            <StrongOfTheDay type="grec" />
+            <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
+            <WordOfTheDay color1="rgba(255,197,61,0.7)" color2="rgb(255,188,0)" />
+          </ScrollView>
         </Box>
       </ScrollView>
     </Container>

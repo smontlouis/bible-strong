@@ -26,6 +26,7 @@ class Link extends Component {
     const { padding, paddingSmall, style } = this.props
     return (
       <TouchableOpacity
+        activeOpacity={0.5}
         {...this.props}
         onPress={this.handlePress}
         style={{

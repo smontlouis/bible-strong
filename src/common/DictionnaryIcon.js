@@ -2,8 +2,8 @@ import React from 'react'
 import Svg, { G, Path } from 'react-native-svg'
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 
-const SvgComponent = ({ color, ...props }) => (
-  <Svg width={22} height={22} viewBox="0 0 18 22" {...props}>
+const SvgComponent = ({ color, size = 22, ...props }) => (
+  <Svg width={size} height={size} viewBox="0 0 18 22" {...props}>
     <G id="Page-1" stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">
       <G id="Group" transform="translate(1.000000, 1.000000)">
         <Path
