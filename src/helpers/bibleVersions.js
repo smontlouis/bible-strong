@@ -38,10 +38,10 @@ export const versions = {
     id: 'OST',
     name: 'Ostervald'
   },
-  BDS: {
-    id: 'BDS',
-    name: 'Bible du Semeur'
-  },
+  // BDS: {
+  //   id: 'BDS',
+  //   name: 'Bible du Semeur'
+  // },
   FMAR: {
     id: 'FMAR',
     name: 'Martin 1744'

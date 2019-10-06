@@ -47,11 +47,11 @@ const useVerseOfTheDay = () => {
           ...vod
         })
       } catch (e) {
-        Sentry.captureMessage('Error in verse of the day', {
-          extra: {
-            error: e.toString(),
-            doy: dayOfTheYear
-          }
+        Sentry.withScope(scope => {
+          scope.setExtra('Error', e.toString())
+          scope.setExtra('Day', dayOfTheYear)
+          // will be tagged with my-tag="my value"
+          Sentry.captureMessage('Error in verse of the day')
         })
         setVOD({ error: true })
       }

@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1570343318030',
+    type: logTypes.BUG,
+    title: 'Version BDS et bugs',
+    description:
+      'La version BDS a été momentanément retirée le temps que je règle la question de droits. Quelques bugs ont été réglés.'
+  },
+  {
     date: '1569090124005',
     type: logTypes.INFO,
     title: '⚠️ Message très important',

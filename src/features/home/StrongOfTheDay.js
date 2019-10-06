@@ -23,12 +23,13 @@ const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       const strongReference = await loadStrongReference(random, type === 'grec' ? 40 : 1)
       if (!strongReference || strongReference.error) {
         console.log(`Failed to load strong ${random} for type ${type}`)
-        Sentry.captureMessage('Failed to load strong', {
-          extra: {
-            random,
-            type
-          }
+
+        Sentry.withScope(scope => {
+          scope.setExtra('Random', random)
+          scope.setExtra('Type', type)
+          Sentry.captureMessage('Failed to load strong')
         })
+
         setError(true)
         return
       }
