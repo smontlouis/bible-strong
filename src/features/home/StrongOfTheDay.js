@@ -6,26 +6,24 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
-import loadStrongReference from '~helpers/loadStrongReference'
+import loadRandomStrongReference from '~helpers/loadRandomStrongReference'
 import waitForStrongWidget from './waitForStrongWidget'
-
-function randomIntFromInterval(min, max) {
-  // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min)
-}
 
 const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const [error, setError] = useState(false)
   const [strongReference, setStrongRef] = useState(false)
   useEffect(() => {
     const loadStrong = async () => {
-      const random = randomIntFromInterval(1, type === 'grec' ? 5624 : 8853)
-      const strongReference = await loadStrongReference(random, type === 'grec' ? 40 : 1)
-      if (!strongReference || strongReference.error) {
-        console.log(`Failed to load strong ${random} for type ${type}`)
+      const strongReference = await loadRandomStrongReference(type === 'grec' ? 40 : 1)
+
+      if (!strongReference) {
+        setError('NOT_FOUND')
+      }
+
+      if (strongReference && strongReference.error) {
+        console.log(`Failed to load strong for type ${type}`)
 
         Sentry.withScope(scope => {
-          scope.setExtra('Random', random)
           scope.setExtra('Type', type)
           Sentry.captureMessage('Failed to load strong')
         })
@@ -42,8 +40,17 @@ const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   if (error) {
     return (
       <Box center shadow height={100} padding={30}>
-        <FeatherIcon name="x" size={30} color="quart" />
-        <Text marginTop={5}>Une erreur est survenue.</Text>
+        {error === 'NOT_FOUND' ? (
+          <>
+            <FeatherIcon name="slash" size={30} color="quart" />
+            <Text marginTop={5}>Pas de strong pour ce Code.</Text>
+          </>
+        ) : (
+          <>
+            <FeatherIcon name="x" size={30} color="quart" />
+            <Text marginTop={5}>Une erreur est survenue.</Text>
+          </>
+        )}
       </Box>
     )
   }

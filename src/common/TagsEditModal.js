@@ -105,14 +105,15 @@ const TagsModal = ({ isVisible, onClosed }) => {
           )}
         </Box>
         <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
-          <TextInput
-            placeholder="Créer un nouveau tag"
-            onChangeText={setNewTag}
-            onSubmitEditing={saveTag}
-            returnKeyType="send"
-            style={{ flex: 1 }}
-            value={newTag}
-          />
+          <Box flex>
+            <TextInput
+              placeholder="Créer un nouveau tag"
+              onChangeText={setNewTag}
+              onSubmitEditing={saveTag}
+              returnKeyType="send"
+              value={newTag}
+            />
+          </Box>
           <TouchableOpacity onPress={saveTag}>
             <StyledIcon isDisabled={!newTag} name="check" size={30} />
           </TouchableOpacity>

@@ -55,16 +55,17 @@ const StudyTitlePrompt = ({ titlePrompt, onClosed, onSave }) => {
       onBackdropPress={onClosed}>
       <Container>
         <Box row center>
-          <TextInput
-            placeholder="Nom de l'étude"
-            onChangeText={setValue}
-            onSubmitEditing={onSaveTitle}
-            returnKeyType="send"
-            style={{ flex: 1 }}
-            value={value}
-            autoFocus
-            selectTextOnFocus
-          />
+          <Box flex>
+            <TextInput
+              placeholder="Nom de l'étude"
+              onChangeText={setValue}
+              onSubmitEditing={onSaveTitle}
+              returnKeyType="send"
+              value={value}
+              autoFocus
+              selectTextOnFocus
+            />
+          </Box>
           <TouchableOpacity onPress={onSaveTitle}>
             <StyledIcon isDisabled={!value} name="check" size={30} />
           </TouchableOpacity>
