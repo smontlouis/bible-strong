@@ -11,7 +11,7 @@
       "ios",
       "android"
     ],
-    "version": "4.0.1",
+    "version": "4.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon-2.png",
     "splash": {
@@ -45,7 +45,7 @@
       "supportsTablet": true,
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.smontlouis.biblestrong",
-      "buildNumber": "73",
+      "buildNumber": "74",
       "config": {
         "googleSignIn": {
           "reservedClientId": "com.googleusercontent.apps.204116128917-q1pl4f4pt4tflfetgb905e9b4e34pu61"
@@ -59,7 +59,7 @@
     },
     "android": {
       "package": "com.smontlouis.biblestrong",
-      "versionCode": 73,
+      "versionCode": 74,
       "permissions": [
         "VIBRATE",
         "WRITE_EXTERNAL_STORAGE",
