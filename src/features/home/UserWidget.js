@@ -3,6 +3,7 @@ import { ScrollView, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
@@ -11,20 +12,32 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
 
-const Container = styled.View(() => ({
-  paddingTop: Platform.OS === 'ios' ? 20 : 45,
+const Container = styled.View(({ theme }) => ({
+  backgroundColor: theme.colors.reverse,
+  paddingTop: getBottomSpace() + Platform.OS === 'ios' ? 20 : 45,
   paddingBottom: 0
 }))
 
 const ProfileImage = styled.Image(({ theme }) => ({
-  width: 40,
-  height: 40,
-  borderRadius: 20,
+  width: 50,
+  height: 50,
+  borderRadius: 10,
   backgroundColor: theme.colors.tertiary,
-  borderWidth: 2,
-  borderColor: 'rgba(0, 0, 0, 0.1)',
   alignItems: 'center',
   justifyContent: 'center'
+}))
+
+const ProfileContainer = styled.View(({ theme }) => ({
+  width: 50,
+  height: 50,
+  borderRadius: 10,
+  shadowColor: theme.colors.primary,
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 1,
+  overflow: 'visible',
+  backgroundColor: 'white'
 }))
 
 const GenerateImageContainer = ProfileImage.withComponent(Box)
@@ -94,20 +107,20 @@ const UserWidget = () => {
 
   return (
     <Container>
-      <Box flex paddingHorizontal={20}>
-        <Box row alignItems="flex-end" marginBottom={20}>
+      <Box flex paddingHorizontal={20} overflow="visible">
+        <Box row alignItems="center" marginBottom={20} overflow="visible">
           <Box flex>
             <Text title fontSize={24}>
               {`Bonjour ${user.displayName.split(' ')[0]},`}
             </Text>
           </Box>
-          <Box>
+          <ProfileContainer>
             {user.photoURL ? (
               <ProfileImage source={{ uri: user.photoURL }} />
             ) : (
               <GenerateImage name={user.displayName} />
             )}
-          </Box>
+          </ProfileContainer>
         </Box>
 
         {!user.emailVerified && (

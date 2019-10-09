@@ -1,4 +1,5 @@
-import { createStackNavigator } from 'react-navigation'
+import { createStackNavigator } from 'react-navigation-stack'
+
 import MainTabNavigator from './MainTabNavigator'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
 import VersionSelectorScreen from '~features/bible/VersionSelectorScreen'

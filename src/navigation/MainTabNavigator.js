@@ -1,23 +1,33 @@
 import React from 'react'
-import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs'
+
+import createAnimatedBottomTabNavigator from '~navigation/createAnimatedBottomTabNavigator'
 import BibleScreen from '~features/bible/BibleScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
-import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
-// import SearchScreen from '~features/search/SearchScreen'
 import HomeScreen from '~features/home/HomeScreen'
+import SearchScreen from '~features/search/SearchScreen'
 import TabBarIcon from '~common/TabBarIcon'
-import DictionnaryIcon from '~common/DictionnaryIcon'
 import getTheme from '~themes'
 
-export default createMaterialBottomTabNavigator(
+export default createAnimatedBottomTabNavigator(
   {
     Home: {
       screen: HomeScreen,
       navigationOptions: ({ screenProps }) => {
         return {
-          title: 'Accueil',
+          title: 'Home',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
+          tabBarColor: getTheme[screenProps.theme].colors.reverse,
+          activeColor: getTheme[screenProps.theme].colors.primary
+        }
+      }
+    },
+    Search: {
+      screen: SearchScreen,
+      navigationOptions: ({ screenProps }) => {
+        return {
+          title: 'Recherche',
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary
         }
@@ -43,26 +53,6 @@ export default createMaterialBottomTabNavigator(
         activeColor: getTheme[screenProps.theme].colors.primary
       })
     },
-    // Search: {
-    //   screen: SearchScreen,
-    //   navigationOptions: ({ screenProps }) => {
-    //     return {
-    //       title: 'Recherche',
-    //       tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
-    //       tabBarColor: getTheme[screenProps.theme].colors.reverse,
-    //       activeColor: getTheme[screenProps.theme].colors.primary
-    //     }
-    //   }
-    // },
-    Dictionnary: {
-      screen: DictionnaryScreen,
-      navigationOptions: ({ screenProps }) => ({
-        title: 'Dictionnaire',
-        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} component={DictionnaryIcon} />,
-        tabBarColor: getTheme[screenProps.theme].colors.reverse,
-        activeColor: getTheme[screenProps.theme].colors.primary
-      })
-    },
     More: {
       screen: MoreScreen,
       navigationOptions: ({ screenProps }) => ({
@@ -75,13 +65,6 @@ export default createMaterialBottomTabNavigator(
   },
   {
     initialRouteName: 'Home',
-    shifting: true,
-    activeColor: '#0ED3B9',
-    lazy: false
-    // barStyle: {
-    //   backgroundColor: '#fff',
-    //   borderTopWidth: 1,
-    //   borderTopColor: 'rgb(230,230,230)'
-    // }
+    activeColor: '#0ED3B9'
   }
 )

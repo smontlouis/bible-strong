@@ -5,7 +5,7 @@ const colors = {
   lightGrey: '#F4F7FF',
   grey: 'rgb(78,79,79)',
   darkGrey: 'rgba(0,0,0,0.5)',
-  primary: 'rgb(9,132,227)',
+  primary: 'rgb(89,131,240)',
   lightPrimary: 'rgba(9, 132, 227, 0.1)',
   secondary: 'rgb(255,188,0)',
   lightSecondary: 'rgba(255,188,0, 0.25)',

@@ -14,6 +14,8 @@
     "__DEV__": "readonly"
   },
   "rules": {
+    "react/static-property-placement": "off",
+    "consistent-return": "off",
     "no-shadow": "off",
     "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["draft"] }],
     "jsx-a11y/anchor-is-valid": "off",

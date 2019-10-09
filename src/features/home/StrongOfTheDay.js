@@ -14,7 +14,7 @@ import waitForStrongWidget from './waitForStrongWidget'
 const itemWidth = wp(60)
 const itemHeight = 130
 
-const StrongOfTheDay = ({ type, color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
+const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131,240)' }) => {
   const [error, setError] = useState(false)
   const [strongReference, setStrongRef] = useState(false)
   useEffect(() => {

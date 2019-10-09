@@ -1,4 +1,4 @@
-import { createMaterialTopTabNavigator } from 'react-navigation'
+import { createMaterialTopTabNavigator } from 'react-navigation-tabs'
 import BookSelectorScreen from '~features/bible/BookSelectorScreen'
 import ChapterSelectorScreen from '~features/bible/ChapterSelectorScreen'
 import VerseSelectorScreen from '~features/bible/VerseSelectorScreen'

@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { ScrollView, Platform, Alert } from 'react-native'
+import { Platform, Alert } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
 import LexiqueIcon from '~common/LexiqueIcon'
+import DictionnaireIcon from '~common/DictionnaryIcon'
 import Container from '~common/ui/Container'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
+import ScrollView from '~common/ui/ScrollView'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
@@ -59,10 +61,10 @@ const MoreScreen = () => {
               Lexique
             </Text>
           </LinkItem>
-          <LinkItem route="Search">
-            <StyledIcon name="search" size={25} />
-            <Text bold fontSize={15}>
-              Recherche
+          <LinkItem route="Dictionnaire">
+            <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
+            <Text color="secondary" bold fontSize={15}>
+              Dictionnaire
             </Text>
           </LinkItem>
           <LinkItem route="Highlights">
@@ -145,7 +147,7 @@ const MoreScreen = () => {
           )}
         </Box>
       </ScrollView>
-      <Box position="absolute" bottom={10} right={10}>
+      <Box position="absolute" bottom={30} right={10}>
         <Text color="grey" fontSize={12}>
           Version: {app.expo.version}
         </Text>

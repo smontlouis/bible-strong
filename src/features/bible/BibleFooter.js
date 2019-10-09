@@ -15,7 +15,7 @@ import { millisToMinutes } from '~helpers/millisToMinutes'
 
 const Container = styled.View(({ audioMode, theme }) => ({
   position: 'absolute',
-  bottom: 0,
+  bottom: 30,
   left: 0,
   right: 0,
   height: 60,

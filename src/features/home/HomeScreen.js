@@ -1,10 +1,9 @@
 import React from 'react'
-import { ScrollView } from 'react-native'
 
-import Container from '~common/ui/Container'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import ScrollView from '~common/ui/ScrollView'
 
 import VerseOfTheDay from './VerseOfTheDay'
 import StrongOfTheDay from './StrongOfTheDay'
@@ -13,7 +12,7 @@ import UserWidget from './UserWidget'
 
 const DLScreen = () => {
   return (
-    <Container>
+    <Box grey>
       <ScrollView>
         <UserWidget />
         <Box grey>
@@ -42,7 +41,7 @@ const DLScreen = () => {
           </ScrollView>
         </Box>
       </ScrollView>
-    </Container>
+    </Box>
   )
 }
 export default DLScreen

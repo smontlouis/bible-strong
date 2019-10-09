@@ -40,6 +40,8 @@ const orderValues = [
   { value: 'a', label: 'Par ordre alphabétique' }
 ]
 
+const timeout = ms => new Promise(r => setTimeout(r, ms))
+
 const SearchScreen = ({ idxFile }) => {
   const index = useRef()
   const [isLoading, setLoading] = useState(true)
@@ -53,6 +55,7 @@ const SearchScreen = ({ idxFile }) => {
 
   useEffect(() => {
     const setIndexCache = async () => {
+      await timeout(1000)
       index.current = await loadIndexCache(idxFile)
       setLoading(false)
     }
@@ -125,7 +128,7 @@ const SearchScreen = ({ idxFile }) => {
 
   return (
     <Container>
-      <Header hasBackButton noBorder title="Recherche dans la Bible" />
+      <Header noBorder title="Recherche dans la Bible" />
       <SearchInput
         placeholder="Recherche par mot ou phrase"
         onChangeText={setSearchValue}
