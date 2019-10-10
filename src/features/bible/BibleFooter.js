@@ -32,7 +32,9 @@ const Container = styled.View(({ audioMode, theme }) => ({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 2
+    elevation: 2,
+    bottom: 10,
+    paddingBottom: 20
   })
 }))
 

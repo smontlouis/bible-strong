@@ -4,9 +4,10 @@ import colors from './darkColors'
 export default {
   colors,
   measures: {
-    headerHeight: 50,
+    headerHeight: 60,
     headerMarginTop: Platform.OS === 'ios' ? 0 : 25,
-    maxWidth: 320
+    maxWidth: 320,
+    paddingBottom: 30
   },
   fontFamily: {
     text: Platform.OS === 'ios' ? 'System' : 'normal',

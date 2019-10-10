@@ -3,32 +3,36 @@ import styled from '@emotion/native'
 import { ActivityIndicator } from 'react-native'
 import Link from '~common/Link'
 
-const WrapperButton = styled.TouchableOpacity(({ theme, small, reverse, type, disabled }) => ({
-  backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
-  borderWidth: reverse ? 1 : 0,
-  borderColor: theme.colors.darkGrey,
-  borderRadius: 24,
-  height: 48,
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingLeft: 10,
-  paddingRight: 10,
-  flexDirection: 'row',
+const WrapperButton = styled.TouchableOpacity(
+  ({ theme, small, reverse, secondary, type, disabled }) => ({
+    backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
+    borderWidth: reverse ? 1 : 0,
+    borderColor: theme.colors.darkGrey,
+    borderRadius: 24,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 10,
+    paddingRight: 10,
+    flexDirection: 'row',
 
-  ...(disabled && {
-    opacity: 0.5
-  }),
+    ...(secondary && { backgroundColor: theme.colors.secondary }),
 
-  ...(small && {
-    height: 30,
-    minWidth: 100,
-    paddingLeft: 5,
-    paddingRight: 5,
-    marginRight: 0,
-    marginLeft: 0
-  }),
-  ...(type === 'secondary' && {})
-}))
+    ...(disabled && {
+      opacity: 0.5
+    }),
+
+    ...(small && {
+      height: 30,
+      minWidth: 100,
+      paddingLeft: 5,
+      paddingRight: 5,
+      marginRight: 0,
+      marginLeft: 0
+    }),
+    ...(type === 'secondary' && {})
+  })
+)
 
 const WrapperLink = WrapperButton.withComponent(Link)
 
@@ -52,7 +56,9 @@ const Button = ({
   disabled,
   type,
   isLoading,
-  rightIcon
+  leftIcon,
+  rightIcon,
+  secondary
 }) => {
   const Component = onPress ? WrapperButton : WrapperLink
 
@@ -64,11 +70,13 @@ const Button = ({
       style={style}
       small={small}
       reverse={reverse}
+      secondary={secondary}
       type={type}>
       {isLoading ? (
         <ActivityIndicator color="white" />
       ) : (
         <>
+          {leftIcon}
           <TextButton small={small} reverse={reverse}>
             {title}
           </TextButton>

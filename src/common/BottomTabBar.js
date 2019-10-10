@@ -9,6 +9,7 @@ const S = StyleSheet.create({
     position: 'relative',
     justifyContent: 'flex-start',
     alignItems: 'center',
+    overflow: 'visible',
     // backgroundColor: 'green',
     width: 70,
     height: 40

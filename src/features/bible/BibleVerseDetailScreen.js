@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
 
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
@@ -15,6 +16,7 @@ import dictionnaireWordsInBible from '~assets/bible_versions/dictionnaire-bible-
 import Link from '~common/Link'
 
 import Container from '~common/ui/Container'
+import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
@@ -193,7 +195,7 @@ class BibleVerseDetailScreen extends React.Component {
     if (this.state.error) {
       return (
         <Container>
-          <Header noBorder hasBackButton title="Désolé..." />
+          <Header hasBackButton title="Désolé..." />
           <Empty
             source={require('~assets/images/empty.json')}
             message={`Impossible de charger la strong pour ce verset...${
@@ -212,9 +214,9 @@ class BibleVerseDetailScreen extends React.Component {
 
     const countWords = this.countDictionnaireWords()
     return (
-      <Container>
+      <Box flex paddingTop={getBottomSpace()}>
         <Header
-          noBorder
+          background
           hasBackButton
           title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`}
           rightComponent={
@@ -230,34 +232,39 @@ class BibleVerseDetailScreen extends React.Component {
             </Link>
           }
         />
-        <Box paddingTop={6} flex>
-          <StyledVerse>
-            <VersetWrapper>
-              <NumberText>{Verset}</NumberText>
-            </VersetWrapper>
-            <CarouselProvider
-              value={{
-                currentStrongReference: this.state.currentStrongReference,
-                goToCarouselItem: this.goToCarouselItem
-              }}>
-              <VerseText>{this.state.formattedTexte}</VerseText>
-            </CarouselProvider>
-          </StyledVerse>
-          <BibleVerseDetailFooter
-            {...{
-              verseNumber: Verset,
-              goToNextVerse: () => {
-                this.updateVerse(+1)
-                this.setState({ isCarouselLoading: true })
-              },
-              goToPrevVerse: () => {
-                this.updateVerse(-1)
-                this.setState({ isCarouselLoading: true })
-              },
-              versesInCurrentChapter
-            }}
-          />
-          <Box flex>
+        <Box flex>
+          <Box background paddingTop={10}>
+            <StyledVerse>
+              <VersetWrapper>
+                <NumberText>{Verset}</NumberText>
+              </VersetWrapper>
+              <CarouselProvider
+                value={{
+                  currentStrongReference: this.state.currentStrongReference,
+                  goToCarouselItem: this.goToCarouselItem
+                }}>
+                <VerseText>{this.state.formattedTexte}</VerseText>
+              </CarouselProvider>
+            </StyledVerse>
+            <BibleVerseDetailFooter
+              {...{
+                verseNumber: Verset,
+                goToNextVerse: () => {
+                  this.updateVerse(+1)
+                  this.setState({ isCarouselLoading: true })
+                },
+                goToPrevVerse: () => {
+                  this.updateVerse(-1)
+                  this.setState({ isCarouselLoading: true })
+                },
+                versesInCurrentChapter
+              }}
+            />
+          </Box>
+          <Box grey>
+            <RoundedCorner />
+          </Box>
+          <Box flex grey>
             {isCarouselLoading && <Loading />}
             {!isCarouselLoading && (
               <Carousel
@@ -275,9 +282,7 @@ class BibleVerseDetailScreen extends React.Component {
                   marginTop: 15,
                   paddingLeft: 20,
                   overflow: 'visible',
-                  flex: 1,
-                  borderTopColor: theme.colors.border,
-                  borderTopWidth: 1
+                  flex: 1
                 }}
                 contentContainerCustomStyle={{}}
                 onSnapToItem={this.onSnapToItem}
@@ -287,7 +292,7 @@ class BibleVerseDetailScreen extends React.Component {
             )}
           </Box>
         </Box>
-      </Container>
+      </Box>
     )
   }
 }

@@ -19,7 +19,7 @@ class BibleSelect extends Component {
     const { navigation } = this.props
     return (
       <Container>
-        <Header hasBackButton noBorder title="Références" />
+        <Header hasBackButton title="Références" />
         <BibleSelectTabNavigator
           screenProps={{ mainNavigation: navigation }}
           navigation={navigation}

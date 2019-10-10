@@ -2,10 +2,11 @@ import React from 'react'
 import styled from '@emotion/native'
 import { connect } from 'react-redux'
 import * as Icon from '@expo/vector-icons'
-import { ScrollView, Platform, Share } from 'react-native'
+import { Share } from 'react-native'
 import compose from 'recompose/compose'
 
 import Container from '~common/ui/Container'
+import ScrollView from '~common/ui/ScrollView'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 import Text from '~common/ui/Text'
@@ -135,7 +136,7 @@ class BibleStrongDetailScreen extends React.Component {
     if (this.state.error) {
       return (
         <Container>
-          <Header noBorder hasBackButton title="Désolé..." />
+          <Header hasBackButton title="Désolé..." />
           <Empty
             source={require('~assets/images/empty.json')}
             message={`Impossible de charger la strong pour ce verset...${
@@ -158,7 +159,7 @@ class BibleStrongDetailScreen extends React.Component {
     } = this.state
 
     return (
-      <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
+      <Container>
         <Box padding={20}>
           <Box>
             <Box style={{ flexDirection: 'row' }}>

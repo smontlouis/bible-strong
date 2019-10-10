@@ -15,7 +15,8 @@ const SearchInput = ({ onChangeText, value, placeholder, theme, onDelete }) => (
     center
     paddingVertical={5}
     paddingHorizontal={10}
-    shadow
+    rounded
+    backgroundColor="rgba(0,0,0,0.1)"
     margin={20}
     marginTop={0}
     marginBottom={5}

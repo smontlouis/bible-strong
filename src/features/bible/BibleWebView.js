@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Alert } from 'react-native'
+import { Alert, View } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
@@ -196,27 +196,37 @@ class BibleWebView extends Component {
     }
 
     return (
-      <WebView
-        useWebKit
-        onLoad={this.sendDataToWebView}
-        onLoadEnd={this.injectFont}
-        onMessage={this.receiveDataFromWebView}
-        originWhitelist={['*']}
-        ref={ref => {
-          this.webview = ref
-        }}
-        onError={syntheticEvent => {
-          const { nativeEvent } = syntheticEvent
-          console.warn('WebView error: ', nativeEvent)
-        }}
-        source={{ html: this.HTMLFile }}
-        style={{ opacity: this.state.webViewOpacity }}
-        injectedJavaScript={INJECTED_JAVASCRIPT}
-        domStorageEnabled
-        allowUniversalAccessFromFileURLs
-        allowFileAccessFromFileURLs
-        allowFileAccess
-      />
+      <View
+        style={{
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          overflow: 'hidden',
+          flex: 1
+        }}>
+        <WebView
+          useWebKit
+          onLoad={this.sendDataToWebView}
+          onLoadEnd={this.injectFont}
+          onMessage={this.receiveDataFromWebView}
+          originWhitelist={['*']}
+          ref={ref => {
+            this.webview = ref
+          }}
+          onError={syntheticEvent => {
+            const { nativeEvent } = syntheticEvent
+            console.warn('WebView error: ', nativeEvent)
+          }}
+          source={{ html: this.HTMLFile }}
+          style={{
+            opacity: this.state.webViewOpacity
+          }}
+          injectedJavaScript={INJECTED_JAVASCRIPT}
+          domStorageEnabled
+          allowUniversalAccessFromFileURLs
+          allowFileAccessFromFileURLs
+          allowFileAccess
+        />
+      </View>
     )
   }
 }

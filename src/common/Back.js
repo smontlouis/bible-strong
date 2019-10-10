@@ -21,7 +21,7 @@ class Back extends Component {
           ...style,
           ...(padding && {
             width: 60,
-            height: 50,
+            height: 60,
             alignItems: 'center',
             justifyContent: 'center'
           })

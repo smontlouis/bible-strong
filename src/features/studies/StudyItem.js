@@ -6,6 +6,7 @@ import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
+import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
@@ -14,8 +15,9 @@ import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import truncate from '~helpers/truncate'
 
 const StudyLink = styled(Link)(({ theme }) => ({
-  padding: 20,
-  paddingRight: 0,
+  marginHorizontal: 20,
+  paddingVertical: 20,
+  paddingHorizontal: 0,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
   position: 'relative',
@@ -35,10 +37,11 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
           {study.title}
         </Text>
         {study.content && (
-          <Paragraph marginTop={10} scaleLineHeight={-1} scale={-4}>
+          <Paragraph marginTop={10} scale={-3}>
             {truncate(deltaToPlainText(study.content.ops), 180)}
           </Paragraph>
         )}
+        <Spacer size={1 / 2} />
         <TagList tags={study.tags} />
       </Box>
       {setStudySettings && (

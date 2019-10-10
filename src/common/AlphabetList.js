@@ -1,14 +1,13 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { viewportWidth } from '~helpers/utils'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
-
-const StyledItem = styled(Box)(({ theme, isSelected }) => ({}))
 
 const StyledText = styled(Text)(({ theme, isSelected }) => ({
   fontWeight: isSelected ? 'bold' : 'normal'
@@ -26,7 +25,7 @@ const AlphabetList = ({ color, onPress, sectionIndex, alphabet }) => {
   const CarouselAlphabet = useRef()
 
   return (
-    <Box paddingBottom={7}>
+    <Box background paddingBottom={7 + getBottomSpace()}>
       <Border />
       <Box paddingTop={5}>
         <Carousel
@@ -38,14 +37,14 @@ const AlphabetList = ({ color, onPress, sectionIndex, alphabet }) => {
               onPress={() => {
                 onPress(alphabet.findIndex(l => l === section))
               }}>
-              <StyledItem isSelected={sectionIndex === alphabet.findIndex(l => l === section)}>
+              <Box isSelected={sectionIndex === alphabet.findIndex(l => l === section)}>
                 <StyledText
                   isSelected={sectionIndex === alphabet.findIndex(l => l === section)}
                   textAlign="center"
                   fontSize={23}>
                   {section}
                 </StyledText>
-              </StyledItem>
+              </Box>
             </TouchableOpacity>
           )}
           sliderWidth={viewportWidth}

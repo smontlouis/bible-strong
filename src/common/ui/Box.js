@@ -34,6 +34,10 @@ const Box = styled.View(props => ({
     backgroundColor: props.theme.colors.lightGrey
   }),
 
+  ...(props.background && {
+    backgroundColor: props.theme.colors.reverse
+  }),
+
   ...(props.rounded && {
     borderRadius: 10
   }),

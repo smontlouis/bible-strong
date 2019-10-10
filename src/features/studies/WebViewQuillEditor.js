@@ -218,7 +218,8 @@ class WebViewQuillEditor extends React.Component {
     }
 
     return (
-      <View style={{ flex: 1 }}>
+      <View
+        style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: 'hidden', flex: 1 }}>
         <WebView
           useWebKit
           onLoad={this.onWebViewLoaded}

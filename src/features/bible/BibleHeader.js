@@ -26,11 +26,9 @@ const StyledText = styled(Text)({
   marginRight: 5
 })
 
-const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
-  marginTop: Platform.OS === 'ios' ? 0 : 25,
-  height: 50,
+const HeaderBox = styled(Box)(({ theme }) => ({
+  height: 60,
   alignItems: 'center',
-  borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border
 }))
 
@@ -45,7 +43,6 @@ const MaterialCommunityIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
 const Header = ({
   isReadOnly,
   isSelectionMode,
-  noBorder,
   book,
   chapter,
   verse,
@@ -57,7 +54,7 @@ const Header = ({
 
   if (isReadOnly) {
     return (
-      <HeaderBox noBorder={noBorder} row>
+      <HeaderBox row>
         <Box flex justifyContent="center">
           <Back padding>
             <StyledIcon name="arrow-left" size={20} />
@@ -73,7 +70,7 @@ const Header = ({
     )
   }
   return (
-    <HeaderBox noBorder={noBorder} row>
+    <HeaderBox row>
       {isSelectionMode && (
         <Box justifyContent="center">
           <Back padding>

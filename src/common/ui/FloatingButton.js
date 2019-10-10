@@ -6,7 +6,7 @@ import Link from '~common/Link'
 
 const Wrapper = styled.View(({ theme }) => ({
   position: 'absolute',
-  bottom: 50,
+  bottom: 40,
   left: 0,
   right: 0,
   justifyContent: 'center',
@@ -22,12 +22,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
   borderRadius: 30,
   justifyContent: 'center',
   alignItems: 'center',
-  flexDirection: 'row',
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2
+  flexDirection: 'row'
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({

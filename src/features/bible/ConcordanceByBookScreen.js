@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import { FlatList } from 'react-native'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
-
+import FlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import waitForStrongDB from '~common/waitForStrongDB'

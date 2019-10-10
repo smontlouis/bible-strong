@@ -27,8 +27,9 @@ const Circle = styled(Box)(({ theme, color }) => ({
 }))
 
 const Container = styled(Box)(({ theme }) => ({
-  padding: 20,
-  marginBottom: 10,
+  margin: 20,
+  paddingBottom: 20,
+  marginBottom: 0,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1
 }))

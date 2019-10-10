@@ -20,11 +20,9 @@ const StyledText = styled(Text)({
   marginRight: 5
 })
 
-const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
-  marginTop: Platform.OS === 'ios' ? 0 : 25,
-  height: 50,
+const HeaderBox = styled(Box)(({ theme }) => ({
+  height: 60,
   alignItems: 'center',
-  borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border
 }))
 
@@ -36,9 +34,9 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
+const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
   return (
-    <HeaderBox noBorder={noBorder} row>
+    <HeaderBox row>
       {hasBackButton ? (
         <Back padding>
           <FeatherIcon name="arrow-left" size={20} />
@@ -47,7 +45,7 @@ const Header = ({ title, noBorder, setIsOpen, isOpen, selectedChip, hasBackButto
         <Box width={15} />
       )}
       <Box flex justifyContent="center">
-        <Text fontSize={16} bold>
+        <Text fontSize={20} title>
           {title}{' '}
         </Text>
       </Box>

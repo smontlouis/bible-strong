@@ -14,6 +14,7 @@ import StudiesScreen from '~features/studies/StudiesScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
+import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
 import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
 import LoginScreen from '~features/settings/LoginScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
@@ -54,7 +55,8 @@ export default createStackNavigator(
     Tag: { screen: TagScreen },
     Downloads: { screen: DownloadsScreen },
     Search: { screen: SearchScreen },
-    Register: { screen: RegisterScreen }
+    Register: { screen: RegisterScreen },
+    Dictionnaire: { screen: DictionnaryScreen }
   },
   {
     headerMode: 'none'

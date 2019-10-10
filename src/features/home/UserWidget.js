@@ -11,6 +11,8 @@ import useLogin from '~helpers/useLogin'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
+import LexiqueIcon from '~common/LexiqueIcon'
+import DictionnaireIcon from '~common/DictionnaryIcon'
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -110,7 +112,7 @@ const UserWidget = () => {
       <Box flex paddingHorizontal={20} overflow="visible">
         <Box row alignItems="center" marginBottom={20} overflow="visible">
           <Box flex>
-            <Text title fontSize={24}>
+            <Text title fontSize={30}>
               {`Bonjour ${user.displayName.split(' ')[0]},`}
             </Text>
           </Box>
@@ -176,6 +178,26 @@ const UserWidget = () => {
           <Text fontSize={12}>{getPluriel('étiquette', tags)}</Text>
         </Chip>
       </ScrollView>
+      <Box row margin={20} marginBottom={0}>
+        <Box flex={2}>
+          <Button
+            route="Lexique"
+            title="Lexique"
+            leftIcon={<LexiqueIcon color="white" style={{ marginRight: 10 }} size={25} />}
+          />
+        </Box>
+        <Box width={20} />
+        <Box flex={3}>
+          <Button
+            secondary
+            route="Dictionnaire"
+            title="Dictionnaire"
+            leftIcon={
+              <DictionnaireIcon secondary color="white" style={{ marginRight: 10 }} size={25} />
+            }
+          />
+        </Box>
+      </Box>
     </Container>
   )
 }

@@ -3,6 +3,7 @@ import Carousel from 'react-native-snap-carousel'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import compose from 'recompose/compose'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
@@ -11,6 +12,7 @@ import BibleLSG from '~assets/bible_versions/bible-lsg-1910.json'
 import formatVerseContent from '~helpers/formatVerseContent'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Container from '~common/ui/Container'
+import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Header from '~common/Header'
@@ -147,7 +149,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   if (error) {
     return (
       <Container>
-        <Header noBorder hasBackButton title="Désolé..." />
+        <Header hasBackButton title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
           message="Impossible de charger le dictionnaire pour ce verset..."
@@ -161,9 +163,10 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   }
 
   return (
-    <Container>
+    <Box flex paddingTop={getBottomSpace()}>
       <Header
-        noBorder
+        background
+        background
         hasBackButton
         title={`${headerTitle} ${headerTitle.length < 20 ? '- Dict. LSG' : ''}`}
         rightComponent={
@@ -172,26 +175,31 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
           </Link>
         }
       />
-      <Box paddingTop={6} flex>
-        <StyledVerse>
-          <VersetWrapper>
-            <NumberText>{verse.Verset}</NumberText>
-          </VersetWrapper>
-          <CarouselProvider
-            value={{
-              current: currentWord,
-              setCurrent: setCurrentWord
-            }}>
-            <VerseText>{formattedText}</VerseText>
-          </CarouselProvider>
-        </StyledVerse>
-        <BibleVerseDetailFooter
-          verseNumber={Verset}
-          versesInCurrentChapter={versesInCurrentChapter}
-          goToNextVerse={() => updateVerse(+1)}
-          goToPrevVerse={() => updateVerse(-1)}
-        />
-        <Box flex>
+      <Box flex>
+        <Box background paddingTop={10}>
+          <StyledVerse>
+            <VersetWrapper>
+              <NumberText>{verse.Verset}</NumberText>
+            </VersetWrapper>
+            <CarouselProvider
+              value={{
+                current: currentWord,
+                setCurrent: setCurrentWord
+              }}>
+              <VerseText>{formattedText}</VerseText>
+            </CarouselProvider>
+          </StyledVerse>
+          <BibleVerseDetailFooter
+            verseNumber={Verset}
+            versesInCurrentChapter={versesInCurrentChapter}
+            goToNextVerse={() => updateVerse(+1)}
+            goToPrevVerse={() => updateVerse(-1)}
+          />
+        </Box>
+        <Box grey>
+          <RoundedCorner />
+        </Box>
+        <Box flex grey>
           {dictionnaryWordsInVerse.length ? (
             <Carousel
               firstItem={dictionnaryWordsInVerse.findIndex(w => w === currentWord)}
@@ -209,9 +217,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
                 marginTop: 15,
                 paddingLeft: 20,
                 overflow: 'visible',
-                flex: 1,
-                borderTopColor: theme.colors.border,
-                borderTopWidth: 1
+                flex: 1
               }}
               onSnapToItem={index => setCurrentWord(dictionnaryWordsInVerse[index])}
               contentContainerCustomStyle={{}}
@@ -226,7 +232,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
           )}
         </Box>
       </Box>
-    </Container>
+    </Box>
   )
 }
 

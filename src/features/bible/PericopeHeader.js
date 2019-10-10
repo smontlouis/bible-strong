@@ -10,11 +10,9 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Back from '~common/Back'
 
-const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
-  marginTop: Platform.OS === 'ios' ? 0 : 25,
-  height: 50,
+const HeaderBox = styled(Box)(({ theme }) => ({
+  height: 60,
   alignItems: 'center',
-  borderBottomWidth: noBorder ? 0 : 1,
   borderBottomColor: theme.colors.border
 }))
 
@@ -36,11 +34,11 @@ const getPrevNextVersions = (versionsArray, version) => {
   return [versionsArray[index - 1], versionsArray[index + 1]]
 }
 
-const Header = ({ hasBackButton, isModal, title, noBorder, version, setVersion }) => {
+const Header = ({ hasBackButton, isModal, title, version, setVersion }) => {
   const versionsArray = Object.keys(versions)
   const [prevVersion, nextVersion] = getPrevNextVersions(versionsArray, version)
   return (
-    <HeaderBox noBorder={noBorder} row overflow="visibility">
+    <HeaderBox row overflow="visibility">
       <Box justifyContent="center">
         {hasBackButton && (
           <Back padding>
@@ -58,7 +56,7 @@ const Header = ({ hasBackButton, isModal, title, noBorder, version, setVersion }
             </LinkBox>
           )}
         </Box>
-        <Text fontSize={16} bold marginLeft={10} marginRight={10}>
+        <Text fontSize={16} title marginLeft={10} marginRight={10}>
           {title}
         </Text>
         <Box center width={70}>

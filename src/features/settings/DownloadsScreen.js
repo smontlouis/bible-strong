@@ -1,10 +1,10 @@
 import React from 'react'
-import { ScrollView } from 'react-native'
 
 import { versions } from '~helpers/bibleVersions'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
+import ScrollView from '~common/ui/ScrollView'
 import Header from '~common/Header'
 import DBSelectorItem from './DatabaseSelectorItem'
 import VersionSelectorItem from './VersionSelectorItem'
@@ -12,7 +12,7 @@ import VersionSelectorItem from './VersionSelectorItem'
 const DLScreen = () => {
   return (
     <Container>
-      <Header hasBackButton title="Gestion des téléchargements" />
+      <Header hasBackButton />
       <ScrollView>
         <Text padding={20} title fontSize={25}>
           Bases de données

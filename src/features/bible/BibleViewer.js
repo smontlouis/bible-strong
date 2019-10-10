@@ -5,10 +5,12 @@ import { createSelector } from 'reselect'
 import { pure, compose } from 'recompose'
 import styled from '@emotion/native'
 import * as Sentry from 'sentry-expo'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import oldAudioBooks from '~helpers/topBibleOldAudioBook'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
+import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
@@ -29,7 +31,7 @@ const Container = styled.View({
 
 const ReadMeButton = styled(Button)({
   marginHorizontal: 20,
-  marginBottom: 10
+  marginBottom: 10 + getBottomSpace()
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -261,7 +263,11 @@ class BibleViewer extends Component {
             setIsPlaying={this.setIsPlaying}
           />
         )}
-        {isReadOnly && <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />}
+        {isReadOnly && !error && (
+          <Box background>
+            <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />
+          </Box>
+        )}
         {modalIsVisible && (
           <SelectedVersesModal
             isSelectionMode={isSelectionMode}

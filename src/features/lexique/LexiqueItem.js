@@ -7,8 +7,8 @@ import Text from '~common/ui/Text'
 
 const SectionItem = styled(Box)(({ theme }) => ({
   height: 80,
-  paddingLeft: 20,
-  paddingRight: 20,
+  marginLeft: 20,
+  marginRight: 20,
   backgroundColor: theme.colors.reverse,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,

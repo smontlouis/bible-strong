@@ -14,10 +14,7 @@ import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
-  marginTop: Platform.OS === 'ios' ? 0 : 25,
   alignItems: 'center',
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
   paddingLeft: 15,
   paddingRight: 15
 }))

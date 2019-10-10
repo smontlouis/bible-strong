@@ -15,8 +15,9 @@ import Paragraph from '~common/ui/Paragraph'
 import theme from '~themes/default'
 
 const NoteLink = styled(Link)(({ theme }) => ({
-  padding: 20,
-  paddingRight: 0,
+  marginHorizontal: 20,
+  paddingVertical: 20,
+  paddingHorizontal: 0,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
   flexDirection: 'row'

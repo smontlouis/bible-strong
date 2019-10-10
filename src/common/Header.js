@@ -8,21 +8,30 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Back from '~common/Back'
 
-const HeaderBox = styled(Box)(({ noBorder, theme }) => ({
-  marginTop: Platform.OS === 'ios' ? 0 : 25,
-  height: 50,
-  borderBottomWidth: noBorder ? 0 : 1,
+const HeaderBox = styled(Box)(({ theme, background }) => ({
+  height: 60,
   borderBottomColor: theme.colors.border,
-  alignItems: 'stretch'
+  alignItems: 'stretch',
+  ...(background && {
+    backgroundColor: theme.colors.reverse
+  })
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, rightComponent }) => {
+const Header = ({
+  background,
+  hasBackButton,
+  isModal,
+  title,
+  onTitlePress,
+  rightComponent,
+  ...props
+}) => {
   return (
-    <HeaderBox noBorder={noBorder} row overflow="visibility">
+    <HeaderBox background={background} row overflow="visibility" {...props}>
       <Box flex>
         {hasBackButton && (
           <Back padding>
@@ -31,7 +40,7 @@ const Header = ({ hasBackButton, isModal, title, onTitlePress, noBorder, rightCo
         )}
       </Box>
       <Box grow center>
-        <Text fontSize={16} onPress={onTitlePress} bold>
+        <Text title fontSize={20} onPress={onTitlePress}>
           {title}
         </Text>
       </Box>

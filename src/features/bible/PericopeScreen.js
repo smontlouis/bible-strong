@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
@@ -7,6 +7,7 @@ import * as Icon from '@expo/vector-icons'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
+import ScrollView from '~common/ui/ScrollView'
 import PericopeHeader from './PericopeHeader'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -90,7 +91,7 @@ const PericopeScreen = ({ navigation }) => {
       />
       <ScrollView>
         <Box padding={20}>
-          <Text title scaleLineHeight={-2} fontSize={50} marginBottom={40}>
+          <Text title scaleLineHeight={-2} fontSize={30} marginBottom={40}>
             {book.Nom}
           </Text>
           {!Object.keys(pericopeBook).length ? (
@@ -104,10 +105,7 @@ const PericopeScreen = ({ navigation }) => {
                 <React.Fragment key={chapterKey}>
                   {!!Object.keys(chapterObject).length && (
                     <Text titleItalic color="tertiary" fontSize={12} marginBottom={10}>
-                      CHAPITRE{' '}
-                      <Text titleItalic color="tertiary" fontSize={20}>
-                        {chapterKey}
-                      </Text>
+                      CHAPITRE {chapterKey}
                     </Text>
                   )}
                   {Object.entries(chapterObject).map(([verseKey, verseObject]) => {
@@ -158,7 +156,12 @@ const PericopeScreen = ({ navigation }) => {
           )}
         </Box>
       </ScrollView>
-      <Box row paddingHorizontal={20} paddingVertical={10} justifyContent="space-between">
+      <Box
+        background
+        row
+        paddingHorizontal={20}
+        paddingVertical={10}
+        justifyContent="space-between">
         {book.Numero != 1 && (
           <Link onPress={() => setBook(books[book.Numero - 2])}>
             <StyledIcon name="arrow-left" size={30} />

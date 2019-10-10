@@ -104,6 +104,7 @@ export const useSectionIndex = () => {
 
   useEffect(() => {
     if (section && section.current) {
+      console.log(section)
       section.current.scrollToLocation({
         sectionIndex: 0,
         itemIndex: 0,

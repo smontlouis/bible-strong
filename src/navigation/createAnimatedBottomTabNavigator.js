@@ -103,8 +103,7 @@ class AnimatedTabNavigationView extends React.Component {
               shadowColor: 'black',
               shadowOffset: { width: 0, height: 0 },
               shadowOpacity: 0.2,
-              shadowRadius: 7,
-              elevation: 2
+              shadowRadius: 7
             }}
           />
         </ScreenContainer>

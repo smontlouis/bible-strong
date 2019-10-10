@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { SectionList } from 'react-native'
 import styled from '@emotion/native'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import Container from '~common/ui/Container'
+import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Header from '~common/Header'
@@ -62,7 +62,7 @@ const LexiqueScreen = () => {
   if (error) {
     return (
       <Container>
-        <Header noBorder hasBackButton title="Désolé..." />
+        <Header hasBackButton title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`Impossible de charger la strong pour ce verset...${
@@ -75,21 +75,20 @@ const LexiqueScreen = () => {
     )
   }
 
-  if (!sectionResults) {
-    return <Loading message="Chargement..." />
-  }
-
   return (
     <Container>
-      <Header hasBackButton title="Lexique" noBorder />
+      <Header hasBackButton title="Lexique" />
       <SearchInput
+        disabled={!sectionResults}
         placeholder="Recherche par code ou par mot"
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
-      <Box flex>
-        {sectionResults.length ? (
+      <Box flex paddingTop={20}>
+        {!sectionResults ? (
+          <Loading message="Chargement..." />
+        ) : sectionResults.length ? (
           <SectionList
             ref={section}
             renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (

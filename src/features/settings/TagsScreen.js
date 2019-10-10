@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FlatList, Alert } from 'react-native'
+import { Alert } from 'react-native'
 import styled from '@emotion/native'
 import { useSelector, useDispatch } from 'react-redux'
 import * as Icon from '@expo/vector-icons'
@@ -7,6 +7,7 @@ import * as Icon from '@expo/vector-icons'
 import FabButton from '~common/ui/FabButton'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
+import FlatList from '~common/ui/FlatList'
 import Modal from '~common/Modal'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
@@ -68,7 +69,7 @@ const TagItem = ({ item, setOpen }) => {
           </Link>
         </Box>
       </Link>
-      <Border />
+      <Border marginHorizontal={20} />
     </Box>
   )
 }

@@ -19,7 +19,8 @@ class TabBarIcon extends React.Component {
     }
     return (
       <AnimatableIcon
-        easing="ease-out"
+        duration={400}
+        easing="ease-in-out-expo"
         name={this.props.name}
         size={23}
         color={this.props.focused ? theme.colors.primary : theme.colors.tertiary}

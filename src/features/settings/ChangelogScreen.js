@@ -1,17 +1,15 @@
 import React from 'react'
-import { ScrollView } from 'react-native'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
 
 import Container from '~common/ui/Container'
+import ScrollView from '~common/ui/ScrollView'
 import Header from '~common/Header'
-import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
 import changelog, { logTypes } from '~helpers/changelog'
-import { saveAllLogsAsSeen } from '~redux/modules/user'
 
 const getTagColor = type => {
   switch (type) {

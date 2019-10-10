@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { FlatList } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
@@ -8,6 +7,7 @@ import * as Icon from '@expo/vector-icons'
 
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
+import FlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -54,7 +54,7 @@ const HistoryItem = ({ item }) => {
             </Text>
           </Box>
         </Box>
-        <Border />
+        <Border marginHorizontal={20} />
       </Link>
     )
   }
@@ -92,7 +92,7 @@ const HistoryItem = ({ item }) => {
             </Text>
           </Box>
         </Box>
-        <Border />
+        <Border marginHorizontal={20} />
       </Link>
     )
   }
@@ -116,7 +116,7 @@ const HistoryItem = ({ item }) => {
             </Text>
           </Box>
         </Box>
-        <Border />
+        <Border marginHorizontal={20} />
       </Link>
     )
   }

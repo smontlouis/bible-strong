@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Platform, ScrollView, Share } from 'react-native'
+import { Share } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
@@ -12,6 +12,7 @@ import Back from '~common/Back'
 import Link from '~common/Link'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
+import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import { setHistory } from '~redux/modules/user'
 
@@ -88,7 +89,7 @@ const DictionnaryDetailScreen = ({ navigation }) => {
   }
 
   return (
-    <Container marginTop={Platform.OS === 'ios' ? 0 : 25}>
+    <Container>
       <Box padding={20}>
         <Box style={{ flexDirection: 'row' }}>
           <Back style={{ flex: 1 }}>

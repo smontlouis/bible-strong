@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
-import { FlatList, Alert } from 'react-native'
+import { Alert } from 'react-native'
 import { connect } from 'react-redux'
 
 import BibleNoteModal from './BibleNoteModal'
 import BibleNoteItem from './BibleNoteItem'
 import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
+import FlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 import MultipleTagsModal from '~common/MultipleTagsModal'

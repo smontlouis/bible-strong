@@ -33,6 +33,7 @@ export const useWaitForDatabase = () => {
       })
     } else {
       const loadDBAsync = async () => {
+        await timeout(2000) // Wait safely
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 

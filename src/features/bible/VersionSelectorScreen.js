@@ -3,13 +3,14 @@ import { connect } from 'react-redux'
 import styled from '@emotion/native'
 
 import Container from '~common/ui/Container'
+import RNFlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
 import * as BibleActions from '~redux/modules/bible'
 import { versions } from '~helpers/bibleVersions'
 
 import VersionSelectorItem from './VersionSelectorItem'
 
-const FlatList = styled.FlatList({
+const FlatList = styled(RNFlatList)({
   flex: 1,
   paddingTop: 10,
   paddingBottom: 20

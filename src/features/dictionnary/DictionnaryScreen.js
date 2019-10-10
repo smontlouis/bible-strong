@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { SectionList } from 'react-native'
 import styled from '@emotion/native'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
+import SectionList from '~common/ui/SectionList'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -67,7 +67,7 @@ const DictionnaireScreen = () => {
   if (error) {
     return (
       <Container>
-        <Header noBorder title="Désolé..." />
+        <Header hasBackButton title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`Impossible de charger le dictionnaire...${
@@ -80,21 +80,19 @@ const DictionnaireScreen = () => {
     )
   }
 
-  if (!sectionResults) {
-    return <Loading message="Chargement..." />
-  }
-
   return (
     <Container>
-      <Header title="Dictionnaire" noBorder />
+      <Header hasBackButton title="Dictionnaire" noBorder />
       <SearchInput
         placeholder="Recherche par mot"
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
-      <Box flex>
-        {sectionResults.length ? (
+      <Box flex paddingTop={20}>
+        {!sectionResults ? (
+          <Loading message="Chargement..." />
+        ) : sectionResults.length ? (
           <SectionList
             ref={section}
             renderItem={({ item: { id, word } }) => <DictionnaireItem key={id} {...{ word }} />}

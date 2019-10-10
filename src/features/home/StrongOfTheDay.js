@@ -44,7 +44,7 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
 
   if (error) {
     return (
-      <Box center shadow height={itemHeight} padding={30} width={itemWidth}>
+      <Box center rounded height={itemHeight} padding={30} width={itemWidth} marginRight={20}>
         {error === 'NOT_FOUND' ? (
           <>
             <FeatherIcon name="slash" size={30} color="quart" />
@@ -62,7 +62,7 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
 
   if (!strongReference) {
     return (
-      <Box height={itemHeight} center width={itemWidth}>
+      <Box height={itemHeight} center rounded width={itemWidth} marginRight={20}>
         <Text>Chargement...</Text>
       </Box>
     )

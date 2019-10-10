@@ -86,7 +86,7 @@ const MoreScreen = () => {
             </Text>
           </LinkItem>
         </Box>
-        <Border />
+        <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
           <LinkItem route="Downloads">
             <StyledIcon name="download" size={25} />

@@ -1,11 +1,11 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { FlatList } from 'react-native'
 import compose from 'recompose/compose'
 
 import useLogin from '~helpers/useLogin'
 import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
+import FlatList from '~common/ui/FlatList'
 import Box from '~common/ui/Box'
 import FloatingButton from '~common/ui/FloatingButton'
 import TagsHeader from '~common/TagsHeader'

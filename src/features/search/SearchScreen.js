@@ -128,7 +128,7 @@ const SearchScreen = ({ idxFile }) => {
 
   return (
     <Container>
-      <Header noBorder title="Recherche dans la Bible" />
+      <Header title="Recherche dans la Bible" />
       <SearchInput
         placeholder="Recherche par mot ou phrase"
         onChangeText={setSearchValue}

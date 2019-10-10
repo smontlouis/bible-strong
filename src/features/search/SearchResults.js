@@ -2,6 +2,7 @@ import React from 'react'
 import { withNavigation } from 'react-navigation'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 import compose from 'recompose/compose'
+import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -12,7 +13,7 @@ import SearchItem from './SearchItem'
 import Empty from '~common/Empty'
 import getBibleVerseText from '~helpers/getBibleVerseText'
 
-const SearchResults = ({ results, navigation, page, setPage }) => {
+const SearchResults = ({ results, navigation, page, setPage, theme }) => {
   if (!results || !results.length) {
     return (
       <Empty
@@ -26,7 +27,14 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
 
   return (
     <KeyboardAwareFlatList
-      style={{ padding: 20, paddingBottom: 40, flex: 1 }}
+      style={{
+        padding: 20,
+        paddingBottom: 40,
+        flex: 1,
+        backgroundColor: theme.colors.reverse,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30
+      }}
       removeClippedSubviews
       data={results}
       ListHeaderComponent={
@@ -74,4 +82,7 @@ const SearchResults = ({ results, navigation, page, setPage }) => {
   )
 }
 
-export default compose(withNavigation)(SearchResults)
+export default compose(
+  withNavigation,
+  withTheme
+)(SearchResults)

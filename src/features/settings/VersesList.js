@@ -1,8 +1,8 @@
 // @flow
 
 import React from 'react'
-import { FlatList } from 'react-native'
 
+import FlatList from '~common/ui/FlatList'
 import Container from '~common/ui/Container'
 import VerseComponent from './Verse'
 
@@ -31,15 +31,13 @@ const VersesList = ({ verseIds }) => {
   const sortedVersesByDate = sortVersesByDate(verseIds)
 
   return (
-    <Container>
-      <FlatList
-        data={sortedVersesByDate}
-        keyExtractor={(item, index) => item.date.toString()}
-        renderItem={({ item: { color, date, verseIds, tags } }) => (
-          <VerseComponent {...{ color, date, verseIds, tags }} />
-        )}
-      />
-    </Container>
+    <FlatList
+      data={sortedVersesByDate}
+      keyExtractor={(item, index) => item.date.toString()}
+      renderItem={({ item: { color, date, verseIds, tags } }) => (
+        <VerseComponent {...{ color, date, verseIds, tags }} />
+      )}
+    />
   )
 }
 

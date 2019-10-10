@@ -21,7 +21,7 @@ class BibleCompareVerses extends Component {
     const { title } = this.state
     return (
       <Container>
-        <Header hasBackButton noBorder title={title ? `Comparer ${title}` : 'Chargement...'} />
+        <Header hasBackButton title={title ? `Comparer ${title}` : 'Chargement...'} />
         <ScrollView>
           {Object.entries(versions).map(([versionId, obj]) => (
             <BibleCompareVerseItem

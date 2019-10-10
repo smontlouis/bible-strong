@@ -10,7 +10,7 @@ import Paragraph from '~common/ui/Paragraph'
 
 const StyledView = styled.TouchableOpacity(({ isSelected, theme }) => ({
   backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
-  borderRadius: 2,
+  borderRadius: 5,
   paddingLeft: 3,
   paddingRight: 3,
   marginBottom: 5,
