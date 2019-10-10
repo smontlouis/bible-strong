@@ -70,7 +70,7 @@ const HomeScreen = () => {
             </Box>
             <Box width={20} />
             <Box flex>
-              <Button
+              {/* <Button
                 color="#7ed6df"
                 route="Support"
                 title="Soutenir"
@@ -82,7 +82,7 @@ const HomeScreen = () => {
                     style={{ marginRight: 10 }}
                   />
                 }
-              />
+              /> */}
             </Box>
           </Box>
         </Box>
