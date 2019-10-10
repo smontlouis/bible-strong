@@ -45,7 +45,7 @@ class ConcordanceVerse extends React.Component {
       <Container
         onPress={() =>
           navigation.navigate({
-            routeName: 'BibleView', 
+            routeName: 'BibleView',
             params: {
               isReadOnly: true,
               book: books[verse.Livre - 1],

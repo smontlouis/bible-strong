@@ -3,7 +3,7 @@ import Carousel from 'react-native-snap-carousel'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import compose from 'recompose/compose'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
@@ -163,9 +163,8 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   }
 
   return (
-    <Box flex paddingTop={getBottomSpace()}>
+    <Box flex paddingTop={getStatusBarHeight()}>
       <Header
-        background
         background
         hasBackButton
         title={`${headerTitle} ${headerTitle.length < 20 ? '- Dict. LSG' : ''}`}

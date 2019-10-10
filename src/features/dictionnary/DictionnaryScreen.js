@@ -35,12 +35,7 @@ const SectionTitle = styled(Box)(({ theme }) => ({
   backgroundColor: theme.colors.secondary,
   justifyContent: 'center',
   alignItems: 'center',
-  overflow: 'visible',
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 3,
-  elevation: 2
+  overflow: 'visible'
 }))
 
 const DictionnaireScreen = () => {

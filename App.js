@@ -1,3 +1,4 @@
+import 'react-native-root-siblings'
 import React from 'react'
 import { YellowBox } from 'react-native'
 import { AppLoading, Updates } from 'expo'

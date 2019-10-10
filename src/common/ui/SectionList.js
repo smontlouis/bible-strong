@@ -21,7 +21,7 @@ const fadeIn = {
 }
 
 export default React.forwardRef((props, ref) => (
-  <Animatable.View style={{ flex: 1 }} animation={fadeIn}>
+  <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={100} duration={500}>
     <SectionList ref={ref} {...props} />
   </Animatable.View>
 ))

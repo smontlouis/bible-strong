@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1570678844370',
+    type: logTypes.NEW,
+    title: 'Nouveau design & bugs',
+    description:
+      "Une refonte graphique totale a été effectuée. Voici donc un nouveau design un peu moins générique. J'espère que ça vous plaira ! Si vous avez une remarque, envoyez-moi un mail."
+  },
+  {
     date: '1570343318030',
     type: logTypes.BUG,
     title: 'Version BDS et bugs',

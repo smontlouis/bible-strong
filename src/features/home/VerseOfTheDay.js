@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Share } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'
 import { Placeholder, PlaceholderLine, Fade } from 'rn-placeholder'
+import * as Animatable from 'react-native-animatable'
 
 import SnackBar from '~common/SnackBar'
-import useLogin from '~helpers/useLogin'
 import { setNotificationVOD } from '~redux/modules/user'
 import { zeroFill } from '~helpers/zeroFill'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -19,8 +19,9 @@ import ShowMoreImage from './ShowMoreImage'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
 
+const AnimatableBox = Animatable.createAnimatableComponent(Box)
+
 const VerseOfTheDay = () => {
-  const { isLogged } = useLogin()
   const verseOfTheDay = useVerseOfTheDay()
   const imageUrls = useImageUrls(verseOfTheDay)
   const [timerPickerOpen, setTimePicker] = useState(false)
@@ -77,7 +78,7 @@ const VerseOfTheDay = () => {
 
   return (
     <>
-      <Box padding={20} grey>
+      <AnimatableBox animation="fadeIn" padding={20} grey>
         <Box row alignItems="center">
           <Text title fontSize={25} flex>
             Verset du jour
@@ -115,7 +116,7 @@ const VerseOfTheDay = () => {
             {title} - {version}
           </Text>
         </Box>
-      </Box>
+      </AnimatableBox>
       <ShowMoreImage imageUrls={imageUrls} />
       <DateTimePicker
         date={initialDate}

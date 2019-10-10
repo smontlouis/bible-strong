@@ -1,9 +1,10 @@
 import React from 'react'
-import { Linking, ScrollView } from 'react-native'
+import { Linking } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
+import ScrollView from '~common/ui/ScrollView'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import Container from '~common/ui/Container'

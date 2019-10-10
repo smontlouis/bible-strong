@@ -1,5 +1,6 @@
 import React from 'react'
 import { ScrollView, Platform } from 'react-native'
+import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
@@ -76,7 +77,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5
 }))
 
-const UserWidget = () => {
+const UserWidget = ({ theme }) => {
   const { isLogged, user } = useLogin()
   const { highlights, notes, studies, tags } = useSelector(({ user: { bible } }) => ({
     highlights: Object.keys(bible.highlights).length,
@@ -99,7 +100,12 @@ const UserWidget = () => {
             route="Login"
             title="Je me connecte"
             rightIcon={
-              <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
+              <Icon.Feather
+                name="arrow-right"
+                size={20}
+                color={theme.colors.reverse}
+                style={{ marginLeft: 10 }}
+              />
             }
           />
         </Box>
@@ -183,7 +189,9 @@ const UserWidget = () => {
           <Button
             route="Lexique"
             title="Lexique"
-            leftIcon={<LexiqueIcon color="white" style={{ marginRight: 10 }} size={25} />}
+            leftIcon={
+              <LexiqueIcon color={theme.colors.reverse} style={{ marginRight: 10 }} size={25} />
+            }
           />
         </Box>
         <Box width={20} />
@@ -193,7 +201,12 @@ const UserWidget = () => {
             route="Dictionnaire"
             title="Dictionnaire"
             leftIcon={
-              <DictionnaireIcon secondary color="white" style={{ marginRight: 10 }} size={25} />
+              <DictionnaireIcon
+                secondary
+                color={theme.colors.reverse}
+                style={{ marginRight: 10 }}
+                size={25}
+              />
             }
           />
         </Box>
@@ -202,4 +215,4 @@ const UserWidget = () => {
   )
 }
 
-export default UserWidget
+export default withTheme(UserWidget)

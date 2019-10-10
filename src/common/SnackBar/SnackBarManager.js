@@ -1,10 +1,11 @@
 import React from 'react'
+import { View } from 'react-native'
 import RootSiblings from 'react-native-root-siblings'
 
 import SnackBar from './SnackBar'
 
 export default class SnackBarManager {
-  constructor () {
+  constructor() {
     this.current = null
     this.queue = []
   }
@@ -14,6 +15,9 @@ export default class SnackBarManager {
       props.onAutoDismiss = this.dismiss
     }
 
+    const sibling = new RootSiblings(
+      <View style={{ top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'red' }} />
+    )
     const current = new RootSiblings(<SnackBar {...props} />)
     this.current = current
     callback && callback()

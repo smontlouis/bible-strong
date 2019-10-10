@@ -4,7 +4,7 @@ import { ActivityIndicator } from 'react-native'
 import Link from '~common/Link'
 
 const WrapperButton = styled.TouchableOpacity(
-  ({ theme, small, reverse, secondary, type, disabled }) => ({
+  ({ theme, small, reverse, secondary, type, disabled, color }) => ({
     backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
     borderWidth: reverse ? 1 : 0,
     borderColor: theme.colors.darkGrey,
@@ -15,6 +15,8 @@ const WrapperButton = styled.TouchableOpacity(
     paddingLeft: 10,
     paddingRight: 10,
     flexDirection: 'row',
+
+    ...(color && { backgroundColor: color }),
 
     ...(secondary && { backgroundColor: theme.colors.secondary }),
 
@@ -58,7 +60,8 @@ const Button = ({
   isLoading,
   leftIcon,
   rightIcon,
-  secondary
+  secondary,
+  color
 }) => {
   const Component = onPress ? WrapperButton : WrapperLink
 
@@ -71,6 +74,7 @@ const Button = ({
       small={small}
       reverse={reverse}
       secondary={secondary}
+      color={color}
       type={type}>
       {isLoading ? (
         <ActivityIndicator color="white" />

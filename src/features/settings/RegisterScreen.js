@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { ScrollView } from 'react-native'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 
 import FireAuth from '~helpers/FireAuth'
 import Button from '~common/ui/Button'
+import ScrollView from '~common/ui/ScrollView'
 import TextInput from '~common/ui/TextInput'
 import Spacer from '~common/ui/Spacer'
 import Container from '~common/ui/Container'

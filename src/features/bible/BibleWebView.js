@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Alert, View } from 'react-native'
+import { Alert } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
-// import { Platform } from 'react-native'
+import * as Animatable from 'react-native-animatable'
 // import * as Haptics from 'expo-haptics'
 import * as Sentry from 'sentry-expo'
 
@@ -196,12 +196,14 @@ class BibleWebView extends Component {
     }
 
     return (
-      <View
+      <Animatable.View
+        transition="opacity"
         style={{
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
           overflow: 'hidden',
-          flex: 1
+          flex: 1,
+          opacity: this.state.webViewOpacity
         }}>
         <WebView
           useWebKit
@@ -217,16 +219,13 @@ class BibleWebView extends Component {
             console.warn('WebView error: ', nativeEvent)
           }}
           source={{ html: this.HTMLFile }}
-          style={{
-            opacity: this.state.webViewOpacity
-          }}
           injectedJavaScript={INJECTED_JAVASCRIPT}
           domStorageEnabled
           allowUniversalAccessFromFileURLs
           allowFileAccessFromFileURLs
           allowFileAccess
         />
-      </View>
+      </Animatable.View>
     )
   }
 }

@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { ScrollView } from 'react-native'
 
 import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
+import ScrollView from '~common/ui/ScrollView'
 import Header from '~common/Header'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import { versions } from '~helpers/bibleVersions'

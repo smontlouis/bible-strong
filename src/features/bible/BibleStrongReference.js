@@ -50,7 +50,9 @@ const ConcordanceText = styled(Paragraph)(({ isConcordance, theme }) => ({
   ...(isConcordance
     ? {
         color: theme.colors.primary,
-        fontWeight: 'bold'
+        textDecorationLine: 'underline',
+        textDecorationStyle: 'solid',
+        textDecorationColor: theme.colors.primary
       }
     : {})
 }))

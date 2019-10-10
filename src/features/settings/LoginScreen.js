@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react'
-import { ScrollView, Linking } from 'react-native'
-
-import * as Icon from '@expo/vector-icons'
-import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
+import ScrollView from '~common/ui/ScrollView'
 import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'

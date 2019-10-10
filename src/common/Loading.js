@@ -10,7 +10,10 @@ import useTimeout from '~helpers/useTimeout'
 const Container = styled.View(({ theme }) => ({
   flex: 1,
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  backgroundColor: theme.colors.lightGrey,
+  borderTopLeftRadius: 30,
+  borderBottomLeftRadius: 30
 }))
 
 const Loading = ({ message = null, subMessage = null, style, children, theme }) => {

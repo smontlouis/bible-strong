@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
 
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
@@ -214,7 +214,8 @@ class BibleVerseDetailScreen extends React.Component {
 
     const countWords = this.countDictionnaireWords()
     return (
-      <Box flex paddingTop={getBottomSpace()}>
+      <Box flex>
+        <Box background paddingTop={getStatusBarHeight()} />
         <Header
           background
           hasBackButton

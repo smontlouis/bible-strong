@@ -1,19 +1,26 @@
 import React from 'react'
-import { ScrollView as RNScrollView } from 'react-native'
+import { ScrollView as RNScrollView, Linking } from 'react-native'
+import * as Icon from '@expo/vector-icons'
+import styled from '@emotion/native'
+
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import ScrollView from '~common/ui/ScrollView'
-
+import { HomeScrollView } from '~common/ui/ScrollView'
 import VerseOfTheDay from './VerseOfTheDay'
 import StrongOfTheDay from './StrongOfTheDay'
 import WordOfTheDay from './WordOfTheDay'
 import UserWidget from './UserWidget'
+import Button from '~common/ui/Button'
+
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.reverse
+}))
 
 const HomeScreen = () => {
   return (
     <Box grey>
-      <ScrollView>
+      <HomeScrollView>
         <UserWidget />
         <Box grey>
           <RoundedCorner />
@@ -24,7 +31,7 @@ const HomeScreen = () => {
             Au hasard
           </Text>
         </Box>
-        <Box grey>
+        <Box grey paddingBottom={30}>
           <RNScrollView
             horizontal
             style={{ overflow: 'visible' }}
@@ -40,7 +47,46 @@ const HomeScreen = () => {
             <WordOfTheDay color1="rgba(255,197,61,0.7)" color2="rgb(255,188,0)" />
           </RNScrollView>
         </Box>
-      </ScrollView>
+        <Box grey>
+          <Box
+            background
+            row
+            padding={20}
+            style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}>
+            <Box flex>
+              <Button
+                color="#3b5998"
+                onPress={() => Linking.openURL('https://www.facebook.com/fr.bible.strong')}
+                title="Suivre"
+                leftIcon={
+                  <FeatherIcon
+                    name="facebook"
+                    size={20}
+                    color="white"
+                    style={{ marginRight: 10 }}
+                  />
+                }
+              />
+            </Box>
+            <Box width={20} />
+            <Box flex>
+              <Button
+                color="#7ed6df"
+                route="Support"
+                title="Soutenir"
+                leftIcon={
+                  <FeatherIcon
+                    name="thumbs-up"
+                    size={20}
+                    color="white"
+                    style={{ marginRight: 10 }}
+                  />
+                }
+              />
+            </Box>
+          </Box>
+        </Box>
+      </HomeScrollView>
     </Box>
   )
 }
