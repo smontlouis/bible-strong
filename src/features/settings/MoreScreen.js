@@ -125,10 +125,10 @@ const MoreScreen = () => {
             <StyledIcon name="terminal" size={25} />
             <Text fontSize={15}>Changelog</Text>
           </LinkItem>
-          {/* <LinkItem route="Support">
+          <LinkItem route="Support">
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
             <Text fontSize={15}>Soutenir le développeur</Text>
-          </LinkItem> */}
+          </LinkItem>
           {!isLogged && (
             <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />
