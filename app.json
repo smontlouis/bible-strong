@@ -33,9 +33,10 @@
       "src/assets/fonts/*",
       "src/assets/images/*",
       "src/assets/bible_versions/bible-lsg-1910.json",
-      "node_modules/@expo/vector-icons/fonts/Feather.ttf",
+      "node_modules/@expo/vector-icons/Feather.ttf",
       "src/features/bible/bibleWebView/dist/index.html",
-      "src/features/studies/studiesWebView/dist/index.html"
+      "src/features/studies/studiesWebView/dist/index.html",
+      "src/assets/db/strong.sqlite"
     ],
     "updates": {
       "fallbackToCacheTimeout": 0,
