@@ -51,6 +51,12 @@ export const useWaitForDatabase = () => {
         if (!dbFile.exists) {
           // || sqliteDB.hash !== dictionnaireDatabaseHash
 
+          if (!sqliteDir.exists) {
+            await FileSystem.makeDirectoryAsync(sqliteDirPath)
+          } else if (!sqliteDir.isDirectory) {
+            throw new Error('SQLite dir is not a directory')
+          }
+
           if (sqliteDB.localUri) {
             await FileSystem.copyAsync({
               from: sqliteDB.localUri,
