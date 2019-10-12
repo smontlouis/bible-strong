@@ -52,7 +52,9 @@ export const useWaitForDatabase = () => {
         if (!dbFile.exists) {
           //  || sqliteDB.hash !== strongDatabaseHash
 
-          if (sqliteDB.localUri) {
+          if (sqliteDB.localUri && !window.strongDownloadHasStarted) {
+            window.strongDownloadHasStarted = true
+
             if (!sqliteDir.exists) {
               await FileSystem.makeDirectoryAsync(sqliteDirPath)
             } else if (!sqliteDir.isDirectory) {
@@ -72,6 +74,7 @@ export const useWaitForDatabase = () => {
               type: 'strong.setLoading',
               payload: false
             })
+            window.strongDownloadHasStarted = false
           } else {
             // Waiting for user to accept to download
             if (!startDownload) {
