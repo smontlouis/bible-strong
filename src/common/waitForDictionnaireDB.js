@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
@@ -50,63 +50,80 @@ export const useWaitForDatabase = () => {
 
         if (!dbFile.exists) {
           // || sqliteDB.hash !== dictionnaireDatabaseHash
-          // Waiting for user to accept to download
-          if (!startDownload) {
-            dispatch({
-              type: 'dictionnaire.setProposeDownload',
-              payload: true
+
+          if (sqliteDB.localUri) {
+            await FileSystem.copyAsync({
+              from: sqliteDB.localUri,
+              to: dbPath
             })
-            return
-          }
 
-          try {
-            if (!window.dictionnaireDownloadHasStarted) {
-              window.dictionnaireDownloadHasStarted = true
-              console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+            await initDictionnaireDB()
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+            console.log('DB dictionnaire loaded')
 
-              await FileSystem.createDownloadResumable(
-                sqliteDB.uri,
-                dbPath,
-                null,
-                ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                  const idxProgress =
-                    Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
-                  dispatch({
-                    type: 'dictionnaire.setProgress',
-                    payload: idxProgress
-                  })
-                }
-              ).downloadAsync()
-
-              dispatchRedux(setDictionnaireDatabaseHash(sqliteDB.hash))
-
-              await initDictionnaireDB()
-              console.log('DB dictionnaire loaded')
-              dispatch({
-                type: 'dictionnaire.setLoading',
-                payload: false
-              })
-              window.dictionnaireDownloadHasStarted = false
-            }
-          } catch (e) {
-            SnackBar.show(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
-              'danger'
-            )
             dispatch({
-              type: 'dictionnaire.setProposeDownload',
-              payload: true
-            })
-            dispatch({
-              type: 'dictionnaire.setStartDownload',
+              type: 'dictionnaire.setLoading',
               payload: false
             })
+          } else {
+            // Waiting for user to accept to download
+            if (!startDownload) {
+              dispatch({
+                type: 'dictionnaire.setProposeDownload',
+                payload: true
+              })
+              return
+            }
+
+            try {
+              if (!window.dictionnaireDownloadHasStarted) {
+                window.dictionnaireDownloadHasStarted = true
+                console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+
+                if (!sqliteDir.exists) {
+                  await FileSystem.makeDirectoryAsync(sqliteDirPath)
+                } else if (!sqliteDir.isDirectory) {
+                  throw new Error('SQLite dir is not a directory')
+                }
+
+                await FileSystem.createDownloadResumable(
+                  sqliteDB.uri,
+                  dbPath,
+                  null,
+                  ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+                    const idxProgress =
+                      Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
+                    dispatch({
+                      type: 'dictionnaire.setProgress',
+                      payload: idxProgress
+                    })
+                  }
+                ).downloadAsync()
+
+                dispatchRedux(setDictionnaireDatabaseHash(sqliteDB.hash))
+
+                await initDictionnaireDB()
+                console.log('DB dictionnaire loaded')
+                dispatch({
+                  type: 'dictionnaire.setLoading',
+                  payload: false
+                })
+                window.dictionnaireDownloadHasStarted = false
+              }
+            } catch (e) {
+              SnackBar.show(
+                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+                'danger'
+              )
+              dispatch({
+                type: 'dictionnaire.setProposeDownload',
+                payload: true
+              })
+              dispatch({
+                type: 'dictionnaire.setStartDownload',
+                payload: false
+              })
+            }
           }
         } else {
           await initDictionnaireDB()

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-import AssetUtils from 'expo-asset-utils'
+import { Asset } from 'expo-asset'
 import SnackBar from '~common/SnackBar'
 
 import { initStrongDB, getStrongDB } from '~helpers/database'
@@ -33,7 +33,7 @@ export const useWaitForDatabase = () => {
       })
     } else {
       const loadDBAsync = async () => {
-        await timeout(2000) // Wait safely
+        await timeout(1000) // Wait safely
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
@@ -47,67 +47,85 @@ export const useWaitForDatabase = () => {
         //   }
         // }
 
-        const sqliteDB = await AssetUtils.resolveAsync(require('~assets/db/strong.sqlite'))
+        const sqliteDB = await Asset.fromModule(require('~assets/db/strong.sqlite'))
 
         if (!dbFile.exists) {
           //  || sqliteDB.hash !== strongDatabaseHash
-          // Waiting for user to accept to download
-          if (!startDownload) {
-            dispatch({
-              type: 'strong.setProposeDownload',
-              payload: true
+
+          if (sqliteDB.localUri) {
+            await FileSystem.copyAsync({
+              from: sqliteDB.localUri,
+              to: dbPath
             })
-            return
-          }
 
-          try {
-            if (!window.strongDownloadHasStarted) {
-              window.strongDownloadHasStarted = true
-              console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+            await initStrongDB()
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+            console.log('DB strong loaded')
 
-              await FileSystem.createDownloadResumable(
-                sqliteDB.uri,
-                dbPath,
-                null,
-                ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
-                  dispatch({
-                    type: 'strong.setProgress',
-                    payload: idxProgress
-                  })
-                }
-              ).downloadAsync()
-
-              dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
-
-              await initStrongDB()
-              console.log('DB strong loaded')
-
-              dispatch({
-                type: 'strong.setLoading',
-                payload: false
-              })
-              window.strongDownloadHasStarted = false
-            }
-          } catch (e) {
-            SnackBar.show(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
-              'danger'
-            )
             dispatch({
-              type: 'strong.setProposeDownload',
-              payload: true
-            })
-            dispatch({
-              type: 'strong.setStartDownload',
+              type: 'strong.setLoading',
               payload: false
             })
+          } else {
+            // Waiting for user to accept to download
+            if (!startDownload) {
+              dispatch({
+                type: 'strong.setProposeDownload',
+                payload: true
+              })
+              return
+            }
+
+            try {
+              if (!window.strongDownloadHasStarted) {
+                window.strongDownloadHasStarted = true
+                console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+
+                if (!sqliteDir.exists) {
+                  await FileSystem.makeDirectoryAsync(sqliteDirPath)
+                } else if (!sqliteDir.isDirectory) {
+                  throw new Error('SQLite dir is not a directory')
+                }
+
+                await FileSystem.createDownloadResumable(
+                  sqliteDB.uri,
+                  dbPath,
+                  null,
+                  ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+                    const idxProgress =
+                      Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+                    dispatch({
+                      type: 'strong.setProgress',
+                      payload: idxProgress
+                    })
+                  }
+                ).downloadAsync()
+
+                dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
+
+                await initStrongDB()
+                console.log('DB strong loaded')
+
+                dispatch({
+                  type: 'strong.setLoading',
+                  payload: false
+                })
+                window.strongDownloadHasStarted = false
+              }
+            } catch (e) {
+              SnackBar.show(
+                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+                'danger'
+              )
+              dispatch({
+                type: 'strong.setProposeDownload',
+                payload: true
+              })
+              dispatch({
+                type: 'strong.setStartDownload',
+                payload: false
+              })
+            }
           }
         } else {
           await initStrongDB()

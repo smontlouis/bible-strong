@@ -17,7 +17,7 @@ const DownloadRequired = ({
   noHeader
 }) => {
   const padding = small ? 10 : 30
-  const iconSize = small ? 40 : size
+  const iconSize = small ? 20 : size
   return (
     <Container>
       {!noHeader && <Header title="Téléchargement nécessaire" hasBackButton={hasBackButton} />}

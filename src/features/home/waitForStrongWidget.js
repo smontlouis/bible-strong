@@ -34,7 +34,7 @@ const waitForWidget = WrappedComponent => props => {
       <Box center rounded height={itemHeight} width={itemWidth} marginRight={20}>
         <DownloadRequired
           noHeader
-          title="La base de données strong est requise pour accéder à ce widget."
+          title="Base de données strong requise."
           setStartDownload={setStartDownload}
           fileSize={35}
           small

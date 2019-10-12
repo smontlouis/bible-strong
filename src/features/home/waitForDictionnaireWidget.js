@@ -1,10 +1,14 @@
 import React from 'react'
 import { ProgressBar } from 'react-native-paper'
 
+import { wp } from '~helpers/utils'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 import DownloadRequired from '~common/DownloadRequired'
+
+const itemWidth = wp(60)
+const itemHeight = 130
 
 const waitForWidget = WrappedComponent => props => {
   const {
@@ -17,7 +21,7 @@ const waitForWidget = WrappedComponent => props => {
 
   if (isLoading && startDownload) {
     return (
-      <Box center shadow height={150}>
+      <Box center rounded height={itemHeight} width={itemWidth}>
         <Loading message="Téléchargement du dictionnaire...">
           <ProgressBar progress={progress} color="blue" />
         </Loading>
@@ -27,10 +31,10 @@ const waitForWidget = WrappedComponent => props => {
 
   if (isLoading && proposeDownload) {
     return (
-      <Box center shadow height={150}>
+      <Box center rounded height={itemHeight} width={itemWidth}>
         <DownloadRequired
           noHeader
-          title="Le dictionnaire est requis pour accéder à ce widget."
+          title="Dictionnaire requis"
           setStartDownload={setStartDownload}
           fileSize={35}
           small
@@ -41,7 +45,7 @@ const waitForWidget = WrappedComponent => props => {
 
   if (isLoading) {
     return (
-      <Box center shadow height={150}>
+      <Box center rounded height={itemHeight} width={itemWidth}>
         <Loading />
       </Box>
     )
