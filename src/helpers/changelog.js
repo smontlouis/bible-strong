@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571074411272',
+    type: logTypes.BUG,
+    title: 'Versets en surbrillance',
+    description:
+      "Certains d'entre vous m'ont fait par de la difficulté de lire les versets en surbrillance. J'ai donc remis la surbrillance en arrière-plan.\nSi vous préfériez l'autre méthode, dites-le moi et je crééerai une option pour choisir entre couleur de fond ou surlignage."
+  },
+  {
     date: '1570678844370',
     type: logTypes.NEW,
     title: 'Nouveau design & bugs',
