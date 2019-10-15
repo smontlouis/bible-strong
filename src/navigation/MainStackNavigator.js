@@ -19,6 +19,7 @@ import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVer
 import LoginScreen from '~features/settings/LoginScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
 import SupportScreen from '~features/settings/SupportScreen'
+import FAQScreen from '~features/settings/FAQScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
 import PericopeScreen from '../features/bible/PericopeScreen'
@@ -56,7 +57,8 @@ export default createStackNavigator(
     Downloads: { screen: DownloadsScreen },
     Search: { screen: SearchScreen },
     Register: { screen: RegisterScreen },
-    Dictionnaire: { screen: DictionnaryScreen }
+    Dictionnaire: { screen: DictionnaryScreen },
+    FAQ: { screen: FAQScreen }
   },
   {
     headerMode: 'none'

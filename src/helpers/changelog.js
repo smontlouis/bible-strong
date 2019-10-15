@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571175754967',
+    type: logTypes.NEW,
+    title: 'Foire aux questions',
+    description:
+      'Une FAQ à été ajoutée tout en bas de la home, elle répond à la plupart des questions que vous me posez régulièrement. :)'
+  },
+  {
     date: '1571167427324',
     type: logTypes.BUG,
     title: 'Partage de verset',

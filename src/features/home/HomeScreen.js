@@ -85,6 +85,21 @@ const HomeScreen = () => {
               />
             </Box>
           </Box>
+          <Box background padding={20} paddingTop={0}>
+            <Button
+              color="#2ecc71"
+              route="FAQ"
+              title="Foire aux questions"
+              leftIcon={
+                <FeatherIcon
+                  name="help-circle"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 10 }}
+                />
+              }
+            />
+          </Box>
         </Box>
       </HomeScrollView>
     </Box>

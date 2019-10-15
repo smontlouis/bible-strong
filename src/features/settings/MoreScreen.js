@@ -92,6 +92,14 @@ const MoreScreen = () => {
             <StyledIcon name="download" size={25} />
             <Text fontSize={15}>Gestion des téléchargements</Text>
           </LinkItem>
+          <LinkItem route="Changelog">
+            <StyledIcon name="terminal" size={25} />
+            <Text fontSize={15}>Changelog</Text>
+          </LinkItem>
+          <LinkItem route="FAQ">
+            <StyledIcon name="help-circle" size={25} />
+            <Text fontSize={15}>Foire aux questions</Text>
+          </LinkItem>
           <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
             <StyledIcon name="sun" size={25} />
             <Text fontSize={15}>Idées de fonctionnalités</Text>
@@ -100,6 +108,7 @@ const MoreScreen = () => {
             <StyledIcon name="alert-circle" size={25} />
             <Text fontSize={15}>Bugs</Text>
           </LinkItem>
+
           <LinkItem href="https://www.facebook.com/fr.bible.strong">
             <StyledIcon name="facebook" size={25} />
             <Text fontSize={15}>Nous suivre sur facebook</Text>
@@ -120,10 +129,6 @@ const MoreScreen = () => {
           <LinkItem href="mailto:s.montlouis.calixte@gmail.com">
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>Contacter le développeur</Text>
-          </LinkItem>
-          <LinkItem route="Changelog">
-            <StyledIcon name="terminal" size={25} />
-            <Text fontSize={15}>Changelog</Text>
           </LinkItem>
           <LinkItem route="Support">
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
