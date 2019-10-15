@@ -4,6 +4,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
 import styled from '@emotion/native'
 import { withNavigation } from 'react-navigation'
+import { useSelector } from 'react-redux'
 
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
@@ -17,11 +18,11 @@ const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary
 }))
 
-const Circle = styled(Box)(({ theme, color }) => ({
+const Circle = styled(Box)(({ colors, color }) => ({
   width: 15,
   height: 15,
   borderRadius: 3,
-  backgroundColor: theme.colors[color],
+  backgroundColor: colors[color],
   marginRight: 5,
   marginTop: 5
 }))
@@ -36,6 +37,9 @@ const Container = styled(Box)(({ theme }) => ({
 
 const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
   const verses = useBibleVerses(verseIds)
+  const { colors } = useSelector(state => ({
+    colors: state.user.bible.settings.colors[state.user.bible.settings.theme]
+  }))
 
   if (!verses.length) {
     return null
@@ -58,7 +62,7 @@ const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
       <Container>
         <Box row style={{ marginBottom: 10 }}>
           <Box flex row alignContent="center">
-            <Circle color={color} />
+            <Circle colors={colors} color={color} />
             <Text fontSize={14} marginLeft={5} title>
               {title}
             </Text>

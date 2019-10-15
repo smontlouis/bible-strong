@@ -4,6 +4,10 @@ import { Dimensions } from 'react-native'
 const window = Dimensions.get('window')
 const screen = Dimensions.get('screen')
 
+export const MAX_WIDTH = 800
+
+export const maxWidth = width => (width > MAX_WIDTH ? MAX_WIDTH : width)
+
 export default function useDimensions() {
   const [dimensions, setDimensions] = useState({
     window,

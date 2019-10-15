@@ -31,7 +31,9 @@ const Container = styled.View({
 
 const ReadMeButton = styled(Button)({
   marginHorizontal: 20,
-  marginBottom: 10 + getBottomSpace()
+  marginBottom: 10 + getBottomSpace(),
+  width: '100%',
+  maxWidth: 600
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -264,7 +266,7 @@ class BibleViewer extends Component {
           />
         )}
         {isReadOnly && !error && (
-          <Box background>
+          <Box grey center>
             <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />
           </Box>
         )}

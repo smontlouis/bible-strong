@@ -20,7 +20,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 const HomeScreen = () => {
   return (
     <Box grey>
-      <HomeScrollView>
+      <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
         <Box grey>
           <RoundedCorner />

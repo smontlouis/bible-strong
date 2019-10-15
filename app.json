@@ -12,7 +12,7 @@
       "android"
     ],
     "version": "5.1.1",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon-2.png",
     "splash": {
       "image": "./assets/images/splash.png",

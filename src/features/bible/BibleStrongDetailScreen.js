@@ -198,7 +198,7 @@ class BibleStrongDetailScreen extends React.Component {
             <TitleBorder />
           </Box>
         </Box>
-        <ScrollView flex={1} style={{ paddingLeft: 20, paddingRight: 20 }}>
+        <ScrollView style={{ paddingLeft: 20, paddingRight: 20, flex: 1 }}>
           <Box>
             {!!Hebreu && (
               <ViewItem>

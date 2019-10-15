@@ -1,9 +1,11 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { Animated, StyleSheet, View } from 'react-native'
+import { Animated, StyleSheet } from 'react-native'
 import { createTabNavigator } from 'react-navigation-tabs'
 import { ScreenContainer } from 'react-native-screens'
+
 import BottomTabBar from '~common/BottomTabBar'
+import withDeviceOrientation from '~helpers/withDeviceOrientation'
 
 const RoundedTopBottomBar = styled.View(({ theme }) => ({
   height: 20,
@@ -19,6 +21,13 @@ const RoundedTopBottomBar = styled.View(({ theme }) => ({
   shadowOpacity: 0.2,
   shadowRadius: 7
 }))
+
+const Container = styled.View(({ orientation }) => ({
+  flex: 1,
+  overflow: 'hidden',
+  flexDirection: orientation.portrait ? 'column' : 'row'
+}))
+
 class AnimatedTabNavigationView extends React.Component {
   static defaultProps = {
     getAccessibilityRole: () => 'button',
@@ -79,9 +88,12 @@ class AnimatedTabNavigationView extends React.Component {
 
   render() {
     const { loaded } = this.state
+    const { orientation } = this.props
+
+    console.log('DUDE', orientation)
 
     return (
-      <View style={styles.container}>
+      <Container orientation={orientation}>
         <ScreenContainer style={{ flex: 1, position: 'relative' }}>
           {this.props.navigation.state.routes.map((route, index) => {
             if (!loaded.includes(index)) {
@@ -105,10 +117,15 @@ class AnimatedTabNavigationView extends React.Component {
               </Animated.View>
             )
           })}
-          <RoundedTopBottomBar />
+          {orientation.portrait && <RoundedTopBottomBar />}
         </ScreenContainer>
-        <TabBar getButtonComponent={this.getButtonComponent} jumpTo={this.jumpTo} {...this.props} />
-      </View>
+        <TabBar
+          getButtonComponent={this.getButtonComponent}
+          jumpTo={this.jumpTo}
+          orientation={orientation}
+          {...this.props}
+        />
+      </Container>
     )
   }
 }
@@ -127,10 +144,11 @@ const TabBar = props => {
     getTestID,
     renderIcon,
     onTabPress,
-    jumpTo
+    jumpTo,
+    orientation,
+    descriptors
   } = props
 
-  const { descriptors } = props
   const { state } = props.navigation
   const route = state.routes[state.index]
   const descriptor = descriptors[route.key]
@@ -143,6 +161,7 @@ const TabBar = props => {
   return (
     <TabBarComponent
       {...tabBarOptions}
+      orientation={orientation}
       jumpTo={jumpTo}
       navigation={navigation}
       screenProps={screenProps}
@@ -158,11 +177,4 @@ const TabBar = props => {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    overflow: 'hidden'
-  }
-})
-
-export default createTabNavigator(AnimatedTabNavigationView)
+export default createTabNavigator(withDeviceOrientation(AnimatedTabNavigationView))

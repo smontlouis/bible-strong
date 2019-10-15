@@ -1,37 +1,38 @@
 import React, { useState } from 'react'
 import * as Animatable from 'react-native-animatable'
 import { LinearGradient } from 'expo-linear-gradient'
-import * as FileSystem from 'expo-file-system'
-import * as Sharing from 'expo-sharing'
+// import * as FileSystem from 'expo-file-system'
+// import * as Sharing from 'expo-sharing'
 import { useSelector } from 'react-redux'
 import { withTheme } from 'emotion-theming'
 
-import useDimensions from '~helpers/useDimensions'
+import useDimensions, { maxWidth } from '~helpers/useDimensions'
 import Image from '~common/ui/Image'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Link from '~common/Link'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
-const shareImage = async source => {
-  const { uri } = await FileSystem.downloadAsync(
-    source,
-    `${FileSystem.documentDirectory}verseOfTheDay.jpeg`
-  )
+// const shareImage = async source => {
+//   const { uri } = await FileSystem.downloadAsync(
+//     source,
+//     `${FileSystem.documentDirectory}verseOfTheDay.jpeg`
+//   )
 
-  console.log('Finished downloading to ', uri)
-  Sharing.shareAsync(uri)
-}
+//   console.log('Finished downloading to ', uri)
+//   Sharing.shareAsync(uri)
+// }
 
 const ShowMoreImage = ({ imageUrls, theme }) => {
-  const {
+  let {
     screen: { width }
   } = useDimensions()
-  const [expandImage, setExpandImage] = useState(true)
+  const [expandImage] = useState(true)
   const themeDefault = useSelector(state => state.user.bible.settings.theme)
+
+  width = maxWidth(width)
 
   if (!imageUrls) {
     return (
@@ -102,11 +103,6 @@ const ShowMoreImage = ({ imageUrls, theme }) => {
           }}
         />
       </AnimatableBox>
-      {/* <Link onPress={() => setExpandImage(e => !e)}>
-        <Box padding={10} center>
-          <FeatherIcon name={`chevron-${expandImage ? 'up' : 'down'}`} size={35} />
-        </Box>
-      </Link> */}
     </Box>
   )
 }

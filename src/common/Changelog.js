@@ -16,6 +16,7 @@ import { saveAllLogsAsSeen } from '~redux/modules/user'
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
   width: '80%',
+  maxWidth: 500,
   minWidth: 300,
   backgroundColor: theme.colors.reverse,
   borderRadius: 10,

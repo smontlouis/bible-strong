@@ -53,7 +53,7 @@ const MoreScreen = () => {
   return (
     <Container>
       <Header title="Plus" />
-      <ScrollView flex={1}>
+      <ScrollView flex={1} maxWidth>
         <Box paddingVertical={10}>
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />

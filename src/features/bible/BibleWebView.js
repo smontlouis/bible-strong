@@ -4,9 +4,9 @@ import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
 import * as Animatable from 'react-native-animatable'
-// import * as Haptics from 'expo-haptics'
 import * as Sentry from 'sentry-expo'
 
+import { MAX_WIDTH } from '~helpers/useDimensions'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
@@ -203,7 +203,11 @@ class BibleWebView extends Component {
           borderTopRightRadius: 30,
           overflow: 'hidden',
           flex: 1,
-          opacity: this.state.webViewOpacity
+          opacity: this.state.webViewOpacity,
+          maxWidth: MAX_WIDTH,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          width: '100%'
         }}>
         <WebView
           useWebKit

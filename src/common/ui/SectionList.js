@@ -1,12 +1,24 @@
 import React from 'react'
 import styled from '@emotion/native'
 import * as Animatable from 'react-native-animatable'
+import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
-const SectionList = styled.SectionList(({ theme }) => ({
+const SectionList = styled.SectionList(({ theme, orientation }) => ({
   paddingBottom: 30,
   backgroundColor: theme.colors.reverse,
   borderTopLeftRadius: 30,
-  borderTopRightRadius: 30
+  borderTopRightRadius: 30,
+  maxWidth: orientation.maxWidth,
+  width: '100%',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+
+  ...(orientation.tablet && {
+    marginTop: 50,
+    marginBottom: 50,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30
+  })
 }))
 
 const fadeIn = {
@@ -20,8 +32,12 @@ const fadeIn = {
   }
 }
 
-export default React.forwardRef((props, ref) => (
-  <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={100} duration={500}>
-    <SectionList ref={ref} {...props} />
-  </Animatable.View>
-))
+export default React.forwardRef(({ ...props }, ref) => {
+  const orientation = useDeviceOrientation()
+
+  return (
+    <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={100} duration={500}>
+      <SectionList orientation={orientation} ref={ref} {...props} />
+    </Animatable.View>
+  )
+})

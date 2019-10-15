@@ -16,7 +16,7 @@ export default createAnimatedBottomTabNavigator(
       navigationOptions: ({ screenProps }) => {
         return {
           title: 'Home',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
+          tabBarIcon: props => <TabBarIcon {...props} name="home" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary
         }
@@ -27,7 +27,7 @@ export default createAnimatedBottomTabNavigator(
       navigationOptions: ({ screenProps }) => {
         return {
           title: 'Recherche',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
+          tabBarIcon: props => <TabBarIcon {...props} name="search" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary
         }
@@ -38,7 +38,7 @@ export default createAnimatedBottomTabNavigator(
       navigationOptions: ({ screenProps }) => {
         return {
           title: 'Bible',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="book-open" />,
+          tabBarIcon: props => <TabBarIcon {...props} name="book-open" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary
         }
@@ -48,7 +48,7 @@ export default createAnimatedBottomTabNavigator(
       screen: StudiesScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Études',
-        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="feather" />,
+        tabBarIcon: props => <TabBarIcon {...props} name="feather" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
@@ -57,7 +57,7 @@ export default createAnimatedBottomTabNavigator(
       screen: MoreScreen,
       navigationOptions: ({ screenProps }) => ({
         title: 'Plus',
-        tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="menu" />,
+        tabBarIcon: props => <TabBarIcon {...props} name="menu" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
         activeColor: getTheme[screenProps.theme].colors.primary
       })
