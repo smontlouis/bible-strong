@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import getVersesRef from '~helpers/getVersesRef'
+import verseToReference from '~helpers/verseToReference'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import Header from '~common/Header'
@@ -8,9 +8,9 @@ import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import { versions } from '~helpers/bibleVersions'
 
 class BibleCompareVerses extends Component {
-  async componentDidMount() {
+  componentDidMount() {
     const { selectedVerses } = this.props.navigation.state.params || {}
-    const { title } = await getVersesRef(selectedVerses)
+    const title = verseToReference(selectedVerses)
     this.setState({ title })
   }
 

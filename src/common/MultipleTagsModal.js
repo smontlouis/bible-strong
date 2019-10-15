@@ -5,7 +5,7 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
-import getVersesRef from '~helpers/getVersesRef'
+import verseToReference from '~helpers/verseToReference'
 
 import TextInput from '~common/ui/TextInput'
 import Text from '~common/ui/Text'
@@ -72,7 +72,8 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
 
   useEffect(() => {
     if (item.ids) {
-      getVersesRef(item.ids).then(({ title }) => setHighlightTitle(title))
+      const title = verseToReference(item.ids)
+      setHighlightTitle(title)
     }
   }, [item])
 

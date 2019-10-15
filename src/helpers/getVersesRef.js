@@ -1,12 +1,16 @@
 import books from '~assets/bible_versions/books-desc'
 import loadBible from '~helpers/loadBible'
 
-const orderVerses = selectedVerses => {
-  const orderedVersesList = Object.keys(selectedVerses).sort((key1, key2) => {
-    const verse1 = key1.split('-')[2]
-    const verse2 = key2.split('-')[2]
-    return verse2 < verse1
+const orderVerses = verses => {
+  const orderedVersesList = Object.keys(verses).sort((key1, key2) => {
+    const verse1 = Number(key1.split('-')[2])
+    const verse2 = Number(key2.split('-')[2])
+
+    if (verse1 < verse2) return -1
+    if (verse1 > verse2) return 1
+    return 0
   })
+
   return orderedVersesList
 }
 

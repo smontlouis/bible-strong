@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 
 import BibleNoteModal from './BibleNoteModal'
 import BibleNoteItem from './BibleNoteItem'
-import getVersesRef from '~helpers/getVersesRef'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
@@ -17,6 +16,7 @@ import * as UserActions from '~redux/modules/user'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
+import verseToReference from '~helpers/verseToReference'
 
 class BibleVerseNotes extends Component {
   componentDidMount() {
@@ -29,7 +29,6 @@ class BibleVerseNotes extends Component {
 
   state = {
     title: '',
-    verse: {},
     notes: [],
     isEditNoteOpen: false,
     noteVerses: null,
@@ -53,7 +52,7 @@ class BibleVerseNotes extends Component {
     const notes = []
 
     if (verse) {
-      title = (await getVersesRef({ [verse]: true })).title
+      title = verseToReference(verse)
       title = `Notes sur ${title}...`
     } else {
       title = 'Notes'
@@ -68,16 +67,17 @@ class BibleVerseNotes extends Component {
           }
           return true
         })
-        .map(async (note, index) => {
+        .map(note => {
           const verseNumbers = {}
           note[0].split('/').map(ref => {
             verseNumbers[ref] = true
           })
-          const { title: reference } = await getVersesRef(verseNumbers)
+
+          const reference = verseToReference(verseNumbers)
           notes.push({ noteId: note[0], reference, notes: note[1] })
         })
     )
-    this.setState({ title, verse, notes })
+    this.setState({ title, notes })
   }
 
   openNoteEditor = noteId => {

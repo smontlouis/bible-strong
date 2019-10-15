@@ -7,7 +7,6 @@ import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
 import { ScrollView, Alert } from 'react-native'
 
-import getVersesRef from '~helpers/getVersesRef'
 import * as UserActions from '~redux/modules/user'
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
@@ -17,6 +16,7 @@ import TextArea from '~common/ui/TextArea'
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 import orderVerses from '~helpers/orderVerses'
+import verseToReference from '~helpers/verseToReference'
 
 const StylizedModal = styled(Modal)({
   flexDirection: 'row',
@@ -77,10 +77,10 @@ class BibleNoteModal extends React.Component {
     return null
   }
 
-  loadPage = async verses => {
+  loadPage = verses => {
     const { notes } = this.props
     const existingNote = this.checkIfExistingNote(notes, verses)
-    const { title: reference } = await getVersesRef(verses)
+    const reference = verseToReference(verses)
 
     if (existingNote) {
       this.setState({

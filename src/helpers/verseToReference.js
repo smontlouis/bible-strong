@@ -1,12 +1,31 @@
 import books from '~assets/bible_versions/books-desc'
 
-// 1-1-1 => Genèse 1:1 || [1-1-1, 1-1-3, 1-1-4, 1-1-5] => Genèse 1:1,3-5
+const orderVerses = arrayVerses => {
+  const orderedVersesList = arrayVerses.sort((key1, key2) => {
+    const verse1 = Number(key1.split('-')[2])
+    const verse2 = Number(key2.split('-')[2])
+
+    if (verse1 < verse2) return -1
+    if (verse1 > verse2) return 1
+    return 0
+  })
+
+  return orderedVersesList
+}
+
+// 1-1-1
+// [1-1-1, 1-1-3, 1-1-4, 1-1-5]   => Genèse 1:1,3-5
+// {1-1-1: true, 1-1-2: true}
 const verseToReference = v => {
   let verses = v
 
-  if (typeof verses === 'string') {
+  if (typeof verses === 'object') {
+    verses = Object.keys(v)
+  } else if (typeof verses === 'string') {
     verses = [v]
   }
+
+  verses = orderVerses(verses)
 
   verses = verses.map(v => {
     const [book, chapter, verse] = v.split('-').map(i => Number(i))

@@ -13,6 +13,7 @@ import { cleanParams } from '~helpers/utils'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import verseToReference from '../../helpers/verseToReference'
 
 const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   backgroundColor: 'transparent',
@@ -79,7 +80,8 @@ const VersesModal = ({
   }))
 
   useEffect(() => {
-    getVersesRef(selectedVerses, version).then(({ title }) => setSelectedVersesTitle(title))
+    const title = verseToReference(selectedVerses)
+    setSelectedVersesTitle(title)
   }, [selectedVerses, version])
 
   const shareVerse = async () => {

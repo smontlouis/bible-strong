@@ -90,8 +90,6 @@ class AnimatedTabNavigationView extends React.Component {
     const { loaded } = this.state
     const { orientation } = this.props
 
-    console.log('DUDE', orientation)
-
     return (
       <Container orientation={orientation}>
         <ScreenContainer style={{ flex: 1, position: 'relative' }}>
