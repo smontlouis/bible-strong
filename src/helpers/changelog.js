@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571167427324',
+    type: logTypes.BUG,
+    title: 'Partage de verset',
+    description:
+      'Lorsque vous partagez un contenu trop long, les versets avaient tendance à se mélanger. Ce bug a été réglé.'
+  },
+  {
     date: '1571074411272',
     type: logTypes.BUG,
     title: 'Versets en surbrillance',
