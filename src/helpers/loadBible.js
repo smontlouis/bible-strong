@@ -14,6 +14,7 @@ export default function loadBible(bible) {
         case 'NVS78P':
         case 'S21':
         case 'KJF':
+        case 'CHU':
         case 'OST': {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])

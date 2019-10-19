@@ -3,6 +3,7 @@ const PericopeFMAR = require('../assets/bible_versions/bible-fmar-pericope.json'
 const PericopeFRC97 = require('../assets/bible_versions/bible-frc97-pericope.json')
 const PericopeLSG = require('../assets/bible_versions/bible-lsg-1910-pericope.json')
 const PericopeNBS = require('../assets/bible_versions/bible-nbs-pericope.json')
+const PericopeCHU = require('../assets/bible_versions/bible-chu-pericope.json')
 const PericopeNEG79 = require('../assets/bible_versions/bible-neg79-pericope.json')
 const PericopeNVS78P = require('../assets/bible_versions/bible-nvs78p-pericope.json')
 const PericopeS21 = require('../assets/bible_versions/bible-s21-pericope.json')
@@ -17,6 +18,9 @@ const getBiblePericope = version => {
     }
     case 'FRC97': {
       return PericopeFRC97
+    }
+    case 'CHU': {
+      return PericopeCHU
     }
     case 'LSG': {
       return PericopeLSG

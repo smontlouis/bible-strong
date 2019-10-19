@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571461855878',
+    type: logTypes.NEW,
+    title: 'Bible Chouraqui 1987 (CHU)',
+    description:
+      "Suite à beaucoup de demandes, la bible d'André Chouraqui a été ajoutée.\n\nEn 1987, paraît chez Desclée De Brouwer sa traduction de la Bible à partir de la Bible dite massorétique, d'abord publiée par volumes à partir des années 1970. Marc Leboucher, qui fut le premier à éditer ce texte en France estime qu'André Chouraqui a adopté dans son travail « un parti pris révolutionnaire, qui a permis de redécouvrir des textes que l'on croyait usés » et qu'« il a surtout mis en lumière l'importance des racines juives du christianisme et rappelé que Jésus appartenait au peuple juif. »"
+  },
+  {
     date: '1571175754967',
     type: logTypes.NEW,
     title: 'Foire aux questions',

@@ -56,6 +56,9 @@ class VersionSelectorItem extends React.Component {
       case 'BDS': {
         return Asset.fromModule(require('~assets/bible_versions/bible-bds.txt')).uri
       }
+      case 'CHU': {
+        return Asset.fromModule(require('~assets/bible_versions/bible-chu.txt')).uri
+      }
       case 'FMAR': {
         return Asset.fromModule(require('~assets/bible_versions/bible-fmar.txt')).uri
       }

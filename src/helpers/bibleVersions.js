@@ -38,10 +38,14 @@ export const versions = {
     id: 'OST',
     name: 'Ostervald'
   },
-  // BDS: {
-  //   id: 'BDS',
-  //   name: 'Bible du Semeur'
-  // },
+  CHU: {
+    id: 'CHU',
+    name: 'Bible Chouraqui 1985'
+  },
+  BDS: {
+    id: 'BDS',
+    name: 'Bible du Semeur'
+  },
   FMAR: {
     id: 'FMAR',
     name: 'Martin 1744'
