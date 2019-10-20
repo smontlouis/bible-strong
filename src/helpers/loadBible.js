@@ -29,13 +29,11 @@ export default function loadBible(bible) {
 
           break
         }
-        case 'LSG': {
+        case 'LSG':
+        default: {
           const LSGBible = require('~assets/bible_versions/bible-lsg-1910.json')
           resolve(LSGBible)
           break
-        }
-        default: {
-          reject('Bible non prise en charge')
         }
       }
     } catch (e) {

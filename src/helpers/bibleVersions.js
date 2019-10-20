@@ -4,6 +4,27 @@ export const getIfVersionNeedsDownload = async versionId => {
   if (versionId === 'LSG') {
     return false
   }
+
+  if (versionId === 'INT') {
+    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+    const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
+
+    if (!sqliteDir.exists) {
+      await FileSystem.makeDirectoryAsync(sqliteDirPath)
+    } else if (!sqliteDir.isDirectory) {
+      throw new Error('SQLite dir is not a directory')
+    }
+
+    const dbPath = `${sqliteDirPath}/interlineaire.sqlite`
+    const file = await FileSystem.getInfoAsync(dbPath)
+
+    if (!file.exists) {
+      return true
+    }
+
+    return false
+  }
+
   const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
   const file = await FileSystem.getInfoAsync(path)
 
@@ -25,6 +46,10 @@ export const versions = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910'
+  },
+  INT: {
+    id: 'INT',
+    name: 'Bible Second Interlinéaire'
   },
   KJF: {
     id: 'KJF',

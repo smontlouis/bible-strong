@@ -11,6 +11,7 @@ import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { initInterlineaireDB } from '~helpers/database'
 
 const BIBLE_FILESIZE = 5000000
 
@@ -48,7 +49,16 @@ class VersionSelectorItem extends React.Component {
     this.setState({ versionNeedsDownload })
   }
 
-  requireBibleFileUri = id => {
+  requireBiblePath = id => {
+    if (id === 'INT') {
+      const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+      return `${sqliteDirPath}/interlineaire.sqlite`
+    }
+
+    return `${FileSystem.documentDirectory}bible-${id}.json`
+  }
+
+  requireBibleFileUri = async id => {
     switch (id) {
       case 'DBY': {
         return Asset.fromModule(require('~assets/bible_versions/bible-dby.txt')).uri
@@ -83,6 +93,15 @@ class VersionSelectorItem extends React.Component {
       case 'KJF': {
         return Asset.fromModule(require('~assets/bible_versions/bible-kjf.txt')).uri
       }
+      case 'INT': {
+        const storageRef = firebase.storage().ref()
+        const sqliteDbUri = await storageRef.child('interlineaire.sqlite').getDownloadURL()
+
+        return sqliteDbUri
+      }
+      default: {
+        return ''
+      }
     }
   }
 
@@ -96,8 +115,8 @@ class VersionSelectorItem extends React.Component {
 
     this.setState({ isLoading: true })
 
-    const path = `${FileSystem.documentDirectory}bible-${version.id}.json`
-    const uri = this.requireBibleFileUri(version.id)
+    const path = this.requireBiblePath(version.id)
+    const uri = await this.requireBibleFileUri(version.id)
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -110,7 +129,11 @@ class VersionSelectorItem extends React.Component {
 
       console.log('Download finished')
 
-      this.setState({ versionNeedsDownload: false, isLoading: false })
+      if (version.id === 'INT') {
+        await initInterlineaireDB()
+      }
+
+      this.setState({ versionNeedsDownload: false })
     } catch (e) {
       SnackBar.show(
         "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
@@ -127,7 +150,7 @@ class VersionSelectorItem extends React.Component {
         text: 'Oui',
         onPress: async () => {
           const { version } = this.props
-          const path = `${FileSystem.documentDirectory}bible-${version.id}.json`
+          const path = this.requireBiblePath(version.id)
           const file = await FileSystem.getInfoAsync(path)
           FileSystem.deleteAsync(file.uri)
           this.setState({ versionNeedsDownload: true })

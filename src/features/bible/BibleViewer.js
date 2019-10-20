@@ -14,7 +14,7 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
-import loadBible from '~helpers/loadBible'
+import loadBibleChapter from '~helpers/loadBibleChapter'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 import { zeroFill } from '~helpers/zeroFill'
@@ -66,7 +66,8 @@ class BibleViewer extends Component {
 
   componentWillMount() {
     setTimeout(() => {
-      this.loadVerses().catch(() => {
+      this.loadVerses().catch(e => {
+        console.log(e)
         this.setState({ error: true, isLoading: false })
       })
     }, 200)
@@ -91,23 +92,13 @@ class BibleViewer extends Component {
   loadVerses = async () => {
     const { book, chapter, version, verse } = this.props
     this.pericope = getBiblePericope(version)
-    let tempVerses
     this.setState({ isLoading: true })
 
-    const res = await loadBible(version)
-    const versesByChapter = res[book.Numero][chapter]
+    const verses = await loadBibleChapter(book.Numero, chapter, version)
 
-    if (!versesByChapter) {
+    if (!verses) {
       throw new Error('I crashed!')
     }
-
-    tempVerses = []
-    tempVerses = Object.keys(versesByChapter).map(v => ({
-      Verset: v,
-      Texte: versesByChapter[v],
-      Livre: book.Numero,
-      Chapitre: chapter
-    }))
 
     const audioBaseUrl = oldAudioBooks.find(a => a == book.Numero)
       ? 'https://s.topchretien.com/media/topbible/bible/'
@@ -115,7 +106,7 @@ class BibleViewer extends Component {
 
     this.setState({
       isLoading: false,
-      verses: tempVerses,
+      verses,
       error: false,
       audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(chapter, 2)}.mp3`
     })

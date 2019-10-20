@@ -4,12 +4,14 @@ import * as FileSystem from 'expo-file-system'
 import { TouchableOpacity } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
+import * as firebase from 'firebase'
 import { withTheme } from 'emotion-theming'
 
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { initInterlineaireDB } from '~helpers/database'
 
 const BIBLE_FILESIZE = 5000000
 
@@ -45,7 +47,16 @@ class VersionSelectorItem extends React.Component {
     this.setState({ versionNeedsDownload })
   }
 
-  requireBibleFileUri = id => {
+  requireBiblePath = id => {
+    if (id === 'INT') {
+      const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+      return `${sqliteDirPath}/interlineaire.sqlite`
+    }
+
+    return `${FileSystem.documentDirectory}bible-${id}.json`
+  }
+
+  requireBibleFileUri = async id => {
     switch (id) {
       case 'DBY': {
         return Asset.fromModule(require('~assets/bible_versions/bible-dby.txt')).uri
@@ -80,6 +91,15 @@ class VersionSelectorItem extends React.Component {
       case 'KJF': {
         return Asset.fromModule(require('~assets/bible_versions/bible-kjf.txt')).uri
       }
+      case 'INT': {
+        const storageRef = firebase.storage().ref()
+        const sqliteDbUri = await storageRef.child('interlineaire.sqlite').getDownloadURL()
+
+        return sqliteDbUri
+      }
+      default: {
+        return ''
+      }
     }
   }
 
@@ -93,8 +113,8 @@ class VersionSelectorItem extends React.Component {
 
     this.setState({ isLoading: true })
 
-    const path = `${FileSystem.documentDirectory}bible-${version.id}.json`
-    const uri = this.requireBibleFileUri(version.id)
+    const path = this.requireBiblePath(version.id)
+    const uri = await this.requireBibleFileUri(version.id)
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -106,6 +126,10 @@ class VersionSelectorItem extends React.Component {
       ).downloadAsync()
 
       console.log('Download finished')
+
+      if (version.id === 'INT') {
+        await initInterlineaireDB()
+      }
 
       this.setState({ versionNeedsDownload: false })
     } catch (e) {
