@@ -99,7 +99,7 @@ class StrongCard extends React.Component {
   render() {
     const {
       isSelectionMode,
-      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG },
+      strongReference: { Code, Hebreu, Grec, Type, Mot, Phonetique, Definition, LSG },
       theme
     } = this.props
 
@@ -134,6 +134,9 @@ class StrongCard extends React.Component {
         </Box>
 
         <ScrollView style={{ marginBottom: 15 }}>
+          <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
+            {Hebreu || Grec}
+          </Paragraph>
           {!!Definition && (
             <ViewItem>
               <SubTitle color="darkGrey">Définition - {Code}</SubTitle>

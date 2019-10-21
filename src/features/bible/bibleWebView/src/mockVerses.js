@@ -1,326 +1,121 @@
 export default [
   {
-    'Verset': '1',
-    'Texte': 'Jésus priait un jour en un certain lieu. Lorsqu’il eut achevé, un de ses disciples lui dit: Seigneur, enseigne-nous à prier, comme Jean l’a enseigné à ses disciples.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 1,
+    Texte:
+      '2065#Ἐρωτῶμεν#nous implorons#V-PIA-1P@1161#δὲ#de plus#Conj@4771#ὑμᾶς#vous#PPro-A2P@80#ἀδελφοί#frères#N-VMP@5228#ὑπὲρ#-#Prep@3588#τῆς#-#Art-GFS@3952#παρουσίας#à venir#N-GFS@3588#τοῦ#du#Art-GMS@2962#Κυρίου#Seigneur#N-GMS@1473#ἡμῶν#de nous#PPro-G1P@2424#Ἰησοῦ#Jésus#N-GMS@5547#Χριστοῦ#Le Christ#N-GMS@2532#καὶ#et#Conj@1473#ἡμῶν#notre#PPro-G1P@1997#ἐπισυναγωγῆς#rassembler#N-GFS@1909#ἐπ’#à#Prep@846#αὐτόν#lui#PPro-AM3S'
   },
   {
-    'Verset': '2',
-    'Texte': 'Il leur dit:Quand vous priez, dites: Père! Que ton nom soit sanctifié; que ton règne vienne.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 2,
+    Texte:
+      "1519#εἰς#pour#Prep@3588#τὸ#-#Art-ANS@3361#μὴ#pas#Adv@5030#ταχέως#rapidement#Adv@4531#σαλευθῆναι#être secoué#V-ANP@4771#ὑμᾶς#vous#PPro-A2P@575#ἀπὸ#dans#Prep@3588#τοῦ#-#Art-GMS@3563#νοὸς#esprit#N-GMS@3366#μηδὲ#ni#Conj@2360#θροεῖσθαι#être troublé#V-PNM/P@3383#μήτε#ni#Conj@1223#διὰ#par#Prep@4151#πνεύματος#esprit#N-GNS@3383#μήτε#ni#Conj@1223#διὰ#par#Prep@3056#λόγου#mot#N-GMS@3383#μήτε#ni#Conj@1223#δι’#par#Prep@1992#ἐπιστολῆς#lettre#N-GFS@5613#ὡς#comme si#Adv@1223#δι’#par#Prep@1473#ἡμῶν#nous#PPro-G1P@5613#ὡς#comme disant#Adv@3754#ὅτι#c'est#Conj@1764#ἐνέστηκεν#présent#V-RIA-3S@3588#ἡ#le#Art-NFS@2250#ἡμέρα#jour#N-NFS@3588#τοῦ#du#Art-GMS@2962#Κυρίου#Seigneur#N-GMS"
   },
   {
-    'Verset': '3',
-    'Texte': 'Donne-nous chaque jour notre pain quotidien;',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 3,
+    Texte:
+      "3361#μή#non#Adv@5100#τις#un#IPro-NMS@4771#ὑμᾶς#vous#PPro-A2P@1818#ἐξαπατήσῃ#devrait tromper#V-ASA-3S@2596#κατὰ#dans#Prep@3367#μηδένα#pas un#Adj-AMS@5158#τρόπον#façon#N-AMS@3754#ὅτι#parce que ce ne sera pas#Conj@1437#ἐὰν#si#Conj@3361#μὴ#pas#Adv@2064#ἔλθῃ#sera venu#V-ASA-3S@3588#ἡ#-#Art-NFS@646#ἀποστασία#l'apostasie#N-NFS@4412#πρῶτον#premier#Adv-S@2532#καὶ#et#Conj@601#ἀποκαλυφθῇ#doit avoir été révélé#V-ASP-3S@3588#ὁ#-#Art-NMS@444#ἄνθρωπος#l'homme#N-NMS@3588#τῆς#-#Art-GFS@458#ἀνομίας#d'anarchie#N-GFS@3588#ὁ#le#Art-NMS@5207#υἱὸς#fils#N-NMS@3588#τῆς#-#Art-GFS@684#ἀπωλείας#de destruction#N-GFS"
   },
   {
-    'Verset': '4',
-    'Texte': 'pardonne-nous nos péchés, car nous aussi nous pardonnons à quiconque nous offense; et ne nous induis pas en tentation.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 4,
+    Texte:
+      "3588#ὁ#le#Art-NMS@480#ἀντικείμενος#s'opposer#V-PPM/P-NMS@2532#καὶ#et#Conj@5229#ὑπεραιρόμενος#s'exaltant#V-PPM/P-NMS@1909#ἐπὶ#cidessus#Prep@3956#πάντα#chaque#Adj-AMS@3004#λεγόμενον#soidisant#V-PPM/P-AMS@2316#Θεὸν#dieu#N-AMS@2228#ἢ#ou#Conj@4574#σέβασμα#objet de culte#N-ANS@5620#ὥστε#donc comme pour#Conj@846#αὐτὸν#lui#PPro-AM3S@1519#εἰς#dans#Prep@3588#τὸν#le#Art-AMS@3485#ναὸν#temple#N-AMS@3588#τοῦ#-#Art-GMS@2316#Θεοῦ#de dieu#N-GMS@2523#καθίσαι#s'asseoir#V-ANA@584#ἀποδεικνύντα#exposant#V-PPA-AMS@1438#ἑαυτὸν#il luimême#RefPro-AM3S@3754#ὅτι#-#Conj@1510#ἔστιν#que son est#V-PIA-3S@2316#Θεός#Dieu#N-NMS"
   },
   {
-    'Verset': '5',
-    'Texte': 'Il leur dit encore:Si l’un de vous a un ami, et qu’il aille le trouver au milieu de la nuit pour lui dire: Ami, prête-moi trois pains,',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 5,
+    Texte:
+      "3756#Οὐ#pas#Adv@3421#μνημονεύετε#tu te souviens#V-PIA-2P@3754#ὅτι#ça#Conj@2089#ἔτι#encore#Adv@1510#ὢν#être#V-PPA-NMS@4314#πρὸς#avec#Prep@4771#ὑμᾶς#vous#PPro-A2P@3778#ταῦτα#ces choses#DPro-ANP@3004#ἔλεγον#J'ai dit#V-IIA-1S@4771#ὑμῖν#à toi#PPro-D2P"
   },
   {
-    'Verset': '6',
-    'Texte': 'car un de mes amis est arrivé de voyage chez moi, et je n’ai rien à lui offrir,',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 6,
+    Texte:
+      '2532#καὶ#Et#Conj@3568#νῦν#maintenant#Adv@3588#τὸ#ce qui#Art-ANS@2722#κατέχον#est contraignant#V-PPA-ANS@1492#οἴδατε#tu sais#V-RIA-2P@1519#εἰς#pour#Prep@3588#τὸ#-#Art-ANS@601#ἀποκαλυφθῆναι#être révélé#V-ANP@846#αὐτὸν#lui#PPro-AM3S@1722#ἐν#dans#Prep@3588#τῷ#-#Art-DMS@1438#ἑαυτοῦ#son#RefPro-GM3S@2540#καιρῷ#temps#N-DMS'
   },
   {
-    'Verset': '7',
-    'Texte': 'et si, de l’intérieur de sa maison, cet ami lui répond: Ne m’importune pas, la porte est déjà fermée, mes enfants et moi sommes au lit, je ne puis me lever pour te donner des pains,',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 7,
+    Texte:
+      "3588#τὸ#le#Art-NNS@1063#γὰρ#effet#Conj@3466#μυστήριον#mystère#N-NNS@2235#ἤδη#déjà#Adv@1754#ἐνεργεῖται#travaille#V-PIM-3S@3588#τῆς#-#Art-GFS@458#ἀνομίας#d'anarchie#N-GFS@3440#μόνον#seulement il y a#Adv@3588#ὁ#le#Art-NMS@2722#κατέχων#le restreindre#V-PPA-NMS@737#ἄρτι#à l'heure actuelle#Adv@2193#ἕως#-#Conj@1537#ἐκ#-#Prep@3319#μέσου#jusqu'à sortir du milieu#Adj-GNS@1096#γένηται#il pourrait être parti#V-ASM-3S"
   },
   {
-    'Verset': '8',
-    'Texte': 'je vous le dis, même s’il ne se levait pas pour les lui donner parce que c’est son ami, il se lèverait à cause de son importunité et lui donnerait tout ce dont il a besoin.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 8,
+    Texte:
+      "2532#καὶ#et#Conj@5119#τότε#alors#Adv@601#ἀποκαλυφθήσεται#sera révélé#V-FIP-3S@3588#ὁ#le#Art-NMS@459#ἄνομος#sansloi#Adj-NMS@3739#ὃν#qui#RelPro-AMS@3588#ὁ#le#Art-NMS@2962#Κύριος#seigneur#N-NMS@2424#Ἰησοῦς#Jésus#N-NMS@337#ἀνελεῖ#va consommer#V-FIA-3S@3588#τῷ#-#Art-DNS@4151#πνεύματι#avec le souffle#N-DNS@3588#τοῦ#-#Art-GNS@4750#στόματος#de la bouche#N-GNS@846#αὐτοῦ#de lui#PPro-GM3S@2532#καὶ#et#Conj@2673#καταργήσει#va annuler#V-FIA-3S@3588#τῇ#par#Art-DFS@2015#ἐπιφανείᾳ#l'apparition#N-DFS@3588#τῆς#-#Art-GFS@3952#παρουσίας#de la venue#N-GFS@846#αὐτοῦ#de lui#PPro-GM3S"
   },
   {
-    'Verset': '9',
-    'Texte': 'Et moi, je vous dis:Demandez, et l’on vous donnera; cherchez, et vous trouverez; frappez, et l’on vous ouvrira.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 9,
+    Texte:
+      '3739#οὗ#dont#RelPro-GMS@1510#ἐστιν#est#V-PIA-3S@3588#ἡ#-#Art-NFS@3952#παρουσία#à venir#N-NFS@2596#κατ’#-#Prep@1753#ἐνέργειαν#selon le travail#N-AFS@3588#τοῦ#-#Art-GMS@4567#Σατανᾶ#de satan#N-GMS@1722#ἐν#dans#Prep@3956#πάσῃ#chaque#Adj-DFS@1411#δυνάμει#pouvoir#N-DFS@2532#καὶ#et#Conj@4592#σημείοις#les signes#N-DNP@2532#καὶ#et#Conj@5059#τέρασιν#merveilles#N-DNP@5579#ψεύδους#du mensonge#N-GNS'
   },
   {
-    'Verset': '10',
-    'Texte': 'Car quiconque demande reçoit, celui qui cherche trouve, et l’on ouvre à celui qui frappe.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 10,
+    Texte:
+      "2532#καὶ#et#Conj@1722#ἐν#dans#Prep@3956#πάσῃ#chaque#Adj-DFS@539#ἀπάτῃ#tromperie#N-DFS@93#ἀδικίας#de méchanceté#N-GFS@3588#τοῖς#-#Art-DMP@622#ἀπολλυμένοις#à ceux qui périssent#V-PPM/P-DMP@473#ἀνθ’#en contrepartie de#Prep@3739#ὧν#qui#RelPro-GNP@3588#τὴν#-#Art-AFS@26#ἀγάπην#l'amour#N-AFS@3588#τῆς#-#Art-GFS@225#ἀληθείας#de la vérité#N-GFS@3756#οὐκ#pas#Adv@1209#ἐδέξαντο#ils ont reçu#V-AIM-3P@1519#εἰς#pour#Prep@3588#τὸ#-#Art-ANS@4982#σωθῆναι#être sauvé#V-ANP@846#αὐτούς#leur#PPro-AM3P"
   },
   {
-    'Verset': '11',
-    'Texte': 'Quel est parmi vous le père qui donnera une pierre à son fils, s’il lui demande du pain? Ou, s’il demande un poisson, lui donnera-t-il un serpent au lieu d’un poisson?',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 11,
+    Texte:
+      "2532#καὶ#Et#Conj@1223#διὰ#-#Prep@3778#τοῦτο#-#DPro-ANS@3992#πέμπει#à cause de cela va envoyer#V-PIA-3S@846#αὐτοῖς#à eux#PPro-DM3P@3588#ὁ#-#Art-NMS@2316#Θεὸς#Dieu#N-NMS@1753#ἐνέργειαν#un travail#N-AFS@4106#πλάνης#de l'illusion#N-GFS@1519#εἰς#pour#Prep@3588#τὸ#-#Art-ANS@4100#πιστεῦσαι#croire#V-ANA@846#αὐτοὺς#les#PPro-AM3P@3588#τῷ#quoi#Art-DNS@5579#ψεύδει#c'est faux#N-DNS"
   },
   {
-    'Verset': '12',
-    'Texte': 'Ou, s’il demande un œuf, lui donnera-t-il un scorpion?',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 12,
+    Texte:
+      "2443#ἵνα#-#Conj@2919#κριθῶσιν#cela devrait être jugé#V-ASP-3P@3956#πάντες#tous#Adj-NMP@3588#οἱ#ceux#Art-NMP@3361#μὴ#non#Adv@4100#πιστεύσαντες#avoir cru#V-APA-NMP@3588#τῇ#la#Art-DFS@225#ἀληθείᾳ#vérité#N-DFS@235#ἀλλὰ#mais#Conj@2106#εὐδοκήσαντες#avoir ravi#V-APA-NMP@3588#τῇ#-#Art-DFS@93#ἀδικίᾳ#dans l'injustice#N-DFS"
   },
   {
-    'Verset': '13',
-    'Texte': 'Si donc, méchants comme vous l’êtes, vous savez donner de bonnes choses à vos enfants, à combien plus forte raison le Père céleste donnera-t-il le Saint-Esprit à ceux qui le lui demandent.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 13,
+    Texte:
+      "1473#Ἡμεῖς#nous#PPro-N1P@1161#δὲ#de plus#Conj@3784#ὀφείλομεν#devrait#V-PIA-1P@2168#εὐχαριστεῖν#donner merci#V-PNA@3588#τῷ#-#Art-DMS@2316#Θεῷ#à Dieu#N-DMS@3842#πάντοτε#toujours#Adv@4012#περὶ#concernant#Prep@4771#ὑμῶν#vous#PPro-G2P@80#ἀδελφοὶ#frères#N-VMP@25#ἠγαπημένοι#bienaimé#V-RPM/P-VMP@5259#ὑπὸ#-#Prep@2962#Κυρίου#par le Seigneur#N-GMS@3754#ὅτι#-#Conj@138#εἵλατο#qui a choisi#V-AIM-3S@4771#ὑμᾶς#vous#PPro-A2P@3588#ὁ#-#Art-NMS@2316#Θεὸς#Dieu#N-NMS@575#ἀπ᾽‿#-#Prep@746#ἀρχῆς#depuis le début#N-GFS@1519#εἰς#à#Prep@4991#σωτηρίαν#salut#N-AFS@1722#ἐν#dans#Prep@38#ἁγιασμῷ#la sanctification#N-DMS@4151#Πνεύματος#de l'esprit#N-GNS@2532#καὶ#et#Conj@4102#πίστει#croyance#N-DFS@225#ἀληθείας#de la vérité#N-GFS"
   },
   {
-    'Verset': '14',
-    'Texte': 'Jésus chassa un démon qui était muet. Lorsque le démon fut sorti, le muet parla, et la foule fut dans l’admiration.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 14,
+    Texte:
+      "1519#εἰς#à#Prep@3739#ὃ#cela#RelPro-ANS@2532#καὶ#aussi#Conj@2564#ἐκάλεσεν#il a appelé#V-AIA-3S@4771#ὑμᾶς#vous#PPro-A2P@1223#διὰ#à travers#Prep@3588#τοῦ#-#Art-GNS@2098#εὐαγγελίου#l'évangile#N-GNS@1473#ἡμῶν#de nous#PPro-G1P@1519#εἰς#à#Prep@4047#περιποίησιν#l'obtention#N-AFS@1391#δόξης#de la gloire#N-GFS@3588#τοῦ#du#Art-GMS@2962#Κυρίου#Seigneur#N-GMS@1473#ἡμῶν#de nous#PPro-G1P@2424#Ἰησοῦ#Jésus#N-GMS@5547#Χριστοῦ#Christ#N-GMS"
   },
   {
-    'Verset': '15',
-    'Texte': 'Mais quelques-uns dirent: c’est par Béelzébul, le prince des démons, qu’il chasse les démons.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 15,
+    Texte:
+      '686#Ἄρα#Donc#Conj@3767#οὖν#alors#Conj@80#ἀδελφοί#frères#N-VMP@4739#στήκετε#rester ferme#V-PMA-2P@2532#καὶ#et#Conj@2902#κρατεῖτε#tiens bon#V-PMA-2P@3588#τὰς#aux#Art-AFP@3862#παραδόσεις#traditions#N-AFP@3739#ἃς#-#RelPro-AFP@1321#ἐδιδάχθητε#que vous avez appris#V-AIP-2P@1535#εἴτε#si#Conj@1223#διὰ#par#Prep@3056#λόγου#mot#N-GMS@1535#εἴτε#ou#Conj@1223#δι’#par#Prep@1992#ἐπιστολῆς#lettre#N-GFS@1473#ἡμῶν#de notre part#PPro-G1P'
   },
   {
-    'Verset': '16',
-    'Texte': 'Et d’autres, pour l’éprouver, lui demandèrent un signe venant du ciel.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 16,
+    Texte:
+      '846#Αὐτὸς#luimême#PPro-NM3S@1161#δὲ#-#Conj@3588#ὁ#de#Art-NMS@2962#Κύριος#plus#N-NMS@1473#ἡμῶν#le seigneur#PPro-G1P@2424#Ἰησοῦς#de nous#N-NMS@5547#Χριστὸς#Jésus#N-NMS@2532#καὶ#Le Christ#Conj@3588#ὁ#et#Art-NMS@2316#Θεὸς#-#N-NMS@3588#ὁ#-#Art-NMS@3962#Πατὴρ#Dieu#N-NMS@1473#ἡμῶν#le père#PPro-G1P@3588#ὁ#de nous#Art-NMS@25#ἀγαπήσας#le#V-APA-NMS@1473#ἡμᾶς#avoir aimé#PPro-A1P@2532#καὶ#nous#Conj@1325#δοὺς#et#V-APA-NMS@3874#παράκλησιν#après nous avoir donné#N-AFS@166#αἰωνίαν#confort#Adj-AFS@2532#καὶ#éternel#Conj@1680#ἐλπίδα#et#N-AFS@18#ἀγαθὴν#espoir#Adj-AFS@1722#ἐν#-#Prep@5485#χάριτι#bon par la grâce#N-DFS'
   },
   {
-    'Verset': '17',
-    'Texte': 'Comme Jésus connaissait leurs pensées, il leur dit:Tout royaume divisé contre lui-même est dévasté, et une maison s’écroule sur une autre.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '18',
-    'Texte': 'Si donc Satan est divisé contre lui-même, comment son royaume subsistera-t-il, puisque vous dites que je chasse les démons par Béelzébul?',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '19',
-    'Texte': 'Et si moi, je chasse les démons par Béelzébul, vos fils, par qui les chassent-ils? C’est pourquoi ils seront eux-mêmes vos juges.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '20',
-    'Texte': 'Mais, si c’est par le doigt de Dieu que je chasse les démons, le royaume de Dieu est donc venu vers vous.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '21',
-    'Texte': 'Lorsqu’un homme fort et bien armé garde sa maison, ce qu’il possède est en sûreté.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '22',
-    'Texte': 'Mais, si un plus fort que lui survient et le dompte, il lui enlève toutes les armes dans lesquelles il se confiait, et il distribue ses dépouilles.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '23',
-    'Texte': 'Celui qui n’est pas avec moi est contre moi, et celui qui n’assemble pas avec moi disperse.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '24',
-    'Texte': 'Lorsque l’esprit impur est sorti d’un homme, il va dans des lieux arides, pour chercher du repos. N’en trouvant point, il dit: Je retournerai dans ma maison d’où je suis sorti;',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '25',
-    'Texte': 'et, quand il arrive, il la trouve balayée et ornée.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '26',
-    'Texte': 'Alors il s’en va, et il prend sept autres esprits plus méchants que lui; ils entrent dans la maison, s’y établissent,et la dernière condition de cet homme est pire que la première.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '27',
-    'Texte': 'Tandis que Jésus parlait ainsi, une femme, élevant la voix du milieu de la foule, lui dit: Heureux le sein qui t’a porté! Heureuses les mamelles qui t’ont allaité!',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '28',
-    'Texte': 'Et il répondit:Heureux plutôt ceux qui écoutent la parole de Dieu, et qui la gardent!',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '29',
-    'Texte': 'Comme le peuple s’amassait en foule, il se mit à dire:Cette génération est une génération méchante; elle demande un miracle; il ne lui sera donné d’autre miracle quecelui de Jonas.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '30',
-    'Texte': 'Car, de même que Jonas fut un signe pour les Ninivites, de même le Fils de l’homme en sera un pour cette génération.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '31',
-    'Texte': 'La reine du Midi se lèvera, au jour du jugement, avec les hommes de cette génération et les condamnera,parce qu’elle vint des extrémités de la terre pour entendre la sagesse de Salomon; et voici, il y a ici plus que Salomon.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '32',
-    'Texte': 'Les hommes de Ninive se lèveront, au jour du jugement, avec cette génération et la condamneront,parce qu’ils se repentirent à la prédication de Jonas; et voici, il y a ici plus que Jonas.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '33',
-    'Texte': 'Personne n’allume une lampe pour la mettre dans un lieu caché ou sous le boisseau, mais on la met sur le chandelier, afin que ceux qui entrent voient la lumière.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '34',
-    'Texte': 'Ton œil est la lampe de ton corps. Lorsque ton œil est en bon état, tout ton corps est éclairé; mais lorsque ton œil est en mauvais état, ton corps est dans les ténèbres.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '35',
-    'Texte': 'Prends donc garde que la lumière qui est en toi ne soit ténèbres.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '36',
-    'Texte': 'Si donc tout ton corps est éclairé, n’ayant aucune partie dans les ténèbres, il sera entièrement éclairé, comme lorsque la lampe t’éclaire de sa lumière.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '37',
-    'Texte': 'Pendant que Jésus parlait, un pharisien le pria de dîner chez lui. Il entra, et se mit à table.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '38',
-    'Texte': 'Le pharisien vit avec étonnement qu’il ne s’était pas lavé avant le repas.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '39',
-    'Texte': 'Mais le Seigneur lui dit:Vous, pharisiens, vous nettoyez le dehors de la coupe et du plat,et à l’intérieur vous êtes pleins de rapine et de méchanceté.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '40',
-    'Texte': 'Insensés! Celui qui a fait le dehors n’a-t-il pas fait aussi le dedans?',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '41',
-    'Texte': 'Donnez plutôt en aumônes ce qui est dedans, et voici, toutes choses seront pures pour vous.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '42',
-    'Texte': 'Mais malheur à vous, pharisiens! Parce que vous payez la dîme de la menthe, de la rue, et de toutes les herbes, etque vous négligez la justice et l’amour de Dieu: c’est là ce qu’il fallait pratiquer, sans omettre les autres choses.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '43',
-    'Texte': 'Malheur à vous, pharisiens! Parce que vous aimez les premiers sièges dans les synagogues, et les salutations dans les places publiques.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '44',
-    'Texte': 'Malheur à vous! Parce que vous êtes comme les sépulcres qui ne paraissent pas, et sur lesquels on marche sans le savoir.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '45',
-    'Texte': 'Un des docteurs de la loi prit la parole, et lui dit: Maître, en parlant de la sorte, c’est aussi nous que tu outrages.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '46',
-    'Texte': 'Et Jésus répondit:Malheur à vous aussi, docteurs de la loi! Parce que vous chargez les hommes de fardeaux difficiles à porter, et que vous ne touchez pas vous-mêmes de l’un de vos doigts.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '47',
-    'Texte': 'Malheur à vous! Parce que vous bâtissez les tombeaux des prophètes, que vos pères ont tués.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '48',
-    'Texte': 'Vous rendez donc témoignage aux œuvres de vos pères, et vous les approuvez; car eux, ils ont tué les prophètes, et vous, vous bâtissez leurs tombeaux.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '49',
-    'Texte': 'C’est pourquoi la sagesse de Dieu a dit:Je leur enverrai des prophètes et des apôtres; ils tueront les uns et persécuteront les autres,',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '50',
-    'Texte': 'afin qu’il soit demandé compte à cette génération du sang de tous les prophètes qui a été répandu depuis la création du monde,',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '51',
-    'Texte': 'depuis le sang d’Abeljusqu’au sang de Zacharie, tué entre l’autel et le temple; oui, je vous le dis, il en sera demandé compte à cette génération.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '52',
-    'Texte': 'Malheur à vous, docteurs de la loi! Parce que vous avez enlevé la clef de la science; vous n’êtes pas entrés vous-mêmes, et vous avez empêché d’entrer ceux qui le voulaient.',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '53',
-    'Texte': 'Quand il fut sorti de là, les scribes et les pharisiens commencèrent à le presser violemment, et à le faire parler sur beaucoup de choses,',
-    'Livre': 42,
-    'Chapitre': 11
-  },
-  {
-    'Verset': '54',
-    'Texte': 'lui tendant des pièges, pour surprendre quelque parole sortie de sa bouche.',
-    'Livre': 42,
-    'Chapitre': 11
+    Livre: 53,
+    Chapitre: 2,
+    Verset: 17,
+    Texte:
+      '3870#παρακαλέσαι#peutil encourager#V-AOA-3S@4771#ὑμῶν#votre#PPro-G2P@3588#τὰς#-#Art-AFP@2588#καρδίας#coeurs#N-AFP@2532#καὶ#et#Conj@4741#στηρίξαι#puissetil les renforcer#V-AOA-3S@1722#ἐν#dans#Prep@3956#παντὶ#chaque#Adj-DNS@2041#ἔργῳ#travail#N-DNS@2532#καὶ#et#Conj@3056#λόγῳ#mot#N-DMS@18#ἀγαθῷ#bien#Adj-DMS'
   }
 ]

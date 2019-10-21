@@ -12,6 +12,7 @@ import {
 
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
+import InterlinearVerse from './InterlinearVerse'
 
 function convertHex(hex, opacity) {
   hex = hex.replace('#', '')
@@ -84,7 +85,7 @@ const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
 
 class Verse extends Component {
   state = {
-    focused: false
+    isFocused: false
   }
 
   componentDidMount() {
@@ -220,11 +221,17 @@ class Verse extends Component {
       settings,
       isVerseToScroll,
       notesText,
-      isSelectionMode
+      isSelectionMode,
+      version,
+      isHebreu
     } = this.props
     const { isFocused } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
+
+    if (version === 'INT') {
+      return <InterlinearVerse isHebreu={isHebreu} settings={settings} verse={verse} />
+    }
 
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>

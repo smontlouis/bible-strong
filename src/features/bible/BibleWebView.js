@@ -14,6 +14,7 @@ import {
   TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
   CONSOLE_LOG,
+  NAVIGATE_TO_STRONG,
   THROW_ERROR
 } from './bibleWebView/src/dispatch'
 
@@ -111,6 +112,14 @@ class BibleWebView extends Component {
         navigation.navigate('BibleVerseNotes', {
           verse: action.payload,
           withBack: true
+        })
+        break
+      }
+      case NAVIGATE_TO_STRONG: {
+        const { navigation } = this.props
+        navigation.navigate('BibleStrongDetail', {
+          reference: action.payload.reference,
+          book: action.payload.book
         })
         break
       }

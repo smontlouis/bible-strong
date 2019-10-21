@@ -8,52 +8,54 @@ import { desktopMode } from './env'
 
 if (!Object.entries) {
   Object.entries = function(obj) {
-    let ownProps = Object.keys(obj);
-        var i = ownProps.length;
-        var resArray = new Array(i) // preallocate the Array
+    const ownProps = Object.keys(obj)
+    let i = ownProps.length
+    const resArray = new Array(i) // preallocate the Array
     while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]]
 
     return resArray
   }
 }
 
-const Container = styled('div')(({ settings: { alignContent, theme, colors }, isReadOnly }) => ({
-  // maxWidth: '320px',
+const Container = styled('div')(({ settings: { alignContent, theme, colors }, rtl }) => ({
   padding: '10px 15px',
   paddingBottom: '40px',
-  // width: '100%',
-  // margin: '0 auto',
   textAlign: alignContent,
   background: colors[theme].reverse,
-  color: colors[theme].default
-  // pointerEvents: isReadOnly ? 'none' : 'auto'
+  color: colors[theme].default,
+  direction: rtl ? 'rtl' : 'ltr'
 }))
 
 const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
 
 const headingStyle = {
-  fontFamily: 'LiterataBook',
-  textAlign: 'left'
+  fontFamily: 'LiterataBook'
 }
 
-const H1 = styled('h1')(({ settings: { fontSizeScale } }) => ({
+const Span = styled('span')({})
+
+const H1 = styled('h1')(({ settings: { fontSizeScale }, isHebreu }) => ({
   ...headingStyle,
-  fontSize: scaleFontSize(28, fontSizeScale)
+  fontSize: scaleFontSize(28, fontSizeScale),
+  textAlign: isHebreu ? 'right' : 'left'
 }))
 
-const H2 = styled('h2')(({ settings: { fontSizeScale } }) => ({
+const H2 = styled('h2')(({ settings: { fontSizeScale }, isHebreu }) => ({
   ...headingStyle,
-  fontSize: scaleFontSize(24, fontSizeScale)
+  fontSize: scaleFontSize(24, fontSizeScale),
+  textAlign: isHebreu ? 'right' : 'left'
 }))
 
-const H3 = styled('h3')(({ settings: { fontSizeScale } }) => ({
+const H3 = styled('h3')(({ settings: { fontSizeScale }, isHebreu }) => ({
   ...headingStyle,
-  fontSize: scaleFontSize(20, fontSizeScale)
+  fontSize: scaleFontSize(20, fontSizeScale),
+  textAlign: isHebreu ? 'right' : 'left'
 }))
 
-const H4 = styled('h4')(({ settings: { fontSizeScale } }) => ({
+const H4 = styled('h4')(({ settings: { fontSizeScale }, isHebreu }) => ({
   ...headingStyle,
-  fontSize: scaleFontSize(18, fontSizeScale)
+  fontSize: scaleFontSize(18, fontSizeScale),
+  textAlign: isHebreu ? 'right' : 'left'
 }))
 
 const getPericopeVerse = (pericopeChapter, verse) => {
@@ -69,7 +71,6 @@ class VersesRenderer extends Component {
     verses: [],
     selectedVerses: {},
     highlightedVerses: {},
-    notedVerses: {},
     notedVersesCount: {},
     notedVersesText: {},
     settings: {},
@@ -87,10 +88,10 @@ class VersesRenderer extends Component {
       payload: 'I did mount'
     })
     // ONLY FOR DEV MODE ON DESKTOP
+    // TODO: TO DELETE
     if (desktopMode) {
       this.setState({
         verses: this.props.verses,
-        notedVerses: this.props.notedVerses,
         settings: this.props.settings,
         verseToScroll: this.props.verseToScroll,
         notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
@@ -99,6 +100,11 @@ class VersesRenderer extends Component {
         version: this.props.version,
         pericopeChapter: this.props.pericopeChapter
       })
+      // // Load font
+      const literate = require('../../../studies/studiesWebView/src/literata').default
+      const style = document.createElement('style')
+      style.innerHTML = literate
+      document.head.appendChild(style)
     }
 
     this.receiveDataFromApp()
@@ -200,7 +206,7 @@ class VersesRenderer extends Component {
             } = response
 
             self.setState({
-              verses,
+              verses: verses.sort((a, b) => a.Verset - b.Verset),
               selectedVerses,
               highlightedVerses,
               notedVerses,
@@ -233,8 +239,10 @@ class VersesRenderer extends Component {
       return null
     }
 
+    const isHebreu = this.state.version === 'INT' && Number(this.state.verses[0].Livre) < 40
+
     return (
-      <Container settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
+      <Container rtl={isHebreu} settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
         {this.state.verses.map(verse => {
           const { Livre, Chapitre, Verset } = verse
           const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
@@ -249,13 +257,31 @@ class VersesRenderer extends Component {
           const { h1, h2, h3, h4 } = getPericopeVerse(this.state.pericopeChapter, Verset)
 
           return (
-            <span key={`${Livre}-${Chapitre}-${Verset}`}>
-              {h1 && <H1 settings={this.state.settings}>{h1}</H1>}
-              {h2 && <H2 settings={this.state.settings}>{h2}</H2>}
-              {h3 && <H3 settings={this.state.settings}>{h3}</H3>}
-              {h4 && <H4 settings={this.state.settings}>{h4}</H4>}
+            <Span key={`${Livre}-${Chapitre}-${Verset}`}>
+              {h1 && (
+                <H1 isHebreu={isHebreu} settings={this.state.settings}>
+                  {h1}
+                </H1>
+              )}
+              {h2 && (
+                <H2 isHebreu={isHebreu} settings={this.state.settings}>
+                  {h2}
+                </H2>
+              )}
+              {h3 && (
+                <H3 isHebreu={isHebreu} settings={this.state.settings}>
+                  {h3}
+                </H3>
+              )}
+              {h4 && (
+                <H4 isHebreu={isHebreu} settings={this.state.settings}>
+                  {h4}
+                </H4>
+              )}
               <ErrorBoundary>
                 <Verse
+                  isHebreu={isHebreu}
+                  version={this.state.version}
                   verse={verse}
                   settings={this.state.settings}
                   isSelected={isSelected}
@@ -267,7 +293,7 @@ class VersesRenderer extends Component {
                   isVerseToScroll={isVerseToScroll}
                 />
               </ErrorBoundary>
-            </span>
+            </Span>
           )
         })}
       </Container>
