@@ -5,6 +5,7 @@ import * as FileSystem from 'expo-file-system'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
+import * as firebase from 'firebase'
 import * as Icon from '@expo/vector-icons'
 
 import SnackBar from '~common/SnackBar'
@@ -106,7 +107,9 @@ class VersionSelectorItem extends React.Component {
   }
 
   calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-    const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
+    const { version } = this.props
+    const fileProgress =
+      Math.floor((totalBytesWritten / version.id === 'INT' ? 20000000 : BIBLE_FILESIZE) * 100) / 100
     this.setState({ fileProgress })
   }
 
@@ -177,7 +180,13 @@ class VersionSelectorItem extends React.Component {
               <TextName>{version.name}</TextName>
             </Box>
             {!isLoading && (
-              <Button reverse small title="Télécharger" onPress={this.startDownload} />
+              <Button
+                reverse
+                small
+                title="Télécharger"
+                subTitle={version.id === 'INT' ? '⚠️ Taille de 20Mo' : null}
+                onPress={this.startDownload}
+              />
             )}
             {isLoading && (
               <Box width={100} justifyContent="center">

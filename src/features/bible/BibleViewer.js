@@ -95,6 +95,10 @@ class BibleViewer extends Component {
     this.setState({ isLoading: true })
 
     const verses = await loadBibleChapter(book.Numero, chapter, version)
+    let secondaryVerses = null
+    if (version === 'INT') {
+      secondaryVerses = await loadBibleChapter(book.Numero, chapter, 'LSG')
+    }
 
     if (!verses) {
       throw new Error('I crashed!')
@@ -107,6 +111,7 @@ class BibleViewer extends Component {
     this.setState({
       isLoading: false,
       verses,
+      secondaryVerses,
       error: false,
       audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(chapter, 2)}.mp3`
     })
@@ -175,7 +180,8 @@ class BibleViewer extends Component {
       multipleTagsItem,
       audioChapterUrl,
       audioMode,
-      isPlaying
+      isPlaying,
+      secondaryVerses
     } = this.state
 
     const {
@@ -231,6 +237,7 @@ class BibleViewer extends Component {
             isReadOnly={isReadOnly}
             isSelectionMode={isSelectionMode}
             arrayVerses={array}
+            secondaryVerses={secondaryVerses}
             selectedVerses={selectedVerses}
             highlightedVerses={highlightedVerses}
             notedVerses={notedVerses}

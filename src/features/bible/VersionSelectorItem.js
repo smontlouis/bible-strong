@@ -158,7 +158,13 @@ class VersionSelectorItem extends React.Component {
               <TextName>{version.name}</TextName>
             </Box>
             {!isLoading && (
-              <Button reverse small title="Télécharger" onPress={this.startDownload} />
+              <Button
+                reverse
+                small
+                title="Télécharger"
+                subTitle={version.id === 'INT' ? '⚠️ Taille de 20Mo' : null}
+                onPress={this.startDownload}
+              />
             )}
             {isLoading && (
               <Box width={100} justifyContent="center">

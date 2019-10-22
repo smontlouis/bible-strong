@@ -5,6 +5,7 @@ import { render } from 'react-dom'
 import './index.css'
 import VersesRenderer from './VersesRenderer'
 import mockVerses from './mockVerses'
+import mockSecondaryVerses from './mockSecondaryVerses'
 import { desktopMode } from './env'
 
 import defaultColors from '../../../../themes/colors'
@@ -48,6 +49,7 @@ const mockNotedVerses = {
 render(
   <VersesRenderer
     verses={desktopMode ? mockVerses : undefined}
+    secondaryVerses={desktopMode ? mockSecondaryVerses : undefined}
     notedVerses={desktopMode ? mockNotedVerses : undefined}
     settings={desktopMode ? mockSettings : undefined}
     verseToScroll={desktopMode ? verseToScroll : undefined}

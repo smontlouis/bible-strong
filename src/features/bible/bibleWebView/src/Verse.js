@@ -215,6 +215,7 @@ class Verse extends Component {
   render() {
     const {
       verse,
+      secondaryVerse,
       isSelected,
       highlightedColor,
       notesCount,
@@ -230,7 +231,14 @@ class Verse extends Component {
     const inlineNotedVerses = settings.notesDisplay === 'inline'
 
     if (version === 'INT') {
-      return <InterlinearVerse isHebreu={isHebreu} settings={settings} verse={verse} />
+      return (
+        <InterlinearVerse
+          secondaryVerse={secondaryVerse}
+          isHebreu={isHebreu}
+          settings={settings}
+          verse={verse}
+        />
+      )
     }
 
     return (

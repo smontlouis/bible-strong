@@ -57,11 +57,11 @@ class AnimatedTabNavigationView extends React.Component {
     if (prevProps.navigation.state.index !== this.props.navigation.state.index) {
       Animated.timing(this.state.indexesOpacity[this.props.navigation.state.index], {
         toValue: 1,
-        duration: 250
+        duration: 200
       }).start()
       Animated.timing(this.state.indexesOpacity[prevProps.navigation.state.index], {
         toValue: 0,
-        duration: 250
+        duration: 200
       }).start()
     }
   }

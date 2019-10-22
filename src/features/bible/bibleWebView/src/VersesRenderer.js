@@ -23,7 +23,16 @@ const Container = styled('div')(({ settings: { alignContent, theme, colors }, rt
   textAlign: alignContent,
   background: colors[theme].reverse,
   color: colors[theme].default,
-  direction: rtl ? 'rtl' : 'ltr'
+  direction: rtl ? 'rtl' : 'ltr',
+  ...(rtl && { textAlign: 'right' })
+}))
+
+const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
+  textAlign: 'right',
+  marginBottom: 20,
+  fontFamily: 'arial',
+  fontSize: 13,
+  color: colors[theme].darkGrey
 }))
 
 const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
@@ -69,6 +78,7 @@ const getPericopeVerse = (pericopeChapter, verse) => {
 class VersesRenderer extends Component {
   state = {
     verses: [],
+    secondaryVerses: [],
     selectedVerses: {},
     highlightedVerses: {},
     notedVersesCount: {},
@@ -90,21 +100,22 @@ class VersesRenderer extends Component {
     // ONLY FOR DEV MODE ON DESKTOP
     // TODO: TO DELETE
     if (desktopMode) {
-      this.setState({
-        verses: this.props.verses,
-        settings: this.props.settings,
-        verseToScroll: this.props.verseToScroll,
-        notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
-        notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
-        selectedVerses: this.props.selectedVerses,
-        version: this.props.version,
-        pericopeChapter: this.props.pericopeChapter
-      })
-      // // Load font
-      const literate = require('../../../studies/studiesWebView/src/literata').default
-      const style = document.createElement('style')
-      style.innerHTML = literate
-      document.head.appendChild(style)
+      // this.setState({
+      //   verses: this.props.verses,
+      //   secondaryVerses: this.props.secondaryVerses || [],
+      //   settings: this.props.settings,
+      //   verseToScroll: this.props.verseToScroll,
+      //   notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
+      //   notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
+      //   selectedVerses: this.props.selectedVerses,
+      //   version: this.props.version,
+      //   pericopeChapter: this.props.pericopeChapter
+      // })
+      // // // Load font
+      // const literate = require('../../../studies/studiesWebView/src/literata').default
+      // const style = document.createElement('style')
+      // style.innerHTML = literate
+      // document.head.appendChild(style)
     }
 
     this.receiveDataFromApp()
@@ -193,6 +204,7 @@ class VersesRenderer extends Component {
           case SEND_INITIAL_DATA: {
             const {
               verses,
+              secondaryVerses,
               selectedVerses,
               highlightedVerses,
               notedVerses,
@@ -207,6 +219,9 @@ class VersesRenderer extends Component {
 
             self.setState({
               verses: verses.sort((a, b) => a.Verset - b.Verset),
+              secondaryVerses: secondaryVerses
+                ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
+                : null,
               selectedVerses,
               highlightedVerses,
               notedVerses,
@@ -243,7 +258,10 @@ class VersesRenderer extends Component {
 
     return (
       <Container rtl={isHebreu} settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
-        {this.state.verses.map(verse => {
+        {isHebreu && (
+          <RightDirection settings={this.state.settings}>Sens de la lecture ←</RightDirection>
+        )}
+        {this.state.verses.map((verse, i) => {
           const { Livre, Chapitre, Verset } = verse
           const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
           const isSelectedMode = !!Object.keys(this.state.selectedVerses).length
@@ -253,6 +271,7 @@ class VersesRenderer extends Component {
           const notesCount = this.state.notedVersesCount[`${Verset}`]
           const notesText = this.state.notedVersesText[`${Verset}`]
           const isVerseToScroll = this.state.verseToScroll == Verset
+          const secondaryVerse = this.state.secondaryVerses && this.state.secondaryVerses[i]
 
           const { h1, h2, h3, h4 } = getPericopeVerse(this.state.pericopeChapter, Verset)
 
@@ -283,6 +302,7 @@ class VersesRenderer extends Component {
                   isHebreu={isHebreu}
                   version={this.state.version}
                   verse={verse}
+                  secondaryVerse={secondaryVerse}
                   settings={this.state.settings}
                   isSelected={isSelected}
                   isSelectedMode={isSelectedMode}

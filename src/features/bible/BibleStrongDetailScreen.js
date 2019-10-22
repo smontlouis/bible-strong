@@ -21,6 +21,7 @@ import capitalize from '~helpers/capitalize'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { setHistory } from '~redux/modules/user'
+import { timeout } from '~helpers/timeout'
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -85,6 +86,8 @@ class BibleStrongDetailScreen extends React.Component {
       })
     )
     this.setState({ strongReference })
+
+    await timeout(1500)
     const versesCountByBook = await loadStrongVersesCountByBook(book, strongReference.Code)
     this.setState({ versesCountByBook, concordanceLoading: false })
   }

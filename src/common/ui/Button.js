@@ -3,6 +3,9 @@ import styled from '@emotion/native'
 import { ActivityIndicator } from 'react-native'
 import Link from '~common/Link'
 
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
+
 const WrapperButton = styled.TouchableOpacity(
   ({ theme, small, reverse, secondary, type, disabled, color }) => ({
     backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
@@ -50,6 +53,7 @@ const TextButton = styled.Text(({ theme, small, reverse }) => ({
 
 const Button = ({
   title,
+  subTitle,
   onPress,
   route,
   style,
@@ -66,28 +70,35 @@ const Button = ({
   const Component = onPress ? WrapperButton : WrapperLink
 
   return (
-    <Component
-      disabled={disabled || isLoading}
-      route={route}
-      onPress={!disabled ? onPress : () => {}}
-      style={style}
-      small={small}
-      reverse={reverse}
-      secondary={secondary}
-      color={color}
-      type={type}>
-      {isLoading ? (
-        <ActivityIndicator color="white" />
-      ) : (
-        <>
-          {leftIcon}
-          <TextButton small={small} reverse={reverse}>
-            {title}
-          </TextButton>
-          {rightIcon}
-        </>
+    <Box>
+      <Component
+        disabled={disabled || isLoading}
+        route={route}
+        onPress={!disabled ? onPress : () => {}}
+        style={style}
+        small={small}
+        reverse={reverse}
+        secondary={secondary}
+        color={color}
+        type={type}>
+        {isLoading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <>
+            {leftIcon}
+            <TextButton small={small} reverse={reverse}>
+              {title}
+            </TextButton>
+            {rightIcon}
+          </>
+        )}
+      </Component>
+      {subTitle && (
+        <Box center marginTop={5}>
+          <Text fontSize={10}>{subTitle}</Text>
+        </Box>
       )}
-    </Component>
+    </Box>
   )
 }
 
