@@ -46,6 +46,11 @@ const mockNotedVerses = {
   }
 }
 
+const selectedCode = {
+  reference: 1817,
+  book: 38
+}
+
 render(
   <VersesRenderer
     verses={desktopMode ? mockVerses : undefined}
@@ -55,6 +60,7 @@ render(
     verseToScroll={desktopMode ? verseToScroll : undefined}
     selectedVerses={desktopMode ? mockSelectedVerses : undefined}
     version={desktopMode ? version : undefined}
+    selectedCode={desktopMode ? selectedCode : undefined}
   />,
   document.getElementById('app')
 )

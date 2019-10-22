@@ -89,7 +89,8 @@ class VersesRenderer extends Component {
     version: 'LSG',
     pericopeChapter: {},
     chapter: '',
-    isSelectionMode: ''
+    isSelectionMode: '',
+    selectedCode: null
   }
 
   componentDidMount() {
@@ -109,7 +110,8 @@ class VersesRenderer extends Component {
       //   notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
       //   selectedVerses: this.props.selectedVerses,
       //   version: this.props.version,
-      //   pericopeChapter: this.props.pericopeChapter
+      //   pericopeChapter: this.props.pericopeChapter,
+      //   selectedCode: this.props.selectedCode
       // })
       // // // Load font
       // const literate = require('../../../studies/studiesWebView/src/literata').default
@@ -214,7 +216,8 @@ class VersesRenderer extends Component {
               version,
               pericopeChapter,
               chapter,
-              isSelectionMode
+              isSelectionMode,
+              selectedCode
             } = response
 
             self.setState({
@@ -233,7 +236,8 @@ class VersesRenderer extends Component {
               version,
               pericopeChapter,
               chapter,
-              isSelectionMode
+              isSelectionMode,
+              selectedCode
             })
             break
           }
@@ -311,6 +315,7 @@ class VersesRenderer extends Component {
                   notesCount={notesCount}
                   notesText={notesText}
                   isVerseToScroll={isVerseToScroll}
+                  selectedCode={this.state.selectedCode}
                 />
               </ErrorBoundary>
             </Span>

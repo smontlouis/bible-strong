@@ -2,12 +2,11 @@ import React from 'react'
 import styled from '@emotion/native'
 import { ScrollView } from 'react-native'
 import * as Icon from '@expo/vector-icons'
-import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
-
+import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 
 import { wp, cleanParams } from '~helpers/utils'
@@ -18,12 +17,16 @@ const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth
 
-const Container = styled(Box)({
+const Container = styled(Box)(({ isModal }) => ({
   width: itemWidth,
   flex: 1,
   paddingHorizontal: itemHorizontalMargin,
-  paddingBottom: 18
-})
+
+  ...(isModal && {
+    width: 'auto',
+    paddingHorizontal: 20
+  })
+}))
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -46,10 +49,12 @@ const SmallParagraph = styled(Paragraph)({
   lineHeight: 18
 })
 
-const OpenStrongIcon = styled.TouchableOpacity(() => ({
+const Header = styled.View(() => ({
+  flex: 1,
   paddingTop: 5,
   flexDirection: 'row',
   alignItems: 'center'
+  // justifyContent: 'center'
 }))
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
@@ -100,32 +105,48 @@ class StrongCard extends React.Component {
     const {
       isSelectionMode,
       strongReference: { Code, Hebreu, Grec, Type, Mot, Phonetique, Definition, LSG },
-      theme
+      theme,
+      isModal,
+      onClosed
     } = this.props
 
     return (
-      <Container overflow>
+      <Container overflow isModal={isModal}>
         {/* <Shadow overflow /> */}
         <Box paddingTop={10}>
           <Box>
-            <OpenStrongIcon onPress={this.openStrong}>
-              <Text title fontSize={22} flex>
-                {truncate(capitalize(Mot), 7)}
-                {!!Phonetique && (
-                  <Text title color="darkGrey" fontSize={16}>
-                    {' '}
-                    {truncate(Phonetique, 7)}
+            <Box row alignItems="center">
+              <Header>
+                <Link onPress={this.openStrong} style={{ flex: 1 }}>
+                  <Text title fontSize={18} flex>
+                    {truncate(capitalize(Mot), 7)}
+                    {!!Phonetique && (
+                      <Text title color="darkGrey" fontSize={16}>
+                        {' '}
+                        {truncate(Phonetique, 7)}
+                      </Text>
+                    )}
                   </Text>
-                )}
-              </Text>
-              {isSelectionMode ? (
-                <IconFeather name="share" size={20} />
-              ) : (
-                <IconFeather name="maximize-2" size={20} />
+                </Link>
+                <Link onPress={this.openStrong}>
+                  {isSelectionMode ? (
+                    <IconFeather name="share" size={20} />
+                  ) : (
+                    <IconFeather name="maximize-2" size={20} />
+                  )}
+                </Link>
+              </Header>
+              {onClosed && (
+                <Link paddingSmall onPress={onClosed} style={{ alignItems: 'flex-end' }}>
+                  <IconFeather name="x" size={25} />
+                </Link>
               )}
-            </OpenStrongIcon>
+            </Box>
+            <Text color="darkGrey" bold fontSIze={18}>
+              {Hebreu || Grec}
+            </Text>
             {!!Type && (
-              <Text titleItalic color="darkGrey">
+              <Text titleItalic color="darkGrey" fontSize={12}>
                 {Type}
               </Text>
             )}
@@ -133,10 +154,7 @@ class StrongCard extends React.Component {
           </Box>
         </Box>
 
-        <ScrollView style={{ marginBottom: 15 }}>
-          <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
-            {Hebreu || Grec}
-          </Paragraph>
+        <ScrollView style={{ marginBottom: 5 }}>
           {!!Definition && (
             <ViewItem>
               <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
@@ -166,4 +184,4 @@ class StrongCard extends React.Component {
   }
 }
 
-export default withTheme(StrongCard)
+export default StrongCard

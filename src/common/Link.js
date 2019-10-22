@@ -30,7 +30,6 @@ class Link extends Component {
         {...this.props}
         onPress={this.handlePress}
         style={{
-          ...style,
           ...(padding && {
             width: 60,
             height: 60,
@@ -42,7 +41,8 @@ class Link extends Component {
             height: 40,
             alignItems: 'center',
             justifyContent: 'center'
-          })
+          }),
+          ...style
         }}
       />
     )

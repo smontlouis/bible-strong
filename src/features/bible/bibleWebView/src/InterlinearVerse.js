@@ -9,15 +9,17 @@ const Wrapper = styled('div')(({ settings: { textDisplay } }) => ({
   display: textDisplay
 }))
 
-const Section = styled('div')(({ isFocused, isHebreu }) => ({
+const Section = styled('div')(({ isSelected, settings: { theme, colors } }) => ({
   display: 'inline-block',
-  background: isFocused ? 'rgba(0,0,0,0.1)' : 'transparent',
   transition: 'background 0.3s ease',
   borderRadius: 4,
-  padding: 5
+  padding: 5,
+  ...(isSelected && {
+    background: colors[theme].primary
+  })
 }))
 
-const NumberText = styled('span')(({ settings: { fontSizeScale }, isHebreu }) => ({
+const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(15, fontSizeScale),
   position: 'relative',
   bottom: 20,
@@ -30,10 +32,14 @@ const NumberText = styled('span')(({ settings: { fontSizeScale }, isHebreu }) =>
   alignItems: 'center'
 }))
 
-const Hebreu = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
+const Hebreu = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
   fontSize: scaleFontSize(20, fontSizeScale),
   fontFamily: 'LiterataBook',
-  color: colors[theme].default
+  color: colors[theme].default,
+
+  ...(isSelected && {
+    color: colors[theme].reverse
+  })
 }))
 
 const Code = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
@@ -51,14 +57,31 @@ const VerseText = styled('div')(({ settings: { fontSizeScale, theme, colors } })
   padding: '10px',
   margin: '10px 0',
   background: colors[theme].lightGrey,
-  borderRadius: 4
+  borderRadius: 4,
+  position: 'relative',
+  paddingRight: 30
 }))
 
-const Mot = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
+const CloseVerseText = styled('div')(() => ({
+  width: 30,
+  height: 30,
+  top: 5,
+  right: 5,
+  position: 'absolute',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+}))
+
+const Mot = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
   fontSize: scaleFontSize(16, fontSizeScale),
   fontFamily: 'LiterataBook',
   color: colors[theme].quart,
-  marginTop: 5 + fontSizeScale * 0.1 * 5
+  marginTop: 5 + fontSizeScale * 0.1 * 5,
+
+  ...(isSelected && {
+    color: colors[theme].reverse
+  })
 }))
 
 const ParsingTag = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
@@ -68,21 +91,8 @@ const ParsingTag = styled('div')(({ settings: { fontSizeScale, theme, colors } }
   color: 'rgba(0,0,0,0.3)'
 }))
 
-const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse }) => {
-  const [isFocused, setIsFocused] = useState(false)
+const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedCode }) => {
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
-
-  const onTouchStart = i => {
-    setIsFocused(i)
-  }
-
-  const onTouchEnd = () => {
-    setIsFocused(false)
-  }
-
-  const onTouchMove = e => {
-    setIsFocused(false)
-  }
 
   const navigateToStrong = (reference, isHebreu) => {
     dispatch({
@@ -96,6 +106,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse }) => {
     <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
       {secondaryVerse && showSecondaryVerse && (
         <VerseText settings={settings}>
+          <CloseVerseText>✕</CloseVerseText>
           {secondaryVerse.Verset} {secondaryVerse.Texte}
         </VerseText>
       )}
@@ -120,18 +131,22 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse }) => {
       </NumberText>
       {sections.map((section, i) => {
         const [code, hebreu, mot, parsingTag] = section.split('#')
+        const isSelected = selectedCode && selectedCode.reference == code
+
         return (
           <Section
             isHebreu={isHebreu}
             key={i}
             onClick={() => navigateToStrong(code, isHebreu)}
-            isFocused={isFocused === i}
-            onTouchStart={() => onTouchStart(i)}
-            onTouchEnd={onTouchEnd}
-            onTouchMove={onTouchMove}>
+            settings={settings}
+            isSelected={isSelected}>
             {/* <Code settings={settings}>{code}</Code> */}
-            <Hebreu settings={settings}>{hebreu}</Hebreu>
-            <Mot settings={settings}>{mot}</Mot>
+            <Hebreu isSelected={isSelected} settings={settings}>
+              {hebreu}
+            </Hebreu>
+            <Mot isSelected={isSelected} settings={settings}>
+              {mot}
+            </Mot>
             {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
           </Section>
         )

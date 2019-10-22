@@ -6,6 +6,7 @@ import { pure, compose } from 'recompose'
 import styled from '@emotion/native'
 import * as Sentry from 'sentry-expo'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { withTheme } from 'emotion-theming'
 
 import oldAudioBooks from '~helpers/topBibleOldAudioBook'
 import Empty from '~common/Empty'
@@ -20,6 +21,7 @@ import * as UserActions from '~redux/modules/user'
 import { zeroFill } from '~helpers/zeroFill'
 
 import BibleNoteModal from './BibleNoteModal'
+import StrongModal from './StrongModal'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
 import SelectedVersesModal from './SelectedVersesModal'
@@ -55,7 +57,8 @@ class BibleViewer extends Component {
     noteVerses: null,
     audioChapterUrl: '',
     audioMode: false,
-    isPlaying: false
+    isPlaying: false,
+    selectedCode: null
   }
 
   pericope = getBiblePericope('LSG')
@@ -63,6 +66,8 @@ class BibleViewer extends Component {
   setAudioMode = value => this.setState({ audioMode: value })
 
   setIsPlaying = value => this.setState({ isPlaying: value })
+
+  setSelectedCode = value => this.setState({ selectedCode: value })
 
   componentWillMount() {
     setTimeout(() => {
@@ -181,7 +186,8 @@ class BibleViewer extends Component {
       audioChapterUrl,
       audioMode,
       isPlaying,
-      secondaryVerses
+      secondaryVerses,
+      selectedCode
     } = this.state
 
     const {
@@ -205,7 +211,8 @@ class BibleViewer extends Component {
       notedVerses,
       settings,
       verse,
-      arrayVerses
+      arrayVerses,
+      theme
     } = this.props
 
     let array = this.state.verses
@@ -216,6 +223,8 @@ class BibleViewer extends Component {
         arrayVerses.find(aV => aV === `${v.Livre}-${v.Chapitre}-${v.Verset}`)
       )
     }
+
+    console.log(this.state.verses)
 
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
@@ -246,6 +255,8 @@ class BibleViewer extends Component {
             chapter={chapter}
             pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
             openNoteModal={this.openNoteModal}
+            setSelectedCode={this.setSelectedCode}
+            selectedCode={selectedCode}
           />
         )}
         {!isReadOnly && (
@@ -301,6 +312,12 @@ class BibleViewer extends Component {
             onSaveNote={this.onSaveNote}
           />
         )}
+        <StrongModal
+          version={version}
+          theme={theme}
+          selectedCode={selectedCode}
+          onClosed={() => this.setSelectedCode(false)}
+        />
       </Container>
     )
   }
@@ -316,6 +333,7 @@ const getHighlightInSelected = createSelector(
 
 export default compose(
   pure,
+  withTheme,
   connect(
     state => ({
       modalIsVisible: !!Object.keys(state.bible.selectedVerses).length,

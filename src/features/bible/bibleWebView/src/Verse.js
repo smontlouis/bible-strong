@@ -224,7 +224,8 @@ class Verse extends Component {
       notesText,
       isSelectionMode,
       version,
-      isHebreu
+      isHebreu,
+      selectedCode
     } = this.props
     const { isFocused } = this.state
 
@@ -237,6 +238,7 @@ class Verse extends Component {
           isHebreu={isHebreu}
           settings={settings}
           verse={verse}
+          selectedCode={selectedCode}
         />
       )
     }

@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import { Alert } from 'react-native'
+import { Alert, View } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
-import * as Animatable from 'react-native-animatable'
 import * as Sentry from 'sentry-expo'
 
 import { MAX_WIDTH } from '~helpers/useDimensions'
@@ -116,11 +115,8 @@ class BibleWebView extends Component {
         break
       }
       case NAVIGATE_TO_STRONG: {
-        const { navigation } = this.props
-        navigation.navigate('BibleStrongDetail', {
-          reference: action.payload.reference,
-          book: action.payload.book
-        })
+        const { setSelectedCode } = this.props
+        setSelectedCode(action.payload) // { reference, book }
         break
       }
       case TOGGLE_SELECTED_VERSE: {
@@ -181,7 +177,8 @@ class BibleWebView extends Component {
       version,
       pericopeChapter,
       chapter,
-      isSelectionMode
+      isSelectionMode,
+      selectedCode
     } = this.props
 
     this.dispatchToWebView({
@@ -197,7 +194,8 @@ class BibleWebView extends Component {
       version,
       pericopeChapter,
       chapter,
-      isSelectionMode
+      isSelectionMode,
+      selectedCode
     })
   }
 
@@ -207,8 +205,7 @@ class BibleWebView extends Component {
     }
 
     return (
-      <Animatable.View
-        transition="opacity"
+      <View
         style={{
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
@@ -240,7 +237,7 @@ class BibleWebView extends Component {
           allowFileAccessFromFileURLs
           allowFileAccess
         />
-      </Animatable.View>
+      </View>
     )
   }
 }

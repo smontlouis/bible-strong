@@ -162,6 +162,7 @@ class BibleVerseDetailScreen extends React.Component {
     const { isSelectionMode } = this.props.navigation.state.params || {}
     return (
       <StrongCard
+        theme={this.props.theme}
         isSelectionMode={isSelectionMode}
         navigation={this.props.navigation}
         book={this.props.verse.Livre}
