@@ -26,6 +26,7 @@ const Header = ({
   hasBackButton,
   isModal,
   title,
+  fontSize = 20,
   onTitlePress,
   rightComponent,
   ...props
@@ -40,7 +41,7 @@ const Header = ({
         )}
       </Box>
       <Box grow center>
-        <Text title fontSize={20} onPress={onTitlePress}>
+        <Text title fontSize={fontSize} onPress={onTitlePress}>
           {title}
         </Text>
       </Box>

@@ -21,14 +21,15 @@ class BibleCompareVerses extends Component {
     const { title } = this.state
     return (
       <Container>
-        <Header hasBackButton title={title ? `Comparer ${title}` : 'Chargement...'} />
+        <Header hasBackButton fontSize={16} title={title ? `Comparer ${title}` : 'Chargement...'} />
         <ScrollView>
-          {Object.entries(versions).map(([versionId, obj]) => (
+          {Object.entries(versions).map(([versionId, obj], position) => (
             <BibleCompareVerseItem
               key={versionId}
               versionId={versionId}
               name={obj.name}
               selectedVerses={selectedVerses}
+              position={position}
             />
           ))}
         </ScrollView>

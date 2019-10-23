@@ -224,8 +224,6 @@ class BibleViewer extends Component {
       )
     }
 
-    console.log(this.state.verses)
-
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
       <Container>

@@ -115,7 +115,7 @@ class StrongCard extends React.Component {
         {/* <Shadow overflow /> */}
         <Box paddingTop={10}>
           <Box>
-            <Box row alignItems="center">
+            <Box row alignItems="flex-end">
               <Header>
                 <Link onPress={this.openStrong} style={{ flex: 1 }}>
                   <Text title fontSize={18} flex>
@@ -142,7 +142,7 @@ class StrongCard extends React.Component {
                 </Link>
               )}
             </Box>
-            <Text color="darkGrey" bold fontSIze={18}>
+            <Text color="darkGrey" bold fontSize={16} textAlign="left">
               {Hebreu || Grec}
             </Text>
             {!!Type && (

@@ -22,6 +22,7 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   justifyContent: 'center',
   alignItems: 'flex-end',
   paddingBottom: 40,
+  zIndex: 10,
 
   ...(isSelectionMode && {
     height: 70,

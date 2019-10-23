@@ -70,7 +70,13 @@ const CloseVerseText = styled('div')(() => ({
   position: 'absolute',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  fontSize: 17,
+  WebkitTouchCallout: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
+  KhtmlUserSelect: 'none',
+  WebkitUserSelect: 'none'
 }))
 
 const Mot = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
@@ -106,7 +112,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
     <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
       {secondaryVerse && showSecondaryVerse && (
         <VerseText settings={settings}>
-          <CloseVerseText>✕</CloseVerseText>
+          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>✕</CloseVerseText>
           {secondaryVerse.Verset} {secondaryVerse.Texte}
         </VerseText>
       )}
@@ -116,7 +122,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
         onClick={() => setShowSecondaryVerse(s => !s)}>
         <svg width={15} x="0px" y="0px" viewBox="0 0 54.308 54.308">
           <path
-            fill="#010002"
+            fill={settings.colors[settings.theme].default}
             d="M53.583,25.902c-5.448-9.413-15.575-15.26-26.429-15.26S6.173,16.489,0.725,25.902L0,27.154
 		l0.725,1.252c5.447,9.413,15.574,15.26,26.429,15.26s20.981-5.847,26.429-15.26l0.725-1.252L53.583,25.902z M5.826,27.154
 		c2.187-3.319,5.102-6.031,8.452-7.993c-1.198,2.126-1.889,4.574-1.889,7.183c0,3.778,1.446,7.215,3.797,9.821

@@ -1,7 +1,8 @@
 import * as FileSystem from 'expo-file-system'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
+import { timeout } from '~helpers/timeout'
 
-export default function loadBible(bible) {
+export default function loadBible(bible, position) {
   return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {
@@ -24,6 +25,9 @@ export default function loadBible(bible) {
           const file = await FileSystem.getInfoAsync(path)
           const data = await FileSystem.readAsStringAsync(file.uri)
 
+          if (position) {
+            await timeout(500 * position + 1)
+          }
           bibleMemoize[bible] = JSON.parse(data)
           resolve(bibleMemoize[bible])
 

@@ -36,7 +36,7 @@ const getVersesRef = versesList => {
   return versesRef
 }
 
-export default async (verses, version = 'LSG') => {
+export default async (verses, version = 'LSG', position) => {
   let selectedVerses = verses
 
   // if 1-1_1
@@ -50,7 +50,7 @@ export default async (verses, version = 'LSG') => {
   const versesList = []
   let bible = null
 
-  bible = await loadBible(version)
+  bible = await loadBible(version, position)
 
   selectedVerses.map(async (key, index) => {
     const [book, chapter, verse] = key.split('-')

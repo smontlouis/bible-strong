@@ -180,7 +180,7 @@ class DBSelectorItem extends React.Component {
   }
 
   render() {
-    const { name, theme } = this.props
+    const { name, theme, fileSize } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
     if (typeof versionNeedsDownload === 'undefined') {
@@ -195,7 +195,13 @@ class DBSelectorItem extends React.Component {
               <TextName>{name}</TextName>
             </Box>
             {!isLoading && (
-              <Button reverse small title="Télécharger" onPress={this.startDownload} />
+              <Button
+                reverse
+                small
+                title="Télécharger"
+                subTitle={`⚠️ Taille de ${Math.round(fileSize / 1000000)}Mo`}
+                onPress={this.startDownload}
+              />
             )}
             {isLoading && (
               <Box width={100} justifyContent="center">

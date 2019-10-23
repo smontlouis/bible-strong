@@ -15,11 +15,11 @@ const Container = styled.View(({ theme }) => ({
 
 class CompareVerseItem extends React.Component {
   async componentDidMount() {
-    const { selectedVerses, versionId } = this.props
+    const { selectedVerses, versionId, position } = this.props
     const versionNeedsDownload = await getIfVersionNeedsDownload(versionId)
 
     if (!versionNeedsDownload) {
-      const { content } = await getVersesRef(selectedVerses, versionId)
+      const { content } = await getVersesRef(selectedVerses, versionId, position)
       this.setState({ content, versionNeedsDownload })
     }
   }
@@ -33,7 +33,7 @@ class CompareVerseItem extends React.Component {
     const { content, versionNeedsDownload } = this.state
     const { versionId, name } = this.props
 
-    if (!content && versionNeedsDownload) {
+    if ((!content && versionNeedsDownload) || versionId === 'INT') {
       return null
     }
 

@@ -22,6 +22,7 @@ const Container = styled.View(({ audioMode, theme }) => ({
   paddingLeft: 10,
   paddingRight: 10,
   pointerEvents: 'box-none',
+  zIndex: 1,
 
   ...(audioMode && {
     height: 100,
