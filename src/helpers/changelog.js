@@ -7,6 +7,18 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571808752355',
+    type: logTypes.FEATURE,
+    title: 'Bible Interlinéaire',
+    description: `La Bible Hébreu / Grec Interlinéaire est enfin disponible !
+
+Avant tout il est important de télécharger la base de données interlinéaire (20mo). Dans l'ancien testament la lecture se fait de droite à gauche.
+    
+Chaque mot est cliquable et vous donne accès au strong en question. La lecture étant très littérale et donc pas simple, j'ai ajouté une petite icone "oeil" vous donnant la possibilité de voir le verset en LSG dans son contexte.
+    
+Il y a surement des bugs et des mots manquants, n'hésitez pas à m'en informer.`
+  },
+  {
     date: '1571461855878',
     type: logTypes.NEW,
     title: 'Bible Chouraqui 1987 (CHU)',
