@@ -145,11 +145,11 @@ class StrongCard extends React.Component {
             <Text color="darkGrey" bold fontSize={16} textAlign="left">
               {Hebreu || Grec}
             </Text>
-            {!!Type && (
+            {/* {!!Type && (
               <Text titleItalic color="darkGrey" fontSize={12}>
                 {Type}
               </Text>
-            )}
+            )} */}
             <TitleBorder />
           </Box>
         </Box>

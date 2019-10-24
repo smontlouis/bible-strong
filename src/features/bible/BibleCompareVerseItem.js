@@ -33,7 +33,7 @@ class CompareVerseItem extends React.Component {
     const { content, versionNeedsDownload } = this.state
     const { versionId, name } = this.props
 
-    if ((!content && versionNeedsDownload) || versionId === 'INT') {
+    if ((!content && versionNeedsDownload) || versionId === 'INT' || versionId === 'LSGS') {
       return null
     }
 

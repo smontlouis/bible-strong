@@ -25,21 +25,21 @@ const mockSettings = {
 }
 
 const mockSelectedVerses = {
-  '40-13-2': true
+  '1-6-10': true
 }
 
 const verseToScroll = 4
 
-const version = 'INT'
+const version = 'LSGS'
 
 const mockNotedVerses = {
-  '40-13-1': {
+  '1-6-1': {
     title: 'Le ciel et la terre',
     description:
       'Informe et vide signifient ici « Tohu bohu », c’est exactemement le même mot que Jérémie utilise dans sa vision quand il décrit la terre dans [Jérémie 4:23]',
     date: 1563909941027
   },
-  '40-13-7/40-13-8': {
+  '1-6-7/1-6-8': {
     title: 'Ceci est une note sur 2 versets',
     description: 'Cool !',
     date: 1563912012088
@@ -47,7 +47,7 @@ const mockNotedVerses = {
 }
 
 const selectedCode = {
-  reference: 1817,
+  reference: 8689,
   book: 38
 }
 

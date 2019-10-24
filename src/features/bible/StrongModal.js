@@ -20,7 +20,7 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  height: hp(40),
+  height: hp(30),
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: -1 },
@@ -88,7 +88,7 @@ const StrongCardWrapper = waitForStrongModal(({ theme, navigation, selectedCode,
 
 const StrongModal = ({ onClosed, theme, selectedCode = {}, navigation, version }) => {
   useEffect(() => {
-    if (version !== 'INT') {
+    if (version !== 'INT' || version === 'LSGS') {
       onClosed()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

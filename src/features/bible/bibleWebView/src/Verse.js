@@ -10,8 +10,10 @@ import {
   NAVIGATE_TO_BIBLE_NOTE
 } from './dispatch'
 
+import { scaleFontSize } from './scaleFontSize'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
+import VerseTextFormatting from './VerseTextFormatting'
 import InterlinearVerse from './InterlinearVerse'
 
 function convertHex(hex, opacity) {
@@ -23,8 +25,6 @@ function convertHex(hex, opacity) {
   const result = `rgba(${r},${g},${b},${opacity / 100})`
   return result
 }
-
-export const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
 
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(19, fontSizeScale),
@@ -230,6 +230,10 @@ class Verse extends Component {
     const { isFocused } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
+
+    if (version === 'LSGS') {
+      return <VerseTextFormatting selectedCode={selectedCode} verse={verse} settings={settings} />
+    }
 
     if (version === 'INT') {
       return (

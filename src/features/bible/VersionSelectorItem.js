@@ -157,7 +157,7 @@ class VersionSelectorItem extends React.Component {
               <TextVersion>{version.id}</TextVersion>
               <TextName>{version.name}</TextName>
             </Box>
-            {!isLoading && (
+            {!isLoading && version.id !== 'LSGS' && (
               <Button
                 reverse
                 small

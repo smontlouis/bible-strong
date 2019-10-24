@@ -25,6 +25,26 @@ export const getIfVersionNeedsDownload = async versionId => {
     return false
   }
 
+  if (versionId === 'LSGS') {
+    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+    const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
+
+    if (!sqliteDir.exists) {
+      await FileSystem.makeDirectoryAsync(sqliteDirPath)
+    } else if (!sqliteDir.isDirectory) {
+      throw new Error('SQLite dir is not a directory')
+    }
+
+    const dbPath = `${sqliteDirPath}/strong.sqlite`
+    const file = await FileSystem.getInfoAsync(dbPath)
+
+    if (!file.exists) {
+      return true
+    }
+
+    return false
+  }
+
   const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
   const file = await FileSystem.getInfoAsync(path)
 
@@ -47,9 +67,13 @@ export const versions = {
     id: 'LSG',
     name: 'Bible Segond 1910'
   },
+  LSGS: {
+    id: 'LSGS',
+    name: 'Bible Second 1910 + Strongs'
+  },
   INT: {
     id: 'INT',
-    name: 'Bible Second Interlinéaire'
+    name: 'Bible Interlinéaire'
   },
   KJF: {
     id: 'KJF',

@@ -14,8 +14,6 @@ import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { initInterlineaireDB } from '~helpers/database'
 
-const BIBLE_FILESIZE = 5000000
-
 const Container = styled.View({
   paddingHorizontal: 20,
   paddingTop: 10,
@@ -108,8 +106,10 @@ class VersionSelectorItem extends React.Component {
 
   calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
     const { version } = this.props
+    const BIBLE_FILESIZE = version.id === 'INT' ? 20000000 : 5000000
+
     const fileProgress =
-      Math.floor((totalBytesWritten / version.id === 'INT' ? 20000000 : BIBLE_FILESIZE) * 100) / 100
+      Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
     this.setState({ fileProgress })
   }
 
@@ -167,7 +167,7 @@ class VersionSelectorItem extends React.Component {
     const { version, theme } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
-    if (typeof versionNeedsDownload === 'undefined') {
+    if (typeof versionNeedsDownload === 'undefined' || version.id === 'LSGS') {
       return null
     }
 

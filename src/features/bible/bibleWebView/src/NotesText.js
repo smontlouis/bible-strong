@@ -1,8 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
-
-import { scaleFontSize } from './Verse'
 import truncate from '../../../../helpers/truncate'
+import { scaleFontSize } from './scaleFontSize'
 
 const Div = styled('span')(({ settings: { fontSizeScale, theme, colors } }) => ({
   fontFamily: 'LiterataBook',
