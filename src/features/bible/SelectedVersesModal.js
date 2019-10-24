@@ -21,7 +21,7 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'flex-end',
-  paddingBottom: 40,
+  paddingBottom: 15,
   zIndex: 10,
 
   ...(isSelectionMode && {
@@ -31,17 +31,15 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
 }))
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
-  width: 260,
-  height: isSelectionMode ? 40 : 120,
+  width: '100%',
+  height: isSelectionMode ? 40 : 125,
   backgroundColor: theme.colors.reverse,
-  borderRadius: 10,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
   alignItems: 'stretch',
-  justifyContent: 'space-between',
 
   ...(isSelectionMode && {
     width: 250,
@@ -178,18 +176,24 @@ const VersesModal = ({
           <HalfContainer>
             {Object.keys(selectedVerses).length <= 1 && (
               <>
-                <TouchableSvgIcon icon={LexiqueIcon} color="primary" onPress={showStrongDetail} />
+                <TouchableSvgIcon
+                  icon={LexiqueIcon}
+                  color="primary"
+                  onPress={showStrongDetail}
+                  label="Lexique"
+                />
                 <TouchableSvgIcon
                   icon={DictionnaireIcon}
                   color="secondary"
                   onPress={showDictionnaryDetail}
+                  label="Dict."
                 />
               </>
             )}
-            <TouchableIcon name="layers" onPress={compareVerses} />
-            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} />
-            <TouchableIcon name="share-2" onPress={shareVerse} />
-            <TouchableIcon name="arrow-down" onPress={clearSelectedVerses} />
+            <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
+            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
+            <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
+            <TouchableIcon name="arrow-down" onPress={clearSelectedVerses} label="Annuler" />
           </HalfContainer>
         </Container>
       )}

@@ -146,7 +146,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
             onClick={() => navigateToStrong(code, isHebreu)}
             settings={settings}
             isSelected={isSelected}>
-            {/* <Code settings={settings}>{code}</Code> */}
+            <Code settings={settings}>{code}</Code>
             <Hebreu isSelected={isSelected} settings={settings}>
               {hebreu}
             </Hebreu>

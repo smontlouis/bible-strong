@@ -7,6 +7,12 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571904885928',
+    type: logTypes.FEATURE,
+    title: 'Bible LSG + Strongs',
+    description: 'Vous avez maintenant accès à la Bible Louis Second 1910 + Codes strongs directement dans la vue Bible.\n\nCertains préfèrent ce type de vues à la vue classique.\n\nÀ noter que dans les modes Interlinéaire(INT) et Bible second + strong(LSGS), vous ne pouvez pas mettre en favoris, en subrillances etc.\n\nSi vous voulez VRAIMENT cette fonctionnalité pour la LSGS, faites-le moi savoir. '
+  },
+  {
     date: '1571808752355',
     type: logTypes.FEATURE,
     title: 'Bible Interlinéaire',
