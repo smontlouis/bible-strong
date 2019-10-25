@@ -33,9 +33,9 @@ const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
 }))
 
 const Hebreu = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(20, fontSizeScale),
+  fontSize: scaleFontSize(18, fontSizeScale),
   fontFamily: 'LiterataBook',
-  color: colors[theme].default,
+  color: colors[theme].primary,
 
   ...(isSelected && {
     color: colors[theme].reverse
@@ -80,9 +80,20 @@ const CloseVerseText = styled('div')(() => ({
 }))
 
 const Mot = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
+  fontSize: scaleFontSize(18, fontSizeScale),
+  fontFamily: 'LiterataBook',
+  color: colors[theme].default,
+  marginTop: 5 + fontSizeScale * 0.1 * 5,
+
+  ...(isSelected && {
+    color: colors[theme].reverse
+  })
+}))
+
+const Phonetique = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
   fontSize: scaleFontSize(16, fontSizeScale),
   fontFamily: 'LiterataBook',
-  color: colors[theme].quart,
+  color: colors[theme].tertiary,
   marginTop: 5 + fontSizeScale * 0.1 * 5,
 
   ...(isSelected && {
@@ -136,7 +147,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
         {verse.Verset}{' '}
       </NumberText>
       {sections.map((section, i) => {
-        const [code, hebreu, mot, parsingTag] = section.split('#')
+        const [code, hebreu, mot, parsingTag, phonetique] = section.split('#')
         const isSelected = selectedCode && selectedCode.reference == code
 
         return (
@@ -153,6 +164,11 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
             <Mot isSelected={isSelected} settings={settings}>
               {mot}
             </Mot>
+            {phonetique && (
+              <Phonetique isSelected={isSelected} settings={settings}>
+                {phonetique}
+              </Phonetique>
+            )}
             {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
           </Section>
         )

@@ -7,10 +7,33 @@ export const logTypes = {
 
 export default [
   {
+    date: '1571977599684',
+    type: logTypes.NEW,
+    title: 'Meilleure bible interlinéaire NT',
+    description: `Vous avez accès à une meilleure bible interlinéaire pour le nouveau testament, merci à Sébastien pour son travail.
+    
+Pour cela il vous faut retélécharger la Bible interlinéaire (dans Gestion de téléchargements).
+
+Pour être franc, elle est encore moins lisible que la précédente (en terme de lecture française), mais on ne pourra pas lui enlever sa précision.
+
+N'hésitez pas à vous aider du petit oeil pour comprendre le sens du verset !
+
+Pour la petite histoire, Dieu fait bien les choses ! J'étais un peu frustré par la première Bible interlinéaire en ma possession car il y avait beaucoup d'erreurs dans la traduction. Gloire à Dieu ! Sébastien s'est présenté à moi et m'a fait part de son travail qu'il a achevé il y a seulement quelques jours.
+
+Il a fait un travail gargantuesque pour le nouveau testament en utilisant les textes anciens, papyrus et onciales tirées de l'édition critique majeur (ECM).
+Récemment il a généré la conjugaison de plus de 28 000 verbes pour avoir un résultat précis et fidèle aux textes.
+
+Il recherche actuellement des personnes qui connaissent les langues afin de pouvoir critiquer son travail et améliorer le tout.
+
+Vous pouvez retrouver son travail sur verite.github.io/verite
+    `
+  },
+  {
     date: '1571904885928',
     type: logTypes.FEATURE,
     title: 'Bible LSG + Strongs',
-    description: 'Vous avez maintenant accès à la Bible Louis Second 1910 + Codes strongs directement dans la vue Bible.\n\nCertains préfèrent ce type de vues à la vue classique.\n\nÀ noter que dans les modes Interlinéaire(INT) et Bible second + strong(LSGS), vous ne pouvez pas mettre en favoris, en subrillances etc.\n\nSi vous voulez VRAIMENT cette fonctionnalité pour la LSGS, faites-le moi savoir. '
+    description:
+      'Vous avez maintenant accès à la Bible Louis Second 1910 + Codes strongs directement dans la vue Bible.\n\nCertains préfèrent ce type de vues à la vue classique.\n\nÀ noter que dans les modes Interlinéaire(INT) et Bible second + strong(LSGS), vous ne pouvez pas mettre en favoris, en subrillances etc.\n\nSi vous voulez VRAIMENT cette fonctionnalité pour la LSGS, faites-le moi savoir. '
   },
   {
     date: '1571808752355',
