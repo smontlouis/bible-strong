@@ -12,7 +12,7 @@ export default [
     title: 'Meilleure bible interlinéaire NT',
     description: `Vous avez accès à une meilleure bible interlinéaire pour le nouveau testament, merci à Sébastien pour son travail.
     
-Pour cela il vous faut retélécharger la Bible interlinéaire (dans Gestion de téléchargements) puis de rédémarrer l'app.
+Pour cela il vous faut retélécharger la Bible interlinéaire (dans Gestion de téléchargements) puis redémarrer l'app.
 
 Pour être franc, elle est encore moins lisible que la précédente (en terme de lecture française), mais on ne pourra pas lui enlever sa précision.
 
