@@ -50,6 +50,8 @@
     "global": "^4.4.0",
     "hoist-non-react-statics": "^3.3.0",
     "immer": "^3.2.0",
+    "intl": "^1.2.5",
+    "intl-locales-supported": "^1.6.0",
     "lottie-react-native": "~2.6.1",
     "lunr": "2.3.6",
     "lunr-languages": "^1.1.0",
