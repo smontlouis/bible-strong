@@ -5,9 +5,8 @@ import { StatusBar, AppState } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from 'sentry-expo'
-import * as Permissions from 'expo-permissions'
 import compose from 'recompose/compose'
-import { Notifications } from 'expo'
+import ErrorBoundary from '~common/ErrorBoundary'
 
 import Analytics, { screen } from '~helpers/analytics'
 import { updateUserData } from '~redux/modules/user'
@@ -89,10 +88,12 @@ class InitApp extends React.Component {
           <PersistGate loading={null} persistor={persistor}>
             <DBStateProvider>
               <>
-                <AppNavigator
-                  screenProps={{ theme }}
-                  onNavigationStateChange={this.onNavigationStateChange}
-                />
+                <ErrorBoundary>
+                  <AppNavigator
+                    screenProps={{ theme }}
+                    onNavigationStateChange={this.onNavigationStateChange}
+                  />
+                </ErrorBoundary>
                 <Changelog />
               </>
             </DBStateProvider>

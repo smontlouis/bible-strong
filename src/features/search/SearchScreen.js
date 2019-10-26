@@ -69,13 +69,8 @@ const SearchScreen = ({ idxFile }) => {
       }
 
       if (order === 'a') {
-        results.sort((a, b) => {
-          const nameA = a.ref
-          const nameB = b.ref
-          if (nameA < nameB) return -1
-          if (nameA > nameB) return 1
-          return 0
-        })
+        const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+        results.sort((a, b) => collator.compare(a.ref, b.ref))
       }
 
       return results.filter(r => {

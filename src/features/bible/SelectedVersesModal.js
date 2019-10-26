@@ -193,7 +193,7 @@ const VersesModal = ({
             <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
             <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
             <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
-            <TouchableIcon name="arrow-down" onPress={clearSelectedVerses} label="Annuler" />
+            <TouchableIcon name="x" onPress={clearSelectedVerses} label="Annuler" />
           </HalfContainer>
         </Container>
       )}

@@ -1,30 +1,44 @@
 import React from 'react'
+import * as Icon from '@expo/vector-icons'
+import * as Sentry from 'sentry-expo'
+
 import Container from '~common/ui/Container'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 class ErrorBoundary extends React.Component {
-  state = { error: null, hasError: false }
+  state = { hasError: false }
 
   static getDerivedStateFromError(error) {
-    return { error, hasError: true }
+    return { hasError: true }
   }
 
-  componentDidCatch(error, info) {
-    if (typeof this.props.onError === 'function') {
-      this.props.onError.call(this, error, info.componentStack)
-    }
+  componentDidCatch(error, errorInfo) {
+    console.log(error)
+    Sentry.captureException(error)
   }
 
   render() {
     if (this.state.hasError) {
-      // Error path
       return (
         <Container>
-          <Text>Error: {this.state.error}</Text>
+          <Box center flex>
+            <Box center paddingHorizontal={30}>
+              <Icon.Feather name="x-circle" size={100} color="rgb(194,40,57)" />
+              <Text bold fontSize={60}>
+                OOPS
+              </Text>
+              <Text textAlign="center" fontSize={14}>
+                {
+                  "Désolé, l'app vient de planter...\nLe développeur en a été informé. Merci de redémarrer l'app."
+                }
+              </Text>
+            </Box>
+          </Box>
         </Container>
       )
     }
-    // Normally, just render children
+
     return this.props.children
   }
 }

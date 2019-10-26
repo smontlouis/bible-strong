@@ -28,10 +28,18 @@ const TextVersion = styled.Text(({ isSelected, theme }) => ({
   fontSize: 12
 }))
 
+const TextCopyright = styled.Text(({ isSelected, theme }) => ({
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontSize: 10,
+  backgroundColor: 'transparent',
+  opacity: 0.5
+}))
+
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
-  backgroundColor: 'transparent'
+  backgroundColor: 'transparent',
+  fontWeight: 'bold'
 }))
 
 class VersionSelectorItem extends React.Component {
@@ -156,6 +164,7 @@ class VersionSelectorItem extends React.Component {
             <Box disabled flex>
               <TextVersion>{version.id}</TextVersion>
               <TextName>{version.name}</TextName>
+              <TextCopyright>{version.c}</TextCopyright>
             </Box>
             {!isLoading && version.id !== 'LSGS' && (
               <Button
@@ -180,6 +189,7 @@ class VersionSelectorItem extends React.Component {
       <TouchableContainer onPress={() => onChange(version.id)}>
         <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
         <TextName isSelected={isSelected}>{version.name}</TextName>
+        <TextCopyright>{version.c}</TextCopyright>
       </TouchableContainer>
     )
   }

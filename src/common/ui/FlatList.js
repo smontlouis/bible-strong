@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
@@ -32,11 +33,20 @@ const fadeIn = {
   }
 }
 
-export default React.forwardRef(({ ...props }, ref) => {
+export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
   const orientation = useDeviceOrientation()
   return (
     <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={300} duration={500}>
-      <FlatList orientation={orientation} ref={ref} {...props} />
+      <FlatList
+        orientation={orientation}
+        contentContainerStyle={{
+          paddingTop: 20,
+          paddingBottom: 10 + getBottomSpace(),
+          ...contentContainerStyle
+        }}
+        ref={ref}
+        {...props}
+      />
     </Animatable.View>
   )
 })

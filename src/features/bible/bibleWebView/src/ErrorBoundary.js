@@ -1,28 +1,21 @@
 import React from 'react'
 
 class ErrorBoundary extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = { error: null, errorInfo: null }
-  }
+  state = { error: null, errorInfo: null }
 
-  componentDidCatch (error, errorInfo) {
+  componentDidCatch(error, errorInfo) {
     // Catch errors in any components below and re-render with error message
     this.setState({
-      error: error,
-      errorInfo: errorInfo
+      error,
+      errorInfo
     })
     // You can also log error messages to an error reporting service here
   }
 
-  render () {
+  render() {
     if (this.state.errorInfo) {
       // Error path
-      return (
-        <div>
-          Error: {this.state.errorInfo}
-        </div>
-      )
+      return <div>Error: {this.state.errorInfo}</div>
     }
     // Normally, just render children
     return this.props.children

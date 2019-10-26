@@ -45,7 +45,7 @@ const StrongCardWrapper = waitForStrongModal(({ theme, navigation, selectedCode,
         const strongReference = await loadStrongReference(selectedCode.reference, selectedCode.book)
         setStrongReference(strongReference)
 
-        if (strongReference?.error) {
+        if (strongReference?.error || !strongReference) {
           setError(true)
           setIsLoading(false)
           return

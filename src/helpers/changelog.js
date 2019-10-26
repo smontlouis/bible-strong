@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1572130206971',
+    type: logTypes.BUG,
+    title: 'Bugs réglés',
+    description:
+      "Quelques bugs ont été réglés: \n- Les flêches gauche et droite gênaient la lecture du texte lorsqu'on scrollait tout en bas. \n- Le partage des images a été réactivé. \n- La recherche alphabétique a été améliorée."
+  },
+  {
     date: '1571977599684',
     type: logTypes.NEW,
     title: 'Meilleure bible interlinéaire NT',

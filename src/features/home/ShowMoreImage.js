@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import * as Animatable from 'react-native-animatable'
 import { LinearGradient } from 'expo-linear-gradient'
-// import * as FileSystem from 'expo-file-system'
-// import * as Sharing from 'expo-sharing'
+import * as FileSystem from 'expo-file-system'
+import * as Sharing from 'expo-sharing'
 import { useSelector } from 'react-redux'
 import { withTheme } from 'emotion-theming'
 
 import useDimensions, { maxWidth } from '~helpers/useDimensions'
 import Image from '~common/ui/Image'
+import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
@@ -15,17 +16,21 @@ import Loading from '~common/Loading'
 
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
-// const shareImage = async source => {
-//   const { uri } = await FileSystem.downloadAsync(
-//     source,
-//     `${FileSystem.documentDirectory}verseOfTheDay.jpeg`
-//   )
+const shareImage = async (verseOfTheDay, source) => {
+  const path = `${FileSystem.documentDirectory}${verseOfTheDay.v}.jpeg`
+  const imageFile = await FileSystem.getInfoAsync(path)
 
-//   console.log('Finished downloading to ', uri)
-//   Sharing.shareAsync(uri)
-// }
+  if (!imageFile.exists) {
+    // console.log('Exists: FALSE')
+    const { uri } = await FileSystem.downloadAsync(source, path)
+    Sharing.shareAsync(uri)
+  } else {
+    // console.log('Exists: TRUE')
+    Sharing.shareAsync(imageFile.uri)
+  }
+}
 
-const ShowMoreImage = ({ imageUrls, theme }) => {
+const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
   let {
     screen: { width }
   } = useDimensions()
@@ -68,27 +73,27 @@ const ShowMoreImage = ({ imageUrls, theme }) => {
           elevation: 1,
           marginHorizontal: 20
         }}>
-        {/* <Link onPress={() => shareImage(imageUrls.large)}> */}
-        <Image
-          thumbnailSource={{ uri: imageUrls.small }}
-          source={{ uri: imageUrls.large, cache: 'force-cache' }}
-          style={{
-            width: width - 40,
-            height: width - 40
-          }}
-          resizeMode="cover"
-        />
-        <Box
-          style={{
-            position: 'absolute',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            bottom: 0,
-            right: 0,
-            padding: 3
-          }}>
-          <Text fontSize={8}>copyright bible.com</Text>
-        </Box>
-        {/* </Link> */}
+        <Link onPress={() => shareImage(verseOfTheDay, imageUrls.large)}>
+          <Image
+            thumbnailSource={{ uri: imageUrls.small }}
+            source={{ uri: imageUrls.large, cache: 'force-cache' }}
+            style={{
+              width: width - 40,
+              height: width - 40
+            }}
+            resizeMode="cover"
+          />
+          <Box
+            style={{
+              position: 'absolute',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              bottom: 0,
+              right: 0,
+              padding: 3
+            }}>
+            <Text fontSize={8}>copyright bible.com</Text>
+          </Box>
+        </Link>
         <LinearGradient
           colors={[
             `rgba(${linearGradientColor},0)`,

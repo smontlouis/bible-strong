@@ -117,7 +117,7 @@ const VerseOfTheDay = () => {
           </Text>
         </Box>
       </AnimatableBox>
-      <ShowMoreImage imageUrls={imageUrls} />
+      <ShowMoreImage imageUrls={imageUrls} verseOfTheDay={verseOfTheDay} />
       <DateTimePicker
         date={initialDate}
         mode="time"
