@@ -22,6 +22,7 @@ import { zeroFill } from '~helpers/zeroFill'
 
 import BibleNoteModal from './BibleNoteModal'
 import StrongModal from './StrongModal'
+import ReferenceModal from './ReferenceModal'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
 import SelectedVersesModal from './SelectedVersesModal'
@@ -32,10 +33,9 @@ const Container = styled.View({
 })
 
 const ReadMeButton = styled(Button)({
-  marginHorizontal: 20,
+  marginTop: 5,
   marginBottom: 10 + getBottomSpace(),
-  width: '100%',
-  maxWidth: 600
+  width: 250
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -68,6 +68,8 @@ class BibleViewer extends Component {
   setIsPlaying = value => this.setState({ isPlaying: value })
 
   setSelectedCode = value => this.setState({ selectedCode: value })
+
+  setReference = value => this.setState({ reference: value })
 
   componentWillMount() {
     setTimeout(() => {
@@ -187,7 +189,8 @@ class BibleViewer extends Component {
       audioMode,
       isPlaying,
       secondaryVerses,
-      selectedCode
+      selectedCode,
+      reference
     } = this.state
 
     const {
@@ -273,7 +276,7 @@ class BibleViewer extends Component {
           />
         )}
         {isReadOnly && !error && (
-          <Box grey center>
+          <Box center background>
             <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />
           </Box>
         )}
@@ -281,6 +284,7 @@ class BibleViewer extends Component {
           <SelectedVersesModal
             isSelectionMode={isSelectionMode}
             setSelectedVerse={this.props.setSelectedVerse}
+            setReference={this.setReference}
             onCreateNoteClick={this.toggleCreateNote}
             isVisible={modalIsVisible}
             isSelectedVerseHighlighted={isSelectedVerseHighlighted}
@@ -315,6 +319,12 @@ class BibleViewer extends Component {
           theme={theme}
           selectedCode={selectedCode}
           onClosed={() => this.setSelectedCode(false)}
+        />
+        <ReferenceModal
+          version={version}
+          selectedVerse={reference}
+          theme={theme}
+          onClosed={() => this.setReference(null)}
         />
       </Container>
     )

@@ -32,7 +32,7 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
-  height: isSelectionMode ? 40 : 125,
+  height: isSelectionMode ? 40 : 'auto',
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
@@ -70,7 +70,8 @@ const VersesModal = ({
   selectedVerses,
   version,
   onCreateNoteClick,
-  isSelectionMode
+  isSelectionMode,
+  setReference
 }) => {
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
 
@@ -144,6 +145,13 @@ const VersesModal = ({
     clearSelectedVerses()
   }
 
+  const onOpenReferences = () => {
+    const reference = Object.keys(selectedVerses)[0]
+    setReference(reference)
+  }
+
+  const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
+
   return (
     <StylizedModal
       isOpen={isVisible}
@@ -174,24 +182,36 @@ const VersesModal = ({
             )}
           </HalfContainer>
           <HalfContainer>
-            {Object.keys(selectedVerses).length <= 1 && (
-              <>
-                <TouchableSvgIcon
-                  icon={LexiqueIcon}
-                  color="primary"
-                  onPress={showStrongDetail}
-                  label="Lexique"
-                />
-                <TouchableSvgIcon
-                  icon={DictionnaireIcon}
-                  color="secondary"
-                  onPress={showDictionnaryDetail}
-                  label="Dict."
-                />
-              </>
-            )}
+            <TouchableSvgIcon
+              icon={LexiqueIcon}
+              color="primary"
+              onPress={showStrongDetail}
+              label="Lexique"
+              disabled={moreThanOneVerseSelected}
+            />
+            <TouchableSvgIcon
+              icon={DictionnaireIcon}
+              color="secondary"
+              onPress={showDictionnaryDetail}
+              label="Dictionnaire"
+              disabled={moreThanOneVerseSelected}
+            />
             <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
             <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
+          </HalfContainer>
+          <HalfContainer>
+            <TouchableIcon
+              name="list"
+              onPress={onOpenReferences}
+              label="Références"
+              disabled={moreThanOneVerseSelected}
+            />
+            <TouchableIcon
+              name="archive"
+              onPress={onOpenReferences}
+              label="Commentaires"
+              disabled={true || moreThanOneVerseSelected}
+            />
             <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
             <TouchableIcon name="x" onPress={clearSelectedVerses} label="Annuler" />
           </HalfContainer>

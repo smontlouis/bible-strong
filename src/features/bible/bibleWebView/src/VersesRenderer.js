@@ -19,7 +19,7 @@ if (!Object.entries) {
 
 const Container = styled('div')(({ settings: { alignContent, theme, colors }, rtl }) => ({
   padding: '10px 15px',
-  paddingBottom: '150px',
+  paddingBottom: '210px',
   textAlign: alignContent,
   background: colors[theme].reverse,
   color: colors[theme].default,

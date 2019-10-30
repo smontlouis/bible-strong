@@ -73,7 +73,7 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
   return (
     <Link
       route="BibleStrongDetail"
-      params={{ book: 40, strongReference }}
+      params={{ book: Grec ? 40 : 1, strongReference }}
       style={{ width: itemWidth }}>
       <Box center rounded marginRight={20} height={itemHeight}>
         <Box

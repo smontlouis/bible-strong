@@ -4,14 +4,15 @@ import * as Icon from '@expo/vector-icons'
 
 import Text from '~common/ui/Text'
 
-const Touchable = styled.TouchableOpacity(({ noFlex }) => ({
+const Touchable = styled.TouchableOpacity(({ noFlex, disabled }) => ({
   alignItems: 'center',
   justifyContent: 'center',
+  opacity: disabled ? 0.3 : 1,
   ...(!noFlex && { flex: 1 })
 }))
 
-const StyledIcon = styled(Icon.Feather)(({ color, isSelected, theme }) => ({
-  color: color || theme.colors.grey,
+const StyledIcon = styled(Icon.Feather)(({ color, isSelected, theme, disabled }) => ({
+  color: disabled ? theme.colors.grey : color || theme.colors.tertiary,
   ...(isSelected && {
     color: theme.colors.primary
   })
@@ -19,12 +20,18 @@ const StyledIcon = styled(Icon.Feather)(({ color, isSelected, theme }) => ({
 
 export default class TabBarIcon extends React.Component {
   render() {
-    const { onPress, color, isSelected, size = 20, noFlex = false, label } = this.props
+    const { onPress, color, isSelected, size = 20, noFlex = false, label, disabled } = this.props
     return (
-      <Touchable onPress={onPress} noFlex={noFlex}>
-        <StyledIcon name={this.props.name} size={size} color={color} isSelected={isSelected} />
+      <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled}>
+        <StyledIcon
+          name={this.props.name}
+          size={size}
+          color={color}
+          isSelected={isSelected}
+          disabled={disabled}
+        />
         {label && (
-          <Text marginTop={5} fontSize={10} color="grey">
+          <Text marginTop={5} fontSize={9} color="grey">
             {label}
           </Text>
         )}

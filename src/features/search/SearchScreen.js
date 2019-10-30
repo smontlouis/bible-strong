@@ -69,6 +69,7 @@ const SearchScreen = ({ idxFile }) => {
       }
 
       if (order === 'a') {
+        // HEAVY
         results.sort(({ ref: a }, { ref: b }) => {
           function chunkify(t) {
             const tz = []

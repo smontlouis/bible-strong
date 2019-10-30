@@ -5,12 +5,14 @@ import * as FileSystem from 'expo-file-system'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
+import * as firebase from 'firebase'
 import * as Icon from '@expo/vector-icons'
 import {
   deleteStrongDB,
   deleteDictionnaireDB,
   initStrongDB,
-  initDictionnaireDB
+  initDictionnaireDB,
+  initTresorDB
 } from '~helpers/database'
 
 import { DBStateContext } from '~helpers/databaseState'
@@ -88,13 +90,18 @@ class DBSelectorItem extends React.Component {
         path = `${FileSystem.documentDirectory}idx-light.json`
         break
       }
+      case 'TRESOR': {
+        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+        path = `${sqliteDirPath}/commentaires-tresor.sqlite`
+        break
+      }
       default:
     }
 
     return path
   }
 
-  requireFileUri = () => {
+  requireFileUri = async () => {
     const { database } = this.props
     switch (database) {
       case 'STRONG': {
@@ -105,6 +112,12 @@ class DBSelectorItem extends React.Component {
       }
       case 'SEARCH': {
         return Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
+      }
+      case 'TRESOR': {
+        const storageRef = firebase.storage().ref()
+        const sqliteDbUri = await storageRef.child('commentaires-tresor.sqlite').getDownloadURL()
+
+        return sqliteDbUri
       }
       default:
     }
@@ -121,7 +134,7 @@ class DBSelectorItem extends React.Component {
     const [, dispatch] = this.context
 
     const path = this.getPath()
-    const uri = this.requireFileUri()
+    const uri = await this.requireFileUri()
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -135,11 +148,21 @@ class DBSelectorItem extends React.Component {
       console.log('Download finished')
 
       this.setState({ versionNeedsDownload: false, isLoading: false })
-      if (this.props.database !== 'SEARCH') {
-        if (this.props.database === 'STRONG') {
+      switch (this.props.database) {
+        case 'STRONG': {
           await initStrongDB()
-        } else {
+          break
+        }
+        case 'DICTIONNAIRE': {
           await initDictionnaireDB()
+          break
+        }
+        case 'TRESOR': {
+          await initTresorDB()
+          break
+        }
+        default: {
+          console.log('Database download finished: Nothing to do')
         }
       }
     } catch (e) {

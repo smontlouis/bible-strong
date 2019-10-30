@@ -35,7 +35,7 @@ const Loading = ({ message = null, subMessage = null, style, children, theme }) 
         </Box>
       )}
       {children && (
-        <Box width={200} marginLeft="auto" marginRight="auto">
+        <Box width={200} marginLeft="auto" marginRight="auto" marginTop={10}>
           {children}
         </Box>
       )}

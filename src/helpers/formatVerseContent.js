@@ -5,6 +5,14 @@ export default verses => {
     return { title: '', content: '' }
   }
 
+  verses = verses.map(v => {
+    if (typeof v === 'string') {
+      const [Livre, Chapitre, Verset] = v.split('-')
+      return { Livre, Chapitre, Verset }
+    }
+    return v
+  })
+
   const content: string = verses.map(v => `${v.Texte}`).join(' ')
 
   const title: string = verses

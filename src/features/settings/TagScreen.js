@@ -77,9 +77,15 @@ const TagScreen = ({ navigation }) => {
         )
       : [],
     notes: item.notes
-      ? Object.keys(item.notes).map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
+      ? Object.keys(item.notes)
+          .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
+          .filter(c => c)
       : [],
-    studies: item.studies ? Object.keys(item.studies).map(id => state.user.bible.studies[id]) : [],
+    studies: item.studies
+      ? Object.keys(item.studies)
+          .map(id => state.user.bible.studies[id])
+          .filter(c => c)
+      : [],
     tag: state.user.bible.tags[item.id]
   }))
   const [titlePrompt, setTitlePrompt] = React.useState(false)
