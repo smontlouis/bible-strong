@@ -7,6 +7,14 @@ class Link extends Component {
   handlePress = () => {
     const { navigation, route, href, share, params, replace, onPress } = this.props
     if (route) {
+      if (onPress) {
+        onPress()
+        setTimeout(() => {
+          replace ? navigation.replace(route, params) : navigation.navigate(route, params)
+        }, 300)
+
+        return
+      }
       replace ? navigation.replace(route, params) : navigation.navigate(route, params)
     }
     if (href) {

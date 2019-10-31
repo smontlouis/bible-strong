@@ -21,11 +21,9 @@ const shareImage = async (verseOfTheDay, source) => {
   const imageFile = await FileSystem.getInfoAsync(path)
 
   if (!imageFile.exists) {
-    // console.log('Exists: FALSE')
     const { uri } = await FileSystem.downloadAsync(source, path)
     Sharing.shareAsync(uri)
   } else {
-    // console.log('Exists: TRUE')
     Sharing.shareAsync(imageFile.uri)
   }
 }

@@ -42,7 +42,7 @@ const Container = styled.View(({ theme }) => ({
   borderTopRightRadius: 30
 }))
 
-const ReferenceItem = ({ reference, version }) => {
+const ReferenceItem = ({ reference, version, onClosed }) => {
   const [Verse, setVerse] = useState(null)
 
   useEffect(() => {
@@ -62,6 +62,7 @@ const ReferenceItem = ({ reference, version }) => {
   return (
     <Link
       route="BibleView"
+      onPress={onClosed}
       params={{
         isReadOnly: true,
         book,
@@ -128,10 +129,20 @@ const CardWrapper = waitForTresorModal(({ theme, selectedVerse, onClosed, versio
   const { title } = formatVerseContent([selectedVerse])
   const renderReferences = () => {
     const refs = references.commentaires ? JSON.parse(references.commentaires) : []
+
+    if (!refs.length) {
+      return (
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Aucune référence pour ce verset..."
+        />
+      )
+    }
+
     return refs.map((ref, i) => {
       const splittedRef = ref.split('-')
       if (splittedRef.length === 3) {
-        return <ReferenceItem key={ref + i} reference={ref} version={version} />
+        return <ReferenceItem key={ref + i} reference={ref} version={version} onClosed={onClosed} />
       }
 
       return (
@@ -168,7 +179,6 @@ const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
   return (
     <StylizedModal
       backdropOpacity={0.3}
-      // coverScreen={false}
       isVisible={!!selectedVerse}
       onBackdropPress={onClosed}
       onBackButtonPress={onClosed}>
