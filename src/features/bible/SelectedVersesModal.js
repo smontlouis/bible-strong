@@ -16,8 +16,7 @@ import TouchableSvgIcon from './TouchableSvgIcon'
 import verseToReference from '../../helpers/verseToReference'
 
 const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
-  backgroundColor: 'transparent',
-  height: 140,
+  height: 200,
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'flex-end',
