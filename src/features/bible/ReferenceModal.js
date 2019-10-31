@@ -7,6 +7,7 @@ import { withNavigation } from 'react-navigation'
 import compose from 'recompose/compose'
 import * as Icon from '@expo/vector-icons'
 
+import { timeout } from '~helpers/timeout'
 import getVersesRef from '~helpers/getVersesRef'
 import formatVerseContent from '~helpers/formatVerseContent'
 import waitForTresorModal from '~common/waitForTresorModal'
@@ -89,6 +90,7 @@ const CardWrapper = waitForTresorModal(({ theme, selectedVerse, onClosed, versio
       if (selectedVerse) {
         setError(false)
         setIsLoading(true)
+        await timeout(500)
         const references = await loadTresorReferences(selectedVerse)
         setReferences(references)
 
@@ -166,7 +168,7 @@ const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
   return (
     <StylizedModal
       backdropOpacity={0.3}
-      coverScreen={false}
+      // coverScreen={false}
       isVisible={!!selectedVerse}
       onBackdropPress={onClosed}
       onBackButtonPress={onClosed}>

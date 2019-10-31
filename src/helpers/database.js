@@ -3,7 +3,6 @@ import * as SQLite from 'expo-sqlite'
 let dbStrong
 let dbDictionnaire
 let dbInterlineaire
-
 let dbTresorCommentaires
 
 export const initStrongDB = () => {
@@ -50,6 +49,6 @@ export const deleteDictionnaireDB = () => {
   dbDictionnaire = undefined
 }
 
-export const deleteTresorCommentaireDB = () => {
+export const deleteTresorDB = () => {
   dbTresorCommentaires = undefined
 }

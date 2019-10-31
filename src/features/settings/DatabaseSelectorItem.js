@@ -10,6 +10,7 @@ import * as Icon from '@expo/vector-icons'
 import {
   deleteStrongDB,
   deleteDictionnaireDB,
+  deleteTresorDB,
   initStrongDB,
   initDictionnaireDB,
   initTresorDB
@@ -185,10 +186,22 @@ class DBSelectorItem extends React.Component {
             dispatch({
               type: this.props.database === 'STRONG' ? 'strong.reset' : 'dictionnaire.reset'
             })
-            if (this.props.database === 'STRONG') {
-              deleteStrongDB()
-            } else {
-              deleteDictionnaireDB()
+            switch (this.props.database) {
+              case 'STRONG': {
+                await deleteStrongDB()
+                break
+              }
+              case 'DICTIONNAIRE': {
+                await deleteDictionnaireDB()
+                break
+              }
+              case 'TRESOR': {
+                await deleteTresorDB()
+                break
+              }
+              default: {
+                console.log('Database download finished: Nothing to do')
+              }
             }
           }
 

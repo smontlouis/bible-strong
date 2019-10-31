@@ -7,6 +7,24 @@ export const logTypes = {
 
 export default [
   {
+    date: '1572477397819',
+    type: logTypes.FEATURE,
+    title: 'Références croisées',
+    description: `J'espère qu'il vous reste de la place sur votre téléphone, parce que j'ai encore une nouvelle base de données pour vous !
+
+Ce sont les références croisées. Pour rentrer en profondeur dans vos études et lire les différents versets liés entre eux.
+
+Les références sont tirées de "The Treasury of Scripture Knowledge (TSK)", un guide contenant plus de 500 000 références bibliques.`
+  },
+  {
+    date: '1572476498987',
+    type: logTypes.BUG,
+    title: 'Bugs réglés',
+    description: `- Hébreu aléatoire et concordances correctes.
+- Les flêches "chapitre suivant et précédent" empêchaient la lecture du texte une fois arrivés en bas.
+    `
+  },
+  {
     date: '1572130206971',
     type: logTypes.BUG,
     title: 'Bugs réglés',

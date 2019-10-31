@@ -21,7 +21,6 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'flex-end',
-  paddingBottom: 15,
   zIndex: 10,
 
   ...(isSelectionMode && {
@@ -40,6 +39,7 @@ const Container = styled.View(({ theme, isSelectionMode }) => ({
   shadowRadius: 4,
   elevation: 2,
   alignItems: 'stretch',
+  paddingBottom: 15,
 
   ...(isSelectionMode && {
     width: 250,
