@@ -132,5 +132,35 @@ export default {
         }
       }
     }
+  },
+  10: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            colors: {
+              default: {
+                color1: state.user.bible.settings.colors.default.color1,
+                color2: state.user.bible.settings.colors.default.color2,
+                color3: state.user.bible.settings.colors.default.color3,
+                color4: state.user.bible.settings.colors.default.color4,
+                color5: state.user.bible.settings.colors.default.color5
+              },
+              dark: {
+                color1: state.user.bible.settings.colors.dark.color1,
+                color2: state.user.bible.settings.colors.dark.color2,
+                color3: state.user.bible.settings.colors.dark.color3,
+                color4: state.user.bible.settings.colors.dark.color4,
+                color5: state.user.bible.settings.colors.dark.color5
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

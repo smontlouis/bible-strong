@@ -37,7 +37,7 @@ const StyledComment = styled('div')(({ settings: { fontSizeScale, theme, colors 
   }
 }))
 
-const ReadMore = styled('div')(({ settings: { theme, colors, fontSizeScale } }) => ({
+const ReadMore = styled('div')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(15, fontSizeScale),
   fontFamily: 'LiterataBook',
   textAlign: 'center',
@@ -45,15 +45,13 @@ const ReadMore = styled('div')(({ settings: { theme, colors, fontSizeScale } }) 
   height: 40,
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: colors[theme].lightGrey
+  justifyContent: 'center'
 }))
 
-const Intro = styled('div')(({ settings: { theme, colors, fontSizeScale } }) => ({
+const Intro = styled('div')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(15, fontSizeScale),
   fontFamily: 'LiterataBook',
   textAlign: 'center',
-  backgroundColor: colors[theme].lightGrey,
   paddingBottom: scaleFontSize(20, fontSizeScale),
   paddingTop: scaleFontSize(15, fontSizeScale)
 }))

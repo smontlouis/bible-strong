@@ -1,6 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { StatusBar } from 'react-native'
+import produce from 'immer'
+import compose from 'recompose/compose'
+import { withTheme } from 'emotion-theming'
 
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
@@ -88,20 +91,32 @@ class BibleScreen extends React.Component {
   }
 }
 
-export default connect(
-  ({ bible, user }, ownProps) => {
-    const { params } = ownProps.navigation.state
-    return {
-      isReadOnly: params && params.isReadOnly,
-      isSelectionMode: params && params.isSelectionMode,
-      settings: user.bible.settings,
-      app: {
-        book: (params && params.book) || bible.selectedBook,
-        chapter: (params && params.chapter) || bible.selectedChapter,
-        verse: (params && params.verse) || bible.selectedVerse,
-        version: (params && params.version) || bible.selectedVersion
+export default compose(
+  withTheme,
+  connect(
+    ({ bible, user }, ownProps) => {
+      const { params } = ownProps.navigation.state
+      return {
+        isReadOnly: params && params.isReadOnly,
+        isSelectionMode: params && params.isSelectionMode,
+        settings: produce(user.bible.settings, draftState => {
+          draftState.colors.default = {
+            ...ownProps.theme.colors,
+            ...draftState.colors.default
+          }
+          draftState.colors.dark = {
+            ...ownProps.theme.colors,
+            ...draftState.colors.dark
+          }
+        }),
+        app: {
+          book: (params && params.book) || bible.selectedBook,
+          chapter: (params && params.chapter) || bible.selectedChapter,
+          verse: (params && params.verse) || bible.selectedVerse,
+          version: (params && params.version) || bible.selectedVersion
+        }
       }
-    }
-  },
-  { ...BibleActions, ...UserActions }
+    },
+    { ...BibleActions, ...UserActions }
+  )
 )(BibleScreen)
