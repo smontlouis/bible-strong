@@ -1,14 +1,40 @@
 import * as SQLite from 'expo-sqlite'
+import * as FileSystem from 'expo-file-system'
 
-let dbStrong
+export const getIfDatabaseExists = async sqliteFile => {
+  const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+  const dbPath = `${sqliteDirPath}/${sqliteFile}.sqlite`
+  const dbFile = await FileSystem.getInfoAsync(dbPath)
+
+  if (dbFile.exists) {
+    return true
+  }
+
+  return false
+}
+
 let dbDictionnaire
 let dbInterlineaire
 let dbTresorCommentaires
 
-export const initStrongDB = () => {
-  dbStrong = SQLite.openDatabase('strong.sqlite')
-  return dbStrong
+class StrongDB {
+  dbStrong
+
+  init = () => {
+    this.dbStrong = SQLite.openDatabase('strong.sqlite')
+    return this.dbStrong
+  }
+
+  get = () => {
+    return this.dbStrong
+  }
+
+  delete = () => {
+    this.dbStrong = undefined
+  }
 }
+
+export const strongDB = new StrongDB()
 
 export const initDictionnaireDB = () => {
   dbDictionnaire = SQLite.openDatabase('dictionnaire.sqlite')
@@ -25,10 +51,6 @@ export const initTresorDB = () => {
   return dbTresorCommentaires
 }
 
-export const getStrongDB = () => {
-  return dbStrong
-}
-
 export const getDictionnaireDB = () => {
   return dbDictionnaire
 }
@@ -41,10 +63,6 @@ export const getTresorDB = () => {
   return dbTresorCommentaires
 }
 
-export const deleteStrongDB = () => {
-  dbStrong = undefined
-}
-
 export const deleteDictionnaireDB = () => {
   dbDictionnaire = undefined
 }
@@ -52,3 +70,22 @@ export const deleteDictionnaireDB = () => {
 export const deleteTresorDB = () => {
   dbTresorCommentaires = undefined
 }
+
+class MhyDB {
+  dbMhy
+
+  init = () => {
+    this.dbMhy = SQLite.openDatabase('commentaires-mhy.sqlite')
+    return this.dbMhy
+  }
+
+  get = () => {
+    return this.dbMhy
+  }
+
+  delete = () => {
+    this.dbMhy = undefined
+  }
+}
+
+export const mhyDB = new MhyDB()

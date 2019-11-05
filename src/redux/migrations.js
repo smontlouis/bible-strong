@@ -117,5 +117,20 @@ export default {
         }
       }
     }
+  },
+  9: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            commentsDisplay: false
+          }
+        }
+      }
+    }
   }
 }

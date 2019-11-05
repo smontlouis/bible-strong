@@ -8,7 +8,7 @@ import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 
-import { initStrongDB } from '~helpers/database'
+import { strongDB } from '~helpers/database'
 import loadCountVerses from '~helpers/loadCountVerses'
 import * as BibleActions from '~redux/modules/bible'
 import SelectorItem from './SelectorItem'
@@ -24,7 +24,7 @@ class VerseSelector extends Component {
   }
 
   componentDidMount() {
-    initStrongDB() // Fix weird bug on iOS
+    strongDB.init() // Fix weird bug on iOS
     this.loadVerses()
   }
 

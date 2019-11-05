@@ -8,10 +8,10 @@ import { withTheme } from 'emotion-theming'
 import * as firebase from 'firebase'
 import * as Icon from '@expo/vector-icons'
 import {
-  deleteStrongDB,
+  strongDB,
+  mhyDB,
   deleteDictionnaireDB,
   deleteTresorDB,
-  initStrongDB,
   initDictionnaireDB,
   initTresorDB
 } from '~helpers/database'
@@ -96,6 +96,11 @@ class DBSelectorItem extends React.Component {
         path = `${sqliteDirPath}/commentaires-tresor.sqlite`
         break
       }
+      case 'MHY': {
+        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+        path = `${sqliteDirPath}/commentaires-mhy.sqlite`
+        break
+      }
       default:
     }
 
@@ -117,6 +122,12 @@ class DBSelectorItem extends React.Component {
       case 'TRESOR': {
         const storageRef = firebase.storage().ref()
         const sqliteDbUri = await storageRef.child('commentaires-tresor.sqlite').getDownloadURL()
+
+        return sqliteDbUri
+      }
+      case 'MHY': {
+        const storageRef = firebase.storage().ref()
+        const sqliteDbUri = await storageRef.child('commentaires-mhy.sqlite').getDownloadURL()
 
         return sqliteDbUri
       }
@@ -151,7 +162,7 @@ class DBSelectorItem extends React.Component {
       this.setState({ versionNeedsDownload: false, isLoading: false })
       switch (this.props.database) {
         case 'STRONG': {
-          await initStrongDB()
+          await strongDB.init()
           break
         }
         case 'DICTIONNAIRE': {
@@ -160,6 +171,10 @@ class DBSelectorItem extends React.Component {
         }
         case 'TRESOR': {
           await initTresorDB()
+          break
+        }
+        case 'MHY': {
+          await mhyDB.init()
           break
         }
         default: {
@@ -188,7 +203,7 @@ class DBSelectorItem extends React.Component {
             })
             switch (this.props.database) {
               case 'STRONG': {
-                await deleteStrongDB()
+                await strongDB.delete()
                 break
               }
               case 'DICTIONNAIRE': {
@@ -197,6 +212,10 @@ class DBSelectorItem extends React.Component {
               }
               case 'TRESOR': {
                 await deleteTresorDB()
+                break
+              }
+              case 'MHY': {
+                await mhyDB.delete()
                 break
               }
               default: {

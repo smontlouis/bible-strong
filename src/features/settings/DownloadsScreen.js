@@ -25,6 +25,7 @@ const DLScreen = () => {
         <DBSelectorItem database="DICTIONNAIRE" name="Dictionnaire Westphal" fileSize={22532096} />
         <DBSelectorItem database="SEARCH" name="Index de recherche" fileSize={16795170} />
         <DBSelectorItem database="TRESOR" name="Trésor de l'écriture" fileSize={5434368} />
+        <DBSelectorItem database="MHY" name="Commentaires de Matthew Henry" fileSize={6574080} />
         <Text padding={20} title fontSize={25}>
           Bibles
         </Text>

@@ -3,8 +3,10 @@ import styled from '@emotion/styled'
 
 import { SEND_INITIAL_DATA, CONSOLE_LOG, THROW_ERROR, dispatch } from './dispatch'
 import Verse from './Verse'
+import Comment from './Comment'
 import ErrorBoundary from './ErrorBoundary'
 import { desktopMode } from './env'
+import { scaleFontSize } from './scaleFontSize'
 
 if (!Object.entries) {
   Object.entries = function(obj) {
@@ -34,8 +36,6 @@ const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
   fontSize: 13,
   color: colors[theme].darkGrey
 }))
-
-const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
 
 const headingStyle = {
   fontFamily: 'LiterataBook'
@@ -79,6 +79,7 @@ class VersesRenderer extends Component {
   state = {
     verses: [],
     secondaryVerses: [],
+    comments: null,
     selectedVerses: {},
     highlightedVerses: {},
     notedVersesCount: {},
@@ -111,7 +112,8 @@ class VersesRenderer extends Component {
       //   selectedVerses: this.props.selectedVerses,
       //   version: this.props.version,
       //   pericopeChapter: this.props.pericopeChapter,
-      //   selectedCode: this.props.selectedCode
+      //   selectedCode: this.props.selectedCode,
+      //   comments: this.props.comments
       // })
       // // // Load font
       // const literate = require('../../../studies/studiesWebView/src/literata').default
@@ -207,6 +209,7 @@ class VersesRenderer extends Component {
             const {
               verses,
               secondaryVerses,
+              comments,
               selectedVerses,
               highlightedVerses,
               notedVerses,
@@ -225,6 +228,7 @@ class VersesRenderer extends Component {
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
                 : null,
+              comments,
               selectedVerses,
               highlightedVerses,
               notedVerses,
@@ -259,12 +263,17 @@ class VersesRenderer extends Component {
     }
 
     const isHebreu = this.state.version === 'INT' && Number(this.state.verses[0].Livre) < 40
+    const introComment = this.state.comments && this.state.comments[0]
 
     return (
       <Container rtl={isHebreu} settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
         {isHebreu && (
           <RightDirection settings={this.state.settings}>Sens de la lecture ←</RightDirection>
         )}
+        {!!introComment && this.state.settings.commentsDisplay && (
+          <Comment isIntro id="comment-0" settings={this.state.settings} comment={introComment} />
+        )}
+
         {this.state.verses.map((verse, i) => {
           const { Livre, Chapitre, Verset } = verse
           const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
@@ -274,6 +283,7 @@ class VersesRenderer extends Component {
             isHighlighted && this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
           const notesCount = this.state.notedVersesCount[`${Verset}`]
           const notesText = this.state.notedVersesText[`${Verset}`]
+          const comment = this.state.comments && this.state.comments[Verset]
           const isVerseToScroll = this.state.verseToScroll == Verset
           const secondaryVerse = this.state.secondaryVerses && this.state.secondaryVerses[i]
 
@@ -300,6 +310,13 @@ class VersesRenderer extends Component {
                 <H4 isHebreu={isHebreu} settings={this.state.settings}>
                   {h4}
                 </H4>
+              )}
+              {!!comment && this.state.settings.commentsDisplay && (
+                <Comment
+                  id={`comment-${verse.Verset}`}
+                  settings={this.state.settings}
+                  comment={comment}
+                />
               )}
               <ErrorBoundary>
                 <Verse

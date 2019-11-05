@@ -24,6 +24,7 @@ export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
+export const SET_SETTINGS_COMMENTS_DISPLAY = 'user/SET_SETTINGS_COMMENTS_DISPLAY'
 
 export const ADD_NOTE = 'user/ADD_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
@@ -76,6 +77,7 @@ const initialState = {
       theme: 'default',
       press: 'shortPress',
       notesDisplay: 'inline',
+      commentsDisplay: false,
       colors: {
         default: defaultColors,
         dark: darkColors
@@ -244,6 +246,10 @@ export default produce((draft, action) => {
     }
     case SET_SETTINGS_NOTES_DISPLAY: {
       draft.bible.settings.notesDisplay = action.payload
+      break
+    }
+    case SET_SETTINGS_COMMENTS_DISPLAY: {
+      draft.bible.settings.commentsDisplay = action.payload
       break
     }
     case INCREASE_SETTINGS_FONTSIZE_SCALE: {
@@ -523,6 +529,13 @@ export function setSettingsTheme(payload) {
 export function setSettingsNotesDisplay(payload) {
   return {
     type: SET_SETTINGS_NOTES_DISPLAY,
+    payload
+  }
+}
+
+export function setSettingsCommentaires(payload) {
+  return {
+    type: SET_SETTINGS_COMMENTS_DISPLAY,
     payload
   }
 }

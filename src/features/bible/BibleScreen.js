@@ -31,6 +31,7 @@ class BibleScreen extends React.Component {
       setSettingsPress,
       setSettingsTheme,
       setSettingsNotesDisplay,
+      setSettingsCommentaires,
       increaseSettingsFontSizeScale,
       decreaseSettingsFontSizeScale,
       settings
@@ -64,9 +65,11 @@ class BibleScreen extends React.Component {
           version={app.version}
           navigation={navigation}
           settings={settings}
+          setSettingsCommentaires={setSettingsCommentaires}
         />
         {this.state.isBibleParamsOpen && (
           <BibleParamsModal
+            navigation={navigation}
             onClosed={this.toggleBibleParamsOpen}
             isOpen={this.state.isBibleParamsOpen}
             setSettingsAlignContent={setSettingsAlignContent}
@@ -74,6 +77,7 @@ class BibleScreen extends React.Component {
             setSettingsTheme={setSettingsTheme}
             setSettingsNotesDisplay={setSettingsNotesDisplay}
             setSettingsPress={setSettingsPress}
+            setSettingsCommentaires={setSettingsCommentaires}
             increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
             decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
             settings={settings}

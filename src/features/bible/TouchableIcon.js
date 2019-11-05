@@ -12,7 +12,7 @@ const Touchable = styled.TouchableOpacity(({ noFlex, disabled }) => ({
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ color, isSelected, theme, disabled }) => ({
-  color: disabled ? theme.colors.grey : color || theme.colors.tertiary,
+  color: disabled ? theme.colors.grey : theme.colors[color] || theme.colors.tertiary,
   ...(isSelected && {
     color: theme.colors.primary
   })

@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import styled from '@emotion/styled'
 
+import { scaleFontSize } from './scaleFontSize'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
-
-const scaleFontSize = (value, scale) => `${value + scale * 0.1 * value}px` // Scale
 
 const Wrapper = styled('div')(({ settings: { textDisplay } }) => ({
   display: textDisplay

@@ -5,6 +5,8 @@ import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
+import SnackBar from '~common/SnackBar'
+import { getIfDatabaseExists } from '~helpers/database'
 import IconShortPress from '~assets/images/IconShortPress'
 import IconLongPress from '~assets/images/IconLongPress'
 import TouchableIcon from './TouchableIcon'
@@ -67,6 +69,11 @@ const notesDisplayToString = {
   block: 'Note en icone'
 }
 
+const commentsDisplayToString = {
+  false: 'Sans comm.',
+  true: 'Avec comm.'
+}
+
 const BibleParamsModal = ({
   isOpen,
   onClosed,
@@ -77,8 +84,30 @@ const BibleParamsModal = ({
   decreaseSettingsFontSizeScale,
   setSettingsTheme,
   setSettingsNotesDisplay,
-  settings: { alignContent, fontSizeScale, textDisplay, theme, press, notesDisplay }
+  setSettingsCommentaires,
+  navigation,
+  settings: {
+    alignContent,
+    fontSizeScale,
+    textDisplay,
+    theme,
+    press,
+    notesDisplay,
+    commentsDisplay
+  }
 }) => {
+  const onOpenCommentaire = async () => {
+    const exists = await getIfDatabaseExists('commentaires-mhy')
+
+    if (!exists) {
+      SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
+      navigation.navigate('Downloads')
+      return
+    }
+
+    setSettingsCommentaires(true)
+  }
+
   return (
     <StylizedModal
       isOpen={isOpen}
@@ -149,6 +178,19 @@ const BibleParamsModal = ({
             name="file-text"
             onPress={() => setSettingsNotesDisplay('block')}
           />
+        </HalfContainer>
+        <HalfContainer border>
+          <TouchableIcon
+            isSelected={!commentsDisplay}
+            name="x-square"
+            onPress={() => setSettingsCommentaires(false)}
+          />
+          <Box width={80} center>
+            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>
+              {commentsDisplayToString[commentsDisplay]}
+            </Text>
+          </Box>
+          <TouchableIcon isSelected={commentsDisplay} name="archive" onPress={onOpenCommentaire} />
         </HalfContainer>
         <HalfContainer border>
           <TouchableSvgIcon

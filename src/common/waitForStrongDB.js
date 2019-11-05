@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system'
 import { Asset } from 'expo-asset'
 import SnackBar from '~common/SnackBar'
 
-import { initStrongDB, getStrongDB } from '~helpers/database'
+import { strongDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
@@ -26,7 +26,7 @@ export const useWaitForDatabase = () => {
   const dispatchRedux = useDispatch()
 
   useEffect(() => {
-    if (getStrongDB()) {
+    if (strongDB.get()) {
       dispatch({
         type: 'strong.setLoading',
         payload: false
@@ -66,7 +66,7 @@ export const useWaitForDatabase = () => {
               to: dbPath
             })
 
-            await initStrongDB()
+            await strongDB.init()
 
             console.log('DB strong loaded')
 
@@ -112,7 +112,7 @@ export const useWaitForDatabase = () => {
 
                 dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
 
-                await initStrongDB()
+                await strongDB.init()
                 console.log('DB strong loaded')
 
                 dispatch({
@@ -137,7 +137,7 @@ export const useWaitForDatabase = () => {
             }
           }
         } else {
-          await initStrongDB()
+          await strongDB.init()
           console.log('DB strong loaded')
           dispatch({
             type: 'strong.setLoading',

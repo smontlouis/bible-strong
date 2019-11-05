@@ -5,10 +5,12 @@ import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
 
 import LexiqueIcon from '~common/LexiqueIcon'
+import SnackBar from '~common/SnackBar'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
 import getVersesRef from '~helpers/getVersesRef'
 import { cleanParams } from '~helpers/utils'
+import { getIfDatabaseExists } from '~helpers/database'
 
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
@@ -70,7 +72,9 @@ const VersesModal = ({
   version,
   onCreateNoteClick,
   isSelectionMode,
-  setReference
+  setReference,
+  setSettingsCommentaires,
+  settings
 }) => {
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
 
@@ -149,6 +153,18 @@ const VersesModal = ({
     setReference(reference)
   }
 
+  const onOpenCommentaire = async () => {
+    const exists = await getIfDatabaseExists('commentaires-mhy')
+
+    if (!exists) {
+      SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
+      navigation.navigate('Downloads')
+      return
+    }
+
+    setSettingsCommentaires(!settings.commentsDisplay)
+  }
+
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
 
   return (
@@ -162,11 +178,11 @@ const VersesModal = ({
       isSelectionMode={isSelectionMode}>
       {isSelectionMode ? (
         <Container isSelectionMode={isSelectionMode}>
-          <TouchableIcon name="x" onPress={clearSelectedVerses} color={colors.reverse} noFlex />
+          <TouchableIcon name="x" onPress={clearSelectedVerses} color="reverse" noFlex />
           <Text flex bold fontSize={15} textAlign="center" color="reverse">
             {selectedVersesTitle.toUpperCase()}
           </Text>
-          <TouchableIcon name="arrow-right" color={colors.reverse} onPress={sendVerseData} noFlex />
+          <TouchableIcon name="arrow-right" color="reverse" onPress={sendVerseData} noFlex />
         </Container>
       ) : (
         <Container>
@@ -207,9 +223,9 @@ const VersesModal = ({
             />
             <TouchableIcon
               name="archive"
-              onPress={onOpenReferences}
+              onPress={onOpenCommentaire}
               label="Commentaires"
-              disabled={true || moreThanOneVerseSelected}
+              color={settings.commentsDisplay ? 'primary' : 'grey'}
             />
             <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
             <TouchableIcon name="x" onPress={clearSelectedVerses} label="Annuler" />

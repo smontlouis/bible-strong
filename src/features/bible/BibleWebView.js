@@ -178,7 +178,8 @@ class BibleWebView extends Component {
       pericopeChapter,
       chapter,
       isSelectionMode,
-      selectedCode
+      selectedCode,
+      comments
     } = this.props
 
     this.dispatchToWebView({
@@ -195,7 +196,8 @@ class BibleWebView extends Component {
       pericopeChapter,
       chapter,
       isSelectionMode,
-      selectedCode
+      selectedCode,
+      comments
     })
   }
 

@@ -1,8 +1,9 @@
-import { strongDB } from '~helpers/database'
+import { mhyDB } from '~helpers/database'
 
-const SQLTransaction = sqlReq => {
+const SQLMhyTransaction = sqlReq => {
   return new Promise((resolve, reject) => {
-    strongDB.get().transaction(
+    if (!mhyDB.get()) mhyDB.init()
+    mhyDB.get().transaction(
       tx => {
         tx.executeSql(
           sqlReq,
@@ -18,4 +19,4 @@ const SQLTransaction = sqlReq => {
   })
 }
 
-export default SQLTransaction
+export default SQLMhyTransaction

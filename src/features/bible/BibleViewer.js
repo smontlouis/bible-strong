@@ -16,6 +16,7 @@ import Button from '~common/ui/Button'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
 import loadBibleChapter from '~helpers/loadBibleChapter'
+import loadMhyComments from '~helpers/loadMhyComments'
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 import { zeroFill } from '~helpers/zeroFill'
@@ -51,6 +52,8 @@ class BibleViewer extends Component {
     error: false,
     isLoading: true,
     verses: [],
+    secondaryVerses: null,
+    comments: null,
     multipleTagsItem: false,
     quickTagsModal: false,
     isCreateNoteOpen: false,
@@ -96,15 +99,32 @@ class BibleViewer extends Component {
     }
   }
 
+  async componentDidUpdate(nextProps) {
+    if (this.props.settings.commentsDisplay && !this.state.comments) {
+      const comments = await loadMhyComments(this.props.book.Numero, this.props.chapter)
+      this.setState({ comments: JSON.parse(comments.commentaires) })
+    }
+  }
+
   loadVerses = async () => {
-    const { book, chapter, version, verse } = this.props
+    const { book, chapter, version, verse, settings } = this.props
     this.pericope = getBiblePericope(version)
     this.setState({ isLoading: true })
 
     const verses = await loadBibleChapter(book.Numero, chapter, version)
+    // console.log('Verses: ', verses)
+
     let secondaryVerses = null
     if (version === 'INT') {
       secondaryVerses = await loadBibleChapter(book.Numero, chapter, 'LSG')
+    }
+
+    if (settings.commentsDisplay) {
+      const comments = await loadMhyComments(book.Numero, chapter)
+      this.setState({ comments: JSON.parse(comments.commentaires) })
+      // console.log('Comments: ', this.state.comments)
+    } else if (this.state.comments) {
+      this.setState({ comments: null })
     }
 
     if (!verses) {
@@ -189,6 +209,7 @@ class BibleViewer extends Component {
       audioMode,
       isPlaying,
       secondaryVerses,
+      comments,
       selectedCode,
       reference
     } = this.state
@@ -258,6 +279,7 @@ class BibleViewer extends Component {
             openNoteModal={this.openNoteModal}
             setSelectedCode={this.setSelectedCode}
             selectedCode={selectedCode}
+            comments={comments}
           />
         )}
         {!isReadOnly && (
@@ -282,9 +304,11 @@ class BibleViewer extends Component {
         )}
         {modalIsVisible && (
           <SelectedVersesModal
+            settings={settings}
             isSelectionMode={isSelectionMode}
             setSelectedVerse={this.props.setSelectedVerse}
             setReference={this.setReference}
+            setSettingsCommentaires={this.props.setSettingsCommentaires}
             onCreateNoteClick={this.toggleCreateNote}
             isVisible={modalIsVisible}
             isSelectedVerseHighlighted={isSelectedVerseHighlighted}
