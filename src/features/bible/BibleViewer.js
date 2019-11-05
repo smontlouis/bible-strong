@@ -99,7 +99,7 @@ class BibleViewer extends Component {
     }
   }
 
-  async componentDidUpdate(nextProps) {
+  async componentDidUpdate() {
     if (this.props.settings.commentsDisplay && !this.state.comments) {
       const comments = await loadMhyComments(this.props.book.Numero, this.props.chapter)
       this.setState({ comments: JSON.parse(comments.commentaires) })
