@@ -19,12 +19,16 @@ const StyledComment = styled('div')(({ settings: { fontSizeScale, theme, colors 
   borderRadius: 4,
   position: 'relative',
   overflow: 'hidden',
+  textAlign: 'left',
 
   p: {
     fontSize: scaleFontSize(17, fontSizeScale),
     lineHeight: scaleFontSize(25, fontSizeScale),
     fontFamily: 'LiterataBook',
     margin: 0
+  },
+  li: {
+    fontFamily: 'LiterataBook'
   },
   'p+p': {
     marginTop: scaleFontSize(25, fontSizeScale)
@@ -68,7 +72,7 @@ const Copyright = styled('div')(({ settings: { theme, colors, fontSizeScale } })
 const Comment = ({ id, settings, comment, isIntro }) => {
   const [readMore, setReadMore] = useState(false)
   const [mhyComment, setComment] = useState(
-    truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 500).html
+    truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html
   )
   const previousReadMore = usePrevious(readMore)
 
@@ -82,7 +86,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
       return
     }
     if (previousReadMore && !readMore) {
-      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 500).html)
+      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html)
       document.getElementById(id).scrollIntoView()
     }
   }, [comment, id, previousReadMore, readMore])
