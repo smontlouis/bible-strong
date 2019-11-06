@@ -102,24 +102,24 @@ class VersesRenderer extends Component {
     // ONLY FOR DEV MODE ON DESKTOP
     // TODO: TO DELETE
     if (desktopMode) {
-      // this.setState({
-      //   verses: this.props.verses,
-      //   secondaryVerses: this.props.secondaryVerses || [],
-      //   settings: this.props.settings,
-      //   verseToScroll: this.props.verseToScroll,
-      //   notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
-      //   notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
-      //   selectedVerses: this.props.selectedVerses,
-      //   version: this.props.version,
-      //   pericopeChapter: this.props.pericopeChapter,
-      //   selectedCode: this.props.selectedCode,
-      //   comments: this.props.comments
-      // })
-      // // // Load font
-      // const literate = require('../../../studies/studiesWebView/src/literata').default
-      // const style = document.createElement('style')
-      // style.innerHTML = literate
-      // document.head.appendChild(style)
+      this.setState({
+        verses: this.props.verses,
+        secondaryVerses: this.props.secondaryVerses || [],
+        settings: this.props.settings,
+        verseToScroll: this.props.verseToScroll,
+        notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
+        notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
+        selectedVerses: this.props.selectedVerses,
+        version: this.props.version,
+        pericopeChapter: this.props.pericopeChapter,
+        selectedCode: this.props.selectedCode,
+        comments: this.transformComments(this.props.comments, this.props.verses.length)
+      })
+      // // Load font
+      const literate = require('../../../studies/studiesWebView/src/literata').default
+      const style = document.createElement('style')
+      style.innerHTML = literate
+      document.head.appendChild(style)
     }
 
     this.receiveDataFromApp()
@@ -198,6 +198,20 @@ class VersesRenderer extends Component {
     return newNotedVerses
   }
 
+  transformComments = (comments, versesLength) => {
+    return Object.entries(comments).reduce((acc, [key, value], i) => {
+      if (i === 0) {
+        return { ...acc, [key]: value }
+      }
+
+      if (Object.entries(comments)[i + 1]) {
+        const newKey = Number(Object.keys(comments)[i + 1]) - 1
+        return { ...acc, [newKey]: value }
+      } // Else it's the last item, choose versesLength
+      return { ...acc, [versesLength]: value }
+    }, {})
+  }
+
   receiveDataFromApp = () => {
     const self = this
     document.addEventListener('messages', event => {
@@ -228,7 +242,7 @@ class VersesRenderer extends Component {
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
                 : null,
-              comments,
+              comments: this.transformComments(comments, verses.length),
               selectedVerses,
               highlightedVerses,
               notedVerses,
@@ -311,13 +325,6 @@ class VersesRenderer extends Component {
                   {h4}
                 </H4>
               )}
-              {!!comment && this.state.settings.commentsDisplay && (
-                <Comment
-                  id={`comment-${verse.Verset}`}
-                  settings={this.state.settings}
-                  comment={comment}
-                />
-              )}
               <ErrorBoundary>
                 <Verse
                   isHebreu={isHebreu}
@@ -335,6 +342,13 @@ class VersesRenderer extends Component {
                   selectedCode={this.state.selectedCode}
                 />
               </ErrorBoundary>
+              {!!comment && this.state.settings.commentsDisplay && (
+                <Comment
+                  id={`comment-${verse.Verset}`}
+                  settings={this.state.settings}
+                  comment={comment}
+                />
+              )}
             </Span>
           )
         })}
