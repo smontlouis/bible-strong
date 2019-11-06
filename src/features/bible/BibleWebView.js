@@ -5,10 +5,13 @@ import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
 import * as Sentry from 'sentry-expo'
 
+import books from '~assets/bible_versions/books'
+import SnackBar from '~common/SnackBar'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
+  NAVIGATE_TO_BIBLE_VIEW,
   SEND_INITIAL_DATA,
   TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
@@ -141,6 +144,24 @@ class BibleWebView extends Component {
         this.props.openNoteModal(action.payload)
         break
       }
+      case NAVIGATE_TO_BIBLE_VIEW: {
+        const { navigation } = this.props
+        const book = Object.keys(books).find(key => books[key][0].toUpperCase() === action.bookCode)
+
+        if (!book) {
+          SnackBar.show("Erreur lors de l'ouverture du verset")
+          Sentry.captureMessage(JSON.stringify(action))
+          return
+        }
+
+        navigation.navigate('BibleView', {
+          isReadOnly: true,
+          book: parseInt(book, 10),
+          chapter: parseInt(action.chapter, 10),
+          verse: parseInt(action.verse, 10)
+        })
+        break
+      }
       case CONSOLE_LOG: {
         console.log('WEBVIEW: ', action.payload)
         break
@@ -202,10 +223,6 @@ class BibleWebView extends Component {
   }
 
   render() {
-    if (!this.state.isHTMLFileLoaded) {
-      return null
-    }
-
     return (
       <View
         style={{
@@ -219,26 +236,28 @@ class BibleWebView extends Component {
           marginRight: 'auto',
           width: '100%'
         }}>
-        <WebView
-          useWebKit
-          onLoad={this.sendDataToWebView}
-          onLoadEnd={this.injectFont}
-          onMessage={this.receiveDataFromWebView}
-          originWhitelist={['*']}
-          ref={ref => {
-            this.webview = ref
-          }}
-          onError={syntheticEvent => {
-            const { nativeEvent } = syntheticEvent
-            console.warn('WebView error: ', nativeEvent)
-          }}
-          source={{ html: this.HTMLFile }}
-          injectedJavaScript={INJECTED_JAVASCRIPT}
-          domStorageEnabled
-          allowUniversalAccessFromFileURLs
-          allowFileAccessFromFileURLs
-          allowFileAccess
-        />
+        {this.state.isHTMLFileLoaded && (
+          <WebView
+            useWebKit
+            onLoad={this.sendDataToWebView}
+            onLoadEnd={this.injectFont}
+            onMessage={this.receiveDataFromWebView}
+            originWhitelist={['*']}
+            ref={ref => {
+              this.webview = ref
+            }}
+            onError={syntheticEvent => {
+              const { nativeEvent } = syntheticEvent
+              console.warn('WebView error: ', nativeEvent)
+            }}
+            source={{ html: this.HTMLFile }}
+            injectedJavaScript={INJECTED_JAVASCRIPT}
+            domStorageEnabled
+            allowUniversalAccessFromFileURLs
+            allowFileAccessFromFileURLs
+            allowFileAccess
+          />
+        )}
       </View>
     )
   }

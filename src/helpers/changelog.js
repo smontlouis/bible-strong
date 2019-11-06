@@ -7,6 +7,18 @@ export const logTypes = {
 
 export default [
   {
+    date: '1573027254463',
+    type: logTypes.FEATURE,
+    title: 'Commentaires Matthew Henry',
+    description: `Les commentaires concis Matthew Henry traduits en français sont désormais disponibles, merci à Dominique Osché pour ce superbe travail de traduction !
+
+Pour les utiliser vous devez télécharger la base de données "Commentaires Matthew Henry" et vous pouvez les activer dans les paramêtres de mise en forme "Aa" ou en sélectionnant un verset.
+
+Pour rappel, les commentaires ne remplacent pas le Saint-Esprit ;), ils servent à vous guider et à vous donner un contexte historique pour comprendre certaines parties de la Bible.
+
+Bonne étude !`
+  },
+  {
     date: '1572477397819',
     type: logTypes.FEATURE,
     title: 'Références croisées',

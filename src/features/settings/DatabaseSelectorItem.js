@@ -7,6 +7,8 @@ import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import * as firebase from 'firebase'
 import * as Icon from '@expo/vector-icons'
+import { connect } from 'react-redux'
+import compose from 'recompose/compose'
 import {
   strongDB,
   mhyDB,
@@ -20,6 +22,7 @@ import { DBStateContext } from '~helpers/databaseState'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import { setSettingsCommentaires } from '~redux/modules/user'
 
 const Container = styled.View({
   paddingHorizontal: 20,
@@ -143,7 +146,6 @@ class DBSelectorItem extends React.Component {
 
   startDownload = async () => {
     this.setState({ isLoading: true })
-    const [, dispatch] = this.context
 
     const path = this.getPath()
     const uri = await this.requireFileUri()
@@ -216,6 +218,7 @@ class DBSelectorItem extends React.Component {
               }
               case 'MHY': {
                 await mhyDB.delete()
+                this.props.dispatch(setSettingsCommentaires(false))
                 break
               }
               default: {
@@ -283,4 +286,7 @@ class DBSelectorItem extends React.Component {
   }
 }
 
-export default withTheme(DBSelectorItem)
+export default compose(
+  withTheme,
+  connect()
+)(DBSelectorItem)

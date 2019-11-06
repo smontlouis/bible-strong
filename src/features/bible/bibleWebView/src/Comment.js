@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import truncHTML from 'trunc-html'
 import styled from '@emotion/styled'
+import { dispatch, NAVIGATE_TO_BIBLE_VIEW } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
 
@@ -38,6 +39,9 @@ const StyledComment = styled('div')(({ settings: { fontSizeScale, theme, colors 
     margin: 0,
     paddingBottom: scaleFontSize(25, fontSizeScale),
     fontSize: scaleFontSize(18, fontSizeScale)
+  },
+  a: {
+    color: colors[theme].primary
   }
 }))
 
@@ -79,6 +83,31 @@ const Comment = ({ id, settings, comment, isIntro }) => {
   const onReadMore = () => {
     setReadMore(s => !s)
   }
+
+  useEffect(() => {
+    document.querySelectorAll(`#${id} a`).forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault()
+
+        const href = e.target.attributes.href.textContent
+        const bookCode = href.substr(0, 3)
+        const splittedHref = href.substr(3).split('.')
+        const [chapter] = splittedHref
+        let [, verse] = splittedHref
+
+        if (verse.includes('-')) {
+          ;[verse] = verse.split('-')
+        }
+
+        dispatch({
+          type: NAVIGATE_TO_BIBLE_VIEW,
+          bookCode,
+          chapter,
+          verse
+        })
+      })
+    })
+  }, [mhyComment, id])
 
   useEffect(() => {
     if (readMore) {

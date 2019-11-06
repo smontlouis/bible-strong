@@ -200,6 +200,8 @@ class VersesRenderer extends Component {
 
   // I want comments to be displayed AFTER related verses, not before.
   transformComments = (comments, versesLength) => {
+    if (!comments) return null
+
     return Object.entries(comments).reduce((acc, [key, value], i) => {
       if (key === 0) {
         return { ...acc, [key]: value }
