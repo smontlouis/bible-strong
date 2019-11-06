@@ -101,26 +101,26 @@ class VersesRenderer extends Component {
     })
     // ONLY FOR DEV MODE ON DESKTOP
     // TODO: TO DELETE
-    if (desktopMode) {
-      this.setState({
-        verses: this.props.verses,
-        secondaryVerses: this.props.secondaryVerses || [],
-        settings: this.props.settings,
-        verseToScroll: this.props.verseToScroll,
-        notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
-        notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
-        selectedVerses: this.props.selectedVerses,
-        version: this.props.version,
-        pericopeChapter: this.props.pericopeChapter,
-        selectedCode: this.props.selectedCode,
-        comments: this.transformComments(this.props.comments, this.props.verses.length)
-      })
-      // // Load font
-      const literate = require('../../../studies/studiesWebView/src/literata').default
-      const style = document.createElement('style')
-      style.innerHTML = literate
-      document.head.appendChild(style)
-    }
+    // if (desktopMode) {
+    //   this.setState({
+    //     verses: this.props.verses,
+    //     secondaryVerses: this.props.secondaryVerses || [],
+    //     settings: this.props.settings,
+    //     verseToScroll: this.props.verseToScroll,
+    //     notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
+    //     notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
+    //     selectedVerses: this.props.selectedVerses,
+    //     version: this.props.version,
+    //     pericopeChapter: this.props.pericopeChapter,
+    //     selectedCode: this.props.selectedCode,
+    //     comments: this.transformComments(this.props.comments, this.props.verses.length)
+    //   })
+    //   // // Load font
+    //   const literate = require('../../../studies/studiesWebView/src/literata').default
+    //   const style = document.createElement('style')
+    //   style.innerHTML = literate
+    //   document.head.appendChild(style)
+    // }
 
     this.receiveDataFromApp()
   }
