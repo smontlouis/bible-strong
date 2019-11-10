@@ -1,16 +1,14 @@
 import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-import { Asset } from 'expo-asset'
 
 import SnackBar from '~common/SnackBar'
 import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import { useDBStateValue } from '~helpers/databaseState'
 import DownloadRequired from '~common/DownloadRequired'
-
-import { setDictionnaireDatabaseHash } from '~redux/modules/bible'
+import { firestoreUris } from '../../config'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -23,7 +21,6 @@ export const useWaitForDatabase = () => {
   ] = useDBStateValue()
 
   const dictionnaireDatabaseHash = useSelector(state => state.bible.dictionnaireDatabaseHash)
-  const dispatchRedux = useDispatch()
 
   useEffect(() => {
     if (getDictionnaireDB()) {
@@ -46,11 +43,7 @@ export const useWaitForDatabase = () => {
         //   }
         // }
 
-        const sqliteDB = await Asset.fromModule(require('~assets/db/dictionnaire.sqlite'))
-
         if (!dbFile.exists) {
-          // || sqliteDB.hash !== dictionnaireDatabaseHash
-
           if (!sqliteDir.exists) {
             await FileSystem.makeDirectoryAsync(sqliteDirPath)
           } else if (!sqliteDir.isDirectory) {
@@ -66,10 +59,12 @@ export const useWaitForDatabase = () => {
             return
           }
 
+          const sqliteDbUri = firestoreUris.dictionnaire
+
           try {
             if (!window.dictionnaireDownloadHasStarted) {
               window.dictionnaireDownloadHasStarted = true
-              console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+              console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
               if (!sqliteDir.exists) {
                 await FileSystem.makeDirectoryAsync(sqliteDirPath)
@@ -78,7 +73,7 @@ export const useWaitForDatabase = () => {
               }
 
               await FileSystem.createDownloadResumable(
-                sqliteDB.uri,
+                sqliteDbUri,
                 dbPath,
                 null,
                 ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
@@ -90,8 +85,6 @@ export const useWaitForDatabase = () => {
                   })
                 }
               ).downloadAsync()
-
-              dispatchRedux(setDictionnaireDatabaseHash(sqliteDB.hash))
 
               await initDictionnaireDB()
               console.log('DB dictionnaire loaded')
@@ -127,7 +120,7 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [dictionnaireDatabaseHash, dispatch, dispatchRedux, startDownload])
+  }, [dictionnaireDatabaseHash, dispatch, startDownload])
 
   const setStartDownload = value =>
     dispatch({
@@ -158,6 +151,7 @@ const waitForDatabase = WrappedComponent => props => {
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
+        hasBackButton
         title="La base de données dictionnaire est requise pour accéder à cette page."
         setStartDownload={setStartDownload}
         fileSize={22}

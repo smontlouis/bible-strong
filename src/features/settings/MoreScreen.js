@@ -5,6 +5,7 @@ import styled from '@emotion/native'
 
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
+import NaveIcon from '~common/NaveIcon'
 import Container from '~common/ui/Container'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
@@ -65,6 +66,12 @@ const MoreScreen = () => {
             <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
             <Text color="secondary" bold fontSize={15}>
               Dictionnaire
+            </Text>
+          </LinkItem>
+          <LinkItem route="Nave">
+            <NaveIcon style={{ marginRight: 15 }} size={25} />
+            <Text color="quint" bold fontSize={15}>
+              Bible Thématique Nave
             </Text>
           </LinkItem>
           <LinkItem route="Highlights">

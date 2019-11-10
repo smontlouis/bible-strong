@@ -4,7 +4,6 @@ import * as FileSystem from 'expo-file-system'
 import { TouchableOpacity } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
-import * as firebase from 'firebase'
 import { withTheme } from 'emotion-theming'
 
 import SnackBar from '~common/SnackBar'
@@ -12,6 +11,7 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { initInterlineaireDB } from '~helpers/database'
+import { firestoreUris } from '../../../config'
 
 const BIBLE_FILESIZE = 5000000
 
@@ -100,8 +100,7 @@ class VersionSelectorItem extends React.Component {
         return Asset.fromModule(require('~assets/bible_versions/bible-kjf.txt')).uri
       }
       case 'INT': {
-        const storageRef = firebase.storage().ref()
-        const sqliteDbUri = await storageRef.child('interlineaire.sqlite').getDownloadURL()
+        const sqliteDbUri = firestoreUris.interlineaire
 
         return sqliteDbUri
       }

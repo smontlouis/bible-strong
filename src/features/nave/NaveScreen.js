@@ -8,15 +8,15 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
-import { getFirstLetterFrom } from '~helpers/alphabet'
-import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
-import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
+import loadNaveByLetter from '~helpers/loadNaveByLetter'
+import loadNaveBySearch from '~helpers/loadNaveBySearch'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList2'
 import SectionTitle from '~common/SectionTitle'
+import waitForDatabase from '~common/waitForNaveDB'
+
+import DictionnaireItem from '../dictionnary/DictionnaireItem'
 import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
-import waitForDatabase from '~common/waitForDictionnaireDB'
-import DictionnaireItem from './DictionnaireItem'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -26,14 +26,12 @@ const useSectionResults = results => {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list, dbItem) => {
-      const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
-      )
+    const sectionResults = results.reduce((list, naveItem) => {
+      const listItem = list.find(item => item.title && item.title === naveItem.letter)
       if (!listItem) {
-        list.push({ title: getFirstLetterFrom(dbItem.sanitized_word), data: [dbItem] })
+        list.push({ title: naveItem.letter, data: [naveItem] })
       } else {
-        listItem.data.push(dbItem)
+        listItem.data.push(naveItem)
       }
 
       return list
@@ -44,16 +42,15 @@ const useSectionResults = results => {
   return sectionResults
 }
 
-const DictionnaireScreen = () => {
+const NaveScreen = () => {
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadDictionnaireBySearch, value: debouncedSearchValue },
-    { query: loadDictionnaireByLetter, value: letter }
+    { query: loadNaveBySearch, value: debouncedSearchValue },
+    { query: loadNaveByLetter, value: letter }
   )
-
   const sectionResults = useSectionResults(results)
 
   useEffect(() => {
@@ -80,7 +77,7 @@ const DictionnaireScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton title="Dictionnaire" noBorder />
+      <Header hasBackButton title="Thématique Nave" noBorder />
       <SearchInput
         placeholder="Recherche par mot"
         onChangeText={setSearchValue}
@@ -92,7 +89,9 @@ const DictionnaireScreen = () => {
           <Loading message="Chargement..." />
         ) : sectionResults.length ? (
           <SectionList
-            renderItem={({ item: { id, word } }) => <DictionnaireItem key={id} {...{ word }} />}
+            renderItem={({ item: { name_lower, name } }) => (
+              <DictionnaireItem key={name_lower} word={name} />
+            )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
             getItemLayout={sectionListGetItemLayout({
@@ -102,23 +101,23 @@ const DictionnaireScreen = () => {
               getSectionFooterHeight: () => 0
             })}
             renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle color="secondary">
+              <SectionTitle color="quint">
                 <Text title fontWeight="bold" fontSize={16} color="reverse">
-                  {title}
+                  {title.toUpperCase()}
                 </Text>
               </SectionTitle>
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.name_lower}
           />
         ) : (
           <Empty source={require('~assets/images/empty.json')} message="Aucun mot trouvé..." />
         )}
       </Box>
-      {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}
+      {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}
     </Container>
   )
 }
 
-export default waitForDatabase(DictionnaireScreen)
+export default waitForDatabase(NaveScreen)

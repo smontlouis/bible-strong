@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-import { Asset } from 'expo-asset'
 
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
+import { firestoreUris } from '../../../config'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
@@ -39,7 +39,8 @@ export const useWaitForIndex = () => {
           return
         }
 
-        const idxUri = Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
+        const idxUri = firestoreUris['idx-light']
+
         console.log(`Downloading ${idxUri} to ${idxPath}`)
 
         try {

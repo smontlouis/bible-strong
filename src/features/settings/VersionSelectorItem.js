@@ -5,7 +5,6 @@ import * as FileSystem from 'expo-file-system'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
-import * as firebase from 'firebase'
 import * as Icon from '@expo/vector-icons'
 
 import SnackBar from '~common/SnackBar'
@@ -13,6 +12,7 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { initInterlineaireDB } from '~helpers/database'
+import { firestoreUris } from '../../../config'
 
 const Container = styled.View({
   paddingHorizontal: 20,
@@ -93,8 +93,7 @@ class VersionSelectorItem extends React.Component {
         return Asset.fromModule(require('~assets/bible_versions/bible-kjf.txt')).uri
       }
       case 'INT': {
-        const storageRef = firebase.storage().ref()
-        const sqliteDbUri = await storageRef.child('interlineaire.sqlite').getDownloadURL()
+        const sqliteDbUri = firestoreUris.interlineaire
 
         return sqliteDbUri
       }
@@ -108,8 +107,7 @@ class VersionSelectorItem extends React.Component {
     const { version } = this.props
     const BIBLE_FILESIZE = version.id === 'INT' ? 20000000 : 5000000
 
-    const fileProgress =
-      Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
+    const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
     this.setState({ fileProgress })
   }
 

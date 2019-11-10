@@ -2,16 +2,16 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
+import * as firebase from 'firebase'
 
 import SnackBar from '~common/SnackBar'
 
-import { initTresorDB, getTresorDB } from '~helpers/database'
+import { naveDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
-import { timeout } from '~helpers/timeout'
 import { firestoreUris } from '../../config'
 
-const STRONG_FILE_SIZE = 5434368
+const FILE_SIZE = 7448576
 
 export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
@@ -21,15 +21,14 @@ export const useWaitForDatabase = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (getTresorDB()) {
+    if (naveDB.get()) {
       setLoading(false)
     } else {
       const loadDBAsync = async () => {
-        await timeout(1000) // Wait safely
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-        const dbPath = `${sqliteDirPath}/commentaires-tresor.sqlite`
+        const dbPath = `${sqliteDirPath}/nave-fr.sqlite`
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         // if (__DEV__) {
@@ -47,10 +46,10 @@ export const useWaitForDatabase = () => {
           }
 
           try {
-            if (!window.tresorDownloadHasStarted) {
-              window.tresorDownloadHasStarted = true
+            if (!window.naveDownloadHasStarted) {
+              window.naveDownloadHasStarted = true
 
-              const sqliteDbUri = firestoreUris['commentaires-tresor']
+              const sqliteDbUri = firestoreUris['nave-fr']
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
@@ -64,17 +63,17 @@ export const useWaitForDatabase = () => {
                 sqliteDbUri,
                 dbPath,
                 null,
-                ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+                ({ totalBytesWritten }) => {
+                  const idxProgress = Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
                   setProgress(idxProgress)
                 }
               ).downloadAsync()
 
-              await initTresorDB()
-              console.log('DB trésor loaded')
+              await naveDB.init()
+              console.log('DB nave loaded')
 
               setLoading(false)
-              window.tresorDownloadHasStarted = false
+              window.naveDownloadHasStarted = false
             }
           } catch (e) {
             SnackBar.show(
@@ -85,8 +84,8 @@ export const useWaitForDatabase = () => {
             setStartDownload(false)
           }
         } else {
-          await initTresorDB()
-          console.log('DB trésor loaded')
+          await naveDB.init()
+          console.log('DB nave loaded')
           setLoading(false)
         }
       }
@@ -109,7 +108,7 @@ const waitForDatabase = WrappedComponent => props => {
 
   if (isLoading && startDownload) {
     return (
-      <Loading message="Téléchargement de la base commentaires...">
+      <Loading message="Téléchargement de la base nave...">
         <ProgressBar progress={Number(progress)} color="blue" />
       </Loading>
     )
@@ -118,11 +117,10 @@ const waitForDatabase = WrappedComponent => props => {
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        noHeader
-        small
-        title={'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'}
+        hasBackButton
+        title={'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'}
         setStartDownload={setStartDownload}
-        fileSize={5.4}
+        fileSize={7}
       />
     )
   }

@@ -9,7 +9,6 @@ import { strongDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
-import { setStrongDatabaseHash } from '~redux/modules/bible'
 import { timeout } from '~helpers/timeout'
 
 const STRONG_FILE_SIZE = 34941952
@@ -23,7 +22,6 @@ export const useWaitForDatabase = () => {
   ] = useDBStateValue()
 
   const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
-  const dispatchRedux = useDispatch()
 
   useEffect(() => {
     if (strongDB.get()) {
@@ -50,8 +48,6 @@ export const useWaitForDatabase = () => {
         const sqliteDB = await Asset.fromModule(require('~assets/db/strong.sqlite'))
 
         if (!dbFile.exists) {
-          //  || sqliteDB.hash !== strongDatabaseHash
-
           if (sqliteDB.localUri && !window.strongDownloadHasStarted) {
             window.strongDownloadHasStarted = true
 
@@ -110,8 +106,6 @@ export const useWaitForDatabase = () => {
                   }
                 ).downloadAsync()
 
-                dispatchRedux(setStrongDatabaseHash(sqliteDB.hash))
-
                 await strongDB.init()
                 console.log('DB strong loaded')
 
@@ -148,7 +142,7 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [strongDatabaseHash, dispatch, startDownload, dispatchRedux])
+  }, [strongDatabaseHash, dispatch, startDownload])
 
   const setStartDownload = value =>
     dispatch({

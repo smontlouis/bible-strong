@@ -5,13 +5,13 @@ import * as FileSystem from 'expo-file-system'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
-import * as firebase from 'firebase'
 import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import {
   strongDB,
   mhyDB,
+  naveDB,
   deleteDictionnaireDB,
   deleteTresorDB,
   initDictionnaireDB,
@@ -24,6 +24,8 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { setSettingsCommentaires } from '~redux/modules/user'
 
+import { firestoreUris } from '../../../config'
+
 const Container = styled.View({
   paddingHorizontal: 20,
   paddingTop: 10,
@@ -34,6 +36,14 @@ const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   backgroundColor: 'transparent'
+}))
+
+const TextCopyright = styled.Text(({ isSelected, theme }) => ({
+  marginTop: 5,
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontSize: 12,
+  backgroundColor: 'transparent',
+  opacity: 0.5
 }))
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -64,7 +74,7 @@ class DBSelectorItem extends React.Component {
       throw new Error('SQLite dir is not a directory')
     }
 
-    const path = this.getPath(sqliteDirPath)
+    const path = this.getPath()
 
     const file = await FileSystem.getInfoAsync(path)
 
@@ -79,14 +89,13 @@ class DBSelectorItem extends React.Component {
     const { database } = this.props
 
     let path
+    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
     switch (database) {
       case 'STRONG': {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         path = `${sqliteDirPath}/strong.sqlite`
         break
       }
       case 'DICTIONNAIRE': {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         path = `${sqliteDirPath}/dictionnaire.sqlite`
         break
       }
@@ -95,13 +104,15 @@ class DBSelectorItem extends React.Component {
         break
       }
       case 'TRESOR': {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         path = `${sqliteDirPath}/commentaires-tresor.sqlite`
         break
       }
       case 'MHY': {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         path = `${sqliteDirPath}/commentaires-mhy.sqlite`
+        break
+      }
+      case 'NAVE': {
+        path = `${sqliteDirPath}/nave-fr.sqlite`
         break
       }
       default:
@@ -117,20 +128,25 @@ class DBSelectorItem extends React.Component {
         return Asset.fromModule(require('~assets/db/strong.sqlite')).uri
       }
       case 'DICTIONNAIRE': {
-        return Asset.fromModule(require('~assets/db/dictionnaire.sqlite')).uri
+        const sqliteDbUri = firestoreUris.dictionnaire
+        return sqliteDbUri
       }
       case 'SEARCH': {
-        return Asset.fromModule(require('~assets/lunr/idx-light.txt')).uri
+        const sqliteDbUri = firestoreUris['idx-light']
+        return sqliteDbUri
       }
       case 'TRESOR': {
-        const storageRef = firebase.storage().ref()
-        const sqliteDbUri = await storageRef.child('commentaires-tresor.sqlite').getDownloadURL()
+        const sqliteDbUri = firestoreUris['commentaires-tresor']
 
         return sqliteDbUri
       }
       case 'MHY': {
-        const storageRef = firebase.storage().ref()
-        const sqliteDbUri = await storageRef.child('commentaires-mhy.sqlite').getDownloadURL()
+        const sqliteDbUri = firestoreUris['commentaires-mhy']
+
+        return sqliteDbUri
+      }
+      case 'NAVE': {
+        const sqliteDbUri = firestoreUris['nave-fr']
 
         return sqliteDbUri
       }
@@ -179,6 +195,10 @@ class DBSelectorItem extends React.Component {
           await mhyDB.init()
           break
         }
+        case 'NAVE': {
+          await naveDB.init()
+          break
+        }
         default: {
           console.log('Database download finished: Nothing to do')
         }
@@ -221,6 +241,10 @@ class DBSelectorItem extends React.Component {
                 this.props.dispatch(setSettingsCommentaires(false))
                 break
               }
+              case 'NAVE': {
+                await naveDB.delete()
+                break
+              }
               default: {
                 console.log('Database download finished: Nothing to do')
               }
@@ -238,7 +262,7 @@ class DBSelectorItem extends React.Component {
   }
 
   render() {
-    const { name, theme, fileSize } = this.props
+    const { name, theme, fileSize, subTitle } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
     if (typeof versionNeedsDownload === 'undefined') {
@@ -251,6 +275,7 @@ class DBSelectorItem extends React.Component {
           <Box flex row>
             <Box disabled flex>
               <TextName>{name}</TextName>
+              {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
             </Box>
             {!isLoading && (
               <Button
@@ -276,6 +301,7 @@ class DBSelectorItem extends React.Component {
         <Box flex row center>
           <Box flex>
             <TextName>{name}</TextName>
+            {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
           </Box>
           <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
             <DeleteIcon name="trash-2" size={20} />

@@ -89,3 +89,22 @@ class MhyDB {
 }
 
 export const mhyDB = new MhyDB()
+
+class NaveDB {
+  dbNave
+
+  init = () => {
+    this.dbNave = SQLite.openDatabase('nave-fr.sqlite')
+    return this.dbNave
+  }
+
+  get = () => {
+    return this.dbNave
+  }
+
+  delete = () => {
+    this.dbNave = undefined
+  }
+}
+
+export const naveDB = new NaveDB()

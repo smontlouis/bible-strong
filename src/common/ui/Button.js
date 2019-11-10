@@ -7,7 +7,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 const WrapperButton = styled.TouchableOpacity(
-  ({ theme, small, reverse, secondary, type, disabled, color }) => ({
+  ({ theme, small, reverse, secondary, type, disabled, color, success, fullWidth}) => ({
     backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
     borderWidth: reverse ? 1 : 0,
     borderColor: theme.colors.darkGrey,
@@ -19,9 +19,12 @@ const WrapperButton = styled.TouchableOpacity(
     paddingRight: 10,
     flexDirection: 'row',
 
+    ...(fullWidth && { flex: 1}),
+
     ...(color && { backgroundColor: color }),
 
     ...(secondary && { backgroundColor: theme.colors.secondary }),
+    ...(success && { backgroundColor: theme.colors.success }),
 
     ...(disabled && {
       opacity: 0.5
@@ -65,13 +68,16 @@ const Button = ({
   leftIcon,
   rightIcon,
   secondary,
-  color
+  success,
+  color,
+  fullWidth,
 }) => {
   const Component = onPress ? WrapperButton : WrapperLink
 
   return (
-    <Box>
+    <Box flex={fullWidth}>
       <Component
+        fullWidth={fullWidth}
         disabled={disabled || isLoading}
         route={route}
         onPress={!disabled ? onPress : () => {}}
@@ -79,6 +85,7 @@ const Button = ({
         small={small}
         reverse={reverse}
         secondary={secondary}
+        success={success}
         color={color}
         type={type}>
         {isLoading ? (

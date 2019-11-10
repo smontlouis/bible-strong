@@ -14,6 +14,7 @@ import Text from '~common/ui/Text'
 import Link from '~common/Link'
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
+import NaveIcon from '~common/NaveIcon'
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -184,7 +185,7 @@ const UserWidget = ({ theme }) => {
           <Text fontSize={12}>{getPluriel('étiquette', tags)}</Text>
         </Chip>
       </ScrollView>
-      <Box row margin={20} marginBottom={0}>
+      <Box row padding={20}>
         <Box flex={2}>
           <Button
             route="Lexique"
@@ -210,6 +211,22 @@ const UserWidget = ({ theme }) => {
             }
           />
         </Box>
+      </Box>
+      <Box row padding={20} paddingBottom={0} paddingTop={0}>
+        <Button
+          fullWidth
+          color={theme.colors.quint}
+          route="Nave"
+          title="Bible thématique Nave"
+          leftIcon={
+            <NaveIcon
+              secondary
+              color={theme.colors.reverse}
+              style={{ marginRight: 10 }}
+              size={25}
+            />
+          }
+        />
       </Box>
     </Container>
   )

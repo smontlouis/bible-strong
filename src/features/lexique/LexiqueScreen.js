@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import styled from '@emotion/native'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import Container from '~common/ui/Container'
@@ -9,44 +8,55 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
-import loadLexique from '~helpers/loadLexique'
+import loadLexiqueByLetter from '~helpers/loadLexiqueByLetter'
+import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
+import { getFirstLetterFrom } from '~helpers/alphabet'
 import Empty from '~common/Empty'
-import AlphabetList from '~common/AlphabetList'
+import AlphabetList from '~common/AlphabetList2'
+import SectionTitle from '~common/SectionTitle'
 
-import {
-  useSectionIndex,
-  useSearchValue,
-  useResults,
-  useSectionResults,
-  useAlphabet
-} from './useUtilities'
+import { useSearchValue, useResultsByLetterOrSearch } from './useUtilities'
 
 import waitForDatabase from '~common/waitForStrongDB'
-
 import LexiqueItem from './LexiqueItem'
 
-const SectionTitle = styled(Box)(({ theme }) => ({
-  fontSize: 20,
-  marginLeft: 20,
-  marginTop: 10,
-  height: 30,
-  width: 30,
-  borderRadius: 15,
-  backgroundColor: theme.colors.primary,
-  justifyContent: 'center',
-  alignItems: 'center',
-  overflow: 'visible'
-}))
+const useSectionResults = results => {
+  const [sectionResults, setSectionResults] = useState(null)
+
+  useEffect(() => {
+    if (!results.length) {
+      setSectionResults([])
+      return
+    }
+    const sectionResults = results.reduce((list, dbItem) => {
+      const listItem = list.find(
+        item => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
+      )
+      if (!listItem) {
+        list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
+      } else {
+        listItem.data.push(dbItem)
+      }
+
+      return list
+    }, [])
+    setSectionResults(sectionResults)
+  }, [results])
+
+  return sectionResults
+}
 
 const LexiqueScreen = () => {
   const [error, setError] = useState(false)
-  const { section, sectionIndex, setSectionIndex, resetSectionIndex } = useSectionIndex()
-  const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue({
-    onDebouncedValue: resetSectionIndex
-  })
-  const results = useResults(loadLexique)
-  const sectionResults = useSectionResults(results, debouncedSearchValue, sectionIndex)
-  const alphabet = useAlphabet(results)
+  const [letter, setLetter] = useState('a')
+  const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+
+  const { results, isLoading } = useResultsByLetterOrSearch(
+    { query: loadLexiqueBySearch, value: debouncedSearchValue },
+    { query: loadLexiqueByLetter, value: letter }
+  )
+
+  const sectionResults = useSectionResults(results)
 
   useEffect(() => {
     if (results.error) {
@@ -81,11 +91,10 @@ const LexiqueScreen = () => {
         onDelete={() => setSearchValue('')}
       />
       <Box flex paddingTop={20}>
-        {!sectionResults ? (
+        {isLoading ? (
           <Loading message="Chargement..." />
         ) : sectionResults.length ? (
           <SectionList
-            ref={section}
             renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (
               <LexiqueItem key={index} {...{ Mot, Grec, Hebreu, Code, lexiqueType }} />
             )}
@@ -98,7 +107,7 @@ const LexiqueScreen = () => {
               getSectionFooterHeight: () => 0
             })}
             renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle>
+              <SectionTitle color="primary">
                 <Text title fontWeight="bold" fontSize={16} color="reverse">
                   {title}
                 </Text>
@@ -112,9 +121,7 @@ const LexiqueScreen = () => {
           <Empty source={require('~assets/images/empty.json')} message="Aucune strong trouvée..." />
         )}
       </Box>
-      {!searchValue && (
-        <AlphabetList alphabet={alphabet} sectionIndex={sectionIndex} onPress={setSectionIndex} />
-      )}
+      {!searchValue && <AlphabetList letter={letter} setLetter={setLetter} />}
     </Container>
   )
 }

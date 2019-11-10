@@ -21,11 +21,37 @@ const DLScreen = () => {
           Si votre base de données a été corrompue, pensez à redémarrer l'application une fois les
           fichiers téléchargés.
         </Paragraph>
-        <DBSelectorItem database="STRONG" name="Lexique hébreu & grec" fileSize={34941952} />
-        <DBSelectorItem database="DICTIONNAIRE" name="Dictionnaire Westphal" fileSize={22532096} />
+        <DBSelectorItem
+          database="STRONG"
+          name="Lexique hébreu & grec"
+          subTitle="Lexique contenu les strongs grecs et hébreu avec leur concordance et définitions"
+          fileSize={34941952}
+        />
+        <DBSelectorItem
+          database="DICTIONNAIRE"
+          name="Dictionnaire Westphal"
+          subTitle="Dictionnaire Encyclopédique de la Bible A. Westphal. "
+          fileSize={22532096}
+        />
         <DBSelectorItem database="SEARCH" name="Index de recherche" fileSize={16795170} />
-        <DBSelectorItem database="TRESOR" name="Trésor de l'écriture" fileSize={5434368} />
-        <DBSelectorItem database="MHY" name="Commentaires de Matthew Henry" fileSize={6574080} />
+        <DBSelectorItem
+          database="TRESOR"
+          name="Références croisées"
+          subTitle="Les Trésor de la connaissance des Écritures est l’un des ensembles les plus complets de références croisées jamais compilées, composé de plus de 572.000 entrées."
+          fileSize={5434368}
+        />
+        <DBSelectorItem
+          database="MHY"
+          name="Commentaires"
+          subTitle="Commentaires concis de Matthew Henry. Traduction Dominique Osché."
+          fileSize={6574080}
+        />
+        <DBSelectorItem
+          database="NAVE"
+          name="Bible thématique Nave"
+          subTitle="Naves Topical Bible se compose de plus de 20.000 sujets et sous-thèmes, et 100.000 références aux Écritures."
+          fileSize={7448576}
+        />
         <Text padding={20} title fontSize={25}>
           Bibles
         </Text>

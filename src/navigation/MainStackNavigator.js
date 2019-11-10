@@ -28,6 +28,7 @@ import TagsScreen from '../features/settings/TagsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
 import SearchScreen from '~features/search/SearchScreen'
+import NaveScreen from '~features/nave/NaveScreen'
 
 export default createStackNavigator(
   {
@@ -58,7 +59,8 @@ export default createStackNavigator(
     Search: { screen: SearchScreen },
     Register: { screen: RegisterScreen },
     Dictionnaire: { screen: DictionnaryScreen },
-    FAQ: { screen: FAQScreen }
+    FAQ: { screen: FAQScreen },
+    Nave: { screen: NaveScreen }
   },
   {
     headerMode: 'none'
