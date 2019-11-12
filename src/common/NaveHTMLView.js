@@ -4,8 +4,8 @@ import { withTheme } from 'emotion-theming'
 import HTMLView from '~helpers/react-native-htmlview'
 
 export const textStyle = {
-  lineHeight: 34,
-  fontSize: 20,
+  lineHeight: 26,
+  fontSize: 18,
   fontFamily: 'literata-book'
 }
 
@@ -41,14 +41,15 @@ const styles = theme => ({
   },
   a: {
     // fontWeight: 'bold',
-    color: theme.colors.default,
+    color: theme.colors.primary,
     borderStyle: 'solid',
     borderWidth: 2,
     borderColor: theme.colors.primary,
     textDecorationLine: 'underline',
     textDecorationStyle: 'solid',
     textDecorationColor: theme.colors.primary,
-    ...textStyle
+    ...textStyle,
+    fontSize: 18
   },
   strong: {
     fontWeight: 'bold',
@@ -57,6 +58,7 @@ const styles = theme => ({
   },
   li: {
     color: theme.colors.default,
+    marginBottom: 40,
     ...textStyle
   },
   ol: {
@@ -69,8 +71,8 @@ const styles = theme => ({
   }
 })
 
-const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => (
+const NaveHTMLView = ({ htmlStyle, theme, ...props }) => (
   <HTMLView stylesheet={{ ...styles(theme), ...htmlStyle }} {...props} />
 )
 
-export default withTheme(StylizedHTMLView)
+export default withTheme(NaveHTMLView)

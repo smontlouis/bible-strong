@@ -211,7 +211,8 @@ class BibleViewer extends Component {
       secondaryVerses,
       comments,
       selectedCode,
-      reference
+      reference,
+      verses
     } = this.state
 
     const {
@@ -235,18 +236,9 @@ class BibleViewer extends Component {
       notedVerses,
       settings,
       verse,
-      arrayVerses,
+      focusVerses,
       theme
     } = this.props
-
-    let array = this.state.verses
-
-    // When opening some verses, not whole chapter
-    if (arrayVerses) {
-      array = array.filter(v =>
-        arrayVerses.find(aV => aV === `${v.Livre}-${v.Chapitre}-${v.Verset}`)
-      )
-    }
 
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
@@ -267,7 +259,8 @@ class BibleViewer extends Component {
             version={version}
             isReadOnly={isReadOnly}
             isSelectionMode={isSelectionMode}
-            arrayVerses={array}
+            verses={verses}
+            focusVerses={focusVerses}
             secondaryVerses={secondaryVerses}
             selectedVerses={selectedVerses}
             highlightedVerses={highlightedVerses}

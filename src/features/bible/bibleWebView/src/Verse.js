@@ -31,7 +31,7 @@ const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   lineHeight: scaleFontSize(30, fontSizeScale)
 }))
 
-const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
+const NumberText = styled('span')(({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
   fontSize: scaleFontSize(14, fontSizeScale)
 }))
 
@@ -48,12 +48,20 @@ const zoom = keyframes({
 })
 
 const ContainerText = styled('span')(
-  ({ isFocused, isSelected, highlightedColor, isVerseToScroll, settings: { theme, colors } }) => {
+  ({
+    isFocused,
+    isTouched,
+    isSelected,
+    highlightedColor,
+    isVerseToScroll,
+    settings: { theme, colors }
+  }) => {
     let background = 'transparent'
+
     if (highlightedColor && !isSelected) {
       background = convertHex(colors[theme][highlightedColor], 50)
     }
-    if (isFocused) {
+    if (isTouched) {
       background = 'rgba(0,0,0,0.1)'
     }
     return {
@@ -67,11 +75,18 @@ const ContainerText = styled('span')(
       msUserSelect: 'none',
       KhtmlUserSelect: 'none',
       WebkitUserSelect: 'none',
-      ...(isVerseToScroll
-        ? {
-            animation: `0.75s ease 0s 3 normal none running ${zoom}`
-          }
-        : {})
+      ...(isVerseToScroll && {
+        animation: `0.75s ease 0s 3 normal none running ${zoom}`
+      }),
+      ...(isFocused && {
+        // color: colors[theme].primary,
+        fontWeight: 'bold'
+        // borderBottom: `2px dotted ${colors[theme].primary}`,
+        // boxShadow: `inset 0 -7px 5px -5px ${colors[theme].secondary}`
+      }),
+      ...(isFocused === false && {
+        opacity: 0.5
+      })
     }
   }
 )
@@ -85,7 +100,7 @@ const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
 
 class Verse extends Component {
   state = {
-    isFocused: false
+    isTouched: false
   }
 
   componentDidMount() {
@@ -168,7 +183,7 @@ class Verse extends Component {
       if (press === 'shortPress') {
         this.toggleSelectVerse()
       } else {
-        this.setState({ isFocused: false })
+        this.setState({ isTouched: false })
         this.navigateToBibleVerseDetail()
       }
     }
@@ -188,14 +203,14 @@ class Verse extends Component {
     this.shouldShortPress = true
     this.moved = false
 
-    this.setState({ isFocused: true })
+    this.setState({ isTouched: true })
 
     // On long press
     this.buttonPressTimer = setTimeout(this.onLongPress, 400)
   }
 
   onTouchEnd = () => {
-    this.setState({ isFocused: false })
+    this.setState({ isTouched: false })
     clearTimeout(this.buttonPressTimer)
 
     if (this.shouldShortPress && this.moved === false) {
@@ -209,7 +224,7 @@ class Verse extends Component {
 
   onTouchMove = e => {
     this.moved = true
-    if (this.state.isFocused) this.setState({ isFocused: false })
+    if (this.state.isTouched) this.setState({ isTouched: false })
   }
 
   render() {
@@ -225,9 +240,10 @@ class Verse extends Component {
       isSelectionMode,
       version,
       isHebreu,
-      selectedCode
+      selectedCode,
+      isFocused
     } = this.props
-    const { isFocused } = this.state
+    const { isTouched } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
 
@@ -250,12 +266,15 @@ class Verse extends Component {
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
-          settings={settings}
           isFocused={isFocused}
+          settings={settings}
+          isTouched={isTouched}
           isSelected={isSelected}
           isVerseToScroll={isVerseToScroll && verse.Verset != 1}
           highlightedColor={highlightedColor}>
-          <NumberText settings={settings}>{verse.Verset} </NumberText>
+          <NumberText isFocused={isFocused} settings={settings}>
+            {verse.Verset}{' '}
+          </NumberText>
           {notesCount && !inlineNotedVerses && !isSelectionMode && (
             <NotesCount
               settings={settings}

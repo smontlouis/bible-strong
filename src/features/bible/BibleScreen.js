@@ -40,7 +40,7 @@ class BibleScreen extends React.Component {
       settings
     } = this.props
 
-    const { arrayVerses } = this.props.navigation.state.params || {}
+    const { focusVerses } = this.props.navigation.state.params || {}
 
     if (Number.isInteger(app.book)) {
       app.book = books[app.book - 1]
@@ -55,13 +55,14 @@ class BibleScreen extends React.Component {
           book={app.book}
           chapter={app.chapter}
           verse={app.verse}
+          focusVerses={focusVerses}
           version={app.version}
           onBibleParamsClick={this.toggleBibleParamsOpen}
         />
         <BibleViewer
           isReadOnly={isReadOnly}
           isSelectionMode={isSelectionMode}
-          arrayVerses={arrayVerses}
+          focusVerses={focusVerses}
           book={app.book}
           chapter={app.chapter}
           verse={app.verse}

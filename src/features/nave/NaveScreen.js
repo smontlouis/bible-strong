@@ -15,7 +15,7 @@ import AlphabetList from '~common/AlphabetList2'
 import SectionTitle from '~common/SectionTitle'
 import waitForDatabase from '~common/waitForNaveDB'
 
-import DictionnaireItem from '../dictionnary/DictionnaireItem'
+import NaveItem from './NaveItem'
 import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
 
 const useSectionResults = results => {
@@ -65,7 +65,7 @@ const NaveScreen = () => {
         <Header hasBackButton title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
-          message={`Impossible de charger le dictionnaire...${
+          message={`Impossible de charger la nave...${
             error === 'CORRUPTED_DATABASE'
               ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
               : ''
@@ -90,7 +90,7 @@ const NaveScreen = () => {
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { name_lower, name } }) => (
-              <DictionnaireItem key={name_lower} word={name} />
+              <NaveItem key={name_lower} name_lower={name_lower} name={name} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}

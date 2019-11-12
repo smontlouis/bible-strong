@@ -7,7 +7,7 @@ const loadNaveByLetter = letter =>
       `SELECT name_lower, name, letter
     FROM TOPICS 
     WHERE letter LIKE '${letter}'
-    ORDER BY letter ASC
+    ORDER BY name ASC
     `
     )
 

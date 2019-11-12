@@ -40,12 +40,30 @@ const MaterialCommunityIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
   color: theme.colors.default
 }))
 
+const formatVerses = verses =>
+  verses.reduce((acc, v, i, array) => {
+    if (v === array[i - 1] + 1 && v === array[i + 1] - 1) {
+      // if suite > 2
+      return acc
+    }
+    if (v === array[i - 1] + 1 && v !== array[i + 1] - 1) {
+      // if endSuite
+      return `${acc}-${v}`
+    }
+    if (array[i - 1] && v - 1 !== array[i - 1]) {
+      // if not preceded by - 1
+      return `${acc},${v}`
+    }
+    return acc + v
+  }, '')
+
 const Header = ({
   isReadOnly,
   isSelectionMode,
   book,
   chapter,
   verse,
+  focusVerses,
   version,
   onBibleParamsClick
 }) => {
@@ -62,7 +80,7 @@ const Header = ({
         </Box>
         <Box grow center>
           <StyledText>
-            {book.Nom} {chapter}:{verse} - {version}
+            {book.Nom} {chapter}:{focusVerses ? formatVerses(focusVerses) : verse} - {version}
           </StyledText>
         </Box>
         <Box flex />

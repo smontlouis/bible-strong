@@ -80,6 +80,7 @@ class VersesRenderer extends Component {
     verses: [],
     secondaryVerses: [],
     comments: null,
+    focusVerses: [],
     selectedVerses: {},
     highlightedVerses: {},
     notedVersesCount: {},
@@ -103,6 +104,7 @@ class VersesRenderer extends Component {
     // TODO: TO DELETE
     // if (desktopMode) {
     //   this.setState({
+    //     focusVerses: this.props.focusVerses,
     //     verses: this.props.verses,
     //     secondaryVerses: this.props.secondaryVerses || [],
     //     settings: this.props.settings,
@@ -226,6 +228,7 @@ class VersesRenderer extends Component {
           case SEND_INITIAL_DATA: {
             const {
               verses,
+              focusVerses,
               secondaryVerses,
               comments,
               selectedVerses,
@@ -243,6 +246,7 @@ class VersesRenderer extends Component {
 
             self.setState({
               verses: verses.sort((a, b) => a.Verset - b.Verset),
+              focusVerses,
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
                 : null,
@@ -299,9 +303,12 @@ class VersesRenderer extends Component {
           const isHighlighted = !!this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
           const highlightedColor =
             isHighlighted && this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
-          const notesCount = this.state.notedVersesCount[`${Verset}`]
-          const notesText = this.state.notedVersesText[`${Verset}`]
+          const notesCount = this.state.notedVersesCount[Verset]
+          const notesText = this.state.notedVersesText[Verset]
           const comment = this.state.comments && this.state.comments[Verset]
+          const isFocused = this.state.focusVerses
+            ? this.state.focusVerses.includes(Number(Verset))
+            : undefined
           const isVerseToScroll = this.state.verseToScroll == Verset
           const secondaryVerse = this.state.secondaryVerses && this.state.secondaryVerses[i]
 
@@ -344,6 +351,7 @@ class VersesRenderer extends Component {
                   notesText={notesText}
                   isVerseToScroll={isVerseToScroll}
                   selectedCode={this.state.selectedCode}
+                  isFocused={isFocused}
                 />
               </ErrorBoundary>
               {!!comment && this.state.settings.commentsDisplay && (

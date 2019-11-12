@@ -187,7 +187,8 @@ class BibleWebView extends Component {
 
   sendDataToWebView = () => {
     const {
-      arrayVerses,
+      verses,
+      focusVerses,
       secondaryVerses,
       selectedVerses,
       highlightedVerses,
@@ -205,7 +206,8 @@ class BibleWebView extends Component {
 
     this.dispatchToWebView({
       type: SEND_INITIAL_DATA,
-      verses: arrayVerses,
+      verses,
+      focusVerses,
       secondaryVerses,
       selectedVerses,
       highlightedVerses,

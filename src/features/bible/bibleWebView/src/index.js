@@ -53,8 +53,11 @@ const selectedCode = {
   book: 38
 }
 
+const focusVerses = [11, 12, 13]
+
 render(
   <VersesRenderer
+    focusVerses={desktopMode ? focusVerses : undefined}
     verses={desktopMode ? mockVerses : undefined}
     secondaryVerses={desktopMode ? mockSecondaryVerses : undefined}
     notedVerses={desktopMode ? mockNotedVerses : undefined}

@@ -120,6 +120,31 @@ const HistoryItem = ({ item }) => {
       </Link>
     )
   }
+
+  if (item.type === 'nave') {
+    const { name, name_lower, date } = item
+    return (
+      <Link route="NaveDetail" params={{ name, name_lower }}>
+        <Box padding={20} row alignItems="center">
+          <Text bold>{name}</Text>
+          <Box marginLeft="auto">
+            <Chip color="quint">
+              <Text bold fontSize={8}>
+                Nave
+              </Text>
+            </Chip>
+            <Text fontSize={10} color="grey">
+              Il y a{' '}
+              {distanceInWords(Number(date), Date.now(), {
+                locale: frLocale
+              })}
+            </Text>
+          </Box>
+        </Box>
+        <Border marginHorizontal={20} />
+      </Link>
+    )
+  }
   return null
 }
 

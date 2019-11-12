@@ -1,17 +1,16 @@
 import SQLNTransaction from '~helpers/SQLNTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
-const loadNaveBySearch = searchValue =>
+const loadNaveItem = name_lower =>
   catchDatabaseError(async () => {
     const result = await SQLNTransaction(
-      `SELECT name_lower, name, letter
+      `SELECT name_lower, name, letter, description
     FROM TOPICS 
-    WHERE name LIKE '%${searchValue}%'
-    ORDER BY name ASC
+    WHERE name_lower LIKE '${name_lower}'
     `
     )
 
-    return result
+    return result[0]
   })
 
-export default loadNaveBySearch
+export default loadNaveItem
