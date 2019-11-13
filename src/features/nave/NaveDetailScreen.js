@@ -4,8 +4,9 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
 import { useDispatch } from 'react-redux'
-
 import * as Sentry from 'sentry-expo'
+
+import Button from '~common/ui/Button'
 import books from '~assets/bible_versions/books-desc'
 import NaveHTMLView from '~common/NaveHTMLView'
 import Back from '~common/Back'
@@ -19,6 +20,8 @@ import { setHistory } from '~redux/modules/user'
 import waitForDatabase from '~common/waitForNaveDB'
 import loadNaveItem from '~helpers/loadNaveItem'
 import Snackbar from '~common/SnackBar'
+
+const MAX_CHAR = 3000
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
@@ -35,10 +38,15 @@ const NaveDetailScreen = ({ navigation }) => {
   const { name_lower, name } = navigation.state.params || {}
   const dispatch = useDispatch()
   const [naveItem, setNaveItem] = useState(null)
+  const [canReadMore, setCanReadMore] = useState(false)
 
   useEffect(() => {
     loadNaveItem(name_lower).then(result => {
-      setNaveItem(result)
+      if (result.description.length > 7000) {
+        setCanReadMore(true)
+      }
+
+      setNaveItem({ ...result, descriptionShort: truncHTML(result.description, MAX_CHAR).html })
       dispatch(
         setHistory({
           name,
@@ -97,6 +105,10 @@ const NaveDetailScreen = ({ navigation }) => {
     }
   }
 
+  const loadRemainingText = () => {
+    setCanReadMore(false)
+  }
+
   return (
     <Container>
       <Box padding={20}>
@@ -134,7 +146,15 @@ const NaveDetailScreen = ({ navigation }) => {
       </Box>
       <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
         {naveItem && naveItem.description && (
-          <NaveHTMLView value={naveItem.description} onLinkPress={openLink} />
+          <NaveHTMLView
+            value={canReadMore ? naveItem.descriptionShort : naveItem.description}
+            onLinkPress={openLink}
+          />
+        )}
+        {canReadMore && (
+          <Box center marginTop={20}>
+            <Button title="Lire plus" onPress={loadRemainingText} style={{ width: 150 }} />
+          </Box>
         )}
       </ScrollView>
     </Container>

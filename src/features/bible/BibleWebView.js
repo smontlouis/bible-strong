@@ -164,11 +164,15 @@ class BibleWebView extends Component {
           return
         }
 
-        navigation.navigate('BibleView', {
-          isReadOnly: true,
-          book: parseInt(book, 10),
-          chapter: parseInt(action.chapter, 10),
-          verse: parseInt(action.verse, 10)
+        navigation.navigate({
+          routeName: 'BibleView',
+          params: {
+            isReadOnly: true,
+            book: parseInt(book, 10),
+            chapter: parseInt(action.chapter, 10),
+            verse: parseInt(action.verse, 10)
+          },
+          key: `bible-view-${book}-${action.chapter}-${action.verse}`
         })
         break
       }

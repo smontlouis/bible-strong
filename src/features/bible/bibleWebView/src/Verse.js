@@ -78,12 +78,13 @@ const ContainerText = styled('span')(
       ...(isVerseToScroll && {
         animation: `0.75s ease 0s 3 normal none running ${zoom}`
       }),
-      ...(isFocused && {
-        // color: colors[theme].primary,
-        fontWeight: 'bold'
-        // borderBottom: `2px dotted ${colors[theme].primary}`,
-        // boxShadow: `inset 0 -7px 5px -5px ${colors[theme].secondary}`
-      }),
+      ...(isFocused &&
+        {
+          // color: colors[theme].primary,
+          // fontWeight: 'bold'
+          // borderBottom: `2px dotted ${colors[theme].primary}`,
+          // boxShadow: `inset 0 -7px 5px -5px ${colors[theme].secondary}`
+        }),
       ...(isFocused === false && {
         opacity: 0.5
       })
