@@ -7,6 +7,32 @@ export const logTypes = {
 
 export default [
   {
+    date: '1573627242720',
+    type: logTypes.FEATURE,
+    title: 'Bible thématique Nave',
+    description: `“ENCORE ?!” Me direz-vous ?
+Oui ! Une nouvelle base de données fait son apparition !
+    
+Je vous présente la Bible Thématique Nave, ou encore “Nave’s Topical Bible”. La Bible Thématique Nave se compose de plus de 20.000 sujets et sous-thèmes, et 100.000 références aux Écritures.
+    
+Elle est très utile lorsque vous souhaitez faire une étude sur un sujet donné et repérer facilement les versets ayant la même thématique.
+    
+Malheureusement elle n'est disponible qu'en anglais. La traduction française présente dans l'application est donc une version traduite automatiquement. J'ai fait de mon mieux pour avoir une traduction correcte, mais il y a beaucoup de fautes.
+    
+Lorsque vous ouvrez une définition, vous aurez également sa signification anglaise entre parenthèses, au cas où le français n’aurait aucun sens.
+    
+Soyez donc indulgents pour les fautes. Si vous souhaitez aider pour la traduction, n'hésitez pas à me contacter. Je mettrai bientôt à disposition un excel pour entrer les erreurs de traduction.
+    
+PS: L’activation des commentaires a été déplacé dans les paramètres de mise en forme “Aa"`
+  },
+  {
+    date: '1573627242717',
+    type: logTypes.NEW,
+    title: 'Bugs et ajouts mineurs',
+    description:
+      'Certaines personnes avait un écran blanc en ouvrant la Bible, ce bug est théoriquement réglé.'
+  },
+  {
     date: '1573027254463',
     type: logTypes.FEATURE,
     title: 'Commentaires Matthew Henry',
