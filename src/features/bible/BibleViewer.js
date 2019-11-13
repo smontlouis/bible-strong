@@ -24,6 +24,7 @@ import { zeroFill } from '~helpers/zeroFill'
 import BibleNoteModal from './BibleNoteModal'
 import StrongModal from './StrongModal'
 import ReferenceModal from './ReferenceModal'
+import NaveModal from '~features/nave/NaveModal'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
 import SelectedVersesModal from './SelectedVersesModal'
@@ -61,7 +62,8 @@ class BibleViewer extends Component {
     audioChapterUrl: '',
     audioMode: false,
     isPlaying: false,
-    selectedCode: null
+    selectedCode: null,
+    currentNave: null
   }
 
   pericope = getBiblePericope('LSG')
@@ -73,6 +75,8 @@ class BibleViewer extends Component {
   setSelectedCode = value => this.setState({ selectedCode: value })
 
   setReference = value => this.setState({ reference: value })
+
+  setNave = value => this.setState({ currentNave: value })
 
   componentWillMount() {
     setTimeout(() => {
@@ -212,6 +216,7 @@ class BibleViewer extends Component {
       comments,
       selectedCode,
       reference,
+      currentNave,
       verses
     } = this.state
 
@@ -301,7 +306,7 @@ class BibleViewer extends Component {
             isSelectionMode={isSelectionMode}
             setSelectedVerse={this.props.setSelectedVerse}
             setReference={this.setReference}
-            setSettingsCommentaires={this.props.setSettingsCommentaires}
+            setNave={this.setNave}
             onCreateNoteClick={this.toggleCreateNote}
             isVisible={modalIsVisible}
             isSelectedVerseHighlighted={isSelectedVerseHighlighted}
@@ -343,6 +348,7 @@ class BibleViewer extends Component {
           theme={theme}
           onClosed={() => this.setReference(null)}
         />
+        <NaveModal selectedVerse={currentNave} theme={theme} onClosed={() => this.setNave(null)} />
       </Container>
     )
   }

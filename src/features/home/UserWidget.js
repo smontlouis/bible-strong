@@ -190,9 +190,7 @@ const UserWidget = ({ theme }) => {
           <Button
             route="Lexique"
             title="Lexique"
-            leftIcon={
-              <LexiqueIcon color={theme.colors.reverse} style={{ marginRight: 10 }} size={25} />
-            }
+            leftIcon={<LexiqueIcon color={'white'} style={{ marginRight: 10 }} size={25} />}
           />
         </Box>
         <Box width={20} />
@@ -202,12 +200,7 @@ const UserWidget = ({ theme }) => {
             route="Dictionnaire"
             title="Dictionnaire"
             leftIcon={
-              <DictionnaireIcon
-                secondary
-                color={theme.colors.reverse}
-                style={{ marginRight: 10 }}
-                size={25}
-              />
+              <DictionnaireIcon secondary color={'white'} style={{ marginRight: 10 }} size={25} />
             }
           />
         </Box>
@@ -218,14 +211,7 @@ const UserWidget = ({ theme }) => {
           color={theme.colors.quint}
           route="Nave"
           title="Bible thématique Nave"
-          leftIcon={
-            <NaveIcon
-              secondary
-              color={theme.colors.reverse}
-              style={{ marginRight: 10 }}
-              size={25}
-            />
-          }
+          leftIcon={<NaveIcon secondary color={'white'} style={{ marginRight: 10 }} size={25} />}
         />
       </Box>
     </Container>

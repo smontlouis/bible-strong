@@ -35,6 +35,7 @@ const Container = styled.View({
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
+  fontWeight: 'bold',
   backgroundColor: 'transparent'
 }))
 

@@ -1,5 +1,5 @@
 export const alphabet = [
-  '#',
+  // '#', // TODO MAKE THIS AVAILABLE
   'A',
   'B',
   'C',

@@ -19,7 +19,7 @@
     "react/static-property-placement": "off",
     "consistent-return": "off",
     "no-shadow": "off",
-    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["draft"] }],
+    "no-param-reassign": "off",
     "jsx-a11y/anchor-is-valid": "off",
     "react/jsx-props-no-spreading": "off",
     "global-require": "off",

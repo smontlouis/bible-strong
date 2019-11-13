@@ -63,13 +63,23 @@ class BibleWebView extends Component {
   }
 
   loadHTMLFile = async () => {
-    const { localUri } = await AssetUtils.resolveAsync(require('./bibleWebView/dist/index.html'))
-    this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+    try {
+      const { localUri } = await AssetUtils.resolveAsync(require('./bibleWebView/dist/index.html'))
+      this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+    } catch (e) {
+      SnackBar.show('Erreur lors de la lecture du fichier')
+      Sentry.captureException(e)
+    }
     this.setState({ isHTMLFileLoaded: true })
   }
 
   injectFont = async () => {
-    const { localUri } = await AssetUtils.resolveAsync(require('~assets/fonts/LiterataBook.otf'))
+    const { localUri } = await AssetUtils.resolveAsync(
+      require('~assets/fonts/LiterataBook.otf')
+    ).catch(e => {
+      SnackBar.show('Erreur lors de la lecture du fichier')
+      Sentry.captureException(e)
+    })
 
     const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
 

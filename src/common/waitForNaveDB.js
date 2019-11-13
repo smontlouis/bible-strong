@@ -108,7 +108,7 @@ const waitForDatabase = WrappedComponent => props => {
 
   if (isLoading && startDownload) {
     return (
-      <Loading message="Téléchargement de la base nave...">
+      <Loading message="Téléchargement des thèmes...">
         <ProgressBar progress={Number(progress)} color="blue" />
       </Loading>
     )

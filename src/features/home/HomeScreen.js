@@ -10,12 +10,11 @@ import { HomeScrollView } from '~common/ui/ScrollView'
 import VerseOfTheDay from './VerseOfTheDay'
 import StrongOfTheDay from './StrongOfTheDay'
 import WordOfTheDay from './WordOfTheDay'
+import NaveOfTheDay from './NaveOfTheDay'
 import UserWidget from './UserWidget'
 import Button from '~common/ui/Button'
 
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.reverse
-}))
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
   return (
@@ -42,6 +41,7 @@ const HomeScreen = () => {
               paddingVertical: 10,
               overflow: 'visible'
             }}>
+            <NaveOfTheDay />
             <StrongOfTheDay type="grec" />
             <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
             <WordOfTheDay color1="rgba(255,197,61,0.7)" color2="rgb(255,188,0)" />

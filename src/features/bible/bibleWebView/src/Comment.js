@@ -79,6 +79,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
     truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html
   )
   const previousReadMore = usePrevious(readMore)
+  const previousComment = usePrevious(comment)
 
   const onReadMore = () => {
     setReadMore(s => !s)
@@ -110,6 +111,12 @@ const Comment = ({ id, settings, comment, isIntro }) => {
   }, [mhyComment, id])
 
   useEffect(() => {
+    if (previousComment !== comment) {
+      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html)
+      setReadMore(false)
+      return
+    }
+
     if (readMore) {
       setComment(comment.replace(/&amp;nbsp;/g, ' '))
       return
@@ -118,7 +125,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
       setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html)
       document.getElementById(id).scrollIntoView()
     }
-  }, [comment, id, previousReadMore, readMore])
+  }, [comment, id, previousComment, previousReadMore, readMore])
 
   return (
     <StyledComment id={id} settings={settings}>

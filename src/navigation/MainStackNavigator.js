@@ -30,6 +30,7 @@ import DownloadsScreen from '../features/settings/DownloadsScreen'
 import SearchScreen from '~features/search/SearchScreen'
 import NaveScreen from '~features/nave/NaveScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
+import NaveWarningScreen from '~features/nave/NaveWarningScreen'
 
 export default createStackNavigator(
   {
@@ -62,7 +63,8 @@ export default createStackNavigator(
     Dictionnaire: { screen: DictionnaryScreen },
     FAQ: { screen: FAQScreen },
     Nave: { screen: NaveScreen },
-    NaveDetail: { screen: NaveDetailScreen }
+    NaveDetail: { screen: NaveDetailScreen },
+    NaveWarning: { screen: NaveWarningScreen }
   },
   {
     headerMode: 'none'

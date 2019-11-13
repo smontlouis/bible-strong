@@ -5,12 +5,11 @@ import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
 
 import LexiqueIcon from '~common/LexiqueIcon'
-import SnackBar from '~common/SnackBar'
+import NaveIcon from '~common/NaveIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
 import getVersesRef from '~helpers/getVersesRef'
 import { cleanParams } from '~helpers/utils'
-import { getIfDatabaseExists } from '~helpers/database'
 
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
@@ -74,8 +73,7 @@ const VersesModal = ({
   onCreateNoteClick,
   isSelectionMode,
   setReference,
-  setSettingsCommentaires,
-  settings
+  setNave
 }) => {
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
 
@@ -154,16 +152,9 @@ const VersesModal = ({
     setReference(reference)
   }
 
-  const onOpenCommentaire = async () => {
-    const exists = await getIfDatabaseExists('commentaires-mhy')
-
-    if (!exists) {
-      SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
-      navigation.navigate('Downloads')
-      return
-    }
-
-    setSettingsCommentaires(!settings.commentsDisplay)
+  const onOpenNave = () => {
+    const reference = Object.keys(selectedVerses)[0]
+    setNave(reference)
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
@@ -212,21 +203,22 @@ const VersesModal = ({
               label="Dictionnaire"
               disabled={moreThanOneVerseSelected}
             />
+            <TouchableSvgIcon
+              icon={NaveIcon}
+              color="quint"
+              onPress={onOpenNave}
+              label="Thèmes"
+              disabled={moreThanOneVerseSelected}
+            />
             <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
-            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
           </HalfContainer>
           <HalfContainer>
+            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
             <TouchableIcon
               name="list"
               onPress={onOpenReferences}
               label="Références"
               disabled={moreThanOneVerseSelected}
-            />
-            <TouchableIcon
-              name="archive"
-              onPress={onOpenCommentaire}
-              label="Commentaires"
-              color={settings.commentsDisplay ? 'primary' : 'grey'}
             />
             <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
             <TouchableIcon name="x" onPress={clearSelectedVerses} label="Annuler" />

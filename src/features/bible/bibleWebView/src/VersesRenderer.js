@@ -8,6 +8,7 @@ import ErrorBoundary from './ErrorBoundary'
 import { desktopMode } from './env'
 import { scaleFontSize } from './scaleFontSize'
 
+// Polyfill for Object.entries
 if (!Object.entries) {
   Object.entries = function(obj) {
     const ownProps = Object.keys(obj)
@@ -16,6 +17,16 @@ if (!Object.entries) {
     while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]]
 
     return resArray
+  }
+}
+
+// Polyfill for NodeList.forEarch
+if (window.NodeList && !NodeList.prototype.forEach) {
+  NodeList.prototype.forEach = function(callback, thisArg) {
+    thisArg = thisArg || window
+    for (let i = 0; i < this.length; i++) {
+      callback.call(thisArg, this[i], i, this)
+    }
   }
 }
 

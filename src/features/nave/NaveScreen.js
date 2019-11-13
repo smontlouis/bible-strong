@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
+import * as Icon from '@expo/vector-icons'
 import SectionList from '~common/ui/SectionList'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Header from '~common/Header'
+import Link from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
 import loadNaveByLetter from '~helpers/loadNaveByLetter'
@@ -77,7 +79,16 @@ const NaveScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton title="Thématique Nave" noBorder />
+      <Header
+        hasBackButton
+        title="Thématique Nave"
+        noBorder
+        rightComponent={
+          <Link route="NaveWarning" padding>
+            <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
+          </Link>
+        }
+      />
       <SearchInput
         placeholder="Recherche par mot"
         onChangeText={setSearchValue}
@@ -102,7 +113,7 @@ const NaveScreen = () => {
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="quint">
-                <Text title fontWeight="bold" fontSize={16} color="reverse">
+                <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
                   {title.toUpperCase()}
                 </Text>
               </SectionTitle>
