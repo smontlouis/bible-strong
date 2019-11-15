@@ -2,14 +2,13 @@ import React from 'react'
 import styled from '@emotion/native'
 import { Switch } from 'react-native-paper'
 import { useSelector, useDispatch } from 'react-redux'
-
+import { withTheme } from 'emotion-theming'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
-import Link from '~common/Link'
 import { toggleCompareVersion } from '~redux/modules/user'
 import { versionsBySections } from '~helpers/bibleVersions'
 
@@ -26,7 +25,7 @@ const TextName = styled.Text(({ isSelected, theme }) => ({
   backgroundColor: 'transparent'
 }))
 
-const SwitchVersion = ({ version, isSelected, onChange }) => {
+const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
   if (version.id === 'LSGS' || version.id === 'INT') return null
 
   return (
@@ -35,10 +34,10 @@ const SwitchVersion = ({ version, isSelected, onChange }) => {
         <TextVersion>{version.id}</TextVersion>
         <TextName>{version.name}</TextName>
       </Box>
-      <Switch value={isSelected} onValueChange={onChange} />
+      <Switch color={theme.colors.primary} value={isSelected} onValueChange={onChange} />
     </Box>
   )
-}
+})
 
 const ToggleCompareVersesScreen = () => {
   const versionsToCompare = useSelector(state => Object.keys(state.user.bible.settings.compare))
