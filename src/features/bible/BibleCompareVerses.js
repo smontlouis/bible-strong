@@ -1,6 +1,7 @@
 import React from 'react'
 import * as Icon from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
+import styled from '@emotion/native'
 
 import verseToReference from '~helpers/verseToReference'
 import Container from '~common/ui/Container'
@@ -10,6 +11,10 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import { versions } from '~helpers/bibleVersions'
+
+const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
 
 const BibleCompareVerses = ({ navigation }) => {
   const { selectedVerses } = navigation.state.params || {}
@@ -25,7 +30,7 @@ const BibleCompareVerses = ({ navigation }) => {
         title={title}
         rightComponent={
           <Link route="ToggleCompareVerses" padding>
-            <Icon.Feather name="check-square" size={20} />
+            <StyledIcon name="check-square" size={20} />
           </Link>
         }
       />

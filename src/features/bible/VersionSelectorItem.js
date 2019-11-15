@@ -183,7 +183,11 @@ class VersionSelectorItem extends React.Component {
     const { version, isSelected, onChange, theme, isParameters } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
-    if (typeof versionNeedsDownload === 'undefined' || (isParameters && version.id === 'LSG')) {
+    if (
+      typeof versionNeedsDownload === 'undefined' ||
+      (isParameters && version.id === 'LSG') ||
+      (isParameters && version.id === 'LSGS')
+    ) {
       return null
     }
 
