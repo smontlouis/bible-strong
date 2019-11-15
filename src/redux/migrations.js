@@ -162,5 +162,20 @@ export default {
         }
       }
     }
+  },
+  11: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            compare: { LSG: true }
+          }
+        }
+      }
+    }
   }
 }

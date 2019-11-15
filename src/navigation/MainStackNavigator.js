@@ -31,6 +31,7 @@ import SearchScreen from '~features/search/SearchScreen'
 import NaveScreen from '~features/nave/NaveScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
 import NaveWarningScreen from '~features/nave/NaveWarningScreen'
+import ToggleCompareVersesScreen from '~features/bible/ToggleCompareVersesScreen'
 
 export default createStackNavigator(
   {
@@ -64,7 +65,8 @@ export default createStackNavigator(
     FAQ: { screen: FAQScreen },
     Nave: { screen: NaveScreen },
     NaveDetail: { screen: NaveDetailScreen },
-    NaveWarning: { screen: NaveWarningScreen }
+    NaveWarning: { screen: NaveWarningScreen },
+    ToggleCompareVerses: { screen: ToggleCompareVersesScreen }
   },
   {
     headerMode: 'none'

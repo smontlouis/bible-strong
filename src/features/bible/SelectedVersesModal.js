@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
+import RefIcon from '~common/RefIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
 import getVersesRef from '~helpers/getVersesRef'
@@ -210,16 +211,17 @@ const VersesModal = ({
               label="Thèmes"
               disabled={moreThanOneVerseSelected}
             />
-            <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
-          </HalfContainer>
-          <HalfContainer>
-            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
-            <TouchableIcon
-              name="list"
+            <TouchableSvgIcon
+              icon={RefIcon}
+              color="quart"
               onPress={onOpenReferences}
               label="Références"
               disabled={moreThanOneVerseSelected}
             />
+          </HalfContainer>
+          <HalfContainer>
+            <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
+            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
             <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
             <TouchableIcon name="x" onPress={clearSelectedVerses} label="Annuler" />
           </HalfContainer>

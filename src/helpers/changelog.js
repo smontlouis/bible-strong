@@ -7,6 +7,20 @@ export const logTypes = {
 
 export default [
   {
+    date: '1573801369766',
+    type: logTypes.NEW,
+    title: 'Comparaison de versions',
+    description:
+      'Plus le nombre de bibles augmente, plus les performances de comparaisons dimininuent. Pour palier à ce souci, vous pouvez maintenant sélectionner les versions à comparer. Je vous conseille de ne pas comparer plus de 5/6 versions. Au délà les performances sont réduites.'
+  },
+  {
+    date: '1573801369760',
+    type: logTypes.NEW,
+    title: 'KJV, NKJV et ESV',
+    description:
+      'Trois nouvelle bibles ont été ajoutées, la King James Version, la New King James Version, et la English Standard Version'
+  },
+  {
     date: '1573627242720',
     type: logTypes.FEATURE,
     title: 'Bible thématique Nave',

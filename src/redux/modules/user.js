@@ -52,6 +52,8 @@ export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
 export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
 
+export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
+
 const initialState = {
   id: '',
   email: '',
@@ -81,6 +83,9 @@ const initialState = {
       colors: {
         default: defaultColors,
         dark: darkColors
+      },
+      compare: {
+        LSG: true
       }
     }
   }
@@ -453,6 +458,14 @@ export default produce((draft, action) => {
       draft.bible.history = draft.bible.history.slice(0, 50)
       break
     }
+    case TOGGLE_COMPARE_VERSION: {
+      if (draft.bible.settings.compare[action.payload]) {
+        delete draft.bible.settings.compare[action.payload]
+      } else {
+        draft.bible.settings.compare[action.payload] = true
+      }
+      break
+    }
     default: {
       break
     }
@@ -685,6 +698,15 @@ export function updateUserData() {
 export function setNotificationVOD(payload) {
   return {
     type: SET_NOTIFICATION_VOD,
+    payload
+  }
+}
+
+// Compare
+
+export function toggleCompareVersion(payload) {
+  return {
+    type: TOGGLE_COMPARE_VERSION,
     payload
   }
 }
