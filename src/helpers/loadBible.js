@@ -6,17 +6,14 @@ export default function loadBible(bible, position) {
   return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {
-        case 'BDS':
-        case 'FMAR':
-        case 'DBY':
-        case 'FRC97':
-        case 'NBS':
-        case 'NEG79':
-        case 'NVS78P':
-        case 'S21':
-        case 'KJF':
-        case 'CHU':
-        case 'OST': {
+        case 'LSGS':
+        case 'INT':
+        case 'LSG': {
+          const LSGBible = require('~assets/bible_versions/bible-lsg-1910.json')
+          resolve(LSGBible)
+          break
+        }
+        default: {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])
           }
@@ -33,14 +30,9 @@ export default function loadBible(bible, position) {
 
           break
         }
-        case 'LSG':
-        default: {
-          const LSGBible = require('~assets/bible_versions/bible-lsg-1910.json')
-          resolve(LSGBible)
-          break
-        }
       }
     } catch (e) {
+      console.log(e)
       reject('Erreur', e)
     }
   })

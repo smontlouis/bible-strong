@@ -1,13 +1,16 @@
 import React from 'react'
 
-import { versions } from '~helpers/bibleVersions'
+import { versionsBySections } from '~helpers/bibleVersions'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
+import SectionList from '~common/ui/SectionList'
+import Box from '~common/ui/Box'
+import Border from '~common/ui/Border'
 import Header from '~common/Header'
 import DBSelectorItem from './DatabaseSelectorItem'
-import VersionSelectorItem from './VersionSelectorItem'
+import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 
 const DLScreen = () => {
   return (
@@ -42,7 +45,8 @@ const DLScreen = () => {
         <DBSelectorItem
           database="SEARCH"
           name="Index de recherche"
-          subTitle="Index permettant une recherche avancée dans la Bible" fileSize={16795170}
+          subTitle="Index permettant une recherche avancée dans la Bible"
+          fileSize={16795170}
         />
         <DBSelectorItem
           database="TRESOR"
@@ -56,14 +60,23 @@ const DLScreen = () => {
           subTitle="Commentaires concis de Matthew Henry. Traduction Dominique Osché."
           fileSize={6574080}
         />
-        <Text padding={20} title fontSize={25}>
+        <Text padding={20} paddingBottom={0} title fontSize={25}>
           Bibles
         </Text>
-        {Object.values(versions)
-          .filter(v => v.id !== 'LSG')
-          .map(version => (
-            <VersionSelectorItem key={version.id} version={version} />
-          ))}
+        <SectionList
+          stickySectionHeadersEnabled={false}
+          sections={versionsBySections}
+          keyExtractor={item => item.id}
+          renderSectionHeader={({ section: { title } }) => (
+            <Box paddingHorizontal={20} marginTop={20}>
+              <Text fontSize={16} color="tertiary">
+                {title}
+              </Text>
+              <Border marginTop={10} />
+            </Box>
+          )}
+          renderItem={({ item }) => <VersionSelectorItem isParameters version={item} />}
+        />
       </ScrollView>
     </Container>
   )

@@ -1,10 +1,11 @@
 import React from 'react'
 import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, Alert } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
+import * as Icon from '@expo/vector-icons'
 
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
@@ -13,10 +14,10 @@ import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { initInterlineaireDB } from '~helpers/database'
 import { firestoreUris } from '../../../config'
 
-const BIBLE_FILESIZE = 5000000
+const BIBLE_FILESIZE = 2500000
 
 const Container = styled.View({
-  padding: 15,
+  padding: 20,
   paddingTop: 10,
   paddingBottom: 10
 })
@@ -25,7 +26,9 @@ const TouchableContainer = Container.withComponent(TouchableOpacity)
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12
+  fontSize: 12,
+  opacity: 0.5,
+  fontWeight: 'bold'
 }))
 
 const TextCopyright = styled.Text(({ isSelected, theme }) => ({
@@ -38,8 +41,11 @@ const TextCopyright = styled.Text(({ isSelected, theme }) => ({
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
-  backgroundColor: 'transparent',
-  fontWeight: 'bold'
+  backgroundColor: 'transparent'
+}))
+
+const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.quart
 }))
 
 class VersionSelectorItem extends React.Component {
@@ -101,8 +107,16 @@ class VersionSelectorItem extends React.Component {
       }
       case 'INT': {
         const sqliteDbUri = firestoreUris.interlineaire
-
         return sqliteDbUri
+      }
+      case 'KJV': {
+        return firestoreUris.kjvBible
+      }
+      case 'NKJV': {
+        return firestoreUris.nkjvBible
+      }
+      case 'ESV': {
+        return firestoreUris.esvBible
       }
       default: {
         return ''
@@ -148,11 +162,28 @@ class VersionSelectorItem extends React.Component {
     }
   }
 
+  confirmDelete = () => {
+    Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer cette version ?', [
+      { text: 'Non', onPress: () => null, style: 'cancel' },
+      {
+        text: 'Oui',
+        onPress: async () => {
+          const { version } = this.props
+          const path = this.requireBiblePath(version.id)
+          const file = await FileSystem.getInfoAsync(path)
+          FileSystem.deleteAsync(file.uri)
+          this.setState({ versionNeedsDownload: true })
+        },
+        style: 'destructive'
+      }
+    ])
+  }
+
   render() {
-    const { version, isSelected, onChange, theme } = this.props
+    const { version, isSelected, onChange, theme, isParameters } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
-    if (typeof versionNeedsDownload === 'undefined') {
+    if (typeof versionNeedsDownload === 'undefined' || (isParameters && version.id === 'LSG')) {
       return null
     }
 
@@ -179,6 +210,22 @@ class VersionSelectorItem extends React.Component {
                 <ProgressBar progress={fileProgress} color={theme.colors.default} />
               </Box>
             )}
+          </Box>
+        </Container>
+      )
+    }
+
+    if (isParameters) {
+      return (
+        <Container>
+          <Box flex row center>
+            <Box flex>
+              <TextVersion>{version.id}</TextVersion>
+              <TextName>{version.name}</TextName>
+            </Box>
+            <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
+              <DeleteIcon name="trash-2" size={20} />
+            </TouchableOpacity>
           </Box>
         </Container>
       )
