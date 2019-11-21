@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Alert, View } from 'react-native'
+import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
@@ -67,8 +68,16 @@ class BibleWebView extends Component {
       const { localUri } = await AssetUtils.resolveAsync(require('./bibleWebView/dist/index.html'))
       this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
     } catch (e) {
-      SnackBar.show('Erreur lors de la lecture du fichier')
+      SnackBar.show('Fichier introuvable... Tentative de récupération...')
       Sentry.captureException(e)
+
+      try {
+        const indexHtml = Asset.fromModule(require('./bibleWebView/dist/index.html'))
+        await indexHtml.downloadAsync()
+        this.HTMLFile = await FileSystem.readAsStringAsync(indexHtml.localUri)
+      } catch (e) {
+        SnackBar.show('Impossible de récupérer le fichier, contactez le développeur.')
+      }
     }
     this.setState({ isHTMLFileLoaded: true })
   }

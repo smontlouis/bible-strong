@@ -120,7 +120,8 @@ const UserWidget = ({ theme }) => {
         <Box row alignItems="center" marginBottom={20} overflow="visible">
           <Box flex>
             <Text title fontSize={30}>
-              {`Bonjour ${user.displayName.split(' ')[0]},`}
+              {`Bonjour ${user.displayName ? user.displayName.split(' ')[0] : ''},`}
+              {/* TODO: Extract in function */}
             </Text>
           </Box>
           <ProfileContainer>
@@ -190,7 +191,7 @@ const UserWidget = ({ theme }) => {
           <Button
             route="Lexique"
             title="Lexique"
-            leftIcon={<LexiqueIcon color={'white'} style={{ marginRight: 10 }} size={25} />}
+            leftIcon={<LexiqueIcon color="white" style={{ marginRight: 10 }} size={25} />}
           />
         </Box>
         <Box width={20} />
@@ -200,7 +201,7 @@ const UserWidget = ({ theme }) => {
             route="Dictionnaire"
             title="Dictionnaire"
             leftIcon={
-              <DictionnaireIcon secondary color={'white'} style={{ marginRight: 10 }} size={25} />
+              <DictionnaireIcon secondary color="white" style={{ marginRight: 10 }} size={25} />
             }
           />
         </Box>
@@ -211,7 +212,7 @@ const UserWidget = ({ theme }) => {
           color={theme.colors.quint}
           route="Nave"
           title="Bible thématique Nave"
-          leftIcon={<NaveIcon secondary color={'white'} style={{ marginRight: 10 }} size={25} />}
+          leftIcon={<NaveIcon secondary color="white" style={{ marginRight: 10 }} size={25} />}
         />
       </Box>
     </Container>

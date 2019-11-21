@@ -29,6 +29,8 @@ import {
 
 import { firebaseDb } from '../helpers/firebaseDb'
 
+const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+
 export default store => next => action => {
   const result = next(action)
   const state = store.getState()
@@ -48,25 +50,29 @@ export default store => next => action => {
     case REMOVE_HIGHLIGHT: {
       const { highlights } = user.bible
       const { tags } = user.bible
-      userDoc.update({
-        'bible.highlights': highlights,
-        'bible.tags': tags
-      })
+      userDoc.update(
+        r({
+          'bible.highlights': highlights,
+          'bible.tags': tags
+        })
+      )
       break
     }
     case UPDATE_TAG:
     case REMOVE_TAG: {
       const { tags, notes, highlights, studies } = user.bible
-      userDoc.update({
-        'bible.tags': tags,
-        'bible.notes': notes,
-        'bible.highlights': highlights
-      })
+      userDoc.update(
+        r({
+          'bible.tags': tags,
+          'bible.notes': notes,
+          'bible.highlights': highlights
+        })
+      )
 
       const batch = firebaseDb.batch()
       Object.keys(studies).forEach(studyId => {
         const studyDoc = firebaseDb.collection('studies').doc(studyId)
-        batch.update(studyDoc, { tags: studies[studyId].tags || {} })
+        batch.update(studyDoc, r({ tags: studies[studyId].tags || {} }))
       })
       batch.commit().then(() => console.log('Batch studies success'))
       break
@@ -76,63 +82,70 @@ export default store => next => action => {
     case REMOVE_NOTE: {
       const { notes } = user.bible
       const { tags } = user.bible
-      userDoc.update({
-        'bible.notes': notes,
-        'bible.tags': tags
-      })
+      userDoc.update(
+        r({
+          'bible.notes': notes,
+          'bible.tags': tags
+        })
+      )
       break
     }
     case ADD_TAG: {
       const { tags } = user.bible
-      userDoc.update({ 'bible.tags': tags })
+      userDoc.update(r({ 'bible.tags': tags }))
       break
     }
     case TOGGLE_TAG_ENTITY: {
       const { tags } = user.bible
-      userDoc.update({ 'bible.tags': tags })
+      userDoc.update(r({ 'bible.tags': tags }))
 
       // Maybe refacto this ? For now firestore is free we don't care
       const entities = user.bible[action.payload.item.entity]
 
       if (action.payload.item.entity === 'studies') {
         const study = user.bible.studies[action.payload.item.id]
-        studyCollection.doc(study.id).set(study)
+        studyCollection.doc(study.id).set(r(study))
       } else {
-        userDoc.update({ [`bible.${action.payload.item.entity}`]: entities })
+        userDoc.update(r({ [`bible.${action.payload.item.entity}`]: entities }))
       }
       break
     }
     case UPLOAD_STUDY: {
       const studyId = action.payload
-      studyCollection.doc(studyId).set(user.bible.studies[studyId])
+      studyCollection.doc(studyId).set(r(user.bible.studies[studyId]))
       break
     }
     case DELETE_STUDY: {
       const studyId = action.payload
       studyCollection.doc(studyId).delete()
       const { tags } = user.bible
-      userDoc.update({
-        'bible.tags': tags
-      })
+      userDoc.update(
+        r({
+          'bible.tags': tags
+        })
+      )
       break
     }
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-      userDoc.update({
-        bible: sanitizeUserBible(user.bible)
-      })
+      userDoc.update(
+        r({
+          bible: sanitizeUserBible(user.bible)
+        })
+      )
       break
     }
 
     // TODO: When there will be too much data to update.
     case UPDATE_USER_DATA: {
       const { changelog, highlights, notes, studies, tags, history, settings } = user.bible
-
-      userDoc.update({
-        'bible.history': history,
-        'bible.settings': settings
-      })
+      userDoc.update(
+        r({
+          'bible.history': history,
+          'bible.settings': settings
+        })
+      )
 
       break
     }

@@ -142,7 +142,7 @@ const SearchScreen = ({ idxFile }) => {
           const results = index.current.search(debouncedSearchValue)
           setResults(filterResults(results))
         } catch (e) {
-          Sentry.captureException(e)
+          // Sentry.captureException(e)
           console.log(e)
           SnackBar.show('Une erreur est survenue.', 'danger')
         }

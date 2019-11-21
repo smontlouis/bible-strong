@@ -19,8 +19,12 @@ class CompareVerseItem extends React.Component {
     const versionNeedsDownload = await getIfVersionNeedsDownload(versionId)
 
     if (!versionNeedsDownload) {
-      const { content } = await getVersesRef(selectedVerses, versionId, position)
-      this.setState({ content, versionNeedsDownload })
+      try {
+        const { content } = await getVersesRef(selectedVerses, versionId, position)
+        this.setState({ content, versionNeedsDownload })
+      } catch (e) {
+        this.setState({ content: 'Impossible de charger ce verset', versionNeedsDownload })
+      }
     }
   }
 

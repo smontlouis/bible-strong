@@ -49,8 +49,8 @@ const NaveDetailScreen = ({ navigation }) => {
       setNaveItem({ ...result, descriptionShort: truncHTML(result.description, MAX_CHAR).html })
       dispatch(
         setHistory({
-          name,
-          name_lower,
+          name: result.name,
+          name_lower: result.name_lower,
           type: 'nave'
         })
       )

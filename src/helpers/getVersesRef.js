@@ -56,7 +56,11 @@ export default async (verses, version = 'LSG', position) => {
     const [book, chapter, verse] = key.split('-')
     if (index === 0) reference = `${books[book - 1].Nom} ${chapter}:`
     else toShare += ' '
-    toShare += `${bible[book][chapter][verse]}`
+    try {
+      toShare += `${bible[book][chapter][verse]}`
+    } catch {
+      toShare = 'Impossible de charger ce verset.'
+    }
     versesList.push(verse)
   })
   reference += getVersesRef(versesList)

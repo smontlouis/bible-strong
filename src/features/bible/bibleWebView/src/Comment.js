@@ -73,10 +73,12 @@ const Copyright = styled('div')(({ settings: { theme, colors, fontSizeScale } })
   paddingTop: scaleFontSize(5, fontSizeScale)
 }))
 
+const MAX_CHAR = 200
+
 const Comment = ({ id, settings, comment, isIntro }) => {
   const [readMore, setReadMore] = useState(false)
   const [mhyComment, setComment] = useState(
-    truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html
+    truncHTML(comment.replace(/&amp;nbsp;/g, ' '), MAX_CHAR).html
   )
   const previousReadMore = usePrevious(readMore)
   const previousComment = usePrevious(comment)
@@ -112,7 +114,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
 
   useEffect(() => {
     if (previousComment !== comment) {
-      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html)
+      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), MAX_CHAR).html)
       setReadMore(false)
       return
     }
@@ -122,7 +124,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
       return
     }
     if (previousReadMore && !readMore) {
-      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), 250).html)
+      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), MAX_CHAR).html)
       document.getElementById(id).scrollIntoView()
     }
   }, [comment, id, previousComment, previousReadMore, readMore])
