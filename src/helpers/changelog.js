@@ -7,6 +7,13 @@ export const logTypes = {
 
 export default [
   {
+    date: '1574359533933',
+    type: logTypes.BUG,
+    title: 'Résolution de bugs',
+    description:
+      "Quelques bugs mineurs ont été réglés. \n\nSi vous rencontrez des bugs, n'attendez pas d'en subir une 50aine avant de m'envoyer un mail.\n\nJe suis une seule personne et je ne peux pas tester sur tous les appareils donc j'ai besoin de votre aide :)."
+  },
+  {
     date: '1573801369766',
     type: logTypes.NEW,
     title: 'Comparaison de versions',
