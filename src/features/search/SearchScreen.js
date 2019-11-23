@@ -139,7 +139,9 @@ const SearchScreen = ({ idxFile }) => {
     if (index.current) {
       if (debouncedSearchValue) {
         try {
-          const results = index.current.search(debouncedSearchValue)
+          const results = index.current.query(q => {
+            q.term(debouncedSearchValue.toLowerCase(), { fields: ['LSG'] })
+          })
           setResults(filterResults(results))
         } catch (e) {
           // Sentry.captureException(e)
@@ -150,7 +152,7 @@ const SearchScreen = ({ idxFile }) => {
         setResults(null)
       }
     }
-  }, [book, debouncedSearchValue, index, order, searchValue, section, setResults])
+  }, [book, debouncedSearchValue, index, order, section, setResults])
 
   if (isLoading) {
     return <Loading message="Chargement de l'index..." />
