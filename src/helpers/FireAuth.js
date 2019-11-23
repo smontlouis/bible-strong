@@ -5,9 +5,10 @@ import * as AppAuth from 'expo-app-auth'
 import * as Sentry from 'sentry-expo'
 import * as SecureStore from 'expo-secure-store'
 import * as AppleAuthentication from 'expo-apple-authentication'
+import * as Network from 'expo-network'
+
 import 'firebase/firestore'
 
-import generateUUID from '~helpers/generateUUID'
 import { firebaseConfig } from '../../config'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebaseDb'
@@ -35,6 +36,9 @@ const FireAuth = class {
     this.onError = onError
 
     firebase.auth().onAuthStateChanged(async user => {
+      const { isConnected } = await Network.getNetworkStateAsync()
+      if (!isConnected) return
+
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return

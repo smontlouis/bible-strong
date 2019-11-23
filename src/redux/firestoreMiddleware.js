@@ -1,3 +1,5 @@
+import * as Network from 'expo-network'
+
 import {
   ADD_HIGHLIGHT,
   REMOVE_HIGHLIGHT,
@@ -31,13 +33,15 @@ import { firebaseDb } from '../helpers/firebaseDb'
 
 const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
-export default store => next => action => {
+export default store => next => async action => {
   const result = next(action)
   const state = store.getState()
 
   const isLogged = !!state.user.id
 
-  if (!isLogged) {
+  const { isConnected } = await Network.getNetworkStateAsync()
+
+  if (!isLogged || !isConnected) {
     return result
   }
 
