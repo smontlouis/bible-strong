@@ -1,12 +1,13 @@
-import SQLTTransaction from '~helpers/SQLTTransaction'
+import { SQLTresorTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const loadTresorCommentaires = verse =>
   catchDatabaseError(async () => {
-    const result = await SQLTTransaction(
+    const result = await SQLTresorTransaction(
       `SELECT commentaires
             FROM COMMENTAIRES
-            WHERE id = '${verse}'`
+            WHERE id = (?)`,
+      [verse]
     )
     return result[0]
   })

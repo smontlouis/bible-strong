@@ -1,4 +1,4 @@
-import SQLTransaction from '~helpers/SQLTransaction'
+import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const updateReferencesOrder = (result, references) => {
@@ -27,7 +27,7 @@ const loadStrongReferences = async (references, book) =>
       return sqlString
     }, `SELECT * FROM ${part} WHERE `)
 
-    const result = await SQLTransaction(sqlReq)
+    const result = await SQLStrongTransaction(sqlReq)
     return updateReferencesOrder(result, references)
   })
 

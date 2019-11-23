@@ -1,10 +1,10 @@
-import SQLTransaction from '~helpers/SQLTransaction'
+import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const loadStrongVersesCountByBook = (book, reference) =>
   catchDatabaseError(async () => {
     const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
-    const result = await SQLTransaction(
+    const result = await SQLStrongTransaction(
       `SELECT count(*) as versesCountByBook, Livre
       FROM ${part} 
       WHERE Texte LIKE '% ${reference} %' 

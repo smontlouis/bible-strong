@@ -1,8 +1,8 @@
-import SQLNTransaction from '~helpers/SQLNTransaction'
+import { SQLNaveTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const fetchData = async item => {
-  const [itemResult] = await SQLNTransaction(
+  const [itemResult] = await SQLNaveTransaction(
     `SELECT ref
           FROM VERSES
           WHERE id = '${item}'`
@@ -20,7 +20,7 @@ const fetchData = async item => {
     return sqlString
   }, 'SELECT name_lower, name FROM TOPICS WHERE ')
 
-  return SQLNTransaction(verseSqlReq)
+  return SQLNaveTransaction(verseSqlReq)
 }
 
 const loadNaveByVerset = verse =>

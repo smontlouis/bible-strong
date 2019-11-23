@@ -1,13 +1,14 @@
-import SQLITransaction from '~helpers/SQLITransaction'
+import { SQLInterlineaireTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const loadInterlineaireChapter = (Livre, Chapitre) =>
   catchDatabaseError(async () => {
-    const result = await SQLITransaction(
+    const result = await SQLInterlineaireTransaction(
       `SELECT * 
             FROM INTERLINEAIRE
-            WHERE LIVRE = ${Livre}
-            AND CHAPITRE  = ${Chapitre}`
+            WHERE LIVRE = (?)
+            AND CHAPITRE  = (?)`,
+      [Livre, Chapitre]
     )
     return result
   })

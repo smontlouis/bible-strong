@@ -1,22 +1,24 @@
-import SQLTransaction from '~helpers/SQLTransaction'
+import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const loadLexiqueBySearch = searchValue =>
   catchDatabaseError(async () => {
-    const resultGrec = await SQLTransaction(
+    const resultGrec = await SQLStrongTransaction(
       `SELECT Code, Grec, Mot, 'Grec' as lexiqueType
     FROM Grec 
-    WHERE Mot LIKE '%${searchValue}%'
+    WHERE Mot LIKE (?)
     ORDER BY Mot ASC
-    `
+    `,
+      [`%${searchValue}%`]
     )
 
-    const resultHebreu = await SQLTransaction(
+    const resultHebreu = await SQLStrongTransaction(
       `SELECT Code, Hebreu, Mot, 'Hébreu' as lexiqueType
     FROM Hebreu
-    WHERE Mot LIKE '%${searchValue}%'
+    WHERE Mot LIKE (?)
     ORDER BY Mot ASC
-    `
+    `,
+      [`%${searchValue}%`]
     )
 
     return [...resultGrec, ...resultHebreu]

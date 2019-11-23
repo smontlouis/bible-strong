@@ -1,10 +1,10 @@
-import SQLTransaction from '~helpers/SQLTransaction'
+import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const loadStrongVerse = ({ Livre, Chapitre, Verset }) =>
   catchDatabaseError(async () => {
     const part = Livre > 39 ? 'LSGSNT2' : 'LSGSAT2'
-    const result = await SQLTransaction(
+    const result = await SQLStrongTransaction(
       `SELECT Texte 
             FROM ${part}
             WHERE LIVRE = ${Livre}

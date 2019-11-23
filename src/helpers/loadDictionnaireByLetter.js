@@ -1,14 +1,15 @@
-import SQLDTransaction from '~helpers/SQLDTransaction'
+import { SQLDictionnaireTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
 const loadDictionnaireByLetter = letter =>
   catchDatabaseError(async () => {
-    const result = await SQLDTransaction(
+    const result = await SQLDictionnaireTransaction(
       `SELECT rowid, word, sanitized_word
-    FROM dictionnaire
-    WHERE sanitized_word LIKE '${letter}%'
-    ORDER BY sanitized_word ASC
-    `
+      FROM dictionnaire
+      WHERE sanitized_word LIKE (?)
+      ORDER BY sanitized_word ASC
+      `,
+      [`${letter}%`]
     )
 
     return result
