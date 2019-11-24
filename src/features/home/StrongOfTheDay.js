@@ -28,11 +28,6 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
       if (strongReference && strongReference.error) {
         console.log(`Failed to load strong for type ${type}`)
 
-        Sentry.withScope(scope => {
-          scope.setExtra('Type', type)
-          Sentry.captureMessage('Failed to load strong')
-        })
-
         setError(true)
         return
       }

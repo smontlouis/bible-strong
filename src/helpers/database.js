@@ -30,6 +30,7 @@ class StrongDB {
   }
 
   delete = () => {
+    this.dbStrong?._db?.close()
     this.dbStrong = undefined
   }
 }
@@ -64,14 +65,17 @@ export const getTresorDB = () => {
 }
 
 export const deleteDictionnaireDB = () => {
+  dbDictionnaire?._db?.close()
   dbDictionnaire = undefined
 }
 
 export const deleteTresorDB = () => {
+  dbTresorCommentaires?._db?.close()
   dbTresorCommentaires = undefined
 }
 
 export const deleteInterlineaireDB = () => {
+  dbInterlineaire?._db?.close()
   dbInterlineaire = undefined
 }
 
@@ -88,6 +92,7 @@ class MhyDB {
   }
 
   delete = () => {
+    this.dbMhy?._db?.close()
     this.dbMhy = undefined
   }
 }
@@ -107,6 +112,7 @@ class NaveDB {
   }
 
   delete = () => {
+    this.dbNave?._db?.close()
     this.dbNave = undefined
   }
 }

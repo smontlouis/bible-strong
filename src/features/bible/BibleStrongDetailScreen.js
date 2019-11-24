@@ -72,7 +72,7 @@ class BibleStrongDetailScreen extends React.Component {
     let { strongReference } = this.props.navigation.state.params
     if (reference) {
       strongReference = await loadStrongReference(reference, book)
-      if (strongReference.error) {
+      if (strongReference?.error) {
         this.setState({ error: strongReference.error })
         return
       }
