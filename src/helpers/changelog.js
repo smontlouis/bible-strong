@@ -7,6 +7,19 @@ export const logTypes = {
 
 export default [
   {
+    date: '1574557605991',
+    type: logTypes.INFO,
+    title: 'Aide',
+    description:
+      "J'ai besoin de votre aide.\n\nCertains des services que j'utilise (Firebase, Sentry, Analytics...) deviennent payants, car vous êtes de plus en plus nombreux.\n\nJe fais de mon mieux, mais je suis seul à travailler sur l'app et aujourd'hui vous êtes plus de 3000. Vous pouvez me soutenir en donnant 1€ ou 2€ par mois sur mon compte tipeee.\n\nCela aidera fortement pour payer les frais de fonctionnement de l'application.\n\nMerci !"
+  },
+  {
+    date: '1574557605990',
+    type: logTypes.BUG,
+    title: 'Résolution de bugs',
+    description: 'Quelques bugs mineurs ont été réglés.'
+  },
+  {
     date: '1574359533933',
     type: logTypes.BUG,
     title: 'Résolution de bugs',
