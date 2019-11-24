@@ -6,12 +6,15 @@ import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
+import { connect } from 'react-redux'
+import compose from 'recompose/compose'
 
+import { setVersion } from '~redux/modules/bible'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import { initInterlineaireDB } from '~helpers/database'
+import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
 import { firestoreUris } from '../../../config'
 
 const BIBLE_FILESIZE = 2500000
@@ -173,6 +176,11 @@ class VersionSelectorItem extends React.Component {
           const file = await FileSystem.getInfoAsync(path)
           FileSystem.deleteAsync(file.uri)
           this.setState({ versionNeedsDownload: true })
+          this.props.dispatch(setVersion('LSG'))
+
+          if (version.id === 'INT') {
+            deleteInterlineaireDB()
+          }
         },
         style: 'destructive'
       }
@@ -245,4 +253,7 @@ class VersionSelectorItem extends React.Component {
   }
 }
 
-export default withTheme(VersionSelectorItem)
+export default compose(
+  withTheme,
+  connect()
+)(VersionSelectorItem)

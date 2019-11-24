@@ -80,7 +80,7 @@ const Changelog = () => {
         backdropOpacity={0.3}
         backdropPressToClose={false}
         swipeToClose={false}>
-        <ScrollView flex={1}>
+        <ScrollView style={{ flex: 1 }}>
           <Box padding={20}>
             <Text fontSize={30} bold>
               Quoi de neuf ?

@@ -70,41 +70,43 @@ const SearchScreen = ({ idxFile }) => {
 
       if (order === 'a') {
         // HEAVY
-        results.sort(({ ref: a }, { ref: b }) => {
-          function chunkify(t) {
-            const tz = []
-            let x = 0
-            let y = -1
-            let n = 0
-            let i
-            let j
+        if (results) {
+          results.sort(({ ref: a }, { ref: b }) => {
+            function chunkify(t) {
+              const tz = []
+              let x = 0
+              let y = -1
+              let n = 0
+              let i
+              let j
 
-            while ((i = (j = t.charAt(x++)).charCodeAt(0))) {
-              const m = i == 46 || (i >= 48 && i <= 57)
-              if (m !== n) {
-                tz[++y] = ''
-                n = m
+              while ((i = (j = t.charAt(x++)).charCodeAt(0))) {
+                const m = i == 46 || (i >= 48 && i <= 57)
+                if (m !== n) {
+                  tz[++y] = ''
+                  n = m
+                }
+                tz[y] += j
               }
-              tz[y] += j
+              return tz
             }
-            return tz
-          }
 
-          const aa = chunkify(a)
-          const bb = chunkify(b)
+            const aa = chunkify(a)
+            const bb = chunkify(b)
 
-          for (x = 0; aa[x] && bb[x]; x++) {
-            if (aa[x] !== bb[x]) {
-              const c = Number(aa[x])
-              const d = Number(bb[x])
-              if (c == aa[x] && d == bb[x]) {
-                return c - d
+            for (x = 0; aa[x] && bb[x]; x++) {
+              if (aa[x] !== bb[x]) {
+                const c = Number(aa[x])
+                const d = Number(bb[x])
+                if (c == aa[x] && d == bb[x]) {
+                  return c - d
+                }
+                return aa[x] > bb[x] ? 1 : -1
               }
-              return aa[x] > bb[x] ? 1 : -1
             }
-          }
-          return aa.length - bb.length
-        })
+            return aa.length - bb.length
+          })
+        }
       }
 
       return results.filter(r => {
@@ -144,7 +146,7 @@ const SearchScreen = ({ idxFile }) => {
           })
           setResults(filterResults(results))
         } catch (e) {
-          // Sentry.captureException(e)
+          Sentry.captureException(e)
           console.log(e)
           SnackBar.show('Une erreur est survenue.', 'danger')
         }

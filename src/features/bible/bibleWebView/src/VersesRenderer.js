@@ -30,6 +30,14 @@ if (window.NodeList && !NodeList.prototype.forEach) {
   }
 }
 
+const exists = obj => {
+  if (!obj || obj.error) {
+    return false
+  }
+
+  return true
+}
+
 const Container = styled('div')(({ settings: { alignContent, theme, colors }, rtl }) => ({
   padding: '10px 15px',
   paddingBottom: '210px',
@@ -256,7 +264,7 @@ class VersesRenderer extends Component {
             } = response
 
             self.setState({
-              verses: verses.sort((a, b) => a.Verset - b.Verset),
+              verses: exists(verses) ? verses.sort((a, b) => a.Verset - b.Verset) : null,
               focusVerses,
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
@@ -291,6 +299,14 @@ class VersesRenderer extends Component {
   }
 
   render() {
+    if (!this.state.verses) {
+      return (
+        <div style={{ height: '100vh', fontFamily: 'arial', display: 'flex', alignItems: 'center', justifyContent: 'center', textTransform: 'uppercase' }}>
+          Une erreur est survenue.
+        </div>
+      )
+    }
+
     if (!this.state.verses.length) {
       return null
     }

@@ -186,7 +186,7 @@ class BibleWebView extends Component {
         break
       }
       case CONSOLE_LOG: {
-        console.log('WEBVIEW: ', action.payload)
+        console.log(`WEBVIEW: %c${action.payload}`, 'color:black;background-color:#81ecec')
         break
       }
       case THROW_ERROR: {

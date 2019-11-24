@@ -195,7 +195,7 @@ class BibleNoteModal extends React.Component {
               <Text title fontSize={20} marginBottom={10}>
                 {title}
               </Text>
-              <ScrollView flex={1}>
+              <ScrollView style={{ flex: 1 }}>
                 <Paragraph small>{description}</Paragraph>
                 <TagList tags={tags} />
               </ScrollView>

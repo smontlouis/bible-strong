@@ -41,7 +41,7 @@ const Changelog = () => {
   return (
     <Container>
       <Header hasBackButton title="Changelog" />
-      <ScrollView flex={1}>
+      <ScrollView style={{ flex: 1 }}>
         <Box padding={20}>
           <Text fontSize={30} bold>
             Quoi de neuf ?

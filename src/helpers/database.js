@@ -71,6 +71,10 @@ export const deleteTresorDB = () => {
   dbTresorCommentaires = undefined
 }
 
+export const deleteInterlineaireDB = () => {
+  dbInterlineaire = undefined
+}
+
 class MhyDB {
   dbMhy
 
