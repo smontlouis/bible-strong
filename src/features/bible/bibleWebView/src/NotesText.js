@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import truncate from '../../../../helpers/truncate'
+import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 
 const Div = styled('span')(({ settings: { fontSizeScale, theme, colors } }) => ({
@@ -26,7 +26,7 @@ const NotesText = ({ notesText, settings, onClick }) => {
       {notesText.map(note => (
         <Div key={note.key} settings={settings} onClick={() => onClick(note.key)}>
           [<Verse settings={settings}>({note.verses}) </Verse>
-          <span>{truncate(note.description, 230)}</span>]
+          <span>{truncate(note.description, 10)}</span>]
         </Div>
       ))}
     </span>

@@ -11,6 +11,7 @@ import { desktopMode } from './env'
 
 import defaultColors from '../../../../themes/colors'
 import darkColors from '../../../../themes/darkColors'
+import ErrorBoundary from './ErrorBoundary'
 
 const mockSettings = {
   alignContent: 'justify',
@@ -56,17 +57,19 @@ const selectedCode = {
 const focusVerses = [11, 12, 13]
 
 render(
-  <VersesRenderer
-    focusVerses={desktopMode ? focusVerses : undefined}
-    verses={desktopMode ? mockVerses : undefined}
-    secondaryVerses={desktopMode ? mockSecondaryVerses : undefined}
-    notedVerses={desktopMode ? mockNotedVerses : undefined}
-    settings={desktopMode ? mockSettings : undefined}
-    verseToScroll={desktopMode ? verseToScroll : undefined}
-    selectedVerses={desktopMode ? mockSelectedVerses : undefined}
-    version={desktopMode ? version : undefined}
-    comments={desktopMode ? mockComments : undefined}
-    // selectedCode={desktopMode ? selectedCode : undefined}
-  />,
+  <ErrorBoundary>
+    <VersesRenderer
+      focusVerses={desktopMode ? focusVerses : undefined}
+      verses={desktopMode ? mockVerses : undefined}
+      secondaryVerses={desktopMode ? mockSecondaryVerses : undefined}
+      notedVerses={desktopMode ? mockNotedVerses : undefined}
+      settings={desktopMode ? mockSettings : undefined}
+      verseToScroll={desktopMode ? verseToScroll : undefined}
+      selectedVerses={desktopMode ? mockSelectedVerses : undefined}
+      version={desktopMode ? version : undefined}
+      comments={desktopMode ? mockComments : undefined}
+      // selectedCode={desktopMode ? selectedCode : undefined}
+    />
+  </ErrorBoundary>,
   document.getElementById('app')
 )

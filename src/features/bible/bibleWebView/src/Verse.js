@@ -75,9 +75,11 @@ const ContainerText = styled('span')(
       msUserSelect: 'none',
       KhtmlUserSelect: 'none',
       WebkitUserSelect: 'none',
-      ...(isVerseToScroll && {
-        animation: `0.75s ease 0s 3 normal none running ${zoom}`
-      }),
+      ...(isVerseToScroll
+        ? {
+            animation: `0.75s ease 0s 3 normal none running ${zoom}`
+          }
+        : {}),
       ...(isFocused &&
         {
           // color: colors[theme].primary,
@@ -85,18 +87,22 @@ const ContainerText = styled('span')(
           // borderBottom: `2px dotted ${colors[theme].primary}`,
           // boxShadow: `inset 0 -7px 5px -5px ${colors[theme].secondary}`
         }),
-      ...(isFocused === false && {
-        opacity: 0.5
-      })
+      ...(isFocused === false
+        ? {
+            opacity: 0.5
+          }
+        : {})
     }
   }
 )
 
 const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
   display: textDisplay,
-  ...(textDisplay === 'block' && {
-    marginBottom: '5px'
-  })
+  ...(textDisplay === 'block'
+    ? {
+        marginBottom: '5px'
+      }
+    : {})
 }))
 
 class Verse extends Component {

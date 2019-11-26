@@ -13,9 +13,11 @@ const Section = styled('div')(({ isSelected, settings: { theme, colors } }) => (
   transition: 'background 0.3s ease',
   borderRadius: 4,
   padding: 5,
-  ...(isSelected && {
-    background: colors[theme].primary
-  })
+  ...(isSelected
+    ? {
+        background: colors[theme].primary
+      }
+    : {})
 }))
 
 const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
@@ -36,9 +38,11 @@ const Hebreu = styled('div')(({ isSelected, settings: { fontSizeScale, theme, co
   fontFamily: 'LiterataBook',
   color: colors[theme].primary,
 
-  ...(isSelected && {
-    color: colors[theme].reverse
-  })
+  ...(isSelected
+    ? {
+        color: colors[theme].reverse
+      }
+    : {})
 }))
 
 const Code = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
@@ -84,9 +88,11 @@ const Mot = styled('div')(({ isSelected, settings: { fontSizeScale, theme, color
   color: colors[theme].default,
   marginTop: 5 + fontSizeScale * 0.1 * 5,
 
-  ...(isSelected && {
-    color: colors[theme].reverse
-  })
+  ...(isSelected
+    ? {
+        color: colors[theme].reverse
+      }
+    : {})
 }))
 
 const Phonetique = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
@@ -95,9 +101,11 @@ const Phonetique = styled('div')(({ isSelected, settings: { fontSizeScale, theme
   color: colors[theme].tertiary,
   marginTop: 5 + fontSizeScale * 0.1 * 5,
 
-  ...(isSelected && {
-    color: colors[theme].reverse
-  })
+  ...(isSelected
+    ? {
+        color: colors[theme].reverse
+      }
+    : {})
 }))
 
 const ParsingTag = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({

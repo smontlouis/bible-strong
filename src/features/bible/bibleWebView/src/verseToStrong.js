@@ -10,10 +10,12 @@ const StyledReference = styled('div')(({ isSelected, settings: { theme, colors }
   padding: '0 5px',
   background: colors[theme].lightPrimary,
 
-  ...(isSelected && {
-    background: colors[theme].primary,
-    color: 'white'
-  })
+  ...(isSelected
+    ? {
+        background: colors[theme].primary,
+        color: 'white'
+      }
+    : {})
 }))
 
 const BibleStrongRef = ({ book, reference }) => {

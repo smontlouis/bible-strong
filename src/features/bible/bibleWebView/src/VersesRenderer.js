@@ -45,7 +45,7 @@ const Container = styled('div')(({ settings: { alignContent, theme, colors }, rt
   background: colors[theme].reverse,
   color: colors[theme].default,
   direction: rtl ? 'rtl' : 'ltr',
-  ...(rtl && { textAlign: 'right' })
+  ...(rtl ? { textAlign: 'right' } : {})
 }))
 
 const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
@@ -106,7 +106,6 @@ class VersesRenderer extends Component {
     notedVersesText: {},
     settings: {},
     verseToScroll: null,
-    isReadOnly: false,
     version: 'LSG',
     pericopeChapter: {},
     chapter: '',
@@ -239,9 +238,9 @@ class VersesRenderer extends Component {
 
   receiveDataFromApp = () => {
     const self = this
-    document.addEventListener('messages', event => {
+    document.addEventListener('message', event => {
       try {
-        const response = event.detail
+        const response = event.data
 
         switch (response.type) {
           case SEND_INITIAL_DATA: {
@@ -255,7 +254,6 @@ class VersesRenderer extends Component {
               notedVerses,
               settings,
               verseToScroll,
-              isReadOnly,
               version,
               pericopeChapter,
               chapter,
@@ -277,7 +275,6 @@ class VersesRenderer extends Component {
               notedVersesText: this.getNotedVersesText(verses, notedVerses),
               settings,
               verseToScroll,
-              isReadOnly,
               version,
               pericopeChapter,
               chapter,
@@ -301,7 +298,15 @@ class VersesRenderer extends Component {
   render() {
     if (!this.state.verses) {
       return (
-        <div style={{ height: '100vh', fontFamily: 'arial', display: 'flex', alignItems: 'center', justifyContent: 'center', textTransform: 'uppercase' }}>
+        <div
+          style={{
+            height: '100vh',
+            fontFamily: 'arial',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textTransform: 'uppercase'
+          }}>
           Une erreur est survenue.
         </div>
       )
@@ -315,7 +320,7 @@ class VersesRenderer extends Component {
     const introComment = this.state.comments && this.state.comments[0]
 
     return (
-      <Container rtl={isHebreu} settings={this.state.settings} isReadOnly={this.state.isReadOnly}>
+      <Container rtl={isHebreu} settings={this.state.settings}>
         {isHebreu && (
           <RightDirection settings={this.state.settings}>Sens de la lecture ←</RightDirection>
         )}

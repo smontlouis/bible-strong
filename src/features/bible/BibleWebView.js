@@ -42,15 +42,16 @@ class BibleWebView extends Component {
       return
     }
 
-    this.webview.injectJavaScript(`
-    (function() {
-      setTimeout(() => {
-        document.dispatchEvent(new CustomEvent("messages", {
-          detail: ${JSON.stringify(message)}
-        }));
-      }, 0)
-    })()
-    `)
+    const run = `
+      (function() {
+        document.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(message)}}));
+      })();
+      true;
+    `
+
+    setTimeout(() => {
+      this.webview.injectJavaScript(run)
+    }, 0)
   }
 
   state = {
