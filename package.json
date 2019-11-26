@@ -35,6 +35,7 @@
     "expo-asset": "^7.0.0",
     "expo-asset-utils": "^1.2.0",
     "expo-av": "~7.0.1",
+    "expo-cli": "3.9.1",
     "expo-constants": "~7.0.0",
     "expo-facebook": "~7.0.0",
     "expo-file-system": "~7.0.0",
