@@ -50,7 +50,7 @@ class BibleWebView extends Component {
     `
 
     setTimeout(() => {
-      this.webview.injectJavaScript(run)
+      this?.webview?.injectJavaScript(run)
     }, 0)
   }
 
