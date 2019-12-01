@@ -73,7 +73,7 @@ const Copyright = styled('div')(({ settings: { theme, colors, fontSizeScale } })
   paddingTop: scaleFontSize(5, fontSizeScale)
 }))
 
-const MAX_CHAR = 200
+const MAX_CHAR = 100
 
 const Comment = ({ id, settings, comment, isIntro }) => {
   const [readMore, setReadMore] = useState(false)

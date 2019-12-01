@@ -12,6 +12,7 @@ import compose from 'recompose/compose'
 import { setVersion } from '~redux/modules/bible'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
@@ -24,6 +25,8 @@ const Container = styled.View({
   paddingTop: 10,
   paddingBottom: 10
 })
+
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({ color: theme.colors.default }))
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
@@ -121,6 +124,21 @@ class VersionSelectorItem extends React.Component {
       case 'ESV': {
         return firestoreUris.esvBible
       }
+      case 'NIV': {
+        return firestoreUris.nivBible
+      }
+      case 'BJC': {
+        return firestoreUris.bjcBible
+      }
+      case 'POV': {
+        return firestoreUris.povBible
+      }
+      case 'BHS': {
+        return firestoreUris.hebrewBible
+      }
+      case 'SBLGNT': {
+        return firestoreUris.greekBible
+      }
       default: {
         return ''
       }
@@ -209,16 +227,19 @@ class VersionSelectorItem extends React.Component {
               <TextCopyright>{version.c}</TextCopyright>
             </Box>
             {!isLoading && version.id !== 'LSGS' && (
-              <Button
-                reverse
-                small
-                title="Télécharger"
-                subTitle={version.id === 'INT' ? '⚠️ Taille de 20Mo' : null}
+              <TouchableOpacity
                 onPress={this.startDownload}
-              />
+                style={{ padding: 10, alignItems: 'flex-end' }}>
+                <FeatherIcon name="download" size={20} />
+                {version.id === 'INT' && (
+                  <Box center marginTop={5}>
+                    <Text fontSize={10}>⚠️ Taille de 20Mo</Text>
+                  </Box>
+                )}
+              </TouchableOpacity>
             )}
             {isLoading && (
-              <Box width={100} justifyContent="center">
+              <Box width={80} justifyContent="center">
                 <ProgressBar progress={fileProgress} color={theme.colors.default} />
               </Box>
             )}

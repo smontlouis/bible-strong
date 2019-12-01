@@ -316,7 +316,9 @@ class VersesRenderer extends Component {
       return null
     }
 
-    const isHebreu = this.state.version === 'INT' && Number(this.state.verses[0].Livre) < 40
+    const isHebreu =
+      this.state.version === 'BHS' ||
+      (this.state.version === 'INT' && Number(this.state.verses[0].Livre) < 40)
     const introComment = this.state.comments && this.state.comments[0]
 
     return (
@@ -329,6 +331,8 @@ class VersesRenderer extends Component {
         )}
 
         {this.state.verses.map((verse, i) => {
+          if (verse.Verset == 0) return null
+
           const { Livre, Chapitre, Verset } = verse
           const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
           const isSelectedMode = !!Object.keys(this.state.selectedVerses).length

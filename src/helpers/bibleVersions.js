@@ -147,6 +147,30 @@ export const versions = {
     id: 'ESV',
     name: 'English Standard Version',
     c: '© 2001 Crossway Bibles'
+  },
+  NIV: {
+    id: 'NIV',
+    name: 'New International Version',
+    c: '© NIV® 1973, 1978, 1984, 2011 Biblica'
+  },
+  // BJC: {
+  //   id: 'BJC',
+  //   name: 'Bible de Jésus-Christ'
+  // },
+  POV: {
+    id: 'POV',
+    name: 'Parole vivante',
+    c: '© 2013'
+  },
+  BHS: {
+    id: 'BHS',
+    name: 'Biblia Hebraica Stuttgartensia',
+    c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77'
+  },
+  SBLGNT: {
+    id: 'SBLGNT',
+    name: 'SBL NT. Grec',
+    c: '© 2010 Society of Bible Litterature'
   }
 }
 
@@ -165,7 +189,10 @@ export const versionsBySections = Object.values(versions).reduce(
       }
       case 'KJV':
       case 'NKJV':
-      case 'ESV': {
+      case 'NIV':
+      case 'ESV':
+      case 'BHS':
+      case 'SBLGNT': {
         sectionArray[2].data.push(version)
         return sectionArray
       }
