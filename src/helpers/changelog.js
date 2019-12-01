@@ -7,6 +7,16 @@ export const logTypes = {
 
 export default [
   {
+    date: '1575160063085',
+    type: logTypes.NEW,
+    title: 'Nouvelles Bibles',
+    description: `Nouvelles Bibles disponibles:
+- New International Version (NIV)
+- Parole Vivante - N.T. (POV)
+- Biblia Hebraica Stuttgartensia - A.T. (BHS)
+- SBL Nouveau testament grec - N.T. (SBLGNT)`
+  },
+  {
     date: '1574557605991',
     type: logTypes.INFO,
     title: 'Aide',
