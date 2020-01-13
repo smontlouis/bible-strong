@@ -50,7 +50,7 @@ const ReadMore = styled('div')(({ settings: { fontSizeScale } }) => ({
   fontFamily: 'LiterataBook',
   textAlign: 'center',
   margin: '0',
-  height: 40,
+  height: 20,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center'
@@ -77,9 +77,7 @@ const MAX_CHAR = 100
 
 const Comment = ({ id, settings, comment, isIntro }) => {
   const [readMore, setReadMore] = useState(false)
-  const [mhyComment, setComment] = useState(
-    truncHTML(comment.replace(/&amp;nbsp;/g, ' '), MAX_CHAR).html
-  )
+  const [mhyComment, setComment] = useState(comment.replace(/&amp;nbsp;/g, ' '))
   const previousReadMore = usePrevious(readMore)
   const previousComment = usePrevious(comment)
 
@@ -114,7 +112,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
 
   useEffect(() => {
     if (previousComment !== comment) {
-      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), MAX_CHAR).html)
+      setComment(comment.replace(/&amp;nbsp;/g, ' '))
       setReadMore(false)
       return
     }
@@ -124,7 +122,6 @@ const Comment = ({ id, settings, comment, isIntro }) => {
       return
     }
     if (previousReadMore && !readMore) {
-      setComment(truncHTML(comment.replace(/&amp;nbsp;/g, ' '), MAX_CHAR).html)
       document.getElementById(id).scrollIntoView()
     }
   }, [comment, id, previousComment, previousReadMore, readMore])
@@ -132,11 +129,14 @@ const Comment = ({ id, settings, comment, isIntro }) => {
   return (
     <StyledComment id={id} settings={settings}>
       {/* <Copyright settings={settings}>Matthew Henry trad. Dominique Osché</Copyright> */}
-
-      {isIntro && <Intro settings={settings}>Introduction</Intro>}
-      <div dangerouslySetInnerHTML={{ __html: mhyComment }} />
+      {readMore && (
+        <>
+          {isIntro && <Intro settings={settings}>Introduction</Intro>}
+          <div dangerouslySetInnerHTML={{ __html: mhyComment }} style={{ paddingBottom: 20 }} />
+        </>
+      )}
       <ReadMore onClick={onReadMore} settings={settings}>
-        {readMore ? '- Lire moins -' : '- Lire plus -'}
+        {readMore ? '- Fermer -' : '- Lire le commentaire -'}
       </ReadMore>
     </StyledComment>
   )

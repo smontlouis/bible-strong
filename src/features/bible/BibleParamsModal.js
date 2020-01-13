@@ -1,6 +1,7 @@
 import React from 'react'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -14,12 +15,13 @@ import TouchableSvgIcon from './TouchableSvgIcon'
 import SvgIcon from './SvgIcon'
 import ColorWheelIcon from '~common/ColorWheelIcon'
 
+
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
   flexDirection: 'row',
   alignItems: 'flex-start',
   justifyContent: 'center',
-  paddingTop: 100
+  paddingTop: getStatusBarHeight() + 10
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -41,7 +43,7 @@ const HalfContainer = styled.View(({ border, theme }) => ({
   flexDirection: 'row',
   justifyContent: 'space-around',
   alignItems: 'center',
-  height: 60
+  height: 50
 }))
 
 const alignContentToString = {

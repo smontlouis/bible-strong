@@ -4,6 +4,8 @@ import { MAX_WIDTH } from '~helpers/useDimensions'
 
 export const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window')
 
+export const smallSize = viewportWidth < 340
+
 export const wp = percentage => {
   const value = (percentage * (viewportWidth > MAX_WIDTH ? MAX_WIDTH : viewportWidth)) / 100
   return Math.round(value)

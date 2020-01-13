@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { ScrollView } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 
 import Box from '~common/ui/Box'
@@ -154,7 +153,7 @@ class StrongCard extends React.Component {
           </Box>
         </Box>
 
-        <ScrollView style={{ marginBottom: 5 }}>
+        <Box style={{ marginBottom: 5 }}>
           {!!Definition && (
             <ViewItem>
               <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
@@ -178,7 +177,7 @@ class StrongCard extends React.Component {
               <SmallParagraph>{LSG}</SmallParagraph>
             </ViewItem>
           )}
-        </ScrollView>
+        </Box>
       </Container>
     )
   }

@@ -1,4 +1,5 @@
 import React from 'react'
+import { ScrollView } from 'react-native'
 import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
@@ -76,6 +77,10 @@ const CountChip = styled.View(({ theme }) => ({
   alignItems: 'center',
   bottom: -5,
   right: -5
+}))
+
+const StyledScrollView = styled.ScrollView(({ theme }) => ({
+  backgroundColor: theme.colors.lightGrey,
 }))
 
 class BibleVerseDetailScreen extends React.Component {
@@ -215,7 +220,7 @@ class BibleVerseDetailScreen extends React.Component {
 
     const countWords = this.countDictionnaireWords()
     return (
-      <Box flex>
+      <StyledScrollView  contentContainerStyle={{ paddingBottom: 20}} scrollIndicatorInsets={{ right: 1 }}>
         <Box background paddingTop={getStatusBarHeight()} />
         <Header
           background
@@ -234,7 +239,7 @@ class BibleVerseDetailScreen extends React.Component {
             </Link>
           }
         />
-        <Box flex>
+        <Box>
           <Box background paddingTop={10}>
             <StyledVerse>
               <VersetWrapper>
@@ -266,7 +271,7 @@ class BibleVerseDetailScreen extends React.Component {
           <Box grey>
             <RoundedCorner />
           </Box>
-          <Box flex grey>
+          <Box grey>
             {isCarouselLoading && <Loading />}
             {!isCarouselLoading && (
               <Carousel
@@ -294,7 +299,7 @@ class BibleVerseDetailScreen extends React.Component {
             )}
           </Box>
         </Box>
-      </Box>
+      </StyledScrollView>
     )
   }
 }

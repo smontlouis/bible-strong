@@ -15,6 +15,7 @@ import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
+import { smallSize } from '~helpers/utils'
 import ShowMoreImage from './ShowMoreImage'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
@@ -93,7 +94,7 @@ const VerseOfTheDay = () => {
         <Link route="BibleView" params={{ isReadOnly: true, book, chapter, verse }}>
           <Paragraph marginTop={5}>{content}</Paragraph>
         </Link>
-        <Box marginTop={20} row>
+        <Box marginTop={20} row center>
           <Box flex>
             <Link
               route="BibleVerseDetail"
@@ -112,7 +113,7 @@ const VerseOfTheDay = () => {
               </Box>
             </Link>
           </Box>
-          <Text titleItalic>
+          <Text titleItalic fontSize={smallSize ? 10 : 12}>
             {title} - {version}
           </Text>
         </Box>
