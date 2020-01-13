@@ -61,6 +61,15 @@ class DBSelectorItem extends React.Component {
   }
 
   async componentDidMount() {
+    this.props.shareFn(() => {
+      this.setState({ versionNeedsDownload: true })
+      try {
+        this.delete()
+      } catch (e) {
+        console.log(`Nothing to delete for ${this.props.database}`)
+      }
+      this.startDownload()
+    })
     const versionNeedsDownload = await this.getIfDatabaseNeedsDownload()
     this.setState({ versionNeedsDownload })
   }
@@ -205,6 +214,7 @@ class DBSelectorItem extends React.Component {
         }
       }
     } catch (e) {
+      console.log(e)
       SnackBar.show(
         "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
         'danger'
@@ -213,50 +223,52 @@ class DBSelectorItem extends React.Component {
     }
   }
 
+  delete = async () => {
+    const [, dispatch] = this.context
+    if (this.props.database !== 'SEARCH') {
+      dispatch({
+        type: this.props.database === 'STRONG' ? 'strong.reset' : 'dictionnaire.reset'
+      })
+      switch (this.props.database) {
+        case 'STRONG': {
+          await strongDB.delete()
+          break
+        }
+        case 'DICTIONNAIRE': {
+          await deleteDictionnaireDB()
+          break
+        }
+        case 'TRESOR': {
+          await deleteTresorDB()
+          break
+        }
+        case 'MHY': {
+          await mhyDB.delete()
+          this.props.dispatch(setSettingsCommentaires(false))
+          break
+        }
+        case 'NAVE': {
+          await naveDB.delete()
+          break
+        }
+        default: {
+          console.log('Database download finished: Nothing to do')
+        }
+      }
+    }
+
+    const path = this.getPath()
+    const file = await FileSystem.getInfoAsync(path)
+    FileSystem.deleteAsync(file.uri)
+    this.setState({ versionNeedsDownload: true })
+  }
+
   confirmDelete = () => {
     Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer cette base de données ?', [
       { text: 'Non', onPress: () => null, style: 'cancel' },
       {
         text: 'Oui',
-        onPress: async () => {
-          const [, dispatch] = this.context
-          if (this.props.database !== 'SEARCH') {
-            dispatch({
-              type: this.props.database === 'STRONG' ? 'strong.reset' : 'dictionnaire.reset'
-            })
-            switch (this.props.database) {
-              case 'STRONG': {
-                await strongDB.delete()
-                break
-              }
-              case 'DICTIONNAIRE': {
-                await deleteDictionnaireDB()
-                break
-              }
-              case 'TRESOR': {
-                await deleteTresorDB()
-                break
-              }
-              case 'MHY': {
-                await mhyDB.delete()
-                this.props.dispatch(setSettingsCommentaires(false))
-                break
-              }
-              case 'NAVE': {
-                await naveDB.delete()
-                break
-              }
-              default: {
-                console.log('Database download finished: Nothing to do')
-              }
-            }
-          }
-
-          const path = this.getPath()
-          const file = await FileSystem.getInfoAsync(path)
-          FileSystem.deleteAsync(file.uri)
-          this.setState({ versionNeedsDownload: true })
-        },
+        onPress: this.delete,
         style: 'destructive'
       }
     ])
@@ -305,7 +317,7 @@ class DBSelectorItem extends React.Component {
             {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
           </Box>
           <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
-            <DeleteIcon name="trash-2" size={20} />
+            <DeleteIcon name="trash-2" size={18} />
           </TouchableOpacity>
         </Box>
       </Container>

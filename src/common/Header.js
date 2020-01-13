@@ -1,8 +1,8 @@
 import React from 'react'
-import { Platform } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
+import { smallSize } from '~helpers/utils'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -41,7 +41,7 @@ const Header = ({
         )}
       </Box>
       <Box grow center>
-        <Text title fontSize={fontSize} onPress={onTitlePress}>
+        <Text title fontSize={smallSize ? 16 : fontSize} onPress={onTitlePress}>
           {title}
         </Text>
       </Box>

@@ -7,6 +7,17 @@ export const logTypes = {
 
 export default [
   {
+    date: '1578883530098',
+    type: logTypes.BUG,
+    title: 'Quelques bugs et une bonne année :)',
+    description: `Bonne année à tous !
+
+- Le violet a été remplacé par le rose en mode sombre
+- Il est possible de télécharger toutes les bases de données et les bibles en une seule fois
+- Meilleure gestion des petits écrans, surtout dans l'écran d'affichage des versets strong.
+`
+  },
+  {
     date: '1575160063085',
     type: logTypes.NEW,
     title: 'Nouvelles Bibles',

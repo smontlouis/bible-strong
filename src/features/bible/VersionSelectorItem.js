@@ -63,6 +63,14 @@ class VersionSelectorItem extends React.Component {
 
   async componentDidMount() {
     const { version } = this.props
+
+    if (this.props.shareFn && (version.id !== 'LSG' && version.id !== 'LSGS')) {
+      this.props.shareFn(() => {
+        this.setState({ versionNeedsDownload: true })
+        this.startDownload()
+      })
+    }
+
     const versionNeedsDownload = await getIfVersionNeedsDownload(version.id)
     this.setState({ versionNeedsDownload })
   }
@@ -173,8 +181,10 @@ class VersionSelectorItem extends React.Component {
         await initInterlineaireDB()
       }
 
-      this.setState({ versionNeedsDownload: false })
+      this.setState({ versionNeedsDownload: false, isLoading: false })
     } catch (e) {
+      console.log('here', uri, this.props)
+      console.log(e)
       SnackBar.show(
         "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
         'danger'
@@ -183,23 +193,29 @@ class VersionSelectorItem extends React.Component {
     }
   }
 
+  delete = async () => {
+    const { version } = this.props
+    const path = this.requireBiblePath(version.id)
+    const file = await FileSystem.getInfoAsync(path)
+    if (!file.uri) {
+      console.log(`Nothing to delete for ${version.id}`)
+      return
+    }
+    FileSystem.deleteAsync(file.uri)
+    this.setState({ versionNeedsDownload: true })
+    this.props.dispatch(setVersion('LSG'))
+
+    if (version.id === 'INT') {
+      deleteInterlineaireDB()
+    }
+  }
+
   confirmDelete = () => {
     Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer cette version ?', [
       { text: 'Non', onPress: () => null, style: 'cancel' },
       {
         text: 'Oui',
-        onPress: async () => {
-          const { version } = this.props
-          const path = this.requireBiblePath(version.id)
-          const file = await FileSystem.getInfoAsync(path)
-          FileSystem.deleteAsync(file.uri)
-          this.setState({ versionNeedsDownload: true })
-          this.props.dispatch(setVersion('LSG'))
-
-          if (version.id === 'INT') {
-            deleteInterlineaireDB()
-          }
-        },
+        onPress: this.delete,
         style: 'destructive'
       }
     ])
@@ -257,7 +273,7 @@ class VersionSelectorItem extends React.Component {
               <TextName>{version.name}</TextName>
             </Box>
             <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
-              <DeleteIcon name="trash-2" size={20} />
+              <DeleteIcon name="trash-2" size={18} />
             </TouchableOpacity>
           </Box>
         </Container>
