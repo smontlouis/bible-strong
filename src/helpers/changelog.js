@@ -7,6 +7,14 @@ export const logTypes = {
 
 export default [
   {
+    date: '1579853456692',
+    type: logTypes.BUG,
+    title: "Bible qui ne s'affiche pas",
+    description: `Bonjour à tous.
+Je me fais un peu rare ces temps-ci, désolé pour ça :).
+Voici une petite mise à jour qui je l'espère, corrigera pour certains le problème d'écran blanc dans la Bible une fois hors-ligne.`
+  },
+  {
     date: '1578883530098',
     type: logTypes.BUG,
     title: 'Quelques bugs et une bonne année :)',
