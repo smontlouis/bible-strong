@@ -17,6 +17,7 @@ const GO_TO_PREV_CHAPTER = 'bible/GO_TO_PREV_CHAPTER'
 const GO_TO_NEXT_CHAPTER = 'bible/GO_TO_NEXT_CHAPTER'
 const SET_STRONG_DATABASE_HASH = 'bible/SET_STRONG_DATABASE_HASH'
 const SET_DICTIONNAIRE_DATABASE_HASH = 'bible/SET_DICTIONNAIRE_DATABASE_HASH'
+const SET_WEBVIEW_HASH = 'bible/SET_WEBVIEW_HASH'
 
 const initialState = {
   selectedVersion: 'LSG',
@@ -30,7 +31,8 @@ const initialState = {
   },
   selectedVerses: {}, // highlighted verses,
   strongDatabaseHash: '',
-  dictionnaireDatabaseHash: ''
+  dictionnaireDatabaseHash: '',
+  webviewHash: ''
 }
 
 // BibleReducer
@@ -177,6 +179,10 @@ export default produce((draft, action) => {
       draft.strongDatabaseHash = action.hash
       break
     }
+    case SET_WEBVIEW_HASH: {
+      draft.webviewHash = action.hash
+      break
+    }
     default: {
       break
     }
@@ -186,6 +192,13 @@ export default produce((draft, action) => {
 export function setStrongDatabaseHash(hash) {
   return {
     type: SET_STRONG_DATABASE_HASH,
+    hash
+  }
+}
+
+export function setWebviewHash(hash) {
+  return {
+    type: SET_WEBVIEW_HASH,
     hash
   }
 }

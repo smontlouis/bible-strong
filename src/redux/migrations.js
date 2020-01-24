@@ -177,5 +177,14 @@ export default {
         }
       }
     }
+  },
+  12: state => {
+    return {
+      ...state,
+      bible: {
+        ...state.bible,
+        webviewHash: ''
+      }
+    }
   }
 }

@@ -242,7 +242,9 @@ class BibleViewer extends Component {
       settings,
       verse,
       focusVerses,
-      theme
+      theme,
+      webviewHash,
+      setWebviewHash
     } = this.props
 
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
@@ -278,6 +280,8 @@ class BibleViewer extends Component {
             setSelectedCode={this.setSelectedCode}
             selectedCode={selectedCode}
             comments={comments}
+            webviewHash={webviewHash}
+            setWebviewHash={setWebviewHash}
           />
         )}
         {!isReadOnly && (
@@ -371,7 +375,8 @@ export default compose(
       selectedVerses: state.bible.selectedVerses,
       highlightedVerses: state.user.bible.highlights,
       notedVerses: state.user.bible.notes,
-      isSelectedVerseHighlighted: !!getHighlightInSelected(state)
+      isSelectedVerseHighlighted: !!getHighlightInSelected(state),
+      webviewHash: state.bible.webviewHash
     }),
     { ...BibleActions, ...UserActions }
   )

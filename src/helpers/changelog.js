@@ -7,6 +7,14 @@ export const logTypes = {
 
 export default [
   {
+    date: '1579853456692',
+    type: logTypes.BUG,
+    title: "Bible qui ne s'affiche pas",
+    description: `Bonjour à tous.
+Je me fais un peu rare ces temps-ci, désolé pour ça :).
+Voici une petite mise à jour qui je l'espère, corrigera pour certains le problème d'écran blanc dans la Bible une fois hors-ligne.`
+  },
+  {
     date: '1578883530098',
     type: logTypes.BUG,
     title: 'Quelques bugs et une bonne année :)',
@@ -15,6 +23,9 @@ export default [
 - Le violet a été remplacé par le rose en mode sombre
 - Il est possible de télécharger toutes les bases de données et les bibles en une seule fois
 - Meilleure gestion des petits écrans, surtout dans l'écran d'affichage des versets strong.
+- Il est maintenant possible de télécharger toutes les bases de données et les bibles en une seule fois
+- Meilleure gestion des petits écrans, surtout dans l'écran d'affichage des versets strong
+- Les commentaires sont moins intrusifs
 `
   },
   {
