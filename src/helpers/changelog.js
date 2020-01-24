@@ -13,8 +13,9 @@ export default [
     description: `Bonne année à tous !
 
 - Le violet a été remplacé par le rose en mode sombre
-- Il est possible de télécharger toutes les bases de données et les bibles en une seule fois
-- Meilleure gestion des petits écrans, surtout dans l'écran d'affichage des versets strong.
+- Il est maintenant possible de télécharger toutes les bases de données et les bibles en une seule fois
+- Meilleure gestion des petits écrans, surtout dans l'écran d'affichage des versets strong
+- Les commentaires sont moins intrusifs
 `
   },
   {

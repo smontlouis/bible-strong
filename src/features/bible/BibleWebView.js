@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { Alert, View } from 'react-native'
 import { Asset } from 'expo-asset'
+import AssetUtils from 'expo-asset-utils'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
-import AssetUtils from 'expo-asset-utils'
 import * as Sentry from 'sentry-expo'
 
 import books from '~assets/bible_versions/books'
@@ -65,20 +65,29 @@ class BibleWebView extends Component {
   }
 
   loadHTMLFile = async () => {
-    try {
-      const { localUri } = await AssetUtils.resolveAsync(require('./bibleWebView/dist/index.html'))
-      this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
-    } catch (e) {
-      SnackBar.show('Fichier introuvable... Tentative de récupération...')
-      Sentry.captureException(e)
+    const { webviewHash, setWebviewHash } = this.props
 
-      try {
-        const indexHtml = Asset.fromModule(require('./bibleWebView/dist/index.html'))
-        await indexHtml.downloadAsync()
-        this.HTMLFile = await FileSystem.readAsStringAsync(indexHtml.localUri)
-      } catch (e) {
-        SnackBar.show('Impossible de récupérer le fichier, contactez le développeur.')
+    try {
+      const indexPath = `${FileSystem.documentDirectory}/index.html`
+      const indexModule = await Asset.fromModule(require('./bibleWebView/dist/index.html'))
+      let dbFile = await FileSystem.getInfoAsync(indexPath)
+
+      console.log(indexModule.hash, webviewHash)
+      if (webviewHash !== indexModule.hash || !dbFile.exists) {
+        console.log('index file copied')
+        await FileSystem.copyAsync({
+          from: indexModule.localUri,
+          to: indexPath
+        })
+        dbFile = await FileSystem.getInfoAsync(indexPath)
+
+        setWebviewHash(indexModule.hash)
       }
+
+      this.HTMLFile = await FileSystem.readAsStringAsync(dbFile.uri)
+    } catch (e) {
+      SnackBar.show('Impossible de lire la Bible, veuillez contacter le développeur.')
+      Sentry.captureException(e)
     }
     this.setState({ isHTMLFileLoaded: true })
   }
