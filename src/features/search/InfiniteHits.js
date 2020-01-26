@@ -19,20 +19,20 @@ const InfiniteHits = ({
   searching,
   ...props
 }) => {
-  if (error) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={"Une erreur est survenue. Assurez-vous d'être connecté à Internet."}
-      />
-    )
-  }
-
   if (!searchState.query) {
     return (
       <Empty
         source={require('~assets/images/search-loop.json')}
         message="Fais une recherche dans la Bible !"
+      />
+    )
+  }
+
+  if (error) {
+    return (
+      <Empty
+        source={require('~assets/images/empty.json')}
+        message={"Une erreur est survenue. Assurez-vous d'être connecté à Internet."}
       />
     )
   }

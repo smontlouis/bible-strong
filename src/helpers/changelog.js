@@ -7,6 +7,18 @@ export const logTypes = {
 
 export default [
   {
+    date: '1580032422298',
+    type: logTypes.FEATURE,
+    title: 'Nouvelle recherche',
+    description: `Bonjour à tous !
+    
+Vous avez maintenant accès à une recherche plus complète et plus stable. Cependant, la recherche fonctionne désormais en ligne.
+    
+Je l'améliorerai au fil du temps, mais vous devriez déjà voir des performances notables. Le service est assez efficace et coûte entre 30 et 50 euros par mois, donc merci à ceux qui m'aident mensuellement sur Tipeee et Paypal !
+
+Pour les plus techniques, le service s'appelle Algolia, c'est de l'Elastic Search.`
+  },
+  {
     date: '1579853456692',
     type: logTypes.BUG,
     title: "Bible qui ne s'affiche pas",

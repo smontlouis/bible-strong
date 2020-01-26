@@ -17,6 +17,10 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
   borderBottomWidth: 1
 }))
 
+const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
+  backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent'
+}))
+
 const Highlight = ({ attribute, hit, highlight, navigation }) => {
   const highlights = highlight({
     highlightProperty: '_highlightResult',
@@ -31,7 +35,8 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
       isReadOnly: true,
       book: books[book - 1],
       chapter: Number(chapter),
-      verse: Number(verse)
+      verse: Number(verse),
+      focusVerses: [Number(verse)]
     })
   return (
     <Container onPress={onPress}>
@@ -40,14 +45,10 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
       </Text>
       <Paragraph small>
         {highlights.map(({ value, isHighlighted }, index) => {
-          const style = {
-            backgroundColor: isHighlighted ? 'yellow' : 'transparent'
-          }
-
           return (
-            <Paragraph small key={index} style={style}>
+            <StyledParagraph isLight={isHighlighted} small key={index}>
               {value}
-            </Paragraph>
+            </StyledParagraph>
           )
         })}
       </Paragraph>
