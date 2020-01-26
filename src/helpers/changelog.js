@@ -16,7 +16,9 @@ Vous avez maintenant accès à une recherche plus complète et plus stable. Cepe
     
 Je l'améliorerai au fil du temps, mais vous devriez déjà voir des performances notables. Le service est assez efficace et coûte entre 30 et 50 euros par mois, donc merci à ceux qui m'aident mensuellement sur Tipeee et Paypal !
 
-Pour les plus techniques, le service s'appelle Algolia, c'est de l'Elastic Search.`
+Pour les plus techniques, le service s'appelle Algolia, c'est de l'Elastic Search.
+
+J'en profite également pour célébrer les 300 abonnés facebook et les 5000 téléchargements sur Android ! Merci pour la confiance accordée !`
   },
   {
     date: '1579853456692',
