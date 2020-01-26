@@ -26,12 +26,20 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
-  alignItems: 'flex-start',
-  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
   padding: 20,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
   overflow: 'hidden'
+}))
+
+const Tag = styled.View(({ theme }) => ({
+  marginLeft: 10,
+  padding: 3,
+  backgroundColor: theme.colors.lightGrey,
+  borderRadius: 3
 }))
 
 const Menu = ({ isOpen, onClosed, children }) => {
@@ -49,9 +57,16 @@ const Menu = ({ isOpen, onClosed, children }) => {
   )
 }
 
-const Item = ({ children, onPress, ...props }) => (
+const Item = ({ children, tag, onPress, ...props }) => (
   <Touchy onPress={onPress}>
     <Text {...props}>{children}</Text>
+    {tag && (
+      <Tag>
+        <Text fontSize={12} color="grey" reverse>
+          {tag}
+        </Text>
+      </Tag>
+    )}
   </Touchy>
 )
 

@@ -25,7 +25,7 @@ class Empty extends React.Component {
         <Box
           alignItems="center"
           justifyContent="center"
-          marginTop={source ? 100 : 0}
+          // marginTop={source ? 100 : 0}
           flex
           paddingHorizontal={20}>
           {source && (

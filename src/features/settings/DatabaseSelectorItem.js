@@ -109,10 +109,6 @@ class DBSelectorItem extends React.Component {
         path = `${sqliteDirPath}/dictionnaire.sqlite`
         break
       }
-      case 'SEARCH': {
-        path = `${FileSystem.documentDirectory}idx-light.json`
-        break
-      }
       case 'TRESOR': {
         path = `${sqliteDirPath}/commentaires-tresor.sqlite`
         break
@@ -139,10 +135,6 @@ class DBSelectorItem extends React.Component {
       }
       case 'DICTIONNAIRE': {
         const sqliteDbUri = firestoreUris.dictionnaire
-        return sqliteDbUri
-      }
-      case 'SEARCH': {
-        const sqliteDbUri = firestoreUris['idx-light']
         return sqliteDbUri
       }
       case 'TRESOR': {

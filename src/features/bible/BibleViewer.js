@@ -7,6 +7,7 @@ import styled from '@emotion/native'
 import * as Sentry from 'sentry-expo'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { withTheme } from 'emotion-theming'
+import SnackBar from '~common/SnackBar'
 
 import oldAudioBooks from '~helpers/topBibleOldAudioBook'
 import Empty from '~common/Empty'
@@ -186,11 +187,19 @@ class BibleViewer extends Component {
   }
 
   openNoteModal = noteId => {
-    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
-      accuRefs[key] = true
-      return accuRefs
-    }, {})
-    this.setState(state => ({ isCreateNoteOpen: !state.isCreateNoteOpen, noteVerses }))
+    try {
+      const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
+        accuRefs[key] = true
+        return accuRefs
+      }, {})
+      this.setState(state => ({ isCreateNoteOpen: !state.isCreateNoteOpen, noteVerses }))
+    } catch (e) {
+      Sentry.withScope(scope => {
+        scope.setExtra('Error', e.toString())
+        scope.setExtra('Note', noteId)
+        Sentry.captureMessage('Note corrumpted')
+      })
+    }
   }
 
   setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })

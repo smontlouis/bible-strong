@@ -71,13 +71,6 @@ const DLScreen = () => {
           shareFn={addDownloadFunc}
         />
         <DBSelectorItem
-          database="SEARCH"
-          name="Index de recherche"
-          subTitle="Index permettant une recherche avancée dans la Bible"
-          fileSize={16795170}
-          shareFn={addDownloadFunc}
-        />
-        <DBSelectorItem
           database="TRESOR"
           name="Références croisées"
           subTitle="L’un des ensembles les plus complets de références croisées jamais compilées, composé de plus de 572.000 entrées."

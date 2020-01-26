@@ -42,8 +42,8 @@ const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
         </TouchableBox>
       </Box>
       <Modal.Menu isOpen={isOpen} onClosed={() => setOpen(false)}>
-        {choices.map(({ value, label }) => (
-          <Modal.Item key={value} onPress={() => onItemPress(value)}>
+        {choices.map(({ value, label, count }) => (
+          <Modal.Item key={value} tag={count} onPress={() => onItemPress(value)}>
             {label}
           </Modal.Item>
         ))}

@@ -9,7 +9,7 @@ const CloseIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
 }))
 
-const SearchInput = ({ onChangeText, value, placeholder, theme, onDelete }) => (
+const SearchInput = ({ onChangeText, value, placeholder, theme, onDelete, ...props }) => (
   <Box
     row
     center
@@ -35,6 +35,7 @@ const SearchInput = ({ onChangeText, value, placeholder, theme, onDelete }) => (
         onChangeText={onChangeText}
         returnKeyType="send"
         value={value}
+        {...props}
       />
     </Box>
     <CloseIcon name="x" size={20} onPress={onDelete} />
