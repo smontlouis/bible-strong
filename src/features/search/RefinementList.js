@@ -23,7 +23,7 @@ const lookupTable = {
   }
 }
 
-const RefinementList = ({ items, refine, attribute }) => {
+const RefinementList = ({ items, refine, attribute, ...props }) => {
   const currentValue = items.find(c => c.isRefined)?.label || ''
 
   const choices = [
@@ -39,14 +39,16 @@ const RefinementList = ({ items, refine, attribute }) => {
   ]
 
   choices.sort((a, b) => {
-    if (a.value < b.value) {
+    if (Number(a.value) < Number(b.value)) {
       return -1
     }
-    if (a.value > b.value) {
+    if (Number(a.value) > Number(b.value)) {
       return 1
     }
     return 0
   })
+
+  console.log(choices)
 
   return (
     <DropdownMenu

@@ -10,7 +10,7 @@ const Filters = ({}) => (
       flexDirection: 'row'
     }}>
     <RefinementList attribute="section" />
-    <RefinementList attribute="book" />
+    <RefinementList attribute="book" limit={100} />
   </ScrollView>
 )
 

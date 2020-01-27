@@ -4585,11 +4585,6 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.5:
-  version "2.2.6"
-  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
-  integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
-
 clean-css@4.2.x:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-4.2.1.tgz#2d411ef76b8569b6d0c84068dabe85b0aa5e5c17"
@@ -12557,17 +12552,6 @@ react-instantsearch-core@^6.2.0:
     algoliasearch-helper "^3.0.0"
     fast-deep-equal "^2.0.1"
     prop-types "^15.5.10"
-
-react-instantsearch-dom@^6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/react-instantsearch-dom/-/react-instantsearch-dom-6.2.0.tgz#8b7a66acddd562dbfbe279fd52856280f8b9712a"
-  integrity sha512-QVj0+rpSTSYlbwJAaxTq8Y768o1mfWJi3MCFSfTE4xeBnVFcbFys7i2i/tjtIQRG9eoIGmMQBnvn3gXZYqbhsQ==
-  dependencies:
-    "@babel/runtime" "^7.1.2"
-    algoliasearch-helper "^3.0.0"
-    classnames "^2.2.5"
-    prop-types "^15.5.10"
-    react-instantsearch-core "^6.2.0"
 
 react-instantsearch-native@^6.2.0:
   version "6.2.0"

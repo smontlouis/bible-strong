@@ -23,7 +23,7 @@ const InfiniteHits = ({
     return (
       <Empty
         source={require('~assets/images/search-loop.json')}
-        message="Fais une recherche dans la Bible !"
+        message="Faites une recherche dans la Bible !"
       />
     )
   }

@@ -8,7 +8,7 @@ const withFireAuth = WrappedComponent => props => {
   const dispatch = useDispatch()
   useEffect(() => {
     const onLogin = (profile, remoteLastSeen, studies) => {
-      SnackBar.show(`Bienvenue ${profile.displayName}.`)
+      console.log(`Bienvenue ${profile.displayName}.`)
       dispatch(UserActions.onUserLoginSuccess(profile, remoteLastSeen, studies))
     }
     const emailVerified = () => console.log('email has been verified')
