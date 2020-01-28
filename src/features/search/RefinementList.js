@@ -48,8 +48,6 @@ const RefinementList = ({ items, refine, attribute, ...props }) => {
     return 0
   })
 
-  console.log(choices)
-
   return (
     <DropdownMenu
       title={lookupTable[attribute].title}

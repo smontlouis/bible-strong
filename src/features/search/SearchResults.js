@@ -1,88 +1,35 @@
 import React from 'react'
-import { withNavigation } from 'react-navigation'
-import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
-import compose from 'recompose/compose'
-import { withTheme } from 'emotion-theming'
 
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import BibleLSG from '~assets/bible_versions/bible-lsg-1910.json'
-import formatVerseContent from '~helpers/formatVerseContent'
-import books from '~assets/bible_versions/books-desc'
-import SearchItem from './SearchItem'
+import ScrollView from '~common/ui/ScrollView'
+import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
+import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
+import NaveResultsWidget from '~features/nave/NaveResultsWidget'
+import InfiniteHits from './InfiniteHits'
 import Empty from '~common/Empty'
-import getBibleVerseText from '~helpers/getBibleVerseText'
+import Box from '~common/ui/Box'
 
-const SearchResults = ({ results, navigation, page, setPage, theme }) => {
-  if (!results || !results.length) {
+const SearchResults = ({ searchValue }) => {
+  if (!searchValue) {
     return (
       <Empty
-        source={require('~assets/images/empty.json')}
-        message="Désolé je n'ai rien trouvé..."
+        source={require('~assets/images/search-loop.json')}
+        message="Faites une recherche dans la Bible !"
       />
     )
   }
 
-  const nbResults = results.length
-
   return (
-    <KeyboardAwareFlatList
-      style={{
-        padding: 20,
-        paddingBottom: 40,
-        flex: 1,
-        backgroundColor: theme.colors.reverse,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30
-      }}
-      removeClippedSubviews
-      data={results}
-      ListHeaderComponent={
-        <Box marginBottom={10}>
-          <Text title fontSize={20}>
-            {nbResults} occurences trouvées
-          </Text>
+    <ScrollView>
+      <Box>
+        <Box row wrap padding={20}>
+          <LexiqueResultsWidget searchValue={searchValue} />
+          <DictionnaryResultsWidget searchValue={searchValue} />
+          <NaveResultsWidget searchValue={searchValue} />
         </Box>
-      }
-      keyExtractor={result => result.ref}
-      renderItem={({ item: result, index }) => {
-        const [book, chapter, verse] = result.ref.split('-')
-        const { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
-        const metaData = result.matchData.metadata
-        const positions = Object.keys(metaData).reduce(
-          (acc, item) => acc.concat(metaData[item].LSG.position),
-          []
-        )
-        positions.sort((a, b) => a[0] - b[0])
-
-        const text = getBibleVerseText(BibleLSG, book, chapter, verse)
-
-        if (!text) {
-          return null
-        }
-
-        return (
-          <SearchItem
-            key={result.ref}
-            positions={positions}
-            reference={title}
-            text={text}
-            onPress={() =>
-              navigation.navigate('BibleView', {
-                isReadOnly: true,
-                book: books[book - 1],
-                chapter: Number(chapter),
-                verse: Number(verse)
-              })
-            }
-          />
-        )
-      }}
-    />
+        <InfiniteHits searchValue={searchValue} />
+      </Box>
+    </ScrollView>
   )
 }
 
-export default compose(
-  withNavigation,
-  withTheme
-)(SearchResults)
+export default SearchResults

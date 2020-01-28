@@ -1,30 +1,23 @@
 import React from 'react'
 import { connectSearchBox } from 'react-instantsearch-native'
 
-import useDebounce from '~helpers/useDebounce'
 import SearchInput from '~common/SearchInput'
 
-const SearchBox = ({ refine, setSearchState }) => {
-  const [searchValue, setSearchValue] = React.useState('')
-  const debouncedSearchValue = useDebounce(searchValue, 300)
-
+const SearchBox = ({ refine, debouncedValue, value, onChange }) => {
   React.useEffect(() => {
-    if (debouncedSearchValue) {
-      refine(debouncedSearchValue)
-    } else {
-      setSearchState({ query: '' })
+    if (debouncedValue) {
+      refine(debouncedValue)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchValue])
+  }, [debouncedValue])
 
   return (
     <SearchInput
-      value={searchValue}
-      onChangeText={setSearchValue}
+      value={value}
+      onChangeText={onChange}
       placeholder="Recherche par mot ou phrase"
       onDelete={() => {
-        setSearchValue('')
-        setSearchState({ query: '' })
+        onChange('')
       }}
       // onSubmitEditing={() => refine(searchValue)}
       returnKeyType="send"

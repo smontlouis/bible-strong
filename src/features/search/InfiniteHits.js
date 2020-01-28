@@ -1,7 +1,7 @@
 import React from 'react'
 import { connectInfiniteHits, connectStateResults } from 'react-instantsearch-native'
+import { FlatList } from 'react-native'
 
-import FlatList from '~common/ui/FlatList'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Loading from '~common/Loading'
@@ -10,7 +10,7 @@ import Empty from '~common/Empty'
 import Highlight from './Highlight'
 
 const InfiniteHits = ({
-  searchState,
+  searchValue,
   hits,
   hasMore,
   refine,
@@ -19,15 +19,6 @@ const InfiniteHits = ({
   searching,
   ...props
 }) => {
-  if (!searchState.query) {
-    return (
-      <Empty
-        source={require('~assets/images/search-loop.json')}
-        message="Faites une recherche dans la Bible !"
-      />
-    )
-  }
-
   if (error) {
     return (
       <Empty
@@ -41,9 +32,9 @@ const InfiniteHits = ({
     <Box flex paddingTop={20}>
       <FlatList
         ListHeaderComponent={
-          <Box padding={20}>
-            <Text title fontSize={20}>
-              {allSearchResults?.nbHits} occurences trouvées
+          <Box paddingHorizontal={20}>
+            <Text title fontSize={16} color="grey">
+              {allSearchResults?.nbHits} occurences trouvées dans la bible
             </Text>
           </Box>
         }

@@ -6,19 +6,19 @@ const loadLexiqueBySearch = searchValue =>
     const resultGrec = await SQLStrongTransaction(
       `SELECT Code, Grec, Mot, 'Grec' as lexiqueType
     FROM Grec 
-    WHERE Mot LIKE (?)
+    WHERE Mot LIKE (?) or Code = (?)
     ORDER BY Mot ASC
     `,
-      [`%${searchValue}%`]
+      [`%${searchValue}%`, searchValue]
     )
 
     const resultHebreu = await SQLStrongTransaction(
       `SELECT Code, Hebreu, Mot, 'Hébreu' as lexiqueType
     FROM Hebreu
-    WHERE Mot LIKE (?)
+    WHERE Mot LIKE (?) or Code = (?)
     ORDER BY Mot ASC
     `,
-      [`%${searchValue}%`]
+      [`%${searchValue}%`, searchValue]
     )
 
     return [...resultGrec, ...resultHebreu]

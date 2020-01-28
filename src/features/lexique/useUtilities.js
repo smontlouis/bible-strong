@@ -35,7 +35,7 @@ export const useResults = (asyncFunc, parameter) => {
   return results
 }
 
-export const useResultsByLetterOrSearch = (search, letter) => {
+export const useResultsByLetterOrSearch = (search = {}, letter = {}) => {
   const [results, setResults] = useState([])
   const [isLoading, setLoading] = useState(true)
   useEffect(() => {
@@ -45,7 +45,10 @@ export const useResultsByLetterOrSearch = (search, letter) => {
         setResults(results)
         setLoading(false)
       })
-    } else {
+      return
+    }
+
+    if (letter.value) {
       setLoading(true)
       letter.query(letter.value).then(results => {
         setResults(results)
