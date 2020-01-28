@@ -12,7 +12,7 @@ import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 const hideIfNoDatabase = WrappedComponent => props => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
 
-  if (isLoading && proposeDownload) return null
+  if (isLoading || proposeDownload) return null
   return <WrappedComponent {...props} />
 }
 

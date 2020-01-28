@@ -1,6 +1,6 @@
 import React from 'react'
 import { connectInfiniteHits, connectStateResults } from 'react-instantsearch-native'
-import { FlatList } from 'react-native'
+import FlatList from '~common/ui/FlatList'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
