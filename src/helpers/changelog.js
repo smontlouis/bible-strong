@@ -7,6 +7,19 @@ export const logTypes = {
 
 export default [
   {
+    date: '1580198076259',
+    type: logTypes.NEW,
+    title: 'Recherche plus complète',
+    description: `Bonjour à tous !
+
+J'ai fait quelques modifications qui je pense, vont vous intéresser. je vous ai maintenant ajouté une recherche globale, en plus de la recherche classique : vous pouvez maintenant chercher dans le lexique (par mot ou code strong), le dictionnaire et la nave en plus de la Bible !
+
+Pourquoi pas par la suite ajouter recherche dans les tags, les études, etc...À méditer.
+
+Merci à Benoit pour l'idée ;).
+    `
+  },
+  {
     date: '1580032422298',
     type: logTypes.FEATURE,
     title: 'Nouvelle recherche',
