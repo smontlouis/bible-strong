@@ -21,6 +21,7 @@ const height = 40
 
 const LexiqueResultsWidget = ({ searchValue }) => {
   const [error, setError] = useState(false)
+  const [limit, setLimit] = useState(LIMIT)
 
   const { results, isLoading } = useResultsByLetterOrSearch({
     query: loadLexiqueBySearch,
@@ -43,7 +44,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
 
   return (
     <>
-      {results.slice(0, LIMIT).map(strong => {
+      {results.slice(0, limit).map(strong => {
         const { Grec, Mot, Code } = strong
 
         const color1 = Grec ? 'rgb(69,150,220)' : 'rgba(248,131,121,1)'
@@ -88,34 +89,36 @@ const LexiqueResultsWidget = ({ searchValue }) => {
           </Link>
         )
       })}
-      {results.length > LIMIT && (
-        <Box
-          opacity={0.5}
-          center
-          rounded
-          marginRight={10}
-          marginBottom={10}
-          height={height}
-          paddingHorizontal={10}>
+      {results.length > limit && (
+        <Link onPress={() => setLimit(l => l + 5)}>
           <Box
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              top: 0,
-              height,
-              borderRadius: 3
-            }}>
-            <LinearGradient
-              start={[0.1, 0.2]}
-              style={{ height }}
-              colors={['rgba(248,131,121,1)', 'rgba(255,77,93,1)']}
-            />
+            opacity={0.5}
+            center
+            rounded
+            marginRight={10}
+            marginBottom={10}
+            height={height}
+            paddingHorizontal={10}>
+            <Box
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                height,
+                borderRadius: 3
+              }}>
+              <LinearGradient
+                start={[0.1, 0.2]}
+                style={{ height }}
+                colors={['rgba(248,131,121,1)', 'rgba(255,77,93,1)']}
+              />
+            </Box>
+            <Text title fontSize={14} style={{ color: 'white' }}>
+              + {results.length - limit}
+            </Text>
           </Box>
-          <Text title fontSize={14} style={{ color: 'white' }}>
-            + {results.length - LIMIT}
-          </Text>
-        </Box>
+        </Link>
       )}
     </>
   )

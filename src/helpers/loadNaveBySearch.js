@@ -9,7 +9,7 @@ const loadNaveBySearch = searchValue =>
       WHERE name LIKE (?)
       ORDER BY name ASC
       `,
-      [`%${searchValue}%`]
+      [`%${searchValue.trim()}%`]
     )
 
     return result

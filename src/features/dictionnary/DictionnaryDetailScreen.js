@@ -4,8 +4,9 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
 import { useDispatch } from 'react-redux'
-
 import * as Sentry from 'sentry-expo'
+
+import Button from '~common/ui/Button'
 import books from '~assets/bible_versions/books-desc'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Back from '~common/Back'
@@ -31,14 +32,25 @@ const TitleBorder = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.secondary
 }))
 
+const MAX_CHAR = 3000
+
 const DictionnaryDetailScreen = ({ navigation }) => {
   const { word } = navigation.state.params || {}
   const dispatch = useDispatch()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
+  const [canReadMore, setCanReadMore] = useState(false)
 
   useEffect(() => {
     loadDictionnaireItem(word).then(result => {
-      setDictionnaireItem(result)
+      if (result.definition.length > 7000) {
+        setCanReadMore(true)
+      }
+
+      setDictionnaireItem({
+        ...result,
+        definitionShort: truncHTML(result.definition, MAX_CHAR).html
+      })
+
       dispatch(
         setHistory({
           word,
@@ -88,6 +100,10 @@ const DictionnaryDetailScreen = ({ navigation }) => {
     }
   }
 
+  const loadRemainingText = () => {
+    setCanReadMore(false)
+  }
+
   return (
     <Container>
       <Box padding={20}>
@@ -119,9 +135,18 @@ const DictionnaryDetailScreen = ({ navigation }) => {
       <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
         {dictionnaireItem && dictionnaireItem.definition && (
           <StylizedHTMLView
-            value={dictionnaireItem.definition.replace(/\n/gi, '')}
+            value={
+              canReadMore
+                ? dictionnaireItem.definitionShort.replace(/\n/gi, '')
+                : dictionnaireItem.definition.replace(/\n/gi, '')
+            }
             onLinkPress={openLink}
           />
+        )}
+        {canReadMore && (
+          <Box center marginTop={20}>
+            <Button title="Lire plus" onPress={loadRemainingText} style={{ width: 150 }} />
+          </Box>
         )}
       </ScrollView>
     </Container>

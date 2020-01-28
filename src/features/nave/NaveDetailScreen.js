@@ -7,7 +7,6 @@ import { useDispatch } from 'react-redux'
 import * as Sentry from 'sentry-expo'
 
 import Button from '~common/ui/Button'
-import books from '~assets/bible_versions/books-desc'
 import NaveHTMLView from '~common/NaveHTMLView'
 import Back from '~common/Back'
 import Link from '~common/Link'

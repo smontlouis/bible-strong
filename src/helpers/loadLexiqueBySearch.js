@@ -9,7 +9,7 @@ const loadLexiqueBySearch = searchValue =>
     WHERE Mot LIKE (?) or Code = (?)
     ORDER BY Mot ASC
     `,
-      [`%${searchValue}%`, searchValue]
+      [`%${searchValue.trim()}%`, searchValue]
     )
 
     const resultHebreu = await SQLStrongTransaction(
@@ -18,7 +18,7 @@ const loadLexiqueBySearch = searchValue =>
     WHERE Mot LIKE (?) or Code = (?)
     ORDER BY Mot ASC
     `,
-      [`%${searchValue}%`, searchValue]
+      [`%${searchValue.trim()}%`, searchValue]
     )
 
     return [...resultGrec, ...resultHebreu]

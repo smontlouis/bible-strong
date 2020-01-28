@@ -9,7 +9,6 @@ import {
 } from '~helpers/database'
 
 const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
-  console.log(sqlReq)
   return new Promise((resolve, reject) => {
     if (!getDB() && initDB) initDB()
     getDB().transaction(
