@@ -15,10 +15,11 @@ const SearchBox = ({ refine, debouncedValue, value, onChange }) => {
     <SearchInput
       value={value}
       onChangeText={onChange}
-      placeholder="Recherche par mot ou phrase"
+      placeholder="Recherche par mot, phrase ou strong"
       onDelete={() => {
         onChange('')
       }}
+      autoFocus
       // onSubmitEditing={() => refine(searchValue)}
       returnKeyType="send"
     />
