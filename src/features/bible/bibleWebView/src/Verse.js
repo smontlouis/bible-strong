@@ -28,7 +28,7 @@ function convertHex(hex, opacity) {
 
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(19, fontSizeScale),
-  lineHeight: scaleFontSize(30, fontSizeScale)
+  lineHeight: scaleFontSize(29, fontSizeScale)
 }))
 
 const NumberText = styled('span')(({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
@@ -103,6 +103,10 @@ const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
         marginBottom: '5px'
       }
     : {})
+}))
+
+const Spacer = styled('div')(() => ({
+  marginTop: 5
 }))
 
 class Verse extends Component {
@@ -270,6 +274,12 @@ class Verse extends Component {
       )
     }
 
+    let array = verse.Texte.split(/(\n)/g)
+
+    if (array.length > 1) {
+      array = array.map(c => (c === '\n' ? <Spacer /> : c))
+    }
+
     return (
       <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
         <ContainerText
@@ -295,7 +305,7 @@ class Verse extends Component {
             onTouchEnd={this.onTouchEnd}
             onTouchMove={this.onTouchMove}
             onTouchCancel={this.onTouchCancel}>
-            {verse.Texte}
+            {array}
           </VerseText>
         </ContainerText>
         {notesText && inlineNotedVerses && !isSelectionMode && (

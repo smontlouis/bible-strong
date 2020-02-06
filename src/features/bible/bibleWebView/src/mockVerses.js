@@ -2,7 +2,7 @@ export default [
   {
     Verset: '1',
     Texte:
-      'Adam connut Ève, sa femme; elle conçut, et enfanta Caïn et elle dit: J’ai formé un homme avec l’aide de l’Éternel.',
+      'Adam connut Ève, sa femme; elle conçut, et enfanta Caïn et elle dit: J’ai formé un homme avec l’aide de l’Éternel.\n',
     Livre: 1,
     Chapitre: 4
   },

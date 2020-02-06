@@ -8,7 +8,7 @@ import { scaleFontSize } from './scaleFontSize'
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontFamily: 'LiterataBook',
   fontSize: scaleFontSize(19, fontSizeScale),
-  lineHeight: scaleFontSize(30, fontSizeScale)
+  lineHeight: scaleFontSize(29, fontSizeScale)
 }))
 
 const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({

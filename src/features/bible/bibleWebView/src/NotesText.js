@@ -11,7 +11,7 @@ const Div = styled('span')(({ settings: { fontSizeScale, theme, colors } }) => (
   KhtmlUserSelect: 'none',
   WebkitUserSelect: 'none',
   fontSize: scaleFontSize(19, fontSizeScale),
-  lineHeight: scaleFontSize(30, fontSizeScale),
+  lineHeight: scaleFontSize(29, fontSizeScale),
   color: colors[theme].quart
 }))
 
