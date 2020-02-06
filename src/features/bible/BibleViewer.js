@@ -79,7 +79,7 @@ class BibleViewer extends Component {
 
   setNave = value => this.setState({ currentNave: value })
 
-  componentWillMount() {
+  componentDidMount() {
     setTimeout(() => {
       this.loadVerses().catch(e => {
         console.log(e)
@@ -89,7 +89,7 @@ class BibleViewer extends Component {
     this.props.clearSelectedVerses()
   }
 
-  componentWillReceiveProps(oldProps) {
+  UNSAFE_componentWillReceiveProps(oldProps) {
     if (
       this.props.chapter !== oldProps.chapter ||
       this.props.book.Numero !== oldProps.book.Numero ||

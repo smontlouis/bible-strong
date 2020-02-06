@@ -12,7 +12,7 @@ class HTMLView extends React.Component {
     element: null
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.value !== nextProps.value) {
       this.startHtmlRender(nextProps.value)
     }

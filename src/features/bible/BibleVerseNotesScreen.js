@@ -23,7 +23,7 @@ class BibleVerseNotes extends Component {
     this.loadPage(this.props)
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.loadPage(nextProps)
   }
 
