@@ -8,15 +8,5 @@
     "~navigation": "${workspaceRoot}/src/navigation",
     "~redux": "${workspaceRoot}/src/redux",
     "~themes": "${workspaceRoot}/src/themes"
-  },
-  "eslint.enable": true,
-  "standard.autoFixOnSave": false,
-  "javascript.suggest.completeFunctionCalls": true,
-  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
-  "editor.formatOnSave": false,
-  "eslint.autoFixOnSave": true,
-  "eslint.alwaysShowStatus": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
   }
 }

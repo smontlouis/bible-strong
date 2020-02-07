@@ -1,0 +1,560 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "StrokeNodeProperties"
+- "StrokeNode"
+provides-nominal:
+- "6Lottie20StrokeNodePropertiesC"
+- "6Lottie10StrokeNodeC"
+provides-member:
+- ["6Lottie20StrokeNodePropertiesC", ""]
+- ["6Lottie10StrokeNodeC", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "*"
+- !private "=="
+- !private ">"
+- "AnimatorNode"
+- "AnyNodeProperty"
+- !private "Array"
+- "AssignmentPrecedence"
+- "Bool"
+- "BooleanLiteralType"
+- "CGFloat"
+- "Color"
+- !private "FloatLiteralType"
+- !private "GroupInterpolator"
+- !private "IntegerLiteralType"
+- !private "Keyframe"
+- !private "KeyframeInterpolator"
+- "KeypathSearchable"
+- "LineCap"
+- "LineJoin"
+- "NodeOutput"
+- "NodeProperty"
+- "NodePropertyMap"
+- "RenderNode"
+- "Renderable"
+- !private "SingleValueProvider"
+- "String"
+- !private "StringLiteralType"
+- "Stroke"
+- "StrokeNode"
+- "StrokeNodeProperties"
+- "StrokeRenderer"
+- "Vector1D"
+depends-member:
+- !private ["s18AdditiveArithmeticP", "init"]
+- !private ["6Lottie12AnimatorNodeP", "StrokeNodeProperties"]
+- !private ["6Lottie12AnimatorNodeP", "StrokeRenderer"]
+- ["6Lottie12AnimatorNodeP", ""]
+- ["6Lottie12AnimatorNodeP", "childKeypaths"]
+- ["6Lottie12AnimatorNodeP", "forceUpstreamOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "hasLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "hasUpstreamUpdates"]
+- ["6Lottie12AnimatorNodeP", "isEnabled"]
+- ["6Lottie12AnimatorNodeP", "keypathLayer"]
+- ["6Lottie12AnimatorNodeP", "keypathName"]
+- ["6Lottie12AnimatorNodeP", "keypathProperties"]
+- ["6Lottie12AnimatorNodeP", "lastUpdateFrame"]
+- ["6Lottie12AnimatorNodeP", "localUpdatesPermeateDownstream"]
+- ["6Lottie12AnimatorNodeP", "outputNode"]
+- ["6Lottie12AnimatorNodeP", "parentNode"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "propertyMap"]
+- ["6Lottie12AnimatorNodeP", "rebuildOutputs"]
+- ["6Lottie12AnimatorNodeP", "renderer"]
+- ["6Lottie12AnimatorNodeP", "shouldRebuildOutputs"]
+- !private ["6Lottie12AnimatorNodeP", "strokeProperties"]
+- !private ["6Lottie12AnimatorNodeP", "strokeRender"]
+- !private ["6Lottie15AnyNodePropertyP", "init"]
+- !private ["6Lottie15AnyNodePropertyP", "value"]
+- !private ["6Lottie16AnyValueProviderP", "init"]
+- !private ["Sa", "append"]
+- !private ["Sa", "count"]
+- !private ["Sa", "init"]
+- !private ["Sa", "map"]
+- !private ["SK", "append"]
+- !private ["SK", "count"]
+- !private ["SK", "init"]
+- !private ["SK", "map"]
+- !private ["SB", "init"]
+- !private ["12CoreGraphics7CGFloatV", "init"]
+- !private ["s7CVarArgP", "append"]
+- !private ["s7CVarArgP", "count"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "map"]
+- !private ["s7CVarArgP", "values"]
+- !private ["Sl", "append"]
+- !private ["Sl", "count"]
+- !private ["Sl", "init"]
+- !private ["Sl", "map"]
+- !private ["Sl", "values"]
+- !private ["6Lottie5ColorV", "cgColorValue"]
+- !private ["6Lottie5ColorV", "deinit"]
+- !private ["SL", "init"]
+- !private ["10Foundation15ContiguousBytesP", "append"]
+- !private ["10Foundation15ContiguousBytesP", "count"]
+- !private ["10Foundation15ContiguousBytesP", "init"]
+- !private ["10Foundation15ContiguousBytesP", "map"]
+- !private ["s28CustomDebugStringConvertibleP", "append"]
+- !private ["s28CustomDebugStringConvertibleP", "count"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "map"]
+- !private ["s28CustomDebugStringConvertibleP", "values"]
+- !private ["s17CustomReflectableP", "append"]
+- !private ["s17CustomReflectableP", "count"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s17CustomReflectableP", "map"]
+- !private ["s17CustomReflectableP", "values"]
+- !private ["s23CustomStringConvertibleP", "append"]
+- !private ["s23CustomStringConvertibleP", "count"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "map"]
+- !private ["s23CustomStringConvertibleP", "values"]
+- !private ["6Lottie11DashElementV", "type"]
+- !private ["6Lottie11DashElementV", "value"]
+- !private ["6Lottie15DashElementTypeO", "deinit"]
+- !private ["6Lottie15DashElementTypeO", "offset"]
+- !private ["10Foundation12DataProtocolP", "append"]
+- !private ["10Foundation12DataProtocolP", "count"]
+- !private ["10Foundation12DataProtocolP", "init"]
+- !private ["10Foundation12DataProtocolP", "map"]
+- !private ["Se", "append"]
+- !private ["Se", "cgColorValue"]
+- !private ["Se", "cgFloatValue"]
+- !private ["Se", "color"]
+- !private ["Se", "count"]
+- !private ["Se", "dashPattern"]
+- !private ["Se", "init"]
+- !private ["Se", "keyframes"]
+- !private ["Se", "lineCap"]
+- !private ["Se", "lineJoin"]
+- !private ["Se", "map"]
+- !private ["Se", "miterLimit"]
+- !private ["Se", "name"]
+- !private ["Se", "offset"]
+- !private ["Se", "opacity"]
+- !private ["Se", "type"]
+- !private ["Se", "value"]
+- !private ["Se", "values"]
+- !private ["Se", "width"]
+- !private ["SD", "values"]
+- !private ["SE", "append"]
+- !private ["SE", "cgColorValue"]
+- !private ["SE", "cgFloatValue"]
+- !private ["SE", "color"]
+- !private ["SE", "count"]
+- !private ["SE", "dashPattern"]
+- !private ["SE", "init"]
+- !private ["SE", "keyframes"]
+- !private ["SE", "lineCap"]
+- !private ["SE", "lineJoin"]
+- !private ["SE", "map"]
+- !private ["SE", "miterLimit"]
+- !private ["SE", "name"]
+- !private ["SE", "offset"]
+- !private ["SE", "opacity"]
+- !private ["SE", "type"]
+- !private ["SE", "value"]
+- !private ["SE", "values"]
+- !private ["SE", "width"]
+- !private ["SQ", "append"]
+- !private ["SQ", "count"]
+- !private ["SQ", "init"]
+- !private ["SQ", "map"]
+- !private ["SQ", "offset"]
+- !private ["SQ", "values"]
+- !private ["s25ExpressibleByArrayLiteralP", "append"]
+- !private ["s25ExpressibleByArrayLiteralP", "count"]
+- !private ["s25ExpressibleByArrayLiteralP", "init"]
+- !private ["s25ExpressibleByArrayLiteralP", "map"]
+- !private ["s30ExpressibleByDictionaryLiteralP", "values"]
+- !private ["s25ExpressibleByFloatLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- !private ["SF", "init"]
+- !private ["6Lottie17GroupInterpolatorC", "deinit"]
+- !private ["6Lottie17GroupInterpolatorC", "init"]
+- !private ["SH", "append"]
+- !private ["SH", "count"]
+- !private ["SH", "init"]
+- !private ["SH", "map"]
+- !private ["SH", "offset"]
+- !private ["SH", "values"]
+- !private ["6Lottie14InterpolatableP", "append"]
+- !private ["6Lottie14InterpolatableP", "cgColorValue"]
+- !private ["6Lottie14InterpolatableP", "cgFloatValue"]
+- !private ["6Lottie14InterpolatableP", "count"]
+- !private ["6Lottie14InterpolatableP", "init"]
+- !private ["6Lottie14InterpolatableP", "map"]
+- !private ["6Lottie13KeyframeGroupC", "keyframes"]
+- !private ["6Lottie20KeyframeInterpolatorC", "deinit"]
+- !private ["6Lottie20KeyframeInterpolatorC", "init"]
+- !private ["6Lottie17KeypathSearchableP", "Array"]
+- !private ["6Lottie17KeypathSearchableP", "CGFloat"]
+- !private ["6Lottie17KeypathSearchableP", "GroupInterpolator"]
+- !private ["6Lottie17KeypathSearchableP", "Keyframe"]
+- !private ["6Lottie17KeypathSearchableP", "KeyframeInterpolator"]
+- !private ["6Lottie17KeypathSearchableP", "NodeProperty"]
+- !private ["6Lottie17KeypathSearchableP", "SingleValueProvider"]
+- !private ["6Lottie17KeypathSearchableP", "StrokeNodeProperties"]
+- !private ["6Lottie17KeypathSearchableP", "StrokeRenderer"]
+- !private ["6Lottie17KeypathSearchableP", "Vector1D"]
+- ["6Lottie17KeypathSearchableP", ""]
+- ["6Lottie17KeypathSearchableP", "childKeypaths"]
+- !private ["6Lottie17KeypathSearchableP", "color"]
+- !private ["6Lottie17KeypathSearchableP", "dashPattern"]
+- !private ["6Lottie17KeypathSearchableP", "dashPhase"]
+- ["6Lottie17KeypathSearchableP", "forceUpstreamOutputUpdates"]
+- ["6Lottie17KeypathSearchableP", "hasLocalUpdates"]
+- ["6Lottie17KeypathSearchableP", "hasUpstreamUpdates"]
+- !private ["6Lottie17KeypathSearchableP", "init"]
+- ["6Lottie17KeypathSearchableP", "isEnabled"]
+- ["6Lottie17KeypathSearchableP", "keypathLayer"]
+- ["6Lottie17KeypathSearchableP", "keypathName"]
+- ["6Lottie17KeypathSearchableP", "keypathProperties"]
+- ["6Lottie17KeypathSearchableP", "lastUpdateFrame"]
+- !private ["6Lottie17KeypathSearchableP", "lineCap"]
+- !private ["6Lottie17KeypathSearchableP", "lineJoin"]
+- ["6Lottie17KeypathSearchableP", "localUpdatesPermeateDownstream"]
+- !private ["6Lottie17KeypathSearchableP", "miterLimit"]
+- !private ["6Lottie17KeypathSearchableP", "opacity"]
+- ["6Lottie17KeypathSearchableP", "outputNode"]
+- ["6Lottie17KeypathSearchableP", "parentNode"]
+- ["6Lottie17KeypathSearchableP", "performAdditionalLocalUpdates"]
+- ["6Lottie17KeypathSearchableP", "performAdditionalOutputUpdates"]
+- ["6Lottie17KeypathSearchableP", "properties"]
+- ["6Lottie17KeypathSearchableP", "propertyMap"]
+- ["6Lottie17KeypathSearchableP", "rebuildOutputs"]
+- ["6Lottie17KeypathSearchableP", "renderer"]
+- ["6Lottie17KeypathSearchableP", "shouldRebuildOutputs"]
+- !private ["6Lottie17KeypathSearchableP", "strokeProperties"]
+- !private ["6Lottie17KeypathSearchableP", "strokeRender"]
+- !private ["6Lottie17KeypathSearchableP", "width"]
+- !private ["SM", "append"]
+- !private ["SM", "count"]
+- !private ["SM", "init"]
+- !private ["SM", "map"]
+- !private ["10Foundation19MutableDataProtocolP", "append"]
+- !private ["10Foundation19MutableDataProtocolP", "count"]
+- !private ["10Foundation19MutableDataProtocolP", "init"]
+- !private ["10Foundation19MutableDataProtocolP", "map"]
+- !private ["6Lottie10NodeOutputP", "color"]
+- !private ["6Lottie10NodeOutputP", "dashLengths"]
+- !private ["6Lottie10NodeOutputP", "dashPhase"]
+- !private ["6Lottie10NodeOutputP", "init"]
+- !private ["6Lottie10NodeOutputP", "isEnabled"]
+- !private ["6Lottie10NodeOutputP", "lineCap"]
+- !private ["6Lottie10NodeOutputP", "lineJoin"]
+- !private ["6Lottie10NodeOutputP", "miterLimit"]
+- !private ["6Lottie10NodeOutputP", "opacity"]
+- !private ["6Lottie10NodeOutputP", "width"]
+- !private ["6Lottie12NodePropertyC", "deinit"]
+- !private ["6Lottie12NodePropertyC", "init"]
+- !private ["6Lottie12NodePropertyC", "value"]
+- !private ["6Lottie15NodePropertyMapP", "Array"]
+- !private ["6Lottie15NodePropertyMapP", "CGFloat"]
+- !private ["6Lottie15NodePropertyMapP", "GroupInterpolator"]
+- !private ["6Lottie15NodePropertyMapP", "Keyframe"]
+- !private ["6Lottie15NodePropertyMapP", "KeyframeInterpolator"]
+- !private ["6Lottie15NodePropertyMapP", "NodeProperty"]
+- !private ["6Lottie15NodePropertyMapP", "SingleValueProvider"]
+- !private ["6Lottie15NodePropertyMapP", "Vector1D"]
+- ["6Lottie15NodePropertyMapP", ""]
+- ["6Lottie15NodePropertyMapP", "childKeypaths"]
+- !private ["6Lottie15NodePropertyMapP", "color"]
+- !private ["6Lottie15NodePropertyMapP", "dashPattern"]
+- !private ["6Lottie15NodePropertyMapP", "dashPhase"]
+- !private ["6Lottie15NodePropertyMapP", "init"]
+- ["6Lottie15NodePropertyMapP", "keypathLayer"]
+- ["6Lottie15NodePropertyMapP", "keypathName"]
+- ["6Lottie15NodePropertyMapP", "keypathProperties"]
+- !private ["6Lottie15NodePropertyMapP", "lineCap"]
+- !private ["6Lottie15NodePropertyMapP", "lineJoin"]
+- !private ["6Lottie15NodePropertyMapP", "miterLimit"]
+- !private ["6Lottie15NodePropertyMapP", "opacity"]
+- ["6Lottie15NodePropertyMapP", "properties"]
+- !private ["6Lottie15NodePropertyMapP", "width"]
+- !private ["Sj", "init"]
+- !private ["6Lottie21PassThroughOutputNodeC", "color"]
+- !private ["6Lottie21PassThroughOutputNodeC", "dashLengths"]
+- !private ["6Lottie21PassThroughOutputNodeC", "dashPhase"]
+- !private ["6Lottie21PassThroughOutputNodeC", "init"]
+- !private ["6Lottie21PassThroughOutputNodeC", "isEnabled"]
+- !private ["6Lottie21PassThroughOutputNodeC", "lineCap"]
+- !private ["6Lottie21PassThroughOutputNodeC", "lineJoin"]
+- !private ["6Lottie21PassThroughOutputNodeC", "miterLimit"]
+- !private ["6Lottie21PassThroughOutputNodeC", "opacity"]
+- !private ["6Lottie21PassThroughOutputNodeC", "width"]
+- !private ["Sk", "append"]
+- !private ["Sk", "count"]
+- !private ["Sk", "init"]
+- !private ["Sk", "map"]
+- !private ["Sm", "append"]
+- !private ["Sm", "count"]
+- !private ["Sm", "init"]
+- !private ["Sm", "map"]
+- !private ["SY", "offset"]
+- !private ["6Lottie10RenderNodeP", "StrokeNodeProperties"]
+- !private ["6Lottie10RenderNodeP", "StrokeRenderer"]
+- ["6Lottie10RenderNodeP", ""]
+- ["6Lottie10RenderNodeP", "childKeypaths"]
+- ["6Lottie10RenderNodeP", "forceUpstreamOutputUpdates"]
+- ["6Lottie10RenderNodeP", "hasLocalUpdates"]
+- ["6Lottie10RenderNodeP", "hasUpstreamUpdates"]
+- ["6Lottie10RenderNodeP", "isEnabled"]
+- ["6Lottie10RenderNodeP", "keypathLayer"]
+- ["6Lottie10RenderNodeP", "keypathName"]
+- ["6Lottie10RenderNodeP", "keypathProperties"]
+- ["6Lottie10RenderNodeP", "lastUpdateFrame"]
+- ["6Lottie10RenderNodeP", "localUpdatesPermeateDownstream"]
+- ["6Lottie10RenderNodeP", "outputNode"]
+- ["6Lottie10RenderNodeP", "parentNode"]
+- ["6Lottie10RenderNodeP", "performAdditionalLocalUpdates"]
+- ["6Lottie10RenderNodeP", "performAdditionalOutputUpdates"]
+- ["6Lottie10RenderNodeP", "propertyMap"]
+- ["6Lottie10RenderNodeP", "rebuildOutputs"]
+- ["6Lottie10RenderNodeP", "renderer"]
+- ["6Lottie10RenderNodeP", "shouldRebuildOutputs"]
+- !private ["6Lottie10RenderNodeP", "strokeProperties"]
+- !private ["6Lottie10RenderNodeP", "strokeRender"]
+- !private ["6Lottie10RenderableP", "color"]
+- !private ["6Lottie10RenderableP", "dashLengths"]
+- !private ["6Lottie10RenderableP", "dashPhase"]
+- !private ["6Lottie10RenderableP", "init"]
+- !private ["6Lottie10RenderableP", "isEnabled"]
+- !private ["6Lottie10RenderableP", "lineCap"]
+- !private ["6Lottie10RenderableP", "lineJoin"]
+- !private ["6Lottie10RenderableP", "miterLimit"]
+- !private ["6Lottie10RenderableP", "opacity"]
+- !private ["6Lottie10RenderableP", "width"]
+- !private ["ST", "append"]
+- !private ["ST", "count"]
+- !private ["ST", "init"]
+- !private ["ST", "map"]
+- !private ["ST", "values"]
+- !private ["6Lottie9ShapeItemC", "color"]
+- !private ["6Lottie9ShapeItemC", "dashPattern"]
+- !private ["6Lottie9ShapeItemC", "lineCap"]
+- !private ["6Lottie9ShapeItemC", "lineJoin"]
+- !private ["6Lottie9ShapeItemC", "miterLimit"]
+- !private ["6Lottie9ShapeItemC", "name"]
+- !private ["6Lottie9ShapeItemC", "opacity"]
+- !private ["6Lottie9ShapeItemC", "width"]
+- !private ["s13SignedNumericP", "init"]
+- !private ["6Lottie19SingleValueProviderC", "deinit"]
+- !private ["6Lottie19SingleValueProviderC", "init"]
+- !private ["Sx", "init"]
+- !private ["6Lottie6StrokeC", "color"]
+- !private ["6Lottie6StrokeC", "dashPattern"]
+- !private ["6Lottie6StrokeC", "lineCap"]
+- !private ["6Lottie6StrokeC", "lineJoin"]
+- !private ["6Lottie6StrokeC", "miterLimit"]
+- !private ["6Lottie6StrokeC", "name"]
+- !private ["6Lottie6StrokeC", "opacity"]
+- !private ["6Lottie6StrokeC", "width"]
+- ["6Lottie10StrokeNodeC", "AnimatorNode"]
+- ["6Lottie10StrokeNodeC", "Bool"]
+- ["6Lottie10StrokeNodeC", "CGFloat"]
+- ["6Lottie10StrokeNodeC", "KeypathSearchable"]
+- ["6Lottie10StrokeNodeC", "NodeOutput"]
+- ["6Lottie10StrokeNodeC", "NodePropertyMap"]
+- ["6Lottie10StrokeNodeC", "Renderable"]
+- ["6Lottie10StrokeNodeC", "Stroke"]
+- ["6Lottie10StrokeNodeC", "StrokeNodeProperties"]
+- ["6Lottie10StrokeNodeC", "StrokeRenderer"]
+- ["6Lottie10StrokeNodeC", "childKeypaths"]
+- ["6Lottie10StrokeNodeC", "deinit"]
+- ["6Lottie10StrokeNodeC", "forceUpstreamOutputUpdates"]
+- ["6Lottie10StrokeNodeC", "hasLocalUpdates"]
+- ["6Lottie10StrokeNodeC", "hasUpstreamUpdates"]
+- ["6Lottie10StrokeNodeC", "init"]
+- ["6Lottie10StrokeNodeC", "isEnabled"]
+- ["6Lottie10StrokeNodeC", "keypathLayer"]
+- ["6Lottie10StrokeNodeC", "keypathName"]
+- ["6Lottie10StrokeNodeC", "keypathProperties"]
+- ["6Lottie10StrokeNodeC", "lastUpdateFrame"]
+- ["6Lottie10StrokeNodeC", "localUpdatesPermeateDownstream"]
+- ["6Lottie10StrokeNodeC", "outputNode"]
+- ["6Lottie10StrokeNodeC", "parentNode"]
+- ["6Lottie10StrokeNodeC", "performAdditionalLocalUpdates"]
+- ["6Lottie10StrokeNodeC", "performAdditionalOutputUpdates"]
+- ["6Lottie10StrokeNodeC", "propertyMap"]
+- ["6Lottie10StrokeNodeC", "rebuildOutputs"]
+- ["6Lottie10StrokeNodeC", "renderer"]
+- ["6Lottie10StrokeNodeC", "shouldRebuildOutputs"]
+- ["6Lottie10StrokeNodeC", "strokeProperties"]
+- ["6Lottie10StrokeNodeC", "strokeRender"]
+- ["6Lottie20StrokeNodePropertiesC", "AnyNodeProperty"]
+- !private ["6Lottie20StrokeNodePropertiesC", "Array"]
+- ["6Lottie20StrokeNodePropertiesC", "CGFloat"]
+- ["6Lottie20StrokeNodePropertiesC", "Color"]
+- !private ["6Lottie20StrokeNodePropertiesC", "GroupInterpolator"]
+- !private ["6Lottie20StrokeNodePropertiesC", "Keyframe"]
+- !private ["6Lottie20StrokeNodePropertiesC", "KeyframeInterpolator"]
+- ["6Lottie20StrokeNodePropertiesC", "LineCap"]
+- ["6Lottie20StrokeNodePropertiesC", "LineJoin"]
+- ["6Lottie20StrokeNodePropertiesC", "NodeProperty"]
+- !private ["6Lottie20StrokeNodePropertiesC", "SingleValueProvider"]
+- ["6Lottie20StrokeNodePropertiesC", "String"]
+- ["6Lottie20StrokeNodePropertiesC", "Stroke"]
+- ["6Lottie20StrokeNodePropertiesC", "Vector1D"]
+- ["6Lottie20StrokeNodePropertiesC", "childKeypaths"]
+- ["6Lottie20StrokeNodePropertiesC", "color"]
+- ["6Lottie20StrokeNodePropertiesC", "dashPattern"]
+- ["6Lottie20StrokeNodePropertiesC", "dashPhase"]
+- ["6Lottie20StrokeNodePropertiesC", "deinit"]
+- ["6Lottie20StrokeNodePropertiesC", "init"]
+- ["6Lottie20StrokeNodePropertiesC", "keypathLayer"]
+- ["6Lottie20StrokeNodePropertiesC", "keypathName"]
+- ["6Lottie20StrokeNodePropertiesC", "keypathProperties"]
+- ["6Lottie20StrokeNodePropertiesC", "lineCap"]
+- ["6Lottie20StrokeNodePropertiesC", "lineJoin"]
+- ["6Lottie20StrokeNodePropertiesC", "miterLimit"]
+- ["6Lottie20StrokeNodePropertiesC", "opacity"]
+- ["6Lottie20StrokeNodePropertiesC", "properties"]
+- ["6Lottie20StrokeNodePropertiesC", "width"]
+- !private ["6Lottie14StrokeRendererC", "color"]
+- !private ["6Lottie14StrokeRendererC", "dashLengths"]
+- !private ["6Lottie14StrokeRendererC", "dashPhase"]
+- !private ["6Lottie14StrokeRendererC", "deinit"]
+- !private ["6Lottie14StrokeRendererC", "init"]
+- !private ["6Lottie14StrokeRendererC", "isEnabled"]
+- !private ["6Lottie14StrokeRendererC", "lineCap"]
+- !private ["6Lottie14StrokeRendererC", "lineJoin"]
+- !private ["6Lottie14StrokeRendererC", "miterLimit"]
+- !private ["6Lottie14StrokeRendererC", "opacity"]
+- !private ["6Lottie14StrokeRendererC", "width"]
+- !private ["6Lottie8Vector1DV", "cgFloatValue"]
+- ["6Lottie8Vector1DV", "deinit"]
+- !private ["6Lottie8Vector1DV", "init"]
+- !private ["s14_ArrayProtocolP", "append"]
+- !private ["s14_ArrayProtocolP", "count"]
+- !private ["s14_ArrayProtocolP", "init"]
+- !private ["s14_ArrayProtocolP", "map"]
+- !private ["s15_CVarArgAlignedP", "init"]
+- !private ["s22_CVarArgPassedAsDoubleP", "init"]
+- !private ["s24_DestructorSafeContainerP", "append"]
+- !private ["s24_DestructorSafeContainerP", "count"]
+- !private ["s24_DestructorSafeContainerP", "init"]
+- !private ["s24_DestructorSafeContainerP", "map"]
+- !private ["s19_HasContiguousBytesP", "append"]
+- !private ["s19_HasContiguousBytesP", "count"]
+- !private ["s19_HasContiguousBytesP", "init"]
+- !private ["s19_HasContiguousBytesP", "map"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "append"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "count"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "map"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "values"]
+- !private ["s21_ObjectiveCBridgeableP", "append"]
+- !private ["s21_ObjectiveCBridgeableP", "count"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "map"]
+- !private ["s21_ObjectiveCBridgeableP", "values"]
+depends-nominal:
+- !private "s18AdditiveArithmeticP"
+- "6Lottie12AnimatorNodeP"
+- !private "6Lottie15AnyNodePropertyP"
+- !private "6Lottie16AnyValueProviderP"
+- !private "Sa"
+- !private "SK"
+- !private "SB"
+- !private "12CoreGraphics7CGFloatV"
+- !private "s7CVarArgP"
+- !private "Sl"
+- !private "6Lottie5ColorV"
+- !private "SL"
+- !private "10Foundation15ContiguousBytesP"
+- !private "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- !private "s23CustomStringConvertibleP"
+- !private "6Lottie11DashElementV"
+- !private "6Lottie15DashElementTypeO"
+- !private "10Foundation12DataProtocolP"
+- !private "Se"
+- !private "SD"
+- !private "SE"
+- !private "SQ"
+- !private "s25ExpressibleByArrayLiteralP"
+- !private "s30ExpressibleByDictionaryLiteralP"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- !private "SF"
+- !private "6Lottie17GroupInterpolatorC"
+- !private "SH"
+- !private "6Lottie14InterpolatableP"
+- !private "6Lottie13KeyframeGroupC"
+- !private "6Lottie20KeyframeInterpolatorC"
+- "6Lottie17KeypathSearchableP"
+- !private "SM"
+- !private "10Foundation19MutableDataProtocolP"
+- !private "6Lottie10NodeOutputP"
+- !private "6Lottie12NodePropertyC"
+- "6Lottie15NodePropertyMapP"
+- !private "Sj"
+- !private "6Lottie21PassThroughOutputNodeC"
+- !private "Sk"
+- !private "Sm"
+- !private "SY"
+- "6Lottie10RenderNodeP"
+- !private "6Lottie10RenderableP"
+- !private "ST"
+- !private "6Lottie9ShapeItemC"
+- !private "s13SignedNumericP"
+- !private "6Lottie19SingleValueProviderC"
+- !private "Sx"
+- !private "6Lottie6StrokeC"
+- "6Lottie10StrokeNodeC"
+- "6Lottie20StrokeNodePropertiesC"
+- !private "6Lottie14StrokeRendererC"
+- "6Lottie8Vector1DV"
+- !private "s14_ArrayProtocolP"
+- !private "s15_CVarArgAlignedP"
+- !private "s22_CVarArgPassedAsDoubleP"
+- !private "s24_DestructorSafeContainerP"
+- !private "s19_HasContiguousBytesP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- !private "s21_ObjectiveCBridgeableP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "c34800dcaae7ae3b73b1d4e4faae94e5"

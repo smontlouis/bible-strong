@@ -1,0 +1,161 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "NodeOutput"
+- "AnimatorNode"
+provides-nominal:
+- "6Lottie10NodeOutputP"
+- "6Lottie12AnimatorNodeP"
+provides-member:
+- ["6Lottie10NodeOutputP", ""]
+- ["6Lottie12AnimatorNodeP", ""]
+- ["6Lottie12AnimatorNodeP", "shouldRebuildOutputs"]
+- ["6Lottie12AnimatorNodeP", "localUpdatesPermeateDownstream"]
+- ["6Lottie12AnimatorNodeP", "forceUpstreamOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "updateOutputs"]
+- ["6Lottie12AnimatorNodeP", "updateContents"]
+- ["6Lottie12AnimatorNodeP", "updateTree"]
+- ["6Lottie12AnimatorNodeP", "keypathName"]
+- ["6Lottie12AnimatorNodeP", "keypathProperties"]
+- ["6Lottie12AnimatorNodeP", "childKeypaths"]
+- ["6Lottie12AnimatorNodeP", "keypathLayer"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "!"
+- !private "!="
+- !private "&&"
+- !private "=="
+- !private "??"
+- "AnimatorNode"
+- "AnyNodeProperty"
+- "AnyObject"
+- "AssignmentPrecedence"
+- "Bool"
+- !private "BooleanLiteralType"
+- "CALayer"
+- "CGFloat"
+- "CGPath"
+- "KeypathSearchable"
+- "NodeOutput"
+- "NodePropertyMap"
+- "String"
+- "TernaryPrecedence"
+- !private "||"
+depends-member:
+- ["6Lottie12AnimatorNodeP", "AnimatorNode"]
+- ["6Lottie12AnimatorNodeP", "AnyNodeProperty"]
+- ["6Lottie12AnimatorNodeP", "Bool"]
+- ["6Lottie12AnimatorNodeP", "CALayer"]
+- ["6Lottie12AnimatorNodeP", "CGFloat"]
+- ["6Lottie12AnimatorNodeP", "KeypathSearchable"]
+- ["6Lottie12AnimatorNodeP", "NodeOutput"]
+- ["6Lottie12AnimatorNodeP", "NodePropertyMap"]
+- ["6Lottie12AnimatorNodeP", "String"]
+- ["6Lottie12AnimatorNodeP", "childKeypaths"]
+- ["6Lottie12AnimatorNodeP", "forceUpstreamOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "hasLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "hasUpstreamUpdates"]
+- ["6Lottie12AnimatorNodeP", "isEnabled"]
+- ["6Lottie12AnimatorNodeP", "keypathLayer"]
+- ["6Lottie12AnimatorNodeP", "keypathName"]
+- ["6Lottie12AnimatorNodeP", "keypathProperties"]
+- ["6Lottie12AnimatorNodeP", "lastUpdateFrame"]
+- ["6Lottie12AnimatorNodeP", "localUpdatesPermeateDownstream"]
+- ["6Lottie12AnimatorNodeP", "outputNode"]
+- ["6Lottie12AnimatorNodeP", "parentNode"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "propertyMap"]
+- ["6Lottie12AnimatorNodeP", "rebuildOutputs"]
+- ["6Lottie12AnimatorNodeP", "shouldRebuildOutputs"]
+- ["6Lottie12AnimatorNodeP", "updateContents"]
+- ["6Lottie12AnimatorNodeP", "updateOutputs"]
+- ["6Lottie12AnimatorNodeP", "updateTree"]
+- ["6Lottie17KeypathSearchableP", "AnimatorNode"]
+- ["6Lottie17KeypathSearchableP", "AnyNodeProperty"]
+- ["6Lottie17KeypathSearchableP", "Bool"]
+- ["6Lottie17KeypathSearchableP", "CALayer"]
+- ["6Lottie17KeypathSearchableP", "CGFloat"]
+- ["6Lottie17KeypathSearchableP", "KeypathSearchable"]
+- ["6Lottie17KeypathSearchableP", "NodeOutput"]
+- ["6Lottie17KeypathSearchableP", "NodePropertyMap"]
+- ["6Lottie17KeypathSearchableP", "String"]
+- ["6Lottie17KeypathSearchableP", ""]
+- !private ["6Lottie17KeypathSearchableP", "childKeypaths"]
+- ["6Lottie17KeypathSearchableP", "forceUpstreamOutputUpdates"]
+- ["6Lottie17KeypathSearchableP", "hasLocalUpdates"]
+- ["6Lottie17KeypathSearchableP", "hasUpstreamUpdates"]
+- ["6Lottie17KeypathSearchableP", "isEnabled"]
+- !private ["6Lottie17KeypathSearchableP", "keypathName"]
+- !private ["6Lottie17KeypathSearchableP", "keypathProperties"]
+- ["6Lottie17KeypathSearchableP", "lastUpdateFrame"]
+- ["6Lottie17KeypathSearchableP", "localUpdatesPermeateDownstream"]
+- !private ["6Lottie17KeypathSearchableP", "needsLocalUpdate"]
+- ["6Lottie17KeypathSearchableP", "outputNode"]
+- ["6Lottie17KeypathSearchableP", "parentNode"]
+- ["6Lottie17KeypathSearchableP", "performAdditionalLocalUpdates"]
+- ["6Lottie17KeypathSearchableP", "performAdditionalOutputUpdates"]
+- ["6Lottie17KeypathSearchableP", "propertyMap"]
+- ["6Lottie17KeypathSearchableP", "rebuildOutputs"]
+- ["6Lottie17KeypathSearchableP", "shouldRebuildOutputs"]
+- !private ["6Lottie17KeypathSearchableP", "updateContents"]
+- !private ["6Lottie17KeypathSearchableP", "updateNodeProperties"]
+- !private ["6Lottie17KeypathSearchableP", "updateOutputs"]
+- ["6Lottie10NodeOutputP", "Bool"]
+- ["6Lottie10NodeOutputP", "CGFloat"]
+- ["6Lottie10NodeOutputP", "CGPath"]
+- ["6Lottie10NodeOutputP", "NodeOutput"]
+- ["6Lottie10NodeOutputP", "hasOutputUpdates"]
+- ["6Lottie10NodeOutputP", "outputPath"]
+- ["6Lottie10NodeOutputP", "parent"]
+- !private ["6Lottie15NodePropertyMapP", "childKeypaths"]
+- !private ["6Lottie15NodePropertyMapP", "keypathName"]
+- !private ["6Lottie15NodePropertyMapP", "keypathProperties"]
+- !private ["6Lottie15NodePropertyMapP", "needsLocalUpdate"]
+- !private ["6Lottie15NodePropertyMapP", "updateNodeProperties"]
+depends-nominal:
+- "6Lottie12AnimatorNodeP"
+- "6Lottie17KeypathSearchableP"
+- "6Lottie10NodeOutputP"
+- !private "6Lottie15NodePropertyMapP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "85a4677404fa7bd8d877a2af50f111bd"

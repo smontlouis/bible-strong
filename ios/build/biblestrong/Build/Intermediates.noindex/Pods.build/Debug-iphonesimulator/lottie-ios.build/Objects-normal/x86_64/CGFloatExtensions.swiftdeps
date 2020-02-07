@@ -1,0 +1,501 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+provides-nominal:
+provides-member:
+- ["12CoreGraphics7CGFloatV", ""]
+- ["12CoreGraphics7CGFloatV", "isInRangeOrEqual"]
+- ["12CoreGraphics7CGFloatV", "isInRange"]
+- ["12CoreGraphics7CGFloatV", "squared"]
+- ["12CoreGraphics7CGFloatV", "cubed"]
+- ["12CoreGraphics7CGFloatV", "cubicRoot"]
+- ["12CoreGraphics7CGFloatV", "cubicBezierInterpolate"]
+- ["12CoreGraphics7CGFloatV", "cubicBezier"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "!"
+- !private "&&"
+- !private "*"
+- !private "+"
+- !private "-"
+- !private "/"
+- !private "/="
+- !private "<"
+- !private "<="
+- !private "=="
+- !private ">"
+- "AssignmentPrecedence"
+- "Bool"
+- "CGFloat"
+- "CGPoint"
+- !private "Double"
+- !private "FloatLiteralType"
+- !private "IntegerLiteralType"
+- "TernaryPrecedence"
+- !private "acos"
+- !private "cos"
+- !private "pow"
+- !private "sqrt"
+depends-member:
+- !private ["s18AdditiveArithmeticP", "CGFloat"]
+- !private ["s18AdditiveArithmeticP", "Double"]
+- !private ["s18AdditiveArithmeticP", "SolveCubic"]
+- !private ["s18AdditiveArithmeticP", "SolveQuadratic"]
+- !private ["s18AdditiveArithmeticP", "acos"]
+- !private ["s18AdditiveArithmeticP", "cos"]
+- !private ["s18AdditiveArithmeticP", "cubed"]
+- !private ["s18AdditiveArithmeticP", "cubicRoot"]
+- !private ["s18AdditiveArithmeticP", "init"]
+- !private ["s18AdditiveArithmeticP", "isInRangeOrEqual"]
+- !private ["s18AdditiveArithmeticP", "pi"]
+- !private ["s18AdditiveArithmeticP", "pow"]
+- !private ["s18AdditiveArithmeticP", "sqrt"]
+- !private ["s18AdditiveArithmeticP", "squared"]
+- !private ["SB", "CGFloat"]
+- !private ["SB", "Double"]
+- !private ["SB", "SolveCubic"]
+- !private ["SB", "SolveQuadratic"]
+- !private ["SB", "acos"]
+- !private ["SB", "cos"]
+- !private ["SB", "cubed"]
+- !private ["SB", "cubicRoot"]
+- !private ["SB", "init"]
+- !private ["SB", "isInRangeOrEqual"]
+- !private ["SB", "pi"]
+- !private ["SB", "pow"]
+- !private ["SB", "sqrt"]
+- !private ["SB", "squared"]
+- !private ["Sz", "pi"]
+- !private ["Sz", "squared"]
+- ["12CoreGraphics7CGFloatV", "Bool"]
+- ["12CoreGraphics7CGFloatV", "CGFloat"]
+- ["12CoreGraphics7CGFloatV", "CGPoint"]
+- !private ["12CoreGraphics7CGFloatV", "Double"]
+- !private ["12CoreGraphics7CGFloatV", "SolveCubic"]
+- !private ["12CoreGraphics7CGFloatV", "SolveQuadratic"]
+- !private ["12CoreGraphics7CGFloatV", "acos"]
+- !private ["12CoreGraphics7CGFloatV", "cos"]
+- ["12CoreGraphics7CGFloatV", "cubed"]
+- ["12CoreGraphics7CGFloatV", "cubicBezier"]
+- ["12CoreGraphics7CGFloatV", "cubicBezierInterpolate"]
+- ["12CoreGraphics7CGFloatV", "cubicRoot"]
+- !private ["12CoreGraphics7CGFloatV", "init"]
+- ["12CoreGraphics7CGFloatV", "isInRange"]
+- ["12CoreGraphics7CGFloatV", "isInRangeOrEqual"]
+- !private ["12CoreGraphics7CGFloatV", "pi"]
+- !private ["12CoreGraphics7CGFloatV", "pow"]
+- !private ["12CoreGraphics7CGFloatV", "sqrt"]
+- ["12CoreGraphics7CGFloatV", "squared"]
+- !private ["So7CGPointV", "x"]
+- !private ["So7CGPointV", "y"]
+- !private ["s7CVarArgP", "CGFloat"]
+- !private ["s7CVarArgP", "Double"]
+- !private ["s7CVarArgP", "SolveCubic"]
+- !private ["s7CVarArgP", "SolveQuadratic"]
+- !private ["s7CVarArgP", "acos"]
+- !private ["s7CVarArgP", "cos"]
+- !private ["s7CVarArgP", "cubed"]
+- !private ["s7CVarArgP", "cubicRoot"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "isInRangeOrEqual"]
+- !private ["s7CVarArgP", "pi"]
+- !private ["s7CVarArgP", "pow"]
+- !private ["s7CVarArgP", "sqrt"]
+- !private ["s7CVarArgP", "squared"]
+- !private ["SL", "CGFloat"]
+- !private ["SL", "Double"]
+- !private ["SL", "SolveCubic"]
+- !private ["SL", "SolveQuadratic"]
+- !private ["SL", "acos"]
+- !private ["SL", "cos"]
+- !private ["SL", "cubed"]
+- !private ["SL", "cubicRoot"]
+- !private ["SL", "init"]
+- !private ["SL", "isInRangeOrEqual"]
+- !private ["SL", "pi"]
+- !private ["SL", "pow"]
+- !private ["SL", "sqrt"]
+- !private ["SL", "squared"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "pi"]
+- !private ["s28CustomDebugStringConvertibleP", "x"]
+- !private ["s28CustomDebugStringConvertibleP", "y"]
+- !private ["s17CustomReflectableP", "CGFloat"]
+- !private ["s17CustomReflectableP", "Double"]
+- !private ["s17CustomReflectableP", "SolveCubic"]
+- !private ["s17CustomReflectableP", "SolveQuadratic"]
+- !private ["s17CustomReflectableP", "acos"]
+- !private ["s17CustomReflectableP", "cos"]
+- !private ["s17CustomReflectableP", "cubed"]
+- !private ["s17CustomReflectableP", "cubicRoot"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s17CustomReflectableP", "isInRangeOrEqual"]
+- !private ["s17CustomReflectableP", "pi"]
+- !private ["s17CustomReflectableP", "pow"]
+- !private ["s17CustomReflectableP", "sqrt"]
+- !private ["s17CustomReflectableP", "squared"]
+- !private ["s17CustomReflectableP", "x"]
+- !private ["s17CustomReflectableP", "y"]
+- !private ["s23CustomStringConvertibleP", "CGFloat"]
+- !private ["s23CustomStringConvertibleP", "Double"]
+- !private ["s23CustomStringConvertibleP", "SolveCubic"]
+- !private ["s23CustomStringConvertibleP", "SolveQuadratic"]
+- !private ["s23CustomStringConvertibleP", "acos"]
+- !private ["s23CustomStringConvertibleP", "cos"]
+- !private ["s23CustomStringConvertibleP", "cubed"]
+- !private ["s23CustomStringConvertibleP", "cubicRoot"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "isInRangeOrEqual"]
+- !private ["s23CustomStringConvertibleP", "pi"]
+- !private ["s23CustomStringConvertibleP", "pow"]
+- !private ["s23CustomStringConvertibleP", "sqrt"]
+- !private ["s23CustomStringConvertibleP", "squared"]
+- !private ["So9NSDecimala", "pi"]
+- !private ["Se", "CGFloat"]
+- !private ["Se", "Double"]
+- !private ["Se", "SolveCubic"]
+- !private ["Se", "SolveQuadratic"]
+- !private ["Se", "acos"]
+- !private ["Se", "cos"]
+- !private ["Se", "cubed"]
+- !private ["Se", "cubicRoot"]
+- !private ["Se", "init"]
+- !private ["Se", "isInRangeOrEqual"]
+- !private ["Se", "pi"]
+- !private ["Se", "pow"]
+- !private ["Se", "sqrt"]
+- !private ["Se", "squared"]
+- !private ["Se", "x"]
+- !private ["Se", "y"]
+- !private ["Sd", "init"]
+- !private ["Sd", "pi"]
+- !private ["SE", "CGFloat"]
+- !private ["SE", "Double"]
+- !private ["SE", "SolveCubic"]
+- !private ["SE", "SolveQuadratic"]
+- !private ["SE", "acos"]
+- !private ["SE", "cos"]
+- !private ["SE", "cubed"]
+- !private ["SE", "cubicRoot"]
+- !private ["SE", "init"]
+- !private ["SE", "isInRangeOrEqual"]
+- !private ["SE", "pi"]
+- !private ["SE", "pow"]
+- !private ["SE", "sqrt"]
+- !private ["SE", "squared"]
+- !private ["SE", "x"]
+- !private ["SE", "y"]
+- !private ["SQ", "CGFloat"]
+- !private ["SQ", "Double"]
+- !private ["SQ", "SolveCubic"]
+- !private ["SQ", "SolveQuadratic"]
+- !private ["SQ", "acos"]
+- !private ["SQ", "cos"]
+- !private ["SQ", "cubed"]
+- !private ["SQ", "cubicRoot"]
+- !private ["SQ", "init"]
+- !private ["SQ", "isInRangeOrEqual"]
+- !private ["SQ", "pi"]
+- !private ["SQ", "pow"]
+- !private ["SQ", "sqrt"]
+- !private ["SQ", "squared"]
+- !private ["SQ", "x"]
+- !private ["SQ", "y"]
+- !private ["s25ExpressibleByFloatLiteralP", "CGFloat"]
+- !private ["s25ExpressibleByFloatLiteralP", "Double"]
+- !private ["s25ExpressibleByFloatLiteralP", "SolveCubic"]
+- !private ["s25ExpressibleByFloatLiteralP", "SolveQuadratic"]
+- !private ["s25ExpressibleByFloatLiteralP", "acos"]
+- !private ["s25ExpressibleByFloatLiteralP", "cos"]
+- !private ["s25ExpressibleByFloatLiteralP", "cubed"]
+- !private ["s25ExpressibleByFloatLiteralP", "cubicRoot"]
+- !private ["s25ExpressibleByFloatLiteralP", "init"]
+- !private ["s25ExpressibleByFloatLiteralP", "isInRangeOrEqual"]
+- !private ["s25ExpressibleByFloatLiteralP", "pi"]
+- !private ["s25ExpressibleByFloatLiteralP", "pow"]
+- !private ["s25ExpressibleByFloatLiteralP", "sqrt"]
+- !private ["s25ExpressibleByFloatLiteralP", "squared"]
+- !private ["s27ExpressibleByIntegerLiteralP", "CGFloat"]
+- !private ["s27ExpressibleByIntegerLiteralP", "Double"]
+- !private ["s27ExpressibleByIntegerLiteralP", "SolveCubic"]
+- !private ["s27ExpressibleByIntegerLiteralP", "SolveQuadratic"]
+- !private ["s27ExpressibleByIntegerLiteralP", "acos"]
+- !private ["s27ExpressibleByIntegerLiteralP", "cos"]
+- !private ["s27ExpressibleByIntegerLiteralP", "cubed"]
+- !private ["s27ExpressibleByIntegerLiteralP", "cubicRoot"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "isInRangeOrEqual"]
+- !private ["s27ExpressibleByIntegerLiteralP", "pi"]
+- !private ["s27ExpressibleByIntegerLiteralP", "pow"]
+- !private ["s27ExpressibleByIntegerLiteralP", "sqrt"]
+- !private ["s27ExpressibleByIntegerLiteralP", "squared"]
+- !private ["s17FixedWidthIntegerP", "pi"]
+- !private ["s17FixedWidthIntegerP", "squared"]
+- !private ["Sf", "pi"]
+- !private ["s7Float80V", "pi"]
+- !private ["SF", "CGFloat"]
+- !private ["SF", "Double"]
+- !private ["SF", "SolveCubic"]
+- !private ["SF", "SolveQuadratic"]
+- !private ["SF", "acos"]
+- !private ["SF", "cos"]
+- !private ["SF", "cubed"]
+- !private ["SF", "cubicRoot"]
+- !private ["SF", "init"]
+- !private ["SF", "isInRangeOrEqual"]
+- !private ["SF", "pi"]
+- !private ["SF", "pow"]
+- !private ["SF", "sqrt"]
+- !private ["SF", "squared"]
+- !private ["SH", "CGFloat"]
+- !private ["SH", "Double"]
+- !private ["SH", "SolveCubic"]
+- !private ["SH", "SolveQuadratic"]
+- !private ["SH", "acos"]
+- !private ["SH", "cos"]
+- !private ["SH", "cubed"]
+- !private ["SH", "cubicRoot"]
+- !private ["SH", "init"]
+- !private ["SH", "isInRangeOrEqual"]
+- !private ["SH", "pi"]
+- !private ["SH", "pow"]
+- !private ["SH", "sqrt"]
+- !private ["SH", "squared"]
+- !private ["Si", "pi"]
+- !private ["Si", "squared"]
+- !private ["s5Int16V", "pi"]
+- !private ["s5Int32V", "pi"]
+- !private ["s5Int64V", "pi"]
+- !private ["s4Int8V", "pi"]
+- !private ["6Lottie14InterpolatableP", "CGFloat"]
+- !private ["6Lottie14InterpolatableP", "Double"]
+- !private ["6Lottie14InterpolatableP", "SolveCubic"]
+- !private ["6Lottie14InterpolatableP", "SolveQuadratic"]
+- !private ["6Lottie14InterpolatableP", "acos"]
+- !private ["6Lottie14InterpolatableP", "cos"]
+- !private ["6Lottie14InterpolatableP", "cubed"]
+- !private ["6Lottie14InterpolatableP", "cubicRoot"]
+- !private ["6Lottie14InterpolatableP", "init"]
+- !private ["6Lottie14InterpolatableP", "isInRangeOrEqual"]
+- !private ["6Lottie14InterpolatableP", "pi"]
+- !private ["6Lottie14InterpolatableP", "pow"]
+- !private ["6Lottie14InterpolatableP", "sqrt"]
+- !private ["6Lottie14InterpolatableP", "squared"]
+- !private ["6Lottie14InterpolatableP", "x"]
+- !private ["6Lottie14InterpolatableP", "y"]
+- !private ["s25LosslessStringConvertibleP", "init"]
+- !private ["s25LosslessStringConvertibleP", "pi"]
+- !private ["s25LosslessStringConvertibleP", "squared"]
+- !private ["s10MirrorPathP", "pi"]
+- !private ["s10MirrorPathP", "squared"]
+- !private ["Sj", "CGFloat"]
+- !private ["Sj", "Double"]
+- !private ["Sj", "SolveCubic"]
+- !private ["Sj", "SolveQuadratic"]
+- !private ["Sj", "acos"]
+- !private ["Sj", "cos"]
+- !private ["Sj", "cubed"]
+- !private ["Sj", "cubicRoot"]
+- !private ["Sj", "init"]
+- !private ["Sj", "isInRangeOrEqual"]
+- !private ["Sj", "pi"]
+- !private ["Sj", "pow"]
+- !private ["Sj", "sqrt"]
+- !private ["Sj", "squared"]
+- !private ["s10SIMDScalarP", "init"]
+- !private ["s10SIMDScalarP", "pi"]
+- !private ["s10SIMDScalarP", "squared"]
+- !private ["7Combine32SchedulerTimeIntervalConvertibleP", "pi"]
+- !private ["SZ", "pi"]
+- !private ["SZ", "squared"]
+- !private ["s13SignedNumericP", "CGFloat"]
+- !private ["s13SignedNumericP", "Double"]
+- !private ["s13SignedNumericP", "SolveCubic"]
+- !private ["s13SignedNumericP", "SolveQuadratic"]
+- !private ["s13SignedNumericP", "acos"]
+- !private ["s13SignedNumericP", "cos"]
+- !private ["s13SignedNumericP", "cubed"]
+- !private ["s13SignedNumericP", "cubicRoot"]
+- !private ["s13SignedNumericP", "init"]
+- !private ["s13SignedNumericP", "isInRangeOrEqual"]
+- !private ["s13SignedNumericP", "pi"]
+- !private ["s13SignedNumericP", "pow"]
+- !private ["s13SignedNumericP", "sqrt"]
+- !private ["s13SignedNumericP", "squared"]
+- !private ["So16NSOperationQueueC10FoundationE17SchedulerTimeTypeV6StrideV", "pi"]
+- !private ["So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV", "pi"]
+- !private ["So9NSRunLoopC10FoundationE17SchedulerTimeTypeV6StrideV", "pi"]
+- !private ["Sx", "CGFloat"]
+- !private ["Sx", "Double"]
+- !private ["Sx", "SolveCubic"]
+- !private ["Sx", "SolveQuadratic"]
+- !private ["Sx", "acos"]
+- !private ["Sx", "cos"]
+- !private ["Sx", "cubed"]
+- !private ["Sx", "cubicRoot"]
+- !private ["Sx", "init"]
+- !private ["Sx", "isInRangeOrEqual"]
+- !private ["Sx", "pi"]
+- !private ["Sx", "pow"]
+- !private ["Sx", "sqrt"]
+- !private ["Sx", "squared"]
+- !private ["s20TextOutputStreamableP", "init"]
+- !private ["s20TextOutputStreamableP", "pi"]
+- !private ["Su", "pi"]
+- !private ["s6UInt16V", "pi"]
+- !private ["s6UInt32V", "pi"]
+- !private ["s6UInt64V", "pi"]
+- !private ["s5UInt8V", "pi"]
+- !private ["SU", "pi"]
+- !private ["s15_CVarArgAlignedP", "CGFloat"]
+- !private ["s15_CVarArgAlignedP", "Double"]
+- !private ["s15_CVarArgAlignedP", "SolveCubic"]
+- !private ["s15_CVarArgAlignedP", "SolveQuadratic"]
+- !private ["s15_CVarArgAlignedP", "acos"]
+- !private ["s15_CVarArgAlignedP", "cos"]
+- !private ["s15_CVarArgAlignedP", "cubed"]
+- !private ["s15_CVarArgAlignedP", "cubicRoot"]
+- !private ["s15_CVarArgAlignedP", "init"]
+- !private ["s15_CVarArgAlignedP", "isInRangeOrEqual"]
+- !private ["s15_CVarArgAlignedP", "pi"]
+- !private ["s15_CVarArgAlignedP", "pow"]
+- !private ["s15_CVarArgAlignedP", "sqrt"]
+- !private ["s15_CVarArgAlignedP", "squared"]
+- !private ["s22_CVarArgPassedAsDoubleP", "CGFloat"]
+- !private ["s22_CVarArgPassedAsDoubleP", "Double"]
+- !private ["s22_CVarArgPassedAsDoubleP", "SolveCubic"]
+- !private ["s22_CVarArgPassedAsDoubleP", "SolveQuadratic"]
+- !private ["s22_CVarArgPassedAsDoubleP", "acos"]
+- !private ["s22_CVarArgPassedAsDoubleP", "cos"]
+- !private ["s22_CVarArgPassedAsDoubleP", "cubed"]
+- !private ["s22_CVarArgPassedAsDoubleP", "cubicRoot"]
+- !private ["s22_CVarArgPassedAsDoubleP", "init"]
+- !private ["s22_CVarArgPassedAsDoubleP", "isInRangeOrEqual"]
+- !private ["s22_CVarArgPassedAsDoubleP", "pi"]
+- !private ["s22_CVarArgPassedAsDoubleP", "pow"]
+- !private ["s22_CVarArgPassedAsDoubleP", "sqrt"]
+- !private ["s22_CVarArgPassedAsDoubleP", "squared"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "pi"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "squared"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "x"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "y"]
+- !private ["s33_ExpressibleByBuiltinFloatLiteralP", "init"]
+- !private ["s33_ExpressibleByBuiltinFloatLiteralP", "pi"]
+- !private ["s35_ExpressibleByBuiltinIntegerLiteralP", "init"]
+- !private ["s35_ExpressibleByBuiltinIntegerLiteralP", "pi"]
+- !private ["s35_ExpressibleByBuiltinIntegerLiteralP", "squared"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "pi"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "squared"]
+- !private ["s21_ObjectiveCBridgeableP", "CGFloat"]
+- !private ["s21_ObjectiveCBridgeableP", "Double"]
+- !private ["s21_ObjectiveCBridgeableP", "SolveCubic"]
+- !private ["s21_ObjectiveCBridgeableP", "SolveQuadratic"]
+- !private ["s21_ObjectiveCBridgeableP", "acos"]
+- !private ["s21_ObjectiveCBridgeableP", "cos"]
+- !private ["s21_ObjectiveCBridgeableP", "cubed"]
+- !private ["s21_ObjectiveCBridgeableP", "cubicRoot"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "isInRangeOrEqual"]
+- !private ["s21_ObjectiveCBridgeableP", "pi"]
+- !private ["s21_ObjectiveCBridgeableP", "pow"]
+- !private ["s21_ObjectiveCBridgeableP", "sqrt"]
+- !private ["s21_ObjectiveCBridgeableP", "squared"]
+- !private ["s21_ObjectiveCBridgeableP", "x"]
+- !private ["s21_ObjectiveCBridgeableP", "y"]
+- !private ["s14_StringElementP", "pi"]
+depends-nominal:
+- !private "s18AdditiveArithmeticP"
+- !private "SB"
+- !private "Sz"
+- "12CoreGraphics7CGFloatV"
+- !private "So7CGPointV"
+- !private "s7CVarArgP"
+- !private "SL"
+- !private "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- !private "s23CustomStringConvertibleP"
+- !private "So9NSDecimala"
+- !private "Se"
+- !private "Sd"
+- !private "SE"
+- !private "SQ"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- !private "s17FixedWidthIntegerP"
+- !private "Sf"
+- !private "s7Float80V"
+- !private "SF"
+- !private "SH"
+- !private "Si"
+- !private "s5Int16V"
+- !private "s5Int32V"
+- !private "s5Int64V"
+- !private "s4Int8V"
+- !private "6Lottie14InterpolatableP"
+- !private "s25LosslessStringConvertibleP"
+- !private "s10MirrorPathP"
+- !private "Sj"
+- !private "s10SIMDScalarP"
+- !private "7Combine32SchedulerTimeIntervalConvertibleP"
+- !private "SZ"
+- !private "s13SignedNumericP"
+- !private "So16NSOperationQueueC10FoundationE17SchedulerTimeTypeV6StrideV"
+- !private "So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV"
+- !private "So9NSRunLoopC10FoundationE17SchedulerTimeTypeV6StrideV"
+- !private "Sx"
+- !private "s20TextOutputStreamableP"
+- !private "Su"
+- !private "s6UInt16V"
+- !private "s6UInt32V"
+- !private "s6UInt64V"
+- !private "s5UInt8V"
+- !private "SU"
+- !private "s15_CVarArgAlignedP"
+- !private "s22_CVarArgPassedAsDoubleP"
+- !private "s30_CustomPlaygroundQuickLookableP"
+- !private "s33_ExpressibleByBuiltinFloatLiteralP"
+- !private "s35_ExpressibleByBuiltinIntegerLiteralP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- !private "s21_ObjectiveCBridgeableP"
+- !private "s14_StringElementP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "6927cfda01d051243a95f6584d4b676b"

@@ -1,0 +1,6 @@
+module Pods_biblestrong {
+  umbrella header "Pods-biblestrong-umbrella.h"
+
+  export *
+  module * { export * }
+}

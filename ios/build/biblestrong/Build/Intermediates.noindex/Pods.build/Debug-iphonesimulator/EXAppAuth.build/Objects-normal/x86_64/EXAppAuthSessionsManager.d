@@ -1,0 +1,38 @@
+dependencies: \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/expo-app-auth/ios/EXAppAuth/EXAppAuthSessionsManager.m \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Target\ Support\ Files/EXAppAuth/EXAppAuth-prefix.pch \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/expo-app-auth/ios/EXAppAuth/EXAppAuthSessionsManager.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMSingletonModule.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/AppAuth.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthState.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthStateChangeDelegate.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthStateErrorDelegate.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthorizationRequest.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDExternalUserAgentRequest.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDResponseTypes.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDScopes.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthorizationResponse.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthorizationService.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDError.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDErrorUtilities.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDExternalUserAgent.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDExternalUserAgentSession.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDGrantTypes.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDIDToken.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDRegistrationRequest.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDRegistrationResponse.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDScopeUtilities.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDServiceConfiguration.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDServiceDiscovery.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDTokenRequest.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDTokenResponse.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDTokenUtilities.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDURLSessionProvider.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDEndSessionRequest.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDEndSessionResponse.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthState+IOS.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDAuthorizationService+IOS.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDExternalUserAgentIOS.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDExternalUserAgentIOSCustomBrowser.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/AppAuth/OIDExternalUserAgentCatalyst.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMDefines.h

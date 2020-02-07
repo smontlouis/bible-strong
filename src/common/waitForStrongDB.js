@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-import { Asset } from 'expo-asset'
 import SnackBar from '~common/SnackBar'
 
 import { strongDB } from '~helpers/database'
@@ -10,6 +9,8 @@ import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
 import { timeout } from '~helpers/timeout'
+
+// const RNFS = require('react-native-fs')
 
 const STRONG_FILE_SIZE = 34941952
 
@@ -21,7 +22,9 @@ export const useWaitForDatabase = () => {
     dispatch
   ] = useDBStateValue()
 
-  const strongDatabaseHash = useSelector(state => state.bible.strongDatabaseHash)
+  const strongDatabaseHash = useSelector(
+    state => state.bible.strongDatabaseHash
+  )
 
   useEffect(() => {
     if (strongDB.get()) {
@@ -38,17 +41,15 @@ export const useWaitForDatabase = () => {
         const dbPath = `${sqliteDirPath}/strong.sqlite`
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
-        // if (__DEV__) {
-        //   if (dbFile.exists) {
-        //     FileSystem.deleteAsync(dbFile.uri)
-        //     dbFile = await FileSystem.getInfoAsync(dbPath)
-        //   }
-        // }
+        // TODO - DO THE SAME FOR ANDROID
+        const sqliteDB = await FileSystem.getInfoAsync(
+          `${FileSystem.bundleDirectory}/www/strong.sqlite`
+        )
 
-        const sqliteDB = await Asset.fromModule(require('~assets/db/strong.sqlite'))
+        console.log(sqliteDB)
 
         if (!dbFile.exists) {
-          if (sqliteDB.localUri && !window.strongDownloadHasStarted) {
+          if (sqliteDB.uri && !window.strongDownloadHasStarted) {
             window.strongDownloadHasStarted = true
 
             if (!sqliteDir.exists) {
@@ -58,7 +59,7 @@ export const useWaitForDatabase = () => {
             }
 
             await FileSystem.copyAsync({
-              from: sqliteDB.localUri,
+              from: sqliteDB.uri,
               to: dbPath
             })
 
@@ -98,7 +99,8 @@ export const useWaitForDatabase = () => {
                   null,
                   ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
                     const idxProgress =
-                      Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+                      Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
+                      100
                     dispatch({
                       type: 'strong.setProgress',
                       payload: idxProgress
@@ -150,7 +152,13 @@ export const useWaitForDatabase = () => {
       payload: value
     })
 
-  return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
+  return {
+    isLoading,
+    progress,
+    proposeDownload,
+    startDownload,
+    setStartDownload
+  }
 }
 
 const waitForDatabase = WrappedComponent => props => {

@@ -1,0 +1,459 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "LineCap"
+- "LineJoin"
+- "GradientStroke"
+provides-nominal:
+- "6Lottie7LineCapO"
+- "6Lottie8LineJoinO"
+- "6Lottie14GradientStrokeC"
+provides-member:
+- ["6Lottie7LineCapO", ""]
+- ["6Lottie8LineJoinO", ""]
+- ["6Lottie14GradientStrokeC", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "=="
+- !private "??"
+- "AssignmentPrecedence"
+- "Codable"
+- "CodingKey"
+- "DashElement"
+- "Decoder"
+- "Double"
+- "Encoder"
+- "FloatLiteralType"
+- "GradientStroke"
+- "GradientType"
+- "Int"
+- "IntegerLiteralType"
+- "KeyframeGroup"
+- "LineCap"
+- "LineJoin"
+- "ShapeItem"
+- "String"
+- "StringLiteralType"
+- "UnicodeScalarType"
+- "Vector1D"
+- "Vector3D"
+- !private "_findStringSwitchCase"
+- !private "~="
+depends-member:
+- ["Sa", "deinit"]
+- ["s9CodingKeyP", "=="]
+- ["s9CodingKeyP", "RawValue"]
+- !private ["s9CodingKeyP", ""]
+- ["s9CodingKeyP", "_Default_RawValue"]
+- !private ["s9CodingKeyP", "_findStringSwitchCase"]
+- ["s9CodingKeyP", "_rawHashValue"]
+- !private ["s9CodingKeyP", "colors"]
+- !private ["s9CodingKeyP", "dashPattern"]
+- ["s9CodingKeyP", "debugDescription"]
+- ["s9CodingKeyP", "description"]
+- !private ["s9CodingKeyP", "endPoint"]
+- !private ["s9CodingKeyP", "gradientType"]
+- ["s9CodingKeyP", "hash"]
+- ["s9CodingKeyP", "hashValue"]
+- !private ["s9CodingKeyP", "highlightAngle"]
+- !private ["s9CodingKeyP", "highlightLength"]
+- ["s9CodingKeyP", "init"]
+- ["s9CodingKeyP", "intValue"]
+- !private ["s9CodingKeyP", "lineCap"]
+- !private ["s9CodingKeyP", "lineJoin"]
+- !private ["s9CodingKeyP", "miterLimit"]
+- !private ["s9CodingKeyP", "numberOfColors"]
+- !private ["s9CodingKeyP", "opacity"]
+- ["s9CodingKeyP", "rawValue"]
+- !private ["s9CodingKeyP", "startPoint"]
+- ["s9CodingKeyP", "stringValue"]
+- !private ["s9CodingKeyP", "width"]
+- ["s28CustomDebugStringConvertibleP", "=="]
+- ["s28CustomDebugStringConvertibleP", "RawValue"]
+- !private ["s28CustomDebugStringConvertibleP", ""]
+- ["s28CustomDebugStringConvertibleP", "_Default_RawValue"]
+- !private ["s28CustomDebugStringConvertibleP", "_findStringSwitchCase"]
+- ["s28CustomDebugStringConvertibleP", "_rawHashValue"]
+- !private ["s28CustomDebugStringConvertibleP", "colors"]
+- !private ["s28CustomDebugStringConvertibleP", "dashPattern"]
+- ["s28CustomDebugStringConvertibleP", "debugDescription"]
+- ["s28CustomDebugStringConvertibleP", "description"]
+- !private ["s28CustomDebugStringConvertibleP", "endPoint"]
+- !private ["s28CustomDebugStringConvertibleP", "gradientType"]
+- ["s28CustomDebugStringConvertibleP", "hash"]
+- ["s28CustomDebugStringConvertibleP", "hashValue"]
+- !private ["s28CustomDebugStringConvertibleP", "highlightAngle"]
+- !private ["s28CustomDebugStringConvertibleP", "highlightLength"]
+- ["s28CustomDebugStringConvertibleP", "init"]
+- ["s28CustomDebugStringConvertibleP", "intValue"]
+- !private ["s28CustomDebugStringConvertibleP", "lineCap"]
+- !private ["s28CustomDebugStringConvertibleP", "lineJoin"]
+- !private ["s28CustomDebugStringConvertibleP", "miterLimit"]
+- !private ["s28CustomDebugStringConvertibleP", "numberOfColors"]
+- !private ["s28CustomDebugStringConvertibleP", "opacity"]
+- ["s28CustomDebugStringConvertibleP", "rawValue"]
+- !private ["s28CustomDebugStringConvertibleP", "startPoint"]
+- ["s28CustomDebugStringConvertibleP", "stringValue"]
+- !private ["s28CustomDebugStringConvertibleP", "width"]
+- ["s23CustomStringConvertibleP", "=="]
+- ["s23CustomStringConvertibleP", "RawValue"]
+- !private ["s23CustomStringConvertibleP", ""]
+- ["s23CustomStringConvertibleP", "_Default_RawValue"]
+- !private ["s23CustomStringConvertibleP", "_findStringSwitchCase"]
+- ["s23CustomStringConvertibleP", "_rawHashValue"]
+- !private ["s23CustomStringConvertibleP", "colors"]
+- !private ["s23CustomStringConvertibleP", "dashPattern"]
+- ["s23CustomStringConvertibleP", "debugDescription"]
+- ["s23CustomStringConvertibleP", "description"]
+- !private ["s23CustomStringConvertibleP", "endPoint"]
+- !private ["s23CustomStringConvertibleP", "gradientType"]
+- ["s23CustomStringConvertibleP", "hash"]
+- ["s23CustomStringConvertibleP", "hashValue"]
+- !private ["s23CustomStringConvertibleP", "highlightAngle"]
+- !private ["s23CustomStringConvertibleP", "highlightLength"]
+- ["s23CustomStringConvertibleP", "init"]
+- ["s23CustomStringConvertibleP", "intValue"]
+- !private ["s23CustomStringConvertibleP", "lineCap"]
+- !private ["s23CustomStringConvertibleP", "lineJoin"]
+- !private ["s23CustomStringConvertibleP", "miterLimit"]
+- !private ["s23CustomStringConvertibleP", "numberOfColors"]
+- !private ["s23CustomStringConvertibleP", "opacity"]
+- ["s23CustomStringConvertibleP", "rawValue"]
+- !private ["s23CustomStringConvertibleP", "startPoint"]
+- ["s23CustomStringConvertibleP", "stringValue"]
+- !private ["s23CustomStringConvertibleP", "width"]
+- !private ["6Lottie11DashElementV", "deinit"]
+- ["Se", "=="]
+- !private ["Se", "CodingKeys"]
+- !private ["Se", "DashElement"]
+- !private ["Se", "Double"]
+- !private ["Se", "GradientDataKeys"]
+- !private ["Se", "GradientStroke"]
+- !private ["Se", "GradientType"]
+- !private ["Se", "Int"]
+- !private ["Se", "KeyframeGroup"]
+- !private ["Se", "LineCap"]
+- !private ["Se", "LineJoin"]
+- ["Se", "RawValue"]
+- ["Se", ""]
+- ["Se", "_Default_RawValue"]
+- !private ["Se", "_findStringSwitchCase"]
+- ["Se", "_rawHashValue"]
+- !private ["Se", "colors"]
+- !private ["Se", "dashPattern"]
+- ["Se", "encode"]
+- !private ["Se", "endPoint"]
+- !private ["Se", "gradientType"]
+- ["Se", "hash"]
+- ["Se", "hashValue"]
+- !private ["Se", "highlightAngle"]
+- !private ["Se", "highlightLength"]
+- ["Se", "init"]
+- !private ["Se", "lineCap"]
+- !private ["Se", "lineJoin"]
+- !private ["Se", "miterLimit"]
+- !private ["Se", "numberOfColors"]
+- !private ["Se", "opacity"]
+- ["Se", "rawValue"]
+- !private ["Se", "round"]
+- !private ["Se", "startPoint"]
+- !private ["Se", "width"]
+- !private ["s7DecoderP", "container"]
+- ["SE", "=="]
+- !private ["SE", "CodingKeys"]
+- !private ["SE", "DashElement"]
+- !private ["SE", "Double"]
+- !private ["SE", "GradientDataKeys"]
+- !private ["SE", "GradientStroke"]
+- !private ["SE", "GradientType"]
+- !private ["SE", "Int"]
+- !private ["SE", "KeyframeGroup"]
+- !private ["SE", "LineCap"]
+- !private ["SE", "LineJoin"]
+- ["SE", "RawValue"]
+- ["SE", ""]
+- ["SE", "_Default_RawValue"]
+- !private ["SE", "_findStringSwitchCase"]
+- ["SE", "_rawHashValue"]
+- !private ["SE", "colors"]
+- !private ["SE", "dashPattern"]
+- ["SE", "encode"]
+- !private ["SE", "endPoint"]
+- !private ["SE", "gradientType"]
+- ["SE", "hash"]
+- ["SE", "hashValue"]
+- !private ["SE", "highlightAngle"]
+- !private ["SE", "highlightLength"]
+- ["SE", "init"]
+- !private ["SE", "lineCap"]
+- !private ["SE", "lineJoin"]
+- !private ["SE", "miterLimit"]
+- !private ["SE", "numberOfColors"]
+- !private ["SE", "opacity"]
+- ["SE", "rawValue"]
+- !private ["SE", "round"]
+- !private ["SE", "startPoint"]
+- !private ["SE", "width"]
+- !private ["s7EncoderP", "container"]
+- ["SQ", "=="]
+- ["SQ", "RawValue"]
+- ["SQ", ""]
+- ["SQ", "_Default_RawValue"]
+- !private ["SQ", "_findStringSwitchCase"]
+- ["SQ", "_rawHashValue"]
+- !private ["SQ", "colors"]
+- !private ["SQ", "dashPattern"]
+- ["SQ", "debugDescription"]
+- ["SQ", "description"]
+- ["SQ", "encode"]
+- !private ["SQ", "endPoint"]
+- !private ["SQ", "gradientType"]
+- ["SQ", "hash"]
+- ["SQ", "hashValue"]
+- !private ["SQ", "highlightAngle"]
+- !private ["SQ", "highlightLength"]
+- ["SQ", "init"]
+- ["SQ", "intValue"]
+- !private ["SQ", "lineCap"]
+- !private ["SQ", "lineJoin"]
+- !private ["SQ", "miterLimit"]
+- !private ["SQ", "numberOfColors"]
+- !private ["SQ", "opacity"]
+- ["SQ", "rawValue"]
+- !private ["SQ", "round"]
+- !private ["SQ", "startPoint"]
+- ["SQ", "stringValue"]
+- !private ["SQ", "width"]
+- ["6Lottie14GradientStrokeC", "CodingKey"]
+- !private ["6Lottie14GradientStrokeC", "CodingKeys"]
+- ["6Lottie14GradientStrokeC", "DashElement"]
+- ["6Lottie14GradientStrokeC", "Decoder"]
+- ["6Lottie14GradientStrokeC", "Double"]
+- ["6Lottie14GradientStrokeC", "Encoder"]
+- !private ["6Lottie14GradientStrokeC", "GradientDataKeys"]
+- !private ["6Lottie14GradientStrokeC", "GradientStroke"]
+- ["6Lottie14GradientStrokeC", "GradientType"]
+- ["6Lottie14GradientStrokeC", "Int"]
+- ["6Lottie14GradientStrokeC", "KeyframeGroup"]
+- ["6Lottie14GradientStrokeC", "LineCap"]
+- ["6Lottie14GradientStrokeC", "LineJoin"]
+- ["6Lottie14GradientStrokeC", "String"]
+- ["6Lottie14GradientStrokeC", "Vector1D"]
+- ["6Lottie14GradientStrokeC", "Vector3D"]
+- !private ["6Lottie14GradientStrokeC", "_findStringSwitchCase"]
+- ["6Lottie14GradientStrokeC", "colors"]
+- ["6Lottie14GradientStrokeC", "dashPattern"]
+- ["6Lottie14GradientStrokeC", "deinit"]
+- ["6Lottie14GradientStrokeC", "encode"]
+- ["6Lottie14GradientStrokeC", "endPoint"]
+- ["6Lottie14GradientStrokeC", "gradientType"]
+- ["6Lottie14GradientStrokeC", "highlightAngle"]
+- ["6Lottie14GradientStrokeC", "highlightLength"]
+- ["6Lottie14GradientStrokeC", "init"]
+- ["6Lottie14GradientStrokeC", "lineCap"]
+- ["6Lottie14GradientStrokeC", "lineJoin"]
+- ["6Lottie14GradientStrokeC", "miterLimit"]
+- ["6Lottie14GradientStrokeC", "numberOfColors"]
+- ["6Lottie14GradientStrokeC", "opacity"]
+- ["6Lottie14GradientStrokeC", "startPoint"]
+- ["6Lottie14GradientStrokeC", "width"]
+- !private ["6Lottie12GradientTypeO", "deinit"]
+- ["SH", "=="]
+- ["SH", "RawValue"]
+- ["SH", ""]
+- ["SH", "_Default_RawValue"]
+- !private ["SH", "_findStringSwitchCase"]
+- ["SH", "_rawHashValue"]
+- !private ["SH", "colors"]
+- !private ["SH", "dashPattern"]
+- ["SH", "debugDescription"]
+- ["SH", "description"]
+- ["SH", "encode"]
+- !private ["SH", "endPoint"]
+- !private ["SH", "gradientType"]
+- ["SH", "hash"]
+- ["SH", "hashValue"]
+- !private ["SH", "highlightAngle"]
+- !private ["SH", "highlightLength"]
+- ["SH", "init"]
+- ["SH", "intValue"]
+- !private ["SH", "lineCap"]
+- !private ["SH", "lineJoin"]
+- !private ["SH", "miterLimit"]
+- !private ["SH", "numberOfColors"]
+- !private ["SH", "opacity"]
+- ["SH", "rawValue"]
+- !private ["SH", "round"]
+- !private ["SH", "startPoint"]
+- ["SH", "stringValue"]
+- !private ["SH", "width"]
+- !private ["s22KeyedDecodingContainerV", "decode"]
+- !private ["s22KeyedDecodingContainerV", "decodeIfPresent"]
+- !private ["s22KeyedDecodingContainerV", "nestedContainer"]
+- !private ["s30KeyedDecodingContainerProtocolP", "decode"]
+- !private ["s30KeyedDecodingContainerProtocolP", "decodeIfPresent"]
+- !private ["s30KeyedDecodingContainerProtocolP", "nestedContainer"]
+- !private ["s22KeyedEncodingContainerV", "encode"]
+- !private ["s22KeyedEncodingContainerV", "encodeIfPresent"]
+- !private ["s22KeyedEncodingContainerV", "nestedContainer"]
+- !private ["s30KeyedEncodingContainerProtocolP", "encode"]
+- !private ["s30KeyedEncodingContainerProtocolP", "encodeIfPresent"]
+- !private ["s30KeyedEncodingContainerProtocolP", "nestedContainer"]
+- !private ["6Lottie13KeyframeGroupC", "deinit"]
+- ["6Lottie7LineCapO", "=="]
+- ["6Lottie7LineCapO", "RawValue"]
+- ["6Lottie7LineCapO", "_Default_RawValue"]
+- ["6Lottie7LineCapO", "_rawHashValue"]
+- ["6Lottie7LineCapO", "butt"]
+- ["6Lottie7LineCapO", "deinit"]
+- ["6Lottie7LineCapO", "encode"]
+- ["6Lottie7LineCapO", "hash"]
+- ["6Lottie7LineCapO", "hashValue"]
+- ["6Lottie7LineCapO", "init"]
+- ["6Lottie7LineCapO", "none"]
+- ["6Lottie7LineCapO", "rawValue"]
+- ["6Lottie7LineCapO", "round"]
+- ["6Lottie7LineCapO", "square"]
+- ["6Lottie8LineJoinO", "=="]
+- ["6Lottie8LineJoinO", "RawValue"]
+- ["6Lottie8LineJoinO", "_Default_RawValue"]
+- ["6Lottie8LineJoinO", "_rawHashValue"]
+- ["6Lottie8LineJoinO", "bevel"]
+- ["6Lottie8LineJoinO", "deinit"]
+- ["6Lottie8LineJoinO", "encode"]
+- ["6Lottie8LineJoinO", "hash"]
+- ["6Lottie8LineJoinO", "hashValue"]
+- ["6Lottie8LineJoinO", "init"]
+- ["6Lottie8LineJoinO", "miter"]
+- ["6Lottie8LineJoinO", "none"]
+- ["6Lottie8LineJoinO", "rawValue"]
+- ["6Lottie8LineJoinO", "round"]
+- ["SY", "=="]
+- ["SY", "RawValue"]
+- ["SY", ""]
+- ["SY", "_Default_RawValue"]
+- !private ["SY", "_findStringSwitchCase"]
+- ["SY", "_rawHashValue"]
+- !private ["SY", "colors"]
+- !private ["SY", "dashPattern"]
+- ["SY", "debugDescription"]
+- ["SY", "description"]
+- ["SY", "encode"]
+- !private ["SY", "endPoint"]
+- !private ["SY", "gradientType"]
+- ["SY", "hash"]
+- ["SY", "hashValue"]
+- !private ["SY", "highlightAngle"]
+- !private ["SY", "highlightLength"]
+- ["SY", "init"]
+- ["SY", "intValue"]
+- !private ["SY", "lineCap"]
+- !private ["SY", "lineJoin"]
+- !private ["SY", "miterLimit"]
+- !private ["SY", "numberOfColors"]
+- !private ["SY", "opacity"]
+- ["SY", "rawValue"]
+- !private ["SY", "round"]
+- !private ["SY", "startPoint"]
+- ["SY", "stringValue"]
+- !private ["SY", "width"]
+- ["6Lottie9ShapeItemC", "CodingKey"]
+- !private ["6Lottie9ShapeItemC", "CodingKeys"]
+- ["6Lottie9ShapeItemC", "DashElement"]
+- ["6Lottie9ShapeItemC", "Decoder"]
+- ["6Lottie9ShapeItemC", "Double"]
+- ["6Lottie9ShapeItemC", "Encoder"]
+- !private ["6Lottie9ShapeItemC", "GradientDataKeys"]
+- !private ["6Lottie9ShapeItemC", "GradientStroke"]
+- ["6Lottie9ShapeItemC", "GradientType"]
+- ["6Lottie9ShapeItemC", "Int"]
+- ["6Lottie9ShapeItemC", "KeyframeGroup"]
+- ["6Lottie9ShapeItemC", "LineCap"]
+- ["6Lottie9ShapeItemC", "LineJoin"]
+- ["6Lottie9ShapeItemC", "String"]
+- ["6Lottie9ShapeItemC", "Vector1D"]
+- ["6Lottie9ShapeItemC", "Vector3D"]
+- ["6Lottie9ShapeItemC", ""]
+- !private ["6Lottie9ShapeItemC", "_findStringSwitchCase"]
+- ["6Lottie9ShapeItemC", "colors"]
+- ["6Lottie9ShapeItemC", "dashPattern"]
+- !private ["6Lottie9ShapeItemC", "deinit"]
+- ["6Lottie9ShapeItemC", "encode"]
+- ["6Lottie9ShapeItemC", "endPoint"]
+- ["6Lottie9ShapeItemC", "gradientType"]
+- ["6Lottie9ShapeItemC", "highlightAngle"]
+- ["6Lottie9ShapeItemC", "highlightLength"]
+- ["6Lottie9ShapeItemC", "init"]
+- ["6Lottie9ShapeItemC", "lineCap"]
+- ["6Lottie9ShapeItemC", "lineJoin"]
+- ["6Lottie9ShapeItemC", "miterLimit"]
+- ["6Lottie9ShapeItemC", "numberOfColors"]
+- ["6Lottie9ShapeItemC", "opacity"]
+- ["6Lottie9ShapeItemC", "startPoint"]
+- ["6Lottie9ShapeItemC", "width"]
+- ["6Lottie8Vector1DV", "deinit"]
+- ["6Lottie8Vector3DV", "deinit"]
+depends-nominal:
+- "Sa"
+- "s9CodingKeyP"
+- "s28CustomDebugStringConvertibleP"
+- "s23CustomStringConvertibleP"
+- !private "6Lottie11DashElementV"
+- "Se"
+- !private "s7DecoderP"
+- "SE"
+- !private "s7EncoderP"
+- "SQ"
+- "6Lottie14GradientStrokeC"
+- !private "6Lottie12GradientTypeO"
+- "SH"
+- !private "s22KeyedDecodingContainerV"
+- !private "s30KeyedDecodingContainerProtocolP"
+- !private "s22KeyedEncodingContainerV"
+- !private "s30KeyedEncodingContainerProtocolP"
+- !private "6Lottie13KeyframeGroupC"
+- "6Lottie7LineCapO"
+- "6Lottie8LineJoinO"
+- "SY"
+- "6Lottie9ShapeItemC"
+- "6Lottie8Vector1DV"
+- "6Lottie8Vector3DV"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "9d8885fd981aaca546262b358a463f4a"

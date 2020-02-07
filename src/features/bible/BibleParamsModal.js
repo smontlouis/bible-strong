@@ -1,5 +1,5 @@
 import React from 'react'
-import Modal from 'react-native-modalbox'
+import Modal from 'react-native-modal'
 import styled from '@emotion/native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
@@ -14,7 +14,6 @@ import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import SvgIcon from './SvgIcon'
 import ColorWheelIcon from '~common/ColorWheelIcon'
-
 
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
@@ -112,13 +111,13 @@ const BibleParamsModal = ({
 
   return (
     <StylizedModal
-      isOpen={isOpen}
-      onClosed={onClosed}
-      animationDuration={200}
-      position="top"
-      entry="top"
-      swipeToClose={false}
-      backdropOpacity={0.1}>
+      isVisible={isOpen}
+      onBackButtonPress={onClosed}
+      onBackdropPress={onClosed}
+      animationIn="slideInDown"
+      animationOut="slideOutUp"
+      backdropOpacity={0.2}
+    >
       <Container>
         <HalfContainer border>
           <TouchableIcon
@@ -134,9 +133,16 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
-          <TouchableIcon name="type" size={15} onPress={() => decreaseSettingsFontSizeScale()} />
+          <TouchableIcon
+            name="type"
+            size={15}
+            onPress={() => decreaseSettingsFontSizeScale()}
+          />
           <Text bold>{`${100 + fontSizeScale * 10}%`}</Text>
-          <TouchableIcon name="type" onPress={() => increaseSettingsFontSizeScale()} />
+          <TouchableIcon
+            name="type"
+            onPress={() => increaseSettingsFontSizeScale()}
+          />
         </HalfContainer>
         <HalfContainer border>
           <TouchableIcon
@@ -192,7 +198,11 @@ const BibleParamsModal = ({
               {commentsDisplayToString[commentsDisplay]}
             </Text>
           </Box>
-          <TouchableIcon isSelected={commentsDisplay} name="archive" onPress={onOpenCommentaire} />
+          <TouchableIcon
+            isSelected={commentsDisplay}
+            name="archive"
+            onPress={onOpenCommentaire}
+          />
         </HalfContainer>
         <HalfContainer border>
           <TouchableSvgIcon

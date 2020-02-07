@@ -1,0 +1,791 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "MaskContainerLayer"
+provides-nominal:
+- "6Lottie18MaskContainerLayerC"
+provides-member:
+- ["6Lottie8MaskModeO", ""]
+- ["6Lottie18MaskContainerLayerC", ""]
+- ["So6CGRectV", ""]
+- ["6Lottie8MaskModeO", "usableMode"]
+- ["So6CGRectV", "veryLargeRect"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "!"
+- !private "&&"
+- !private "=="
+- "AnyNodeProperty"
+- !private "Array"
+- "AssignmentPrecedence"
+- "BezierPath"
+- "Bool"
+- !private "BooleanLiteralType"
+- "CALayer"
+- "CAShapeLayer"
+- !private "CAShapeLayerFillRule"
+- !private "CGColor"
+- !private "CGColorSpaceCreateDeviceRGB"
+- "CGFloat"
+- !private "CGMutablePath"
+- "CGRect"
+- "CastingPrecedence"
+- !private "Float"
+- !private "FloatLiteralType"
+- !private "IntegerLiteralType"
+- !private "KeyframeInterpolator"
+- "Mask"
+- "MaskContainerLayer"
+- "MaskLayer"
+- "MaskMode"
+- "MaskNodeProperties"
+- "NSCoder"
+- !private "NSNull"
+- "NodeProperty"
+- "NodePropertyMap"
+- "String"
+- !private "StringLiteralType"
+- "TernaryPrecedence"
+- "Vector1D"
+- !private "fatalError"
+- !private "||"
+depends-member:
+- !private ["s18AdditiveArithmeticP", "init"]
+- !private ["6Lottie15AnyNodePropertyP", "init"]
+- !private ["6Lottie15AnyNodePropertyP", "needsUpdate"]
+- !private ["6Lottie15AnyNodePropertyP", "update"]
+- !private ["6Lottie15AnyNodePropertyP", "value"]
+- !private ["6Lottie16AnyValueProviderP", "init"]
+- !private ["Sa", "append"]
+- !private ["Sa", "forEach"]
+- !private ["Sa", "init"]
+- !private ["6Lottie10BezierPathV", "cgPath"]
+- !private ["6Lottie10BezierPathV", "deinit"]
+- !private ["SK", "append"]
+- !private ["SK", "forEach"]
+- !private ["SK", "init"]
+- !private ["SB", "init"]
+- !private ["So8CAActionP", "init"]
+- ["So7CALayerC", "Bool"]
+- !private ["So7CALayerC", "CALayer"]
+- ["So7CALayerC", "CAShapeLayer"]
+- !private ["So7CALayerC", "CAShapeLayerFillRule"]
+- !private ["So7CALayerC", "CGColor"]
+- !private ["So7CALayerC", "CGColorSpaceCreateDeviceRGB"]
+- ["So7CALayerC", "CGFloat"]
+- !private ["So7CALayerC", "CGMutablePath"]
+- !private ["So7CALayerC", "CGRect"]
+- !private ["So7CALayerC", "Float"]
+- ["So7CALayerC", "Mask"]
+- !private ["So7CALayerC", "MaskContainerLayer"]
+- ["So7CALayerC", "MaskLayer"]
+- ["So7CALayerC", "MaskNodeProperties"]
+- ["So7CALayerC", "NSCoder"]
+- !private ["So7CALayerC", "NSNull"]
+- ["So7CALayerC", ""]
+- !private ["So7CALayerC", "actions"]
+- !private ["So7CALayerC", "addSublayer"]
+- !private ["So7CALayerC", "anchorPoint"]
+- !private ["So7CALayerC", "fatalError"]
+- !private ["So7CALayerC", "fillColor"]
+- !private ["So7CALayerC", "fillRule"]
+- ["So7CALayerC", "init"]
+- !private ["So7CALayerC", "mask"]
+- ["So7CALayerC", "maskLayer"]
+- ["So7CALayerC", "maskLayers"]
+- !private ["So7CALayerC", "opacity"]
+- !private ["So7CALayerC", "path"]
+- ["So7CALayerC", "properties"]
+- ["So7CALayerC", "updateWithFrame"]
+- !private ["So13CAMediaTimingP", "CALayer"]
+- ["So13CAMediaTimingP", "CAShapeLayer"]
+- !private ["So13CAMediaTimingP", "CAShapeLayerFillRule"]
+- !private ["So13CAMediaTimingP", "CGColor"]
+- !private ["So13CAMediaTimingP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["So13CAMediaTimingP", "CGMutablePath"]
+- !private ["So13CAMediaTimingP", "CGRect"]
+- !private ["So13CAMediaTimingP", "Float"]
+- !private ["So13CAMediaTimingP", "MaskLayer"]
+- !private ["So13CAMediaTimingP", "MaskNodeProperties"]
+- !private ["So13CAMediaTimingP", "NSNull"]
+- ["So13CAMediaTimingP", ""]
+- !private ["So13CAMediaTimingP", "actions"]
+- !private ["So13CAMediaTimingP", "addSublayer"]
+- !private ["So13CAMediaTimingP", "anchorPoint"]
+- !private ["So13CAMediaTimingP", "fatalError"]
+- !private ["So13CAMediaTimingP", "fillColor"]
+- !private ["So13CAMediaTimingP", "fillRule"]
+- ["So13CAMediaTimingP", "init"]
+- !private ["So13CAMediaTimingP", "mask"]
+- !private ["So13CAMediaTimingP", "maskLayer"]
+- !private ["So13CAMediaTimingP", "maskLayers"]
+- !private ["So13CAMediaTimingP", "opacity"]
+- !private ["So13CAMediaTimingP", "path"]
+- !private ["So13CAMediaTimingP", "properties"]
+- !private ["So13CAMediaTimingP", "updateWithFrame"]
+- !private ["So12CAShapeLayerC", "fillColor"]
+- !private ["So12CAShapeLayerC", "fillRule"]
+- ["So12CAShapeLayerC", "init"]
+- !private ["So12CAShapeLayerC", "path"]
+- !private ["So20CAShapeLayerFillRulea", "evenOdd"]
+- !private ["So10CGColorRefa", "init"]
+- !private ["So16CGMutablePathRefa", "addPath"]
+- !private ["So16CGMutablePathRefa", "addRect"]
+- !private ["So16CGMutablePathRefa", "init"]
+- !private ["So9CGPathRefa", "addPath"]
+- !private ["So9CGPathRefa", "addRect"]
+- !private ["So7CGPointV", "zero"]
+- ["So6CGRectV", "CGRect"]
+- !private ["So6CGRectV", "init"]
+- ["So6CGRectV", "veryLargeRect"]
+- !private ["s7CVarArgP", "CALayer"]
+- ["s7CVarArgP", "CAShapeLayer"]
+- !private ["s7CVarArgP", "CAShapeLayerFillRule"]
+- !private ["s7CVarArgP", "CGColor"]
+- !private ["s7CVarArgP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["s7CVarArgP", "CGMutablePath"]
+- !private ["s7CVarArgP", "CGRect"]
+- !private ["s7CVarArgP", "Float"]
+- !private ["s7CVarArgP", "MaskLayer"]
+- !private ["s7CVarArgP", "MaskNodeProperties"]
+- !private ["s7CVarArgP", "NSNull"]
+- ["s7CVarArgP", ""]
+- !private ["s7CVarArgP", "actions"]
+- !private ["s7CVarArgP", "addSublayer"]
+- !private ["s7CVarArgP", "anchorPoint"]
+- !private ["s7CVarArgP", "append"]
+- !private ["s7CVarArgP", "fatalError"]
+- !private ["s7CVarArgP", "fillColor"]
+- !private ["s7CVarArgP", "fillRule"]
+- !private ["s7CVarArgP", "forEach"]
+- ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "mask"]
+- !private ["s7CVarArgP", "maskLayer"]
+- !private ["s7CVarArgP", "maskLayers"]
+- !private ["s7CVarArgP", "opacity"]
+- !private ["s7CVarArgP", "path"]
+- !private ["s7CVarArgP", "properties"]
+- !private ["s7CVarArgP", "updateWithFrame"]
+- !private ["s7CVarArgP", "values"]
+- !private ["Sl", "append"]
+- !private ["Sl", "forEach"]
+- !private ["Sl", "init"]
+- !private ["Sl", "values"]
+- !private ["SL", "init"]
+- !private ["10Foundation15ContiguousBytesP", "append"]
+- !private ["10Foundation15ContiguousBytesP", "forEach"]
+- !private ["10Foundation15ContiguousBytesP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "CALayer"]
+- ["s28CustomDebugStringConvertibleP", "CAShapeLayer"]
+- !private ["s28CustomDebugStringConvertibleP", "CAShapeLayerFillRule"]
+- !private ["s28CustomDebugStringConvertibleP", "CGColor"]
+- !private ["s28CustomDebugStringConvertibleP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["s28CustomDebugStringConvertibleP", "CGMutablePath"]
+- !private ["s28CustomDebugStringConvertibleP", "CGRect"]
+- !private ["s28CustomDebugStringConvertibleP", "Float"]
+- !private ["s28CustomDebugStringConvertibleP", "MaskLayer"]
+- !private ["s28CustomDebugStringConvertibleP", "MaskNodeProperties"]
+- !private ["s28CustomDebugStringConvertibleP", "NSNull"]
+- ["s28CustomDebugStringConvertibleP", ""]
+- !private ["s28CustomDebugStringConvertibleP", "actions"]
+- !private ["s28CustomDebugStringConvertibleP", "addSublayer"]
+- !private ["s28CustomDebugStringConvertibleP", "anchorPoint"]
+- !private ["s28CustomDebugStringConvertibleP", "append"]
+- !private ["s28CustomDebugStringConvertibleP", "fatalError"]
+- !private ["s28CustomDebugStringConvertibleP", "fillColor"]
+- !private ["s28CustomDebugStringConvertibleP", "fillRule"]
+- !private ["s28CustomDebugStringConvertibleP", "forEach"]
+- ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "mask"]
+- !private ["s28CustomDebugStringConvertibleP", "maskLayer"]
+- !private ["s28CustomDebugStringConvertibleP", "maskLayers"]
+- !private ["s28CustomDebugStringConvertibleP", "opacity"]
+- !private ["s28CustomDebugStringConvertibleP", "path"]
+- !private ["s28CustomDebugStringConvertibleP", "properties"]
+- !private ["s28CustomDebugStringConvertibleP", "updateWithFrame"]
+- !private ["s28CustomDebugStringConvertibleP", "values"]
+- !private ["s28CustomDebugStringConvertibleP", "veryLargeRect"]
+- !private ["s28CustomDebugStringConvertibleP", "zero"]
+- !private ["s17CustomReflectableP", "CGRect"]
+- !private ["s17CustomReflectableP", "append"]
+- !private ["s17CustomReflectableP", "forEach"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s17CustomReflectableP", "values"]
+- !private ["s17CustomReflectableP", "veryLargeRect"]
+- !private ["s17CustomReflectableP", "zero"]
+- !private ["s23CustomStringConvertibleP", "CALayer"]
+- ["s23CustomStringConvertibleP", "CAShapeLayer"]
+- !private ["s23CustomStringConvertibleP", "CAShapeLayerFillRule"]
+- !private ["s23CustomStringConvertibleP", "CGColor"]
+- !private ["s23CustomStringConvertibleP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["s23CustomStringConvertibleP", "CGMutablePath"]
+- !private ["s23CustomStringConvertibleP", "CGRect"]
+- !private ["s23CustomStringConvertibleP", "Float"]
+- !private ["s23CustomStringConvertibleP", "MaskLayer"]
+- !private ["s23CustomStringConvertibleP", "MaskNodeProperties"]
+- !private ["s23CustomStringConvertibleP", "NSNull"]
+- ["s23CustomStringConvertibleP", ""]
+- !private ["s23CustomStringConvertibleP", "actions"]
+- !private ["s23CustomStringConvertibleP", "addSublayer"]
+- !private ["s23CustomStringConvertibleP", "anchorPoint"]
+- !private ["s23CustomStringConvertibleP", "append"]
+- !private ["s23CustomStringConvertibleP", "fatalError"]
+- !private ["s23CustomStringConvertibleP", "fillColor"]
+- !private ["s23CustomStringConvertibleP", "fillRule"]
+- !private ["s23CustomStringConvertibleP", "forEach"]
+- ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "mask"]
+- !private ["s23CustomStringConvertibleP", "maskLayer"]
+- !private ["s23CustomStringConvertibleP", "maskLayers"]
+- !private ["s23CustomStringConvertibleP", "opacity"]
+- !private ["s23CustomStringConvertibleP", "path"]
+- !private ["s23CustomStringConvertibleP", "properties"]
+- !private ["s23CustomStringConvertibleP", "updateWithFrame"]
+- !private ["s23CustomStringConvertibleP", "values"]
+- !private ["10Foundation12DataProtocolP", "append"]
+- !private ["10Foundation12DataProtocolP", "forEach"]
+- !private ["10Foundation12DataProtocolP", "init"]
+- !private ["Se", "CGRect"]
+- ["Se", "add"]
+- !private ["Se", "append"]
+- !private ["Se", "cgFloatValue"]
+- !private ["Se", "cgPath"]
+- ["Se", "darken"]
+- ["Se", "difference"]
+- !private ["Se", "expansion"]
+- !private ["Se", "forEach"]
+- !private ["Se", "init"]
+- ["Se", "intersect"]
+- !private ["Se", "inverted"]
+- !private ["Se", "keyframes"]
+- ["Se", "lighten"]
+- !private ["Se", "mode"]
+- ["Se", "none"]
+- !private ["Se", "opacity"]
+- !private ["Se", "shape"]
+- ["Se", "subtract"]
+- !private ["Se", "usableMode"]
+- !private ["Se", "values"]
+- !private ["Se", "veryLargeRect"]
+- !private ["Se", "zero"]
+- !private ["SD", "values"]
+- !private ["SE", "CGRect"]
+- ["SE", "add"]
+- !private ["SE", "append"]
+- !private ["SE", "cgFloatValue"]
+- !private ["SE", "cgPath"]
+- ["SE", "darken"]
+- ["SE", "difference"]
+- !private ["SE", "expansion"]
+- !private ["SE", "forEach"]
+- !private ["SE", "init"]
+- ["SE", "intersect"]
+- !private ["SE", "inverted"]
+- !private ["SE", "keyframes"]
+- ["SE", "lighten"]
+- !private ["SE", "mode"]
+- ["SE", "none"]
+- !private ["SE", "opacity"]
+- !private ["SE", "shape"]
+- ["SE", "subtract"]
+- !private ["SE", "usableMode"]
+- !private ["SE", "values"]
+- !private ["SE", "veryLargeRect"]
+- !private ["SE", "zero"]
+- !private ["SQ", "CALayer"]
+- ["SQ", "CAShapeLayer"]
+- !private ["SQ", "CAShapeLayerFillRule"]
+- !private ["SQ", "CGColor"]
+- !private ["SQ", "CGColorSpaceCreateDeviceRGB"]
+- !private ["SQ", "CGMutablePath"]
+- !private ["SQ", "CGRect"]
+- !private ["SQ", "Float"]
+- !private ["SQ", "MaskLayer"]
+- !private ["SQ", "MaskNodeProperties"]
+- !private ["SQ", "NSNull"]
+- ["SQ", ""]
+- !private ["SQ", "actions"]
+- ["SQ", "add"]
+- !private ["SQ", "addPath"]
+- !private ["SQ", "addRect"]
+- !private ["SQ", "addSublayer"]
+- !private ["SQ", "anchorPoint"]
+- !private ["SQ", "append"]
+- ["SQ", "darken"]
+- ["SQ", "difference"]
+- !private ["SQ", "evenOdd"]
+- !private ["SQ", "fatalError"]
+- !private ["SQ", "fillColor"]
+- !private ["SQ", "fillRule"]
+- !private ["SQ", "forEach"]
+- ["SQ", "init"]
+- ["SQ", "intersect"]
+- ["SQ", "lighten"]
+- !private ["SQ", "mask"]
+- !private ["SQ", "maskLayer"]
+- !private ["SQ", "maskLayers"]
+- ["SQ", "none"]
+- !private ["SQ", "opacity"]
+- !private ["SQ", "path"]
+- !private ["SQ", "properties"]
+- ["SQ", "subtract"]
+- !private ["SQ", "updateWithFrame"]
+- !private ["SQ", "usableMode"]
+- !private ["SQ", "values"]
+- !private ["SQ", "veryLargeRect"]
+- !private ["SQ", "zero"]
+- !private ["s25ExpressibleByArrayLiteralP", "append"]
+- !private ["s25ExpressibleByArrayLiteralP", "forEach"]
+- !private ["s25ExpressibleByArrayLiteralP", "init"]
+- !private ["s30ExpressibleByDictionaryLiteralP", "values"]
+- !private ["s25ExpressibleByFloatLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- !private ["Sf", "init"]
+- !private ["SF", "init"]
+- !private ["SH", "CALayer"]
+- ["SH", "CAShapeLayer"]
+- !private ["SH", "CAShapeLayerFillRule"]
+- !private ["SH", "CGColor"]
+- !private ["SH", "CGColorSpaceCreateDeviceRGB"]
+- !private ["SH", "CGMutablePath"]
+- !private ["SH", "CGRect"]
+- !private ["SH", "Float"]
+- !private ["SH", "MaskLayer"]
+- !private ["SH", "MaskNodeProperties"]
+- !private ["SH", "NSNull"]
+- ["SH", ""]
+- !private ["SH", "actions"]
+- ["SH", "add"]
+- !private ["SH", "addPath"]
+- !private ["SH", "addRect"]
+- !private ["SH", "addSublayer"]
+- !private ["SH", "anchorPoint"]
+- !private ["SH", "append"]
+- ["SH", "darken"]
+- ["SH", "difference"]
+- !private ["SH", "evenOdd"]
+- !private ["SH", "fatalError"]
+- !private ["SH", "fillColor"]
+- !private ["SH", "fillRule"]
+- !private ["SH", "forEach"]
+- ["SH", "init"]
+- ["SH", "intersect"]
+- ["SH", "lighten"]
+- !private ["SH", "mask"]
+- !private ["SH", "maskLayer"]
+- !private ["SH", "maskLayers"]
+- ["SH", "none"]
+- !private ["SH", "opacity"]
+- !private ["SH", "path"]
+- !private ["SH", "properties"]
+- ["SH", "subtract"]
+- !private ["SH", "updateWithFrame"]
+- !private ["SH", "usableMode"]
+- !private ["SH", "values"]
+- !private ["6Lottie14InterpolatableP", "append"]
+- !private ["6Lottie14InterpolatableP", "cgFloatValue"]
+- !private ["6Lottie14InterpolatableP", "cgPath"]
+- !private ["6Lottie14InterpolatableP", "forEach"]
+- !private ["6Lottie14InterpolatableP", "init"]
+- !private ["6Lottie14InterpolatableP", "zero"]
+- !private ["6Lottie13KeyframeGroupC", "keyframes"]
+- !private ["6Lottie20KeyframeInterpolatorC", "deinit"]
+- !private ["6Lottie20KeyframeInterpolatorC", "init"]
+- !private ["s25LosslessStringConvertibleP", "init"]
+- !private ["6Lottie4MaskC", "expansion"]
+- !private ["6Lottie4MaskC", "inverted"]
+- !private ["6Lottie4MaskC", "mode"]
+- !private ["6Lottie4MaskC", "opacity"]
+- !private ["6Lottie4MaskC", "shape"]
+- ["6Lottie18MaskContainerLayerC", "Bool"]
+- !private ["6Lottie18MaskContainerLayerC", "CALayer"]
+- ["6Lottie18MaskContainerLayerC", "CGFloat"]
+- ["6Lottie18MaskContainerLayerC", "Mask"]
+- !private ["6Lottie18MaskContainerLayerC", "MaskContainerLayer"]
+- ["6Lottie18MaskContainerLayerC", "MaskLayer"]
+- ["6Lottie18MaskContainerLayerC", "NSCoder"]
+- !private ["6Lottie18MaskContainerLayerC", "addSublayer"]
+- !private ["6Lottie18MaskContainerLayerC", "anchorPoint"]
+- ["6Lottie18MaskContainerLayerC", "deinit"]
+- !private ["6Lottie18MaskContainerLayerC", "fatalError"]
+- ["6Lottie18MaskContainerLayerC", "init"]
+- !private ["6Lottie18MaskContainerLayerC", "maskLayers"]
+- ["6Lottie18MaskContainerLayerC", "updateWithFrame"]
+- ["6Lottie8MaskModeO", "MaskMode"]
+- ["6Lottie8MaskModeO", "add"]
+- ["6Lottie8MaskModeO", "darken"]
+- !private ["6Lottie8MaskModeO", "deinit"]
+- ["6Lottie8MaskModeO", "difference"]
+- ["6Lottie8MaskModeO", "intersect"]
+- ["6Lottie8MaskModeO", "lighten"]
+- ["6Lottie8MaskModeO", "none"]
+- ["6Lottie8MaskModeO", "subtract"]
+- ["6Lottie8MaskModeO", "usableMode"]
+- !private ["SM", "append"]
+- !private ["SM", "forEach"]
+- !private ["SM", "init"]
+- !private ["10Foundation19MutableDataProtocolP", "append"]
+- !private ["10Foundation19MutableDataProtocolP", "forEach"]
+- !private ["10Foundation19MutableDataProtocolP", "init"]
+- !private ["So8NSCodingP", "CALayer"]
+- ["So8NSCodingP", "CAShapeLayer"]
+- !private ["So8NSCodingP", "CAShapeLayerFillRule"]
+- !private ["So8NSCodingP", "CGColor"]
+- !private ["So8NSCodingP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["So8NSCodingP", "CGMutablePath"]
+- !private ["So8NSCodingP", "CGRect"]
+- !private ["So8NSCodingP", "Float"]
+- !private ["So8NSCodingP", "MaskLayer"]
+- !private ["So8NSCodingP", "MaskNodeProperties"]
+- !private ["So8NSCodingP", "NSNull"]
+- ["So8NSCodingP", ""]
+- !private ["So8NSCodingP", "actions"]
+- !private ["So8NSCodingP", "addSublayer"]
+- !private ["So8NSCodingP", "anchorPoint"]
+- !private ["So8NSCodingP", "fatalError"]
+- !private ["So8NSCodingP", "fillColor"]
+- !private ["So8NSCodingP", "fillRule"]
+- ["So8NSCodingP", "init"]
+- !private ["So8NSCodingP", "mask"]
+- !private ["So8NSCodingP", "maskLayer"]
+- !private ["So8NSCodingP", "maskLayers"]
+- !private ["So8NSCodingP", "opacity"]
+- !private ["So8NSCodingP", "path"]
+- !private ["So8NSCodingP", "properties"]
+- !private ["So8NSCodingP", "updateWithFrame"]
+- !private ["So9NSCopyingP", "init"]
+- !private ["So6NSNullC", "init"]
+- ["So8NSObjectC", "Bool"]
+- !private ["So8NSObjectC", "CALayer"]
+- ["So8NSObjectC", "CAShapeLayer"]
+- !private ["So8NSObjectC", "CAShapeLayerFillRule"]
+- !private ["So8NSObjectC", "CGColor"]
+- !private ["So8NSObjectC", "CGColorSpaceCreateDeviceRGB"]
+- ["So8NSObjectC", "CGFloat"]
+- !private ["So8NSObjectC", "CGMutablePath"]
+- !private ["So8NSObjectC", "CGRect"]
+- !private ["So8NSObjectC", "Float"]
+- ["So8NSObjectC", "Mask"]
+- !private ["So8NSObjectC", "MaskContainerLayer"]
+- ["So8NSObjectC", "MaskLayer"]
+- ["So8NSObjectC", "MaskNodeProperties"]
+- ["So8NSObjectC", "NSCoder"]
+- !private ["So8NSObjectC", "NSNull"]
+- !private ["So8NSObjectC", "actions"]
+- !private ["So8NSObjectC", "addSublayer"]
+- !private ["So8NSObjectC", "anchorPoint"]
+- !private ["So8NSObjectC", "fatalError"]
+- !private ["So8NSObjectC", "fillColor"]
+- !private ["So8NSObjectC", "fillRule"]
+- ["So8NSObjectC", "init"]
+- !private ["So8NSObjectC", "mask"]
+- ["So8NSObjectC", "maskLayer"]
+- ["So8NSObjectC", "maskLayers"]
+- !private ["So8NSObjectC", "opacity"]
+- !private ["So8NSObjectC", "path"]
+- ["So8NSObjectC", "properties"]
+- ["So8NSObjectC", "updateWithFrame"]
+- !private ["So8NSObjectP", "CALayer"]
+- ["So8NSObjectP", "CAShapeLayer"]
+- !private ["So8NSObjectP", "CAShapeLayerFillRule"]
+- !private ["So8NSObjectP", "CGColor"]
+- !private ["So8NSObjectP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["So8NSObjectP", "CGMutablePath"]
+- !private ["So8NSObjectP", "CGRect"]
+- !private ["So8NSObjectP", "Float"]
+- !private ["So8NSObjectP", "MaskLayer"]
+- !private ["So8NSObjectP", "MaskNodeProperties"]
+- !private ["So8NSObjectP", "NSNull"]
+- ["So8NSObjectP", ""]
+- !private ["So8NSObjectP", "actions"]
+- !private ["So8NSObjectP", "addSublayer"]
+- !private ["So8NSObjectP", "anchorPoint"]
+- !private ["So8NSObjectP", "fatalError"]
+- !private ["So8NSObjectP", "fillColor"]
+- !private ["So8NSObjectP", "fillRule"]
+- ["So8NSObjectP", "init"]
+- !private ["So8NSObjectP", "mask"]
+- !private ["So8NSObjectP", "maskLayer"]
+- !private ["So8NSObjectP", "maskLayers"]
+- !private ["So8NSObjectP", "opacity"]
+- !private ["So8NSObjectP", "path"]
+- !private ["So8NSObjectP", "properties"]
+- !private ["So8NSObjectP", "updateWithFrame"]
+- !private ["So14NSSecureCodingP", "CALayer"]
+- ["So14NSSecureCodingP", "CAShapeLayer"]
+- !private ["So14NSSecureCodingP", "CAShapeLayerFillRule"]
+- !private ["So14NSSecureCodingP", "CGColor"]
+- !private ["So14NSSecureCodingP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["So14NSSecureCodingP", "CGMutablePath"]
+- !private ["So14NSSecureCodingP", "CGRect"]
+- !private ["So14NSSecureCodingP", "Float"]
+- !private ["So14NSSecureCodingP", "MaskLayer"]
+- !private ["So14NSSecureCodingP", "MaskNodeProperties"]
+- !private ["So14NSSecureCodingP", "NSNull"]
+- ["So14NSSecureCodingP", ""]
+- !private ["So14NSSecureCodingP", "actions"]
+- !private ["So14NSSecureCodingP", "addSublayer"]
+- !private ["So14NSSecureCodingP", "anchorPoint"]
+- !private ["So14NSSecureCodingP", "fatalError"]
+- !private ["So14NSSecureCodingP", "fillColor"]
+- !private ["So14NSSecureCodingP", "fillRule"]
+- ["So14NSSecureCodingP", "init"]
+- !private ["So14NSSecureCodingP", "mask"]
+- !private ["So14NSSecureCodingP", "maskLayer"]
+- !private ["So14NSSecureCodingP", "maskLayers"]
+- !private ["So14NSSecureCodingP", "opacity"]
+- !private ["So14NSSecureCodingP", "path"]
+- !private ["So14NSSecureCodingP", "properties"]
+- !private ["So14NSSecureCodingP", "updateWithFrame"]
+- !private ["6Lottie12NodePropertyC", "deinit"]
+- !private ["6Lottie12NodePropertyC", "init"]
+- !private ["6Lottie12NodePropertyC", "needsUpdate"]
+- !private ["6Lottie12NodePropertyC", "update"]
+- !private ["6Lottie12NodePropertyC", "value"]
+- !private ["6Lottie15NodePropertyMapP", "Array"]
+- !private ["6Lottie15NodePropertyMapP", "KeyframeInterpolator"]
+- !private ["6Lottie15NodePropertyMapP", "NodeProperty"]
+- !private ["6Lottie15NodePropertyMapP", ""]
+- !private ["6Lottie15NodePropertyMapP", "expansion"]
+- !private ["6Lottie15NodePropertyMapP", "init"]
+- !private ["6Lottie15NodePropertyMapP", "inverted"]
+- !private ["6Lottie15NodePropertyMapP", "mode"]
+- !private ["6Lottie15NodePropertyMapP", "opacity"]
+- ["6Lottie15NodePropertyMapP", "properties"]
+- !private ["6Lottie15NodePropertyMapP", "propertyMap"]
+- !private ["6Lottie15NodePropertyMapP", "shape"]
+- !private ["Sj", "init"]
+- !private ["Sk", "append"]
+- !private ["Sk", "forEach"]
+- !private ["Sk", "init"]
+- !private ["Sm", "append"]
+- !private ["Sm", "forEach"]
+- !private ["Sm", "init"]
+- ["SY", "add"]
+- ["SY", "darken"]
+- ["SY", "difference"]
+- !private ["SY", "evenOdd"]
+- ["SY", "intersect"]
+- ["SY", "lighten"]
+- ["SY", "none"]
+- ["SY", "subtract"]
+- !private ["SY", "usableMode"]
+- !private ["s10SIMDScalarP", "init"]
+- !private ["ST", "append"]
+- !private ["ST", "forEach"]
+- !private ["ST", "init"]
+- !private ["ST", "values"]
+- !private ["s13SignedNumericP", "init"]
+- !private ["Sx", "init"]
+- !private ["s20TextOutputStreamableP", "init"]
+- !private ["6Lottie8Vector1DV", "cgFloatValue"]
+- !private ["6Lottie8Vector1DV", "deinit"]
+- !private ["s14_ArrayProtocolP", "append"]
+- !private ["s14_ArrayProtocolP", "forEach"]
+- !private ["s14_ArrayProtocolP", "init"]
+- !private ["14CoreFoundation9_CFObjectP", "addPath"]
+- !private ["14CoreFoundation9_CFObjectP", "addRect"]
+- !private ["14CoreFoundation9_CFObjectP", "init"]
+- !private ["12CoreGraphics22_CGColorInitTrampolineP", "init"]
+- !private ["s15_CVarArgAlignedP", "init"]
+- !private ["s22_CVarArgPassedAsDoubleP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "CGRect"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "veryLargeRect"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "zero"]
+- !private ["s24_DestructorSafeContainerP", "append"]
+- !private ["s24_DestructorSafeContainerP", "forEach"]
+- !private ["s24_DestructorSafeContainerP", "init"]
+- !private ["s33_ExpressibleByBuiltinFloatLiteralP", "init"]
+- !private ["s35_ExpressibleByBuiltinIntegerLiteralP", "init"]
+- !private ["s26_ExpressibleByColorLiteralP", "init"]
+- !private ["s19_HasContiguousBytesP", "append"]
+- !private ["s19_HasContiguousBytesP", "forEach"]
+- !private ["s19_HasContiguousBytesP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "append"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "evenOdd"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "forEach"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "values"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CALayer"]
+- ["10Foundation27_KeyValueCodingAndObservingP", "CAShapeLayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CAShapeLayerFillRule"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CGColor"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CGMutablePath"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CGRect"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "Float"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "MaskLayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "MaskNodeProperties"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "NSNull"]
+- ["10Foundation27_KeyValueCodingAndObservingP", ""]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "actions"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "addSublayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "anchorPoint"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fatalError"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fillColor"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fillRule"]
+- ["10Foundation27_KeyValueCodingAndObservingP", "init"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "mask"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "maskLayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "maskLayers"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "opacity"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "path"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "properties"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "updateWithFrame"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CALayer"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CAShapeLayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CAShapeLayerFillRule"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CGColor"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CGColorSpaceCreateDeviceRGB"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CGMutablePath"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CGRect"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "Float"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "MaskLayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "MaskNodeProperties"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "NSNull"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", ""]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "actions"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "addSublayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "anchorPoint"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fatalError"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fillColor"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fillRule"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", "init"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "mask"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "maskLayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "maskLayers"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "opacity"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "path"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "properties"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "updateWithFrame"]
+- !private ["s21_ObjectiveCBridgeableP", "CGRect"]
+- !private ["s21_ObjectiveCBridgeableP", "append"]
+- !private ["s21_ObjectiveCBridgeableP", "evenOdd"]
+- !private ["s21_ObjectiveCBridgeableP", "forEach"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "values"]
+- !private ["s21_ObjectiveCBridgeableP", "veryLargeRect"]
+- !private ["s21_ObjectiveCBridgeableP", "zero"]
+- !private ["s20_SwiftNewtypeWrapperP", "evenOdd"]
+depends-nominal:
+- !private "s18AdditiveArithmeticP"
+- !private "6Lottie15AnyNodePropertyP"
+- !private "6Lottie16AnyValueProviderP"
+- !private "Sa"
+- !private "6Lottie10BezierPathV"
+- !private "SK"
+- !private "SB"
+- !private "So8CAActionP"
+- "So7CALayerC"
+- "So13CAMediaTimingP"
+- "So12CAShapeLayerC"
+- !private "So20CAShapeLayerFillRulea"
+- !private "So10CGColorRefa"
+- !private "So16CGMutablePathRefa"
+- !private "So9CGPathRefa"
+- !private "So7CGPointV"
+- "So6CGRectV"
+- "s7CVarArgP"
+- !private "Sl"
+- !private "SL"
+- !private "10Foundation15ContiguousBytesP"
+- "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- "s23CustomStringConvertibleP"
+- !private "10Foundation12DataProtocolP"
+- "Se"
+- !private "SD"
+- "SE"
+- "SQ"
+- !private "s25ExpressibleByArrayLiteralP"
+- !private "s30ExpressibleByDictionaryLiteralP"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- !private "Sf"
+- !private "SF"
+- "SH"
+- !private "6Lottie14InterpolatableP"
+- !private "6Lottie13KeyframeGroupC"
+- !private "6Lottie20KeyframeInterpolatorC"
+- !private "s25LosslessStringConvertibleP"
+- !private "6Lottie4MaskC"
+- "6Lottie18MaskContainerLayerC"
+- "6Lottie8MaskModeO"
+- !private "SM"
+- !private "10Foundation19MutableDataProtocolP"
+- "So8NSCodingP"
+- !private "So9NSCopyingP"
+- !private "So6NSNullC"
+- "So8NSObjectC"
+- "So8NSObjectP"
+- "So14NSSecureCodingP"
+- !private "6Lottie12NodePropertyC"
+- "6Lottie15NodePropertyMapP"
+- !private "Sj"
+- !private "Sk"
+- !private "Sm"
+- "SY"
+- !private "s10SIMDScalarP"
+- !private "ST"
+- !private "s13SignedNumericP"
+- !private "Sx"
+- !private "s20TextOutputStreamableP"
+- !private "6Lottie8Vector1DV"
+- !private "s14_ArrayProtocolP"
+- !private "14CoreFoundation9_CFObjectP"
+- !private "12CoreGraphics22_CGColorInitTrampolineP"
+- !private "s15_CVarArgAlignedP"
+- !private "s22_CVarArgPassedAsDoubleP"
+- !private "s30_CustomPlaygroundQuickLookableP"
+- !private "s24_DestructorSafeContainerP"
+- !private "s33_ExpressibleByBuiltinFloatLiteralP"
+- !private "s35_ExpressibleByBuiltinIntegerLiteralP"
+- !private "s26_ExpressibleByColorLiteralP"
+- !private "s19_HasContiguousBytesP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- "10Foundation27_KeyValueCodingAndObservingP"
+- "10Foundation37_KeyValueCodingAndObservingPublishingP"
+- !private "s21_ObjectiveCBridgeableP"
+- !private "s20_SwiftNewtypeWrapperP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "4636e5a12149aa65ee84dd03252d5fa5"

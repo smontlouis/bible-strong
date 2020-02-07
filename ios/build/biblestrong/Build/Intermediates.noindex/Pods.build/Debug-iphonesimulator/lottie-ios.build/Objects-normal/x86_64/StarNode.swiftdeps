@@ -1,0 +1,685 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "StarNodeProperties"
+- "StarNode"
+provides-nominal:
+- "6Lottie18StarNodePropertiesC"
+- "6Lottie8StarNodeC"
+provides-member:
+- ["6Lottie18StarNodePropertiesC", ""]
+- ["6Lottie8StarNodeC", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "!"
+- !private "!="
+- !private "&&"
+- !private "*"
+- !private "+"
+- !private "+="
+- !private "-"
+- !private "..<"
+- !private "/"
+- !private "=="
+- "AnimatorNode"
+- "AnyNodeProperty"
+- !private "Array"
+- "AssignmentPrecedence"
+- !private "BezierPath"
+- "Bool"
+- "BooleanLiteralType"
+- "CGFloat"
+- !private "CGPoint"
+- !private "CurveVertex"
+- "FloatLiteralType"
+- !private "Int"
+- !private "IntegerLiteralType"
+- !private "KeyframeInterpolator"
+- "KeypathSearchable"
+- "NodeProperty"
+- "NodePropertyMap"
+- "PathDirection"
+- "PathNode"
+- "PathOutputNode"
+- !private "SingleValueProvider"
+- "Star"
+- "StarNode"
+- "StarNodeProperties"
+- "String"
+- !private "StringLiteralType"
+- "TernaryPrecedence"
+- "Vector1D"
+- "Vector3D"
+- !private "atan2"
+- !private "ceil"
+- !private "cos"
+- !private "floor"
+- !private "sin"
+depends-member:
+- !private ["s18AdditiveArithmeticP", "init"]
+- !private ["s18AdditiveArithmeticP", "pi"]
+- !private ["s18AdditiveArithmeticP", "toRadians"]
+- !private ["6Lottie12AnimatorNodeP", "BezierPath"]
+- !private ["6Lottie12AnimatorNodeP", "CGFloat"]
+- !private ["6Lottie12AnimatorNodeP", "CGPoint"]
+- !private ["6Lottie12AnimatorNodeP", "CurveVertex"]
+- !private ["6Lottie12AnimatorNodeP", "Int"]
+- !private ["6Lottie12AnimatorNodeP", "PathOutputNode"]
+- !private ["6Lottie12AnimatorNodeP", "PolystarConstant"]
+- !private ["6Lottie12AnimatorNodeP", "StarNode"]
+- !private ["6Lottie12AnimatorNodeP", "StarNodeProperties"]
+- ["6Lottie12AnimatorNodeP", ""]
+- !private ["6Lottie12AnimatorNodeP", "atan2"]
+- !private ["6Lottie12AnimatorNodeP", "ceil"]
+- ["6Lottie12AnimatorNodeP", "childKeypaths"]
+- !private ["6Lottie12AnimatorNodeP", "cos"]
+- !private ["6Lottie12AnimatorNodeP", "floor"]
+- ["6Lottie12AnimatorNodeP", "forceUpstreamOutputUpdates"]
+- ["6Lottie12AnimatorNodeP", "hasLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "hasUpstreamUpdates"]
+- ["6Lottie12AnimatorNodeP", "isEnabled"]
+- ["6Lottie12AnimatorNodeP", "keypathLayer"]
+- ["6Lottie12AnimatorNodeP", "keypathName"]
+- ["6Lottie12AnimatorNodeP", "keypathProperties"]
+- ["6Lottie12AnimatorNodeP", "lastUpdateFrame"]
+- ["6Lottie12AnimatorNodeP", "localUpdatesPermeateDownstream"]
+- ["6Lottie12AnimatorNodeP", "outputNode"]
+- ["6Lottie12AnimatorNodeP", "parentNode"]
+- ["6Lottie12AnimatorNodeP", "pathOutput"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalLocalUpdates"]
+- ["6Lottie12AnimatorNodeP", "performAdditionalOutputUpdates"]
+- !private ["6Lottie12AnimatorNodeP", "properties"]
+- ["6Lottie12AnimatorNodeP", "propertyMap"]
+- ["6Lottie12AnimatorNodeP", "rebuildOutputs"]
+- ["6Lottie12AnimatorNodeP", "shouldRebuildOutputs"]
+- !private ["6Lottie12AnimatorNodeP", "sin"]
+- !private ["6Lottie15AnyNodePropertyP", "init"]
+- !private ["6Lottie15AnyNodePropertyP", "value"]
+- !private ["6Lottie16AnyValueProviderP", "init"]
+- !private ["Sa", "append"]
+- !private ["Sa", "endIndex"]
+- !private ["Sa", "init"]
+- !private ["Sa", "reversed"]
+- !private ["Sa", "subscript"]
+- !private ["6Lottie10BezierPathV", "addVertex"]
+- !private ["6Lottie10BezierPathV", "close"]
+- !private ["6Lottie10BezierPathV", "deinit"]
+- !private ["6Lottie10BezierPathV", "init"]
+- !private ["SK", "append"]
+- !private ["SK", "endIndex"]
+- !private ["SK", "init"]
+- !private ["SK", "reversed"]
+- !private ["SK", "subscript"]
+- !private ["SB", "pi"]
+- !private ["SB", "toRadians"]
+- !private ["Sz", "init"]
+- !private ["12CoreGraphics7CGFloatV", "pi"]
+- !private ["12CoreGraphics7CGFloatV", "toRadians"]
+- !private ["So7CGPointV", "init"]
+- !private ["So7CGPointV", "x"]
+- !private ["So7CGPointV", "y"]
+- !private ["So7CGPointV", "zero"]
+- !private ["s7CVarArgP", "append"]
+- !private ["s7CVarArgP", "endIndex"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "pi"]
+- !private ["s7CVarArgP", "reversed"]
+- !private ["s7CVarArgP", "subscript"]
+- !private ["s7CVarArgP", "toRadians"]
+- !private ["s7CVarArgP", "values"]
+- !private ["Sl", "append"]
+- !private ["Sl", "endIndex"]
+- !private ["Sl", "init"]
+- !private ["Sl", "reversed"]
+- !private ["Sl", "subscript"]
+- !private ["Sl", "values"]
+- !private ["SL", "init"]
+- !private ["SL", "pi"]
+- !private ["SL", "toRadians"]
+- !private ["10Foundation15ContiguousBytesP", "append"]
+- !private ["10Foundation15ContiguousBytesP", "endIndex"]
+- !private ["10Foundation15ContiguousBytesP", "init"]
+- !private ["10Foundation15ContiguousBytesP", "reversed"]
+- !private ["10Foundation15ContiguousBytesP", "subscript"]
+- !private ["6Lottie11CurveVertexV", "inTangent"]
+- !private ["6Lottie11CurveVertexV", "init"]
+- !private ["6Lottie11CurveVertexV", "point"]
+- !private ["6Lottie11CurveVertexV", "reversed"]
+- !private ["s28CustomDebugStringConvertibleP", "append"]
+- !private ["s28CustomDebugStringConvertibleP", "endIndex"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "reversed"]
+- !private ["s28CustomDebugStringConvertibleP", "subscript"]
+- !private ["s28CustomDebugStringConvertibleP", "values"]
+- !private ["s28CustomDebugStringConvertibleP", "x"]
+- !private ["s28CustomDebugStringConvertibleP", "y"]
+- !private ["s28CustomDebugStringConvertibleP", "zero"]
+- !private ["s17CustomReflectableP", "append"]
+- !private ["s17CustomReflectableP", "endIndex"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s17CustomReflectableP", "pi"]
+- !private ["s17CustomReflectableP", "reversed"]
+- !private ["s17CustomReflectableP", "subscript"]
+- !private ["s17CustomReflectableP", "toRadians"]
+- !private ["s17CustomReflectableP", "values"]
+- !private ["s17CustomReflectableP", "x"]
+- !private ["s17CustomReflectableP", "y"]
+- !private ["s17CustomReflectableP", "zero"]
+- !private ["s23CustomStringConvertibleP", "append"]
+- !private ["s23CustomStringConvertibleP", "endIndex"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "pi"]
+- !private ["s23CustomStringConvertibleP", "reversed"]
+- !private ["s23CustomStringConvertibleP", "subscript"]
+- !private ["s23CustomStringConvertibleP", "toRadians"]
+- !private ["s23CustomStringConvertibleP", "values"]
+- !private ["10Foundation12DataProtocolP", "append"]
+- !private ["10Foundation12DataProtocolP", "endIndex"]
+- !private ["10Foundation12DataProtocolP", "init"]
+- !private ["10Foundation12DataProtocolP", "reversed"]
+- !private ["10Foundation12DataProtocolP", "subscript"]
+- !private ["Se", "addVertex"]
+- !private ["Se", "append"]
+- !private ["Se", "cgFloatValue"]
+- !private ["Se", "close"]
+- !private ["Se", "counterClockwise"]
+- !private ["Se", "direction"]
+- !private ["Se", "endIndex"]
+- !private ["Se", "init"]
+- !private ["Se", "innerRadius"]
+- !private ["Se", "innerRoundness"]
+- !private ["Se", "keyframes"]
+- !private ["Se", "name"]
+- !private ["Se", "outerRadius"]
+- !private ["Se", "outerRoundness"]
+- !private ["Se", "pi"]
+- !private ["Se", "pointValue"]
+- !private ["Se", "points"]
+- !private ["Se", "position"]
+- !private ["Se", "reversed"]
+- !private ["Se", "rotation"]
+- !private ["Se", "subscript"]
+- !private ["Se", "toRadians"]
+- !private ["Se", "values"]
+- !private ["Se", "x"]
+- !private ["Se", "y"]
+- !private ["Se", "zero"]
+- !private ["SD", "values"]
+- !private ["SE", "addVertex"]
+- !private ["SE", "append"]
+- !private ["SE", "cgFloatValue"]
+- !private ["SE", "close"]
+- !private ["SE", "counterClockwise"]
+- !private ["SE", "direction"]
+- !private ["SE", "endIndex"]
+- !private ["SE", "init"]
+- !private ["SE", "innerRadius"]
+- !private ["SE", "innerRoundness"]
+- !private ["SE", "keyframes"]
+- !private ["SE", "name"]
+- !private ["SE", "outerRadius"]
+- !private ["SE", "outerRoundness"]
+- !private ["SE", "pi"]
+- !private ["SE", "pointValue"]
+- !private ["SE", "points"]
+- !private ["SE", "position"]
+- !private ["SE", "reversed"]
+- !private ["SE", "rotation"]
+- !private ["SE", "subscript"]
+- !private ["SE", "toRadians"]
+- !private ["SE", "values"]
+- !private ["SE", "x"]
+- !private ["SE", "y"]
+- !private ["SE", "zero"]
+- !private ["SQ", "append"]
+- !private ["SQ", "counterClockwise"]
+- !private ["SQ", "endIndex"]
+- !private ["SQ", "init"]
+- !private ["SQ", "pi"]
+- !private ["SQ", "reversed"]
+- !private ["SQ", "subscript"]
+- !private ["SQ", "toRadians"]
+- !private ["SQ", "values"]
+- !private ["SQ", "x"]
+- !private ["SQ", "y"]
+- !private ["SQ", "zero"]
+- !private ["s25ExpressibleByArrayLiteralP", "append"]
+- !private ["s25ExpressibleByArrayLiteralP", "endIndex"]
+- !private ["s25ExpressibleByArrayLiteralP", "init"]
+- !private ["s25ExpressibleByArrayLiteralP", "reversed"]
+- !private ["s25ExpressibleByArrayLiteralP", "subscript"]
+- !private ["s30ExpressibleByDictionaryLiteralP", "values"]
+- !private ["s25ExpressibleByFloatLiteralP", "pi"]
+- !private ["s25ExpressibleByFloatLiteralP", "toRadians"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "pi"]
+- !private ["s27ExpressibleByIntegerLiteralP", "toRadians"]
+- !private ["s17FixedWidthIntegerP", "init"]
+- !private ["SF", "pi"]
+- !private ["SF", "toRadians"]
+- !private ["SH", "append"]
+- !private ["SH", "counterClockwise"]
+- !private ["SH", "endIndex"]
+- !private ["SH", "init"]
+- !private ["SH", "pi"]
+- !private ["SH", "reversed"]
+- !private ["SH", "subscript"]
+- !private ["SH", "toRadians"]
+- !private ["SH", "values"]
+- !private ["Si", "init"]
+- !private ["6Lottie14InterpolatableP", "addVertex"]
+- !private ["6Lottie14InterpolatableP", "append"]
+- !private ["6Lottie14InterpolatableP", "cgFloatValue"]
+- !private ["6Lottie14InterpolatableP", "close"]
+- !private ["6Lottie14InterpolatableP", "endIndex"]
+- !private ["6Lottie14InterpolatableP", "inTangent"]
+- !private ["6Lottie14InterpolatableP", "init"]
+- !private ["6Lottie14InterpolatableP", "pi"]
+- !private ["6Lottie14InterpolatableP", "point"]
+- !private ["6Lottie14InterpolatableP", "pointValue"]
+- !private ["6Lottie14InterpolatableP", "reversed"]
+- !private ["6Lottie14InterpolatableP", "subscript"]
+- !private ["6Lottie14InterpolatableP", "toRadians"]
+- !private ["6Lottie14InterpolatableP", "x"]
+- !private ["6Lottie14InterpolatableP", "y"]
+- !private ["6Lottie14InterpolatableP", "zero"]
+- !private ["6Lottie13KeyframeGroupC", "keyframes"]
+- !private ["6Lottie20KeyframeInterpolatorC", "deinit"]
+- !private ["6Lottie20KeyframeInterpolatorC", "init"]
+- !private ["6Lottie17KeypathSearchableP", "Array"]
+- !private ["6Lottie17KeypathSearchableP", "BezierPath"]
+- !private ["6Lottie17KeypathSearchableP", "CGFloat"]
+- !private ["6Lottie17KeypathSearchableP", "CGPoint"]
+- !private ["6Lottie17KeypathSearchableP", "CurveVertex"]
+- !private ["6Lottie17KeypathSearchableP", "Int"]
+- !private ["6Lottie17KeypathSearchableP", "KeyframeInterpolator"]
+- !private ["6Lottie17KeypathSearchableP", "NodeProperty"]
+- !private ["6Lottie17KeypathSearchableP", "PathOutputNode"]
+- !private ["6Lottie17KeypathSearchableP", "PolystarConstant"]
+- !private ["6Lottie17KeypathSearchableP", "SingleValueProvider"]
+- !private ["6Lottie17KeypathSearchableP", "StarNode"]
+- !private ["6Lottie17KeypathSearchableP", "StarNodeProperties"]
+- !private ["6Lottie17KeypathSearchableP", "Vector1D"]
+- ["6Lottie17KeypathSearchableP", ""]
+- !private ["6Lottie17KeypathSearchableP", "atan2"]
+- !private ["6Lottie17KeypathSearchableP", "ceil"]
+- ["6Lottie17KeypathSearchableP", "childKeypaths"]
+- !private ["6Lottie17KeypathSearchableP", "cos"]
+- !private ["6Lottie17KeypathSearchableP", "direction"]
+- !private ["6Lottie17KeypathSearchableP", "floor"]
+- ["6Lottie17KeypathSearchableP", "forceUpstreamOutputUpdates"]
+- ["6Lottie17KeypathSearchableP", "hasLocalUpdates"]
+- ["6Lottie17KeypathSearchableP", "hasUpstreamUpdates"]
+- !private ["6Lottie17KeypathSearchableP", "init"]
+- !private ["6Lottie17KeypathSearchableP", "innerRadius"]
+- !private ["6Lottie17KeypathSearchableP", "innerRoundedness"]
+- ["6Lottie17KeypathSearchableP", "isEnabled"]
+- ["6Lottie17KeypathSearchableP", "keypathLayer"]
+- ["6Lottie17KeypathSearchableP", "keypathName"]
+- ["6Lottie17KeypathSearchableP", "keypathProperties"]
+- ["6Lottie17KeypathSearchableP", "lastUpdateFrame"]
+- ["6Lottie17KeypathSearchableP", "localUpdatesPermeateDownstream"]
+- !private ["6Lottie17KeypathSearchableP", "outerRadius"]
+- !private ["6Lottie17KeypathSearchableP", "outerRoundedness"]
+- ["6Lottie17KeypathSearchableP", "outputNode"]
+- ["6Lottie17KeypathSearchableP", "parentNode"]
+- ["6Lottie17KeypathSearchableP", "pathOutput"]
+- ["6Lottie17KeypathSearchableP", "performAdditionalLocalUpdates"]
+- ["6Lottie17KeypathSearchableP", "performAdditionalOutputUpdates"]
+- !private ["6Lottie17KeypathSearchableP", "points"]
+- !private ["6Lottie17KeypathSearchableP", "position"]
+- ["6Lottie17KeypathSearchableP", "properties"]
+- ["6Lottie17KeypathSearchableP", "propertyMap"]
+- ["6Lottie17KeypathSearchableP", "rebuildOutputs"]
+- !private ["6Lottie17KeypathSearchableP", "rotation"]
+- ["6Lottie17KeypathSearchableP", "shouldRebuildOutputs"]
+- !private ["6Lottie17KeypathSearchableP", "sin"]
+- !private ["s25LosslessStringConvertibleP", "init"]
+- !private ["s10MirrorPathP", "init"]
+- !private ["SM", "append"]
+- !private ["SM", "endIndex"]
+- !private ["SM", "init"]
+- !private ["SM", "reversed"]
+- !private ["SM", "subscript"]
+- !private ["10Foundation19MutableDataProtocolP", "append"]
+- !private ["10Foundation19MutableDataProtocolP", "endIndex"]
+- !private ["10Foundation19MutableDataProtocolP", "init"]
+- !private ["10Foundation19MutableDataProtocolP", "reversed"]
+- !private ["10Foundation19MutableDataProtocolP", "subscript"]
+- !private ["6Lottie10NodeOutputP", "init"]
+- !private ["6Lottie10NodeOutputP", "removePaths"]
+- !private ["6Lottie10NodeOutputP", "setPath"]
+- !private ["6Lottie12NodePropertyC", "deinit"]
+- !private ["6Lottie12NodePropertyC", "init"]
+- !private ["6Lottie12NodePropertyC", "value"]
+- !private ["6Lottie15NodePropertyMapP", "Array"]
+- !private ["6Lottie15NodePropertyMapP", "KeyframeInterpolator"]
+- !private ["6Lottie15NodePropertyMapP", "NodeProperty"]
+- !private ["6Lottie15NodePropertyMapP", "SingleValueProvider"]
+- !private ["6Lottie15NodePropertyMapP", "Vector1D"]
+- ["6Lottie15NodePropertyMapP", ""]
+- ["6Lottie15NodePropertyMapP", "childKeypaths"]
+- !private ["6Lottie15NodePropertyMapP", "direction"]
+- !private ["6Lottie15NodePropertyMapP", "init"]
+- !private ["6Lottie15NodePropertyMapP", "innerRadius"]
+- !private ["6Lottie15NodePropertyMapP", "innerRoundedness"]
+- ["6Lottie15NodePropertyMapP", "keypathLayer"]
+- ["6Lottie15NodePropertyMapP", "keypathName"]
+- ["6Lottie15NodePropertyMapP", "keypathProperties"]
+- !private ["6Lottie15NodePropertyMapP", "outerRadius"]
+- !private ["6Lottie15NodePropertyMapP", "outerRoundedness"]
+- !private ["6Lottie15NodePropertyMapP", "points"]
+- !private ["6Lottie15NodePropertyMapP", "position"]
+- ["6Lottie15NodePropertyMapP", "properties"]
+- !private ["6Lottie15NodePropertyMapP", "rotation"]
+- !private ["Sj", "init"]
+- !private ["Sj", "pi"]
+- !private ["Sj", "toRadians"]
+- !private ["6Lottie13PathDirectionO", "counterClockwise"]
+- !private ["6Lottie13PathDirectionO", "deinit"]
+- !private ["6Lottie8PathNodeP", "BezierPath"]
+- !private ["6Lottie8PathNodeP", "CGFloat"]
+- !private ["6Lottie8PathNodeP", "CGPoint"]
+- !private ["6Lottie8PathNodeP", "CurveVertex"]
+- !private ["6Lottie8PathNodeP", "Int"]
+- !private ["6Lottie8PathNodeP", "PathOutputNode"]
+- !private ["6Lottie8PathNodeP", "PolystarConstant"]
+- !private ["6Lottie8PathNodeP", "StarNode"]
+- !private ["6Lottie8PathNodeP", "StarNodeProperties"]
+- ["6Lottie8PathNodeP", ""]
+- !private ["6Lottie8PathNodeP", "atan2"]
+- !private ["6Lottie8PathNodeP", "ceil"]
+- ["6Lottie8PathNodeP", "childKeypaths"]
+- !private ["6Lottie8PathNodeP", "cos"]
+- !private ["6Lottie8PathNodeP", "floor"]
+- ["6Lottie8PathNodeP", "forceUpstreamOutputUpdates"]
+- ["6Lottie8PathNodeP", "hasLocalUpdates"]
+- ["6Lottie8PathNodeP", "hasUpstreamUpdates"]
+- ["6Lottie8PathNodeP", "isEnabled"]
+- ["6Lottie8PathNodeP", "keypathLayer"]
+- ["6Lottie8PathNodeP", "keypathName"]
+- ["6Lottie8PathNodeP", "keypathProperties"]
+- ["6Lottie8PathNodeP", "lastUpdateFrame"]
+- ["6Lottie8PathNodeP", "localUpdatesPermeateDownstream"]
+- ["6Lottie8PathNodeP", "outputNode"]
+- ["6Lottie8PathNodeP", "parentNode"]
+- ["6Lottie8PathNodeP", "pathOutput"]
+- ["6Lottie8PathNodeP", "performAdditionalLocalUpdates"]
+- ["6Lottie8PathNodeP", "performAdditionalOutputUpdates"]
+- !private ["6Lottie8PathNodeP", "properties"]
+- ["6Lottie8PathNodeP", "propertyMap"]
+- ["6Lottie8PathNodeP", "rebuildOutputs"]
+- ["6Lottie8PathNodeP", "shouldRebuildOutputs"]
+- !private ["6Lottie8PathNodeP", "sin"]
+- !private ["6Lottie14PathOutputNodeC", "init"]
+- !private ["6Lottie14PathOutputNodeC", "removePaths"]
+- !private ["6Lottie14PathOutputNodeC", "setPath"]
+- !private ["Sk", "append"]
+- !private ["Sk", "endIndex"]
+- !private ["Sk", "init"]
+- !private ["Sk", "reversed"]
+- !private ["Sk", "subscript"]
+- !private ["Sm", "append"]
+- !private ["Sm", "endIndex"]
+- !private ["Sm", "init"]
+- !private ["Sm", "reversed"]
+- !private ["Sm", "subscript"]
+- !private ["SY", "counterClockwise"]
+- !private ["s10SIMDScalarP", "init"]
+- !private ["ST", "append"]
+- !private ["ST", "endIndex"]
+- !private ["ST", "init"]
+- !private ["ST", "reversed"]
+- !private ["ST", "subscript"]
+- !private ["ST", "values"]
+- !private ["6Lottie9ShapeItemC", "direction"]
+- !private ["6Lottie9ShapeItemC", "innerRadius"]
+- !private ["6Lottie9ShapeItemC", "innerRoundness"]
+- !private ["6Lottie9ShapeItemC", "name"]
+- !private ["6Lottie9ShapeItemC", "outerRadius"]
+- !private ["6Lottie9ShapeItemC", "outerRoundness"]
+- !private ["6Lottie9ShapeItemC", "points"]
+- !private ["6Lottie9ShapeItemC", "position"]
+- !private ["6Lottie9ShapeItemC", "rotation"]
+- !private ["SZ", "init"]
+- !private ["s13SignedNumericP", "init"]
+- !private ["s13SignedNumericP", "pi"]
+- !private ["s13SignedNumericP", "toRadians"]
+- !private ["6Lottie19SingleValueProviderC", "deinit"]
+- !private ["6Lottie19SingleValueProviderC", "init"]
+- !private ["6Lottie4StarC", "direction"]
+- !private ["6Lottie4StarC", "innerRadius"]
+- !private ["6Lottie4StarC", "innerRoundness"]
+- !private ["6Lottie4StarC", "name"]
+- !private ["6Lottie4StarC", "outerRadius"]
+- !private ["6Lottie4StarC", "outerRoundness"]
+- !private ["6Lottie4StarC", "points"]
+- !private ["6Lottie4StarC", "position"]
+- !private ["6Lottie4StarC", "rotation"]
+- ["6Lottie8StarNodeC", "AnimatorNode"]
+- !private ["6Lottie8StarNodeC", "BezierPath"]
+- ["6Lottie8StarNodeC", "Bool"]
+- ["6Lottie8StarNodeC", "CGFloat"]
+- !private ["6Lottie8StarNodeC", "CGPoint"]
+- !private ["6Lottie8StarNodeC", "CurveVertex"]
+- !private ["6Lottie8StarNodeC", "Int"]
+- ["6Lottie8StarNodeC", "KeypathSearchable"]
+- ["6Lottie8StarNodeC", "NodePropertyMap"]
+- ["6Lottie8StarNodeC", "PathOutputNode"]
+- ["6Lottie8StarNodeC", "PolystarConstant"]
+- ["6Lottie8StarNodeC", "Star"]
+- !private ["6Lottie8StarNodeC", "StarNode"]
+- ["6Lottie8StarNodeC", "StarNodeProperties"]
+- !private ["6Lottie8StarNodeC", "atan2"]
+- !private ["6Lottie8StarNodeC", "ceil"]
+- ["6Lottie8StarNodeC", "childKeypaths"]
+- !private ["6Lottie8StarNodeC", "cos"]
+- ["6Lottie8StarNodeC", "deinit"]
+- !private ["6Lottie8StarNodeC", "floor"]
+- ["6Lottie8StarNodeC", "forceUpstreamOutputUpdates"]
+- ["6Lottie8StarNodeC", "hasLocalUpdates"]
+- ["6Lottie8StarNodeC", "hasUpstreamUpdates"]
+- ["6Lottie8StarNodeC", "init"]
+- ["6Lottie8StarNodeC", "isEnabled"]
+- ["6Lottie8StarNodeC", "keypathLayer"]
+- ["6Lottie8StarNodeC", "keypathName"]
+- ["6Lottie8StarNodeC", "keypathProperties"]
+- ["6Lottie8StarNodeC", "lastUpdateFrame"]
+- ["6Lottie8StarNodeC", "localUpdatesPermeateDownstream"]
+- ["6Lottie8StarNodeC", "outputNode"]
+- ["6Lottie8StarNodeC", "parentNode"]
+- ["6Lottie8StarNodeC", "pathOutput"]
+- ["6Lottie8StarNodeC", "performAdditionalLocalUpdates"]
+- ["6Lottie8StarNodeC", "performAdditionalOutputUpdates"]
+- ["6Lottie8StarNodeC", "properties"]
+- ["6Lottie8StarNodeC", "propertyMap"]
+- ["6Lottie8StarNodeC", "rebuildOutputs"]
+- ["6Lottie8StarNodeC", "shouldRebuildOutputs"]
+- !private ["6Lottie8StarNodeC", "sin"]
+- ["6Lottie18StarNodePropertiesC", "AnyNodeProperty"]
+- !private ["6Lottie18StarNodePropertiesC", "Array"]
+- !private ["6Lottie18StarNodePropertiesC", "KeyframeInterpolator"]
+- ["6Lottie18StarNodePropertiesC", "NodeProperty"]
+- ["6Lottie18StarNodePropertiesC", "PathDirection"]
+- !private ["6Lottie18StarNodePropertiesC", "SingleValueProvider"]
+- ["6Lottie18StarNodePropertiesC", "Star"]
+- ["6Lottie18StarNodePropertiesC", "String"]
+- ["6Lottie18StarNodePropertiesC", "Vector1D"]
+- ["6Lottie18StarNodePropertiesC", "Vector3D"]
+- ["6Lottie18StarNodePropertiesC", "childKeypaths"]
+- ["6Lottie18StarNodePropertiesC", "deinit"]
+- ["6Lottie18StarNodePropertiesC", "direction"]
+- ["6Lottie18StarNodePropertiesC", "init"]
+- ["6Lottie18StarNodePropertiesC", "innerRadius"]
+- ["6Lottie18StarNodePropertiesC", "innerRoundedness"]
+- ["6Lottie18StarNodePropertiesC", "keypathLayer"]
+- ["6Lottie18StarNodePropertiesC", "keypathName"]
+- ["6Lottie18StarNodePropertiesC", "keypathProperties"]
+- ["6Lottie18StarNodePropertiesC", "outerRadius"]
+- ["6Lottie18StarNodePropertiesC", "outerRoundedness"]
+- ["6Lottie18StarNodePropertiesC", "points"]
+- ["6Lottie18StarNodePropertiesC", "position"]
+- ["6Lottie18StarNodePropertiesC", "properties"]
+- ["6Lottie18StarNodePropertiesC", "rotation"]
+- !private ["Sx", "init"]
+- !private ["Sx", "pi"]
+- !private ["Sx", "toRadians"]
+- !private ["6Lottie8Vector1DV", "cgFloatValue"]
+- !private ["6Lottie8Vector1DV", "deinit"]
+- !private ["6Lottie8Vector1DV", "init"]
+- !private ["6Lottie8Vector3DV", "deinit"]
+- !private ["6Lottie8Vector3DV", "pointValue"]
+- !private ["s14_ArrayProtocolP", "append"]
+- !private ["s14_ArrayProtocolP", "endIndex"]
+- !private ["s14_ArrayProtocolP", "init"]
+- !private ["s14_ArrayProtocolP", "reversed"]
+- !private ["s14_ArrayProtocolP", "subscript"]
+- !private ["s15_CVarArgAlignedP", "pi"]
+- !private ["s15_CVarArgAlignedP", "toRadians"]
+- !private ["s22_CVarArgPassedAsDoubleP", "pi"]
+- !private ["s22_CVarArgPassedAsDoubleP", "toRadians"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "x"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "y"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "zero"]
+- !private ["s24_DestructorSafeContainerP", "append"]
+- !private ["s24_DestructorSafeContainerP", "endIndex"]
+- !private ["s24_DestructorSafeContainerP", "init"]
+- !private ["s24_DestructorSafeContainerP", "reversed"]
+- !private ["s24_DestructorSafeContainerP", "subscript"]
+- !private ["s35_ExpressibleByBuiltinIntegerLiteralP", "init"]
+- !private ["s19_HasContiguousBytesP", "append"]
+- !private ["s19_HasContiguousBytesP", "endIndex"]
+- !private ["s19_HasContiguousBytesP", "init"]
+- !private ["s19_HasContiguousBytesP", "reversed"]
+- !private ["s19_HasContiguousBytesP", "subscript"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "append"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "endIndex"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "reversed"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "subscript"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "values"]
+- !private ["s21_ObjectiveCBridgeableP", "append"]
+- !private ["s21_ObjectiveCBridgeableP", "endIndex"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "pi"]
+- !private ["s21_ObjectiveCBridgeableP", "reversed"]
+- !private ["s21_ObjectiveCBridgeableP", "subscript"]
+- !private ["s21_ObjectiveCBridgeableP", "toRadians"]
+- !private ["s21_ObjectiveCBridgeableP", "values"]
+- !private ["s21_ObjectiveCBridgeableP", "x"]
+- !private ["s21_ObjectiveCBridgeableP", "y"]
+- !private ["s21_ObjectiveCBridgeableP", "zero"]
+depends-nominal:
+- !private "s18AdditiveArithmeticP"
+- "6Lottie12AnimatorNodeP"
+- !private "6Lottie15AnyNodePropertyP"
+- !private "6Lottie16AnyValueProviderP"
+- !private "Sa"
+- !private "6Lottie10BezierPathV"
+- !private "SK"
+- !private "SB"
+- !private "Sz"
+- !private "12CoreGraphics7CGFloatV"
+- !private "So7CGPointV"
+- !private "s7CVarArgP"
+- !private "Sl"
+- !private "SL"
+- !private "10Foundation15ContiguousBytesP"
+- !private "6Lottie11CurveVertexV"
+- !private "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- !private "s23CustomStringConvertibleP"
+- !private "10Foundation12DataProtocolP"
+- !private "Se"
+- !private "SD"
+- !private "SE"
+- !private "SQ"
+- !private "s25ExpressibleByArrayLiteralP"
+- !private "s30ExpressibleByDictionaryLiteralP"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- !private "s17FixedWidthIntegerP"
+- !private "SF"
+- !private "SH"
+- !private "Si"
+- !private "6Lottie14InterpolatableP"
+- !private "6Lottie13KeyframeGroupC"
+- !private "6Lottie20KeyframeInterpolatorC"
+- "6Lottie17KeypathSearchableP"
+- !private "s25LosslessStringConvertibleP"
+- !private "s10MirrorPathP"
+- !private "SM"
+- !private "10Foundation19MutableDataProtocolP"
+- !private "6Lottie10NodeOutputP"
+- !private "6Lottie12NodePropertyC"
+- "6Lottie15NodePropertyMapP"
+- !private "Sj"
+- !private "6Lottie13PathDirectionO"
+- "6Lottie8PathNodeP"
+- !private "6Lottie14PathOutputNodeC"
+- !private "Sk"
+- !private "Sm"
+- !private "SY"
+- !private "s10SIMDScalarP"
+- !private "ST"
+- !private "6Lottie9ShapeItemC"
+- !private "SZ"
+- !private "s13SignedNumericP"
+- !private "6Lottie19SingleValueProviderC"
+- !private "6Lottie4StarC"
+- "6Lottie8StarNodeC"
+- "6Lottie18StarNodePropertiesC"
+- !private "Sx"
+- !private "6Lottie8Vector1DV"
+- !private "6Lottie8Vector3DV"
+- !private "s14_ArrayProtocolP"
+- !private "s15_CVarArgAlignedP"
+- !private "s22_CVarArgPassedAsDoubleP"
+- !private "s30_CustomPlaygroundQuickLookableP"
+- !private "s24_DestructorSafeContainerP"
+- !private "s35_ExpressibleByBuiltinIntegerLiteralP"
+- !private "s19_HasContiguousBytesP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- !private "s21_ObjectiveCBridgeableP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "0ca31f9582dd91fe43c37296fc253bc9"

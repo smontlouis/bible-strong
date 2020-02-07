@@ -1,4 +1,4 @@
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 export const logger = store => next => action => {
   Sentry.addBreadcrumb({

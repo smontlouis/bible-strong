@@ -1,0 +1,1 @@
+../../../../../node_modules/expo-sharing/ios/EXSharing/EXSharingModule.h

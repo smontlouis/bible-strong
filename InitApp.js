@@ -4,7 +4,7 @@ import { Provider as PaperProvider } from 'react-native-paper'
 import { StatusBar, AppState } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 import compose from 'recompose/compose'
 import ErrorBoundary from '~common/ErrorBoundary'
 

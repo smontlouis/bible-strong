@@ -1,0 +1,337 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "TextAnimator"
+provides-nominal:
+- "6Lottie12TextAnimatorC"
+provides-member:
+- ["6Lottie12TextAnimatorC", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "=="
+- !private "??"
+- "AssignmentPrecedence"
+- "Codable"
+- "CodingKey"
+- "Color"
+- "Decoder"
+- "Encoder"
+- !private "FloatLiteralType"
+- !private "IntegerLiteralType"
+- "KeyframeGroup"
+- "String"
+- "StringLiteralType"
+- "TextAnimator"
+- "UnicodeScalarType"
+- "Vector1D"
+- "Vector3D"
+- !private "_findStringSwitchCase"
+- !private "~="
+depends-member:
+- ["s9CodingKeyP", "=="]
+- ["s9CodingKeyP", "RawValue"]
+- !private ["s9CodingKeyP", ""]
+- ["s9CodingKeyP", "_Default_RawValue"]
+- !private ["s9CodingKeyP", "_findStringSwitchCase"]
+- ["s9CodingKeyP", "_rawHashValue"]
+- !private ["s9CodingKeyP", "anchor"]
+- ["s9CodingKeyP", "debugDescription"]
+- ["s9CodingKeyP", "description"]
+- !private ["s9CodingKeyP", "fillColor"]
+- ["s9CodingKeyP", "hash"]
+- ["s9CodingKeyP", "hashValue"]
+- ["s9CodingKeyP", "init"]
+- ["s9CodingKeyP", "intValue"]
+- !private ["s9CodingKeyP", "name"]
+- !private ["s9CodingKeyP", "opacity"]
+- !private ["s9CodingKeyP", "position"]
+- ["s9CodingKeyP", "rawValue"]
+- !private ["s9CodingKeyP", "rotation"]
+- !private ["s9CodingKeyP", "scale"]
+- !private ["s9CodingKeyP", "skew"]
+- !private ["s9CodingKeyP", "skewAxis"]
+- ["s9CodingKeyP", "stringValue"]
+- !private ["s9CodingKeyP", "strokeColor"]
+- !private ["s9CodingKeyP", "strokeWidth"]
+- !private ["s9CodingKeyP", "textAnimator"]
+- !private ["s9CodingKeyP", "tracking"]
+- ["6Lottie5ColorV", "deinit"]
+- ["s28CustomDebugStringConvertibleP", "=="]
+- ["s28CustomDebugStringConvertibleP", "RawValue"]
+- !private ["s28CustomDebugStringConvertibleP", ""]
+- ["s28CustomDebugStringConvertibleP", "_Default_RawValue"]
+- !private ["s28CustomDebugStringConvertibleP", "_findStringSwitchCase"]
+- ["s28CustomDebugStringConvertibleP", "_rawHashValue"]
+- !private ["s28CustomDebugStringConvertibleP", "anchor"]
+- ["s28CustomDebugStringConvertibleP", "debugDescription"]
+- ["s28CustomDebugStringConvertibleP", "description"]
+- !private ["s28CustomDebugStringConvertibleP", "fillColor"]
+- ["s28CustomDebugStringConvertibleP", "hash"]
+- ["s28CustomDebugStringConvertibleP", "hashValue"]
+- ["s28CustomDebugStringConvertibleP", "init"]
+- ["s28CustomDebugStringConvertibleP", "intValue"]
+- !private ["s28CustomDebugStringConvertibleP", "name"]
+- !private ["s28CustomDebugStringConvertibleP", "opacity"]
+- !private ["s28CustomDebugStringConvertibleP", "position"]
+- ["s28CustomDebugStringConvertibleP", "rawValue"]
+- !private ["s28CustomDebugStringConvertibleP", "rotation"]
+- !private ["s28CustomDebugStringConvertibleP", "scale"]
+- !private ["s28CustomDebugStringConvertibleP", "skew"]
+- !private ["s28CustomDebugStringConvertibleP", "skewAxis"]
+- ["s28CustomDebugStringConvertibleP", "stringValue"]
+- !private ["s28CustomDebugStringConvertibleP", "strokeColor"]
+- !private ["s28CustomDebugStringConvertibleP", "strokeWidth"]
+- !private ["s28CustomDebugStringConvertibleP", "textAnimator"]
+- !private ["s28CustomDebugStringConvertibleP", "tracking"]
+- ["s23CustomStringConvertibleP", "=="]
+- ["s23CustomStringConvertibleP", "RawValue"]
+- !private ["s23CustomStringConvertibleP", ""]
+- ["s23CustomStringConvertibleP", "_Default_RawValue"]
+- !private ["s23CustomStringConvertibleP", "_findStringSwitchCase"]
+- ["s23CustomStringConvertibleP", "_rawHashValue"]
+- !private ["s23CustomStringConvertibleP", "anchor"]
+- ["s23CustomStringConvertibleP", "debugDescription"]
+- ["s23CustomStringConvertibleP", "description"]
+- !private ["s23CustomStringConvertibleP", "fillColor"]
+- ["s23CustomStringConvertibleP", "hash"]
+- ["s23CustomStringConvertibleP", "hashValue"]
+- ["s23CustomStringConvertibleP", "init"]
+- ["s23CustomStringConvertibleP", "intValue"]
+- !private ["s23CustomStringConvertibleP", "name"]
+- !private ["s23CustomStringConvertibleP", "opacity"]
+- !private ["s23CustomStringConvertibleP", "position"]
+- ["s23CustomStringConvertibleP", "rawValue"]
+- !private ["s23CustomStringConvertibleP", "rotation"]
+- !private ["s23CustomStringConvertibleP", "scale"]
+- !private ["s23CustomStringConvertibleP", "skew"]
+- !private ["s23CustomStringConvertibleP", "skewAxis"]
+- ["s23CustomStringConvertibleP", "stringValue"]
+- !private ["s23CustomStringConvertibleP", "strokeColor"]
+- !private ["s23CustomStringConvertibleP", "strokeWidth"]
+- !private ["s23CustomStringConvertibleP", "textAnimator"]
+- !private ["s23CustomStringConvertibleP", "tracking"]
+- !private ["Se", "CodingKeys"]
+- !private ["Se", "KeyframeGroup"]
+- !private ["Se", "String"]
+- !private ["Se", "TextAnimator"]
+- !private ["Se", "TextAnimatorKeys"]
+- ["Se", ""]
+- !private ["Se", "_findStringSwitchCase"]
+- !private ["Se", "anchor"]
+- ["Se", "encode"]
+- !private ["Se", "fillColor"]
+- ["Se", "init"]
+- !private ["Se", "name"]
+- !private ["Se", "opacity"]
+- !private ["Se", "position"]
+- !private ["Se", "rotation"]
+- !private ["Se", "scale"]
+- !private ["Se", "skew"]
+- !private ["Se", "skewAxis"]
+- !private ["Se", "strokeColor"]
+- !private ["Se", "strokeWidth"]
+- !private ["Se", "tracking"]
+- !private ["s7DecoderP", "container"]
+- !private ["SE", "CodingKeys"]
+- !private ["SE", "KeyframeGroup"]
+- !private ["SE", "String"]
+- !private ["SE", "TextAnimator"]
+- !private ["SE", "TextAnimatorKeys"]
+- ["SE", ""]
+- !private ["SE", "_findStringSwitchCase"]
+- !private ["SE", "anchor"]
+- ["SE", "encode"]
+- !private ["SE", "fillColor"]
+- ["SE", "init"]
+- !private ["SE", "name"]
+- !private ["SE", "opacity"]
+- !private ["SE", "position"]
+- !private ["SE", "rotation"]
+- !private ["SE", "scale"]
+- !private ["SE", "skew"]
+- !private ["SE", "skewAxis"]
+- !private ["SE", "strokeColor"]
+- !private ["SE", "strokeWidth"]
+- !private ["SE", "tracking"]
+- !private ["s7EncoderP", "container"]
+- ["SQ", "=="]
+- ["SQ", "RawValue"]
+- !private ["SQ", ""]
+- ["SQ", "_Default_RawValue"]
+- !private ["SQ", "_findStringSwitchCase"]
+- ["SQ", "_rawHashValue"]
+- !private ["SQ", "anchor"]
+- ["SQ", "debugDescription"]
+- ["SQ", "description"]
+- !private ["SQ", "fillColor"]
+- ["SQ", "hash"]
+- ["SQ", "hashValue"]
+- ["SQ", "init"]
+- ["SQ", "intValue"]
+- !private ["SQ", "name"]
+- !private ["SQ", "opacity"]
+- !private ["SQ", "position"]
+- ["SQ", "rawValue"]
+- !private ["SQ", "rotation"]
+- !private ["SQ", "scale"]
+- !private ["SQ", "skew"]
+- !private ["SQ", "skewAxis"]
+- ["SQ", "stringValue"]
+- !private ["SQ", "strokeColor"]
+- !private ["SQ", "strokeWidth"]
+- !private ["SQ", "textAnimator"]
+- !private ["SQ", "tracking"]
+- ["SH", "=="]
+- ["SH", "RawValue"]
+- !private ["SH", ""]
+- ["SH", "_Default_RawValue"]
+- !private ["SH", "_findStringSwitchCase"]
+- ["SH", "_rawHashValue"]
+- !private ["SH", "anchor"]
+- ["SH", "debugDescription"]
+- ["SH", "description"]
+- !private ["SH", "fillColor"]
+- ["SH", "hash"]
+- ["SH", "hashValue"]
+- ["SH", "init"]
+- ["SH", "intValue"]
+- !private ["SH", "name"]
+- !private ["SH", "opacity"]
+- !private ["SH", "position"]
+- ["SH", "rawValue"]
+- !private ["SH", "rotation"]
+- !private ["SH", "scale"]
+- !private ["SH", "skew"]
+- !private ["SH", "skewAxis"]
+- ["SH", "stringValue"]
+- !private ["SH", "strokeColor"]
+- !private ["SH", "strokeWidth"]
+- !private ["SH", "textAnimator"]
+- !private ["SH", "tracking"]
+- !private ["s22KeyedDecodingContainerV", "decodeIfPresent"]
+- !private ["s22KeyedDecodingContainerV", "nestedContainer"]
+- !private ["s30KeyedDecodingContainerProtocolP", "decodeIfPresent"]
+- !private ["s30KeyedDecodingContainerProtocolP", "nestedContainer"]
+- !private ["s22KeyedEncodingContainerV", "encodeIfPresent"]
+- !private ["s22KeyedEncodingContainerV", "nestedContainer"]
+- !private ["s30KeyedEncodingContainerProtocolP", "encodeIfPresent"]
+- !private ["s30KeyedEncodingContainerProtocolP", "nestedContainer"]
+- !private ["6Lottie13KeyframeGroupC", "deinit"]
+- ["SY", "=="]
+- ["SY", "RawValue"]
+- !private ["SY", ""]
+- ["SY", "_Default_RawValue"]
+- !private ["SY", "_findStringSwitchCase"]
+- ["SY", "_rawHashValue"]
+- !private ["SY", "anchor"]
+- ["SY", "debugDescription"]
+- ["SY", "description"]
+- !private ["SY", "fillColor"]
+- ["SY", "hash"]
+- ["SY", "hashValue"]
+- ["SY", "init"]
+- ["SY", "intValue"]
+- !private ["SY", "name"]
+- !private ["SY", "opacity"]
+- !private ["SY", "position"]
+- ["SY", "rawValue"]
+- !private ["SY", "rotation"]
+- !private ["SY", "scale"]
+- !private ["SY", "skew"]
+- !private ["SY", "skewAxis"]
+- ["SY", "stringValue"]
+- !private ["SY", "strokeColor"]
+- !private ["SY", "strokeWidth"]
+- !private ["SY", "textAnimator"]
+- !private ["SY", "tracking"]
+- ["6Lottie12TextAnimatorC", "CodingKey"]
+- !private ["6Lottie12TextAnimatorC", "CodingKeys"]
+- ["6Lottie12TextAnimatorC", "Color"]
+- ["6Lottie12TextAnimatorC", "Decoder"]
+- ["6Lottie12TextAnimatorC", "Encoder"]
+- ["6Lottie12TextAnimatorC", "KeyframeGroup"]
+- ["6Lottie12TextAnimatorC", "String"]
+- !private ["6Lottie12TextAnimatorC", "TextAnimator"]
+- !private ["6Lottie12TextAnimatorC", "TextAnimatorKeys"]
+- !private ["6Lottie12TextAnimatorC", "TextSelectorKeys"]
+- ["6Lottie12TextAnimatorC", "Vector1D"]
+- ["6Lottie12TextAnimatorC", "Vector3D"]
+- !private ["6Lottie12TextAnimatorC", "_findStringSwitchCase"]
+- ["6Lottie12TextAnimatorC", "anchor"]
+- ["6Lottie12TextAnimatorC", "deinit"]
+- ["6Lottie12TextAnimatorC", "encode"]
+- ["6Lottie12TextAnimatorC", "fillColor"]
+- ["6Lottie12TextAnimatorC", "init"]
+- ["6Lottie12TextAnimatorC", "name"]
+- ["6Lottie12TextAnimatorC", "opacity"]
+- ["6Lottie12TextAnimatorC", "position"]
+- ["6Lottie12TextAnimatorC", "rotation"]
+- ["6Lottie12TextAnimatorC", "scale"]
+- ["6Lottie12TextAnimatorC", "skew"]
+- ["6Lottie12TextAnimatorC", "skewAxis"]
+- ["6Lottie12TextAnimatorC", "strokeColor"]
+- ["6Lottie12TextAnimatorC", "strokeWidth"]
+- ["6Lottie12TextAnimatorC", "tracking"]
+- ["6Lottie8Vector1DV", "deinit"]
+- ["6Lottie8Vector3DV", "deinit"]
+depends-nominal:
+- "s9CodingKeyP"
+- "6Lottie5ColorV"
+- "s28CustomDebugStringConvertibleP"
+- "s23CustomStringConvertibleP"
+- "Se"
+- !private "s7DecoderP"
+- "SE"
+- !private "s7EncoderP"
+- "SQ"
+- "SH"
+- !private "s22KeyedDecodingContainerV"
+- !private "s30KeyedDecodingContainerProtocolP"
+- !private "s22KeyedEncodingContainerV"
+- !private "s30KeyedEncodingContainerProtocolP"
+- !private "6Lottie13KeyframeGroupC"
+- "SY"
+- "6Lottie12TextAnimatorC"
+- "6Lottie8Vector1DV"
+- "6Lottie8Vector3DV"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "fa19bb4a467391e3e4f625bd167df088"

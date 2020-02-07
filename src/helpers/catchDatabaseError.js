@@ -1,4 +1,4 @@
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
 
 const catchDBError = async fn => {

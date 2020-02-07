@@ -1,0 +1,38 @@
+dependencies: \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/expo-facebook/ios/EXFacebook/EXFacebookAppDelegate.m \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Target\ Support\ Files/EXFacebook/EXFacebook-prefix.pch \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/expo-facebook/ios/EXFacebook/EXFacebookAppDelegate.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMSingletonModule.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/expo-facebook/ios/EXFacebook/EXFacebook.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMExportedModule.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMDefines.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMInternalModule.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKCoreKit.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAccessToken.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKCopying.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKGraphRequestConnection.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppEvents.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKApplicationDelegate.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKButton.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKConstants.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKGraphRequest.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKGraphRequestDataAttachment.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKSettings.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKTestUsersManager.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKUtility.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLink.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkTarget.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkNavigation.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkResolving.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkResolver.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkReturnToRefererController.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkReturnToRefererView.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKAppLinkUtility.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKGraphErrorRecoveryProcessor.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKMeasurementEvent.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKMutableCopying.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKProfile.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKProfilePictureView.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKURL.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/FBSDKCoreKit/FBSDKWebViewAppLinkResolver.h \
+  /Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Private/UMCore/UMAppDelegateWrapper.h

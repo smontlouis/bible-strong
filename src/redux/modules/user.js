@@ -1,6 +1,6 @@
 import produce from 'immer'
 import deepmerge from 'deepmerge'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 import { clearSelectedVerses } from './bible'
 

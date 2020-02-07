@@ -1,0 +1,326 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "FillRenderer"
+provides-nominal:
+- "6Lottie12FillRendererC"
+provides-member:
+- ["6Lottie8FillRuleO", ""]
+- ["6Lottie12FillRendererC", ""]
+- ["6Lottie8FillRuleO", "cgFillRule"]
+- ["6Lottie8FillRuleO", "caFillRule"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "!="
+- !private "&&"
+- !private "*"
+- !private "=="
+- "AssignmentPrecedence"
+- "Bool"
+- "BooleanLiteralType"
+- "CAShapeLayer"
+- "CAShapeLayerFillRule"
+- "CGColor"
+- "CGContext"
+- "CGFloat"
+- "CGPathFillRule"
+- "FillRenderer"
+- "FillRule"
+- !private "Float"
+- "FloatLiteralType"
+- "IntegerLiteralType"
+- "PassThroughOutputNode"
+- "Renderable"
+depends-member:
+- !private ["s18AdditiveArithmeticP", "init"]
+- !private ["SB", "init"]
+- !private ["So7CALayerC", "fillColor"]
+- !private ["So7CALayerC", "fillRule"]
+- !private ["So7CALayerC", "opacity"]
+- !private ["So13CAMediaTimingP", "fillColor"]
+- !private ["So13CAMediaTimingP", "fillRule"]
+- !private ["So13CAMediaTimingP", "opacity"]
+- !private ["So12CAShapeLayerC", "fillColor"]
+- !private ["So12CAShapeLayerC", "fillRule"]
+- !private ["So12CAShapeLayerC", "opacity"]
+- !private ["So20CAShapeLayerFillRulea", "evenOdd"]
+- !private ["So20CAShapeLayerFillRulea", "nonZero"]
+- !private ["So12CGContextRefa", "fillPath"]
+- !private ["So12CGContextRefa", "path"]
+- !private ["So12CGContextRefa", "setAlpha"]
+- !private ["So12CGContextRefa", "setFillColor"]
+- !private ["So9CGPathRefa", "isEmpty"]
+- !private ["12CoreGraphics14CGPathFillRuleO", "evenOdd"]
+- !private ["12CoreGraphics14CGPathFillRuleO", "winding"]
+- !private ["s7CVarArgP", "fillColor"]
+- !private ["s7CVarArgP", "fillRule"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "opacity"]
+- !private ["SL", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "fillColor"]
+- !private ["s28CustomDebugStringConvertibleP", "fillRule"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "opacity"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s23CustomStringConvertibleP", "fillColor"]
+- !private ["s23CustomStringConvertibleP", "fillRule"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "opacity"]
+- !private ["Se", "CAShapeLayerFillRule"]
+- !private ["Se", "caFillRule"]
+- !private ["Se", "cgFillRule"]
+- ["Se", "evenOdd"]
+- !private ["Se", "init"]
+- ["Se", "none"]
+- !private ["SE", "CAShapeLayerFillRule"]
+- !private ["SE", "caFillRule"]
+- !private ["SE", "cgFillRule"]
+- ["SE", "evenOdd"]
+- !private ["SE", "init"]
+- ["SE", "none"]
+- !private ["SQ", "CAShapeLayerFillRule"]
+- !private ["SQ", "caFillRule"]
+- !private ["SQ", "cgFillRule"]
+- ["SQ", "evenOdd"]
+- !private ["SQ", "fillColor"]
+- !private ["SQ", "fillPath"]
+- !private ["SQ", "fillRule"]
+- !private ["SQ", "init"]
+- !private ["SQ", "isEmpty"]
+- !private ["SQ", "nonZero"]
+- ["SQ", "none"]
+- !private ["SQ", "opacity"]
+- !private ["SQ", "path"]
+- !private ["SQ", "setAlpha"]
+- !private ["SQ", "setFillColor"]
+- !private ["SQ", "winding"]
+- !private ["s25ExpressibleByFloatLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- ["6Lottie12FillRendererC", "Bool"]
+- ["6Lottie12FillRendererC", "CAShapeLayer"]
+- ["6Lottie12FillRendererC", "CGColor"]
+- ["6Lottie12FillRendererC", "CGContext"]
+- ["6Lottie12FillRendererC", "CGFloat"]
+- ["6Lottie12FillRendererC", "FillRule"]
+- !private ["6Lottie12FillRendererC", "Float"]
+- ["6Lottie12FillRendererC", "color"]
+- ["6Lottie12FillRendererC", "deinit"]
+- ["6Lottie12FillRendererC", "fillRule"]
+- ["6Lottie12FillRendererC", "hasRenderUpdates"]
+- ["6Lottie12FillRendererC", "hasUpdate"]
+- ["6Lottie12FillRendererC", "init"]
+- ["6Lottie12FillRendererC", "isEnabled"]
+- ["6Lottie12FillRendererC", "opacity"]
+- ["6Lottie12FillRendererC", "render"]
+- ["6Lottie12FillRendererC", "renderBoundsFor"]
+- ["6Lottie12FillRendererC", "shouldRenderInContext"]
+- ["6Lottie12FillRendererC", "updateShapeLayer"]
+- ["6Lottie8FillRuleO", "CAShapeLayerFillRule"]
+- ["6Lottie8FillRuleO", "CGPathFillRule"]
+- ["6Lottie8FillRuleO", "caFillRule"]
+- ["6Lottie8FillRuleO", "cgFillRule"]
+- ["6Lottie8FillRuleO", "evenOdd"]
+- ["6Lottie8FillRuleO", "none"]
+- !private ["Sf", "init"]
+- !private ["SF", "init"]
+- !private ["SH", "CAShapeLayerFillRule"]
+- !private ["SH", "caFillRule"]
+- !private ["SH", "cgFillRule"]
+- ["SH", "evenOdd"]
+- !private ["SH", "fillColor"]
+- !private ["SH", "fillPath"]
+- !private ["SH", "fillRule"]
+- !private ["SH", "init"]
+- !private ["SH", "isEmpty"]
+- !private ["SH", "nonZero"]
+- ["SH", "none"]
+- !private ["SH", "opacity"]
+- !private ["SH", "path"]
+- !private ["SH", "setAlpha"]
+- !private ["SH", "setFillColor"]
+- !private ["SH", "winding"]
+- !private ["s25LosslessStringConvertibleP", "init"]
+- !private ["So8NSCodingP", "fillColor"]
+- !private ["So8NSCodingP", "fillRule"]
+- !private ["So8NSCodingP", "opacity"]
+- !private ["So8NSObjectC", "fillColor"]
+- !private ["So8NSObjectC", "fillRule"]
+- !private ["So8NSObjectC", "opacity"]
+- !private ["So8NSObjectP", "fillColor"]
+- !private ["So8NSObjectP", "fillRule"]
+- !private ["So8NSObjectP", "opacity"]
+- !private ["So14NSSecureCodingP", "fillColor"]
+- !private ["So14NSSecureCodingP", "fillRule"]
+- !private ["So14NSSecureCodingP", "opacity"]
+- !private ["6Lottie10NodeOutputP", "Float"]
+- ["6Lottie10NodeOutputP", ""]
+- !private ["6Lottie10NodeOutputP", "color"]
+- !private ["6Lottie10NodeOutputP", "fillRule"]
+- ["6Lottie10NodeOutputP", "hasRenderUpdates"]
+- ["6Lottie10NodeOutputP", "hasUpdate"]
+- !private ["6Lottie10NodeOutputP", "init"]
+- ["6Lottie10NodeOutputP", "isEnabled"]
+- !private ["6Lottie10NodeOutputP", "opacity"]
+- ["6Lottie10NodeOutputP", "render"]
+- ["6Lottie10NodeOutputP", "renderBoundsFor"]
+- ["6Lottie10NodeOutputP", "shouldRenderInContext"]
+- ["6Lottie10NodeOutputP", "updateShapeLayer"]
+- !private ["Sj", "init"]
+- ["6Lottie21PassThroughOutputNodeC", "Bool"]
+- ["6Lottie21PassThroughOutputNodeC", "CAShapeLayer"]
+- ["6Lottie21PassThroughOutputNodeC", "CGColor"]
+- ["6Lottie21PassThroughOutputNodeC", "CGContext"]
+- ["6Lottie21PassThroughOutputNodeC", "CGFloat"]
+- ["6Lottie21PassThroughOutputNodeC", "FillRule"]
+- !private ["6Lottie21PassThroughOutputNodeC", "Float"]
+- ["6Lottie21PassThroughOutputNodeC", ""]
+- ["6Lottie21PassThroughOutputNodeC", "color"]
+- ["6Lottie21PassThroughOutputNodeC", "fillRule"]
+- ["6Lottie21PassThroughOutputNodeC", "hasRenderUpdates"]
+- ["6Lottie21PassThroughOutputNodeC", "hasUpdate"]
+- ["6Lottie21PassThroughOutputNodeC", "init"]
+- ["6Lottie21PassThroughOutputNodeC", "isEnabled"]
+- ["6Lottie21PassThroughOutputNodeC", "opacity"]
+- ["6Lottie21PassThroughOutputNodeC", "render"]
+- ["6Lottie21PassThroughOutputNodeC", "renderBoundsFor"]
+- ["6Lottie21PassThroughOutputNodeC", "shouldRenderInContext"]
+- ["6Lottie21PassThroughOutputNodeC", "updateShapeLayer"]
+- !private ["SY", "CAShapeLayerFillRule"]
+- !private ["SY", "caFillRule"]
+- !private ["SY", "cgFillRule"]
+- ["SY", "evenOdd"]
+- !private ["SY", "nonZero"]
+- ["SY", "none"]
+- !private ["SY", "winding"]
+- !private ["6Lottie10RenderableP", "Float"]
+- ["6Lottie10RenderableP", ""]
+- !private ["6Lottie10RenderableP", "color"]
+- !private ["6Lottie10RenderableP", "fillRule"]
+- ["6Lottie10RenderableP", "hasRenderUpdates"]
+- ["6Lottie10RenderableP", "hasUpdate"]
+- ["6Lottie10RenderableP", "isEnabled"]
+- !private ["6Lottie10RenderableP", "opacity"]
+- ["6Lottie10RenderableP", "render"]
+- ["6Lottie10RenderableP", "renderBoundsFor"]
+- ["6Lottie10RenderableP", "shouldRenderInContext"]
+- ["6Lottie10RenderableP", "updateShapeLayer"]
+- !private ["s10SIMDScalarP", "init"]
+- !private ["s13SignedNumericP", "init"]
+- !private ["Sx", "init"]
+- !private ["s20TextOutputStreamableP", "init"]
+- !private ["14CoreFoundation9_CFObjectP", "fillPath"]
+- !private ["14CoreFoundation9_CFObjectP", "isEmpty"]
+- !private ["14CoreFoundation9_CFObjectP", "path"]
+- !private ["14CoreFoundation9_CFObjectP", "setAlpha"]
+- !private ["14CoreFoundation9_CFObjectP", "setFillColor"]
+- !private ["s15_CVarArgAlignedP", "init"]
+- !private ["s22_CVarArgPassedAsDoubleP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "init"]
+- !private ["s33_ExpressibleByBuiltinFloatLiteralP", "init"]
+- !private ["s35_ExpressibleByBuiltinIntegerLiteralP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "evenOdd"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "nonZero"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fillColor"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fillRule"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "opacity"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fillColor"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fillRule"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "opacity"]
+- !private ["s21_ObjectiveCBridgeableP", "evenOdd"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "nonZero"]
+- !private ["s20_SwiftNewtypeWrapperP", "evenOdd"]
+- !private ["s20_SwiftNewtypeWrapperP", "nonZero"]
+depends-nominal:
+- !private "s18AdditiveArithmeticP"
+- !private "SB"
+- !private "So7CALayerC"
+- !private "So13CAMediaTimingP"
+- !private "So12CAShapeLayerC"
+- !private "So20CAShapeLayerFillRulea"
+- !private "So12CGContextRefa"
+- !private "So9CGPathRefa"
+- !private "12CoreGraphics14CGPathFillRuleO"
+- !private "s7CVarArgP"
+- !private "SL"
+- !private "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- !private "s23CustomStringConvertibleP"
+- "Se"
+- "SE"
+- "SQ"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- "6Lottie12FillRendererC"
+- "6Lottie8FillRuleO"
+- !private "Sf"
+- !private "SF"
+- "SH"
+- !private "s25LosslessStringConvertibleP"
+- !private "So8NSCodingP"
+- !private "So8NSObjectC"
+- !private "So8NSObjectP"
+- !private "So14NSSecureCodingP"
+- "6Lottie10NodeOutputP"
+- !private "Sj"
+- "6Lottie21PassThroughOutputNodeC"
+- "SY"
+- "6Lottie10RenderableP"
+- !private "s10SIMDScalarP"
+- !private "s13SignedNumericP"
+- !private "Sx"
+- !private "s20TextOutputStreamableP"
+- !private "14CoreFoundation9_CFObjectP"
+- !private "s15_CVarArgAlignedP"
+- !private "s22_CVarArgPassedAsDoubleP"
+- !private "s30_CustomPlaygroundQuickLookableP"
+- !private "s33_ExpressibleByBuiltinFloatLiteralP"
+- !private "s35_ExpressibleByBuiltinIntegerLiteralP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- !private "10Foundation27_KeyValueCodingAndObservingP"
+- !private "10Foundation37_KeyValueCodingAndObservingPublishingP"
+- !private "s21_ObjectiveCBridgeableP"
+- !private "s20_SwiftNewtypeWrapperP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Metal.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "80e693afc1a9d86d0dac18a2e583547e"

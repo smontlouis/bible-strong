@@ -1,0 +1,370 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "StarType"
+- "Star"
+provides-nominal:
+- "6Lottie8StarTypeO"
+- "6Lottie4StarC"
+provides-member:
+- ["6Lottie8StarTypeO", ""]
+- ["6Lottie4StarC", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "=="
+- !private "??"
+- "AssignmentPrecedence"
+- "Codable"
+- "CodingKey"
+- "Decoder"
+- "Encoder"
+- "FloatLiteralType"
+- "Int"
+- "IntegerLiteralType"
+- "KeyframeGroup"
+- "PathDirection"
+- "ShapeItem"
+- "Star"
+- "StarType"
+- "String"
+- "StringLiteralType"
+- "UnicodeScalarType"
+- "Vector1D"
+- "Vector3D"
+- !private "_findStringSwitchCase"
+- !private "~="
+depends-member:
+- ["s9CodingKeyP", "=="]
+- ["s9CodingKeyP", "RawValue"]
+- !private ["s9CodingKeyP", ""]
+- ["s9CodingKeyP", "_Default_RawValue"]
+- !private ["s9CodingKeyP", "_findStringSwitchCase"]
+- ["s9CodingKeyP", "_rawHashValue"]
+- ["s9CodingKeyP", "debugDescription"]
+- ["s9CodingKeyP", "description"]
+- !private ["s9CodingKeyP", "direction"]
+- ["s9CodingKeyP", "hash"]
+- ["s9CodingKeyP", "hashValue"]
+- ["s9CodingKeyP", "init"]
+- !private ["s9CodingKeyP", "innerRadius"]
+- !private ["s9CodingKeyP", "innerRoundness"]
+- ["s9CodingKeyP", "intValue"]
+- !private ["s9CodingKeyP", "outerRadius"]
+- !private ["s9CodingKeyP", "outerRoundness"]
+- !private ["s9CodingKeyP", "points"]
+- !private ["s9CodingKeyP", "position"]
+- ["s9CodingKeyP", "rawValue"]
+- !private ["s9CodingKeyP", "rotation"]
+- !private ["s9CodingKeyP", "starType"]
+- ["s9CodingKeyP", "stringValue"]
+- ["s28CustomDebugStringConvertibleP", "=="]
+- ["s28CustomDebugStringConvertibleP", "RawValue"]
+- !private ["s28CustomDebugStringConvertibleP", ""]
+- ["s28CustomDebugStringConvertibleP", "_Default_RawValue"]
+- !private ["s28CustomDebugStringConvertibleP", "_findStringSwitchCase"]
+- ["s28CustomDebugStringConvertibleP", "_rawHashValue"]
+- ["s28CustomDebugStringConvertibleP", "debugDescription"]
+- ["s28CustomDebugStringConvertibleP", "description"]
+- !private ["s28CustomDebugStringConvertibleP", "direction"]
+- ["s28CustomDebugStringConvertibleP", "hash"]
+- ["s28CustomDebugStringConvertibleP", "hashValue"]
+- ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "innerRadius"]
+- !private ["s28CustomDebugStringConvertibleP", "innerRoundness"]
+- ["s28CustomDebugStringConvertibleP", "intValue"]
+- !private ["s28CustomDebugStringConvertibleP", "outerRadius"]
+- !private ["s28CustomDebugStringConvertibleP", "outerRoundness"]
+- !private ["s28CustomDebugStringConvertibleP", "points"]
+- !private ["s28CustomDebugStringConvertibleP", "position"]
+- ["s28CustomDebugStringConvertibleP", "rawValue"]
+- !private ["s28CustomDebugStringConvertibleP", "rotation"]
+- !private ["s28CustomDebugStringConvertibleP", "starType"]
+- ["s28CustomDebugStringConvertibleP", "stringValue"]
+- ["s23CustomStringConvertibleP", "=="]
+- ["s23CustomStringConvertibleP", "RawValue"]
+- !private ["s23CustomStringConvertibleP", ""]
+- ["s23CustomStringConvertibleP", "_Default_RawValue"]
+- !private ["s23CustomStringConvertibleP", "_findStringSwitchCase"]
+- ["s23CustomStringConvertibleP", "_rawHashValue"]
+- ["s23CustomStringConvertibleP", "debugDescription"]
+- ["s23CustomStringConvertibleP", "description"]
+- !private ["s23CustomStringConvertibleP", "direction"]
+- ["s23CustomStringConvertibleP", "hash"]
+- ["s23CustomStringConvertibleP", "hashValue"]
+- ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "innerRadius"]
+- !private ["s23CustomStringConvertibleP", "innerRoundness"]
+- ["s23CustomStringConvertibleP", "intValue"]
+- !private ["s23CustomStringConvertibleP", "outerRadius"]
+- !private ["s23CustomStringConvertibleP", "outerRoundness"]
+- !private ["s23CustomStringConvertibleP", "points"]
+- !private ["s23CustomStringConvertibleP", "position"]
+- ["s23CustomStringConvertibleP", "rawValue"]
+- !private ["s23CustomStringConvertibleP", "rotation"]
+- !private ["s23CustomStringConvertibleP", "starType"]
+- ["s23CustomStringConvertibleP", "stringValue"]
+- ["Se", "=="]
+- !private ["Se", "CodingKeys"]
+- !private ["Se", "KeyframeGroup"]
+- !private ["Se", "PathDirection"]
+- ["Se", "RawValue"]
+- !private ["Se", "Star"]
+- !private ["Se", "StarType"]
+- ["Se", ""]
+- ["Se", "_Default_RawValue"]
+- !private ["Se", "_findStringSwitchCase"]
+- ["Se", "_rawHashValue"]
+- !private ["Se", "clockwise"]
+- !private ["Se", "direction"]
+- ["Se", "encode"]
+- ["Se", "hash"]
+- ["Se", "hashValue"]
+- ["Se", "init"]
+- !private ["Se", "innerRadius"]
+- !private ["Se", "innerRoundness"]
+- !private ["Se", "outerRadius"]
+- !private ["Se", "outerRoundness"]
+- !private ["Se", "points"]
+- !private ["Se", "position"]
+- ["Se", "rawValue"]
+- !private ["Se", "rotation"]
+- !private ["Se", "starType"]
+- !private ["s7DecoderP", "container"]
+- ["SE", "=="]
+- !private ["SE", "CodingKeys"]
+- !private ["SE", "KeyframeGroup"]
+- !private ["SE", "PathDirection"]
+- ["SE", "RawValue"]
+- !private ["SE", "Star"]
+- !private ["SE", "StarType"]
+- ["SE", ""]
+- ["SE", "_Default_RawValue"]
+- !private ["SE", "_findStringSwitchCase"]
+- ["SE", "_rawHashValue"]
+- !private ["SE", "clockwise"]
+- !private ["SE", "direction"]
+- ["SE", "encode"]
+- ["SE", "hash"]
+- ["SE", "hashValue"]
+- ["SE", "init"]
+- !private ["SE", "innerRadius"]
+- !private ["SE", "innerRoundness"]
+- !private ["SE", "outerRadius"]
+- !private ["SE", "outerRoundness"]
+- !private ["SE", "points"]
+- !private ["SE", "position"]
+- ["SE", "rawValue"]
+- !private ["SE", "rotation"]
+- !private ["SE", "starType"]
+- !private ["s7EncoderP", "container"]
+- ["SQ", "=="]
+- ["SQ", "RawValue"]
+- ["SQ", ""]
+- ["SQ", "_Default_RawValue"]
+- !private ["SQ", "_findStringSwitchCase"]
+- ["SQ", "_rawHashValue"]
+- !private ["SQ", "clockwise"]
+- ["SQ", "debugDescription"]
+- ["SQ", "description"]
+- !private ["SQ", "direction"]
+- ["SQ", "encode"]
+- ["SQ", "hash"]
+- ["SQ", "hashValue"]
+- ["SQ", "init"]
+- !private ["SQ", "innerRadius"]
+- !private ["SQ", "innerRoundness"]
+- ["SQ", "intValue"]
+- !private ["SQ", "outerRadius"]
+- !private ["SQ", "outerRoundness"]
+- !private ["SQ", "points"]
+- !private ["SQ", "position"]
+- ["SQ", "rawValue"]
+- !private ["SQ", "rotation"]
+- !private ["SQ", "starType"]
+- ["SQ", "stringValue"]
+- ["SH", "=="]
+- ["SH", "RawValue"]
+- ["SH", ""]
+- ["SH", "_Default_RawValue"]
+- !private ["SH", "_findStringSwitchCase"]
+- ["SH", "_rawHashValue"]
+- !private ["SH", "clockwise"]
+- ["SH", "debugDescription"]
+- ["SH", "description"]
+- !private ["SH", "direction"]
+- ["SH", "encode"]
+- ["SH", "hash"]
+- ["SH", "hashValue"]
+- ["SH", "init"]
+- !private ["SH", "innerRadius"]
+- !private ["SH", "innerRoundness"]
+- ["SH", "intValue"]
+- !private ["SH", "outerRadius"]
+- !private ["SH", "outerRoundness"]
+- !private ["SH", "points"]
+- !private ["SH", "position"]
+- ["SH", "rawValue"]
+- !private ["SH", "rotation"]
+- !private ["SH", "starType"]
+- ["SH", "stringValue"]
+- !private ["s22KeyedDecodingContainerV", "decode"]
+- !private ["s22KeyedDecodingContainerV", "decodeIfPresent"]
+- !private ["s30KeyedDecodingContainerProtocolP", "decode"]
+- !private ["s30KeyedDecodingContainerProtocolP", "decodeIfPresent"]
+- !private ["s22KeyedEncodingContainerV", "encode"]
+- !private ["s30KeyedEncodingContainerProtocolP", "encode"]
+- !private ["6Lottie13KeyframeGroupC", "deinit"]
+- !private ["6Lottie13PathDirectionO", "clockwise"]
+- !private ["6Lottie13PathDirectionO", "deinit"]
+- ["SY", "=="]
+- ["SY", "RawValue"]
+- ["SY", ""]
+- ["SY", "_Default_RawValue"]
+- !private ["SY", "_findStringSwitchCase"]
+- ["SY", "_rawHashValue"]
+- !private ["SY", "clockwise"]
+- ["SY", "debugDescription"]
+- ["SY", "description"]
+- !private ["SY", "direction"]
+- ["SY", "encode"]
+- ["SY", "hash"]
+- ["SY", "hashValue"]
+- ["SY", "init"]
+- !private ["SY", "innerRadius"]
+- !private ["SY", "innerRoundness"]
+- ["SY", "intValue"]
+- !private ["SY", "outerRadius"]
+- !private ["SY", "outerRoundness"]
+- !private ["SY", "points"]
+- !private ["SY", "position"]
+- ["SY", "rawValue"]
+- !private ["SY", "rotation"]
+- !private ["SY", "starType"]
+- ["SY", "stringValue"]
+- ["6Lottie9ShapeItemC", "CodingKey"]
+- !private ["6Lottie9ShapeItemC", "CodingKeys"]
+- ["6Lottie9ShapeItemC", "Decoder"]
+- ["6Lottie9ShapeItemC", "Encoder"]
+- ["6Lottie9ShapeItemC", "KeyframeGroup"]
+- ["6Lottie9ShapeItemC", "PathDirection"]
+- !private ["6Lottie9ShapeItemC", "Star"]
+- ["6Lottie9ShapeItemC", "StarType"]
+- ["6Lottie9ShapeItemC", "String"]
+- ["6Lottie9ShapeItemC", "Vector1D"]
+- ["6Lottie9ShapeItemC", "Vector3D"]
+- ["6Lottie9ShapeItemC", ""]
+- !private ["6Lottie9ShapeItemC", "_findStringSwitchCase"]
+- !private ["6Lottie9ShapeItemC", "deinit"]
+- ["6Lottie9ShapeItemC", "direction"]
+- ["6Lottie9ShapeItemC", "encode"]
+- ["6Lottie9ShapeItemC", "init"]
+- ["6Lottie9ShapeItemC", "innerRadius"]
+- ["6Lottie9ShapeItemC", "innerRoundness"]
+- ["6Lottie9ShapeItemC", "outerRadius"]
+- ["6Lottie9ShapeItemC", "outerRoundness"]
+- ["6Lottie9ShapeItemC", "points"]
+- ["6Lottie9ShapeItemC", "position"]
+- ["6Lottie9ShapeItemC", "rotation"]
+- ["6Lottie9ShapeItemC", "starType"]
+- ["6Lottie4StarC", "CodingKey"]
+- !private ["6Lottie4StarC", "CodingKeys"]
+- ["6Lottie4StarC", "Decoder"]
+- ["6Lottie4StarC", "Encoder"]
+- ["6Lottie4StarC", "KeyframeGroup"]
+- ["6Lottie4StarC", "PathDirection"]
+- !private ["6Lottie4StarC", "Star"]
+- ["6Lottie4StarC", "StarType"]
+- ["6Lottie4StarC", "String"]
+- ["6Lottie4StarC", "Vector1D"]
+- ["6Lottie4StarC", "Vector3D"]
+- !private ["6Lottie4StarC", "_findStringSwitchCase"]
+- ["6Lottie4StarC", "deinit"]
+- ["6Lottie4StarC", "direction"]
+- ["6Lottie4StarC", "encode"]
+- ["6Lottie4StarC", "init"]
+- ["6Lottie4StarC", "innerRadius"]
+- ["6Lottie4StarC", "innerRoundness"]
+- ["6Lottie4StarC", "outerRadius"]
+- ["6Lottie4StarC", "outerRoundness"]
+- ["6Lottie4StarC", "points"]
+- ["6Lottie4StarC", "position"]
+- ["6Lottie4StarC", "rotation"]
+- ["6Lottie4StarC", "starType"]
+- ["6Lottie8StarTypeO", "=="]
+- ["6Lottie8StarTypeO", "RawValue"]
+- ["6Lottie8StarTypeO", "_Default_RawValue"]
+- ["6Lottie8StarTypeO", "_rawHashValue"]
+- ["6Lottie8StarTypeO", "deinit"]
+- ["6Lottie8StarTypeO", "encode"]
+- ["6Lottie8StarTypeO", "hash"]
+- ["6Lottie8StarTypeO", "hashValue"]
+- ["6Lottie8StarTypeO", "init"]
+- ["6Lottie8StarTypeO", "none"]
+- ["6Lottie8StarTypeO", "polygon"]
+- ["6Lottie8StarTypeO", "rawValue"]
+- ["6Lottie8StarTypeO", "star"]
+- ["6Lottie8Vector1DV", "deinit"]
+- ["6Lottie8Vector3DV", "deinit"]
+depends-nominal:
+- "s9CodingKeyP"
+- "s28CustomDebugStringConvertibleP"
+- "s23CustomStringConvertibleP"
+- "Se"
+- !private "s7DecoderP"
+- "SE"
+- !private "s7EncoderP"
+- "SQ"
+- "SH"
+- !private "s22KeyedDecodingContainerV"
+- !private "s30KeyedDecodingContainerProtocolP"
+- !private "s22KeyedEncodingContainerV"
+- !private "s30KeyedEncodingContainerProtocolP"
+- !private "6Lottie13KeyframeGroupC"
+- !private "6Lottie13PathDirectionO"
+- "SY"
+- "6Lottie9ShapeItemC"
+- "6Lottie4StarC"
+- "6Lottie8StarTypeO"
+- "6Lottie8Vector1DV"
+- "6Lottie8Vector3DV"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "6b138b75de58b39c0277dd803edbd977"

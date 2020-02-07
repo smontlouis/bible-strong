@@ -1,0 +1,493 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "AnimationViewManagerModule"
+provides-nominal:
+- "19lottie_react_native26AnimationViewManagerModuleC"
+provides-member:
+- ["19lottie_react_native26AnimationViewManagerModuleC", ""]
+provides-dynamic-lookup:
+- "constantsToExport"
+- "play"
+- "requiresMainQueueSetup"
+- "reset"
+- "view"
+depends-top-level:
+- !private "!="
+- !private "&&"
+- !private "=="
+- !private "AnimationFrameTime"
+- "AnimationViewManagerModule"
+- "AnyHashable"
+- "Bool"
+- !private "BooleanLiteralType"
+- !private "CastingPrecedence"
+- !private "ContainerView"
+- !private "FloatLiteralType"
+- !private "IntegerLiteralType"
+- !private "LottieCompletionBlock"
+- "NSNumber"
+- "RCTViewManager"
+- !private "RCT_DEV"
+- !private "StringLiteralType"
+- "UIView"
+- !private "print"
+depends-member:
+- !private ["s18AdditiveArithmeticP", "init"]
+- !private ["19lottie_react_native26AnimationViewManagerModuleC", "AnimationFrameTime"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "AnyHashable"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "Bool"]
+- !private ["19lottie_react_native26AnimationViewManagerModuleC", "ContainerView"]
+- !private ["19lottie_react_native26AnimationViewManagerModuleC", "LottieCompletionBlock"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "NSNumber"]
+- !private ["19lottie_react_native26AnimationViewManagerModuleC", "RCT_DEV"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "UIView"]
+- !private ["19lottie_react_native26AnimationViewManagerModuleC", "bridge"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "constantsToExport"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "deinit"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "init"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "play"]
+- !private ["19lottie_react_native26AnimationViewManagerModuleC", "print"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "requiresMainQueueSetup"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "reset"]
+- ["19lottie_react_native26AnimationViewManagerModuleC", "view"]
+- !private ["SB", "init"]
+- !private ["So15CALayerDelegateP", "init"]
+- !private ["So15CALayerDelegateP", "onAnimationFinish"]
+- !private ["So15CALayerDelegateP", "play"]
+- !private ["So15CALayerDelegateP", "reset"]
+- !private ["12CoreGraphics7CGFloatV", "init"]
+- !private ["s7CVarArgP", "AnimationFrameTime"]
+- !private ["s7CVarArgP", "ContainerView"]
+- !private ["s7CVarArgP", "RCT_DEV"]
+- ["s7CVarArgP", ""]
+- !private ["s7CVarArgP", "addUIBlock"]
+- !private ["s7CVarArgP", "bridge"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "intValue"]
+- !private ["s7CVarArgP", "onAnimationFinish"]
+- !private ["s7CVarArgP", "play"]
+- !private ["s7CVarArgP", "print"]
+- !private ["s7CVarArgP", "reset"]
+- !private ["s7CVarArgP", "subscript"]
+- !private ["s7CVarArgP", "uiManager"]
+- !private ["Sl", "subscript"]
+- !private ["SL", "init"]
+- !private ["19lottie_react_native13ContainerViewC", "deinit"]
+- !private ["19lottie_react_native13ContainerViewC", "init"]
+- !private ["19lottie_react_native13ContainerViewC", "onAnimationFinish"]
+- !private ["19lottie_react_native13ContainerViewC", "play"]
+- !private ["19lottie_react_native13ContainerViewC", "reset"]
+- !private ["s28CustomDebugStringConvertibleP", "AnimationFrameTime"]
+- !private ["s28CustomDebugStringConvertibleP", "ContainerView"]
+- !private ["s28CustomDebugStringConvertibleP", "RCT_DEV"]
+- ["s28CustomDebugStringConvertibleP", ""]
+- !private ["s28CustomDebugStringConvertibleP", "addUIBlock"]
+- !private ["s28CustomDebugStringConvertibleP", "bridge"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "intValue"]
+- !private ["s28CustomDebugStringConvertibleP", "onAnimationFinish"]
+- !private ["s28CustomDebugStringConvertibleP", "play"]
+- !private ["s28CustomDebugStringConvertibleP", "print"]
+- !private ["s28CustomDebugStringConvertibleP", "reset"]
+- !private ["s28CustomDebugStringConvertibleP", "subscript"]
+- !private ["s28CustomDebugStringConvertibleP", "uiManager"]
+- !private ["s17CustomReflectableP", "addUIBlock"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s17CustomReflectableP", "subscript"]
+- !private ["s17CustomReflectableP", "uiManager"]
+- !private ["s23CustomStringConvertibleP", "AnimationFrameTime"]
+- !private ["s23CustomStringConvertibleP", "ContainerView"]
+- !private ["s23CustomStringConvertibleP", "RCT_DEV"]
+- ["s23CustomStringConvertibleP", ""]
+- !private ["s23CustomStringConvertibleP", "addUIBlock"]
+- !private ["s23CustomStringConvertibleP", "bridge"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "intValue"]
+- !private ["s23CustomStringConvertibleP", "onAnimationFinish"]
+- !private ["s23CustomStringConvertibleP", "play"]
+- !private ["s23CustomStringConvertibleP", "print"]
+- !private ["s23CustomStringConvertibleP", "reset"]
+- !private ["s23CustomStringConvertibleP", "subscript"]
+- !private ["s23CustomStringConvertibleP", "uiManager"]
+- !private ["Se", "addUIBlock"]
+- !private ["Se", "init"]
+- !private ["Se", "subscript"]
+- !private ["Se", "uiManager"]
+- !private ["SD", "subscript"]
+- !private ["SE", "addUIBlock"]
+- !private ["SE", "init"]
+- !private ["SE", "subscript"]
+- !private ["SE", "uiManager"]
+- !private ["SQ", "AnimationFrameTime"]
+- !private ["SQ", "ContainerView"]
+- !private ["SQ", "RCT_DEV"]
+- ["SQ", ""]
+- !private ["SQ", "addUIBlock"]
+- !private ["SQ", "bridge"]
+- !private ["SQ", "init"]
+- !private ["SQ", "init"]
+- !private ["SQ", "intValue"]
+- !private ["SQ", "onAnimationFinish"]
+- !private ["SQ", "play"]
+- !private ["SQ", "print"]
+- !private ["SQ", "reset"]
+- !private ["SQ", "subscript"]
+- !private ["SQ", "uiManager"]
+- !private ["s27ExpressibleByBooleanLiteralP", "intValue"]
+- !private ["s30ExpressibleByDictionaryLiteralP", "subscript"]
+- !private ["s25ExpressibleByFloatLiteralP", "init"]
+- !private ["s25ExpressibleByFloatLiteralP", "intValue"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "intValue"]
+- !private ["s23ExpressibleByNilLiteralP", "addUIBlock"]
+- !private ["s23ExpressibleByNilLiteralP", "uiManager"]
+- !private ["SF", "init"]
+- !private ["SH", "AnimationFrameTime"]
+- !private ["SH", "ContainerView"]
+- !private ["SH", "RCT_DEV"]
+- ["SH", ""]
+- !private ["SH", "addUIBlock"]
+- !private ["SH", "bridge"]
+- !private ["SH", "init"]
+- !private ["SH", "init"]
+- !private ["SH", "intValue"]
+- !private ["SH", "onAnimationFinish"]
+- !private ["SH", "play"]
+- !private ["SH", "print"]
+- !private ["SH", "reset"]
+- !private ["SH", "subscript"]
+- !private ["SH", "uiManager"]
+- !private ["6Lottie14InterpolatableP", "init"]
+- !private ["So8NSCodingP", "init"]
+- !private ["So8NSCodingP", "intValue"]
+- !private ["So8NSCodingP", "onAnimationFinish"]
+- !private ["So8NSCodingP", "play"]
+- !private ["So8NSCodingP", "reset"]
+- !private ["So9NSCopyingP", "intValue"]
+- !private ["So8NSNumberC", "intValue"]
+- !private ["So8NSObjectC", "AnimationFrameTime"]
+- ["So8NSObjectC", "AnyHashable"]
+- ["So8NSObjectC", "Bool"]
+- !private ["So8NSObjectC", "ContainerView"]
+- !private ["So8NSObjectC", "LottieCompletionBlock"]
+- ["So8NSObjectC", "NSNumber"]
+- !private ["So8NSObjectC", "RCT_DEV"]
+- ["So8NSObjectC", "UIView"]
+- !private ["So8NSObjectC", "addUIBlock"]
+- !private ["So8NSObjectC", "bridge"]
+- ["So8NSObjectC", "constantsToExport"]
+- ["So8NSObjectC", "init"]
+- !private ["So8NSObjectC", "init"]
+- !private ["So8NSObjectC", "intValue"]
+- !private ["So8NSObjectC", "onAnimationFinish"]
+- ["So8NSObjectC", "play"]
+- !private ["So8NSObjectC", "print"]
+- ["So8NSObjectC", "requiresMainQueueSetup"]
+- ["So8NSObjectC", "reset"]
+- !private ["So8NSObjectC", "uiManager"]
+- ["So8NSObjectC", "view"]
+- !private ["So8NSObjectP", "AnimationFrameTime"]
+- !private ["So8NSObjectP", "ContainerView"]
+- !private ["So8NSObjectP", "RCT_DEV"]
+- ["So8NSObjectP", ""]
+- !private ["So8NSObjectP", "addUIBlock"]
+- !private ["So8NSObjectP", "bridge"]
+- !private ["So8NSObjectP", "init"]
+- !private ["So8NSObjectP", "init"]
+- !private ["So8NSObjectP", "intValue"]
+- !private ["So8NSObjectP", "onAnimationFinish"]
+- !private ["So8NSObjectP", "play"]
+- !private ["So8NSObjectP", "print"]
+- !private ["So8NSObjectP", "reset"]
+- !private ["So8NSObjectP", "uiManager"]
+- !private ["So14NSSecureCodingP", "intValue"]
+- !private ["So7NSValueC", "intValue"]
+- !private ["Sj", "init"]
+- !private ["Sq", "addUIBlock"]
+- !private ["Sq", "uiManager"]
+- !private ["So9RCTBridgeC", "uiManager"]
+- !private ["So15RCTBridgeModuleP", "AnimationFrameTime"]
+- !private ["So15RCTBridgeModuleP", "ContainerView"]
+- !private ["So15RCTBridgeModuleP", "RCT_DEV"]
+- ["So15RCTBridgeModuleP", ""]
+- !private ["So15RCTBridgeModuleP", "addUIBlock"]
+- !private ["So15RCTBridgeModuleP", "bridge"]
+- !private ["So15RCTBridgeModuleP", "init"]
+- !private ["So15RCTBridgeModuleP", "init"]
+- !private ["So15RCTBridgeModuleP", "print"]
+- !private ["So12RCTComponentP", "init"]
+- !private ["So12RCTComponentP", "onAnimationFinish"]
+- !private ["So12RCTComponentP", "play"]
+- !private ["So12RCTComponentP", "reset"]
+- !private ["So15RCTInvalidatingP", "addUIBlock"]
+- !private ["So15RCTInvalidatingP", "uiManager"]
+- !private ["So12RCTUIManagerC", "addUIBlock"]
+- !private ["So7RCTViewC", "init"]
+- !private ["So7RCTViewC", "onAnimationFinish"]
+- !private ["So7RCTViewC", "play"]
+- !private ["So7RCTViewC", "reset"]
+- !private ["So14RCTViewManagerC", "AnimationFrameTime"]
+- ["So14RCTViewManagerC", "AnyHashable"]
+- ["So14RCTViewManagerC", "Bool"]
+- !private ["So14RCTViewManagerC", "ContainerView"]
+- !private ["So14RCTViewManagerC", "LottieCompletionBlock"]
+- ["So14RCTViewManagerC", "NSNumber"]
+- !private ["So14RCTViewManagerC", "RCT_DEV"]
+- ["So14RCTViewManagerC", "UIView"]
+- ["So14RCTViewManagerC", ""]
+- !private ["So14RCTViewManagerC", "bridge"]
+- ["So14RCTViewManagerC", "constantsToExport"]
+- ["So14RCTViewManagerC", "init"]
+- !private ["So14RCTViewManagerC", "init"]
+- ["So14RCTViewManagerC", "play"]
+- !private ["So14RCTViewManagerC", "print"]
+- ["So14RCTViewManagerC", "requiresMainQueueSetup"]
+- ["So14RCTViewManagerC", "reset"]
+- ["So14RCTViewManagerC", "view"]
+- !private ["ST", "subscript"]
+- !private ["s13SignedNumericP", "init"]
+- !private ["Sx", "init"]
+- !private ["So29UIAccessibilityIdentificationP", "init"]
+- !private ["So29UIAccessibilityIdentificationP", "onAnimationFinish"]
+- !private ["So29UIAccessibilityIdentificationP", "play"]
+- !private ["So29UIAccessibilityIdentificationP", "reset"]
+- !private ["So12UIAppearanceP", "init"]
+- !private ["So12UIAppearanceP", "onAnimationFinish"]
+- !private ["So12UIAppearanceP", "play"]
+- !private ["So12UIAppearanceP", "reset"]
+- !private ["So21UIAppearanceContainerP", "init"]
+- !private ["So21UIAppearanceContainerP", "onAnimationFinish"]
+- !private ["So21UIAppearanceContainerP", "play"]
+- !private ["So21UIAppearanceContainerP", "reset"]
+- !private ["So17UICoordinateSpaceP", "init"]
+- !private ["So17UICoordinateSpaceP", "onAnimationFinish"]
+- !private ["So17UICoordinateSpaceP", "play"]
+- !private ["So17UICoordinateSpaceP", "reset"]
+- !private ["So13UIDynamicItemP", "init"]
+- !private ["So13UIDynamicItemP", "onAnimationFinish"]
+- !private ["So13UIDynamicItemP", "play"]
+- !private ["So13UIDynamicItemP", "reset"]
+- !private ["So18UIFocusEnvironmentP", "init"]
+- !private ["So18UIFocusEnvironmentP", "onAnimationFinish"]
+- !private ["So18UIFocusEnvironmentP", "play"]
+- !private ["So18UIFocusEnvironmentP", "reset"]
+- !private ["So11UIFocusItemP", "init"]
+- !private ["So11UIFocusItemP", "onAnimationFinish"]
+- !private ["So11UIFocusItemP", "play"]
+- !private ["So11UIFocusItemP", "reset"]
+- !private ["So20UIFocusItemContainerP", "init"]
+- !private ["So20UIFocusItemContainerP", "onAnimationFinish"]
+- !private ["So20UIFocusItemContainerP", "play"]
+- !private ["So20UIFocusItemContainerP", "reset"]
+- !private ["So24UILargeContentViewerItemP", "init"]
+- !private ["So24UILargeContentViewerItemP", "onAnimationFinish"]
+- !private ["So24UILargeContentViewerItemP", "play"]
+- !private ["So24UILargeContentViewerItemP", "reset"]
+- !private ["So30UIPasteConfigurationSupportingP", "init"]
+- !private ["So30UIPasteConfigurationSupportingP", "onAnimationFinish"]
+- !private ["So30UIPasteConfigurationSupportingP", "play"]
+- !private ["So30UIPasteConfigurationSupportingP", "reset"]
+- !private ["So11UIResponderC", "init"]
+- !private ["So11UIResponderC", "onAnimationFinish"]
+- !private ["So11UIResponderC", "play"]
+- !private ["So11UIResponderC", "reset"]
+- !private ["So30UIResponderStandardEditActionsP", "init"]
+- !private ["So30UIResponderStandardEditActionsP", "onAnimationFinish"]
+- !private ["So30UIResponderStandardEditActionsP", "play"]
+- !private ["So30UIResponderStandardEditActionsP", "reset"]
+- !private ["So18UITraitEnvironmentP", "init"]
+- !private ["So18UITraitEnvironmentP", "onAnimationFinish"]
+- !private ["So18UITraitEnvironmentP", "play"]
+- !private ["So18UITraitEnvironmentP", "reset"]
+- !private ["So23UIUserActivityRestoringP", "init"]
+- !private ["So23UIUserActivityRestoringP", "onAnimationFinish"]
+- !private ["So23UIUserActivityRestoringP", "play"]
+- !private ["So23UIUserActivityRestoringP", "reset"]
+- !private ["So6UIViewC", "init"]
+- !private ["So6UIViewC", "onAnimationFinish"]
+- !private ["So6UIViewC", "play"]
+- !private ["So6UIViewC", "reset"]
+- !private ["s15_CVarArgAlignedP", "init"]
+- !private ["s22_CVarArgPassedAsDoubleP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "intValue"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "subscript"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "AnimationFrameTime"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "ContainerView"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "RCT_DEV"]
+- ["10Foundation27_KeyValueCodingAndObservingP", ""]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "addUIBlock"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "bridge"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "init"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "init"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "intValue"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "onAnimationFinish"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "play"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "print"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "reset"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "uiManager"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "AnimationFrameTime"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "ContainerView"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "RCT_DEV"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", ""]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "addUIBlock"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "bridge"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "init"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "init"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "intValue"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "onAnimationFinish"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "play"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "print"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "reset"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "uiManager"]
+- !private ["s21_ObjectiveCBridgeableP", "addUIBlock"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "subscript"]
+- !private ["s21_ObjectiveCBridgeableP", "uiManager"]
+- !private ["s38__DefaultCustomPlaygroundQuickLookableP", "init"]
+- !private ["s38__DefaultCustomPlaygroundQuickLookableP", "onAnimationFinish"]
+- !private ["s38__DefaultCustomPlaygroundQuickLookableP", "play"]
+- !private ["s38__DefaultCustomPlaygroundQuickLookableP", "reset"]
+depends-nominal:
+- !private "s18AdditiveArithmeticP"
+- "19lottie_react_native26AnimationViewManagerModuleC"
+- !private "SB"
+- !private "So15CALayerDelegateP"
+- !private "12CoreGraphics7CGFloatV"
+- "s7CVarArgP"
+- !private "Sl"
+- !private "SL"
+- !private "19lottie_react_native13ContainerViewC"
+- "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- "s23CustomStringConvertibleP"
+- !private "Se"
+- !private "SD"
+- !private "SE"
+- "SQ"
+- !private "s27ExpressibleByBooleanLiteralP"
+- !private "s30ExpressibleByDictionaryLiteralP"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- !private "s23ExpressibleByNilLiteralP"
+- !private "SF"
+- "SH"
+- !private "6Lottie14InterpolatableP"
+- !private "So8NSCodingP"
+- !private "So9NSCopyingP"
+- !private "So8NSNumberC"
+- "So8NSObjectC"
+- "So8NSObjectP"
+- !private "So14NSSecureCodingP"
+- !private "So7NSValueC"
+- !private "Sj"
+- !private "Sq"
+- !private "So9RCTBridgeC"
+- "So15RCTBridgeModuleP"
+- !private "So12RCTComponentP"
+- !private "So15RCTInvalidatingP"
+- !private "So12RCTUIManagerC"
+- !private "So7RCTViewC"
+- "So14RCTViewManagerC"
+- !private "ST"
+- !private "s13SignedNumericP"
+- !private "Sx"
+- !private "So29UIAccessibilityIdentificationP"
+- !private "So12UIAppearanceP"
+- !private "So21UIAppearanceContainerP"
+- !private "So17UICoordinateSpaceP"
+- !private "So13UIDynamicItemP"
+- !private "So18UIFocusEnvironmentP"
+- !private "So11UIFocusItemP"
+- !private "So20UIFocusItemContainerP"
+- !private "So24UILargeContentViewerItemP"
+- !private "So30UIPasteConfigurationSupportingP"
+- !private "So11UIResponderC"
+- !private "So30UIResponderStandardEditActionsP"
+- !private "So18UITraitEnvironmentP"
+- !private "So23UIUserActivityRestoringP"
+- !private "So6UIViewC"
+- !private "s15_CVarArgAlignedP"
+- !private "s22_CVarArgPassedAsDoubleP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- "10Foundation27_KeyValueCodingAndObservingP"
+- "10Foundation37_KeyValueCodingAndObservingPublishingP"
+- !private "s21_ObjectiveCBridgeableP"
+- !private "s38__DefaultCustomPlaygroundQuickLookableP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Metal.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Swift.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/build/biblestrong/Build/Products/Debug-iphonesimulator/lottie-ios/Lottie.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Yoga/yoga/Yoga.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/lottie_react_native/lottie-react-native-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/build/biblestrong/Build/Products/Debug-iphonesimulator/lottie-ios/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTBridge.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTBridgeModule.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTBorderStyle.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTTextDecorationLineType.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTAnimationType.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTFrameUpdate.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTBridgeDelegate.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Yoga/yoga/YGValue.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/lottie-react-native/src/ios/LottieReactNative/Bridging.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTInvalidating.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTLog.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTJavaScriptLoader.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTUIManager.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTViewManager.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTEventDispatcher.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTDefines.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTUtils.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Yoga/yoga/YGEnums.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Yoga/yoga/YGMacros.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTPointerEvents.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/UIView+React.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/build/biblestrong/Build/Products/Debug-iphonesimulator/lottie-ios/Swift Compatibility Header/Lottie-Swift.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTComponent.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTAssert.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTConvert.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTView.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/React-Core/React/RCTRootView.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/build/biblestrong/Build/Products/Debug-iphonesimulator/lottie-ios/Lottie.modulemap"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/lottie_react_native/lottie-react-native.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "07f0c1771e10e0171db7c2444918c1ec"

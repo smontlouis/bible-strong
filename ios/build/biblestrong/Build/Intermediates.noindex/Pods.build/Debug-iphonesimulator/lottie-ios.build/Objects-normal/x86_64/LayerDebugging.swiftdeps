@@ -1,0 +1,711 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "LayerDebugStyle"
+- "LayerDebugging"
+- "CustomLayerDebugging"
+- "DebugLayer"
+provides-nominal:
+- "6Lottie15LayerDebugStyleV"
+- "6Lottie14LayerDebuggingP"
+- "6Lottie20CustomLayerDebuggingP"
+- "6Lottie10DebugLayerC"
+- "6Lottie16CompositionLayerC"
+- "6Lottie18AnimationContainerC"
+- "6Lottie20NullCompositionLayerC"
+- "6Lottie21ShapeCompositionLayerC"
+- "6Lottie16ShapeRenderLayerC"
+provides-member:
+- ["6Lottie15LayerDebugStyleV", ""]
+- ["6Lottie14LayerDebuggingP", ""]
+- ["6Lottie20CustomLayerDebuggingP", ""]
+- ["6Lottie10DebugLayerC", ""]
+- ["So7CALayerC", ""]
+- ["6Lottie16CompositionLayerC", ""]
+- ["6Lottie18AnimationContainerC", ""]
+- ["6Lottie20NullCompositionLayerC", ""]
+- ["6Lottie21ShapeCompositionLayerC", ""]
+- ["6Lottie16ShapeRenderLayerC", ""]
+- ["Sa", ""]
+- ["So7CALayerC", "logLayerTree"]
+- ["So7CALayerC", "setDebuggingState"]
+- ["6Lottie15LayerDebugStyleV", "defaultStyle"]
+- ["6Lottie15LayerDebugStyleV", "topLayerStyle"]
+- ["6Lottie15LayerDebugStyleV", "nullLayerStyle"]
+- ["6Lottie15LayerDebugStyleV", "shapeLayerStyle"]
+- ["6Lottie15LayerDebugStyleV", "shapeRenderLayerStyle"]
+- ["Sa", "parents"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "+"
+- !private "..."
+- !private "..<"
+- "AnimationContainer"
+- "Array"
+- "AssignmentPrecedence"
+- "Bool"
+- "CALayer"
+- "CGColor"
+- !private "CGColorSpaceCreateDeviceRGB"
+- "CGFloat"
+- !private "CGRect"
+- "CastingPrecedence"
+- "CompositionLayer"
+- "CustomLayerDebugging"
+- "DebugLayer"
+- !private "FloatLiteralType"
+- "Int"
+- !private "IntegerLiteralType"
+- "LayerDebugStyle"
+- "LayerDebugging"
+- "LayerModel"
+- "NSCoder"
+- "NullCompositionLayer"
+- "ShapeCompositionLayer"
+- "ShapeRenderLayer"
+- !private "String"
+- !private "StringLiteralType"
+- !private "fatalError"
+- !private "print"
+depends-member:
+- ["6Lottie18AnimationContainerC", "LayerDebugStyle"]
+- ["6Lottie18AnimationContainerC", "debugStyle"]
+- ["6Lottie18AnimationContainerC", "deinit"]
+- ["Sa", "Int"]
+- ["Sa", "LayerModel"]
+- !private ["Sa", "append"]
+- !private ["Sa", "count"]
+- !private ["Sa", "forEach"]
+- !private ["Sa", "init"]
+- ["Sa", "parents"]
+- !private ["Sa", "subscript"]
+- !private ["SK", "Int"]
+- !private ["SK", "append"]
+- !private ["SK", "count"]
+- !private ["SK", "forEach"]
+- !private ["SK", "init"]
+- !private ["SK", "subscript"]
+- ["So7CALayerC", "Bool"]
+- ["So7CALayerC", "CALayer"]
+- !private ["So7CALayerC", "CGRect"]
+- !private ["So7CALayerC", "CustomLayerDebugging"]
+- !private ["So7CALayerC", "DebugLayer"]
+- ["So7CALayerC", "Int"]
+- ["So7CALayerC", "LayerDebugStyle"]
+- !private ["So7CALayerC", "LayerDebugging"]
+- ["So7CALayerC", "NSCoder"]
+- !private ["So7CALayerC", "String"]
+- ["So7CALayerC", ""]
+- !private ["So7CALayerC", "addSublayer"]
+- !private ["So7CALayerC", "backgroundColor"]
+- !private ["So7CALayerC", "borderColor"]
+- !private ["So7CALayerC", "borderWidth"]
+- !private ["So7CALayerC", "bounds"]
+- !private ["So7CALayerC", "contentsLayer"]
+- ["So7CALayerC", "debugStyle"]
+- !private ["So7CALayerC", "fatalError"]
+- ["So7CALayerC", "init"]
+- ["So7CALayerC", "layerForDebugging"]
+- ["So7CALayerC", "logLayerTree"]
+- !private ["So7CALayerC", "position"]
+- !private ["So7CALayerC", "print"]
+- !private ["So7CALayerC", "removeFromSuperlayer"]
+- ["So7CALayerC", "setDebuggingState"]
+- !private ["So7CALayerC", "sublayers"]
+- !private ["So7CALayerC", "zPosition"]
+- !private ["So13CAMediaTimingP", "CGRect"]
+- !private ["So13CAMediaTimingP", "DebugLayer"]
+- !private ["So13CAMediaTimingP", "LayerDebugStyle"]
+- !private ["So13CAMediaTimingP", "String"]
+- ["So13CAMediaTimingP", ""]
+- !private ["So13CAMediaTimingP", "addSublayer"]
+- !private ["So13CAMediaTimingP", "backgroundColor"]
+- !private ["So13CAMediaTimingP", "borderColor"]
+- !private ["So13CAMediaTimingP", "borderWidth"]
+- !private ["So13CAMediaTimingP", "bounds"]
+- !private ["So13CAMediaTimingP", "contentsLayer"]
+- ["So13CAMediaTimingP", "debugStyle"]
+- !private ["So13CAMediaTimingP", "fatalError"]
+- !private ["So13CAMediaTimingP", "init"]
+- ["So13CAMediaTimingP", "layerForDebugging"]
+- !private ["So13CAMediaTimingP", "logLayerTree"]
+- !private ["So13CAMediaTimingP", "position"]
+- !private ["So13CAMediaTimingP", "print"]
+- !private ["So13CAMediaTimingP", "removeFromSuperlayer"]
+- !private ["So13CAMediaTimingP", "setDebuggingState"]
+- !private ["So13CAMediaTimingP", "sublayers"]
+- !private ["So13CAMediaTimingP", "zPosition"]
+- !private ["So10CGColorRefa", "init"]
+- !private ["So7CGPointV", "zero"]
+- !private ["So6CGRectV", "init"]
+- !private ["s7CVarArgP", "CGRect"]
+- !private ["s7CVarArgP", "DebugLayer"]
+- !private ["s7CVarArgP", "Int"]
+- !private ["s7CVarArgP", "LayerDebugStyle"]
+- !private ["s7CVarArgP", "String"]
+- ["s7CVarArgP", ""]
+- !private ["s7CVarArgP", "addSublayer"]
+- !private ["s7CVarArgP", "append"]
+- !private ["s7CVarArgP", "backgroundColor"]
+- !private ["s7CVarArgP", "borderColor"]
+- !private ["s7CVarArgP", "borderWidth"]
+- !private ["s7CVarArgP", "bounds"]
+- !private ["s7CVarArgP", "contentsLayer"]
+- !private ["s7CVarArgP", "count"]
+- ["s7CVarArgP", "debugStyle"]
+- !private ["s7CVarArgP", "fatalError"]
+- !private ["s7CVarArgP", "forEach"]
+- !private ["s7CVarArgP", "init"]
+- ["s7CVarArgP", "layerForDebugging"]
+- !private ["s7CVarArgP", "logLayerTree"]
+- !private ["s7CVarArgP", "position"]
+- !private ["s7CVarArgP", "print"]
+- !private ["s7CVarArgP", "removeFromSuperlayer"]
+- !private ["s7CVarArgP", "setDebuggingState"]
+- !private ["s7CVarArgP", "sublayers"]
+- !private ["s7CVarArgP", "subscript"]
+- !private ["s7CVarArgP", "zPosition"]
+- !private ["Sl", "Int"]
+- !private ["Sl", "append"]
+- !private ["Sl", "count"]
+- !private ["Sl", "forEach"]
+- !private ["Sl", "init"]
+- !private ["Sl", "subscript"]
+- !private ["SL", "init"]
+- ["6Lottie16CompositionLayerC", "CALayer"]
+- ["6Lottie16CompositionLayerC", "LayerDebugStyle"]
+- !private ["6Lottie16CompositionLayerC", "contentsLayer"]
+- ["6Lottie16CompositionLayerC", "debugStyle"]
+- ["6Lottie16CompositionLayerC", "deinit"]
+- ["6Lottie16CompositionLayerC", "layerForDebugging"]
+- !private ["10Foundation15ContiguousBytesP", "Int"]
+- !private ["10Foundation15ContiguousBytesP", "append"]
+- !private ["10Foundation15ContiguousBytesP", "count"]
+- !private ["10Foundation15ContiguousBytesP", "forEach"]
+- !private ["10Foundation15ContiguousBytesP", "init"]
+- !private ["10Foundation15ContiguousBytesP", "subscript"]
+- !private ["s28CustomDebugStringConvertibleP", "CGRect"]
+- !private ["s28CustomDebugStringConvertibleP", "DebugLayer"]
+- !private ["s28CustomDebugStringConvertibleP", "Int"]
+- !private ["s28CustomDebugStringConvertibleP", "LayerDebugStyle"]
+- !private ["s28CustomDebugStringConvertibleP", "String"]
+- ["s28CustomDebugStringConvertibleP", ""]
+- !private ["s28CustomDebugStringConvertibleP", "addSublayer"]
+- !private ["s28CustomDebugStringConvertibleP", "append"]
+- !private ["s28CustomDebugStringConvertibleP", "backgroundColor"]
+- !private ["s28CustomDebugStringConvertibleP", "borderColor"]
+- !private ["s28CustomDebugStringConvertibleP", "borderWidth"]
+- !private ["s28CustomDebugStringConvertibleP", "bounds"]
+- !private ["s28CustomDebugStringConvertibleP", "contentsLayer"]
+- !private ["s28CustomDebugStringConvertibleP", "count"]
+- ["s28CustomDebugStringConvertibleP", "debugStyle"]
+- !private ["s28CustomDebugStringConvertibleP", "fatalError"]
+- !private ["s28CustomDebugStringConvertibleP", "forEach"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- ["s28CustomDebugStringConvertibleP", "layerForDebugging"]
+- !private ["s28CustomDebugStringConvertibleP", "logLayerTree"]
+- !private ["s28CustomDebugStringConvertibleP", "position"]
+- !private ["s28CustomDebugStringConvertibleP", "print"]
+- !private ["s28CustomDebugStringConvertibleP", "removeFromSuperlayer"]
+- !private ["s28CustomDebugStringConvertibleP", "setDebuggingState"]
+- !private ["s28CustomDebugStringConvertibleP", "sublayers"]
+- !private ["s28CustomDebugStringConvertibleP", "subscript"]
+- !private ["s28CustomDebugStringConvertibleP", "zPosition"]
+- !private ["s28CustomDebugStringConvertibleP", "zero"]
+- ["6Lottie20CustomLayerDebuggingP", "CALayer"]
+- !private ["6Lottie20CustomLayerDebuggingP", "LayerDebugStyle"]
+- ["6Lottie20CustomLayerDebuggingP", ""]
+- !private ["6Lottie20CustomLayerDebuggingP", "contentsLayer"]
+- ["6Lottie20CustomLayerDebuggingP", "debugStyle"]
+- ["6Lottie20CustomLayerDebuggingP", "layerForDebugging"]
+- !private ["s17CustomReflectableP", "Int"]
+- !private ["s17CustomReflectableP", "append"]
+- !private ["s17CustomReflectableP", "count"]
+- !private ["s17CustomReflectableP", "forEach"]
+- !private ["s17CustomReflectableP", "init"]
+- !private ["s17CustomReflectableP", "subscript"]
+- !private ["s17CustomReflectableP", "zero"]
+- !private ["s23CustomStringConvertibleP", "CGRect"]
+- !private ["s23CustomStringConvertibleP", "DebugLayer"]
+- !private ["s23CustomStringConvertibleP", "Int"]
+- !private ["s23CustomStringConvertibleP", "LayerDebugStyle"]
+- !private ["s23CustomStringConvertibleP", "String"]
+- ["s23CustomStringConvertibleP", ""]
+- !private ["s23CustomStringConvertibleP", "addSublayer"]
+- !private ["s23CustomStringConvertibleP", "append"]
+- !private ["s23CustomStringConvertibleP", "backgroundColor"]
+- !private ["s23CustomStringConvertibleP", "borderColor"]
+- !private ["s23CustomStringConvertibleP", "borderWidth"]
+- !private ["s23CustomStringConvertibleP", "bounds"]
+- !private ["s23CustomStringConvertibleP", "contentsLayer"]
+- !private ["s23CustomStringConvertibleP", "count"]
+- ["s23CustomStringConvertibleP", "debugStyle"]
+- !private ["s23CustomStringConvertibleP", "fatalError"]
+- !private ["s23CustomStringConvertibleP", "forEach"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- ["s23CustomStringConvertibleP", "layerForDebugging"]
+- !private ["s23CustomStringConvertibleP", "logLayerTree"]
+- !private ["s23CustomStringConvertibleP", "position"]
+- !private ["s23CustomStringConvertibleP", "print"]
+- !private ["s23CustomStringConvertibleP", "removeFromSuperlayer"]
+- !private ["s23CustomStringConvertibleP", "setDebuggingState"]
+- !private ["s23CustomStringConvertibleP", "sublayers"]
+- !private ["s23CustomStringConvertibleP", "subscript"]
+- !private ["s23CustomStringConvertibleP", "zPosition"]
+- !private ["10Foundation12DataProtocolP", "Int"]
+- !private ["10Foundation12DataProtocolP", "append"]
+- !private ["10Foundation12DataProtocolP", "count"]
+- !private ["10Foundation12DataProtocolP", "forEach"]
+- !private ["10Foundation12DataProtocolP", "init"]
+- !private ["10Foundation12DataProtocolP", "subscript"]
+- !private ["6Lottie10DebugLayerC", "CGRect"]
+- ["6Lottie10DebugLayerC", "LayerDebugStyle"]
+- ["6Lottie10DebugLayerC", "NSCoder"]
+- !private ["6Lottie10DebugLayerC", "backgroundColor"]
+- !private ["6Lottie10DebugLayerC", "bounds"]
+- ["6Lottie10DebugLayerC", "deinit"]
+- !private ["6Lottie10DebugLayerC", "fatalError"]
+- ["6Lottie10DebugLayerC", "init"]
+- !private ["6Lottie10DebugLayerC", "position"]
+- !private ["6Lottie10DebugLayerC", "removeFromSuperlayer"]
+- !private ["6Lottie10DebugLayerC", "zPosition"]
+- !private ["Se", "Int"]
+- !private ["Se", "append"]
+- !private ["Se", "count"]
+- !private ["Se", "forEach"]
+- !private ["Se", "init"]
+- !private ["Se", "parent"]
+- !private ["Se", "subscript"]
+- !private ["Se", "zero"]
+- !private ["SE", "Int"]
+- !private ["SE", "append"]
+- !private ["SE", "count"]
+- !private ["SE", "forEach"]
+- !private ["SE", "init"]
+- !private ["SE", "parent"]
+- !private ["SE", "subscript"]
+- !private ["SE", "zero"]
+- !private ["SQ", "CGRect"]
+- !private ["SQ", "DebugLayer"]
+- !private ["SQ", "Int"]
+- !private ["SQ", "LayerDebugStyle"]
+- !private ["SQ", "String"]
+- ["SQ", ""]
+- !private ["SQ", "addSublayer"]
+- !private ["SQ", "append"]
+- !private ["SQ", "backgroundColor"]
+- !private ["SQ", "borderColor"]
+- !private ["SQ", "borderWidth"]
+- !private ["SQ", "bounds"]
+- !private ["SQ", "contentsLayer"]
+- !private ["SQ", "count"]
+- ["SQ", "debugStyle"]
+- !private ["SQ", "fatalError"]
+- !private ["SQ", "forEach"]
+- !private ["SQ", "init"]
+- ["SQ", "layerForDebugging"]
+- !private ["SQ", "logLayerTree"]
+- !private ["SQ", "position"]
+- !private ["SQ", "print"]
+- !private ["SQ", "removeFromSuperlayer"]
+- !private ["SQ", "setDebuggingState"]
+- !private ["SQ", "sublayers"]
+- !private ["SQ", "subscript"]
+- !private ["SQ", "zPosition"]
+- !private ["SQ", "zero"]
+- !private ["s25ExpressibleByArrayLiteralP", "Int"]
+- !private ["s25ExpressibleByArrayLiteralP", "append"]
+- !private ["s25ExpressibleByArrayLiteralP", "count"]
+- !private ["s25ExpressibleByArrayLiteralP", "forEach"]
+- !private ["s25ExpressibleByArrayLiteralP", "init"]
+- !private ["s25ExpressibleByArrayLiteralP", "subscript"]
+- !private ["s43ExpressibleByExtendedGraphemeClusterLiteralP", "init"]
+- !private ["s32ExpressibleByStringInterpolationP", "init"]
+- !private ["s26ExpressibleByStringLiteralP", "init"]
+- !private ["s33ExpressibleByUnicodeScalarLiteralP", "init"]
+- !private ["SH", "CGRect"]
+- !private ["SH", "DebugLayer"]
+- !private ["SH", "Int"]
+- !private ["SH", "LayerDebugStyle"]
+- !private ["SH", "String"]
+- ["SH", ""]
+- !private ["SH", "addSublayer"]
+- !private ["SH", "append"]
+- !private ["SH", "backgroundColor"]
+- !private ["SH", "borderColor"]
+- !private ["SH", "borderWidth"]
+- !private ["SH", "bounds"]
+- !private ["SH", "contentsLayer"]
+- !private ["SH", "count"]
+- ["SH", "debugStyle"]
+- !private ["SH", "fatalError"]
+- !private ["SH", "forEach"]
+- !private ["SH", "init"]
+- ["SH", "layerForDebugging"]
+- !private ["SH", "logLayerTree"]
+- !private ["SH", "position"]
+- !private ["SH", "print"]
+- !private ["SH", "removeFromSuperlayer"]
+- !private ["SH", "setDebuggingState"]
+- !private ["SH", "sublayers"]
+- !private ["SH", "subscript"]
+- !private ["SH", "zPosition"]
+- !private ["6Lottie14InterpolatableP", "Int"]
+- !private ["6Lottie14InterpolatableP", "append"]
+- !private ["6Lottie14InterpolatableP", "count"]
+- !private ["6Lottie14InterpolatableP", "forEach"]
+- !private ["6Lottie14InterpolatableP", "init"]
+- !private ["6Lottie14InterpolatableP", "subscript"]
+- !private ["6Lottie14InterpolatableP", "zero"]
+- !private ["6Lottie17KeypathSearchableP", "LayerDebugStyle"]
+- !private ["6Lottie17KeypathSearchableP", "contentsLayer"]
+- ["6Lottie17KeypathSearchableP", "debugStyle"]
+- ["6Lottie17KeypathSearchableP", "layerForDebugging"]
+- ["6Lottie15LayerDebugStyleV", "CGColor"]
+- !private ["6Lottie15LayerDebugStyleV", "CGColorSpaceCreateDeviceRGB"]
+- ["6Lottie15LayerDebugStyleV", "CGFloat"]
+- ["6Lottie15LayerDebugStyleV", "LayerDebugStyle"]
+- ["6Lottie15LayerDebugStyleV", "anchorColor"]
+- ["6Lottie15LayerDebugStyleV", "anchorWidth"]
+- ["6Lottie15LayerDebugStyleV", "boundsColor"]
+- ["6Lottie15LayerDebugStyleV", "boundsWidth"]
+- ["6Lottie15LayerDebugStyleV", "defaultStyle"]
+- ["6Lottie15LayerDebugStyleV", "init"]
+- ["6Lottie15LayerDebugStyleV", "nullLayerStyle"]
+- ["6Lottie15LayerDebugStyleV", "shapeLayerStyle"]
+- ["6Lottie15LayerDebugStyleV", "shapeRenderLayerStyle"]
+- ["6Lottie15LayerDebugStyleV", "topLayerStyle"]
+- ["6Lottie14LayerDebuggingP", "LayerDebugStyle"]
+- ["6Lottie14LayerDebuggingP", ""]
+- ["6Lottie14LayerDebuggingP", "debugStyle"]
+- !private ["6Lottie10LayerModelC", "parent"]
+- !private ["s25LosslessStringConvertibleP", "init"]
+- !private ["s10MirrorPathP", "init"]
+- !private ["SM", "Int"]
+- !private ["SM", "append"]
+- !private ["SM", "count"]
+- !private ["SM", "forEach"]
+- !private ["SM", "init"]
+- !private ["SM", "subscript"]
+- !private ["10Foundation19MutableDataProtocolP", "Int"]
+- !private ["10Foundation19MutableDataProtocolP", "append"]
+- !private ["10Foundation19MutableDataProtocolP", "count"]
+- !private ["10Foundation19MutableDataProtocolP", "forEach"]
+- !private ["10Foundation19MutableDataProtocolP", "init"]
+- !private ["10Foundation19MutableDataProtocolP", "subscript"]
+- !private ["So8NSCodingP", "CGRect"]
+- !private ["So8NSCodingP", "DebugLayer"]
+- !private ["So8NSCodingP", "LayerDebugStyle"]
+- !private ["So8NSCodingP", "String"]
+- ["So8NSCodingP", ""]
+- !private ["So8NSCodingP", "addSublayer"]
+- !private ["So8NSCodingP", "backgroundColor"]
+- !private ["So8NSCodingP", "borderColor"]
+- !private ["So8NSCodingP", "borderWidth"]
+- !private ["So8NSCodingP", "bounds"]
+- !private ["So8NSCodingP", "contentsLayer"]
+- ["So8NSCodingP", "debugStyle"]
+- !private ["So8NSCodingP", "fatalError"]
+- !private ["So8NSCodingP", "init"]
+- ["So8NSCodingP", "layerForDebugging"]
+- !private ["So8NSCodingP", "logLayerTree"]
+- !private ["So8NSCodingP", "position"]
+- !private ["So8NSCodingP", "print"]
+- !private ["So8NSCodingP", "removeFromSuperlayer"]
+- !private ["So8NSCodingP", "setDebuggingState"]
+- !private ["So8NSCodingP", "sublayers"]
+- !private ["So8NSCodingP", "zPosition"]
+- ["So8NSObjectC", "Bool"]
+- ["So8NSObjectC", "CALayer"]
+- !private ["So8NSObjectC", "CGRect"]
+- !private ["So8NSObjectC", "CustomLayerDebugging"]
+- !private ["So8NSObjectC", "DebugLayer"]
+- ["So8NSObjectC", "Int"]
+- ["So8NSObjectC", "LayerDebugStyle"]
+- !private ["So8NSObjectC", "LayerDebugging"]
+- ["So8NSObjectC", "NSCoder"]
+- !private ["So8NSObjectC", "String"]
+- !private ["So8NSObjectC", "addSublayer"]
+- !private ["So8NSObjectC", "backgroundColor"]
+- !private ["So8NSObjectC", "borderColor"]
+- !private ["So8NSObjectC", "borderWidth"]
+- !private ["So8NSObjectC", "bounds"]
+- !private ["So8NSObjectC", "contentsLayer"]
+- ["So8NSObjectC", "debugStyle"]
+- !private ["So8NSObjectC", "fatalError"]
+- ["So8NSObjectC", "init"]
+- ["So8NSObjectC", "layerForDebugging"]
+- ["So8NSObjectC", "logLayerTree"]
+- !private ["So8NSObjectC", "position"]
+- !private ["So8NSObjectC", "print"]
+- !private ["So8NSObjectC", "removeFromSuperlayer"]
+- ["So8NSObjectC", "setDebuggingState"]
+- !private ["So8NSObjectC", "sublayers"]
+- !private ["So8NSObjectC", "zPosition"]
+- !private ["So8NSObjectP", "CGRect"]
+- !private ["So8NSObjectP", "DebugLayer"]
+- !private ["So8NSObjectP", "LayerDebugStyle"]
+- !private ["So8NSObjectP", "String"]
+- ["So8NSObjectP", ""]
+- !private ["So8NSObjectP", "addSublayer"]
+- !private ["So8NSObjectP", "backgroundColor"]
+- !private ["So8NSObjectP", "borderColor"]
+- !private ["So8NSObjectP", "borderWidth"]
+- !private ["So8NSObjectP", "bounds"]
+- !private ["So8NSObjectP", "contentsLayer"]
+- ["So8NSObjectP", "debugStyle"]
+- !private ["So8NSObjectP", "fatalError"]
+- !private ["So8NSObjectP", "init"]
+- ["So8NSObjectP", "layerForDebugging"]
+- !private ["So8NSObjectP", "logLayerTree"]
+- !private ["So8NSObjectP", "position"]
+- !private ["So8NSObjectP", "print"]
+- !private ["So8NSObjectP", "removeFromSuperlayer"]
+- !private ["So8NSObjectP", "setDebuggingState"]
+- !private ["So8NSObjectP", "sublayers"]
+- !private ["So8NSObjectP", "zPosition"]
+- !private ["So14NSSecureCodingP", "CGRect"]
+- !private ["So14NSSecureCodingP", "DebugLayer"]
+- !private ["So14NSSecureCodingP", "LayerDebugStyle"]
+- !private ["So14NSSecureCodingP", "String"]
+- ["So14NSSecureCodingP", ""]
+- !private ["So14NSSecureCodingP", "addSublayer"]
+- !private ["So14NSSecureCodingP", "backgroundColor"]
+- !private ["So14NSSecureCodingP", "borderColor"]
+- !private ["So14NSSecureCodingP", "borderWidth"]
+- !private ["So14NSSecureCodingP", "bounds"]
+- !private ["So14NSSecureCodingP", "contentsLayer"]
+- ["So14NSSecureCodingP", "debugStyle"]
+- !private ["So14NSSecureCodingP", "fatalError"]
+- !private ["So14NSSecureCodingP", "init"]
+- ["So14NSSecureCodingP", "layerForDebugging"]
+- !private ["So14NSSecureCodingP", "logLayerTree"]
+- !private ["So14NSSecureCodingP", "position"]
+- !private ["So14NSSecureCodingP", "print"]
+- !private ["So14NSSecureCodingP", "removeFromSuperlayer"]
+- !private ["So14NSSecureCodingP", "setDebuggingState"]
+- !private ["So14NSSecureCodingP", "sublayers"]
+- !private ["So14NSSecureCodingP", "zPosition"]
+- ["6Lottie20NullCompositionLayerC", "LayerDebugStyle"]
+- ["6Lottie20NullCompositionLayerC", "debugStyle"]
+- ["6Lottie20NullCompositionLayerC", "deinit"]
+- !private ["Sk", "Int"]
+- !private ["Sk", "append"]
+- !private ["Sk", "count"]
+- !private ["Sk", "forEach"]
+- !private ["Sk", "init"]
+- !private ["Sk", "subscript"]
+- !private ["Sm", "Int"]
+- !private ["Sm", "append"]
+- !private ["Sm", "count"]
+- !private ["Sm", "forEach"]
+- !private ["Sm", "init"]
+- !private ["Sm", "subscript"]
+- !private ["ST", "Int"]
+- !private ["ST", "append"]
+- !private ["ST", "count"]
+- !private ["ST", "forEach"]
+- !private ["ST", "init"]
+- !private ["ST", "subscript"]
+- ["6Lottie21ShapeCompositionLayerC", "LayerDebugStyle"]
+- ["6Lottie21ShapeCompositionLayerC", "debugStyle"]
+- ["6Lottie21ShapeCompositionLayerC", "deinit"]
+- ["6Lottie19ShapeContainerLayerC", "LayerDebugStyle"]
+- ["6Lottie19ShapeContainerLayerC", "debugStyle"]
+- ["6Lottie16ShapeRenderLayerC", "LayerDebugStyle"]
+- ["6Lottie16ShapeRenderLayerC", "debugStyle"]
+- ["6Lottie16ShapeRenderLayerC", "deinit"]
+- !private ["SS", "init"]
+- !private ["Sy", "init"]
+- !private ["s16TextOutputStreamP", "init"]
+- !private ["s20TextOutputStreamableP", "init"]
+- !private ["s14_ArrayProtocolP", "Int"]
+- !private ["s14_ArrayProtocolP", "append"]
+- !private ["s14_ArrayProtocolP", "count"]
+- !private ["s14_ArrayProtocolP", "forEach"]
+- !private ["s14_ArrayProtocolP", "init"]
+- !private ["s14_ArrayProtocolP", "subscript"]
+- !private ["14CoreFoundation9_CFObjectP", "init"]
+- !private ["12CoreGraphics22_CGColorInitTrampolineP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "init"]
+- !private ["s30_CustomPlaygroundQuickLookableP", "zero"]
+- !private ["s24_DestructorSafeContainerP", "Int"]
+- !private ["s24_DestructorSafeContainerP", "append"]
+- !private ["s24_DestructorSafeContainerP", "count"]
+- !private ["s24_DestructorSafeContainerP", "forEach"]
+- !private ["s24_DestructorSafeContainerP", "init"]
+- !private ["s24_DestructorSafeContainerP", "subscript"]
+- !private ["s51_ExpressibleByBuiltinExtendedGraphemeClusterLiteralP", "init"]
+- !private ["s34_ExpressibleByBuiltinStringLiteralP", "init"]
+- !private ["s41_ExpressibleByBuiltinUnicodeScalarLiteralP", "init"]
+- !private ["s26_ExpressibleByColorLiteralP", "init"]
+- !private ["s19_HasContiguousBytesP", "Int"]
+- !private ["s19_HasContiguousBytesP", "append"]
+- !private ["s19_HasContiguousBytesP", "count"]
+- !private ["s19_HasContiguousBytesP", "forEach"]
+- !private ["s19_HasContiguousBytesP", "init"]
+- !private ["s19_HasContiguousBytesP", "subscript"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "Int"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "append"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "count"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "forEach"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "init"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "subscript"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "CGRect"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "DebugLayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "LayerDebugStyle"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "String"]
+- ["10Foundation27_KeyValueCodingAndObservingP", ""]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "addSublayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "backgroundColor"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "borderColor"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "borderWidth"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "bounds"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "contentsLayer"]
+- ["10Foundation27_KeyValueCodingAndObservingP", "debugStyle"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fatalError"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "init"]
+- ["10Foundation27_KeyValueCodingAndObservingP", "layerForDebugging"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "logLayerTree"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "position"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "print"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "removeFromSuperlayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "setDebuggingState"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "sublayers"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "zPosition"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "CGRect"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "DebugLayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "LayerDebugStyle"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "String"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", ""]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "addSublayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "backgroundColor"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "borderColor"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "borderWidth"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "bounds"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "contentsLayer"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", "debugStyle"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fatalError"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "init"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", "layerForDebugging"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "logLayerTree"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "position"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "print"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "removeFromSuperlayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "setDebuggingState"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "sublayers"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "zPosition"]
+- !private ["s21_ObjectiveCBridgeableP", "Int"]
+- !private ["s21_ObjectiveCBridgeableP", "append"]
+- !private ["s21_ObjectiveCBridgeableP", "count"]
+- !private ["s21_ObjectiveCBridgeableP", "forEach"]
+- !private ["s21_ObjectiveCBridgeableP", "init"]
+- !private ["s21_ObjectiveCBridgeableP", "subscript"]
+- !private ["s21_ObjectiveCBridgeableP", "zero"]
+depends-nominal:
+- "6Lottie18AnimationContainerC"
+- "Sa"
+- !private "SK"
+- "So7CALayerC"
+- "So13CAMediaTimingP"
+- !private "So10CGColorRefa"
+- !private "So7CGPointV"
+- !private "So6CGRectV"
+- "s7CVarArgP"
+- !private "Sl"
+- !private "SL"
+- "6Lottie16CompositionLayerC"
+- !private "10Foundation15ContiguousBytesP"
+- "s28CustomDebugStringConvertibleP"
+- "6Lottie20CustomLayerDebuggingP"
+- !private "s17CustomReflectableP"
+- "s23CustomStringConvertibleP"
+- !private "10Foundation12DataProtocolP"
+- "6Lottie10DebugLayerC"
+- !private "Se"
+- !private "SE"
+- "SQ"
+- !private "s25ExpressibleByArrayLiteralP"
+- !private "s43ExpressibleByExtendedGraphemeClusterLiteralP"
+- !private "s32ExpressibleByStringInterpolationP"
+- !private "s26ExpressibleByStringLiteralP"
+- !private "s33ExpressibleByUnicodeScalarLiteralP"
+- "SH"
+- !private "6Lottie14InterpolatableP"
+- "6Lottie17KeypathSearchableP"
+- "6Lottie15LayerDebugStyleV"
+- "6Lottie14LayerDebuggingP"
+- !private "6Lottie10LayerModelC"
+- !private "s25LosslessStringConvertibleP"
+- !private "s10MirrorPathP"
+- !private "SM"
+- !private "10Foundation19MutableDataProtocolP"
+- "So8NSCodingP"
+- "So8NSObjectC"
+- "So8NSObjectP"
+- "So14NSSecureCodingP"
+- "6Lottie20NullCompositionLayerC"
+- !private "Sk"
+- !private "Sm"
+- !private "ST"
+- "6Lottie21ShapeCompositionLayerC"
+- "6Lottie19ShapeContainerLayerC"
+- "6Lottie16ShapeRenderLayerC"
+- !private "SS"
+- !private "Sy"
+- !private "s16TextOutputStreamP"
+- !private "s20TextOutputStreamableP"
+- !private "s14_ArrayProtocolP"
+- !private "14CoreFoundation9_CFObjectP"
+- !private "12CoreGraphics22_CGColorInitTrampolineP"
+- !private "s30_CustomPlaygroundQuickLookableP"
+- !private "s24_DestructorSafeContainerP"
+- !private "s51_ExpressibleByBuiltinExtendedGraphemeClusterLiteralP"
+- !private "s34_ExpressibleByBuiltinStringLiteralP"
+- !private "s41_ExpressibleByBuiltinUnicodeScalarLiteralP"
+- !private "s26_ExpressibleByColorLiteralP"
+- !private "s19_HasContiguousBytesP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- "10Foundation27_KeyValueCodingAndObservingP"
+- "10Foundation37_KeyValueCodingAndObservingPublishingP"
+- !private "s21_ObjectiveCBridgeableP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Metal.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "c5ef4392989dc5a31c395e93c715cb28"

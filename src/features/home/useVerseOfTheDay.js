@@ -1,10 +1,10 @@
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Platform } from 'react-native'
 import * as Permissions from 'expo-permissions'
 import compose from 'recompose/compose'
-import { Notifications } from 'expo'
+// import { Notifications } from 'expo'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
@@ -58,80 +58,80 @@ export const useVerseOfTheDay = () => {
       return true
     }
 
-    const scheduleNotification = async () => {
-      try {
-        await Notifications.cancelAllScheduledNotificationsAsync()
+    // const scheduleNotification = async () => {
+    //   try {
+    //     await Notifications.cancelAllScheduledNotificationsAsync()
 
-        if (!verseOfTheDayTime) {
-          console.log(
-            "User is not logged or there is not verse of the day timeset, don't do anything"
-          )
-          return
-        }
+    //     if (!verseOfTheDayTime) {
+    //       console.log(
+    //         "User is not logged or there is not verse of the day timeset, don't do anything"
+    //       )
+    //       return
+    //     }
 
-        if (Platform.OS === 'android') {
-          await Notifications.createChannelAndroidAsync('verset-du-jour', {
-            name: 'Versets du jour',
-            sound: true,
-            priority: 'max',
-            vibrate: [0, 250, 250, 250]
-          })
-        }
+    //     if (Platform.OS === 'android') {
+    //       await Notifications.createChannelAndroidAsync('verset-du-jour', {
+    //         name: 'Versets du jour',
+    //         sound: true,
+    //         priority: 'max',
+    //         vibrate: [0, 250, 250, 250]
+    //       })
+    //     }
 
-        const [vodHours, vodMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
-        const nowDate = new Date(Date.now())
-        const nowHour = nowDate.getHours()
-        const nowMinutes = nowDate.getMinutes()
+    //     const [vodHours, vodMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
+    //     const nowDate = new Date(Date.now())
+    //     const nowHour = nowDate.getHours()
+    //     const nowMinutes = nowDate.getMinutes()
 
-        nowDate.setMinutes(0, 0)
-        const addDay =
-          nowHour * 60 * 60 * 1000 + nowMinutes * 60 * 1000 >
-          vodHours * 60 * 60 * 1000 + vodMinutes * 60 * 1000
-            ? 1
-            : 0
+    //     nowDate.setMinutes(0, 0)
+    //     const addDay =
+    //       nowHour * 60 * 60 * 1000 + nowMinutes * 60 * 1000 >
+    //       vodHours * 60 * 60 * 1000 + vodMinutes * 60 * 1000
+    //         ? 1
+    //         : 0
 
-        const date = compose(
-          setMinutes(vodMinutes),
-          setHours(vodHours),
-          addDays(addDay)
-        )(nowDate)
+    //     const date = compose(
+    //       setMinutes(vodMinutes),
+    //       setHours(vodHours),
+    //       addDays(addDay)
+    //     )(nowDate)
 
-        const notificationId = await Notifications.scheduleLocalNotificationAsync(
-          {
-            title: `Bonjour ${user.displayName ? user.displayName.split(' ')[0] : ''}`, // @TODO: Extract to function
-            body: 'Découvre ton verset du jour !',
-            ios: {
-              sound: true
-            },
-            android: {
-              channelId: 'verset-du-jour',
-              color: '#0984e3'
-            }
-          },
-          {
-            repeat: 'day',
-            time: date.getTime()
-          }
-        )
+    //     const notificationId = await Notifications.scheduleLocalNotificationAsync(
+    //       {
+    //         title: `Bonjour ${user.displayName ? user.displayName.split(' ')[0] : ''}`, // @TODO: Extract to function
+    //         body: 'Découvre ton verset du jour !',
+    //         ios: {
+    //           sound: true
+    //         },
+    //         android: {
+    //           channelId: 'verset-du-jour',
+    //           color: '#0984e3'
+    //         }
+    //       },
+    //       {
+    //         repeat: 'day',
+    //         time: date.getTime()
+    //       }
+    //     )
 
-        console.log(`Notification ${notificationId} set at ${verseOfTheDayTime} on ${date}`)
-      } catch (e) {
-        Snackbar.show('Erreur de notification.')
-        console.log(e)
-        Sentry.captureException(e)
-      }
-    }
-    const initNotifications = async () => {
-      const canSendNotification = await askPermissions()
-      Notifications.addListener(a => {
-        console.log('notifications launched', a)
-      })
+    //     console.log(`Notification ${notificationId} set at ${verseOfTheDayTime} on ${date}`)
+    //   } catch (e) {
+    //     Snackbar.show('Erreur de notification.')
+    //     console.log(e)
+    //     Sentry.captureException(e)
+    //   }
+    // }
+    // const initNotifications = async () => {
+    //   const canSendNotification = await askPermissions()
+    //   Notifications.addListener(a => {
+    //     console.log('notifications launched', a)
+    //   })
 
-      if (canSendNotification) {
-        scheduleNotification()
-      }
-    }
-    initNotifications()
+    //   if (canSendNotification) {
+    //     scheduleNotification()
+    //   }
+    // }
+    // initNotifications()
   }, [user.displayName, verseOfTheDayTime])
   return verseOfTheDay
 }

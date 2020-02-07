@@ -26,7 +26,9 @@ const Container = styled.View({
   paddingBottom: 10
 })
 
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({ color: theme.colors.default }))
+const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.default
+}))
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
@@ -87,37 +89,37 @@ class VersionSelectorItem extends React.Component {
   requireBibleFileUri = async id => {
     switch (id) {
       case 'DBY': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-dby.txt')).uri
+        return firestoreUris.dbyBible
       }
       case 'OST': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-ost.txt')).uri
+        return firestoreUris.ostBible
       }
       case 'BDS': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-bds.txt')).uri
+        return firestoreUris.bdsBible
       }
       case 'CHU': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-chu.txt')).uri
+        return firestoreUris.chuBible
       }
       case 'FMAR': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-fmar.txt')).uri
+        return firestoreUris.fmarBible
       }
       case 'FRC97': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-frc97.txt')).uri
+        return firestoreUris.frc97Bible
       }
       case 'NBS': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-nbs.txt')).uri
+        return firestoreUris.nbsBible
       }
       case 'NEG79': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-neg79.txt')).uri
+        return firestoreUris.neg79Bible
       }
       case 'NVS78P': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-nvs78p.txt')).uri
+        return firestoreUris.nvs78pBible
       }
       case 'S21': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-s21.txt')).uri
+        return firestoreUris.s21Bible
       }
       case 'KJF': {
-        return Asset.fromModule(require('~assets/bible_versions/bible-kjf.txt')).uri
+        return firestoreUris.kjfBible
       }
       case 'INT': {
         const sqliteDbUri = firestoreUris.interlineaire
@@ -154,7 +156,8 @@ class VersionSelectorItem extends React.Component {
   }
 
   calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-    const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
+    const fileProgress =
+      Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
     this.setState({ fileProgress })
   }
 
@@ -211,14 +214,18 @@ class VersionSelectorItem extends React.Component {
   }
 
   confirmDelete = () => {
-    Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer cette version ?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: this.delete,
-        style: 'destructive'
-      }
-    ])
+    Alert.alert(
+      'Attention',
+      'Êtes-vous vraiment sur de supprimer cette version ?',
+      [
+        { text: 'Non', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Oui',
+          onPress: this.delete,
+          style: 'destructive'
+        }
+      ]
+    )
   }
 
   render() {
@@ -245,7 +252,8 @@ class VersionSelectorItem extends React.Component {
             {!isLoading && version.id !== 'LSGS' && (
               <TouchableOpacity
                 onPress={this.startDownload}
-                style={{ padding: 10, alignItems: 'flex-end' }}>
+                style={{ padding: 10, alignItems: 'flex-end' }}
+              >
                 <FeatherIcon name="download" size={20} />
                 {version.id === 'INT' && (
                   <Box center marginTop={5}>
@@ -256,7 +264,10 @@ class VersionSelectorItem extends React.Component {
             )}
             {isLoading && (
               <Box width={80} justifyContent="center">
-                <ProgressBar progress={fileProgress} color={theme.colors.default} />
+                <ProgressBar
+                  progress={fileProgress}
+                  color={theme.colors.default}
+                />
               </Box>
             )}
           </Box>
@@ -272,7 +283,10 @@ class VersionSelectorItem extends React.Component {
               <TextVersion>{version.id}</TextVersion>
               <TextName>{version.name}</TextName>
             </Box>
-            <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
+            <TouchableOpacity
+              onPress={this.confirmDelete}
+              style={{ padding: 10 }}
+            >
               <DeleteIcon name="trash-2" size={18} />
             </TouchableOpacity>
           </Box>

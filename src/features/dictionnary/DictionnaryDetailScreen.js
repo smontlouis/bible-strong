@@ -4,7 +4,7 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
 import { useDispatch } from 'react-redux'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 import Button from '~common/ui/Button'
 import books from '~assets/bible_versions/books-desc'

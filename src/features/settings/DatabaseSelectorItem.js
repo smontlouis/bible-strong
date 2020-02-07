@@ -131,7 +131,10 @@ class DBSelectorItem extends React.Component {
     const { database } = this.props
     switch (database) {
       case 'STRONG': {
-        return Asset.fromModule(require('~assets/db/strong.sqlite')).uri
+        const { uri: sqliteDbUri } = await FileSystem.getInfoAsync(
+          `${FileSystem.bundleDirectory}/www/strong.sqlite`
+        )
+        return sqliteDbUri
       }
       case 'DICTIONNAIRE': {
         const sqliteDbUri = firestoreUris.dictionnaire
@@ -219,7 +222,10 @@ class DBSelectorItem extends React.Component {
     const [, dispatch] = this.context
     if (this.props.database !== 'SEARCH') {
       dispatch({
-        type: this.props.database === 'STRONG' ? 'strong.reset' : 'dictionnaire.reset'
+        type:
+          this.props.database === 'STRONG'
+            ? 'strong.reset'
+            : 'dictionnaire.reset'
       })
       switch (this.props.database) {
         case 'STRONG': {
@@ -256,14 +262,18 @@ class DBSelectorItem extends React.Component {
   }
 
   confirmDelete = () => {
-    Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer cette base de données ?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: this.delete,
-        style: 'destructive'
-      }
-    ])
+    Alert.alert(
+      'Attention',
+      'Êtes-vous vraiment sur de supprimer cette base de données ?',
+      [
+        { text: 'Non', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Oui',
+          onPress: this.delete,
+          style: 'destructive'
+        }
+      ]
+    )
   }
 
   render() {
@@ -293,7 +303,10 @@ class DBSelectorItem extends React.Component {
             )}
             {isLoading && (
               <Box width={100} justifyContent="center">
-                <ProgressBar progress={fileProgress} color={theme.colors.default} />
+                <ProgressBar
+                  progress={fileProgress}
+                  color={theme.colors.default}
+                />
               </Box>
             )}
           </Box>
@@ -308,7 +321,10 @@ class DBSelectorItem extends React.Component {
             <TextName>{name}</TextName>
             {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
           </Box>
-          <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
+          <TouchableOpacity
+            onPress={this.confirmDelete}
+            style={{ padding: 10 }}
+          >
             <DeleteIcon name="trash-2" size={18} />
           </TouchableOpacity>
         </Box>

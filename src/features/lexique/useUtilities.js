@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 import useDebounce from '~helpers/useDebounce'
 

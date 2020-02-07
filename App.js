@@ -1,16 +1,16 @@
 import 'react-native-root-siblings'
 import React from 'react'
-import { YellowBox } from 'react-native'
-import { AppLoading, Updates } from 'expo'
+import { YellowBox, ActivityIndicator } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Asset } from 'expo-asset'
 import { Provider } from 'react-redux'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 import { setAutoFreeze } from 'immer'
 
 import Analytics, { screen } from '~helpers/analytics'
 import SnackBar from '~common/SnackBar'
+import Loading from '~common/Loading'
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
 
@@ -22,10 +22,12 @@ YellowBox.ignoreWarnings([
   'Setting a timer'
 ])
 
-Sentry.init({
-  dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
-  enableInExpoDevelopment: false
-})
+if (!__DEV__) {
+  Sentry.init({
+    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
+    enableInExpoDevelopment: false
+  })
+}
 
 export const { store, persistor } = configureStore()
 
@@ -34,9 +36,20 @@ class App extends React.Component {
     isLoadingComplete: false
   }
 
+  async componentDidMount() {
+    await this.loadResourcesAsync()
+    this.handleFinishLoading()
+
+    if (!__DEV__) {
+      Analytics.hit(screen('Bible'))
+    }
+  }
+
   loadResourcesAsync = async () => {
     return Promise.all([
-      Asset.loadAsync([require('./src/features/bible/bibleWebView/dist/index.html')]),
+      Asset.loadAsync([
+        require('./src/features/bible/bibleWebView/dist/index.html')
+      ]),
       Font.loadAsync({
         ...Icon.Feather.font,
         'literata-book': require('~assets/fonts/LiterataBook.otf'),
@@ -55,37 +68,29 @@ class App extends React.Component {
     this.setState({ isLoadingComplete: true })
   }
 
-  updateApp = async () => {
-    try {
-      const update = await Updates.checkForUpdateAsync()
+  // updateApp = async () => {
+  //   try {
+  //     const update = await Updates.checkForUpdateAsync()
 
-      if (update.isAvailable) {
-        SnackBar.show('Une mise à jour est disponible, téléchargement...')
-        await Updates.fetchUpdateAsync()
+  //     if (update.isAvailable) {
+  //       SnackBar.show('Une mise à jour est disponible, téléchargement...')
+  //       await Updates.fetchUpdateAsync()
 
-        SnackBar.show("Mise à jour installée. Redémarrez l'app.")
-      }
-    } catch (e) {
-      // handle or log error
-    }
-  }
+  //       SnackBar.show("Mise à jour installée. Redémarrez l'app.")
+  //     }
+  //   } catch (e) {
+  //     // handle or log error
+  //   }
+  // }
 
-  componentDidMount() {
-    if (!__DEV__) {
-      Analytics.hit(screen('Bible'))
-    }
-    this.updateApp()
-  }
+  // componentDidMount() {
+
+  //   this.updateApp()
+  // }
 
   render() {
     if (!this.state.isLoadingComplete) {
-      return (
-        <AppLoading
-          startAsync={this.loadResourcesAsync}
-          onError={this.handleLoadingError}
-          onFinish={this.handleFinishLoading}
-        />
-      )
+      return <ActivityIndicator />
     }
 
     return (

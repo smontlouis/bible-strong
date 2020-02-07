@@ -1,10 +1,8 @@
 import React, { Component } from 'react'
-import { Alert, View } from 'react-native'
-import { Asset } from 'expo-asset'
+import { Alert, View, Platform } from 'react-native'
 import AssetUtils from 'expo-asset-utils'
-import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 import books from '~assets/bible_versions/books'
 import SnackBar from '~common/SnackBar'
@@ -66,29 +64,6 @@ class BibleWebView extends Component {
 
   loadHTMLFile = async () => {
     const { webviewHash, setWebviewHash } = this.props
-
-    try {
-      const indexPath = `${FileSystem.documentDirectory}/index.html`
-      const indexModule = await Asset.fromModule(require('./bibleWebView/dist/index.html'))
-      let dbFile = await FileSystem.getInfoAsync(indexPath)
-
-      console.log(indexModule.hash, webviewHash)
-      if (webviewHash !== indexModule.hash || !dbFile.exists) {
-        console.log('index file copied')
-        await FileSystem.copyAsync({
-          from: indexModule.localUri,
-          to: indexPath
-        })
-        dbFile = await FileSystem.getInfoAsync(indexPath)
-
-        setWebviewHash(indexModule.hash)
-      }
-
-      this.HTMLFile = await FileSystem.readAsStringAsync(dbFile.uri)
-    } catch (e) {
-      SnackBar.show('Impossible de lire la Bible, veuillez contacter le développeur.')
-      Sentry.captureException(e)
-    }
     this.setState({ isHTMLFileLoaded: true })
   }
 
@@ -285,7 +260,7 @@ class BibleWebView extends Component {
               const { nativeEvent } = syntheticEvent
               console.warn('WebView error: ', nativeEvent)
             }}
-            source={{ html: this.HTMLFile }}
+            source={Platform.OS === 'android' ? { uri: "file:///android_asset/index.html" } : require('./bibleWebView/dist/index.html')}
             injectedJavaScript={INJECTED_JAVASCRIPT}
             domStorageEnabled
             allowUniversalAccessFromFileURLs

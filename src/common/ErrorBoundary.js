@@ -1,6 +1,6 @@
 import React from 'react'
 import * as Icon from '@expo/vector-icons'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'

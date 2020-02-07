@@ -1,0 +1,340 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "ShapeContainerLayer"
+provides-nominal:
+- "6Lottie19ShapeContainerLayerC"
+provides-member:
+- ["6Lottie19ShapeContainerLayerC", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "=="
+- "AssignmentPrecedence"
+- "Bool"
+- !private "BooleanLiteralType"
+- "CALayer"
+- "CGFloat"
+- "CastingPrecedence"
+- "FloatLiteralType"
+- "IntegerLiteralType"
+- "NSCoder"
+- !private "NSNull"
+- "ShapeContainerLayer"
+- !private "StringLiteralType"
+- !private "fatalError"
+depends-member:
+- !private ["Sa", "append"]
+- !private ["Sa", "forEach"]
+- !private ["SK", "append"]
+- !private ["SK", "forEach"]
+- !private ["So8CAActionP", "init"]
+- ["So7CALayerC", "Bool"]
+- ["So7CALayerC", "CGFloat"]
+- ["So7CALayerC", "NSCoder"]
+- !private ["So7CALayerC", "NSNull"]
+- ["So7CALayerC", "ShapeContainerLayer"]
+- ["So7CALayerC", ""]
+- !private ["So7CALayerC", "actions"]
+- !private ["So7CALayerC", "fatalError"]
+- ["So7CALayerC", "hasRenderUpdate"]
+- ["So7CALayerC", "init"]
+- ["So7CALayerC", "insertRenderLayer"]
+- !private ["So7CALayerC", "insertSublayer"]
+- !private ["So7CALayerC", "isHidden"]
+- ["So7CALayerC", "markRenderUpdates"]
+- ["So7CALayerC", "rebuildContents"]
+- ["So7CALayerC", "renderLayers"]
+- ["So7CALayerC", "renderScale"]
+- !private ["So13CAMediaTimingP", "NSNull"]
+- ["So13CAMediaTimingP", ""]
+- !private ["So13CAMediaTimingP", "actions"]
+- !private ["So13CAMediaTimingP", "fatalError"]
+- !private ["So13CAMediaTimingP", "hasRenderUpdate"]
+- !private ["So13CAMediaTimingP", "init"]
+- !private ["So13CAMediaTimingP", "insertSublayer"]
+- !private ["So13CAMediaTimingP", "isHidden"]
+- !private ["So13CAMediaTimingP", "markRenderUpdates"]
+- !private ["So13CAMediaTimingP", "rebuildContents"]
+- !private ["So13CAMediaTimingP", "renderLayers"]
+- !private ["So13CAMediaTimingP", "renderScale"]
+- !private ["s7CVarArgP", "NSNull"]
+- ["s7CVarArgP", ""]
+- !private ["s7CVarArgP", "actions"]
+- !private ["s7CVarArgP", "append"]
+- !private ["s7CVarArgP", "fatalError"]
+- !private ["s7CVarArgP", "forEach"]
+- !private ["s7CVarArgP", "hasRenderUpdate"]
+- !private ["s7CVarArgP", "init"]
+- !private ["s7CVarArgP", "insertSublayer"]
+- !private ["s7CVarArgP", "isHidden"]
+- !private ["s7CVarArgP", "markRenderUpdates"]
+- !private ["s7CVarArgP", "rebuildContents"]
+- !private ["s7CVarArgP", "renderLayers"]
+- !private ["s7CVarArgP", "renderScale"]
+- !private ["Sl", "append"]
+- !private ["Sl", "forEach"]
+- !private ["10Foundation15ContiguousBytesP", "append"]
+- !private ["10Foundation15ContiguousBytesP", "forEach"]
+- !private ["s28CustomDebugStringConvertibleP", "NSNull"]
+- ["s28CustomDebugStringConvertibleP", ""]
+- !private ["s28CustomDebugStringConvertibleP", "actions"]
+- !private ["s28CustomDebugStringConvertibleP", "append"]
+- !private ["s28CustomDebugStringConvertibleP", "fatalError"]
+- !private ["s28CustomDebugStringConvertibleP", "forEach"]
+- !private ["s28CustomDebugStringConvertibleP", "hasRenderUpdate"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "insertSublayer"]
+- !private ["s28CustomDebugStringConvertibleP", "isHidden"]
+- !private ["s28CustomDebugStringConvertibleP", "markRenderUpdates"]
+- !private ["s28CustomDebugStringConvertibleP", "rebuildContents"]
+- !private ["s28CustomDebugStringConvertibleP", "renderLayers"]
+- !private ["s28CustomDebugStringConvertibleP", "renderScale"]
+- !private ["s17CustomReflectableP", "append"]
+- !private ["s17CustomReflectableP", "forEach"]
+- !private ["s23CustomStringConvertibleP", "NSNull"]
+- ["s23CustomStringConvertibleP", ""]
+- !private ["s23CustomStringConvertibleP", "actions"]
+- !private ["s23CustomStringConvertibleP", "append"]
+- !private ["s23CustomStringConvertibleP", "fatalError"]
+- !private ["s23CustomStringConvertibleP", "forEach"]
+- !private ["s23CustomStringConvertibleP", "hasRenderUpdate"]
+- !private ["s23CustomStringConvertibleP", "init"]
+- !private ["s23CustomStringConvertibleP", "insertSublayer"]
+- !private ["s23CustomStringConvertibleP", "isHidden"]
+- !private ["s23CustomStringConvertibleP", "markRenderUpdates"]
+- !private ["s23CustomStringConvertibleP", "rebuildContents"]
+- !private ["s23CustomStringConvertibleP", "renderLayers"]
+- !private ["s23CustomStringConvertibleP", "renderScale"]
+- !private ["10Foundation12DataProtocolP", "append"]
+- !private ["10Foundation12DataProtocolP", "forEach"]
+- !private ["Se", "append"]
+- !private ["Se", "forEach"]
+- !private ["SE", "append"]
+- !private ["SE", "forEach"]
+- !private ["SQ", "NSNull"]
+- ["SQ", ""]
+- !private ["SQ", "actions"]
+- !private ["SQ", "append"]
+- !private ["SQ", "fatalError"]
+- !private ["SQ", "forEach"]
+- !private ["SQ", "hasRenderUpdate"]
+- !private ["SQ", "init"]
+- !private ["SQ", "insertSublayer"]
+- !private ["SQ", "isHidden"]
+- !private ["SQ", "markRenderUpdates"]
+- !private ["SQ", "rebuildContents"]
+- !private ["SQ", "renderLayers"]
+- !private ["SQ", "renderScale"]
+- !private ["s25ExpressibleByArrayLiteralP", "append"]
+- !private ["s25ExpressibleByArrayLiteralP", "forEach"]
+- !private ["SH", "NSNull"]
+- ["SH", ""]
+- !private ["SH", "actions"]
+- !private ["SH", "append"]
+- !private ["SH", "fatalError"]
+- !private ["SH", "forEach"]
+- !private ["SH", "hasRenderUpdate"]
+- !private ["SH", "init"]
+- !private ["SH", "insertSublayer"]
+- !private ["SH", "isHidden"]
+- !private ["SH", "markRenderUpdates"]
+- !private ["SH", "rebuildContents"]
+- !private ["SH", "renderLayers"]
+- !private ["SH", "renderScale"]
+- !private ["6Lottie14InterpolatableP", "append"]
+- !private ["6Lottie14InterpolatableP", "forEach"]
+- !private ["SM", "append"]
+- !private ["SM", "forEach"]
+- !private ["10Foundation19MutableDataProtocolP", "append"]
+- !private ["10Foundation19MutableDataProtocolP", "forEach"]
+- !private ["So8NSCodingP", "NSNull"]
+- ["So8NSCodingP", ""]
+- !private ["So8NSCodingP", "actions"]
+- !private ["So8NSCodingP", "fatalError"]
+- !private ["So8NSCodingP", "hasRenderUpdate"]
+- !private ["So8NSCodingP", "init"]
+- !private ["So8NSCodingP", "insertSublayer"]
+- !private ["So8NSCodingP", "isHidden"]
+- !private ["So8NSCodingP", "markRenderUpdates"]
+- !private ["So8NSCodingP", "rebuildContents"]
+- !private ["So8NSCodingP", "renderLayers"]
+- !private ["So8NSCodingP", "renderScale"]
+- !private ["So9NSCopyingP", "init"]
+- !private ["So6NSNullC", "init"]
+- ["So8NSObjectC", "Bool"]
+- ["So8NSObjectC", "CGFloat"]
+- ["So8NSObjectC", "NSCoder"]
+- !private ["So8NSObjectC", "NSNull"]
+- ["So8NSObjectC", "ShapeContainerLayer"]
+- !private ["So8NSObjectC", "actions"]
+- !private ["So8NSObjectC", "fatalError"]
+- ["So8NSObjectC", "hasRenderUpdate"]
+- ["So8NSObjectC", "init"]
+- ["So8NSObjectC", "insertRenderLayer"]
+- !private ["So8NSObjectC", "insertSublayer"]
+- !private ["So8NSObjectC", "isHidden"]
+- ["So8NSObjectC", "markRenderUpdates"]
+- ["So8NSObjectC", "rebuildContents"]
+- ["So8NSObjectC", "renderLayers"]
+- ["So8NSObjectC", "renderScale"]
+- !private ["So8NSObjectP", "NSNull"]
+- ["So8NSObjectP", ""]
+- !private ["So8NSObjectP", "actions"]
+- !private ["So8NSObjectP", "fatalError"]
+- !private ["So8NSObjectP", "hasRenderUpdate"]
+- !private ["So8NSObjectP", "init"]
+- !private ["So8NSObjectP", "insertSublayer"]
+- !private ["So8NSObjectP", "isHidden"]
+- !private ["So8NSObjectP", "markRenderUpdates"]
+- !private ["So8NSObjectP", "rebuildContents"]
+- !private ["So8NSObjectP", "renderLayers"]
+- !private ["So8NSObjectP", "renderScale"]
+- !private ["So14NSSecureCodingP", "NSNull"]
+- ["So14NSSecureCodingP", ""]
+- !private ["So14NSSecureCodingP", "actions"]
+- !private ["So14NSSecureCodingP", "fatalError"]
+- !private ["So14NSSecureCodingP", "hasRenderUpdate"]
+- !private ["So14NSSecureCodingP", "init"]
+- !private ["So14NSSecureCodingP", "insertSublayer"]
+- !private ["So14NSSecureCodingP", "isHidden"]
+- !private ["So14NSSecureCodingP", "markRenderUpdates"]
+- !private ["So14NSSecureCodingP", "rebuildContents"]
+- !private ["So14NSSecureCodingP", "renderLayers"]
+- !private ["So14NSSecureCodingP", "renderScale"]
+- !private ["Sk", "append"]
+- !private ["Sk", "forEach"]
+- !private ["Sm", "append"]
+- !private ["Sm", "forEach"]
+- !private ["ST", "append"]
+- !private ["ST", "forEach"]
+- ["6Lottie19ShapeContainerLayerC", "Bool"]
+- ["6Lottie19ShapeContainerLayerC", "CGFloat"]
+- ["6Lottie19ShapeContainerLayerC", "NSCoder"]
+- !private ["6Lottie19ShapeContainerLayerC", "NSNull"]
+- ["6Lottie19ShapeContainerLayerC", "ShapeContainerLayer"]
+- !private ["6Lottie19ShapeContainerLayerC", "actions"]
+- ["6Lottie19ShapeContainerLayerC", "deinit"]
+- !private ["6Lottie19ShapeContainerLayerC", "fatalError"]
+- ["6Lottie19ShapeContainerLayerC", "hasRenderUpdate"]
+- ["6Lottie19ShapeContainerLayerC", "init"]
+- ["6Lottie19ShapeContainerLayerC", "insertRenderLayer"]
+- !private ["6Lottie19ShapeContainerLayerC", "insertSublayer"]
+- !private ["6Lottie19ShapeContainerLayerC", "isHidden"]
+- ["6Lottie19ShapeContainerLayerC", "markRenderUpdates"]
+- ["6Lottie19ShapeContainerLayerC", "rebuildContents"]
+- ["6Lottie19ShapeContainerLayerC", "renderLayers"]
+- ["6Lottie19ShapeContainerLayerC", "renderScale"]
+- !private ["s14_ArrayProtocolP", "append"]
+- !private ["s14_ArrayProtocolP", "forEach"]
+- !private ["s24_DestructorSafeContainerP", "append"]
+- !private ["s24_DestructorSafeContainerP", "forEach"]
+- !private ["s19_HasContiguousBytesP", "append"]
+- !private ["s19_HasContiguousBytesP", "forEach"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "append"]
+- !private ["s35_HasCustomAnyHashableRepresentationP", "forEach"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "NSNull"]
+- ["10Foundation27_KeyValueCodingAndObservingP", ""]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "actions"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "fatalError"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "hasRenderUpdate"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "init"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "insertSublayer"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "isHidden"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "markRenderUpdates"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "rebuildContents"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "renderLayers"]
+- !private ["10Foundation27_KeyValueCodingAndObservingP", "renderScale"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "NSNull"]
+- ["10Foundation37_KeyValueCodingAndObservingPublishingP", ""]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "actions"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "fatalError"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "hasRenderUpdate"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "init"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "insertSublayer"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "isHidden"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "markRenderUpdates"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "rebuildContents"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "renderLayers"]
+- !private ["10Foundation37_KeyValueCodingAndObservingPublishingP", "renderScale"]
+- !private ["s21_ObjectiveCBridgeableP", "append"]
+- !private ["s21_ObjectiveCBridgeableP", "forEach"]
+depends-nominal:
+- !private "Sa"
+- !private "SK"
+- !private "So8CAActionP"
+- "So7CALayerC"
+- "So13CAMediaTimingP"
+- "s7CVarArgP"
+- !private "Sl"
+- !private "10Foundation15ContiguousBytesP"
+- "s28CustomDebugStringConvertibleP"
+- !private "s17CustomReflectableP"
+- "s23CustomStringConvertibleP"
+- !private "10Foundation12DataProtocolP"
+- !private "Se"
+- !private "SE"
+- "SQ"
+- !private "s25ExpressibleByArrayLiteralP"
+- "SH"
+- !private "6Lottie14InterpolatableP"
+- !private "SM"
+- !private "10Foundation19MutableDataProtocolP"
+- "So8NSCodingP"
+- !private "So9NSCopyingP"
+- !private "So6NSNullC"
+- "So8NSObjectC"
+- "So8NSObjectP"
+- "So14NSSecureCodingP"
+- !private "Sk"
+- !private "Sm"
+- !private "ST"
+- "6Lottie19ShapeContainerLayerC"
+- !private "s14_ArrayProtocolP"
+- !private "s24_DestructorSafeContainerP"
+- !private "s19_HasContiguousBytesP"
+- !private "s35_HasCustomAnyHashableRepresentationP"
+- "10Foundation27_KeyValueCodingAndObservingP"
+- "10Foundation37_KeyValueCodingAndObservingPublishingP"
+- !private "s21_ObjectiveCBridgeableP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/ObjectiveC.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreImage.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/QuartzCore.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Dispatch.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Metal.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Darwin.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Foundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreFoundation.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/CoreGraphics.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/Swift.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/UIKit.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/lib/swift/SwiftOnoneSupport.swiftmodule/x86_64.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Combine.framework/Modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftinterface"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/ObjectiveC.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreImage.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/QuartzCore.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Dispatch.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Metal.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Darwin.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Foundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreFoundation.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/CoreGraphics.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/UIKit.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/SwiftOnoneSupport.swiftmodule/x86_64.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/Combine.swiftmodule/x86_64-apple-ios-simulator.swiftmodule"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios-umbrella.h"
+- "/Users/smontlouis/Projets/bible-strong/bible-strong-app/ios/Pods/Headers/Public/Lottie/lottie-ios.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/OpenGLES.framework/Headers/OpenGLES.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/apinotes/Dispatch.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UserNotifications.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk/System/Library/Frameworks/Security.framework/Headers/Security.apinotes"
+interface-hash: "35a092627dad9bedce4d6faf3080e2a7"

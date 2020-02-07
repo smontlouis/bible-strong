@@ -1,4 +1,5 @@
 import React from 'react'
+import { View } from 'react-native'
 import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
@@ -37,7 +38,7 @@ export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
   const orientation = useDeviceOrientation()
 
   return (
-    <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={100} duration={500}>
+    <View style={{ flex: 1 }} animation={fadeIn} delay={100} duration={500}>
       <SectionList
         orientation={orientation}
         contentContainerStyle={{
@@ -48,6 +49,6 @@ export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
         ref={ref}
         {...props}
       />
-    </Animatable.View>
+    </View>
   )
 })

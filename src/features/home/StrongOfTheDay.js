@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 
 import { wp } from '~helpers/utils'
 import Link from '~common/Link'
