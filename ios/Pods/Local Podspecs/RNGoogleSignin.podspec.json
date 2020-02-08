@@ -1,0 +1,36 @@
+{
+  "name": "RNGoogleSignin",
+  "version": "3.0.4",
+  "summary": "Google Signin for your react native applications",
+  "description": "Google Signin for your react native applications",
+  "license": "MIT",
+  "authors": {
+    "name": "devfd",
+    "email": "apptailor.co@gmail.com",
+    "url": "https://github.com/devfd"
+  },
+  "homepage": "https://github.com/react-native-community/react-native-google-signin",
+  "source": {
+    "git": "https://github.com/react-native-community/react-native-google-signin.git",
+    "tag": "v3.0.4"
+  },
+  "social_media_url": "https://github.com/react-native-community/react-native-google-signin/pull/284/files",
+  "requires_arc": true,
+  "static_framework": true,
+  "platforms": {
+    "ios": "9.0"
+  },
+  "preserve_paths": [
+    "LICENSE",
+    "README.md"
+  ],
+  "source_files": "ios/RNGoogleSignin/*.{h,m}",
+  "dependencies": {
+    "React": [
+
+    ],
+    "GoogleSignIn": [
+      "~> 5.0.0"
+    ]
+  }
+}

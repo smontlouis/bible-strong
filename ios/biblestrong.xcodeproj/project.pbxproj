@@ -12,6 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3DE4DAD41476765101945408 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D43FF9D506E70904424FA7E9 /* libPods-biblestrong.a */; };
+		63C8335223EE99AF00D11705 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 63C8335123EE99AF00D11705 /* GoogleService-Info.plist */; };
 		63CFB53823ED4954009B17AA /* www in Resources */ = {isa = PBXBuildFile; fileRef = 63CFB53723ED4953009B17AA /* www */; };
 		63D840D623ECFD3400C49B4C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D840D523ECFD3400C49B4C /* File.swift */; };
 /* End PBXBuildFile section */
@@ -27,6 +28,7 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = biblestrong/main.m; sourceTree = "<group>"; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B47C5AFCB8BDE514B7D1AC6 /* Pods-biblestrong.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.debug.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.debug.xcconfig"; sourceTree = "<group>"; };
+		63C8335123EE99AF00D11705 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		63CFB53723ED4953009B17AA /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = biblestrong/www; sourceTree = "<group>"; };
 		63D840D423ECFD3400C49B4C /* biblestrong-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "biblestrong-Bridging-Header.h"; sourceTree = "<group>"; };
 		63D840D523ECFD3400C49B4C /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 		13B07FAE1A68108700A75B9A /* biblestrong */ = {
 			isa = PBXGroup;
 			children = (
+				63C8335123EE99AF00D11705 /* GoogleService-Info.plist */,
 				63CFB53723ED4953009B17AA /* www */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -177,6 +180,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				63CFB53823ED4954009B17AA /* www in Resources */,
+				63C8335223EE99AF00D11705 /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
@@ -207,10 +211,12 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-biblestrong/Pods-biblestrong-resources.sh",
 				"${PODS_ROOT}/FBSDKCoreKit/FacebookSDKStrings.bundle",
+				"${PODS_ROOT}/GoogleSignIn/Resources/GoogleSignIn.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FacebookSDKStrings.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleSignIn.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
