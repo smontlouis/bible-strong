@@ -51,13 +51,13 @@ const DLScreen = () => {
             <Box padding={20}>
               <Button title="Tout télécharger" onPress={onConfirmDownload} />
             </Box>
-            <DBSelectorItem
+            {/* <DBSelectorItem
               database="STRONG"
               name="Lexique hébreu & grec"
               subTitle="Lexique contenu les strongs grecs et hébreu avec leur concordance et définitions"
               fileSize={34941952}
               shareFn={addDownloadFunc}
-            />
+            /> */}
             <DBSelectorItem
               database="DICTIONNAIRE"
               name="Dictionnaire Westphal"

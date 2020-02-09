@@ -1,15 +1,12 @@
-import * as firebase from 'firebase'
-import * as Google from 'expo-google-app-auth'
-import * as Facebook from 'expo-facebook'
-import * as AppAuth from 'expo-app-auth'
+import auth from '@react-native-firebase/auth'
+import { GoogleSignin } from '@react-native-community/google-signin'
+import { LoginManager, AccessToken } from 'react-native-fbsdk'
+
 import * as Sentry from '@sentry/react-native'
 import * as SecureStore from 'expo-secure-store'
 import * as AppleAuthentication from 'expo-apple-authentication'
 import * as Network from 'expo-network'
 
-import 'firebase/firestore'
-
-import { firebaseConfig } from '../../config'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebaseDb'
 
@@ -28,14 +25,18 @@ const FireAuth = class {
 
   onError = null
 
-  init(onLogin, onUserChange, onLogout, onEmailVerified, onError) {
+  async init(onLogin, onUserChange, onLogout, onEmailVerified, onError) {
     this.onUserChange = onUserChange
     this.onLogout = onLogout
     this.onEmailVerified = onEmailVerified
     this.onLogin = onLogin
     this.onError = onError
 
-    firebase.auth().onAuthStateChanged(async user => {
+    GoogleSignin.configure({
+      scopes: ['profile', 'email', 'openid']
+    })
+
+    auth().onAuthStateChanged(async user => {
       const { isConnected } = await Network.getNetworkStateAsync()
       if (!isConnected) return
 
@@ -98,7 +99,8 @@ const FireAuth = class {
                 studies[study.id] = study
               })
 
-              if (this.onLogin) this.onLogin(data || {}, remoteLastSeen, studies) // On login
+              if (this.onLogin)
+                this.onLogin(data || {}, remoteLastSeen, studies) // On login
             })
         }
 
@@ -169,13 +171,17 @@ const FireAuth = class {
   facebookLogin = () =>
     new Promise(async resolve => {
       try {
-        const { type, token } = await Facebook.logInWithReadPermissionsAsync('312719079612015', {
-          permissions: ['public_profile', 'email']
-        })
+        const result = await LoginManager.logInWithPermissions([
+          'public_profile',
+          'email'
+        ])
 
-        if (type === 'success' && token) {
+        console.log(result)
+
+        if (!result.isCancelled) {
+          const { accessToken } = await AccessToken.getCurrentAccessToken()
           // Build Firebase credential with the Facebook access token.
-          const credential = firebase.auth.FacebookAuthProvider.credential(token)
+          const credential = auth.FacebookAuthProvider.credential(accessToken)
           return this.onCredentialSuccess(credential, resolve)
         }
 
@@ -192,25 +198,15 @@ const FireAuth = class {
   googleLogin = () =>
     new Promise(async resolve => {
       try {
-        const result = await Google.logInAsync({
-          androidClientId: firebaseConfig.androidClientId,
-          androidStandaloneAppClientId: firebaseConfig.androidStandaloneAppClientId,
-          iosClientId: firebaseConfig.iosClientId,
-          iosStandaloneAppClientId: firebaseConfig.iosStandaloneAppClientId,
-          scopes: ['profile', 'email', 'openid'],
-          redirectUrl: `${AppAuth.OAuthRedirect}:/oauth2redirect/google`
-        })
+        const { idToken } = await GoogleSignin.signIn()
+        const { accessToken } = await GoogleSignin.getTokens()
 
-        if (result.type === 'success') {
-          const googleUser = result
+        const credential = auth.GoogleAuthProvider.credential(
+          idToken,
+          accessToken
+        )
 
-          const credential = firebase.auth.GoogleAuthProvider.credential(
-            googleUser.idToken,
-            googleUser.accessToken
-          )
-
-          return this.onCredentialSuccess(credential, resolve)
-        }
+        return this.onCredentialSuccess(credential, resolve)
 
         SnackBar.show('Connexion annulée.')
         return resolve(false)
@@ -224,7 +220,7 @@ const FireAuth = class {
 
   onCredentialSuccess = async (credential, resolve) => {
     try {
-      const user = await firebase.auth().signInWithCredential(credential)
+      const user = await auth().signInWithCredential(credential)
 
       console.log('user signed in ', user)
       SnackBar.show('Connexion réussie')
@@ -232,7 +228,10 @@ const FireAuth = class {
     } catch (e) {
       console.log(e.code)
       if (e.code === 'auth/account-exists-with-different-credential') {
-        SnackBar.show('Cet utilisateur existe déjà avec un autre compte.', 'danger')
+        SnackBar.show(
+          'Cet utilisateur existe déjà avec un autre compte.',
+          'danger'
+        )
       }
       return resolve(false)
     }
@@ -282,7 +281,7 @@ const FireAuth = class {
     })
 
   logout = () => {
-    firebase.auth().signOut()
+    auth().signOut()
     // Sign-out successful.
     this.user = null
     if (this.onLogout) this.onLogout()

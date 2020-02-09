@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
@@ -10,7 +11,7 @@ import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
 import { timeout } from '~helpers/timeout'
 
-// const RNFS = require('react-native-fs')
+const RNFS = require('react-native-fs')
 
 const STRONG_FILE_SIZE = 34941952
 
@@ -42,14 +43,19 @@ export const useWaitForDatabase = () => {
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         // TODO - DO THE SAME FOR ANDROID
-        const sqliteDB = await FileSystem.getInfoAsync(
-          `${FileSystem.bundleDirectory}/www/strong.sqlite`
-        )
 
-        console.log(sqliteDB)
+        let sqliteDB = {}
+
+        if (Platform.OS === 'android') {
+          sqliteDB.exists = await RNFS.existsAssets('www/strong.sqlite')
+        } else {
+          sqliteDB = await FileSystem.getInfoAsync(
+            `${FileSystem.bundleDirectory}/www/strong.sqlite`
+          )
+        }
 
         if (!dbFile.exists) {
-          if (sqliteDB.uri && !window.strongDownloadHasStarted) {
+          if (sqliteDB.exists && !window.strongDownloadHasStarted) {
             window.strongDownloadHasStarted = true
 
             if (!sqliteDir.exists) {
@@ -58,10 +64,14 @@ export const useWaitForDatabase = () => {
               throw new Error('SQLite dir is not a directory')
             }
 
-            await FileSystem.copyAsync({
-              from: sqliteDB.uri,
-              to: dbPath
-            })
+            if (Platform.OS === 'android') {
+              RNFS.copyFileAssets('www/strong.sqlite', dbPath)
+            } else {
+              await FileSystem.copyAsync({
+                from: sqliteDB.uri,
+                to: dbPath
+              })
+            }
 
             await strongDB.init()
 
@@ -73,64 +83,60 @@ export const useWaitForDatabase = () => {
             })
             window.strongDownloadHasStarted = false
           } else {
+            // TODO - Unnecessary because database is local
             // Waiting for user to accept to download
-            if (!startDownload) {
-              dispatch({
-                type: 'strong.setProposeDownload',
-                payload: true
-              })
-              return
-            }
-
-            try {
-              if (!window.strongDownloadHasStarted) {
-                window.strongDownloadHasStarted = true
-                console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
-
-                if (!sqliteDir.exists) {
-                  await FileSystem.makeDirectoryAsync(sqliteDirPath)
-                } else if (!sqliteDir.isDirectory) {
-                  throw new Error('SQLite dir is not a directory')
-                }
-
-                await FileSystem.createDownloadResumable(
-                  sqliteDB.uri,
-                  dbPath,
-                  null,
-                  ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                    const idxProgress =
-                      Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
-                      100
-                    dispatch({
-                      type: 'strong.setProgress',
-                      payload: idxProgress
-                    })
-                  }
-                ).downloadAsync()
-
-                await strongDB.init()
-                console.log('DB strong loaded')
-
-                dispatch({
-                  type: 'strong.setLoading',
-                  payload: false
-                })
-                window.strongDownloadHasStarted = false
-              }
-            } catch (e) {
-              SnackBar.show(
-                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
-                'danger'
-              )
-              dispatch({
-                type: 'strong.setProposeDownload',
-                payload: true
-              })
-              dispatch({
-                type: 'strong.setStartDownload',
-                payload: false
-              })
-            }
+            // if (!startDownload) {
+            //   dispatch({
+            //     type: 'strong.setProposeDownload',
+            //     payload: true
+            //   })
+            //   return
+            // }
+            // try {
+            //   if (!window.strongDownloadHasStarted) {
+            //     window.strongDownloadHasStarted = true
+            //     console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
+            //     if (!sqliteDir.exists) {
+            //       await FileSystem.makeDirectoryAsync(sqliteDirPath)
+            //     } else if (!sqliteDir.isDirectory) {
+            //       throw new Error('SQLite dir is not a directory')
+            //     }
+            //     await FileSystem.createDownloadResumable(
+            //       sqliteDB.uri,
+            //       dbPath,
+            //       null,
+            //       ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+            //         const idxProgress =
+            //           Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
+            //           100
+            //         dispatch({
+            //           type: 'strong.setProgress',
+            //           payload: idxProgress
+            //         })
+            //       }
+            //     ).downloadAsync()
+            //     await strongDB.init()
+            //     console.log('DB strong loaded')
+            //     dispatch({
+            //       type: 'strong.setLoading',
+            //       payload: false
+            //     })
+            //     window.strongDownloadHasStarted = false
+            //   }
+            // } catch (e) {
+            //   SnackBar.show(
+            //     "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+            //     'danger'
+            //   )
+            //   dispatch({
+            //     type: 'strong.setProposeDownload',
+            //     payload: true
+            //   })
+            //   dispatch({
+            //     type: 'strong.setStartDownload',
+            //     payload: false
+            //   })
+            // }
           }
         } else {
           await strongDB.init()

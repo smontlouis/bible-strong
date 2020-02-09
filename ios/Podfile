@@ -2,6 +2,11 @@ platform :ios, '10.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 require_relative '../node_modules/react-native-unimodules/cocoapods'
 
+project 'biblestrong',
+        'Dev' => :debug,
+        'Staging' => :release, 
+        'Prod' => :release
+
 target 'biblestrong' do
 
   rnPrefix = "../node_modules/react-native"
@@ -41,4 +46,5 @@ target 'biblestrong' do
   # Automatically detect installed unimodules
   use_unimodules!
   use_native_modules!
+
 end

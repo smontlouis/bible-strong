@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-import * as firebase from 'firebase'
 
 import SnackBar from '~common/SnackBar'
 
@@ -64,7 +63,8 @@ export const useWaitForDatabase = () => {
                 dbPath,
                 null,
                 ({ totalBytesWritten }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
+                  const idxProgress =
+                    Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
                   setProgress(idxProgress)
                 }
               ).downloadAsync()
@@ -94,7 +94,13 @@ export const useWaitForDatabase = () => {
     }
   }, [dispatch, startDownload, dispatch])
 
-  return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
+  return {
+    isLoading,
+    progress,
+    proposeDownload,
+    startDownload,
+    setStartDownload
+  }
 }
 
 const waitForDatabase = WrappedComponent => props => {
@@ -118,7 +124,9 @@ const waitForDatabase = WrappedComponent => props => {
     return (
       <DownloadRequired
         hasBackButton
-        title={'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'}
+        title={
+          'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
+        }
         setStartDownload={setStartDownload}
         fileSize={7}
       />

@@ -1,5 +1,3 @@
-import * as Network from 'expo-network'
-
 import {
   ADD_HIGHLIGHT,
   REMOVE_HIGHLIGHT,
@@ -39,9 +37,7 @@ export default store => next => async action => {
 
   const isLogged = !!state.user.id
 
-  const { isConnected } = await Network.getNetworkStateAsync()
-
-  if (!isLogged || !isConnected) {
+  if (!isLogged) {
     return result
   }
 
@@ -143,7 +139,15 @@ export default store => next => async action => {
 
     // TODO: When there will be too much data to update.
     case UPDATE_USER_DATA: {
-      const { changelog, highlights, notes, studies, tags, history, settings } = user.bible
+      const {
+        changelog,
+        highlights,
+        notes,
+        studies,
+        tags,
+        history,
+        settings
+      } = user.bible
       userDoc.update(
         r({
           'bible.history': history,

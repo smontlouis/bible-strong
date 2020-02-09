@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Bible Strong</string>
+    <string name="facebook_app_id">312719079612015</string> <string name="fb_login_protocol_scheme">fb312719079612015</string>
 </resources>
