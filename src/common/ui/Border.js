@@ -7,3 +7,12 @@ const Border = styled(Box)(({ theme }) => ({
 }))
 
 export default Border
+
+const Thumb = ({}) => (
+  <div>
+    <img className="thumb_img" src={imgSrc} />
+    <div className="thumb_category">{category}</div>
+    <div className="thumb_title">{title}</div>
+    <div></div>
+  </div>
+)

@@ -80,7 +80,7 @@ const CountChip = styled.View(({ theme }) => ({
 }))
 
 const StyledScrollView = styled.ScrollView(({ theme }) => ({
-  backgroundColor: theme.colors.lightGrey,
+  backgroundColor: theme.colors.lightGrey
 }))
 
 class BibleVerseDetailScreen extends React.Component {
@@ -121,7 +121,10 @@ class BibleVerseDetailScreen extends React.Component {
       return
     }
 
-    const { versesInCurrentChapter, error } = await loadCountVerses(verse.Livre, verse.Chapitre)
+    const { versesInCurrentChapter, error } = await loadCountVerses(
+      verse.Livre,
+      verse.Chapitre
+    )
     if (error) {
       this.setState({ error })
       return
@@ -151,7 +154,8 @@ class BibleVerseDetailScreen extends React.Component {
     })
   }
 
-  findRefIndex = ref => this.state.strongReferences.findIndex(r => r.Code === Number(ref))
+  findRefIndex = ref =>
+    this.state.strongReferences.findIndex(r => r.Code === Number(ref))
 
   goToCarouselItem = ref => {
     this._carousel.snapToItem(this.findRefIndex(ref))
@@ -220,14 +224,24 @@ class BibleVerseDetailScreen extends React.Component {
 
     const countWords = this.countDictionnaireWords()
     return (
-      <StyledScrollView  contentContainerStyle={{ paddingBottom: 20}} scrollIndicatorInsets={{ right: 1 }}>
+      <StyledScrollView
+        contentContainerStyle={{ paddingBottom: 20 }}
+        scrollIndicatorInsets={{ right: 1 }}
+      >
         <Box background paddingTop={getStatusBarHeight()} />
         <Header
           background
           hasBackButton
-          title={`${headerTitle} ${headerTitle.length < 20 ? '- Strong LSG' : ''}`}
+          title={`${headerTitle} ${
+            headerTitle.length < 20 ? '- Strong LSG' : ''
+          }`}
           rightComponent={
-            <Link route="DictionnaireVerseDetail" params={{ verse }} replace padding>
+            <Link
+              route="DictionnaireVerseDetail"
+              params={{ verse }}
+              replace
+              padding
+            >
               <Box position="relative" overflow="visibility">
                 <DictionnaryIcon color={theme.colors.secondary} />
                 <CountChip>
@@ -249,7 +263,8 @@ class BibleVerseDetailScreen extends React.Component {
                 value={{
                   currentStrongReference: this.state.currentStrongReference,
                   goToCarouselItem: this.goToCarouselItem
-                }}>
+                }}
+              >
                 <VerseText>{this.state.formattedTexte}</VerseText>
               </CarouselProvider>
             </StyledVerse>

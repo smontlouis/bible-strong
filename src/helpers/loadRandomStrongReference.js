@@ -7,6 +7,7 @@ const loadRandomStrongReference = async book =>
     const result = await SQLStrongTransaction(
       `SELECT * FROM ${part} WHERE Code IN (SELECT Code FROM ${part} ORDER BY RANDOM() LIMIT 1)`
     )
+
     return result[0]
   })
 

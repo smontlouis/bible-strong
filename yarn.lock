@@ -2308,16 +2308,6 @@
     node-fetch "^2.6.0"
     tempy "^0.3.0"
 
-"@expo/websql@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@expo/websql/-/websql-1.0.1.tgz#fff0cf9c1baa1f70f9e1d658b7c39a420d9b10a9"
-  dependencies:
-    argsarray "^0.0.1"
-    immediate "^3.2.2"
-    noop-fn "^1.0.0"
-    pouchdb-collections "^1.0.1"
-    tiny-queue "^0.2.1"
-
 "@expo/xdl@^57.0.1":
   version "57.0.2"
   resolved "https://registry.yarnpkg.com/@expo/xdl/-/xdl-57.0.2.tgz#94b7b473f54d025f1bcee52284ea0c300a129657"
@@ -3185,10 +3175,6 @@
   resolved "https://registry.yarnpkg.com/@types/untildify/-/untildify-3.0.0.tgz#cd3e6624e46ccf292d3823fb48fa90dda0deaec0"
   integrity sha512-FTktI3Y1h+gP9GTjTvXBP5v8xpH4RU6uS9POoBcGy4XkS2Np6LNtnP1eiNNth4S7P+qw2c/rugkwBasSHFzJEg==
 
-"@types/websql@^0.0.27":
-  version "0.0.27"
-  resolved "https://registry.yarnpkg.com/@types/websql/-/websql-0.0.27.tgz#621a666a7f02018e7cbb4abab956a25736c27d71"
-
 "@types/yargs-parser@*":
   version "13.1.0"
   resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-13.1.0.tgz#c563aa192f39350a1d18da36c5a8da382bbd8228"
@@ -3776,10 +3762,6 @@ argparse@^1.0.7:
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-1.0.10.tgz#bcd6791ea5ae09725e17e5ad988134cd40b3d911"
   dependencies:
     sprintf-js "~1.0.2"
-
-argsarray@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/argsarray/-/argsarray-0.0.1.tgz#6e7207b4ecdb39b0af88303fa5ae22bda8df61cb"
 
 aria-query@^3.0.0:
   version "3.0.0"
@@ -7356,13 +7338,6 @@ expo-analytics@^1.0.11:
   dependencies:
     expo-constants "^5.0.1"
 
-expo-app-auth@~6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-app-auth/-/expo-app-auth-6.0.0.tgz#4b2535da16a0234f67e813708960fc146aec867e"
-  integrity sha512-/7dv/RXYfg4OGmm5xOJUTecezTqccxmaUuYx1jt+hoI/QqD+q5uvT2u5Phi8uU4WsE5bi8qlkSRNTpL+rGSVoQ==
-  dependencies:
-    invariant "^2.2.4"
-
 expo-app-loader-provider@~8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/expo-app-loader-provider/-/expo-app-loader-provider-8.0.0.tgz#c18ef20a24153f5a0dbb297106ef0bcb5de57180"
@@ -7464,13 +7439,6 @@ expo-constants@^5.0.1:
   dependencies:
     ua-parser-js "^0.7.19"
 
-expo-constants@~6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-6.0.0.tgz#ff4598985ba006e24949be3f05be7429e5bedacf"
-  integrity sha512-O0yL3Ok0YUEWpAqsWjOdgFD/lMfg8PUGH/nq31CZ1s7cuFUlksD42i5YhIRlb0Pa/btK8X9LpfY3eWhx9eTmbg==
-  dependencies:
-    ua-parser-js "^0.7.19"
-
 expo-constants@~8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-8.0.0.tgz#e2c5a072dacb4263ccfc57dcb4835ca791960d48"
@@ -7482,11 +7450,6 @@ expo-error-recovery@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/expo-error-recovery/-/expo-error-recovery-1.0.0.tgz#2ca9d59fcd16c5c881af877993731056f2d46afe"
   integrity sha512-xnxciNEpGmwxx8BAE2A9fd9HxtzWtz8p9mikKU+EfWgOXaYD3FJwgbFoVLD2pm4QUarxwOcic76rcwg+0cNnGg==
-
-expo-facebook@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/expo-facebook/-/expo-facebook-8.0.0.tgz#d337a56459a3833488a879b925349b30c06a0afd"
-  integrity sha512-fF+lwFLWkB/mrr/xu4aIZ3HhpsITUTC1Dut4fD7ZzBPpQ3x2s1KpdNOOrb6FQFlE0thFlLAASRe0HDhFD7EN4w==
 
 expo-file-system@~8.0.0:
   version "8.0.0"
@@ -7501,14 +7464,6 @@ expo-font@~8.0.0:
   integrity sha512-1hrlvxv8MpE1761v2mDjZRwhhM4hkfDr/MQlkWD2+g17N+UjU3WQct4kc+VuZW30pP+YowwrmG3O6JVoIOhWGA==
   dependencies:
     fontfaceobserver "^2.1.0"
-
-expo-google-app-auth@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-google-app-auth/-/expo-google-app-auth-6.0.0.tgz#1d9e4603271fa89d36ebaf604adb0169739f4235"
-  integrity sha512-23gkverd0OKGuCSjCxR/Uo08GvlMpTBR5yipbfwGosqvEk3WuCAhISGWIEg0Ozd0WA8DfZ9AyQhLYyWkbM4EIQ==
-  dependencies:
-    expo-app-auth "~6.0.0"
-    expo-constants "~6.0.0"
 
 expo-haptics@~8.0.0:
   version "8.0.0"
@@ -7548,15 +7503,6 @@ expo-sharing@~8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/expo-sharing/-/expo-sharing-8.0.0.tgz#71195e6a24d6e36839e80d15581017d9cf02099c"
   integrity sha512-pucK9IaO7ZgKumUlQtmiKENP1zfZeh6TDyWF9Nlt37GJDBl+j9pPW+fS6dYfhF7UoPGEjactpYCtozoMu2fF2A==
-
-expo-sqlite@~8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/expo-sqlite/-/expo-sqlite-8.0.0.tgz#293b45c78d612ab25400c8c579bd7d73f06ccb6f"
-  integrity sha512-nJBj1psOkYGIGh2hqMFV/+04EvfGAD3wkHMauUvveU6m/+c48GIxmesPMMDfqtzESgzMcVSKLfbiMYrdQJyrHg==
-  dependencies:
-    "@expo/websql" "^1.0.1"
-    "@types/websql" "^0.0.27"
-    lodash "^4.17.15"
 
 express@4.16.4:
   version "4.16.4"
@@ -8992,10 +8938,6 @@ iltorb@^2.0.1:
 image-size@^0.6.0:
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/image-size/-/image-size-0.6.3.tgz#e7e5c65bb534bd7cdcedd6cb5166272a85f75fb2"
-
-immediate@^3.2.2:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.2.3.tgz#d140fa8f614659bd6541233097ddaac25cdd991c"
 
 immer@1.10.0:
   version "1.10.0"
@@ -11922,10 +11864,6 @@ node-releases@^1.1.47:
   dependencies:
     semver "^6.3.0"
 
-noop-fn@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/noop-fn/-/noop-fn-1.0.0.tgz#5f33d47f13d2150df93e0cb036699e982f78ffbf"
-
 noop-logger@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/noop-logger/-/noop-logger-0.1.1.tgz#94a2b1633c4f1317553007d8966fd0e841b6a4c2"
@@ -13141,10 +13079,6 @@ postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.5, postcss@^7.0.6:
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
-pouchdb-collections@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/pouchdb-collections/-/pouchdb-collections-1.0.1.tgz#fe63a17da977611abef7cb8026cb1a9553fd8359"
-
 prebuild-install@^5.3.0, prebuild-install@^5.3.2:
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-5.3.3.tgz#ef4052baac60d465f5ba6bf003c9c1de79b9da8e"
@@ -13902,6 +13836,11 @@ react-native-snap-carousel@^3.8.4:
     prop-types "^15.6.1"
     react-addons-shallow-compare "15.6.2"
 
+react-native-sqlite-storage@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-sqlite-storage/-/react-native-sqlite-storage-4.1.0.tgz#641780eef06bc90b853d3dcd628c0fe54b656d7b"
+  integrity sha512-H8++CILlZQ2f2n+OvVmGyqMaV+UFKTRSTx9/3eIAxBg4d0rjeZogs6hgHlfADvEGNmrEyUBDpnX9+uHnDtwAHQ==
+
 react-native-svg@9.13.3:
   version "9.13.3"
   resolved "https://registry.yarnpkg.com/react-native-svg/-/react-native-svg-9.13.3.tgz#6414b337d55af169ac2487ab70f3108404434446"
@@ -13971,6 +13910,11 @@ react-native-webview@^8.0.6:
   dependencies:
     escape-string-regexp "2.0.0"
     invariant "2.2.4"
+
+react-native-zip-archive@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-zip-archive/-/react-native-zip-archive-5.0.0.tgz#7833e48b895f3da1f6c99b6f504f124ee243667f"
+  integrity sha512-4AoBKb09lKESRaKcwhBG4+DLAhEHlw4H7AKUZC5zFHjtsaewNfwAMRgP3y+K2mjKN+Ihr/O7NFJFVEDrtarygg==
 
 react-native@~0.61.4:
   version "0.61.5"
@@ -15859,10 +15803,6 @@ timsort@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/timsort/-/timsort-0.3.0.tgz#405411a8e7e6339fe64db9a234de11dc31e02bd4"
   integrity sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=
-
-tiny-queue@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/tiny-queue/-/tiny-queue-0.2.1.tgz#25a67f2c6e253b2ca941977b5ef7442ef97a6046"
 
 tmp@^0.0.33:
   version "0.0.33"

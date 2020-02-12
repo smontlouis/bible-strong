@@ -25,3 +25,7 @@ Android: [https://play.google.com/store/apps/details?id=com.smontlouis.biblestro
 -[] Firebase analytics
 -[] Notifications
 -[] Remove console.logs
+-[] Zip sqlite
+-[] Versionning
+-[] Splash Screen
+-[] CFBundleName Issue

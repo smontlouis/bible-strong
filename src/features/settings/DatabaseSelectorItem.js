@@ -1,6 +1,5 @@
 import React from 'react'
 import { TouchableOpacity, Alert } from 'react-native'
-import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system'
 import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'

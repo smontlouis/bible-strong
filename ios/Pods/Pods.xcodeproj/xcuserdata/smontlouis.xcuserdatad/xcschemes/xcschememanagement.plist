@@ -24,11 +24,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>EXAppAuth.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>EXAppLoaderProvider.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -45,11 +40,6 @@
 			<false/>
 		</dict>
 		<key>EXErrorRecovery.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>EXFacebook.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -80,11 +70,6 @@
 			<false/>
 		</dict>
 		<key>EXPermissions.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>EXSQLite.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -289,6 +274,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>RNZipArchive.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>React-Core.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -370,6 +360,11 @@
 			<false/>
 		</dict>
 		<key>ReactCommon.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>SSZipArchive.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -500,6 +495,11 @@
 			<false/>
 		</dict>
 		<key>react-native-safe-area-context.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>react-native-sqlite-storage.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>

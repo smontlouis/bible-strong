@@ -9,6 +9,10 @@ export default function loadBible(bible, position) {
         case 'LSGS':
         case 'INT':
         case 'LSG': {
+          if (bibleMemoize[bible]) {
+            return resolve(bibleMemoize[bible])
+          }
+
           const LSGBible = require('~assets/bible_versions/bible-lsg-1910.json')
           resolve(LSGBible)
           break

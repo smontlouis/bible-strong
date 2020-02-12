@@ -1,12 +1,13 @@
-import * as SQLite from 'expo-sqlite'
-import * as FileSystem from 'expo-file-system'
+import SQLite from 'react-native-sqlite-storage'
+
+const RNFS = require('react-native-fs')
 
 export const getIfDatabaseExists = async sqliteFile => {
-  const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+  const sqliteDirPath = `${RNFS.DocumentDirectoryPath}/SQLite`
   const dbPath = `${sqliteDirPath}/${sqliteFile}.sqlite`
-  const dbFile = await FileSystem.getInfoAsync(dbPath)
+  const dbFileExists = await RNFS.exists(dbPath)
 
-  if (dbFile.exists) {
+  if (dbFileExists) {
     return true
   }
 
@@ -20,8 +21,17 @@ let dbTresorCommentaires
 class StrongDB {
   dbStrong
 
-  init = () => {
-    this.dbStrong = SQLite.openDatabase('strong.sqlite')
+  init = async () => {
+    this.dbStrong = SQLite.openDatabase(
+      {
+        name: 'strong.sqlite',
+        readOnly: true,
+        createFromLocation: '/SQLite/strong.sqlite'
+      },
+      () => {},
+      e => console.log(e)
+    )
+
     return this.dbStrong
   }
 

@@ -1,0 +1,34 @@
+{
+  "name": "RNZipArchive",
+  "version": "5.0.0",
+  "summary": "A little wrapper on ZipArchive for react-native",
+  "authors": "Perry Poon <plrthink@gmail.com> (https://github.com/plrthink)",
+  "license": "MIT",
+  "homepage": "https://github.com/mockingbot/react-native-zip-archive",
+  "source": {
+    "git": "https://github.com/mockingbot/react-native-zip-archive.git",
+    "tag": "5.0.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "preserve_paths": "*.js",
+  "dependencies": {
+    "React": [
+
+    ],
+    "SSZipArchive": [
+      "2.2.2"
+    ]
+  },
+  "compiler_flags": "-GCC_PREPROCESSOR_DEFINITIONS=\"HAVE_INTTYPES_H HAVE_PKCRYPT HAVE_STDINT_H HAVE_WZAES HAVE_ZLIB MZ_ZIP_NO_SIGNING $(inherited)\"",
+  "subspecs": [
+    {
+      "name": "Core",
+      "source_files": "ios/*.{h,m}",
+      "public_header_files": [
+        "ios/RNZipArchive.h"
+      ]
+    }
+  ]
+}

@@ -62,7 +62,10 @@ const StyledVerse = styled.View(() => ({
   flexDirection: 'row'
 }))
 
-const verseToDictionnary = ({ Livre, Chapitre, Verset }, dictionnaryWordsInVerse) => {
+const verseToDictionnary = (
+  { Livre, Chapitre, Verset },
+  dictionnaryWordsInVerse
+) => {
   try {
     const verseText = getBibleVerseText(BibleLSG, Livre, Chapitre, Verset)
     if (!dictionnaryWordsInVerse.length) {
@@ -105,7 +108,9 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   const { Livre, Chapitre, Verset } = verse
   const { title: headerTitle } = formatVerseContent([verse])
   const versesInCurrentChapter =
-    BibleLSG[Livre] && BibleLSG[Livre][Chapitre] && Object.keys(BibleLSG[Livre][Chapitre]).length
+    BibleLSG[Livre] &&
+    BibleLSG[Livre][Chapitre] &&
+    Object.keys(BibleLSG[Livre][Chapitre]).length
   const dictionnaryWordsInVerse = getBibleVerseText(
     dictionnaireWordsInBible,
     Livre,
@@ -126,7 +131,10 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
       return
     }
 
-    const verseToDictionnaryText = verseToDictionnary(verse, dictionnaryWordsInVerse)
+    const verseToDictionnaryText = verseToDictionnary(
+      verse,
+      dictionnaryWordsInVerse
+    )
     setFormattedText(verseToDictionnaryText)
 
     const loadAsyncWords = async () => {
@@ -184,7 +192,8 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
               value={{
                 current: currentWord,
                 setCurrent: setCurrentWord
-              }}>
+              }}
+            >
               <VerseText>{formattedText}</VerseText>
             </CarouselProvider>
           </StyledVerse>
@@ -201,11 +210,17 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
         <Box flex grey>
           {dictionnaryWordsInVerse.length ? (
             <Carousel
-              firstItem={dictionnaryWordsInVerse.findIndex(w => w === currentWord)}
+              firstItem={dictionnaryWordsInVerse.findIndex(
+                w => w === currentWord
+              )}
               ref={carousel}
               data={words}
               renderItem={({ item, index }) => (
-                <DictionnaireCard navigation={navigation} dictionnaireRef={item} index={index} />
+                <DictionnaireCard
+                  navigation={navigation}
+                  dictionnaireRef={item}
+                  index={index}
+                />
               )}
               activeSlideAlignment="start"
               sliderWidth={sliderWidth}
@@ -218,7 +233,9 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
                 overflow: 'visible',
                 flex: 1
               }}
-              onSnapToItem={index => setCurrentWord(dictionnaryWordsInVerse[index])}
+              onSnapToItem={index =>
+                setCurrentWord(dictionnaryWordsInVerse[index])
+              }
               contentContainerCustomStyle={{}}
               useScrollView={false}
               initialNumToRender={2}

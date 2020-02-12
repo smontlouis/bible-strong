@@ -16,8 +16,12 @@ const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
         tx.executeSql(
           sqlReq,
           args,
-          (_, { rows: { _array } }) => {
-            resolve(_array)
+          (_, resultSet) => {
+            const tmpResults = []
+            for (let x = 0; x < resultSet.rows.length; x++) {
+              tmpResults.push(resultSet.rows.item(x))
+            }
+            resolve(tmpResults)
           },
           (txObj, error) => reject(error)
         )

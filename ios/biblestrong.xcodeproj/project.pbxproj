@@ -12,7 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3DE4DAD41476765101945408 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D43FF9D506E70904424FA7E9 /* libPods-biblestrong.a */; };
-		63CFB53823ED4954009B17AA /* www in Resources */ = {isa = PBXBuildFile; fileRef = 63CFB53723ED4953009B17AA /* www */; };
+		638897AE23F12D6700E7880D /* www in Resources */ = {isa = PBXBuildFile; fileRef = 638897AD23F12D6700E7880D /* www */; };
 		63D840D623ECFD3400C49B4C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D840D523ECFD3400C49B4C /* File.swift */; };
 /* End PBXBuildFile section */
 
@@ -30,7 +30,7 @@
 		6321EC4323EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6321EC4523EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6321EC4723EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		63CFB53723ED4953009B17AA /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = biblestrong/www; sourceTree = "<group>"; };
+		638897AD23F12D6700E7880D /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = biblestrong/www; sourceTree = "<group>"; };
 		63D840D423ECFD3400C49B4C /* biblestrong-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "biblestrong-Bridging-Header.h"; sourceTree = "<group>"; };
 		63D840D523ECFD3400C49B4C /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		696C0E267DAB31F9E583F818 /* Pods-biblestrong.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.staging.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.staging.xcconfig"; sourceTree = "<group>"; };
@@ -57,7 +57,7 @@
 		13B07FAE1A68108700A75B9A /* biblestrong */ = {
 			isa = PBXGroup;
 			children = (
-				63CFB53723ED4953009B17AA /* www */,
+				638897AD23F12D6700E7880D /* www */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -223,7 +223,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63CFB53823ED4954009B17AA /* www in Resources */,
+				638897AE23F12D6700E7880D /* www in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);

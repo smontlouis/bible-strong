@@ -171,9 +171,6 @@ PODS:
     - BoringSSL-GRPC/Interface (= 0.0.3)
   - BoringSSL-GRPC/Interface (0.0.3)
   - DoubleConversion (1.1.6)
-  - EXAppAuth (6.0.0):
-    - AppAuth
-    - UMCore
   - EXAppleAuthentication (2.0.0):
     - UMCore
   - EXAppLoaderProvider (8.0.0)
@@ -184,11 +181,6 @@ PODS:
     - UMConstantsInterface
     - UMCore
   - EXErrorRecovery (1.0.0):
-    - UMCore
-  - EXFacebook (8.0.0):
-    - FBSDKCoreKit (~> 5.8.0)
-    - FBSDKLoginKit (~> 5.8.0)
-    - UMConstantsInterface
     - UMCore
   - EXFileSystem (8.0.0):
     - UMCore
@@ -208,9 +200,6 @@ PODS:
   - EXSecureStore (8.0.0):
     - UMCore
   - EXSharing (8.0.0):
-    - UMCore
-    - UMFileSystemInterface
-  - EXSQLite (8.0.0):
     - UMCore
     - UMFileSystemInterface
   - FBLazyVector (0.61.5)
@@ -546,6 +535,8 @@ PODS:
     - React
   - react-native-safe-area-context (0.7.2):
     - React
+  - react-native-sqlite-storage (4.1.0):
+    - React
   - react-native-webview (8.0.6):
     - React
   - React-RCTActionSheet (0.61.5):
@@ -618,9 +609,17 @@ PODS:
     - Sentry (~> 4.4.0)
   - RNSVG (9.13.3):
     - React
+  - RNZipArchive (5.0.0):
+    - React
+    - RNZipArchive/Core (= 5.0.0)
+    - SSZipArchive (= 2.2.2)
+  - RNZipArchive/Core (5.0.0):
+    - React
+    - SSZipArchive (= 2.2.2)
   - Sentry (4.4.3):
     - Sentry/Core (= 4.4.3)
   - Sentry/Core (4.4.3)
+  - SSZipArchive (2.2.2)
   - UMBarCodeScannerInterface (5.0.0)
   - UMCameraInterface (5.0.0)
   - UMConstantsInterface (5.0.0)
@@ -640,13 +639,11 @@ PODS:
 
 DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
-  - EXAppAuth (from `../node_modules/expo-app-auth/ios`)
   - EXAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - EXAppLoaderProvider (from `../node_modules/expo-app-loader-provider/ios`)
   - EXAV (from `../node_modules/expo-av/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXErrorRecovery (from `../node_modules/expo-error-recovery/ios`)
-  - EXFacebook (from `../node_modules/expo-facebook/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
@@ -655,7 +652,6 @@ DEPENDENCIES:
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
-  - EXSQLite (from `../node_modules/expo-sqlite/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
@@ -675,6 +671,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-fbsdk (from `../node_modules/react-native-fbsdk`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -700,6 +697,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
+  - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - UMBarCodeScannerInterface (from `../node_modules/unimodules-barcode-scanner-interface/ios`)
   - UMCameraInterface (from `../node_modules/unimodules-camera-interface/ios`)
   - UMConstantsInterface (from `../node_modules/unimodules-constants-interface/ios`)
@@ -744,13 +742,11 @@ SPEC REPOS:
     - leveldb-library
     - nanopb
     - Sentry
+    - SSZipArchive
 
 EXTERNAL SOURCES:
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
-  EXAppAuth:
-    :path: !ruby/object:Pathname
-    path: "../node_modules/expo-app-auth/ios"
   EXAppleAuthentication:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-apple-authentication/ios"
@@ -766,9 +762,6 @@ EXTERNAL SOURCES:
   EXErrorRecovery:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-error-recovery/ios"
-  EXFacebook:
-    :path: !ruby/object:Pathname
-    path: "../node_modules/expo-facebook/ios"
   EXFileSystem:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-file-system/ios"
@@ -793,9 +786,6 @@ EXTERNAL SOURCES:
   EXSharing:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-sharing/ios"
-  EXSQLite:
-    :path: !ruby/object:Pathname
-    path: "../node_modules/expo-sqlite/ios"
   FBLazyVector:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
@@ -830,6 +820,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fbsdk"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-sqlite-storage:
+    :path: "../node_modules/react-native-sqlite-storage"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-RCTActionSheet:
@@ -878,6 +870,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sentry/react-native"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  RNZipArchive:
+    :path: "../node_modules/react-native-zip-archive"
   UMBarCodeScannerInterface:
     :path: !ruby/object:Pathname
     path: "../node_modules/unimodules-barcode-scanner-interface/ios"
@@ -923,13 +917,11 @@ SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BoringSSL-GRPC: db8764df3204ccea016e1c8dd15d9a9ad63ff318
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
-  EXAppAuth: a5e758845e701381b5a7bedafe29e83f9cd165eb
   EXAppleAuthentication: 7d20ab4397f595d22c2fe61ca6abfca16a346a72
   EXAppLoaderProvider: ebdb6bc2632c1ccadbe49f5e4104d8d690969c49
   EXAV: 39a3b794d690e91404774cabfc563182d4f84ac3
   EXConstants: 4051b16c17ef3defa03c541d42811dc92b249146
   EXErrorRecovery: d36db99ec6a3808f313f01b0890eb443796dd1c2
-  EXFacebook: c10f77ea97b3003c29b4f0a49942acc1ba8330b5
   EXFileSystem: 6e0d9bb6cc4ea404dbb8f583c1a8a2dcdf4b83b6
   EXFont: 6187b5ab46ee578d5f8e7f2ea092752e78772235
   EXHaptics: 24438d930bd1fbef68e9eec47facea5dc2dab8a9
@@ -938,7 +930,6 @@ SPEC CHECKSUMS:
   EXPermissions: 9bc08859a675d291e89be9a0870155c27c16ac35
   EXSecureStore: 1448b90d665c9400aaaf6655fccb464da14698f6
   EXSharing: 5c9aa8f3cc1c117de74e50ccef862c52f57af2d7
-  EXSQLite: 220226a354912b100dfe913f5fe6f31762c8927e
   FBLazyVector: aaeaf388755e4f29cd74acbc9e3b8da6d807c37f
   FBReactNativeSpec: 118d0d177724c2d67f08a59136eb29ef5943ec75
   FBSDKCoreKit: e7dcac0aabcfb09d0166998edd95fe3b05a0ce5d
@@ -979,6 +970,7 @@ SPEC CHECKSUMS:
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-fbsdk: c35d42169e64aaf66f01713c1e18d0674f7f6519
   react-native-safe-area-context: 4b3d1b9ebb040a4814a222703e7434b20c95fcf5
+  react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
   react-native-webview: e32e5ced4c99d7240362690a65e3467d7ef535ef
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
@@ -1003,7 +995,9 @@ SPEC CHECKSUMS:
   RNScreens: 5e4758109c6d35f9a009ce72af873df907548020
   RNSentry: 9cfa3717b1e6bf9ad4b124683e78e3b98b01d3af
   RNSVG: f6177f8d7c095fada7cfee2e4bb7388ba426064c
+  RNZipArchive: be636657a6630e9771d4a3223dc8fd0bd0137b55
   Sentry: 14bdd673870e8cf64932b149fad5bbbf39a9b390
+  SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
   UMBarCodeScannerInterface: 3802c8574ef119c150701d679ab386e2266d6a54
   UMCameraInterface: 985d301f688ed392f815728f0dd906ca34b7ccb1
   UMConstantsInterface: bda5f8bd3403ad99e663eb3c4da685d063c5653c

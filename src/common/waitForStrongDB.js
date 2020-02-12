@@ -10,10 +10,13 @@ import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
 import { timeout } from '~helpers/timeout'
+import { existsAssets, unzipAssets } from '~helpers/assetUtils'
 
 const RNFS = require('react-native-fs')
 
-const STRONG_FILE_SIZE = 34941952
+const delay = duration => new Promise(resolve => setTimeout(resolve, duration))
+
+// const STRONG_FILE_SIZE = 34941952
 
 export const useWaitForDatabase = () => {
   const [
@@ -36,42 +39,32 @@ export const useWaitForDatabase = () => {
     } else {
       const loadDBAsync = async () => {
         await timeout(1000) // Wait safely
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
+        const sqliteDirPath = `${RNFS.DocumentDirectoryPath}/SQLite`
+        const sqliteDirExists = await RNFS.exists(sqliteDirPath)
 
         const dbPath = `${sqliteDirPath}/strong.sqlite`
-        const dbFile = await FileSystem.getInfoAsync(dbPath)
+        const dbFileExists = await RNFS.exists(dbPath)
 
-        // TODO - DO THE SAME FOR ANDROID
+        console.log('File exists ? ', dbFileExists)
+        if (dbFileExists) console.log(await RNFS.stat(dbPath))
 
-        let sqliteDB = {}
+        const sqliteZipExists = await existsAssets('www/strong.sqlite.zip')
 
-        if (Platform.OS === 'android') {
-          sqliteDB.exists = await RNFS.existsAssets('www/strong.sqlite')
-        } else {
-          sqliteDB = await FileSystem.getInfoAsync(
-            `${FileSystem.bundleDirectory}/www/strong.sqlite`
-          )
-        }
-
-        if (!dbFile.exists) {
-          if (sqliteDB.exists && !window.strongDownloadHasStarted) {
+        if (!dbFileExists) {
+          if (sqliteZipExists && !window.strongDownloadHasStarted) {
             window.strongDownloadHasStarted = true
 
-            if (!sqliteDir.exists) {
+            if (!sqliteDirExists) {
               await FileSystem.makeDirectoryAsync(sqliteDirPath)
-            } else if (!sqliteDir.isDirectory) {
-              throw new Error('SQLite dir is not a directory')
             }
 
-            if (Platform.OS === 'android') {
-              RNFS.copyFileAssets('www/strong.sqlite', dbPath)
-            } else {
-              await FileSystem.copyAsync({
-                from: sqliteDB.uri,
-                to: dbPath
-              })
-            }
+            console.log('Unzipping...')
+            console.time('unzipping')
+
+            await unzipAssets('www/strong.sqlite.zip', sqliteDirPath)
+
+            console.timeEnd('unzipping')
+            console.log('Unzipping done')
 
             await strongDB.init()
 
@@ -83,60 +76,7 @@ export const useWaitForDatabase = () => {
             })
             window.strongDownloadHasStarted = false
           } else {
-            // TODO - Unnecessary because database is local
-            // Waiting for user to accept to download
-            // if (!startDownload) {
-            //   dispatch({
-            //     type: 'strong.setProposeDownload',
-            //     payload: true
-            //   })
-            //   return
-            // }
-            // try {
-            //   if (!window.strongDownloadHasStarted) {
-            //     window.strongDownloadHasStarted = true
-            //     console.log(`Downloading ${sqliteDB.uri} to ${dbPath}`)
-            //     if (!sqliteDir.exists) {
-            //       await FileSystem.makeDirectoryAsync(sqliteDirPath)
-            //     } else if (!sqliteDir.isDirectory) {
-            //       throw new Error('SQLite dir is not a directory')
-            //     }
-            //     await FileSystem.createDownloadResumable(
-            //       sqliteDB.uri,
-            //       dbPath,
-            //       null,
-            //       ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-            //         const idxProgress =
-            //           Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
-            //           100
-            //         dispatch({
-            //           type: 'strong.setProgress',
-            //           payload: idxProgress
-            //         })
-            //       }
-            //     ).downloadAsync()
-            //     await strongDB.init()
-            //     console.log('DB strong loaded')
-            //     dispatch({
-            //       type: 'strong.setLoading',
-            //       payload: false
-            //     })
-            //     window.strongDownloadHasStarted = false
-            //   }
-            // } catch (e) {
-            //   SnackBar.show(
-            //     "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
-            //     'danger'
-            //   )
-            //   dispatch({
-            //     type: 'strong.setProposeDownload',
-            //     payload: true
-            //   })
-            //   dispatch({
-            //     type: 'strong.setStartDownload',
-            //     payload: false
-            //   })
-            // }
+            // Grosse erreur impossible de continuer
           }
         } else {
           await strongDB.init()
