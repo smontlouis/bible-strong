@@ -7,6 +7,16 @@ export const logTypes = {
 
 export default [
   {
+    date: '1581504493873',
+    type: logTypes.BUG,
+    title: 'Lecture audio corrigée',
+    description: `
+    Un bug empêchait la lecture audio pour certains livres. Ce souci a été réglé.
+
+    Merci à Kenza ;)
+    `
+  },
+  {
     date: '1580198076259',
     type: logTypes.NEW,
     title: 'Recherche plus complète',

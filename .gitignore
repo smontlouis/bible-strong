@@ -1,9 +1,13 @@
 node_modules/**/*
 .expo/*
+android/
+ios/
 npm-debug.*
 *.jks
 *.p12
 *.key
+*.pem
+keystore.txt
 *.mobileprovision
 src/assets/db/**
 src/assets/bible_versions/**

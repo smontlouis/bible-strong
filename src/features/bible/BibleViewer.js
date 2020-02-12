@@ -136,9 +136,7 @@ class BibleViewer extends Component {
       throw new Error('I crashed!')
     }
 
-    const audioBaseUrl = oldAudioBooks.find(a => a == book.Numero)
-      ? 'https://s.topchretien.com/media/topbible/bible/'
-      : 'https://s.topchretien.com/media/topbible/bible_v2/'
+    const audioBaseUrl = 'https://s.topchretien.com/media/topbible/bible/'
 
     this.setState({
       isLoading: false,
