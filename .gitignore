@@ -10,6 +10,9 @@ project/*
 config.js
 app.json
 
+.expo/
+src/assets/db/
+
 # Xcode
 !**/*.xcodeproj
 !**/*.pbxproj
