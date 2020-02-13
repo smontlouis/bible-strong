@@ -10,10 +10,9 @@ export default [
     date: '1581504493873',
     type: logTypes.BUG,
     title: 'Lecture audio corrigée',
-    description: `
-    Un bug empêchait la lecture audio pour certains livres. Ce souci a été réglé.
+    description: `Un bug empêchait la lecture audio pour certains livres. Ce souci a été réglé.
 
-    Merci à Kenza ;)
+Merci à Kenza ;)
     `
   },
   {
