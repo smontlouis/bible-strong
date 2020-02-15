@@ -1,6 +1,6 @@
 import 'react-native-root-siblings'
 import React from 'react'
-import { YellowBox, ActivityIndicator } from 'react-native'
+import { YellowBox, ActivityIndicator, View } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
@@ -112,7 +112,12 @@ class App extends React.Component {
 
   render() {
     if (!this.state.isLoadingComplete) {
-      return <ActivityIndicator />
+      return (
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator />
+        </View>
+      )
     }
 
     return (

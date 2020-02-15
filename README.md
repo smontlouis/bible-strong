@@ -30,3 +30,4 @@ Android: [https://play.google.com/store/apps/details?id=com.smontlouis.biblestro
 -[x] Splash Screen
 -[] Install codepush
 -[] Backup données
+-[] Status bar ?
