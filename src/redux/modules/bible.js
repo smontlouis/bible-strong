@@ -1,6 +1,7 @@
 import produce from 'immer'
+import analytics from '@react-native-firebase/analytics';
+
 import books from '~assets/bible_versions/books-desc'
-// import Analytics, { event } from '~helpers/analytics'
 
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
 const SET_TEMP_SELECTED_CHAPTER = 'bible/SET_TEMP_SELECTED_CHAPTER'
@@ -268,7 +269,10 @@ export function resetTempSelected() {
 
 export function setVersion(version) {
   if (!__DEV__) {
-    // Analytics.hit(event('Bible', 'version', version))
+    analytics().logEvent('version_bible', {
+      version
+    });
+  }
   }
   return {
     type: SET_VERSION,

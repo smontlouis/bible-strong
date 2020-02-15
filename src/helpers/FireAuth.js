@@ -1,4 +1,6 @@
 import auth from '@react-native-firebase/auth'
+import analytics from '@react-native-firebase/analytics'
+
 import { GoogleSignin } from '@react-native-community/google-signin'
 import { LoginManager, AccessToken } from 'react-native-fbsdk'
 
@@ -106,6 +108,9 @@ const FireAuth = class {
 
         this.user = user // Store user
 
+        if (!__DEV__) {
+          analytics().setUserId(profile.id)
+        }
         Sentry.configureScope(scope => {
           scope.setUser(profile)
         })

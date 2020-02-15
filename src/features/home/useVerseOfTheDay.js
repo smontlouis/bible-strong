@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react-native'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Platform } from 'react-native'
-// import { Notifications } from 'react-native-notifications'
+import PushNotification from 'react-native-push-notification'
 import compose from 'recompose/compose'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
@@ -52,66 +52,72 @@ export const useVerseOfTheDay = () => {
     loadVerse()
   }, [version])
 
-  // useEffect(() => {
-  //   const scheduleNotification = async () => {
-  //     try {
-  //       if (notificationId)
-  //         await Notifications.cancelLocalNotification(notificationId)
+  useEffect(() => {
+    const scheduleNotification = async () => {
+      try {
+        if (notificationId)
+          await PushNotification.cancelLocalNotifications({
+            id: notificationId
+          })
 
-  //       if (!verseOfTheDayTime) {
-  //         console.log(
-  //           "User is not logged or there is not verse of the day timeset, don't do anything"
-  //         )
-  //         return
-  //       }
+        if (!verseOfTheDayTime) {
+          console.log(
+            "User is not logged or there is not verse of the day timeset, don't do anything"
+          )
+          return
+        }
 
-  //       const [vodHours, vodMinutes] = verseOfTheDayTime
-  //         .split(':')
-  //         .map(n => Number(n))
-  //       const nowDate = new Date(Date.now())
-  //       const nowHour = nowDate.getHours()
-  //       const nowMinutes = nowDate.getMinutes()
+        const [vodHours, vodMinutes] = verseOfTheDayTime
+          .split(':')
+          .map(n => Number(n))
+        const nowDate = new Date(Date.now())
+        const nowHour = nowDate.getHours()
+        const nowMinutes = nowDate.getMinutes()
 
-  //       nowDate.setMinutes(0, 0)
-  //       const addDay =
-  //         nowHour * 60 * 60 * 1000 + nowMinutes * 60 * 1000 >
-  //         vodHours * 60 * 60 * 1000 + vodMinutes * 60 * 1000
-  //           ? 1
-  //           : 0
+        nowDate.setMinutes(0, 0)
+        const addDay =
+          nowHour * 60 * 60 * 1000 + nowMinutes * 60 * 1000 >
+          vodHours * 60 * 60 * 1000 + vodMinutes * 60 * 1000
+            ? 1
+            : 0
 
-  //       const date = compose(
-  //         setMinutes(vodMinutes),
-  //         setHours(vodHours),
-  //         addDays(addDay)
-  //       )(nowDate)
+        const date = compose(
+          setMinutes(vodMinutes),
+          setHours(vodHours),
+          addDays(addDay)
+        )(nowDate)
 
-  //       const notification = Notifications.postLocalNotification({
-  //         title: `Bonjour ${
-  //           user.displayName ? user.displayName.split(' ')[0] : ''
-  //         }`, // @TODO: Extract to function
-  //         body: 'Découvre ton verset du jour !',
-  //         category: 'NOTIFICATIONS',
-  //         fireDate: date.getTime()
-  //       })
+        const notification = PushNotification.localNotificationSchedule({
+          title: `Bonjour ${
+            user.displayName ? user.displayName.split(' ')[0] : ''
+          }`, // @TODO: Extract to function
+          message: 'Découvre ton verset du jour !',
+          category: 'NOTIFICATIONS',
+          repeatType: 'day',
+          date
+        })
 
-  //       console.log(
-  //         `Notification ${notification} set at ${verseOfTheDayTime} on ${date}`
-  //       )
-  //       dispatch(setNotificationId(notification))
-  //     } catch (e) {
-  //       Snackbar.show('Erreur de notification.')
-  //       console.log(e)
-  //       Sentry.captureException(e)
-  //     }
-  //   }
-  //   // const initNotifications = async () => {
-  //   //   const hasPermissions = await Notifications.isRegisteredForRemoteNotifications()
+        console.log(
+          `Notification ${notification} set at ${verseOfTheDayTime} on ${date}`
+        )
+        dispatch(setNotificationId(notification))
+      } catch (e) {
+        Snackbar.show('Erreur de notification.')
+        console.log(e)
+        Sentry.captureException(e)
+      }
+    }
+    const initNotifications = async () => {
+      const hasPermissions = await new Promise(resolve => {
+        PushNotification.checkPermissions(({ alert }) => resolve(alert))
+      })
 
-  //   //   if (hasPermissions) {
-  //   //     scheduleNotification()
-  //   //   }
-  //   // }
-  //   // initNotifications()
-  // }, [dispatch, notificationId, user.displayName, verseOfTheDayTime])
+      console.log('HASPER', hasPermissions)
+      if (hasPermissions) {
+        scheduleNotification()
+      }
+    }
+    initNotifications()
+  }, [dispatch, notificationId, user.displayName, verseOfTheDayTime])
   return verseOfTheDay
 }

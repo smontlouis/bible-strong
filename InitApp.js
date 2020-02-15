@@ -6,9 +6,9 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import compose from 'recompose/compose'
+import analytics from '@react-native-firebase/analytics'
 import ErrorBoundary from '~common/ErrorBoundary'
 
-// import Analytics, { screen } from '~helpers/analytics'
 import { updateUserData } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
@@ -71,7 +71,7 @@ class InitApp extends React.Component {
 
     if (prevScreen !== currentScreen) {
       if (!__DEV__) {
-        // Analytics.hit(screen(currentScreen))
+        analytics().setCurrentScreen(currentScreen, currentScreen)
       }
 
       Sentry.addBreadcrumb({

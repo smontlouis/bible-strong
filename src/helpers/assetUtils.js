@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 import * as FileSystem from 'expo-file-system'
-import { unzip, unzipAssets as unzipAssetsFn } from 'react-native-zip-archive'
+import { unzip } from 'react-native-zip-archive'
 
 const RNFS = require('react-native-fs')
 

@@ -1,15 +1,15 @@
 import 'react-native-root-siblings'
 import React from 'react'
 import { YellowBox, ActivityIndicator } from 'react-native'
-// import { Notifications } from 'react-native-notifications'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
+import PushNotification from 'react-native-push-notification'
+import analytics from '@react-native-firebase/analytics'
 
-// import Analytics, { screen } from '~helpers/analytics'
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
 
@@ -31,7 +31,6 @@ if (!__DEV__) {
 }
 
 export const { store, persistor } = configureStore()
-const PushNotification = require('react-native-push-notification')
 
 class App extends React.Component {
   state = {
@@ -43,10 +42,10 @@ class App extends React.Component {
     this.handleFinishLoading()
 
     if (!__DEV__) {
-      // Analytics.hit(screen('Bible'))
+      analytics().setCurrentScreen('Bible', 'Bible')
     }
 
-    // this.initNotifications()
+    this.initNotifications()
   }
 
   initNotifications = () => {
@@ -87,6 +86,8 @@ class App extends React.Component {
        */
       requestPermissions: true
     })
+
+    console.log('Notifications initialized')
   }
 
   loadResourcesAsync = async () => {

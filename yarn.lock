@@ -2068,7 +2068,7 @@
   dependencies:
     serve-static "^1.13.1"
 
-"@react-native-community/cli-platform-android@^3.0.0":
+"@react-native-community/cli-platform-android@^3.0.0-alpha.1":
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-3.1.4.tgz#61f964dc311623e60b0fb29c5f3732cc8a6f076f"
   integrity sha512-ClSdY20F0gzWVLTqCv7vHjnUqOcuq10jd9GgHX6lGSc2GI+Ql3/aQg3tmG4uY3KXNNwAv3U8QCoYgg1WGfwiHA==
@@ -2081,7 +2081,7 @@
     slash "^3.0.0"
     xmldoc "^1.1.2"
 
-"@react-native-community/cli-platform-ios@^3.0.0":
+"@react-native-community/cli-platform-ios@^3.0.0-alpha.1":
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-3.1.4.tgz#14f5dc5850db13d20d39f9353861f7d4adc65ccb"
   integrity sha512-QctH7sNLLInYPA2Sb6u5WUzLpo3G6jlQWr67pNfF8nj0ek/yuZG9B+Y4y6IW1cjnHngAaKINxeNGCE59wl5K4w==
@@ -2106,7 +2106,7 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-types/-/cli-types-3.0.0.tgz#488d46605cb05e88537e030f38da236eeda74652"
   integrity sha512-ng6Tm537E/M42GjE4TRUxQyL8sRfClcL7bQWblOCoxPZzJ2J3bdALsjeG3vDnVCIfI/R0AeFalN9KjMt0+Z/Zg==
 
-"@react-native-community/cli@^3.0.0":
+"@react-native-community/cli@^3.0.0-alpha.1":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-3.1.0.tgz#02433ddbd5bf0d41c0680a3a877c5d1ece9f514f"
   integrity sha512-Map5wWtB67LolI28o/2Z5WsuCO91RW7i5JDvl7Qk5Wb2ZNc+vTvFurqRSSTIKHUTvWGkCq0k2NNG+xKEthtr0Q==
@@ -2175,12 +2175,17 @@
   dependencies:
     invariant "^2.2.4"
 
+"@react-native-firebase/analytics@^6.3.3":
+  version "6.3.3"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/analytics/-/analytics-6.3.3.tgz#492e07f1fc5287a71af0d1b01bb76898b700ea2e"
+  integrity sha512-LmUALDevlPxF3Uyr33eH2uB6pHusLZef/0B+kzEKWQQgRPIDRVtrsKCvRK3aTfTlAEk5kYKyOV2pkgZZuaODzA==
+
 "@react-native-firebase/app-types@6.3.3":
   version "6.3.3"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/app-types/-/app-types-6.3.3.tgz#aec56053ee0db8269153027f469a00af6553633c"
   integrity sha512-OW4ssR/Q5EA68bjPgyYulFYRr0bpNRQ/8CuCWI+lkpdQuKFN3RM5VAiU3WmLf/fz6ofSL+4BIEqrH+8aqygCpA==
 
-"@react-native-firebase/app@^6.3.1":
+"@react-native-firebase/app@^6.3.3":
   version "6.3.3"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/app/-/app-6.3.3.tgz#65fbc4f82b9467bfd6e7d2f45ee90c3e194bf42a"
   integrity sha512-wlSgXGtJahuakFL1j7KT4o2x3q6F/DTPSNpW9EPNXdfxxMMTwDBbK3Oap9qKt6OiZqNpCrCmtdvCnM485E6kBw==
@@ -2189,12 +2194,12 @@
     opencollective-postinstall "^2.0.1"
     superstruct "^0.6.2"
 
-"@react-native-firebase/auth@^6.3.1":
+"@react-native-firebase/auth@^6.3.3":
   version "6.3.3"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/auth/-/auth-6.3.3.tgz#2c975e7add7bd3f160d4a6e6abb7bae176890ed5"
   integrity sha512-c0HGz53NZ6BSzuDO8qIEc+A1Bc3P9Prw6SQ+qbDJw/Y7YGSJyiKJphXeSl65mYYsgbB2O+GrJOkNrrbc4b/5lQ==
 
-"@react-native-firebase/firestore@^6.3.1":
+"@react-native-firebase/firestore@^6.3.3":
   version "6.3.3"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-6.3.3.tgz#7a9d6cdce69988d5ac9eaae21ab91f3267503cd4"
   integrity sha512-L7pbC6CkzrddliJtif5NtNqIgcNnNZB9hU4bm/AkhSoICKjM/85RjAAxgaI/X1yhjQoA8M+j9TM9u7LiLFbK7Q==
@@ -13190,15 +13195,15 @@ react-native-zip-archive@^5.0.0:
   resolved "https://registry.yarnpkg.com/react-native-zip-archive/-/react-native-zip-archive-5.0.0.tgz#7833e48b895f3da1f6c99b6f504f124ee243667f"
   integrity sha512-4AoBKb09lKESRaKcwhBG4+DLAhEHlw4H7AKUZC5zFHjtsaewNfwAMRgP3y+K2mjKN+Ihr/O7NFJFVEDrtarygg==
 
-react-native@~0.61.4:
-  version "0.61.5"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.5.tgz#6e21acb56cbd75a3baeb1f70201a66f42600bba8"
-  integrity sha512-MXqE3NoGO0T3dUKIKkIppijBhRRMpfN6ANbhMXHDuyfA+fSilRWgCwYgR/YNCC7ntECoJYikKaNTUBB0DeQy6Q==
+react-native@0.61.4:
+  version "0.61.4"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.4.tgz#9ec6e8a2aa8eac57143dcfa39115c7d9a139bc2c"
+  integrity sha512-L8U+dDEy4vP74yWYbb+2XKaZeUkbpCUoSzcmeEM8Oznt69q71Q4fuYyxZGrzVW6tMYw9ZzGXTkfLuOh2nvLeVw==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@react-native-community/cli" "^3.0.0"
-    "@react-native-community/cli-platform-android" "^3.0.0"
-    "@react-native-community/cli-platform-ios" "^3.0.0"
+    "@react-native-community/cli" "^3.0.0-alpha.1"
+    "@react-native-community/cli-platform-android" "^3.0.0-alpha.1"
+    "@react-native-community/cli-platform-ios" "^3.0.0-alpha.1"
     abort-controller "^3.0.0"
     art "^0.10.0"
     base64-js "^1.1.2"
