@@ -8,7 +8,7 @@ import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
 import Snackbar from '~common/SnackBar'
-import { setNotificationId } from '~redux/modules/user'
+// import { setNotificationId } from '~redux/modules/user'
 
 import useLogin from '~helpers/useLogin'
 import VOD from '~assets/bible_versions/bible-vod'
@@ -18,15 +18,15 @@ import { getDayOfTheYear } from './getDayOfTheYear'
 
 export const useVerseOfTheDay = () => {
   const { user } = useLogin()
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   const [verseOfTheDay, setVOD] = useState(false)
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
   )
-  const notificationId = useSelector(
-    state => state.user.notifications.notificationId
-  )
+  // const notificationId = useSelector(
+  //   state => state.user.notifications.notificationId
+  // )
 
   useEffect(() => {
     const dayOfTheYear =
@@ -55,10 +55,7 @@ export const useVerseOfTheDay = () => {
   useEffect(() => {
     const scheduleNotification = async () => {
       try {
-        if (notificationId)
-          await PushNotification.cancelLocalNotifications({
-            id: notificationId
-          })
+        await PushNotification.cancelAllLocalNotifications()
 
         if (!verseOfTheDayTime) {
           console.log(
@@ -87,7 +84,7 @@ export const useVerseOfTheDay = () => {
           addDays(addDay)
         )(nowDate)
 
-        const notification = PushNotification.localNotificationSchedule({
+        await PushNotification.localNotificationSchedule({
           title: `Bonjour ${
             user.displayName ? user.displayName.split(' ')[0] : ''
           }`, // @TODO: Extract to function
@@ -97,10 +94,8 @@ export const useVerseOfTheDay = () => {
           date
         })
 
-        console.log(
-          `Notification ${notification} set at ${verseOfTheDayTime} on ${date}`
-        )
-        dispatch(setNotificationId(notification))
+        console.log(`Notification set at ${verseOfTheDayTime} on ${date}`)
+        // dispatch(setNotificationId(randomId))
       } catch (e) {
         Snackbar.show('Erreur de notification.')
         console.log(e)
@@ -112,12 +107,14 @@ export const useVerseOfTheDay = () => {
         PushNotification.checkPermissions(({ alert }) => resolve(alert))
       })
 
-      console.log('HASPER', hasPermissions)
+      console.log('has permissions', hasPermissions)
       if (hasPermissions) {
         scheduleNotification()
       }
     }
     initNotifications()
-  }, [dispatch, notificationId, user.displayName, verseOfTheDayTime])
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verseOfTheDayTime])
   return verseOfTheDay
 }

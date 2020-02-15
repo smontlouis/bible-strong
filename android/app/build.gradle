@@ -154,13 +154,11 @@ android {
     productFlavors {
         dev {
             applicationIdSuffix ".dev"
-            versionNameSuffix "-dev"
             resValue "string", "content_provider", "com.facebook.app.dev.FacebookContentProvider312719079612015"
         }
         
         staging {
             applicationIdSuffix ".staging"
-            versionNameSuffix "-staging"
             resValue "string", "content_provider", "com.facebook.app.staging.FacebookContentProvider312719079612015"
         }
         prod {

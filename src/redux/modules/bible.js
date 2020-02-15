@@ -1,5 +1,5 @@
 import produce from 'immer'
-import analytics from '@react-native-firebase/analytics';
+import analytics from '@react-native-firebase/analytics'
 
 import books from '~assets/bible_versions/books-desc'
 
@@ -271,8 +271,7 @@ export function setVersion(version) {
   if (!__DEV__) {
     analytics().logEvent('version_bible', {
       version
-    });
-  }
+    })
   }
   return {
     type: SET_VERSION,

@@ -23,22 +23,29 @@ import { useVerseOfTheDay } from './useVerseOfTheDay'
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
 const VerseOfTheDay = () => {
+  const [timerPickerOpen, setTimePicker] = useState(false)
   const verseOfTheDay = useVerseOfTheDay()
   const imageUrls = useImageUrls(verseOfTheDay)
-  const [timerPickerOpen, setTimePicker] = useState(false)
   const dispatch = useDispatch()
-  const verseOfTheDayTime = useSelector(state => state.user.notifications.verseOfTheDay)
-  const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
+  const verseOfTheDayTime = useSelector(
+    state => state.user.notifications.verseOfTheDay
+  )
+
+  const [initialHour, initialMinutes] = verseOfTheDayTime
+    .split(':')
+    .map(n => Number(n))
   const initialDate = new Date(1, 1, 1, initialHour, initialMinutes)
 
   const onConfirmTimePicker = date => {
+    setTimePicker(false)
     const dateObject = new Date(date)
     const hours = zeroFill(dateObject.getHours())
     const minutes = zeroFill(dateObject.getMinutes())
 
     dispatch(setNotificationVOD(`${hours}:${minutes}`))
-    setTimePicker(false)
-    SnackBar.show(`Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`)
+    SnackBar.show(
+      `Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`
+    )
   }
 
   const openTimePicker = () => {
@@ -91,7 +98,9 @@ const VerseOfTheDay = () => {
             <FeatherIcon size={20} name="share-2" />
           </Link>
         </Box>
-        <Link route="BibleView" params={{ isReadOnly: true, book, chapter, verse }}>
+        <Link
+          route="BibleView"
+          params={{ isReadOnly: true, book, chapter, verse }}>
           <Paragraph marginTop={5}>{content}</Paragraph>
         </Link>
         <Box marginTop={20} row center>

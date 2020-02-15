@@ -16,7 +16,7 @@ import Box from '~common/ui/Box'
 import TagsEditModal from '~common/TagsEditModal'
 import useLogin from '~helpers/useLogin'
 
-import app from '../../../app.json'
+import app from '../../../package.json'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -161,10 +161,13 @@ const MoreScreen = () => {
       </ScrollView>
       <Box position="absolute" bottom={30} right={10}>
         <Text color="grey" fontSize={12}>
-          Version: {app.expo.version}
+          Version: {app.version}
         </Text>
       </Box>
-      <TagsEditModal isVisible={isEditTagsOpen} onClosed={() => setEditTagsOpen(false)} />
+      <TagsEditModal
+        isVisible={isEditTagsOpen}
+        onClosed={() => setEditTagsOpen(false)}
+      />
     </Container>
   )
 }

@@ -25,6 +25,11 @@ module.exports = function(api) {
         }
       ],
       '@babel/plugin-proposal-optional-chaining'
-    ]
+    ],
+    env: {
+      production: {
+        plugins: ['transform-remove-console']
+      }
+    }
   }
 }

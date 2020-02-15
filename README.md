@@ -28,3 +28,5 @@ Android: [https://play.google.com/store/apps/details?id=com.smontlouis.biblestro
 -[x] Zip sqlite
 -[x] Versionning
 -[x] Splash Screen
+-[] Install codepush
+-[] Backup données

@@ -39,7 +39,6 @@
     "debounce": "^1.2.0",
     "deepmerge": "^4.2.2",
     "emotion-theming": "^10.0.27",
-    "expo-analytics": "^1.0.11",
     "expo-apple-authentication": "~2.0.0",
     "expo-asset": "~8.0.0",
     "expo-asset-utils": "^1.2.0",
