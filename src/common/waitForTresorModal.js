@@ -65,13 +65,14 @@ export const useWaitForDatabase = () => {
                 dbPath,
                 null,
                 ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
+                  const idxProgress =
+                    Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
+                    100
                   setProgress(idxProgress)
                 }
               ).downloadAsync()
 
               await initTresorDB()
-              console.log('DB trésor loaded')
 
               setLoading(false)
               window.tresorDownloadHasStarted = false
@@ -86,7 +87,6 @@ export const useWaitForDatabase = () => {
           }
         } else {
           await initTresorDB()
-          console.log('DB trésor loaded')
           setLoading(false)
         }
       }
@@ -95,7 +95,13 @@ export const useWaitForDatabase = () => {
     }
   }, [dispatch, startDownload, dispatch])
 
-  return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
+  return {
+    isLoading,
+    progress,
+    proposeDownload,
+    startDownload,
+    setStartDownload
+  }
 }
 
 const waitForDatabase = WrappedComponent => props => {
@@ -120,7 +126,9 @@ const waitForDatabase = WrappedComponent => props => {
       <DownloadRequired
         noHeader
         small
-        title={'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'}
+        title={
+          'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'
+        }
         setStartDownload={setStartDownload}
         fileSize={5.4}
       />

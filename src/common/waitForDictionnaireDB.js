@@ -20,7 +20,9 @@ export const useWaitForDatabase = () => {
     dispatch
   ] = useDBStateValue()
 
-  const dictionnaireDatabaseHash = useSelector(state => state.bible.dictionnaireDatabaseHash)
+  const dictionnaireDatabaseHash = useSelector(
+    state => state.bible.dictionnaireDatabaseHash
+  )
 
   useEffect(() => {
     if (getDictionnaireDB()) {
@@ -78,7 +80,9 @@ export const useWaitForDatabase = () => {
                 null,
                 ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
                   const idxProgress =
-                    Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
+                    Math.floor(
+                      (totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100
+                    ) / 100
                   dispatch({
                     type: 'dictionnaire.setProgress',
                     payload: idxProgress
@@ -87,7 +91,7 @@ export const useWaitForDatabase = () => {
               ).downloadAsync()
 
               await initDictionnaireDB()
-              console.log('DB dictionnaire loaded')
+
               dispatch({
                 type: 'dictionnaire.setLoading',
                 payload: false
@@ -110,7 +114,7 @@ export const useWaitForDatabase = () => {
           }
         } else {
           await initDictionnaireDB()
-          console.log('DB dictionnaire loaded')
+
           dispatch({
             type: 'dictionnaire.setLoading',
             payload: false
@@ -128,7 +132,13 @@ export const useWaitForDatabase = () => {
       payload: value
     })
 
-  return { isLoading, progress, proposeDownload, startDownload, setStartDownload }
+  return {
+    isLoading,
+    progress,
+    proposeDownload,
+    startDownload,
+    setStartDownload
+  }
 }
 
 const waitForDatabase = WrappedComponent => props => {

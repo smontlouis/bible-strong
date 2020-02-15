@@ -25,7 +25,6 @@ class StrongDB {
     this.dbStrong = SQLite.openDatabase(
       {
         name: 'strong.sqlite',
-        readOnly: true,
         createFromLocation: '/SQLite/strong.sqlite'
       },
       () => {
@@ -153,8 +152,8 @@ class NaveDB {
   init = () => {
     this.dbNave = SQLite.openDatabase(
       {
-        name: 'nave-fr.sqlite',
-        createFromLocation: '/SQLite/nave-fr.sqlite'
+        name: 'naveFr',
+        createFromLocation: '/SQLite/naveFr.sqlite'
       },
       () => {
         console.log('Nave loaded')

@@ -27,7 +27,7 @@ export const useWaitForDatabase = () => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-        const dbPath = `${sqliteDirPath}/nave-fr.sqlite`
+        const dbPath = `${sqliteDirPath}/naveFr.sqlite`
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         // if (__DEV__) {
@@ -70,7 +70,6 @@ export const useWaitForDatabase = () => {
               ).downloadAsync()
 
               await naveDB.init()
-              console.log('DB nave loaded')
 
               setLoading(false)
               window.naveDownloadHasStarted = false
@@ -85,7 +84,7 @@ export const useWaitForDatabase = () => {
           }
         } else {
           await naveDB.init()
-          console.log('DB nave loaded')
+
           setLoading(false)
         }
       }

@@ -117,7 +117,7 @@ class DBSelectorItem extends React.Component {
         break
       }
       case 'NAVE': {
-        path = `${sqliteDirPath}/nave-fr.sqlite`
+        path = `${sqliteDirPath}/naveFr.sqlite`
         break
       }
       default:

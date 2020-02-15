@@ -73,7 +73,7 @@ export const useWaitForDatabase = () => {
           }
         } else {
           await strongDB.init()
-          console.log('DB strong loaded')
+
           dispatch({
             type: 'strong.setLoading',
             payload: false
