@@ -183,7 +183,19 @@ export default {
       ...state,
       bible: {
         ...state.bible,
-        webviewHash: ''
+        webviewHash: '' // deprecated
+      }
+    }
+  },
+  13: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        notifications: {
+          ...state.user.notifications,
+          notificationId: ''
+        }
       }
     }
   }

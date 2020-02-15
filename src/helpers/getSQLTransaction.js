@@ -26,7 +26,10 @@ const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
           (txObj, error) => reject(error)
         )
       },
-      error => reject(error)
+      error => {
+        console.log(error)
+        reject(error.message)
+      }
     )
   })
 }

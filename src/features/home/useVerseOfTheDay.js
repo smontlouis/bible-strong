@@ -1,14 +1,14 @@
 import * as Sentry from '@sentry/react-native'
 import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Platform } from 'react-native'
-import * as Permissions from 'expo-permissions'
+// import { Notifications } from 'react-native-notifications'
 import compose from 'recompose/compose'
-// import { Notifications } from 'expo'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
 import Snackbar from '~common/SnackBar'
+import { setNotificationId } from '~redux/modules/user'
 
 import useLogin from '~helpers/useLogin'
 import VOD from '~assets/bible_versions/bible-vod'
@@ -18,13 +18,21 @@ import { getDayOfTheYear } from './getDayOfTheYear'
 
 export const useVerseOfTheDay = () => {
   const { user } = useLogin()
+  const dispatch = useDispatch()
   const [verseOfTheDay, setVOD] = useState(false)
   const version = useSelector(state => state.bible.selectedVersion)
-  const verseOfTheDayTime = useSelector(state => state.user.notifications.verseOfTheDay)
+  const verseOfTheDayTime = useSelector(
+    state => state.user.notifications.verseOfTheDay
+  )
+  const notificationId = useSelector(
+    state => state.user.notifications.notificationId
+  )
 
   useEffect(() => {
     const dayOfTheYear =
-      getDayOfTheYear() + 1 < 1 || getDayOfTheYear() + 1 > 366 ? 1 : getDayOfTheYear() + 1
+      getDayOfTheYear() + 1 < 1 || getDayOfTheYear() + 1 > 366
+        ? 1
+        : getDayOfTheYear() + 1
     const loadVerse = async () => {
       try {
         const [bookName, chapter, verse] = VOD[dayOfTheYear].split('.')
@@ -44,94 +52,66 @@ export const useVerseOfTheDay = () => {
     loadVerse()
   }, [version])
 
-  useEffect(() => {
-    const askPermissions = async () => {
-      const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS)
-      let finalStatus = existingStatus
-      if (existingStatus !== 'granted') {
-        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-        finalStatus = status
-      }
-      if (finalStatus !== 'granted') {
-        return false
-      }
-      return true
-    }
+  // useEffect(() => {
+  //   const scheduleNotification = async () => {
+  //     try {
+  //       if (notificationId)
+  //         await Notifications.cancelLocalNotification(notificationId)
 
-    // const scheduleNotification = async () => {
-    //   try {
-    //     await Notifications.cancelAllScheduledNotificationsAsync()
+  //       if (!verseOfTheDayTime) {
+  //         console.log(
+  //           "User is not logged or there is not verse of the day timeset, don't do anything"
+  //         )
+  //         return
+  //       }
 
-    //     if (!verseOfTheDayTime) {
-    //       console.log(
-    //         "User is not logged or there is not verse of the day timeset, don't do anything"
-    //       )
-    //       return
-    //     }
+  //       const [vodHours, vodMinutes] = verseOfTheDayTime
+  //         .split(':')
+  //         .map(n => Number(n))
+  //       const nowDate = new Date(Date.now())
+  //       const nowHour = nowDate.getHours()
+  //       const nowMinutes = nowDate.getMinutes()
 
-    //     if (Platform.OS === 'android') {
-    //       await Notifications.createChannelAndroidAsync('verset-du-jour', {
-    //         name: 'Versets du jour',
-    //         sound: true,
-    //         priority: 'max',
-    //         vibrate: [0, 250, 250, 250]
-    //       })
-    //     }
+  //       nowDate.setMinutes(0, 0)
+  //       const addDay =
+  //         nowHour * 60 * 60 * 1000 + nowMinutes * 60 * 1000 >
+  //         vodHours * 60 * 60 * 1000 + vodMinutes * 60 * 1000
+  //           ? 1
+  //           : 0
 
-    //     const [vodHours, vodMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
-    //     const nowDate = new Date(Date.now())
-    //     const nowHour = nowDate.getHours()
-    //     const nowMinutes = nowDate.getMinutes()
+  //       const date = compose(
+  //         setMinutes(vodMinutes),
+  //         setHours(vodHours),
+  //         addDays(addDay)
+  //       )(nowDate)
 
-    //     nowDate.setMinutes(0, 0)
-    //     const addDay =
-    //       nowHour * 60 * 60 * 1000 + nowMinutes * 60 * 1000 >
-    //       vodHours * 60 * 60 * 1000 + vodMinutes * 60 * 1000
-    //         ? 1
-    //         : 0
+  //       const notification = Notifications.postLocalNotification({
+  //         title: `Bonjour ${
+  //           user.displayName ? user.displayName.split(' ')[0] : ''
+  //         }`, // @TODO: Extract to function
+  //         body: 'Découvre ton verset du jour !',
+  //         category: 'NOTIFICATIONS',
+  //         fireDate: date.getTime()
+  //       })
 
-    //     const date = compose(
-    //       setMinutes(vodMinutes),
-    //       setHours(vodHours),
-    //       addDays(addDay)
-    //     )(nowDate)
+  //       console.log(
+  //         `Notification ${notification} set at ${verseOfTheDayTime} on ${date}`
+  //       )
+  //       dispatch(setNotificationId(notification))
+  //     } catch (e) {
+  //       Snackbar.show('Erreur de notification.')
+  //       console.log(e)
+  //       Sentry.captureException(e)
+  //     }
+  //   }
+  //   // const initNotifications = async () => {
+  //   //   const hasPermissions = await Notifications.isRegisteredForRemoteNotifications()
 
-    //     const notificationId = await Notifications.scheduleLocalNotificationAsync(
-    //       {
-    //         title: `Bonjour ${user.displayName ? user.displayName.split(' ')[0] : ''}`, // @TODO: Extract to function
-    //         body: 'Découvre ton verset du jour !',
-    //         ios: {
-    //           sound: true
-    //         },
-    //         android: {
-    //           channelId: 'verset-du-jour',
-    //           color: '#0984e3'
-    //         }
-    //       },
-    //       {
-    //         repeat: 'day',
-    //         time: date.getTime()
-    //       }
-    //     )
-
-    //     console.log(`Notification ${notificationId} set at ${verseOfTheDayTime} on ${date}`)
-    //   } catch (e) {
-    //     Snackbar.show('Erreur de notification.')
-    //     console.log(e)
-    //     Sentry.captureException(e)
-    //   }
-    // }
-    // const initNotifications = async () => {
-    //   const canSendNotification = await askPermissions()
-    //   Notifications.addListener(a => {
-    //     console.log('notifications launched', a)
-    //   })
-
-    //   if (canSendNotification) {
-    //     scheduleNotification()
-    //   }
-    // }
-    // initNotifications()
-  }, [user.displayName, verseOfTheDayTime])
+  //   //   if (hasPermissions) {
+  //   //     scheduleNotification()
+  //   //   }
+  //   // }
+  //   // initNotifications()
+  // }, [dispatch, notificationId, user.displayName, verseOfTheDayTime])
   return verseOfTheDay
 }

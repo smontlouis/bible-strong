@@ -28,7 +28,9 @@ class StrongDB {
         readOnly: true,
         createFromLocation: '/SQLite/strong.sqlite'
       },
-      () => {},
+      () => {
+        console.log('Strong loaded')
+      },
       e => console.log(e)
     )
 
@@ -48,17 +50,44 @@ class StrongDB {
 export const strongDB = new StrongDB()
 
 export const initDictionnaireDB = () => {
-  dbDictionnaire = SQLite.openDatabase('dictionnaire.sqlite')
+  dbDictionnaire = SQLite.openDatabase(
+    {
+      name: 'dictionnaire.sqlite',
+      createFromLocation: '/SQLite/dictionnaire.sqlite'
+    },
+    () => {
+      console.log('Dictionnaire loaded')
+    },
+    e => console.log(e)
+  )
   return dbDictionnaire
 }
 
 export const initInterlineaireDB = () => {
-  dbInterlineaire = SQLite.openDatabase('interlineaire.sqlite')
+  dbInterlineaire = SQLite.openDatabase(
+    {
+      name: 'interlineraire.sqlite',
+      createFromLocation: '/SQLite/interlineaire.sqlite'
+    },
+    () => {
+      console.log('Interlineaire loaded')
+    },
+    e => console.log(e)
+  )
   return dbDictionnaire
 }
 
 export const initTresorDB = () => {
-  dbTresorCommentaires = SQLite.openDatabase('commentaires-tresor.sqlite')
+  dbTresorCommentaires = SQLite.openDatabase(
+    {
+      name: 'commentaires-tresor.sqlite',
+      createFromLocation: '/SQLite/commentaires-tresor.sqlite'
+    },
+    () => {
+      console.log('Tresor loaded')
+    },
+    e => console.log(e)
+  )
   return dbTresorCommentaires
 }
 
@@ -93,7 +122,16 @@ class MhyDB {
   dbMhy
 
   init = () => {
-    this.dbMhy = SQLite.openDatabase('commentaires-mhy.sqlite')
+    this.dbMhy = SQLite.openDatabase(
+      {
+        name: 'commentaires-mhy.sqlite',
+        createFromLocation: '/SQLite/commentaires-mhy.sqlite'
+      },
+      () => {
+        console.log('Commentaires loaded')
+      },
+      e => console.log(e)
+    )
     return this.dbMhy
   }
 
@@ -113,7 +151,16 @@ class NaveDB {
   dbNave
 
   init = () => {
-    this.dbNave = SQLite.openDatabase('nave-fr.sqlite')
+    this.dbNave = SQLite.openDatabase(
+      {
+        name: 'nave-fr.sqlite',
+        createFromLocation: '/SQLite/nave-fr.sqlite'
+      },
+      () => {
+        console.log('Nave loaded')
+      },
+      e => console.log(e)
+    )
     return this.dbNave
   }
 

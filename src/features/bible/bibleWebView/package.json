@@ -32,6 +32,7 @@
     "file-loader": "^3.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-native-push-notification": "^3.1.9",
     "trunc-html": "^1.1.2"
   }
 }

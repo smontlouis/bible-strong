@@ -12,7 +12,10 @@ import SearchResults from './SearchResults'
 
 import { algoliaConfig } from '../../../config'
 
-const searchClient = algoliasearch(algoliaConfig.applicationId, algoliaConfig.apiKey)
+const searchClient = algoliasearch(
+  algoliaConfig.applicationId,
+  algoliaConfig.apiKey
+)
 
 const useDeleteOldIndex = () => {
   React.useEffect(() => {

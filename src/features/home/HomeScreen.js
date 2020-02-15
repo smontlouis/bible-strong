@@ -43,7 +43,11 @@ const HomeScreen = () => {
             }}>
             <NaveOfTheDay />
             <StrongOfTheDay type="grec" />
-            <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
+            <StrongOfTheDay
+              type="hebreu"
+              color1="rgba(248,131,121,1)"
+              color2="rgba(255,77,93,1)"
+            />
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
@@ -56,7 +60,9 @@ const HomeScreen = () => {
             <Box flex>
               <Button
                 color="#3b5998"
-                onPress={() => Linking.openURL('https://www.facebook.com/fr.bible.strong')}
+                onPress={() =>
+                  Linking.openURL('https://www.facebook.com/fr.bible.strong')
+                }
                 title="Suivre"
                 leftIcon={
                   <FeatherIcon

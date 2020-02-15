@@ -322,8 +322,7 @@ class DBSelectorItem extends React.Component {
           </Box>
           <TouchableOpacity
             onPress={this.confirmDelete}
-            style={{ padding: 10 }}
-          >
+            style={{ padding: 10 }}>
             <DeleteIcon name="trash-2" size={18} />
           </TouchableOpacity>
         </Box>

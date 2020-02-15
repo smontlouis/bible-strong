@@ -23,9 +23,9 @@ iOS: [https://apps.apple.com/fr/app/bible-strong/id1454738221?ls=1](https://apps
 Android: [https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong](https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong)
 
 -[] Firebase analytics
--[] Notifications
--[] Remove console.logs
--[] Zip sqlite
+-[x] Notifications
+-[x] Remove console.logs
+-[x] Zip sqlite
+-[] Zip lsg-bible-strong
 -[] Versionning
--[] Splash Screen
--[] CFBundleName Issue
+-[x] Splash Screen

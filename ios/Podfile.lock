@@ -533,11 +533,13 @@ PODS:
   - react-native-fbsdk/Share (1.1.2):
     - FBSDKShareKit (= 5.8)
     - React
-  - react-native-safe-area-context (0.7.2):
+  - react-native-notifications (3.1.2):
+    - React
+  - react-native-safe-area-context (0.7.3):
     - React
   - react-native-sqlite-storage (4.1.0):
     - React
-  - react-native-webview (8.0.6):
+  - react-native-webview (8.1.0):
     - React
   - React-RCTActionSheet (0.61.5):
     - React-Core/RCTActionSheetHeaders (= 0.61.5)
@@ -578,33 +580,35 @@ PODS:
     - React
   - RNCMaskedView (0.1.6):
     - React
+  - RNCPushNotificationIOS (1.0.6):
+    - React
   - RNDateTimePicker (2.2.1):
     - React
-  - RNFBApp (6.3.1):
+  - RNFBApp (6.3.3):
     - Firebase/Core (~> 6.13.0)
     - React
-  - RNFBAuth (6.3.1):
+  - RNFBAuth (6.3.3):
     - Firebase/Auth (~> 6.13.0)
     - Firebase/Core (~> 6.13.0)
     - React
     - RNFBApp
-  - RNFBFirestore (6.3.1):
+  - RNFBFirestore (6.3.3):
     - Firebase/Core (~> 6.13.0)
     - Firebase/Firestore (~> 6.13.0)
     - React
     - RNFBApp
   - RNFS (2.16.4):
     - React
-  - RNGestureHandler (1.5.6):
+  - RNGestureHandler (1.6.0):
     - React
   - RNGoogleSignin (3.0.4):
     - GoogleSignIn (~> 5.0.0)
     - React
   - RNReanimated (1.7.0):
     - React
-  - RNScreens (2.0.0-beta.2):
+  - RNScreens (2.0.0-beta.4):
     - React
-  - RNSentry (1.2.2):
+  - RNSentry (1.3.1):
     - React
     - Sentry (~> 4.4.0)
   - RNSVG (9.13.3):
@@ -670,6 +674,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-fbsdk (from `../node_modules/react-native-fbsdk`)
+  - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -686,6 +691,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
+  - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
@@ -818,6 +824,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-fbsdk:
     :path: "../node_modules/react-native-fbsdk"
+  react-native-notifications:
+    :path: "../node_modules/react-native-notifications"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sqlite-storage:
@@ -848,6 +856,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/async-storage"
   RNCMaskedView:
     :path: "../node_modules/@react-native-community/masked-view"
+  RNCPushNotificationIOS:
+    :path: "../node_modules/@react-native-community/push-notification-ios"
   RNDateTimePicker:
     :path: "../node_modules/@react-native-community/datetimepicker"
   RNFBApp:
@@ -969,9 +979,10 @@ SPEC CHECKSUMS:
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-fbsdk: c35d42169e64aaf66f01713c1e18d0674f7f6519
-  react-native-safe-area-context: 4b3d1b9ebb040a4814a222703e7434b20c95fcf5
+  react-native-notifications: f56a12d741eeb2fd4d7a418a4689111c50f7cd72
+  react-native-safe-area-context: e200d4433aba6b7e60b52da5f37af11f7a0b0392
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
-  react-native-webview: e32e5ced4c99d7240362690a65e3467d7ef535ef
+  react-native-webview: 88d83b4df2e792cfc36c952b1c496e2ac01cf0b8
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
   React-RCTBlob: d89293cc0236d9cb0933d85e430b0bbe81ad1d72
@@ -984,16 +995,17 @@ SPEC CHECKSUMS:
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   RNCAsyncStorage: 44395cb9c7c1523104c2b499eb426ef7aff82bca
   RNCMaskedView: a88953beefbd347a29072d9eba90e42945fe291e
+  RNCPushNotificationIOS: 05262c52fcfb861a2b79aa8e51cad66263c9ea52
   RNDateTimePicker: 1a251f8b276abda796d8119a96bcd1763a76f6b0
-  RNFBApp: 279ec5c4bb43b8fc7b8031eed90ad7d2bea7a048
-  RNFBAuth: b631f0e98cebd098ddf8f6b7facda2a5ba1a6bef
-  RNFBFirestore: 1b5be285c76247a8c78aa85b53202647db7541fa
+  RNFBApp: 887ccc5840f93abad3202ff23eb0faf7bee4ac12
+  RNFBAuth: 9c6a6ad1435eeff2aca7bbb335123e25b5781e65
+  RNFBFirestore: c03f496b934c498fea94f17b739c6dcb2309f8cc
   RNFS: 90d1a32d3bc8f75cc7fc3dd2f67506049664346b
-  RNGestureHandler: 911d3b110a7a233a34c4f800e7188a84b75319c6
+  RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNGoogleSignin: a00f87261ea13df9a5cea8deafa6927d6f2c3562
   RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
-  RNScreens: 5e4758109c6d35f9a009ce72af873df907548020
-  RNSentry: 9cfa3717b1e6bf9ad4b124683e78e3b98b01d3af
+  RNScreens: 6053a007667bea81a69087caadf103bba04c032e
+  RNSentry: 6458ba85aa3f8ae291abed4f72abbd7080839c71
   RNSVG: f6177f8d7c095fada7cfee2e4bb7388ba426064c
   RNZipArchive: be636657a6630e9771d4a3223dc8fd0bd0137b55
   Sentry: 14bdd673870e8cf64932b149fad5bbbf39a9b390

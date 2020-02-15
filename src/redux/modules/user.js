@@ -18,13 +18,16 @@ export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
-export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
-export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
+export const INCREASE_SETTINGS_FONTSIZE_SCALE =
+  'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
+export const DECREASE_SETTINGS_FONTSIZE_SCALE =
+  'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
-export const SET_SETTINGS_COMMENTS_DISPLAY = 'user/SET_SETTINGS_COMMENTS_DISPLAY'
+export const SET_SETTINGS_COMMENTS_DISPLAY =
+  'user/SET_SETTINGS_COMMENTS_DISPLAY'
 
 export const ADD_NOTE = 'user/ADD_NOTE'
 export const EDIT_NOTE = 'user/EDIT_NOTE'
@@ -51,6 +54,7 @@ export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
 export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
 export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
+export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
 
 export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
 
@@ -63,7 +67,8 @@ const initialState = {
   lastSeen: 0,
   emailVerified: false,
   notifications: {
-    verseOfTheDay: '07:00'
+    verseOfTheDay: '07:00',
+    notificationId: ''
   },
   bible: {
     changelog: {},
@@ -158,7 +163,9 @@ export default produce((draft, action) => {
       if (bible) {
         if (!isLogged) {
           console.log('User was not logged, merge data')
-          draft.bible = deepmerge(draft.bible, bible, { arrayMerge: overwriteMerge })
+          draft.bible = deepmerge(draft.bible, bible, {
+            arrayMerge: overwriteMerge
+          })
         } else if (remoteLastSeen > localLastSeen) {
           // Remote wins
           console.log('Remote wins')
@@ -176,17 +183,25 @@ export default produce((draft, action) => {
             Object.keys(action.studies).forEach(remoteStudyId => {
               if (draft.bible.studies[remoteStudyId]) {
                 // We have a conflict here
-                console.log(`We have a conflict with ${remoteStudyId}, pick by modified_date`)
-                const localModificationDate = draft.bible.studies[remoteStudyId].modified_at
-                const remoteModificationDate = action.studies[remoteStudyId].modified_at
+                console.log(
+                  `We have a conflict with ${remoteStudyId}, pick by modified_date`
+                )
+                const localModificationDate =
+                  draft.bible.studies[remoteStudyId].modified_at
+                const remoteModificationDate =
+                  action.studies[remoteStudyId].modified_at
                 if (remoteModificationDate > localModificationDate) {
                   console.log('Remote date is recent')
-                  draft.bible.studies[remoteStudyId] = action.studies[remoteStudyId]
+                  draft.bible.studies[remoteStudyId] =
+                    action.studies[remoteStudyId]
                 }
               } else {
                 // No conflicts, just put that study in there
-                console.log(`No conflicts for ${remoteStudyId}, just put that story in there`)
-                draft.bible.studies[remoteStudyId] = action.studies[remoteStudyId]
+                console.log(
+                  `No conflicts for ${remoteStudyId}, just put that story in there`
+                )
+                draft.bible.studies[remoteStudyId] =
+                  action.studies[remoteStudyId]
               }
             })
           } else {
@@ -419,7 +434,9 @@ export default produce((draft, action) => {
       const currentTheme = draft.bible.settings.theme
       const color =
         action.color ||
-        (currentTheme === 'dark' ? darkColors[action.name] : defaultColors[action.name])
+        (currentTheme === 'dark'
+          ? darkColors[action.name]
+          : defaultColors[action.name])
       draft.bible.settings.colors[currentTheme][action.name] = color
       break
     }
@@ -466,6 +483,9 @@ export default produce((draft, action) => {
       }
       break
     }
+    case SET_NOTIFICATION_ID: {
+      draft.notifications.notificationId = action.payload
+    }
     default: {
       break
     }
@@ -502,7 +522,11 @@ export function addHighlight(color) {
     dispatch(clearSelectedVerses())
     return dispatch({
       type: ADD_HIGHLIGHT,
-      selectedVerses: addDateAndColorToVerses(selectedVerses, highlightedVerses, color)
+      selectedVerses: addDateAndColorToVerses(
+        selectedVerses,
+        highlightedVerses,
+        color
+      )
     })
   }
 }
@@ -698,6 +722,13 @@ export function updateUserData() {
 export function setNotificationVOD(payload) {
   return {
     type: SET_NOTIFICATION_VOD,
+    payload
+  }
+}
+
+export function setNotificationId(payload) {
+  return {
+    type: SET_NOTIFICATION_ID,
     payload
   }
 }

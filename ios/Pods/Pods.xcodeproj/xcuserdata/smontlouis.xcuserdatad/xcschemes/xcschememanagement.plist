@@ -219,6 +219,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>RNCPushNotificationIOS.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>RNDateTimePicker.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -490,6 +495,11 @@
 			<false/>
 		</dict>
 		<key>react-native-fbsdk.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>react-native-notifications.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>

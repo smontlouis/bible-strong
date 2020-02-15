@@ -8,5 +8,8 @@
     "~navigation": "${workspaceRoot}/src/navigation",
     "~redux": "${workspaceRoot}/src/redux",
     "~themes": "${workspaceRoot}/src/themes"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
   }
 }

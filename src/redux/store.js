@@ -12,21 +12,30 @@ import migrations from './migrations'
 import reducer from '~redux/modules/reducer'
 
 export default function configureStore() {
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+  const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
   const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
     stateReconciler: autoMergeLevel2,
-    version: 12,
+    version: 13,
     // debug: true,
     migrate: createMigrate(migrations, { debug: true })
   }
 
-  const middleware = [logger, lastSeenMiddleware, crashReporter, firestoreMiddleware, thunk]
+  const middleware = [
+    logger,
+    lastSeenMiddleware,
+    crashReporter,
+    firestoreMiddleware,
+    thunk
+  ]
 
   const persistedReducer = persistReducer(persistConfig, reducer)
-  const store = composeEnhancers(applyMiddleware(...middleware))(createStore)(persistedReducer)
+  const store = composeEnhancers(applyMiddleware(...middleware))(createStore)(
+    persistedReducer
+  )
   const persistor = persistStore(store)
   // persistor.purge() // Purge async storage
 

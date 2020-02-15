@@ -53,7 +53,8 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
     )
   }
 
-  const linearGradientColor = themeDefault === 'default' ? '255, 255, 255' : '18,45,66'
+  const linearGradientColor =
+    themeDefault === 'default' ? '255, 255, 255' : '18,45,66'
 
   return (
     <Box grey>

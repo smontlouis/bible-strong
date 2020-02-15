@@ -8,7 +8,7 @@ import * as Sentry from '@sentry/react-native'
 import compose from 'recompose/compose'
 import ErrorBoundary from '~common/ErrorBoundary'
 
-import Analytics, { screen } from '~helpers/analytics'
+// import Analytics, { screen } from '~helpers/analytics'
 import { updateUserData } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
@@ -61,12 +61,17 @@ class InitApp extends React.Component {
   }
 
   onNavigationStateChange = (prevState, currentState, action) => {
-    const { route: currentScreen, params: currentParams } = this.getActiveRouteName(currentState)
-    const { route: prevScreen, params: prevParams } = this.getActiveRouteName(prevState)
+    const {
+      route: currentScreen,
+      params: currentParams
+    } = this.getActiveRouteName(currentState)
+    const { route: prevScreen, params: prevParams } = this.getActiveRouteName(
+      prevState
+    )
 
     if (prevScreen !== currentScreen) {
       if (!__DEV__) {
-        Analytics.hit(screen(currentScreen))
+        // Analytics.hit(screen(currentScreen))
       }
 
       Sentry.addBreadcrumb({

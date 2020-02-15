@@ -251,8 +251,7 @@ class VersionSelectorItem extends React.Component {
             {!isLoading && version.id !== 'LSGS' && (
               <TouchableOpacity
                 onPress={this.startDownload}
-                style={{ padding: 10, alignItems: 'flex-end' }}
-              >
+                style={{ padding: 10, alignItems: 'flex-end' }}>
                 <FeatherIcon name="download" size={20} />
                 {version.id === 'INT' && (
                   <Box center marginTop={5}>
@@ -284,8 +283,7 @@ class VersionSelectorItem extends React.Component {
             </Box>
             <TouchableOpacity
               onPress={this.confirmDelete}
-              style={{ padding: 10 }}
-            >
+              style={{ padding: 10 }}>
               <DeleteIcon name="trash-2" size={18} />
             </TouchableOpacity>
           </Box>

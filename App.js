@@ -1,16 +1,15 @@
 import 'react-native-root-siblings'
 import React from 'react'
 import { YellowBox, ActivityIndicator } from 'react-native'
+// import { Notifications } from 'react-native-notifications'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
-import { Asset } from 'expo-asset'
 import { Provider } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import { setAutoFreeze } from 'immer'
+import PushNotificationIOS from '@react-native-community/push-notification-ios'
 
-import Analytics, { screen } from '~helpers/analytics'
-import SnackBar from '~common/SnackBar'
-import Loading from '~common/Loading'
+// import Analytics, { screen } from '~helpers/analytics'
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
 
@@ -19,7 +18,9 @@ YellowBox.ignoreWarnings([
   'Require cycle:',
   'LottieAnimation',
   'LottieAnimationView',
-  'Setting a timer'
+  'Setting a timer',
+  'expoConstants',
+  "Cannot read property 'name' of null"
 ])
 
 if (!__DEV__) {
@@ -30,6 +31,7 @@ if (!__DEV__) {
 }
 
 export const { store, persistor } = configureStore()
+const PushNotification = require('react-native-push-notification')
 
 class App extends React.Component {
   state = {
@@ -41,15 +43,54 @@ class App extends React.Component {
     this.handleFinishLoading()
 
     if (!__DEV__) {
-      Analytics.hit(screen('Bible'))
+      // Analytics.hit(screen('Bible'))
     }
+
+    // this.initNotifications()
+  }
+
+  initNotifications = () => {
+    PushNotification.configure({
+      // (optional) Called when Token is generated (iOS and Android)
+      onRegister(token) {
+        console.log('TOKEN:', token)
+      },
+
+      // (required) Called when a remote or local notification is opened or received
+      onNotification(notification) {
+        console.log('NOTIFICATION:', notification)
+
+        // process the notification
+
+        // required on iOS only (see fetchCompletionHandler docs: https://github.com/react-native-community/react-native-push-notification-ios)
+        notification.finish(PushNotificationIOS.FetchResult.NoData)
+      },
+
+      // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
+      senderID: 'YOUR GCM (OR FCM) SENDER ID',
+
+      // IOS ONLY (optional): default: all - Permissions to register.
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true
+      },
+
+      // Should the initial notification be popped automatically
+      // default: true
+      popInitialNotification: true,
+
+      /**
+       * (optional) default: true
+       * - Specified if permissions (ios) and token (android and ios) will requested or not,
+       * - if not, you must call PushNotificationsHandler.requestPermissions() later
+       */
+      requestPermissions: true
+    })
   }
 
   loadResourcesAsync = async () => {
     return Promise.all([
-      Asset.loadAsync([
-        require('./src/features/bible/bibleWebView/dist/index.html')
-      ]),
       Font.loadAsync({
         ...Icon.Feather.font,
         'literata-book': require('~assets/fonts/LiterataBook.otf'),
@@ -67,26 +108,6 @@ class App extends React.Component {
   handleFinishLoading = () => {
     this.setState({ isLoadingComplete: true })
   }
-
-  // updateApp = async () => {
-  //   try {
-  //     const update = await Updates.checkForUpdateAsync()
-
-  //     if (update.isAvailable) {
-  //       SnackBar.show('Une mise à jour est disponible, téléchargement...')
-  //       await Updates.fetchUpdateAsync()
-
-  //       SnackBar.show("Mise à jour installée. Redémarrez l'app.")
-  //     }
-  //   } catch (e) {
-  //     // handle or log error
-  //   }
-  // }
-
-  // componentDidMount() {
-
-  //   this.updateApp()
-  // }
 
   render() {
     if (!this.state.isLoadingComplete) {

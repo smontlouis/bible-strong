@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
-import * as FileSystem from 'expo-file-system'
 import SnackBar from '~common/SnackBar'
 
 import { strongDB } from '~helpers/database'
@@ -55,20 +54,14 @@ export const useWaitForDatabase = () => {
             window.strongDownloadHasStarted = true
 
             if (!sqliteDirExists) {
-              await FileSystem.makeDirectoryAsync(sqliteDirPath)
+              await RNFS.mkdir(sqliteDirPath)
             }
 
             console.log('Unzipping...')
-            console.time('unzipping')
-
             await unzipAssets('www/strong.sqlite.zip', sqliteDirPath)
-
-            console.timeEnd('unzipping')
             console.log('Unzipping done')
 
             await strongDB.init()
-
-            console.log('DB strong loaded')
 
             dispatch({
               type: 'strong.setLoading',

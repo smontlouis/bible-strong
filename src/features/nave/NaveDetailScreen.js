@@ -45,7 +45,10 @@ const NaveDetailScreen = ({ navigation }) => {
         setCanReadMore(true)
       }
 
-      setNaveItem({ ...result, descriptionShort: truncHTML(result.description, MAX_CHAR).html })
+      setNaveItem({
+        ...result,
+        descriptionShort: truncHTML(result.description, MAX_CHAR).html
+      })
       dispatch(
         setHistory({
           name: result.name,
@@ -73,7 +76,9 @@ const NaveDetailScreen = ({ navigation }) => {
       } catch (e) {
         console.log(e)
         Snackbar.show('Impossible de charger ce verset.')
-        Sentry.captureMessage(`Something went wrong with verse ${href} in ${name}`)
+        Sentry.captureMessage(
+          `Something went wrong with verse ${href} in ${name}`
+        )
       }
     }
 
@@ -146,13 +151,19 @@ const NaveDetailScreen = ({ navigation }) => {
       <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
         {naveItem && naveItem.description && (
           <NaveHTMLView
-            value={canReadMore ? naveItem.descriptionShort : naveItem.description}
+            value={
+              canReadMore ? naveItem.descriptionShort : naveItem.description
+            }
             onLinkPress={openLink}
           />
         )}
         {canReadMore && (
           <Box center marginTop={20}>
-            <Button title="Lire plus" onPress={loadRemainingText} style={{ width: 150 }} />
+            <Button
+              title="Lire plus"
+              onPress={loadRemainingText}
+              style={{ width: 150 }}
+            />
           </Box>
         )}
       </ScrollView>

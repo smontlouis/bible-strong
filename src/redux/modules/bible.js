@@ -1,6 +1,6 @@
 import produce from 'immer'
 import books from '~assets/bible_versions/books-desc'
-import Analytics, { event } from '~helpers/analytics'
+// import Analytics, { event } from '~helpers/analytics'
 
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
 const SET_TEMP_SELECTED_CHAPTER = 'bible/SET_TEMP_SELECTED_CHAPTER'
@@ -114,7 +114,9 @@ export default produce((draft, action) => {
 
       if (currentChapter === 1) {
         const currentBook = draft.selectedBook
-        const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
+        const currentBookIndex = books.findIndex(
+          b => b.Numero === currentBook.Numero
+        )
 
         const prevBook = books[currentBookIndex - 1]
         draft.selectedBook = prevBook
@@ -148,7 +150,9 @@ export default produce((draft, action) => {
       const currentBook = draft.selectedBook
 
       if (currentChapter === currentBook.Chapitres) {
-        const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
+        const currentBookIndex = books.findIndex(
+          b => b.Numero === currentBook.Numero
+        )
 
         const nextBook = books[currentBookIndex + 1]
 
@@ -264,7 +268,7 @@ export function resetTempSelected() {
 
 export function setVersion(version) {
   if (!__DEV__) {
-    Analytics.hit(event('Bible', 'version', version))
+    // Analytics.hit(event('Bible', 'version', version))
   }
   return {
     type: SET_VERSION,
