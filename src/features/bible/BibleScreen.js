@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { StatusBar } from 'react-native'
 import produce from 'immer'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
@@ -48,7 +47,6 @@ class BibleScreen extends React.Component {
 
     return (
       <Container>
-        <StatusBar translucent backgroundColor="white" />
         <BibleHeader
           isReadOnly={isReadOnly}
           isSelectionMode={isSelectionMode}

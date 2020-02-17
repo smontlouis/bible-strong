@@ -1,6 +1,6 @@
 import 'react-native-root-siblings'
 import React from 'react'
-import { YellowBox, ActivityIndicator, View } from 'react-native'
+import { YellowBox, ActivityIndicator, View, StatusBar } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
@@ -9,6 +9,7 @@ import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
+import codePush from 'react-native-code-push'
 
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
@@ -122,10 +123,11 @@ class App extends React.Component {
 
     return (
       <Provider store={store}>
+        <StatusBar translucent />
         <InitApp persistor={persistor} />
       </Provider>
     )
   }
 }
 
-export default App
+export default codePush(App)

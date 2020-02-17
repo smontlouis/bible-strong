@@ -8,6 +8,7 @@
 #import "AppDelegate.h"
 #import <Firebase.h>
 #import <RNCPushNotificationIOS.h>
+#import <CodePush/CodePush.h>
 
 
 #import <React/RCTBundleURLProvider.h>
@@ -52,10 +53,10 @@
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge {
-  #ifdef DEBUG
+  #if DEBUG
     return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
   #else
-    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+    return [CodePush bundleURL];
   #endif
 }
 

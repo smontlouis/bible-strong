@@ -9,7 +9,17 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Base64.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>BoringSSL-GRPC.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>CodePush.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -194,6 +204,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>JWT.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-biblestrong.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -225,6 +240,11 @@
 			<false/>
 		</dict>
 		<key>RNDateTimePicker.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>RNFBAnalytics.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
