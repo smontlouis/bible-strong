@@ -43,20 +43,20 @@ class App extends React.Component {
   codePushStatusDidChange(status) {
     switch (status) {
       case codePush.SyncStatus.CHECKING_FOR_UPDATE:
-        console.log('Checking for updates.')
+        console.log('[CodePush] Checking for updates.')
         break
       case codePush.SyncStatus.DOWNLOADING_PACKAGE:
-        console.log('Downloading package.')
+        console.log('[CodePush] Downloading package.')
         SnackBar.show('Une mise à jour est disponible, téléchargement...')
         break
       case codePush.SyncStatus.INSTALLING_UPDATE:
-        console.log('Installing update.')
+        console.log('[CodePush] Installing update.')
         break
       case codePush.SyncStatus.UP_TO_DATE:
-        console.log('Up-to-date.')
+        console.log('[CodePush] Up-to-date.')
         break
       case codePush.SyncStatus.UPDATE_INSTALLED:
-        console.log('Update installed.')
+        console.log('[CodePush] Update installed.')
         SnackBar.show("Mise à jour installée. Redémarrez l'app.")
         break
       default:
@@ -78,10 +78,13 @@ class App extends React.Component {
 
     this.initNotifications()
 
-    codePush.sync({
-      updateDialog: false,
-      installMode: codePush.InstallMode.ON_NEXT_RESTART
-    })
+    codePush.sync(
+      {
+        updateDialog: false,
+        installMode: codePush.InstallMode.ON_NEXT_RESTART
+      },
+      this.codePushStatusDidChange
+    )
   }
 
   initNotifications = () => {
