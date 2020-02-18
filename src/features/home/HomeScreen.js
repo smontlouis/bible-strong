@@ -26,7 +26,7 @@ const HomeScreen = () => {
         </Box>
         <VerseOfTheDay />
         <Box padding={20} paddingBottom={0} grey>
-          <Text title fontSize={25} style={{ backgroundColor: 'blue' }}>
+          <Text title fontSize={25} style={{ backgroundColor: 'yellow' }}>
             Au hasard
           </Text>
         </Box>

@@ -10,7 +10,9 @@
     "test": "node ./node_modules/jest/bin/jest.js --watchAll",
     "postversion": "react-native-version",
     "clean": "watchman watch-del-all && rm -rf package-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && yarn install && say I love react native",
-    "postinstall": "jetify && rndebugger-open"
+    "postinstall": "jetify && rndebugger-open",
+    "publish-android": "code-push release-react BibleStrong-Android android",
+    "publish-ios": "code-push release-react BibleStrong-iOS ios"
   },
   "jest": {
     "preset": "jest-expo",

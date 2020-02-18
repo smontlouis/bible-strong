@@ -10,10 +10,10 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
 import codePush from 'react-native-code-push'
-import SnackBar from '~common/SnackBar'
 
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
+import CodePushCheck from './CodePushCheck'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings([
@@ -33,39 +33,10 @@ if (!__DEV__) {
 }
 
 export const { store, persistor } = configureStore()
-const codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL }
 
 class App extends React.Component {
   state = {
     isLoadingComplete: false
-  }
-
-  codePushStatusDidChange(status) {
-    switch (status) {
-      case codePush.SyncStatus.CHECKING_FOR_UPDATE:
-        console.log('[CodePush] Checking for updates.')
-        break
-      case codePush.SyncStatus.DOWNLOADING_PACKAGE:
-        console.log('[CodePush] Downloading package.')
-        SnackBar.show('Une mise à jour est disponible, téléchargement...')
-        break
-      case codePush.SyncStatus.INSTALLING_UPDATE:
-        console.log('[CodePush] Installing update.')
-        break
-      case codePush.SyncStatus.UP_TO_DATE:
-        console.log('[CodePush] Up-to-date.')
-        break
-      case codePush.SyncStatus.UPDATE_INSTALLED:
-        console.log('[CodePush] Update installed.')
-        SnackBar.show("Mise à jour installée. Redémarrez l'app.")
-        break
-      default:
-        break
-    }
-  }
-
-  codePushDownloadDidProgress(progress) {
-    console.log(`${progress.receivedBytes} of ${progress.totalBytes} received.`)
   }
 
   async componentDidMount() {
@@ -77,14 +48,7 @@ class App extends React.Component {
     }
 
     this.initNotifications()
-
-    codePush.sync(
-      {
-        updateDialog: false,
-        installMode: codePush.InstallMode.ON_NEXT_RESTART
-      },
-      this.codePushStatusDidChange
-    )
+    codePush.notifyAppReady()
   }
 
   initNotifications = () => {
@@ -163,9 +127,10 @@ class App extends React.Component {
       <Provider store={store}>
         <StatusBar translucent />
         <InitApp persistor={persistor} />
+        <CodePushCheck />
       </Provider>
     )
   }
 }
 
-export default codePush(codePushOptions)(App)
+export default App
