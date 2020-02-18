@@ -106,7 +106,10 @@ class BibleViewer extends Component {
 
   async componentDidUpdate() {
     if (this.props.settings.commentsDisplay && !this.state.comments) {
-      const comments = await loadMhyComments(this.props.book.Numero, this.props.chapter)
+      const comments = await loadMhyComments(
+        this.props.book.Numero,
+        this.props.chapter
+      )
       this.setState({ comments: JSON.parse(comments.commentaires) })
     }
   }
@@ -137,15 +140,18 @@ class BibleViewer extends Component {
     }
 
     const audioBaseUrl = oldAudioBooks.find(a => a == book.Numero)
-      ? 'https://s.topchretien.com/media/topbible/bible/'
-      : 'https://s.topchretien.com/media/topbible/bible_v2/'
+      ? 'https://s.topchretien.com/media/topbible/bible_say/'
+      : 'https://s.topchretien.com/media/topbible/bible/'
 
     this.setState({
       isLoading: false,
       verses,
       secondaryVerses,
       error: false,
-      audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(chapter, 2)}.mp3`
+      audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(
+        chapter,
+        2
+      )}.mp3`
     })
     this.props.setHistory({
       book: book.Numero,
@@ -162,7 +168,14 @@ class BibleViewer extends Component {
   }
 
   openInBibleTab = () => {
-    const { book, chapter, verse, navigation, setAllAndValidateSelected, version } = this.props
+    const {
+      book,
+      chapter,
+      verse,
+      navigation,
+      setAllAndValidateSelected,
+      version
+    } = this.props
     setAllAndValidateSelected({
       book,
       chapter,
@@ -183,7 +196,10 @@ class BibleViewer extends Component {
   }
 
   toggleCreateNote = () => {
-    this.setState(state => ({ isCreateNoteOpen: !state.isCreateNoteOpen, noteVerses: null }))
+    this.setState(state => ({
+      isCreateNoteOpen: !state.isCreateNoteOpen,
+      noteVerses: null
+    }))
   }
 
   openNoteModal = noteId => {
@@ -192,7 +208,10 @@ class BibleViewer extends Component {
         accuRefs[key] = true
         return accuRefs
       }, {})
-      this.setState(state => ({ isCreateNoteOpen: !state.isCreateNoteOpen, noteVerses }))
+      this.setState(state => ({
+        isCreateNoteOpen: !state.isCreateNoteOpen,
+        noteVerses
+      }))
     } catch (e) {
       Sentry.withScope(scope => {
         scope.setExtra('Error', e.toString())
@@ -284,7 +303,11 @@ class BibleViewer extends Component {
             settings={settings}
             verseToScroll={verse}
             chapter={chapter}
-            pericopeChapter={getPericopeChapter(this.pericope, book.Numero, chapter)}
+            pericopeChapter={getPericopeChapter(
+              this.pericope,
+              book.Numero,
+              chapter
+            )}
             openNoteModal={this.openNoteModal}
             setSelectedCode={this.setSelectedCode}
             selectedCode={selectedCode}
@@ -310,7 +333,10 @@ class BibleViewer extends Component {
         )}
         {isReadOnly && !error && (
           <Box center background>
-            <ReadMeButton title="Ouvrir dans Bible" onPress={this.openInBibleTab} />
+            <ReadMeButton
+              title="Ouvrir dans Bible"
+              onPress={this.openInBibleTab}
+            />
           </Box>
         )}
         {modalIsVisible && (
@@ -361,7 +387,11 @@ class BibleViewer extends Component {
           theme={theme}
           onClosed={() => this.setReference(null)}
         />
-        <NaveModal selectedVerse={currentNave} theme={theme} onClosed={() => this.setNave(null)} />
+        <NaveModal
+          selectedVerse={currentNave}
+          theme={theme}
+          onClosed={() => this.setNave(null)}
+        />
       </Container>
     )
   }
