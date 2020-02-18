@@ -7,6 +7,14 @@ export const logTypes = {
 
 export default [
   {
+    date: '1581504493873',
+    type: logTypes.BUG,
+    title: 'Lecture audio corrigée',
+    description: `Un bug empêchait la lecture audio pour certains livres. Ce souci a été réglé.
+Merci à Kenza ;)
+    `
+  },
+  {
     date: '1580198076259',
     type: logTypes.NEW,
     title: 'Recherche plus complète',
@@ -368,7 +376,8 @@ Sur ce, je m’en vais demander de la sagesse à Dieu et je reviendrai vers vous
     date: '1566639586810',
     type: logTypes.BUG,
     title: "Chargement de l'index...",
-    description: "Au premier chargement de l'index, l'écran restait bloqué. Ce bug est résolu."
+    description:
+      "Au premier chargement de l'index, l'écran restait bloqué. Ce bug est résolu."
   },
   {
     date: '1566445889323',
@@ -490,13 +499,15 @@ http://www.kingjamesfrancaise.net/
     date: '1562470112286',
     type: logTypes.BUG,
     title: 'Texte italique sur Android',
-    description: "Dans certains endroits de l'App, le texte était italique. Ce bug a été réglé."
+    description:
+      "Dans certains endroits de l'App, le texte était italique. Ce bug a été réglé."
   },
   {
     date: '1562469387018',
     type: logTypes.NEW,
     title: 'Ajout de "Quoi de neuf ?"',
-    description: "Vous serez dorénavant tenu au courant de chaque modification dans l'App."
+    description:
+      "Vous serez dorénavant tenu au courant de chaque modification dans l'App."
   },
   {
     date: '1562460467170',
