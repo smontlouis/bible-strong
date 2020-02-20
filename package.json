@@ -92,6 +92,7 @@
     "react-native-section-list-get-item-layout": "^2.2.3",
     "react-native-snackbar-dialog": "^1.4.1",
     "react-native-snap-carousel": "^3.8.4",
+    "react-native-splash-screen": "^3.2.0",
     "react-native-sqlite-storage": "^4.1.0",
     "react-native-svg": "9.13.3",
     "react-native-unimodules": "~0.7.0",

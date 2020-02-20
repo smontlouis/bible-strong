@@ -199,9 +199,13 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 def enableHermes = project.ext.react.get("enableHermes", false);
 
 dependencies {
+    implementation project(':react-native-splash-screen')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation project(path: ":@react-native-firebase_app")
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation project(':react-native-splash-screen')
+
 
     addUnimodulesDependencies()
 
@@ -224,6 +228,7 @@ task copyDownloadableDepsToLibs(type: Copy) {
 configurations.all {
      resolutionStrategy {
        force "com.facebook.soloader:soloader:0.8.0"
+       force "androidx.appcompat:appcompat:1.0.2"
      }
 }
 

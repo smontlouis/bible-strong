@@ -10,6 +10,7 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
 import codePush from 'react-native-code-push'
+import SplashScreen from 'react-native-splash-screen'
 
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
@@ -111,6 +112,7 @@ class App extends React.Component {
 
   handleFinishLoading = () => {
     this.setState({ isLoadingComplete: true })
+    SplashScreen.hide()
   }
 
   render() {
@@ -127,7 +129,7 @@ class App extends React.Component {
       <Provider store={store}>
         <StatusBar translucent />
         <InitApp persistor={persistor} />
-        <CodePushCheck />
+        {/* <CodePushCheck /> */}
       </Provider>
     )
   }
