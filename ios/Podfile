@@ -47,6 +47,5 @@ target 'biblestrong' do
   use_unimodules!
   use_native_modules!
 
-  pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
 
 end
