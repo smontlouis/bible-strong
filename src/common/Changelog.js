@@ -10,7 +10,7 @@ import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
-import changelog, { logTypes } from '~helpers/changelog'
+import { logTypes } from '~helpers/changelog'
 import { saveAllLogsAsSeen } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
@@ -68,8 +68,12 @@ const findNewLogs = (seenLogs, changeLog) =>
 const Changelog = () => {
   const dispatch = useDispatch()
   const seenLogs = useSelector(state => Object.keys(state.user.bible.changelog))
+  const changelog = useSelector(state => state.user.changelog.data)
+  const changelogIsLoading = useSelector(
+    state => state.user.changelog.isLoading
+  )
 
-  if (hasNewLogs(seenLogs, changelog)) {
+  if (!changelogIsLoading && hasNewLogs(seenLogs, changelog)) {
     const newLogs = findNewLogs(seenLogs, changelog)
     return (
       <StylizedModal
@@ -115,7 +119,11 @@ const Changelog = () => {
           </Box>
         </ScrollView>
         <Box padding={20} alignItems="flex-end">
-          <Button title="Fermer" onPress={() => dispatch(saveAllLogsAsSeen(changelog))} small />
+          <Button
+            title="Fermer"
+            onPress={() => dispatch(saveAllLogsAsSeen(changelog))}
+            small
+          />
         </Box>
       </StylizedModal>
     )

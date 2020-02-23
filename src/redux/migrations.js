@@ -198,5 +198,18 @@ export default {
         }
       }
     }
+  },
+  14: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        changelog: {
+          isLoading: true,
+          lastSeen: 0,
+          data: []
+        }
+      }
+    }
   }
 }

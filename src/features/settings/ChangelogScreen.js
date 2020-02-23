@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
+import { useSelector } from 'react-redux'
 
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
@@ -9,7 +10,7 @@ import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
-import changelog, { logTypes } from '~helpers/changelog'
+import { logTypes } from '~helpers/changelog'
 
 const getTagColor = type => {
   switch (type) {
@@ -38,6 +39,8 @@ const Tag = styled.View(({ type }) => ({
 }))
 
 const Changelog = () => {
+  const changelog = useSelector(state => state.user.changelog.data)
+
   return (
     <Container>
       <Header hasBackButton title="Changelog" />

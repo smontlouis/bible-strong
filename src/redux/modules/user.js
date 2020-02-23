@@ -7,6 +7,7 @@ import { clearSelectedVerses } from './bible'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 
+import { firebaseDb } from '~helpers/firebaseDb'
 import orderVerses from '~helpers/orderVerses'
 import generateUUID from '~helpers/generateUUID'
 
@@ -58,6 +59,10 @@ export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
 
 export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
 
+export const GET_CHANGELOG = 'user/GET_CHANGELOG'
+export const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
+export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
+
 const initialState = {
   id: '',
   email: '',
@@ -69,6 +74,11 @@ const initialState = {
   notifications: {
     verseOfTheDay: '07:00',
     notificationId: ''
+  },
+  changelog: {
+    isLoading: true,
+    lastSeen: 0,
+    data: []
   },
   bible: {
     changelog: {},
@@ -485,6 +495,17 @@ export default produce((draft, action) => {
     }
     case SET_NOTIFICATION_ID: {
       draft.notifications.notificationId = action.payload
+      break
+    }
+    case GET_CHANGELOG_SUCCESS: {
+      draft.changelog.isLoading = false
+      draft.changelog.lastSeen = Date.now().toString()
+      draft.changelog.data = [...draft.changelog.data, ...action.payload]
+      break
+    }
+    case GET_CHANGELOG_FAIL: {
+      draft.changelog.isLoading = false
+      break
     }
     default: {
       break
@@ -738,6 +759,44 @@ export function setNotificationId(payload) {
 export function toggleCompareVersion(payload) {
   return {
     type: TOGGLE_COMPARE_VERSION,
+    payload
+  }
+}
+
+// Changelog
+
+export function getChangelog() {
+  return async (dispatch, getState) => {
+    dispatch({
+      type: GET_CHANGELOG
+    })
+    const lastChangelog = getState().user.changelog.lastSeen.toString()
+    const changelogDoc = firebaseDb
+      .collection('changelog')
+      .where('date', '>', lastChangelog)
+      .orderBy('date', 'desc')
+      .limit(20)
+
+    try {
+      const querySnapshot = await changelogDoc.get()
+
+      const changelog = []
+      querySnapshot.forEach(doc => {
+        changelog.push(doc.data())
+      })
+
+      return dispatch(addChangelog(changelog))
+    } catch (e) {
+      return dispatch({
+        type: GET_CHANGELOG_FAIL
+      })
+    }
+  }
+}
+
+export function addChangelog(payload) {
+  return {
+    type: GET_CHANGELOG_SUCCESS,
     payload
   }
 }

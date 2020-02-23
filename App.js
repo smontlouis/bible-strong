@@ -49,7 +49,7 @@ class App extends React.Component {
     }
 
     this.initNotifications()
-    codePush.notifyAppReady()
+    // codePush.notifyAppReady()
   }
 
   initNotifications = () => {

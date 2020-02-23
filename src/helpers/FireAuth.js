@@ -245,8 +245,7 @@ const FireAuth = class {
   login = (email, password) =>
     new Promise(async resolve => {
       try {
-        firebase
-          .auth()
+        auth()
           .signInWithEmailAndPassword(email, password)
           .then(() => {
             resolve(true)
@@ -264,8 +263,7 @@ const FireAuth = class {
   register = (username, email, password) =>
     new Promise(async resolve => {
       try {
-        firebase
-          .auth()
+        auth()
           .createUserWithEmailAndPassword(email, password)
           .then(({ user }) => {
             firebaseDb
