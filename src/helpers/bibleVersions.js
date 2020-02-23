@@ -1,4 +1,40 @@
 import * as FileSystem from 'expo-file-system'
+import to from 'await-to-js'
+
+import { biblesRef } from '~helpers/firebase'
+
+export const getIfVersionNeedsUpdate = async versionId => {
+  if (versionId === 'LSG') {
+    return false
+  }
+
+  if (versionId === 'INT') {
+    // DO SOMETHING HERE
+    return false
+  }
+
+  if (versionId === 'LSGS') {
+    // DO SOMETHING HERE
+    return false
+  }
+
+  const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
+
+  const [errF, file] = await to(FileSystem.getInfoAsync(path))
+
+  if (!file.exists) {
+    return false
+  }
+
+  const [errRF, remoteFile] = await to(biblesRef[versionId].getMetadata())
+
+  if (errF || errRF) {
+    console.log('Error...')
+    return false
+  }
+
+  return file.size !== remoteFile.size
+}
 
 export const getIfVersionNeedsDownload = async versionId => {
   if (versionId === 'LSG') {

@@ -8,7 +8,8 @@ import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 
-import { storageRef } from '~helpers/firebase'
+import { databasesRef } from '~helpers/firebase'
+import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 
 import {
   strongDB,
@@ -24,13 +25,19 @@ import { DBStateContext } from '~helpers/databaseState'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import { setSettingsCommentaires } from '~redux/modules/user'
+import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
 
-const Container = styled.View({
-  paddingHorizontal: 20,
+const Container = styled.View(({ needsUpdate, theme }) => ({
+  padding: 20,
   paddingTop: 10,
-  paddingBottom: 10
-})
+  paddingBottom: 10,
+  ...(needsUpdate
+    ? {
+        borderLeftColor: theme.colors.success,
+        borderLeftWidth: 5
+      }
+    : {})
+}))
 
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
@@ -70,115 +77,23 @@ class DBSelectorItem extends React.Component {
       }
       this.startDownload()
     })
-    const versionNeedsDownload = await this.getIfDatabaseNeedsDownload()
+    const versionNeedsDownload = await getIfDatabaseNeedsDownload(
+      this.props.database
+    )
     this.setState({ versionNeedsDownload })
   }
 
-  getIfDatabaseNeedsDownload = async () => {
-    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-    const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
-
-    if (!sqliteDir.exists) {
-      await FileSystem.makeDirectoryAsync(sqliteDirPath)
-    } else if (!sqliteDir.isDirectory) {
-      throw new Error('SQLite dir is not a directory')
-    }
-
-    const path = this.getPath()
-
-    const file = await FileSystem.getInfoAsync(path)
-
-    if (!file.exists) {
-      return true
-    }
-
-    return false
-  }
-
-  getPath = () => {
-    const { database } = this.props
-
-    let path
-    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-    switch (database) {
-      case 'STRONG': {
-        path = `${sqliteDirPath}/strong.sqlite`
-        break
-      }
-      case 'DICTIONNAIRE': {
-        path = `${sqliteDirPath}/dictionnaire.sqlite`
-        break
-      }
-      case 'TRESOR': {
-        path = `${sqliteDirPath}/commentaires-tresor.sqlite`
-        break
-      }
-      case 'MHY': {
-        path = `${sqliteDirPath}/commentaires-mhy.sqlite`
-        break
-      }
-      case 'NAVE': {
-        path = `${sqliteDirPath}/naveFr.sqlite`
-        break
-      }
-      default:
-    }
-
-    return path
-  }
-
-  requireFileUri = async () => {
-    const { database } = this.props
-    switch (database) {
-      case 'STRONG': {
-        const { uri: sqliteDbUri } = await FileSystem.getInfoAsync(
-          `${FileSystem.bundleDirectory}/www/strong.sqlite`
-        )
-        return sqliteDbUri
-      }
-      case 'DICTIONNAIRE': {
-        const sqliteDbUri = await storageRef
-          .child('databases/dictionnaire.sqlite')
-          .getDownloadURL()
-
-        return sqliteDbUri
-      }
-      case 'TRESOR': {
-        const sqliteDbUri = await storageRef
-          .child('databases/commentaires-tresor.sqlite')
-          .getDownloadURL()
-
-        return sqliteDbUri
-      }
-      case 'MHY': {
-        const sqliteDbUri = await storageRef
-          .child('databases/commentaires-mhy.sqlite')
-          .getDownloadURL()
-
-        return sqliteDbUri
-      }
-      case 'NAVE': {
-        const sqliteDbUri = await storageRef
-          .child('databases/nave-fr.sqlite')
-          .getDownloadURL()
-
-        return sqliteDbUri
-      }
-      default:
-    }
-  }
-
-  calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+  calculateProgress = ({ totalBytesWritten }) => {
     const { fileSize } = this.props
     const fileProgress = Math.floor((totalBytesWritten / fileSize) * 100) / 100
     this.setState({ fileProgress })
   }
 
   startDownload = async () => {
+    const { path, database } = this.props
     this.setState({ isLoading: true })
 
-    const path = this.getPath()
-    const uri = await this.requireFileUri()
+    const uri = await databasesRef[database].getDownloadURL()
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -228,6 +143,7 @@ class DBSelectorItem extends React.Component {
   }
 
   delete = async () => {
+    const { path } = this.props
     const [, dispatch] = this.context
     if (this.props.database !== 'SEARCH') {
       dispatch({
@@ -264,7 +180,6 @@ class DBSelectorItem extends React.Component {
       }
     }
 
-    const path = this.getPath()
     const file = await FileSystem.getInfoAsync(path)
     FileSystem.deleteAsync(file.uri)
     this.setState({ versionNeedsDownload: true })
@@ -285,8 +200,15 @@ class DBSelectorItem extends React.Component {
     )
   }
 
+  updateVersion = async () => {
+    const { dispatch, database } = this.props
+    await this.delete()
+    await this.startDownload()
+    dispatch(setVersionUpdated(database))
+  }
+
   render() {
-    const { name, theme, fileSize, subTitle } = this.props
+    const { name, theme, fileSize, subTitle, needsUpdate } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
     if (typeof versionNeedsDownload === 'undefined') {
@@ -324,21 +246,38 @@ class DBSelectorItem extends React.Component {
     }
 
     return (
-      <Container>
+      <Container needsUpdate={needsUpdate}>
         <Box flex row center>
           <Box flex>
             <TextName>{name}</TextName>
             {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
           </Box>
-          <TouchableOpacity
-            onPress={this.confirmDelete}
-            style={{ padding: 10 }}>
-            <DeleteIcon name="trash-2" size={18} />
-          </TouchableOpacity>
+          {needsUpdate ? (
+            <TouchableOpacity
+              onPress={this.updateVersion}
+              style={{ padding: 10 }}>
+              <Icon.Feather
+                color={theme.colors.success}
+                name="download"
+                size={18}
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={this.confirmDelete}
+              style={{ padding: 10 }}>
+              <DeleteIcon name="trash-2" size={18} />
+            </TouchableOpacity>
+          )}
         </Box>
       </Container>
     )
   }
 }
 
-export default compose(withTheme, connect())(DBSelectorItem)
+export default compose(
+  withTheme,
+  connect((state, ownProps) => ({
+    needsUpdate: state.user.needsUpdate[ownProps.database]
+  }))
+)(DBSelectorItem)

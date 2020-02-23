@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { StyleSheet, TouchableOpacity } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
 
@@ -83,7 +82,7 @@ const TabBar = props => {
             }}
             accessibilityLabel={getAccessibilityLabel({ route })}>
             {renderIcon({ route, focused: isRouteActive, tintColor })}
-            {orientation.portrait ? (
+            {/* {orientation.portrait ? (
               <AnimatableCircle
                 orientation={orientation}
                 transition="bottom"
@@ -95,7 +94,7 @@ const TabBar = props => {
                 transition="left"
                 style={{ left: isRouteActive ? 3 : -100 }}
               />
-            )}
+            )} */}
           </TouchableTab>
         )
       })}

@@ -9,7 +9,12 @@ import compose from 'recompose/compose'
 import analytics from '@react-native-firebase/analytics'
 import ErrorBoundary from '~common/ErrorBoundary'
 
-import { updateUserData, getChangelog } from '~redux/modules/user'
+import {
+  updateUserData,
+  getChangelog,
+  getVersionUpdate,
+  getDatabaseUpdate
+} from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import Changelog from '~common/Changelog'
@@ -20,6 +25,8 @@ import { DBStateProvider } from '~helpers/databaseState'
 class InitApp extends React.Component {
   componentDidMount() {
     this.props.dispatch(getChangelog())
+    this.props.dispatch(getVersionUpdate())
+    this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
     AppState.addEventListener('change', this.handleAppStateChange)
   }
@@ -61,7 +68,7 @@ class InitApp extends React.Component {
     }
   }
 
-  onNavigationStateChange = (prevState, currentState, action) => {
+  onNavigationStateChange = (prevState, currentState) => {
     const {
       route: currentScreen,
       params: currentParams

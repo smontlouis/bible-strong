@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { Alert } from 'react-native'
 
 import { versionsBySections } from '~helpers/bibleVersions'
+import { databases } from '~helpers/databases'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
-import ScrollView from '~common/ui/ScrollView'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
@@ -51,41 +51,18 @@ const DLScreen = () => {
             <Box padding={20}>
               <Button title="Tout télécharger" onPress={onConfirmDownload} />
             </Box>
-            {/* <DBSelectorItem
-              database="STRONG"
-              name="Lexique hébreu & grec"
-              subTitle="Lexique contenu les strongs grecs et hébreu avec leur concordance et définitions"
-              fileSize={34941952}
-              shareFn={addDownloadFunc}
-            /> */}
-            <DBSelectorItem
-              database="DICTIONNAIRE"
-              name="Dictionnaire Westphal"
-              subTitle="Dictionnaire Encyclopédique de la Bible A. Westphal. "
-              fileSize={22532096}
-              shareFn={addDownloadFunc}
-            />
-            <DBSelectorItem
-              database="NAVE"
-              name="Bible thématique Nave"
-              subTitle="Plus de 20.000 sujets et sous-thèmes, et 100.000 références aux Écritures."
-              fileSize={7448576}
-              shareFn={addDownloadFunc}
-            />
-            <DBSelectorItem
-              database="TRESOR"
-              name="Références croisées"
-              subTitle="L’un des ensembles les plus complets de références croisées jamais compilées, composé de plus de 572.000 entrées."
-              fileSize={5434368}
-              shareFn={addDownloadFunc}
-            />
-            <DBSelectorItem
-              database="MHY"
-              name="Commentaires"
-              subTitle="Commentaires concis de Matthew Henry. Traduction Dominique Osché."
-              fileSize={6574080}
-              shareFn={addDownloadFunc}
-            />
+            {Object.values(databases).map(db => (
+              <DBSelectorItem
+                key={db.id}
+                database={db.id}
+                name={db.name}
+                subTitle={db.desc}
+                fileSize={db.fileSize}
+                path={db.path}
+                shareFn={addDownloadFunc}
+              />
+            ))}
+
             <Text padding={20} paddingBottom={0} title fontSize={25}>
               Bibles
             </Text>

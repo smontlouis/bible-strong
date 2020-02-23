@@ -208,7 +208,8 @@ export default {
           isLoading: true,
           lastSeen: 0,
           data: []
-        }
+        },
+        needsUpdate: {}
       }
     }
   }

@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
+import compose from 'recompose/compose'
 import { Animated, StyleSheet } from 'react-native'
 import { createTabNavigator } from 'react-navigation-tabs'
 import { ScreenContainer } from 'react-native-screens'
@@ -39,14 +40,17 @@ class AnimatedTabNavigationView extends React.Component {
 
     return {
       // Set the current tab to be loaded if it was not loaded before
-      loaded: prevState.loaded.includes(index) ? prevState.loaded : [...prevState.loaded, index]
+      loaded: prevState.loaded.includes(index)
+        ? prevState.loaded
+        : [...prevState.loaded, index]
     }
   }
 
   state = {
     loaded: [this.props.navigation.state.index],
     indexesOpacity: this.props.navigation.state.routes.map(
-      (_, index) => new Animated.Value(this.props.navigation.state.index === index ? 1 : 0)
+      (_, index) =>
+        new Animated.Value(this.props.navigation.state.index === index ? 1 : 0)
     )
   }
 
@@ -54,15 +58,23 @@ class AnimatedTabNavigationView extends React.Component {
   // the most simple way to do this, you might want to control each tab visibility
   // individually with their own animated value for example.
   componentDidUpdate(prevProps) {
-    if (prevProps.navigation.state.index !== this.props.navigation.state.index) {
-      Animated.timing(this.state.indexesOpacity[this.props.navigation.state.index], {
-        toValue: 1,
-        duration: 200
-      }).start()
-      Animated.timing(this.state.indexesOpacity[prevProps.navigation.state.index], {
-        toValue: 0,
-        duration: 200
-      }).start()
+    if (
+      prevProps.navigation.state.index !== this.props.navigation.state.index
+    ) {
+      Animated.timing(
+        this.state.indexesOpacity[this.props.navigation.state.index],
+        {
+          toValue: 1,
+          duration: 200
+        }
+      ).start()
+      Animated.timing(
+        this.state.indexesOpacity[prevProps.navigation.state.index],
+        {
+          toValue: 0,
+          duration: 200
+        }
+      ).start()
     }
   }
 
@@ -109,7 +121,10 @@ class AnimatedTabNavigationView extends React.Component {
             return (
               <Animated.View
                 key={route.key}
-                style={[StyleSheet.absoluteFillObject, { backgroundColor: '#fff', opacity }]}
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { backgroundColor: '#fff', opacity }
+                ]}
                 pointerEvents={isFocused ? 'auto' : 'none'}>
                 {this.props.renderScene({ route })}
               </Animated.View>
@@ -175,4 +190,9 @@ const TabBar = props => {
   )
 }
 
-export default createTabNavigator(withDeviceOrientation(AnimatedTabNavigationView))
+export default compose(
+  createTabNavigator,
+  withDeviceOrientation
+)(AnimatedTabNavigationView)
+
+createTabNavigator(withDeviceOrientation(AnimatedTabNavigationView))

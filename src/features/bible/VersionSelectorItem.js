@@ -5,11 +5,11 @@ import { ProgressBar } from 'react-native-paper'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
-import { connect } from 'react-redux'
-import compose from 'recompose/compose'
-import { storageRef } from '~helpers/firebase'
+import { useDispatch, useSelector } from 'react-redux'
+import { biblesRef } from '~helpers/firebase'
 
 import { setVersion } from '~redux/modules/bible'
+import { setVersionUpdated } from '~redux/modules/user'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -18,11 +18,17 @@ import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
 
 const BIBLE_FILESIZE = 2500000
 
-const Container = styled.View({
+const Container = styled.View(({ needsUpdate, theme }) => ({
   padding: 20,
   paddingTop: 10,
-  paddingBottom: 10
-})
+  paddingBottom: 10,
+  ...(needsUpdate
+    ? {
+        borderLeftColor: theme.colors.success,
+        borderLeftWidth: 5
+      }
+    : {})
+}))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
@@ -54,28 +60,42 @@ const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.quart
 }))
 
-class VersionSelectorItem extends React.Component {
-  state = {
-    versionNeedsDownload: undefined,
-    fileProgress: 0,
-    isLoading: false
-  }
+const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
+  color: theme.colors.success
+}))
 
-  async componentDidMount() {
-    const { version } = this.props
+const VersionSelectorItem = ({
+  version,
+  isSelected,
+  onChange,
+  theme,
+  isParameters,
+  shareFn
+}) => {
+  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState(
+    undefined
+  )
+  const [fileProgress, setFileProgress] = React.useState(0)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const needsUpdate = useSelector(state => state.user.needsUpdate[version.id])
+  const dispatch = useDispatch()
 
-    if (this.props.shareFn && version.id !== 'LSG' && version.id !== 'LSGS') {
-      this.props.shareFn(() => {
-        this.setState({ versionNeedsDownload: true })
-        this.startDownload()
-      })
-    }
+  React.useEffect(() => {
+    ;(async () => {
+      if (shareFn && version.id !== 'LSG' && version.id !== 'LSGS') {
+        shareFn(() => {
+          setVersionNeedsDownload(true)
+          startDownload()
+        })
+      }
 
-    const versionNeedsDownload = await getIfVersionNeedsDownload(version.id)
-    this.setState({ versionNeedsDownload })
-  }
+      const v = await getIfVersionNeedsDownload(version.id)
+      setVersionNeedsDownload(v)
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  requireBiblePath = id => {
+  const requireBiblePath = id => {
     if (id === 'INT') {
       const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
       return `${sqliteDirPath}/interlineaire.sqlite`
@@ -84,160 +104,17 @@ class VersionSelectorItem extends React.Component {
     return `${FileSystem.documentDirectory}bible-${id}.json`
   }
 
-  requireBibleFileUri = async id => {
-    switch (id) {
-      case 'DBY': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-dby.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'OST': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-ost.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'BDS': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-bds.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'CHU': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-chu.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'FMAR': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-fmar.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'FRC97': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-frc97.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'NBS': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-nbs.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'NEG79': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-neg79.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'NVS78P': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-nvs78p.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'S21': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-s21.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'KJF': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-kjf.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'INT': {
-        const sqliteDbUri = await storageRef
-          .child('databases/interlineaire.sqlite')
-          .getDownloadURL()
-
-        return sqliteDbUri
-      }
-      case 'KJV': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-kjv.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'NKJV': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-nkjv.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'ESV': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-esv.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'NIV': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-niv.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'POV': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-pov.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'BHS': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-hebrew.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      case 'SBLGNT': {
-        const bibleUri = await storageRef
-          .child('bibles/bible-greek.json')
-          .getDownloadURL()
-
-        return bibleUri
-      }
-      default: {
-        return ''
-      }
-    }
-  }
-
-  calculateProgress = ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+  const calculateProgress = ({ totalBytesWritten }) => {
     const fileProgress =
       Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
-    this.setState({ fileProgress })
+    setFileProgress(fileProgress)
   }
 
-  startDownload = async () => {
-    const { version } = this.props
+  const startDownload = React.useCallback(async () => {
+    setIsLoading(true)
 
-    this.setState({ isLoading: true })
-
-    const path = this.requireBiblePath(version.id)
-    const uri = await this.requireBibleFileUri(version.id)
+    const path = requireBiblePath(version.id)
+    const uri = await biblesRef[version.id].getDownloadURL()
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -245,7 +122,7 @@ class VersionSelectorItem extends React.Component {
         uri,
         path,
         null,
-        this.calculateProgress
+        calculateProgress
       ).downloadAsync()
 
       console.log('Download finished')
@@ -254,36 +131,41 @@ class VersionSelectorItem extends React.Component {
         await initInterlineaireDB()
       }
 
-      this.setState({ versionNeedsDownload: false, isLoading: false })
+      setVersionNeedsDownload(false)
+      setIsLoading(false)
     } catch (e) {
-      console.log('here', uri, this.props)
       console.log(e)
       SnackBar.show(
         "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
         'danger'
       )
-      this.setState({ isLoading: false })
+      setIsLoading(false)
     }
+  }, [version.id])
+
+  const updateVersion = async () => {
+    await deleteVersion()
+    await startDownload()
+    dispatch(setVersionUpdated(version.id))
   }
 
-  delete = async () => {
-    const { version } = this.props
-    const path = this.requireBiblePath(version.id)
+  const deleteVersion = async () => {
+    const path = requireBiblePath(version.id)
     const file = await FileSystem.getInfoAsync(path)
     if (!file.uri) {
       console.log(`Nothing to delete for ${version.id}`)
       return
     }
     FileSystem.deleteAsync(file.uri)
-    this.setState({ versionNeedsDownload: true })
-    this.props.dispatch(setVersion('LSG'))
+    setVersionNeedsDownload(true)
+    dispatch(setVersion('LSG'))
 
     if (version.id === 'INT') {
       deleteInterlineaireDB()
     }
   }
 
-  confirmDelete = () => {
+  const confirmDelete = () => {
     Alert.alert(
       'Attention',
       'Êtes-vous vraiment sur de supprimer cette version ?',
@@ -291,85 +173,86 @@ class VersionSelectorItem extends React.Component {
         { text: 'Non', onPress: () => null, style: 'cancel' },
         {
           text: 'Oui',
-          onPress: this.delete,
+          onPress: deleteVersion,
           style: 'destructive'
         }
       ]
     )
   }
 
-  render() {
-    const { version, isSelected, onChange, theme, isParameters } = this.props
-    const { versionNeedsDownload, isLoading, fileProgress } = this.state
+  if (
+    typeof versionNeedsDownload === 'undefined' ||
+    (isParameters && version.id === 'LSG') ||
+    (isParameters && version.id === 'LSGS')
+  ) {
+    return null
+  }
 
-    if (
-      typeof versionNeedsDownload === 'undefined' ||
-      (isParameters && version.id === 'LSG') ||
-      (isParameters && version.id === 'LSGS')
-    ) {
-      return null
-    }
-
-    if (versionNeedsDownload) {
-      return (
-        <Container>
-          <Box flex row>
-            <Box disabled flex>
-              <TextVersion>{version.id}</TextVersion>
-              <TextName>{version.name}</TextName>
-              <TextCopyright>{version.c}</TextCopyright>
-            </Box>
-            {!isLoading && version.id !== 'LSGS' && (
-              <TouchableOpacity
-                onPress={this.startDownload}
-                style={{ padding: 10, alignItems: 'flex-end' }}>
-                <FeatherIcon name="download" size={20} />
-                {version.id === 'INT' && (
-                  <Box center marginTop={5}>
-                    <Text fontSize={10}>⚠️ Taille de 20Mo</Text>
-                  </Box>
-                )}
-              </TouchableOpacity>
-            )}
-            {isLoading && (
-              <Box width={80} justifyContent="center">
-                <ProgressBar
-                  progress={fileProgress}
-                  color={theme.colors.default}
-                />
-              </Box>
-            )}
-          </Box>
-        </Container>
-      )
-    }
-
-    if (isParameters) {
-      return (
-        <Container>
-          <Box flex row center>
-            <Box flex>
-              <TextVersion>{version.id}</TextVersion>
-              <TextName>{version.name}</TextName>
-            </Box>
-            <TouchableOpacity
-              onPress={this.confirmDelete}
-              style={{ padding: 10 }}>
-              <DeleteIcon name="trash-2" size={18} />
-            </TouchableOpacity>
-          </Box>
-        </Container>
-      )
-    }
-
+  if (versionNeedsDownload) {
     return (
-      <TouchableContainer onPress={() => onChange(version.id)}>
-        <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-        <TextName isSelected={isSelected}>{version.name}</TextName>
-        <TextCopyright>{version.c}</TextCopyright>
-      </TouchableContainer>
+      <Container>
+        <Box flex row>
+          <Box disabled flex>
+            <TextVersion>{version.id}</TextVersion>
+            <TextName>{version.name}</TextName>
+            <TextCopyright>{version.c}</TextCopyright>
+          </Box>
+          {!isLoading && version.id !== 'LSGS' && (
+            <TouchableOpacity
+              onPress={startDownload}
+              style={{ padding: 10, alignItems: 'flex-end' }}>
+              <FeatherIcon name="download" size={20} />
+              {version.id === 'INT' && (
+                <Box center marginTop={5}>
+                  <Text fontSize={10}>⚠️ Taille de 20Mo</Text>
+                </Box>
+              )}
+            </TouchableOpacity>
+          )}
+          {isLoading && (
+            <Box width={80} justifyContent="center">
+              <ProgressBar
+                progress={fileProgress}
+                color={theme.colors.default}
+              />
+            </Box>
+          )}
+        </Box>
+      </Container>
     )
   }
+
+  if (isParameters) {
+    return (
+      <Container needsUpdate={needsUpdate}>
+        <Box flex row center>
+          <Box flex>
+            <TextVersion>{version.id}</TextVersion>
+            <TextName>{version.name}</TextName>
+          </Box>
+          {needsUpdate ? (
+            <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
+              <UpdateIcon name="download" size={18} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
+              <DeleteIcon name="trash-2" size={18} />
+            </TouchableOpacity>
+          )}
+        </Box>
+      </Container>
+    )
+  }
+
+  return (
+    <TouchableContainer
+      needsUpdate={needsUpdate}
+      onPress={() => onChange(version.id)}>
+      <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
+      <TextName isSelected={isSelected}>{version.name}</TextName>
+      <TextCopyright>{version.c}</TextCopyright>
+    </TouchableContainer>
+  )
 }
 
-export default compose(withTheme, connect())(VersionSelectorItem)
+export default withTheme(VersionSelectorItem)
