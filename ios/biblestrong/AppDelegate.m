@@ -8,7 +8,8 @@
 #import "AppDelegate.h"
 #import <Firebase.h>
 #import <RNCPushNotificationIOS.h>
-#import <CodePush/CodePush.h>
+// #import <CodePush/CodePush.h> - @TODO - Reactivate when codepush works
+#import "RNSplashScreen.h"
 
 
 #import <React/RCTBundleURLProvider.h>
@@ -41,6 +42,7 @@
     [FIRApp configure];
   }
 
+  [RNSplashScreen show];
   return YES;
 }
 
@@ -56,7 +58,8 @@
   #if DEBUG
     return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
   #else
-    return [CodePush bundleURL];
+    // return [CodePush bundleURL]; - @TODO - Reactivate when codepush works
+    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   #endif
 }
 

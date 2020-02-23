@@ -529,6 +529,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>react-native-splash-screen.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>react-native-sqlite-storage.xcscheme</key>
 		<dict>
 			<key>isShown</key>

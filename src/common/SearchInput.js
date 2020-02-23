@@ -34,7 +34,7 @@ const SearchInput = ({
       size={20}
       style={{ marginRight: 10 }}
     />
-    <Box flex>
+    <Box flex center>
       <TextInput
         noBorder
         placeholder={placeholder}
@@ -42,7 +42,7 @@ const SearchInput = ({
         onChangeText={onChangeText}
         returnKeyType="send"
         value={value}
-        style={{ height: 50, marginTop: 0 }}
+        style={{ marginTop: 0, paddingBottom: 0 }}
         {...props}
       />
     </Box>

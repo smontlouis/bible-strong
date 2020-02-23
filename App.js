@@ -9,12 +9,12 @@ import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
-import codePush from 'react-native-code-push'
+// import codePush from 'react-native-code-push'
 import SplashScreen from 'react-native-splash-screen'
 
 import configureStore from '~redux/store'
 import InitApp from './InitApp'
-import CodePushCheck from './CodePushCheck'
+// import CodePushCheck from './CodePushCheck'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings([
@@ -129,7 +129,7 @@ class App extends React.Component {
       <Provider store={store}>
         <StatusBar translucent />
         <InitApp persistor={persistor} />
-        {/* <CodePushCheck /> */}
+        {/* <CodePushCheck /> - @TODO - Reactivatre when codepush works */}
       </Provider>
     )
   }
