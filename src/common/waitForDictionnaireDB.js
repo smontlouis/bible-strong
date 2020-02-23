@@ -8,7 +8,7 @@ import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import { useDBStateValue } from '~helpers/databaseState'
 import DownloadRequired from '~common/DownloadRequired'
-import { firestoreUris } from '../../config'
+import { storageRef } from '~helpers/firebase'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -61,11 +61,14 @@ export const useWaitForDatabase = () => {
             return
           }
 
-          const sqliteDbUri = firestoreUris.dictionnaire
-
           try {
             if (!window.dictionnaireDownloadHasStarted) {
               window.dictionnaireDownloadHasStarted = true
+
+              const sqliteDbUri = await storageRef
+                .child('databases/dictionnaire.sqlite')
+                .getDownloadURL()
+
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
               if (!sqliteDir.exists) {

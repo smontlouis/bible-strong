@@ -34,6 +34,8 @@
     "@react-native-firebase/app": "^6.3.3",
     "@react-native-firebase/auth": "^6.3.3",
     "@react-native-firebase/firestore": "^6.3.3",
+    "@react-native-firebase/storage": "^6.3.3",
+
     "@sentry/react-native": "^1.2.2",
     "algoliasearch": "^4.0.1",
     "colorsys": "^1.0.22",

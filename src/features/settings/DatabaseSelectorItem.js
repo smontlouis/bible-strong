@@ -7,6 +7,9 @@ import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
+
+import { storageRef } from '~helpers/firebase'
+
 import {
   strongDB,
   mhyDB,
@@ -22,8 +25,6 @@ import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { setSettingsCommentaires } from '~redux/modules/user'
-
-import { firestoreUris } from '../../../config'
 
 const Container = styled.View({
   paddingHorizontal: 20,
@@ -136,21 +137,30 @@ class DBSelectorItem extends React.Component {
         return sqliteDbUri
       }
       case 'DICTIONNAIRE': {
-        const sqliteDbUri = firestoreUris.dictionnaire
+        const sqliteDbUri = await storageRef
+          .child('databases/dictionnaire.sqlite')
+          .getDownloadURL()
+
         return sqliteDbUri
       }
       case 'TRESOR': {
-        const sqliteDbUri = firestoreUris['commentaires-tresor']
+        const sqliteDbUri = await storageRef
+          .child('databases/commentaires-tresor.sqlite')
+          .getDownloadURL()
 
         return sqliteDbUri
       }
       case 'MHY': {
-        const sqliteDbUri = firestoreUris['commentaires-mhy']
+        const sqliteDbUri = await storageRef
+          .child('databases/commentaires-mhy.sqlite')
+          .getDownloadURL()
 
         return sqliteDbUri
       }
       case 'NAVE': {
-        const sqliteDbUri = firestoreUris['nave-fr']
+        const sqliteDbUri = await storageRef
+          .child('databases/nave-fr.sqlite')
+          .getDownloadURL()
 
         return sqliteDbUri
       }
@@ -331,7 +341,4 @@ class DBSelectorItem extends React.Component {
   }
 }
 
-export default compose(
-  withTheme,
-  connect()
-)(DBSelectorItem)
+export default compose(withTheme, connect())(DBSelectorItem)

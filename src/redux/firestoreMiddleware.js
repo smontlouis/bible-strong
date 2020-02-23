@@ -27,7 +27,7 @@ import {
 
 // TODO - DO IT FOR COLOR SETTINGS ?
 
-import { firebaseDb } from '../helpers/firebaseDb'
+import { firebaseDb } from '../helpers/firebase'
 
 const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 

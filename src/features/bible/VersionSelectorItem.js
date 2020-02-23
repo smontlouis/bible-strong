@@ -7,15 +7,14 @@ import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
+import { storageRef } from '~helpers/firebase'
 
 import { setVersion } from '~redux/modules/bible'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Button from '~common/ui/Button'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
-import { firestoreUris } from '../../../config'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -65,7 +64,7 @@ class VersionSelectorItem extends React.Component {
   async componentDidMount() {
     const { version } = this.props
 
-    if (this.props.shareFn && (version.id !== 'LSG' && version.id !== 'LSGS')) {
+    if (this.props.shareFn && version.id !== 'LSG' && version.id !== 'LSGS') {
       this.props.shareFn(() => {
         this.setState({ versionNeedsDownload: true })
         this.startDownload()
@@ -88,65 +87,137 @@ class VersionSelectorItem extends React.Component {
   requireBibleFileUri = async id => {
     switch (id) {
       case 'DBY': {
-        return firestoreUris.dbyBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-dby.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'OST': {
-        return firestoreUris.ostBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-ost.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'BDS': {
-        return firestoreUris.bdsBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-bds.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'CHU': {
-        return firestoreUris.chuBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-chu.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'FMAR': {
-        return firestoreUris.fmarBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-fmar.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'FRC97': {
-        return firestoreUris.frc97Bible
+        const bibleUri = await storageRef
+          .child('bibles/bible-frc97.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'NBS': {
-        return firestoreUris.nbsBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-nbs.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'NEG79': {
-        return firestoreUris.neg79Bible
+        const bibleUri = await storageRef
+          .child('bibles/bible-neg79.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'NVS78P': {
-        return firestoreUris.nvs78pBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-nvs78p.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'S21': {
-        return firestoreUris.s21Bible
+        const bibleUri = await storageRef
+          .child('bibles/bible-s21.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'KJF': {
-        return firestoreUris.kjfBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-kjf.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'INT': {
-        const sqliteDbUri = firestoreUris.interlineaire
+        const sqliteDbUri = await storageRef
+          .child('databases/interlineaire.sqlite')
+          .getDownloadURL()
+
         return sqliteDbUri
       }
       case 'KJV': {
-        return firestoreUris.kjvBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-kjv.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'NKJV': {
-        return firestoreUris.nkjvBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-nkjv.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'ESV': {
-        return firestoreUris.esvBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-esv.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'NIV': {
-        return firestoreUris.nivBible
-      }
-      case 'BJC': {
-        return firestoreUris.bjcBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-niv.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'POV': {
-        return firestoreUris.povBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-pov.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'BHS': {
-        return firestoreUris.hebrewBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-hebrew.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       case 'SBLGNT': {
-        return firestoreUris.greekBible
+        const bibleUri = await storageRef
+          .child('bibles/bible-greek.json')
+          .getDownloadURL()
+
+        return bibleUri
       }
       default: {
         return ''
@@ -301,7 +372,4 @@ class VersionSelectorItem extends React.Component {
   }
 }
 
-export default compose(
-  withTheme,
-  connect()
-)(VersionSelectorItem)
+export default compose(withTheme, connect())(VersionSelectorItem)

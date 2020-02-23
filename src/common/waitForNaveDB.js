@@ -8,7 +8,7 @@ import SnackBar from '~common/SnackBar'
 import { naveDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
-import { firestoreUris } from '../../config'
+import { storageRef } from '~helpers/firebase'
 
 const FILE_SIZE = 7448576
 
@@ -48,7 +48,9 @@ export const useWaitForDatabase = () => {
             if (!window.naveDownloadHasStarted) {
               window.naveDownloadHasStarted = true
 
-              const sqliteDbUri = firestoreUris['nave-fr']
+              const sqliteDbUri = await storageRef
+                .child('databases/nave-fr.sqlite')
+                .getDownloadURL()
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 

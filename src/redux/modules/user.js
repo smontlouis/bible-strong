@@ -7,7 +7,7 @@ import { clearSelectedVerses } from './bible'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 
-import { firebaseDb } from '~helpers/firebaseDb'
+import { firebaseDb } from '~helpers/firebase'
 import orderVerses from '~helpers/orderVerses'
 import generateUUID from '~helpers/generateUUID'
 

@@ -10,7 +10,7 @@ import * as AppleAuthentication from 'expo-apple-authentication'
 import * as Network from 'expo-network'
 
 import SnackBar from '~common/SnackBar'
-import { firebaseDb } from '~helpers/firebaseDb'
+import { firebaseDb } from '~helpers/firebase'
 
 const FireAuth = class {
   user = null

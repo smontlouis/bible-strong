@@ -9,7 +9,7 @@ import { initTresorDB, getTresorDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { timeout } from '~helpers/timeout'
-import { firestoreUris } from '../../config'
+import { storageRef } from '~helpers/firebase'
 
 const STRONG_FILE_SIZE = 5434368
 
@@ -50,7 +50,9 @@ export const useWaitForDatabase = () => {
             if (!window.tresorDownloadHasStarted) {
               window.tresorDownloadHasStarted = true
 
-              const sqliteDbUri = firestoreUris['commentaires-tresor']
+              const sqliteDbUri = await storageRef
+                .child('databases/commentaires-tresor.sqlite')
+                .getDownloadURL()
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
