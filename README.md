@@ -22,13 +22,14 @@ iOS: [https://apps.apple.com/fr/app/bible-strong/id1454738221?ls=1](https://apps
 
 Android: [https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong](https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong)
 
--[x] Firebase analytics
--[x] Notifications
--[x] Remove console.logs
--[x] Zip sqlite
--[x] Versionning
--[x] Splash Screen
--[x] Install codepush
--[x] Status bar 
--[ ] SourceMap
--[] Backup données
+- [x] Eject Expo 
+- [x] Firebase analytics
+- [x] Notifications
+- [x] Remove console.logs
+- [x] Zip sqlite
+- [x] Fix Versionning
+- [x] Splash Screen
+- [x] Install codepush
+- [x] Status bar 
+- [ ] SourceMap
+- [ ] Backup données firebase
