@@ -99,7 +99,7 @@
     "react-native-svg": "9.13.3",
     "react-native-unimodules": "~0.7.0",
     "react-native-webview": "^8.0.6",
-    "react-native-zip-archive": "^5.0.0",
+    "react-native-zip-archive": "^5.0.1",
     "react-navigation": "^4.0.10",
     "react-navigation-drawer": "^2.2.2",
     "react-navigation-material-bottom-tabs": "^1.0.0",

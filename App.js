@@ -28,8 +28,7 @@ YellowBox.ignoreWarnings([
 
 if (!__DEV__) {
   Sentry.init({
-    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
-    enableInExpoDevelopment: false
+    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911'
   })
 }
 
