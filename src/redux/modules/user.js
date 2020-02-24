@@ -803,6 +803,7 @@ export function getChangelog() {
 
       return dispatch(addChangelog(changelog))
     } catch (e) {
+      console.log(e)
       return dispatch({
         type: GET_CHANGELOG_FAIL
       })

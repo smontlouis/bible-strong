@@ -54,6 +54,10 @@ const Tag = styled.View(({ type, theme }) => ({
 }))
 
 const hasNewLogs = (seenLogs, changelog) => {
+  if (!changelog.length) {
+    return false
+  }
+
   if (!seenLogs.length) {
     return true
   }

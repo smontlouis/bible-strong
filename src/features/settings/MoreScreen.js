@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Platform, Alert } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
+import { useSelector } from 'react-redux'
+import * as Animatable from 'react-native-animatable'
 
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -23,9 +25,19 @@ const LinkItem = styled(Link)(({}) => ({
   alignItems: 'center',
   paddingHorizontal: 20,
   paddingVertical: 15
-  // borderBottomWidth: 1,
-  // borderBottomColor: theme.colors.border
 }))
+
+const Circle = styled.View(({ theme }) => ({
+  position: 'absolute',
+  width: 10,
+  height: 10,
+  borderRadius: 10,
+  top: 0,
+  right: 8,
+  backgroundColor: theme.colors.success
+}))
+
+const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: theme.colors[color] || theme.colors.grey,
@@ -43,6 +55,9 @@ const shareMessage = () => {
 const MoreScreen = () => {
   const { isLogged, logout } = useLogin()
   const [isEditTagsOpen, setEditTagsOpen] = useState(false)
+  const hasUpdate = useSelector(state =>
+    Object.values(state.user.needsUpdate).some(v => v)
+  )
 
   const promptLogout = () => {
     Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?', [
@@ -96,7 +111,16 @@ const MoreScreen = () => {
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
           <LinkItem route="Downloads">
-            <StyledIcon name="download" size={25} />
+            <Box>
+              {hasUpdate && (
+                <AnimatedCircle
+                  animation="pulse"
+                  easing="ease-out"
+                  iterationCount="infinite"
+                />
+              )}
+              <StyledIcon name="download" size={25} />
+            </Box>
             <Text fontSize={15}>Gestion des téléchargements</Text>
           </LinkItem>
           <LinkItem route="Changelog">

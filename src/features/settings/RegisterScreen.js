@@ -10,6 +10,7 @@ import Spacer from '~common/ui/Spacer'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Header from '~common/Header'
+import SnackBar from '~common/SnackBar'
 
 const LoginScreen = ({ theme }) => {
   const [username, setUsername] = useState('')
@@ -18,6 +19,10 @@ const LoginScreen = ({ theme }) => {
   const [isLoading, setLoading] = useState(false)
 
   const onRegister = async () => {
+    if (!username || !email || !password) {
+      SnackBar.show('Veuillez remplir les champs')
+      return false
+    }
     setLoading(true)
     const isStillLoading = await FireAuth.register(username, email, password)
     setLoading(isStillLoading)
@@ -30,24 +35,46 @@ const LoginScreen = ({ theme }) => {
         <Box padding={20}>
           <TextInput
             placeholder="Nom"
-            leftIcon={<Icon.Feather name="user" size={20} color={theme.colors.darkGrey} />}
+            leftIcon={
+              <Icon.Feather
+                name="user"
+                size={20}
+                color={theme.colors.darkGrey}
+              />
+            }
             onChangeText={setUsername}
           />
           <Spacer />
           <TextInput
             placeholder="Email"
-            leftIcon={<Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />}
+            leftIcon={
+              <Icon.Feather
+                name="mail"
+                size={20}
+                color={theme.colors.darkGrey}
+              />
+            }
             onChangeText={setEmail}
           />
           <Spacer />
           <TextInput
             placeholder="Mot de passe"
-            leftIcon={<Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />}
+            leftIcon={
+              <Icon.Feather
+                name="lock"
+                size={20}
+                color={theme.colors.darkGrey}
+              />
+            }
             onChangeText={setPassword}
             secureTextEntry
           />
           <Spacer size={2} />
-          <Button title="Créer mon compte" onPress={onRegister} isLoading={isLoading} />
+          <Button
+            title="Créer mon compte"
+            onPress={onRegister}
+            isLoading={isLoading}
+          />
         </Box>
       </ScrollView>
     </Container>

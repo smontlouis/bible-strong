@@ -260,6 +260,25 @@ const FireAuth = class {
       }
     })
 
+  resetPassword = email =>
+    new Promise(async resolve => {
+      try {
+        auth()
+          .sendPasswordResetEmail(email)
+          .then(() => {
+            SnackBar.show('Email envoyé.')
+            resolve(false)
+          })
+          .catch(err => {
+            if (this.onError) this.onError(err)
+            resolve(false)
+          })
+      } catch (e) {
+        if (this.onError) this.onError(e)
+        resolve(false)
+      }
+    })
+
   register = (username, email, password) =>
     new Promise(async resolve => {
       try {

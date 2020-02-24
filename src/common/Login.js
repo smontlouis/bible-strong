@@ -3,6 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import * as AppleAuthentication from 'expo-apple-authentication'
+import SnackBar from '~common/SnackBar'
 
 import Link from '~common/Link'
 import TextInput from '~common/ui/TextInput'
@@ -52,6 +53,10 @@ const Login = ({ theme }) => {
   }
 
   const onLogin = async () => {
+    if (!email || !password) {
+      SnackBar.show('Veuillez remplir les champs')
+      return false
+    }
     setLoading(true)
     const isStillLoading = await FireAuth.login(email, password)
     setLoading(isStillLoading)
@@ -60,6 +65,16 @@ const Login = ({ theme }) => {
   const onAppleLogin = async () => {
     setLoading(true)
     const isStillLoading = await FireAuth.appleLogin()
+    setLoading(isStillLoading)
+  }
+
+  const resetPassword = async () => {
+    if (!email) {
+      SnackBar.show('Veuillez remplir les champs')
+      return false
+    }
+    setLoading(true)
+    const isStillLoading = await FireAuth.resetPassword(email)
     setLoading(isStillLoading)
   }
 
@@ -76,16 +91,25 @@ const Login = ({ theme }) => {
       <Box>
         <TextInput
           placeholder="Email"
-          leftIcon={<Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />}
+          leftIcon={
+            <Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />
+          }
           onChangeText={setEmail}
         />
         <Spacer />
         <TextInput
           placeholder="Mot de passe"
-          leftIcon={<Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />}
+          leftIcon={
+            <Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />
+          }
           secureTextEntry
           onChangeText={setPassword}
         />
+        <Box alignItems="flex-end" marginTop={10}>
+          <Link onPress={resetPassword}>
+            <Text underline>Mot de passe oublié ?</Text>
+          </Link>
+        </Box>
         <Spacer size={2} />
         <Button title="Connexion" isLoading={isLoading} onPress={onLogin} />
       </Box>
@@ -97,12 +121,18 @@ const Login = ({ theme }) => {
       </Box>
       <Spacer />
       <Box row>
-        <SocialButton disabled={isLoading} onPress={onGoogleLogin} color="#D14C3E">
+        <SocialButton
+          disabled={isLoading}
+          onPress={onGoogleLogin}
+          color="#D14C3E">
           <ButtonIcon size={20} name="google" color="white" />
           <ButtonText color="white">Google</ButtonText>
         </SocialButton>
         <Box width={10} />
-        <SocialButton disabled={isLoading} onPress={onFacebookLogin} color="#3b5998">
+        <SocialButton
+          disabled={isLoading}
+          onPress={onFacebookLogin}
+          color="#3b5998">
           <ButtonIcon size={20} name="facebook" color="white" />
           <ButtonText color="white">Facebook</ButtonText>
         </SocialButton>
