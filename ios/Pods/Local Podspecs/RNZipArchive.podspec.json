@@ -1,13 +1,13 @@
 {
   "name": "RNZipArchive",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "summary": "A little wrapper on ZipArchive for react-native",
   "authors": "Perry Poon <plrthink@gmail.com> (https://github.com/plrthink)",
   "license": "MIT",
   "homepage": "https://github.com/mockingbot/react-native-zip-archive",
   "source": {
     "git": "https://github.com/mockingbot/react-native-zip-archive.git",
-    "tag": "5.0.0"
+    "tag": "5.0.1"
   },
   "platforms": {
     "ios": "8.0"

@@ -639,11 +639,11 @@ PODS:
     - Sentry (~> 4.4.0)
   - RNSVG (9.13.3):
     - React
-  - RNZipArchive (5.0.0):
+  - RNZipArchive (5.0.1):
     - React
-    - RNZipArchive/Core (= 5.0.0)
+    - RNZipArchive/Core (= 5.0.1)
     - SSZipArchive (= 2.2.2)
-  - RNZipArchive/Core (5.0.0):
+  - RNZipArchive/Core (5.0.1):
     - React
     - SSZipArchive (= 2.2.2)
   - Sentry (4.4.3):
@@ -1047,7 +1047,7 @@ SPEC CHECKSUMS:
   RNFBApp: 887ccc5840f93abad3202ff23eb0faf7bee4ac12
   RNFBAuth: 9c6a6ad1435eeff2aca7bbb335123e25b5781e65
   RNFBFirestore: c03f496b934c498fea94f17b739c6dcb2309f8cc
-  RNFBStorage: 3628afb1f3dd0b3395fc15c95967b9f080897aec
+  RNFBStorage: 7e692e25f23faf05889a779b0a9a5ae7655f0b98
   RNFS: 90d1a32d3bc8f75cc7fc3dd2f67506049664346b
   RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNGoogleSignin: a00f87261ea13df9a5cea8deafa6927d6f2c3562
@@ -1055,7 +1055,7 @@ SPEC CHECKSUMS:
   RNScreens: 6053a007667bea81a69087caadf103bba04c032e
   RNSentry: 6458ba85aa3f8ae291abed4f72abbd7080839c71
   RNSVG: f6177f8d7c095fada7cfee2e4bb7388ba426064c
-  RNZipArchive: be636657a6630e9771d4a3223dc8fd0bd0137b55
+  RNZipArchive: 87111bb6130a38edd68c8d2059d46ac94d53ffe4
   Sentry: 14bdd673870e8cf64932b149fad5bbbf39a9b390
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
   UMBarCodeScannerInterface: 3802c8574ef119c150701d679ab386e2266d6a54
