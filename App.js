@@ -97,7 +97,7 @@ class App extends React.Component {
     return Promise.all([
       Font.loadAsync({
         ...Icon.Feather.font,
-        'literata-book': require('~assets/fonts/LiterataBook.otf'),
+        'literata-book': require('~assets/fonts/LiterataBook-Regular.otf'),
         'eina-03-bold': require('~assets/fonts/eina-03-bold.otf')
       })
     ])

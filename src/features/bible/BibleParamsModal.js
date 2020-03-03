@@ -14,6 +14,7 @@ import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import SvgIcon from './SvgIcon'
 import ColorWheelIcon from '~common/ColorWheelIcon'
+import fonts from '~helpers/fonts'
 
 const StylizedModal = styled(Modal)({
   backgroundColor: 'transparent',
@@ -116,9 +117,13 @@ const BibleParamsModal = ({
       onBackdropPress={onClosed}
       animationIn="slideInDown"
       animationOut="slideOutUp"
-      backdropOpacity={0.2}
-    >
+      backdropOpacity={0.2}>
       <Container>
+        {fonts.map(f => (
+          <Text key={f} style={{ fontFamily: f }}>
+            {f}
+          </Text>
+        ))}
         <HalfContainer border>
           <TouchableIcon
             isSelected={alignContent === 'justify'}

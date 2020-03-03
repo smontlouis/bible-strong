@@ -212,5 +212,14 @@ export default {
         needsUpdate: {}
       }
     }
+  },
+  15: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        fontFamily: ''
+      }
+    }
   }
 }

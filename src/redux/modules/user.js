@@ -70,6 +70,8 @@ export const GET_VERSION_UPDATE_SUCCESS = 'user/GET_VERSION_UPDATE_SUCCESS'
 export const GET_VERSION_UPDATE_FAIL = 'user/GET_VERSION_UPDATE_FAIL'
 export const SET_VERSION_UPDATED = 'user/SET_VERSION_UPDATED'
 
+export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
+
 const initialState = {
   id: '',
   email: '',
@@ -88,6 +90,7 @@ const initialState = {
     data: []
   },
   needsUpdate: {},
+  fontFamily: '',
   bible: {
     changelog: {},
     highlights: {},
@@ -145,6 +148,10 @@ const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case SET_FONT_FAMILY: {
+      draft.user.fontFamily = action.payload
+      break
+    }
     case SET_NOTIFICATION_VOD: {
       draft.notifications.verseOfTheDay = action.payload
       break
@@ -528,6 +535,14 @@ export default produce((draft, action) => {
     }
   }
 }, initialState)
+
+// FONT-FAMILY
+export function setFontFamily(payload) {
+  return {
+    type: SET_FONT_FAMILY,
+    payload
+  }
+}
 
 // NOTES
 export function addNote(note, noteVerses) {

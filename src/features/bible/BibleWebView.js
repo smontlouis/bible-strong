@@ -4,6 +4,7 @@ import AssetUtils from 'expo-asset-utils'
 import { WebView } from 'react-native-webview'
 import * as Sentry from '@sentry/react-native'
 
+import firecode from '../../assets/fonts/firecode'
 import books from '~assets/bible_versions/books'
 import SnackBar from '~common/SnackBar'
 import { MAX_WIDTH } from '~helpers/useDimensions'
@@ -65,29 +66,33 @@ class BibleWebView extends Component {
   }
 
   loadHTMLFile = async () => {
-    const { webviewHash, setWebviewHash } = this.props
-    this.setState({ isHTMLFileLoaded: true })
-  }
-
-  injectFont = async () => {
-    const { localUri } = await AssetUtils.resolveAsync(
-      require('~assets/fonts/LiterataBook.otf')
+    const { localUri: fileUri } = await AssetUtils.resolveAsync(
+      require('~assets/fonts/FiraCode-Regular.otf')
     ).catch(e => {
       SnackBar.show('Erreur lors de la lecture du fichier')
       Sentry.captureException(e)
     })
+    this.fileUri = fileUri
 
-    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${localUri}') format('opentype');}`
+    this.setState({ isHTMLFileLoaded: true })
+  }
 
-    this.webview.injectJavaScript(`
-    (function() {
-      setTimeout(() => {
+  injectFont = () => {
+    // const fileUri = Platform.select({
+    //   ios: 'FireCode-Regular.otf',
+    //   android: 'file:///android_asset/fonts/FireCode-Regular.otf'
+    // })
+
+    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${firecode}') format('woff');}`
+
+    return `
         var style = document.createElement("style");
         style.innerHTML = "${fontRule}";
         document.head.appendChild(style);
-      }, 0)
-    })()
-    `)
+
+        document.body.style.backgroundColor = 'red';
+        true;
+    `
   }
 
   enableWebViewOpacity = async () => {
@@ -257,7 +262,6 @@ class BibleWebView extends Component {
           <WebView
             useWebKit
             onLoad={this.sendDataToWebView}
-            onLoadEnd={this.injectFont}
             onMessage={this.receiveDataFromWebView}
             originWhitelist={['*']}
             ref={ref => {
@@ -267,8 +271,12 @@ class BibleWebView extends Component {
               const { nativeEvent } = syntheticEvent
               console.warn('WebView error: ', nativeEvent)
             }}
-            source={{ uri: 'file:///android_asset/index.html' }}
-            injectedJavaScript={INJECTED_JAVASCRIPT}
+            source={
+              Platform.OS === 'android'
+                ? { uri: 'file:///android_asset/index.html' }
+                : require('./bibleWebView/dist/index.html')
+            }
+            injectedJavaScript={this.injectFont()}
             domStorageEnabled
             allowUniversalAccessFromFileURLs
             allowFileAccessFromFileURLs
