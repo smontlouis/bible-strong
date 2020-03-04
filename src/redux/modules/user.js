@@ -90,7 +90,7 @@ const initialState = {
     data: []
   },
   needsUpdate: {},
-  fontFamily: '',
+  fontFamily: 'Literata Book',
   bible: {
     changelog: {},
     highlights: {},
@@ -149,7 +149,7 @@ const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
 export default produce((draft, action) => {
   switch (action.type) {
     case SET_FONT_FAMILY: {
-      draft.user.fontFamily = action.payload
+      draft.fontFamily = action.payload
       break
     }
     case SET_NOTIFICATION_VOD: {

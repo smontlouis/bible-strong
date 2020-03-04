@@ -7,7 +7,17 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 const WrapperButton = styled.TouchableOpacity(
-  ({ theme, small, reverse, secondary, type, disabled, color, success, fullWidth }) => ({
+  ({
+    theme,
+    small,
+    reverse,
+    secondary,
+    type,
+    disabled,
+    color,
+    success,
+    fullWidth
+  }) => ({
     backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
     borderWidth: reverse ? 1 : 0,
     borderColor: theme.colors.darkGrey,

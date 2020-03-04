@@ -1,7 +1,12 @@
 import React, { Component } from 'react'
 import styled from '@emotion/styled'
 
-import { SEND_INITIAL_DATA, CONSOLE_LOG, THROW_ERROR, dispatch } from './dispatch'
+import {
+  SEND_INITIAL_DATA,
+  CONSOLE_LOG,
+  THROW_ERROR,
+  dispatch
+} from './dispatch'
 import Verse from './Verse'
 import Comment from './Comment'
 import ErrorBoundary from './ErrorBoundary'
@@ -38,15 +43,17 @@ const exists = obj => {
   return true
 }
 
-const Container = styled('div')(({ settings: { alignContent, theme, colors }, rtl }) => ({
-  padding: '10px 15px',
-  paddingBottom: '210px',
-  textAlign: alignContent,
-  background: colors[theme].reverse,
-  color: colors[theme].default,
-  direction: rtl ? 'rtl' : 'ltr',
-  ...(rtl ? { textAlign: 'right' } : {})
-}))
+const Container = styled('div')(
+  ({ settings: { alignContent, theme, colors }, rtl }) => ({
+    padding: '10px 15px',
+    paddingBottom: '210px',
+    textAlign: alignContent,
+    background: colors[theme].reverse,
+    color: colors[theme].default,
+    direction: rtl ? 'rtl' : 'ltr',
+    ...(rtl ? { textAlign: 'right' } : {})
+  })
+)
 
 const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
   textAlign: 'right',
@@ -56,35 +63,39 @@ const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
   color: colors[theme].darkGrey
 }))
 
-const headingStyle = {
-  fontFamily: 'LiterataBook'
-}
-
 const Span = styled('span')({})
 
-const H1 = styled('h1')(({ settings: { fontSizeScale }, isHebreu }) => ({
-  ...headingStyle,
-  fontSize: scaleFontSize(28, fontSizeScale),
-  textAlign: isHebreu ? 'right' : 'left'
-}))
+const H1 = styled('h1')(
+  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
+    fontFamily,
+    fontSize: scaleFontSize(28, fontSizeScale),
+    textAlign: isHebreu ? 'right' : 'left'
+  })
+)
 
-const H2 = styled('h2')(({ settings: { fontSizeScale }, isHebreu }) => ({
-  ...headingStyle,
-  fontSize: scaleFontSize(24, fontSizeScale),
-  textAlign: isHebreu ? 'right' : 'left'
-}))
+const H2 = styled('h2')(
+  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
+    fontFamily,
+    fontSize: scaleFontSize(24, fontSizeScale),
+    textAlign: isHebreu ? 'right' : 'left'
+  })
+)
 
-const H3 = styled('h3')(({ settings: { fontSizeScale }, isHebreu }) => ({
-  ...headingStyle,
-  fontSize: scaleFontSize(20, fontSizeScale),
-  textAlign: isHebreu ? 'right' : 'left'
-}))
+const H3 = styled('h3')(
+  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
+    fontFamily,
+    fontSize: scaleFontSize(20, fontSizeScale),
+    textAlign: isHebreu ? 'right' : 'left'
+  })
+)
 
-const H4 = styled('h4')(({ settings: { fontSizeScale }, isHebreu }) => ({
-  ...headingStyle,
-  fontSize: scaleFontSize(18, fontSizeScale),
-  textAlign: isHebreu ? 'right' : 'left'
-}))
+const H4 = styled('h4')(
+  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
+    fontFamily,
+    fontSize: scaleFontSize(18, fontSizeScale),
+    textAlign: isHebreu ? 'right' : 'left'
+  })
+)
 
 const getPericopeVerse = (pericopeChapter, verse) => {
   if (pericopeChapter && pericopeChapter[verse]) {
@@ -146,7 +157,11 @@ class VersesRenderer extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState && prevState.chapter !== this.state.chapter && this.state.verseToScroll === 1) {
+    if (
+      prevState &&
+      prevState.chapter !== this.state.chapter &&
+      this.state.verseToScroll === 1
+    ) {
       window.scrollTo(0, 0)
     }
     if (prevState && prevState.settings.theme !== this.state.settings.theme) {
@@ -160,7 +175,9 @@ class VersesRenderer extends Component {
       }
       // dispatch({ type: CONSOLE_LOG, payload: `${prevState} ${prevState.verseToScroll}, ${this.state.verseToScroll}` })
       setTimeout(() => {
-        document.querySelector(`#verset-${this.state.verseToScroll}`).scrollIntoView()
+        document
+          .querySelector(`#verset-${this.state.verseToScroll}`)
+          .scrollIntoView()
       }, 200)
     }
   }
@@ -258,11 +275,14 @@ class VersesRenderer extends Component {
               pericopeChapter,
               chapter,
               isSelectionMode,
-              selectedCode
+              selectedCode,
+              fontFamily
             } = response
 
             self.setState({
-              verses: exists(verses) ? verses.sort((a, b) => a.Verset - b.Verset) : null,
+              verses: exists(verses)
+                ? verses.sort((a, b) => a.Verset - b.Verset)
+                : null,
               focusVerses,
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
@@ -273,7 +293,7 @@ class VersesRenderer extends Component {
               notedVerses,
               notedVersesCount: this.getNotedVersesCount(verses, notedVerses),
               notedVersesText: this.getNotedVersesText(verses, notedVerses),
-              settings,
+              settings: { ...settings, fontFamily },
               verseToScroll,
               version,
               pericopeChapter,
@@ -324,21 +344,33 @@ class VersesRenderer extends Component {
     return (
       <Container rtl={isHebreu} settings={this.state.settings}>
         {isHebreu && (
-          <RightDirection settings={this.state.settings}>Sens de la lecture ←</RightDirection>
+          <RightDirection settings={this.state.settings}>
+            Sens de la lecture ←
+          </RightDirection>
         )}
         {!!introComment && this.state.settings.commentsDisplay && (
-          <Comment isIntro id="comment-0" settings={this.state.settings} comment={introComment} />
+          <Comment
+            isIntro
+            id="comment-0"
+            settings={this.state.settings}
+            comment={introComment}
+          />
         )}
 
         {this.state.verses.map((verse, i) => {
           if (verse.Verset == 0) return null
 
           const { Livre, Chapitre, Verset } = verse
-          const isSelected = !!this.state.selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
+          const isSelected = !!this.state.selectedVerses[
+            `${Livre}-${Chapitre}-${Verset}`
+          ]
           const isSelectedMode = !!Object.keys(this.state.selectedVerses).length
-          const isHighlighted = !!this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+          const isHighlighted = !!this.state.highlightedVerses[
+            `${Livre}-${Chapitre}-${Verset}`
+          ]
           const highlightedColor =
-            isHighlighted && this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
+            isHighlighted &&
+            this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
           const notesCount = this.state.notedVersesCount[Verset]
           const notesText = this.state.notedVersesText[Verset]
           const comment = this.state.comments && this.state.comments[Verset]
@@ -346,9 +378,13 @@ class VersesRenderer extends Component {
             ? this.state.focusVerses.includes(Number(Verset))
             : undefined
           const isVerseToScroll = this.state.verseToScroll == Verset
-          const secondaryVerse = this.state.secondaryVerses && this.state.secondaryVerses[i]
+          const secondaryVerse =
+            this.state.secondaryVerses && this.state.secondaryVerses[i]
 
-          const { h1, h2, h3, h4 } = getPericopeVerse(this.state.pericopeChapter, Verset)
+          const { h1, h2, h3, h4 } = getPericopeVerse(
+            this.state.pericopeChapter,
+            Verset
+          )
 
           return (
             <Span key={`${Livre}-${Chapitre}-${Verset}`}>

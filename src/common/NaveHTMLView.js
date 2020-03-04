@@ -5,8 +5,7 @@ import HTMLView from '~helpers/react-native-htmlview'
 
 export const textStyle = {
   lineHeight: 26,
-  fontSize: 18,
-  fontFamily: 'literata-book'
+  fontSize: 18
 }
 
 const styles = theme => ({
@@ -30,11 +29,13 @@ const styles = theme => ({
   },
   p: {
     color: theme.colors.default,
+    fontFamily: theme.fontFamily.paragraph,
     ...textStyle
   },
   em: {
     // color: '$color.primaryLighten',
     ...textStyle,
+    fontFamily: theme.fontFamily.paragraph,
     color: theme.colors.tertiary,
     fontStyle: 'italic',
     fontWeight: 'bold'
@@ -49,24 +50,29 @@ const styles = theme => ({
     textDecorationStyle: 'solid',
     textDecorationColor: theme.colors.primary,
     ...textStyle,
+    fontFamily: theme.fontFamily.paragraph,
     fontSize: 18
   },
   strong: {
     fontWeight: 'bold',
     color: theme.colors.default,
+    fontFamily: theme.fontFamily.paragraph,
     ...textStyle
   },
   li: {
     color: theme.colors.default,
     marginBottom: 40,
+    fontFamily: theme.fontFamily.paragraph,
     ...textStyle
   },
   ol: {
     color: theme.colors.default,
+    fontFamily: theme.fontFamily.paragraph,
     ...textStyle
   },
   ul: {
     color: theme.colors.default,
+    fontFamily: theme.fontFamily.paragraph,
     ...textStyle
   }
 })

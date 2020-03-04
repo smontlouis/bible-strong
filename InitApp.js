@@ -94,16 +94,27 @@ class InitApp extends React.Component {
   }
 
   render() {
-    const { theme, persistor } = this.props
+    const { theme: currentTheme, fontFamily, persistor } = this.props
+
+    const defaultTheme = getTheme[currentTheme]
+
+    const theme = {
+      ...defaultTheme,
+      fontFamily: {
+        ...defaultTheme.fontFamily,
+        paragraph: fontFamily
+      }
+    }
+
     return (
-      <ThemeProvider theme={getTheme[theme]}>
+      <ThemeProvider theme={theme}>
         <PaperProvider theme={paperTheme}>
           <PersistGate loading={null} persistor={persistor}>
             <DBStateProvider>
               <>
                 <ErrorBoundary>
                   <AppNavigator
-                    screenProps={{ theme }}
+                    screenProps={{ theme: currentTheme }}
                     onNavigationStateChange={this.onNavigationStateChange}
                   />
                 </ErrorBoundary>
@@ -119,7 +130,8 @@ class InitApp extends React.Component {
 
 export default compose(
   connect(state => ({
-    theme: state.user.bible.settings.theme
+    theme: state.user.bible.settings.theme,
+    fontFamily: state.user.fontFamily
   })),
   withFireAuth
 )(InitApp)

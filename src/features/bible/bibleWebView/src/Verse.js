@@ -31,9 +31,11 @@ const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   lineHeight: scaleFontSize(29, fontSizeScale)
 }))
 
-const NumberText = styled('span')(({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(14, fontSizeScale)
-}))
+const NumberText = styled('span')(
+  ({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
+    fontSize: scaleFontSize(14, fontSizeScale)
+  })
+)
 
 const zoom = keyframes({
   '0%': {
@@ -54,7 +56,7 @@ const ContainerText = styled('span')(
     isSelected,
     highlightedColor,
     isVerseToScroll,
-    settings: { theme, colors }
+    settings: { theme, colors, fontFamily }
   }) => {
     let background = 'transparent'
 
@@ -65,7 +67,7 @@ const ContainerText = styled('span')(
       background = 'rgba(0,0,0,0.1)'
     }
     return {
-      fontFamily: 'LiterataBook',
+      fontFamily,
       transition: 'background 0.3s ease',
       background,
       padding: '4px',
@@ -259,7 +261,13 @@ class Verse extends Component {
     const inlineNotedVerses = settings.notesDisplay === 'inline'
 
     if (version === 'LSGS') {
-      return <VerseTextFormatting selectedCode={selectedCode} verse={verse} settings={settings} />
+      return (
+        <VerseTextFormatting
+          selectedCode={selectedCode}
+          verse={verse}
+          settings={settings}
+        />
+      )
     }
 
     if (version === 'INT') {
@@ -309,7 +317,11 @@ class Verse extends Component {
           </VerseText>
         </ContainerText>
         {notesText && inlineNotedVerses && !isSelectionMode && (
-          <NotesText settings={settings} onClick={this.navigateToNote} notesText={notesText} />
+          <NotesText
+            settings={settings}
+            onClick={this.navigateToNote}
+            notesText={notesText}
+          />
         )}
       </Wrapper>
     )

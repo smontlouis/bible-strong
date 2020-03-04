@@ -2,18 +2,19 @@ import React from 'react'
 import Modal from 'react-native-modal'
 import styled from '@emotion/native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import { ScrollView } from 'react-native'
 
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Link from '~common/Link'
+import Border from '~common/ui/Border'
+import Text from '~common/ui/Text'
+import Button from '~common/ui/Button'
 import SnackBar from '~common/SnackBar'
 import { getIfDatabaseExists } from '~helpers/database'
 import IconShortPress from '~assets/images/IconShortPress'
 import IconLongPress from '~assets/images/IconLongPress'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import SvgIcon from './SvgIcon'
-import ColorWheelIcon from '~common/ColorWheelIcon'
 import fonts from '~helpers/fonts'
 
 const StylizedModal = styled(Modal)({
@@ -25,7 +26,8 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
-  width: 200,
+  width: '100%',
+  maxWidth: 400,
   backgroundColor: theme.colors.reverse,
   borderRadius: 10,
   shadowColor: theme.colors.default,
@@ -38,17 +40,25 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const HalfContainer = styled.View(({ border, theme }) => ({
+  paddingHorizontal: 20,
+  paddingVertical: 15,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: border ? 1 : 0,
   flexDirection: 'row',
-  justifyContent: 'space-around',
-  alignItems: 'center',
-  height: 50
+  alignItems: 'center'
+}))
+
+const FontText = styled.Text(({ isSelected, theme }) => ({
+  fontSize: 16,
+  fontWeight: isSelected ? 'bold' : 'normal',
+  paddingLeft: 15,
+  paddingRight: 15,
+  color: isSelected ? theme.colors.primary : theme.colors.default
 }))
 
 const alignContentToString = {
-  left: 'Gauche',
-  justify: 'Justifier'
+  left: 'À gauche',
+  justify: 'Justifié'
 }
 
 const textDisplayToString = {
@@ -57,23 +67,23 @@ const textDisplayToString = {
 }
 
 const themeToString = {
-  default: 'Mode jour',
-  dark: 'Mode nuit'
+  default: 'Jour',
+  dark: 'Nuit'
 }
 
 const pressToString = {
-  shortPress: 'Strong appui court',
-  longPress: 'Strong appui long'
+  shortPress: 'Appui court',
+  longPress: 'Appui long'
 }
 
 const notesDisplayToString = {
-  inline: 'Note à la ligne',
-  block: 'Note en icone'
+  inline: 'À la ligne',
+  block: 'En icone'
 }
 
 const commentsDisplayToString = {
-  false: 'Sans comm.',
-  true: 'Avec comm.'
+  false: 'Sans',
+  true: 'Avec'
 }
 
 const BibleParamsModal = ({
@@ -88,6 +98,8 @@ const BibleParamsModal = ({
   setSettingsNotesDisplay,
   setSettingsCommentaires,
   navigation,
+  setFontFamily,
+  fontFamily,
   settings: {
     alignContent,
     fontSizeScale,
@@ -119,43 +131,45 @@ const BibleParamsModal = ({
       animationOut="slideOutUp"
       backdropOpacity={0.2}>
       <Container>
-        {fonts.map(f => (
-          <Text key={f} style={{ fontFamily: f }}>
-            {f}
-          </Text>
-        ))}
         <HalfContainer border>
-          <TouchableIcon
-            isSelected={alignContent === 'justify'}
-            name="align-justify"
-            onPress={() => setSettingsAlignContent('justify')}
-          />
-          <Text bold>{alignContentToString[alignContent]}</Text>
-          <TouchableIcon
-            isSelected={alignContent === 'left'}
-            name="align-left"
-            onPress={() => setSettingsAlignContent('left')}
-          />
+          <Text flex={2}>Alignement du texte</Text>
+          <Box row flex={1}>
+            <Text bold marginRight={10}>
+              {alignContentToString[alignContent]}
+            </Text>
+            <TouchableIcon
+              isSelected={alignContent === 'justify'}
+              name="align-justify"
+              onPress={() => setSettingsAlignContent('justify')}
+            />
+            <TouchableIcon
+              isSelected={alignContent === 'left'}
+              name="align-left"
+              onPress={() => setSettingsAlignContent('left')}
+            />
+          </Box>
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Taille du texte</Text>
+          <Text bold>{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             name="type"
             size={15}
             onPress={() => decreaseSettingsFontSizeScale()}
           />
-          <Text bold>{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             name="type"
             onPress={() => increaseSettingsFontSizeScale()}
           />
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Mode des versets</Text>
+          <Text bold>{textDisplayToString[textDisplay]}</Text>
           <TouchableIcon
             isSelected={textDisplay === 'inline'}
             name="menu"
             onPress={() => setSettingsTextDisplay('inline')}
           />
-          <Text bold>{textDisplayToString[textDisplay]}</Text>
           <TouchableIcon
             isSelected={textDisplay === 'block'}
             name="list"
@@ -163,12 +177,13 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Thème</Text>
+          <Text bold>{themeToString[theme]}</Text>
           <TouchableIcon
             isSelected={theme === 'default'}
             name="sun"
             onPress={() => setSettingsTheme('default')}
           />
-          <Text bold>{themeToString[theme]}</Text>
           <TouchableIcon
             isSelected={theme === 'dark'}
             name="moon"
@@ -176,16 +191,14 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Affichage des notes</Text>
+          <Text bold>{notesDisplayToString[notesDisplay]}</Text>
+
           <TouchableIcon
             isSelected={notesDisplay === 'inline'}
             name="align-left"
             onPress={() => setSettingsNotesDisplay('inline')}
           />
-          <Box width={80} center>
-            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>
-              {notesDisplayToString[notesDisplay]}
-            </Text>
-          </Box>
           <TouchableIcon
             isSelected={notesDisplay === 'block'}
             name="file-text"
@@ -193,16 +206,13 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Commentaires</Text>
+          <Text bold>{commentsDisplayToString[commentsDisplay]}</Text>
           <TouchableIcon
             isSelected={!commentsDisplay}
             name="x-square"
             onPress={() => setSettingsCommentaires(false)}
           />
-          <Box width={80} center>
-            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>
-              {commentsDisplayToString[commentsDisplay]}
-            </Text>
-          </Box>
           <TouchableIcon
             isSelected={commentsDisplay}
             name="archive"
@@ -210,17 +220,14 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Affichage des strongs</Text>
+          <Text bold>{pressToString[press]}</Text>
           <TouchableSvgIcon
             icon={IconShortPress}
             isSelected={press === 'shortPress'}
             onPress={() => setSettingsPress('shortPress')}
             size={25}
           />
-          <Box width={80} center>
-            <Text bold style={{ fontSize: 13, textAlign: 'center' }}>
-              {pressToString[press]}
-            </Text>
-          </Box>
           <TouchableSvgIcon
             icon={IconLongPress}
             isSelected={press === 'longPress'}
@@ -228,15 +235,32 @@ const BibleParamsModal = ({
             size={25}
           />
         </HalfContainer>
+        <Box>
+          <ScrollView horizontal style={{ paddingVertical: 15 }}>
+            {['Literata Book', ...fonts].map(f => {
+              const isSelected = fontFamily === f
+              return (
+                <Link key={f} onPress={() => setFontFamily(f)}>
+                  <FontText isSelected={isSelected} style={{ fontFamily: f }}>
+                    {f}
+                  </FontText>
+                </Link>
+              )
+            })}
+          </ScrollView>
+          <Border />
+        </Box>
         <HalfContainer>
-          <Link route="ModifyColors" style={{ flexDirection: 'row' }}>
-            <SvgIcon icon={ColorWheelIcon} />
-            <Box width={135}>
-              <Text bold style={{ fontSize: 13 }}>
-                Surbrillances
-              </Text>
-            </Box>
-          </Link>
+          <Text flex>Couleurs des surbrillances</Text>
+          <Button
+            reverse
+            title="Ouvrir"
+            onPress={() => {
+              navigation.navigate('ModifyColors')
+              onClosed()
+            }}
+            small
+          />
         </HalfContainer>
       </Container>
     </StylizedModal>

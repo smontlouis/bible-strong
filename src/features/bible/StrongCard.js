@@ -65,7 +65,7 @@ const smallTextStyle = theme => ({
   lineHeight: 18,
   fontSize: 12,
   color: theme.colors.default,
-  fontFamily: 'literata-book'
+  fontFamily: theme.fontFamily.paragraph
 })
 
 class StrongCard extends React.Component {
@@ -75,7 +75,16 @@ class StrongCard extends React.Component {
       strongReference,
       navigation,
       isSelectionMode,
-      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec }
+      strongReference: {
+        Code,
+        Type,
+        Mot,
+        Phonetique,
+        Definition,
+        LSG,
+        Hebreu,
+        Grec
+      }
     } = this.props
 
     if (isSelectionMode) {
@@ -103,7 +112,16 @@ class StrongCard extends React.Component {
   render() {
     const {
       isSelectionMode,
-      strongReference: { Code, Hebreu, Grec, Type, Mot, Phonetique, Definition, LSG },
+      strongReference: {
+        Code,
+        Hebreu,
+        Grec,
+        Type,
+        Mot,
+        Phonetique,
+        Definition,
+        LSG
+      },
       theme,
       isModal,
       onClosed
@@ -136,7 +154,10 @@ class StrongCard extends React.Component {
                 </Link>
               </Header>
               {onClosed && (
-                <Link paddingSmall onPress={onClosed} style={{ alignItems: 'flex-end' }}>
+                <Link
+                  paddingSmall
+                  onPress={onClosed}
+                  style={{ alignItems: 'flex-end' }}>
                   <IconFeather name="x" size={25} />
                 </Link>
               )}

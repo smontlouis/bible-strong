@@ -268,6 +268,7 @@ class BibleViewer extends Component {
       highlightedVerses,
       notedVerses,
       settings,
+      fontFamily,
       verse,
       focusVerses,
       theme,
@@ -301,6 +302,7 @@ class BibleViewer extends Component {
             highlightedVerses={highlightedVerses}
             notedVerses={notedVerses}
             settings={settings}
+            fontFamily={fontFamily}
             verseToScroll={verse}
             chapter={chapter}
             pericopeChapter={getPericopeChapter(

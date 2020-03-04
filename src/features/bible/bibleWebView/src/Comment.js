@@ -13,65 +13,71 @@ export function usePrevious(value) {
   return ref.current
 }
 
-const StyledComment = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
-  padding: scaleFontSize(14, fontSizeScale),
-  margin: '10px 0',
-  background: colors[theme].lightGrey,
-  borderRadius: 4,
-  position: 'relative',
-  overflow: 'hidden',
-  textAlign: 'left',
+const StyledComment = styled('div')(
+  ({ settings: { fontSizeScale, fontFamily, theme, colors } }) => ({
+    padding: scaleFontSize(14, fontSizeScale),
+    margin: '10px 0',
+    background: colors[theme].lightGrey,
+    borderRadius: 4,
+    position: 'relative',
+    overflow: 'hidden',
+    textAlign: 'left',
 
-  p: {
-    fontSize: scaleFontSize(17, fontSizeScale),
-    lineHeight: scaleFontSize(25, fontSizeScale),
-    fontFamily: 'LiterataBook',
-    margin: 0
-  },
-  li: {
-    fontFamily: 'LiterataBook'
-  },
-  'p+p': {
-    marginTop: scaleFontSize(25, fontSizeScale)
-  },
-  h3: {
-    fontFamily: 'LiterataBook',
-    margin: 0,
-    paddingBottom: scaleFontSize(25, fontSizeScale),
-    fontSize: scaleFontSize(18, fontSizeScale)
-  },
-  a: {
-    color: colors[theme].primary
-  }
-}))
+    p: {
+      fontSize: scaleFontSize(17, fontSizeScale),
+      lineHeight: scaleFontSize(25, fontSizeScale),
+      fontFamily,
+      margin: 0
+    },
+    li: {
+      fontFamily
+    },
+    'p+p': {
+      marginTop: scaleFontSize(25, fontSizeScale)
+    },
+    h3: {
+      fontFamily,
+      margin: 0,
+      paddingBottom: scaleFontSize(25, fontSizeScale),
+      fontSize: scaleFontSize(18, fontSizeScale)
+    },
+    a: {
+      color: colors[theme].primary
+    }
+  })
+)
 
-const ReadMore = styled('div')(({ settings: { fontSizeScale } }) => ({
+const ReadMore = styled('div')(
+  ({ settings: { fontSizeScale, fontFamily } }) => ({
+    fontSize: scaleFontSize(15, fontSizeScale),
+    fontFamily,
+    textAlign: 'center',
+    margin: '0',
+    height: 20,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  })
+)
+
+const Intro = styled('div')(({ settings: { fontSizeScale, fontFamily } }) => ({
   fontSize: scaleFontSize(15, fontSizeScale),
-  fontFamily: 'LiterataBook',
-  textAlign: 'center',
-  margin: '0',
-  height: 20,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-}))
-
-const Intro = styled('div')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(15, fontSizeScale),
-  fontFamily: 'LiterataBook',
+  fontFamily,
   textAlign: 'center',
   paddingBottom: scaleFontSize(20, fontSizeScale),
   paddingTop: scaleFontSize(15, fontSizeScale)
 }))
 
-const Copyright = styled('div')(({ settings: { theme, colors, fontSizeScale } }) => ({
-  fontSize: scaleFontSize(10, fontSizeScale),
-  fontFamily: 'LiterataBook',
-  textAlign: 'center',
-  color: colors[theme].darkGrey,
-  paddingBottom: scaleFontSize(5, fontSizeScale),
-  paddingTop: scaleFontSize(5, fontSizeScale)
-}))
+const Copyright = styled('div')(
+  ({ settings: { theme, colors, fontSizeScale, fontFamily } }) => ({
+    fontSize: scaleFontSize(10, fontSizeScale),
+    fontFamily,
+    textAlign: 'center',
+    color: colors[theme].darkGrey,
+    paddingBottom: scaleFontSize(5, fontSizeScale),
+    paddingTop: scaleFontSize(5, fontSizeScale)
+  })
+)
 
 const MAX_CHAR = 100
 
@@ -132,7 +138,10 @@ const Comment = ({ id, settings, comment, isIntro }) => {
       {readMore && (
         <>
           {isIntro && <Intro settings={settings}>Introduction</Intro>}
-          <div dangerouslySetInnerHTML={{ __html: mhyComment }} style={{ paddingBottom: 20 }} />
+          <div
+            dangerouslySetInnerHTML={{ __html: mhyComment }}
+            style={{ paddingBottom: 20 }}
+          />
         </>
       )}
       <ReadMore onClick={onReadMore} settings={settings}>

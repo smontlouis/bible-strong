@@ -83,7 +83,7 @@ class BibleWebView extends Component {
     //   android: 'file:///android_asset/fonts/FireCode-Regular.otf'
     // })
 
-    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${firecode}') format('woff');}`
+    const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${firecode}') format('woff');}`
 
     return `
         var style = document.createElement("style");
@@ -221,7 +221,8 @@ class BibleWebView extends Component {
       chapter,
       isSelectionMode,
       selectedCode,
-      comments
+      comments,
+      fontFamily
     } = this.props
 
     this.dispatchToWebView({
@@ -240,7 +241,8 @@ class BibleWebView extends Component {
       chapter,
       isSelectionMode,
       selectedCode,
-      comments
+      comments,
+      fontFamily
     })
   }
 

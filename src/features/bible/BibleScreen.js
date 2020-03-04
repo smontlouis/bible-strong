@@ -64,7 +64,9 @@ class BibleScreen extends React.Component {
       setSettingsCommentaires,
       increaseSettingsFontSizeScale,
       decreaseSettingsFontSizeScale,
-      settings
+      setFontFamily,
+      settings,
+      fontFamily
     } = this.props
 
     if (this.state.isLoading) {
@@ -99,6 +101,7 @@ class BibleScreen extends React.Component {
           version={app.version}
           navigation={navigation}
           settings={settings}
+          fontFamily={fontFamily}
           setSettingsCommentaires={setSettingsCommentaires}
         />
         {this.state.isBibleParamsOpen && (
@@ -115,6 +118,8 @@ class BibleScreen extends React.Component {
             increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
             decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
             settings={settings}
+            fontFamily={fontFamily}
+            setFontFamily={setFontFamily}
           />
         )}
       </Container>
@@ -130,6 +135,7 @@ export default compose(
       return {
         isReadOnly: params && params.isReadOnly,
         isSelectionMode: params && params.isSelectionMode,
+        fontFamily: user.fontFamily,
         settings: produce(user.bible.settings, draftState => {
           draftState.colors.default = {
             ...ownProps.theme.colors,

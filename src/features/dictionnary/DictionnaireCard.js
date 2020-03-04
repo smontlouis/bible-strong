@@ -51,7 +51,7 @@ const smallTextStyle = theme => ({
   lineHeight: 18,
   fontSize: 12,
   color: theme.colors.default,
-  fontFamily: 'literata-book'
+  fontFamily: theme.fontFamily.paragraph
 })
 
 class StrongCard extends React.Component {
@@ -74,7 +74,11 @@ class StrongCard extends React.Component {
   }
 
   render() {
-    const { isSelectionMode, dictionnaireRef: { word, definition } = {}, theme } = this.props
+    const {
+      isSelectionMode,
+      dictionnaireRef: { word, definition } = {},
+      theme
+    } = this.props
 
     if (!word) {
       return (

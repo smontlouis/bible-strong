@@ -10,24 +10,14 @@ const fonts = {
     'monospace'
   ],
   ios: [
-    'Al Nile',
     'American Typewriter',
     'Arial',
     'Avenir',
-    'Avenir Next',
     'Baskerville',
-    'Bradley Hand',
-    'Cochin',
     'Chalkboard SE',
-    'Courier',
-    'Damascus',
     'Didot',
-    'AppleSDGothicNeo-Regular',
-    'Gill Sans',
     'Helvetica',
-    'Helvetica Neue',
-    'Iowan Old Style',
-    'Superclarendon'
+    'Iowan Old Style'
   ]
 }
 

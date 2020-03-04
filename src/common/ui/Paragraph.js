@@ -7,8 +7,8 @@ const scaleFontSize = (value, scale, scaleLineHeight = 0) => {
 } // Scale
 
 const Paragraph = styled(Text)(
-  ({ small, color, theme, scale = 0, scaleLineHeight = 0 }) => ({
-    fontFamily: 'Georgia',
+  ({ small, theme, scale = 0, scaleLineHeight = 0 }) => ({
+    fontFamily: theme.fontFamily.paragraph,
     fontSize: small ? 14 : scaleFontSize(19, scale),
     lineHeight: small ? 22 : scaleFontSize(30, scale, scaleLineHeight)
   })

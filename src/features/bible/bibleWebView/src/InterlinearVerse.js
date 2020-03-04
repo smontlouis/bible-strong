@@ -8,114 +8,134 @@ const Wrapper = styled('div')(({ settings: { textDisplay } }) => ({
   display: textDisplay
 }))
 
-const Section = styled('div')(({ isSelected, settings: { theme, colors } }) => ({
-  display: 'inline-block',
-  transition: 'background 0.3s ease',
-  borderRadius: 4,
-  padding: 5,
-  ...(isSelected
-    ? {
-        background: colors[theme].primary
-      }
-    : {})
-}))
+const Section = styled('div')(
+  ({ isSelected, settings: { theme, colors } }) => ({
+    display: 'inline-block',
+    transition: 'background 0.3s ease',
+    borderRadius: 4,
+    padding: 5,
+    ...(isSelected
+      ? {
+          background: colors[theme].primary
+        }
+      : {})
+  })
+)
 
-const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(15, fontSizeScale),
-  position: 'relative',
-  bottom: 20,
-  fontFamily: 'LiterataBook',
-  padding: '0 5px',
+const NumberText = styled('span')(
+  ({ settings: { fontSizeScale, fontFamily } }) => ({
+    fontSize: scaleFontSize(15, fontSizeScale),
+    position: 'relative',
+    bottom: 20,
+    fontFamily,
+    padding: '0 5px',
 
-  display: 'inline-flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center'
-}))
+    display: 'inline-flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  })
+)
 
-const Hebreu = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(18, fontSizeScale),
-  fontFamily: 'LiterataBook',
-  color: colors[theme].primary,
+const Hebreu = styled('div')(
+  ({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
+    fontSize: scaleFontSize(18, fontSizeScale),
+    fontFamily,
+    color: colors[theme].primary,
 
-  ...(isSelected
-    ? {
-        color: colors[theme].reverse
-      }
-    : {})
-}))
+    ...(isSelected
+      ? {
+          color: colors[theme].reverse
+        }
+      : {})
+  })
+)
 
-const Code = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(11, fontSizeScale),
-  fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)'
-}))
+const Code = styled('div')(
+  ({ settings: { fontSizeScale, theme, colors } }) => ({
+    fontSize: scaleFontSize(11, fontSizeScale),
+    fontFamily: 'arial',
+    color: 'rgba(0,0,0,0.3)'
+  })
+)
 
-const VerseText = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(16, fontSizeScale),
-  lineHeight: scaleFontSize(25, fontSizeScale),
-  fontFamily: 'LiterataBook',
-  direction: 'ltr',
-  textAlign: 'left',
-  padding: '10px',
-  margin: '10px 0',
-  background: colors[theme].lightGrey,
-  borderRadius: 4,
-  position: 'relative',
-  paddingRight: 30
-}))
+const VerseText = styled('div')(
+  ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+    fontSize: scaleFontSize(16, fontSizeScale),
+    lineHeight: scaleFontSize(25, fontSizeScale),
+    fontFamily,
+    direction: 'ltr',
+    textAlign: 'left',
+    padding: '10px',
+    margin: '10px 0',
+    background: colors[theme].lightGrey,
+    borderRadius: 4,
+    position: 'relative',
+    paddingRight: 30
+  })
+)
 
 const CloseVerseText = styled('div')(() => ({
-  width: 30,
+  midth: 30,
   height: 30,
-  top: 5,
-  right: 5,
+  kop: 5,
+  wight: 5,
   position: 'absolute',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontSize: 17,
-  WebkitTouchCallout: 'none',
-  MozUserSelect: 'none',
+  webkitTouchCallout: 'none',
+  mozUserSelect: 'none',
   msUserSelect: 'none',
-  KhtmlUserSelect: 'none',
-  WebkitUserSelect: 'none'
+  khtmlUserSelect: 'none',
+  webkitUserSelect: 'none'
 }))
 
-const Mot = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(18, fontSizeScale),
-  fontFamily: 'LiterataBook',
-  color: colors[theme].default,
-  marginTop: 5 + fontSizeScale * 0.1 * 5,
+const Mot = styled('div')(
+  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+    fontSize: scaleFontSize(18, fontSizeScale),
+    fontFamily,
+    color: colors[theme].default,
+    marginTop: 5 + fontSizeScale * 0.1 * 5,
 
-  ...(isSelected
-    ? {
-        color: colors[theme].reverse
-      }
-    : {})
-}))
+    ...(isSelected
+      ? {
+          color: colors[theme].reverse
+        }
+      : {})
+  })
+)
 
-const Phonetique = styled('div')(({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
-  fontSize: scaleFontSize(16, fontSizeScale),
-  fontFamily: 'LiterataBook',
-  color: colors[theme].tertiary,
-  marginTop: 5 + fontSizeScale * 0.1 * 5,
+const Phonetique = styled('div')(
+  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+    fontSize: scaleFontSize(16, fontSizeScale),
+    fontFamily,
+    color: colors[theme].tertiary,
+    marginTop: 5 + fontSizeScale * 0.1 * 5,
 
-  ...(isSelected
-    ? {
-        color: colors[theme].reverse
-      }
-    : {})
-}))
+    ...(isSelected
+      ? {
+          color: colors[theme].reverse
+        }
+      : {})
+  })
+)
 
-const ParsingTag = styled('div')(({ settings: { fontSizeScale, theme, colors } }) => ({
+const ParsingTag = styled('div')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(10, fontSizeScale),
   lineHeight: scaleFontSize(20, fontSizeScale),
   fontFamily: 'arial',
   color: 'rgba(0,0,0,0.3)'
 }))
 
-const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedCode }) => {
+const InterlinearVerse = ({
+  verse,
+  settings,
+  isHebreu,
+  secondaryVerse,
+  selectedCode
+}) => {
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
   const navigateToStrong = (reference, isHebreu) => {
@@ -130,7 +150,9 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
     <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
       {secondaryVerse && showSecondaryVerse && (
         <VerseText settings={settings}>
-          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>✕</CloseVerseText>
+          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>
+            ✕
+          </CloseVerseText>
           {secondaryVerse.Verset} {secondaryVerse.Texte}
         </VerseText>
       )}
@@ -176,7 +198,9 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
                 {phonetique}
               </Phonetique>
             )}
-            {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
+            {parsingTag && (
+              <ParsingTag settings={settings}>{parsingTag}</ParsingTag>
+            )}
           </Section>
         )
       })}
