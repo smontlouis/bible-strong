@@ -38,7 +38,7 @@ const NumberText = styled('span')(
 )
 
 const Hebreu = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors } }) => ({
+  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
     fontSize: scaleFontSize(18, fontSizeScale),
     fontFamily,
     color: colors[theme].primary,
@@ -51,13 +51,11 @@ const Hebreu = styled('div')(
   })
 )
 
-const Code = styled('div')(
-  ({ settings: { fontSizeScale, theme, colors } }) => ({
-    fontSize: scaleFontSize(11, fontSizeScale),
-    fontFamily: 'arial',
-    color: 'rgba(0,0,0,0.3)'
-  })
-)
+const Code = styled('div')(({ settings: { fontSizeScale } }) => ({
+  fontSize: scaleFontSize(11, fontSizeScale),
+  fontFamily: 'arial',
+  color: 'rgba(0,0,0,0.3)'
+}))
 
 const VerseText = styled('div')(
   ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
@@ -76,10 +74,10 @@ const VerseText = styled('div')(
 )
 
 const CloseVerseText = styled('div')(() => ({
-  midth: 30,
+  width: 30,
   height: 30,
-  kop: 5,
-  wight: 5,
+  top: 5,
+  right: 5,
   position: 'absolute',
   display: 'flex',
   alignItems: 'center',
