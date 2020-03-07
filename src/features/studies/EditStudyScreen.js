@@ -111,7 +111,12 @@ class EditStudyScreen extends React.Component {
   setQuickTagsModal = value => this.setState({ quickTagsModal: value })
 
   render() {
-    const { isReadOnly, titlePrompt, multipleTagsItem, quickTagsModal } = this.state
+    const {
+      isReadOnly,
+      titlePrompt,
+      multipleTagsItem,
+      quickTagsModal
+    } = this.state
 
     return (
       <Container>
@@ -146,6 +151,7 @@ class EditStudyScreen extends React.Component {
           shareMethods={this.acceptMethods}
           onDeltaChangeCallback={this.onDeltaChangeCallback}
           contentToDisplay={this.props.currentStudy.content}
+          fontFamily={this.props.fontFamily}
           params={this.props.navigation.state.params}
         />
         <SelectHeaderModal
@@ -201,6 +207,7 @@ export default compose(
   withStudy,
   connect(({ user }, ownProps) => {
     return {
+      fontFamily: user.fontFamily,
       currentStudy: user.bible.studies[ownProps.studyId]
     }
   })

@@ -10,30 +10,10 @@ import {
 import Verse from './Verse'
 import Comment from './Comment'
 import ErrorBoundary from './ErrorBoundary'
-import { desktopMode } from './env'
+// import { desktopMode } from './env'
 import { scaleFontSize } from './scaleFontSize'
 
-// Polyfill for Object.entries
-if (!Object.entries) {
-  Object.entries = function(obj) {
-    const ownProps = Object.keys(obj)
-    let i = ownProps.length
-    const resArray = new Array(i) // preallocate the Array
-    while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]]
-
-    return resArray
-  }
-}
-
-// Polyfill for NodeList.forEarch
-if (window.NodeList && !NodeList.prototype.forEach) {
-  NodeList.prototype.forEach = function(callback, thisArg) {
-    thisArg = thisArg || window
-    for (let i = 0; i < this.length; i++) {
-      callback.call(thisArg, this[i], i, this)
-    }
-  }
-}
+import './polyfills'
 
 const exists = obj => {
   if (!obj || obj.error) {
@@ -129,6 +109,7 @@ class VersesRenderer extends Component {
       type: CONSOLE_LOG,
       payload: 'I did mount'
     })
+
     // ONLY FOR DEV MODE ON DESKTOP
     // TODO: TO DELETE
     // if (desktopMode) {

@@ -9,10 +9,12 @@ import { useSelector } from 'react-redux'
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import Paragraph from '~common/ui/Paragraph'
 import truncate from '~helpers/truncate'
 import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
 import useBibleVerses from '~helpers/useBibleVerses'
+import { removeBreakLines } from '~helpers/utils'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary
@@ -46,7 +48,9 @@ const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
   }
 
   const { title, content } = formatVerseContent(verses)
-  const formattedDate = distanceInWords(Number(date), Date.now(), { locale: frLocale })
+  const formattedDate = distanceInWords(Number(date), Date.now(), {
+    locale: frLocale
+  })
   const { Livre, Chapitre, Verset } = verses[0]
   return (
     <TouchableOpacity
@@ -69,9 +73,9 @@ const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
           </Box>
           <DateText style={{ fontSize: 10 }}>Il y a {formattedDate}</DateText>
         </Box>
-        <Text medium marginBottom={15}>
-          {truncate(content, 200)}
-        </Text>
+        <Paragraph scale={-2} medium marginBottom={15}>
+          {truncate(removeBreakLines(content), 200)}
+        </Paragraph>
         <TagList tags={tags} />
       </Container>
     </TouchableOpacity>

@@ -1,21 +1,13 @@
 import React, { createRef } from 'react'
 import { withNavigation } from 'react-navigation'
-import { View, Alert, Platform } from 'react-native'
+import { View, Alert } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
 import * as Sentry from '@sentry/react-native'
 
 import books from '~assets/bible_versions/books-desc'
-import KeyboardSpacer from '~common/KeyboardSpacer'
-
-const INJECTED_JAVASCRIPT = `(function() {
-  // This is the important part!
-  if (!window.ReactNativeWebView) {
-    window.ReactNativeWebView = window['ReactABI33_0_0NativeWebView'];
-  }
-  // End of the important part! Now continue using it as usual
-})();`
+import literata from '~assets/fonts/literata'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef()
@@ -47,20 +39,32 @@ class WebViewQuillEditor extends React.Component {
       if (newParams.type.includes('verse')) {
         const isBlock = newParams.type.includes('block')
         this.dispatchToWebView('FOCUS_EDITOR')
-        this.dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', newParams)
+        this.dispatchToWebView(
+          isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES',
+          newParams
+        )
       } else {
         const isBlock = newParams.type.includes('block')
         this.dispatchToWebView('FOCUS_EDITOR')
-        this.dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', newParams)
+        this.dispatchToWebView(
+          isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG',
+          newParams
+        )
       }
     }
 
-    if (prevProps.isReadOnly !== this.props.isReadOnly && !this.props.isReadOnly) {
+    if (
+      prevProps.isReadOnly !== this.props.isReadOnly &&
+      !this.props.isReadOnly
+    ) {
       this.dispatchToWebView('CAN_EDIT')
       this.dispatchToWebView('FOCUS_EDITOR')
     }
 
-    if (prevProps.isReadOnly !== this.props.isReadOnly && this.props.isReadOnly) {
+    if (
+      prevProps.isReadOnly !== this.props.isReadOnly &&
+      this.props.isReadOnly
+    ) {
       this.dispatchToWebView('READ_ONLY')
       this.dispatchToWebView('BLUR_EDITOR')
     }
@@ -84,23 +88,15 @@ class WebViewQuillEditor extends React.Component {
     }
   }
 
-  injectFont = async () => {
-    const webView = this.webViewRef.current
+  injectFont = () => {
+    const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
-    const { localUri } = await AssetUtils.resolveAsync(require('~assets/fonts/LiterataBook.otf'))
-    const { uri } = await FileSystem.getInfoAsync(localUri)
-
-    const fontRule = `@font-face { font-family: 'LiterataBook'; src: local('LiterataBook'), url('${uri}') format('opentype');}`
-
-    webView.injectJavaScript(`
-    (function() {
-      setTimeout(() => {
+    return `
         var style = document.createElement("style");
         style.innerHTML = "${fontRule}";
         document.head.appendChild(style);
-      }, 0)
-    })()
-    `)
+        true;
+    `
   }
 
   handleMessage = event => {
@@ -117,8 +113,18 @@ class WebViewQuillEditor extends React.Component {
         case 'TEXT_CHANGED':
           if (this.props.onDeltaChangeCallback) {
             delete msgData.payload.type
-            const { delta, deltaChange, deltaOld, changeSource } = msgData.payload
-            this.props.onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
+            const {
+              delta,
+              deltaChange,
+              deltaOld,
+              changeSource
+            } = msgData.payload
+            this.props.onDeltaChangeCallback(
+              delta,
+              deltaChange,
+              deltaOld,
+              changeSource
+            )
           }
           break
         case 'VIEW_BIBLE_VERSE': {
@@ -162,11 +168,17 @@ class WebViewQuillEditor extends React.Component {
           return
         }
         case 'CONSOLE_LOG': {
-          console.log(`%c${msgData.payload}`, 'color:black;background-color:#81ecec')
+          console.log(
+            `%c${msgData.payload}`,
+            'color:black;background-color:#81ecec'
+          )
           return
         }
         case 'THROW_ERROR': {
-          console.log(`%c${msgData.payload}`, 'color:black;background-color:#81ecec')
+          console.log(
+            `%c${msgData.payload}`,
+            'color:black;background-color:#81ecec'
+          )
           Alert.alert(
             `Une erreur est survenue, impossible de charger la page: ${msgData.payload} \n Le développeur en a été informé.`
           )
@@ -185,7 +197,10 @@ class WebViewQuillEditor extends React.Component {
   }
 
   onWebViewLoaded = () => {
-    this.dispatchToWebView('LOAD_EDITOR')
+    const { fontFamily } = this.props
+    this.dispatchToWebView('LOAD_EDITOR', {
+      fontFamily
+    })
   }
 
   editorLoaded = () => {
@@ -219,7 +234,12 @@ class WebViewQuillEditor extends React.Component {
 
     return (
       <View
-        style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: 'hidden', flex: 1 }}>
+        style={{
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          overflow: 'hidden',
+          flex: 1
+        }}>
         <WebView
           useWebKit
           onLoad={this.onWebViewLoaded}
@@ -228,7 +248,7 @@ class WebViewQuillEditor extends React.Component {
           originWhitelist={['*']}
           ref={this.webViewRef}
           source={{ html: this.HTMLFile }}
-          injectedJavaScript={INJECTED_JAVASCRIPT}
+          injectedJavaScript={this.injectFont()}
           domStorageEnabled
           allowUniversalAccessFromFileURLs
           allowFileAccessFromFileURLs
@@ -238,7 +258,6 @@ class WebViewQuillEditor extends React.Component {
           onError={this.onError}
           bounces={false}
         />
-        {Platform.OS === 'android' && <KeyboardSpacer />}
       </View>
     )
   }

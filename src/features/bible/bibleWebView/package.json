@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --mode development --open",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "postbuild": "cp ./dist/index.html ../../../../android/app/src/main/assets/index.html"
   },
   "keywords": [],
   "author": "“Stéphane <s.montlouis.calixte@gmail.com> (https://github.com/bulby97)",

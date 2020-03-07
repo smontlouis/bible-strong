@@ -1,14 +1,7 @@
 import { Platform } from 'react-native'
 
 const fonts = {
-  android: [
-    'normal',
-    'notoserif',
-    'sans-serif',
-    'serif',
-    'Roboto',
-    'monospace'
-  ],
+  android: ['serif', 'Roboto', 'monospace'],
   ios: [
     'American Typewriter',
     'Arial',

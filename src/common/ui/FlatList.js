@@ -36,7 +36,11 @@ const fadeIn = {
 export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
   const orientation = useDeviceOrientation()
   return (
-    <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={300} duration={500}>
+    <Animatable.View
+      style={{ flex: 1 }}
+      animation={fadeIn}
+      delay={300}
+      duration={500}>
       <FlatList
         orientation={orientation}
         contentContainerStyle={{

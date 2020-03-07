@@ -15,7 +15,7 @@ import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
-import { smallSize } from '~helpers/utils'
+import { smallSize, removeBreakLines } from '~helpers/utils'
 import ShowMoreImage from './ShowMoreImage'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
@@ -100,8 +100,14 @@ const VerseOfTheDay = () => {
         </Box>
         <Link
           route="BibleView"
-          params={{ isReadOnly: true, book, chapter, verse }}>
-          <Paragraph marginTop={5}>{content}</Paragraph>
+          params={{
+            isReadOnly: true,
+            book,
+            chapter,
+            verse,
+            focusVerses: [verse]
+          }}>
+          <Paragraph marginTop={5}>{removeBreakLines(content)}</Paragraph>
         </Link>
         <Box marginTop={20} row center>
           <Box flex>

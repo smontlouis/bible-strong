@@ -2,7 +2,7 @@ import React from 'react'
 import Modal from 'react-native-modal'
 import styled from '@emotion/native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import { ScrollView } from 'react-native'
+import { FlatList } from 'react-native'
 
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
@@ -41,6 +41,7 @@ const Container = styled.View(({ theme }) => ({
 
 const HalfContainer = styled.View(({ border, theme }) => ({
   paddingHorizontal: 20,
+  paddingRight: 10,
   paddingVertical: 15,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: border ? 1 : 0,
@@ -50,7 +51,6 @@ const HalfContainer = styled.View(({ border, theme }) => ({
 
 const FontText = styled.Text(({ isSelected, theme }) => ({
   fontSize: 16,
-  fontWeight: isSelected ? 'bold' : 'normal',
   paddingLeft: 15,
   paddingRight: 15,
   color: isSelected ? theme.colors.primary : theme.colors.default
@@ -122,6 +122,8 @@ const BibleParamsModal = ({
     setSettingsCommentaires(true)
   }
 
+  const fontsView = React.useRef()
+
   return (
     <StylizedModal
       isVisible={isOpen}
@@ -132,26 +134,25 @@ const BibleParamsModal = ({
       backdropOpacity={0.2}>
       <Container>
         <HalfContainer border>
-          <Text flex={2}>Alignement du texte</Text>
-          <Box row flex={1}>
-            <Text bold marginRight={10}>
-              {alignContentToString[alignContent]}
-            </Text>
-            <TouchableIcon
-              isSelected={alignContent === 'justify'}
-              name="align-justify"
-              onPress={() => setSettingsAlignContent('justify')}
-            />
-            <TouchableIcon
-              isSelected={alignContent === 'left'}
-              name="align-left"
-              onPress={() => setSettingsAlignContent('left')}
-            />
-          </Box>
+          <Text flex={5}>Alignement du texte</Text>
+          <Text marginLeft={5} fontSize={12} bold marginRight={10}>
+            {alignContentToString[alignContent]}
+          </Text>
+          <TouchableIcon
+            isSelected={alignContent === 'justify'}
+            name="align-justify"
+            onPress={() => setSettingsAlignContent('justify')}
+          />
+          <TouchableIcon
+            isSelected={alignContent === 'left'}
+            name="align-left"
+            onPress={() => setSettingsAlignContent('left')}
+          />
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Taille du texte</Text>
-          <Text bold>{`${100 + fontSizeScale * 10}%`}</Text>
+          <Text marginLeft={5} fontSize={12} bold>{`${100 +
+            fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             name="type"
             size={15}
@@ -164,7 +165,9 @@ const BibleParamsModal = ({
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Mode des versets</Text>
-          <Text bold>{textDisplayToString[textDisplay]}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {textDisplayToString[textDisplay]}
+          </Text>
           <TouchableIcon
             isSelected={textDisplay === 'inline'}
             name="menu"
@@ -178,7 +181,9 @@ const BibleParamsModal = ({
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Thème</Text>
-          <Text bold>{themeToString[theme]}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {themeToString[theme]}
+          </Text>
           <TouchableIcon
             isSelected={theme === 'default'}
             name="sun"
@@ -192,7 +197,9 @@ const BibleParamsModal = ({
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Affichage des notes</Text>
-          <Text bold>{notesDisplayToString[notesDisplay]}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {notesDisplayToString[notesDisplay]}
+          </Text>
 
           <TouchableIcon
             isSelected={notesDisplay === 'inline'}
@@ -207,7 +214,9 @@ const BibleParamsModal = ({
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Commentaires</Text>
-          <Text bold>{commentsDisplayToString[commentsDisplay]}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {commentsDisplayToString[commentsDisplay]}
+          </Text>
           <TouchableIcon
             isSelected={!commentsDisplay}
             name="x-square"
@@ -221,7 +230,9 @@ const BibleParamsModal = ({
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Affichage des strongs</Text>
-          <Text bold>{pressToString[press]}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {pressToString[press]}
+          </Text>
           <TouchableSvgIcon
             icon={IconShortPress}
             isSelected={press === 'shortPress'}
@@ -236,18 +247,31 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <Box>
-          <ScrollView horizontal style={{ paddingVertical: 15 }}>
-            {['Literata Book', ...fonts].map(f => {
-              const isSelected = fontFamily === f
+          <FlatList
+            ref={fontsView}
+            horizontal
+            getItemLayout={(data, index) => ({
+              length: 100,
+              offset: 100 * index,
+              index
+            })}
+            initialScrollIndex={fonts.findIndex(f => f === fontFamily)}
+            style={{ paddingVertical: 15 }}
+            data={['Literata Book', ...fonts]}
+            keyExtractor={item => item}
+            renderItem={({ item }) => {
+              const isSelected = fontFamily === item
               return (
-                <Link key={f} onPress={() => setFontFamily(f)}>
-                  <FontText isSelected={isSelected} style={{ fontFamily: f }}>
-                    {f}
+                <Link onPress={() => setFontFamily(item)}>
+                  <FontText
+                    isSelected={isSelected}
+                    style={{ fontFamily: item }}>
+                    {item}
                   </FontText>
                 </Link>
               )
-            })}
-          </ScrollView>
+            }}
+          />
           <Border />
         </Box>
         <HalfContainer>

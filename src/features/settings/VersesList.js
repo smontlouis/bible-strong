@@ -1,9 +1,6 @@
-// @flow
-
 import React from 'react'
 
 import FlatList from '~common/ui/FlatList'
-import Container from '~common/ui/Container'
 import VerseComponent from './Verse'
 
 export const sortVersesByDate = p =>
@@ -12,7 +9,12 @@ export const sortVersesByDate = p =>
     const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
 
     if (!arr.find(a => a.date === p[verse].date)) {
-      arr.push({ date: p[verse].date, color: p[verse].color, verseIds: [], tags: {} })
+      arr.push({
+        date: p[verse].date,
+        color: p[verse].color,
+        verseIds: [],
+        tags: {}
+      })
     }
 
     const dateInArray = arr.find(a => a.date === p[verse].date)
@@ -33,7 +35,7 @@ const VersesList = ({ verseIds }) => {
   return (
     <FlatList
       data={sortedVersesByDate}
-      keyExtractor={(item, index) => item.date.toString()}
+      keyExtractor={item => item.date.toString()}
       renderItem={({ item: { color, date, verseIds, tags } }) => (
         <VerseComponent {...{ color, date, verseIds, tags }} />
       )}

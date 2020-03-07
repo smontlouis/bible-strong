@@ -29,8 +29,11 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
   })
 
   const [book, chapter, verse] = hit.ref.split('-')
-  const { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
+  const { title } = formatVerseContent([
+    { Livre: book, Chapitre: chapter, Verset: verse }
+  ])
   const onPress = () =>
+    console.log(book, chapter, verse) ||
     navigation.navigate('BibleView', {
       isReadOnly: true,
       book: books[book - 1],
@@ -56,7 +59,4 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
   )
 }
 
-export default compose(
-  connectHighlight,
-  withNavigation
-)(Highlight)
+export default compose(connectHighlight, withNavigation)(Highlight)

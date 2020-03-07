@@ -14,7 +14,9 @@ const HighlightsScreen = () => {
 
   const filteredHighlights = Object.keys(verseIds)
     .filter(vId =>
-      selectedChip ? verseIds[vId].tags && verseIds[vId].tags[selectedChip.id] : true
+      selectedChip
+        ? verseIds[vId].tags && verseIds[vId].tags[selectedChip.id]
+        : true
     )
     .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
 

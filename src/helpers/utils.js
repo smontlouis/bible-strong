@@ -2,12 +2,15 @@ import { Dimensions } from 'react-native'
 
 import { MAX_WIDTH } from '~helpers/useDimensions'
 
-export const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window')
+export const { width: viewportWidth, height: viewportHeight } = Dimensions.get(
+  'window'
+)
 
 export const smallSize = viewportWidth < 340
 
 export const wp = percentage => {
-  const value = (percentage * (viewportWidth > MAX_WIDTH ? MAX_WIDTH : viewportWidth)) / 100
+  const value =
+    (percentage * (viewportWidth > MAX_WIDTH ? MAX_WIDTH : viewportWidth)) / 100
   return Math.round(value)
 }
 
@@ -28,3 +31,5 @@ export const cleanParams = () => ({
   version: undefined,
   verses: undefined
 })
+
+export const removeBreakLines = str => str.replace('\n', '')

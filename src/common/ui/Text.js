@@ -7,7 +7,9 @@ const Text = styled.Text(props => {
   return {
     fontFamily: s.fontFamily(props),
 
-    color: props.color ? props.theme.colors[props.color] : props.theme.colors.default,
+    color: props.color
+      ? props.theme.colors[props.color]
+      : props.theme.colors.default,
     fontSize: props.fontSize,
     fontWeight: props.bold ? 'bold' : undefined,
     textAlign: props.textAlign,
@@ -38,8 +40,12 @@ const Text = styled.Text(props => {
     alignContent: props.alignContent || 'flex-start',
     alignSelf: props.alignSelf,
     // shorthands
-    flexWrap: (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
-    flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+    flexWrap:
+      (props.wrap && 'wrap') ||
+      (props.wrapReverse && 'wrap-reverse') ||
+      'nowrap',
+    flexDirection:
+      (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
 
     ...(props.underline && {
       textDecorationLine: 'underline',

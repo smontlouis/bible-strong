@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { Platform } from 'react-native'
+import { useSelector } from 'react-redux'
 import PushNotification from 'react-native-push-notification'
 import compose from 'recompose/compose'
 import addDays from 'date-fns/fp/addDays'
@@ -18,15 +17,11 @@ import { getDayOfTheYear } from './getDayOfTheYear'
 
 export const useVerseOfTheDay = () => {
   const { user } = useLogin()
-  // const dispatch = useDispatch()
   const [verseOfTheDay, setVOD] = useState(false)
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
   )
-  // const notificationId = useSelector(
-  //   state => state.user.notifications.notificationId
-  // )
 
   useEffect(() => {
     const dayOfTheYear =

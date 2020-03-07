@@ -6,6 +6,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { removeBreakLines } from '~helpers/utils'
 
 const Container = styled.View(({ theme }) => ({
   padding: 20,
@@ -20,10 +21,17 @@ class CompareVerseItem extends React.Component {
 
     if (!versionNeedsDownload) {
       try {
-        const { content } = await getVersesRef(selectedVerses, versionId, position)
+        const { content } = await getVersesRef(
+          selectedVerses,
+          versionId,
+          position
+        )
         this.setState({ content, versionNeedsDownload })
       } catch (e) {
-        this.setState({ content: 'Impossible de charger ce verset', versionNeedsDownload })
+        this.setState({
+          content: 'Impossible de charger ce verset',
+          versionNeedsDownload
+        })
       }
     }
   }
@@ -37,7 +45,11 @@ class CompareVerseItem extends React.Component {
     const { content, versionNeedsDownload } = this.state
     const { versionId, name } = this.props
 
-    if ((!content && versionNeedsDownload) || versionId === 'INT' || versionId === 'LSGS') {
+    if (
+      (!content && versionNeedsDownload) ||
+      versionId === 'INT' ||
+      versionId === 'LSGS'
+    ) {
       return null
     }
 
@@ -49,7 +61,7 @@ class CompareVerseItem extends React.Component {
           </Text>
         </Box>
         <Paragraph scale={-1} scaleLineHeight={-2}>
-          {content}
+          {removeBreakLines(content)}
         </Paragraph>
       </Container>
     )

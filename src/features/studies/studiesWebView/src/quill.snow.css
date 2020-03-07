@@ -1,7 +1,4 @@
-@font-face {
-  font-family: "LiterataBook";
-  src: url("../../../../assets/fonts/LiterataBook-Regular-light.otf");
-}
+
 
 
 /*!
@@ -12,8 +9,7 @@
  */
 .ql-container {
     box-sizing: border-box;
-    font-family: 'LiterataBook', Helvetica, Arial, sans-serif;
-    font-size: 18px;
+    font-size: 16px;
     margin: 0px;
     position: relative;
   }

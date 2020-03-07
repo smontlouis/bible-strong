@@ -48,7 +48,9 @@ export default class ReactQuillEditor extends React.Component {
     this.quill.on('text-change', debounce(this.onChangeText, 500))
   }
 
-  loadEditor = () => {
+  loadEditor = ({ fontFamily }) => {
+    dispatchConsole(fontFamily)
+    document.getElementById('editor').style.fontFamily = fontFamily
     this.quill = new Quill('#editor', {
       theme: 'snow',
       modules: {
@@ -82,7 +84,7 @@ export default class ReactQuillEditor extends React.Component {
 
       switch (msgData.type) {
         case 'LOAD_EDITOR':
-          this.loadEditor()
+          this.loadEditor(msgData.payload)
           break
         case 'SET_CONTENTS':
           this.quill.setContents(msgData.payload.delta, Quill.sources.SILENT)
@@ -125,7 +127,12 @@ export default class ReactQuillEditor extends React.Component {
           break
         case 'BLOCK_DIVIDER': {
           const range = this.quill.getSelection(true)
-          this.quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER)
+          this.quill.insertEmbed(
+            range.index,
+            'divider',
+            true,
+            Quill.sources.USER
+          )
           this.quill.setSelection(range.index + 1, Quill.sources.SILENT)
           break
         }

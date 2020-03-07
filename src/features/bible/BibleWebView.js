@@ -4,7 +4,7 @@ import AssetUtils from 'expo-asset-utils'
 import { WebView } from 'react-native-webview'
 import * as Sentry from '@sentry/react-native'
 
-import firecode from '../../assets/fonts/firecode'
+import literata from '../../assets/fonts/literata'
 import books from '~assets/bible_versions/books'
 import SnackBar from '~common/SnackBar'
 import { MAX_WIDTH } from '~helpers/useDimensions'
@@ -19,14 +19,6 @@ import {
   NAVIGATE_TO_STRONG,
   THROW_ERROR
 } from './bibleWebView/src/dispatch'
-
-const INJECTED_JAVASCRIPT = `(function() {
-  // This is the important part!
-  if (!window.ReactNativeWebView) {
-    window.ReactNativeWebView = window['ReactABI33_0_0NativeWebView'];
-  }
-  // End of the important part! Now continue using it as usual
-})();`
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
@@ -78,19 +70,12 @@ class BibleWebView extends Component {
   }
 
   injectFont = () => {
-    // const fileUri = Platform.select({
-    //   ios: 'FireCode-Regular.otf',
-    //   android: 'file:///android_asset/fonts/FireCode-Regular.otf'
-    // })
-
-    const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${firecode}') format('woff');}`
+    const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
     return `
         var style = document.createElement("style");
         style.innerHTML = "${fontRule}";
         document.head.appendChild(style);
-
-        document.body.style.backgroundColor = 'red';
         true;
     `
   }
