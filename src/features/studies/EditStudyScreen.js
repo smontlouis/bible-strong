@@ -81,7 +81,6 @@ class EditStudyScreen extends React.Component {
     this.props.navigation.navigate('BibleView', {
       isSelectionMode: type
     })
-    this.closeBlockModal()
   }
 
   setTitlePrompt = value => this.setState({ titlePrompt: value })
@@ -154,7 +153,7 @@ class EditStudyScreen extends React.Component {
         />
         {isReadOnly && (
           <FabButton
-            icon="feather"
+            icon="edit"
             onPress={() => this.setState({ isReadOnly: false })}
             align="flex-end"
           />

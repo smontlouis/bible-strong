@@ -255,7 +255,9 @@ class WebViewQuillEditor extends React.Component {
         behavior="padding"
         style={{
           overflow: 'hidden',
-          flex: 1
+          flex: 1,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30
         }}>
         <WebView
           useWebKit

@@ -7,9 +7,12 @@ import {
   MenuOptions,
   MenuOption,
   MenuTrigger,
-  renderers
+  renderers,
+  withMenuContext
 } from 'react-native-popup-menu'
+import Color from 'color'
 
+import TouchableCircle from '~features/bible/TouchableCircle'
 import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Link from '~common/Link'
@@ -26,11 +29,12 @@ const TouchableIcon = styled(TouchableOpacity)(() => ({
   marginHorizontal: 10
 }))
 
-const PopOverMenu = ({ element, popover }) => (
-  <Menu renderer={Popover} rendererProps={{ placement: 'top' }}>
+const PopOverMenu = ({ element, popover, ...props }) => (
+  <Menu renderer={Popover} rendererProps={{ placement: 'top' }} {...props}>
     <MenuTrigger>{element}</MenuTrigger>
     <MenuOptions
       optionsContainerStyle={{
+        backgroundColor: 'white',
         shadowColor: 'rgb(89,131,240)',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -71,9 +75,9 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
           center
           borderRadius={20}
           backgroundColor="lightPrimary"
-          paddingVertical={5}
-          paddingHorizontal={5}>
-          <Text fontSize={13} bold color="primary">
+          paddingVertical={4}
+          paddingHorizontal={7}>
+          <Text fontSize={15} bold color="primary">
             {getHeaderTitle()}
           </Text>
           <Box
@@ -116,85 +120,130 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
   )
 }
 
-const SelectMore = ({ dispatchToWebView, activeFormats }) => {
-  const openColorModal = v => console.log(v)
+const colors = [
+  '#cc0000',
+  '#f1c232',
+  '#6aa84f',
+  '#45818e',
+  '#3d85c6',
+  '#674ea7',
+  '#a64d79'
+]
+const lighten = ['0.3', '0.5', '0.7', '0.9']
+
+const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
+  const [colorModal, setOpenColorModal] = React.useState()
+
+  const setColor = color => {
+    dispatchToWebView('TOGGLE_FORMAT', {
+      type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
+      value: color
+    })
+  }
 
   return (
     <PopOverMenu
+      onClose={() => setOpenColorModal()}
       element={<FeatherIcon name="more-horizontal" size={18} />}
       popover={
-        <Box>
-          <Box row>
-            <TouchableIcon onPress={() => openColorModal('background')}>
-              <BackgroundIcon color={activeFormats.background} />
-            </TouchableIcon>
-            <TouchableIcon onPress={() => openColorModal('color')}>
-              <ColorIcon color={activeFormats.color} />
-            </TouchableIcon>
-            <TouchableIcon
-              underlayColor="rgba(0,0,0,0.25)"
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'BLOCKQUOTE',
-                  value: !activeFormats.blockquote
-                })
-              }>
-              <QuoteIcon
-                color={activeFormats.blockquote ? 'primary' : 'default'}
-              />
-            </TouchableIcon>
+        colorModal ? (
+          <Box width={200}>
+            {lighten.map(l => (
+              <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
+                {colors.map(c => (
+                  <TouchableCircle
+                    key={c}
+                    size={20}
+                    color={Color(c)
+                      .lighten(l)
+                      .string()}
+                    onPress={() => {
+                      setColor(
+                        Color(c)
+                          .lighten(l)
+                          .string()
+                      )
+                      ctx.menuActions.closeMenu()
+                    }}
+                  />
+                ))}
+              </Box>
+            ))}
           </Box>
-          <Border marginTop={10} />
-          <Box row marginTop={10}>
-            <TouchableIcon
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'LIST',
-                  value: activeFormats.list === 'bullet' ? false : 'bullet'
-                })
-              }>
-              <FormatIcon
-                isSelected={activeFormats.list === 'bullet'}
-                name="list"
-                size={20}
-              />
-            </TouchableIcon>
-            <TouchableIcon
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'LIST',
-                  value: activeFormats.list === 'ordered' ? false : 'ordered'
-                })
-              }>
-              <MaterialFormatIcon
-                isSelected={activeFormats.list === 'ordered'}
-                name="format-list-numbered"
-                size={20}
-              />
-            </TouchableIcon>
-            <TouchableIcon
-              onPress={() => {
-                dispatchToWebView('BLOCK_DIVIDER')
-              }}>
-              <FeatherIcon size={20} name="minus" />
-            </TouchableIcon>
+        ) : (
+          <Box>
+            <Box row>
+              <TouchableIcon onPress={() => setOpenColorModal('background')}>
+                <BackgroundIcon color={activeFormats.background} />
+              </TouchableIcon>
+              <TouchableIcon onPress={() => setOpenColorModal('color')}>
+                <ColorIcon color={activeFormats.color} />
+              </TouchableIcon>
+              <TouchableIcon
+                underlayColor="rgba(0,0,0,0.25)"
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', {
+                    type: 'BLOCKQUOTE',
+                    value: !activeFormats.blockquote
+                  })
+                }>
+                <QuoteIcon
+                  color={activeFormats.blockquote ? 'primary' : 'default'}
+                />
+              </TouchableIcon>
+            </Box>
+            <Border marginTop={10} />
+            <Box row marginTop={10}>
+              <TouchableIcon
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', {
+                    type: 'LIST',
+                    value: activeFormats.list === 'bullet' ? false : 'bullet'
+                  })
+                }>
+                <FormatIcon
+                  isSelected={activeFormats.list === 'bullet'}
+                  name="list"
+                  size={20}
+                />
+              </TouchableIcon>
+              <TouchableIcon
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', {
+                    type: 'LIST',
+                    value: activeFormats.list === 'ordered' ? false : 'ordered'
+                  })
+                }>
+                <MaterialFormatIcon
+                  isSelected={activeFormats.list === 'ordered'}
+                  name="format-list-numbered"
+                  size={20}
+                />
+              </TouchableIcon>
+              <TouchableIcon
+                onPress={() => {
+                  dispatchToWebView('BLOCK_DIVIDER')
+                }}>
+                <FeatherIcon size={20} name="minus" />
+              </TouchableIcon>
+            </Box>
+            <Border marginTop={10} />
+            <Box row marginTop={10}>
+              <TouchableIcon
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
+                }>
+                <MaterialIcon name="undo" size={20} />
+              </TouchableIcon>
+              <TouchableIcon
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
+                }>
+                <MaterialIcon name="redo" size={20} />
+              </TouchableIcon>
+            </Box>
           </Box>
-          <Border marginTop={10} />
-          <Box row marginTop={10}>
-            <TouchableIcon
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
-              }>
-              <MaterialIcon name="undo" size={20} />
-            </TouchableIcon>
-            <TouchableIcon
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
-              }>
-              <MaterialIcon name="redo" size={20} />
-            </TouchableIcon>
-          </Box>
-        </Box>
+        )
       }
     />
   )
@@ -276,16 +325,12 @@ const MaterialFormatIcon = FormatIcon.withComponent(Icon.MaterialIcons)
 const StudyFooter = ({
   dispatchToWebView,
   navigateBibleView,
-  activeFormats
+  activeFormats,
+  ctx
 }) => {
   return (
-    <Box row height={40} backgroundColor="#F9F9F9">
-      <Box
-        row
-        flex
-        alignItems="center"
-        justifyContent="flex-start"
-        paddingLeft={10}>
+    <Box row height={50} backgroundColor="#F9F9F9" alignItems="center">
+      <Box row flex center paddingLeft={10}>
         <SelectHeading
           dispatchToWebView={dispatchToWebView}
           activeFormats={activeFormats}
@@ -329,15 +374,16 @@ const StudyFooter = ({
         <SelectMore
           dispatchToWebView={dispatchToWebView}
           activeFormats={activeFormats}
+          ctx={ctx}
         />
         <Box marginLeft="auto" />
         <SelectBlock navigateBibleView={navigateBibleView} />
       </Box>
-      <Link onPress={() => dispatchToWebView('BLUR_EDITOR')} paddingSmall>
+      <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
         <MaterialIcon name="keyboard-hide" size={20} color="grey" />
       </Link>
     </Box>
   )
 }
 
-export default StudyFooter
+export default withMenuContext(StudyFooter)
