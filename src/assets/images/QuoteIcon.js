@@ -3,7 +3,7 @@ import Svg, { Path } from 'react-native-svg'
 import { withTheme } from 'emotion-theming'
 
 const SvgComponent = ({ theme, color, ...props }) => (
-  <Svg width={25} height={25} viewBox="0 0 18 18" {...props}>
+  <Svg width={20} height={20} viewBox="0 0 18 18" {...props}>
     <Path
       d="M4 5h3v3H4zM11 5h3v3h-3z"
       strokeLinecap="round"

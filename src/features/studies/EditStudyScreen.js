@@ -11,9 +11,6 @@ import WebViewQuillEditor from '~features/studies/WebViewQuillEditor'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
 import EditStudyHeader from './EditStudyHeader'
-import SelectHeaderModal from './SelectHeaderModal'
-import SelectBlockModal from './SelectBlockModal'
-import SelectColorModal from './SelectColorModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
 
 const withStudy = Component => props => {
@@ -43,7 +40,6 @@ const withStudy = Component => props => {
 
 class EditStudyScreen extends React.Component {
   state = {
-    isColorModalOpen: false,
     isReadOnly: true,
     titlePrompt: '',
     multipleTagsItem: false,
@@ -72,10 +68,6 @@ class EditStudyScreen extends React.Component {
     // TODO: See if it's soo expensive
     dispatch(uploadStudy(this.props.currentStudy.id))
   }
-
-  openColorModal = (value = true) => this.setState({ isColorModalOpen: value })
-
-  closeColorModal = () => this.setState({ isColorModalOpen: false })
 
   navigateBibleView = type => {
     this.props.navigation.navigate('BibleView', {
@@ -126,12 +118,6 @@ class EditStudyScreen extends React.Component {
           fontFamily={this.props.fontFamily}
           params={this.props.navigation.state.params}
           navigateBibleView={this.navigateBibleView}
-        />
-        <SelectColorModal
-          dispatchToWebView={this.dispatchToWebView}
-          activeFormats={this.state.activeFormats}
-          isOpen={this.state.isColorModalOpen}
-          onClosed={this.closeColorModal}
         />
         <StudyTitlePrompt
           titlePrompt={titlePrompt}

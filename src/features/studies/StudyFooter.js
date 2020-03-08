@@ -144,7 +144,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
   return (
     <PopOverMenu
       onClose={() => setOpenColorModal()}
-      element={<FeatherIcon name="more-horizontal" size={18} />}
+      element={<FeatherIcon name="more-horizontal" size={18} color="primary" />}
       popover={
         colorModal ? (
           <Box width={200}>
@@ -173,59 +173,65 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
         ) : (
           <Box>
             <Box row>
-              <TouchableIcon onPress={() => setOpenColorModal('background')}>
+              <FormatIcon
+                isSelected={activeFormats.background}
+                style={{ marginHorizontal: 10 }}
+                onPress={() => setOpenColorModal('background')}>
                 <BackgroundIcon color={activeFormats.background} />
-              </TouchableIcon>
-              <TouchableIcon onPress={() => setOpenColorModal('color')}>
+              </FormatIcon>
+              <FormatIcon
+                isSelected={activeFormats.color}
+                style={{ marginHorizontal: 10 }}
+                onPress={() => setOpenColorModal('color')}>
                 <ColorIcon color={activeFormats.color} />
-              </TouchableIcon>
-              <TouchableIcon
-                underlayColor="rgba(0,0,0,0.25)"
+              </FormatIcon>
+              <FormatIcon
+                isSelected={activeFormats.blockquote}
+                style={{ marginHorizontal: 10 }}
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', {
                     type: 'BLOCKQUOTE',
                     value: !activeFormats.blockquote
                   })
                 }>
-                <QuoteIcon
-                  color={activeFormats.blockquote ? 'primary' : 'default'}
-                />
-              </TouchableIcon>
+                <QuoteIcon color="primary" />
+              </FormatIcon>
             </Box>
             <Border marginTop={10} />
             <Box row marginTop={10}>
-              <TouchableIcon
+              <FormatIcon
+                isSelected={activeFormats.list === 'bullet'}
+                style={{ marginHorizontal: 10 }}
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', {
                     type: 'LIST',
                     value: activeFormats.list === 'bullet' ? false : 'bullet'
                   })
                 }>
-                <FormatIcon
-                  isSelected={activeFormats.list === 'bullet'}
-                  name="list"
-                  size={20}
-                />
-              </TouchableIcon>
-              <TouchableIcon
+                <FeatherIcon color="primary" name="list" size={20} />
+              </FormatIcon>
+              <FormatIcon
+                isSelected={activeFormats.list === 'ordered'}
+                style={{ marginHorizontal: 10 }}
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', {
                     type: 'LIST',
                     value: activeFormats.list === 'ordered' ? false : 'ordered'
                   })
                 }>
-                <MaterialFormatIcon
-                  isSelected={activeFormats.list === 'ordered'}
+                <MaterialIcon
+                  color="primary"
                   name="format-list-numbered"
                   size={20}
                 />
-              </TouchableIcon>
-              <TouchableIcon
+              </FormatIcon>
+              <FormatIcon
+                style={{ marginHorizontal: 10 }}
                 onPress={() => {
                   dispatchToWebView('BLOCK_DIVIDER')
                 }}>
-                <FeatherIcon size={20} name="minus" />
-              </TouchableIcon>
+                <FeatherIcon size={20} name="minus" color="primary" />
+              </FormatIcon>
             </Box>
             <Border marginTop={10} />
             <Box row marginTop={10}>
@@ -233,13 +239,13 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
                 }>
-                <MaterialIcon name="undo" size={20} />
+                <MaterialIcon name="undo" size={20} color="primary" />
               </TouchableIcon>
               <TouchableIcon
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
                 }>
-                <MaterialIcon name="redo" size={20} />
+                <MaterialIcon name="redo" size={20} color="primary" />
               </TouchableIcon>
             </Box>
           </Box>
@@ -312,15 +318,13 @@ const SelectBlock = ({ navigateBibleView }) => {
   )
 }
 
-const FormatIcon = styled(Icon.Feather)(({ theme, isSelected }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
+const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }) => ({
   width: 25,
   height: 25,
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent'
 }))
-
-const MaterialFormatIcon = FormatIcon.withComponent(Icon.MaterialIcons)
 
 const StudyFooter = ({
   dispatchToWebView,
@@ -337,40 +341,38 @@ const StudyFooter = ({
         />
         <FormatIcon
           isSelected={activeFormats.bold}
-          name="bold"
-          size={16}
           onPress={() =>
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'BOLD',
               value: !activeFormats.bold
             })
           }
-          style={{ marginLeft: 10, marginRight: 15, width: 16, height: 16 }}
-        />
+          style={{ marginLeft: 10, marginRight: 10 }}>
+          <FeatherIcon color="primary" name="bold" size={16} />
+        </FormatIcon>
         <FormatIcon
           isSelected={activeFormats.italic}
-          name="italic"
-          size={16}
           onPress={() =>
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'ITALIC',
               value: !activeFormats.italic
             })
           }
-          style={{ marginRight: 15, width: 16, height: 16 }}
-        />
+          style={{ marginRight: 10 }}>
+          <FeatherIcon color="primary" name="italic" size={16} />
+        </FormatIcon>
         <FormatIcon
           isSelected={activeFormats.underline}
-          name="underline"
-          size={16}
           onPress={() =>
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'UNDERLINE',
               value: !activeFormats.underline
             })
           }
-          style={{ marginRight: 15, width: 16, height: 16 }}
-        />
+          style={{ marginRight: 10 }}>
+          <FeatherIcon color="primary" name="underline" size={16} />
+        </FormatIcon>
+
         <SelectMore
           dispatchToWebView={dispatchToWebView}
           activeFormats={activeFormats}
@@ -380,7 +382,7 @@ const StudyFooter = ({
         <SelectBlock navigateBibleView={navigateBibleView} />
       </Box>
       <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
-        <MaterialIcon name="keyboard-hide" size={20} color="grey" />
+        <MaterialIcon name="keyboard-hide" size={20} color="primary" />
       </Link>
     </Box>
   )
