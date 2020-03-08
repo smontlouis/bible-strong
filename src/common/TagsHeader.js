@@ -21,7 +21,6 @@ const StyledText = styled(Text)({
 })
 
 const HeaderBox = styled(Box)(({ theme }) => ({
-  height: 60,
   alignItems: 'center',
   borderBottomColor: theme.colors.border
 }))

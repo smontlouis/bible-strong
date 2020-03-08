@@ -28,7 +28,7 @@ const Container = styled.View(({ theme }) => ({
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   flex: 1,
-  flexDirection: "row",
+  flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'flex-start',
   paddingLeft: 20,
@@ -38,7 +38,13 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden'
 }))
 
-const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleView, theme }) => {
+const SelectBlockModal = ({
+  isOpen,
+  onClosed,
+  dispatchToWebView,
+  navigateBibleView,
+  theme
+}) => {
   return (
     <StylizedModal
       backdropOpacity={0.3}
@@ -56,19 +62,39 @@ const SelectBlockModal = ({ isOpen, onClosed, dispatchToWebView, navigateBibleVi
           <Text>Séparateur</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('verse')}>
-          <Icon.Feather color={theme.colors.quint} size={24} name="link-2" style={{ marginRight: 15 }} />
+          <Icon.Feather
+            color={theme.colors.quint}
+            size={24}
+            name="link-2"
+            style={{ marginRight: 15 }}
+          />
           <Text>Insérer un lien de verset</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('verse-block')}>
-        <Icon.MaterialCommunityIcons color={theme.colors.quint} size={24} name="text" style={{ marginRight: 15 }} />
+          <Icon.MaterialCommunityIcons
+            color={theme.colors.quint}
+            size={24}
+            name="text"
+            style={{ marginRight: 15 }}
+          />
           <Text>Insérer un texte de verset</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('strong')}>
-          <Icon.Feather color={theme.colors.primary} size={24} name="link-2" style={{ marginRight: 15 }} />
+          <Icon.Feather
+            color={theme.colors.primary}
+            size={24}
+            name="link-2"
+            style={{ marginRight: 15 }}
+          />
           <Text>Insérer un lien de strong</Text>
         </Touchy>
         <Touchy onPress={() => navigateBibleView('strong-block')}>
-          <Icon.MaterialCommunityIcons color={theme.colors.primary} size={24} name="text" style={{ marginRight: 15 }} />
+          <Icon.MaterialCommunityIcons
+            color={theme.colors.primary}
+            size={24}
+            name="text"
+            style={{ marginRight: 15 }}
+          />
           <Text>Insérer un texte de strong</Text>
         </Touchy>
       </Container>

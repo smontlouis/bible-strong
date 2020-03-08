@@ -7,6 +7,8 @@ import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import compose from 'recompose/compose'
 import analytics from '@react-native-firebase/analytics'
+import { MenuProvider } from 'react-native-popup-menu'
+
 import ErrorBoundary from '~common/ErrorBoundary'
 
 import {
@@ -109,19 +111,28 @@ class InitApp extends React.Component {
     return (
       <ThemeProvider theme={theme}>
         <PaperProvider theme={paperTheme}>
-          <PersistGate loading={null} persistor={persistor}>
-            <DBStateProvider>
-              <>
-                <ErrorBoundary>
-                  <AppNavigator
-                    screenProps={{ theme: currentTheme }}
-                    onNavigationStateChange={this.onNavigationStateChange}
-                  />
-                </ErrorBoundary>
-                <Changelog />
-              </>
-            </DBStateProvider>
-          </PersistGate>
+          <MenuProvider
+            backHandler
+            customStyles={{
+              backdrop: {
+                backgroundColor: 'black',
+                opacity: 0.2
+              }
+            }}>
+            <PersistGate loading={null} persistor={persistor}>
+              <DBStateProvider>
+                <>
+                  <ErrorBoundary>
+                    <AppNavigator
+                      screenProps={{ theme: currentTheme }}
+                      onNavigationStateChange={this.onNavigationStateChange}
+                    />
+                  </ErrorBoundary>
+                  <Changelog />
+                </>
+              </DBStateProvider>
+            </PersistGate>
+          </MenuProvider>
         </PaperProvider>
       </ThemeProvider>
     )

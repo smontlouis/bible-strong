@@ -6,33 +6,33 @@ import Link from '~common/Link'
 
 const Wrapper = styled.View(({ theme }) => ({
   position: 'absolute',
-  bottom: 40,
+  bottom: 30,
   left: 0,
   right: 0,
   justifyContent: 'center',
   alignItems: 'center',
-  height: 40,
+  height: 30,
   pointerEvents: 'box-none'
 }))
 
 const StyledLink = styled(Link)(({ theme }) => ({
-  backgroundColor: theme.colors.primary,
+  backgroundColor: theme.colors.lightPrimary,
   paddingHorizontal: 15,
-  height: 40,
+  height: 30,
   borderRadius: 30,
   justifyContent: 'center',
   alignItems: 'center',
-  flexDirection: 'row'
+  flexDirection: 'row',
+  width: 80
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: 'white',
-  marginRight: 10
+  color: theme.colors.primary
 }))
 
 const TextButton = styled.Text(({ theme }) => ({
-  fontSize: 15,
-  color: 'white'
+  fontSize: 13,
+  color: theme.colors.primary
 }))
 
 const FloatingButton = ({ label, icon, onPress, route, params }) => {
@@ -40,7 +40,7 @@ const FloatingButton = ({ label, icon, onPress, route, params }) => {
     <Wrapper>
       <StyledLink route={route} params={params} onPress={onPress}>
         <StyledIcon name={icon} size={20} />
-        <TextButton>{label}</TextButton>
+        {/* <TextButton>{label}</TextButton> */}
       </StyledLink>
     </Wrapper>
   )

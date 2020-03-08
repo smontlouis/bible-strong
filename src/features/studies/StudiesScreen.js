@@ -1,11 +1,11 @@
 import React from 'react'
+import { FlatList } from 'react-native'
 import { useSelector, useDispatch } from 'react-redux'
 import compose from 'recompose/compose'
 
 import useLogin from '~helpers/useLogin'
 import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
-import FlatList from '~common/ui/FlatList'
 import Box from '~common/ui/Box'
 import FloatingButton from '~common/ui/FloatingButton'
 import TagsHeader from '~common/TagsHeader'
@@ -37,12 +37,6 @@ const StudiesScreen = () => {
 
   return (
     <Container>
-      <TagsHeader
-        title="Études"
-        setIsOpen={setTagsIsOpen}
-        isOpen={isTagsOpen}
-        selectedChip={selectedChip}
-      />
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={() => setTagsIsOpen(false)}
@@ -57,20 +51,36 @@ const StudiesScreen = () => {
       <Box flex>
         {filteredStudies.length ? (
           <FlatList
+            ListHeaderComponent={
+              <TagsHeader
+                title="Études"
+                setIsOpen={setTagsIsOpen}
+                isOpen={isTagsOpen}
+                selectedChip={selectedChip}
+              />
+            }
+            numColumns={2}
             data={filteredStudies}
             contentContainerStyle={{ paddingBottom: 100 }}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <StudyItem key={item.id} study={item} setStudySettings={setStudySettings} />
+              <StudyItem
+                key={item.id}
+                study={item}
+                setStudySettings={setStudySettings}
+              />
             )}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message="Aucune étude..." />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Aucune étude..."
+          />
         )}
         {isLogged && (
           <FloatingButton
             label="Nouvelle étude"
-            icon="feather"
+            icon="plus"
             route="EditStudy"
             params={{ canEdit: true }}
           />

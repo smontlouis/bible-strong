@@ -4,8 +4,8 @@ import { withTheme } from 'emotion-theming'
 import HTMLView from '~helpers/react-native-htmlview'
 
 export const textStyle = {
-  lineHeight: 28,
-  fontSize: 17
+  lineHeight: 29,
+  fontSize: 19
 }
 
 const styles = theme => ({

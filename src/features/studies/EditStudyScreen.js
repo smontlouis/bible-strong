@@ -43,9 +43,6 @@ const withStudy = Component => props => {
 
 class EditStudyScreen extends React.Component {
   state = {
-    activeFormats: {},
-    isHeaderModalOpen: false,
-    isBlockModalOpen: false,
     isColorModalOpen: false,
     isReadOnly: true,
     titlePrompt: '',
@@ -74,23 +71,6 @@ class EditStudyScreen extends React.Component {
 
     // TODO: See if it's soo expensive
     dispatch(uploadStudy(this.props.currentStudy.id))
-  }
-
-  setActiveFormats = (formats = {}) => {
-    this.setState({ activeFormats: JSON.parse(formats) })
-  }
-
-  openHeaderModal = () => this.setState({ isHeaderModalOpen: true })
-
-  closeHeaderModal = () => this.setState({ isHeaderModalOpen: false })
-
-  openBlockModal = () => {
-    this.dispatchToWebView('BLUR_EDITOR')
-    this.setState({ isBlockModalOpen: true })
-  }
-
-  closeBlockModal = () => {
-    this.setState({ isBlockModalOpen: false })
   }
 
   openColorModal = (value = true) => this.setState({ isColorModalOpen: value })
@@ -139,31 +119,13 @@ class EditStudyScreen extends React.Component {
             this.props.dispatch(uploadStudy(this.props.currentStudy.id))
           }}
           title={this.props.currentStudy.title}
-          activeFormats={this.state.activeFormats}
-          dispatchToWebView={this.dispatchToWebView}
-          openHeaderModal={this.openHeaderModal}
-          openBlockModal={this.openBlockModal}
-          openColorModal={this.openColorModal}
         />
         <WebViewQuillEditor
           isReadOnly={isReadOnly}
-          setActiveFormats={this.setActiveFormats}
-          shareMethods={this.acceptMethods}
           onDeltaChangeCallback={this.onDeltaChangeCallback}
           contentToDisplay={this.props.currentStudy.content}
           fontFamily={this.props.fontFamily}
           params={this.props.navigation.state.params}
-        />
-        <SelectHeaderModal
-          dispatchToWebView={this.dispatchToWebView}
-          activeFormats={this.state.activeFormats}
-          isOpen={this.state.isHeaderModalOpen}
-          onClosed={this.closeHeaderModal}
-        />
-        <SelectBlockModal
-          dispatchToWebView={this.dispatchToWebView}
-          isOpen={this.state.isBlockModalOpen}
-          onClosed={this.closeBlockModal}
           navigateBibleView={this.navigateBibleView}
         />
         <SelectColorModal

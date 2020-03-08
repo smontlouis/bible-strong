@@ -26,10 +26,18 @@ const Box = styled.View(props => {
     alignContent: props.alignContent || 'flex-start',
     alignSelf: props.alignSelf,
     // shorthands
-    flexWrap: (props.wrap && 'wrap') || (props.wrapReverse && 'wrap-reverse') || 'nowrap',
-    flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+    flexWrap:
+      (props.wrap && 'wrap') ||
+      (props.wrapReverse && 'wrap-reverse') ||
+      'nowrap',
+    flexDirection:
+      (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
 
     opacity: props.disabled ? 0.3 : props.opacity || 1,
+
+    backgroundColor: props.theme.colors[props.backgroundColor]
+      ? props.theme.colors[props.backgroundColor]
+      : props.backgroundColor,
 
     ...(props.grey && {
       backgroundColor: props.theme.colors.lightGrey
@@ -51,6 +59,17 @@ const Box = styled.View(props => {
       shadowRadius: 3,
       elevation: 2,
       borderRadius: 5,
+      overflow: 'visible'
+    }),
+
+    ...(props.lightShadow && {
+      backgroundColor: props.theme.colors.reverse,
+      shadowColor: 'rgb(89,131,240)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 7,
+      elevation: 1,
+      borderRadius: 8,
       overflow: 'visible'
     })
   }

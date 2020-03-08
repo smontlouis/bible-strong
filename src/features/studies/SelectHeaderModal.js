@@ -3,8 +3,8 @@ import Modal from 'react-native-modal'
 
 import styled from '@emotion/native'
 
-import Text from '~common/ui/Text'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import Text from '~common/ui/Text'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -54,22 +54,26 @@ const ChooseHeaderModal = ({
       isVisible={isOpen}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-    >
+      onBackdropPress={onClosed}>
       <Container>
-        {
-          headings.map(h => (
-            <Touchy
-              key={h.label}
-              onPress={() => {
-                dispatchToWebView('TOGGLE_FORMAT', { type: 'HEADER', value: h.value })
-                onClosed()
-              }}
-            >
-              <Text fontSize={16} bold color={activeFormats['header'] === h.value ? 'primary' : 'default'}>{h.label}</Text>
-            </Touchy>
-          ))
-        }
+        {headings.map(h => (
+          <Touchy
+            key={h.label}
+            onPress={() => {
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'HEADER',
+                value: h.value
+              })
+              onClosed()
+            }}>
+            <Text
+              fontSize={16}
+              bold
+              color={activeFormats.header === h.value ? 'primary' : 'default'}>
+              {h.label}
+            </Text>
+          </Touchy>
+        ))}
       </Container>
     </StylizedModal>
   )

@@ -1,6 +1,6 @@
 import React, { createRef } from 'react'
 import { withNavigation } from 'react-navigation'
-import { View, Alert } from 'react-native'
+import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
 import AssetUtils from 'expo-asset-utils'
@@ -8,16 +8,30 @@ import * as Sentry from '@sentry/react-native'
 
 import books from '~assets/bible_versions/books-desc'
 import literata from '~assets/fonts/literata'
+import StudyFooter from './StudyFooter'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef()
 
   state = {
-    isHTMLFileLoaded: false
+    isHTMLFileLoaded: false,
+    isKeyboardOpened: false,
+    activeFormats: {}
   }
 
   componentDidMount() {
-    this.props.shareMethods(this.dispatchToWebView)
+    const updateListener =
+      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
+    const resetListener =
+      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
+    this._listeners = [
+      Keyboard.addListener(updateListener, () =>
+        this.setState({ isKeyboardOpened: true })
+      ),
+      Keyboard.addListener(resetListener, () =>
+        this.setState({ isKeyboardOpened: false })
+      )
+    ]
 
     this.loadHTMLFile()
   }
@@ -99,6 +113,10 @@ class WebViewQuillEditor extends React.Component {
     `
   }
 
+  setActiveFormats = (formats = {}) => {
+    this.setState({ activeFormats: JSON.parse(formats) })
+  }
+
   handleMessage = event => {
     const { navigation } = this.props
     let msgData
@@ -164,7 +182,7 @@ class WebViewQuillEditor extends React.Component {
           return
         }
         case 'ACTIVE_FORMATS': {
-          this.props.setActiveFormats(msgData.payload)
+          this.setActiveFormats(msgData.payload)
           return
         }
         case 'CONSOLE_LOG': {
@@ -233,10 +251,9 @@ class WebViewQuillEditor extends React.Component {
     }
 
     return (
-      <View
+      <KeyboardAvoidingView
+        behavior="padding"
         style={{
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
           overflow: 'hidden',
           flex: 1
         }}>
@@ -257,8 +274,17 @@ class WebViewQuillEditor extends React.Component {
           renderError={this.renderError}
           onError={this.onError}
           bounces={false}
+          scrollEnabled={false}
+          hideKeyboardAccessoryView
         />
-      </View>
+        {this.state.isKeyboardOpened && (
+          <StudyFooter
+            navigateBibleView={this.props.navigateBibleView}
+            dispatchToWebView={this.dispatchToWebView}
+            activeFormats={this.state.activeFormats}
+          />
+        )}
+      </KeyboardAvoidingView>
     )
   }
 }

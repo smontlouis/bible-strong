@@ -9,6 +9,7 @@ import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
+
 // import codePush from 'react-native-code-push'
 import SplashScreen from 'react-native-splash-screen'
 

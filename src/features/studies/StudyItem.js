@@ -15,41 +15,51 @@ import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import truncate from '~helpers/truncate'
 
 const StudyLink = styled(Link)(({ theme }) => ({
-  marginHorizontal: 20,
-  paddingVertical: 20,
-  paddingHorizontal: 0,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
   position: 'relative',
-  flexDirection: 'row'
+  flexDirection: 'row',
+  margin: 10
 }))
 
 const StudyItem = ({ study, theme, setStudySettings }) => {
-  const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), { locale: frLocale })
+  const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
+    locale: frLocale
+  })
 
   return (
-    <StudyLink key={study.id} route="EditStudy" params={{ studyId: study.id }}>
-      <Box flex>
-        <Text color="darkGrey" fontSize={12}>
-          Modifié il y a {formattedDate}
-        </Text>
-        <Text bold scale={-2} marginTop={4}>
-          {study.title}
-        </Text>
-        {study.content && (
-          <Paragraph marginTop={10} scale={-3}>
-            {truncate(deltaToPlainText(study.content.ops), 180)}
-          </Paragraph>
-        )}
-        <Spacer size={1 / 2} />
-        <TagList tags={study.tags} />
-      </Box>
-      {setStudySettings && (
-        <Link onPress={() => setStudySettings(study.id)} padding>
-          <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
-        </Link>
-      )}
-    </StudyLink>
+    <Box width="50%">
+      <StudyLink
+        onLongPress={() => setStudySettings(study.id)}
+        key={study.id}
+        route="EditStudy"
+        params={{ studyId: study.id }}>
+        <Box flex backgroundColor="white" lightShadow padding={10} height={230}>
+          <Text color="darkGrey" fontSize={10}>
+            Il y a {formattedDate}
+          </Text>
+          {study.content ? (
+            <>
+              <Text bold scale={-2} marginTop={4}>
+                {study.title}
+              </Text>
+
+              <Paragraph marginTop={10} scale={-3}>
+                {truncate(deltaToPlainText(study.content.ops), 80)}
+              </Paragraph>
+            </>
+          ) : (
+            <>
+              <Text bold scale={-2} marginTop={4} color="border">
+                Étude vide
+              </Text>
+            </>
+          )}
+
+          <Box marginTop="auto">
+            <TagList limit={1} tags={study.tags} />
+          </Box>
+        </Box>
+      </StudyLink>
+    </Box>
   )
 }
 
