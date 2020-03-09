@@ -60,7 +60,9 @@ const HistoryItem = ({ item }) => {
   }
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
-    let { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
+    let { title } = formatVerseContent([
+      { Livre: book, Chapitre: chapter, Verset: verse }
+    ])
     if (title.endsWith(':1')) {
       title = title.substring(0, title.length - 2)
     }
@@ -175,7 +177,10 @@ const History = () => {
             renderItem={({ item }) => <HistoryItem item={item} />}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message="Historique vide..." />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Historique vide..."
+          />
         )}
       </Box>
     </Container>

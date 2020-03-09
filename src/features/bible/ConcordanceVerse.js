@@ -30,7 +30,11 @@ class ConcordanceVerse extends React.Component {
   }
 
   formatVerse = async (strongVerse, concordanceFor) => {
-    const { formattedTexte } = await verseToStrong(strongVerse, concordanceFor, true)
+    const { formattedTexte } = await verseToStrong(
+      strongVerse,
+      concordanceFor,
+      true
+    )
     this.setState({ formattedTexte })
   }
 
@@ -50,7 +54,8 @@ class ConcordanceVerse extends React.Component {
               isReadOnly: true,
               book: books[verse.Livre - 1],
               chapter: verse.Chapitre,
-              verse: verse.Verset
+              verse: verse.Verset,
+              focusVerses: [verse.Verset]
             },
             key: `bible-view-${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
           })

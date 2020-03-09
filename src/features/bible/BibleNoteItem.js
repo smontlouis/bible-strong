@@ -26,8 +26,10 @@ class BibleNoteItem extends React.Component {
   render() {
     const { item, setNoteSettings } = this.props
 
-    const [Livre, Chapitre, Verset] = item.noteId.split('-')
-    const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), { locale: frLocale })
+    const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
+    const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
+      locale: frLocale
+    })
 
     return (
       <Box>
@@ -37,7 +39,8 @@ class BibleNoteItem extends React.Component {
             isReadOnly: true,
             book: books[Livre - 1],
             chapter: Number(Chapitre),
-            verse: Number(Verset)
+            verse: Number(Verset),
+            focusVerses: [Number(Verset)]
           }}>
           <Box flex>
             <Box row justifyContent="space-between">
@@ -58,7 +61,11 @@ class BibleNoteItem extends React.Component {
             <TagList tags={item.notes.tags} />
           </Box>
           <Link padding onPress={() => setNoteSettings(item.noteId)}>
-            <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
+            <Icon.Feather
+              name="more-vertical"
+              size={20}
+              color={theme.colors.tertiary}
+            />
           </Link>
         </NoteLink>
         <Border marginHorizontal={20} />

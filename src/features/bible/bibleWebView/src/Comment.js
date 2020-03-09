@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import truncHTML from 'trunc-html'
 import styled from '@emotion/styled'
-import { dispatch, NAVIGATE_TO_BIBLE_VIEW } from './dispatch'
+import { dispatch, NAVIGATE_TO_BIBLE_VIEW, CONSOLE_LOG } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
 
@@ -114,7 +114,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
         })
       })
     })
-  }, [mhyComment, id])
+  }, [mhyComment, id, readMore])
 
   useEffect(() => {
     if (previousComment !== comment) {
