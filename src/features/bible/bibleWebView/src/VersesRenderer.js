@@ -25,6 +25,8 @@ const exists = obj => {
 
 const Container = styled('div')(
   ({ settings: { alignContent, theme, colors }, rtl }) => ({
+    maxWidth: '800px',
+    margin: '0 auto',
     padding: '10px 15px',
     paddingBottom: '210px',
     textAlign: alignContent,

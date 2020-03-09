@@ -52,11 +52,11 @@ const ReadMore = styled('div')(
     fontSize: scaleFontSize(15, fontSizeScale),
     fontFamily,
     textAlign: 'center',
-    margin: '0',
     height: 20,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    margin: '20px 0'
   })
 )
 
@@ -133,21 +133,21 @@ const Comment = ({ id, settings, comment, isIntro }) => {
   }, [comment, id, previousComment, previousReadMore, readMore])
 
   return (
-    <StyledComment id={id} settings={settings}>
+    <div id={id}>
       {/* <Copyright settings={settings}>Matthew Henry trad. Dominique Osché</Copyright> */}
       {readMore && (
-        <>
+        <StyledComment settings={settings}>
           {isIntro && <Intro settings={settings}>Introduction</Intro>}
           <div
             dangerouslySetInnerHTML={{ __html: mhyComment }}
             style={{ paddingBottom: 20 }}
           />
-        </>
+        </StyledComment>
       )}
       <ReadMore onClick={onReadMore} settings={settings}>
         {readMore ? '- Fermer -' : '- Lire le commentaire -'}
       </ReadMore>
-    </StyledComment>
+    </div>
   )
 }
 

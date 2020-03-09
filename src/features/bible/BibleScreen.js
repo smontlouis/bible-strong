@@ -80,7 +80,7 @@ class BibleScreen extends React.Component {
     }
 
     return (
-      <Container>
+      <Container pure>
         <BibleHeader
           isReadOnly={isReadOnly}
           isSelectionMode={isSelectionMode}

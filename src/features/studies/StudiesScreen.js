@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import compose from 'recompose/compose'
 
 import useLogin from '~helpers/useLogin'
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -24,6 +25,7 @@ const StudiesScreen = () => {
   const [isStudySettingsOpen, setStudySettings] = React.useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
   const dispatch = useDispatch()
+  const r = useMediaQueriesArray()
 
   const [selectedChip, setSelectedChip] = React.useState(null)
   const studies = useSelector(state => Object.values(state.user.bible.studies))
@@ -51,6 +53,7 @@ const StudiesScreen = () => {
       <Box flex>
         {filteredStudies.length ? (
           <FlatList
+            key={r(['xs', 'sm', 'md', 'lg'])}
             ListHeaderComponent={
               <TagsHeader
                 title="Études"
@@ -59,7 +62,7 @@ const StudiesScreen = () => {
                 selectedChip={selectedChip}
               />
             }
-            numColumns={2}
+            numColumns={r([2, 2, 4, 5])}
             data={filteredStudies}
             contentContainerStyle={{ paddingBottom: 100 }}
             keyExtractor={item => item.id}

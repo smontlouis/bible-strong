@@ -27,6 +27,9 @@ const StyledText = styled(Text)({
 })
 
 const HeaderBox = styled(Box)(({ theme }) => ({
+  maxWidth: 830,
+  width: '100%',
+  alignSelf: 'center',
   height: 60,
   alignItems: 'center',
   borderBottomColor: theme.colors.border
@@ -80,7 +83,8 @@ const Header = ({
         </Box>
         <Box grow center>
           <StyledText>
-            {book.Nom} {chapter}:{focusVerses ? formatVerses(focusVerses) : verse} - {version}
+            {book.Nom} {chapter}:
+            {focusVerses ? formatVerses(focusVerses) : verse} - {version}
           </StyledText>
         </Box>
         <Box flex />
@@ -98,11 +102,16 @@ const Header = ({
       )}
       <LinkBox route="BibleSelect" style={{ paddingLeft: 15, paddingRight: 0 }}>
         <StyledText>
-          {isSmall ? truncate(`${book.Nom} ${chapter}`, 10) : `${book.Nom} ${chapter}`}
+          {isSmall
+            ? truncate(`${book.Nom} ${chapter}`, 10)
+            : `${book.Nom} ${chapter}`}
         </StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route="VersionSelector" params={{ version }} style={{ paddingRight: 0 }}>
+      <LinkBox
+        route="VersionSelector"
+        params={{ version }}
+        style={{ paddingRight: 0 }}>
         <StyledText>{version}</StyledText>
         <StyledIcon name="chevron-down" size={15} />
       </LinkBox>

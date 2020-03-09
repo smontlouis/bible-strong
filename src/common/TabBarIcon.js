@@ -38,13 +38,11 @@ const TabBarIcon = props => {
     <Animatable.View
       style={{
         position: 'relative',
-        ...(orientation.portrait
-          ? { marginTop: props.focused ? -8 : -3 }
-          : { marginLeft: props.focused ? 8 : 0 })
+        marginTop: props.focused ? -8 : -3
       }}
       duration={400}
       easing="ease-in-out-expo"
-      transition={orientation.portrait ? 'marginTop' : 'marginLeft'}>
+      transition="marginTop">
       <Icon.Feather
         name={props.name}
         size={23}

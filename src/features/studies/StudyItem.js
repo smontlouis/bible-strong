@@ -6,13 +6,13 @@ import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
-import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import TagList from '~common/TagList'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import truncate from '~helpers/truncate'
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 
 const StudyLink = styled(Link)(({ theme }) => ({
   position: 'relative',
@@ -24,9 +24,10 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
     locale: frLocale
   })
+  const r = useMediaQueriesArray()
 
   return (
-    <Box width="50%">
+    <Box width={r(['50%', '50%', '20%', '15%'])}>
       <StudyLink
         onLongPress={() => setStudySettings(study.id)}
         key={study.id}

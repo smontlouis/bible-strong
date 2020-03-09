@@ -14,15 +14,15 @@ export default function useDimensions() {
     screen
   })
 
-  const onChange = ({ window, screen }) => {
-    setDimensions({ window, screen })
-  }
-
   useEffect(() => {
+    const onChange = ({ window, screen }) => {
+      setDimensions({ window, screen })
+    }
+
     Dimensions.addEventListener('change', onChange)
 
     return () => Dimensions.removeEventListener('change', onChange)
-  }, [])
+  })
 
   return dimensions
 }

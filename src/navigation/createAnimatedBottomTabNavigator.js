@@ -25,8 +25,8 @@ const RoundedTopBottomBar = styled.View(({ theme }) => ({
 
 const Container = styled.View(({ orientation }) => ({
   flex: 1,
-  overflow: 'hidden',
-  flexDirection: orientation.portrait ? 'column' : 'row'
+  overflow: 'hidden'
+  // flexDirection: orientation.portrait ? 'column' : 'row'
 }))
 
 class AnimatedTabNavigationView extends React.Component {
@@ -130,7 +130,7 @@ class AnimatedTabNavigationView extends React.Component {
               </Animated.View>
             )
           })}
-          {orientation.portrait && <RoundedTopBottomBar />}
+          {this.props.navigation.state.index !== 2 && <RoundedTopBottomBar />}
         </ScreenContainer>
         <TabBar
           getButtonComponent={this.getButtonComponent}

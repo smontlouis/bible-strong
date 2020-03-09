@@ -114,6 +114,7 @@ const BibleParamsModal = ({
     const exists = await getIfDatabaseExists('commentaires-mhy')
 
     if (!exists) {
+      onClosed()
       SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
       navigation.navigate('Downloads')
       return

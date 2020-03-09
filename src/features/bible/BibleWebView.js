@@ -7,7 +7,6 @@ import * as Sentry from '@sentry/react-native'
 import literata from '../../assets/fonts/literata'
 import books from '~assets/bible_versions/books'
 import SnackBar from '~common/SnackBar'
-import { MAX_WIDTH } from '~helpers/useDimensions'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
@@ -239,11 +238,7 @@ class BibleWebView extends Component {
           borderTopRightRadius: 30,
           overflow: 'hidden',
           flex: 1,
-          opacity: this.state.webViewOpacity,
-          maxWidth: MAX_WIDTH,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          width: '100%'
+          opacity: this.state.webViewOpacity
         }}>
         {this.state.isHTMLFileLoaded && (
           <WebView

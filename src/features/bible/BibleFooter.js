@@ -25,43 +25,45 @@ const Container = styled.View(({ audioMode, theme }) => ({
   zIndex: 1,
 
   ...(audioMode && {
-    height: 100,
+    height: 120,
     backgroundColor: theme.colors.reverse,
     marginLeft: 0,
     marginRight: 0,
-    shadowColor: theme.colors.default,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 2,
-    bottom: 10,
+    // shadowColor: theme.colors.default,
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.3,
+    // shadowRadius: 3,
+    // elevation: 2,
+    bottom: 0,
     paddingBottom: 20
   })
 }))
 
-const IconButton = styled.TouchableOpacity(({ theme, big, noShadow, color }) => ({
-  width: 40,
-  height: 40,
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: 20,
-  backgroundColor: color ? theme.colors[color] : theme.colors.reverse,
+const IconButton = styled.TouchableOpacity(
+  ({ theme, big, noShadow, color }) => ({
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: color ? theme.colors[color] : theme.colors.reverse,
 
-  ...(!noShadow && {
-    shadowColor: theme.colors.default,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 2,
-    overflow: 'visible'
-  }),
+    ...(!noShadow && {
+      shadowColor: theme.colors.default,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 3,
+      elevation: 2,
+      overflow: 'visible'
+    }),
 
-  ...(big && {
-    width: 50,
-    height: 50,
-    borderRadius: 25
+    ...(big && {
+      width: 50,
+      height: 50,
+      borderRadius: 25
+    })
   })
-}))
+)
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: color ? theme.colors[color] : theme.colors.tertiary
@@ -141,7 +143,9 @@ const useLoadSound = (
         console.log(audioUrl)
         setError(true)
         setIsLoading(false)
-        SnackBar.show('Impossible de lire le chapitre. Vérifiez votre connexion internet.')
+        SnackBar.show(
+          'Impossible de lire le chapitre. Vérifiez votre connexion internet.'
+        )
 
         // TODO: check error to send to sentry
       }
@@ -203,7 +207,9 @@ const useLoadSound = (
 }
 
 const AudioBar = ({ audioObject }) => {
-  const progress = audioObject ? (audioObject.positionMillis * 100) / audioObject.durationMillis : 0
+  const progress = audioObject
+    ? (audioObject.positionMillis * 100) / audioObject.durationMillis
+    : 0
   return (
     <>
       <Box height={4} position="relative" backgroundColor="rgba(0,0,0,0.2)">
@@ -228,7 +234,14 @@ const AudioBar = ({ audioObject }) => {
   )
 }
 
-const PlayButton = ({ disabled, isPlaying, setIsPlaying, error, isLoading, isBuffering }) => {
+const PlayButton = ({
+  disabled,
+  isPlaying,
+  setIsPlaying,
+  error,
+  isLoading,
+  isBuffering
+}) => {
   if (error) {
     return (
       <IconButton big disabled={disabled} activeOpacity={0.5} noShadow>
@@ -252,14 +265,24 @@ const PlayButton = ({ disabled, isPlaying, setIsPlaying, error, isLoading, isBuf
       activeOpacity={0.5}
       onPress={() => setIsPlaying(!isPlaying)}
       noShadow>
-      <StyledIcon name={isPlaying ? 'pause' : 'play'} size={23} style={{ marginLeft: 3 }} />
+      <StyledIcon
+        name={isPlaying ? 'pause' : 'play'}
+        size={23}
+        style={{ marginLeft: 3 }}
+      />
     </IconButton>
   )
 }
 
 const OpenAudioModeButton = ({ error, isPlaying, isBuffering, isLoading }) => {
   if (error) {
-    return <StyledIcon name="x" size={20} color={isPlaying || isBuffering ? 'reverse' : ''} />
+    return (
+      <StyledIcon
+        name="x"
+        size={20}
+        color={isPlaying || isBuffering ? 'reverse' : ''}
+      />
+    )
   }
 
   if (isPlaying && (isLoading || isBuffering)) {
@@ -338,7 +361,9 @@ const BibleFooter = ({
           {hasPreviousChapter && (
             <IconButton
               noShadow={audioMode}
-              disabled={disabled || (isLoading && audioMode) || (isLoading && isPlaying)}
+              disabled={
+                disabled || (isLoading && audioMode) || (isLoading && isPlaying)
+              }
               activeOpacity={0.5}
               onPress={() => {
                 setIsLoading(true)
@@ -358,7 +383,9 @@ const BibleFooter = ({
                 setAudioMode(true)
               }}
               color={isPlaying ? 'primary' : ''}>
-              <OpenAudioModeButton {...{ error, isPlaying, isBuffering, isLoading }} />
+              <OpenAudioModeButton
+                {...{ error, isPlaying, isBuffering, isLoading }}
+              />
             </IconButton>
           )}
           {audioMode && (
@@ -395,7 +422,9 @@ const BibleFooter = ({
           {hasNextChapter && (
             <IconButton
               noShadow={audioMode}
-              disabled={disabled || (isLoading && audioMode) || (isLoading && isPlaying)}
+              disabled={
+                disabled || (isLoading && audioMode) || (isLoading && isPlaying)
+              }
               activeOpacity={0.5}
               onPress={() => {
                 setIsLoading(true)
