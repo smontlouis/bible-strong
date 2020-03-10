@@ -18,7 +18,10 @@ import SectionTitle from '~common/SectionTitle'
 import waitForDatabase from '~common/waitForNaveDB'
 
 import NaveItem from './NaveItem'
-import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
+import {
+  useSearchValue,
+  useResultsByLetterOrSearch
+} from '../lexique/useUtilities'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -29,7 +32,9 @@ const useSectionResults = results => {
       return
     }
     const sectionResults = results.reduce((list, naveItem) => {
-      const listItem = list.find(item => item.title && item.title === naveItem.letter)
+      const listItem = list.find(
+        item => item.title && item.title === naveItem.letter
+      )
       if (!listItem) {
         list.push({ title: naveItem.letter, data: [naveItem] })
       } else {
@@ -85,7 +90,11 @@ const NaveScreen = () => {
         noBorder
         rightComponent={
           <Link route="NaveWarning" padding>
-            <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
+            <Icon.Feather
+              size={20}
+              name="alert-triangle"
+              color="rgb(255,188,0)"
+            />
           </Link>
         }
       />
@@ -113,7 +122,11 @@ const NaveScreen = () => {
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="quint">
-                <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
+                <Text
+                  title
+                  fontWeight="bold"
+                  fontSize={16}
+                  style={{ color: 'white' }}>
                   {title.toUpperCase()}
                 </Text>
               </SectionTitle>
@@ -123,10 +136,15 @@ const NaveScreen = () => {
             keyExtractor={item => item.name_lower}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message="Aucun mot trouvé..." />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Aucun mot trouvé..."
+          />
         )}
       </Box>
-      {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}
+      {!searchValue && (
+        <AlphabetList color="quint" letter={letter} setLetter={setLetter} />
+      )}
     </Container>
   )
 }

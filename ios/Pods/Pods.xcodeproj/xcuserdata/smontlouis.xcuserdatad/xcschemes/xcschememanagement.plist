@@ -529,6 +529,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>react-native-netinfo.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>react-native-notifications.xcscheme</key>
 		<dict>
 			<key>isShown</key>

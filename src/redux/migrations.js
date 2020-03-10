@@ -221,5 +221,14 @@ export default {
         fontFamily: ''
       }
     }
+  },
+  16: state => {
+    return {
+      ...state,
+      isLoading: {
+        ...state.user,
+        isLoading: false
+      }
+    }
   }
 }

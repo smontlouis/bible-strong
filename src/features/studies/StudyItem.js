@@ -33,7 +33,13 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
         key={study.id}
         route="EditStudy"
         params={{ studyId: study.id }}>
-        <Box flex backgroundColor="white" lightShadow padding={10} height={230}>
+        <Box
+          flex
+          backgroundColor="reverse"
+          lightShadow
+          padding={10}
+          height={230}
+          borderRadius={8}>
           <Text color="darkGrey" fontSize={10}>
             Il y a {formattedDate}
           </Text>

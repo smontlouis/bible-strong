@@ -27,7 +27,10 @@ const withFireAuth = WrappedComponent => props => {
       if (e.code === 'auth/weak-password') {
         SnackBar.show('Le mot de passe est trop court.')
       }
-      if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+      if (
+        e.code === 'auth/wrong-password' ||
+        e.code === 'auth/user-not-found'
+      ) {
         SnackBar.show('Mot de passe invalide ou utilisateur inexistant.')
       }
       if (e.code === 'auth/invalid-email') {
@@ -36,7 +39,14 @@ const withFireAuth = WrappedComponent => props => {
       console.log('Error', e)
     }
 
-    FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError)
+    FireAuth.init(
+      onLogin,
+      onUserChange,
+      onLogout,
+      emailVerified,
+      onError,
+      dispatch
+    )
   }, [dispatch])
 
   return <WrappedComponent {...props} />

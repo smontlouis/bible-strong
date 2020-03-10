@@ -46,6 +46,33 @@ export default class ReactQuillEditor extends React.Component {
 
   addTextChangeEventToEditor = () => {
     this.quill.on('text-change', debounce(this.onChangeText, 500))
+
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
+      const isReadOnly = this.quill.container.classList.contains('ql-disabled')
+
+      if (isReadOnly) return
+      if (type !== Quill.events.SELECTION_CHANGE) return
+
+      if (range) {
+        const selectedBottom = this.quill.getBounds(range).bottom
+
+        setTimeout(() => {
+          const windowHeight = document.body.getBoundingClientRect().height
+
+          if (selectedBottom > windowHeight) {
+            document
+              .querySelector('.ql-editor')
+              .scrollTo(
+                0,
+                document.querySelector('.ql-editor').scrollTop +
+                  selectedBottom -
+                  windowHeight +
+                  30
+              )
+          }
+        }, 300)
+      }
+    })
   }
 
   loadEditor = ({ fontFamily }) => {

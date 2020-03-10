@@ -69,7 +69,6 @@ const Box = styled.View(props => {
       shadowOpacity: 0.1,
       shadowRadius: 7,
       elevation: 1,
-      borderRadius: 8,
       overflow: 'visible'
     })
   }

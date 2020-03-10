@@ -72,6 +72,9 @@ export const SET_VERSION_UPDATED = 'user/SET_VERSION_UPDATED'
 
 export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
 
+export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
+export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
+
 const initialState = {
   id: '',
   email: '',
@@ -80,6 +83,7 @@ const initialState = {
   provider: '',
   lastSeen: 0,
   emailVerified: false,
+  isLoading: false,
   notifications: {
     verseOfTheDay: '07:00',
     notificationId: ''
@@ -148,6 +152,14 @@ const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
 // UserReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case APP_FETCH_DATA: {
+      draft.isLoading = true
+      break
+    }
+    case APP_FETCH_DATA_FAIL: {
+      draft.isLoading = false
+      break
+    }
     case SET_FONT_FAMILY: {
       draft.fontFamily = action.payload
       break
@@ -184,6 +196,7 @@ export default produce((draft, action) => {
       draft.provider = provider
       draft.lastSeen = lastSeen
       draft.emailVerified = emailVerified
+      draft.isLoading = false
 
       if (bible) {
         if (!isLogged) {

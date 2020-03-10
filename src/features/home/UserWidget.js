@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, Platform } from 'react-native'
+import { ScrollView, Platform, ActivityIndicator } from 'react-native'
 import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
@@ -15,6 +15,8 @@ import Link from '~common/Link'
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import NaveIcon from '~common/NaveIcon'
+
+import OfflineNotice from './OfflineNotice'
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -80,12 +82,15 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
 
 const UserWidget = ({ theme }) => {
   const { isLogged, user } = useLogin()
-  const { highlights, notes, studies, tags } = useSelector(({ user: { bible } }) => ({
-    highlights: Object.keys(bible.highlights).length,
-    notes: Object.keys(bible.notes).length,
-    studies: Object.keys(bible.studies).length,
-    tags: Object.keys(bible.tags).length
-  }))
+  const isLoading = useSelector(state => state.user.isLoading)
+  const { highlights, notes, studies, tags } = useSelector(
+    ({ user: { bible } }) => ({
+      highlights: Object.keys(bible.highlights).length,
+      notes: Object.keys(bible.notes).length,
+      studies: Object.keys(bible.studies).length,
+      tags: Object.keys(bible.tags).length
+    })
+  )
 
   if (!isLogged) {
     return (
@@ -95,7 +100,8 @@ const UserWidget = ({ theme }) => {
             Bienvenue
           </Text>
           <Paragraph marginTop={20} marginBottom={20}>
-            Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !
+            Connectez-vous pour profiter de toutes les fonctionnalités de la
+            Bible Strong !
           </Paragraph>
           <Button
             route="Login"
@@ -117,10 +123,14 @@ const UserWidget = ({ theme }) => {
   return (
     <Container>
       <Box flex paddingHorizontal={20} overflow="visible">
+        <OfflineNotice />
+
         <Box row alignItems="center" marginBottom={20} overflow="visible">
           <Box flex>
             <Text title fontSize={30}>
-              {`Bonjour ${user.displayName ? user.displayName.split(' ')[0] : ''},`}
+              {`Bonjour ${
+                user.displayName ? user.displayName.split(' ')[0] : ''
+              },`}
               {/* TODO: Extract in function */}
             </Text>
           </Box>
@@ -133,9 +143,20 @@ const UserWidget = ({ theme }) => {
           </ProfileContainer>
         </Box>
 
+        {isLoading && (
+          <Box row>
+            <ActivityIndicator color="black" />
+            <Text marginLeft={10} bold color="primary">
+              Synchronisation des données...
+            </Text>
+          </Box>
+        )}
+
         {!user.emailVerified && (
           <Box marginTop={10}>
-            <Text color="quart">Un email vous a été envoyé, merci de vérifier votre adresse.</Text>
+            <Text color="quart">
+              Un email vous a été envoyé, merci de vérifier votre adresse.
+            </Text>
           </Box>
         )}
       </Box>
@@ -191,7 +212,13 @@ const UserWidget = ({ theme }) => {
           <Button
             route="Lexique"
             title="Lexique"
-            leftIcon={<LexiqueIcon color="white" style={{ marginRight: 10 }} size={25} />}
+            leftIcon={
+              <LexiqueIcon
+                color="white"
+                style={{ marginRight: 10 }}
+                size={25}
+              />
+            }
           />
         </Box>
         <Box width={20} />
@@ -201,7 +228,12 @@ const UserWidget = ({ theme }) => {
             route="Dictionnaire"
             title="Dictionnaire"
             leftIcon={
-              <DictionnaireIcon secondary color="white" style={{ marginRight: 10 }} size={25} />
+              <DictionnaireIcon
+                secondary
+                color="white"
+                style={{ marginRight: 10 }}
+                size={25}
+              />
             }
           />
         </Box>
@@ -212,7 +244,14 @@ const UserWidget = ({ theme }) => {
           color={theme.colors.quint}
           route="Nave"
           title="Bible thématique Nave"
-          leftIcon={<NaveIcon secondary color="white" style={{ marginRight: 10 }} size={25} />}
+          leftIcon={
+            <NaveIcon
+              secondary
+              color="white"
+              style={{ marginRight: 10 }}
+              size={25}
+            />
+          }
         />
       </Box>
     </Container>

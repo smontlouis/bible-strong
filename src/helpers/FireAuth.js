@@ -11,6 +11,7 @@ import * as Network from 'expo-network'
 
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
+import { APP_FETCH_DATA, APP_FETCH_DATA_FAIL } from '~redux/modules/user'
 
 const FireAuth = class {
   user = null
@@ -27,7 +28,14 @@ const FireAuth = class {
 
   onError = null
 
-  async init(onLogin, onUserChange, onLogout, onEmailVerified, onError) {
+  async init(
+    onLogin,
+    onUserChange,
+    onLogout,
+    onEmailVerified,
+    onError,
+    dispatch
+  ) {
     this.onUserChange = onUserChange
     this.onLogout = onLogout
     this.onEmailVerified = onEmailVerified
@@ -72,7 +80,16 @@ const FireAuth = class {
         let remoteLastSeen = null
 
         const userDoc = firebaseDb.collection('users').doc(user.uid)
-        let userData = await userDoc.get()
+
+        dispatch({ type: APP_FETCH_DATA })
+        let userData
+        try {
+          userData = await userDoc.get()
+        } catch (e) {
+          dispatch({ type: APP_FETCH_DATA_FAIL })
+          console.log('Erreur')
+          console.log(e)
+        }
         let data = userData.data()
 
         if (data) {
