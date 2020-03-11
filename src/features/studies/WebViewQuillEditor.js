@@ -282,6 +282,7 @@ class WebViewQuillEditor extends React.Component {
         {this.state.isKeyboardOpened && (
           <StudyFooter
             navigateBibleView={this.props.navigateBibleView}
+            openBibleView={this.props.openBibleView}
             dispatchToWebView={this.dispatchToWebView}
             activeFormats={this.state.activeFormats}
           />

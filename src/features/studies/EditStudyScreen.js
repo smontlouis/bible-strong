@@ -75,6 +75,12 @@ class EditStudyScreen extends React.Component {
     })
   }
 
+  openBibleView = () => {
+    this.props.navigation.navigate('BibleView', {
+      hasBackButton: true
+    })
+  }
+
   setTitlePrompt = value => this.setState({ titlePrompt: value })
 
   setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
@@ -90,7 +96,7 @@ class EditStudyScreen extends React.Component {
     } = this.state
 
     return (
-      <Container>
+      <Container pure>
         <EditStudyHeader
           isReadOnly={isReadOnly}
           setTitlePrompt={() =>
@@ -118,6 +124,7 @@ class EditStudyScreen extends React.Component {
           fontFamily={this.props.fontFamily}
           params={this.props.navigation.state.params}
           navigateBibleView={this.navigateBibleView}
+          openBibleView={this.openBibleView}
         />
         <StudyTitlePrompt
           titlePrompt={titlePrompt}

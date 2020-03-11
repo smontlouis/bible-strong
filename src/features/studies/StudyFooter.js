@@ -21,6 +21,7 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
+import useMediaQueries from '~helpers/useMediaQueries'
 
 const { Popover } = renderers
 
@@ -326,12 +327,70 @@ const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }) => ({
   backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent'
 }))
 
+const FormatIconForPopover = FormatIcon.withComponent(Box)
+
+const ColorPopover = ({ type, setColor, ctx }) => (
+  <Box width={200}>
+    <Box row marginBottom={15} padding={5} alignItems="center">
+      <Icon.Feather
+        onPress={() => {
+          setColor(type, false)
+          ctx.menuActions.closeMenu()
+        }}
+        name="x-circle"
+        size={23}
+        style={{ marginRight: 10 }}
+      />
+      <Text
+        onPress={() => {
+          setColor(type, false)
+          ctx.menuActions.closeMenu()
+        }}
+        fontSize={18}>
+        Aucune
+      </Text>
+    </Box>
+    {lighten.map(l => (
+      <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
+        {colors.map(c => (
+          <TouchableCircle
+            key={c}
+            size={20}
+            color={Color(c)
+              .lighten(l)
+              .string()}
+            onPress={() => {
+              setColor(
+                type,
+                Color(c)
+                  .lighten(l)
+                  .string()
+              )
+              ctx.menuActions.closeMenu()
+            }}
+          />
+        ))}
+      </Box>
+    ))}
+  </Box>
+)
+
 const StudyFooter = ({
   dispatchToWebView,
   navigateBibleView,
+  openBibleView,
   activeFormats,
   ctx
 }) => {
+  const deviceSize = useMediaQueries()
+
+  const setColor = (colorModal, color) => {
+    dispatchToWebView('TOGGLE_FORMAT', {
+      type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
+      value: color
+    })
+  }
+
   return (
     <Box row height={50} backgroundColor="#F9F9F9" alignItems="center">
       <Box row flex center paddingLeft={10}>
@@ -372,13 +431,100 @@ const StudyFooter = ({
           style={{ marginRight: 10 }}>
           <FeatherIcon color="primary" name="underline" size={16} />
         </FormatIcon>
-
-        <SelectMore
-          dispatchToWebView={dispatchToWebView}
-          activeFormats={activeFormats}
-          ctx={ctx}
-        />
+        {deviceSize === 'xs' || deviceSize === 'sm' ? (
+          <SelectMore
+            dispatchToWebView={dispatchToWebView}
+            activeFormats={activeFormats}
+            ctx={ctx}
+          />
+        ) : (
+          <>
+            <PopOverMenu
+              element={
+                <FormatIconForPopover
+                  isSelected={activeFormats.background}
+                  style={{ marginHorizontal: 10 }}>
+                  <BackgroundIcon color={activeFormats.background} />
+                </FormatIconForPopover>
+              }
+              popover={
+                <ColorPopover type="background" ctx={ctx} setColor={setColor} />
+              }
+            />
+            <PopOverMenu
+              element={
+                <FormatIconForPopover
+                  isSelected={activeFormats.color}
+                  style={{ marginHorizontal: 10 }}>
+                  <ColorIcon color={activeFormats.color} />
+                </FormatIconForPopover>
+              }
+              popover={
+                <ColorPopover type="color" ctx={ctx} setColor={setColor} />
+              }
+            />
+            <FormatIcon
+              isSelected={activeFormats.blockquote}
+              style={{ marginHorizontal: 10 }}
+              onPress={() =>
+                dispatchToWebView('TOGGLE_FORMAT', {
+                  type: 'BLOCKQUOTE',
+                  value: !activeFormats.blockquote
+                })
+              }>
+              <QuoteIcon color="primary" />
+            </FormatIcon>
+            <FormatIcon
+              isSelected={activeFormats.list === 'bullet'}
+              style={{ marginHorizontal: 10 }}
+              onPress={() =>
+                dispatchToWebView('TOGGLE_FORMAT', {
+                  type: 'LIST',
+                  value: activeFormats.list === 'bullet' ? false : 'bullet'
+                })
+              }>
+              <FeatherIcon color="primary" name="list" size={20} />
+            </FormatIcon>
+            <FormatIcon
+              isSelected={activeFormats.list === 'ordered'}
+              style={{ marginHorizontal: 10 }}
+              onPress={() =>
+                dispatchToWebView('TOGGLE_FORMAT', {
+                  type: 'LIST',
+                  value: activeFormats.list === 'ordered' ? false : 'ordered'
+                })
+              }>
+              <MaterialIcon
+                color="primary"
+                name="format-list-numbered"
+                size={20}
+              />
+            </FormatIcon>
+            <FormatIcon
+              style={{ marginHorizontal: 10 }}
+              onPress={() => {
+                dispatchToWebView('BLOCK_DIVIDER')
+              }}>
+              <FeatherIcon size={20} name="minus" color="primary" />
+            </FormatIcon>
+            <TouchableIcon
+              onPress={() =>
+                dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
+              }>
+              <MaterialIcon name="undo" size={20} color="primary" />
+            </TouchableIcon>
+            <TouchableIcon
+              onPress={() =>
+                dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
+              }>
+              <MaterialIcon name="redo" size={20} color="primary" />
+            </TouchableIcon>
+          </>
+        )}
         <Box marginLeft="auto" />
+        <FormatIcon onPress={openBibleView} style={{ marginRight: 15 }}>
+          <FeatherIcon color="primary" name="book-open" size={20} />
+        </FormatIcon>
         <SelectBlock navigateBibleView={navigateBibleView} />
       </Box>
       <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>

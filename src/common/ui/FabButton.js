@@ -22,14 +22,18 @@ const StyledLink = styled(Link)(({ theme }) => ({
   right: 30
 }))
 
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
+const StyledIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
   color: 'white'
 }))
 
 const Fab = ({ icon, onPress, route, params, component: Component }) => {
   return (
     <StyledLink route={route} params={params} onPress={onPress}>
-      {Component ? <Component color="white" /> : <StyledIcon name={icon} size={22} />}
+      {Component ? (
+        <Component color="white" />
+      ) : (
+        <StyledIcon name={icon} size={22} />
+      )}
     </StyledLink>
   )
 }

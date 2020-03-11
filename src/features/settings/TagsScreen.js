@@ -30,7 +30,8 @@ const Chip = styled(Box)(({ theme }) => ({
 }))
 
 const TagItem = ({ item, setOpen }) => {
-  const highlightsNumber = item.highlights && Object.keys(item.highlights).length
+  const highlightsNumber =
+    item.highlights && Object.keys(item.highlights).length
   const notesNumber = item.notes && Object.keys(item.notes).length
   const studiesNumber = item.studies && Object.keys(item.studies).length
 
@@ -44,7 +45,8 @@ const TagItem = ({ item, setOpen }) => {
               {!!highlightsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {highlightsNumber} {`surbrillance${highlightsNumber > 1 ? 's' : ''}`}
+                    {highlightsNumber}{' '}
+                    {`surbrillance${highlightsNumber > 1 ? 's' : ''}`}
                   </Text>
                 </Chip>
               )}
@@ -106,7 +108,10 @@ const TagsScreen = () => {
           contentContainerStyle={{ paddingBottom: 70 }}
         />
       ) : (
-        <Empty source={require('~assets/images/empty.json')} message="Aucune étiquette..." />
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Aucune étiquette..."
+        />
       )}
 
       <Modal.Menu isOpen={!!isOpen} onClosed={() => setOpen(false)}>
@@ -137,7 +142,7 @@ const TagsScreen = () => {
         }}
       />
       <FabButton
-        icon="tag"
+        icon="add"
         onPress={() => {
           setTitlePrompt(true)
         }}

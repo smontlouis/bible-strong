@@ -32,7 +32,13 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   color: isDisabled ? theme.colors.border : theme.colors.primary
 }))
 
-const TitlePrompt = ({ isOpen, title, onClosed, onSave }) => {
+const TitlePrompt = ({
+  isOpen,
+  title,
+  onClosed,
+  onSave,
+  placeholder = "Nom de l'étiquettes"
+}) => {
   const [value, setValue] = useState(title)
 
   const onSaveTitle = () => {
@@ -58,7 +64,7 @@ const TitlePrompt = ({ isOpen, title, onClosed, onSave }) => {
         <Box row center>
           <Box flex>
             <TextInput
-              placeholder="Nom de l'étude"
+              placeholder={placeholder}
               onChangeText={setValue}
               onSubmitEditing={onSaveTitle}
               returnKeyType="send"
@@ -68,7 +74,11 @@ const TitlePrompt = ({ isOpen, title, onClosed, onSave }) => {
             />
           </Box>
           <TouchableOpacity onPress={onSaveTitle}>
-            <StyledIcon isDisabled={!value || !value.trim()} name="check" size={30} />
+            <StyledIcon
+              isDisabled={!value || !value.trim()}
+              name="check"
+              size={30}
+            />
           </TouchableOpacity>
         </Box>
       </Container>

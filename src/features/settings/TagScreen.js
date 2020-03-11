@@ -29,7 +29,9 @@ import books from '~assets/bible_versions/books-desc'
 const NoteItem = ({ item }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
-  const formattedDate = distanceInWords(Number(item.date), Date.now(), { locale: frLocale })
+  const formattedDate = distanceInWords(Number(item.date), Date.now(), {
+    locale: frLocale
+  })
 
   return (
     <Link
@@ -96,7 +98,9 @@ const TagScreen = ({ navigation }) => {
         hasBackButton
         title={tag.name}
         rightComponent={
-          <Link onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })} padding>
+          <Link
+            onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })}
+            padding>
             <Icon.Feather size={20} name="edit-3" />
           </Link>
         }
@@ -116,7 +120,12 @@ const TagScreen = ({ navigation }) => {
 
             {highlights.map(h => {
               const { color, date, verseIds, tags } = h
-              return <HighlightItem key={date} {...{ color, date, verseIds, tags }} />
+              return (
+                <HighlightItem
+                  key={date}
+                  {...{ color, date, verseIds, tags }}
+                />
+              )
             })}
           </Box>
         )}

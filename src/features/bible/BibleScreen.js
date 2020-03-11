@@ -66,7 +66,8 @@ class BibleScreen extends React.Component {
       decreaseSettingsFontSizeScale,
       setFontFamily,
       settings,
-      fontFamily
+      fontFamily,
+      hasBackButton
     } = this.props
 
     if (this.state.isLoading) {
@@ -83,6 +84,7 @@ class BibleScreen extends React.Component {
       <Container pure>
         <BibleHeader
           isReadOnly={isReadOnly}
+          hasBackButton={hasBackButton}
           isSelectionMode={isSelectionMode}
           book={app.book}
           chapter={app.chapter}
@@ -133,8 +135,9 @@ export default compose(
     ({ bible, user }, ownProps) => {
       const { params } = ownProps.navigation.state
       return {
-        isReadOnly: params && params.isReadOnly,
-        isSelectionMode: params && params.isSelectionMode,
+        isReadOnly: params?.isReadOnly,
+        hasBackButton: params?.hasBackButton,
+        isSelectionMode: params?.isSelectionMode,
         fontFamily: user.fontFamily,
         settings: produce(user.bible.settings, draftState => {
           draftState.colors.default = {
@@ -147,10 +150,10 @@ export default compose(
           }
         }),
         app: {
-          book: (params && params.book) || bible.selectedBook,
-          chapter: (params && params.chapter) || bible.selectedChapter,
-          verse: (params && params.verse) || bible.selectedVerse,
-          version: (params && params.version) || bible.selectedVersion
+          book: params?.book || bible.selectedBook,
+          chapter: params?.chapter || bible.selectedChapter,
+          verse: params?.verse || bible.selectedVerse,
+          version: params?.version || bible.selectedVersion
         }
       }
     },

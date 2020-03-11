@@ -27,7 +27,7 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
   const r = useMediaQueriesArray()
 
   return (
-    <Box width={r(['50%', '50%', '20%', '15%'])}>
+    <Box width={r(['50%', '50%', '20%', '20%'])}>
       <StudyLink
         onLongPress={() => setStudySettings(study.id)}
         key={study.id}

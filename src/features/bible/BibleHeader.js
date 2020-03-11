@@ -63,6 +63,7 @@ const formatVerses = verses =>
 const Header = ({
   isReadOnly,
   isSelectionMode,
+  hasBackButton,
   book,
   chapter,
   verse,
@@ -93,7 +94,7 @@ const Header = ({
   }
   return (
     <HeaderBox row>
-      {isSelectionMode && (
+      {(isSelectionMode || hasBackButton) && (
         <Box justifyContent="center">
           <Back padding>
             <StyledIcon name="arrow-left" size={20} />
