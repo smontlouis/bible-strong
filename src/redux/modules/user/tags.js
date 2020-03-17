@@ -3,10 +3,10 @@ import * as Sentry from '@sentry/react-native'
 
 import generateUUID from '~helpers/generateUUID'
 
-const ADD_TAG = 'user/ADD_TAG'
-const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
-const UPDATE_TAG = 'user/UPDATE_TAG'
-const REMOVE_TAG = 'user/REMOVE_TAG'
+export const ADD_TAG = 'user/ADD_TAG'
+export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
+export const UPDATE_TAG = 'user/UPDATE_TAG'
+export const REMOVE_TAG = 'user/REMOVE_TAG'
 
 export default produce((draft, action) => {
   switch (action.type) {

@@ -1,10 +1,10 @@
 import produce from 'immer'
 import { removeEntityInTags } from '../utils'
 
-const CREATE_STUDY = 'user/CREATE_STUDY'
-const UPDATE_STUDY = 'user/UPDATE_STUDY'
-const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
-const DELETE_STUDY = 'user/DELETE_STUDY'
+export const CREATE_STUDY = 'user/CREATE_STUDY'
+export const UPDATE_STUDY = 'user/UPDATE_STUDY'
+export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
+export const DELETE_STUDY = 'user/DELETE_STUDY'
 
 export default produce((draft, action) => {
   switch (action.type) {

@@ -3,10 +3,10 @@ import produce from 'immer'
 import { versions, getIfVersionNeedsUpdate } from '~helpers/bibleVersions'
 import { databases, getIfDatabaseNeedsUpdate } from '~helpers/databases'
 
-const GET_VERSION_UPDATE = 'user/GET_VERSION_UPDATE'
-const GET_VERSION_UPDATE_SUCCESS = 'user/GET_VERSION_UPDATE_SUCCESS'
-const GET_VERSION_UPDATE_FAIL = 'user/GET_VERSION_UPDATE_FAIL'
-const SET_VERSION_UPDATED = 'user/SET_VERSION_UPDATED'
+export const GET_VERSION_UPDATE = 'user/GET_VERSION_UPDATE'
+export const GET_VERSION_UPDATE_SUCCESS = 'user/GET_VERSION_UPDATE_SUCCESS'
+export const GET_VERSION_UPDATE_FAIL = 'user/GET_VERSION_UPDATE_FAIL'
+export const SET_VERSION_UPDATED = 'user/SET_VERSION_UPDATED'
 
 export default produce((draft, action) => {
   switch (action.type) {

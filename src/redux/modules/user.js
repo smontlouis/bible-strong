@@ -1,6 +1,6 @@
 import produce from 'immer'
 import deepmerge from 'deepmerge'
-// import { reduceReducers } from './utils'
+import { reduceReducers } from './utils'
 
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
@@ -21,31 +21,31 @@ export * from './user/tags'
 export * from './user/versionUpdate'
 export * from './user/studies'
 
-const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
-const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
-const USER_LOGOUT = 'USER_LOGOUT'
+export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
+export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
+export const USER_LOGOUT = 'USER_LOGOUT'
 
-const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
+export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
-const SET_HISTORY = 'user/SET_HISTORY'
-const DELETE_HISTORY = 'user/DELETE_HISTORY'
-const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
+export const SET_HISTORY = 'user/SET_HISTORY'
+export const DELETE_HISTORY = 'user/DELETE_HISTORY'
+export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
 
-const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
+export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
-const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
-const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
+export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
+export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
 
-const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
+export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
 
-const GET_CHANGELOG = 'user/GET_CHANGELOG'
-const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
-const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
+export const GET_CHANGELOG = 'user/GET_CHANGELOG'
+export const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
+export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
 
-const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
+export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
 
-const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
-const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
+export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
+export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
 const initialState = {
   id: '',
@@ -273,20 +273,18 @@ const userReducer = produce((draft, action) => {
       break
     }
   }
-}, initialState)
+})
 
-export default userReducer
-
-// export default reduceReducers(
-//   initialState,
-//   userReducer,
-//   notesReducer,
-//   highlightsReducer,
-//   settingsReducer,
-//   tagsReducer,
-//   versionUpdateReducer,
-//   studiesReducer
-// )
+export default reduceReducers(
+  initialState,
+  userReducer,
+  notesReducer,
+  highlightsReducer,
+  settingsReducer,
+  tagsReducer,
+  versionUpdateReducer,
+  studiesReducer
+)
 
 // FONT-FAMILY
 export function setFontFamily(payload) {
@@ -305,7 +303,6 @@ export function saveAllLogsAsSeen(payload) {
 }
 
 // USERS
-
 export function onUserLoginSuccess(profile, remoteLastSeen, studies) {
   return {
     type: USER_LOGIN_SUCCESS,

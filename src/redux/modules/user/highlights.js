@@ -2,8 +2,8 @@ import produce from 'immer'
 import { clearSelectedVerses } from '../bible'
 import { removeEntityInTags } from '../utils'
 
-const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
-const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
+export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
+export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 
 const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
   const formattedObj = Object.keys(verses).reduce(

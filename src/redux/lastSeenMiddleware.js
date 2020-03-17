@@ -11,7 +11,6 @@ import {
   SET_SETTINGS_PRESS,
   SET_SETTINGS_NOTES_DISPLAY,
   ADD_NOTE,
-  EDIT_NOTE,
   REMOVE_NOTE,
   ADD_TAG,
   REMOVE_TAG,
@@ -40,7 +39,6 @@ export default store => next => action => {
     case SET_SETTINGS_PRESS:
     case SET_SETTINGS_NOTES_DISPLAY:
     case ADD_NOTE:
-    case EDIT_NOTE:
     case REMOVE_NOTE:
     case ADD_TAG:
     case REMOVE_TAG:

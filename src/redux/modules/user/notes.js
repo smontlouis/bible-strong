@@ -3,8 +3,8 @@ import { clearSelectedVerses } from '../bible'
 import orderVerses from '~helpers/orderVerses'
 import { removeEntityInTags } from '../utils'
 
-const ADD_NOTE = 'user/ADD_NOTE'
-const REMOVE_NOTE = 'user/REMOVE_NOTE'
+export const ADD_NOTE = 'user/ADD_NOTE'
+export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 
 export default produce((draft, action) => {
   switch (action.type) {

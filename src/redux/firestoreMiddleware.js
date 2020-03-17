@@ -11,7 +11,6 @@ import {
   SET_SETTINGS_PRESS,
   SET_SETTINGS_NOTES_DISPLAY,
   ADD_NOTE,
-  EDIT_NOTE,
   REMOVE_NOTE,
   ADD_TAG,
   REMOVE_TAG,
@@ -78,7 +77,6 @@ export default store => next => async action => {
       break
     }
     case ADD_NOTE:
-    case EDIT_NOTE:
     case REMOVE_NOTE: {
       const { notes } = user.bible
       const { tags } = user.bible
