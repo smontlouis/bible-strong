@@ -1,79 +1,51 @@
 import produce from 'immer'
 import deepmerge from 'deepmerge'
-import * as Sentry from '@sentry/react-native'
-
-import { clearSelectedVerses } from './bible'
+// import { reduceReducers } from './utils'
 
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 
 import { firebaseDb } from '~helpers/firebase'
-import orderVerses from '~helpers/orderVerses'
-import generateUUID from '~helpers/generateUUID'
-import { versions, getIfVersionNeedsUpdate } from '~helpers/bibleVersions'
-import { databases, getIfDatabaseNeedsUpdate } from '~helpers/databases'
 
-export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
-export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
-export const USER_LOGOUT = 'USER_LOGOUT'
+import highlightsReducer from './user/highlights'
+import notesReducer from './user/notes'
+import settingsReducer from './user/settings'
+import tagsReducer from './user/tags'
+import versionUpdateReducer from './user/versionUpdate'
+import studiesReducer from './user/studies'
 
-export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
-export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
+export * from './user/highlights'
+export * from './user/notes'
+export * from './user/settings'
+export * from './user/tags'
+export * from './user/versionUpdate'
+export * from './user/studies'
 
-export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
-export const INCREASE_SETTINGS_FONTSIZE_SCALE =
-  'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
-export const DECREASE_SETTINGS_FONTSIZE_SCALE =
-  'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
-export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
-export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
-export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
-export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
-export const SET_SETTINGS_COMMENTS_DISPLAY =
-  'user/SET_SETTINGS_COMMENTS_DISPLAY'
+const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
+const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
+const USER_LOGOUT = 'USER_LOGOUT'
 
-export const ADD_NOTE = 'user/ADD_NOTE'
-export const EDIT_NOTE = 'user/EDIT_NOTE'
-export const REMOVE_NOTE = 'user/REMOVE_NOTE'
+const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
-export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
+const SET_HISTORY = 'user/SET_HISTORY'
+const DELETE_HISTORY = 'user/DELETE_HISTORY'
+const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
 
-export const ADD_TAG = 'user/ADD_TAG'
-export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
-export const UPDATE_TAG = 'user/UPDATE_TAG'
-export const REMOVE_TAG = 'user/REMOVE_TAG'
+const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
-export const CREATE_STUDY = 'user/CREATE_STUDY'
-export const UPDATE_STUDY = 'user/UPDATE_STUDY'
-export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
-export const DELETE_STUDY = 'user/DELETE_STUDY'
+const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
+const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
 
-export const CHANGE_COLOR = 'user/CHANGE_COLOR'
+const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
 
-export const SET_HISTORY = 'user/SET_HISTORY'
-export const DELETE_HISTORY = 'user/DELETE_HISTORY'
-export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
+const GET_CHANGELOG = 'user/GET_CHANGELOG'
+const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
+const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
 
-export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
+const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
 
-export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
-export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
-
-export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
-
-export const GET_CHANGELOG = 'user/GET_CHANGELOG'
-export const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
-export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
-
-export const GET_VERSION_UPDATE = 'user/GET_VERSION_UPDATE'
-export const GET_VERSION_UPDATE_SUCCESS = 'user/GET_VERSION_UPDATE_SUCCESS'
-export const GET_VERSION_UPDATE_FAIL = 'user/GET_VERSION_UPDATE_FAIL'
-export const SET_VERSION_UPDATED = 'user/SET_VERSION_UPDATED'
-
-export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
-
-export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
-export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
+const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
+const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
 const initialState = {
   id: '',
@@ -121,36 +93,10 @@ const initialState = {
   }
 }
 
-const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
-  const formattedObj = Object.keys(verses).reduce(
-    (obj, verse) => ({
-      ...obj,
-      [verse]: {
-        color,
-        date: Date.now(),
-        ...(highlightedVerses[verse] && {
-          tags: highlightedVerses[verse].tags || {}
-        })
-      }
-    }),
-    {}
-  )
-
-  return formattedObj
-}
-
-const removeEntityInTags = (draft, entity, key) => {
-  for (const tag in draft.bible.tags) {
-    if (draft.bible.tags[tag][entity]) {
-      delete draft.bible.tags[tag][entity][key]
-    }
-  }
-}
-
-const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray
+const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 
 // UserReducer
-export default produce((draft, action) => {
+const userReducer = produce((draft, action) => {
   switch (action.type) {
     case APP_FETCH_DATA: {
       draft.isLoading = true
@@ -260,222 +206,10 @@ export default produce((draft, action) => {
         }
       }
     }
-    case ADD_NOTE: {
-      draft.bible.notes = {
-        ...draft.bible.notes,
-        ...action.payload
-      }
-      break
-    }
-    case REMOVE_NOTE: {
-      delete draft.bible.notes[action.payload]
-      removeEntityInTags(draft, 'notes', action.payload)
-      break
-    }
-    case ADD_HIGHLIGHT: {
-      draft.bible.highlights = {
-        ...draft.bible.highlights,
-        ...action.selectedVerses
-      }
-      break
-    }
-    case REMOVE_HIGHLIGHT: {
-      Object.keys(action.selectedVerses).forEach(key => {
-        delete draft.bible.highlights[key]
-        removeEntityInTags(draft, 'highlights', key)
-      })
-      break
-    }
-    case SET_SETTINGS_ALIGN_CONTENT: {
-      draft.bible.settings.alignContent = action.payload
-      break
-    }
-    case SET_SETTINGS_TEXT_DISPLAY: {
-      draft.bible.settings.textDisplay = action.payload
-      break
-    }
-    case SET_SETTINGS_THEME: {
-      draft.bible.settings.theme = action.payload
-      break
-    }
-    case SET_SETTINGS_PRESS: {
-      draft.bible.settings.press = action.payload
-      break
-    }
-    case SET_SETTINGS_NOTES_DISPLAY: {
-      draft.bible.settings.notesDisplay = action.payload
-      break
-    }
-    case SET_SETTINGS_COMMENTS_DISPLAY: {
-      draft.bible.settings.commentsDisplay = action.payload
-      break
-    }
-    case INCREASE_SETTINGS_FONTSIZE_SCALE: {
-      if (draft.bible.settings.fontSizeScale < 3) {
-        draft.bible.settings.fontSizeScale += 1
-      }
-      break
-    }
-    case DECREASE_SETTINGS_FONTSIZE_SCALE: {
-      if (draft.bible.settings.fontSizeScale > -3) {
-        draft.bible.settings.fontSizeScale -= 1
-      }
-      break
-    }
     case SAVE_ALL_LOGS_AS_SEEN: {
-      action.payload.map(log => {
+      action.payload.forEach(log => {
         draft.bible.changelog[log.date] = true
       })
-      break
-    }
-    case ADD_TAG: {
-      const tagId = generateUUID()
-      draft.bible.tags[tagId] = {
-        id: tagId,
-        date: Date.now(),
-        name: action.payload
-      }
-      break
-    }
-    case UPDATE_TAG: {
-      draft.bible.tags[action.id].name = action.value
-      const entitiesArray = ['highlights', 'notes', 'studies']
-
-      entitiesArray.forEach(ent => {
-        const entities = draft.bible[ent]
-        Object.values(entities).forEach(entity => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[action.id]) {
-            entityTags[action.id].name = action.value
-          }
-        })
-      })
-
-      break
-    }
-    case REMOVE_TAG: {
-      delete draft.bible.tags[action.payload]
-
-      const entitiesArray = ['highlights', 'notes', 'studies']
-
-      entitiesArray.forEach(ent => {
-        const entities = draft.bible[ent]
-        Object.values(entities).forEach(entity => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[action.payload]) {
-            delete entityTags[action.payload]
-          }
-        })
-      })
-      break
-    }
-    case TOGGLE_TAG_ENTITY: {
-      const { item, tagId } = action.payload
-
-      if (item.ids) {
-        const hasTag =
-          draft.bible[item.entity][Object.keys(item.ids)[0]].tags &&
-          draft.bible[item.entity][Object.keys(item.ids)[0]].tags[tagId]
-
-        Object.keys(item.ids).forEach(id => {
-          // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
-          if (hasTag) {
-            try {
-              delete draft.bible.tags[tagId][item.entity][id]
-              delete draft.bible[item.entity][id].tags[tagId]
-            } catch (e) {
-              Sentry.captureException(e)
-            }
-
-            // ADD OPERATION
-          } else {
-            if (!draft.bible.tags[tagId][item.entity]) {
-              draft.bible.tags[tagId][item.entity] = {}
-            }
-            draft.bible.tags[tagId][item.entity][id] = true
-
-            if (!draft.bible[item.entity][id].tags) {
-              draft.bible[item.entity][id].tags = {}
-            }
-            draft.bible[item.entity][id].tags[tagId] = {
-              id: tagId,
-              name: draft.bible.tags[tagId].name
-            }
-          }
-        })
-      } else {
-        // DELETE OPERATION
-        if (
-          draft.bible[item.entity][item.id].tags &&
-          draft.bible[item.entity][item.id].tags[tagId]
-        ) {
-          delete draft.bible.tags[tagId][item.entity][item.id]
-          delete draft.bible[item.entity][item.id].tags[tagId]
-          // ADD OPERATION
-        } else {
-          if (!draft.bible.tags[tagId][item.entity]) {
-            draft.bible.tags[tagId][item.entity] = {}
-          }
-          draft.bible.tags[tagId][item.entity][item.id] = true
-
-          if (!draft.bible[item.entity][item.id].tags) {
-            draft.bible[item.entity][item.id].tags = {}
-          }
-          draft.bible[item.entity][item.id].tags[tagId] = {
-            id: tagId,
-            name: draft.bible.tags[tagId].name
-          }
-        }
-      }
-
-      break
-    }
-    case CREATE_STUDY: {
-      draft.bible.studies[action.payload] = {
-        id: action.payload,
-        created_at: Date.now(),
-        modified_at: Date.now(),
-        title: 'Document sans titre',
-        content: null,
-        user: {
-          id: draft.id,
-          displayName: draft.displayName,
-          photoUrl: draft.photoURL
-        }
-      }
-      break
-    }
-    case UPDATE_STUDY: {
-      const study = draft.bible.studies[action.payload.id]
-      if (study) {
-        study.modified_at = Date.now()
-        if (action.payload.content) study.content = action.payload.content
-        if (action.payload.title) study.title = action.payload.title
-
-        // Just in case
-        study.user = {
-          id: draft.id,
-          displayName: draft.displayName,
-          photoUrl: draft.photoURL
-        }
-      } else {
-        throw new Error(`Cannot find study: ${action.payload.id}`)
-      }
-      break
-    }
-    case DELETE_STUDY: {
-      delete draft.bible.studies[action.payload]
-      removeEntityInTags(draft, 'studies', action.payload)
-      break
-    }
-    case CHANGE_COLOR: {
-      const currentTheme = draft.bible.settings.theme
-      const color =
-        action.color ||
-        (currentTheme === 'dark'
-          ? darkColors[action.name]
-          : defaultColors[action.name])
-      draft.bible.settings.colors[currentTheme][action.name] = color
       break
     }
     case DELETE_HISTORY: {
@@ -535,19 +269,24 @@ export default produce((draft, action) => {
       draft.changelog.isLoading = false
       break
     }
-    case GET_VERSION_UPDATE_SUCCESS: {
-      draft.needsUpdate = { ...draft.needsUpdate, ...action.payload }
-      break
-    }
-    case SET_VERSION_UPDATED: {
-      draft.needsUpdate[action.payload] = false
-      break
-    }
     default: {
       break
     }
   }
 }, initialState)
+
+export default userReducer
+
+// export default reduceReducers(
+//   initialState,
+//   userReducer,
+//   notesReducer,
+//   highlightsReducer,
+//   settingsReducer,
+//   tagsReducer,
+//   versionUpdateReducer,
+//   studiesReducer
+// )
 
 // FONT-FAMILY
 export function setFontFamily(payload) {
@@ -557,175 +296,11 @@ export function setFontFamily(payload) {
   }
 }
 
-// NOTES
-export function addNote(note, noteVerses) {
-  return (dispatch, getState) => {
-    let selectedVerses = noteVerses || getState().bible.selectedVerses
-    selectedVerses = orderVerses(selectedVerses)
-    const key = Object.keys(selectedVerses).join('/')
-    dispatch(clearSelectedVerses())
-
-    if (!key) return
-    return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
-  }
-}
-
-export function deleteNote(noteId) {
-  return {
-    type: REMOVE_NOTE,
-    payload: noteId
-  }
-}
-
-// HIGHLIGHTS
-
-export function addHighlight(color) {
-  return (dispatch, getState) => {
-    const { selectedVerses } = getState().bible
-    const highlightedVerses = getState().user.bible.highlights
-
-    dispatch(clearSelectedVerses())
-    return dispatch({
-      type: ADD_HIGHLIGHT,
-      selectedVerses: addDateAndColorToVerses(
-        selectedVerses,
-        highlightedVerses,
-        color
-      )
-    })
-  }
-}
-
-export function removeHighlight() {
-  return (dispatch, getState) => {
-    const { selectedVerses } = getState().bible
-
-    dispatch(clearSelectedVerses())
-    return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
-  }
-}
-
-// SETTINGS
-
-export function setSettingsAlignContent(payload) {
-  return {
-    type: SET_SETTINGS_ALIGN_CONTENT,
-    payload
-  }
-}
-
-export function setSettingsTextDisplay(payload) {
-  return {
-    type: SET_SETTINGS_TEXT_DISPLAY,
-    payload
-  }
-}
-
-export function setSettingsTheme(payload) {
-  return {
-    type: SET_SETTINGS_THEME,
-    payload
-  }
-}
-
-export function setSettingsNotesDisplay(payload) {
-  return {
-    type: SET_SETTINGS_NOTES_DISPLAY,
-    payload
-  }
-}
-
-export function setSettingsCommentaires(payload) {
-  return {
-    type: SET_SETTINGS_COMMENTS_DISPLAY,
-    payload
-  }
-}
-
-export function increaseSettingsFontSizeScale() {
-  return {
-    type: INCREASE_SETTINGS_FONTSIZE_SCALE
-  }
-}
-
-export function decreaseSettingsFontSizeScale() {
-  return {
-    type: DECREASE_SETTINGS_FONTSIZE_SCALE
-  }
-}
-
-export function setSettingsPress(payload) {
-  return {
-    type: SET_SETTINGS_PRESS,
-    payload
-  }
-}
-
+// CHANGELOG
 export function saveAllLogsAsSeen(payload) {
   return {
     type: SAVE_ALL_LOGS_AS_SEEN,
     payload
-  }
-}
-
-// TAGS
-
-export function addTag(payload) {
-  return {
-    type: ADD_TAG,
-    payload
-  }
-}
-
-export function updateTag(id, value) {
-  return {
-    type: UPDATE_TAG,
-    id,
-    value
-  }
-}
-
-export function removeTag(payload) {
-  return {
-    type: REMOVE_TAG,
-    payload
-  }
-}
-
-export function toggleTagEntity({ item, tagId }) {
-  return {
-    type: TOGGLE_TAG_ENTITY,
-    payload: { item, tagId }
-  }
-}
-
-// STUDIES
-
-export function createStudy(id) {
-  return {
-    type: CREATE_STUDY,
-    payload: id
-  }
-}
-
-export function updateStudy({ id, content, title }) {
-  return {
-    type: UPDATE_STUDY,
-    payload: { id, content, title }
-  }
-}
-
-export function uploadStudy(id) {
-  return {
-    type: UPLOAD_STUDY,
-    payload: id
-  }
-}
-
-export function deleteStudy(id) {
-  return {
-    type: DELETE_STUDY,
-    payload: id
   }
 }
 
@@ -753,16 +328,7 @@ export function onUserUpdateProfile(profile) {
   }
 }
 
-export function changeColor({ name, color }) {
-  return {
-    type: CHANGE_COLOR,
-    name,
-    color
-  }
-}
-
 // HISTORY
-
 export function setHistory(item) {
   return {
     type: SET_HISTORY,
@@ -783,7 +349,6 @@ export function updateUserData() {
 }
 
 // Notifications
-
 export function setNotificationVOD(payload) {
   return {
     type: SET_NOTIFICATION_VOD,
@@ -799,7 +364,6 @@ export function setNotificationId(payload) {
 }
 
 // Compare
-
 export function toggleCompareVersion(payload) {
   return {
     type: TOGGLE_COMPARE_VERSION,
@@ -808,7 +372,6 @@ export function toggleCompareVersion(payload) {
 }
 
 // Changelog
-
 export function getChangelog() {
   return async (dispatch, getState) => {
     dispatch({
@@ -843,72 +406,5 @@ export function addChangelog(payload) {
   return {
     type: GET_CHANGELOG_SUCCESS,
     payload
-  }
-}
-
-// Bible Version update
-
-export function getVersionUpdate() {
-  return async dispatch => {
-    dispatch({
-      type: GET_VERSION_UPDATE
-    })
-
-    try {
-      const versionsNeedUpdate = await Promise.all(
-        Object.keys(versions).map(async versionId => {
-          const needsUpdate = await getIfVersionNeedsUpdate(versionId)
-          return { [versionId]: needsUpdate }
-        })
-      )
-
-      dispatch({
-        type: GET_VERSION_UPDATE_SUCCESS,
-        payload: versionsNeedUpdate.reduce(
-          (acc, curr) => ({ ...acc, ...curr }),
-          {}
-        )
-      })
-    } catch (e) {
-      dispatch({
-        type: GET_VERSION_UPDATE_FAIL
-      })
-    }
-  }
-}
-
-export function setVersionUpdated(payload) {
-  return {
-    type: SET_VERSION_UPDATED,
-    payload
-  }
-}
-
-export function getDatabaseUpdate() {
-  return async dispatch => {
-    dispatch({
-      type: GET_VERSION_UPDATE
-    })
-
-    try {
-      const databasesNeedUpdate = await Promise.all(
-        Object.keys(databases).map(async dbId => {
-          const needsUpdate = await getIfDatabaseNeedsUpdate(dbId)
-          return { [dbId]: needsUpdate }
-        })
-      )
-
-      dispatch({
-        type: GET_VERSION_UPDATE_SUCCESS,
-        payload: databasesNeedUpdate.reduce(
-          (acc, curr) => ({ ...acc, ...curr }),
-          {}
-        )
-      })
-    } catch (e) {
-      dispatch({
-        type: GET_VERSION_UPDATE_FAIL
-      })
-    }
   }
 }

@@ -24,8 +24,11 @@ import getTheme from '~themes'
 import { paperTheme } from '~themes/default'
 import { DBStateProvider } from '~helpers/databaseState'
 
+import * as test from '~redux/modules/user'
+
 class InitApp extends React.Component {
   componentDidMount() {
+    console.log(test)
     this.props.dispatch(getChangelog())
     this.props.dispatch(getVersionUpdate())
     this.props.dispatch(getDatabaseUpdate())
@@ -118,7 +121,8 @@ class InitApp extends React.Component {
                 backgroundColor: 'black',
                 opacity: 0.2
               }
-            }}>
+            }}
+          >
             <PersistGate loading={null} persistor={persistor}>
               <DBStateProvider>
                 <>
