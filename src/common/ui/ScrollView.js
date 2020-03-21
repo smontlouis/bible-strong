@@ -15,7 +15,7 @@ const ScrollView = styled.ScrollView(({ theme, orientation }) => ({
   width: '100%',
 
   ...(orientation.tablet && {
-    marginTop: 50,
+    marginTop: 20,
     marginBottom: 50,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30
@@ -33,7 +33,11 @@ const fadeIn = {
   }
 }
 
-export const HomeScrollView = ({ children, contentContainerStyle, ...props }) => {
+export const HomeScrollView = ({
+  children,
+  contentContainerStyle,
+  ...props
+}) => {
   const orientation = useDeviceOrientation()
   return (
     <ScrollView
@@ -43,7 +47,8 @@ export const HomeScrollView = ({ children, contentContainerStyle, ...props }) =>
         paddingTop: 20,
         paddingBottom: 20,
         ...contentContainerStyle
-      }}>
+      }}
+    >
       {children}
     </ScrollView>
   )
@@ -52,7 +57,12 @@ export const HomeScrollView = ({ children, contentContainerStyle, ...props }) =>
 export default ({ children, contentContainerStyle, ...props }) => {
   const orientation = useDeviceOrientation()
   return (
-    <Animatable.View style={{ flex: 1 }} animation={fadeIn} delay={300} duration={500}>
+    <Animatable.View
+      style={{ flex: 1 }}
+      animation={fadeIn}
+      delay={300}
+      duration={500}
+    >
       <ScrollView
         {...props}
         orientation={orientation}
@@ -60,7 +70,8 @@ export default ({ children, contentContainerStyle, ...props }) => {
           paddingTop: 20,
           paddingBottom: 10 + getBottomSpace(),
           ...contentContainerStyle
-        }}>
+        }}
+      >
         {children}
       </ScrollView>
     </Animatable.View>

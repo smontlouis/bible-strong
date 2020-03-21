@@ -16,7 +16,7 @@ const SectionList = styled.SectionList(({ theme, orientation }) => ({
   marginRight: 'auto',
 
   ...(orientation.tablet && {
-    marginTop: 50,
+    marginTop: 20,
     marginBottom: 50,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30

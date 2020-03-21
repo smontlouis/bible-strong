@@ -19,6 +19,7 @@ import verseToReference from '../../helpers/verseToReference'
 
 const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
   height: 200,
+  maxWidth: 400,
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'flex-end',
@@ -168,23 +169,49 @@ const VersesModal = ({
       backdrop={false}
       backdropPressToClose={false}
       swipeToClose={false}
-      isSelectionMode={isSelectionMode}>
+      isSelectionMode={isSelectionMode}
+    >
       {isSelectionMode ? (
         <Container isSelectionMode={isSelectionMode}>
-          <TouchableIcon name="x" onPress={clearSelectedVerses} color="reverse" noFlex />
+          <TouchableIcon
+            name="x"
+            onPress={clearSelectedVerses}
+            color="reverse"
+            noFlex
+          />
           <Text flex bold fontSize={15} textAlign="center" color="reverse">
             {selectedVersesTitle.toUpperCase()}
           </Text>
-          <TouchableIcon name="arrow-right" color="reverse" onPress={sendVerseData} noFlex />
+          <TouchableIcon
+            name="arrow-right"
+            color="reverse"
+            onPress={sendVerseData}
+            noFlex
+          />
         </Container>
       ) : (
         <Container>
           <HalfContainer border>
-            <TouchableCircle color={colors.color1} onPress={() => addHighlight('color1')} />
-            <TouchableCircle color={colors.color2} onPress={() => addHighlight('color2')} />
-            <TouchableCircle color={colors.color3} onPress={() => addHighlight('color3')} />
-            <TouchableCircle color={colors.color4} onPress={() => addHighlight('color4')} />
-            <TouchableCircle color={colors.color5} onPress={() => addHighlight('color5')} />
+            <TouchableCircle
+              color={colors.color1}
+              onPress={() => addHighlight('color1')}
+            />
+            <TouchableCircle
+              color={colors.color2}
+              onPress={() => addHighlight('color2')}
+            />
+            <TouchableCircle
+              color={colors.color3}
+              onPress={() => addHighlight('color3')}
+            />
+            <TouchableCircle
+              color={colors.color4}
+              onPress={() => addHighlight('color4')}
+            />
+            <TouchableCircle
+              color={colors.color5}
+              onPress={() => addHighlight('color5')}
+            />
             {isSelectedVerseHighlighted && (
               <TouchableIcon name="x-circle" onPress={removeHighlight} />
             )}
@@ -220,10 +247,26 @@ const VersesModal = ({
             />
           </HalfContainer>
           <HalfContainer>
-            <TouchableIcon name="layers" onPress={compareVerses} label="Comparer" />
-            <TouchableIcon name="file-plus" onPress={onCreateNoteClick} label="Note" />
-            <TouchableIcon name="share-2" onPress={shareVerse} label="Partager" />
-            <TouchableIcon name="x" onPress={clearSelectedVerses} label="Annuler" />
+            <TouchableIcon
+              name="layers"
+              onPress={compareVerses}
+              label="Comparer"
+            />
+            <TouchableIcon
+              name="file-plus"
+              onPress={onCreateNoteClick}
+              label="Note"
+            />
+            <TouchableIcon
+              name="share-2"
+              onPress={shareVerse}
+              label="Partager"
+            />
+            <TouchableIcon
+              name="x"
+              onPress={clearSelectedVerses}
+              label="Annuler"
+            />
           </HalfContainer>
         </Container>
       )}

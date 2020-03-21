@@ -24,7 +24,8 @@ import { hp } from '~helpers/utils'
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   zIndex: 10,
-  margin: 0
+  margin: 0,
+  alignItems: 'center'
 })
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
@@ -33,6 +34,8 @@ const IconFeather = styled(Icon.Feather)(({ theme }) => ({
 
 const Container = styled.View(({ theme }) => ({
   height: hp(60),
+  maxWidth: 600,
+  width: '100%',
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: -1 },
@@ -70,7 +73,8 @@ const ReferenceItem = ({ reference, version, onClosed }) => {
         book,
         chapter,
         verse
-      }}>
+      }}
+    >
       <Box marginBottom={30}>
         <Text title fontSize={14}>
           {Verse.title}
@@ -83,99 +87,119 @@ const ReferenceItem = ({ reference, version, onClosed }) => {
   )
 }
 
-const CardWrapper = waitForTresorModal(({ theme, selectedVerse, onClosed, version }) => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [references, setReferences] = useState(null)
-  const [error, setError] = useState(false)
+const CardWrapper = waitForTresorModal(
+  ({ theme, selectedVerse, onClosed, version }) => {
+    const [isLoading, setIsLoading] = useState(true)
+    const [references, setReferences] = useState(null)
+    const [error, setError] = useState(false)
 
-  useEffect(() => {
-    const loadRef = async () => {
-      if (selectedVerse) {
-        setError(false)
-        setIsLoading(true)
-        await timeout(500)
-        const references = await loadTresorReferences(selectedVerse)
-        setReferences(references)
+    useEffect(() => {
+      const loadRef = async () => {
+        if (selectedVerse) {
+          setError(false)
+          setIsLoading(true)
+          await timeout(500)
+          const references = await loadTresorReferences(selectedVerse)
+          setReferences(references)
 
-        if (references?.error || !references) {
-          setError(true)
+          if (references?.error || !references) {
+            setError(true)
+            setIsLoading(false)
+            return
+          }
+
           setIsLoading(false)
-          return
         }
-
-        setIsLoading(false)
       }
-    }
 
-    loadRef()
-  }, [selectedVerse])
+      loadRef()
+    }, [selectedVerse])
 
-  if (error) {
-    return (
-      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
-    )
-  }
-
-  if (isLoading) {
-    return (
-      <Box flex center>
-        <ActivityIndicator color={theme.colors.grey} />
-      </Box>
-    )
-  }
-
-  if (!selectedVerse) {
-    return null
-  }
-
-  const { title } = formatVerseContent([selectedVerse])
-  const renderReferences = () => {
-    const refs = references.commentaires ? JSON.parse(references.commentaires) : []
-
-    if (!refs.length) {
+    if (error) {
       return (
         <Empty
           source={require('~assets/images/empty.json')}
-          message="Aucune référence pour ce verset..."
+          message="Une erreur est survenue..."
         />
       )
     }
 
-    return refs.map((ref, i) => {
-      const splittedRef = ref.split('-')
-      if (splittedRef.length === 3) {
-        return <ReferenceItem key={ref + i} reference={ref} version={version} onClosed={onClosed} />
+    if (isLoading) {
+      return (
+        <Box flex center>
+          <ActivityIndicator color={theme.colors.grey} />
+        </Box>
+      )
+    }
+
+    if (!selectedVerse) {
+      return null
+    }
+
+    const { title } = formatVerseContent([selectedVerse])
+    const renderReferences = () => {
+      const refs = references.commentaires
+        ? JSON.parse(references.commentaires)
+        : []
+
+      if (!refs.length) {
+        return (
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Aucune référence pour ce verset..."
+          />
+        )
       }
 
-      return (
-        <Text title key={ref} fontSize={20} marginBottom={5} color="lightPrimary">
-          {splittedRef}
-        </Text>
-      )
-    })
-  }
+      return refs.map((ref, i) => {
+        const splittedRef = ref.split('-')
+        if (splittedRef.length === 3) {
+          return (
+            <ReferenceItem
+              key={ref + i}
+              reference={ref}
+              version={version}
+              onClosed={onClosed}
+            />
+          )
+        }
 
-  return (
-    <Box flex>
-      <Box row height={60} alignItems="center">
-        <Box flex paddingLeft={20}>
-          <Text title fontSize={16} marginTop={10}>
-            {title}
+        return (
+          <Text
+            title
+            key={ref}
+            fontSize={20}
+            marginBottom={5}
+            color="lightPrimary"
+          >
+            {splittedRef}
           </Text>
-          <Text fontSize={13} color="grey">
-            Références croisées{' '}
-          </Text>
+        )
+      })
+    }
+
+    return (
+      <Box flex>
+        <Box row height={60} alignItems="center">
+          <Box flex paddingLeft={20}>
+            <Text title fontSize={16} marginTop={10}>
+              {title}
+            </Text>
+            <Text fontSize={13} color="grey">
+              Références croisées{' '}
+            </Text>
+          </Box>
+          <Link onPress={onClosed} padding>
+            <IconFeather name="x" size={25} />
+          </Link>
         </Box>
-        <Link onPress={onClosed} padding>
-          <IconFeather name="x" size={25} />
-        </Link>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+          {renderReferences()}
+        </ScrollView>
       </Box>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-        {renderReferences()}
-      </ScrollView>
-    </Box>
-  )
-})
+    )
+  }
+)
 
 const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
   return (
@@ -183,7 +207,8 @@ const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
       backdropOpacity={0.3}
       isVisible={!!selectedVerse}
       onBackdropPress={onClosed}
-      onBackButtonPress={onClosed}>
+      onBackButtonPress={onClosed}
+    >
       <Container>
         <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
       </Container>

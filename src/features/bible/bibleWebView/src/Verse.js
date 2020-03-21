@@ -28,7 +28,7 @@ function convertHex(hex, opacity) {
 
 const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(19, fontSizeScale),
-  lineHeight: scaleFontSize(29, fontSizeScale)
+  lineHeight: scaleFontSize(32, fontSizeScale)
 }))
 
 const NumberText = styled('span')(
@@ -289,7 +289,8 @@ class Verse extends Component {
           isTouched={isTouched}
           isSelected={isSelected}
           isVerseToScroll={isVerseToScroll && verse.Verset != 1}
-          highlightedColor={highlightedColor}>
+          highlightedColor={highlightedColor}
+        >
           <NumberText isFocused={isFocused} settings={settings}>
             {verse.Verset}{' '}
           </NumberText>
@@ -305,7 +306,8 @@ class Verse extends Component {
             onTouchStart={this.onTouchStart}
             onTouchEnd={this.onTouchEnd}
             onTouchMove={this.onTouchMove}
-            onTouchCancel={this.onTouchCancel}>
+            onTouchCancel={this.onTouchCancel}
+          >
             {array}
           </VerseText>
         </ContainerText>

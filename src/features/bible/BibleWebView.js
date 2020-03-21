@@ -10,6 +10,7 @@ import SnackBar from '~common/SnackBar'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
+  NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_BIBLE_VIEW,
   SEND_INITIAL_DATA,
   TOGGLE_SELECTED_VERSE,
@@ -110,6 +111,11 @@ class BibleWebView extends Component {
           verse: action.payload,
           withBack: true
         })
+        break
+      }
+      case NAVIGATE_TO_PERICOPE: {
+        const { navigation } = this.props
+        navigation.navigate('Pericope')
         break
       }
       case NAVIGATE_TO_STRONG: {
@@ -239,7 +245,8 @@ class BibleWebView extends Component {
           overflow: 'hidden',
           flex: 1,
           opacity: this.state.webViewOpacity
-        }}>
+        }}
+      >
         {this.state.isHTMLFileLoaded && (
           <WebView
             useWebKit

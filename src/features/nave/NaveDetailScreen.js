@@ -15,6 +15,7 @@ import Text from '~common/ui/Text'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import { setHistory } from '~redux/modules/user'
+import { MAX_WIDTH } from '~helpers/useDimensions'
 
 import waitForDatabase from '~common/waitForNaveDB'
 import loadNaveItem from '~helpers/loadNaveItem'
@@ -115,7 +116,13 @@ const NaveDetailScreen = ({ navigation }) => {
 
   return (
     <Container>
-      <Box padding={20}>
+      <Box
+        padding={20}
+        maxWidth={MAX_WIDTH}
+        width="100%"
+        marginLeft="auto"
+        marginRight="auto"
+      >
         <Box style={{ flexDirection: 'row' }}>
           <Box flex>
             <Back>

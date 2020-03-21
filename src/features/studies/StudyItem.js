@@ -27,19 +27,21 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
   const r = useMediaQueriesArray()
 
   return (
-    <Box width={r(['50%', '50%', '20%', '20%'])}>
+    <Box width={r(['50%', '50%', '33%', '33%'])}>
       <StudyLink
         onLongPress={() => setStudySettings(study.id)}
         key={study.id}
         route="EditStudy"
-        params={{ studyId: study.id }}>
+        params={{ studyId: study.id }}
+      >
         <Box
           flex
           backgroundColor="reverse"
           lightShadow
           padding={10}
           height={230}
-          borderRadius={8}>
+          borderRadius={8}
+        >
           <Text color="darkGrey" fontSize={10}>
             Il y a {formattedDate}
           </Text>

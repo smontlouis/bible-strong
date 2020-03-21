@@ -32,4 +32,4 @@ export const cleanParams = () => ({
   verses: undefined
 })
 
-export const removeBreakLines = str => str.replace('\n', '')
+export const removeBreakLines = str => str.replace(/\n/g, '')

@@ -15,6 +15,7 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
+import { MAX_WIDTH } from '~helpers/useDimensions'
 import { setHistory } from '~redux/modules/user'
 
 import waitForDatabase from '~common/waitForDictionnaireDB'
@@ -68,7 +69,9 @@ const DictionnaryDetailScreen = ({ navigation }) => {
         const splittedHref = sanitizedHref
           .replace(String.fromCharCode(160), ' ')
           .split(/\b\s+(?!$)/)
-        const [chapter, verse] = splittedHref[splittedHref.length - 1].split('.')
+        const [chapter, verse] = splittedHref[splittedHref.length - 1].split(
+          '.'
+        )
         navigation.navigate('BibleView', {
           isReadOnly: true,
           book,
@@ -77,16 +80,25 @@ const DictionnaryDetailScreen = ({ navigation }) => {
         })
       } catch (e) {
         Snackbar.show('Impossible de charger ce mot.')
-        Sentry.captureMessage(`Something went wrong with verse ${href} in ${word} ${e}`)
+        Sentry.captureMessage(
+          `Something went wrong with verse ${href} in ${word} ${e}`
+        )
       }
     } else {
-      navigation.navigate({ routeName: 'DictionnaryDetail', params: { word: href }, key: href })
+      navigation.navigate({
+        routeName: 'DictionnaryDetail',
+        params: { word: href },
+        key: href
+      })
     }
   }
 
   const shareDefinition = () => {
     try {
-      const message = `${word} \n\n${truncHTML(dictionnaireItem.definition, 4000)
+      const message = `${word} \n\n${truncHTML(
+        dictionnaireItem.definition,
+        4000
+      )
         .text.replace(/&#/g, '\\')
         .replace(/\\x([0-9A-F]+);/gi, function() {
           return String.fromCharCode(parseInt(arguments[1], 16))
@@ -106,7 +118,13 @@ const DictionnaryDetailScreen = ({ navigation }) => {
 
   return (
     <Container>
-      <Box padding={20}>
+      <Box
+        padding={20}
+        maxWidth={MAX_WIDTH}
+        width="100%"
+        marginLeft="auto"
+        marginRight="auto"
+      >
         <Box style={{ flexDirection: 'row' }}>
           <Back style={{ flex: 1 }}>
             <Text title fontSize={22} flex>
@@ -145,7 +163,11 @@ const DictionnaryDetailScreen = ({ navigation }) => {
         )}
         {canReadMore && (
           <Box center marginTop={20}>
-            <Button title="Lire plus" onPress={loadRemainingText} style={{ width: 150 }} />
+            <Button
+              title="Lire plus"
+              onPress={loadRemainingText}
+              style={{ width: 150 }}
+            />
           </Box>
         )}
       </ScrollView>

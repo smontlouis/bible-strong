@@ -25,7 +25,7 @@ const InfiniteHits = ({
   ...props
 }) => {
   return (
-    <Box flex paddingTop={20}>
+    <Box flex>
       <FlatList
         ListHeaderComponent={
           <Box>

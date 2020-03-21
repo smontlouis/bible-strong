@@ -5,11 +5,13 @@ import {
   SEND_INITIAL_DATA,
   CONSOLE_LOG,
   THROW_ERROR,
-  dispatch
+  dispatch,
+  NAVIGATE_TO_PERICOPE
 } from './dispatch'
 import Verse from './Verse'
 import Comment from './Comment'
 import ErrorBoundary from './ErrorBoundary'
+import ExternalIcon from './ExternalIcon'
 // import { desktopMode } from './env'
 import { scaleFontSize } from './scaleFontSize'
 
@@ -298,6 +300,12 @@ class VersesRenderer extends Component {
     })
   }
 
+  navigateToPericope = () => {
+    dispatch({
+      type: NAVIGATE_TO_PERICOPE
+    })
+  }
+
   render() {
     if (!this.state.verses) {
       return (
@@ -309,7 +317,8 @@ class VersesRenderer extends Component {
             alignItems: 'center',
             justifyContent: 'center',
             textTransform: 'uppercase'
-          }}>
+          }}
+        >
           Une erreur est survenue.
         </div>
       )
@@ -372,23 +381,43 @@ class VersesRenderer extends Component {
           return (
             <Span key={`${Livre}-${Chapitre}-${Verset}`}>
               {h1 && (
-                <H1 isHebreu={isHebreu} settings={this.state.settings}>
+                <H1
+                  isHebreu={isHebreu}
+                  settings={this.state.settings}
+                  onClick={this.navigateToPericope}
+                >
                   {h1}
+                  <ExternalIcon />
                 </H1>
               )}
               {h2 && (
-                <H2 isHebreu={isHebreu} settings={this.state.settings}>
+                <H2
+                  isHebreu={isHebreu}
+                  settings={this.state.settings}
+                  onClick={this.navigateToPericope}
+                >
                   {h2}
+                  <ExternalIcon />
                 </H2>
               )}
               {h3 && (
-                <H3 isHebreu={isHebreu} settings={this.state.settings}>
+                <H3
+                  isHebreu={isHebreu}
+                  settings={this.state.settings}
+                  onClick={this.navigateToPericope}
+                >
                   {h3}
+                  <ExternalIcon />
                 </H3>
               )}
               {h4 && (
-                <H4 isHebreu={isHebreu} settings={this.state.settings}>
+                <H4
+                  isHebreu={isHebreu}
+                  settings={this.state.settings}
+                  onClick={this.navigateToPericope}
+                >
                   {h4}
+                  <ExternalIcon />
                 </H4>
               )}
               <ErrorBoundary>

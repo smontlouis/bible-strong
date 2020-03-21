@@ -16,6 +16,13 @@ const StylizedModal = styled(Modal)({
 })
 
 const Container = styled.View(({ theme }) => ({
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '100%',
+  maxWidth: 600,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
+
   display: 'flex',
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
@@ -35,7 +42,13 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden'
 }))
 
-const StudySettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultipleTagsItem }) => {
+const StudySettingsModal = ({
+  isOpen,
+  onClosed,
+  theme,
+  setTitlePrompt,
+  setMultipleTagsItem
+}) => {
   const dispatch = useDispatch()
   const studyId = isOpen
   const study = useSelector(state => state.user.bible.studies[studyId])
@@ -57,7 +70,8 @@ const StudySettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultip
       isVisible={!!isOpen}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}>
+      onBackdropPress={onClosed}
+    >
       <Container>
         <Touchy
           onPress={() => {
@@ -65,7 +79,8 @@ const StudySettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultip
             setTimeout(() => {
               setMultipleTagsItem({ ...study, entity: 'studies' })
             }, 500)
-          }}>
+          }}
+        >
           <Text fontSize={16} bold>
             Tags
           </Text>
@@ -76,7 +91,8 @@ const StudySettingsModal = ({ isOpen, onClosed, theme, setTitlePrompt, setMultip
             setTimeout(() => {
               setTitlePrompt({ id: study.id, title: study.title })
             }, 500)
-          }}>
+          }}
+        >
           <Text fontSize={16} bold>
             Renommer
           </Text>

@@ -11,19 +11,24 @@ import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
 
 const itemHeight = 130
-const itemWidth = wp(60)
+const itemWidth = wp(60) > 300 ? 300 : wp(60)
 
 function randomIntFromInterval(min, max) {
   // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
+const DictionnaireOfTheDay = ({
+  color1 = 'rgba(86,204,242,1)',
+  color2 = 'rgba(47,128,237,1)'
+}) => {
   const [error, setError] = useState(false)
   const [strongReference, setStrongRef] = useState(null)
   useEffect(() => {
     const loadStrong = async () => {
-      const strongReference = await loadDictionnaireItemByRowId(randomIntFromInterval(5437, 10872))
+      const strongReference = await loadDictionnaireItemByRowId(
+        randomIntFromInterval(5437, 10872)
+      )
       if (strongReference.error) {
         setError(strongReference.error)
         return
@@ -64,14 +69,20 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
             top: 0,
             height: itemHeight,
             borderRadius: 3
-          }}>
+          }}
+        >
           <LinearGradient
             start={[0.1, 0.2]}
             style={{ height: itemHeight }}
             colors={[color1, color2]}
           />
         </Box>
-        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
+        <Box
+          backgroundColor="rgba(0,0,0,0.1)"
+          paddingHorizontal={5}
+          paddingVertical={3}
+          rounded
+        >
           <Text fontSize={10} style={{ color: 'white' }}>
             Dictionnaire
           </Text>

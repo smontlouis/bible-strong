@@ -6,10 +6,10 @@ import * as FileSystem from 'expo-file-system'
 import useDebounce from '~helpers/useDebounce'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
+
 import SearchBox from './SearchBox'
 import Filters from './Filters'
 import SearchResults from './SearchResults'
-
 import { algoliaConfig } from '../../../config'
 
 const searchClient = algoliasearch(

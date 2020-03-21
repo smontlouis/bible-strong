@@ -125,7 +125,8 @@ class AnimatedTabNavigationView extends React.Component {
                   StyleSheet.absoluteFillObject,
                   { backgroundColor: '#fff', opacity }
                 ]}
-                pointerEvents={isFocused ? 'auto' : 'none'}>
+                pointerEvents={isFocused ? 'auto' : 'none'}
+              >
                 {this.props.renderScene({ route })}
               </Animated.View>
             )
@@ -194,5 +195,3 @@ export default compose(
   createTabNavigator,
   withDeviceOrientation
 )(AnimatedTabNavigationView)
-
-createTabNavigator(withDeviceOrientation(AnimatedTabNavigationView))

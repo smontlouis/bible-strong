@@ -15,7 +15,7 @@ const FlatList = styled.FlatList(({ theme, orientation }) => ({
   marginRight: 'auto',
 
   ...(orientation.tablet && {
-    marginTop: 50,
+    marginTop: 20,
     marginBottom: 50,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30
@@ -40,7 +40,8 @@ export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
       style={{ flex: 1 }}
       animation={fadeIn}
       delay={300}
-      duration={500}>
+      duration={500}
+    >
       <FlatList
         orientation={orientation}
         contentContainerStyle={{

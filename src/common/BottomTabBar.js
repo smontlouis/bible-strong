@@ -3,6 +3,9 @@ import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
 
+import GlobalStateContext from '~helpers/globalContext'
+import { usePrevious } from '~helpers/usePrevious'
+
 const TouchableTab = styled.TouchableOpacity(({ orientation }) => ({
   position: 'relative',
   justifyContent: 'flex-start',
@@ -46,6 +49,8 @@ const Container = styled.View(({ theme, orientation }) => ({
   // })
 }))
 
+const AnimatableContainer = Animatable.createAnimatableComponent(Container)
+
 const TabBar = props => {
   const {
     renderIcon,
@@ -59,11 +64,32 @@ const TabBar = props => {
   } = props
 
   const { routes, index: activeRouteIndex } = navigation.state
+  const prevIndex = usePrevious(activeRouteIndex)
+  const {
+    state: { isFullscreen },
+    updateState
+  } = React.useContext(GlobalStateContext)
+
+  // React.useEffect(() => {
+  //   if (activeRouteIndex === 2 && prevIndex !== activeRouteIndex) {
+  //     updateState('isFullscreen', true)
+  //   }
+  //   if (prevIndex === 2 && prevIndex !== activeRouteIndex) {
+  //     updateState('isFullscreen', false)
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [prevIndex, activeRouteIndex])
 
   return (
-    <Container
+    <AnimatableContainer
       orientation={orientation}
-      style={{ paddingTop: activeRouteIndex === 2 ? 15 : 0 }}>
+      transition="height"
+      style={{
+        overflow: isFullscreen ? 'hidden' : 'visible',
+        paddingTop: activeRouteIndex === 2 ? (isFullscreen ? 0 : 15) : 0,
+        height: activeRouteIndex === 2 ? (isFullscreen ? 0 : 60) : 40
+      }}
+    >
       {routes.map((route, routeIndex) => {
         const isRouteActive = routeIndex === activeRouteIndex
         const tintColor = isRouteActive ? activeTintColor : inactiveTintColor
@@ -75,7 +101,8 @@ const TabBar = props => {
             onPress={() => {
               onTabPress({ route })
             }}
-            accessibilityLabel={getAccessibilityLabel({ route })}>
+            accessibilityLabel={getAccessibilityLabel({ route })}
+          >
             {renderIcon({ route, focused: isRouteActive, tintColor })}
             <AnimatableCircle
               orientation={orientation}
@@ -85,7 +112,7 @@ const TabBar = props => {
           </TouchableTab>
         )
       })}
-    </Container>
+    </AnimatableContainer>
   )
 }
 

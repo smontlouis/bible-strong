@@ -62,7 +62,7 @@ const StudiesScreen = () => {
                 selectedChip={selectedChip}
               />
             }
-            numColumns={r([2, 2, 4, 5])}
+            numColumns={r([2, 2, 3, 3])}
             data={filteredStudies}
             contentContainerStyle={{ paddingBottom: 100 }}
             keyExtractor={item => item.id}

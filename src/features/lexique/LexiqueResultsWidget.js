@@ -47,6 +47,8 @@ const LexiqueResultsWidget = ({ searchValue }) => {
       {results.slice(0, limit).map(strong => {
         const { Grec, Mot, Code } = strong
 
+        console.log(strong)
+
         const color1 = Grec ? 'rgb(69,150,220)' : 'rgba(248,131,121,1)'
         const color2 = Grec ? 'rgb(89,131,240)' : 'rgba(255,77,93,1)'
 
@@ -54,14 +56,16 @@ const LexiqueResultsWidget = ({ searchValue }) => {
           <Link
             key={Code + Mot}
             route="BibleStrongDetail"
-            params={{ book: Grec ? 40 : 1, strongReference: strong }}>
+            params={{ book: Grec ? 40 : 1, reference: Code }}
+          >
             <Box
               center
               rounded
               marginRight={10}
               marginBottom={10}
               height={height}
-              paddingHorizontal={20}>
+              paddingHorizontal={20}
+            >
               <Box
                 style={{
                   position: 'absolute',
@@ -70,14 +74,20 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                   top: 0,
                   height,
                   borderRadius: 3
-                }}>
-                <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
+                }}
+              >
+                <LinearGradient
+                  start={[0.1, 0.2]}
+                  style={{ height }}
+                  colors={[color1, color2]}
+                />
               </Box>
               <Box
                 backgroundColor="rgba(0,0,0,0.1)"
                 paddingHorizontal={3}
                 paddingVertical={2}
-                rounded>
+                rounded
+              >
                 <Text fontSize={7} style={{ color: 'white' }}>
                   {Code} {Grec ? 'Grec' : 'Hébreu'}
                 </Text>
@@ -98,7 +108,8 @@ const LexiqueResultsWidget = ({ searchValue }) => {
             marginRight={10}
             marginBottom={10}
             height={height}
-            paddingHorizontal={10}>
+            paddingHorizontal={10}
+          >
             <Box
               style={{
                 position: 'absolute',
@@ -107,7 +118,8 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                 top: 0,
                 height,
                 borderRadius: 3
-              }}>
+              }}
+            >
               <LinearGradient
                 start={[0.1, 0.2]}
                 style={{ height }}

@@ -11,9 +11,12 @@ import loadNaveByRandom from '~helpers/loadNaveByRandom'
 import waitForNaveWidget from './waitForNaveWidget'
 
 const itemHeight = 130
-const itemWidth = wp(60)
+const itemWidth = wp(60) > 300 ? 300 : wp(60)
 
-const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
+const NaveOfTheDay = ({
+  color1 = 'rgb(80, 83, 140)',
+  color2 = 'rgb(48, 51, 107)'
+}) => {
   const [error, setError] = useState(false)
   const [naveReference, setNaveRef] = useState(null)
   useEffect(() => {
@@ -50,7 +53,13 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
 
   return (
     <Link route="NaveDetail" params={{ name, name_lower }}>
-      <Box center rounded height={itemHeight} width={itemWidth} marginRight={20}>
+      <Box
+        center
+        rounded
+        height={itemHeight}
+        width={itemWidth}
+        marginRight={20}
+      >
         <Box
           style={{
             position: 'absolute',
@@ -59,14 +68,20 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
             top: 0,
             height: itemHeight,
             borderRadius: 3
-          }}>
+          }}
+        >
           <LinearGradient
             start={[0.1, 0.2]}
             style={{ height: itemHeight }}
             colors={[color1, color2]}
           />
         </Box>
-        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
+        <Box
+          backgroundColor="rgba(0,0,0,0.1)"
+          paddingHorizontal={5}
+          paddingVertical={3}
+          rounded
+        >
           <Text fontSize={10} style={{ color: 'white' }}>
             Thème
           </Text>

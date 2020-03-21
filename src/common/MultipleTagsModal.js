@@ -15,11 +15,16 @@ import { addTag, toggleTagEntity } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
+  alignItems: 'center'
 })
 
 const Container = styled.View(({ theme }) => ({
   height: 260,
+  maxWidth: 600,
+  width: '100%',
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
@@ -83,7 +88,8 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
       isVisible={!!item}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard>
+      avoidKeyboard
+    >
       <Container>
         <Box padding={20} paddingBottom={0}>
           <Text bold>
@@ -94,14 +100,19 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
         </Box>
         <Box flex>
           {tags.length ? (
-            <ScrollView contentContainerStyle={{ padding: 20 }} style={{ flex: 1 }}>
+            <ScrollView
+              contentContainerStyle={{ padding: 20 }}
+              style={{ flex: 1 }}
+            >
               <Box row wrap>
                 {tags.map(chip => (
                   <Chip
                     key={chip.id}
                     label={chip.name}
                     isSelected={selectedChips && selectedChips[chip.id]}
-                    onPress={() => dispatch(toggleTagEntity({ item, tagId: chip.id }))}
+                    onPress={() =>
+                      dispatch(toggleTagEntity({ item, tagId: chip.id }))
+                    }
                   />
                 ))}
               </Box>

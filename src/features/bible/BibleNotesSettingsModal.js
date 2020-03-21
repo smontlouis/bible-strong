@@ -17,6 +17,12 @@ const StylizedModal = styled(Modal)({
 
 const Container = styled.View(({ theme }) => ({
   display: 'flex',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '100%',
+  maxWidth: 600,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
@@ -64,7 +70,8 @@ const NotesSettingsModal = ({
       isVisible={!!isOpen}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}>
+      onBackdropPress={onClosed}
+    >
       <Container>
         <Touchy
           onPress={() => {
@@ -72,7 +79,8 @@ const NotesSettingsModal = ({
             setTimeout(() => {
               openNoteEditor(noteId)
             }, 500)
-          }}>
+          }}
+        >
           <Text fontSize={16} bold>
             Éditer
           </Text>
@@ -83,7 +91,8 @@ const NotesSettingsModal = ({
             setTimeout(() => {
               setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
             }, 500)
-          }}>
+          }}
+        >
           <Text fontSize={16} bold>
             Tags
           </Text>

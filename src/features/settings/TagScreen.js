@@ -41,7 +41,8 @@ const NoteItem = ({ item }) => {
         book: books[Livre - 1],
         chapter: Number(Chapitre),
         verse: Number(Verset)
-      }}>
+      }}
+    >
       <Box padding={20}>
         <Box row justifyContent="space-between">
           <Text color="darkGrey" bold fontSize={11}>
@@ -100,7 +101,8 @@ const TagScreen = ({ navigation }) => {
         rightComponent={
           <Link
             onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })}
-            padding>
+            padding
+          >
             <Icon.Feather size={20} name="edit-3" />
           </Link>
         }
@@ -146,9 +148,11 @@ const TagScreen = ({ navigation }) => {
             <Text padding={20} fontSize={25} title>
               Études
             </Text>
-            {studies.map(item => {
-              return <StudyItem key={item.id} study={item} />
-            })}
+            <Box row>
+              {studies.map(item => {
+                return <StudyItem key={item.id} study={item} />
+              })}
+            </Box>
           </Box>
         )}
       </ScrollView>

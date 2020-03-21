@@ -14,6 +14,7 @@ import analytics from '@react-native-firebase/analytics'
 import SplashScreen from 'react-native-splash-screen'
 
 import configureStore from '~redux/store'
+import GlobalContext from '~helpers/globalContext'
 import InitApp from './InitApp'
 // import CodePushCheck from './CodePushCheck'
 
@@ -37,7 +38,8 @@ export const { store, persistor } = configureStore()
 
 class App extends React.Component {
   state = {
-    isLoadingComplete: false
+    isLoadingComplete: false,
+    isFullscreen: false
   }
 
   async componentDidMount() {
@@ -104,6 +106,10 @@ class App extends React.Component {
     ])
   }
 
+  updateState = (key, val) => {
+    this.setState({ [key]: val })
+  }
+
   handleLoadingError = error => {
     // In this case, you might want to report the error to your error
     // reporting service, for example Sentry
@@ -119,18 +125,23 @@ class App extends React.Component {
     if (!this.state.isLoadingComplete) {
       return (
         <View
-          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
           <ActivityIndicator />
         </View>
       )
     }
 
     return (
-      <Provider store={store}>
-        <StatusBar translucent />
-        <InitApp persistor={persistor} />
-        {/* <CodePushCheck /> - @TODO - Reactivatre when codepush works */}
-      </Provider>
+      <GlobalContext.Provider
+        value={{ state: this.state, updateState: this.updateState }}
+      >
+        <Provider store={store}>
+          <StatusBar translucent />
+          <InitApp persistor={persistor} />
+          {/* <CodePushCheck /> - @TODO - Reactivatre when codepush works */}
+        </Provider>
+      </GlobalContext.Provider>
     )
   }
 }

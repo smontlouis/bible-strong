@@ -4,9 +4,11 @@ import styled from '@emotion/native'
 import getVersesRef from '~helpers/getVersesRef'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
+import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
+import books from '~assets/bible_versions/books-desc'
 
 const Container = styled.View(({ theme }) => ({
   padding: 20,
@@ -43,7 +45,17 @@ class CompareVerseItem extends React.Component {
 
   render() {
     const { content, versionNeedsDownload } = this.state
-    const { versionId, name } = this.props
+    const { versionId, name, selectedVerses } = this.props
+
+    const focusVerses = Object.keys(selectedVerses)
+      .map(v => v.split('-')[v.split('-').length - 1])
+      .map(Number)
+
+    focusVerses.sort((a, b) => a - b)
+
+    const [book, chapter, verse] = Object.keys(selectedVerses)[0]
+      .split('-')
+      .map(Number)
 
     if (
       (!content && versionNeedsDownload) ||
@@ -54,16 +66,26 @@ class CompareVerseItem extends React.Component {
     }
 
     return (
-      <Container>
-        <Box row>
-          <Text color="darkGrey" bold fontSize={14}>
-            {versionId} - {name}
-          </Text>
-        </Box>
-        <Paragraph scale={-1} scaleLineHeight={-2}>
-          {removeBreakLines(content)}
-        </Paragraph>
-      </Container>
+      <Link
+        route="BibleView"
+        params={{
+          isReadOnly: true,
+          book: books[book - 1],
+          chapter,
+          verse,
+          version: versionId,
+          focusVerses
+        }}
+      >
+        <Container>
+          <Box row>
+            <Text color="darkGrey" bold fontSize={14} marginBottom={5}>
+              {versionId} - {name}
+            </Text>
+          </Box>
+          <Paragraph scale={-1}>{removeBreakLines(content)}</Paragraph>
+        </Container>
+      </Link>
     )
   }
 }

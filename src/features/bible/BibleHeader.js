@@ -1,9 +1,10 @@
 import React from 'react'
-import { Platform } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
 
+import * as Animatable from 'react-native-animatable'
+import GlobalStateContext from '~helpers/globalContext'
 import truncate from '~helpers/truncate'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
@@ -11,16 +12,15 @@ import Link from '~common/Link'
 import Back from '~common/Back'
 import useDimensions from '~helpers/useDimensions'
 
-const LinkBox = styled(Link)({
+const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'center',
   paddingLeft: 10,
-  paddingRight: 10,
-  paddingVertical: 15
-})
+  paddingRight: 10
+}))
 
-const StyledText = styled(Text)({
+const StyledText = styled(Animatable.Text)({
   fontSize: 16,
   fontWeight: 'bold',
   marginRight: 5
@@ -30,10 +30,11 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   maxWidth: 830,
   width: '100%',
   alignSelf: 'center',
-  height: 60,
-  alignItems: 'center',
+  alignItems: 'stretch',
   borderBottomColor: theme.colors.border
 }))
+
+const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default
@@ -42,6 +43,10 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 const MaterialCommunityIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
   color: theme.colors.default
 }))
+
+const AMaterialCommunityIcon = Animatable.createAnimatableComponent(
+  MaterialCommunityIcon
+)
 
 const formatVerses = verses =>
   verses.reduce((acc, v, i, array) => {
@@ -74,6 +79,11 @@ const Header = ({
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
 
+  const {
+    state: { isFullscreen },
+    updateState
+  } = React.useContext(GlobalStateContext)
+
   if (isReadOnly) {
     return (
       <HeaderBox row>
@@ -93,7 +103,11 @@ const Header = ({
     )
   }
   return (
-    <HeaderBox row>
+    <AnimatableHeaderBox
+      row
+      transition="height"
+      style={{ height: isFullscreen ? 25 : 60 }}
+    >
       {(isSelectionMode || hasBackButton) && (
         <Box justifyContent="center">
           <Back padding>
@@ -107,21 +121,42 @@ const Header = ({
             ? truncate(`${book.Nom} ${chapter}`, 10)
             : `${book.Nom} ${chapter}`}
         </StyledText>
-        <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
       <LinkBox
         route="VersionSelector"
         params={{ version }}
-        style={{ paddingRight: 0 }}>
+        style={{ paddingRight: 0 }}
+      >
         <StyledText>{version}</StyledText>
-        <StyledIcon name="chevron-down" size={15} />
       </LinkBox>
-      <LinkBox route="Pericope" style={{ width: 50 }}>
+      <LinkBox
+        onPress={() => updateState('isFullscreen', !isFullscreen)}
+        style={{ width: 50 }}
+      >
+        <MaterialCommunityIcon
+          name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
+          size={20}
+        />
+      </LinkBox>
+      {/* <LinkBox route="Pericope" style={{ width: 50 }}>
         <MaterialCommunityIcon name="subtitles" size={20} />
-      </LinkBox>
+      </LinkBox> */}
 
-      <LinkBox route="History" style={{ width: 50, marginLeft: 'auto' }}>
-        <MaterialCommunityIcon name="history" size={20} />
+      <LinkBox
+        route="History"
+        style={{
+          width: 50,
+          marginLeft: 'auto'
+        }}
+      >
+        <AMaterialCommunityIcon
+          style={{
+            opacity: isFullscreen ? 0 : 1
+          }}
+          transition="opacity"
+          name="history"
+          size={20}
+        />
       </LinkBox>
       {!isSelectionMode && (
         <LinkBox
@@ -132,11 +167,19 @@ const Header = ({
             alignItems: 'center',
             paddingLeft: 0,
             paddingRight: 0
-          }}>
-          <StyledText>Aa</StyledText>
+          }}
+        >
+          <StyledText
+            style={{
+              opacity: isFullscreen ? 0 : 1
+            }}
+            transition="opacity"
+          >
+            Aa
+          </StyledText>
         </LinkBox>
       )}
-    </HeaderBox>
+    </AnimatableHeaderBox>
   )
 }
 

@@ -9,7 +9,7 @@ const VerseText = styled('span')(
   ({ settings: { fontSizeScale, fontFamily } }) => ({
     fontFamily,
     fontSize: scaleFontSize(19, fontSizeScale),
-    lineHeight: scaleFontSize(29, fontSizeScale)
+    lineHeight: scaleFontSize(32, fontSizeScale)
   })
 )
 
@@ -40,7 +40,8 @@ const VerseTextFormatting = ({ selectedCode, verse, settings }) => {
       value={{
         selectedCode,
         settings
-      }}>
+      }}
+    >
       <NumberText settings={settings}>{verse.Verset} </NumberText>
       <VerseText settings={settings}>{text}</VerseText>
     </VerseProvider>

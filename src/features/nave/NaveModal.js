@@ -11,11 +11,14 @@ import CardWrapper from './NaveModalCard'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
+  alignItems: 'center',
   zIndex: 10,
   margin: 0
 })
 
 const Container = styled.View(({ theme }) => ({
+  maxWidth: 600,
+  width: '100%',
   height: hp(40),
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
@@ -34,7 +37,8 @@ const NaveModal = ({ onClosed, theme, selectedVerse, version }) => {
       backdropOpacity={0.3}
       isVisible={!!selectedVerse}
       onBackdropPress={onClosed}
-      onBackButtonPress={onClosed}>
+      onBackButtonPress={onClosed}
+    >
       <Container>
         <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
       </Container>

@@ -12,6 +12,7 @@ import Empty from '~common/Empty'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
+import { MAX_WIDTH } from '~helpers/useDimensions'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -88,13 +89,25 @@ class BibleStrongDetailScreen extends React.Component {
     this.setState({ strongReference })
 
     await timeout(1500)
-    const versesCountByBook = await loadStrongVersesCountByBook(book, strongReference.Code)
+    const versesCountByBook = await loadStrongVersesCountByBook(
+      book,
+      strongReference.Code
+    )
     this.setState({ versesCountByBook, concordanceLoading: false })
   }
 
   shareContent = () => {
     const {
-      strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG }
+      strongReference: {
+        Code,
+        Hebreu,
+        Grec,
+        Mot,
+        Phonetique,
+        Definition,
+        Type,
+        LSG
+      }
     } = this.state
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
@@ -158,15 +171,34 @@ class BibleStrongDetailScreen extends React.Component {
 
     const {
       strongReference,
-      strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG }
+      strongReference: {
+        Code,
+        Hebreu,
+        Grec,
+        Mot,
+        Phonetique,
+        Definition,
+        Origine,
+        Type,
+        LSG
+      }
     } = this.state
 
     return (
       <Container>
-        <Box padding={20}>
+        <Box
+          padding={20}
+          maxWidth={MAX_WIDTH}
+          width="100%"
+          marginLeft="auto"
+          marginRight="auto"
+        >
           <Box>
             <Box style={{ flexDirection: 'row' }}>
-              <Touchable onPress={() => this.props.navigation.goBack()} style={{ flex: 1 }}>
+              <Touchable
+                onPress={() => this.props.navigation.goBack()}
+                style={{ flex: 1 }}
+              >
                 <Text title fontSize={22} flex>
                   {capitalize(Mot)}
                   {!!Phonetique && (
@@ -179,7 +211,11 @@ class BibleStrongDetailScreen extends React.Component {
               </Touchable>
               <Touchable onPress={this.shareContent}>
                 <FeatherIcon
-                  style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
+                  style={{
+                    paddingTop: 10,
+                    paddingHorizontal: 5,
+                    marginRight: 10
+                  }}
                   name="share-2"
                   size={20}
                 />
@@ -222,7 +258,10 @@ class BibleStrongDetailScreen extends React.Component {
             {!!Definition && (
               <ViewItem>
                 <SubTitle color="tertiary">Définition - {Code}</SubTitle>
-                <StylizedHTMLView value={Definition} onLinkPress={this.linkToStrong} />
+                <StylizedHTMLView
+                  value={Definition}
+                  onLinkPress={this.linkToStrong}
+                />
               </ViewItem>
             )}
             {!!LSG && (
@@ -234,10 +273,14 @@ class BibleStrongDetailScreen extends React.Component {
             {!!Origine && (
               <ViewItem>
                 <SubTitle color="tertiary">Origine du mot</SubTitle>
-                <StylizedHTMLView value={Origine} onLinkPress={this.linkToStrong} />
+                <StylizedHTMLView
+                  value={Origine}
+                  onLinkPress={this.linkToStrong}
+                />
               </ViewItem>
             )}
-            {(this.state.versesCountByBook.length > 0 || this.state.concordanceLoading) && (
+            {(this.state.versesCountByBook.length > 0 ||
+              this.state.concordanceLoading) && (
               <OccurrencesFoundByBookList
                 strongReference={strongReference}
                 navigation={this.props.navigation}
@@ -252,7 +295,4 @@ class BibleStrongDetailScreen extends React.Component {
   }
 }
 
-export default compose(
-  waitForStrongDB,
-  connect()
-)(BibleStrongDetailScreen)
+export default compose(waitForStrongDB, connect())(BibleStrongDetailScreen)

@@ -15,6 +15,12 @@ const StylizedModal = styled(Modal)({
 const Container = styled.View(({ theme }) => ({
   display: 'flex',
   maxHeight: 300,
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '100%',
+  maxWidth: 600,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
   backgroundColor: theme.colors.reverse,
   borderRadius: 3,
   shadowColor: theme.colors.default,
@@ -49,7 +55,8 @@ const Menu = ({ isOpen, onClosed, children }) => {
       isVisible={isOpen}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}>
+      onBackdropPress={onClosed}
+    >
       <Container>
         <ScrollView>{children}</ScrollView>
       </Container>

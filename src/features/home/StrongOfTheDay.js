@@ -11,15 +11,21 @@ import Box from '~common/ui/Box'
 import loadRandomStrongReference from '~helpers/loadRandomStrongReference'
 import waitForStrongWidget from './waitForStrongWidget'
 
-const itemWidth = wp(60)
+const itemWidth = wp(60) > 300 ? 300 : wp(60)
 const itemHeight = 130
 
-const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131,240)' }) => {
+const StrongOfTheDay = ({
+  type,
+  color1 = 'rgb(69,150,220)',
+  color2 = 'rgb(89,131,240)'
+}) => {
   const [error, setError] = useState(false)
   const [strongReference, setStrongRef] = useState(false)
   useEffect(() => {
     const loadStrong = async () => {
-      const strongReference = await loadRandomStrongReference(type === 'grec' ? 40 : 1)
+      const strongReference = await loadRandomStrongReference(
+        type === 'grec' ? 40 : 1
+      )
 
       if (!strongReference) {
         setError('NOT_FOUND')
@@ -39,7 +45,14 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
 
   if (error) {
     return (
-      <Box center rounded height={itemHeight} padding={30} width={itemWidth} marginRight={20}>
+      <Box
+        center
+        rounded
+        height={itemHeight}
+        padding={30}
+        width={itemWidth}
+        marginRight={20}
+      >
         {error === 'NOT_FOUND' ? (
           <>
             <FeatherIcon name="slash" size={30} color="quart" />
@@ -57,7 +70,13 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
 
   if (!strongReference) {
     return (
-      <Box height={itemHeight} center rounded width={itemWidth} marginRight={20}>
+      <Box
+        height={itemHeight}
+        center
+        rounded
+        width={itemWidth}
+        marginRight={20}
+      >
         <Text>Chargement...</Text>
       </Box>
     )
@@ -69,7 +88,8 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
     <Link
       route="BibleStrongDetail"
       params={{ book: Grec ? 40 : 1, strongReference }}
-      style={{ width: itemWidth }}>
+      style={{ width: itemWidth }}
+    >
       <Box center rounded marginRight={20} height={itemHeight}>
         <Box
           style={{
@@ -79,15 +99,30 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
             top: 0,
             height: itemHeight,
             borderRadius: 3
-          }}>
-          <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
+          }}
+        >
+          <LinearGradient
+            start={[0.1, 0.2]}
+            style={{ height: 130 }}
+            colors={[color1, color2]}
+          />
         </Box>
-        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
+        <Box
+          backgroundColor="rgba(0,0,0,0.1)"
+          paddingHorizontal={5}
+          paddingVertical={3}
+          rounded
+        >
           <Text fontSize={10} style={{ color: 'white' }}>
             {type === 'grec' ? 'Grec' : 'Hébreu'}
           </Text>
         </Box>
-        <Paragraph style={{ color: 'white' }} scale={1} scaleLineHeight={-2} marginBottom={3}>
+        <Paragraph
+          style={{ color: 'white' }}
+          scale={1}
+          scaleLineHeight={-2}
+          marginBottom={3}
+        >
           {Grec || Hebreu}
         </Paragraph>
         <Text title fontSize={16} style={{ color: 'white' }}>

@@ -11,30 +11,31 @@ import ScrollView from '~common/ui/ScrollView'
 import PericopeHeader from './PericopeHeader'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import SnackBar from '~common/SnackBar'
 
-const H1 = styled(Text)(() => ({
+const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
   marginLeft: 20,
   marginBottom: 20
 }))
 
-const H2 = styled(Text)(() => ({
+const H2 = styled(Paragraph)(() => ({
   fontSize: 20,
   marginLeft: 20,
   marginBottom: 20
 }))
 
-const H3 = styled(Text)(() => ({
+const H3 = styled(Paragraph)(() => ({
   fontSize: 18,
   marginLeft: 20,
   marginBottom: 20
 }))
 
-const H4 = styled(Text)(() => ({
+const H4 = styled(Paragraph)(() => ({
   fontSize: 16,
   marginLeft: 20,
   marginBottom: 20
@@ -91,9 +92,9 @@ const PericopeScreen = ({ navigation }) => {
       />
       <ScrollView>
         <Box padding={20}>
-          <Text title scaleLineHeight={-2} fontSize={30} marginBottom={40}>
+          <Paragraph style={{ fontSize: 30 }} marginBottom={40}>
             {book.Nom}
-          </Text>
+          </Paragraph>
           {!Object.keys(pericopeBook).length ? (
             <Empty
               source={require('~assets/images/empty.json')}
@@ -104,52 +105,46 @@ const PericopeScreen = ({ navigation }) => {
               return (
                 <React.Fragment key={chapterKey}>
                   {!!Object.keys(chapterObject).length && (
-                    <Text titleItalic color="tertiary" fontSize={12} marginBottom={10}>
+                    <Text
+                      titleItalic
+                      color="tertiary"
+                      fontSize={12}
+                      marginBottom={10}
+                    >
                       CHAPITRE {chapterKey}
                     </Text>
                   )}
-                  {Object.entries(chapterObject).map(([verseKey, verseObject]) => {
-                    const { h1, h2, h3, h4 } = verseObject
-                    return (
-                      <TouchableOpacity
-                        key={verseKey}
-                        onPress={() =>
-                          versionNeedsDownload
-                            ? SnackBar.show('Vous devez télécharger cette version de la Bible.')
-                            : navigation.navigate({
-                                routeName: 'BibleView',
-                                params: {
-                                  isReadOnly: true,
-                                  book,
-                                  chapter: Number(chapterKey),
-                                  version,
-                                  verse: 1
-                                }
-                              })
-                        }>
-                        {h1 && (
-                          <H1 title scaleLineHeight={-2}>
-                            {h1}
-                          </H1>
-                        )}
-                        {h2 && (
-                          <H2 title scaleLineHeight={-2}>
-                            {h2}
-                          </H2>
-                        )}
-                        {h3 && (
-                          <H3 title scaleLineHeight={-2}>
-                            {h3}
-                          </H3>
-                        )}
-                        {h4 && (
-                          <H4 title scaleLineHeight={-2}>
-                            {h4}
-                          </H4>
-                        )}
-                      </TouchableOpacity>
-                    )
-                  })}
+                  {Object.entries(chapterObject).map(
+                    ([verseKey, verseObject]) => {
+                      const { h1, h2, h3, h4 } = verseObject
+                      return (
+                        <TouchableOpacity
+                          key={verseKey}
+                          onPress={() =>
+                            versionNeedsDownload
+                              ? SnackBar.show(
+                                  'Vous devez télécharger cette version de la Bible.'
+                                )
+                              : navigation.navigate({
+                                  routeName: 'BibleView',
+                                  params: {
+                                    isReadOnly: true,
+                                    book,
+                                    chapter: Number(chapterKey),
+                                    version,
+                                    verse: 1
+                                  }
+                                })
+                          }
+                        >
+                          {h1 && <H1>{h1}</H1>}
+                          {h2 && <H2>{h2}</H2>}
+                          {h3 && <H3>{h3}</H3>}
+                          {h4 && <H4>{h4}</H4>}
+                        </TouchableOpacity>
+                      )
+                    }
+                  )}
                 </React.Fragment>
               )
             })
@@ -161,14 +156,18 @@ const PericopeScreen = ({ navigation }) => {
         row
         paddingHorizontal={20}
         paddingVertical={10}
-        justifyContent="space-between">
+        justifyContent="space-between"
+      >
         {book.Numero != 1 && (
           <Link onPress={() => setBook(books[book.Numero - 2])}>
             <StyledIcon name="arrow-left" size={30} />
           </Link>
         )}
         {book.Numero != 66 && (
-          <Link onPress={() => setBook(books[book.Numero])} style={{ marginLeft: 'auto' }}>
+          <Link
+            onPress={() => setBook(books[book.Numero])}
+            style={{ marginLeft: 'auto' }}
+          >
             <StyledIcon name="arrow-right" size={30} />
           </Link>
         )}

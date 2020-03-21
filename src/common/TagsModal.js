@@ -14,11 +14,16 @@ import { addTag } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
+  alignItems: 'center'
 })
 
 const Container = styled.View(({ theme }) => ({
   height: 260,
+  maxWidth: 600,
+  width: '100%',
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
   backgroundColor: theme.colors.reverse,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
@@ -51,15 +56,23 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       isVisible={isVisible}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard>
+      avoidKeyboard
+    >
       <Container>
         <Box flex>
           <Box padding={20} paddingBottom={0}>
             <Text bold>Étiquettes</Text>
           </Box>
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ padding: 20 }}
+          >
             <Box row wrap>
-              <Chip label="Tout" isSelected={!selectedChip} onPress={() => onSelected(null)} />
+              <Chip
+                label="Tout"
+                isSelected={!selectedChip}
+                onPress={() => onSelected(null)}
+              />
               {tags.map(chip => (
                 <Chip
                   key={chip.id}

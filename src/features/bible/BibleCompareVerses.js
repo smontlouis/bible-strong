@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 
 import verseToReference from '~helpers/verseToReference'
+
 import Container from '~common/ui/Container'
 import Empty from '~common/Empty'
 import ScrollView from '~common/ui/ScrollView'
@@ -20,7 +21,9 @@ const BibleCompareVerses = ({ navigation }) => {
   const { selectedVerses } = navigation.state.params || {}
   const title = verseToReference(selectedVerses)
 
-  const versionsToCompare = useSelector(state => Object.keys(state.user.bible.settings.compare))
+  const versionsToCompare = useSelector(state =>
+    Object.keys(state.user.bible.settings.compare)
+  )
 
   return (
     <Container>
@@ -35,8 +38,9 @@ const BibleCompareVerses = ({ navigation }) => {
         }
       />
       <ScrollView>
-        {!Object.entries(versions).filter(([versionId]) => versionsToCompare.includes(versionId))
-          .length ? (
+        {!Object.entries(versions).filter(([versionId]) =>
+          versionsToCompare.includes(versionId)
+        ).length ? (
           <Empty
             source={require('~assets/images/empty.json')}
             message="Aucune version à comparer..."
