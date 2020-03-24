@@ -19,7 +19,7 @@ export default function configureStore() {
     key: 'root',
     storage: AsyncStorage,
     stateReconciler: autoMergeLevel2,
-    version: 16,
+    version: 17,
     // debug: true,
     migrate: createMigrate(migrations, { debug: true })
   }

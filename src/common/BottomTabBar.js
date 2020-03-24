@@ -87,7 +87,12 @@ const TabBar = props => {
       style={{
         overflow: isFullscreen ? 'hidden' : 'visible',
         paddingTop: activeRouteIndex === 2 ? (isFullscreen ? 0 : 15) : 0,
-        height: activeRouteIndex === 2 ? (isFullscreen ? 0 : 60) : 40
+        height:
+          activeRouteIndex === 2
+            ? isFullscreen
+              ? 0
+              : 60 + getBottomSpace()
+            : 40 + getBottomSpace()
       }}
     >
       {routes.map((route, routeIndex) => {

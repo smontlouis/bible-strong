@@ -66,6 +66,7 @@ const TextButton = styled.Text(({ theme, small, reverse }) => ({
 
 const Button = ({
   title,
+  children,
   subTitle,
   onPress,
   route,
@@ -97,14 +98,15 @@ const Button = ({
         secondary={secondary}
         success={success}
         color={color}
-        type={type}>
+        type={type}
+      >
         {isLoading ? (
           <ActivityIndicator color="white" />
         ) : (
           <>
             {leftIcon}
             <TextButton small={small} reverse={reverse}>
-              {title}
+              {title || children}
             </TextButton>
             {rightIcon}
           </>

@@ -44,6 +44,8 @@ export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
 
 export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
 
+export const SET_FIRST_TIME = 'user/SET_FIRST_TIME'
+
 export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
 export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
@@ -53,6 +55,7 @@ const initialState = {
   displayName: '',
   photoURL: '',
   provider: '',
+  isFirstTime: true,
   lastSeen: 0,
   emailVerified: false,
   isLoading: false,
@@ -98,6 +101,10 @@ const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 // UserReducer
 const userReducer = produce((draft, action) => {
   switch (action.type) {
+    case SET_FIRST_TIME: {
+      draft.isFirstTime = action.payload
+      break
+    }
     case APP_FETCH_DATA: {
       draft.isLoading = true
       break
@@ -285,6 +292,14 @@ export default reduceReducers(
   versionUpdateReducer,
   studiesReducer
 )
+
+// First-Time
+export function setFirstTime(payload) {
+  return {
+    type: SET_FIRST_TIME,
+    payload
+  }
+}
 
 // FONT-FAMILY
 export function setFontFamily(payload) {

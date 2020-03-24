@@ -33,3 +33,5 @@ export const cleanParams = () => ({
 })
 
 export const removeBreakLines = str => str.replace(/\n/g, '')
+
+export const maxWidth = (width, mWidth) => (width > mWidth ? mWidth : width)

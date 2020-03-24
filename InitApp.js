@@ -10,6 +10,7 @@ import analytics from '@react-native-firebase/analytics'
 import { MenuProvider } from 'react-native-popup-menu'
 
 import ErrorBoundary from '~common/ErrorBoundary'
+import OnBoarding from '~common/OnBoarding'
 
 import {
   updateUserData,
@@ -130,6 +131,7 @@ class InitApp extends React.Component {
                     />
                   </ErrorBoundary>
                   <Changelog />
+                  <OnBoarding />
                 </>
               </DBStateProvider>
             </PersistGate>

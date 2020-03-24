@@ -225,9 +225,18 @@ export default {
   16: state => {
     return {
       ...state,
-      isLoading: {
+      user: {
         ...state.user,
         isLoading: false
+      }
+    }
+  },
+  17: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        isFirstTime: true
       }
     }
   }

@@ -5,7 +5,7 @@ const useMediaQueries = () => {
     screen: { width }
   } = useDimensions()
 
-  if (width <= 400) {
+  if (width <= 320) {
     return 'xs'
   }
 
