@@ -5,8 +5,10 @@ import { GoogleSignin } from '@react-native-community/google-signin'
 import { LoginManager, AccessToken } from 'react-native-fbsdk'
 
 import * as Sentry from '@sentry/react-native'
-import * as SecureStore from 'expo-secure-store'
-import * as AppleAuthentication from 'expo-apple-authentication'
+import appleAuth, {
+  AppleAuthRequestScope,
+  AppleAuthRequestOperation
+} from '@invertase/react-native-apple-authentication'
 import * as Network from 'expo-network'
 
 import SnackBar from '~common/SnackBar'
@@ -141,52 +143,42 @@ const FireAuth = class {
 
   appleLogin = () =>
     new Promise(async resolve => {
-      // await SecureStore.deleteItemAsync('appleEmail')
-      // await SecureStore.deleteItemAsync('applePassword')
+      try {
+        const appleAuthRequestResponse = await appleAuth.performRequest({
+          requestedOperation: AppleAuthRequestOperation.LOGIN,
+          requestedScopes: [
+            AppleAuthRequestScope.EMAIL,
+            AppleAuthRequestScope.FULL_NAME
+          ]
+        })
 
-      let email = await SecureStore.getItemAsync('appleEmail')
-      let password
+        const { identityToken, nonce } = appleAuthRequestResponse
 
-      if (email) {
-        console.log('email exists')
-        password = await SecureStore.getItemAsync('applePassword')
-        const success = await this.login(email, password)
-        resolve(success)
-      } else {
-        console.log("email doesn't exist")
-        try {
-          const credential = await AppleAuthentication.signInAsync({
-            requestedScopes: [
-              AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-              AppleAuthentication.AppleAuthenticationScope.EMAIL
-            ]
-          })
+        // can be null in some scenarios
+        if (identityToken) {
+          // 3). create a Firebase `AppleAuthProvider` credential
+          const appleCredential = auth.AppleAuthProvider.credential(
+            identityToken,
+            nonce
+          )
+          const userCredential = await auth().signInWithCredential(
+            appleCredential
+          )
 
-          // signed in
-          console.log(credential)
-
-          email = credential.email
-          password = credential.user
-
-          const { givenName, familyName } = credential.fullName
-          const username = `${givenName} ${familyName}`.trim()
-
-          const success = await this.register(username, email, password)
-
-          if (success) {
-            await SecureStore.setItemAsync('appleEmail', email)
-            await SecureStore.setItemAsync('applePassword', password)
-          }
-
-          resolve(success)
-        } catch (e) {
-          if (e.code === 'ERR_CANCELED') {
-            console.log('ERR_CANCELED')
-          } else {
-            console.log('OTHER_ERROR', e)
-          }
+          console.log(
+            `Firebase authenticated via Apple, UID: ${userCredential.user.uid}`
+          )
+          resolve(false)
+        } else {
           resolve(false)
         }
+      } catch (e) {
+        if (e.code === 'ERR_CANCELED') {
+          console.log('ERR_CANCELED')
+        } else {
+          console.log('OTHER_ERROR', e)
+        }
+        resolve(false)
       }
     })
 

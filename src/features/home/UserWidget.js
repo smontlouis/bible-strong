@@ -1,5 +1,10 @@
 import React from 'react'
-import { ScrollView, Platform, ActivityIndicator } from 'react-native'
+import {
+  ScrollView,
+  Platform,
+  ActivityIndicator,
+  StyleSheet
+} from 'react-native'
 import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
@@ -43,7 +48,8 @@ const ProfileContainer = styled.View(({ theme }) => ({
   shadowRadius: 4,
   elevation: 1,
   overflow: 'visible',
-  backgroundColor: 'white'
+  backgroundColor: 'white',
+  position: 'relative'
 }))
 
 const GenerateImageContainer = ProfileImage.withComponent(Box)
@@ -140,17 +146,17 @@ const UserWidget = ({ theme }) => {
             ) : (
               <GenerateImage name={user.displayName} />
             )}
+            {isLoading && (
+              <Box
+                backgroundColor="rgba(255,255,255,0.8)"
+                center
+                style={StyleSheet.absoluteFillObject}
+              >
+                <ActivityIndicator color="black" />
+              </Box>
+            )}
           </ProfileContainer>
         </Box>
-
-        {isLoading && (
-          <Box row>
-            <ActivityIndicator color="black" />
-            <Text marginLeft={10} bold color="primary">
-              Synchronisation des données...
-            </Text>
-          </Box>
-        )}
 
         {!user.emailVerified && (
           <Box marginTop={10}>
@@ -169,7 +175,8 @@ const UserWidget = ({ theme }) => {
           paddingHorizontal: 20,
           paddingVertical: 10,
           overflow: 'visible'
-        }}>
+        }}
+      >
         <Chip route="Highlights">
           <Box row marginBottom={5}>
             <ChipIcon name="edit-3" size={20} />

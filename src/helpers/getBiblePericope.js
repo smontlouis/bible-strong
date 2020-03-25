@@ -16,6 +16,7 @@ const getBiblePericope = version => {
     case 'FMAR': {
       return PericopeFMAR
     }
+    case 'NFC':
     case 'FRC97': {
       return PericopeFRC97
     }

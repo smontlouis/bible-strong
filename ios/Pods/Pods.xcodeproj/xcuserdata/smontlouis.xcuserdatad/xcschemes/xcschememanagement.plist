@@ -229,6 +229,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>RNAppleAuthentication.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>RNCAsyncStorage.xcscheme</key>
 		<dict>
 			<key>isShown</key>

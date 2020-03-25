@@ -25,6 +25,7 @@
     "@emotion/core": "^10.0.27",
     "@emotion/native": "^10.0.27",
     "@expo/vector-icons": "^10.0.6",
+    "@invertase/react-native-apple-authentication": "^0.2.0",
     "@react-native-community/async-storage": "^1.7.1",
     "@react-native-community/datetimepicker": "^2.2.1",
     "@react-native-community/google-signin": "^3.0.4",

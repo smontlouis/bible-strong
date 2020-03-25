@@ -169,6 +169,11 @@ export const versions = {
     name: 'Français courant',
     c: '© Alliance Biblique Française'
   },
+  NFC: {
+    id: 'NFC',
+    name: 'Nouvelle Français courant',
+    c: "Alliance biblique française Bibli'0, ©2019"
+  },
   KJV: {
     id: 'KJV',
     name: 'King James Version',

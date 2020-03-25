@@ -1,12 +1,14 @@
 import React from 'react'
 import Modal from 'react-native-modal'
 import * as Icon from '@expo/vector-icons'
+import * as Sentry from '@sentry/react-native'
 
 import styled from '@emotion/native'
 import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
-import { ScrollView, Alert } from 'react-native'
+import { ScrollView, Alert, Share } from 'react-native'
 
+import Snackbar from '~common/SnackBar'
 import * as UserActions from '~redux/modules/user'
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
@@ -37,15 +39,15 @@ const Container = styled.View(({ theme }) => ({
   padding: 20
 }))
 
-const StyledDeleteIcon = styled.TouchableOpacity(({ theme }) => ({
-  backgroundColor: theme.colors.quart,
+const StyledIcon = styled.TouchableOpacity(({ theme, color }) => ({
+  backgroundColor: theme.colors[color],
   width: 30,
   height: 30,
   color: 'white',
   borderRadius: 5,
   alignItems: 'center',
   justifyContent: 'center',
-  marginRight: 10
+  marginLeft: 10
 }))
 
 class BibleNoteModal extends React.Component {
@@ -112,7 +114,10 @@ class BibleNoteModal extends React.Component {
   onSaveNote = () => {
     const { title, description, tags } = this.state
     const { noteVerses, selectedVerses } = this.props
-    this.props.addNote({ title, description, date: Date.now(), ...(tags && { tags }) }, noteVerses)
+    this.props.addNote(
+      { title, description, date: Date.now(), ...(tags && { tags }) },
+      noteVerses
+    )
     this.props.onClosed()
 
     const orderedVerses = orderVerses(noteVerses || selectedVerses)
@@ -142,6 +147,23 @@ class BibleNoteModal extends React.Component {
     this.setState({ isEditing: false })
   }
 
+  shareNote = () => {
+    try {
+      const message = `
+Note pour ${this.state.reference}
+
+${this.state.title}
+
+${this.state.description}
+      `
+      Share.share({ message })
+    } catch (e) {
+      Snackbar.show('Erreur lors du partage.')
+      console.log(e)
+      Sentry.captureException(e)
+    }
+  }
+
   render() {
     const { isOpen, onClosed } = this.props
     const { title, description, isEditing, id, tags } = this.state
@@ -154,7 +176,8 @@ class BibleNoteModal extends React.Component {
         avoidKeyboard
         onBackButtonPress={onClosed}
         animationIn="fadeInDown"
-        animationOut="fadeOutUp">
+        animationOut="fadeOutUp"
+      >
         <Container>
           <Text fontSize={16} bold color="darkGrey" marginBottom={10}>
             Note pour {this.state.reference}
@@ -201,19 +224,26 @@ class BibleNoteModal extends React.Component {
               </ScrollView>
               <Box row marginTop={10} justifyContent="flex-end">
                 {id && (
-                  <StyledDeleteIcon onPress={() => this.deleteNote(id)}>
+                  <StyledIcon onPress={() => this.deleteNote(id)} color="quart">
                     <Icon.Feather name="trash-2" size={15} color="white" />
-                  </StyledDeleteIcon>
+                  </StyledIcon>
                 )}
                 {id && (
-                  <Button
-                    small
-                    onPress={() => this.setState({ isEditing: true })}
-                    style={{ marginRight: 10 }}
-                    title="Editer"
-                  />
+                  <StyledIcon onPress={() => this.shareNote()} color="success">
+                    <Icon.MaterialIcons name="share" size={15} color="white" />
+                  </StyledIcon>
                 )}
-                <Button small reverse onPress={onClosed} title="Fermer" />
+                {id && (
+                  <StyledIcon
+                    onPress={() => this.setState({ isEditing: true })}
+                    color="primary"
+                  >
+                    <Icon.MaterialIcons name="edit" size={15} color="white" />
+                  </StyledIcon>
+                )}
+                <StyledIcon onPress={onClosed} color="grey">
+                  <Icon.MaterialIcons name="close" size={15} color="white" />
+                </StyledIcon>
               </Box>
             </>
           )}

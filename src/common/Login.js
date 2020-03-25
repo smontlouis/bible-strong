@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
-import * as AppleAuthentication from 'expo-apple-authentication'
-import SnackBar from '~common/SnackBar'
+import { AppleButton } from '@invertase/react-native-apple-authentication'
 
+import SnackBar from '~common/SnackBar'
 import Link from '~common/Link'
 import TextInput from '~common/ui/TextInput'
 import Button from '~common/ui/Button'
@@ -78,13 +78,13 @@ const Login = ({ theme }) => {
     setLoading(isStillLoading)
   }
 
-  useEffect(() => {
-    const waitForApple = async () => {
-      const canDisplay = await AppleAuthentication.isAvailableAsync()
-      setCanDisplayAppleButton(canDisplay)
-    }
-    waitForApple()
-  }, [])
+  // useEffect(() => {
+  //   const waitForApple = async () => {
+  //     const canDisplay = await AppleAuthentication.isAvailableAsync()
+  //     setCanDisplayAppleButton(canDisplay)
+  //   }
+  //   waitForApple()
+  // }, [])
 
   return (
     <Box>
@@ -120,11 +120,19 @@ const Login = ({ theme }) => {
         </Text>
       </Box>
       <Spacer />
+      <AppleButton
+        style={{ width: '100%', height: 50 }}
+        buttonStyle={AppleButton.Style.BLACK}
+        buttonType={AppleButton.Type.SIGN_IN}
+        onPress={onAppleLogin}
+      />
+      <Spacer />
       <Box row>
         <SocialButton
           disabled={isLoading}
           onPress={onGoogleLogin}
-          color="#D14C3E">
+          color="#D14C3E"
+        >
           <ButtonIcon size={20} name="google" color="white" />
           <ButtonText color="white">Google</ButtonText>
         </SocialButton>
@@ -132,20 +140,12 @@ const Login = ({ theme }) => {
         <SocialButton
           disabled={isLoading}
           onPress={onFacebookLogin}
-          color="#3b5998">
+          color="#3b5998"
+        >
           <ButtonIcon size={20} name="facebook" color="white" />
           <ButtonText color="white">Facebook</ButtonText>
         </SocialButton>
       </Box>
-      {canDisplayAppleButton && (
-        <AppleAuthentication.AppleAuthenticationButton
-          style={{ flex: 1, height: 44, marginTop: 10 }}
-          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-          cornerRadius={5}
-          onPress={onAppleLogin}
-        />
-      )}
       <Spacer size={2} />
       <Box center>
         <Link route="Register">

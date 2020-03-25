@@ -8,7 +8,7 @@ import Carousel, { Pagination } from 'react-native-snap-carousel'
 import { Button as RNPButton } from 'react-native-paper'
 
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
-import { viewportWidth, wp, maxWidth, hp } from '~helpers/utils'
+import { wp, hp } from '~helpers/utils'
 import { setFirstTime } from '~redux/modules/user'
 
 import Box from '~common/ui/Box'
