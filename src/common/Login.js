@@ -78,14 +78,6 @@ const Login = ({ theme }) => {
     setLoading(isStillLoading)
   }
 
-  // useEffect(() => {
-  //   const waitForApple = async () => {
-  //     const canDisplay = await AppleAuthentication.isAvailableAsync()
-  //     setCanDisplayAppleButton(canDisplay)
-  //   }
-  //   waitForApple()
-  // }, [])
-
   return (
     <Box>
       <Box>
