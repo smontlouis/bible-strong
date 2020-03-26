@@ -47,8 +47,6 @@ const LexiqueResultsWidget = ({ searchValue }) => {
       {results.slice(0, limit).map(strong => {
         const { Grec, Mot, Code } = strong
 
-        console.log(strong)
-
         const color1 = Grec ? 'rgb(69,150,220)' : 'rgba(248,131,121,1)'
         const color2 = Grec ? 'rgb(89,131,240)' : 'rgba(255,77,93,1)'
 

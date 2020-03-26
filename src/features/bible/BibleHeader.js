@@ -20,11 +20,12 @@ const LinkBox = styled(Link)(() => ({
   paddingRight: 10
 }))
 
-const StyledText = styled(Animatable.Text)({
+const StyledText = styled(Animatable.Text)(({ theme }) => ({
   fontSize: 16,
   fontWeight: 'bold',
-  marginRight: 5
-})
+  marginRight: 5,
+  color: theme.colors.default
+}))
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   maxWidth: 830,

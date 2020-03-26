@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
-import { AppleButton } from '@invertase/react-native-apple-authentication'
+import appleAuth, {
+  AppleButton
+} from '@invertase/react-native-apple-authentication'
 
 import SnackBar from '~common/SnackBar'
 import Link from '~common/Link'
@@ -38,7 +40,6 @@ const Login = ({ theme }) => {
   const [isLoading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [canDisplayAppleButton, setCanDisplayAppleButton] = useState(false)
 
   const onGoogleLogin = async () => {
     setLoading(true)
@@ -112,12 +113,14 @@ const Login = ({ theme }) => {
         </Text>
       </Box>
       <Spacer />
-      <AppleButton
-        style={{ width: '100%', height: 50 }}
-        buttonStyle={AppleButton.Style.BLACK}
-        buttonType={AppleButton.Type.SIGN_IN}
-        onPress={onAppleLogin}
-      />
+      {appleAuth.isSignUpButtonSupported && (
+        <AppleButton
+          style={{ width: '100%', height: 50 }}
+          buttonStyle={AppleButton.Style.BLACK}
+          buttonType={AppleButton.Type.SIGN_IN}
+          onPress={onAppleLogin}
+        />
+      )}
       <Spacer />
       <Box row>
         <SocialButton

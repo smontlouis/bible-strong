@@ -48,7 +48,8 @@ const SearchInput = ({
           style={{
             width: '100%',
             height: '100%',
-            fontSize: 18
+            fontSize: 18,
+            color: theme.colors.default
           }}
           {...props}
         />

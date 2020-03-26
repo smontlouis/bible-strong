@@ -56,6 +56,11 @@ const slides = [
     description:
       'Créez un compte pour synchroniser\n vos données dans le cloud, et cela\n en tout sécurité !',
     image: require('../assets/images/Bible_Strong__Fifth_Slide.png')
+  },
+  {
+    title: 'Accès hors-ligne',
+    description:
+      'Bible Strong a été pensé pour un accès avant tout hors-ligne. \n\nAvant de commencer, rendez-vous\n dans `Plus -> Gestion des téléchargements`\n pour télécharger tout ce dont vous avez\n besoin !'
   }
 ]
 
@@ -69,14 +74,16 @@ const Item = ({ item, index }) => {
       overflow="visible"
       paddingHorizontal={20}
     >
-      <Image
-        source={item.image}
-        style={{
-          width: r([wp(60), wp(80), 450, 500]),
-          height: r([wp(50), wp(68), 380, 460])
-        }}
-      />
-      <Text title fontSize={24} marginTop={30}>
+      {item.image && (
+        <Image
+          source={item.image}
+          style={{
+            width: r([wp(60), wp(80), 450, 500]),
+            height: r([wp(50), wp(68), 380, 460])
+          }}
+        />
+      )}
+      <Text textAlign="center" title fontSize={24} marginTop={30}>
         {item.title}
       </Text>
       <Paragraph
@@ -149,7 +156,7 @@ const OnBoarding = () => {
             tappableDots={!!carousel.current}
           />
           <Box width={170} marginTop={20}>
-            {activeSlide === 4 ? (
+            {activeSlide === 5 ? (
               <Button onPress={() => dispatch(setFirstTime(false))}>
                 Commencer
               </Button>

@@ -21,7 +21,6 @@ const StylizedModal = styled(Modal)({
 const Container = styled.View(({ theme }) => ({
   height: 260,
   maxWidth: 600,
-  width: '100%',
   borderTopLeftRadius: 30,
   borderTopRightRadius: 30,
   backgroundColor: theme.colors.reverse,
