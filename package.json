@@ -15,11 +15,23 @@
     "publish-ios": "code-push release-react BibleStrong-iOS ios"
   },
   "jest": {
-    "preset": "jest-expo",
     "modulePathIgnorePatterns": [
       ".yarn",
       ".npm"
     ]
+  },
+  "detox": {
+    "configurations": {
+      "ios.sim.debug": {
+        "binaryPath": "ios/build/Build/Products/Dev-iphonesimulator/Bible Strong - Dev.app",
+        "build": "xcodebuild -workspace ios/biblestrong.xcworkspace -scheme 'biblestrong - dev' -configuration Dev -sdk iphonesimulator -derivedDataPath ios/build",
+        "type": "ios.simulator",
+        "device": {
+          "type": "iPhone 11 Pro"
+        }
+      }
+    },
+    "test-runner": "jest"
   },
   "dependencies": {
     "@emotion/core": "^10.0.27",
@@ -127,6 +139,7 @@
     "babel-plugin-root-import": "^6.4.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "^8.0.0",
+    "detox": "^16.0.1",
     "eslint": "^6.4.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-prettier": "^6.7.0",
@@ -135,8 +148,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-react-hooks": "^2.0.1",
-    "jest": "~24.9.0",
-    "jest-expo": "^36.0.0",
+    "jest": "~25.2.3",
     "jetifier": "~1.6.4",
     "metro-react-native-babel-preset": "~0.56.0",
     "prettier": "^1.18.2",
