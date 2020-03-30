@@ -7,7 +7,8 @@ import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
   TOGGLE_SELECTED_VERSE,
-  NAVIGATE_TO_BIBLE_NOTE
+  NAVIGATE_TO_BIBLE_NOTE,
+  CONSOLE_LOG
 } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
@@ -26,10 +27,12 @@ function convertHex(hex, opacity) {
   return result
 }
 
-const VerseText = styled('span')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(19, fontSizeScale),
-  lineHeight: scaleFontSize(32, fontSizeScale)
-}))
+const VerseText = styled('span')(
+  ({ isParallel, settings: { fontSizeScale } }) => ({
+    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
+    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale)
+  })
+)
 
 const NumberText = styled('span')(
   ({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
@@ -116,7 +119,7 @@ class Verse extends Component {
   }
 
   componentWillUnmount() {
-    this.detectScroll = window.removeEventListener('scroll')
+    this.detectScroll = window.removeEventListener('scroll', this.detectScroll)
   }
 
   navigateToVerseNotes = () => {
@@ -236,6 +239,7 @@ class Verse extends Component {
   render() {
     const {
       verse,
+      parallelVerse,
       secondaryVerse,
       isSelected,
       highlightedColor,
@@ -247,15 +251,53 @@ class Verse extends Component {
       version,
       isHebreu,
       selectedCode,
-      isFocused
+      isSelectedMode,
+      isFocused,
+      isParallel,
+      isParallelVerse
     } = this.props
     const { isTouched } = this.state
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
 
+    if (isParallelVerse) {
+      return (
+        <div style={{ display: 'flex' }}>
+          {parallelVerse.map((p, i) => {
+            return (
+              <div
+                style={{
+                  flex: 1,
+                  padding: '5px 0',
+                  paddingLeft: i === 0 ? '0px' : '10px'
+                }}
+              >
+                <Verse
+                  isParallel
+                  verse={p.verse}
+                  version={p.version}
+                  settings={settings}
+                  isSelected={isSelected}
+                  isSelectedMode={isSelectedMode}
+                  isSelectionMode={isSelectionMode}
+                  highlightedColor={highlightedColor}
+                  notesCount={notesCount}
+                  notesText={notesText}
+                  isVerseToScroll={isVerseToScroll}
+                  selectedCode={selectedCode}
+                  isFocused={isFocused}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )
+    }
+
     if (version === 'LSGS') {
       return (
         <VerseTextFormatting
+          isParallel={isParallel}
           selectedCode={selectedCode}
           verse={verse}
           settings={settings}
@@ -302,6 +344,7 @@ class Verse extends Component {
             />
           )}
           <VerseText
+            isParallel={isParallel}
             settings={settings}
             onTouchStart={this.onTouchStart}
             onTouchEnd={this.onTouchEnd}
@@ -313,6 +356,7 @@ class Verse extends Component {
         </ContainerText>
         {notesText && inlineNotedVerses && !isSelectionMode && (
           <NotesText
+            isParallel={isParallel}
             settings={settings}
             onClick={this.navigateToNote}
             notesText={notesText}

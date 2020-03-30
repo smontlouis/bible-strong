@@ -14,6 +14,9 @@
     "__DEV__": "readonly"
   },
   "rules": {
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off",
+    "guard-for-in": "off",
     "eqeqeq": "off",
     "jsx-a11y/accessible-emoji": "off",
     "import/extensions": 1,

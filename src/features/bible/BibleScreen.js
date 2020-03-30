@@ -53,6 +53,8 @@ class BibleScreen extends React.Component {
   render() {
     const {
       app,
+      addParallelVersion,
+      removeAllParallelVersions,
       navigation,
       isReadOnly,
       isSelectionMode,
@@ -83,6 +85,7 @@ class BibleScreen extends React.Component {
     return (
       <Container pure>
         <BibleHeader
+          navigation={navigation}
           isReadOnly={isReadOnly}
           hasBackButton={hasBackButton}
           isSelectionMode={isSelectionMode}
@@ -92,6 +95,9 @@ class BibleScreen extends React.Component {
           focusVerses={focusVerses}
           version={app.version}
           onBibleParamsClick={this.toggleBibleParamsOpen}
+          isParallel={!!app.parallelVersions.length}
+          addParallelVersion={addParallelVersion}
+          removeAllParallelVersions={removeAllParallelVersions}
         />
         <BibleViewer
           isReadOnly={isReadOnly}
@@ -101,6 +107,7 @@ class BibleScreen extends React.Component {
           chapter={app.chapter}
           verse={app.verse}
           version={app.version}
+          parallelVersions={app.parallelVersions}
           navigation={navigation}
           settings={settings}
           fontFamily={fontFamily}
@@ -153,7 +160,11 @@ export default compose(
           book: params?.book || bible.selectedBook,
           chapter: params?.chapter || bible.selectedChapter,
           verse: params?.verse || bible.selectedVerse,
-          version: params?.version || bible.selectedVersion
+          version: params?.version || bible.selectedVersion,
+          parallelVersions:
+            params?.isSelectionMode || params?.isReadOnly
+              ? []
+              : bible.parallelVersions
         }
       }
     },

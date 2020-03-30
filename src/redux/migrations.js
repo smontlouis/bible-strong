@@ -239,5 +239,14 @@ export default {
         isFirstTime: true
       }
     }
+  },
+  18: state => {
+    return {
+      ...state,
+      bible: {
+        ...state.bible,
+        parallelVersions: []
+      }
+    }
   }
 }

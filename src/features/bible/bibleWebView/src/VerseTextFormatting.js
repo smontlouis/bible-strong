@@ -6,10 +6,11 @@ import { VerseProvider } from './VerseContext'
 import { scaleFontSize } from './scaleFontSize'
 
 const VerseText = styled('span')(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
+  ({ isParallel, settings: { fontSizeScale, fontFamily } }) => ({
     fontFamily,
-    fontSize: scaleFontSize(19, fontSizeScale),
-    lineHeight: scaleFontSize(32, fontSizeScale)
+
+    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
+    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale)
   })
 )
 
@@ -17,7 +18,7 @@ const NumberText = styled('span')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(14, fontSizeScale)
 }))
 
-const VerseTextFormatting = ({ selectedCode, verse, settings }) => {
+const VerseTextFormatting = ({ isParallel, selectedCode, verse, settings }) => {
   const [text, setText] = useState(verse.Texte)
 
   useEffect(() => {
@@ -43,7 +44,9 @@ const VerseTextFormatting = ({ selectedCode, verse, settings }) => {
       }}
     >
       <NumberText settings={settings}>{verse.Verset} </NumberText>
-      <VerseText settings={settings}>{text}</VerseText>
+      <VerseText isParallel={isParallel} settings={settings}>
+        {text}
+      </VerseText>
     </VerseProvider>
   )
 }

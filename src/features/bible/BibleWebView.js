@@ -8,6 +8,7 @@ import literata from '../../assets/fonts/literata'
 import books from '~assets/bible_versions/books'
 import SnackBar from '~common/SnackBar'
 import {
+  NAVIGATE_TO_VERSION,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_PERICOPE,
@@ -17,7 +18,9 @@ import {
   NAVIGATE_TO_BIBLE_NOTE,
   CONSOLE_LOG,
   NAVIGATE_TO_STRONG,
-  THROW_ERROR
+  THROW_ERROR,
+  REMOVE_PARALLEL_VERSION,
+  ADD_PARALLEL_VERSION
 } from './bibleWebView/src/dispatch'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -118,6 +121,27 @@ class BibleWebView extends Component {
         navigation.navigate('Pericope')
         break
       }
+      case NAVIGATE_TO_VERSION: {
+        const { navigation } = this.props
+        const { version, index } = action.payload
+
+        // index = 0 is Default one
+        navigation.navigate('VersionSelector', {
+          version,
+          parallelVersionIndex: index === 0 ? undefined : index - 1
+        })
+        break
+      }
+      case REMOVE_PARALLEL_VERSION: {
+        const { removeParallelVersion } = this.props
+        removeParallelVersion(action.payload - 1)
+        break
+      }
+      case ADD_PARALLEL_VERSION: {
+        const { addParallelVersion } = this.props
+        addParallelVersion()
+        break
+      }
       case NAVIGATE_TO_STRONG: {
         const { setSelectedCode } = this.props
         setSelectedCode(action.payload) // { reference, book }
@@ -198,6 +222,7 @@ class BibleWebView extends Component {
   sendDataToWebView = () => {
     const {
       verses,
+      parallelVerses,
       focusVerses,
       secondaryVerses,
       selectedVerses,
@@ -218,6 +243,7 @@ class BibleWebView extends Component {
     this.dispatchToWebView({
       type: SEND_INITIAL_DATA,
       verses,
+      parallelVerses,
       focusVerses,
       secondaryVerses,
       selectedVerses,

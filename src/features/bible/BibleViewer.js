@@ -54,6 +54,7 @@ class BibleViewer extends Component {
     error: false,
     isLoading: true,
     verses: [],
+    parallelVerses: null,
     secondaryVerses: null,
     comments: null,
     multipleTagsItem: false,
@@ -93,7 +94,9 @@ class BibleViewer extends Component {
     if (
       this.props.chapter !== oldProps.chapter ||
       this.props.book.Numero !== oldProps.book.Numero ||
-      this.props.version !== oldProps.version
+      this.props.version !== oldProps.version ||
+      JSON.stringify(this.props.parallelVersions) !==
+        JSON.stringify(oldProps.parallelVersions)
     ) {
       setTimeout(() => {
         this.loadVerses().catch(() => {
@@ -115,12 +118,27 @@ class BibleViewer extends Component {
   }
 
   loadVerses = async () => {
-    const { book, chapter, version, verse, settings } = this.props
+    const {
+      book,
+      chapter,
+      version,
+      verse,
+      settings,
+      parallelVersions
+    } = this.props
     this.pericope = getBiblePericope(version)
     this.setState({ isLoading: true })
 
     const verses = await loadBibleChapter(book.Numero, chapter, version)
     // console.log('Verses: ', verses)
+
+    const parallelVerses = []
+    if (parallelVersions.length) {
+      for (const p of parallelVersions) {
+        const pVerses = await loadBibleChapter(book.Numero, chapter, p)
+        parallelVerses.push({ id: p, verses: pVerses })
+      }
+    }
 
     let secondaryVerses = null
     if (version === 'INT') {
@@ -146,6 +164,7 @@ class BibleViewer extends Component {
     this.setState({
       isLoading: false,
       verses,
+      parallelVerses,
       secondaryVerses,
       error: false,
       audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(
@@ -240,6 +259,7 @@ class BibleViewer extends Component {
       audioChapterUrl,
       audioMode,
       isPlaying,
+      parallelVerses,
       secondaryVerses,
       comments,
       selectedCode,
@@ -273,7 +293,9 @@ class BibleViewer extends Component {
       focusVerses,
       theme,
       webviewHash,
-      setWebviewHash
+      setWebviewHash,
+      removeParallelVersion,
+      addParallelVersion
     } = this.props
 
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
@@ -296,6 +318,7 @@ class BibleViewer extends Component {
             isReadOnly={isReadOnly}
             isSelectionMode={isSelectionMode}
             verses={verses}
+            parallelVerses={parallelVerses}
             focusVerses={focusVerses}
             secondaryVerses={secondaryVerses}
             selectedVerses={selectedVerses}
@@ -316,6 +339,8 @@ class BibleViewer extends Component {
             comments={comments}
             webviewHash={webviewHash}
             setWebviewHash={setWebviewHash}
+            removeParallelVersion={removeParallelVersion}
+            addParallelVersion={addParallelVersion}
           />
         )}
         {!isReadOnly && (

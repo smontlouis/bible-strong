@@ -33,7 +33,6 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
     { Livre: book, Chapitre: chapter, Verset: verse }
   ])
   const onPress = () =>
-    console.log(book, chapter, verse) ||
     navigation.navigate('BibleView', {
       isReadOnly: true,
       book: books[book - 1],

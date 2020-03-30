@@ -19,12 +19,13 @@ const SectionList = styled(RNSectionList)({
   paddingBottom: 20
 })
 
-const setAndClose = (setVersion, navigation, vers) => {
-  setVersion(vers)
-  navigation.goBack()
-}
-
 const VersionSelector = ({ setVersion, navigation }) => {
+  const parallelVersionIndex = navigation.state?.params?.parallelVersionIndex
+
+  const setAndClose = (vers, parallelVersionIndex) => {
+    setVersion(vers, parallelVersionIndex)
+    navigation.goBack()
+  }
   return (
     <Container>
       <Header hasBackButton title="Version" />
@@ -43,7 +44,7 @@ const VersionSelector = ({ setVersion, navigation }) => {
         )}
         renderItem={({ item }) => (
           <VersionSelectorItem
-            onChange={vers => setAndClose(setVersion, navigation, vers)}
+            onChange={vers => setAndClose(vers, parallelVersionIndex)}
             version={item}
             isSelected={item.id === navigation.state.params.version}
           />
@@ -59,7 +60,4 @@ VersionSelector.navigationOptions = {
   headerStyle: { borderBottomWidth: 0 }
 }
 
-export default connect(
-  null,
-  BibleActions
-)(VersionSelector)
+export default connect(null, BibleActions)(VersionSelector)

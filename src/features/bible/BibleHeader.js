@@ -1,16 +1,53 @@
 import React from 'react'
-import * as Icon from '@expo/vector-icons'
-import { pure } from 'recompose'
 import styled from '@emotion/native'
+import compose from 'recompose/compose'
+import pure from 'recompose/pure'
 
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  renderers,
+  withMenuContext
+} from 'react-native-popup-menu'
+import { withNavigation } from 'react-navigation'
 import * as Animatable from 'react-native-animatable'
+import { useTheme } from 'emotion-theming'
+
 import GlobalStateContext from '~helpers/globalContext'
 import truncate from '~helpers/truncate'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Link from '~common/Link'
 import Back from '~common/Back'
 import useDimensions from '~helpers/useDimensions'
+import ParallelIcon from '~common/ParallelIcon'
+
+const { Popover } = renderers
+
+const PopOverMenu = ({ element, popover, ...props }) => {
+  const theme = useTheme()
+  return (
+    <Menu renderer={Popover} rendererProps={{ placement: 'bottom' }} {...props}>
+      <MenuTrigger>{element}</MenuTrigger>
+      <MenuOptions
+        optionsContainerStyle={{
+          backgroundColor: theme.colors.reverse,
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          borderRadius: 8
+        }}
+      >
+        <Box padding={10}>{popover}</Box>
+      </MenuOptions>
+    </Menu>
+  )
+}
 
 const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',
@@ -20,11 +57,11 @@ const LinkBox = styled(Link)(() => ({
   paddingRight: 10
 }))
 
-const StyledText = styled(Animatable.Text)(({ theme }) => ({
+const StyledText = styled(Animatable.Text)(({ color, theme }) => ({
   fontSize: 16,
   fontWeight: 'bold',
   marginRight: 5,
-  color: theme.colors.default
+  color: theme.colors[color] || theme.colors.default
 }))
 
 const HeaderBox = styled(Box)(({ theme }) => ({
@@ -36,18 +73,6 @@ const HeaderBox = styled(Box)(({ theme }) => ({
 }))
 
 const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
-
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
-}))
-
-const MaterialCommunityIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
-  color: theme.colors.default
-}))
-
-const AMaterialCommunityIcon = Animatable.createAnimatableComponent(
-  MaterialCommunityIcon
-)
 
 const formatVerses = verses =>
   verses.reduce((acc, v, i, array) => {
@@ -67,6 +92,7 @@ const formatVerses = verses =>
   }, '')
 
 const Header = ({
+  navigation,
   isReadOnly,
   isSelectionMode,
   hasBackButton,
@@ -75,7 +101,10 @@ const Header = ({
   verse,
   focusVerses,
   version,
-  onBibleParamsClick
+  onBibleParamsClick,
+  addParallelVersion,
+  removeAllParallelVersions,
+  isParallel
 }) => {
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
@@ -90,7 +119,7 @@ const Header = ({
       <HeaderBox row>
         <Box flex justifyContent="center">
           <Back padding>
-            <StyledIcon name="arrow-left" size={20} />
+            <FeatherIcon name="arrow-left" size={20} />
           </Back>
         </Box>
         <Box grow center>
@@ -112,7 +141,7 @@ const Header = ({
       {(isSelectionMode || hasBackButton) && (
         <Box justifyContent="center">
           <Back padding>
-            <StyledIcon name="arrow-left" size={20} />
+            <FeatherIcon name="arrow-left" size={20} />
           </Back>
         </Box>
       )}
@@ -126,62 +155,70 @@ const Header = ({
       <LinkBox
         route="VersionSelector"
         params={{ version }}
-        style={{ paddingRight: 0 }}
+        style={{ marginRight: 'auto' }}
       >
         <StyledText>{version}</StyledText>
       </LinkBox>
-      <LinkBox
-        onPress={() => updateState('isFullscreen', !isFullscreen)}
-        style={{ width: 50 }}
-      >
-        <MaterialCommunityIcon
-          name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
-          size={20}
-        />
-      </LinkBox>
-      {/* <LinkBox route="Pericope" style={{ width: 50 }}>
-        <MaterialCommunityIcon name="subtitles" size={20} />
-      </LinkBox> */}
-
-      <LinkBox
-        route="History"
-        style={{
-          width: 50,
-          marginLeft: 'auto'
-        }}
-      >
-        <AMaterialCommunityIcon
-          style={{
-            opacity: isFullscreen ? 0 : 1
-          }}
-          transition="opacity"
-          name="history"
-          size={20}
-        />
-      </LinkBox>
-      {!isSelectionMode && (
+      {isFullscreen && (
         <LinkBox
-          onPress={onBibleParamsClick}
-          style={{
-            width: 40,
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingLeft: 0,
-            paddingRight: 0
-          }}
+          onPress={() => updateState('isFullscreen', false)}
+          style={{ width: 50 }}
         >
-          <StyledText
-            style={{
-              opacity: isFullscreen ? 0 : 1
-            }}
-            transition="opacity"
-          >
-            Aa
-          </StyledText>
+          <MaterialIcon name="fullscreen-exit" size={20} />
         </LinkBox>
+      )}
+      {!isSelectionMode && !isFullscreen && (
+        <PopOverMenu
+          element={
+            <Box
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="center"
+              height={50}
+              width={50}
+              style={{
+                opacity: isFullscreen ? 0 : 1
+              }}
+            >
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          }
+          popover={
+            <>
+              <MenuOption
+                onSelect={
+                  isParallel ? removeAllParallelVersions : addParallelVersion
+                }
+              >
+                <Box row alignItems="center">
+                  <ParallelIcon color={isParallel ? 'primary' : 'default'} />
+                  <Text marginLeft={10}>Affichage parallèle</Text>
+                </Box>
+              </MenuOption>
+              <MenuOption onSelect={() => navigation.navigate('History')}>
+                <Box row alignItems="center">
+                  <MaterialIcon name="history" size={20} />
+                  <Text marginLeft={10}>Historique</Text>
+                </Box>
+              </MenuOption>
+              <MenuOption onSelect={() => updateState('isFullscreen', true)}>
+                <Box row alignItems="center">
+                  <MaterialIcon name="fullscreen" size={20} />
+                  <Text marginLeft={10}>Plein écran</Text>
+                </Box>
+              </MenuOption>
+              <MenuOption onSelect={onBibleParamsClick}>
+                <Box row alignItems="center">
+                  <StyledText style={{ marginRight: 0 }}>Aa</StyledText>
+                  <Text marginLeft={10}>Mise en forme</Text>
+                </Box>
+              </MenuOption>
+            </>
+          }
+        />
       )}
     </AnimatableHeaderBox>
   )
 }
 
-export default pure(Header)
+export default compose(pure, withMenuContext, withNavigation)(Header)

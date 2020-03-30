@@ -2,16 +2,22 @@ import React, { Component } from 'react'
 import styled from '@emotion/styled'
 
 import {
+  ADD_PARALLEL_VERSION,
+  REMOVE_PARALLEL_VERSION,
   SEND_INITIAL_DATA,
   CONSOLE_LOG,
   THROW_ERROR,
   dispatch,
-  NAVIGATE_TO_PERICOPE
+  NAVIGATE_TO_PERICOPE,
+  NAVIGATE_TO_VERSION
 } from './dispatch'
 import Verse from './Verse'
 import Comment from './Comment'
 import ErrorBoundary from './ErrorBoundary'
+import ChevronDownIcon from './ChevronDownIcon'
 import ExternalIcon from './ExternalIcon'
+import MinusIcon from './MinusIcon'
+import PlusIcon from './PlusIcon'
 // import { desktopMode } from './env'
 import { scaleFontSize } from './scaleFontSize'
 
@@ -25,11 +31,21 @@ const exists = obj => {
   return true
 }
 
+const extractParallelVerse = (i, parallelVerses, verse, version) => [
+  { version, verse },
+  ...parallelVerses.map(p => ({ version: p.id, verse: p.verses[i] }))
+]
+
+const extractParallelVersionTitles = (parallelVerses, currentVersion) => [
+  currentVersion,
+  ...parallelVerses.map(p => p.id)
+]
+
 const Container = styled('div')(
-  ({ settings: { alignContent, theme, colors }, rtl }) => ({
-    maxWidth: '800px',
+  ({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
+    maxWidth: isParallelVerse ? 'none' : '800px',
     margin: '0 auto',
-    padding: '10px 15px',
+    padding: isParallelVerse ? '10px 0' : '10px 15px',
     paddingBottom: '210px',
     textAlign: alignContent,
     background: colors[theme].reverse,
@@ -81,6 +97,31 @@ const H4 = styled('h4')(
   })
 )
 
+const VersionTitle = styled('div')(
+  ({ settings: { fontSizeScale, fontFamily } }) => ({
+    fontFamily,
+    fontWeight: 'bold',
+    fontSize: scaleFontSize(18, fontSizeScale)
+  })
+)
+
+const mediaQueries = ['@media (min-width: 640px)']
+
+const ResponsivePlusIcon = styled(PlusIcon)(
+  ({ settings: { theme, colors } }) => ({
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    right: '0',
+    color: colors[theme].primary,
+    display: 'none',
+
+    [mediaQueries[0]]: {
+      display: 'block'
+    }
+  })
+)
+
 const getPericopeVerse = (pericopeChapter, verse) => {
   if (pericopeChapter && pericopeChapter[verse]) {
     return pericopeChapter[verse]
@@ -92,6 +133,7 @@ const getPericopeVerse = (pericopeChapter, verse) => {
 class VersesRenderer extends Component {
   state = {
     verses: [],
+    parallelVerses: [],
     secondaryVerses: [],
     comments: null,
     focusVerses: [],
@@ -120,19 +162,29 @@ class VersesRenderer extends Component {
     //   this.setState({
     //     focusVerses: this.props.focusVerses,
     //     verses: this.props.verses,
+    //     parallelVerses: this.props.parallelVerses,
     //     secondaryVerses: this.props.secondaryVerses || [],
     //     settings: this.props.settings,
     //     verseToScroll: this.props.verseToScroll,
-    //     notedVersesCount: this.getNotedVersesCount(this.props.verses, this.props.notedVerses),
-    //     notedVersesText: this.getNotedVersesText(this.props.verses, this.props.notedVerses),
+    //     notedVersesCount: this.getNotedVersesCount(
+    //       this.props.verses,
+    //       this.props.notedVerses
+    //     ),
+    //     notedVersesText: this.getNotedVersesText(
+    //       this.props.verses,
+    //       this.props.notedVerses
+    //     ),
     //     selectedVerses: this.props.selectedVerses,
     //     version: this.props.version,
     //     pericopeChapter: this.props.pericopeChapter,
     //     selectedCode: this.props.selectedCode,
-    //     comments: this.transformComments(this.props.comments, this.props.verses.length)
+    //     comments: this.transformComments(
+    //       this.props.comments,
+    //       this.props.verses.length
+    //     )
     //   })
     //   // // Load font
-    //   const literate = require('../../../studies/studiesWebView/src/literata').default
+    //   const literate = require('./literata').default
     //   const style = document.createElement('style')
     //   style.innerHTML = literate
     //   document.head.appendChild(style)
@@ -248,6 +300,7 @@ class VersesRenderer extends Component {
           case SEND_INITIAL_DATA: {
             const {
               verses,
+              parallelVerses,
               focusVerses,
               secondaryVerses,
               comments,
@@ -268,6 +321,7 @@ class VersesRenderer extends Component {
               verses: exists(verses)
                 ? verses.sort((a, b) => a.Verset - b.Verset)
                 : null,
+              parallelVerses,
               focusVerses,
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
@@ -306,6 +360,26 @@ class VersesRenderer extends Component {
     })
   }
 
+  navigateToVersion = (version, index) => {
+    dispatch({
+      type: NAVIGATE_TO_VERSION,
+      payload: { version, index }
+    })
+  }
+
+  removeParallelVersion = index => {
+    dispatch({
+      type: REMOVE_PARALLEL_VERSION,
+      payload: index
+    })
+  }
+
+  addParallelVersion = () => {
+    dispatch({
+      type: ADD_PARALLEL_VERSION
+    })
+  }
+
   render() {
     if (!this.state.verses) {
       return (
@@ -332,9 +406,56 @@ class VersesRenderer extends Component {
       this.state.version === 'BHS' ||
       (this.state.version === 'INT' && Number(this.state.verses[0].Livre) < 40)
     const introComment = this.state.comments && this.state.comments[0]
+    const isParallelVerse =
+      this.state.parallelVerses && !!this.state.parallelVerses.length
+    const parallelVersionTitles =
+      isParallelVerse &&
+      extractParallelVersionTitles(
+        this.state.parallelVerses,
+        this.state.version
+      )
 
     return (
-      <Container rtl={isHebreu} settings={this.state.settings}>
+      <Container
+        rtl={isHebreu}
+        settings={this.state.settings}
+        isParallelVerse={isParallelVerse}
+      >
+        {isParallelVerse && (
+          <div style={{ display: 'flex', position: 'relative' }}>
+            {parallelVersionTitles.map((p, i) => (
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <VersionTitle
+                  onClick={() => this.navigateToVersion(p, i)}
+                  style={{ paddingLeft: i === 0 ? '0px' : '10px' }}
+                  key={i}
+                  settings={this.state.settings}
+                >
+                  {p}
+                  <ChevronDownIcon style={{ marginLeft: 4 }} />
+                </VersionTitle>
+                {i !== 0 && (
+                  <MinusIcon
+                    onClick={() => this.removeParallelVersion(i)}
+                    style={{ marginLeft: 20, opacity: 0.5 }}
+                  />
+                )}
+              </div>
+            ))}
+            {this.state.parallelVerses.length < 3 && (
+              <ResponsivePlusIcon
+                settings={this.state.settings}
+                onClick={() => this.addParallelVersion()}
+              />
+            )}
+          </div>
+        )}
         {isHebreu && (
           <RightDirection settings={this.state.settings}>
             Sens de la lecture ←
@@ -372,6 +493,14 @@ class VersesRenderer extends Component {
           const isVerseToScroll = this.state.verseToScroll == Verset
           const secondaryVerse =
             this.state.secondaryVerses && this.state.secondaryVerses[i]
+          const parallelVerse =
+            isParallelVerse &&
+            extractParallelVerse(
+              i,
+              this.state.parallelVerses,
+              verse,
+              this.state.version
+            )
 
           const { h1, h2, h3, h4 } = getPericopeVerse(
             this.state.pericopeChapter,
@@ -420,24 +549,26 @@ class VersesRenderer extends Component {
                   <ExternalIcon />
                 </H4>
               )}
-              <ErrorBoundary>
-                <Verse
-                  isHebreu={isHebreu}
-                  version={this.state.version}
-                  verse={verse}
-                  secondaryVerse={secondaryVerse}
-                  settings={this.state.settings}
-                  isSelected={isSelected}
-                  isSelectedMode={isSelectedMode}
-                  isSelectionMode={this.state.isSelectionMode}
-                  highlightedColor={highlightedColor}
-                  notesCount={notesCount}
-                  notesText={notesText}
-                  isVerseToScroll={isVerseToScroll}
-                  selectedCode={this.state.selectedCode}
-                  isFocused={isFocused}
-                />
-              </ErrorBoundary>
+              {/* <ErrorBoundary> */}
+              <Verse
+                isHebreu={isHebreu}
+                version={this.state.version}
+                verse={verse}
+                isParallelVerse={isParallelVerse}
+                parallelVerse={parallelVerse}
+                secondaryVerse={secondaryVerse}
+                settings={this.state.settings}
+                isSelected={isSelected}
+                isSelectedMode={isSelectedMode}
+                isSelectionMode={this.state.isSelectionMode}
+                highlightedColor={highlightedColor}
+                notesCount={notesCount}
+                notesText={notesText}
+                isVerseToScroll={isVerseToScroll}
+                selectedCode={this.state.selectedCode}
+                isFocused={isFocused}
+              />
+              {/* </ErrorBoundary> */}
               {!!comment && this.state.settings.commentsDisplay && (
                 <Comment
                   id={`comment-${verse.Verset}`}

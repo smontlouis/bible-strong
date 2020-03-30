@@ -19,12 +19,16 @@ const GO_TO_NEXT_CHAPTER = 'bible/GO_TO_NEXT_CHAPTER'
 const SET_STRONG_DATABASE_HASH = 'bible/SET_STRONG_DATABASE_HASH'
 const SET_DICTIONNAIRE_DATABASE_HASH = 'bible/SET_DICTIONNAIRE_DATABASE_HASH'
 const SET_WEBVIEW_HASH = 'bible/SET_WEBVIEW_HASH'
+const ADD_PARALLEL_VERSION = 'bible/ADD_PARALLEL_VERSION'
+const REMOVE_PARALLEL_VERSION = 'bible/REMOVE_PARALLEL_VERSION'
+const REMOVE_ALL_PARALLEL_VERSIONS = 'bible/REMOVE_ALL_PARALLEL_VERSIONS'
 
 const initialState = {
   selectedVersion: 'LSG',
   selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
   selectedChapter: 1,
   selectedVerse: 1,
+  parallelVersions: [],
   temp: {
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
@@ -39,6 +43,23 @@ const initialState = {
 // BibleReducer
 export default produce((draft, action) => {
   switch (action.type) {
+    case ADD_PARALLEL_VERSION: {
+      if (draft.selectedVersion === 'INT') {
+        draft.selectedVersion = 'LSG'
+      }
+      draft.parallelVersions.push('LSG')
+      break
+    }
+    case REMOVE_PARALLEL_VERSION: {
+      draft.parallelVersions = draft.parallelVersions.filter(
+        (p, i) => i !== action.payload
+      )
+      break
+    }
+    case REMOVE_ALL_PARALLEL_VERSIONS: {
+      draft.parallelVersions = []
+      break
+    }
     case SET_TEMP_SELECTED_BOOK: {
       draft.temp = {
         selectedBook: action.book,
@@ -90,7 +111,16 @@ export default produce((draft, action) => {
       return
     }
     case SET_VERSION: {
-      draft.selectedVersion = action.version
+      if (action.version === 'INT') {
+        draft.parallelVersions = []
+      }
+
+      if (typeof action.parallelVersionIndex !== 'undefined') {
+        draft.parallelVersions[action.parallelVersionIndex] =
+          action.version === 'INT' ? 'LSG' : action.version
+      } else {
+        draft.selectedVersion = action.version
+      }
       return
     }
     case ADD_HIGHLIGHTED_VERSE: {
@@ -194,6 +224,25 @@ export default produce((draft, action) => {
   }
 }, initialState)
 
+export function addParallelVersion() {
+  return {
+    type: ADD_PARALLEL_VERSION
+  }
+}
+
+export function removeParallelVersion(index) {
+  return {
+    type: REMOVE_PARALLEL_VERSION,
+    payload: index
+  }
+}
+
+export function removeAllParallelVersions() {
+  return {
+    type: REMOVE_ALL_PARALLEL_VERSIONS
+  }
+}
+
 export function setStrongDatabaseHash(hash) {
   return {
     type: SET_STRONG_DATABASE_HASH,
@@ -267,7 +316,7 @@ export function resetTempSelected() {
   }
 }
 
-export function setVersion(version) {
+export function setVersion(version, parallelVersionIndex) {
   if (!__DEV__) {
     analytics().logEvent('version_bible', {
       version
@@ -275,6 +324,7 @@ export function setVersion(version) {
   }
   return {
     type: SET_VERSION,
+    parallelVersionIndex,
     version
   }
 }

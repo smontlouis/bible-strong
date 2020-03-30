@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --mode development --open",
     "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
     "postbuild": "cp ./dist/index.html ../../../../android/app/src/main/assets/index.html"
   },
   "keywords": [],

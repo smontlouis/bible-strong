@@ -4,33 +4,39 @@ import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 
 const Div = styled('span')(
-  ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
     fontFamily,
     webkitTouchCallout: 'none',
     mozUserSelect: 'none',
     msUserSelect: 'none',
     khtmlUserSelect: 'none',
     webkitUserSelect: 'none',
-    fontSize: scaleFontSize(19, fontSizeScale),
-    lineHeight: scaleFontSize(29, fontSizeScale),
-    color: colors[theme].quart
+    color: colors[theme].quart,
+
+    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
+    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale)
   })
 )
 
-const Verse = styled('span')(({ settings: { fontSizeScale } }) => ({
+const Verse = styled('span')(({ isParallel, settings: { fontSizeScale } }) => ({
   paddingLeft: '3px',
-  fontSize: scaleFontSize(14, fontSizeScale)
+  fontSize: scaleFontSize(isParallel ? 9 : 14, fontSizeScale)
 }))
 
-const NotesText = ({ notesText, settings, onClick }) => {
+const NotesText = ({ notesText, settings, onClick, isParallel }) => {
   return (
     <span>
       {notesText.map(note => (
         <Div
           key={note.key}
           settings={settings}
-          onClick={() => onClick(note.key)}>
-          [<Verse settings={settings}>({note.verses}) </Verse>
+          isParallel={isParallel}
+          onClick={() => onClick(note.key)}
+        >
+          [
+          <Verse isParallel={isParallel} settings={settings}>
+            ({note.verses}){' '}
+          </Verse>
           <span>{truncate(note.description, 10)}</span>]
         </Div>
       ))}

@@ -15,7 +15,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.errorInfo) {
       // Error path
-      return <div>Error: {this.state.errorInfo}</div>
+      return <div>Error</div>
     }
     // Normally, just render children
     return this.props.children
