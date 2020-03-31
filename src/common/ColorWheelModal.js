@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
-import { ColorWheel } from '~common/ColorWheel'
+import ColorPicker from '~common/ColorPicker'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -20,6 +20,10 @@ const StylizedModal = styled(Modal)({
 const Container = styled.View(({ theme }) => ({
   height: 260 + getBottomSpace(),
   display: 'flex',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '100%',
+  maxWidth: 600,
   backgroundColor: theme.colors.reverse,
   borderRadius: 3,
   shadowColor: theme.colors.default,
@@ -54,16 +58,16 @@ const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
       isVisible={!!currentColor}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}>
+      onBackdropPress={onClosed}
+    >
       <Container>
         {!!chosenColor && (
           <>
-            <Box height={200} center>
-              <ColorWheel
-                initialColor={currentColor.color}
-                onColorChange={color => setChosenColor(colorsys.hsv2Hex(color))}
-                style={{ width: 200, height: 200 }}
-                thumbStyle={{ height: 30, width: 30, borderRadius: 30 }}
+            <Box height={200}>
+              <ColorPicker
+                onChangeColor={(...color) =>
+                  setChosenColor(colorsys.hslToHex(...color))
+                }
               />
             </Box>
             <Box row padding={10} center>
@@ -72,6 +76,7 @@ const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
                 Couleur {currentColor.number}
               </Text>
               <Button
+                small
                 title="Valider"
                 onPress={() => {
                   dispatch(

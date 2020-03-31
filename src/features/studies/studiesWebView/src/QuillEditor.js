@@ -22,15 +22,16 @@ export default class ReactQuillEditor extends React.Component {
     dispatchConsole('component mounted')
 
     if (BROWSER_TESTING_ENABLED) {
-      // this.loadEditor()
-      // const MockContent = require('./MockContent').default
-      // this.quill.setContents(MockContent, Quill.sources.SILENT)
-      // this.quill.enable()
-      // // Load font
-      // const literate = require('./literata').default
-      // const style = document.createElement('style')
-      // style.innerHTML = literate
-      // document.head.appendChild(style)
+      this.loadEditor({})
+      const MockContent = require('./MockContent').default
+      this.quill.setContents(MockContent, Quill.sources.SILENT)
+      this.quill.enable()
+      // Load font
+      const literate = require('../../../bible/bibleWebView/src/literata')
+        .default
+      const style = document.createElement('style')
+      style.innerHTML = literate
+      document.head.appendChild(style)
     }
   }
 
