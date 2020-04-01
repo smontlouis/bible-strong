@@ -105,6 +105,15 @@ const VersionTitle = styled('div')(
   })
 )
 
+const VersionsContainer = styled('div')(({ settings: { theme, colors } }) => ({
+  display: 'flex',
+  position: 'sticky',
+  top: 0,
+  background: colors[theme].reverse,
+  paddingTop: '5px',
+  paddingBottom: '10px'
+}))
+
 const mediaQueries = ['@media (min-width: 640px)']
 
 const ResponsivePlusIcon = styled(PlusIcon)(
@@ -422,7 +431,7 @@ class VersesRenderer extends Component {
         isParallelVerse={isParallelVerse}
       >
         {isParallelVerse && (
-          <div style={{ display: 'flex', position: 'relative' }}>
+          <VersionsContainer settings={this.state.settings}>
             {parallelVersionTitles.map((p, i) => (
               <div
                 style={{
@@ -454,7 +463,7 @@ class VersesRenderer extends Component {
                 onClick={() => this.addParallelVersion()}
               />
             )}
-          </div>
+          </VersionsContainer>
         )}
         {isHebreu && (
           <RightDirection settings={this.state.settings}>
