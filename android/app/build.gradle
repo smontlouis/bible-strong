@@ -83,7 +83,6 @@ project.ext.react = [
 apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/@sentry/react-native/sentry.gradle"
-// apply from: "../../node_modules/react-native-code-push/android/codepush.gradle" - @TODO - Reactivate when codepush works
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -202,7 +201,6 @@ def enableHermes = project.ext.react.get("enableHermes", false);
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
-    implementation project(path: ":@react-native-firebase_app")
     implementation 'androidx.appcompat:appcompat:1.2.0-alpha02'
 
 
