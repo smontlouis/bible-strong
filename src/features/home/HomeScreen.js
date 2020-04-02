@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView as RNScrollView, Linking } from 'react-native'
+import { ScrollView as RNScrollView, Linking, Platform } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
@@ -40,7 +40,8 @@ const HomeScreen = () => {
               paddingHorizontal: 20,
               paddingVertical: 10,
               overflow: 'visible'
-            }}>
+            }}
+          >
             <NaveOfTheDay />
             <StrongOfTheDay type="grec" />
             <StrongOfTheDay
@@ -56,7 +57,8 @@ const HomeScreen = () => {
             background
             row
             padding={20}
-            style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}>
+            style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
+          >
             <Box flex>
               <Button
                 color="#3b5998"
@@ -78,8 +80,15 @@ const HomeScreen = () => {
             <Box flex>
               <Button
                 color="#7ed6df"
-                route="Support"
                 title="Soutenir"
+                {...(Platform.OS === 'android'
+                  ? {
+                      route: 'Support'
+                    }
+                  : {
+                      onPress: () =>
+                        Linking.openURL('https://www.paypal.me/smontlouis')
+                    })}
                 leftIcon={
                   <FeatherIcon
                     name="thumbs-up"

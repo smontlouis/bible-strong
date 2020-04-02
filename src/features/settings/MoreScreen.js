@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Platform, Alert } from 'react-native'
+import { Platform, Alert, Linking } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
@@ -149,7 +149,8 @@ const MoreScreen = () => {
               Platform.OS === 'ios'
                 ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
                 : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
-            }>
+            }
+          >
             <StyledIcon name="star" size={25} />
             <Text fontSize={15}>Noter l'application</Text>
           </LinkItem>
@@ -161,7 +162,16 @@ const MoreScreen = () => {
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>Contacter le développeur</Text>
           </LinkItem>
-          <LinkItem route="Support">
+          <LinkItem
+            {...(Platform.OS === 'android'
+              ? {
+                  route: 'Support'
+                }
+              : {
+                  onPress: () =>
+                    Linking.openURL('https://www.paypal.me/smontlouis')
+                })}
+          >
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
             <Text fontSize={15}>Soutenir le développeur</Text>
           </LinkItem>
