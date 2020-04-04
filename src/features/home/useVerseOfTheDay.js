@@ -10,6 +10,7 @@ import Snackbar from '~common/SnackBar'
 // import { setNotificationId } from '~redux/modules/user'
 
 import useLogin from '~helpers/useLogin'
+import extractFirstName from '~helpers/extractFirstName'
 import VOD from '~assets/bible_versions/bible-vod'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesRef from '~helpers/getVersesRef'
@@ -80,9 +81,7 @@ export const useVerseOfTheDay = () => {
         )(nowDate)
 
         await PushNotification.localNotificationSchedule({
-          title: `Bonjour ${
-            user.displayName ? user.displayName.split(' ')[0] : ''
-          }`, // @TODO: Extract to function
+          title: `Bonjour ${extractFirstName(user.displayName)}`,
           message: 'Découvre ton verset du jour !',
           category: 'NOTIFICATIONS',
           repeatType: 'day',

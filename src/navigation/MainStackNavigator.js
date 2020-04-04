@@ -32,6 +32,7 @@ import NaveScreen from '~features/nave/NaveScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
 import NaveWarningScreen from '~features/nave/NaveWarningScreen'
 import ToggleCompareVersesScreen from '~features/bible/ToggleCompareVersesScreen'
+import StorybookScreen from '../../storybook/StoryBookScreen'
 
 export default createStackNavigator(
   {
@@ -67,6 +68,7 @@ export default createStackNavigator(
     NaveDetail: { screen: NaveDetailScreen },
     NaveWarning: { screen: NaveWarningScreen },
     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
+    Storybook: { screen: StorybookScreen },
   },
   {
     headerMode: 'none',

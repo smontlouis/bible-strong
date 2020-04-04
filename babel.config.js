@@ -5,9 +5,9 @@ module.exports = function(api) {
       [
         'babel-preset-expo',
         {
-          lazyImports: true
-        }
-      ]
+          lazyImports: true,
+        },
+      ],
     ],
     plugins: [
       [
@@ -20,16 +20,16 @@ module.exports = function(api) {
             '~helpers': './src/helpers',
             '~navigation': './src/navigation',
             '~redux': './src/redux',
-            '~themes': './src/themes'
-          }
-        }
+            '~themes': './src/themes',
+          },
+        },
       ],
-      '@babel/plugin-proposal-optional-chaining'
+      '@babel/plugin-proposal-optional-chaining',
     ],
     env: {
       production: {
-        plugins: ['transform-remove-console']
-      }
-    }
+        plugins: ['transform-remove-console'],
+      },
+    },
   }
 }

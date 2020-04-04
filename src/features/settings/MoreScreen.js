@@ -162,7 +162,7 @@ const MoreScreen = () => {
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>Contacter le développeur</Text>
           </LinkItem>
-          <LinkItem
+          {/* <LinkItem
             {...(Platform.OS === 'android'
               ? {
                   route: 'Support',
@@ -174,7 +174,7 @@ const MoreScreen = () => {
           >
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
             <Text fontSize={15}>Soutenir le développeur</Text>
-          </LinkItem>
+          </LinkItem> */}
           {!isLogged && (
             <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />

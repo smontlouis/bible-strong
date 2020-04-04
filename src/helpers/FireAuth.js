@@ -69,6 +69,7 @@ const FireAuth = class {
           user.providerData[0].providerId != 'password' ||
           user.emailVerified
 
+        // TODO - Revoir ça pour connexion Apple
         const profile = {
           id: user.uid,
           email: user.email,

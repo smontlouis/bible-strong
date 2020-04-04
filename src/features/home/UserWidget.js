@@ -14,6 +14,8 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 import useLogin from '~helpers/useLogin'
+import extractFirstName from '~helpers/extractFirstName'
+import extractInitials from '~helpers/extractInitials'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
@@ -57,10 +59,7 @@ const GenerateImageContainer = ProfileImage.withComponent(Box)
 const GenerateImage = ({ name }) => (
   <GenerateImageContainer>
     <Text color="reverse" bold fontSize={24}>
-      {name
-        .split(' ')
-        .map(n => n.substring(0, 1))
-        .slice(0, 2)}
+      {extractInitials(name)}
     </Text>
   </GenerateImageContainer>
 )
@@ -134,10 +133,7 @@ const UserWidget = ({ theme }) => {
         <Box row alignItems="center" marginBottom={20} overflow="visible">
           <Box flex>
             <Text title fontSize={30}>
-              {`Bonjour ${
-                user.displayName ? user.displayName.split(' ')[0] : ''
-              },`}
-              {/* TODO: Extract in function */}
+              {`Bonjour ${extractFirstName(user.displayName)},`}
             </Text>
           </Box>
           <ProfileContainer>

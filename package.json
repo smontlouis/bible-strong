@@ -11,7 +11,18 @@
     "postversion": "react-native-version",
     "clean": "rm -rf yarn-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && yarn install && say I love react native",
     "postinstall": "jetify && rndebugger-open",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\""
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "storybook": "start-storybook -p 7007",
+    "prestorybook": "rnstl"
+  },
+  "config": {
+    "react-native-storybook-loader": {
+      "searchDir": [
+        "./src"
+      ],
+      "pattern": "**/*.stories.tsx",
+      "outputFile": "./storybook/storyLoader.js"
+    }
   },
   "jest": {
     "modulePathIgnorePatterns": [
@@ -133,12 +144,18 @@
     "@babel/core": "~7.6.0",
     "@babel/plugin-proposal-optional-chaining": "^7.6.0",
     "@react-native-community/eslint-config": "^1.0.0",
+    "@storybook/addon-actions": "^5.3.18",
+    "@storybook/addon-links": "^5.3.18",
+    "@storybook/addons": "^5.3.18",
+    "@storybook/react-native": "^5.3.18",
+    "@storybook/react-native-server": "^5.3.18",
     "@types/jest": "^25.2.1",
     "@types/react": "^16.9.32",
     "@types/react-native": "^0.62.1",
     "@types/react-test-renderer": "^16.9.2",
     "babel-eslint": "^10.0.3",
     "babel-jest": "~24.9.0",
+    "babel-loader": "^8.1.0",
     "babel-plugin-module-resolver": "^3.2.0",
     "babel-plugin-root-import": "^6.4.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -157,6 +174,7 @@
     "metro-react-native-babel-preset": "~0.56.0",
     "prettier": "^1.18.2",
     "react-native-debugger-open": "^0.3.24",
+    "react-native-storybook-loader": "^1.8.1",
     "react-native-version": "^3.2.0",
     "react-test-renderer": "~16.9.0",
     "typescript": "^3.8.3"

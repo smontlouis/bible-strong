@@ -79,6 +79,19 @@ const HomeScreen = () => {
             <Box width={20} />
             <Box flex>
               <Button
+                color="#2ecc71"
+                route="FAQ"
+                title="FAQ"
+                leftIcon={
+                  <FeatherIcon
+                    name="help-circle"
+                    size={20}
+                    color="white"
+                    style={{ marginRight: 10 }}
+                  />
+                }
+              />
+              {/* <Button
                 color="#7ed6df"
                 title="Soutenir"
                 {...(Platform.OS === 'android'
@@ -97,10 +110,10 @@ const HomeScreen = () => {
                     style={{ marginRight: 10 }}
                   />
                 }
-              />
+              /> */}
             </Box>
           </Box>
-          <Box background padding={20} paddingTop={0}>
+          {/* <Box background padding={20} paddingTop={0}>
             <Button
               color="#2ecc71"
               route="FAQ"
@@ -114,7 +127,12 @@ const HomeScreen = () => {
                 />
               }
             />
-          </Box>
+          </Box> */}
+          {__DEV__ && (
+            <Box background padding={20} paddingTop={0}>
+              <Button route="Storybook" title="Storybook" />
+            </Box>
+          )}
         </Box>
       </HomeScrollView>
     </Box>

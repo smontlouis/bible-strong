@@ -25,12 +25,12 @@ YellowBox.ignoreWarnings([
   'LottieAnimationView',
   'Setting a timer',
   'expoConstants',
-  "Cannot read property 'name' of null"
+  "Cannot read property 'name' of null",
 ])
 
 if (!__DEV__) {
   Sentry.init({
-    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911'
+    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
   })
 }
 
@@ -39,7 +39,7 @@ export const { store, persistor } = configureStore()
 class App extends React.Component {
   state = {
     isLoadingComplete: false,
-    isFullscreen: false
+    isFullscreen: false,
   }
 
   async componentDidMount() {
@@ -78,7 +78,7 @@ class App extends React.Component {
       permissions: {
         alert: true,
         badge: true,
-        sound: true
+        sound: true,
       },
 
       // Should the initial notification be popped automatically
@@ -90,7 +90,7 @@ class App extends React.Component {
        * - Specified if permissions (ios) and token (android and ios) will requested or not,
        * - if not, you must call PushNotificationsHandler.requestPermissions() later
        */
-      requestPermissions: true
+      requestPermissions: true,
     })
 
     console.log('Notifications initialized')
@@ -101,8 +101,8 @@ class App extends React.Component {
       Font.loadAsync({
         ...Icon.Feather.font,
         'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
-        'eina-03-bold': require('~assets/fonts/eina-03-bold.otf')
-      })
+        'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
+      }),
     ])
   }
 
@@ -139,7 +139,6 @@ class App extends React.Component {
         <Provider store={store}>
           <StatusBar translucent />
           <InitApp persistor={persistor} />
-          {/* <CodePushCheck /> - @TODO - Reactivatre when codepush works */}
         </Provider>
       </GlobalContext.Provider>
     )
