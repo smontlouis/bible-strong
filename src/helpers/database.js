@@ -25,7 +25,7 @@ class StrongDB {
     this.dbStrong = SQLite.openDatabase(
       {
         name: 'strong.sqlite',
-        createFromLocation: '/SQLite/strong.sqlite'
+        createFromLocation: '/SQLite/strong.sqlite',
       },
       () => {
         console.log('Strong loaded')
@@ -52,7 +52,7 @@ export const initDictionnaireDB = () => {
   dbDictionnaire = SQLite.openDatabase(
     {
       name: 'dictionnaire.sqlite',
-      createFromLocation: '/SQLite/dictionnaire.sqlite'
+      createFromLocation: '/SQLite/dictionnaire.sqlite',
     },
     () => {
       console.log('Dictionnaire loaded')
@@ -66,7 +66,7 @@ export const initInterlineaireDB = () => {
   dbInterlineaire = SQLite.openDatabase(
     {
       name: 'interlineraire.sqlite',
-      createFromLocation: '/SQLite/interlineaire.sqlite'
+      createFromLocation: '/SQLite/interlineaire.sqlite',
     },
     () => {
       console.log('Interlineaire loaded')
@@ -80,7 +80,7 @@ export const initTresorDB = () => {
   dbTresorCommentaires = SQLite.openDatabase(
     {
       name: 'commentaires-tresor.sqlite',
-      createFromLocation: '/SQLite/commentaires-tresor.sqlite'
+      createFromLocation: '/SQLite/commentaires-tresor.sqlite',
     },
     () => {
       console.log('Tresor loaded')
@@ -124,7 +124,7 @@ class MhyDB {
     this.dbMhy = SQLite.openDatabase(
       {
         name: 'commentaires-mhy.sqlite',
-        createFromLocation: '/SQLite/commentaires-mhy.sqlite'
+        createFromLocation: '/SQLite/commentaires-mhy.sqlite',
       },
       () => {
         console.log('Commentaires loaded')
@@ -153,7 +153,7 @@ class NaveDB {
     this.dbNave = SQLite.openDatabase(
       {
         name: 'naveFr',
-        createFromLocation: '/SQLite/naveFr.sqlite'
+        createFromLocation: '/SQLite/naveFr.sqlite',
       },
       () => {
         console.log('Nave loaded')

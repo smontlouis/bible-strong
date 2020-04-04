@@ -6,8 +6,12 @@ const orderVerses = verses => {
     const verse1 = Number(key1.split('-')[2])
     const verse2 = Number(key2.split('-')[2])
 
-    if (verse1 < verse2) return -1
-    if (verse1 > verse2) return 1
+    if (verse1 < verse2) {
+      return -1
+    }
+    if (verse1 > verse2) {
+      return 1
+    }
     return 0
   })
 
@@ -24,7 +28,9 @@ const getVersesRef = versesList => {
         versesRef += '-'
         isListing = true
       }
-      if (versesList.slice(1).length - 1 === index) versesRef += verse
+      if (versesList.slice(1).length - 1 === index) {
+        versesRef += verse
+      }
     } else if (isListing) {
       versesRef += `${previousVerse}, ${verse}`
       isListing = false
@@ -54,8 +60,11 @@ export default async (verses, version = 'LSG', position) => {
 
   selectedVerses.map(async (key, index) => {
     const [book, chapter, verse] = key.split('-')
-    if (index === 0) reference = `${books[book - 1].Nom} ${chapter}:`
-    else toShare += ' '
+    if (index === 0) {
+      reference = `${books[book - 1].Nom} ${chapter}:`
+    } else {
+      toShare += ' '
+    }
     try {
       toShare += `${bible[book][chapter][verse]}`
     } catch {
@@ -69,6 +78,6 @@ export default async (verses, version = 'LSG', position) => {
     title: reference || '',
     version,
     content: toShare,
-    all: `${toShare} \n${reference} ${version} \n\n https://bible-strong.app`
+    all: `${toShare} \n${reference} ${version} \n\n https://bible-strong.app`,
   }
 }

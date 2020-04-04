@@ -15,7 +15,7 @@ import { addTag } from '~redux/modules/user'
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   margin: 0,
-  alignItems: 'center'
+  alignItems: 'center',
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -29,12 +29,12 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace(),
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
-  color: isDisabled ? theme.colors.border : theme.colors.primary
+  color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
 const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {

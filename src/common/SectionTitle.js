@@ -11,7 +11,7 @@ const SectionTitle = styled(Box)(({ theme, color }) => ({
   backgroundColor: theme.colors[color],
   justifyContent: 'center',
   alignItems: 'center',
-  overflow: 'visible'
+  overflow: 'visible',
 }))
 
 export default SectionTitle

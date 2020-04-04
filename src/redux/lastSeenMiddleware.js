@@ -21,7 +21,7 @@ import {
   CHANGE_COLOR,
   DELETE_HISTORY,
   UPDATE_USER_DATA,
-  SET_LAST_SEEN
+  SET_LAST_SEEN,
 } from './modules/user'
 
 export default store => next => action => {

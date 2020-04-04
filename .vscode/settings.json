@@ -9,7 +9,11 @@
     "~redux": "${workspaceRoot}/src/redux",
     "~themes": "${workspaceRoot}/src/themes"
   },
-  "editor.codeActionsOnSave": {
-    "source.fixAll": true
-  }
+  "editor.formatOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
 }

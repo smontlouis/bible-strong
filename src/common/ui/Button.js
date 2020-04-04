@@ -16,7 +16,7 @@ const WrapperButton = styled.TouchableOpacity(
     disabled,
     color,
     success,
-    fullWidth
+    fullWidth,
   }) => ({
     backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
     borderWidth: reverse ? 1 : 0,
@@ -37,7 +37,7 @@ const WrapperButton = styled.TouchableOpacity(
     ...(success && { backgroundColor: theme.colors.success }),
 
     ...(disabled && {
-      opacity: 0.5
+      opacity: 0.5,
     }),
 
     ...(small && {
@@ -46,9 +46,9 @@ const WrapperButton = styled.TouchableOpacity(
       paddingLeft: 5,
       paddingRight: 5,
       marginRight: 0,
-      marginLeft: 0
+      marginLeft: 0,
     }),
-    ...(type === 'secondary' && {})
+    ...(type === 'secondary' && {}),
   })
 )
 
@@ -60,8 +60,8 @@ const TextButton = styled.Text(({ theme, small, reverse }) => ({
   fontSize: 16,
 
   ...(small && {
-    fontSize: 14
-  })
+    fontSize: 14,
+  }),
 }))
 
 const Button = ({
@@ -81,7 +81,7 @@ const Button = ({
   secondary,
   success,
   color,
-  fullWidth
+  fullWidth,
 }) => {
   const Component = onPress ? WrapperButton : WrapperLink
 

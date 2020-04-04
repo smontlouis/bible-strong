@@ -27,15 +27,19 @@ const catchDBError = async fn => {
 
     if (diskError) {
       SnackBar.show('Redémarrez votre application', 'danger', {
-        duration: 5000
+        duration: 5000,
       })
 
       return { error: 'DISK_IO' }
     }
 
-    SnackBar.show('Une error est survenue, le développeur en a été informé.', 'danger', {
-      duration: 5000
-    })
+    SnackBar.show(
+      'Une error est survenue, le développeur en a été informé.',
+      'danger',
+      {
+        duration: 5000,
+      }
+    )
 
     console.log(e)
     Sentry.captureException(e)

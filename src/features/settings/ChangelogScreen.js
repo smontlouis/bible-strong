@@ -35,7 +35,7 @@ const Tag = styled.View(({ type }) => ({
   marginLeft: 10,
   padding: 3,
   backgroundColor: getTagColor(type),
-  borderRadius: 3
+  borderRadius: 3,
 }))
 
 const Changelog = () => {
@@ -69,7 +69,7 @@ const Changelog = () => {
                 <Text fontSize={10} color="grey">
                   Il y a{' '}
                   {distanceInWords(Number(log.date), Date.now(), {
-                    locale: frLocale
+                    locale: frLocale,
                   })}
                 </Text>
                 <Text marginTop={10}>{log.description}</Text>

@@ -8,7 +8,7 @@ import {
   MenuOption,
   MenuTrigger,
   renderers,
-  withMenuContext
+  withMenuContext,
 } from 'react-native-popup-menu'
 import Color from 'color'
 
@@ -27,7 +27,7 @@ const { Popover } = renderers
 
 const TouchableIcon = styled(TouchableOpacity)(() => ({
   borderRadius: 2,
-  marginHorizontal: 10
+  marginHorizontal: 10,
 }))
 
 const PopOverMenu = ({ element, popover, ...props }) => (
@@ -41,8 +41,9 @@ const PopOverMenu = ({ element, popover, ...props }) => (
         shadowOpacity: 0.1,
         shadowRadius: 7,
         elevation: 1,
-        borderRadius: 8
-      }}>
+        borderRadius: 8,
+      }}
+    >
       <Box padding={10}>{popover}</Box>
     </MenuOptions>
   </Menu>
@@ -52,13 +53,13 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
   const headings = [
     { label: 'Normal', value: 0 },
     { label: 'Titre', value: 1 },
-    { label: 'Sous-titre', value: 2 }
+    { label: 'Sous-titre', value: 2 },
   ]
 
   const headerTitle = {
     0: 'Normal',
     1: 'Titre',
-    2: 'Sous-titre'
+    2: 'Sous-titre',
   }
 
   const getHeaderTitle = () => {
@@ -77,7 +78,8 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
           borderRadius={20}
           backgroundColor="lightPrimary"
           paddingVertical={4}
-          paddingHorizontal={7}>
+          paddingHorizontal={7}
+        >
           <Text fontSize={15} bold color="primary">
             {getHeaderTitle()}
           </Text>
@@ -87,7 +89,8 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
             backgroundColor="primary"
             width={18}
             height={18}
-            center>
+            center
+          >
             <FeatherIcon name="chevron-up" color="reverse" size={18} />
           </Box>
         </Box>
@@ -98,9 +101,10 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
           onSelect={() => {
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'HEADER',
-              value: h.value
+              value: h.value,
             })
-          }}>
+          }}
+        >
           <Text
             fontSize={14}
             bold
@@ -112,7 +116,8 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
                 : h.value === 0
                 ? 'primary'
                 : 'grey'
-            }>
+            }
+          >
             {h.label}
           </Text>
         </MenuOption>
@@ -128,7 +133,7 @@ const colors = [
   '#45818e',
   '#3d85c6',
   '#674ea7',
-  '#a64d79'
+  '#a64d79',
 ]
 const lighten = ['0.3', '0.5', '0.7', '0.9']
 
@@ -138,7 +143,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
   const setColor = color => {
     dispatchToWebView('TOGGLE_FORMAT', {
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
-      value: color
+      value: color,
     })
   }
 
@@ -177,13 +182,15 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
               <FormatIcon
                 isSelected={activeFormats.background}
                 style={{ marginHorizontal: 10 }}
-                onPress={() => setOpenColorModal('background')}>
+                onPress={() => setOpenColorModal('background')}
+              >
                 <BackgroundIcon color={activeFormats.background} />
               </FormatIcon>
               <FormatIcon
                 isSelected={activeFormats.color}
                 style={{ marginHorizontal: 10 }}
-                onPress={() => setOpenColorModal('color')}>
+                onPress={() => setOpenColorModal('color')}
+              >
                 <ColorIcon color={activeFormats.color} />
               </FormatIcon>
               <FormatIcon
@@ -192,9 +199,10 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', {
                     type: 'BLOCKQUOTE',
-                    value: !activeFormats.blockquote
+                    value: !activeFormats.blockquote,
                   })
-                }>
+                }
+              >
                 <QuoteIcon color="primary" />
               </FormatIcon>
             </Box>
@@ -206,9 +214,10 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', {
                     type: 'LIST',
-                    value: activeFormats.list === 'bullet' ? false : 'bullet'
+                    value: activeFormats.list === 'bullet' ? false : 'bullet',
                   })
-                }>
+                }
+              >
                 <FeatherIcon color="primary" name="list" size={20} />
               </FormatIcon>
               <FormatIcon
@@ -217,9 +226,10 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', {
                     type: 'LIST',
-                    value: activeFormats.list === 'ordered' ? false : 'ordered'
+                    value: activeFormats.list === 'ordered' ? false : 'ordered',
                   })
-                }>
+                }
+              >
                 <MaterialIcon
                   color="primary"
                   name="format-list-numbered"
@@ -230,7 +240,8 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                 style={{ marginHorizontal: 10 }}
                 onPress={() => {
                   dispatchToWebView('BLOCK_DIVIDER')
-                }}>
+                }}
+              >
                 <FeatherIcon size={20} name="minus" color="primary" />
               </FormatIcon>
             </Box>
@@ -239,13 +250,15 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
               <TouchableIcon
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
-                }>
+                }
+              >
                 <MaterialIcon name="undo" size={20} color="primary" />
               </TouchableIcon>
               <TouchableIcon
                 onPress={() =>
                   dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
-                }>
+                }
+              >
                 <MaterialIcon name="redo" size={20} color="primary" />
               </TouchableIcon>
             </Box>
@@ -324,7 +337,7 @@ const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }) => ({
   height: 25,
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent'
+  backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent',
 }))
 
 const FormatIconForPopover = FormatIcon.withComponent(Box)
@@ -346,7 +359,8 @@ const ColorPopover = ({ type, setColor, ctx }) => (
           setColor(type, false)
           ctx.menuActions.closeMenu()
         }}
-        fontSize={18}>
+        fontSize={18}
+      >
         Aucune
       </Text>
     </Box>
@@ -380,14 +394,14 @@ const StudyFooter = ({
   navigateBibleView,
   openBibleView,
   activeFormats,
-  ctx
+  ctx,
 }) => {
   const deviceSize = useMediaQueries()
 
   const setColor = (colorModal, color) => {
     dispatchToWebView('TOGGLE_FORMAT', {
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
-      value: color
+      value: color,
     })
   }
 
@@ -403,10 +417,11 @@ const StudyFooter = ({
           onPress={() =>
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'BOLD',
-              value: !activeFormats.bold
+              value: !activeFormats.bold,
             })
           }
-          style={{ marginLeft: 10, marginRight: 10 }}>
+          style={{ marginLeft: 10, marginRight: 10 }}
+        >
           <FeatherIcon color="primary" name="bold" size={16} />
         </FormatIcon>
         <FormatIcon
@@ -414,10 +429,11 @@ const StudyFooter = ({
           onPress={() =>
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'ITALIC',
-              value: !activeFormats.italic
+              value: !activeFormats.italic,
             })
           }
-          style={{ marginRight: 10 }}>
+          style={{ marginRight: 10 }}
+        >
           <FeatherIcon color="primary" name="italic" size={16} />
         </FormatIcon>
         <FormatIcon
@@ -425,10 +441,11 @@ const StudyFooter = ({
           onPress={() =>
             dispatchToWebView('TOGGLE_FORMAT', {
               type: 'UNDERLINE',
-              value: !activeFormats.underline
+              value: !activeFormats.underline,
             })
           }
-          style={{ marginRight: 10 }}>
+          style={{ marginRight: 10 }}
+        >
           <FeatherIcon color="primary" name="underline" size={16} />
         </FormatIcon>
         {deviceSize === 'xs' || deviceSize === 'sm' ? (
@@ -443,7 +460,8 @@ const StudyFooter = ({
               element={
                 <FormatIconForPopover
                   isSelected={activeFormats.background}
-                  style={{ marginHorizontal: 10 }}>
+                  style={{ marginHorizontal: 10 }}
+                >
                   <BackgroundIcon color={activeFormats.background} />
                 </FormatIconForPopover>
               }
@@ -455,7 +473,8 @@ const StudyFooter = ({
               element={
                 <FormatIconForPopover
                   isSelected={activeFormats.color}
-                  style={{ marginHorizontal: 10 }}>
+                  style={{ marginHorizontal: 10 }}
+                >
                   <ColorIcon color={activeFormats.color} />
                 </FormatIconForPopover>
               }
@@ -469,9 +488,10 @@ const StudyFooter = ({
               onPress={() =>
                 dispatchToWebView('TOGGLE_FORMAT', {
                   type: 'BLOCKQUOTE',
-                  value: !activeFormats.blockquote
+                  value: !activeFormats.blockquote,
                 })
-              }>
+              }
+            >
               <QuoteIcon color="primary" />
             </FormatIcon>
             <FormatIcon
@@ -480,9 +500,10 @@ const StudyFooter = ({
               onPress={() =>
                 dispatchToWebView('TOGGLE_FORMAT', {
                   type: 'LIST',
-                  value: activeFormats.list === 'bullet' ? false : 'bullet'
+                  value: activeFormats.list === 'bullet' ? false : 'bullet',
                 })
-              }>
+              }
+            >
               <FeatherIcon color="primary" name="list" size={20} />
             </FormatIcon>
             <FormatIcon
@@ -491,9 +512,10 @@ const StudyFooter = ({
               onPress={() =>
                 dispatchToWebView('TOGGLE_FORMAT', {
                   type: 'LIST',
-                  value: activeFormats.list === 'ordered' ? false : 'ordered'
+                  value: activeFormats.list === 'ordered' ? false : 'ordered',
                 })
-              }>
+              }
+            >
               <MaterialIcon
                 color="primary"
                 name="format-list-numbered"
@@ -504,19 +526,22 @@ const StudyFooter = ({
               style={{ marginHorizontal: 10 }}
               onPress={() => {
                 dispatchToWebView('BLOCK_DIVIDER')
-              }}>
+              }}
+            >
               <FeatherIcon size={20} name="minus" color="primary" />
             </FormatIcon>
             <TouchableIcon
               onPress={() =>
                 dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
-              }>
+              }
+            >
               <MaterialIcon name="undo" size={20} color="primary" />
             </TouchableIcon>
             <TouchableIcon
               onPress={() =>
                 dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
-              }>
+              }
+            >
               <MaterialIcon name="redo" size={20} color="primary" />
             </TouchableIcon>
           </>

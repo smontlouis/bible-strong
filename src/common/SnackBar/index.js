@@ -20,7 +20,7 @@ export default {
       textColor: 'white',
       tapToClose: true,
       duration: 2500,
-      ...params
+      ...params,
     })
-  }
+  },
 }

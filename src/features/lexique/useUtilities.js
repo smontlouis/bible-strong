@@ -24,8 +24,8 @@ export const useResults = (asyncFunc, parameter) => {
       if (!results) {
         Sentry.captureMessage('useResults: Results is undefined', {
           extra: {
-            asyncFunc
-          }
+            asyncFunc,
+          },
         })
       }
       setResults(results)

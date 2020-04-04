@@ -13,7 +13,7 @@ const Tag = styled(Box)(({ theme }) => ({
   paddingRight: 7,
   marginRight: 5,
   marginBottom: 2,
-  marginTop: 5
+  marginTop: 5,
 }))
 
 const TagList = ({ tags, limit }) => {
@@ -45,8 +45,9 @@ const TagList = ({ tags, limit }) => {
             paddingRight: 7,
             marginRight: 5,
             marginBottom: 2,
-            marginTop: 4
-          }}>
+            marginTop: 4,
+          }}
+        >
           + {Object.values(tags).length - limit}
         </Text>
       )}

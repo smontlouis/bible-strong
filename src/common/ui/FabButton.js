@@ -19,11 +19,11 @@ const StyledLink = styled(Link)(({ theme }) => ({
   elevation: 2,
   position: 'absolute',
   bottom: 30,
-  right: 30
+  right: 30,
 }))
 
 const StyledIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
-  color: 'white'
+  color: 'white',
 }))
 
 const Fab = ({ icon, onPress, route, params, component: Component }) => {

@@ -16,12 +16,18 @@ const waitForWidget = WrappedComponent => props => {
     startDownload,
     proposeDownload,
     setStartDownload,
-    progress
+    progress,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {
     return (
-      <Box center rounded height={itemHeight} width={itemWidth} marginRight={20}>
+      <Box
+        center
+        rounded
+        height={itemHeight}
+        width={itemWidth}
+        marginRight={20}
+      >
         <Loading message="Téléchargement de la base strong...">
           <ProgressBar progress={progress} color="blue" />
         </Loading>
@@ -31,7 +37,13 @@ const waitForWidget = WrappedComponent => props => {
 
   if (isLoading && proposeDownload) {
     return (
-      <Box center rounded height={itemHeight} width={itemWidth} marginRight={20}>
+      <Box
+        center
+        rounded
+        height={itemHeight}
+        width={itemWidth}
+        marginRight={20}
+      >
         <DownloadRequired
           noHeader
           title="Base de données strong requise."
@@ -45,7 +57,13 @@ const waitForWidget = WrappedComponent => props => {
 
   if (isLoading) {
     return (
-      <Box center rounded height={itemHeight} width={itemWidth} marginRight={20}>
+      <Box
+        center
+        rounded
+        height={itemHeight}
+        width={itemWidth}
+        marginRight={20}
+      >
         <Loading />
       </Box>
     )

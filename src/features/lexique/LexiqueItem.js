@@ -13,7 +13,7 @@ const SectionItem = styled(Box)(({ theme }) => ({
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
   alignItems: 'flex-start',
-  justifyContent: 'center'
+  justifyContent: 'center',
 }))
 
 const Chip = styled(Box)(({ theme, isHebreu }) => ({
@@ -23,14 +23,15 @@ const Chip = styled(Box)(({ theme, isHebreu }) => ({
   paddingBottom: 2,
   paddingLeft: 5,
   paddingRight: 5,
-  marginBottom: 3
+  marginBottom: 3,
 }))
 
 const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType }) => (
   // That's why : `const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'` - Ok this is not the best implementation
   <Link
     route="BibleStrongDetail"
-    params={{ book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code }}>
+    params={{ book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code }}
+  >
     <SectionItem>
       <Box row>
         <Chip isHebreu={lexiqueType === 'Hébreu'}>

@@ -23,7 +23,7 @@ const slideHeight = hp(70)
 const itemWidth = slideWidth
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
-  backgroundColor: theme.colors.primary
+  backgroundColor: theme.colors.primary,
 }))
 
 const slides = [
@@ -31,37 +31,37 @@ const slides = [
     title: 'Bienvenue,',
     description:
       'Accédez à un lexique hébreu/grec,\n un dictionnaire, des thématiques,\n des commentaires, tout cela\n depuis votre mobile !',
-    image: require('../assets/images/Bible_Strong__First_Slide.png')
+    image: require('../assets/images/Bible_Strong__First_Slide.png'),
   },
   {
     title: 'Votre couteau suisse',
     description:
       'Prenez des notes, surlignez, organisez\n par étiquette, partagez.',
-    image: require('../assets/images/Bible_Strong__Second_Slide.png')
+    image: require('../assets/images/Bible_Strong__Second_Slide.png'),
   },
   {
     title: 'Personnalisable',
     description:
       "Thèmes jour/nuit, choix de polices,\n taille du texte... Modifiez l'application\n à votre convenance ! ",
-    image: require('../assets/images/Bible_Strong__Third_Slide.png')
+    image: require('../assets/images/Bible_Strong__Third_Slide.png'),
   },
   {
     title: 'Vos Études',
     description:
       'Un éditeur de texte riche et complet\n pour rédiger vos études, vos méditations,\n vos notes...',
-    image: require('../assets/images/Bible_Strong__Fourth_Slide.png')
+    image: require('../assets/images/Bible_Strong__Fourth_Slide.png'),
   },
   {
     title: 'Vos données en sécurité',
     description:
       'Créez un compte pour synchroniser\n vos données dans le cloud, et cela\n en tout sécurité !',
-    image: require('../assets/images/Bible_Strong__Fifth_Slide.png')
+    image: require('../assets/images/Bible_Strong__Fifth_Slide.png'),
   },
   {
     title: 'Accès hors-ligne',
     description:
-      'Bible Strong a été pensé pour un accès avant tout hors-ligne. \n\nAvant de commencer, rendez-vous\n dans `Plus -> Gestion des téléchargements`\n pour télécharger tout ce dont vous avez\n besoin !'
-  }
+      'Bible Strong a été pensé pour un accès avant tout hors-ligne. \n\nAvant de commencer, rendez-vous\n dans `Plus -> Gestion des téléchargements`\n pour télécharger tout ce dont vous avez\n besoin !',
+  },
 ]
 
 const Item = ({ item, index }) => {
@@ -79,7 +79,7 @@ const Item = ({ item, index }) => {
           source={item.image}
           style={{
             width: r([wp(60), wp(80), 450, 500]),
-            height: r([wp(50), wp(68), 380, 460])
+            height: r([wp(50), wp(68), 380, 460]),
           }}
         />
       )}
@@ -128,7 +128,7 @@ const OnBoarding = () => {
             inactiveSlideOpacity={0.3}
             contentContainerCustomStyle={{
               overflow: 'visible',
-              paddingBottom: 0
+              paddingBottom: 0,
             }}
             onSnapToItem={setActiveSlide}
             useScrollView={false}
@@ -137,18 +137,18 @@ const OnBoarding = () => {
             dotsLength={slides.length}
             activeDotIndex={activeSlide}
             containerStyle={{
-              paddingVertical: 10
+              paddingVertical: 10,
             }}
             dotContainerStyle={{
               width: 10,
-              marginHorizontal: 3
+              marginHorizontal: 3,
             }}
             dotStyle={{
               width: 10,
               height: 10,
               borderRadius: 5,
               marginHorizontal: 8,
-              backgroundColor: 'rgba(0, 0, 0, 0.92)'
+              backgroundColor: 'rgba(0, 0, 0, 0.92)',
             }}
             inactiveDotOpacity={0.4}
             inactiveDotScale={0.6}

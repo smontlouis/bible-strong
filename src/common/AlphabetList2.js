@@ -11,7 +11,7 @@ import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
 
 const StyledText = styled(Text)(({ theme, isSelected }) => ({
-  fontWeight: isSelected ? 'bold' : 'normal'
+  fontWeight: isSelected ? 'bold' : 'normal',
 }))
 
 const StyledUnderline = styled(Box)(({ theme, color }) => ({
@@ -19,7 +19,7 @@ const StyledUnderline = styled(Box)(({ theme, color }) => ({
   height: 8,
   width: 30,
   borderRadius: 5,
-  backgroundColor: color ? theme.colors[color] : theme.colors.primary
+  backgroundColor: color ? theme.colors[color] : theme.colors.primary,
 }))
 
 const AlphabetList = ({ color, setLetter, letter }) => {
@@ -38,9 +38,14 @@ const AlphabetList = ({ color, setLetter, letter }) => {
             <TouchableOpacity
               onPress={() => {
                 setLetter(section)
-              }}>
+              }}
+            >
               <Box isSelected={letter === section}>
-                <StyledText isSelected={letter === section} textAlign="center" fontSize={23}>
+                <StyledText
+                  isSelected={letter === section}
+                  textAlign="center"
+                  fontSize={23}
+                >
                   {section.toUpperCase()}
                 </StyledText>
               </Box>

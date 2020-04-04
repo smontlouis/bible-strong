@@ -13,12 +13,12 @@ const HeaderBox = styled(Box)(({ theme, background }) => ({
   borderBottomColor: theme.colors.border,
   alignItems: 'stretch',
   ...(background && {
-    backgroundColor: theme.colors.reverse
-  })
+    backgroundColor: theme.colors.reverse,
+  }),
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const Header = ({
@@ -46,7 +46,12 @@ const Header = ({
         </Text>
       </Box>
       {rightComponent ? (
-        <Box flex justifyContent="center" alignItems="flex-end" overflow="visibility">
+        <Box
+          flex
+          justifyContent="center"
+          alignItems="flex-end"
+          overflow="visibility"
+        >
           {rightComponent}
         </Box>
       ) : (

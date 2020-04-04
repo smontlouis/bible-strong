@@ -12,10 +12,10 @@ export default {
           ...state.user.bible,
           settings: {
             ...state.user.bible.settings,
-            press: 'shortPress'
-          }
-        }
-      }
+            press: 'shortPress',
+          },
+        },
+      },
     }
   },
   1: state => {
@@ -25,9 +25,9 @@ export default {
         ...state.user,
         bible: {
           ...state.user.bible,
-          changelog: {}
-        }
-      }
+          changelog: {},
+        },
+      },
     }
   },
   2: state => {
@@ -39,10 +39,10 @@ export default {
           ...state.user.bible,
           settings: {
             ...state.user.bible.settings,
-            notesDisplay: 'inline'
-          }
-        }
-      }
+            notesDisplay: 'inline',
+          },
+        },
+      },
     }
   },
   3: state => {
@@ -53,9 +53,9 @@ export default {
         bible: {
           ...state.user.bible,
           studies: {},
-          tags: {}
-        }
-      }
+          tags: {},
+        },
+      },
     }
   },
   4: state => {
@@ -63,8 +63,8 @@ export default {
       ...state,
       user: {
         ...state.user,
-        id: ''
-      }
+        id: '',
+      },
     }
   },
   5: state => {
@@ -73,8 +73,8 @@ export default {
       bible: {
         ...state.bible,
         strongDatabaseHash: '',
-        dictionnaireDatabaseHash: ''
-      }
+        dictionnaireDatabaseHash: '',
+      },
     }
   },
   6: state => {
@@ -88,11 +88,11 @@ export default {
             ...state.user.bible.settings,
             colors: {
               default: defaultColors,
-              dark: darkColors
-            }
-          }
-        }
-      }
+              dark: darkColors,
+            },
+          },
+        },
+      },
     }
   },
   7: state => {
@@ -102,9 +102,9 @@ export default {
         ...state.user,
         bible: {
           ...state.user.bible,
-          history: []
-        }
-      }
+          history: [],
+        },
+      },
     }
   },
   8: state => {
@@ -113,9 +113,9 @@ export default {
       user: {
         ...state.user,
         notifications: {
-          verseOfTheDay: '07:00'
-        }
-      }
+          verseOfTheDay: '07:00',
+        },
+      },
     }
   },
   9: state => {
@@ -127,10 +127,10 @@ export default {
           ...state.user.bible,
           settings: {
             ...state.user.bible.settings,
-            commentsDisplay: false
-          }
-        }
-      }
+            commentsDisplay: false,
+          },
+        },
+      },
     }
   },
   10: state => {
@@ -148,19 +148,19 @@ export default {
                 color2: state.user.bible.settings.colors.default.color2,
                 color3: state.user.bible.settings.colors.default.color3,
                 color4: state.user.bible.settings.colors.default.color4,
-                color5: state.user.bible.settings.colors.default.color5
+                color5: state.user.bible.settings.colors.default.color5,
               },
               dark: {
                 color1: state.user.bible.settings.colors.dark.color1,
                 color2: state.user.bible.settings.colors.dark.color2,
                 color3: state.user.bible.settings.colors.dark.color3,
                 color4: state.user.bible.settings.colors.dark.color4,
-                color5: state.user.bible.settings.colors.dark.color5
-              }
-            }
-          }
-        }
-      }
+                color5: state.user.bible.settings.colors.dark.color5,
+              },
+            },
+          },
+        },
+      },
     }
   },
   11: state => {
@@ -172,10 +172,10 @@ export default {
           ...state.user.bible,
           settings: {
             ...state.user.bible.settings,
-            compare: { LSG: true }
-          }
-        }
-      }
+            compare: { LSG: true },
+          },
+        },
+      },
     }
   },
   12: state => {
@@ -183,8 +183,8 @@ export default {
       ...state,
       bible: {
         ...state.bible,
-        webviewHash: '' // deprecated
-      }
+        webviewHash: '', // deprecated
+      },
     }
   },
   13: state => {
@@ -194,9 +194,9 @@ export default {
         ...state.user,
         notifications: {
           ...state.user.notifications,
-          notificationId: ''
-        }
-      }
+          notificationId: '',
+        },
+      },
     }
   },
   14: state => {
@@ -207,10 +207,10 @@ export default {
         changelog: {
           isLoading: true,
           lastSeen: 0,
-          data: []
+          data: [],
         },
-        needsUpdate: {}
-      }
+        needsUpdate: {},
+      },
     }
   },
   15: state => {
@@ -218,8 +218,8 @@ export default {
       ...state,
       user: {
         ...state.user,
-        fontFamily: ''
-      }
+        fontFamily: '',
+      },
     }
   },
   16: state => {
@@ -227,8 +227,8 @@ export default {
       ...state,
       user: {
         ...state.user,
-        isLoading: false
-      }
+        isLoading: false,
+      },
     }
   },
   17: state => {
@@ -236,8 +236,8 @@ export default {
       ...state,
       user: {
         ...state.user,
-        isFirstTime: true
-      }
+        isFirstTime: true,
+      },
     }
   },
   18: state => {
@@ -245,8 +245,8 @@ export default {
       ...state,
       bible: {
         ...state.bible,
-        parallelVersions: []
-      }
+        parallelVersions: [],
+      },
     }
-  }
+  },
 }

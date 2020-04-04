@@ -7,7 +7,7 @@ const useLogin = () => {
     isLogged: !!user.id,
     user,
     logout: FireAuth.logout,
-    login: FireAuth.login
+    login: FireAuth.login,
   }
 }
 

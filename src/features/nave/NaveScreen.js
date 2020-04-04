@@ -20,7 +20,7 @@ import waitForDatabase from '~common/waitForNaveDB'
 import NaveItem from './NaveItem'
 import {
   useSearchValue,
-  useResultsByLetterOrSearch
+  useResultsByLetterOrSearch,
 } from '../lexique/useUtilities'
 
 const useSectionResults = results => {
@@ -118,7 +118,7 @@ const NaveScreen = () => {
               getItemHeight: () => 60,
               getSectionHeaderHeight: () => 50,
               getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0
+              getSectionFooterHeight: () => 0,
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="quint">
@@ -126,7 +126,8 @@ const NaveScreen = () => {
                   title
                   fontWeight="bold"
                   fontSize={16}
-                  style={{ color: 'white' }}>
+                  style={{ color: 'white' }}
+                >
                   {title.toUpperCase()}
                 </Text>
               </SectionTitle>

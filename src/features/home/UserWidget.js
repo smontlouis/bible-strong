@@ -3,7 +3,7 @@ import {
   ScrollView,
   Platform,
   ActivityIndicator,
-  StyleSheet
+  StyleSheet,
 } from 'react-native'
 import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
@@ -26,7 +26,7 @@ import OfflineNotice from './OfflineNotice'
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
   paddingTop: getBottomSpace() + Platform.OS === 'ios' ? 20 : 45,
-  paddingBottom: 0
+  paddingBottom: 0,
 }))
 
 const ProfileImage = styled.Image(({ theme }) => ({
@@ -35,7 +35,7 @@ const ProfileImage = styled.Image(({ theme }) => ({
   borderRadius: 10,
   backgroundColor: theme.colors.tertiary,
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
 }))
 
 const ProfileContainer = styled.View(({ theme }) => ({
@@ -49,7 +49,7 @@ const ProfileContainer = styled.View(({ theme }) => ({
   elevation: 1,
   overflow: 'visible',
   backgroundColor: 'white',
-  position: 'relative'
+  position: 'relative',
 }))
 
 const GenerateImageContainer = ProfileImage.withComponent(Box)
@@ -78,12 +78,12 @@ const Chip = styled(Link)(({ theme }) => ({
   shadowOpacity: 0.08,
   shadowRadius: 4,
   elevation: 1,
-  overflow: 'visible'
+  overflow: 'visible',
 }))
 
 const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: theme.colors[color] || theme.colors.grey,
-  marginRight: 5
+  marginRight: 5,
 }))
 
 const UserWidget = ({ theme }) => {
@@ -94,7 +94,7 @@ const UserWidget = ({ theme }) => {
       highlights: Object.keys(bible.highlights).length,
       notes: Object.keys(bible.notes).length,
       studies: Object.keys(bible.studies).length,
-      tags: Object.keys(bible.tags).length
+      tags: Object.keys(bible.tags).length,
     })
   )
 
@@ -174,7 +174,7 @@ const UserWidget = ({ theme }) => {
           flexDirection: 'row',
           paddingHorizontal: 20,
           paddingVertical: 10,
-          overflow: 'visible'
+          overflow: 'visible',
         }}
       >
         <Chip route="Highlights">

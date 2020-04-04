@@ -13,7 +13,7 @@ const SectionItem = styled(Box)(({ theme }) => ({
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
   alignItems: 'flex-start',
-  justifyContent: 'center'
+  justifyContent: 'center',
 }))
 
 const DictionnaireItem = memo(({ word }) => (

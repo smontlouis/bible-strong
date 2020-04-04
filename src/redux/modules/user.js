@@ -61,12 +61,12 @@ const initialState = {
   isLoading: false,
   notifications: {
     verseOfTheDay: '07:00',
-    notificationId: ''
+    notificationId: '',
   },
   changelog: {
     isLoading: true,
     lastSeen: 0,
-    data: []
+    data: [],
   },
   needsUpdate: {},
   fontFamily: 'Literata Book',
@@ -87,13 +87,13 @@ const initialState = {
       commentsDisplay: false,
       colors: {
         default: defaultColors,
-        dark: darkColors
+        dark: darkColors,
       },
       compare: {
-        LSG: true
-      }
-    }
-  }
+        LSG: true,
+      },
+    },
+  },
 }
 
 const overwriteMerge = (destinationArray, sourceArray) => sourceArray
@@ -135,7 +135,7 @@ const userReducer = produce((draft, action) => {
         provider,
         lastSeen,
         emailVerified,
-        bible
+        bible,
       } = action.profile
 
       const isLogged = !!draft.id
@@ -155,7 +155,7 @@ const userReducer = produce((draft, action) => {
         if (!isLogged) {
           console.log('User was not logged, merge data')
           draft.bible = deepmerge(draft.bible, bible, {
-            arrayMerge: overwriteMerge
+            arrayMerge: overwriteMerge,
           })
         } else if (remoteLastSeen > localLastSeen) {
           // Remote wins
@@ -209,8 +209,8 @@ const userReducer = produce((draft, action) => {
         bible: {
           ...initialState.bible,
           // Keep changelog
-          changelog: draft.bible.changelog
-        }
+          changelog: draft.bible.changelog,
+        },
       }
     }
     case SAVE_ALL_LOGS_AS_SEEN: {
@@ -249,7 +249,7 @@ const userReducer = produce((draft, action) => {
 
       draft.bible.history.unshift({
         ...action.payload,
-        date: Date.now()
+        date: Date.now(),
       })
       draft.bible.history = draft.bible.history.slice(0, 50)
       break
@@ -297,7 +297,7 @@ export default reduceReducers(
 export function setFirstTime(payload) {
   return {
     type: SET_FIRST_TIME,
-    payload
+    payload,
   }
 }
 
@@ -305,7 +305,7 @@ export function setFirstTime(payload) {
 export function setFontFamily(payload) {
   return {
     type: SET_FONT_FAMILY,
-    payload
+    payload,
   }
 }
 
@@ -313,7 +313,7 @@ export function setFontFamily(payload) {
 export function saveAllLogsAsSeen(payload) {
   return {
     type: SAVE_ALL_LOGS_AS_SEEN,
-    payload
+    payload,
   }
 }
 
@@ -323,20 +323,20 @@ export function onUserLoginSuccess(profile, remoteLastSeen, studies) {
     type: USER_LOGIN_SUCCESS,
     profile,
     remoteLastSeen,
-    studies
+    studies,
   }
 }
 
 export function onUserLogout() {
   return {
-    type: USER_LOGOUT
+    type: USER_LOGOUT,
   }
 }
 
 export function onUserUpdateProfile(profile) {
   return {
     type: USER_UPDATE_PROFILE,
-    payload: profile
+    payload: profile,
   }
 }
 
@@ -344,19 +344,19 @@ export function onUserUpdateProfile(profile) {
 export function setHistory(item) {
   return {
     type: SET_HISTORY,
-    payload: item
+    payload: item,
   }
 }
 
 export function deleteHistory() {
   return {
-    type: DELETE_HISTORY
+    type: DELETE_HISTORY,
   }
 }
 
 export function updateUserData() {
   return {
-    type: UPDATE_USER_DATA
+    type: UPDATE_USER_DATA,
   }
 }
 
@@ -364,14 +364,14 @@ export function updateUserData() {
 export function setNotificationVOD(payload) {
   return {
     type: SET_NOTIFICATION_VOD,
-    payload
+    payload,
   }
 }
 
 export function setNotificationId(payload) {
   return {
     type: SET_NOTIFICATION_ID,
-    payload
+    payload,
   }
 }
 
@@ -379,7 +379,7 @@ export function setNotificationId(payload) {
 export function toggleCompareVersion(payload) {
   return {
     type: TOGGLE_COMPARE_VERSION,
-    payload
+    payload,
   }
 }
 
@@ -387,7 +387,7 @@ export function toggleCompareVersion(payload) {
 export function getChangelog() {
   return async (dispatch, getState) => {
     dispatch({
-      type: GET_CHANGELOG
+      type: GET_CHANGELOG,
     })
     const lastChangelog = getState().user.changelog.lastSeen.toString()
     const changelogDoc = firebaseDb
@@ -408,7 +408,7 @@ export function getChangelog() {
     } catch (e) {
       console.log(e)
       return dispatch({
-        type: GET_CHANGELOG_FAIL
+        type: GET_CHANGELOG_FAIL,
       })
     }
   }
@@ -417,6 +417,6 @@ export function getChangelog() {
 export function addChangelog(payload) {
   return {
     type: GET_CHANGELOG_SUCCESS,
-    payload
+    payload,
   }
 }

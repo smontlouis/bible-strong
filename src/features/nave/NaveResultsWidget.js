@@ -12,7 +12,9 @@ import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 const hideIfNoDatabase = WrappedComponent => props => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
 
-  if (isLoading || proposeDownload) return null
+  if (isLoading || proposeDownload) {
+    return null
+  }
   return <WrappedComponent {...props} />
 }
 
@@ -27,7 +29,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
 
   const { results, isLoading } = useResultsByLetterOrSearch({
     query: loadNaveBySearch,
-    value: searchValue
+    value: searchValue,
   })
 
   useEffect(() => {
@@ -49,14 +51,19 @@ const LexiqueResultsWidget = ({ searchValue }) => {
       {results.slice(0, limit).map(ref => {
         const { name_lower, name } = ref
         return (
-          <Link key={name_lower} route="NaveDetail" params={{ name_lower, name }}>
+          <Link
+            key={name_lower}
+            route="NaveDetail"
+            params={{ name_lower, name }}
+          >
             <Box
               center
               rounded
               marginRight={10}
               marginBottom={10}
               height={height}
-              paddingHorizontal={10}>
+              paddingHorizontal={10}
+            >
               <Box
                 style={{
                   position: 'absolute',
@@ -64,15 +71,21 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                   right: 0,
                   top: 0,
                   height,
-                  borderRadius: 3
-                }}>
-                <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
+                  borderRadius: 3,
+                }}
+              >
+                <LinearGradient
+                  start={[0.1, 0.2]}
+                  style={{ height }}
+                  colors={[color1, color2]}
+                />
               </Box>
               <Box
                 backgroundColor="rgba(0,0,0,0.1)"
                 paddingHorizontal={3}
                 paddingVertical={2}
-                rounded>
+                rounded
+              >
                 <Text fontSize={7} style={{ color: 'white' }}>
                   Nave
                 </Text>
@@ -93,7 +106,8 @@ const LexiqueResultsWidget = ({ searchValue }) => {
             marginRight={10}
             marginBottom={10}
             height={height}
-            paddingHorizontal={20}>
+            paddingHorizontal={20}
+          >
             <Box
               style={{
                 position: 'absolute',
@@ -101,9 +115,14 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                 right: 0,
                 top: 0,
                 height,
-                borderRadius: 3
-              }}>
-              <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
+                borderRadius: 3,
+              }}
+            >
+              <LinearGradient
+                start={[0.1, 0.2]}
+                style={{ height }}
+                colors={[color1, color2]}
+              />
             </Box>
             <Text title fontSize={14} style={{ color: 'white' }}>
               + {results.length - limit}

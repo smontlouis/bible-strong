@@ -7,7 +7,7 @@ import { LoginManager, AccessToken } from 'react-native-fbsdk'
 import * as Sentry from '@sentry/react-native'
 import appleAuth, {
   AppleAuthRequestScope,
-  AppleAuthRequestOperation
+  AppleAuthRequestOperation,
 } from '@invertase/react-native-apple-authentication'
 import * as Network from 'expo-network'
 
@@ -45,12 +45,14 @@ const FireAuth = class {
     this.onError = onError
 
     GoogleSignin.configure({
-      scopes: ['profile', 'email', 'openid']
+      scopes: ['profile', 'email', 'openid'],
     })
 
     auth().onAuthStateChanged(async user => {
       const { isConnected } = await Network.getNetworkStateAsync()
-      if (!isConnected) return
+      if (!isConnected) {
+        return
+      }
 
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
@@ -71,12 +73,12 @@ const FireAuth = class {
           id: user.uid,
           email: user.email,
           ...(user.providerData[0].displayName && {
-            displayName: user.providerData[0].displayName
+            displayName: user.providerData[0].displayName,
           }),
           photoURL: user.providerData[0].photoURL,
           provider: user.providerData[0].providerId,
           lastSeen: Date.now(),
-          emailVerified
+          emailVerified,
         }
 
         let remoteLastSeen = null
@@ -120,8 +122,9 @@ const FireAuth = class {
                 studies[study.id] = study
               })
 
-              if (this.onLogin)
-                this.onLogin(data || {}, remoteLastSeen, studies) // On login
+              if (this.onLogin) {
+                this.onLogin(data || {}, remoteLastSeen, studies)
+              } // On login
             })
         }
 
@@ -148,8 +151,8 @@ const FireAuth = class {
           requestedOperation: AppleAuthRequestOperation.LOGIN,
           requestedScopes: [
             AppleAuthRequestScope.EMAIL,
-            AppleAuthRequestScope.FULL_NAME
-          ]
+            AppleAuthRequestScope.FULL_NAME,
+          ],
         })
 
         const { identityToken, nonce } = appleAuthRequestResponse
@@ -187,7 +190,7 @@ const FireAuth = class {
       try {
         const result = await LoginManager.logInWithPermissions([
           'public_profile',
-          'email'
+          'email',
         ])
 
         console.log(result)
@@ -260,11 +263,15 @@ const FireAuth = class {
             resolve(true)
           })
           .catch(err => {
-            if (this.onError) this.onError(err)
+            if (this.onError) {
+              this.onError(err)
+            }
             resolve(false)
           })
       } catch (e) {
-        if (this.onError) this.onError(e)
+        if (this.onError) {
+          this.onError(e)
+        }
         resolve(false)
       }
     })
@@ -279,11 +286,15 @@ const FireAuth = class {
             resolve(false)
           })
           .catch(err => {
-            if (this.onError) this.onError(err)
+            if (this.onError) {
+              this.onError(err)
+            }
             resolve(false)
           })
       } catch (e) {
-        if (this.onError) this.onError(e)
+        if (this.onError) {
+          this.onError(e)
+        }
         resolve(false)
       }
     })
@@ -302,11 +313,15 @@ const FireAuth = class {
             return resolve(true)
           })
           .catch(err => {
-            if (this.onError) this.onError(err)
+            if (this.onError) {
+              this.onError(err)
+            }
             return resolve(false)
           })
       } catch (e) {
-        if (this.onError) this.onError(e)
+        if (this.onError) {
+          this.onError(e)
+        }
         return resolve(false)
       }
     })
@@ -315,7 +330,9 @@ const FireAuth = class {
     auth().signOut()
     // Sign-out successful.
     this.user = null
-    if (this.onLogout) this.onLogout()
+    if (this.onLogout) {
+      this.onLogout()
+    }
     SnackBar.show('Vous êtes déconnecté.')
   }
 }

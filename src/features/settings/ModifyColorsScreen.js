@@ -16,14 +16,14 @@ const ColorSquare = styled.View(({ color, size }) => ({
   height: size,
   borderRadius: size / 4,
   backgroundColor: color,
-  marginRight: 10
+  marginRight: 10,
 }))
 
 const ModifyColorsScreen = () => {
   const [currentColor, setColorWheelOpen] = useState(null)
   const dispatch = useDispatch()
   const { colors } = useSelector(state => ({
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme]
+    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
 
   return (
@@ -39,9 +39,10 @@ const ModifyColorsScreen = () => {
                   setColorWheelOpen({
                     number: i + 1,
                     name: `color${i + 1}`,
-                    color: colors[`color${i + 1}`]
+                    color: colors[`color${i + 1}`],
                   })
-                }>
+                }
+              >
                 <Box row padding={10} alignItems="center">
                   <ColorSquare size={30} color={colors[`color${i + 1}`]} />
                   <Text bold>Couleur {i + 1}</Text>
@@ -56,7 +57,10 @@ const ModifyColorsScreen = () => {
           ))}
         </Box>
       </ScrollView>
-      <ColorWheelModal currentColor={currentColor} onClosed={() => setColorWheelOpen(false)} />
+      <ColorWheelModal
+        currentColor={currentColor}
+        onClosed={() => setColorWheelOpen(false)}
+      />
     </Container>
   )
 }

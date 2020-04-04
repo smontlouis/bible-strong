@@ -20,29 +20,29 @@ import SnackBar from '~common/SnackBar'
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
   marginLeft: 20,
-  marginBottom: 20
+  marginBottom: 20,
 }))
 
 const H2 = styled(Paragraph)(() => ({
   fontSize: 20,
   marginLeft: 20,
-  marginBottom: 20
+  marginBottom: 20,
 }))
 
 const H3 = styled(Paragraph)(() => ({
   fontSize: 18,
   marginLeft: 20,
-  marginBottom: 20
+  marginBottom: 20,
 }))
 
 const H4 = styled(Paragraph)(() => ({
   fontSize: 16,
   marginLeft: 20,
-  marginBottom: 20
+  marginBottom: 20,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 function clearEmpties(o) {
@@ -63,7 +63,7 @@ function clearEmpties(o) {
 const PericopeScreen = ({ navigation }) => {
   const { initialVersion, initialBook } = useSelector(state => ({
     initialVersion: state.bible.selectedVersion,
-    initialBook: state.bible.selectedBook
+    initialBook: state.bible.selectedBook,
   }))
   const [version, setVersion] = useState(initialVersion)
   const [book, setBook] = useState(initialBook)
@@ -132,8 +132,8 @@ const PericopeScreen = ({ navigation }) => {
                                     book,
                                     chapter: Number(chapterKey),
                                     version,
-                                    verse: 1
-                                  }
+                                    verse: 1,
+                                  },
                                 })
                           }
                         >

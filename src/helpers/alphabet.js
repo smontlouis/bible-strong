@@ -25,8 +25,10 @@ export const alphabet = [
   'W',
   'X',
   'Y',
-  'Z'
+  'Z',
 ]
 
 export const getFirstLetterFrom = value =>
-  alphabet.includes(value.slice(0, 1).toUpperCase()) ? value.slice(0, 1).toUpperCase() : '#'
+  alphabet.includes(value.slice(0, 1).toUpperCase())
+    ? value.slice(0, 1).toUpperCase()
+    : '#'

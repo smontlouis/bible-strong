@@ -5,7 +5,9 @@ import Text from '~common/ui/Text'
 import NaveModalItem from './NaveModalItem'
 
 const NaveModalForVerse = ({ items, label, onClosed }) => {
-  if (!items) return null
+  if (!items) {
+    return null
+  }
 
   return (
     <Box>

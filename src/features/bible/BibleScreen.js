@@ -18,7 +18,7 @@ import * as UserActions from '~redux/modules/user'
 class BibleScreen extends React.Component {
   state = {
     isBibleParamsOpen: false,
-    isLoading: true
+    isLoading: true,
   }
 
   async componentDidMount() {
@@ -69,7 +69,7 @@ class BibleScreen extends React.Component {
       setFontFamily,
       settings,
       fontFamily,
-      hasBackButton
+      hasBackButton,
     } = this.props
 
     if (this.state.isLoading) {
@@ -149,11 +149,11 @@ export default compose(
         settings: produce(user.bible.settings, draftState => {
           draftState.colors.default = {
             ...ownProps.theme.colors,
-            ...draftState.colors.default
+            ...draftState.colors.default,
           }
           draftState.colors.dark = {
             ...ownProps.theme.colors,
-            ...draftState.colors.dark
+            ...draftState.colors.dark,
           }
         }),
         app: {
@@ -164,8 +164,8 @@ export default compose(
           parallelVersions:
             params?.isSelectionMode || params?.isReadOnly
               ? []
-              : bible.parallelVersions
-        }
+              : bible.parallelVersions,
+        },
       }
     },
     { ...BibleActions, ...UserActions }

@@ -19,19 +19,19 @@ const SectionList = styled.SectionList(({ theme, orientation }) => ({
     marginTop: 20,
     marginBottom: 50,
     borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30
-  })
+    borderBottomRightRadius: 30,
+  }),
 }))
 
 const fadeIn = {
   from: {
     translateY: 10,
-    opacity: 0
+    opacity: 0,
   },
   to: {
     translateY: 0,
-    opacity: 1
-  }
+    opacity: 1,
+  },
 }
 
 export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
@@ -44,7 +44,7 @@ export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
         contentContainerStyle={{
           paddingTop: 20,
           paddingBottom: 10 + getBottomSpace(),
-          ...contentContainerStyle
+          ...contentContainerStyle,
         }}
         ref={ref}
         {...props}

@@ -5,7 +5,7 @@ import { withTheme } from 'emotion-theming'
 const Div = styled.View(() => ({
   flex: 1,
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
 }))
 
 class SvgIcon extends React.Component {

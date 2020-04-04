@@ -7,11 +7,16 @@ const updateReferencesOrder = (result, references) => {
   references.map((ref, index) => {
     const refCode = parseInt(ref)
     result.map((res, index) => {
-      if (refCode === res.Code) updatedResult.push(res)
-      else return false
+      if (refCode === res.Code) {
+        updatedResult.push(res)
+      } else {
+        return false
+      }
     })
   })
-  if (updatedResult.length !== result.length) return references
+  if (updatedResult.length !== result.length) {
+    return references
+  }
   return updatedResult
 }
 

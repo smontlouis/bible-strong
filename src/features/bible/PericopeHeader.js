@@ -13,7 +13,7 @@ import Back from '~common/Back'
 const HeaderBox = styled(Box)(({ theme }) => ({
   height: 60,
   alignItems: 'center',
-  borderBottomColor: theme.colors.border
+  borderBottomColor: theme.colors.border,
 }))
 
 const LinkBox = styled(Link)({
@@ -22,11 +22,11 @@ const LinkBox = styled(Link)({
   justifyContent: 'center',
   paddingLeft: 10,
   paddingRight: 10,
-  paddingVertical: 15
+  paddingVertical: 15,
 })
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const getPrevNextVersions = (versionsArray, version) => {

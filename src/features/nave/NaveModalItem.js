@@ -17,7 +17,7 @@ const StyledNaveItem = styled.View(({ theme }) => ({
   paddingLeft: 12,
   paddingRight: 12,
   marginRight: 5,
-  marginBottom: 5
+  marginBottom: 5,
 }))
 
 const NaveItem = ({ item: { name, name_lower }, onClosed }) => {

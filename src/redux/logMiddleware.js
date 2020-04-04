@@ -4,7 +4,7 @@ export const logger = store => next => action => {
   Sentry.addBreadcrumb({
     category: 'Dispatch',
     message: action.type,
-    data: action
+    data: action,
   })
 
   const result = next(action)
@@ -19,8 +19,8 @@ export const crashReporter = store => next => action => {
     Sentry.captureException(err, {
       extra: {
         action,
-        state: store.getState()
-      }
+        state: store.getState(),
+      },
     })
     throw err
   }

@@ -15,9 +15,9 @@ const DICTIONNAIRE_FILE_SIZE = 22532096
 export const useWaitForDatabase = () => {
   const [
     {
-      dictionnaire: { isLoading, proposeDownload, startDownload, progress }
+      dictionnaire: { isLoading, proposeDownload, startDownload, progress },
     },
-    dispatch
+    dispatch,
   ] = useDBStateValue()
 
   const dictionnaireDatabaseHash = useSelector(
@@ -28,7 +28,7 @@ export const useWaitForDatabase = () => {
     if (getDictionnaireDB()) {
       dispatch({
         type: 'dictionnaire.setLoading',
-        payload: false
+        payload: false,
       })
     } else {
       const loadDBAsync = async () => {
@@ -56,7 +56,7 @@ export const useWaitForDatabase = () => {
           if (!startDownload) {
             dispatch({
               type: 'dictionnaire.setProposeDownload',
-              payload: true
+              payload: true,
             })
             return
           }
@@ -88,7 +88,7 @@ export const useWaitForDatabase = () => {
                     ) / 100
                   dispatch({
                     type: 'dictionnaire.setProgress',
-                    payload: idxProgress
+                    payload: idxProgress,
                   })
                 }
               ).downloadAsync()
@@ -97,7 +97,7 @@ export const useWaitForDatabase = () => {
 
               dispatch({
                 type: 'dictionnaire.setLoading',
-                payload: false
+                payload: false,
               })
               window.dictionnaireDownloadHasStarted = false
             }
@@ -108,11 +108,11 @@ export const useWaitForDatabase = () => {
             )
             dispatch({
               type: 'dictionnaire.setProposeDownload',
-              payload: true
+              payload: true,
             })
             dispatch({
               type: 'dictionnaire.setStartDownload',
-              payload: false
+              payload: false,
             })
           }
         } else {
@@ -120,7 +120,7 @@ export const useWaitForDatabase = () => {
 
           dispatch({
             type: 'dictionnaire.setLoading',
-            payload: false
+            payload: false,
           })
         }
       }
@@ -132,7 +132,7 @@ export const useWaitForDatabase = () => {
   const setStartDownload = value =>
     dispatch({
       type: 'dictionnaire.setStartDownload',
-      payload: value
+      payload: value,
     })
 
   return {
@@ -140,7 +140,7 @@ export const useWaitForDatabase = () => {
     progress,
     proposeDownload,
     startDownload,
-    setStartDownload
+    setStartDownload,
   }
 }
 
@@ -150,7 +150,7 @@ const waitForDatabase = WrappedComponent => props => {
     progress,
     proposeDownload,
     startDownload,
-    setStartDownload
+    setStartDownload,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {

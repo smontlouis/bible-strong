@@ -14,16 +14,25 @@ const DownloadRequired = ({
   hasBackButton,
   size = 100,
   small,
-  noHeader
+  noHeader,
 }) => {
   const padding = small ? 10 : 30
   const iconSize = small ? 20 : size
   return (
     <Container>
-      {!noHeader && <Header title="Téléchargement nécessaire" hasBackButton={hasBackButton} />}
+      {!noHeader && (
+        <Header
+          title="Téléchargement nécessaire"
+          hasBackButton={hasBackButton}
+        />
+      )}
       <Box flex center padding={padding}>
         <Box center maxWidth={300}>
-          <Icon.Feather name="download-cloud" size={iconSize} color="rgb(98,113,122)" />
+          <Icon.Feather
+            name="download-cloud"
+            size={iconSize}
+            color="rgb(98,113,122)"
+          />
           <Text textAlign="center" marginBottom={padding} marginTop={padding}>
             {title}
           </Text>

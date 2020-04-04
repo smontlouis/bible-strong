@@ -8,8 +8,9 @@ const styledProps = (map, fallback) => props => {
   const keysFromProps = Object.keys(map).filter(key => !!props[key])
   if (keysFromProps.length > 1) {
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.error(`[styledProps] Multiple props provided: ${keysFromProps.join(', ')}.`)
+      console.error(
+        `[styledProps] Multiple props provided: ${keysFromProps.join(', ')}.`
+      )
     }
   }
   const keyFromProps = keysFromProps[0]
@@ -21,8 +22,9 @@ const styledProps = (map, fallback) => props => {
       return map[props[fallback]]
     }
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.error(`[styledProps] Unknown fallback prop provided: ${fallback}.`)
+      console.error(
+        `[styledProps] Unknown fallback prop provided: ${fallback}.`
+      )
     }
   }
   return undefined

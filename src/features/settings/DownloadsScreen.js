@@ -29,8 +29,8 @@ const DLScreen = () => {
           onPress: () => {
             allDownloadFunc.map((fn, i) => setTimeout(() => fn(), i * 200))
           },
-          style: 'destructive'
-        }
+          style: 'destructive',
+        },
       ]
     )
   }

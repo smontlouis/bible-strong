@@ -18,7 +18,7 @@ import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import { versions } from '~helpers/bibleVersions'
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const BibleCompareVerses = ({ navigation }) => {
@@ -45,7 +45,7 @@ const BibleCompareVerses = ({ navigation }) => {
       )
       setPrevNextItems({
         verseNumber: verse,
-        versesInCurrentChapter
+        versesInCurrentChapter,
       })
     }
 

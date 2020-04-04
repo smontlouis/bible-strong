@@ -20,7 +20,7 @@ import {
   NAVIGATE_TO_STRONG,
   THROW_ERROR,
   REMOVE_PARALLEL_VERSION,
-  ADD_PARALLEL_VERSION
+  ADD_PARALLEL_VERSION,
 } from './bibleWebView/src/dispatch'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -28,7 +28,7 @@ class BibleWebView extends Component {
   webview = null
 
   state = {
-    isHTMLFileLoaded: false
+    isHTMLFileLoaded: false,
   }
 
   dispatchToWebView = message => {
@@ -52,7 +52,7 @@ class BibleWebView extends Component {
 
   state = {
     webViewOpacity: 0,
-    isHTMLFileLoaded: false
+    isHTMLFileLoaded: false,
   }
 
   componentDidMount() {
@@ -103,7 +103,7 @@ class BibleWebView extends Component {
         navigation.navigate({
           routeName: 'BibleVerseDetail',
           params: action.params,
-          key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`
+          key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`,
         })
 
         break
@@ -112,7 +112,7 @@ class BibleWebView extends Component {
         const { navigation } = this.props
         navigation.navigate('BibleVerseNotes', {
           verse: action.payload,
-          withBack: true
+          withBack: true,
         })
         break
       }
@@ -128,7 +128,7 @@ class BibleWebView extends Component {
         // index = 0 is Default one
         navigation.navigate('VersionSelector', {
           version,
-          parallelVersionIndex: index === 0 ? undefined : index - 1
+          parallelVersionIndex: index === 0 ? undefined : index - 1,
         })
         break
       }
@@ -187,9 +187,9 @@ class BibleWebView extends Component {
             isReadOnly: true,
             book: parseInt(book, 10),
             chapter: parseInt(action.chapter, 10),
-            verse: parseInt(action.verse, 10)
+            verse: parseInt(action.verse, 10),
           },
-          key: `bible-view-${book}-${action.chapter}-${action.verse}`
+          key: `bible-view-${book}-${action.chapter}-${action.verse}`,
         })
         break
       }
@@ -237,7 +237,7 @@ class BibleWebView extends Component {
       isSelectionMode,
       selectedCode,
       comments,
-      fontFamily
+      fontFamily,
     } = this.props
 
     this.dispatchToWebView({
@@ -258,7 +258,7 @@ class BibleWebView extends Component {
       isSelectionMode,
       selectedCode,
       comments,
-      fontFamily
+      fontFamily,
     })
   }
 
@@ -270,7 +270,7 @@ class BibleWebView extends Component {
           borderTopRightRadius: 30,
           overflow: 'hidden',
           flex: 1,
-          opacity: this.state.webViewOpacity
+          opacity: this.state.webViewOpacity,
         }}
       >
         {this.state.isHTMLFileLoaded && (

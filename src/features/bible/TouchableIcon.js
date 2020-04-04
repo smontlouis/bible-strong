@@ -8,7 +8,7 @@ const Touchable = styled.TouchableOpacity(({ noFlex, disabled }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   opacity: disabled ? 0.3 : 1,
-  ...(!noFlex && { flex: 1 })
+  ...(!noFlex && { flex: 1 }),
 }))
 
 const StyledIcon = styled(Icon.Feather)(
@@ -17,8 +17,8 @@ const StyledIcon = styled(Icon.Feather)(
       ? theme.colors.grey
       : theme.colors[color] || theme.colors.tertiary,
     ...(isSelected && {
-      color: theme.colors.primary
-    })
+      color: theme.colors.primary,
+    }),
   })
 )
 
@@ -31,7 +31,7 @@ export default class TabBarIcon extends React.Component {
       size = 20,
       noFlex = false,
       label,
-      disabled
+      disabled,
     } = this.props
     return (
       <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled}>

@@ -13,9 +13,9 @@ const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
         color,
         date: Date.now(),
         ...(highlightedVerses[verse] && {
-          tags: highlightedVerses[verse].tags || {}
-        })
-      }
+          tags: highlightedVerses[verse].tags || {},
+        }),
+      },
     }),
     {}
   )
@@ -28,7 +28,7 @@ export default produce((draft, action) => {
     case ADD_HIGHLIGHT: {
       draft.bible.highlights = {
         ...draft.bible.highlights,
-        ...action.selectedVerses
+        ...action.selectedVerses,
       }
       break
     }
@@ -57,7 +57,7 @@ export function addHighlight(color) {
         selectedVerses,
         highlightedVerses,
         color
-      )
+      ),
     })
   }
 }

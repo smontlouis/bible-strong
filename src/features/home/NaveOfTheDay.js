@@ -15,7 +15,7 @@ const itemWidth = wp(60) > 300 ? 300 : wp(60)
 
 const NaveOfTheDay = ({
   color1 = 'rgb(80, 83, 140)',
-  color2 = 'rgb(48, 51, 107)'
+  color2 = 'rgb(48, 51, 107)',
 }) => {
   const [error, setError] = useState(false)
   const [naveReference, setNaveRef] = useState(null)
@@ -67,7 +67,7 @@ const NaveOfTheDay = ({
             right: 0,
             top: 0,
             height: itemHeight,
-            borderRadius: 3
+            borderRadius: 3,
           }}
         >
           <LinearGradient

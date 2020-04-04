@@ -14,13 +14,13 @@ const useBibleVerses = verseIds => {
           Verset: Number(v),
           Texte: versesByChapter[v],
           Livre: Number(Livre),
-          Chapitre: Number(Chapitre)
+          Chapitre: Number(Chapitre),
         }))
         .filter(v => verseIds.find(vI => vI.Verset === v.Verset))
       setVerses(versesWithText)
     }
     loadVerses()
-  }, [])
+  }, [verseIds])
 
   return verses
 }

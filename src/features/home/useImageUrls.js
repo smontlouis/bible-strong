@@ -10,12 +10,16 @@ export const useImageUrls = verseOfTheDay => {
         )
         const imageJSON = await imageRes.json()
         setImageUrls({
-          small: `https:${imageJSON.images[imageJSON.images.length - 1].renditions[0].url}`,
-          large: `https:${imageJSON.images[imageJSON.images.length - 1].renditions[2].url}`
+          small: `https:${
+            imageJSON.images[imageJSON.images.length - 1].renditions[0].url
+          }`,
+          large: `https:${
+            imageJSON.images[imageJSON.images.length - 1].renditions[2].url
+          }`,
         })
       } catch (e) {
         setImageUrls({
-          error: true
+          error: true,
         })
       }
     }

@@ -34,7 +34,8 @@ const OfflineNotice = () => {
       borderLeftWidth={4}
       borderLeftColor="rgb(255,188,0)"
       marginTop={10}
-      marginBottom={20}>
+      marginBottom={20}
+    >
       <FeatherIcon size={20} name="alert-triangle" color="secondary" />
       <Box marginLeft={10} paddingRight={10}>
         <Text bold>Vous êtes hors-ligne</Text>

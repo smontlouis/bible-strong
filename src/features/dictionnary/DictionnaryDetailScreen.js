@@ -23,14 +23,14 @@ import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import Snackbar from '~common/SnackBar'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.secondary
+  backgroundColor: theme.colors.secondary,
 }))
 
 const MAX_CHAR = 3000
@@ -49,13 +49,13 @@ const DictionnaryDetailScreen = ({ navigation }) => {
 
       setDictionnaireItem({
         ...result,
-        definitionShort: truncHTML(result.definition, MAX_CHAR).html
+        definitionShort: truncHTML(result.definition, MAX_CHAR).html,
       })
 
       dispatch(
         setHistory({
           word,
-          type: 'word'
+          type: 'word',
         })
       )
     })
@@ -76,7 +76,7 @@ const DictionnaryDetailScreen = ({ navigation }) => {
           isReadOnly: true,
           book,
           chapter: parseInt(chapter, 10),
-          verse: parseInt(verse, 10)
+          verse: parseInt(verse, 10),
         })
       } catch (e) {
         Snackbar.show('Impossible de charger ce mot.')
@@ -88,7 +88,7 @@ const DictionnaryDetailScreen = ({ navigation }) => {
       navigation.navigate({
         routeName: 'DictionnaryDetail',
         params: { word: href },
-        key: href
+        key: href,
       })
     }
   }

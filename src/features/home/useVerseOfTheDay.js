@@ -38,7 +38,7 @@ export const useVerseOfTheDay = () => {
           book: Number(book),
           chapter: Number(chapter),
           verse: Number(verse),
-          ...vod
+          ...vod,
         })
       } catch (e) {
         setVOD({ error: true })
@@ -86,7 +86,7 @@ export const useVerseOfTheDay = () => {
           message: 'Découvre ton verset du jour !',
           category: 'NOTIFICATIONS',
           repeatType: 'day',
-          date
+          date,
         })
 
         console.log(`Notification set at ${verseOfTheDayTime} on ${date}`)

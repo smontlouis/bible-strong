@@ -20,9 +20,9 @@ const delay = duration => new Promise(resolve => setTimeout(resolve, duration))
 export const useWaitForDatabase = () => {
   const [
     {
-      strong: { isLoading, proposeDownload, startDownload, progress }
+      strong: { isLoading, proposeDownload, startDownload, progress },
     },
-    dispatch
+    dispatch,
   ] = useDBStateValue()
 
   const strongDatabaseHash = useSelector(
@@ -33,7 +33,7 @@ export const useWaitForDatabase = () => {
     if (strongDB.get()) {
       dispatch({
         type: 'strong.setLoading',
-        payload: false
+        payload: false,
       })
     } else {
       const loadDBAsync = async () => {
@@ -45,7 +45,9 @@ export const useWaitForDatabase = () => {
         const dbFileExists = await RNFS.exists(dbPath)
 
         console.log('File exists ? ', dbFileExists)
-        if (dbFileExists) console.log(await RNFS.stat(dbPath))
+        if (dbFileExists) {
+          console.log(await RNFS.stat(dbPath))
+        }
 
         const sqliteZipExists = await existsAssets('www/strong.sqlite.zip')
 
@@ -65,7 +67,7 @@ export const useWaitForDatabase = () => {
 
             dispatch({
               type: 'strong.setLoading',
-              payload: false
+              payload: false,
             })
             window.strongDownloadHasStarted = false
           } else {
@@ -76,7 +78,7 @@ export const useWaitForDatabase = () => {
 
           dispatch({
             type: 'strong.setLoading',
-            payload: false
+            payload: false,
           })
         }
       }
@@ -88,7 +90,7 @@ export const useWaitForDatabase = () => {
   const setStartDownload = value =>
     dispatch({
       type: 'strong.setStartDownload',
-      payload: value
+      payload: value,
     })
 
   return {
@@ -96,7 +98,7 @@ export const useWaitForDatabase = () => {
     progress,
     proposeDownload,
     startDownload,
-    setStartDownload
+    setStartDownload,
   }
 }
 
@@ -106,7 +108,7 @@ const waitForDatabase = WrappedComponent => props => {
     progress,
     proposeDownload,
     startDownload,
-    setStartDownload
+    setStartDownload,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {

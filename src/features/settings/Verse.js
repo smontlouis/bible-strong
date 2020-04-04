@@ -17,7 +17,7 @@ import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 
 const DateText = styled.Text(({ theme }) => ({
-  color: theme.colors.tertiary
+  color: theme.colors.tertiary,
 }))
 
 const Circle = styled(Box)(({ colors, color }) => ({
@@ -26,7 +26,7 @@ const Circle = styled(Box)(({ colors, color }) => ({
   borderRadius: 3,
   backgroundColor: colors[color],
   marginRight: 5,
-  marginTop: 5
+  marginTop: 5,
 }))
 
 const Container = styled(Box)(({ theme }) => ({
@@ -34,13 +34,13 @@ const Container = styled(Box)(({ theme }) => ({
   paddingBottom: 20,
   marginBottom: 0,
   borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
+  borderBottomWidth: 1,
 }))
 
 const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
   const verses = useBibleVerses(verseIds)
   const { colors } = useSelector(state => ({
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme]
+    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
 
   if (!verses.length) {
@@ -49,7 +49,7 @@ const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
 
   const { title, content } = formatVerseContent(verses)
   const formattedDate = distanceInWords(Number(date), Date.now(), {
-    locale: frLocale
+    locale: frLocale,
   })
   const { Livre, Chapitre, Verset } = verses[0]
   return (
@@ -60,9 +60,10 @@ const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
           isReadOnly: true,
           book: books[Livre - 1],
           chapter: Chapitre,
-          verse: Verset
+          verse: Verset,
         })
-      }>
+      }
+    >
       <Container>
         <Box row style={{ marginBottom: 10 }}>
           <Box flex row alignContent="center">

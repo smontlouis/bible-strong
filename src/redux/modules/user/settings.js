@@ -73,54 +73,54 @@ export default produce((draft, action) => {
 export function setSettingsAlignContent(payload) {
   return {
     type: SET_SETTINGS_ALIGN_CONTENT,
-    payload
+    payload,
   }
 }
 
 export function setSettingsTextDisplay(payload) {
   return {
     type: SET_SETTINGS_TEXT_DISPLAY,
-    payload
+    payload,
   }
 }
 
 export function setSettingsTheme(payload) {
   return {
     type: SET_SETTINGS_THEME,
-    payload
+    payload,
   }
 }
 
 export function setSettingsNotesDisplay(payload) {
   return {
     type: SET_SETTINGS_NOTES_DISPLAY,
-    payload
+    payload,
   }
 }
 
 export function setSettingsCommentaires(payload) {
   return {
     type: SET_SETTINGS_COMMENTS_DISPLAY,
-    payload
+    payload,
   }
 }
 
 export function increaseSettingsFontSizeScale() {
   return {
-    type: INCREASE_SETTINGS_FONTSIZE_SCALE
+    type: INCREASE_SETTINGS_FONTSIZE_SCALE,
   }
 }
 
 export function decreaseSettingsFontSizeScale() {
   return {
-    type: DECREASE_SETTINGS_FONTSIZE_SCALE
+    type: DECREASE_SETTINGS_FONTSIZE_SCALE,
   }
 }
 
 export function setSettingsPress(payload) {
   return {
     type: SET_SETTINGS_PRESS,
-    payload
+    payload,
   }
 }
 
@@ -128,6 +128,6 @@ export function changeColor({ name, color }) {
   return {
     type: CHANGE_COLOR,
     name,
-    color
+    color,
   }
 }

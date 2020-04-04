@@ -12,7 +12,7 @@ const TouchableTab = styled.TouchableOpacity(({ orientation }) => ({
   alignItems: 'center',
   width: 70,
   height: 40,
-  overflow: 'visible'
+  overflow: 'visible',
 
   // ...(orientation.landscape && {
   //   width: 50,
@@ -28,7 +28,7 @@ const Circle = styled.View(({ theme, orientation }) => ({
   height: 6,
   borderRadius: 3,
   backgroundColor: theme.colors.primary,
-  left: 35 - 3
+  left: 35 - 3,
 }))
 
 const AnimatableCircle = Animatable.createAnimatableComponent(Circle)
@@ -40,7 +40,7 @@ const Container = styled.View(({ theme, orientation }) => ({
   backgroundColor: theme.colors.reverse,
   paddingHorizontal: 20,
   alignItems: 'flex-end',
-  justifyContent: 'space-around'
+  justifyContent: 'space-around',
 
   // ...(orientation.landscape && {
   //   overflow: 'hidden',
@@ -60,14 +60,14 @@ const TabBar = props => {
     onTabPress,
     getAccessibilityLabel,
     navigation,
-    orientation
+    orientation,
   } = props
 
   const { routes, index: activeRouteIndex } = navigation.state
   const prevIndex = usePrevious(activeRouteIndex)
   const {
     state: { isFullscreen },
-    updateState
+    updateState,
   } = React.useContext(GlobalStateContext)
 
   // React.useEffect(() => {
@@ -92,7 +92,7 @@ const TabBar = props => {
             ? isFullscreen
               ? 0
               : 60 + getBottomSpace()
-            : 40 + getBottomSpace()
+            : 40 + getBottomSpace(),
       }}
     >
       {routes.map((route, routeIndex) => {

@@ -42,7 +42,7 @@ const VerseText = styled.View(() => ({
   flex: 1,
   flexWrap: 'wrap',
   alignItems: 'flex-start',
-  flexDirection: 'row'
+  flexDirection: 'row',
 }))
 
 const VersetWrapper = styled.View(() => ({
@@ -50,21 +50,21 @@ const VersetWrapper = styled.View(() => ({
   marginRight: 5,
   borderRightWidth: 3,
   borderRightColor: 'transparent',
-  alignItems: 'flex-end'
+  alignItems: 'flex-end',
 }))
 
 const NumberText = styled(Paragraph)({
   marginTop: 0,
   fontSize: 9,
   justifyContent: 'flex-end',
-  marginRight: 3
+  marginRight: 3,
 })
 
 const StyledVerse = styled.View(({ theme }) => ({
   paddingLeft: 0,
   paddingRight: 10,
   marginBottom: 5,
-  flexDirection: 'row'
+  flexDirection: 'row',
 }))
 
 const CountChip = styled.View(({ theme }) => ({
@@ -76,11 +76,11 @@ const CountChip = styled.View(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   bottom: -5,
-  right: -5
+  right: -5,
 }))
 
 const StyledScrollView = styled.ScrollView(({ theme }) => ({
-  backgroundColor: theme.colors.lightGrey
+  backgroundColor: theme.colors.lightGrey,
 }))
 
 class BibleVerseDetailScreen extends React.Component {
@@ -90,7 +90,7 @@ class BibleVerseDetailScreen extends React.Component {
     strongReferences: [],
     currentStrongReference: 0,
     verse: this.props.verse,
-    versesInCurrentChapter: null
+    versesInCurrentChapter: null,
   }
 
   componentDidMount() {
@@ -107,8 +107,8 @@ class BibleVerseDetailScreen extends React.Component {
     this.setState(state => ({
       verse: {
         ...state.verse,
-        Verset: Number(state.verse.Verset) + value
-      }
+        Verset: Number(state.verse.Verset) + value,
+      },
     }))
   }
 
@@ -136,7 +136,7 @@ class BibleVerseDetailScreen extends React.Component {
 
   formatVerse = async strongVerse => {
     const {
-      verse: { Livre }
+      verse: { Livre },
     } = this.props
     const { formattedTexte, references } = await verseToStrong(strongVerse)
     this.setState({ formattedTexte }, async () => {
@@ -145,7 +145,7 @@ class BibleVerseDetailScreen extends React.Component {
         {
           isCarouselLoading: false,
           strongReferences,
-          currentStrongReference: strongReferences[0]
+          currentStrongReference: strongReferences[0],
         },
         () => {
           this._carousel.snapToItem(0, false)
@@ -163,7 +163,7 @@ class BibleVerseDetailScreen extends React.Component {
 
   onSnapToItem = index => {
     this.setState({
-      currentStrongReference: this.state.strongReferences[index]
+      currentStrongReference: this.state.strongReferences[index],
     })
   }
 
@@ -195,7 +195,7 @@ class BibleVerseDetailScreen extends React.Component {
       verse,
       verse: { Verset },
       isCarouselLoading,
-      versesInCurrentChapter
+      versesInCurrentChapter,
     } = this.state
 
     const { theme } = this.props
@@ -262,7 +262,7 @@ class BibleVerseDetailScreen extends React.Component {
               <CarouselProvider
                 value={{
                   currentStrongReference: this.state.currentStrongReference,
-                  goToCarouselItem: this.goToCarouselItem
+                  goToCarouselItem: this.goToCarouselItem,
                 }}
               >
                 <VerseText>{this.state.formattedTexte}</VerseText>
@@ -279,7 +279,7 @@ class BibleVerseDetailScreen extends React.Component {
                   this.updateVerse(-1)
                   this.setState({ isCarouselLoading: true })
                 },
-                versesInCurrentChapter
+                versesInCurrentChapter,
               }}
             />
           </Box>
@@ -304,7 +304,7 @@ class BibleVerseDetailScreen extends React.Component {
                   marginTop: 15,
                   paddingLeft: 20,
                   overflow: 'visible',
-                  flex: 1
+                  flex: 1,
                 }}
                 contentContainerCustomStyle={{}}
                 onSnapToItem={this.onSnapToItem}
@@ -321,14 +321,11 @@ class BibleVerseDetailScreen extends React.Component {
 
 export default compose(
   withTheme,
-  connect(
-    (state, ownProps) => {
-      const { verse } = ownProps.navigation.state.params || {}
-      return {
-        verse
-      }
-    },
-    BibleActions
-  ),
+  connect((state, ownProps) => {
+    const { verse } = ownProps.navigation.state.params || {}
+    return {
+      verse,
+    }
+  }, BibleActions),
   waitForStrongDB
 )(BibleVerseDetailScreen)

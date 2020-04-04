@@ -22,7 +22,7 @@ const colors = [
   '#ff9800',
   '#ff5722',
   '#f44336',
-  '#e00032'
+  '#e00032',
 ]
 const colorsRow1 = colors.slice(0, 10)
 const colorsRow2 = colors.slice(10, 20)
@@ -114,29 +114,29 @@ function ColorBox(props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
-    flex: 1
+    flex: 1,
   },
   primaryColorsView: {
     flex: 1,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   shadesView: {
     flex: 1,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   selectedColorView: {
     marginTop: 8,
     flexDirection: 'row',
-    flex: 1
+    flex: 1,
   },
   colorBox: {
-    flex: 1
+    flex: 1,
   },
   primaryColorBox: {},
   shadesColorBox: {},
   selectedColor: {
-    width: '50%'
-  }
+    width: '50%',
+  },
 })
 
 export default CromaColorPicker

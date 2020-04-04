@@ -11,7 +11,7 @@ export const maxWidth = width => (width > MAX_WIDTH ? MAX_WIDTH : width)
 export default function useDimensions() {
   const [dimensions, setDimensions] = useState({
     window,
-    screen
+    screen,
   })
 
   useEffect(() => {

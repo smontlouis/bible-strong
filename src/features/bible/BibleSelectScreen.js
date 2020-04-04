@@ -30,7 +30,4 @@ class BibleSelect extends Component {
   }
 }
 
-export default connect(
-  null,
-  BibleActions
-)(BibleSelect)
+export default connect(null, BibleActions)(BibleSelect)

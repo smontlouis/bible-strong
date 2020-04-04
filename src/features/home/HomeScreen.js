@@ -39,7 +39,7 @@ const HomeScreen = () => {
               flexDirection: 'row',
               paddingHorizontal: 20,
               paddingVertical: 10,
-              overflow: 'visible'
+              overflow: 'visible',
             }}
           >
             <NaveOfTheDay />
@@ -83,11 +83,11 @@ const HomeScreen = () => {
                 title="Soutenir"
                 {...(Platform.OS === 'android'
                   ? {
-                      route: 'Support'
+                      route: 'Support',
                     }
                   : {
                       onPress: () =>
-                        Linking.openURL('https://www.paypal.me/smontlouis')
+                        Linking.openURL('https://www.paypal.me/smontlouis'),
                     })}
                 leftIcon={
                   <FeatherIcon

@@ -22,7 +22,7 @@ const StylizedModal = styled(Modal)({
   flexDirection: 'row',
   alignItems: 'flex-start',
   justifyContent: 'center',
-  paddingTop: getStatusBarHeight() + 10
+  paddingTop: getStatusBarHeight() + 10,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -36,7 +36,7 @@ const Container = styled.View(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
   alignItems: 'stretch',
-  justifyContent: 'space-between'
+  justifyContent: 'space-between',
 }))
 
 const HalfContainer = styled.View(({ border, theme }) => ({
@@ -46,44 +46,44 @@ const HalfContainer = styled.View(({ border, theme }) => ({
   borderBottomColor: theme.colors.border,
   borderBottomWidth: border ? 1 : 0,
   flexDirection: 'row',
-  alignItems: 'center'
+  alignItems: 'center',
 }))
 
 const FontText = styled.Text(({ isSelected, theme }) => ({
   fontSize: 16,
   paddingLeft: 15,
   paddingRight: 15,
-  color: isSelected ? theme.colors.primary : theme.colors.default
+  color: isSelected ? theme.colors.primary : theme.colors.default,
 }))
 
 const alignContentToString = {
   left: 'À gauche',
-  justify: 'Justifié'
+  justify: 'Justifié',
 }
 
 const textDisplayToString = {
   inline: 'Continu',
-  block: 'À la ligne'
+  block: 'À la ligne',
 }
 
 const themeToString = {
   default: 'Jour',
-  dark: 'Nuit'
+  dark: 'Nuit',
 }
 
 const pressToString = {
   shortPress: 'Appui court',
-  longPress: 'Appui long'
+  longPress: 'Appui long',
 }
 
 const notesDisplayToString = {
   inline: 'À la ligne',
-  block: 'En icone'
+  block: 'En icone',
 }
 
 const commentsDisplayToString = {
   false: 'Sans',
-  true: 'Avec'
+  true: 'Avec',
 }
 
 const BibleParamsModal = ({
@@ -107,8 +107,8 @@ const BibleParamsModal = ({
     theme,
     press,
     notesDisplay,
-    commentsDisplay
-  }
+    commentsDisplay,
+  },
 }) => {
   const onOpenCommentaire = async () => {
     const exists = await getIfDatabaseExists('commentaires-mhy')
@@ -132,7 +132,8 @@ const BibleParamsModal = ({
       onBackdropPress={onClosed}
       animationIn="slideInDown"
       animationOut="slideOutUp"
-      backdropOpacity={0.2}>
+      backdropOpacity={0.2}
+    >
       <Container>
         <HalfContainer border>
           <Text flex={5}>Alignement du texte</Text>
@@ -254,7 +255,7 @@ const BibleParamsModal = ({
             getItemLayout={(data, index) => ({
               length: 100,
               offset: 100 * index,
-              index
+              index,
             })}
             initialScrollIndex={fonts.findIndex(f => f === fontFamily)}
             style={{ paddingVertical: 15 }}
@@ -266,7 +267,8 @@ const BibleParamsModal = ({
                 <Link onPress={() => setFontFamily(item)}>
                   <FontText
                     isSelected={isSelected}
-                    style={{ fontFamily: item }}>
+                    style={{ fontFamily: item }}
+                  >
                     {item}
                   </FontText>
                 </Link>

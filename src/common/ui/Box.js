@@ -40,15 +40,15 @@ const Box = styled.View(props => {
       : props.backgroundColor,
 
     ...(props.grey && {
-      backgroundColor: props.theme.colors.lightGrey
+      backgroundColor: props.theme.colors.lightGrey,
     }),
 
     ...(props.background && {
-      backgroundColor: props.theme.colors.reverse
+      backgroundColor: props.theme.colors.reverse,
     }),
 
     ...(props.rounded && {
-      borderRadius: 10
+      borderRadius: 10,
     }),
 
     ...(props.shadow && {
@@ -59,7 +59,7 @@ const Box = styled.View(props => {
       shadowRadius: 3,
       elevation: 2,
       borderRadius: 5,
-      overflow: 'visible'
+      overflow: 'visible',
     }),
 
     ...(props.lightShadow && {
@@ -69,8 +69,8 @@ const Box = styled.View(props => {
       shadowOpacity: 0.1,
       shadowRadius: 7,
       elevation: 1,
-      overflow: 'visible'
-    })
+      overflow: 'visible',
+    }),
   }
 })
 

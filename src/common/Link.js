@@ -5,17 +5,29 @@ import { withNavigation } from 'react-navigation'
 
 class Link extends Component {
   handlePress = () => {
-    const { navigation, route, href, share, params, replace, onPress } = this.props
+    const {
+      navigation,
+      route,
+      href,
+      share,
+      params,
+      replace,
+      onPress,
+    } = this.props
     if (route) {
       if (onPress) {
         onPress()
         setTimeout(() => {
-          replace ? navigation.replace(route, params) : navigation.navigate(route, params)
+          replace
+            ? navigation.replace(route, params)
+            : navigation.navigate(route, params)
         }, 300)
 
         return
       }
-      replace ? navigation.replace(route, params) : navigation.navigate(route, params)
+      replace
+        ? navigation.replace(route, params)
+        : navigation.navigate(route, params)
     }
     if (href) {
       Linking.openURL(href)
@@ -42,22 +54,19 @@ class Link extends Component {
             width: 60,
             height: 60,
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }),
           ...(paddingSmall && {
             width: 50,
             height: 40,
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }),
-          ...style
+          ...style,
         }}
       />
     )
   }
 }
 
-export default compose(
-  withNavigation,
-  pure
-)(Link)
+export default compose(withNavigation, pure)(Link)

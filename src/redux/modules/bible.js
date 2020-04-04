@@ -32,12 +32,12 @@ const initialState = {
   temp: {
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
-    selectedVerse: 1
+    selectedVerse: 1,
   },
   selectedVerses: {}, // highlighted verses,
   strongDatabaseHash: '',
   dictionnaireDatabaseHash: '',
-  webviewHash: ''
+  webviewHash: '',
 }
 
 // BibleReducer
@@ -64,7 +64,7 @@ export default produce((draft, action) => {
       draft.temp = {
         selectedBook: action.book,
         selectedChapter: 1,
-        selectedVerse: 1
+        selectedVerse: 1,
       }
       return
     }
@@ -72,7 +72,7 @@ export default produce((draft, action) => {
       draft.temp = {
         ...draft.temp,
         selectedChapter: action.chapter,
-        selectedVerse: 1
+        selectedVerse: 1,
       }
       return
     }
@@ -88,7 +88,7 @@ export default produce((draft, action) => {
       draft.temp = {
         selectedBook: action.selected.book || draft.temp.selectedBook,
         selectedChapter: action.selected.chapter || draft.temp.selectedChapter,
-        selectedVerse: action.selected.verse || draft.temp.selectedVerse
+        selectedVerse: action.selected.verse || draft.temp.selectedVerse,
       }
       draft.selectedVersion = action.selected.version || draft.selectedVersion
       draft.selectedBook = action.selected.book || draft.selectedBook
@@ -106,7 +106,7 @@ export default produce((draft, action) => {
       draft.temp = {
         selectedBook: draft.selectedBook,
         selectedChapter: draft.selectedChapter,
-        selectedVerse: draft.selectedVerse
+        selectedVerse: draft.selectedVerse,
       }
       return
     }
@@ -126,7 +126,7 @@ export default produce((draft, action) => {
     case ADD_HIGHLIGHTED_VERSE: {
       draft.selectedVerses = {
         ...draft.selectedVerses,
-        [action.id]: true
+        [action.id]: true,
       }
       return
     }
@@ -139,7 +139,9 @@ export default produce((draft, action) => {
       return
     }
     case GO_TO_PREV_CHAPTER: {
-      if (draft.selectedBook.Numero === 1 && draft.selectedChapter === 1) return
+      if (draft.selectedBook.Numero === 1 && draft.selectedChapter === 1) {
+        return
+      }
 
       const currentChapter = draft.selectedChapter
 
@@ -156,7 +158,7 @@ export default produce((draft, action) => {
         draft.temp = {
           selectedBook: prevBook,
           selectedChapter: prevBook.Chapitres,
-          selectedVerse: 1
+          selectedVerse: 1,
         }
 
         return
@@ -193,7 +195,7 @@ export default produce((draft, action) => {
         draft.temp = {
           selectedBook: nextBook,
           selectedChapter: 1,
-          selectedVerse: 1
+          selectedVerse: 1,
         }
 
         return
@@ -226,34 +228,34 @@ export default produce((draft, action) => {
 
 export function addParallelVersion() {
   return {
-    type: ADD_PARALLEL_VERSION
+    type: ADD_PARALLEL_VERSION,
   }
 }
 
 export function removeParallelVersion(index) {
   return {
     type: REMOVE_PARALLEL_VERSION,
-    payload: index
+    payload: index,
   }
 }
 
 export function removeAllParallelVersions() {
   return {
-    type: REMOVE_ALL_PARALLEL_VERSIONS
+    type: REMOVE_ALL_PARALLEL_VERSIONS,
   }
 }
 
 export function setStrongDatabaseHash(hash) {
   return {
     type: SET_STRONG_DATABASE_HASH,
-    hash
+    hash,
   }
 }
 
 export function setWebviewHash(hash) {
   return {
     type: SET_WEBVIEW_HASH,
-    hash
+    hash,
   }
 }
 
@@ -264,41 +266,41 @@ export function setDictionnaireDatabaseHash(hash) {
 export function setTempSelectedBook(book) {
   return {
     type: SET_TEMP_SELECTED_BOOK,
-    book
+    book,
   }
 }
 
 export function setTempSelectedChapter(chapter) {
   return {
     type: SET_TEMP_SELECTED_CHAPTER,
-    chapter
+    chapter,
   }
 }
 
 export function setTempSelectedVerse(verse) {
   return {
     type: SET_TEMP_SELECTED_VERSE,
-    verse
+    verse,
   }
 }
 
 export function setSelectedVerse(verse) {
   return {
     type: SET_SELECTED_VERSE,
-    verse
+    verse,
   }
 }
 
 export function validateSelected() {
   return {
-    type: VALIDATE_SELECTED
+    type: VALIDATE_SELECTED,
   }
 }
 
 export function setAllAndValidateSelected(selected) {
   return {
     type: SET_ALL_AND_VALIDATE_SELECTED,
-    selected
+    selected,
   }
 }
 
@@ -312,32 +314,32 @@ export function setAllAndValidateSelectedAsync(selected) {
 
 export function resetTempSelected() {
   return {
-    type: RESET_TEMP_SELECTED
+    type: RESET_TEMP_SELECTED,
   }
 }
 
 export function setVersion(version, parallelVersionIndex) {
   if (!__DEV__) {
     analytics().logEvent('version_bible', {
-      version
+      version,
     })
   }
   return {
     type: SET_VERSION,
     parallelVersionIndex,
-    version
+    version,
   }
 }
 
 export function goToPrevChapter() {
   return {
-    type: GO_TO_PREV_CHAPTER
+    type: GO_TO_PREV_CHAPTER,
   }
 }
 
 export function goToNextChapter() {
   return {
-    type: GO_TO_NEXT_CHAPTER
+    type: GO_TO_NEXT_CHAPTER,
   }
 }
 
@@ -368,19 +370,19 @@ export function goToPrevVerse(nbVerses) {
 export function addSelectedVerse(id) {
   return {
     type: ADD_HIGHLIGHTED_VERSE,
-    id
+    id,
   }
 }
 
 export function removeSelectedVerse(id) {
   return {
     type: REMOVE_HIGHLIGHTED_VERSE,
-    id
+    id,
   }
 }
 
 export function clearSelectedVerses() {
   return {
-    type: CLEAR_HIGHLIGHTED_VERSES
+    type: CLEAR_HIGHLIGHTED_VERSES,
   }
 }

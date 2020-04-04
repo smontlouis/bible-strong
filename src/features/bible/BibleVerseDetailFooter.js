@@ -8,23 +8,26 @@ import Text from '~common/ui/Text'
 const IconButton = styled.TouchableOpacity({
   alignItems: 'center',
   justifyContent: 'center',
-  flexDirection: 'row'
+  flexDirection: 'row',
 })
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const BibleVerseDetailFooter = ({
   verseNumber,
   goToNextVerse,
   goToPrevVerse,
-  versesInCurrentChapter
+  versesInCurrentChapter,
 }) => {
   return (
     <Box row paddingLeft={20} paddingRight={20} marginTop={20}>
       {!(verseNumber == 1) && (
-        <IconButton activeOpacity={0.5} onPress={() => goToPrevVerse(versesInCurrentChapter)}>
+        <IconButton
+          activeOpacity={0.5}
+          onPress={() => goToPrevVerse(versesInCurrentChapter)}
+        >
           <FeatherIcon name="arrow-left-circle" size={20} />
           <Text paddingLeft={10} color="darkGrey">
             Verset précédent
@@ -33,7 +36,10 @@ const BibleVerseDetailFooter = ({
       )}
       <Box flex />
       {!(verseNumber == versesInCurrentChapter) && (
-        <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
+        <IconButton
+          activeOpacity={0.5}
+          onPress={() => goToNextVerse(versesInCurrentChapter)}
+        >
           <Text paddingRight={10} color="darkGrey">
             Verset suivant
           </Text>

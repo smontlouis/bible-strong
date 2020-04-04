@@ -13,7 +13,7 @@ import books from '~assets/bible_versions/books-desc'
 const Container = styled.View(({ theme }) => ({
   padding: 20,
   borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
+  borderBottomWidth: 1,
 }))
 
 class CompareVerseItem extends React.Component {
@@ -32,7 +32,7 @@ class CompareVerseItem extends React.Component {
       } catch (e) {
         this.setState({
           content: 'Impossible de charger ce verset',
-          versionNeedsDownload
+          versionNeedsDownload,
         })
       }
     }
@@ -40,7 +40,7 @@ class CompareVerseItem extends React.Component {
 
   state = {
     content: '',
-    versionNeedsDownload: true
+    versionNeedsDownload: true,
   }
 
   render() {
@@ -74,7 +74,7 @@ class CompareVerseItem extends React.Component {
           chapter,
           verse,
           version: versionId,
-          focusVerses
+          focusVerses,
         }}
       >
         <Container>

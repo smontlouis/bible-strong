@@ -5,7 +5,7 @@ const Container = styled.View(({ theme, pure }) => ({
   paddingTop: getStatusBarHeight(),
   position: 'relative',
   flex: 1,
-  backgroundColor: pure ? theme.colors.reverse : theme.colors.lightGrey
+  backgroundColor: pure ? theme.colors.reverse : theme.colors.lightGrey,
 }))
 
 export default Container

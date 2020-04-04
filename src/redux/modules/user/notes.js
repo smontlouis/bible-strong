@@ -11,7 +11,7 @@ export default produce((draft, action) => {
     case ADD_NOTE: {
       draft.bible.notes = {
         ...draft.bible.notes,
-        ...action.payload
+        ...action.payload,
       }
       break
     }
@@ -33,7 +33,9 @@ export function addNote(note, noteVerses) {
     const key = Object.keys(selectedVerses).join('/')
     dispatch(clearSelectedVerses())
 
-    if (!key) return
+    if (!key) {
+      return
+    }
     return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
   }
 }
@@ -41,6 +43,6 @@ export function addNote(note, noteVerses) {
 export function deleteNote(noteId) {
   return {
     type: REMOVE_NOTE,
-    payload: noteId
+    payload: noteId,
   }
 }

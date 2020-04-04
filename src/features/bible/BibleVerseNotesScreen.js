@@ -35,7 +35,7 @@ class BibleVerseNotes extends Component {
     isTagsOpen: false,
     selectedChip: null,
     isNoteSettingsOpen: false,
-    multipleTagsItem: false
+    multipleTagsItem: false,
   }
 
   setTagsIsOpen = value => this.setState({ isTagsOpen: value })
@@ -95,7 +95,11 @@ class BibleVerseNotes extends Component {
   deleteNote = noteId => {
     Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
       { text: 'Non', onPress: () => null, style: 'cancel' },
-      { text: 'Oui', onPress: () => this.props.deleteNote(noteId), style: 'destructive' }
+      {
+        text: 'Oui',
+        onPress: () => this.props.deleteNote(noteId),
+        style: 'destructive',
+      },
     ])
   }
 
@@ -119,7 +123,7 @@ class BibleVerseNotes extends Component {
       isTagsOpen,
       selectedChip,
       isNoteSettingsOpen,
-      multipleTagsItem
+      multipleTagsItem,
     } = this.state
 
     const filteredNotes = notes.filter(s =>
@@ -183,7 +187,7 @@ class BibleVerseNotes extends Component {
 
 export default connect(
   state => ({
-    notes: state.user.bible.notes
+    notes: state.user.bible.notes,
   }),
   { ...BibleActions, ...UserActions }
 )(BibleVerseNotes)

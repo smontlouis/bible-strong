@@ -28,31 +28,31 @@ const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.primary
+  backgroundColor: theme.colors.primary,
 }))
 
 const ViewItem = styled.View(() => ({
-  marginTop: 15
+  marginTop: 15,
 }))
 
 const SubTitle = styled(Text)({
   fontSize: 16,
-  marginBottom: 3
+  marginBottom: 3,
 })
 
 const Word = styled(Text)(({ theme }) => ({
   fontSize: 18,
   fontWeight: 'bold',
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const Touchable = styled.TouchableOpacity(() => ({
   flexDirection: 'row',
-  alignItems: 'flex-start'
+  alignItems: 'flex-start',
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 class BibleStrongDetailScreen extends React.Component {
@@ -60,7 +60,7 @@ class BibleStrongDetailScreen extends React.Component {
     error: false,
     strongReference: null,
     versesCountByBook: [],
-    concordanceLoading: true
+    concordanceLoading: true,
   }
 
   componentDidMount() {
@@ -83,7 +83,7 @@ class BibleStrongDetailScreen extends React.Component {
       setHistory({
         ...strongReference,
         book,
-        type: 'strong'
+        type: 'strong',
       })
     )
     this.setState({ strongReference })
@@ -106,8 +106,8 @@ class BibleStrongDetailScreen extends React.Component {
         Phonetique,
         Definition,
         Type,
-        LSG
-      }
+        LSG,
+      },
     } = this.state
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
@@ -136,15 +136,15 @@ class BibleStrongDetailScreen extends React.Component {
       navigation,
       navigation: {
         state: {
-          params: { book }
-        }
-      }
+          params: { book },
+        },
+      },
     } = this.props
 
     navigation.navigate({
       routeName: 'BibleStrongDetail',
       params: { book, reference },
-      key: `bible-strong-detail-${reference}`
+      key: `bible-strong-detail-${reference}`,
     })
   }
 
@@ -180,8 +180,8 @@ class BibleStrongDetailScreen extends React.Component {
         Definition,
         Origine,
         Type,
-        LSG
-      }
+        LSG,
+      },
     } = this.state
 
     return (
@@ -214,7 +214,7 @@ class BibleStrongDetailScreen extends React.Component {
                   style={{
                     paddingTop: 10,
                     paddingHorizontal: 5,
-                    marginRight: 10
+                    marginRight: 10,
                   }}
                   name="share-2"
                   size={20}

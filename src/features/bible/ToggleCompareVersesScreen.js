@@ -16,17 +16,19 @@ const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 12,
   opacity: 0.5,
-  fontWeight: 'bold'
+  fontWeight: 'bold',
 }))
 
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
-  backgroundColor: 'transparent'
+  backgroundColor: 'transparent',
 }))
 
 const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
-  if (version.id === 'LSGS' || version.id === 'INT') return null
+  if (version.id === 'LSGS' || version.id === 'INT') {
+    return null
+  }
 
   return (
     <Box paddingHorizontal={20} paddingVertical={10} row>
@@ -34,13 +36,19 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
         <TextVersion>{version.id}</TextVersion>
         <TextName>{version.name}</TextName>
       </Box>
-      <Switch color={theme.colors.primary} value={isSelected} onValueChange={onChange} />
+      <Switch
+        color={theme.colors.primary}
+        value={isSelected}
+        onValueChange={onChange}
+      />
     </Box>
   )
 })
 
 const ToggleCompareVersesScreen = () => {
-  const versionsToCompare = useSelector(state => Object.keys(state.user.bible.settings.compare))
+  const versionsToCompare = useSelector(state =>
+    Object.keys(state.user.bible.settings.compare)
+  )
   const dispatch = useDispatch()
 
   return (

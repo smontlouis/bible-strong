@@ -12,25 +12,25 @@ const TouchableBox = styled.TouchableOpacity({
   flexDirection: 'row',
   alignItems: 'center',
   paddingRight: 15,
-  paddingVertical: 15
+  paddingVertical: 15,
 })
 
 const StyledText = styled(Text)({
   fontSize: 14,
-  marginRight: 5
+  marginRight: 5,
 })
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
-  borderBottomColor: theme.colors.border
+  borderBottomColor: theme.colors.border,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {

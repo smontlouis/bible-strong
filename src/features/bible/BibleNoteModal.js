@@ -23,7 +23,7 @@ import verseToReference from '~helpers/verseToReference'
 const StylizedModal = styled(Modal)({
   flexDirection: 'row',
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -36,7 +36,7 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  padding: 20
+  padding: 20,
 }))
 
 const StyledIcon = styled.TouchableOpacity(({ theme, color }) => ({
@@ -47,7 +47,7 @@ const StyledIcon = styled.TouchableOpacity(({ theme, color }) => ({
   borderRadius: 5,
   alignItems: 'center',
   justifyContent: 'center',
-  marginLeft: 10
+  marginLeft: 10,
 }))
 
 class BibleNoteModal extends React.Component {
@@ -57,7 +57,7 @@ class BibleNoteModal extends React.Component {
     title: '',
     description: '',
     tags: {},
-    isEditing: false
+    isEditing: false,
   }
 
   backHandler
@@ -73,7 +73,7 @@ class BibleNoteModal extends React.Component {
     if (notes[key]) {
       return {
         key,
-        ...notes[key]
+        ...notes[key],
       }
     }
     return null
@@ -91,14 +91,14 @@ class BibleNoteModal extends React.Component {
         title: existingNote.title,
         description: existingNote.description,
         tags: existingNote.tags,
-        isEditing: false
+        isEditing: false,
       })
     } else {
       this.setState({
         reference,
         title: '',
         description: '',
-        isEditing: true
+        isEditing: true,
       })
     }
   }
@@ -135,8 +135,8 @@ class BibleNoteModal extends React.Component {
           this.props.deleteNote(noteId)
           this.props.onClosed()
         },
-        style: 'destructive'
-      }
+        style: 'destructive',
+      },
     ])
   }
 
@@ -258,7 +258,7 @@ export default compose(
   connect(
     state => ({
       selectedVerses: state.bible.selectedVerses,
-      notes: state.user.bible.notes
+      notes: state.user.bible.notes,
     }),
     { ...UserActions }
   )

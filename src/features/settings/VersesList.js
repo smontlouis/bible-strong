@@ -13,7 +13,7 @@ export const sortVersesByDate = p =>
         date: p[verse].date,
         color: p[verse].color,
         verseIds: [],
-        tags: {}
+        tags: {},
       })
     }
 

@@ -16,7 +16,7 @@ class WebViewQuillEditor extends React.Component {
   state = {
     isHTMLFileLoaded: false,
     isKeyboardOpened: false,
-    activeFormats: {}
+    activeFormats: {},
   }
 
   componentDidMount() {
@@ -30,7 +30,7 @@ class WebViewQuillEditor extends React.Component {
       ),
       Keyboard.addListener(resetListener, () =>
         this.setState({ isKeyboardOpened: false })
-      )
+      ),
     ]
 
     this.loadHTMLFile()
@@ -135,7 +135,7 @@ class WebViewQuillEditor extends React.Component {
               delta,
               deltaChange,
               deltaOld,
-              changeSource
+              changeSource,
             } = msgData.payload
             this.props.onDeltaChangeCallback(
               delta,
@@ -149,7 +149,7 @@ class WebViewQuillEditor extends React.Component {
           navigation.navigate('BibleView', {
             ...msgData.payload,
             arrayVerses: null, // Remove arrayVerses
-            book: books[msgData.payload.book - 1]
+            book: books[msgData.payload.book - 1],
           })
           return
         }
@@ -159,25 +159,25 @@ class WebViewQuillEditor extends React.Component {
         }
         case 'SELECT_BIBLE_VERSE': {
           navigation.navigate('BibleView', {
-            isSelectionMode: 'verse'
+            isSelectionMode: 'verse',
           })
           return
         }
         case 'SELECT_BIBLE_STRONG': {
           navigation.navigate('BibleView', {
-            isSelectionMode: 'strong'
+            isSelectionMode: 'strong',
           })
           return
         }
         case 'SELECT_BIBLE_VERSE_BLOCK': {
           navigation.navigate('BibleView', {
-            isSelectionMode: 'verse-block'
+            isSelectionMode: 'verse-block',
           })
           return
         }
         case 'SELECT_BIBLE_STRONG_BLOCK': {
           navigation.navigate('BibleView', {
-            isSelectionMode: 'strong-block'
+            isSelectionMode: 'strong-block',
           })
           return
         }
@@ -217,14 +217,14 @@ class WebViewQuillEditor extends React.Component {
   onWebViewLoaded = () => {
     const { fontFamily } = this.props
     this.dispatchToWebView('LOAD_EDITOR', {
-      fontFamily
+      fontFamily,
     })
   }
 
   editorLoaded = () => {
     if (this.props.contentToDisplay) {
       this.dispatchToWebView('SET_CONTENTS', {
-        delta: this.props.contentToDisplay
+        delta: this.props.contentToDisplay,
       })
     }
 
@@ -235,13 +235,13 @@ class WebViewQuillEditor extends React.Component {
 
   onError = error => {
     Alert.alert('WebView onError', error, [
-      { text: 'OK', onPress: () => console.log('OK Pressed') }
+      { text: 'OK', onPress: () => console.log('OK Pressed') },
     ])
   }
 
   renderError = error => {
     Alert.alert('WebView renderError', error, [
-      { text: 'OK', onPress: () => console.log('OK Pressed') }
+      { text: 'OK', onPress: () => console.log('OK Pressed') },
     ])
   }
 
@@ -257,8 +257,9 @@ class WebViewQuillEditor extends React.Component {
           overflow: 'hidden',
           flex: 1,
           borderTopLeftRadius: 30,
-          borderTopRightRadius: 30
-        }}>
+          borderTopRightRadius: 30,
+        }}
+      >
         <WebView
           useWebKit
           onLoad={this.onWebViewLoaded}
@@ -294,7 +295,7 @@ class WebViewQuillEditor extends React.Component {
 
 // Specifies the default values for props:
 WebViewQuillEditor.defaultProps = {
-  theme: 'snow'
+  theme: 'snow',
 }
 
 export default withNavigation(WebViewQuillEditor)

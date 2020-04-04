@@ -7,7 +7,7 @@ import Text from '~common/ui/Text'
 
 const Container = styled.View({
   flex: 1,
-  alignItems: 'center'
+  alignItems: 'center',
 })
 
 class Empty extends React.Component {
@@ -27,7 +27,8 @@ class Empty extends React.Component {
           justifyContent="center"
           // marginTop={source ? 100 : 0}
           flex
-          paddingHorizontal={20}>
+          paddingHorizontal={20}
+        >
           {source && (
             <Lottie
               ref={animation => {
@@ -36,7 +37,7 @@ class Empty extends React.Component {
               style={{
                 width: '100%',
                 height: 200,
-                marginBottom: 20
+                marginBottom: 20,
               }}
               source={source}
             />

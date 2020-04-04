@@ -5,7 +5,7 @@ import HTMLView from '~helpers/react-native-htmlview'
 
 export const textStyle = {
   lineHeight: 29,
-  fontSize: 19
+  fontSize: 19,
 }
 
 const styles = theme => ({
@@ -13,24 +13,24 @@ const styles = theme => ({
     fontWeight: 'bold',
     fontSize: 24,
     lineHeight: 25,
-    color: theme.colors.default
+    color: theme.colors.default,
   },
   h2: {
     fontWeight: 'bold',
     fontSize: 24,
     lineHeight: 25,
-    color: theme.colors.default
+    color: theme.colors.default,
   },
   h3: {
     fontWeight: 'bold',
     fontSize: 24,
     lineHeight: 25,
-    color: theme.colors.default
+    color: theme.colors.default,
   },
   p: {
     color: theme.colors.default,
     ...textStyle,
-    fontFamily: theme.fontFamily.paragraph
+    fontFamily: theme.fontFamily.paragraph,
   },
   em: {
     // color: '$color.primaryLighten',
@@ -38,7 +38,7 @@ const styles = theme => ({
     fontFamily: theme.fontFamily.paragraph,
     color: theme.colors.tertiary,
     fontStyle: 'italic',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   a: {
     // fontWeight: 'bold',
@@ -50,29 +50,29 @@ const styles = theme => ({
     textDecorationStyle: 'solid',
     textDecorationColor: theme.colors.primary,
     fontFamily: theme.fontFamily.paragraph,
-    ...textStyle
+    ...textStyle,
   },
   strong: {
     fontWeight: 'bold',
     color: theme.colors.default,
     fontFamily: theme.fontFamily.paragraph,
-    ...textStyle
+    ...textStyle,
   },
   li: {
     color: theme.colors.default,
     fontFamily: theme.fontFamily.paragraph,
-    ...textStyle
+    ...textStyle,
   },
   ol: {
     color: theme.colors.default,
     fontFamily: theme.fontFamily.paragraph,
-    ...textStyle
+    ...textStyle,
   },
   ul: {
     color: theme.colors.default,
     fontFamily: theme.fontFamily.paragraph,
-    ...textStyle
-  }
+    ...textStyle,
+  },
 })
 
 const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => (

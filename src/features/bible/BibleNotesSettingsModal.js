@@ -12,7 +12,7 @@ import { deleteNote } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -29,7 +29,7 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace(),
 }))
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
@@ -38,7 +38,7 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   padding: 20,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
-  overflow: 'hidden'
+  overflow: 'hidden',
 }))
 
 const NotesSettingsModal = ({
@@ -47,7 +47,7 @@ const NotesSettingsModal = ({
   theme,
   setTitlePrompt,
   setMultipleTagsItem,
-  openNoteEditor
+  openNoteEditor,
 }) => {
   const dispatch = useDispatch()
   const noteId = isOpen
@@ -59,8 +59,8 @@ const NotesSettingsModal = ({
       {
         text: 'Oui',
         onPress: () => dispatch(deleteNote(id), onClosed()),
-        style: 'destructive'
-      }
+        style: 'destructive',
+      },
     ])
   }
 

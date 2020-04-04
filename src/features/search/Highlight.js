@@ -14,23 +14,23 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
   paddingBottom: 20,
   marginBottom: 0,
   borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1
+  borderBottomWidth: 1,
 }))
 
 const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
-  backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent'
+  backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent',
 }))
 
 const Highlight = ({ attribute, hit, highlight, navigation }) => {
   const highlights = highlight({
     highlightProperty: '_highlightResult',
     attribute,
-    hit
+    hit,
   })
 
   const [book, chapter, verse] = hit.ref.split('-')
   const { title } = formatVerseContent([
-    { Livre: book, Chapitre: chapter, Verset: verse }
+    { Livre: book, Chapitre: chapter, Verset: verse },
   ])
   const onPress = () =>
     navigation.navigate('BibleView', {
@@ -38,7 +38,7 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
       book: books[book - 1],
       chapter: Number(chapter),
       verse: Number(verse),
-      focusVerses: [Number(verse)]
+      focusVerses: [Number(verse)],
     })
   return (
     <Container onPress={onPress}>

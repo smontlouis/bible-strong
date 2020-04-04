@@ -11,7 +11,7 @@ const Filters = ({}) => (
       horizontal
       style={{ maxHeight: 55, paddingHorizontal: 10 }}
       contentContainerStyle={{
-        flexDirection: 'row'
+        flexDirection: 'row',
       }}
     >
       <RefinementList attribute="section" />

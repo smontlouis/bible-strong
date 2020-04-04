@@ -16,7 +16,7 @@ class ConcordanceByBook extends Component {
   async componentDidMount() {
     const {
       book,
-      strongReference: { Code }
+      strongReference: { Code },
     } = this.props.navigation.state.params
 
     const verses = await loadFoundVersesByBook(book, Code)
@@ -28,11 +28,14 @@ class ConcordanceByBook extends Component {
   render() {
     const {
       book,
-      strongReference: { Code, Mot }
+      strongReference: { Code, Mot },
     } = this.props.navigation.state.params
     return (
       <Container>
-        <Header hasBackButton title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`} />
+        <Header
+          hasBackButton
+          title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
+        />
         {!this.state.verses.length && (
           <Box flex>
             <Loading />
@@ -44,7 +47,9 @@ class ConcordanceByBook extends Component {
               contentContainerStyle={{ padding: 20 }}
               removeClippedSubviews
               data={this.state.verses}
-              keyExtractor={item => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
+              keyExtractor={item =>
+                `${item.Livre}-${item.Chapitre}-${item.Verset}`
+              }
               renderItem={({ item }) => (
                 <ConcordanceVerse
                   navigation={this.props.navigation}

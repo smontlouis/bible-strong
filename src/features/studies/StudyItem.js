@@ -17,12 +17,12 @@ import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 const StudyLink = styled(Link)(({ theme }) => ({
   position: 'relative',
   flexDirection: 'row',
-  margin: 10
+  margin: 10,
 }))
 
 const StudyItem = ({ study, theme, setStudySettings }) => {
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
-    locale: frLocale
+    locale: frLocale,
   })
   const r = useMediaQueriesArray()
 

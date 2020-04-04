@@ -95,8 +95,14 @@ const LexiqueScreen = () => {
           <Loading message="Chargement..." />
         ) : sectionResults.length ? (
           <SectionList
-            renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (
-              <LexiqueItem key={index} {...{ Mot, Grec, Hebreu, Code, lexiqueType }} />
+            renderItem={({
+              item: { Mot, Grec, Hebreu, Code, lexiqueType },
+              index,
+            }) => (
+              <LexiqueItem
+                key={index}
+                {...{ Mot, Grec, Hebreu, Code, lexiqueType }}
+              />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
@@ -104,7 +110,7 @@ const LexiqueScreen = () => {
               getItemHeight: () => 80,
               getSectionHeaderHeight: () => 50,
               getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0
+              getSectionFooterHeight: () => 0,
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="primary">
@@ -118,7 +124,10 @@ const LexiqueScreen = () => {
             keyExtractor={item => item.Mot + item.Code}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message="Aucune strong trouvée..." />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Aucune strong trouvée..."
+          />
         )}
       </Box>
       {!searchValue && <AlphabetList letter={letter} setLetter={setLetter} />}

@@ -32,13 +32,13 @@ import SelectedVersesModal from './SelectedVersesModal'
 
 const Container = styled.View({
   flex: 1,
-  overflow: 'hidden'
+  overflow: 'hidden',
 })
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
   marginBottom: 10 + getBottomSpace(),
-  width: 250
+  width: 250,
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -65,7 +65,7 @@ class BibleViewer extends Component {
     audioMode: false,
     isPlaying: false,
     selectedCode: null,
-    currentNave: null
+    currentNave: null,
   }
 
   pericope = getBiblePericope('LSG')
@@ -124,7 +124,7 @@ class BibleViewer extends Component {
       version,
       verse,
       settings,
-      parallelVersions
+      parallelVersions,
     } = this.props
     this.pericope = getBiblePericope(version)
     this.setState({ isLoading: true })
@@ -170,19 +170,19 @@ class BibleViewer extends Component {
       audioChapterUrl: `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(
         chapter,
         2
-      )}.mp3`
+      )}.mp3`,
     })
     this.props.setHistory({
       book: book.Numero,
       chapter,
       verse,
       version,
-      type: 'verse'
+      type: 'verse',
     })
     Sentry.addBreadcrumb({
       category: 'bible viewer',
       message: 'Load verses',
-      data: { book: book.Numero, chapter, verse, version }
+      data: { book: book.Numero, chapter, verse, version },
     })
   }
 
@@ -193,13 +193,13 @@ class BibleViewer extends Component {
       verse,
       navigation,
       setAllAndValidateSelected,
-      version
+      version,
     } = this.props
     setAllAndValidateSelected({
       book,
       chapter,
       verse,
-      version
+      version,
     })
     navigation.navigate('Bible')
   }
@@ -217,7 +217,7 @@ class BibleViewer extends Component {
   toggleCreateNote = () => {
     this.setState(state => ({
       isCreateNoteOpen: !state.isCreateNoteOpen,
-      noteVerses: null
+      noteVerses: null,
     }))
   }
 
@@ -229,7 +229,7 @@ class BibleViewer extends Component {
       }, {})
       this.setState(state => ({
         isCreateNoteOpen: !state.isCreateNoteOpen,
-        noteVerses
+        noteVerses,
       }))
     } catch (e) {
       Sentry.withScope(scope => {
@@ -265,7 +265,7 @@ class BibleViewer extends Component {
       selectedCode,
       reference,
       currentNave,
-      verses
+      verses,
     } = this.state
 
     const {
@@ -295,7 +295,7 @@ class BibleViewer extends Component {
       webviewHash,
       setWebviewHash,
       removeParallelVersion,
-      addParallelVersion
+      addParallelVersion,
     } = this.props
 
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
@@ -442,7 +442,7 @@ export default compose(
       highlightedVerses: state.user.bible.highlights,
       notedVerses: state.user.bible.notes,
       isSelectedVerseHighlighted: !!getHighlightInSelected(state),
-      webviewHash: state.bible.webviewHash
+      webviewHash: state.bible.webviewHash,
     }),
     { ...BibleActions, ...UserActions }
   )

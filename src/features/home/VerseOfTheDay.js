@@ -105,8 +105,9 @@ const VerseOfTheDay = () => {
             book,
             chapter,
             verse,
-            focusVerses: [verse]
-          }}>
+            focusVerses: [verse],
+          }}
+        >
           <Paragraph marginTop={5}>{removeBreakLines(content)}</Paragraph>
         </Link>
         <Box marginTop={20} row center>
@@ -117,9 +118,10 @@ const VerseOfTheDay = () => {
                 verse: {
                   Livre: book,
                   Chapitre: chapter,
-                  Verset: verse
-                }
-              }}>
+                  Verset: verse,
+                },
+              }}
+            >
               <Box row>
                 <LexiqueIcon />
                 <Text title color="primary" marginLeft={10}>

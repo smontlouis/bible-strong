@@ -100,7 +100,7 @@ export const useWaitForDatabase = () => {
     progress,
     proposeDownload,
     startDownload,
-    setStartDownload
+    setStartDownload,
   }
 }
 
@@ -110,7 +110,7 @@ const waitForDatabase = WrappedComponent => props => {
     progress,
     proposeDownload,
     startDownload,
-    setStartDownload
+    setStartDownload,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {

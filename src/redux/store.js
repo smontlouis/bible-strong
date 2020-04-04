@@ -21,7 +21,7 @@ export default function configureStore() {
     stateReconciler: autoMergeLevel2,
     version: 18,
     // debug: true,
-    migrate: createMigrate(migrations, { debug: true })
+    migrate: createMigrate(migrations, { debug: true }),
   }
 
   const middleware = [
@@ -29,7 +29,7 @@ export default function configureStore() {
     lastSeenMiddleware,
     crashReporter,
     firestoreMiddleware,
-    thunk
+    thunk,
   ]
 
   const persistedReducer = persistReducer(persistConfig, reducer)

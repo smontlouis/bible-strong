@@ -28,7 +28,7 @@ export const biblesRef = {
   POV: storageRef.child('bibles/bible-pov.json'),
   BHS: storageRef.child('bibles/bible-hebrew.json'),
   SBLGNT: storageRef.child('bibles/bible-greek.json'),
-  NFC: storageRef.child('bibles/bible-nfc.json')
+  NFC: storageRef.child('bibles/bible-nfc.json'),
 }
 
 export const databasesRef = {
@@ -37,5 +37,5 @@ export const databasesRef = {
   DICTIONNAIRE: storageRef.child('databases/dictionnaire.sqlite'),
   INTERLINEAIRE: storageRef.child('databases/interlineaire.sqlite'),
   NAVE: storageRef.child('databases/nave-fr.sqlite'),
-  STRONG: storageRef.child('databases/strong.sqlite')
+  STRONG: storageRef.child('databases/strong.sqlite'),
 }

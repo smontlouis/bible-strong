@@ -18,9 +18,9 @@ export default createAnimatedBottomTabNavigator(
           title: 'Home',
           tabBarIcon: props => <TabBarIcon {...props} name="home" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
-          activeColor: getTheme[screenProps.theme].colors.primary
+          activeColor: getTheme[screenProps.theme].colors.primary,
         }
-      }
+      },
     },
     Search: {
       screen: SearchScreen,
@@ -29,9 +29,9 @@ export default createAnimatedBottomTabNavigator(
           title: 'Recherche',
           tabBarIcon: props => <TabBarIcon {...props} name="search" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
-          activeColor: getTheme[screenProps.theme].colors.primary
+          activeColor: getTheme[screenProps.theme].colors.primary,
         }
-      }
+      },
     },
     Bible: {
       screen: BibleScreen,
@@ -40,9 +40,9 @@ export default createAnimatedBottomTabNavigator(
           title: 'Bible',
           tabBarIcon: props => <TabBarIcon {...props} name="book-open" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
-          activeColor: getTheme[screenProps.theme].colors.primary
+          activeColor: getTheme[screenProps.theme].colors.primary,
         }
-      }
+      },
     },
     Studies: {
       screen: StudiesScreen,
@@ -50,8 +50,8 @@ export default createAnimatedBottomTabNavigator(
         title: 'Études',
         tabBarIcon: props => <TabBarIcon {...props} name="feather" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
-        activeColor: getTheme[screenProps.theme].colors.primary
-      })
+        activeColor: getTheme[screenProps.theme].colors.primary,
+      }),
     },
     More: {
       screen: MoreScreen,
@@ -59,12 +59,12 @@ export default createAnimatedBottomTabNavigator(
         title: 'Plus',
         tabBarIcon: props => <TabBarIcon {...props} name="menu" />,
         tabBarColor: getTheme[screenProps.theme].colors.reverse,
-        activeColor: getTheme[screenProps.theme].colors.primary
-      })
-    }
+        activeColor: getTheme[screenProps.theme].colors.primary,
+      }),
+    },
   },
   {
     initialRouteName: 'Home',
-    activeColor: '#0ED3B9'
+    activeColor: '#0ED3B9',
   }
 )

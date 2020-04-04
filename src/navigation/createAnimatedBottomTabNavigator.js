@@ -20,19 +20,19 @@ const RoundedTopBottomBar = styled.View(({ theme }) => ({
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 0 },
   shadowOpacity: 0.2,
-  shadowRadius: 7
+  shadowRadius: 7,
 }))
 
 const Container = styled.View(({ orientation }) => ({
   flex: 1,
-  overflow: 'hidden'
+  overflow: 'hidden',
   // flexDirection: orientation.portrait ? 'column' : 'row'
 }))
 
 class AnimatedTabNavigationView extends React.Component {
   static defaultProps = {
     getAccessibilityRole: () => 'button',
-    getAccessibilityStates: ({ focused }) => (focused ? ['selected'] : [])
+    getAccessibilityStates: ({ focused }) => (focused ? ['selected'] : []),
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -42,7 +42,7 @@ class AnimatedTabNavigationView extends React.Component {
       // Set the current tab to be loaded if it was not loaded before
       loaded: prevState.loaded.includes(index)
         ? prevState.loaded
-        : [...prevState.loaded, index]
+        : [...prevState.loaded, index],
     }
   }
 
@@ -51,7 +51,7 @@ class AnimatedTabNavigationView extends React.Component {
     indexesOpacity: this.props.navigation.state.routes.map(
       (_, index) =>
         new Animated.Value(this.props.navigation.state.index === index ? 1 : 0)
-    )
+    ),
   }
 
   // Animate from previousy selected index to newly selected index. This is
@@ -65,14 +65,14 @@ class AnimatedTabNavigationView extends React.Component {
         this.state.indexesOpacity[this.props.navigation.state.index],
         {
           toValue: 1,
-          duration: 200
+          duration: 200,
         }
       ).start()
       Animated.timing(
         this.state.indexesOpacity[prevProps.navigation.state.index],
         {
           toValue: 0,
-          duration: 200
+          duration: 200,
         }
       ).start()
     }
@@ -123,7 +123,7 @@ class AnimatedTabNavigationView extends React.Component {
                 key={route.key}
                 style={[
                   StyleSheet.absoluteFillObject,
-                  { backgroundColor: '#fff', opacity }
+                  { backgroundColor: '#fff', opacity },
                 ]}
                 pointerEvents={isFocused ? 'auto' : 'none'}
               >
@@ -160,7 +160,7 @@ const TabBar = props => {
     onTabPress,
     jumpTo,
     orientation,
-    descriptors
+    descriptors,
   } = props
 
   const { state } = props.navigation

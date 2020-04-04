@@ -5,14 +5,14 @@ const initialState = {
     isLoading: true,
     proposeDownload: false,
     startDownload: false,
-    progress: undefined
+    progress: undefined,
   },
   dictionnaire: {
     isLoading: true,
     proposeDownload: false,
     startDownload: false,
-    progress: undefined
-  }
+    progress: undefined,
+  },
 }
 
 const strongReducer = (state, action) => {
@@ -20,22 +20,22 @@ const strongReducer = (state, action) => {
     case 'strong.setLoading':
       return {
         ...state,
-        isLoading: action.payload
+        isLoading: action.payload,
       }
     case 'strong.setProposeDownload':
       return {
         ...state,
-        proposeDownload: action.payload
+        proposeDownload: action.payload,
       }
     case 'strong.setStartDownload':
       return {
         ...state,
-        startDownload: action.payload
+        startDownload: action.payload,
       }
     case 'strong.setProgress':
       return {
         ...state,
-        progress: action.payload
+        progress: action.payload,
       }
     case 'strong.reset':
       return { ...initialState.strong, proposeDownload: true }
@@ -49,22 +49,22 @@ const dictionnaireReducer = (state, action) => {
     case 'dictionnaire.setLoading':
       return {
         ...state,
-        isLoading: action.payload
+        isLoading: action.payload,
       }
     case 'dictionnaire.setProposeDownload':
       return {
         ...state,
-        proposeDownload: action.payload
+        proposeDownload: action.payload,
       }
     case 'dictionnaire.setStartDownload':
       return {
         ...state,
-        startDownload: action.payload
+        startDownload: action.payload,
       }
     case 'dictionnaire.setProgress':
       return {
         ...state,
-        progress: action.payload
+        progress: action.payload,
       }
     case 'dictionnaire.reset':
       return { ...initialState.dictionnaire, proposeDownload: true }
@@ -75,7 +75,7 @@ const dictionnaireReducer = (state, action) => {
 
 const reducer = ({ strong, dictionnaire }, action) => ({
   strong: strongReducer(strong, action),
-  dictionnaire: dictionnaireReducer(dictionnaire, action)
+  dictionnaire: dictionnaireReducer(dictionnaire, action),
 })
 
 export const DBStateContext = createContext()

@@ -347,7 +347,7 @@ function unicodeNormalizer(lunr) {
     '&': 'and',
     '|': 'or',
     '<': 'less',
-    '>': 'greater'
+    '>': 'greater',
   }
   const charmapPattern = Object.keys(charmap)
     .map(function(char) {
@@ -362,7 +362,10 @@ function unicodeNormalizer(lunr) {
     // Add the pipeline function to both the indexing pipeline and the
     // searching pipeline
     this.pipeline.before(lunr.fr.stemmer, lunr.unicodeNormalizer.transform)
-    this.searchPipeline.before(lunr.fr.stemmer, lunr.unicodeNormalizer.transform)
+    this.searchPipeline.before(
+      lunr.fr.stemmer,
+      lunr.unicodeNormalizer.transform
+    )
   }
 
   lunr.unicodeNormalizer.transform = function(token) {
@@ -373,7 +376,10 @@ function unicodeNormalizer(lunr) {
     })
   }
 
-  lunr.Pipeline.registerFunction(lunr.unicodeNormalizer.transform, 'unicodeNormalizer')
+  lunr.Pipeline.registerFunction(
+    lunr.unicodeNormalizer.transform,
+    'unicodeNormalizer'
+  )
 }
 
 module.exports = unicodeNormalizer

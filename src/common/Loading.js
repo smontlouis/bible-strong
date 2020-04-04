@@ -13,10 +13,16 @@ const Container = styled.View(({ theme }) => ({
   justifyContent: 'center',
   backgroundColor: theme.colors.lightGrey,
   borderTopLeftRadius: 30,
-  borderBottomLeftRadius: 30
+  borderBottomLeftRadius: 30,
 }))
 
-const Loading = ({ message = null, subMessage = null, style, children, theme }) => {
+const Loading = ({
+  message = null,
+  subMessage = null,
+  style,
+  children,
+  theme,
+}) => {
   const [isReady] = useTimeout(3000)
 
   return (

@@ -50,14 +50,14 @@ const Text = styled.Text(props => {
     ...(props.underline && {
       textDecorationLine: 'underline',
       textDecorationStyle: 'solid',
-      textDecorationColor: props.theme.colors.default
-    })
+      textDecorationColor: props.theme.colors.default,
+    }),
   }
 })
 
 Text.defaultProps = {
   fontFamily: 'text',
-  colors: 'default'
+  colors: 'default',
 }
 
 export default Text

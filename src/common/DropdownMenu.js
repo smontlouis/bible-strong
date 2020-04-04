@@ -10,17 +10,17 @@ import Text from '~common/ui/Text'
 const TouchableBox = styled.TouchableOpacity({
   flexDirection: 'row',
   alignItems: 'center',
-  paddingRight: 15
+  paddingRight: 15,
 })
 
 const StyledText = styled(Text)({
   fontSize: 14,
   fontWeight: 'bold',
-  marginRight: 5
+  marginRight: 5,
 })
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
@@ -43,7 +43,11 @@ const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
       </Box>
       <Modal.Menu isOpen={isOpen} onClosed={() => setOpen(false)}>
         {choices.map(({ value, label, count }) => (
-          <Modal.Item key={value} tag={count} onPress={() => onItemPress(value)}>
+          <Modal.Item
+            key={value}
+            tag={count}
+            onPress={() => onItemPress(value)}
+          >
             {label}
           </Modal.Item>
         ))}

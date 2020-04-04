@@ -18,8 +18,8 @@ export default produce((draft, action) => {
         user: {
           id: draft.id,
           displayName: draft.displayName,
-          photoUrl: draft.photoURL
-        }
+          photoUrl: draft.photoURL,
+        },
       }
       break
     }
@@ -27,14 +27,18 @@ export default produce((draft, action) => {
       const study = draft.bible.studies[action.payload.id]
       if (study) {
         study.modified_at = Date.now()
-        if (action.payload.content) study.content = action.payload.content
-        if (action.payload.title) study.title = action.payload.title
+        if (action.payload.content) {
+          study.content = action.payload.content
+        }
+        if (action.payload.title) {
+          study.title = action.payload.title
+        }
 
         // Just in case
         study.user = {
           id: draft.id,
           displayName: draft.displayName,
-          photoUrl: draft.photoURL
+          photoUrl: draft.photoURL,
         }
       } else {
         throw new Error(`Cannot find study: ${action.payload.id}`)
@@ -56,27 +60,27 @@ export default produce((draft, action) => {
 export function createStudy(id) {
   return {
     type: CREATE_STUDY,
-    payload: id
+    payload: id,
   }
 }
 
 export function updateStudy({ id, content, title }) {
   return {
     type: UPDATE_STUDY,
-    payload: { id, content, title }
+    payload: { id, content, title },
   }
 }
 
 export function uploadStudy(id) {
   return {
     type: UPLOAD_STUDY,
-    payload: id
+    payload: id,
   }
 }
 
 export function deleteStudy(id) {
   return {
     type: DELETE_STUDY,
-    payload: id
+    payload: id,
   }
 }

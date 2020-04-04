@@ -2,7 +2,7 @@ import useDimensions from './useDimensions'
 
 const useMediaQueries = () => {
   const {
-    screen: { width }
+    screen: { width },
   } = useDimensions()
 
   if (width <= 320) {

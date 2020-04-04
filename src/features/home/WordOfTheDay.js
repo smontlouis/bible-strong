@@ -20,7 +20,7 @@ function randomIntFromInterval(min, max) {
 
 const DictionnaireOfTheDay = ({
   color1 = 'rgba(86,204,242,1)',
-  color2 = 'rgba(47,128,237,1)'
+  color2 = 'rgba(47,128,237,1)',
 }) => {
   const [error, setError] = useState(false)
   const [strongReference, setStrongRef] = useState(null)
@@ -68,7 +68,7 @@ const DictionnaireOfTheDay = ({
             right: 0,
             top: 0,
             height: itemHeight,
-            borderRadius: 3
+            borderRadius: 3,
           }}
         >
           <LinearGradient

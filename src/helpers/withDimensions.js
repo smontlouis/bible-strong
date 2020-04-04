@@ -10,7 +10,7 @@ export default function withDimensions(WrappedComponent) {
   class EnhancedComponent extends React.Component {
     state = {
       dimensions: { width, height },
-      isLandscape: isOrientationLandscape({ width, height })
+      isLandscape: isOrientationLandscape({ width, height }),
     }
 
     componentDidMount() {

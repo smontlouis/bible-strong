@@ -15,12 +15,12 @@ import SelectorItem from './SelectorItem'
 
 class VerseSelector extends Component {
   static navigationOptions = {
-    tabBarLabel: 'VERSET'
+    tabBarLabel: 'VERSET',
   }
 
   state = {
     versesInCurrentChapter: undefined,
-    error: false
+    error: false,
   }
 
   componentDidMount() {
@@ -88,8 +88,9 @@ class VerseSelector extends Component {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          paddingTop: 10
-        }}>
+          paddingTop: 10,
+        }}
+      >
         {array.map(v => (
           <SelectorItem
             key={v}
@@ -109,7 +110,7 @@ export default compose(
     ({ bible: { temp } }) => ({
       selectedBook: temp.selectedBook,
       selectedChapter: temp.selectedChapter,
-      selectedVerse: temp.selectedVerse
+      selectedVerse: temp.selectedVerse,
     }),
     { ...BibleActions }
   )

@@ -66,9 +66,9 @@ export default createStackNavigator(
     Nave: { screen: NaveScreen },
     NaveDetail: { screen: NaveDetailScreen },
     NaveWarning: { screen: NaveWarningScreen },
-    ToggleCompareVerses: { screen: ToggleCompareVersesScreen }
+    ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
   },
   {
-    headerMode: 'none'
+    headerMode: 'none',
   }
 )

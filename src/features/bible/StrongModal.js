@@ -16,7 +16,7 @@ import StrongCard from '~features/bible/StrongCard'
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   zIndex: 10,
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -29,64 +29,78 @@ const Container = styled.View(({ theme }) => ({
   elevation: 2,
   paddingBottom: getBottomSpace(),
   borderTopLeftRadius: 30,
-  borderTopRightRadius: 30
+  borderTopRightRadius: 30,
 }))
 
-const StrongCardWrapper = waitForStrongModal(({ theme, navigation, selectedCode, onClosed }) => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [strongReference, setStrongReference] = useState(null)
-  const [error, setError] = useState(false)
+const StrongCardWrapper = waitForStrongModal(
+  ({ theme, navigation, selectedCode, onClosed }) => {
+    const [isLoading, setIsLoading] = useState(true)
+    const [strongReference, setStrongReference] = useState(null)
+    const [error, setError] = useState(false)
 
-  useEffect(() => {
-    const loadStrong = async () => {
-      if (selectedCode?.reference) {
-        setError(false)
-        setIsLoading(true)
-        const strongReference = await loadStrongReference(selectedCode.reference, selectedCode.book)
-        setStrongReference(strongReference)
+    useEffect(() => {
+      const loadStrong = async () => {
+        if (selectedCode?.reference) {
+          setError(false)
+          setIsLoading(true)
+          const strongReference = await loadStrongReference(
+            selectedCode.reference,
+            selectedCode.book
+          )
+          setStrongReference(strongReference)
 
-        if (strongReference?.error || !strongReference) {
-          setError(true)
+          if (strongReference?.error || !strongReference) {
+            setError(true)
+            setIsLoading(false)
+            return
+          }
+
           setIsLoading(false)
-          return
         }
+        if (!selectedCode?.reference) {
+          setError(true)
+        }
+      }
 
-        setIsLoading(false)
-      }
-      if (!selectedCode?.reference) {
-        setError(true)
-      }
+      loadStrong()
+    }, [selectedCode])
+
+    if (error) {
+      return (
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Une erreur est survenue..."
+        />
+      )
     }
 
-    loadStrong()
-  }, [selectedCode])
-
-  if (error) {
+    if (isLoading) {
+      return (
+        <Box flex center>
+          <ActivityIndicator color={theme.colors.grey} />
+        </Box>
+      )
+    }
     return (
-      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
+      <StrongCard
+        theme={theme}
+        navigation={navigation}
+        book={selectedCode.book}
+        strongReference={strongReference}
+        isModal
+        onClosed={onClosed}
+      />
     )
   }
+)
 
-  if (isLoading) {
-    return (
-      <Box flex center>
-        <ActivityIndicator color={theme.colors.grey} />
-      </Box>
-    )
-  }
-  return (
-    <StrongCard
-      theme={theme}
-      navigation={navigation}
-      book={selectedCode.book}
-      strongReference={strongReference}
-      isModal
-      onClosed={onClosed}
-    />
-  )
-})
-
-const StrongModal = ({ onClosed, theme, selectedCode = {}, navigation, version }) => {
+const StrongModal = ({
+  onClosed,
+  theme,
+  selectedCode = {},
+  navigation,
+  version,
+}) => {
   useEffect(() => {
     if (version !== 'INT' || version === 'LSGS') {
       onClosed()
@@ -103,7 +117,8 @@ const StrongModal = ({ onClosed, theme, selectedCode = {}, navigation, version }
       onBackButtonPress={onClosed}
       // swipeDirection="down"
       // onSwipeComplete={onClosed}
-      avoidKeyboard>
+      avoidKeyboard
+    >
       <Container>
         <StrongCardWrapper {...{ theme, navigation, selectedCode, onClosed }} />
       </Container>

@@ -6,7 +6,9 @@ import Text from '~common/ui/Text'
 
 const StyledChip = styled.View(({ theme, isSelected }) => ({
   borderRadius: 20,
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
+  backgroundColor: isSelected
+    ? theme.colors.primary
+    : theme.colors.lightPrimary,
   paddingTop: 5,
   paddingBottom: 5,
   paddingLeft: 12,
@@ -14,23 +16,23 @@ const StyledChip = styled.View(({ theme, isSelected }) => ({
   marginRight: 5,
   marginBottom: 5,
 
-  ...isSelected && {
+  ...(isSelected && {
     shadowColor: theme.colors.default,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
-    elevation: 1
-  }
+    elevation: 1,
+  }),
 }))
 
 const StyledText = styled(Text)(({ theme, isSelected }) => ({
-  color: isSelected ? 'white' : 'black'
+  color: isSelected ? 'white' : 'black',
 }))
 
 const Chip = ({ label, isSelected, onPress }) => (
   <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
     <StyledChip isSelected={isSelected}>
-      <StyledText isSelected={isSelected}>{ label }</StyledText>
+      <StyledText isSelected={isSelected}>{label}</StyledText>
     </StyledChip>
   </TouchableOpacity>
 )

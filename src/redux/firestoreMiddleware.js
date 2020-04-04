@@ -21,7 +21,7 @@ import {
   CHANGE_COLOR,
   SET_HISTORY,
   DELETE_HISTORY,
-  UPDATE_USER_DATA
+  UPDATE_USER_DATA,
 } from './modules/user'
 
 // TODO - DO IT FOR COLOR SETTINGS ?
@@ -52,7 +52,7 @@ export default store => next => async action => {
       userDoc.update(
         r({
           'bible.highlights': highlights,
-          'bible.tags': tags
+          'bible.tags': tags,
         })
       )
       break
@@ -64,7 +64,7 @@ export default store => next => async action => {
         r({
           'bible.tags': tags,
           'bible.notes': notes,
-          'bible.highlights': highlights
+          'bible.highlights': highlights,
         })
       )
 
@@ -83,7 +83,7 @@ export default store => next => async action => {
       userDoc.update(
         r({
           'bible.notes': notes,
-          'bible.tags': tags
+          'bible.tags': tags,
         })
       )
       break
@@ -119,7 +119,7 @@ export default store => next => async action => {
       const { tags } = user.bible
       userDoc.update(
         r({
-          'bible.tags': tags
+          'bible.tags': tags,
         })
       )
       break
@@ -129,7 +129,7 @@ export default store => next => async action => {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
       userDoc.update(
         r({
-          bible: sanitizeUserBible(user.bible)
+          bible: sanitizeUserBible(user.bible),
         })
       )
       break
@@ -144,12 +144,12 @@ export default store => next => async action => {
         studies,
         tags,
         history,
-        settings
+        settings,
       } = user.bible
       userDoc.update(
         r({
           'bible.history': history,
-          'bible.settings': settings
+          'bible.settings': settings,
         })
       )
 

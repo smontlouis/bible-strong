@@ -25,11 +25,11 @@ const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   zIndex: 10,
   margin: 0,
-  alignItems: 'center'
+  alignItems: 'center',
 })
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const Container = styled.View(({ theme }) => ({
@@ -44,7 +44,7 @@ const Container = styled.View(({ theme }) => ({
   elevation: 2,
   paddingBottom: getBottomSpace(),
   borderTopLeftRadius: 30,
-  borderTopRightRadius: 30
+  borderTopRightRadius: 30,
 }))
 
 const ReferenceItem = ({ reference, version, onClosed }) => {
@@ -72,7 +72,7 @@ const ReferenceItem = ({ reference, version, onClosed }) => {
         isReadOnly: true,
         book,
         chapter,
-        verse
+        verse,
       }}
     >
       <Box marginBottom={30}>

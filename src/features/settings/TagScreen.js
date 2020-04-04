@@ -30,7 +30,7 @@ const NoteItem = ({ item }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
-    locale: frLocale
+    locale: frLocale,
   })
 
   return (
@@ -40,7 +40,7 @@ const NoteItem = ({ item }) => {
         isReadOnly: true,
         book: books[Livre - 1],
         chapter: Number(Chapitre),
-        verse: Number(Verset)
+        verse: Number(Verset),
       }}
     >
       <Box padding={20}>
@@ -89,7 +89,7 @@ const TagScreen = ({ navigation }) => {
           .map(id => state.user.bible.studies[id])
           .filter(c => c)
       : [],
-    tag: state.user.bible.tags[item.id]
+    tag: state.user.bible.tags[item.id],
   }))
   const [titlePrompt, setTitlePrompt] = React.useState(false)
 

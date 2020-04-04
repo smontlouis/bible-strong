@@ -11,14 +11,14 @@ const VerseText = styled.View(() => ({
   flex: 1,
   flexWrap: 'wrap',
   alignItems: 'flex-start',
-  flexDirection: 'row'
+  flexDirection: 'row',
 }))
 
 const Container = styled.TouchableOpacity(({ theme }) => ({
   paddingTop: 10,
   paddingBottom: 10,
   borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border
+  borderBottomColor: theme.colors.border,
 }))
 
 class ConcordanceVerse extends React.Component {
@@ -55,11 +55,12 @@ class ConcordanceVerse extends React.Component {
               book: books[verse.Livre - 1],
               chapter: verse.Chapitre,
               verse: verse.Verset,
-              focusVerses: [verse.Verset]
+              focusVerses: [verse.Verset],
             },
-            key: `bible-view-${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+            key: `bible-view-${verse.Livre}-${verse.Chapitre}-${verse.Verset}`,
           })
-        }>
+        }
+      >
         <Text title fontSize={16} marginBottom={5}>
           {books[verse.Livre - 1].Nom} {verse.Chapitre}:{verse.Verset}
         </Text>

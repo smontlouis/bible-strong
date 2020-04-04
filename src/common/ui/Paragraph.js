@@ -10,7 +10,7 @@ const Paragraph = styled(Text)(
   ({ small, theme, scale = 0, scaleLineHeight = 0 }) => ({
     fontFamily: theme.fontFamily.paragraph,
     fontSize: small ? 14 : scaleFontSize(19, scale),
-    lineHeight: small ? 22 : scaleFontSize(29, scale, scaleLineHeight)
+    lineHeight: small ? 22 : scaleFontSize(29, scale, scaleLineHeight),
   })
 )
 

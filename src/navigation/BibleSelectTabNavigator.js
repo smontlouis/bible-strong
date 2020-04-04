@@ -9,7 +9,7 @@ import theme from '~themes/default'
 const RouteConfigs = {
   Livres: { screen: BookSelectorScreen },
   Chapitre: { screen: ChapterSelectorScreen },
-  Verset: { screen: VerseSelectorScreen }
+  Verset: { screen: VerseSelectorScreen },
 }
 
 const TabNavigatorConfig = {
@@ -23,12 +23,12 @@ const TabNavigatorConfig = {
     activeTintColor: theme.colors.primary,
     inactiveTintColor: 'black',
     style: {
-      backgroundColor: 'white'
+      backgroundColor: 'white',
     },
     indicatorStyle: {
-      backgroundColor: theme.colors.primary
-    }
-  }
+      backgroundColor: theme.colors.primary,
+    },
+  },
 }
 
 export default createMaterialTopTabNavigator(RouteConfigs, TabNavigatorConfig)

@@ -28,8 +28,8 @@ const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
 
   ...(isSelectionMode && {
     height: 70,
-    width: 250
-  })
+    width: 250,
+  }),
 }))
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
@@ -51,8 +51,8 @@ const Container = styled.View(({ theme, isSelectionMode }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: 10,
-    paddingRight: 10
-  })
+    paddingRight: 10,
+  }),
 }))
 
 const HalfContainer = styled.View(({ border, theme }) => ({
@@ -60,7 +60,7 @@ const HalfContainer = styled.View(({ border, theme }) => ({
   borderBottomWidth: border ? 1 : 0,
   flexDirection: 'row',
   alignItems: 'stretch',
-  height: 60
+  height: 60,
 }))
 
 const VersesModal = ({
@@ -75,12 +75,12 @@ const VersesModal = ({
   onCreateNoteClick,
   isSelectionMode,
   setReference,
-  setNave
+  setNave,
 }) => {
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
 
   const { colors } = useSelector(state => ({
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme]
+    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
 
   useEffect(() => {
@@ -106,10 +106,10 @@ const VersesModal = ({
         verse: {
           Livre,
           Chapitre,
-          Verset
-        }
+          Verset,
+        },
       },
-      key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`
+      key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`,
     })
   }
 
@@ -122,17 +122,17 @@ const VersesModal = ({
         verse: {
           Livre,
           Chapitre,
-          Verset
-        }
+          Verset,
+        },
       },
-      key: `dictionnaire-verse-detail-${Livre}-${Chapitre}-${Verset}`
+      key: `dictionnaire-verse-detail-${Livre}-${Chapitre}-${Verset}`,
     })
   }
 
   const compareVerses = () => {
     clearSelectedVerses()
     navigation.navigate('BibleCompareVerses', {
-      selectedVerses
+      selectedVerses,
     })
   }
 
@@ -144,7 +144,7 @@ const VersesModal = ({
       title,
       content,
       version,
-      verses: Object.keys(selectedVerses)
+      verses: Object.keys(selectedVerses),
     })
     clearSelectedVerses()
   }

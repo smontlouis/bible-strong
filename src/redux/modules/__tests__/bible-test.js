@@ -11,20 +11,23 @@ const initialState = {
   temp: {
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
-    selectedVerse: 1
+    selectedVerse: 1,
   },
-  selectedVerses: {} // highlighted verses
+  selectedVerses: {}, // highlighted verses
 }
 
 describe('Bible Reducer', () => {
   it('should handle SET_TEMP_SELECTED_BOOK', () => {
-    const newState = reducer(undefined, BibleActions.setTempSelectedBook(booksDesc[2]))
+    const newState = reducer(
+      undefined,
+      BibleActions.setTempSelectedBook(booksDesc[2])
+    )
     expect(newState).toEqual({
       ...initialState,
       temp: {
         ...initialState.temp,
-        selectedBook: booksDesc[2]
-      }
+        selectedBook: booksDesc[2],
+      },
     })
   })
 
@@ -34,8 +37,8 @@ describe('Bible Reducer', () => {
       ...initialState,
       temp: {
         ...initialState.temp,
-        selectedChapter: 4
-      }
+        selectedChapter: 4,
+      },
     })
   })
 
@@ -45,8 +48,8 @@ describe('Bible Reducer', () => {
       ...initialState,
       temp: {
         ...initialState.temp,
-        selectedVerse: 10
-      }
+        selectedVerse: 10,
+      },
     })
   })
 
@@ -57,7 +60,7 @@ describe('Bible Reducer', () => {
         book: booksDesc[4],
         chapter: 2,
         verse: 1,
-        version: 'OST'
+        version: 'OST',
       })
     )
     expect(newState).toMatchSnapshot()
@@ -70,8 +73,8 @@ describe('Bible Reducer', () => {
         temp: {
           selectedBook: booksDesc[6],
           selectedChapter: 5,
-          selectedVerse: 8
-        }
+          selectedVerse: 8,
+        },
       },
       BibleActions.validateSelected()
     )
@@ -85,8 +88,8 @@ describe('Bible Reducer', () => {
         temp: {
           selectedBook: booksDesc[6],
           selectedChapter: 5,
-          selectedVerse: 8
-        }
+          selectedVerse: 8,
+        },
       },
       BibleActions.resetTempSelected()
     )
@@ -97,7 +100,7 @@ describe('Bible Reducer', () => {
     const newState = reducer(undefined, BibleActions.setVersion('OST'))
     expect(newState).toEqual({
       ...initialState,
-      selectedVersion: 'OST'
+      selectedVersion: 'OST',
     })
   })
 
@@ -108,8 +111,8 @@ describe('Bible Reducer', () => {
         selectedVerses: {
           1: true,
           3: true,
-          5: true
-        }
+          5: true,
+        },
       },
       BibleActions.addSelectedVerse(4)
     )
@@ -119,8 +122,8 @@ describe('Bible Reducer', () => {
         1: true,
         3: true,
         5: true,
-        4: true
-      }
+        4: true,
+      },
     })
   })
 
@@ -131,8 +134,8 @@ describe('Bible Reducer', () => {
         selectedVerses: {
           1: true,
           3: true,
-          5: true
-        }
+          5: true,
+        },
       },
       BibleActions.removeSelectedVerse(3)
     )
@@ -140,8 +143,8 @@ describe('Bible Reducer', () => {
       ...initialState,
       selectedVerses: {
         1: true,
-        5: true
-      }
+        5: true,
+      },
     })
   })
 
@@ -152,14 +155,14 @@ describe('Bible Reducer', () => {
         selectedVerses: {
           1: true,
           3: true,
-          5: true
-        }
+          5: true,
+        },
       },
       BibleActions.clearSelectedVerses()
     )
     expect(newState).toEqual({
       ...initialState,
-      selectedVerses: {}
+      selectedVerses: {},
     })
   })
 
@@ -175,8 +178,8 @@ describe('Bible Reducer', () => {
         selectedChapter: 2,
         temp: {
           ...initialState.temp,
-          selectedChapter: 2
-        }
+          selectedChapter: 2,
+        },
       },
       BibleActions.goToPrevChapter()
     )
@@ -185,8 +188,8 @@ describe('Bible Reducer', () => {
       selectedChapter: 1,
       temp: {
         ...initialState.temp,
-        selectedChapter: 1
-      }
+        selectedChapter: 1,
+      },
     })
   })
 
@@ -197,8 +200,8 @@ describe('Bible Reducer', () => {
         selectedBook: booksDesc[1],
         temp: {
           ...initialState.temp,
-          selectedBook: booksDesc[1]
-        }
+          selectedBook: booksDesc[1],
+        },
       },
       BibleActions.goToPrevChapter()
     )
@@ -207,8 +210,8 @@ describe('Bible Reducer', () => {
       selectedChapter: 50,
       temp: {
         ...initialState.temp,
-        selectedChapter: 50
-      }
+        selectedChapter: 50,
+      },
     })
   })
 
@@ -221,8 +224,8 @@ describe('Bible Reducer', () => {
         temp: {
           ...initialState.temp,
           selectedBook: booksDesc[65],
-          selectedChapter: 22
-        }
+          selectedChapter: 22,
+        },
       },
       BibleActions.goToNextChapter()
     )
@@ -236,8 +239,8 @@ describe('Bible Reducer', () => {
       selectedChapter: 2,
       temp: {
         ...initialState.temp,
-        selectedChapter: 2
-      }
+        selectedChapter: 2,
+      },
     })
   })
 
@@ -248,8 +251,8 @@ describe('Bible Reducer', () => {
         selectedChapter: 50,
         temp: {
           ...initialState.temp,
-          selectedChapter: 50
-        }
+          selectedChapter: 50,
+        },
       },
       BibleActions.goToNextChapter()
     )
@@ -260,8 +263,8 @@ describe('Bible Reducer', () => {
       temp: {
         ...initialState.temp,
         selectedBook: booksDesc[1],
-        selectedChapter: 1
-      }
+        selectedChapter: 1,
+      },
     })
   })
 })

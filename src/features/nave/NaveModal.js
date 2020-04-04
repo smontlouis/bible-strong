@@ -13,7 +13,7 @@ const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   alignItems: 'center',
   zIndex: 10,
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -28,7 +28,7 @@ const Container = styled.View(({ theme }) => ({
   elevation: 2,
   paddingBottom: getBottomSpace(),
   borderTopLeftRadius: 30,
-  borderTopRightRadius: 30
+  borderTopRightRadius: 30,
 }))
 
 const NaveModal = ({ onClosed, theme, selectedVerse, version }) => {

@@ -11,7 +11,7 @@ const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   alignItems: 'center',
   margin: 0,
-  paddingBottom: 60 + getBottomSpace()
+  paddingBottom: 60 + getBottomSpace(),
 })
 
 const WrapperIcon = styled.TouchableOpacity(({ theme }) => ({
@@ -25,11 +25,11 @@ const WrapperIcon = styled.TouchableOpacity(({ theme }) => ({
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
-  elevation: 2
+  elevation: 2,
 }))
 
 const StyledIcon = styled(Icon.FontAwesome)(({ theme, isDisabled }) => ({
-  color: 'rgb(210,210,210)'
+  color: 'rgb(210,210,210)',
 }))
 
 const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
@@ -47,7 +47,8 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
       backdropOpacity={0.1}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard>
+      avoidKeyboard
+    >
       <AnimatedCircularProgress
         ref={progressRef}
         size={60}
@@ -64,7 +65,8 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
               setTimeout(() => {
                 setMultipleTagsItem(item)
               }, 500)
-            }}>
+            }}
+          >
             <StyledIcon size={20} name="tags" />
           </WrapperIcon>
         )}

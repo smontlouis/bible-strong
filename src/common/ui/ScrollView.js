@@ -18,19 +18,19 @@ const ScrollView = styled.ScrollView(({ theme, orientation }) => ({
     marginTop: 20,
     marginBottom: 50,
     borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30
-  })
+    borderBottomRightRadius: 30,
+  }),
 }))
 
 const fadeIn = {
   from: {
     translateY: 10,
-    opacity: 0
+    opacity: 0,
   },
   to: {
     translateY: 0,
-    opacity: 1
-  }
+    opacity: 1,
+  },
 }
 
 export const HomeScrollView = ({
@@ -46,7 +46,7 @@ export const HomeScrollView = ({
       contentContainerStyle={{
         paddingTop: 20,
         paddingBottom: 20,
-        ...contentContainerStyle
+        ...contentContainerStyle,
       }}
     >
       {children}
@@ -69,7 +69,7 @@ export default ({ children, contentContainerStyle, ...props }) => {
         contentContainerStyle={{
           paddingTop: 20,
           paddingBottom: 10 + getBottomSpace(),
-          ...contentContainerStyle
+          ...contentContainerStyle,
         }}
       >
         {children}

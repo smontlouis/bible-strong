@@ -26,8 +26,12 @@ const loadLexiqueBySearch = searchValue =>
       .sort((a, b) => {
         const nameA = a.Mot.toLowerCase()
         const nameB = b.Mot.toLowerCase()
-        if (nameA < nameB) return -1
-        if (nameA > nameB) return 1
+        if (nameA < nameB) {
+          return -1
+        }
+        if (nameA > nameB) {
+          return 1
+        }
         return 0
       })
   })

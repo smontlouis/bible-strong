@@ -12,7 +12,9 @@ import { useResultsByLetterOrSearch } from './useUtilities'
 const hideIfNoDatabase = WrappedComponent => props => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
 
-  if (isLoading || proposeDownload) return null
+  if (isLoading || proposeDownload) {
+    return null
+  }
   return <WrappedComponent {...props} />
 }
 
@@ -25,7 +27,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
 
   const { results, isLoading } = useResultsByLetterOrSearch({
     query: loadLexiqueBySearch,
-    value: searchValue
+    value: searchValue,
   })
 
   useEffect(() => {
@@ -71,7 +73,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                   right: 0,
                   top: 0,
                   height,
-                  borderRadius: 3
+                  borderRadius: 3,
                 }}
               >
                 <LinearGradient
@@ -115,7 +117,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                 right: 0,
                 top: 0,
                 height,
-                borderRadius: 3
+                borderRadius: 3,
               }}
             >
               <LinearGradient

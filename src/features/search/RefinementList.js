@@ -9,18 +9,18 @@ const lookupTable = {
   section: {
     title: 'Section',
     NT: 'Nouveau Testament',
-    AT: 'Ancien Testament'
+    AT: 'Ancien Testament',
   },
   book: {
     title: 'Livre',
     ...books.reduce(
       (acc, curr) => ({
         ...acc,
-        [curr.Numero]: curr.Nom
+        [curr.Numero]: curr.Nom,
       }),
       {}
-    )
-  }
+    ),
+  },
 }
 
 const RefinementList = ({ items, refine, attribute, ...props }) => {
@@ -33,9 +33,9 @@ const RefinementList = ({ items, refine, attribute, ...props }) => {
       return {
         value,
         label: lookupTable[attribute][value],
-        count: item.count
+        count: item.count,
       }
-    })
+    }),
   ]
 
   choices.sort((a, b) => {

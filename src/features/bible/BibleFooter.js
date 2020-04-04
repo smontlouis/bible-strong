@@ -35,8 +35,8 @@ const Container = styled.View(({ audioMode, theme }) => ({
     // shadowRadius: 3,
     // elevation: 2,
     bottom: 0,
-    paddingBottom: 20
-  })
+    paddingBottom: 20,
+  }),
 }))
 
 const IconButton = styled.TouchableOpacity(
@@ -54,19 +54,19 @@ const IconButton = styled.TouchableOpacity(
       shadowOpacity: 0.3,
       shadowRadius: 3,
       elevation: 2,
-      overflow: 'visible'
+      overflow: 'visible',
     }),
 
     ...(big && {
       width: 50,
       height: 50,
-      borderRadius: 25
-    })
+      borderRadius: 25,
+    }),
   })
 )
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
-  color: color ? theme.colors[color] : theme.colors.tertiary
+  color: color ? theme.colors[color] : theme.colors.tertiary,
 }))
 
 const Progress = styled(Box)(({ progress, theme }) => ({
@@ -75,7 +75,7 @@ const Progress = styled(Box)(({ progress, theme }) => ({
   top: 0,
   height: 4,
   left: 0,
-  backgroundColor: theme.colors.primary
+  backgroundColor: theme.colors.primary,
 }))
 
 const useLoadSound = (
@@ -101,15 +101,21 @@ const useLoadSound = (
       shouldDuckAndroid: true,
       interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
       staysActiveInBackground: true,
-      playThroughEarpieceAndroid: false
+      playThroughEarpieceAndroid: false,
     })
   }, [])
 
   useEffect(() => {
     const loadSound = async () => {
-      if (!audioUrl) return
-      if (!audioMode && !isPlaying) return
-      if (isPlaying && audioUrl === previousAudioUrl) return
+      if (!audioUrl) {
+        return
+      }
+      if (!audioMode && !isPlaying) {
+        return
+      }
+      if (isPlaying && audioUrl === previousAudioUrl) {
+        return
+      }
 
       try {
         console.log('AUDIO URL', audioUrl)
@@ -127,7 +133,7 @@ const useLoadSound = (
 
         await s.loadAsync(
           {
-            uri: audioUrl
+            uri: audioUrl,
           },
           {},
           false
@@ -240,7 +246,7 @@ const PlayButton = ({
   setIsPlaying,
   error,
   isLoading,
-  isBuffering
+  isBuffering,
 }) => {
   if (error) {
     return (
@@ -264,7 +270,8 @@ const PlayButton = ({
       disabled={disabled}
       activeOpacity={0.5}
       onPress={() => setIsPlaying(!isPlaying)}
-      noShadow>
+      noShadow
+    >
       <StyledIcon
         name={isPlaying ? 'pause' : 'play'}
         size={23}
@@ -310,7 +317,7 @@ const BibleFooter = ({
   setAudioMode,
   isPlaying,
   setIsPlaying,
-  audioUrl
+  audioUrl,
 }) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
@@ -368,7 +375,8 @@ const BibleFooter = ({
               onPress={() => {
                 setIsLoading(true)
                 goToPrevChapter()
-              }}>
+              }}
+            >
               <StyledIcon name="arrow-left" size={20} />
             </IconButton>
           )}
@@ -382,7 +390,8 @@ const BibleFooter = ({
               onPress={() => {
                 setAudioMode(true)
               }}
-              color={isPlaying ? 'primary' : ''}>
+              color={isPlaying ? 'primary' : ''}
+            >
               <OpenAudioModeButton
                 {...{ error, isPlaying, isBuffering, isLoading }}
               />
@@ -394,7 +403,8 @@ const BibleFooter = ({
                 disabled={disabled || isLoading}
                 activeOpacity={0.5}
                 onPress={() => setPosition(-5000)}
-                noShadow>
+                noShadow
+              >
                 <StyledIcon name="rewind" size={18} />
               </IconButton>
               <PlayButton
@@ -405,14 +415,15 @@ const BibleFooter = ({
                   isPlaying,
                   error,
                   isLoading,
-                  isBuffering
+                  isBuffering,
                 }}
               />
               <IconButton
                 disabled={disabled || isLoading}
                 activeOpacity={0.5}
                 onPress={() => setPosition(+5000)}
-                noShadow>
+                noShadow
+              >
                 <StyledIcon name="fast-forward" size={18} />
               </IconButton>
             </>
@@ -429,7 +440,8 @@ const BibleFooter = ({
               onPress={() => {
                 setIsLoading(true)
                 goToNextChapter()
-              }}>
+              }}
+            >
               <StyledIcon name="arrow-right" size={20} />
             </IconButton>
           )}

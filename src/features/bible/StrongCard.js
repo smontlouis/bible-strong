@@ -23,49 +23,49 @@ const Container = styled(Box)(({ isModal }) => ({
 
   ...(isModal && {
     width: 'auto',
-    paddingHorizontal: 20
-  })
+    paddingHorizontal: 20,
+  }),
 }))
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.primary
+  backgroundColor: theme.colors.primary,
 }))
 
 const ViewItem = styled.View(() => ({
-  marginTop: 15
+  marginTop: 15,
 }))
 
 const SubTitle = styled(Text)({
   fontSize: 13,
-  marginBottom: 3
+  marginBottom: 3,
 })
 
 const SmallParagraph = styled(Paragraph)({
   fontSize: 12,
-  lineHeight: 18
+  lineHeight: 18,
 })
 
 const Header = styled.View(() => ({
   flex: 1,
   paddingTop: 5,
   flexDirection: 'row',
-  alignItems: 'center'
+  alignItems: 'center',
   // justifyContent: 'center'
 }))
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   paddingTop: 5,
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const smallTextStyle = theme => ({
   lineHeight: 18,
   fontSize: 12,
   color: theme.colors.default,
-  fontFamily: theme.fontFamily.paragraph
+  fontFamily: theme.fontFamily.paragraph,
 })
 
 class StrongCard extends React.Component {
@@ -83,8 +83,8 @@ class StrongCard extends React.Component {
         Definition,
         LSG,
         Hebreu,
-        Grec
-      }
+        Grec,
+      },
     } = this.props
 
     if (isSelectionMode) {
@@ -98,13 +98,13 @@ class StrongCard extends React.Component {
         definition: Definition,
         translatedBy: LSG,
         original: Hebreu || Grec,
-        book
+        book,
       })
     } else {
       navigation.navigate({
         routeName: 'BibleStrongDetail',
         params: { book, strongReference },
-        key: `bible-strong-detail-${strongReference.Code}`
+        key: `bible-strong-detail-${strongReference.Code}`,
       })
     }
   }
@@ -120,11 +120,11 @@ class StrongCard extends React.Component {
         Mot,
         Phonetique,
         Definition,
-        LSG
+        LSG,
       },
       theme,
       isModal,
-      onClosed
+      onClosed,
     } = this.props
 
     return (
@@ -157,7 +157,8 @@ class StrongCard extends React.Component {
                 <Link
                   paddingSmall
                   onPress={onClosed}
-                  style={{ alignItems: 'flex-end' }}>
+                  style={{ alignItems: 'flex-end' }}
+                >
                   <IconFeather name="x" size={25} />
                 </Link>
               )}
@@ -185,7 +186,7 @@ class StrongCard extends React.Component {
                   a: { ...smallTextStyle(theme) },
                   li: { ...smallTextStyle(theme) },
                   ol: { ...smallTextStyle(theme) },
-                  ul: { ...smallTextStyle(theme) }
+                  ul: { ...smallTextStyle(theme) },
                 }}
                 value={Definition}
                 onLinkPress={() => {}}

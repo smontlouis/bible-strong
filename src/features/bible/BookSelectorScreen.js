@@ -10,7 +10,7 @@ import BookSelectorItem from './BookSelectorItem'
 
 class BookSelector extends Component {
   static navigationOptions = {
-    tabBarLabel: 'LIVRE'
+    tabBarLabel: 'LIVRE',
   }
 
   onBookChange = book => {
@@ -28,8 +28,9 @@ class BookSelector extends Component {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          paddingTop: 10
-        }}>
+          paddingTop: 10,
+        }}
+      >
         {Object.values(books).map(book => (
           <BookSelectorItem
             isNT={book.Numero >= 40}
@@ -48,7 +49,7 @@ export default compose(
   pure,
   connect(
     state => ({
-      selectedBook: state.bible.temp.selectedBook
+      selectedBook: state.bible.temp.selectedBook,
     }),
     BibleActions
   )

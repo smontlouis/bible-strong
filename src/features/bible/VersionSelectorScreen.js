@@ -16,7 +16,7 @@ import VersionSelectorItem from './VersionSelectorItem'
 const SectionList = styled(RNSectionList)({
   flex: 1,
   paddingTop: 10,
-  paddingBottom: 20
+  paddingBottom: 20,
 })
 
 const VersionSelector = ({ setVersion, navigation }) => {
@@ -57,7 +57,7 @@ const VersionSelector = ({ setVersion, navigation }) => {
 VersionSelector.navigationOptions = {
   headerTitle: 'Versions',
   headerTintColor: '#000',
-  headerStyle: { borderBottomWidth: 0 }
+  headerStyle: { borderBottomWidth: 0 },
 }
 
 export default connect(null, BibleActions)(VersionSelector)

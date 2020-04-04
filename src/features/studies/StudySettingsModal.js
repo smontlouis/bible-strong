@@ -12,7 +12,7 @@ import { deleteStudy } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -30,7 +30,7 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace(),
 }))
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
@@ -39,7 +39,7 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   padding: 20,
   borderBottomColor: theme.colors.border,
   borderBottomWidth: 1,
-  overflow: 'hidden'
+  overflow: 'hidden',
 }))
 
 const StudySettingsModal = ({
@@ -47,7 +47,7 @@ const StudySettingsModal = ({
   onClosed,
   theme,
   setTitlePrompt,
-  setMultipleTagsItem
+  setMultipleTagsItem,
 }) => {
   const dispatch = useDispatch()
   const studyId = isOpen
@@ -59,8 +59,8 @@ const StudySettingsModal = ({
       {
         text: 'Oui',
         onPress: () => dispatch(deleteStudy(studyId), onClosed()),
-        style: 'destructive'
-      }
+        style: 'destructive',
+      },
     ])
   }
 

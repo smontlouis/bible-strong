@@ -5,12 +5,14 @@ import {
   naveDB,
   getTresorDB,
   getInterlineaireDB,
-  initInterlineaireDB
+  initInterlineaireDB,
 } from '~helpers/database'
 
 const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
   return new Promise((resolve, reject) => {
-    if (!getDB() && initDB) initDB()
+    if (!getDB() && initDB) {
+      initDB()
+    }
     getDB().transaction(
       tx => {
         tx.executeSql(

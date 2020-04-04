@@ -14,7 +14,7 @@ const Circle = styled.View(({ theme }) => ({
   borderRadius: 10,
   top: 0,
   right: -3,
-  backgroundColor: theme.colors.success
+  backgroundColor: theme.colors.success,
 }))
 
 const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
@@ -38,11 +38,12 @@ const TabBarIcon = props => {
     <Animatable.View
       style={{
         position: 'relative',
-        marginTop: props.focused ? -8 : -3
+        marginTop: props.focused ? -8 : -3,
       }}
       duration={400}
       easing="ease-in-out-expo"
-      transition="marginTop">
+      transition="marginTop"
+    >
       <Icon.Feather
         name={props.name}
         size={23}

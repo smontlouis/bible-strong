@@ -13,7 +13,7 @@ const waitForModal = WrappedComponent => props => {
     startDownload,
     proposeDownload,
     setStartDownload,
-    progress
+    progress,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {

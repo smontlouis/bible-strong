@@ -1,7 +1,7 @@
 import React from 'react'
 import {
   connectInfiniteHits,
-  connectStateResults
+  connectStateResults,
 } from 'react-instantsearch-native'
 import FlatList from '~common/ui/FlatList'
 

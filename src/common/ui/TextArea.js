@@ -6,7 +6,7 @@ const StyledTextArea = styled.TextInput(({ theme }) => ({
   borderBottomWidth: 2,
   paddingBottom: 10,
   marginTop: 20,
-  maxHeight: 200
+  maxHeight: 200,
 }))
 
 export default StyledTextArea

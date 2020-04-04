@@ -25,7 +25,7 @@ const Chip = styled.View(({ theme, color }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   paddingHorizontal: 5,
-  marginBottom: 5
+  marginBottom: 5,
 }))
 
 const HistoryItem = ({ item }) => {
@@ -49,7 +49,7 @@ const HistoryItem = ({ item }) => {
             <Text fontSize={10} color="grey">
               Il y a{' '}
               {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale
+                locale: frLocale,
               })}
             </Text>
           </Box>
@@ -61,7 +61,7 @@ const HistoryItem = ({ item }) => {
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
     let { title } = formatVerseContent([
-      { Livre: book, Chapitre: chapter, Verset: verse }
+      { Livre: book, Chapitre: chapter, Verset: verse },
     ])
     if (title.endsWith(':1')) {
       title = title.substring(0, title.length - 2)
@@ -74,8 +74,9 @@ const HistoryItem = ({ item }) => {
           book: books[book - 1],
           chapter,
           verse,
-          version
-        }}>
+          version,
+        }}
+      >
         <Box padding={20} row alignItems="center">
           <Text bold>
             {title} {version}
@@ -89,7 +90,7 @@ const HistoryItem = ({ item }) => {
             <Text fontSize={10} color="grey">
               Il y a{' '}
               {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale
+                locale: frLocale,
               })}
             </Text>
           </Box>
@@ -113,7 +114,7 @@ const HistoryItem = ({ item }) => {
             <Text fontSize={10} color="grey">
               Il y a{' '}
               {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale
+                locale: frLocale,
               })}
             </Text>
           </Box>
@@ -138,7 +139,7 @@ const HistoryItem = ({ item }) => {
             <Text fontSize={10} color="grey">
               Il y a{' '}
               {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale
+                locale: frLocale,
               })}
             </Text>
           </Box>
@@ -153,7 +154,7 @@ const HistoryItem = ({ item }) => {
 const History = () => {
   const { history, colors } = useSelector(state => ({
     history: state.user.bible.history,
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme]
+    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
   const dispatch = useDispatch()
 

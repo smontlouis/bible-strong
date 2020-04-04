@@ -50,7 +50,7 @@ export const databases = {
     name: 'Dictionnaire Westphal',
     desc: 'Dictionnaire Encyclopédique de la Bible A. Westphal. ',
     fileSize: 22532096,
-    path: `${sqliteDirPath}/dictionnaire.sqlite`
+    path: `${sqliteDirPath}/dictionnaire.sqlite`,
   },
   NAVE: {
     id: 'NAVE',
@@ -58,7 +58,7 @@ export const databases = {
     desc:
       'Plus de 20.000 sujets et sous-thèmes, et 100.000 références aux Écritures.',
     fileSize: 7448576,
-    path: `${sqliteDirPath}/naveFr.sqlite`
+    path: `${sqliteDirPath}/naveFr.sqlite`,
   },
   TRESOR: {
     id: 'TRESOR',
@@ -66,14 +66,14 @@ export const databases = {
     desc:
       'L’un des ensembles les plus complets de références croisées jamais compilées, composé de plus de 572.000 entrées.',
     fileSize: 5434368,
-    path: `${sqliteDirPath}/commentaires-tresor.sqlite`
+    path: `${sqliteDirPath}/commentaires-tresor.sqlite`,
   },
   MHY: {
     id: 'MHY',
     name: 'Commentaires',
     desc: 'Commentaires concis de Matthew Henry. Traduction Dominique Osché.',
     fileSize: 6574080,
-    path: `${sqliteDirPath}/commentaires-mhy.sqlite`
+    path: `${sqliteDirPath}/commentaires-mhy.sqlite`,
   },
   STRONG: {
     id: 'STRONG',
@@ -81,6 +81,6 @@ export const databases = {
     desc:
       'Lexique contenu les strongs grecs et hébreu avec leur concordance et définitions',
     fileSize: 34941952,
-    path: `${sqliteDirPath}/strong.sqlite`
-  }
+    path: `${sqliteDirPath}/strong.sqlite`,
+  },
 }

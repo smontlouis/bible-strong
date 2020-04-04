@@ -9,7 +9,7 @@ import {
   MenuOption,
   MenuTrigger,
   renderers,
-  withMenuContext
+  withMenuContext,
 } from 'react-native-popup-menu'
 import { withNavigation } from 'react-navigation'
 import * as Animatable from 'react-native-animatable'
@@ -40,7 +40,7 @@ const PopOverMenu = ({ element, popover, ...props }) => {
           shadowOpacity: 0.1,
           shadowRadius: 7,
           elevation: 1,
-          borderRadius: 8
+          borderRadius: 8,
         }}
       >
         <Box padding={10}>{popover}</Box>
@@ -54,14 +54,14 @@ const LinkBox = styled(Link)(() => ({
   alignItems: 'center',
   justifyContent: 'center',
   paddingLeft: 10,
-  paddingRight: 10
+  paddingRight: 10,
 }))
 
 const StyledText = styled(Animatable.Text)(({ color, theme }) => ({
   fontSize: 16,
   fontWeight: 'bold',
   marginRight: 5,
-  color: theme.colors[color] || theme.colors.default
+  color: theme.colors[color] || theme.colors.default,
 }))
 
 const HeaderBox = styled(Box)(({ theme }) => ({
@@ -69,7 +69,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   width: '100%',
   alignSelf: 'center',
   alignItems: 'stretch',
-  borderBottomColor: theme.colors.border
+  borderBottomColor: theme.colors.border,
 }))
 
 const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
@@ -104,14 +104,14 @@ const Header = ({
   onBibleParamsClick,
   addParallelVersion,
   removeAllParallelVersions,
-  isParallel
+  isParallel,
 }) => {
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
 
   const {
     state: { isFullscreen },
-    updateState
+    updateState,
   } = React.useContext(GlobalStateContext)
 
   if (isReadOnly) {
@@ -177,7 +177,7 @@ const Header = ({
               height={50}
               width={50}
               style={{
-                opacity: isFullscreen ? 0 : 1
+                opacity: isFullscreen ? 0 : 1,
               }}
             >
               <FeatherIcon name="more-vertical" size={18} />

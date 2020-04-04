@@ -8,12 +8,21 @@ const Touchable = styled.TouchableOpacity(({ disabled }) => ({
   flex: 1,
   alignItems: 'center',
   justifyContent: 'center',
-  opacity: disabled ? 0.3 : 1
+  opacity: disabled ? 0.3 : 1,
 }))
 
 class TouchableSvgIcon extends React.Component {
   render() {
-    const { onPress, isSelected, color, size = 20, icon: Icon, theme, label, disabled } = this.props
+    const {
+      onPress,
+      isSelected,
+      color,
+      size = 20,
+      icon: Icon,
+      theme,
+      label,
+      disabled,
+    } = this.props
     return (
       <Touchable onPress={onPress} disabled={disabled}>
         <Icon

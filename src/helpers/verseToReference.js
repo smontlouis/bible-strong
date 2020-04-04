@@ -5,8 +5,12 @@ const orderVerses = arrayVerses => {
     const verse1 = Number(key1.split('-')[2])
     const verse2 = Number(key2.split('-')[2])
 
-    if (verse1 < verse2) return -1
-    if (verse1 > verse2) return 1
+    if (verse1 < verse2) {
+      return -1
+    }
+    if (verse1 > verse2) {
+      return 1
+    }
     return 0
   })
 
@@ -32,7 +36,7 @@ const verseToReference = v => {
     return {
       book,
       chapter,
-      verse
+      verse,
     }
   })
 

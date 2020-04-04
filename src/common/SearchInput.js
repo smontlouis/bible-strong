@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 
 const CloseIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const SearchInput = ({
@@ -49,7 +49,7 @@ const SearchInput = ({
             width: '100%',
             height: '100%',
             fontSize: 18,
-            color: theme.colors.default
+            color: theme.colors.default,
           }}
           {...props}
         />

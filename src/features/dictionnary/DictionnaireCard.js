@@ -22,36 +22,36 @@ const Container = styled(Box)({
   width: itemWidth,
   flex: 1,
   paddingHorizontal: itemHorizontalMargin,
-  paddingBottom: 18
+  paddingBottom: 18,
 })
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.secondary
+  backgroundColor: theme.colors.secondary,
 }))
 
 const ViewItem = styled.View(() => ({
-  marginTop: 15
+  marginTop: 15,
 }))
 
 const OpenStrongIcon = styled.TouchableOpacity(() => ({
   paddingTop: 5,
   flexDirection: 'row',
-  alignItems: 'center'
+  alignItems: 'center',
 }))
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   paddingTop: 5,
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const smallTextStyle = theme => ({
   lineHeight: 18,
   fontSize: 12,
   color: theme.colors.default,
-  fontFamily: theme.fontFamily.paragraph
+  fontFamily: theme.fontFamily.paragraph,
 })
 
 class StrongCard extends React.Component {
@@ -59,7 +59,7 @@ class StrongCard extends React.Component {
     const {
       navigation,
       isSelectionMode,
-      dictionnaireRef: { word }
+      dictionnaireRef: { word },
     } = this.props
 
     if (isSelectionMode) {
@@ -68,7 +68,7 @@ class StrongCard extends React.Component {
       navigation.navigate({
         routeName: 'DictionnaryDetail',
         params: { word },
-        key: `dictionnary-detail-${word}`
+        key: `dictionnary-detail-${word}`,
       })
     }
   }
@@ -77,7 +77,7 @@ class StrongCard extends React.Component {
     const {
       isSelectionMode,
       dictionnaireRef: { word, definition } = {},
-      theme
+      theme,
     } = this.props
 
     if (!word) {
@@ -132,7 +132,7 @@ class StrongCard extends React.Component {
                   ul: { ...smallTextStyle(theme) },
                   h1: { ...smallTextStyle(theme) },
                   h2: { ...smallTextStyle(theme) },
-                  h3: { ...smallTextStyle(theme) }
+                  h3: { ...smallTextStyle(theme) },
                 }}
                 value={html}
                 onLinkPress={() => {}}

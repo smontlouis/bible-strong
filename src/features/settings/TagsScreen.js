@@ -26,7 +26,7 @@ const Chip = styled(Box)(({ theme }) => ({
   paddingRight: 7,
   marginRight: 5,
   marginBottom: 5,
-  marginTop: 5
+  marginTop: 5,
 }))
 
 const TagItem = ({ item, setOpen }) => {
@@ -92,8 +92,8 @@ const TagsScreen = () => {
           dispatch(removeTag(isOpen.id))
           setOpen(false)
         },
-        style: 'destructive'
-      }
+        style: 'destructive',
+      },
     ])
   }
 
@@ -122,7 +122,8 @@ const TagsScreen = () => {
             setTimeout(() => {
               setTitlePrompt({ id: isOpen.id, name: isOpen.name })
             }, 500)
-          }}>
+          }}
+        >
           Éditer
         </Modal.Item>
         <Modal.Item bold color="quart" onPress={promptLogout}>

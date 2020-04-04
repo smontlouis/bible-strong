@@ -19,7 +19,7 @@ const loadBibleChapter = async (bookNb, chapterNb, version = 'LSG') => {
     Verset: v,
     Texte: res[bookNb][chapterNb][v],
     Livre: bookNb,
-    Chapitre: chapterNb
+    Chapitre: chapterNb,
   }))
 }
 

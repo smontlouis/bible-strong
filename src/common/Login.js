@@ -3,7 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import appleAuth, {
-  AppleButton
+  AppleButton,
 } from '@invertase/react-native-apple-authentication'
 
 import SnackBar from '~common/SnackBar'
@@ -24,16 +24,16 @@ const SocialButton = styled.TouchableOpacity(({ theme, color }) => ({
   paddingLeft: 10,
   paddingRight: 10,
   backgroundColor: color || theme.colors.reverse,
-  flex: 1
+  flex: 1,
 }))
 
 const ButtonIcon = styled(Icon.FontAwesome)(() => ({
-  marginRight: 15
+  marginRight: 15,
 }))
 
 const ButtonText = styled(Text)(({ theme, color }) => ({
   fontSize: 16,
-  color: color || theme.colors.defaut
+  color: color || theme.colors.defaut,
 }))
 
 const Login = ({ theme }) => {

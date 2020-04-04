@@ -1,12 +1,19 @@
 import React, { Component } from 'react'
-import { Animated, Image, Dimensions, PanResponder, StyleSheet, View } from 'react-native'
+import {
+  Animated,
+  Image,
+  Dimensions,
+  PanResponder,
+  StyleSheet,
+  View,
+} from 'react-native'
 import colorsys from 'colorsys'
 
 export class ColorWheel extends Component {
   static defaultProps = {
     thumbSize: 50,
     initialColor: '#ffffff',
-    onColorChange: () => {}
+    onColorChange: () => {},
   }
 
   constructor(props) {
@@ -15,20 +22,22 @@ export class ColorWheel extends Component {
       offset: { x: 0, y: 0 },
       currentColor: props.initialColor,
       pan: new Animated.ValueXY(),
-      radius: 0
+      radius: 0,
     }
   }
 
   componentDidMount = () => {
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponderCapture: ({ nativeEvent }) => {
-        if (this.outBounds(nativeEvent)) return
+        if (this.outBounds(nativeEvent)) {
+          return
+        }
         this.updateColor({ nativeEvent })
         this.setState({ panHandlerReady: true })
 
         this.state.pan.setValue({
           x: -this.state.left + nativeEvent.pageX - this.props.thumbSize / 2,
-          y: -this.state.top + nativeEvent.pageY - this.props.thumbSize / 2
+          y: -this.state.top + nativeEvent.pageY - this.props.thumbSize / 2,
         })
         return true
       },
@@ -36,7 +45,9 @@ export class ColorWheel extends Component {
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderGrant: () => true,
       onPanResponderMove: (event, gestureState) => {
-        if (this.outBounds(gestureState)) return
+        if (this.outBounds(gestureState)) {
+          return
+        }
 
         this.resetPanHandler()
         return Animated.event(
@@ -44,8 +55,8 @@ export class ColorWheel extends Component {
             null,
             {
               dx: this.state.pan.x,
-              dy: this.state.pan.y
-            }
+              dy: this.state.pan.y,
+            },
           ],
           { listener: this.updateColor }
         )(event, gestureState)
@@ -62,7 +73,7 @@ export class ColorWheel extends Component {
         if (this.props.onColorChangeComplete) {
           this.props.onColorChangeComplete(this.state.hsv)
         }
-      }
+      },
     })
   }
 
@@ -83,7 +94,7 @@ export class ColorWheel extends Component {
       const radius = Math.min(width, height) / 2
       const offset = {
         x: absX + width / 2,
-        y: (y % window.height) + height / 2
+        y: (y % window.height) + height / 2,
       }
 
       this.setState({
@@ -92,7 +103,7 @@ export class ColorWheel extends Component {
         height,
         width,
         top: y % window.height,
-        left: absX
+        left: absX,
       })
       this.forceUpdate(this.state.currentColor)
     })
@@ -105,7 +116,7 @@ export class ColorWheel extends Component {
     return {
       deg: Math.atan2(dy, dx) * (-180 / Math.PI),
       // pitagoras r^2 = x^2 + y^2 normalized
-      radius: Math.sqrt(dy * dy + dx * dx) / this.state.radius
+      radius: Math.sqrt(dy * dy + dx * dx) / this.state.radius,
     }
   }
 
@@ -122,7 +133,7 @@ export class ColorWheel extends Component {
     this.setState({ panHandlerReady: false })
     this.state.pan.setOffset({
       x: this.state.pan.x._value,
-      y: this.state.pan.y._value
+      y: this.state.pan.y._value,
     })
     this.state.pan.setValue({ x: 0, y: 0 })
   }
@@ -134,7 +145,7 @@ export class ColorWheel extends Component {
     const y = r * Math.sin(rad)
     return {
       left: this.state.width / 2 + x,
-      top: this.state.height / 2 - y
+      top: this.state.height / 2 - y,
     }
   }
 
@@ -153,7 +164,7 @@ export class ColorWheel extends Component {
     this.props.onColorChange({ h, s, v })
     this.state.pan.setValue({
       x: left - this.props.thumbSize / 2,
-      y: top - this.props.thumbSize / 2
+      y: top - this.props.thumbSize / 2,
     })
   }
 
@@ -165,8 +176,8 @@ export class ColorWheel extends Component {
     Animated.spring(this.state.pan, {
       toValue: {
         x: left - this.props.thumbSize / 2,
-        y: top - this.props.thumbSize / 2
-      }
+        y: top - this.props.thumbSize / 2,
+      },
     }).start()
   }
 
@@ -180,11 +191,12 @@ export class ColorWheel extends Component {
         height: this.props.thumbSize,
         borderRadius: this.props.thumbSize / 2,
         backgroundColor: this.state.currentColor,
-        opacity: this.state.offset.x === 0 ? 0 : 1
-      }
+        opacity: this.state.offset.x === 0 ? 0 : 1,
+      },
     ]
 
-    const panHandlers = (this._panResponder && this._panResponder.panHandlers) || {}
+    const panHandlers =
+      (this._panResponder && this._panResponder.panHandlers) || {}
 
     return (
       <View
@@ -193,14 +205,15 @@ export class ColorWheel extends Component {
         }}
         {...panHandlers}
         onLayout={nativeEvent => this.onLayout(nativeEvent)}
-        style={[styles.coverResponder, this.props.style]}>
+        style={[styles.coverResponder, this.props.style]}
+      >
         <Image
           style={[
             styles.img,
             {
               height: radius * 2 - this.props.thumbSize,
-              width: radius * 2 - this.props.thumbSize
-            }
+              width: radius * 2 - this.props.thumbSize,
+            },
           ]}
           source={require('./color-wheel.png')}
         />
@@ -214,10 +227,10 @@ const styles = StyleSheet.create({
   coverResponder: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   img: {
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   circle: {
     position: 'absolute',
@@ -228,6 +241,6 @@ const styles = StyleSheet.create({
     shadowColor: 'rgb(46, 48, 58)',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
-    shadowRadius: 2
-  }
+    shadowRadius: 2,
+  },
 })

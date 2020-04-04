@@ -29,7 +29,7 @@ export const cleanParams = () => ({
   translatedBy: undefined,
   content: undefined,
   version: undefined,
-  verses: undefined
+  verses: undefined,
 })
 
 export const removeBreakLines = str => str.replace(/\n/g, '')

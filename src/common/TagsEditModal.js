@@ -14,7 +14,7 @@ import { addTag, updateTag, removeTag } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -25,12 +25,16 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace(),
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled, color }) => ({
   marginLeft: 10,
-  color: color ? theme.colors[color] : isDisabled ? theme.colors.border : theme.colors.primary
+  color: color
+    ? theme.colors[color]
+    : isDisabled
+    ? theme.colors.border
+    : theme.colors.primary,
 }))
 
 const TagsModal = ({ isVisible, onClosed }) => {
@@ -66,8 +70,8 @@ const TagsModal = ({ isVisible, onClosed }) => {
           setNewTag('')
           setSelectedChip(null)
         },
-        style: 'destructive'
-      }
+        style: 'destructive',
+      },
     ])
   }
 
@@ -76,7 +80,8 @@ const TagsModal = ({ isVisible, onClosed }) => {
       isVisible={isVisible}
       onBackButtonPress={onClosed}
       onBackdropPress={onClosed}
-      avoidKeyboard>
+      avoidKeyboard
+    >
       <Container>
         <Box flex>
           {tags.length ? (

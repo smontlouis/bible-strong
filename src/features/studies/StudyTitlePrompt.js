@@ -12,7 +12,7 @@ import TextInput from '~common/ui/TextInput'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -24,12 +24,12 @@ const Container = styled.View(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
   padding: 10,
-  paddingBottom: getBottomSpace() || 10
+  paddingBottom: getBottomSpace() || 10,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
-  color: isDisabled ? theme.colors.border : theme.colors.primary
+  color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
 const StudyTitlePrompt = ({ titlePrompt, onClosed, onSave }) => {
@@ -52,7 +52,8 @@ const StudyTitlePrompt = ({ titlePrompt, onClosed, onSave }) => {
       isVisible={!!titlePrompt}
       avoidKeyboard
       onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}>
+      onBackdropPress={onClosed}
+    >
       <Container>
         <Box row center>
           <Box flex>

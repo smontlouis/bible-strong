@@ -7,12 +7,12 @@ const RoundedCorner = styled(Box)(({ theme, reverse }) => ({
   ...(reverse
     ? {
         borderTopLeftRadius: 30,
-        borderTopRightRadius: 30
+        borderTopRightRadius: 30,
       }
     : {
         borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30
-      })
+        borderBottomRightRadius: 30,
+      }),
 }))
 
 export default RoundedCorner

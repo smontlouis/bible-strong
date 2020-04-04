@@ -25,13 +25,13 @@ const Container = styled.View(({ needsUpdate, theme }) => ({
   ...(needsUpdate
     ? {
         borderLeftColor: theme.colors.success,
-        borderLeftWidth: 5
+        borderLeftWidth: 5,
       }
-    : {})
+    : {}),
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
@@ -40,28 +40,28 @@ const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 12,
   opacity: 0.5,
-  fontWeight: 'bold'
+  fontWeight: 'bold',
 }))
 
 const TextCopyright = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 10,
   backgroundColor: 'transparent',
-  opacity: 0.5
+  opacity: 0.5,
 }))
 
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
-  backgroundColor: 'transparent'
+  backgroundColor: 'transparent',
 }))
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.quart
+  color: theme.colors.quart,
 }))
 
 const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.success
+  color: theme.colors.success,
 }))
 
 const VersionSelectorItem = ({
@@ -70,7 +70,7 @@ const VersionSelectorItem = ({
   onChange,
   theme,
   isParameters,
-  shareFn
+  shareFn,
 }) => {
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState(
     undefined
@@ -174,8 +174,8 @@ const VersionSelectorItem = ({
         {
           text: 'Oui',
           onPress: deleteVersion,
-          style: 'destructive'
-        }
+          style: 'destructive',
+        },
       ]
     )
   }
@@ -200,7 +200,8 @@ const VersionSelectorItem = ({
           {!isLoading && version.id !== 'LSGS' && (
             <TouchableOpacity
               onPress={startDownload}
-              style={{ padding: 10, alignItems: 'flex-end' }}>
+              style={{ padding: 10, alignItems: 'flex-end' }}
+            >
               <FeatherIcon name="download" size={20} />
               {version.id === 'INT' && (
                 <Box center marginTop={5}>
@@ -247,7 +248,8 @@ const VersionSelectorItem = ({
   return (
     <TouchableContainer
       needsUpdate={needsUpdate}
-      onPress={() => onChange(version.id)}>
+      onPress={() => onChange(version.id)}
+    >
       <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
       <TextName isSelected={isSelected}>{version.name}</TextName>
       <TextCopyright>{version.c}</TextCopyright>

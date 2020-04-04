@@ -43,7 +43,7 @@ class EditStudyScreen extends React.Component {
     isReadOnly: true,
     titlePrompt: '',
     multipleTagsItem: false,
-    quickTagsModal: false
+    quickTagsModal: false,
   }
 
   componentDidMount() {
@@ -71,13 +71,13 @@ class EditStudyScreen extends React.Component {
 
   navigateBibleView = type => {
     this.props.navigation.navigate('BibleView', {
-      isSelectionMode: type
+      isSelectionMode: type,
     })
   }
 
   openBibleView = () => {
     this.props.navigation.navigate('BibleView', {
-      hasBackButton: true
+      hasBackButton: true,
     })
   }
 
@@ -92,7 +92,7 @@ class EditStudyScreen extends React.Component {
       isReadOnly,
       titlePrompt,
       multipleTagsItem,
-      quickTagsModal
+      quickTagsModal,
     } = this.state
 
     return (
@@ -102,7 +102,7 @@ class EditStudyScreen extends React.Component {
           setTitlePrompt={() =>
             this.setTitlePrompt({
               id: this.props.currentStudy.id,
-              title: this.props.currentStudy.title
+              title: this.props.currentStudy.title,
             })
           }
           setReadOnly={() => {
@@ -110,8 +110,8 @@ class EditStudyScreen extends React.Component {
               isReadOnly: true,
               quickTagsModal: {
                 id: this.props.currentStudy.id,
-                entity: 'studies'
-              }
+                entity: 'studies',
+              },
             })
             this.props.dispatch(uploadStudy(this.props.currentStudy.id))
           }}
@@ -162,7 +162,7 @@ export default compose(
   connect(({ user }, ownProps) => {
     return {
       fontFamily: user.fontFamily,
-      currentStudy: user.bible.studies[ownProps.studyId]
+      currentStudy: user.bible.studies[ownProps.studyId],
     }
   })
 )(EditStudyScreen)

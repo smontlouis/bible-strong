@@ -12,7 +12,7 @@ const Wrapper = styled.View(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   height: 30,
-  pointerEvents: 'box-none'
+  pointerEvents: 'box-none',
 }))
 
 const StyledLink = styled(Link)(({ theme }) => ({
@@ -23,16 +23,16 @@ const StyledLink = styled(Link)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   flexDirection: 'row',
-  width: 80
+  width: 80,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.primary
+  color: theme.colors.primary,
 }))
 
 const TextButton = styled.Text(({ theme }) => ({
   fontSize: 13,
-  color: theme.colors.primary
+  color: theme.colors.primary,
 }))
 
 const FloatingButton = ({ label, icon, onPress, route, params }) => {

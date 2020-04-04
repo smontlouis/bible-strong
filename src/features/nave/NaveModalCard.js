@@ -14,7 +14,7 @@ import NaveForVerse from './NaveModalForVerse'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
@@ -46,7 +46,10 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
 
   if (error) {
     return (
-      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
+      <Empty
+        source={require('~assets/images/empty.json')}
+        message="Une erreur est survenue..."
+      />
     )
   }
 

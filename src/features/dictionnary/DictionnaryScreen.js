@@ -14,7 +14,10 @@ import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList2'
 import SectionTitle from '~common/SectionTitle'
-import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
+import {
+  useSearchValue,
+  useResultsByLetterOrSearch,
+} from '../lexique/useUtilities'
 import waitForDatabase from '~common/waitForDictionnaireDB'
 import DictionnaireItem from './DictionnaireItem'
 
@@ -28,10 +31,14 @@ const useSectionResults = results => {
     }
     const sectionResults = results.reduce((list, dbItem) => {
       const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
+        item =>
+          item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
       )
       if (!listItem) {
-        list.push({ title: getFirstLetterFrom(dbItem.sanitized_word), data: [dbItem] })
+        list.push({
+          title: getFirstLetterFrom(dbItem.sanitized_word),
+          data: [dbItem],
+        })
       } else {
         listItem.data.push(dbItem)
       }
@@ -92,14 +99,16 @@ const DictionnaireScreen = () => {
           <Loading message="Chargement..." />
         ) : sectionResults.length ? (
           <SectionList
-            renderItem={({ item: { id, word } }) => <DictionnaireItem key={id} {...{ word }} />}
+            renderItem={({ item: { id, word } }) => (
+              <DictionnaireItem key={id} {...{ word }} />
+            )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
             getItemLayout={sectionListGetItemLayout({
               getItemHeight: () => 60,
               getSectionHeaderHeight: () => 50,
               getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0
+              getSectionFooterHeight: () => 0,
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="secondary">
@@ -113,10 +122,15 @@ const DictionnaireScreen = () => {
             keyExtractor={item => item.id}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message="Aucun mot trouvé..." />
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Aucun mot trouvé..."
+          />
         )}
       </Box>
-      {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}
+      {!searchValue && (
+        <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />
+      )}
     </Container>
   )
 }

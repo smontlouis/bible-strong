@@ -20,7 +20,7 @@ export const copyAssets = async (filePath, destPath) => {
 
   return FileSystem.copyAsync({
     from: `${RNFS.MainBundlePath}/${filePath}`,
-    to: destPath
+    to: destPath,
   })
 }
 

@@ -3,5 +3,5 @@ import darkTheme from './dark'
 
 export default {
   default: defaultTheme,
-  dark: darkTheme
+  dark: darkTheme,
 }

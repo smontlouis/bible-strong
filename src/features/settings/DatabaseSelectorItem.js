@@ -18,7 +18,7 @@ import {
   deleteDictionnaireDB,
   deleteTresorDB,
   initDictionnaireDB,
-  initTresorDB
+  initTresorDB,
 } from '~helpers/database'
 
 import { DBStateContext } from '~helpers/databaseState'
@@ -34,16 +34,16 @@ const Container = styled.View(({ needsUpdate, theme }) => ({
   ...(needsUpdate
     ? {
         borderLeftColor: theme.colors.success,
-        borderLeftWidth: 5
+        borderLeftWidth: 5,
       }
-    : {})
+    : {}),
 }))
 
 const TextName = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   fontWeight: 'bold',
-  backgroundColor: 'transparent'
+  backgroundColor: 'transparent',
 }))
 
 const TextCopyright = styled.Text(({ isSelected, theme }) => ({
@@ -51,11 +51,11 @@ const TextCopyright = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 12,
   backgroundColor: 'transparent',
-  opacity: 0.5
+  opacity: 0.5,
 }))
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.quart
+  color: theme.colors.quart,
 }))
 
 class DBSelectorItem extends React.Component {
@@ -64,7 +64,7 @@ class DBSelectorItem extends React.Component {
   state = {
     versionNeedsDownload: undefined,
     fileProgress: 0,
-    isLoading: false
+    isLoading: false,
   }
 
   async componentDidMount() {
@@ -150,7 +150,7 @@ class DBSelectorItem extends React.Component {
         type:
           this.props.database === 'STRONG'
             ? 'strong.reset'
-            : 'dictionnaire.reset'
+            : 'dictionnaire.reset',
       })
       switch (this.props.database) {
         case 'STRONG': {
@@ -194,8 +194,8 @@ class DBSelectorItem extends React.Component {
         {
           text: 'Oui',
           onPress: this.delete,
-          style: 'destructive'
-        }
+          style: 'destructive',
+        },
       ]
     )
   }
@@ -255,7 +255,8 @@ class DBSelectorItem extends React.Component {
           {needsUpdate ? (
             <TouchableOpacity
               onPress={this.updateVersion}
-              style={{ padding: 10 }}>
+              style={{ padding: 10 }}
+            >
               <Icon.Feather
                 color={theme.colors.success}
                 name="download"
@@ -265,7 +266,8 @@ class DBSelectorItem extends React.Component {
           ) : (
             <TouchableOpacity
               onPress={this.confirmDelete}
-              style={{ padding: 10 }}>
+              style={{ padding: 10 }}
+            >
               <DeleteIcon name="trash-2" size={18} />
             </TouchableOpacity>
           )}
@@ -278,6 +280,6 @@ class DBSelectorItem extends React.Component {
 export default compose(
   withTheme,
   connect((state, ownProps) => ({
-    needsUpdate: state.user.needsUpdate[ownProps.database]
+    needsUpdate: state.user.needsUpdate[ownProps.database],
   }))
 )(DBSelectorItem)

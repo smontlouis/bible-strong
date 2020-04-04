@@ -37,7 +37,7 @@ const VerseText = styled.View(() => ({
   flex: 1,
   flexWrap: 'wrap',
   alignItems: 'flex-start',
-  flexDirection: 'row'
+  flexDirection: 'row',
 }))
 
 const VersetWrapper = styled.View(() => ({
@@ -45,21 +45,21 @@ const VersetWrapper = styled.View(() => ({
   marginRight: 5,
   borderRightWidth: 3,
   borderRightColor: 'transparent',
-  alignItems: 'flex-end'
+  alignItems: 'flex-end',
 }))
 
 const NumberText = styled(Paragraph)({
   marginTop: 0,
   fontSize: 9,
   justifyContent: 'flex-end',
-  marginRight: 3
+  marginRight: 3,
 })
 
 const StyledVerse = styled.View(() => ({
   paddingLeft: 0,
   paddingRight: 10,
   marginBottom: 5,
-  flexDirection: 'row'
+  flexDirection: 'row',
 }))
 
 const verseToDictionnary = (
@@ -121,7 +121,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   const updateVerse = value => {
     setVerse(verse => ({
       ...verse,
-      Verset: Number(verse.Verset) + value
+      Verset: Number(verse.Verset) + value,
     }))
   }
 
@@ -191,7 +191,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
             <CarouselProvider
               value={{
                 current: currentWord,
-                setCurrent: setCurrentWord
+                setCurrent: setCurrentWord,
               }}
             >
               <VerseText>{formattedText}</VerseText>
@@ -231,7 +231,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
                 marginTop: 15,
                 paddingLeft: 20,
                 overflow: 'visible',
-                flex: 1
+                flex: 1,
               }}
               onSnapToItem={index =>
                 setCurrentWord(dictionnaryWordsInVerse[index])

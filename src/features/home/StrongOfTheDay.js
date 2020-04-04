@@ -17,7 +17,7 @@ const itemHeight = 130
 const StrongOfTheDay = ({
   type,
   color1 = 'rgb(69,150,220)',
-  color2 = 'rgb(89,131,240)'
+  color2 = 'rgb(89,131,240)',
 }) => {
   const [error, setError] = useState(false)
   const [strongReference, setStrongRef] = useState(false)
@@ -98,7 +98,7 @@ const StrongOfTheDay = ({
             right: 0,
             top: 0,
             height: itemHeight,
-            borderRadius: 3
+            borderRadius: 3,
           }}
         >
           <LinearGradient

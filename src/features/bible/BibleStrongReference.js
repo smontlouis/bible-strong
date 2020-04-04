@@ -9,12 +9,14 @@ import { CarouselConsumer } from '~helpers/CarouselContext'
 import Paragraph from '~common/ui/Paragraph'
 
 const StyledView = styled.TouchableOpacity(({ isSelected, theme }) => ({
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
+  backgroundColor: isSelected
+    ? theme.colors.primary
+    : theme.colors.lightPrimary,
   borderRadius: 5,
   paddingLeft: 3,
   paddingRight: 3,
   marginBottom: 5,
-  overflow: 'hidden'
+  overflow: 'hidden',
 }))
 
 const StyledCircle = styled.TouchableOpacity(({ theme, isSelected }) => ({
@@ -23,28 +25,35 @@ const StyledCircle = styled.TouchableOpacity(({ theme, isSelected }) => ({
   borderRadius: 25 / 2,
   backgroundColor: theme.colors.lightPrimary,
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
 }))
 
-const StyledInsideCircle = styled.View(({ theme, isSelected, isConcordance }) => ({
-  width: 15,
-  height: 15,
-  borderRadius: 15 / 2,
-  backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
-  alignItems: 'center',
-  justifyContent: 'center'
-}))
+const StyledInsideCircle = styled.View(
+  ({ theme, isSelected, isConcordance }) => ({
+    width: 15,
+    height: 15,
+    borderRadius: 15 / 2,
+    backgroundColor:
+      isSelected || isConcordance
+        ? theme.colors.primary
+        : theme.colors.lightPrimary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  })
+)
 
-const StyledText = styled(Paragraph)(({ isFromConcordance, isSelected, theme }) => ({
-  color: isSelected ? theme.colors.reverse : theme.colors.default,
-  ...(isFromConcordance
-    ? {
-        color: 'red',
-        fontWeight: 'bold',
-        fontSize: 12
-      }
-    : {})
-}))
+const StyledText = styled(Paragraph)(
+  ({ isFromConcordance, isSelected, theme }) => ({
+    color: isSelected ? theme.colors.reverse : theme.colors.default,
+    ...(isFromConcordance
+      ? {
+          color: 'red',
+          fontWeight: 'bold',
+          fontSize: 12,
+        }
+      : {}),
+  })
+)
 
 const ConcordanceText = styled(Paragraph)(({ isConcordance, theme }) => ({
   ...(isConcordance
@@ -52,14 +61,22 @@ const ConcordanceText = styled(Paragraph)(({ isConcordance, theme }) => ({
         color: theme.colors.primary,
         textDecorationLine: 'underline',
         textDecorationStyle: 'solid',
-        textDecorationColor: theme.colors.primary
+        textDecorationColor: theme.colors.primary,
       }
-    : {})
+    : {}),
 }))
 
-const BibleStrongRef = ({ small, navigation, reference, word, book, concordanceFor }) => {
+const BibleStrongRef = ({
+  small,
+  navigation,
+  reference,
+  word,
+  book,
+  concordanceFor,
+}) => {
   if (concordanceFor) {
-    const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
+    const isConcordance =
+      `0${concordanceFor}` === reference || `${concordanceFor}` === reference
 
     if (!word && !isConcordance) {
       return null
@@ -79,13 +96,15 @@ const BibleStrongRef = ({ small, navigation, reference, word, book, concordanceF
     <CarouselConsumer>
       {({ currentStrongReference, goToCarouselItem }) => {
         const isSelected =
-          currentStrongReference && currentStrongReference.Code === Number(reference)
+          currentStrongReference &&
+          currentStrongReference.Code === Number(reference)
         if (!word) {
           return (
             <StyledCircle
               activeOpacity={0.5}
               onPress={() => goToCarouselItem(reference)}
-              isSelected={isSelected}>
+              isSelected={isSelected}
+            >
               <StyledInsideCircle isSelected={isSelected} />
             </StyledCircle>
           )
@@ -95,7 +114,8 @@ const BibleStrongRef = ({ small, navigation, reference, word, book, concordanceF
           <StyledView
             activeOpacity={0.5}
             onPress={() => goToCarouselItem(reference)}
-            isSelected={isSelected}>
+            isSelected={isSelected}
+          >
             <StyledText isSelected={isSelected}>{word}</StyledText>
           </StyledView>
         )
@@ -104,7 +124,4 @@ const BibleStrongRef = ({ small, navigation, reference, word, book, concordanceF
   )
 }
 
-export default compose(
-  withNavigation,
-  pure
-)(BibleStrongRef)
+export default compose(withNavigation, pure)(BibleStrongRef)

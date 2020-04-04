@@ -10,8 +10,8 @@ const fonts = {
     'Chalkboard SE',
     'Didot',
     'Helvetica',
-    'Iowan Old Style'
-  ]
+    'Iowan Old Style',
+  ],
 }
 
 export default fonts[Platform.OS]

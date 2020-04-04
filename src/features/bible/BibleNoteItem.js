@@ -19,7 +19,7 @@ const NoteLink = styled(Link)(({ theme }) => ({
   paddingVertical: 20,
   padding: 20,
   paddingRight: 0,
-  flexDirection: 'row'
+  flexDirection: 'row',
 }))
 
 class BibleNoteItem extends React.Component {
@@ -28,7 +28,7 @@ class BibleNoteItem extends React.Component {
 
     const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
-      locale: frLocale
+      locale: frLocale,
     })
 
     return (
@@ -40,8 +40,9 @@ class BibleNoteItem extends React.Component {
             book: books[Livre - 1],
             chapter: Number(Chapitre),
             verse: Number(Verset),
-            focusVerses: [Number(Verset)]
-          }}>
+            focusVerses: [Number(Verset)],
+          }}
+        >
           <Box flex>
             <Box row justifyContent="space-between">
               <Text color="darkGrey" bold fontSize={11}>

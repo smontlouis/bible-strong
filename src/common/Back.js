@@ -23,15 +23,12 @@ class Back extends Component {
             width: 60,
             height: 60,
             alignItems: 'center',
-            justifyContent: 'center'
-          })
+            justifyContent: 'center',
+          }),
         }}
       />
     )
   }
 }
 
-export default compose(
-  withNavigation,
-  pure
-)(Back)
+export default compose(withNavigation, pure)(Back)

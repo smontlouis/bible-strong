@@ -9,7 +9,7 @@ import SelectorItem from './SelectorItem'
 
 class ChapterSelector extends Component {
   static navigationOptions = {
-    tabBarLabel: 'CHAPITRE'
+    tabBarLabel: 'CHAPITRE',
   }
 
   onChapterChange = (chapter: number) => {
@@ -29,8 +29,9 @@ class ChapterSelector extends Component {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          paddingTop: 10
-        }}>
+          paddingTop: 10,
+        }}
+      >
         {array.map(c => (
           <SelectorItem
             key={c}
@@ -49,7 +50,7 @@ export default compose(
   connect(
     state => ({
       selectedBook: state.bible.temp.selectedBook,
-      selectedChapter: state.bible.temp.selectedChapter
+      selectedChapter: state.bible.temp.selectedChapter,
     }),
     { ...BibleActions }
   )

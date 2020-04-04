@@ -30,7 +30,7 @@ const shareImage = async (verseOfTheDay, source) => {
 
 const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
   let {
-    screen: { width }
+    screen: { width },
   } = useDimensions()
   const [expandImage] = useState(true)
   const themeDefault = useSelector(state => state.user.bible.settings.theme)
@@ -70,15 +70,16 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
           shadowOpacity: 0.1,
           shadowRadius: 5,
           elevation: 1,
-          marginHorizontal: 20
-        }}>
+          marginHorizontal: 20,
+        }}
+      >
         <Link onPress={() => shareImage(verseOfTheDay, imageUrls.large)}>
           <Image
             thumbnailSource={{ uri: imageUrls.small }}
             source={{ uri: imageUrls.large, cache: 'force-cache' }}
             style={{
               width: width - 40,
-              height: width - 40
+              height: width - 40,
             }}
             resizeMode="cover"
           />
@@ -88,22 +89,23 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
               bottom: 0,
               right: 0,
-              padding: 3
-            }}>
+              padding: 3,
+            }}
+          >
             <Text fontSize={8}>copyright bible.com</Text>
           </Box>
         </Link>
         <LinearGradient
           colors={[
             `rgba(${linearGradientColor},0)`,
-            `rgba(${linearGradientColor},${expandImage ? 0 : 1})`
+            `rgba(${linearGradientColor},${expandImage ? 0 : 1})`,
           ]}
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             bottom: 0,
-            height: 100
+            height: 100,
           }}
         />
       </AnimatableBox>

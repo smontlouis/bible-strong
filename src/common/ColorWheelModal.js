@@ -14,7 +14,7 @@ import { changeColor } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -31,7 +31,7 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace(),
 }))
 
 const ColorSquare = styled.View(({ color, size }) => ({
@@ -39,7 +39,7 @@ const ColorSquare = styled.View(({ color, size }) => ({
   height: size,
   borderRadius: size / 4,
   backgroundColor: color,
-  marginRight: 10
+  marginRight: 10,
 }))
 
 const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
@@ -82,7 +82,7 @@ const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
                   dispatch(
                     changeColor({
                       name: currentColor.name,
-                      color: chosenColor
+                      color: chosenColor,
                     })
                   )
                   onClosed()

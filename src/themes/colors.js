@@ -18,7 +18,7 @@ const colors = {
   color2: '#ff7675',
   color3: '#fdcb6e',
   color4: '#74b9ff',
-  color5: '#95afc0'
+  color5: '#95afc0',
 }
 
 export default colors

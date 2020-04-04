@@ -8,7 +8,9 @@ const fetchData = async item => {
           WHERE id = '${item}'`
   )
 
-  if (!itemResult) return
+  if (!itemResult) {
+    return
+  }
 
   const refArray = JSON.parse(itemResult.ref)
 

@@ -15,7 +15,7 @@ export default produce((draft, action) => {
       draft.bible.tags[tagId] = {
         id: tagId,
         date: Date.now(),
-        name: action.payload
+        name: action.payload,
       }
       break
     }
@@ -81,7 +81,7 @@ export default produce((draft, action) => {
             }
             draft.bible[item.entity][id].tags[tagId] = {
               id: tagId,
-              name: draft.bible.tags[tagId].name
+              name: draft.bible.tags[tagId].name,
             }
           }
         })
@@ -107,7 +107,7 @@ export default produce((draft, action) => {
           }
           draft.bible[item.entity][item.id].tags[tagId] = {
             id: tagId,
-            name: draft.bible.tags[tagId].name
+            name: draft.bible.tags[tagId].name,
           }
         }
       }
@@ -123,7 +123,7 @@ export default produce((draft, action) => {
 export function addTag(payload) {
   return {
     type: ADD_TAG,
-    payload
+    payload,
   }
 }
 
@@ -131,20 +131,20 @@ export function updateTag(id, value) {
   return {
     type: UPDATE_TAG,
     id,
-    value
+    value,
   }
 }
 
 export function removeTag(payload) {
   return {
     type: REMOVE_TAG,
-    payload
+    payload,
   }
 }
 
 export function toggleTagEntity({ item, tagId }) {
   return {
     type: TOGGLE_TAG_ENTITY,
-    payload: { item, tagId }
+    payload: { item, tagId },
   }
 }

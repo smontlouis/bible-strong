@@ -24,14 +24,14 @@ import Snackbar from '~common/SnackBar'
 const MAX_CHAR = 3000
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,
   height: 3,
-  backgroundColor: theme.colors.quint
+  backgroundColor: theme.colors.quint,
 }))
 
 const NaveDetailScreen = ({ navigation }) => {
@@ -48,13 +48,13 @@ const NaveDetailScreen = ({ navigation }) => {
 
       setNaveItem({
         ...result,
-        descriptionShort: truncHTML(result.description, MAX_CHAR).html
+        descriptionShort: truncHTML(result.description, MAX_CHAR).html,
       })
       dispatch(
         setHistory({
           name: result.name,
           name_lower: result.name_lower,
-          type: 'nave'
+          type: 'nave',
         })
       )
     })
@@ -72,7 +72,7 @@ const NaveDetailScreen = ({ navigation }) => {
           book: Number(book),
           chapter: Number(chapter),
           verse: Number(verse),
-          focusVerses: verses?.split(',').map(Number)
+          focusVerses: verses?.split(',').map(Number),
         })
       } catch (e) {
         console.log(e)
@@ -87,9 +87,9 @@ const NaveDetailScreen = ({ navigation }) => {
       navigation.navigate({
         routeName: 'NaveDetail',
         params: {
-          name_lower: item
+          name_lower: item,
         },
-        key: name_lower
+        key: name_lower,
       })
     }
   }

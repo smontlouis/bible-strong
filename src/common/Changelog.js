@@ -24,7 +24,7 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
-  elevation: 2
+  elevation: 2,
 }))
 
 const getTagColor = type => {
@@ -50,7 +50,7 @@ const Tag = styled.View(({ type, theme }) => ({
   marginLeft: 10,
   padding: 3,
   backgroundColor: getTagColor(type),
-  borderRadius: 3
+  borderRadius: 3,
 }))
 
 const hasNewLogs = (seenLogs, changelog) => {
@@ -87,7 +87,8 @@ const Changelog = () => {
         position="center"
         backdropOpacity={0.3}
         backdropPressToClose={false}
-        swipeToClose={false}>
+        swipeToClose={false}
+      >
         <ScrollView style={{ flex: 1 }}>
           <Box padding={20}>
             <Text fontSize={30} bold>
@@ -113,7 +114,7 @@ const Changelog = () => {
                   <Text fontSize={10} color="grey">
                     Il y a{' '}
                     {distanceInWords(Number(log.date), Date.now(), {
-                      locale: frLocale
+                      locale: frLocale,
                     })}
                   </Text>
                   <Text marginTop={10}>{log.description}</Text>

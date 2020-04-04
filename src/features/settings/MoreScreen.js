@@ -24,7 +24,7 @@ const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
-  paddingVertical: 15
+  paddingVertical: 15,
 }))
 
 const Circle = styled.View(({ theme }) => ({
@@ -34,14 +34,14 @@ const Circle = styled.View(({ theme }) => ({
   borderRadius: 10,
   top: 0,
   right: 8,
-  backgroundColor: theme.colors.success
+  backgroundColor: theme.colors.success,
 }))
 
 const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: theme.colors[color] || theme.colors.grey,
-  marginRight: 15
+  marginRight: 15,
 }))
 
 const shareMessage = () => {
@@ -62,7 +62,7 @@ const MoreScreen = () => {
   const promptLogout = () => {
     Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?', [
       { text: 'Non', onPress: () => null, style: 'cancel' },
-      { text: 'Oui', onPress: () => logout(), style: 'destructive' }
+      { text: 'Oui', onPress: () => logout(), style: 'destructive' },
     ])
   }
 
@@ -165,11 +165,11 @@ const MoreScreen = () => {
           <LinkItem
             {...(Platform.OS === 'android'
               ? {
-                  route: 'Support'
+                  route: 'Support',
                 }
               : {
                   onPress: () =>
-                    Linking.openURL('https://www.paypal.me/smontlouis')
+                    Linking.openURL('https://www.paypal.me/smontlouis'),
                 })}
           >
             <StyledIcon name="thumbs-up" size={25} color="secondary" />

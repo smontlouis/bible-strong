@@ -7,11 +7,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    top: 0
+    top: 0,
   },
   container: {
-    backgroundColor: '#e1e4e8'
-  }
+    backgroundColor: '#e1e4e8',
+  },
 })
 
 class ProgressiveImage extends React.Component {
@@ -21,13 +21,13 @@ class ProgressiveImage extends React.Component {
 
   handleThumbnailLoad = () => {
     Animated.timing(this.thumbnailAnimated, {
-      toValue: 1
+      toValue: 1,
     }).start()
   }
 
   onImageLoad = () => {
     Animated.timing(this.imageAnimated, {
-      toValue: 1
+      toValue: 1,
     }).start()
   }
 

@@ -16,7 +16,7 @@ import { addTag, toggleTagEntity } from '~redux/modules/user'
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   margin: 0,
-  alignItems: 'center'
+  alignItems: 'center',
 })
 
 const Container = styled.View(({ theme }) => ({
@@ -30,12 +30,12 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  paddingBottom: getBottomSpace()
+  paddingBottom: getBottomSpace(),
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
-  color: isDisabled ? theme.colors.border : theme.colors.primary
+  color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
 const MultipleTagsModal = ({ item = {}, onClosed }) => {
@@ -50,14 +50,14 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
     if (item.ids) {
       return Object.keys(item.ids).map(id => ({
         id,
-        ...state.user.bible[item.entity][id]
+        ...state.user.bible[item.entity][id],
       }))
     }
 
     return [
       state.user.bible[item.entity]
         ? { id: item.id, ...state.user.bible[item.entity][item.id] }
-        : {}
+        : {},
     ]
   })
 

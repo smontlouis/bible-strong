@@ -102,97 +102,97 @@ export const versions = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910',
-    c: '1910 - Libre de droit'
+    c: '1910 - Libre de droit',
   },
   LSGS: {
     id: 'LSGS',
     name: 'Bible Segond 1910 + Strongs',
-    c: '1910 - Libre de droit'
+    c: '1910 - Libre de droit',
   },
   NBS: {
     id: 'NBS',
     name: 'Nouvelle Bible Segond',
-    c: '© 2002 Société Biblique Française'
+    c: '© 2002 Société Biblique Française',
   },
   NEG79: {
     id: 'NEG79',
     name: 'Nouvelle Edition de Genève 1979',
-    c: '© 1979 Société Biblique de Genève'
+    c: '© 1979 Société Biblique de Genève',
   },
   NVS78P: {
     id: 'NVS78P',
     name: 'Nouvelle Segond révisée',
-    c: '© Alliance Biblique Française'
+    c: '© Alliance Biblique Française',
   },
   S21: {
     id: 'S21',
     name: 'Bible Segond 21',
-    c: '© 2007 Société Biblique de Genève'
+    c: '© 2007 Société Biblique de Genève',
   },
   INT: {
     id: 'INT',
     name: 'Bible Interlinéaire',
-    c: '© Editio Critica Maior'
+    c: '© Editio Critica Maior',
   },
   KJF: {
     id: 'KJF',
     name: 'King James Française',
-    c: '© 1611 Traduction française, Bible des réformateurs 2006'
+    c: '© 1611 Traduction française, Bible des réformateurs 2006',
   },
   DBY: {
     id: 'DBY',
     name: 'Bible Darby',
-    c: '1890 Libre de droit'
+    c: '1890 Libre de droit',
   },
   OST: {
     id: 'OST',
     name: 'Ostervald',
-    c: '1881 Libre de droit'
+    c: '1881 Libre de droit',
   },
   CHU: {
     id: 'CHU',
     name: 'Bible Chouraqui 1985',
-    c: '© 1977 Editions Desclée de Brouwer'
+    c: '© 1977 Editions Desclée de Brouwer',
   },
   BDS: {
     id: 'BDS',
     name: 'Bible du Semeur',
-    c: '© 2000 Société Biblique Internationale'
+    c: '© 2000 Société Biblique Internationale',
   },
   FMAR: {
     id: 'FMAR',
     name: 'Martin 1744',
-    c: '1744 Libre de droit'
+    c: '1744 Libre de droit',
   },
   FRC97: {
     id: 'FRC97',
     name: 'Français courant',
-    c: '© Alliance Biblique Française'
+    c: '© Alliance Biblique Française',
   },
   NFC: {
     id: 'NFC',
     name: 'Nouvelle Français courant',
-    c: "Alliance biblique française Bibli'0, ©2019"
+    c: "Alliance biblique française Bibli'0, ©2019",
   },
   KJV: {
     id: 'KJV',
     name: 'King James Version',
-    c: '1611 Libre de droit'
+    c: '1611 Libre de droit',
   },
   NKJV: {
     id: 'NKJV',
     name: 'New King James Version',
-    c: '© 1982 Thomas Nelson, Inc'
+    c: '© 1982 Thomas Nelson, Inc',
   },
   ESV: {
     id: 'ESV',
     name: 'English Standard Version',
-    c: '© 2001 Crossway Bibles'
+    c: '© 2001 Crossway Bibles',
   },
   NIV: {
     id: 'NIV',
     name: 'New International Version',
-    c: '© NIV® 1973, 1978, 1984, 2011 Biblica'
+    c: '© NIV® 1973, 1978, 1984, 2011 Biblica',
   },
   // BJC: {
   //   id: 'BJC',
@@ -201,18 +201,18 @@ export const versions = {
   POV: {
     id: 'POV',
     name: 'Parole vivante',
-    c: '© 2013'
+    c: '© 2013',
   },
   BHS: {
     id: 'BHS',
     name: 'Biblia Hebraica Stuttgartensia',
-    c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77'
+    c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
   },
   SBLGNT: {
     id: 'SBLGNT',
     name: 'SBL NT. Grec',
-    c: '© 2010 Society of Bible Litterature'
-  }
+    c: '© 2010 Society of Bible Litterature',
+  },
 }
 
 export const versionsBySections = Object.values(versions).reduce(
@@ -246,6 +246,6 @@ export const versionsBySections = Object.values(versions).reduce(
   [
     { title: 'Versions Louis Segond', data: [] },
     { title: 'Autres versions', data: [] },
-    { title: 'Versions étrangères', data: [] }
+    { title: 'Versions étrangères', data: [] },
   ]
 )

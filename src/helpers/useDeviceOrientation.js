@@ -14,9 +14,10 @@ const useDeviceOrientation = () => {
     portrait: isOrientationPortrait(screen),
     landscape: isOrientationLandscape(screen),
     tablet:
-      Math.round((dimensions.screen.width / dimensions.screen.height) * 100) / 100 === 1.33 &&
-      isOrientationLandscape(screen),
-    maxWidth: MAX_WIDTH
+      Math.round((dimensions.screen.width / dimensions.screen.height) * 100) /
+        100 ===
+        1.33 && isOrientationLandscape(screen),
+    maxWidth: MAX_WIDTH,
   })
 
   useEffect(() => {
@@ -25,9 +26,12 @@ const useDeviceOrientation = () => {
         portrait: isOrientationPortrait(screen),
         landscape: isOrientationLandscape(screen),
         tablet:
-          Math.round((dimensions.screen.width / dimensions.screen.height) * 100) / 100 === 1.33 &&
-          isOrientationLandscape(screen),
-        maxWidth: MAX_WIDTH
+          Math.round(
+            (dimensions.screen.width / dimensions.screen.height) * 100
+          ) /
+            100 ===
+            1.33 && isOrientationLandscape(screen),
+        maxWidth: MAX_WIDTH,
       })
     }
 

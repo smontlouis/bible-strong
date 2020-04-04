@@ -15,27 +15,33 @@ const OccurencesNumber = styled.View(({ theme }) => ({
   paddingTop: 2,
   paddingBottom: 2,
   borderRadius: 3,
-  backgroundColor: theme.colors.lightPrimary
+  backgroundColor: theme.colors.lightPrimary,
 }))
 
 const ListItem = styled(Box)(({ theme }) => ({
   borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border
+  borderBottomColor: theme.colors.border,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default
+  color: theme.colors.default,
 }))
 
 const OccurrencesFoundByBookList = ({
   strongReference,
   navigation,
   versesCountByBook,
-  loading
+  loading,
 }) => (
   <Box marginTop={20}>
     {loading ? (
-      <Box style={{ flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10 }}>
+      <Box
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          marginBottom: 10,
+        }}
+      >
         <Text color="darkGrey" fontSize={16} marginRight={10}>
           Concordance
         </Text>
@@ -58,12 +64,12 @@ const OccurrencesFoundByBookList = ({
                   routeName: 'ConcordanceByBook',
                   params: {
                     book: item.Livre,
-                    strongReference
+                    strongReference,
                   },
-                  key: `concordance-${strongReference.Code}-${item.Livre}`
+                  key: `concordance-${strongReference.Code}-${item.Livre}`,
                 })
-              }
-              }>
+              }}
+            >
               <ListItem row alignItems="center" height={50}>
                 <Text fontSize={16}>{books[item.Livre - 1].Nom}</Text>
                 <OccurencesNumber>

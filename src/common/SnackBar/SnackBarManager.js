@@ -16,9 +16,19 @@ export default class SnackBarManager {
     }
 
     const sibling = new RootSiblings(
-      <View style={{ top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'red' }} />
+      (
+        <View
+          style={{
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: 'red',
+          }}
+        />
+      )
     )
-    const current = new RootSiblings(<SnackBar {...props} />)
+    const current = new RootSiblings((<SnackBar {...props} />))
     this.current = current
     callback && callback()
   }
@@ -38,7 +48,7 @@ export default class SnackBarManager {
   get = () => {
     return {
       current: this.current,
-      queue: this.queue
+      queue: this.queue,
     }
   }
 

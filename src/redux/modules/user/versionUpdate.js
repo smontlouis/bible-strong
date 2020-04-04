@@ -27,7 +27,7 @@ export default produce((draft, action) => {
 export function getVersionUpdate() {
   return async dispatch => {
     dispatch({
-      type: GET_VERSION_UPDATE
+      type: GET_VERSION_UPDATE,
     })
 
     try {
@@ -43,11 +43,11 @@ export function getVersionUpdate() {
         payload: versionsNeedUpdate.reduce(
           (acc, curr) => ({ ...acc, ...curr }),
           {}
-        )
+        ),
       })
     } catch (e) {
       dispatch({
-        type: GET_VERSION_UPDATE_FAIL
+        type: GET_VERSION_UPDATE_FAIL,
       })
     }
   }
@@ -56,14 +56,14 @@ export function getVersionUpdate() {
 export function setVersionUpdated(payload) {
   return {
     type: SET_VERSION_UPDATED,
-    payload
+    payload,
   }
 }
 
 export function getDatabaseUpdate() {
   return async dispatch => {
     dispatch({
-      type: GET_VERSION_UPDATE
+      type: GET_VERSION_UPDATE,
     })
 
     try {
@@ -79,11 +79,11 @@ export function getDatabaseUpdate() {
         payload: databasesNeedUpdate.reduce(
           (acc, curr) => ({ ...acc, ...curr }),
           {}
-        )
+        ),
       })
     } catch (e) {
       dispatch({
-        type: GET_VERSION_UPDATE_FAIL
+        type: GET_VERSION_UPDATE_FAIL,
       })
     }
   }

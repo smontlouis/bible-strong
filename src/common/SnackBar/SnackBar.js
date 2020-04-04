@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Easing,
   InteractionManager,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from 'react-native'
 
 const DEFAULT_DURATION: number = 5000
@@ -29,55 +29,55 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'absolute',
     bottom: INITIAL_POSITION_BOTTOM,
-    width
+    width,
   },
 
   containerTop: {
     flex: 1,
     position: 'absolute',
     top: INITIAL_POSITION_TOP,
-    width
+    width,
   },
 
   text: {
     padding: 15,
-    fontSize: 16
+    fontSize: 16,
   },
 
   inlineText: {
     flex: 1,
     padding: 15,
-    fontSize: 16
+    fontSize: 16,
   },
 
   buttonContainer: {
     paddingHorizontal: 12,
-    paddingVertical: 10
+    paddingVertical: 10,
   },
 
   button: {
     fontSize: 16,
     fontWeight: '500',
-    marginLeft: 8
+    marginLeft: 8,
   },
 
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     padding: 8,
-    marginBottom: 8
+    marginBottom: 8,
   },
 
   inlineRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 18
+    padding: 18,
   },
 
   flat: {
-    fontSize: 14
-  }
+    fontSize: 14,
+  },
 })
 
 export default class SnackBar extends Component {
@@ -98,7 +98,7 @@ export default class SnackBar extends Component {
     backgroundColor: STYLE_BANNER_COLOR,
     buttonColor: TEXT_COLOR_ACCENT,
     textColor: 'white',
-    position: 'bottom'
+    position: 'bottom',
   }
 
   constructor(props) {
@@ -107,7 +107,7 @@ export default class SnackBar extends Component {
     this.state = {
       transformOffsetYTop: new Animated.Value(-180),
       transformOffsetYBottom: new Animated.Value(0),
-      transformOpacity: new Animated.Value(0)
+      transformOpacity: new Animated.Value(0),
     }
   }
 
@@ -122,26 +122,32 @@ export default class SnackBar extends Component {
   }
 
   show = () => {
-    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } = this.state
+    const {
+      transformOpacity,
+      transformOffsetYTop,
+      transformOffsetYBottom,
+    } = this.state
 
     const { fadeOutDuration, isStatic, duration, position } = this.props
 
-    const initialPosition = position === 'top' ? INITIAL_POSITION_TOP : INITIAL_POSITION_BOTTOM
-    const transformOffsetY = position === 'top' ? transformOffsetYTop : transformOffsetYBottom
+    const initialPosition =
+      position === 'top' ? INITIAL_POSITION_TOP : INITIAL_POSITION_BOTTOM
+    const transformOffsetY =
+      position === 'top' ? transformOffsetYTop : transformOffsetYBottom
 
     Animated.parallel([
       Animated.timing(transformOpacity, {
         toValue: 1,
         duration: fadeOutDuration,
         easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true
+        useNativeDriver: true,
       }),
       Animated.timing(transformOffsetY, {
         toValue: initialPosition,
         duration: fadeOutDuration,
         easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true
-      })
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       if (isStatic) {
         return
@@ -156,11 +162,16 @@ export default class SnackBar extends Component {
   }
 
   hide = () => {
-    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } = this.state
+    const {
+      transformOpacity,
+      transformOffsetYTop,
+      transformOffsetYBottom,
+    } = this.state
 
     const { fadeOutDuration, onAutoDismiss, position } = this.props
 
-    const transformOffsetY = position === 'top' ? transformOffsetYTop : transformOffsetYBottom
+    const transformOffsetY =
+      position === 'top' ? transformOffsetYTop : transformOffsetYBottom
     const toPosition = position === 'top' ? TO_POSITION_TOP : TO_POSITION_BOTTOM
 
     Animated.parallel([
@@ -168,14 +179,14 @@ export default class SnackBar extends Component {
         toValue: 0,
         duration: fadeOutDuration,
         easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true
+        useNativeDriver: true,
       }),
       Animated.timing(transformOffsetY, {
         toValue: toPosition,
         easing: Easing.inOut(Easing.quad),
         duration: fadeOutDuration,
-        useNativeDriver: true
-      })
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       onAutoDismiss && onAutoDismiss()
     })
@@ -186,15 +197,29 @@ export default class SnackBar extends Component {
 
     return (
       <TouchableOpacity style={styles.buttonContainer} onPress={onPress}>
-        <Text style={[styles.button, style, { color: buttonColor }]}>{text}</Text>
+        <Text style={[styles.button, style, { color: buttonColor }]}>
+          {text}
+        </Text>
       </TouchableOpacity>
     )
   }
 
   renderContent = () => {
-    const { confirmText, onConfirm, cancelText, onCancel, title, textColor, textStyle } = this.props
+    const {
+      confirmText,
+      onConfirm,
+      cancelText,
+      onCancel,
+      title,
+      textColor,
+      textStyle,
+    } = this.props
 
-    const titleElement = <Text style={[styles.text, { color: textColor }, textStyle]}>{title}</Text>
+    const titleElement = (
+      <Text style={[styles.text, { color: textColor }, textStyle]}>
+        {title}
+      </Text>
+    )
 
     if (confirmText && cancelText) {
       return (
@@ -221,7 +246,13 @@ export default class SnackBar extends Component {
   }
 
   render() {
-    const { style, renderContent, backgroundColor, position, tapToClose } = this.props
+    const {
+      style,
+      renderContent,
+      backgroundColor,
+      position,
+      tapToClose,
+    } = this.props
 
     const isTop = position === 'top'
     const transformOffsetY = isTop
@@ -231,14 +262,16 @@ export default class SnackBar extends Component {
       <TouchableWithoutFeedback onPress={() => tapToClose && this.hide()}>
         <Animated.View
           style={[
-            (isTop && styles.containerTop) || (!isTop && styles.containerBottom),
+            (isTop && styles.containerTop) ||
+              (!isTop && styles.containerBottom),
             {
               opacity: this.state.transformOpacity,
               transform: [{ translateY: transformOffsetY }],
-              backgroundColor
+              backgroundColor,
             },
-            style
-          ]}>
+            style,
+          ]}
+        >
           {renderContent ? renderContent() : this.renderContent()}
         </Animated.View>
       </TouchableWithoutFeedback>

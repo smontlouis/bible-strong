@@ -17,13 +17,13 @@ const LinkItem = styled(Link)(({ theme }) => ({
   paddingHorizontal: 20,
   paddingVertical: 15,
   borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border
+  borderBottomColor: theme.colors.border,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: theme.colors[color] || theme.colors.grey,
   marginLeft: 'auto',
-  marginRight: 15
+  marginRight: 15,
 }))
 
 const LoginScreen = () => {
@@ -39,39 +39,49 @@ const LoginScreen = () => {
             Avant toute chose, merci d'envisager de m'aider.
           </Paragraph>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
-            Plus vous êtes nombreux, plus le coût des serveurs augmente. L'application est
-            développée sur mon temps libre et est totalement gratuite. Dieu m'a donné un don, et
-            c'est un plaisir pour moi de l'utiliser à sa gloire.
+            Plus vous êtes nombreux, plus le coût des serveurs augmente.
+            L'application est développée sur mon temps libre et est totalement
+            gratuite. Dieu m'a donné un don, et c'est un plaisir pour moi de
+            l'utiliser à sa gloire.
           </Paragraph>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
-            Si vous souhaitez me soutenir, vous pouvez le faire de deux façons. Soit par{' '}
+            Si vous souhaitez me soutenir, vous pouvez le faire de deux façons.
+            Soit par{' '}
             <Paragraph
               color="primary"
-              onPress={() => Linking.openURL('https://fr.tipeee.com/smontlouis')}
-              bold>
+              onPress={() =>
+                Linking.openURL('https://fr.tipeee.com/smontlouis')
+              }
+              bold
+            >
               Tipeee,
             </Paragraph>{' '}
             ou par{' '}
             <Paragraph
               color="primary"
-              onPress={() => Linking.openURL('https://www.paypal.me/smontlouis')}
-              bold>
+              onPress={() =>
+                Linking.openURL('https://www.paypal.me/smontlouis')
+              }
+              bold
+            >
               Paypal
             </Paragraph>
             .
           </Paragraph>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
-            Tipeee vous permet de soutenir en une fois ou mensuellement. Lorsque vous soutenez
-            quelqu'un mensuellement, vous pouvez donner 1€ par mois par exemple.
+            Tipeee vous permet de soutenir en une fois ou mensuellement. Lorsque
+            vous soutenez quelqu'un mensuellement, vous pouvez donner 1€ par
+            mois par exemple.
           </Paragraph>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
             Juste 1€ par mois ! Et comme dit le proverbe martiniquais :{' '}
-            <Paragraph color="quart">"Sé grèn diri ka fè sak diri."</Paragraph>, "Ce sont les grains
-            de riz qui font les sacs de riz.", autrement dit, l’accumulation de petites choses font
-            de grandes choses.
+            <Paragraph color="quart">"Sé grèn diri ka fè sak diri."</Paragraph>,
+            "Ce sont les grains de riz qui font les sacs de riz.", autrement
+            dit, l’accumulation de petites choses font de grandes choses.
           </Paragraph>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
-            Vous trouverez plus d'informations sur mon parcours et ma motivation sur ma page Tipeee.
+            Vous trouverez plus d'informations sur mon parcours et ma motivation
+            sur ma page Tipeee.
           </Paragraph>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
             Merci de m'avoir lu et bonne étude !

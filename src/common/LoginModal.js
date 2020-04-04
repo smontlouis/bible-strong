@@ -11,7 +11,7 @@ import Text from '~common/ui/Text'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
-  margin: 0
+  margin: 0,
 })
 
 // More like StudiesLoginModal
@@ -23,7 +23,7 @@ const Container = styled.View(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
-  padding: 20
+  padding: 20,
 }))
 
 const LoginModal = ({ isVisible }) => {

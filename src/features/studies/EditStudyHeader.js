@@ -10,11 +10,11 @@ import Header from '~common/Header'
 const HeaderBox = styled(Box)({
   alignItems: 'center',
   paddingLeft: 15,
-  paddingRight: 15
+  paddingRight: 15,
 })
 
 const ValidateIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.success
+  color: theme.colors.success,
 }))
 
 const EditHeader = ({ isReadOnly, setReadOnly, title, setTitlePrompt }) => {
@@ -29,7 +29,8 @@ const EditHeader = ({ isReadOnly, setReadOnly, title, setTitlePrompt }) => {
           <Link
             onPress={setReadOnly}
             underlayColor="transparent"
-            style={{ marginRight: 15 }}>
+            style={{ marginRight: 15 }}
+          >
             <ValidateIcon name="check" size={25} />
           </Link>
         </Box>
