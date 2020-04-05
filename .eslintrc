@@ -2,6 +2,7 @@
   "extends": "@react-native-community",
   "rules": {
     "semi": ["error", "never"],
-    "react-native/no-inline-styles": "off"
+    "react-native/no-inline-styles": "off",
+    "curly": "off"
   }
 }

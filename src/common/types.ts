@@ -26,11 +26,12 @@ export interface Section {
   readingSlices: ReadingSlice[]
 }
 
-export interface MySection {
+export interface MySection extends Omit<Section, 'readingSlices'> {
   progress?: number
+  readingSlices: MyReadingSlice[]
 }
 
-enum SliceType {
+export enum SliceType {
   Text = 'Text',
   Verse = 'Verse',
   Chapter = 'Chapter',
@@ -40,7 +41,17 @@ enum SliceType {
 export interface ReadingSlice {
   id: string
   description: string
-  slices: (TextSlice | VerseSlice | ChapterSlice | VideoSlice)[]
+  slices: EntitySlice[]
+}
+
+export interface MyReadingSlice extends ReadingSlice {
+  isComplete?: boolean
+}
+
+export type EntitySlice = TextSlice | VerseSlice | ChapterSlice | VideoSlice
+export type MyEntitySlice = EntitySlice & {
+  isComplete?: boolean
+  isLast?: boolean
 }
 
 export interface TextSlice {

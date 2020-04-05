@@ -16,7 +16,7 @@ import {
   updateUserData,
   getChangelog,
   getVersionUpdate,
-  getDatabaseUpdate
+  getDatabaseUpdate,
 } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
@@ -67,14 +67,14 @@ class InitApp extends React.Component {
     }
     return {
       route: route.routeName,
-      params: route.params
+      params: route.params,
     }
   }
 
   onNavigationStateChange = (prevState, currentState) => {
     const {
       route: currentScreen,
-      params: currentParams
+      params: currentParams,
     } = this.getActiveRouteName(currentState)
     const { route: prevScreen, params: prevParams } = this.getActiveRouteName(
       prevState
@@ -90,8 +90,8 @@ class InitApp extends React.Component {
         message: `From: ${prevScreen} To: ${currentScreen}`,
         data: {
           prevRoute: { prevScreen, prevParams },
-          currentRoute: { currentScreen, currentParams }
-        }
+          currentRoute: { currentScreen, currentParams },
+        },
       })
     }
   }
@@ -105,8 +105,8 @@ class InitApp extends React.Component {
       ...defaultTheme,
       fontFamily: {
         ...defaultTheme.fontFamily,
-        paragraph: fontFamily
-      }
+        paragraph: fontFamily,
+      },
     }
 
     return (
@@ -117,8 +117,8 @@ class InitApp extends React.Component {
             customStyles={{
               backdrop: {
                 backgroundColor: 'black',
-                opacity: 0.2
-              }
+                opacity: 0.2,
+              },
             }}
           >
             <PersistGate loading={null} persistor={persistor}>
@@ -145,7 +145,7 @@ class InitApp extends React.Component {
 export default compose(
   connect(state => ({
     theme: state.user.bible.settings.theme,
-    fontFamily: state.user.fontFamily
+    fontFamily: state.user.fontFamily,
   })),
   withFireAuth
 )(InitApp)

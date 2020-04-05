@@ -23,7 +23,7 @@ const orderVerses = arrayVerses => {
 const verseToReference = v => {
   let verses = v
 
-  if (typeof verses === 'object') {
+  if (typeof verses === 'object' && !Array.isArray(verses)) {
     verses = Object.keys(v)
   } else if (typeof verses === 'string') {
     verses = [v]

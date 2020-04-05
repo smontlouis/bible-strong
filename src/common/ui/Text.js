@@ -13,6 +13,7 @@ const Text = styled.Text(props => {
     fontSize: props.fontSize,
     fontWeight: props.bold ? 'bold' : undefined,
     textAlign: props.textAlign,
+    opacity: props.opacity,
 
     // container
     backgroundColor: props.backgroundColor,
