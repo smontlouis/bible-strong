@@ -1,6 +1,22 @@
 import books from '~assets/bible_versions/books-desc'
 
-const chapterToReference = (chapters: string[]) => {
+const range = (start: number, end: number) => {
+  return Array(end - start + 1)
+    .fill('')
+    .map((_, idx) => start + idx)
+}
+
+export const chapterToReference = (chapters: string[] | string) => {
+  // 3|3-5
+  if (typeof chapters === 'string') {
+    const [book, numberRange] = chapters.split('|')
+    const [startChapter, endChapter] = numberRange.split('-').map(Number)
+    const chaptersRange = endChapter
+      ? range(startChapter, endChapter).map(n => `${book}-${n}`)
+      : [`${book}-${startChapter}`]
+    chapters = chaptersRange
+  }
+
   const verses = chapters.map(v => {
     const [book, chapter] = v.split('-').map(i => Number(i))
     return {

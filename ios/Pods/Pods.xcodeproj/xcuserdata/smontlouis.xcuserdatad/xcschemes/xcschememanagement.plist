@@ -404,6 +404,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>ReactNativeART.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>SSZipArchive.xcscheme</key>
 		<dict>
 			<key>isShown</key>

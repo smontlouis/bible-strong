@@ -6,7 +6,11 @@ import chapterToReference from '~helpers/chapterToReference'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import { MyEntitySlice as EntitySliceProps, SliceType } from '~common/types'
+import {
+  MyEntitySlice as EntitySliceProps,
+  SliceType,
+  Status,
+} from '~common/types'
 
 const extractTitle = (props: EntitySliceProps) => {
   switch (props.type) {
@@ -15,41 +19,51 @@ const extractTitle = (props: EntitySliceProps) => {
     case SliceType.Video:
       return `Vidéo: ${props.title}`
     case SliceType.Verse:
-      return verseToReference(props.verses)
+      return verseToReference(props.verses, { isPlan: true })
     case SliceType.Chapter:
       return chapterToReference(props.chapters)
     default:
-      return 'No type found for this item'
+      return `No type found for this item: ${props.type}`
   }
 }
 
-const renderIcon = (props: EntitySliceProps) => {
+const renderIcon = (
+  props: EntitySliceProps,
+  isComplete: boolean,
+  isNext: boolean
+) => {
   switch (props.type) {
     case SliceType.Text:
       return (
         <FeatherIcon
           name="type"
-          size={8}
-          color={props.isComplete ? 'white' : 'primary'}
+          size={7}
+          color={isComplete ? 'white' : 'primary'}
         />
       )
     case SliceType.Video:
       return (
         <MaterialIcon
           name="play-arrow"
-          color={props.isComplete ? 'white' : 'primary'}
+          size={13}
+          color={isComplete ? 'white' : 'primary'}
         />
       )
     case SliceType.Verse:
     case SliceType.Chapter:
-      return props.isComplete ? (
+      return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
-      ) : (
+      ) : isNext ? null : (
         <SmallCircle />
       )
 
     default:
-      return 'No type found for this item'
+      console.log(`No type found for this item: ${props.type}`)
+      return isComplete ? (
+        <FeatherIcon name="check" size={10} color="white" />
+      ) : isNext ? null : (
+        <SmallCircle />
+      )
   }
 }
 
@@ -64,38 +78,62 @@ const SmallCircle = styled(Box)(({ theme }: { theme: any }) => ({
 }))
 
 const Circle = styled(Box)(
-  ({ theme, isComplete }: { theme: any; isComplete: boolean }) => ({
-    width: 16,
-    height: 16,
+  ({
+    theme,
+    isComplete,
+    isNext,
+  }: {
+    theme: any
+    isComplete: boolean
+    isNext: boolean
+  }) => ({
+    width: 18,
+    height: 18,
     backgroundColor: isComplete
       ? theme.colors.primary
       : theme.colors.lightPrimary,
-    borderRadius: 8,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
+    ...(isNext && {
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+    }),
   })
 )
 
 const Line = styled(Box)(
-  ({ theme, isComplete }: { theme: any; isComplete: boolean }) => ({
+  ({
+    theme,
+    isComplete,
+    isNext,
+  }: {
+    theme: any
+    isComplete: boolean
+    isNext: boolean
+  }) => ({
     height: 10,
-    width: isComplete ? 3 : 2,
-    backgroundColor: isComplete
-      ? theme.colors.primary
-      : theme.colors.lightPrimary,
+    width: isComplete || isNext ? 3 : 2,
+    backgroundColor:
+      isComplete || isNext ? theme.colors.primary : theme.colors.lightPrimary,
   })
 )
 
-const EntitySlice = (props: EntitySliceProps) => {
-  const { isComplete, isLast } = props
+const EntitySlice = (props: EntitySliceProps & { isLast?: boolean }) => {
+  const { status, isLast } = props
+  const isComplete = status === Status.Completed
+  const isNext = status === Status.Next
   const title = extractTitle(props)
+
   return (
     <Box row>
       <Box marginRight={25} center>
-        <Circle isComplete={isComplete}>{renderIcon(props)}</Circle>
-        {!isLast && <Line isComplete={isComplete} />}
+        <Circle isComplete={isComplete} isNext={isNext}>
+          {renderIcon(props, isComplete, isNext)}
+        </Circle>
+        {!isLast && <Line isComplete={isComplete} isNext={isNext} />}
       </Box>
-      <Text opacity={isComplete ? 1 : 0.3}>{title}</Text>
+      <Text opacity={isComplete || isNext ? 1 : 0.3}>{title}</Text>
     </Box>
   )
 }

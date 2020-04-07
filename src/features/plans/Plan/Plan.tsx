@@ -14,6 +14,7 @@ const Plan = ({ sections }: MyPlan) => {
           title={section.title}
           subTitle={section.subTitle}
           readingSlices={section.readingSlices}
+          progress={section.progress}
         />
       ))}
     </ScrollView>

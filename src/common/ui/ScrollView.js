@@ -54,7 +54,7 @@ export const HomeScrollView = ({
   )
 }
 
-export default ({ children, contentContainerStyle, ...props }) => {
+export default ({ children, contentContainerStyle = {}, ...props }) => {
   const orientation = useDeviceOrientation()
   return (
     <Animatable.View

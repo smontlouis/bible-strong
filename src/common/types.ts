@@ -11,9 +11,16 @@ export interface Plan {
   author: User
 }
 
+export enum Status {
+  Idle = 'Idle',
+  Next = 'Next',
+  Progress = 'Progress',
+  Completed = 'Completed',
+}
+
 export interface MyPlan extends Omit<Plan, 'sections'> {
-  isComplete?: boolean
-  progress?: number
+  status: Status
+  progress: number
   sections: MySection[]
 }
 
@@ -27,12 +34,13 @@ export interface Section {
 }
 
 export interface MySection extends Omit<Section, 'readingSlices'> {
-  progress?: number
+  progress: number
   readingSlices: MyReadingSlice[]
 }
 
 export enum SliceType {
   Text = 'Text',
+  Image = 'Image',
   Verse = 'Verse',
   Chapter = 'Chapter',
   Video = 'Video',
@@ -40,18 +48,22 @@ export enum SliceType {
 
 export interface ReadingSlice {
   id: string
-  description: string
+  description?: string
   slices: EntitySlice[]
 }
 
 export interface MyReadingSlice extends ReadingSlice {
-  isComplete?: boolean
+  status?: Status
 }
 
-export type EntitySlice = TextSlice | VerseSlice | ChapterSlice | VideoSlice
+export type EntitySlice =
+  | TextSlice
+  | VerseSlice
+  | ChapterSlice
+  | VideoSlice
+  | ImageSlice
 export type MyEntitySlice = EntitySlice & {
-  isComplete?: boolean
-  isLast?: boolean
+  status?: Status
 }
 
 export interface TextSlice {
@@ -61,17 +73,25 @@ export interface TextSlice {
   description: string
 }
 
+export interface ImageSlice {
+  id: string
+  alt?: string
+  src: string
+  type: SliceType.Image
+}
+
 export interface VerseSlice {
   id: string
   type: SliceType.Verse
-  verses: string[]
+  verses: string[] | string
+  subType?: 'pray'
 }
 
 export interface ChapterSlice {
   id: string
   type: SliceType.Chapter
-  image?: string
-  chapters: string[]
+  chapters: string[] | string
+  subType?: 'pray'
 }
 
 export interface VideoSlice {

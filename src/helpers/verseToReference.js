@@ -17,11 +17,28 @@ const orderVerses = arrayVerses => {
   return orderedVersesList
 }
 
+const range = (start: number, end: number) => {
+  return Array(end - start + 1)
+    .fill('')
+    .map((_, idx) => start + idx)
+}
+
 // 1-1-1
 // [1-1-1, 1-1-3, 1-1-4, 1-1-5]   => Genèse 1:1,3-5
 // {1-1-1: true, 1-1-2: true}
-const verseToReference = v => {
+const verseToReference = (v, options = {}) => {
   let verses = v
+
+  // Needs a special extraction
+  if (options.isPlan) {
+    const [book, rest] = v.split('|')
+    const [chapter, numberRange] = rest.split(':')
+    const [startVerse, endVerse] = numberRange.split('-').map(Number)
+    const versesRange = endVerse
+      ? range(startVerse, endVerse).map(n => `${book}-${chapter}-${n}`)
+      : [`${book}-${chapter}-${startVerse}`]
+    verses = versesRange
+  }
 
   if (typeof verses === 'object' && !Array.isArray(verses)) {
     verses = Object.keys(v)

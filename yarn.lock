@@ -2538,6 +2538,15 @@
     prop-types "^15.6.1"
     react-lifecycles-compat "^3.0.4"
 
+"@react-native-community/art@^1.1.2", "@react-native-community/art@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/art/-/art-1.2.0.tgz#386d95393f6042d9006f9d4bc6063fb898794460"
+  integrity sha512-a+ZcRGl/BzLa89yi33Mbn5SHavsEXqKUMdbfLf3U8MDLElndPqUetoJyGkv63+BcPO49UMWiQRP1YUz6/zfJ+A==
+  dependencies:
+    art "^0.10.3"
+    invariant "^2.2.4"
+    prop-types "^15.7.2"
+
 "@react-native-community/async-storage@^1.7.1":
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@react-native-community/async-storage/-/async-storage-1.7.1.tgz#ef2104d865de61ad91bba66613e57e689ff4e6a1"
@@ -4487,7 +4496,7 @@ arrify@^1.0.1:
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
   integrity sha1-iYUI2iIm84DfkEcoRWhJwVAaSw0=
 
-art@^0.10.0:
+art@^0.10.0, art@^0.10.3:
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/art/-/art-0.10.3.tgz#b01d84a968ccce6208df55a733838c96caeeaea2"
   integrity sha512-HXwbdofRTiJT6qZX/FnchtldzJjS3vkLJxQilc3Xj+ma2MXjY4UAyQ0ls1XZYVnDvVIBiFZbC6QsvtW86TD6tQ==
@@ -16131,6 +16140,14 @@ react-native-popup-menu@^0.15.7:
   version "0.15.7"
   resolved "https://registry.yarnpkg.com/react-native-popup-menu/-/react-native-popup-menu-0.15.7.tgz#ddffa8aa6e5d7d11533947921e9bdf94cd7fc7d0"
   integrity sha512-TgPVGQdsHPgynn+mMpTX51QKKhavDXI3tA879zylRUBMrxfNiR3gAWNanI1Sd5X4Sv0tZ1/A33k/gNTwciMDDg==
+
+react-native-progress@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-progress/-/react-native-progress-4.1.0.tgz#38ec27153861580d59765fdc5b4024c328677f96"
+  integrity sha512-6aZgClVBLCMpixOE04iGicARQINKNi02z2uRqLG4RtxdOJPL3GkHoH82+TrnwFBMvs/5ImasSr9s8n4SML//cQ==
+  dependencies:
+    "@react-native-community/art" "^1.1.2"
+    prop-types "^15.7.2"
 
 react-native-push-notification@^3.1.9:
   version "3.1.9"
