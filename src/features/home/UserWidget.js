@@ -19,6 +19,7 @@ import extractInitials from '~helpers/extractInitials'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
+import { MaterialIcon } from '~common/ui/Icon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import NaveIcon from '~common/NaveIcon'
@@ -110,7 +111,6 @@ const UserWidget = ({ theme }) => {
           </Paragraph>
           <Button
             route="Login"
-            title="Je me connecte"
             rightIcon={
               <Icon.Feather
                 name="arrow-right"
@@ -119,7 +119,9 @@ const UserWidget = ({ theme }) => {
                 style={{ marginLeft: 10 }}
               />
             }
-          />
+          >
+            Je me connecte
+          </Button>
         </Box>
       </Container>
     )
@@ -214,7 +216,6 @@ const UserWidget = ({ theme }) => {
         <Box flex={2}>
           <Button
             route="Lexique"
-            title="Lexique"
             leftIcon={
               <LexiqueIcon
                 color="white"
@@ -222,14 +223,15 @@ const UserWidget = ({ theme }) => {
                 size={25}
               />
             }
-          />
+          >
+            Lexique
+          </Button>
         </Box>
         <Box width={20} />
         <Box flex={3}>
           <Button
             secondary
             route="Dictionnaire"
-            title="Dictionnaire"
             leftIcon={
               <DictionnaireIcon
                 secondary
@@ -238,24 +240,47 @@ const UserWidget = ({ theme }) => {
                 size={25}
               />
             }
-          />
+          >
+            Dictionnaire
+          </Button>
         </Box>
       </Box>
       <Box row padding={20} paddingBottom={0} paddingTop={0}>
-        <Button
-          fullWidth
-          color={theme.colors.quint}
-          route="Nave"
-          title="Bible thématique Nave"
-          leftIcon={
-            <NaveIcon
-              secondary
-              color="white"
-              style={{ marginRight: 10 }}
-              size={25}
-            />
-          }
-        />
+        <Box flex={4}>
+          <Button
+            fullWidth
+            color={theme.colors.quint}
+            route="Nave"
+            leftIcon={
+              <NaveIcon
+                secondary
+                color="white"
+                style={{ marginRight: 10 }}
+                size={25}
+              />
+            }
+          >
+            Thèmes
+          </Button>
+        </Box>
+        <Box width={20} />
+        <Box flex={3}>
+          <Button
+            fullWidth
+            color={theme.colors.primary}
+            route="Plans"
+            leftIcon={
+              <MaterialIcon
+                name="playlist-add-check"
+                color="white"
+                size={30}
+                style={{ marginRight: 10 }}
+              />
+            }
+          >
+            Plans
+          </Button>
+        </Box>
       </Box>
     </Container>
   )

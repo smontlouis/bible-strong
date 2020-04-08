@@ -65,7 +65,6 @@ const HomeScreen = () => {
                 onPress={() =>
                   Linking.openURL('https://www.facebook.com/fr.bible.strong')
                 }
-                title="Suivre"
                 leftIcon={
                   <FeatherIcon
                     name="facebook"
@@ -74,14 +73,15 @@ const HomeScreen = () => {
                     style={{ marginRight: 10 }}
                   />
                 }
-              />
+              >
+                Suivre
+              </Button>
             </Box>
             <Box width={20} />
             <Box flex>
               <Button
                 color="#2ecc71"
                 route="FAQ"
-                title="FAQ"
                 leftIcon={
                   <FeatherIcon
                     name="help-circle"
@@ -90,7 +90,9 @@ const HomeScreen = () => {
                     style={{ marginRight: 10 }}
                   />
                 }
-              />
+              >
+                FAQ
+              </Button>
               {/* <Button
                 color="#7ed6df"
                 title="Soutenir"
@@ -130,7 +132,7 @@ const HomeScreen = () => {
           </Box> */}
           {__DEV__ && (
             <Box background padding={20} paddingTop={0}>
-              <Button route="Storybook" title="Storybook" />
+              <Button route="Storybook">Storybook</Button>
             </Box>
           )}
         </Box>

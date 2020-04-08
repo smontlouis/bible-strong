@@ -70,11 +70,9 @@ const LoginScreen = ({ theme }) => {
             secureTextEntry
           />
           <Spacer size={2} />
-          <Button
-            title="Créer mon compte"
-            onPress={onRegister}
-            isLoading={isLoading}
-          />
+          <Button onPress={onRegister} isLoading={isLoading}>
+            Créer mon compte
+          </Button>
         </Box>
       </ScrollView>
     </Container>

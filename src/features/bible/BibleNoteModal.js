@@ -208,8 +208,9 @@ ${this.state.description}
                   small
                   disabled={submitIsDisabled}
                   onPress={this.onSaveNote}
-                  title="Sauvegarder"
-                />
+                >
+                  Sauvegarder
+                </Button>
               </Box>
             </>
           )}

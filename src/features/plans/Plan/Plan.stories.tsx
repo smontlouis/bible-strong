@@ -1,10 +1,9 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react-native'
 
-import { MyPlan } from '~common/types'
 import Plan from './Plan'
 
-import plan from './mock-plan'
+import { bibleProjectPlan as plan } from '../bible-project-plan'
 
 storiesOf('Plan', module).add('Default', () => (
   <Plan
@@ -12,7 +11,5 @@ storiesOf('Plan', module).add('Default', () => (
     title={plan.title}
     author={plan.author}
     sections={plan.sections}
-    status={plan.status}
-    progress={plan.progress}
   />
 ))

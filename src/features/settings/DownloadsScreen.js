@@ -49,7 +49,7 @@ const DLScreen = () => {
               l'application une fois les fichiers téléchargés.
             </Paragraph>
             <Box padding={20}>
-              <Button title="Tout télécharger" onPress={onConfirmDownload} />
+              <Button onPress={onConfirmDownload}>Tout télécharger</Button>
             </Box>
             {Object.values(databases).map(db => (
               <DBSelectorItem

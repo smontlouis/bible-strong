@@ -77,7 +77,6 @@ const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
               </Text>
               <Button
                 small
-                title="Valider"
                 onPress={() => {
                   dispatch(
                     changeColor({
@@ -87,7 +86,9 @@ const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
                   )
                   onClosed()
                 }}
-              />
+              >
+                Valider
+              </Button>
             </Box>
           </>
         )}

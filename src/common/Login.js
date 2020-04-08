@@ -104,7 +104,9 @@ const Login = ({ theme }) => {
           </Link>
         </Box>
         <Spacer size={2} />
-        <Button title="Connexion" isLoading={isLoading} onPress={onLogin} />
+        <Button isLoading={isLoading} onPress={onLogin}>
+          Connexion
+        </Button>
       </Box>
       <Spacer />
       <Box center>

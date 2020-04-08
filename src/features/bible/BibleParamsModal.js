@@ -287,7 +287,9 @@ const BibleParamsModal = ({
               onClosed()
             }}
             small
-          />
+          >
+            Ouvrir
+          </Button>
         </HalfContainer>
       </Container>
     </StylizedModal>

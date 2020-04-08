@@ -11,17 +11,12 @@ export interface Plan {
   author: User
 }
 
-export enum Status {
-  Idle = 'Idle',
-  Next = 'Next',
-  Progress = 'Progress',
-  Completed = 'Completed',
-}
+export type Status = 'Idle' | 'Next' | 'Progress' | 'Completed'
 
-export interface MyPlan extends Omit<Plan, 'sections'> {
+export interface ComputedPlan extends Omit<Plan, 'sections'> {
   status: Status
   progress: number
-  sections: MySection[]
+  sections: ComputedSection[]
 }
 
 export interface Section {
@@ -33,18 +28,12 @@ export interface Section {
   readingSlices: ReadingSlice[]
 }
 
-export interface MySection extends Omit<Section, 'readingSlices'> {
+export interface ComputedSection extends Omit<Section, 'readingSlices'> {
   progress: number
-  readingSlices: MyReadingSlice[]
+  data: ComputedReadingSlice[]
 }
 
-export enum SliceType {
-  Text = 'Text',
-  Image = 'Image',
-  Verse = 'Verse',
-  Chapter = 'Chapter',
-  Video = 'Video',
-}
+export type SliceType = 'Text' | 'Image' | 'Verse' | 'Chapter' | 'Video'
 
 export interface ReadingSlice {
   id: string
@@ -52,7 +41,7 @@ export interface ReadingSlice {
   slices: EntitySlice[]
 }
 
-export interface MyReadingSlice extends ReadingSlice {
+export interface ComputedReadingSlice extends ReadingSlice {
   status?: Status
 }
 
@@ -68,7 +57,7 @@ export type MyEntitySlice = EntitySlice & {
 
 export interface TextSlice {
   id: string
-  type: SliceType.Text
+  type: 'Text'
   title?: string
   description: string
 }
@@ -77,26 +66,26 @@ export interface ImageSlice {
   id: string
   alt?: string
   src: string
-  type: SliceType.Image
+  type: 'Image'
 }
 
 export interface VerseSlice {
   id: string
-  type: SliceType.Verse
+  type: 'Verse'
   verses: string[] | string
   subType?: 'pray'
 }
 
 export interface ChapterSlice {
   id: string
-  type: SliceType.Chapter
+  type: 'Chapter'
   chapters: string[] | string
   subType?: 'pray'
 }
 
 export interface VideoSlice {
   id: string
-  type: SliceType.Video
+  type: 'Video'
   title: string
   description?: string
   url: string

@@ -13,6 +13,7 @@ import settingsReducer from './user/settings'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
+import plansReducer from './user/plans'
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -20,6 +21,7 @@ export * from './user/settings'
 export * from './user/tags'
 export * from './user/versionUpdate'
 export * from './user/studies'
+export * from './user/plans'
 
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
 export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
@@ -94,6 +96,7 @@ const initialState = {
       },
     },
   },
+  plans: {},
 }
 
 const overwriteMerge = (destinationArray, sourceArray) => sourceArray
@@ -290,7 +293,8 @@ export default reduceReducers(
   settingsReducer,
   tagsReducer,
   versionUpdateReducer,
-  studiesReducer
+  studiesReducer,
+  plansReducer
 )
 
 // First-Time

@@ -124,11 +124,9 @@ const Changelog = () => {
           </Box>
         </ScrollView>
         <Box padding={20} alignItems="flex-end">
-          <Button
-            title="Fermer"
-            onPress={() => dispatch(saveAllLogsAsSeen(changelog))}
-            small
-          />
+          <Button onPress={() => dispatch(saveAllLogsAsSeen(changelog))} small>
+            Fermer
+          </Button>
         </Box>
       </StylizedModal>
     )

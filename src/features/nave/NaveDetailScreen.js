@@ -166,11 +166,9 @@ const NaveDetailScreen = ({ navigation }) => {
         )}
         {canReadMore && (
           <Box center marginTop={20}>
-            <Button
-              title="Lire plus"
-              onPress={loadRemainingText}
-              style={{ width: 150 }}
-            />
+            <Button onPress={loadRemainingText} style={{ width: 150 }}>
+              Lire plus
+            </Button>
           </Box>
         )}
       </ScrollView>

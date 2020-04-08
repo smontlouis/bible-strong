@@ -6,21 +6,17 @@ import chapterToReference from '~helpers/chapterToReference'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import {
-  MyEntitySlice as EntitySliceProps,
-  SliceType,
-  Status,
-} from '~common/types'
+import { MyEntitySlice as EntitySliceProps, Status } from '~common/types'
 
 const extractTitle = (props: EntitySliceProps) => {
   switch (props.type) {
-    case SliceType.Text:
+    case 'Text':
       return `Méditation: ${props.title}`
-    case SliceType.Video:
+    case 'Video':
       return `Vidéo: ${props.title}`
-    case SliceType.Verse:
+    case 'Verse':
       return verseToReference(props.verses, { isPlan: true })
-    case SliceType.Chapter:
+    case 'Chapter':
       return chapterToReference(props.chapters)
     default:
       return `No type found for this item: ${props.type}`
@@ -33,7 +29,7 @@ const renderIcon = (
   isNext: boolean
 ) => {
   switch (props.type) {
-    case SliceType.Text:
+    case 'Text':
       return (
         <FeatherIcon
           name="type"
@@ -41,7 +37,7 @@ const renderIcon = (
           color={isComplete ? 'white' : 'primary'}
         />
       )
-    case SliceType.Video:
+    case 'Video':
       return (
         <MaterialIcon
           name="play-arrow"
@@ -49,8 +45,8 @@ const renderIcon = (
           color={isComplete ? 'white' : 'primary'}
         />
       )
-    case SliceType.Verse:
-    case SliceType.Chapter:
+    case 'Verse':
+    case 'Chapter':
       return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
       ) : isNext ? null : (
@@ -121,8 +117,8 @@ const Line = styled(Box)(
 
 const EntitySlice = (props: EntitySliceProps & { isLast?: boolean }) => {
   const { status, isLast } = props
-  const isComplete = status === Status.Completed
-  const isNext = status === Status.Next
+  const isComplete = status === 'Completed'
+  const isNext = status === 'Next'
   const title = extractTitle(props)
 
   return (

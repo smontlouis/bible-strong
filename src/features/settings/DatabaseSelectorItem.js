@@ -227,10 +227,11 @@ class DBSelectorItem extends React.Component {
               <Button
                 reverse
                 small
-                title="Télécharger"
                 subTitle={`⚠️ Taille de ${Math.round(fileSize / 1000000)}Mo`}
                 onPress={this.startDownload}
-              />
+              >
+                Télécharger
+              </Button>
             )}
             {isLoading && (
               <Box width={100} justifyContent="center">

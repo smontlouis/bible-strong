@@ -5,7 +5,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
 import { FeatherIcon } from '~common/ui/Icon'
-import { MyReadingSlice as MyReadingSliceProps, Status } from '~common/types'
+import { ComputedReadingSlice } from '~common/types'
 import EntitySlice from './EntitySlice'
 
 const FineLine = styled(Box)(({ theme }) => ({
@@ -32,34 +32,37 @@ const ReadingSlice = ({
   slices,
   status,
   isLast,
-}: MyReadingSliceProps & { isLast?: boolean }) => {
-  const isNext = status === Status.Next
+}: ComputedReadingSlice & { isLast?: boolean }) => {
+  const isNext = status === 'Next'
   return (
-    <Box
-      paddingLeft={28}
-      paddingTop={15}
-      backgroundColor="lightGrey"
-      position="relative"
-    >
-      <FineLine />
-      <Box row marginBottom={15}>
-        <Box flex>
-          {slices.map((slice, i) => (
-            <EntitySlice
-              status={status}
-              isLast={i === slices.length - 1}
-              key={slice.id}
-              {...slice}
-            />
-          ))}
+    <>
+      <Box
+        paddingLeft={28}
+        paddingTop={15}
+        backgroundColor="lightGrey"
+        position="relative"
+      >
+        <FineLine />
+        <Box row marginBottom={15}>
+          <Box flex>
+            {slices.map((slice, i) => (
+              <EntitySlice
+                status={status}
+                isLast={i === slices.length - 1}
+                key={slice.id}
+                {...slice}
+              />
+            ))}
+          </Box>
+          <Box paddingHorizontal={10} alignItems="center" row>
+            {isNext && <NextButton>LIRE</NextButton>}
+            <FeatherIcon name="chevron-right" size={14} color="primary" />
+          </Box>
         </Box>
-        <Box paddingHorizontal={10} alignItems="center" row>
-          {isNext && <NextButton>LIRE</NextButton>}
-          <FeatherIcon name="chevron-right" size={14} color="primary" />
-        </Box>
+        {!isLast && <Border marginLeft={40} />}
       </Box>
-      {!isLast && <Border marginLeft={40} />}
-    </Box>
+      {isLast && <Border />}
+    </>
   )
 }
 
