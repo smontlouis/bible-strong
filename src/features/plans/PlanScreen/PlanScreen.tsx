@@ -1,49 +1,50 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { NavigationStackProp } from 'react-navigation-stack'
+import { Modalize } from 'react-native-modalize'
 
 import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Header from '~common/Header'
-import Link from '~common/Link'
-import { RootState } from 'src/redux/modules/reducer'
-import { Status } from 'src/common/types'
+import { ComputedPlanItem } from 'src/common/types'
+import PlanSectionList from './PlanSectionList'
+import { useComputedPlan } from '../plan.hooks'
+import { usePrevious } from '~helpers/usePrevious'
+import SuccessModal from './SuccessModal'
 
-interface UserPlan {
-  id: string
-  status: Status
-  readingSlices: UserReadingSlice[]
+interface Props {
+  navigation: NavigationStackProp<{ plan: ComputedPlanItem }>
 }
 
-interface UserReadingSlice {
-  id: string
-  status: Status
-}
+const PlanScreen = ({ navigation }: Props) => {
+  const {
+    id,
+    title,
+    image,
+    description,
+    author,
+  }: ComputedPlanItem = navigation.getParam('plan', {})
+  const modalRef = React.useRef<Modalize>(null)
+  const plan = useComputedPlan(id)
+  const progress = plan?.progress
+  const prevProgress: number | undefined = usePrevious<number | undefined>(
+    progress
+  )
 
-const mockUserPlans: UserPlan[] = [
-  {
-    id: 'bible-project-plan',
-    status: 'Idle',
-    readingSlices: [
-      {
-        id: '0',
-        status: 'Completed',
-      },
-      {
-        id: '347',
-        status: 'Next',
-      },
-    ],
-  },
-]
+  React.useEffect(() => {
+    if (!!prevProgress && !!progress && prevProgress !== progress) {
+      if (progress > prevProgress) {
+        console.log('upgrade')
+        modalRef.current?.open()
+      } else {
+        console.log('downgrade')
+      }
+    }
+  }, [progress, prevProgress])
 
-const PlanScreen = () => {
-  // const myPlans = useSelector((state: RootState) => state.plan.myPlans)
-  // const userPlans = useSelector((state: RootState) => mockUserPlans)
-  console.log('ciyciy')
   return (
     <Container>
-      <Header title="Mes Plans" hasBackButton />
+      <Header title={title} hasBackButton />
+      {plan?.sections && <PlanSectionList {...plan} />}
+      <SuccessModal modalRef={modalRef} isPlanCompleted={progress === 1} />
     </Container>
   )
 }

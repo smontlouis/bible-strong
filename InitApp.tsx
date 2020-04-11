@@ -21,11 +21,15 @@ import {
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import Changelog from '~common/Changelog'
-import getTheme from '~themes'
+import getTheme, { Theme } from '~themes/index'
 import { paperTheme } from '~themes/default'
 import { DBStateProvider } from '~helpers/databaseState'
 
-class InitApp extends React.Component {
+interface Props {
+  theme: string
+}
+
+class InitApp extends React.Component<Props> {
   componentDidMount() {
     this.props.dispatch(getChangelog())
     this.props.dispatch(getVersionUpdate())
@@ -99,7 +103,7 @@ class InitApp extends React.Component {
   render() {
     const { theme: currentTheme, fontFamily, persistor } = this.props
 
-    const defaultTheme = getTheme[currentTheme]
+    const defaultTheme: Theme = getTheme[currentTheme]
 
     const theme = {
       ...defaultTheme,

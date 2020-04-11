@@ -268,7 +268,7 @@ const UserWidget = ({ theme }) => {
           <Button
             fullWidth
             color={theme.colors.primary}
-            route="Plans"
+            route="MyPlanList"
             leftIcon={
               <MaterialIcon
                 name="playlist-add-check"

@@ -2,7 +2,10 @@ import { Plan } from 'src/common/types'
 
 export const bibleProjectPlan: Plan = {
   id: 'bible-project-plan',
-  title: 'Bible',
+  title: 'Lire les écritures',
+  description: `Découvrez le plan "ReadScripture" que la ministère Crazy Love a développé en collaboration avec The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !`,
+  image:
+    'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Freadscripture.png?alt=media&token=7d72f066-1a5b-43a0-bb6b-d1fcb0299f62',
   author: { id: '', displayName: '', photoUrl: '' },
   sections: [
     {

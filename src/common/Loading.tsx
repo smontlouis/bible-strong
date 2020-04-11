@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { ActivityIndicator } from 'react-native'
-import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import { useTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useTimeout from '~helpers/useTimeout'
+import styled from '~styled'
+import { Theme } from '~themes'
 
 const Container = styled.View(({ theme }) => ({
   flex: 1,
@@ -16,14 +17,16 @@ const Container = styled.View(({ theme }) => ({
   borderBottomLeftRadius: 30,
 }))
 
-const Loading = ({
-  message = null,
-  subMessage = null,
-  style,
-  children,
-  theme,
-}) => {
+interface Props {
+  message?: string
+  subMessage?: string
+  style?: Object
+  children?: React.ReactNode
+}
+
+const Loading = ({ message, subMessage, style, children }: Props) => {
   const [isReady] = useTimeout(3000)
+  const theme: Theme = useTheme()
 
   return (
     <Container style={style}>
@@ -49,4 +52,4 @@ const Loading = ({
   )
 }
 
-export default withTheme(Loading)
+export default Loading

@@ -1,3 +1,5 @@
+export type Status = 'Idle' | 'Pending' | 'Resolved' | 'Rejected'
+
 export interface User {
   id: string
   displayName: string
@@ -7,14 +9,20 @@ export interface User {
 export interface Plan {
   id: string
   title: string
+  image?: string
+  description?: string
   sections: Section[]
   author: User
 }
 
-export type Status = 'Idle' | 'Next' | 'Progress' | 'Completed'
+export type PlanStatus = 'Idle' | 'Next' | 'Progress' | 'Completed'
 
+export interface ComputedPlanItem extends Omit<Plan, 'sections'> {
+  status: PlanStatus
+  progress: number
+}
 export interface ComputedPlan extends Omit<Plan, 'sections'> {
-  status: Status
+  status: PlanStatus
   progress: number
   sections: ComputedSection[]
 }
@@ -42,7 +50,7 @@ export interface ReadingSlice {
 }
 
 export interface ComputedReadingSlice extends ReadingSlice {
-  status?: Status
+  status?: PlanStatus
 }
 
 export type EntitySlice =
@@ -51,9 +59,6 @@ export type EntitySlice =
   | ChapterSlice
   | VideoSlice
   | ImageSlice
-export type MyEntitySlice = EntitySlice & {
-  status?: Status
-}
 
 export interface TextSlice {
   id: string
@@ -72,14 +77,14 @@ export interface ImageSlice {
 export interface VerseSlice {
   id: string
   type: 'Verse'
-  verses: string[] | string
+  verses: string
   subType?: 'pray'
 }
 
 export interface ChapterSlice {
   id: string
   type: 'Chapter'
-  chapters: string[] | string
+  chapters: string
   subType?: 'pray'
 }
 
@@ -89,4 +94,15 @@ export interface VideoSlice {
   title: string
   description?: string
   url: string
+}
+
+export interface OngoingPlan {
+  id: string
+  status: PlanStatus
+  readingSlices: OngoingReadingSlice[]
+}
+
+export interface OngoingReadingSlice {
+  id: string
+  status: PlanStatus
 }

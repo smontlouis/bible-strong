@@ -7,7 +7,8 @@
     "~helpers": "${workspaceRoot}/src/helpers",
     "~navigation": "${workspaceRoot}/src/navigation",
     "~redux": "${workspaceRoot}/src/redux",
-    "~themes": "${workspaceRoot}/src/themes"
+    "~themes": "${workspaceRoot}/src/themes",
+    "~styled": "${workspaceRoot}/src/styled"
   },
   "editor.formatOnSave": true,
   "eslint.validate": [

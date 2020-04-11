@@ -1,11 +1,12 @@
 import React from 'react'
-import styled from '@emotion/native'
 
+import styled from '~styled'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ComputedReadingSlice } from '~common/types'
+import Link from '~common/Link'
 import EntitySlice from './EntitySlice'
 
 const FineLine = styled(Box)(({ theme }) => ({
@@ -27,15 +28,23 @@ const NextButton = styled(Text)(({ theme }) => ({
   marginRight: 10,
 }))
 
+interface Props {
+  isLast?: boolean
+  planId: string
+  isSectionCompleted: boolean
+}
+
 const ReadingSlice = ({
   id,
+  planId,
   slices,
   status,
   isLast,
-}: ComputedReadingSlice & { isLast?: boolean }) => {
+  isSectionCompleted,
+}: ComputedReadingSlice & Props) => {
   const isNext = status === 'Next'
   return (
-    <>
+    <Link route="PlanSlice" params={{ readingSlice: { id, planId, slices } }}>
       <Box
         paddingLeft={28}
         paddingTop={15}
@@ -45,14 +54,19 @@ const ReadingSlice = ({
         <FineLine />
         <Box row marginBottom={15}>
           <Box flex>
-            {slices.map((slice, i) => (
-              <EntitySlice
-                status={status}
-                isLast={i === slices.length - 1}
-                key={slice.id}
-                {...slice}
-              />
-            ))}
+            {slices
+              .filter(f => f.type !== 'Image')
+              .map((slice, i) => (
+                <EntitySlice
+                  status={status}
+                  isSectionCompleted={isSectionCompleted}
+                  isLast={
+                    i === slices.filter(f => f.type !== 'Image').length - 1
+                  }
+                  key={slice.id}
+                  {...slice}
+                />
+              ))}
           </Box>
           <Box paddingHorizontal={10} alignItems="center" row>
             {isNext && <NextButton>LIRE</NextButton>}
@@ -62,7 +76,7 @@ const ReadingSlice = ({
         {!isLast && <Border marginLeft={40} />}
       </Box>
       {isLast && <Border />}
-    </>
+    </Link>
   )
 }
 

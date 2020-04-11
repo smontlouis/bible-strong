@@ -1,9 +1,8 @@
 import { Platform } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
-
 import colors from './colors'
 
-export default {
+const theme = {
   colors,
   measures: {
     headerHeight: 60,
@@ -17,6 +16,8 @@ export default {
     titleItalic: Platform.OS === 'ios' ? 'System' : 'normal',
   },
 }
+
+export default theme
 
 export const paperTheme = {
   ...DefaultTheme,

@@ -1,15 +1,10 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react-native'
 
-import Plan from './Plan'
+import PlanSectionList from './PlanSectionList'
 
 import { bibleProjectPlan as plan } from '../bible-project-plan'
 
 storiesOf('Plan', module).add('Default', () => (
-  <Plan
-    id={plan.id}
-    title={plan.title}
-    author={plan.author}
-    sections={plan.sections}
-  />
+  <PlanSectionList sections={plan.sections} />
 ))

@@ -10,6 +10,8 @@ const Box = styled.View(props => {
     paddingHorizontal: props.paddingHorizontal,
     margin: props.margin,
     borderWidth: props.borderWidth,
+    borderColor: props.theme.colors[props.borderColor] || props.borderColor,
+
     overflow: props.overflow ? 'visible' : 'hidden',
     width: props.width,
     maxWidth: props.maxWidth,
@@ -60,6 +62,11 @@ const Box = styled.View(props => {
       elevation: 2,
       borderRadius: 5,
       overflow: 'visible',
+    }),
+
+    ...(props.size && {
+      width: props.size,
+      height: props.size,
     }),
 
     ...(props.lightShadow && {

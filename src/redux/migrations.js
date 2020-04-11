@@ -249,13 +249,4 @@ export default {
       },
     }
   },
-  19: state => {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        plans: {},
-      },
-    }
-  },
 }

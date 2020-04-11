@@ -1,12 +1,13 @@
 import React from 'react'
-import styled from '@emotion/native'
 
+import styled from '~styled'
 import verseToReference from '~helpers/verseToReference'
 import chapterToReference from '~helpers/chapterToReference'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import { MyEntitySlice as EntitySliceProps, Status } from '~common/types'
+import { EntitySlice as EntitySliceProps, PlanStatus } from '~common/types'
+import { Theme } from '~themes/'
 
 const extractTitle = (props: EntitySliceProps) => {
   switch (props.type) {
@@ -74,18 +75,12 @@ const SmallCircle = styled(Box)(({ theme }: { theme: any }) => ({
 }))
 
 const Circle = styled(Box)(
-  ({
-    theme,
-    isComplete,
-    isNext,
-  }: {
-    theme: any
-    isComplete: boolean
-    isNext: boolean
-  }) => ({
+  ({ theme, isComplete, isNext, isSectionCompleted }) => ({
     width: 18,
     height: 18,
-    backgroundColor: isComplete
+    backgroundColor: isSectionCompleted
+      ? theme.colors.success
+      : isComplete
       ? theme.colors.primary
       : theme.colors.lightPrimary,
     borderRadius: 9,
@@ -103,20 +98,31 @@ const Line = styled(Box)(
     theme,
     isComplete,
     isNext,
+    isSectionCompleted,
   }: {
-    theme: any
+    theme: Theme
     isComplete: boolean
     isNext: boolean
+    isSectionCompleted: boolean
   }) => ({
     height: 10,
     width: isComplete || isNext ? 3 : 2,
-    backgroundColor:
-      isComplete || isNext ? theme.colors.primary : theme.colors.lightPrimary,
+    backgroundColor: isSectionCompleted
+      ? theme.colors.success
+      : isComplete || isNext
+      ? theme.colors.primary
+      : theme.colors.lightPrimary,
   })
 )
 
-const EntitySlice = (props: EntitySliceProps & { isLast?: boolean }) => {
-  const { status, isLast } = props
+interface Props {
+  isLast?: boolean
+  status?: PlanStatus
+  isSectionCompleted: boolean
+}
+
+const EntitySlice = (props: EntitySliceProps & Props) => {
+  const { status, isLast, isSectionCompleted } = props
   const isComplete = status === 'Completed'
   const isNext = status === 'Next'
   const title = extractTitle(props)
@@ -124,12 +130,22 @@ const EntitySlice = (props: EntitySliceProps & { isLast?: boolean }) => {
   return (
     <Box row>
       <Box marginRight={25} center>
-        <Circle isComplete={isComplete} isNext={isNext}>
+        <Circle
+          isSectionCompleted={isSectionCompleted}
+          isComplete={isComplete}
+          isNext={isNext}
+        >
           {renderIcon(props, isComplete, isNext)}
         </Circle>
-        {!isLast && <Line isComplete={isComplete} isNext={isNext} />}
+        {!isLast && (
+          <Line
+            isComplete={isComplete}
+            isNext={isNext}
+            isSectionCompleted={isSectionCompleted}
+          />
+        )}
       </Box>
-      <Text opacity={isComplete || isNext ? 1 : 0.3}>{title}</Text>
+      <Text opacity={isComplete || isNext ? 1 : 0.6}>{title}</Text>
     </Box>
   )
 }
