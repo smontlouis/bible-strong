@@ -4,9 +4,8 @@ import { withNavigation, NavigationInjectedProps } from 'react-navigation'
 import Link from '~common/Link'
 import styled from '~styled'
 import { MaterialIcon } from '~common/ui/Icon'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { markAsRead } from '~redux/modules/plan'
-import { RootState } from '~redux/modules/reducer'
 
 const StyledLink = styled(Link)(({ theme }) => ({
   backgroundColor: theme.colors.success,
@@ -26,21 +25,16 @@ const StyledLink = styled(Link)(({ theme }) => ({
 interface Props {
   readingSliceId: string
   planId: string
+  isRead: boolean
 }
 
 const ReadButton = ({
   readingSliceId,
   planId,
+  isRead,
   navigation,
 }: NavigationInjectedProps & Props) => {
   const dispatch = useDispatch()
-  const isRead = useSelector(
-    (state: RootState) =>
-      state.plan.ongoingPlans
-        .find(oP => oP.id === planId)
-        ?.readingSlices.find(rSlice => rSlice.id === readingSliceId)?.status ===
-      'Completed'
-  )
 
   const onPress = () => {
     dispatch(markAsRead({ readingSliceId, planId }))

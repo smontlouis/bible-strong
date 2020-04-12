@@ -57,7 +57,10 @@ const calculateProgress = (
 
   return (
     ongoingReadingSlices.filter(oReadingSlice =>
-      readingSlices.find(rSlice => rSlice.id === oReadingSlice.id)
+      readingSlices.find(
+        rSlice =>
+          rSlice.id === oReadingSlice.id && oReadingSlice.status === 'Completed'
+      )
     ).length / readingSlices.length
   )
 }
@@ -114,14 +117,22 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
       (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
       []
     )
+
+    const onGoingReadingSlicesArray = Object.entries(
+      ongoingPlan?.readingSlices
+    ).map(([id, status]) => ({
+      id,
+      status,
+    }))
+
     return {
       ...plan,
       status: ongoingPlan.status,
       progress: calculateProgress(
         flattenedReadingSlices,
-        ongoingPlan?.readingSlices
+        onGoingReadingSlicesArray
       ),
-      sections: transformSections(plan.sections, ongoingPlan.readingSlices),
+      sections: transformSections(plan.sections, onGoingReadingSlicesArray),
     }
   }
   return {
@@ -146,6 +157,13 @@ export const useComputedPlanItems = (): ComputedPlanItem[] => {
       const ongoingPlan = ongoingPlans.find(uP => uP.id === plan.id)
 
       if (ongoingPlan) {
+        const onGoingReadingSlicesArray = Object.entries(
+          ongoingPlan?.readingSlices
+        ).map(([id, status]) => ({
+          id,
+          status,
+        }))
+
         // Calculate progress
         const flattenedReadingSlices: ReadingSlice[] = sections.reduce(
           (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
@@ -156,7 +174,7 @@ export const useComputedPlanItems = (): ComputedPlanItem[] => {
           status: ongoingPlan.status,
           progress: calculateProgress(
             flattenedReadingSlices,
-            ongoingPlan?.readingSlices
+            onGoingReadingSlicesArray
           ),
         }
       }

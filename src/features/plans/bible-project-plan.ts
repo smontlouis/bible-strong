@@ -6,7 +6,12 @@ export const bibleProjectPlan: Plan = {
   description: `Découvrez le plan "ReadScripture" que la ministère Crazy Love a développé en collaboration avec The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !`,
   image:
     'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Freadscripture.png?alt=media&token=7d72f066-1a5b-43a0-bb6b-d1fcb0299f62',
-  author: { id: '', displayName: '', photoUrl: '' },
+  author: {
+    id: 'ZvfOG5Yt9rN2lKc4sjb3n5W5pit1',
+    displayName: 'Stéphane MLC',
+    photoUrl:
+      'https://lh3.googleusercontent.com/a-/AOh14GgMHihnLd5Bje30QhtP8s_eaUALPMDalSyOhTAWiw=s96-c',
+  },
   sections: [
     {
       id: '1',

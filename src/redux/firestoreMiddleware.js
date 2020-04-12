@@ -27,6 +27,8 @@ import {
 // TODO - DO IT FOR COLOR SETTINGS ?
 
 import { firebaseDb } from '../helpers/firebase'
+import { markAsRead, resetPlan } from './modules/plan'
+import { RootState } from '~redux/modules/reducer'
 
 const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
@@ -40,11 +42,20 @@ export default store => next => async action => {
     return result
   }
 
-  const { user } = state
+  const { user, plan }: RootState = state
   const userDoc = firebaseDb.collection('users').doc(user.id)
   const studyCollection = firebaseDb.collection('studies')
 
   switch (action.type) {
+    case resetPlan.type:
+    case markAsRead.type: {
+      userDoc.update(
+        r({
+          plan: plan.ongoingPlans,
+        })
+      )
+      break
+    }
     case ADD_HIGHLIGHT:
     case REMOVE_HIGHLIGHT: {
       const { highlights } = user.bible
@@ -130,6 +141,7 @@ export default store => next => async action => {
       userDoc.update(
         r({
           bible: sanitizeUserBible(user.bible),
+          plan: plan.ongoingPlans,
         })
       )
       break

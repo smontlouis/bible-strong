@@ -1,7 +1,10 @@
 import React from 'react'
 import { NavigationStackProp } from 'react-navigation-stack'
+import { MenuOption } from 'react-native-popup-menu'
 
+import PopOverMenu from '~common/PopOverMenu'
 import Container from '~common/ui/Container'
+import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import { ComputedReadingSlice, EntitySlice } from '~common/types'
 import ScrollView from '~common/ui/ScrollView'
@@ -11,6 +14,10 @@ import chapterToReference from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 import Box from '~common/ui/Box'
 import ReadButton from './ReadButton'
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState } from '~redux/modules/reducer'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import { markAsRead } from '~redux/modules/plan'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -36,13 +43,56 @@ const PlanSliceScreen = ({ navigation }: Props) => {
     'readingSlice',
     {}
   )
+  const dispatch = useDispatch()
+  const isRead = useSelector(
+    (state: RootState) =>
+      state.plan.ongoingPlans.find(oP => oP.id === planId)?.readingSlices[
+        id
+      ] === 'Completed'
+  )
+
+  const onMarkAsReadSelect = () => {
+    dispatch(markAsRead({ readingSliceId: id, planId }))
+    navigation.goBack()
+  }
+
   const mainSlice: EntitySlice | undefined = slices.find(
     s => s.type === 'Chapter' || s.type === 'Verse'
   )
   const title = mainSlice ? extractTitle(mainSlice) : ''
   return (
     <Container>
-      <Header title={title} hasBackButton />
+      <Header
+        title={title}
+        hasBackButton
+        rightComponent={
+          <PopOverMenu
+            element={
+              <Box
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="center"
+                height={50}
+                width={50}
+              >
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            }
+            popover={
+              <>
+                <MenuOption onSelect={onMarkAsReadSelect}>
+                  <Box row alignItems="center">
+                    <MaterialIcon name="check" size={20} />
+                    <Text marginLeft={10}>
+                      {isRead ? 'Marquer comme non lu' : 'Marquer comme lu'}
+                    </Text>
+                  </Box>
+                </MenuOption>
+              </>
+            }
+          />
+        }
+      />
       <ScrollView>
         <PauseText>
           {
@@ -53,7 +103,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
           <Slice key={slice.id} {...slice} />
         ))}
         <Box height={80} center marginTop={30}>
-          <ReadButton readingSliceId={id} planId={planId} />
+          <ReadButton isRead={isRead} readingSliceId={id} planId={planId} />
         </Box>
       </ScrollView>
     </Container>

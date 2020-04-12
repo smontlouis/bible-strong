@@ -138,9 +138,7 @@ const userReducer = produce((draft, action) => {
         bible,
       } = action.profile
 
-      const isLogged = !!draft.id
-      const { remoteLastSeen } = action
-      const { lastSeen: localLastSeen } = draft
+      const { isLogged, localLastSeen, remoteLastSeen } = action
 
       draft.id = id
       draft.email = email
@@ -319,11 +317,17 @@ export function saveAllLogsAsSeen(payload) {
 
 // USERS
 export function onUserLoginSuccess(profile, remoteLastSeen, studies) {
-  return {
-    type: USER_LOGIN_SUCCESS,
-    profile,
-    remoteLastSeen,
-    studies,
+  return async (dispatch, getState) => {
+    const { id, lastSeen } = getState().user
+
+    dispatch({
+      type: USER_LOGIN_SUCCESS,
+      isLogged: !!id,
+      localLastSeen: lastSeen,
+      profile,
+      remoteLastSeen,
+      studies,
+    })
   }
 }
 

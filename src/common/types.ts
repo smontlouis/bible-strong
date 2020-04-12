@@ -99,7 +99,7 @@ export interface VideoSlice {
 export interface OngoingPlan {
   id: string
   status: PlanStatus
-  readingSlices: OngoingReadingSlice[]
+  readingSlices: { [id: string]: PlanStatus }
 }
 
 export interface OngoingReadingSlice {

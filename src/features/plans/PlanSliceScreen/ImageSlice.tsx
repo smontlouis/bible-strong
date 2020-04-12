@@ -38,6 +38,7 @@ const useFireStorage = (src: string) => {
 
   return imageUrl
 }
+
 const ImageSlice = ({ src }: ImageSliceProps) => {
   const imageUrl = useFireStorage(src)
 

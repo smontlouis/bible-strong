@@ -42,7 +42,6 @@ export default React.forwardRef(({ contentContainerStyle, ...props }, ref) => {
       <SectionList
         orientation={orientation}
         contentContainerStyle={{
-          paddingTop: 20,
           paddingBottom: 10 + getBottomSpace(),
           ...contentContainerStyle,
         }}
