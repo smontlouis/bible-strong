@@ -12,9 +12,6 @@ const Container = styled.View(({ theme }) => ({
   flex: 1,
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: theme.colors.lightGrey,
-  borderTopLeftRadius: 30,
-  borderBottomLeftRadius: 30,
 }))
 
 interface Props {

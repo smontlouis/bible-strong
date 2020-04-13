@@ -5,7 +5,6 @@ import styled from '@emotion/native'
 
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import { HomeScrollView } from '~common/ui/ScrollView'
 import VerseOfTheDay from './VerseOfTheDay'
 import StrongOfTheDay from './StrongOfTheDay'
@@ -13,6 +12,7 @@ import WordOfTheDay from './WordOfTheDay'
 import NaveOfTheDay from './NaveOfTheDay'
 import UserWidget from './UserWidget'
 import Button from '~common/ui/Button'
+import PlanHome from './PlanHome'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
@@ -24,13 +24,7 @@ const HomeScreen = () => {
         <Box grey>
           <RoundedCorner />
         </Box>
-        <VerseOfTheDay />
-        <Box padding={20} paddingBottom={0} grey>
-          <Text title fontSize={23}>
-            Au hasard
-          </Text>
-        </Box>
-        <Box grey paddingBottom={30}>
+        <Box grey paddingTop={10}>
           <RNScrollView
             horizontal
             style={{ overflow: 'visible' }}
@@ -52,6 +46,8 @@ const HomeScreen = () => {
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
+        <PlanHome />
+        <VerseOfTheDay />
         <Box grey>
           <Box
             background

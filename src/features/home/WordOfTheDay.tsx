@@ -9,9 +9,9 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
-
-const itemHeight = 130
-const itemWidth = wp(60) > 300 ? 300 : wp(60)
+import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
+import DictionnaireIcon from '~common/DictionnaryIcon'
+import RandomButton from './RandomButton'
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -23,9 +23,12 @@ const DictionnaireOfTheDay = ({
   color2 = 'rgba(47,128,237,1)',
 }) => {
   const [error, setError] = useState(false)
+  const [startRandom, setStartRandom] = useState(true)
   const [strongReference, setStrongRef] = useState(null)
   useEffect(() => {
     const loadStrong = async () => {
+      if (!startRandom) return
+
       const strongReference = await loadDictionnaireItemByRowId(
         randomIntFromInterval(5437, 10872)
       )
@@ -35,32 +38,29 @@ const DictionnaireOfTheDay = ({
       }
 
       setStrongRef(strongReference)
+      setStartRandom(false)
     }
     loadStrong()
-  }, [])
+  }, [startRandom])
 
   if (error) {
     return (
-      <Box center shadow height={itemHeight} padding={30}>
+      <WidgetContainer>
         <FeatherIcon name="x" size={30} color="quart" />
         <Text marginTop={5}>Une erreur est survenue.</Text>
-      </Box>
+      </WidgetContainer>
     )
   }
 
   if (!strongReference) {
-    return (
-      <Box height={itemHeight} center>
-        <Text>Chargement...</Text>
-      </Box>
-    )
+    return <WidgetLoading />
   }
 
   const { word } = strongReference
 
   return (
     <Link route="DictionnaryDetail" params={{ word }}>
-      <Box center rounded height={itemHeight} width={itemWidth}>
+      <WidgetContainer>
         <Box
           style={{
             position: 'absolute',
@@ -77,20 +77,40 @@ const DictionnaireOfTheDay = ({
             colors={[color1, color2]}
           />
         </Box>
-        <Box
-          backgroundColor="rgba(0,0,0,0.1)"
-          paddingHorizontal={5}
-          paddingVertical={3}
-          rounded
-        >
-          <Text fontSize={10} style={{ color: 'white' }}>
-            Dictionnaire
-          </Text>
+        <RandomButton onPress={() => setStartRandom(true)} />
+        <Box flex={1} center>
+          <Box
+            backgroundColor="rgba(0,0,0,0.1)"
+            paddingHorizontal={5}
+            paddingVertical={3}
+            rounded
+          >
+            <Text fontSize={10} color="white">
+              Dictionnaire
+            </Text>
+          </Box>
+          <Paragraph scale={-1} color="white" scaleLineHeight={-2}>
+            {word}
+          </Paragraph>
         </Box>
-        <Paragraph style={{ color: 'white' }} scale={1} scaleLineHeight={-2}>
-          {word}
-        </Paragraph>
-      </Box>
+        <Link route="Dictionnaire" style={{ width: '100%' }}>
+          <Box
+            row
+            center
+            backgroundColor="rgba(0,0,0,0.04)"
+            paddingVertical={10}
+          >
+            <DictionnaireIcon
+              style={{ marginRight: 10 }}
+              size={20}
+              color="white"
+            />
+            <Text color="white" bold fontSize={12}>
+              Dictionnaire
+            </Text>
+          </Box>
+        </Link>
+      </WidgetContainer>
     </Link>
   )
 }

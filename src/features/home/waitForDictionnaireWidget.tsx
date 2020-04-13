@@ -1,14 +1,8 @@
 import React from 'react'
-import { ProgressBar } from 'react-native-paper'
 
-import { wp } from '~helpers/utils'
-import Loading from '~common/Loading'
-import Box from '~common/ui/Box'
 import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 import DownloadRequired from '~common/DownloadRequired'
-
-const itemWidth = wp(60)
-const itemHeight = 130
+import { DownloadingWidget, WidgetContainer, WidgetLoading } from './widget'
 
 const waitForWidget = WrappedComponent => props => {
   const {
@@ -20,18 +14,12 @@ const waitForWidget = WrappedComponent => props => {
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {
-    return (
-      <Box center rounded height={itemHeight} width={itemWidth}>
-        <Loading message="Téléchargement du dictionnaire...">
-          <ProgressBar progress={progress} color="blue" />
-        </Loading>
-      </Box>
-    )
+    return <DownloadingWidget progress={progress} />
   }
 
   if (isLoading && proposeDownload) {
     return (
-      <Box center rounded height={itemHeight} width={itemWidth}>
+      <WidgetContainer>
         <DownloadRequired
           noHeader
           title="Dictionnaire requis"
@@ -39,16 +27,12 @@ const waitForWidget = WrappedComponent => props => {
           fileSize={35}
           small
         />
-      </Box>
+      </WidgetContainer>
     )
   }
 
   if (isLoading) {
-    return (
-      <Box center rounded height={itemHeight} width={itemWidth}>
-        <Loading />
-      </Box>
-    )
+    return <WidgetLoading />
   }
 
   return <WrappedComponent {...props} />

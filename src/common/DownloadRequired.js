@@ -19,7 +19,7 @@ const DownloadRequired = ({
   const padding = small ? 10 : 30
   const iconSize = small ? 20 : size
   return (
-    <Container>
+    <Container pure={small} noPadding={small}>
       {!noHeader && (
         <Header
           title="Téléchargement nécessaire"

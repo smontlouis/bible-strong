@@ -10,9 +10,9 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import loadRandomStrongReference from '~helpers/loadRandomStrongReference'
 import waitForStrongWidget from './waitForStrongWidget'
-
-const itemWidth = wp(60) > 300 ? 300 : wp(60)
-const itemHeight = 130
+import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
+import LexiqueIcon from '~common/LexiqueIcon'
+import RandomButton from './RandomButton'
 
 const StrongOfTheDay = ({
   type,
@@ -20,9 +20,12 @@ const StrongOfTheDay = ({
   color2 = 'rgb(89,131,240)',
 }) => {
   const [error, setError] = useState(false)
+  const [startRandom, setStartRandom] = useState(true)
   const [strongReference, setStrongRef] = useState(false)
   useEffect(() => {
     const loadStrong = async () => {
+      if (!startRandom) return
+
       const strongReference = await loadRandomStrongReference(
         type === 'grec' ? 40 : 1
       )
@@ -39,20 +42,14 @@ const StrongOfTheDay = ({
       }
 
       setStrongRef(strongReference)
+      setStartRandom(false)
     }
     loadStrong()
-  }, [type])
+  }, [type, startRandom])
 
   if (error) {
     return (
-      <Box
-        center
-        rounded
-        height={itemHeight}
-        padding={30}
-        width={itemWidth}
-        marginRight={20}
-      >
+      <WidgetContainer>
         {error === 'NOT_FOUND' ? (
           <>
             <FeatherIcon name="slash" size={30} color="quart" />
@@ -64,22 +61,12 @@ const StrongOfTheDay = ({
             <Text marginTop={5}>Une erreur est survenue.</Text>
           </>
         )}
-      </Box>
+      </WidgetContainer>
     )
   }
 
   if (!strongReference) {
-    return (
-      <Box
-        height={itemHeight}
-        center
-        rounded
-        width={itemWidth}
-        marginRight={20}
-      >
-        <Text>Chargement...</Text>
-      </Box>
-    )
+    return <WidgetLoading />
   }
 
   const { Grec, Hebreu, Mot } = strongReference
@@ -88,9 +75,8 @@ const StrongOfTheDay = ({
     <Link
       route="BibleStrongDetail"
       params={{ book: Grec ? 40 : 1, strongReference }}
-      style={{ width: itemWidth }}
     >
-      <Box center rounded marginRight={20} height={itemHeight}>
+      <WidgetContainer>
         <Box
           style={{
             position: 'absolute',
@@ -107,28 +93,44 @@ const StrongOfTheDay = ({
             colors={[color1, color2]}
           />
         </Box>
-        <Box
-          backgroundColor="rgba(0,0,0,0.1)"
-          paddingHorizontal={5}
-          paddingVertical={3}
-          rounded
-        >
-          <Text fontSize={10} style={{ color: 'white' }}>
-            {type === 'grec' ? 'Grec' : 'Hébreu'}
+        <RandomButton onPress={() => setStartRandom(true)} />
+        <Box flex={1} center>
+          <Box
+            backgroundColor="rgba(0,0,0,0.1)"
+            paddingHorizontal={5}
+            paddingVertical={3}
+            rounded
+          >
+            <Text fontSize={10} style={{ color: 'white' }}>
+              {type === 'grec' ? 'Grec' : 'Hébreu'}
+            </Text>
+          </Box>
+          <Paragraph
+            style={{ color: 'white' }}
+            scale={-2}
+            scaleLineHeight={-2}
+            marginBottom={3}
+          >
+            {Grec || Hebreu}
+          </Paragraph>
+          <Text title fontSize={14} style={{ color: 'white' }}>
+            {Mot}
           </Text>
         </Box>
-        <Paragraph
-          style={{ color: 'white' }}
-          scale={1}
-          scaleLineHeight={-2}
-          marginBottom={3}
-        >
-          {Grec || Hebreu}
-        </Paragraph>
-        <Text title fontSize={16} style={{ color: 'white' }}>
-          {Mot}
-        </Text>
-      </Box>
+        <Link route="Lexique" style={{ width: '100%' }}>
+          <Box
+            row
+            center
+            backgroundColor="rgba(0,0,0,0.04)"
+            paddingVertical={10}
+          >
+            <LexiqueIcon style={{ marginRight: 10 }} size={20} color="white" />
+            <Text color="white" bold fontSize={12}>
+              Lexique
+            </Text>
+          </Box>
+        </Link>
+      </WidgetContainer>
     </Link>
   )
 }

@@ -9,18 +9,21 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import loadNaveByRandom from '~helpers/loadNaveByRandom'
 import waitForNaveWidget from './waitForNaveWidget'
-
-const itemHeight = 130
-const itemWidth = wp(60) > 300 ? 300 : wp(60)
+import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
+import NaveIcon from '~common/NaveIcon'
+import RandomButton from './RandomButton'
 
 const NaveOfTheDay = ({
   color1 = 'rgb(80, 83, 140)',
   color2 = 'rgb(48, 51, 107)',
 }) => {
   const [error, setError] = useState(false)
+  const [startRandom, setStartRandom] = useState(true)
   const [naveReference, setNaveRef] = useState(null)
   useEffect(() => {
     const loadNave = async () => {
+      if (!startRandom) return
+
       const naveReference = await loadNaveByRandom()
       if (naveReference.error) {
         setError(naveReference.error)
@@ -28,38 +31,29 @@ const NaveOfTheDay = ({
       }
 
       setNaveRef(naveReference)
+      setStartRandom(false)
     }
     loadNave()
-  }, [])
+  }, [startRandom])
 
   if (error) {
     return (
-      <Box center shadow height={itemHeight} padding={30} marginRight={20}>
+      <WidgetContainer>
         <FeatherIcon name="x" size={30} color="quart" />
         <Text marginTop={5}>Une erreur est survenue.</Text>
-      </Box>
+      </WidgetContainer>
     )
   }
 
   if (!naveReference) {
-    return (
-      <Box height={itemHeight} center marginRight={20}>
-        <Text>Chargement...</Text>
-      </Box>
-    )
+    return <WidgetLoading />
   }
 
   const { name, name_lower } = naveReference
 
   return (
     <Link route="NaveDetail" params={{ name, name_lower }}>
-      <Box
-        center
-        rounded
-        height={itemHeight}
-        width={itemWidth}
-        marginRight={20}
-      >
+      <WidgetContainer>
         <Box
           style={{
             position: 'absolute',
@@ -76,20 +70,36 @@ const NaveOfTheDay = ({
             colors={[color1, color2]}
           />
         </Box>
-        <Box
-          backgroundColor="rgba(0,0,0,0.1)"
-          paddingHorizontal={5}
-          paddingVertical={3}
-          rounded
-        >
-          <Text fontSize={10} style={{ color: 'white' }}>
-            Thème
-          </Text>
+        <RandomButton onPress={() => setStartRandom(true)} />
+        <Box flex={1} center>
+          <Box
+            backgroundColor="rgba(0,0,0,0.1)"
+            paddingHorizontal={5}
+            paddingVertical={3}
+            rounded
+          >
+            <Text fontSize={10} style={{ color: 'white' }}>
+              Thème
+            </Text>
+          </Box>
+          <Paragraph style={{ color: 'white' }} scale={-1} scaleLineHeight={-2}>
+            {name}
+          </Paragraph>
         </Box>
-        <Paragraph style={{ color: 'white' }} scale={1} scaleLineHeight={-2}>
-          {name}
-        </Paragraph>
-      </Box>
+        <Link route="Nave" style={{ width: '100%' }}>
+          <Box
+            row
+            center
+            backgroundColor="rgba(0,0,0,0.1)"
+            paddingVertical={10}
+          >
+            <NaveIcon style={{ marginRight: 10 }} size={20} color="white" />
+            <Text color="white" bold fontSize={12}>
+              Thèmes Nave
+            </Text>
+          </Box>
+        </Link>
+      </WidgetContainer>
     </Link>
   )
 }

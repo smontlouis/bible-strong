@@ -5,6 +5,10 @@ const Box = styled.View(props => {
   return {
     // container
     position: props.position,
+    top: props.top,
+    left: props.left,
+    right: props.right,
+    bottom: props.bottom,
     padding: props.padding,
     paddingVertical: props.paddingVertical,
     paddingHorizontal: props.paddingHorizontal,

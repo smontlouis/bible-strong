@@ -132,9 +132,9 @@ const UserWidget = ({ theme }) => {
       <Box flex paddingHorizontal={20} overflow="visible">
         <OfflineNotice />
 
-        <Box row alignItems="center" marginBottom={20} overflow="visible">
+        <Box row alignItems="center" overflow="visible">
           <Box flex>
-            <Text title fontSize={30}>
+            <Text title fontSize={25}>
               {`Bonjour ${extractFirstName(user.displayName)},`}
             </Text>
           </Box>
@@ -166,7 +166,7 @@ const UserWidget = ({ theme }) => {
       </Box>
       <ScrollView
         horizontal
-        style={{ maxHeight: 95, overflow: 'visible' }}
+        style={{ maxHeight: 95, overflow: 'visible', marginTop: 20 }}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
           flexDirection: 'row',
@@ -176,7 +176,7 @@ const UserWidget = ({ theme }) => {
         }}
       >
         <Chip route="Highlights">
-          <Box row marginBottom={5}>
+          <Box row>
             <ChipIcon name="edit-3" size={20} />
             <Text bold fontSize={20}>
               {highlights}
@@ -185,7 +185,7 @@ const UserWidget = ({ theme }) => {
           <Text fontSize={12}>{getPluriel('surbrillance', highlights)}</Text>
         </Chip>
         <Chip route="BibleVerseNotes">
-          <Box row marginBottom={5}>
+          <Box row>
             <ChipIcon name="file-text" size={20} />
             <Text bold fontSize={20}>
               {notes}
@@ -194,7 +194,7 @@ const UserWidget = ({ theme }) => {
           <Text fontSize={12}>{getPluriel('note', notes)}</Text>
         </Chip>
         <Chip route="Studies">
-          <Box row marginBottom={5}>
+          <Box row>
             <ChipIcon name="feather" size={20} />
             <Text bold fontSize={20}>
               {studies}
@@ -203,7 +203,7 @@ const UserWidget = ({ theme }) => {
           <Text fontSize={12}>{getPluriel('étude', studies)}</Text>
         </Chip>
         <Chip route="Tags">
-          <Box row marginBottom={5}>
+          <Box row>
             <ChipIcon name="tag" size={20} />
             <Text bold fontSize={20}>
               {tags}
@@ -212,7 +212,7 @@ const UserWidget = ({ theme }) => {
           <Text fontSize={12}>{getPluriel('étiquette', tags)}</Text>
         </Chip>
       </ScrollView>
-      <Box row padding={20}>
+      {/* <Box row padding={20}>
         <Box flex={2}>
           <Button
             route="Lexique"
@@ -281,7 +281,7 @@ const UserWidget = ({ theme }) => {
             Plans
           </Button>
         </Box>
-      </Box>
+      </Box> */}
     </Container>
   )
 }

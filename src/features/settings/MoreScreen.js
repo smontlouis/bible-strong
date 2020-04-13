@@ -5,6 +5,7 @@ import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
 import * as Animatable from 'react-native-animatable'
 
+import { MaterialIcon } from '~common/ui/Icon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import NaveIcon from '~common/NaveIcon'
@@ -87,6 +88,16 @@ const MoreScreen = () => {
             <NaveIcon style={{ marginRight: 15 }} size={25} />
             <Text color="quint" bold fontSize={15}>
               Bible Thématique Nave
+            </Text>
+          </LinkItem>
+          <LinkItem route="MyPlanList">
+            <MaterialIcon
+              name="playlist-add-check"
+              size={25}
+              style={{ marginRight: 15 }}
+            />
+            <Text bold fontSize={15}>
+              Plans
             </Text>
           </LinkItem>
           <LinkItem route="Highlights">
