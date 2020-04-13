@@ -1,4 +1,4 @@
-import styled from '@emotion/native'
+import styled from '~styled'
 import { bindStyles } from '~helpers/styledProps'
 import theme from '~themes/default'
 

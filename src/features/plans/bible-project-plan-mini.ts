@@ -4,8 +4,6 @@ export const bibleProjectPlanMini: Plan = {
   id: 'bible-project-plan-mini',
   title: 'Lire les écritures (mini)',
   description: `Découvrez le plan "ReadScripture" que la ministère Crazy Love a développé en collaboration avec The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !`,
-  image:
-    'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Freadscripture.png?alt=media&token=7d72f066-1a5b-43a0-bb6b-d1fcb0299f62',
   author: {
     id: 'ZvfOG5Yt9rN2lKc4sjb3n5W5pit1',
     displayName: 'Stéphane MLC',
@@ -17,8 +15,6 @@ export const bibleProjectPlanMini: Plan = {
       id: '1',
       title: 'Création et chute',
       subTitle: 'Genèse 1-11',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Ftree.png?alt=media&token=39574418-0ef6-4208-981c-2e60b76d9d65',
       readingSlices: [
         {
           id: '0',
@@ -28,8 +24,8 @@ export const bibleProjectPlanMini: Plan = {
               type: 'Video',
               title: 'Video: Genesis 1-11',
               description:
-                'Genesis 1-11:  God creates a good world, but humanity rebels against God and ruins it. We trace that story to see how God has a plan to rescue and bless the whole world through Abraham.',
-              url: 'https://www.youtube.com/watch?v=GQI72THyO5I',
+                "Genèse 1-11 : Dieu crée un monde bon, mais l'humanité se rebelle contre Dieu et le ruine. Nous retraçons cette histoire pour voir comment Dieu a un plan pour sauver et bénir le monde entier à travers Abraham",
+              url: 'https://www.youtube.com/watch?v=3m24IHVZ0XM',
             },
             { id: '1', src: '1_genesis_1', type: 'Image' },
             { id: '2', chapters: '1|1-3', type: 'Chapter' },
@@ -89,8 +85,6 @@ export const bibleProjectPlanMini: Plan = {
       id: '2',
       title: "L'alliance avec Abraham",
       subTitle: 'Genèse 12-50',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fface.png?alt=media&token=a9298829-a6a7-4dfe-8b7b-3b748d8b98f2',
       readingSlices: [
         {
           id: '8',

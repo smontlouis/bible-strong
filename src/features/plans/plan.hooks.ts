@@ -1,5 +1,8 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import * as Sentry from '@sentry/react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { storageRef } from '~helpers/firebase'
+import { cacheImage } from '~redux/modules/plan'
 
 import {
   ComputedPlan,
@@ -30,6 +33,15 @@ interface VerseContent {
 interface ChapterForPlanContent {
   title: string
   verses: VerseContent[]
+  viewMore: {
+    route: 'BibleView'
+    params: {
+      isReadOnly: true
+      book: number
+      chapter: number
+      verse: 1
+    }
+  }
 }
 
 interface ChapterForPlan {
@@ -230,6 +242,15 @@ const getChaptersForPlan = async (
       return {
         title: `Chapitre ${chapter}`,
         verses: chapterContent,
+        viewMore: {
+          route: 'BibleView',
+          params: {
+            isReadOnly: true,
+            book,
+            chapter,
+            verse: 1,
+          },
+        },
       }
     }
   )
@@ -312,4 +333,33 @@ export const useVersesToContent = (verses: string) => {
   }, [verses, version])
 
   return { status, content }
+}
+
+export const useFireStorage = (src?: string) => {
+  const [imageUrl, setImageUrl] = React.useState<string>()
+  const dispatch = useDispatch()
+  const cachedUri = useSelector(
+    (state: RootState) => src && state.plan.images[src]
+  )
+
+  React.useEffect(() => {
+    if (!src) return
+    ;(async () => {
+      if (cachedUri) {
+        setImageUrl(cachedUri)
+        return
+      }
+
+      try {
+        const uri = await storageRef.child(`images/${src}.png`).getDownloadURL()
+        setImageUrl(uri)
+        dispatch(cacheImage({ id: src, value: uri }))
+      } catch (e) {
+        Sentry.captureException(e)
+        console.log(`can't find: images/${src}`)
+      }
+    })()
+  }, [src, cachedUri, dispatch])
+
+  return imageUrl
 }

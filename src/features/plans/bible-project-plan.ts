@@ -4,8 +4,7 @@ export const bibleProjectPlan: Plan = {
   id: 'bible-project-plan',
   title: 'Lire les écritures',
   description: `Découvrez le plan "ReadScripture" que la ministère Crazy Love a développé en collaboration avec The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !`,
-  image:
-    'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Freadscripture.png?alt=media&token=7d72f066-1a5b-43a0-bb6b-d1fcb0299f62',
+  image: 'readscripture',
   author: {
     id: 'ZvfOG5Yt9rN2lKc4sjb3n5W5pit1',
     displayName: 'Stéphane MLC',
@@ -17,8 +16,7 @@ export const bibleProjectPlan: Plan = {
       id: '1',
       title: 'Création et chute',
       subTitle: 'Genèse 1-11',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Ftree.png?alt=media&token=39574418-0ef6-4208-981c-2e60b76d9d65',
+      image: 'tree',
       readingSlices: [
         {
           id: '0',
@@ -89,8 +87,7 @@ export const bibleProjectPlan: Plan = {
       id: '2',
       title: "L'alliance avec Abraham",
       subTitle: 'Genèse 12-50',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fface.png?alt=media&token=a9298829-a6a7-4dfe-8b7b-3b748d8b98f2',
+      image: 'face',
       readingSlices: [
         {
           id: '8',
@@ -299,8 +296,7 @@ export const bibleProjectPlan: Plan = {
       id: '3',
       title: "L'exode d'Egypte",
       subTitle: 'Exode 1-18',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fsea.png?alt=media&token=08658e47-938b-42ae-9332-e16aaf0b41b9',
+      image: 'sea',
       readingSlices: [
         {
           id: '17',
@@ -410,8 +406,7 @@ export const bibleProjectPlan: Plan = {
       id: '4',
       title: "L'Alliance au Mont Sinaï",
       subTitle: 'Exode 19-Leviticus',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fcovenant.png?alt=media&token=51032b01-f36d-4ddd-ace4-61ba8c1d35ea',
+      image: 'covenant',
       readingSlices: [
         {
           id: '3',
@@ -696,8 +691,7 @@ export const bibleProjectPlan: Plan = {
       id: '5',
       title: 'Le désert',
       subTitle: 'Nombres, Deutéronome',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Faltar.png?alt=media&token=5df0ea92-367c-4b35-a80a-3cebde32934e',
+      image: 'altar',
       readingSlices: [
         {
           id: '24',
@@ -1078,8 +1072,7 @@ export const bibleProjectPlan: Plan = {
       id: '6',
       title: 'La terre promise',
       subTitle: 'Josué, Juges',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fgrape.png?alt=media&token=0ff57f8d-9a81-471d-be36-ecfd328cd558',
+      image: 'grape',
       readingSlices: [
         {
           id: '27',
@@ -1259,8 +1252,7 @@ export const bibleProjectPlan: Plan = {
       id: '7',
       title: "La montée et la chute du royaume d'Israël",
       subTitle: 'Ruth - 2 Rois',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fcity.png?alt=media&token=5b4a4f9e-f30d-4ed3-8c78-57e131bc2907',
+      image: 'city',
       readingSlices: [
         {
           id: '30',
@@ -1724,8 +1716,7 @@ export const bibleProjectPlan: Plan = {
       id: '8',
       title: "Les prophètes avant l'Exode",
       subTitle: 'Ésaïe - Sophonie',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Flion.png?alt=media&token=d7ab972b-642d-4975-b2df-24985359c3dd',
+      image: 'lion',
       readingSlices: [
         {
           id: '35',
@@ -2232,8 +2223,7 @@ export const bibleProjectPlan: Plan = {
       id: '9',
       title: "La Sagesse d'Israël",
       subTitle: 'Job - Cantique des cantiques',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fmessiah.png?alt=media&token=39a1fdb6-9860-4d73-8112-c46d3047ea24',
+      image: 'messiah',
       readingSlices: [
         {
           id: '48',
@@ -2668,8 +2658,7 @@ export const bibleProjectPlan: Plan = {
       id: '10',
       title: "Les prophètes de l'Exode",
       subTitle: 'Jérémie - Ézéchiel',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fcup.png?alt=media&token=c845af22-a02e-4dfe-a53b-df715f936db3',
+      image: 'cup',
       readingSlices: [
         {
           id: '4',
@@ -3125,8 +3114,7 @@ export const bibleProjectPlan: Plan = {
       id: '11',
       title: "Le retour d'Exode",
       subTitle: 'Esdras-Néhémie, Esther',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fwall.png?alt=media&token=d33b38e2-76dc-4c97-a29d-bf2d67f51219',
+      image: 'wall',
       readingSlices: [
         {
           id: '6',
@@ -3280,8 +3268,7 @@ export const bibleProjectPlan: Plan = {
       id: '12',
       title: "Les prophètes après l'Exode",
       subTitle: 'Daniel - Malachie',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fstaff.png?alt=media&token=73052845-a68d-4f77-9dc5-3a5120c46439',
+      image: 'staff',
       readingSlices: [
         {
           id: '9',
@@ -3451,8 +3438,7 @@ export const bibleProjectPlan: Plan = {
       id: '13',
       title: "L'histoire jusqu'à présent ",
       subTitle: '1-2 Chroniques',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fscroll.png?alt=media&token=742cecb4-e07b-4bc9-ab49-a527fb4ce7f7',
+      image: 'scroll',
       readingSlices: [
         {
           id: '12',
@@ -3676,8 +3662,7 @@ export const bibleProjectPlan: Plan = {
       id: '14',
       title: 'Jésus et le Royaume',
       subTitle: 'Matthieu - Actes',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fcross.png?alt=media&token=241e0fb0-178a-4fd0-9389-7a50db213854',
+      image: 'cross',
       readingSlices: [
         {
           id: '1',
@@ -4506,8 +4491,7 @@ export const bibleProjectPlan: Plan = {
       id: '15',
       title: 'Le peuple du Royaume',
       subTitle: 'Romains - Jude',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Fpeople.png?alt=media&token=6dececee-b071-429c-8237-ba8a724b7567',
+      image: 'people',
       readingSlices: [
         {
           id: '2',
@@ -5418,8 +5402,7 @@ export const bibleProjectPlan: Plan = {
       id: '16',
       title: "L'Apocalypse",
       subTitle: 'Apocalypse',
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Flamb.png?alt=media&token=1499156d-77ae-4b54-9940-a5d8411df648',
+      image: 'lamb',
       readingSlices: [
         {
           id: '69',

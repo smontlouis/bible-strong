@@ -6,9 +6,29 @@ import Paragraph from '~common/ui/Paragraph'
 
 import { useVersesToContent } from '../plan.hooks'
 import PauseText from './PauseText'
+import Loading from '~common/Loading'
 
 const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
   const { status, content } = useVersesToContent(verses)
+
+  if (status === 'Pending') {
+    return (
+      <Box height={200}>
+        <Loading />
+      </Box>
+    )
+  }
+
+  if (status === 'Rejected') {
+    return (
+      <Box center padding={20}>
+        <Paragraph scaleLineHeight={1}>
+          Il semblerait que ce chapitre n'existe pas dans cette version.
+        </Paragraph>
+      </Box>
+    )
+  }
+
   if (status === 'Resolved' && content) {
     return (
       <Box padding={20}>

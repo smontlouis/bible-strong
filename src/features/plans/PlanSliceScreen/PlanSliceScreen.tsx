@@ -1,23 +1,24 @@
 import React from 'react'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { Modalize } from 'react-native-modalize'
 import { MenuOption } from 'react-native-popup-menu'
-
-import PopOverMenu from '~common/PopOverMenu'
-import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
+import { NavigationStackProp } from 'react-navigation-stack'
+import { useDispatch, useSelector } from 'react-redux'
 import Header from '~common/Header'
+import PopOverMenu from '~common/PopOverMenu'
 import { ComputedReadingSlice, EntitySlice } from '~common/types'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
-import Slice from './Slice'
-import PauseText from './PauseText'
+import Text from '~common/ui/Text'
 import chapterToReference from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
-import Box from '~common/ui/Box'
-import ReadButton from './ReadButton'
-import { useSelector, useDispatch } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import { markAsRead } from '~redux/modules/plan'
+import { RootState } from '~redux/modules/reducer'
+import ParamsModal from './ParamsModal'
+import PauseText from './PauseText'
+import ReadButton from './ReadButton'
+import Slice from './Slice'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -44,12 +45,15 @@ const PlanSliceScreen = ({ navigation }: Props) => {
     {}
   )
   const dispatch = useDispatch()
+  const paramsModalRef = React.useRef<Modalize>(null)
+
   const isRead = useSelector(
     (state: RootState) =>
       state.plan.ongoingPlans.find(oP => oP.id === planId)?.readingSlices[
         id
       ] === 'Completed'
   )
+  const version = useSelector((state: RootState) => state.bible.selectedVersion)
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id, planId }))
@@ -82,10 +86,34 @@ const PlanSliceScreen = ({ navigation }: Props) => {
               <>
                 <MenuOption onSelect={onMarkAsReadSelect}>
                   <Box row alignItems="center">
-                    <MaterialIcon name="check" size={20} />
+                    <MaterialIcon
+                      name="check"
+                      size={20}
+                      color="success"
+                      style={{ opacity: isRead ? 0.3 : 1 }}
+                    />
                     <Text marginLeft={10}>
                       {isRead ? 'Marquer comme non lu' : 'Marquer comme lu'}
                     </Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption
+                  onSelect={() =>
+                    navigation.navigate({
+                      routeName: 'VersionSelector',
+                      params: { version },
+                    })
+                  }
+                >
+                  <Box row alignItems="center">
+                    <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>
+                    <Text marginLeft={10}>Changer de version</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={() => paramsModalRef.current?.open()}>
+                  <Box row alignItems="center">
+                    <TextIcon>Aa</TextIcon>
+                    <Text marginLeft={10}>Mise en forme</Text>
                   </Box>
                 </MenuOption>
               </>
@@ -106,6 +134,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
           <ReadButton isRead={isRead} readingSliceId={id} planId={planId} />
         </Box>
       </ScrollView>
+      <ParamsModal paramsModalRef={paramsModalRef} />
     </Container>
   )
 }

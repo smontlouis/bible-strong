@@ -200,17 +200,17 @@ export const versions = {
   // },
   POV: {
     id: 'POV',
-    name: 'Parole vivante',
+    name: 'Parole vivante (NT)',
     c: '© 2013',
   },
   BHS: {
     id: 'BHS',
-    name: 'Biblia Hebraica Stuttgartensia',
+    name: 'Biblia Hebraica Stuttgartensia (AT)',
     c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
   },
   SBLGNT: {
     id: 'SBLGNT',
-    name: 'SBL NT. Grec',
+    name: 'SBL NT. Grec (NT)',
     c: '© 2010 Society of Bible Litterature',
   },
 }

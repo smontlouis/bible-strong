@@ -3,6 +3,7 @@ import { useTheme } from 'emotion-theming'
 import * as Animatable from 'react-native-animatable'
 import ProgressCircle from 'react-native-progress/Circle'
 import FastImage from 'react-native-fast-image'
+import Lottie from 'lottie-react-native'
 
 import styled from '~styled'
 import Link from '~common/Link'
@@ -12,10 +13,11 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ComputedSection } from '~common/types'
 import { Theme } from '~themes'
+import { useFireStorage } from '../plan.hooks'
 
 const AFeatherIcon = Animatable.createAnimatableComponent(FeatherIcon) as any
 
-const CircleImage = styled(Box)(() => ({
+const CircleImage = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: 2,
   right: 0,
@@ -24,7 +26,7 @@ const CircleImage = styled(Box)(() => ({
   width: 34,
   height: 34,
   borderRadius: 17,
-  backgroundColor: '#F4F7FF',
+  backgroundColor: theme.colors.lightGrey,
 }))
 
 const Section = ({
@@ -40,27 +42,40 @@ const Section = ({
   isCollapsed: boolean
 }) => {
   const theme: Theme = useTheme()
+  const cacheImage = useFireStorage(image)
+  const isSectionCompleted = progress === 1
   return (
     <Link onPress={() => toggle(id)}>
       <Box row paddingLeft={20} paddingVertical={20} backgroundColor="reverse">
-        <ProgressCircle
-          size={38}
-          progress={progress}
-          borderWidth={0}
-          color={progress === 1 ? theme.colors.success : theme.colors.primary}
-          unfilledColor={progress ? 'rgb(230,230,230)' : undefined}
-        >
-          <CircleImage center>
-            {image && (
-              <FastImage
-                style={{ width: 26, height: 26 }}
-                source={{
-                  uri: image,
-                }}
-              />
-            )}
-          </CircleImage>
-        </ProgressCircle>
+        {isSectionCompleted ? (
+          <Lottie
+            autoPlay
+            style={{
+              width: 40,
+              height: 40,
+            }}
+            source={require('../../../assets/images/medal.json')}
+          />
+        ) : (
+          <ProgressCircle
+            size={38}
+            progress={progress}
+            borderWidth={0}
+            color={theme.colors.primary}
+            unfilledColor={progress ? 'rgb(230,230,230)' : undefined}
+          >
+            <CircleImage center>
+              {cacheImage && (
+                <FastImage
+                  style={{ width: 26, height: 26 }}
+                  source={{
+                    uri: cacheImage,
+                  }}
+                />
+              )}
+            </CircleImage>
+          </ProgressCircle>
+        )}
 
         <Box flex paddingLeft={20}>
           <Text>{title}</Text>

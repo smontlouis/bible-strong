@@ -2,6 +2,7 @@ import React from 'react'
 import FastImage from 'react-native-fast-image'
 import ProgressCircle from 'react-native-progress/Circle'
 import { useTheme } from 'emotion-theming'
+import Lottie from 'lottie-react-native'
 
 import styled from '~styled'
 import Container from '~common/ui/Container'
@@ -10,7 +11,7 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import FlatList from '~common/ui/FlatList'
-import { useComputedPlanItems } from '../plan.hooks'
+import { useComputedPlanItems, useFireStorage } from '../plan.hooks'
 import { ComputedPlanItem } from 'src/common/types'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Theme } from '~themes'
@@ -38,6 +39,8 @@ const PlanItem = ({
   author,
 }: ComputedPlanItem) => {
   const theme: Theme = useTheme()
+  const cacheImage = useFireStorage(image)
+  const isPlanCompleted = status === 'Completed'
   return (
     <Link
       route="Plan"
@@ -45,7 +48,7 @@ const PlanItem = ({
         plan: {
           id,
           title,
-          image,
+          image: cacheImage,
           description,
           status,
           progress,
@@ -69,27 +72,40 @@ const PlanItem = ({
           borderColor: 'success',
         })}
       >
-        <ProgressCircle
-          size={40}
-          progress={progress}
-          borderWidth={0}
-          color={
-            status === 'Completed' ? theme.colors.success : theme.colors.primary
-          }
-          unfilledColor={theme.colors.lightGrey}
-          thickness={2}
-        >
-          <CircleImage center>
-            {image && (
-              <FastImage
-                style={{ width: 32, height: 32 }}
-                source={{
-                  uri: image,
-                }}
-              />
-            )}
-          </CircleImage>
-        </ProgressCircle>
+        {isPlanCompleted ? (
+          <Lottie
+            autoPlay
+            style={{
+              width: 40,
+              height: 40,
+            }}
+            source={require('../../../assets/images/crown.json')}
+          />
+        ) : (
+          <ProgressCircle
+            size={40}
+            progress={progress}
+            borderWidth={0}
+            color={
+              status === 'Completed'
+                ? theme.colors.success
+                : theme.colors.primary
+            }
+            unfilledColor={theme.colors.lightGrey}
+            thickness={2}
+          >
+            <CircleImage center>
+              {cacheImage && (
+                <FastImage
+                  style={{ width: 32, height: 32 }}
+                  source={{
+                    uri: cacheImage,
+                  }}
+                />
+              )}
+            </CircleImage>
+          </ProgressCircle>
+        )}
         <Box flex paddingLeft={10}>
           <Text title>{title}</Text>
         </Box>

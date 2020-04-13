@@ -6,6 +6,8 @@ import styled from '~styled'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import { ComputedPlanItem } from '~common/types'
+import { useTheme } from 'emotion-theming'
+import { Theme } from '~themes'
 
 const CircleImage = styled(Box)(({ theme }) => ({
   width: 100,
@@ -17,7 +19,7 @@ const CircleImage = styled(Box)(({ theme }) => ({
 }))
 
 interface Props {
-  modalRefDetails: React.Ref<any>
+  modalRefDetails: React.RefObject<Modalize<any, any>>
 }
 
 const DetailsModal = ({
@@ -27,9 +29,14 @@ const DetailsModal = ({
   description,
   author,
 }: Omit<ComputedPlanItem, 'status' | 'progress'> & Props) => {
+  const theme: Theme = useTheme()
   return (
-    <Modalize ref={modalRefDetails} adjustToContentHeight>
-      <Box paddingHorizontal={20} paddingVertical={50} paddingBottom={100}>
+    <Modalize
+      ref={modalRefDetails}
+      adjustToContentHeight
+      modalStyle={{ backgroundColor: theme.colors.lightGrey }}
+    >
+      <Box paddingHorizontal={20} paddingVertical={50}>
         {image && (
           <Box center marginBottom={20}>
             <CircleImage center>
@@ -53,6 +60,23 @@ const DetailsModal = ({
         >
           {description}
         </Paragraph>
+        {author.displayName && (
+          <Box center marginTop={40}>
+            {author.photoUrl && (
+              <Box borderRadius={10} marginBottom={10}>
+                <FastImage
+                  style={{ width: 50, height: 50 }}
+                  source={{
+                    uri: author.photoUrl,
+                  }}
+                />
+              </Box>
+            )}
+            <Paragraph fontFamily="text" scale={-3}>
+              Créé par {author.displayName}
+            </Paragraph>
+          </Box>
+        )}
       </Box>
     </Modalize>
   )

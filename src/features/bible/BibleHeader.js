@@ -19,7 +19,7 @@ import GlobalStateContext from '~helpers/globalContext'
 import truncate from '~helpers/truncate'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import Link from '~common/Link'
 import Back from '~common/Back'
 import useDimensions from '~helpers/useDimensions'
@@ -55,13 +55,6 @@ const LinkBox = styled(Link)(() => ({
   justifyContent: 'center',
   paddingLeft: 10,
   paddingRight: 10,
-}))
-
-const StyledText = styled(Animatable.Text)(({ color, theme }) => ({
-  fontSize: 16,
-  fontWeight: 'bold',
-  marginRight: 5,
-  color: theme.colors[color] || theme.colors.default,
 }))
 
 const HeaderBox = styled(Box)(({ theme }) => ({
@@ -123,10 +116,10 @@ const Header = ({
           </Back>
         </Box>
         <Box grow center>
-          <StyledText>
+          <TextIcon>
             {book.Nom} {chapter}:
             {focusVerses ? formatVerses(focusVerses) : verse} - {version}
-          </StyledText>
+          </TextIcon>
         </Box>
         <Box flex />
       </HeaderBox>
@@ -146,18 +139,18 @@ const Header = ({
         </Box>
       )}
       <LinkBox route="BibleSelect" style={{ paddingLeft: 15, paddingRight: 0 }}>
-        <StyledText>
+        <TextIcon>
           {isSmall
             ? truncate(`${book.Nom} ${chapter}`, 10)
             : `${book.Nom} ${chapter}`}
-        </StyledText>
+        </TextIcon>
       </LinkBox>
       <LinkBox
         route="VersionSelector"
         params={{ version }}
         style={{ marginRight: 'auto' }}
       >
-        <StyledText>{version}</StyledText>
+        <TextIcon>{version}</TextIcon>
       </LinkBox>
       {isFullscreen && (
         <LinkBox
@@ -209,7 +202,7 @@ const Header = ({
               </MenuOption>
               <MenuOption onSelect={onBibleParamsClick}>
                 <Box row alignItems="center">
-                  <StyledText style={{ marginRight: 0 }}>Aa</StyledText>
+                  <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
                   <Text marginLeft={10}>Mise en forme</Text>
                 </Box>
               </MenuOption>

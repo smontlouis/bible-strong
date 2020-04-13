@@ -10,13 +10,11 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
 
-// import codePush from 'react-native-code-push'
 import SplashScreen from 'react-native-splash-screen'
 
 import configureStore from '~redux/store'
 import GlobalContext from '~helpers/globalContext'
 import InitApp from './InitApp'
-// import CodePushCheck from './CodePushCheck'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings([
@@ -51,7 +49,6 @@ class App extends React.Component {
     }
 
     this.initNotifications()
-    // codePush.notifyAppReady()
   }
 
   initNotifications = () => {

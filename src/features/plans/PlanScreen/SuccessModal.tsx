@@ -1,14 +1,13 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
 import Lottie from 'lottie-react-native'
-import { Easing } from 'react-native'
 
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 
 interface Props {
-  modalRef: React.Ref<any>
+  modalRef: React.RefObject<Modalize<any, any>>
   isPlanCompleted: boolean
 }
 
