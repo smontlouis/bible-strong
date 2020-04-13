@@ -55,7 +55,7 @@ const VerseOfTheDay = () => {
   if (!verseOfTheDay) {
     return (
       <Box padding={20} grey>
-        <Text title fontSize={30} flex>
+        <Text title fontSize={23} flex>
           Verset du jour
         </Text>
         <Box marginTop={20}>
@@ -88,7 +88,7 @@ const VerseOfTheDay = () => {
     <>
       <AnimatableBox animation="fadeIn" padding={20} grey>
         <Box row alignItems="center">
-          <Text title fontSize={25} flex>
+          <Text title fontSize={23} flex>
             Verset du jour
           </Text>
           <Link paddingSmall onPress={openTimePicker}>
@@ -108,7 +108,9 @@ const VerseOfTheDay = () => {
             focusVerses: [verse],
           }}
         >
-          <Paragraph marginTop={5}>{removeBreakLines(content)}</Paragraph>
+          <Paragraph marginTop={5} scale={-1}>
+            {removeBreakLines(content)}
+          </Paragraph>
         </Link>
         <Box marginTop={20} row center>
           <Box flex>

@@ -65,7 +65,12 @@ buck-out
 .gradle
 local.properties
 *.iml
-/android/
+android/sentry.properties
+android/build/
+android/app/build/
+android/keystores/
+android/app/src/main/assets/www/
+google-services.json
 
 # Node
 node_modules
