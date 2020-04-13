@@ -3,10 +3,12 @@ import { Modalize } from 'react-native-modalize'
 import { MenuOption } from 'react-native-popup-menu'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { useDispatch, useSelector } from 'react-redux'
+
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import { ComputedReadingSlice, EntitySlice } from '~common/types'
 import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
@@ -122,6 +124,28 @@ const PlanSliceScreen = ({ navigation }: Props) => {
         }
       />
       <ScrollView>
+        {isRead && (
+          <Box
+            opacity={0.6}
+            backgroundColor="success"
+            borderRadius={30}
+            padding={20}
+            marginHorizontal={20}
+            center
+            row
+          >
+            <FeatherIcon name="check" size={20} color="reverse" />
+            <Paragraph
+              marginLeft={5}
+              color="reverse"
+              scale={-2}
+              fontFamily="text"
+              bold
+            >
+              Vous avez déjà terminé cette lecture.
+            </Paragraph>
+          </Box>
+        )}
         <PauseText>
           {
             'Prenez une grande inspiration,\n alors que vous vous apprêtez à passer du\n temps avec Dieu'

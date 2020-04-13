@@ -3,6 +3,7 @@ import { Plan } from 'src/common/types'
 export const bibleProjectPlanMini: Plan = {
   id: 'bible-project-plan-mini',
   title: 'Lire les écritures (mini)',
+  image: 'readscripture',
   description: `Découvrez le plan "ReadScripture" que la ministère Crazy Love a développé en collaboration avec The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !`,
   author: {
     id: 'ZvfOG5Yt9rN2lKc4sjb3n5W5pit1',
@@ -15,6 +16,7 @@ export const bibleProjectPlanMini: Plan = {
       id: '1',
       title: 'Création et chute',
       subTitle: 'Genèse 1-11',
+      image: 'tree',
       readingSlices: [
         {
           id: '0',
@@ -85,6 +87,7 @@ export const bibleProjectPlanMini: Plan = {
       id: '2',
       title: "L'alliance avec Abraham",
       subTitle: 'Genèse 12-50',
+      image: 'face',
       readingSlices: [
         {
           id: '8',
