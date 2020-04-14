@@ -14,7 +14,7 @@ const extractTitle = (props: EntitySliceProps) => {
     case 'Text':
       return `Méditation: ${props.title}`
     case 'Video':
-      return `Vidéo: ${props.title}`
+      return `${props.title}`
     case 'Verse':
       return verseToReference(props.verses, { isPlan: true })
     case 'Chapter':
