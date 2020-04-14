@@ -1,6 +1,0 @@
-version: "Apple Swift version 5.1.3 (swiftlang-1100.0.282.1 clang-1100.0.33.15)"
-options: "f54382d239870b79b0630e7c94dcdff2"
-build_time: [1581045845, 809209000]
-inputs:
-  "/Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/lottie-react-native/src/ios/LottieReactNative/AnimationViewManagerModule.swift": [1581034361, 253000000]
-  "/Users/smontlouis/Projets/bible-strong/bible-strong-app/node_modules/lottie-react-native/src/ios/LottieReactNative/ContainerView.swift": [1581034361, 253000000]
