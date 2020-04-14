@@ -3,7 +3,8 @@ import { Plan } from 'src/common/types'
 export const bibleProjectPlan: Plan = {
   id: 'bible-project-plan',
   title: 'Lire les écritures',
-  description: `Découvrez le plan "ReadScripture" que la ministère Crazy Love a développé en collaboration avec The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !`,
+  description:
+    'Découvrez le plan "Lire les écritures" développé par The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !',
   image: 'readscripture',
   author: {
     id: 'ZvfOG5Yt9rN2lKc4sjb3n5W5pit1',
@@ -24,10 +25,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Genesis 1-11',
+              title: 'Vidéo : Genèse 1-11',
               description:
-                'Genesis 1-11:  God creates a good world, but humanity rebels against God and ruins it. We trace that story to see how God has a plan to rescue and bless the whole world through Abraham.',
-              url: 'https://www.youtube.com/watch?v=GQI72THyO5I',
+                "Genèse 1-11 : Dieu crée un monde bon, mais l'humanité se rebelle contre Dieu et le ruine. Nous retraçons cette histoire pour voir comment Dieu a un plan pour sauver et bénir le monde entier à travers Abraham.",
+              url: 'https://www.youtube.com/watch?v=3m24IHVZ0XM',
             },
             { id: '1', src: '1_genesis_1', type: 'Image' },
             { id: '2', chapters: '1|1-3', type: 'Chapter' },
@@ -45,10 +46,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Image of God',
+              title: 'Vidéo : Image de Dieu',
               description:
-                'Explore the theme of the image of God which surfaced in your previous session reading.',
-              url: 'https://www.youtube.com/watch?v=YbipxLDtY8c',
+                "Explorez le thème de l'image de Dieu vu dans la lecture précédente.",
+              url: 'https://www.youtube.com/watch?v=sDnohPQxLD8',
             },
             { id: '1', src: '1_genesis_1', type: 'Image' },
             { id: '2', chapters: '1|4-7', type: 'Chapter' },
@@ -66,9 +67,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Genesis 1-11',
+              title: 'Torah: Genèse 1-11',
               description:
-                'Recap this chapter on Creation and Fall with our animated Torah series video on Genesis 1-11',
+                'Récapitulez ce chapitre sur la création et la chute avec notre vidéo de la série animée Torah sur Genèse 1-11',
               url: 'https://www.youtube.com/watch?v=KOUV7mWDI34',
             },
             { id: '1', src: '1_genesis_1', type: 'Image' },
@@ -134,10 +135,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Genesis 12-50',
+              title: 'Vidéo : Genèse 12-50',
               description:
-                'Genesis 12-50: God makes a promise to bless rebellious humanity through the family of Abraham, and the story follows this promise through four generations.',
-              url: 'https://www.youtube.com/watch?v=F4isSyennFo',
+                "Genèse 12-50 : Dieu fait la promesse de bénir l'humanité rebelle à travers la famille d'Abraham, et l'histoire suit cette promesse à travers quatre générations.",
+              url: 'https://www.youtube.com/watch?v=NylJU42gNnU',
             },
             { id: '1', src: '1_genesis_2', type: 'Image' },
             { id: '2', chapters: '1|12-15', type: 'Chapter' },
@@ -155,9 +156,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Genesis 12-50',
+              title: 'Torah : Genèse 12-50',
               description:
-                "You're almost through the book of Genesis! Watch our animated Torah series video on Genesis 12-50 to remember what you've covered and where you're going.",
+                'Vous avez presque terminé le livre de la Genèse ! Regardez la vidéo de notre série animée sur la Torah sur Genèse 12-50 pour vous rappeler ce que vous avez couvert et où vous allez.',
               url: 'https://www.youtube.com/watch?v=VpbWbyx1008',
             },
             { id: '1', src: '1_genesis_2', type: 'Image' },
@@ -254,10 +255,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: The Covenants',
+              title: 'Vidéo : Les Alliances',
               description:
-                "See how God's covenant with Noah fits into the overall story of the Bible",
-              url: 'https://www.youtube.com/watch?v=8ferLIsvlmI',
+                "Voyez comment l'alliance de Dieu avec Noé s'inscrit dans l'histoire globale de la Bible",
+              url: 'https://www.youtube.com/watch?v=FVzc7zXuQzA',
             },
             { id: '1', src: '1_genesis_2', type: 'Image' },
             { id: '2', chapters: '1|16-18', type: 'Chapter' },
@@ -275,10 +276,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: The Messiah',
+              title: 'Vidéo : Le Messie',
               description:
-                "The Messiah: Learn more about Jacob's promise to Judah about the future King",
-              url: 'https://www.youtube.com/watch?v=3dEh25pduQ8',
+                'Le Messie : En savoir plus sur la promesse de Jacob à Juda concernant le futur roi',
+              url: 'https://www.youtube.com/watch?v=4eBBvA8zzxI',
             },
             { id: '1', src: '1_genesis_2', type: 'Image' },
             { id: '2', chapters: '1|48-50', type: 'Chapter' },
@@ -343,10 +344,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Exodus 1-18',
+              title: 'Vidéo : Exode 1-18',
               description:
-                'Exodus 1-18: God rescues the Israelites from slavery in Egypt and confronts the evil and injustice of Pharaoh the king.',
-              url: 'https://www.youtube.com/watch?v=jH_aojNJM3E',
+                "Exode 1-18 : Dieu sauve les Israélites de l'esclavage en Égypte et affronte le mal et l'injustice du roi Pharaon.",
+              url: 'https://www.youtube.com/watch?v=6gAkIXm4ZN8',
             },
             { id: '1', src: '02', type: 'Image' },
             { id: '2', chapters: '2|1-3', type: 'Chapter' },
@@ -364,10 +365,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Holiness',
+              title: 'Vidéo : Sainteté',
               description:
-                "After Moses and the burning bush, it's a good time to explore the theme of God's holiness.",
-              url: 'https://www.youtube.com/watch?v=l9vn5UvsHvM',
+                "Après Moïse et le buisson ardent, c'est un bon moment pour explorer le thème de la sainteté de Dieu.",
+              url: 'https://www.youtube.com/watch?v=jxKoDvf2nXk',
             },
             { id: '1', src: '02', type: 'Image' },
             { id: '2', chapters: '2|4-6', type: 'Chapter' },
@@ -385,9 +386,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Exodus 1-18',
+              title: 'Torah : Exode 1-18',
               description:
-                'Recap this chapter on the Exodus from Egypt with an animated video of Exodus 1-18.',
+                "Résumons ce chapitre sur l'Exode d'Egypte avec une vidéo animée de l'Exode 1-18.",
               url: 'https://www.youtube.com/watch?v=0uf-PgW7rqE',
             },
             { id: '1', src: '02', type: 'Image' },
@@ -427,10 +428,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Exodus 19-40',
+              title: 'Vidéo : Exode 19-40',
               description:
-                'Exodus 19-40: God invites the redeemed Israelites into a covenant relationship with Him, and descends to dwell among them in the Tabernacle. The Israelites rebel, however, creating a rift in the relationship.',
-              url: 'https://www.youtube.com/watch?v=oNpTha80yyE',
+                "Exode 19-40 : Dieu invite les Israélites rachetés à une relation d'alliance avec Lui, et descend pour habiter parmi eux dans le Tabernacle. Les Israélites se rebellent, toutefois, créant une faille dans la relation.",
+              url: 'https://www.youtube.com/watch?v=GIdz46OiA5s',
             },
             { id: '1', src: '02', type: 'Image' },
             { id: '2', chapters: '2|19-21', type: 'Chapter' },
@@ -448,10 +449,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Leviticus',
+              title: 'Vidéo : Lévitique',
               description:
-                "God responds to the Israelites' sin and rebellion by providing them an elaborate series of rituals and institutions to deal with their sin. God's holiness motivates Him to deal with their rebellion so He can live among them in peace.",
-              url: 'https://www.youtube.com/watch?v=IJ-FekWUZzE',
+                "Dieu répond au péché et à la rébellion des Israélites en leur fournissant une série élaborée de rituels et d'institutions pour faire face à leur péché. La sainteté de Dieu le motive à faire face à leur rébellion afin qu'il puisse vivre parmi eux en paix.",
+              url: 'https://www.youtube.com/watch?v=Bule8U5Hfu4',
             },
             { id: '1', src: '03', type: 'Image' },
             { id: '2', chapters: '3|1-4', type: 'Chapter' },
@@ -469,10 +470,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Heaven and Earth',
+              title: 'Vidéo : Le ciel et la terre',
               description:
-                "More than a boring list of building specifications, these chapters on the Tabernacle point us to the important biblical theme of God's restoration of heaven and earth. ",
-              url: 'https://www.youtube.com/watch?v=Zy2AQlK6C5k',
+                "Plus qu'une liste ennuyeuse de spécifications de construction, ces chapitres sur le Tabernacle nous indiquent l'important thème biblique de la restauration du ciel et de la terre par Dieu.",
+              url: 'https://www.youtube.com/watch?v=PZ-CmV2Xg6A',
             },
             { id: '1', src: '02', type: 'Image' },
             { id: '2', chapters: '2|25-27', type: 'Chapter' },
@@ -529,10 +530,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Atonement',
+              title: 'Vidéo: Sacrifice et Expiation',
               description:
-                "As you progress through Leviticus you'll learn a lot about animal sacrfices and priestly rituals. This is a good time to remember the big picture Biblical theme represented here: Atonement",
-              url: 'https://www.youtube.com/watch?v=G_OlRWGLdnw',
+                "En progressant dans le Lévitique, vous en apprendrez beaucoup sur les sacrements des animaux et les rituels sacerdotaux. C'est un bon moment pour se souvenir du thème biblique représenté ici : Expiation",
+              url: 'https://www.youtube.com/watch?v=wmICj1t6UIA',
             },
             { id: '1', src: '03', type: 'Image' },
             { id: '2', chapters: '3|5-7', type: 'Chapter' },
@@ -563,10 +564,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Related Video: Holiness',
+              title: 'Vidéo associée : Sainteté',
               description:
-                "You're halfway through Leviticus! As we are learning about the sacrifical laws, it's a good time to remember the big picture theme represented here: God's holiness",
-              url: 'https://www.youtube.com/watch?v=l9vn5UvsHvM',
+                "Vous êtes à mi-chemin du Lévitique ! Alors que nous apprenons les lois du sacrifice, c'est un bon moment pour se rappeler le thème général représenté ici : La sainteté de Dieu",
+              url: 'https://www.youtube.com/watch?v=jxKoDvf2nXk',
             },
             { id: '1', src: '03', type: 'Image' },
             { id: '2', chapters: '3|11-13', type: 'Chapter' },
@@ -649,9 +650,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Exodus 19-40',
+              title: 'Torah : Exode 19-40',
               description:
-                'Watch an animated recap of Exodus 19-40 as you finish up the book of Exodus today.',
+                "Regardez un résumé animé d'Exodus 19-40 en terminant le livre de l'Exodus aujourd'hui.",
               url: 'https://www.youtube.com/watch?v=b0GhR-2kPKI',
             },
             { id: '1', src: '02', type: 'Image' },
@@ -670,9 +671,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Leviticus',
+              title: 'Torah : Lévitique',
               description:
-                "Congratulations! You're going to finish Leviticus today. Here's an animated recap of the book.",
+                "Félicitations ! Vous allez finir le Lévitique aujourd'hui. Voici un résumé animé du livre.",
               url: 'https://www.youtube.com/watch?v=WmvyrLXoQio',
             },
             { id: '1', src: '03', type: 'Image' },
@@ -699,10 +700,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Numbers',
+              title: 'Vidéo : Nombres',
               description:
-                'Numbers: Israel leaves Mount Sinai and travels through the wilderness on the way to the land promised to Abraham. The trip goes horribly as Israel rebels, and reveals how God shows both justice and mercy on his people.',
-              url: 'https://www.youtube.com/watch?v=tp5MIrMZFqo',
+                "Nombres : Israël quitte le mont Sinaï et traverse le désert pour se rendre sur la terre promise à Abraham. Le voyage se déroule dans des conditions horribles alors qu'Israël se rebelle, et révèle comment Dieu fait preuve à la fois de justice et de miséricorde envers son peuple.",
+              url: 'https://www.youtube.com/watch?v=VxrSqvkN-BY',
             },
             { id: '1', src: '04', type: 'Image' },
             { id: '2', chapters: '4|1-4', type: 'Chapter' },
@@ -720,10 +721,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Deuteronomy',
+              title: 'Vidéo : Deutéronome',
               description:
-                'Moses gives the Israelites his final words of wisdom and warning before they enter the promised land. He challenges them to be faithful to the covenant and to love God.',
-              url: 'https://www.youtube.com/watch?v=q5QEH9bH8AU',
+                "Moïse donne aux Israélites ses dernières paroles de sagesse et d'avertissement avant qu'ils n'entrent dans la terre promise. Il les met au défi d'être fidèles à l'alliance et d'aimer Dieu.",
+              url: 'https://www.youtube.com/watch?v=j8FrGTdho14',
             },
             { id: '1', src: '05', type: 'Image' },
             { id: '2', chapters: '5|1-3', type: 'Chapter' },
@@ -754,10 +755,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Holiness',
+              title: 'Vidéo : Sainteté',
               description:
-                "You're about to read detailed instructions on cleanliness in the land which might be confusing. This is another good time to remember the greater truth God is trying to teach the people at this time and re-watch the video on holiness.",
-              url: 'https://www.youtube.com/watch?v=l9vn5UvsHvM',
+                "Après Moïse et le buisson ardent, c'est un bon moment pour explorer le thème de la sainteté de Dieu.",
+              url: 'https://www.youtube.com/watch?v=jxKoDvf2nXk',
             },
             { id: '1', src: '04', type: 'Image' },
             { id: '2', chapters: '4|5-7', type: 'Chapter' },
@@ -918,9 +919,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: The Law',
+              title: 'Vidéo : La loi',
               description:
-                'Old Testament Law is often times confusing to people. Watch this animated theme video to learn more about the Law in context.',
+                "La loi de l'Ancien Testament est souvent source de confusion pour les gens. Regardez cette vidéo thématique animée pour en savoir plus sur le droit dans son contexte.",
               url: 'https://www.youtube.com/watch?v=3BGO9Mmd_cU',
             },
             { id: '1', src: '05', type: 'Image' },
@@ -1030,9 +1031,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Deuteronomy',
+              title: 'Torah : Deutéronome',
               description:
-                "Here's an animated recap of the book of Deuteronomy! Congrats on finishing another book today.",
+                "Voici un résumé animé du livre du Deutéronome ! Félicitations pour avoir terminé un autre livre aujourd'hui.",
               url: 'https://www.youtube.com/watch?v=NMhmDPWeftw',
             },
             { id: '1', src: '05', type: 'Image' },
@@ -1051,9 +1052,9 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Torah: Numbers',
+              title: 'Torah : Nombres',
               description:
-                "Today is your last day in the book of Numbers! Watch an animated recap of what you've covered.",
+                "Aujourd'hui est votre dernier jour dans le livre des nombres ! Regardez un récapitulatif animé de ce que vous avez couvert.",
               url: 'https://www.youtube.com/watch?v=zebxH-5o-SQ',
             },
             { id: '1', src: '04', type: 'Image' },
@@ -1080,10 +1081,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Joshua',
+              title: 'Vidéo : Josué',
               description:
-                "After Moses' death, Joshua leads the Israelites into the land God promised Abraham and helps them defeat the Canaanites. The Israelites settle in the land and are challenged to be faithful to God.",
-              url: 'https://www.youtube.com/watch?v=JqOqJlFF_eU',
+                "Après la mort de Moïse, Josué conduit les Israélites dans le pays que Dieu a promis à Abraham et les aide à vaincre les Cananéens. Les Israélites s'installent dans le pays et sont mis au défi d'être fidèles à Dieu.",
+              url: 'https://www.youtube.com/watch?v=3r38RWz3k4c',
             },
             { id: '1', src: '06', type: 'Image' },
             { id: '2', chapters: '6|1-4', type: 'Chapter' },
@@ -1114,10 +1115,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Judges',
+              title: 'Vidéo : Juges',
               description:
-                "After Joshua's death, the Israelites turn away from God and break the covenant. This begins a cycle of rebellion, repentance, and restoration as God patiently stays committed to an unfaithful people.",
-              url: 'https://www.youtube.com/watch?v=kOYy8iCfIJ4',
+                "Après la mort de Josué, les Israélites se sont détournés de Dieu et ont rompu l'alliance. C'est le début d'un cycle de rébellion, de repentance et de restauration, alors que Dieu reste patiemment engagé envers un peuple infidèle.",
+              url: 'https://www.youtube.com/watch?v=CJhCzmboXSQ',
             },
             { id: '1', src: '07', type: 'Image' },
             { id: '2', chapters: '7|1-3', type: 'Chapter' },
@@ -1260,10 +1261,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Ruth',
+              title: 'Vidéo : Ruth',
               description:
-                'An Israelite family is struck by a series of tragic deaths, and God mysteriously provides for the widows through the generous acts of an Israelite farmer. The story explores how God can use all life experiences as part of His plan to bless and redeem His people.',
-              url: 'https://www.youtube.com/watch?v=nl-Nlu17_ao',
+                "Une famille israélite est frappée par une série de morts tragiques, et Dieu pourvoit mystérieusement aux besoins des veuves grâce aux actes généreux d'un fermier israélite. L'histoire explore comment Dieu peut utiliser toutes les expériences de la vie dans le cadre de son plan pour bénir et racheter son peuple.",
+              url: 'https://www.youtube.com/watch?v=vwh7UOJYCGw',
             },
             { id: '1', src: '10', type: 'Image' },
             { id: '2', chapters: '8|1-4', type: 'Chapter' },
@@ -1281,10 +1282,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1 Samuel',
+              title: 'Vidéo : 1 Samuel',
               description:
-                "God raises up Samuel to lead Israel in a desperate time, which eventually leads to the advent of the kingdom in Israel. Israel's first king, Saul, is a miserable failure and is replaced by the humble and faithful David who rises to greatness.",
-              url: 'https://www.youtube.com/watch?v=QJOju5Dw0V0',
+                "Dieu élève Samuel pour diriger Israël dans une période désespérée, qui mène finalement à l'avènement du royaume en Israël. Le premier roi d'Israël, Saül, est un misérable échec et est remplacé par l'humble et fidèle David qui s'élève vers la grandeur.",
+              url: 'https://www.youtube.com/watch?v=IfyG_XDWZBU',
             },
             { id: '1', src: '11', type: 'Image' },
             { id: '2', chapters: '9|1-3', type: 'Chapter' },
@@ -1302,10 +1303,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 2 Samuel',
+              title: 'Vidéo : 2 Samuel',
               description:
-                "David becomes God's most faithful king, but then rebels, resulting in the slow destruction of his family and kingdom. The story offers a many-sided portrait of Israel's most famous king as a case study in human nature.",
-              url: 'https://www.youtube.com/watch?v=YvoWDXNDJgs',
+                "David devient le roi le plus fidèle de Dieu, mais se rebelle ensuite, ce qui entraîne la lente destruction de sa famille et de son royaume. L'histoire offre un portrait à plusieurs facettes du roi le plus célèbre d'Israël comme une étude de cas dans la nature humaine.",
+              url: 'https://www.youtube.com/watch?v=a8yoTzGxOTU',
             },
             { id: '1', src: '12', type: 'Image' },
             { id: '2', chapters: '10|1-3', type: 'Chapter' },
@@ -1323,10 +1324,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1 & 2 Kings',
+              title: 'Vidéo : 1 & 2 Rois',
               description:
-                'After David, Solomon leads Israel into a period of greatness, followed by failure and rebellion. Israel splits into two separate kingdoms, and the story traces the slow decline of both, resulting in destruction at the hands of foreign empires. God sends waves of prophets to hold Israel accountable, but Israel ignores them, to her peril.',
-              url: 'https://www.youtube.com/watch?v=bVFW3wbi9pk',
+                "Après David, Salomon conduit Israël dans une période de grandeur, suivie d'un échec et d'une rébellion. Israël se divise en deux royaumes distincts, et l'histoire retrace le lent déclin des deux, qui se traduit par la destruction aux mains d'empires étrangers. Dieu envoie des vagues de prophètes pour demander des comptes à Israël, mais Israël les ignore, à ses risques et périls.",
+              url: 'https://www.youtube.com/watch?v=uNfWBrrMn4Y',
             },
             { id: '1', src: '13', type: 'Image' },
             { id: '2', chapters: '11|1-3', type: 'Chapter' },
@@ -1474,10 +1475,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: The Messiah',
+              title: 'Vidéo : Le Messie',
               description:
-                "You're about to read a very important part of the unified story of the Bible. God is going to promise David that there will always be a human representative from his line on the throne of Israel, which is a major part of our understanding of Jesus as Messiah in the New Testament. Watch this theme video as it unpacks the theme of `The Messiah`",
-              url: 'https://www.youtube.com/watch?v=3dEh25pduQ8',
+                'Le Messie : En savoir plus sur la promesse de Jacob à Juda concernant le futur roi',
+              url: 'https://www.youtube.com/watch?v=4eBBvA8zzxI',
             },
             { id: '1', src: '12', type: 'Image' },
             { id: '2', chapters: '10|4-8', type: 'Chapter' },
@@ -1724,10 +1725,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Isaiah 1-39',
+              title: 'Vidéo : Esaïe 1-39',
               description:
-                "Isaiah announces a message of judgment on Israel's failure to keep their covenant with God. It will purify Israel to prepare them for the coming messianic king who found the new Jerusalem to become a light to the nations. But all of these hopes seem to come crashing down with Israel's exile. How will the promises be fulfilled?",
-              url: 'https://www.youtube.com/watch?v=d0A6Uchb1F8',
+                "Esaïe annonce un message de jugement sur l'échec d'Israël à respecter son alliance avec Dieu. Il purifiera Israël pour le préparer à la venue du roi messianique qui a trouvé la nouvelle Jérusalem pour devenir une lumière pour les nations. Mais tous ces espoirs semblent s'effondrer avec l'exil d'Israël. Comment ces promesses seront-elles tenues ?",
+              url: 'https://www.youtube.com/watch?v=eOmd1d-6Whw',
             },
             { id: '1', src: '22', type: 'Image' },
             { id: '2', chapters: '23|1-4', type: 'Chapter' },
@@ -1758,10 +1759,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Isaiah 40-66',
+              title: 'Vidéo : Esaïe 40-66',
               description:
-                "On the other side of Israel's exile, Isaiah's hope for the new Jerusalem and the messianic king are announced. It's then revealed that Israel is still hard-hearted after the exile, and that their king will become a suffering servant who will die for the sins of Israel and open up the covenant family of God to all nations.",
-              url: 'https://www.youtube.com/watch?v=_TzdEPuqgQg',
+                "De l'autre côté de l'exil d'Israël, l'espoir d'Isaïe pour la nouvelle Jérusalem et le roi messianique est annoncé. Il est alors révélé qu'Israël est toujours aussi dur après l'exil, et que leur roi deviendra un serviteur souffrant qui mourra pour les péchés d'Israël et ouvrira la famille de l'alliance de Dieu à toutes les nations.",
+              url: 'https://www.youtube.com/watch?v=ztaPgwQ5j8k',
             },
             { id: '1', src: '23', type: 'Image' },
             { id: '2', chapters: '23|39-41', type: 'Chapter' },
@@ -1779,10 +1780,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: The Gospel of the Kingdom',
+              title: "Vidéo : L'Évangile du Royaume",
               description:
-                "Although the kingdom of Israel is currently going downhill, the prophet Isaiah looks forward to a coming messenger bringing 'the gospel of the Kingdom'. This theme is key to understanding the good news Jesus brought in the New Testament so take a look at this video.",
-              url: 'https://www.youtube.com/watch?v=xmFPS0f-kzs',
+                "Bien que le royaume d'Israël soit actuellement en déclin, le prophète Esaïe attend avec impatience la venue d'un messager qui apportera \"l'évangile du royaume\". Ce thème est essentiel pour comprendre la bonne nouvelle que Jésus a apportée dans le Nouveau Testament, alors regardez cette vidéo.",
+              url: 'https://www.youtube.com/watch?v=txGfRrR9v_M',
             },
             { id: '1', src: '23', type: 'Image' },
             { id: '2', chapters: '23|52-54', type: 'Chapter' },
@@ -1800,10 +1801,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Hosea',
+              title: 'Vidéo : Osée',
               description:
-                "Hosea accuses Israel of breaking their covenant with God, and warns them of the tragic consequences to follow. But because God's mercy and covenant love are more powerful than Israel's sin, Hosea also announces hope for the future of Israel after the exile.",
-              url: 'https://www.youtube.com/watch?v=kE6SZ1ogOVU',
+                "Osée accuse Israël de rompre son alliance avec Dieu, et les avertit des conséquences tragiques qui s'ensuivront. Mais parce que la miséricorde de Dieu et l'amour de l'alliance sont plus puissants que le péché d'Israël, Osée annonce également l'espoir pour l'avenir d'Israël après l'exil.",
+              url: 'https://www.youtube.com/watch?v=cFUsMnQe1Ts',
             },
             { id: '1', src: '29', type: 'Image' },
             { id: '2', chapters: '28|1-5', type: 'Chapter' },
@@ -1821,10 +1822,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Joel',
+              title: 'Vidéo : Joël',
               description:
-                'Joel views a recent locust plague as an expression of the "Day of the Lord\'s" justice for Israel\'s sin. But his reflection on the Scriptures leads him to trust that true repentance will bring about the great restoration hoped for in the other prophetic books. For Joel, the past has become an image of the future.',
-              url: 'https://www.youtube.com/watch?v=zQLazbgz90c',
+                'Joel considère une récente invasion de criquets comme une expression du "jour de la justice du Seigneur" pour le péché d\'Israël. Mais sa réflexion sur les Ecritures le conduit à croire que la vraie repentance apportera la grande restauration espérée dans les autres livres prophétiques. Pour Joël, le passé est devenu une image de l\'avenir.',
+              url: 'https://www.youtube.com/watch?v=KyfKz8DrhVk',
             },
             { id: '1', src: '30', type: 'Image' },
             { id: '2', chapters: '29|1-3', type: 'Chapter' },
@@ -1842,10 +1843,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Amos',
+              title: 'Vidéo : Amos',
               description:
-                "Amos accuses Israel of breaking their covenant with God, and highlights how their idolatry has led to injustice and the neglect of the poor. Amos warns of God's coming justice on their sin, and challenges them that true worship of God will always lead to justice for the poor. The book ends with a promise of the messianic kingdom on the other side of God's judgment.",
-              url: 'https://www.youtube.com/watch?v=mGgWaPGpGz4',
+                "Amos accuse Israël de rompre son alliance avec Dieu, et souligne comment leur idolâtrie a conduit à l'injustice et à la négligence des pauvres. Amos avertit de la justice à venir de Dieu sur leur péché, et les met au défi que le vrai culte de Dieu mènera toujours à la justice pour les pauvres. Le livre se termine par une promesse du royaume messianique de l'autre côté du jugement de Dieu.",
+              url: 'https://www.youtube.com/watch?v=8sRTnbX_TJY',
             },
             { id: '1', src: '31', type: 'Image' },
             { id: '2', chapters: '30|1-5', type: 'Chapter' },
@@ -1863,10 +1864,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Obadiah',
+              title: 'Vidéo : Abdias',
               description:
-                "Obadiah accuses the nation of Edom, Israel's neighbor and relative, of violence and injustice. But Edom's downfall before Babylon becomes an image of how God will one day bring down all arrogant and violent nations and establish his kingdom of justice over them.",
-              url: 'https://www.youtube.com/watch?v=i4ogCrEoG5s',
+                "Abdias accuse la nation d'Édom, voisin et parent d'Israël, de violence et d'injustice. Mais la chute d'Édom devant Babylone devient une image de la façon dont Dieu fera un jour tomber toutes les nations arrogantes et violentes et établira sur elles son royaume de justice.",
+              url: 'https://www.youtube.com/watch?v=RgTE--fi8m0',
             },
             { id: '1', src: '32', type: 'Image' },
             { id: '2', chapters: '31|1', type: 'Chapter' },
@@ -1884,10 +1885,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Micah',
+              title: 'Vidéo : Michée',
               description:
-                "Micah announces that God's justice is coming down on Israel's sin and covenant failure. But their sin is not the final word, as God's covenant love and faithfulness will create a new future on the other side of Israel's sin and exile.",
-              url: 'https://www.youtube.com/watch?v=MFEUEcylwLc',
+                "Michée annonce que la justice de Dieu s'abat sur le péché d'Israël et l'échec de l'alliance. Mais leur péché n'est pas le dernier mot, car l'amour et la fidélité à l'alliance de Dieu créeront un nouvel avenir de l'autre côté du péché et de l'exil d'Israël.",
+              url: 'https://www.youtube.com/watch?v=dmS-4-0cx5g',
             },
             { id: '1', src: '34', type: 'Image' },
             { id: '2', chapters: '33|1-4', type: 'Chapter' },
@@ -1905,10 +1906,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Jonah',
+              title: 'Vidéo : Jonas',
               description:
-                "A subversive story about a rebellious prophet who hates his God for loving his enemies. Jonah's ridiculous behavior contrasts the soft-hearted repentant of the gentiles in this story, and so becomes the author's way of challenging the reader to reckon with God's love for their enemies as well.",
-              url: 'https://www.youtube.com/watch?v=dLIabZc0O4c',
+                "Une histoire subversive sur un prophète rebelle qui déteste son Dieu parce qu'il aime ses ennemis. Le comportement ridicule de Jonas contraste avec le repentir tendre des Gentils dans cette histoire, et devient ainsi la façon de l'auteur de mettre le lecteur au défi de tenir compte de l'amour de Dieu pour ses ennemis également.",
+              url: 'https://www.youtube.com/watch?v=DNjuAr9c7VU',
             },
             { id: '1', src: '33', type: 'Image' },
             { id: '2', chapters: '32|1-4', type: 'Chapter' },
@@ -1926,10 +1927,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Nahum',
+              title: 'Vidéo : Nahum',
               description:
-                "Nahum portrays the downfall of Nineveh and Assyria as an image of how God will confront and bring down all violent human empires. His message of justice against Nineveh challenges us toward humility and hope for the future of God's world.",
-              url: 'https://www.youtube.com/watch?v=Y30DanA5EhU',
+                "Nahum dépeint la chute de Ninive et de l'Assyrie comme une image de la façon dont Dieu affrontera et fera tomber tous les empires humains violents. Son message de justice contre Ninive nous met au défi de l'humilité et de l'espoir pour l'avenir du monde de Dieu.",
+              url: 'https://www.youtube.com/watch?v=7rBdJ1JZo9A',
             },
             { id: '1', src: '35', type: 'Image' },
             { id: '2', chapters: '34|1-3', type: 'Chapter' },
@@ -1947,10 +1948,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Habakkuk',
+              title: 'Vidéo : Habacuc',
               description:
-                "Habakkuk struggles to understand God's goodness in the midst of such evil and injustice in the world. God announces that he will bring down Babylon and any nations that act like Babylon and bring his kingdom and the messiah in the future. And so Habakkuk becomes an example of God's righteous people living by faith in his promises to rescue his world.",
-              url: 'https://www.youtube.com/watch?v=OPMaRqGJPUU',
+                "Habacuc lutte pour comprendre la bonté de Dieu au milieu de tant de mal et d'injustice dans le monde. Dieu annonce qu'il fera tomber Babylone et toutes les nations qui agissent comme Babylone et qu'il fera venir son royaume et le messie dans le futur. Habacuc devient ainsi un exemple du peuple juste de Dieu qui vit par la foi en ses promesses de sauver son monde.",
+              url: 'https://www.youtube.com/watch?v=lBQbCKsvwCI',
             },
             { id: '1', src: '36', type: 'Image' },
             { id: '2', chapters: '35|1-3', type: 'Chapter' },
@@ -1968,10 +1969,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Zephaniah',
+              title: 'Vidéo : Sophonie',
               description:
-                "Zephaniah announces God's coming judgment on Israel's injustice and covenant unfaithfulness. It will devastate Jerusalem and end in exile. But God's love and mercy will endure, and so Zephaniah sees this purifying judgment as the true hope of the world, as God creates a world where all people can flourish in safety and peace.",
-              url: 'https://www.youtube.com/watch?v=oFZknKPNvz8',
+                "Sophonie annonce le jugement à venir de Dieu sur l'injustice et l'infidélité d'Israël à l'égard de l'alliance. Il dévastera Jérusalem et mettra fin à l'exil. Mais l'amour et la miséricorde de Dieu perdureront, et Sophonie voit donc dans ce jugement purificateur la véritable espérance du monde, car Dieu crée un monde où tous les peuples peuvent s'épanouir dans la sécurité et la paix.",
+              url: 'https://www.youtube.com/watch?v=oiTxzjDvjgk',
             },
             { id: '1', src: '37', type: 'Image' },
             { id: '2', chapters: '36|1-3', type: 'Chapter' },
@@ -2231,10 +2232,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Job',
+              title: 'Vidéo : Job',
               description:
-                "The book of Job explores the difficult question of God's relationship to human suffering. And while it doesn't offer tidy answers, we are invited into new levels of trust in God's wisdom and character.",
-              url: 'https://www.youtube.com/watch?v=xQwnH8th_fs',
+                "Le livre de Job explore la difficile question de la relation de Dieu à la souffrance humaine. Et bien qu'il n'offre pas de réponses toutes faites, il nous invite à de nouveaux niveaux de confiance dans la sagesse et le caractère de Dieu.",
+              url: 'https://www.youtube.com/watch?v=xRQ5ctHjhBs',
             },
             { id: '1', src: '17', type: 'Image' },
             { id: '2', chapters: '18|1-3', type: 'Chapter' },
@@ -2252,10 +2253,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Ecclesiastes',
+              title: 'Vidéo : Ecclésiaste',
               description:
-                "Ecclesiastes dismantles our simplistic ideas about God and our lives, by showing that death, chance, and the passage of time makes it impossible to control life's outcomes. But this unpredictable nature of life actually opens up the way to wisdom and the fear of the Lord.",
-              url: 'https://www.youtube.com/watch?v=lrsQ1tc-2wk',
+                "L'Ecclésiaste démantèle nos idées simplistes sur Dieu et notre vie, en montrant que la mort, le hasard et le passage du temps rendent impossible le contrôle des résultats de la vie. Mais cette nature imprévisible de la vie ouvre en fait la voie à la sagesse et à la crainte du Seigneur.",
+              url: 'https://www.youtube.com/watch?v=VURWsXy1nww',
             },
             { id: '1', src: '20', type: 'Image' },
             { id: '2', chapters: '21|1-4', type: 'Chapter' },
@@ -2273,10 +2274,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Psalms',
+              title: 'Vidéo : Psaumes',
               description:
-                "The book of Psalms has been designed to be the prayerbook of God's people who are trying to be faithful to God as they wait for the messiah and his coming kingdom.",
-              url: 'https://www.youtube.com/watch?v=j9phNEaPrv8',
+                "Le livre des Psaumes a été conçu pour être le livre de prières du peuple de Dieu qui essaie d'être fidèle à Dieu dans l'attente du messie et de son royaume à venir.",
+              url: 'https://www.youtube.com/watch?v=T-DvRiiLS1Y',
             },
             { id: '1', chapters: '19|1-2', type: 'Chapter' },
             {
@@ -2293,10 +2294,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Song of Songs',
+              title: 'Vidéo : Cantique des cantiques',
               description:
-                "The Song of Songs is a collection of ancient Israelite love poems that celebrates the beauty and power of God's gift of love and sexual desire.",
-              url: 'https://www.youtube.com/watch?v=4KC7xE4fgOw',
+                "Le Cantique des cantiques est un recueil d'anciens poèmes d'amour israélites qui célèbre la beauté et la puissance du don d'amour et de désir sexuel de Dieu.",
+              url: 'https://www.youtube.com/watch?v=YE-TO4LMbtQ',
             },
             { id: '1', src: '21', type: 'Image' },
             { id: '2', chapters: '22|1-4', type: 'Chapter' },
@@ -2418,10 +2419,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Wisdom: Job',
+              title: 'Sagesse : Job',
               description:
-                'You are almost done with the book of Job! Take a look at this video highlighting the books place in the wisdom literature tradition of Israel.',
-              url: 'https://www.youtube.com/watch?v=GswSg2ohqmA',
+                'Vous avez presque terminé le livre de Job ! Regardez cette vidéo qui met en évidence la place des livres dans la tradition de la littérature de sagesse en Israël.',
+              url: 'https://www.youtube.com/watch?v=m8gavTyySCk',
             },
             { id: '1', src: '17', type: 'Image' },
             { id: '2', chapters: '18|32-34', type: 'Chapter' },
@@ -2478,10 +2479,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Proverbs',
+              title: 'Vidéo : Proverbes',
               description:
-                "Proverbs explores what it means to live well in God's world, using wisdom and the fear of the Lord as your guide.",
-              url: 'https://www.youtube.com/watch?v=AzmYV8GNAIM',
+                'Proverbes explore ce que signifie vivre bien dans le monde de Dieu, en utilisant la sagesse et la crainte du Seigneur comme guide.',
+              url: 'https://www.youtube.com/watch?v=onMgVuZ4q0Q',
             },
             { id: '1', src: '19', type: 'Image' },
             { id: '2', chapters: '20|1-3', type: 'Chapter' },
@@ -2499,10 +2500,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Wisdom: Proverbs',
+              title: 'Sagesse : Proverbes',
               description:
-                'The book of Proverbs has a unique place in the wisdom literature tradition of Israel. Watch this video to see where it fits.',
-              url: 'https://www.youtube.com/watch?v=Gab04dPs_uA',
+                'Le livre des Proverbes occupe une place unique dans la tradition de la littérature de sagesse en Israël. Regardez cette vidéo pour voir où il se situe.',
+              url: 'https://www.youtube.com/watch?v=onMgVuZ4q0Q',
             },
             { id: '1', src: '19', type: 'Image' },
             { id: '2', chapters: '20|7-9', type: 'Chapter' },
@@ -2611,10 +2612,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Wisdom: Ecclesiastes',
+              title: 'Sagesse : Ecclésiaste',
               description:
-                'The book of Ecclesiastes has a unique place in the wisdom literature tradition of Israel. Watch this video to see where it fits.',
-              url: 'https://www.youtube.com/watch?v=VeUiuSK81-0',
+                "Le livre de l'Ecclésiaste occupe une place unique dans la tradition de la littérature de sagesse en Israël. Regardez cette vidéo pour voir où il se situe.",
+              url: 'https://www.youtube.com/watch?v=2eb3BHpw0X8',
             },
             { id: '1', src: '20', type: 'Image' },
             { id: '2', chapters: '21|9-12', type: 'Chapter' },
@@ -2666,10 +2667,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Ezekiel 1-32',
+              title: 'Vidéo : Ezéchiel 1-33',
               description:
-                "Ezekiel encounters God's glorious temple presence among the exiled Israelites in Babylon. He's commissioned to announce God's judgment on Israel and the nations for covenant failure and injustice.",
-              url: 'https://www.youtube.com/watch?v=R-CIPu1nko8',
+                "Ezéchiel rencontre la glorieuse présence de Dieu dans le temple parmi les Israélites exilés à Babylone. Il est chargé d'annoncer le jugement de Dieu sur Israël et les nations pour l'échec de l'alliance et l'injustice.",
+              url: 'https://www.youtube.com/watch?v=4Yr9DEYJ9IU',
             },
             { id: '1', src: '26', type: 'Image' },
             { id: '2', chapters: '26|1-4', type: 'Chapter' },
@@ -2687,10 +2688,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Ezekiel 33-48',
+              title: 'Vidéo : Ezéchiel 34-48',
               description:
-                'After the fall of Jerusalem to Babylon, Ezekiel announces a message of hope that God will rescue Israel by bringing the messianic king, defeating evil among the nations, and bringing restoration to all of creation from his cosmic temple.',
-              url: 'https://www.youtube.com/watch?v=SDeCWW_Bnyw',
+                "Après la chute de Jérusalem à Babylone, Ezéchiel annonce un message d'espoir que Dieu sauvera Israël en faisant venir le roi messianique, en vainquant le mal parmi les nations et en apportant la restauration à toute la création depuis son temple cosmique.",
+              url: 'https://www.youtube.com/watch?v=MyFcRxLzW6g',
             },
             { id: '1', src: '27', type: 'Image' },
             { id: '2', chapters: '26|31-33', type: 'Chapter' },
@@ -2708,10 +2709,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Jeremiah',
+              title: 'Vidéo : Jérémie',
               description:
-                "Jeremiah accuses Israel of breaking their covenant with God and warns them about the resulting exile to Babylon. But his hope is that God's mercy will one day heal Israel's rebellious hearts so they can truly know and follow their God.",
-              url: 'https://www.youtube.com/watch?v=RSK36cHbrk0',
+                "Jérémie accuse Israël de rompre son alliance avec Dieu et l'avertit de l'exil à Babylone qui en résulte. Mais son espoir est que la miséricorde de Dieu guérisse un jour les cœurs rebelles d'Israël afin qu'ils puissent vraiment connaître et suivre leur Dieu.",
+              url: 'https://www.youtube.com/watch?v=qTz_5zFBDsc',
             },
             { id: '1', src: '24', type: 'Image' },
             { id: '2', chapters: '24|1-3', type: 'Chapter' },
@@ -2742,10 +2743,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Lamentations',
+              title: 'Vidéo : Lamentations',
               description:
-                "Lamentations is a collection of five poems that explore the grief and trauma experienced by Israel in the fall of Jerusalem and the exile to Babylon. These honest expressions of pain become the basis for hope in God's mercy, and teach us that lamenting evil and tragedy is part of the journey of faith.",
-              url: 'https://www.youtube.com/watch?v=p8GDFPdaQZQ',
+                "Lamentations est un recueil de cinq poèmes qui explorent le chagrin et le traumatisme vécus par Israël lors de la chute de Jérusalem et de l'exil à Babylone. Ces expressions honnêtes de la douleur deviennent la base de l'espoir dans la miséricorde de Dieu, et nous enseignent que se lamenter sur le mal et la tragédie fait partie du cheminement de la foi.",
+              url: 'https://www.youtube.com/watch?v=nY4dZgLRzSg',
             },
             { id: '1', src: '25', type: 'Image' },
             { id: '2', chapters: '25|1-2', type: 'Chapter' },
@@ -3122,10 +3123,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Ezra-Nehemiah',
+              title: 'Vidéo : Esdras-Néhémie',
               description:
-                "The book of Ezra-Nehemiah tells the story of Israel's return to Jerusalem to rebuild their lives and renew the covenant. Despite their best attempts, Israel's leaders are unable to bring about the fulfillment of the prophetic hopes, and so the story ends waiting for God to heal the hearts of his people and send the messianic kingdom.",
-              url: 'https://www.youtube.com/watch?v=MkETkRv9tG8',
+                "Le livre d'Esras-Néhémie raconte l'histoire du retour d'Israël à Jérusalem pour reconstruire leur vie et renouveler l'alliance. Malgré leurs meilleures tentatives, les dirigeants d'Israël sont incapables de réaliser les espoirs prophétiques, et l'histoire se termine donc en attendant que Dieu guérisse les cœurs de son peuple et envoie le royaume messianique.",
+              url: 'https://www.youtube.com/watch?v=twgdre6_vdE',
             },
             { id: '1', src: '15', type: 'Image' },
             { id: '2', chapters: '15|1-3', type: 'Chapter' },
@@ -3143,10 +3144,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Esther',
+              title: 'Vidéo : Esther',
               description:
-                "Esther tells the story of God's mysterious providence at work to rescue his people from disaster. It happens through the most unlikely people and in surprising ways, encouraging us to look for signs of God's direction in our own lives as well.",
-              url: 'https://www.youtube.com/watch?v=JydNSlufRIs',
+                "Esther raconte l'histoire de la mystérieuse providence de Dieu à l'œuvre pour sauver son peuple du désastre. Elle se produit à travers les personnes les plus improbables et de manière surprenante, nous encourageant à chercher des signes de la direction de Dieu dans notre propre vie également.",
+              url: 'https://www.youtube.com/watch?v=wB1_ziugZB8',
             },
             { id: '1', src: '16', type: 'Image' },
             { id: '2', chapters: '17|1-5', type: 'Chapter' },
@@ -3276,10 +3277,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Daniel',
+              title: 'Vidéo : Daniel',
               description:
-                "The story of Daniel and his friends in Babylon motivate faithfulness in the midst of exile in a foreign land. Daniels' visions offer hope that God will one day bring his kingdom and defeat evil among all the nations.",
-              url: 'https://www.youtube.com/watch?v=9cSC9uobtPM',
+                "L'histoire de Daniel et de ses amis à Babylone motive la fidélité au milieu de l'exil en terre étrangère. Les visions de Daniels offrent l'espoir que Dieu apportera un jour son royaume et vaincra le mal parmi toutes les nations.",
+              url: 'https://www.youtube.com/watch?v=5RyZ2lceuPA',
             },
             { id: '1', src: '28', type: 'Image' },
             { id: '2', chapters: '27|1-3', type: 'Chapter' },
@@ -3297,10 +3298,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Haggai',
+              title: 'Vidéo : Aggée',
               description:
-                "Haggai challenges Israel after the exile to remain faithful to their God and rebuild the temple. If they disobey, they risk losing their role in the fulfillment of God's promises to bring the messianic kingdom. ",
-              url: 'https://www.youtube.com/watch?v=juPvv_xcX-U',
+                "Aggée met Israël au défi, après l'exil, de rester fidèle à son Dieu et de reconstruire le temple. S'ils désobéissent, ils risquent de perdre leur rôle dans l'accomplissement des promesses de Dieu d'apporter le royaume messianique.",
+              url: 'https://www.youtube.com/watch?v=DOoPKFpFZZE',
             },
             { id: '1', src: '38', type: 'Image' },
             { id: '2', chapters: '37|1-2', type: 'Chapter' },
@@ -3318,10 +3319,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Malachi',
+              title: 'Vidéo : Malachie',
               description:
-                "Malachi exposes the selfishness and hard hearts of Israel after the exile, and announces that the coming day of the Lord will purify Israel and prepare them for God's future kingdom.",
-              url: 'https://www.youtube.com/watch?v=HPGShWZ4Jvk',
+                "Malachie expose l'égoïsme et les cœurs durs d'Israël après l'exil, et annonce que le jour prochain du Seigneur va purifier Israël et le préparer pour le futur royaume de Dieu.",
+              url: 'https://www.youtube.com/watch?v=2ENSIn3OOyE',
             },
             { id: '1', src: '40', type: 'Image' },
             { id: '2', chapters: '39|1-2', type: 'Chapter' },
@@ -3391,10 +3392,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Zechariah',
+              title: 'Vidéo : Zacharie',
               description:
-                "Zechariah's visions foster hope in the future promise of the messianic kingdom, and challenge Israel after the exile to remain faithful to their God.",
-              url: 'https://www.youtube.com/watch?v=_106IfO6Kc0',
+                "Les visions de Zacharie nourrissent l'espoir dans la promesse future du royaume messianique, et mettent Israël au défi de rester fidèle à son Dieu après l'exil.",
+              url: 'https://www.youtube.com/watch?v=vyQme1-Libg',
             },
             { id: '1', src: '39', type: 'Image' },
             { id: '2', chapters: '38|1-4', type: 'Chapter' },
@@ -3446,10 +3447,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1-2 Chronicles',
+              title: 'Vidéo : 1-2 Chroniques',
               description:
-                "Chronicles is a majestic summary of the entire Old Testament. It was written to show how Israel's story from the past points to the future hope of the messianic kingdom. ",
-              url: 'https://www.youtube.com/watch?v=HR7xaHv3Ias',
+                "Chroniques est un résumé majestueux de tout l'Ancien Testament. Il a été écrit pour montrer comment l'histoire d'Israël du passé indique l'espoir futur du royaume messianique.",
+              url: 'https://www.youtube.com/watch?v=zlz7aB9Zmhc',
             },
             { id: '1', src: '41', type: 'Image' },
             { id: '2', chapters: '13|1-10', type: 'Chapter' },
@@ -3683,10 +3684,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Matthew 14-28',
+              title: 'Vidéo : Matthieu 14-28',
               description:
-                "Matthew shows how Jesus' announcement of God's kingdom generates hostility from Israel's leaders. It all leads to his sacrificial death and resurrection in Jerusalem, and the story ends with the risen Jesus as the new king of the world.",
-              url: 'https://www.youtube.com/watch?v=GGCF3OPWN14',
+                "Matthieu montre comment l'annonce par Jésus du royaume de Dieu génère l'hostilité des dirigeants d'Israël. Tout cela conduit à sa mort sacrificielle et à sa résurrection à Jérusalem, et l'histoire se termine avec Jésus ressuscité comme nouveau roi du monde.",
+              url: 'https://www.youtube.com/watch?v=mq0vO1vNVfY',
             },
             { id: '1', src: '43', type: 'Image' },
             { id: '2', chapters: '40|13-14', type: 'Chapter' },
@@ -3704,10 +3705,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: John 1-12',
+              title: 'Vidéo : Jean 1-12',
               description:
-                "John presents Jesus as the incarnation of the creator God of Israel, who has come as the fulfillment of Israel's entire story. In Jesus, God's love and the gift of eternal life are offered to the world.",
-              url: 'https://www.youtube.com/watch?v=G-2e9mMf7E8',
+                "Jean présente Jésus comme l'incarnation du Dieu créateur d'Israël, qui est venu comme l'accomplissement de toute l'histoire d'Israël. En Jésus, l'amour de Dieu et le don de la vie éternelle sont offerts au monde.",
+              url: 'https://www.youtube.com/watch?v=QReuhS_R8Kk',
             },
             { id: '1', src: '45', type: 'Image' },
             { id: '2', chapters: '43|1-2', type: 'Chapter' },
@@ -3764,10 +3765,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: John 13-21',
+              title: 'Vidéo : Jean 13-21',
               description:
-                "John presents Jesus' final words to his disciples before his death and resurrection. His departure will allow the Spirit to come and empower his followers to carry on his mission in the world.",
-              url: 'https://www.youtube.com/watch?v=RUfh_wOsauk',
+                "Jean présente les dernières paroles de Jésus à ses disciples avant sa mort et sa résurrection. Son départ permettra à l'Esprit de venir et donnera à ses disciples le pouvoir de poursuivre sa mission dans le monde.",
+              url: 'https://www.youtube.com/watch?v=isJCKKCZx5A',
             },
             { id: '1', src: '46', type: 'Image' },
             { id: '2', chapters: '43|13-15', type: 'Chapter' },
@@ -3785,10 +3786,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Luke 1-9',
+              title: 'Vidéo : Luc 1-9',
               description:
-                "Luke introduces Jesus as promised king of Israel and God's son who announces good news to the poor. Jesus is portrayed as a new Moses who will liberate Israel through a new Exodus.",
-              url: 'https://www.youtube.com/watch?v=XIb_dCIxzr0',
+                "Luc présente Jésus comme le roi d'Israël promis et le fils de Dieu qui annonce une bonne nouvelle aux pauvres. Jésus est présenté comme un nouveau Moïse qui libèrera Israël par un nouvel Exode.",
+              url: 'https://www.youtube.com/watch?v=Bo46uU2IF9w',
             },
             { id: '1', src: '47', type: 'Image' },
             { id: '2', chapters: '42|1', type: 'Chapter' },
@@ -3806,10 +3807,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Acts 1-12',
+              title: 'Vidéo : Actes 1-12',
               description:
-                "Luke continues Jesus' story by showing the Holy Spirit is sent to make the disciples into a new temple. Through them, Jesus and the Spirit will carry on the mission of God's kingdom in the world.",
-              url: 'https://www.youtube.com/watch?v=CGbNw855ksw',
+                "Luc poursuit l'histoire de Jésus en montrant que le Saint-Esprit est envoyé pour faire des disciples un nouveau temple. À travers eux, Jésus et l'Esprit poursuivront la mission du royaume de Dieu dans le monde.",
+              url: 'https://www.youtube.com/watch?v=YLnUYCSWD9k',
             },
             { id: '1', src: '49', type: 'Image' },
             { id: '2', chapters: '44|1-2', type: 'Chapter' },
@@ -3866,10 +3867,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Matthew 1-13',
+              title: 'Vidéo : Matthieu 1-13',
               description:
-                "Matthew presents Jesus as the God of Israel who comes to be with his people. He is a new Moses who brings God's kingdom and a new Torah to Israel.",
-              url: 'https://www.youtube.com/watch?v=NUh9Bsiee_U',
+                "Matthieu présente Jésus comme le Dieu d'Israël qui vient pour être avec son peuple. Il est un nouveau Moïse qui apporte le royaume de Dieu et une nouvelle Torah à Israël.",
+              url: 'https://www.youtube.com/watch?v=wOJY7gRBkNU',
             },
             { id: '1', src: '42', type: 'Image' },
             { id: '2', chapters: '40|1-2', type: 'Chapter' },
@@ -4004,10 +4005,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Mark',
+              title: 'Vidéo : Marc',
               description:
-                "Mark's story emphasizes the scandalous claim that Jesus is Israel's messianic king who established his kingdom through his suffering, death, and resurrection. ",
-              url: 'https://www.youtube.com/watch?v=HGHqu9-DtXk',
+                "L'histoire de Marc souligne l'affirmation scandaleuse selon laquelle Jésus est le roi messianique d'Israël qui a établi son royaume par sa souffrance, sa mort et sa résurrection.",
+              url: 'https://www.youtube.com/watch?v=9NhjIuy6_oo',
             },
             { id: '1', src: '44', type: 'Image' },
             { id: '2', chapters: '41|1-2', type: 'Chapter' },
@@ -4207,10 +4208,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Luke 10-24',
+              title: 'Vidéo : Luc 10-24',
               description:
-                "Luke traces Jesus' journey to Jerusalem, which becomes an education in discipleship for his followers. Israel's resistance to Jesus' message culminates in his death and resurrection, which opens up hope for all nations.",
-              url: 'https://www.youtube.com/watch?v=26z_KhwNdD8',
+                "Luc retrace le voyage de Jésus à Jérusalem, qui devient une éducation à la vie de disciple pour ses disciples. La résistance d'Israël au message de Jésus culmine dans sa mort et sa résurrection, qui ouvre l'espoir pour toutes les nations.",
+              url: 'https://www.youtube.com/watch?v=O-Za0jggT8Q',
             },
             { id: '1', src: '48', type: 'Image' },
             { id: '2', chapters: '42|10-11', type: 'Chapter' },
@@ -4371,10 +4372,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Acts 13-28',
+              title: 'Vidéo : Actes 13-28',
               description:
-                'Luke traces how the Spirit-empowered messianic movement in Jerusalem becomes a multi-ethnic international movement that spreads all the way to Rome. ',
-              url: 'https://www.youtube.com/watch?v=Z-17KxpjL0Q',
+                "Luc retrace comment le mouvement messianique animé par l'Esprit à Jérusalem devient un mouvement international multiethnique qui s'étend jusqu'à Rome.",
+              url: 'https://www.youtube.com/watch?v=M7Xgd_7bfpA',
             },
             { id: '1', src: '49', type: 'Image' },
             { id: '2', chapters: '44|13-14', type: 'Chapter' },
@@ -4470,10 +4471,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Gospel of Mark',
+              title: "Vidéo : L'évangile de Marc",
               description:
-                "Our gospel video series gives you an animated look at all the action. Here's a good recap of Mark.",
-              url: 'https://www.youtube.com/watch?v=OVRixfameGY',
+                "Notre série de vidéos gospel vous donne un regard animé sur toute l'action. Voici un bon récapitulatif de Marc.",
+              url: 'https://www.youtube.com/watch?v=CZEo5S5veYQ&t=3s',
             },
             { id: '1', src: '44', type: 'Image' },
             { id: '2', chapters: '41|9-10', type: 'Chapter' },
@@ -4499,10 +4500,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Romans 1-4',
+              title: 'Vidéo : Romains 1-4',
               description:
-                'This video introduces Paul the Apostle and summarizes the historical context and main ideas of the first four chapters of his most epic work, The Letter to the Romans.',
-              url: 'https://www.youtube.com/watch?v=ej_6dVdJSIU',
+                "Cette vidéo présente l'apôtre Paul et résume le contexte historique et les idées principales des quatre premiers chapitres de son œuvre la plus épique, La Lettre aux Romains.",
+              url: 'https://www.youtube.com/watch?v=8EJmsrA0H4M',
             },
             { id: '1', src: '50', type: 'Image' },
             { id: '2', chapters: '45|1-2', type: 'Chapter' },
@@ -4533,10 +4534,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1 Corinthians',
+              title: 'Vidéo : 1 Corinthiens',
               description:
-                "Paul addresses a host of problems in the ancient church of Corinth. As he does so, he shows us what it means to see all of life's complexities through the lens of the Gospel about Jesus.",
-              url: 'https://www.youtube.com/watch?v=veU6dB3996o',
+                "Paul aborde une foule de problèmes dans l'ancienne église de Corinthe. Ce faisant, il nous montre ce que cela signifie de voir toutes les complexités de la vie à travers la lentille de l'Evangile sur Jésus.",
+              url: 'https://www.youtube.com/watch?v=q99CrlpKBrw',
             },
             { id: '1', src: '52', type: 'Image' },
             { id: '2', chapters: '46|1-2', type: 'Chapter' },
@@ -4554,10 +4555,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Galatians',
+              title: 'Vidéo : Galates',
               description:
-                "Paul confronts the Galatians Christians for thinking they could supplement God's grace by observing certain commands in the Torah. He reminds them that salvation is a total gift of God's love, and needs no completion through religious rituals. ",
-              url: 'https://www.youtube.com/watch?v=vmx4UjRFp0M',
+                "Paul confronte les chrétiens de Galilée qui pensent qu'ils pourraient compléter la grâce de Dieu en observant certains commandements de la Torah. Il leur rappelle que le salut est un don total de l'amour de Dieu, et n'a pas besoin d'être complété par des rituels religieux.",
+              url: 'https://www.youtube.com/watch?v=3elnA_n3nWc',
             },
             { id: '1', src: '54', type: 'Image' },
             { id: '2', chapters: '48|1-2', type: 'Chapter' },
@@ -4575,10 +4576,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Ephesians',
+              title: 'Vidéo : Ephésiens',
               description:
-                'Paul offers a panoramic summary of his entire message and mission as an apostle of Jesus to the non-Jewish world. He also shows how the Gospel creates a diverse community that is unified by devotion to Jesus and to each other.',
-              url: 'https://www.youtube.com/watch?v=Y71r-T98E2Q',
+                "Paul offre un résumé panoramique de tout son message et de sa mission d'apôtre de Jésus pour le monde non-juif. Il montre également comment l'Évangile crée une communauté diversifiée qui est unifiée par la dévotion à Jésus et aux uns et aux autres.",
+              url: 'https://www.youtube.com/watch?v=7pUE5wvhbBI',
             },
             { id: '1', src: '55', type: 'Image' },
             { id: '2', chapters: '49|1-2', type: 'Chapter' },
@@ -4596,10 +4597,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Colossians',
+              title: 'Vidéo : Colossiens',
               description:
-                'Paul shows the Colossian Christians how Jesus is key to understanding all of reality. His death and resurrection as king of the world demand that every aspect of our lives be transformed by his love and grace.',
-              url: 'https://www.youtube.com/watch?v=pXTXlDxQsvc',
+                'Paul montre aux chrétiens colossiens comment Jésus est la clé pour comprendre toute la réalité. Sa mort et sa résurrection en tant que roi du monde exigent que chaque aspect de notre vie soit transformé par son amour et sa grâce.',
+              url: 'https://www.youtube.com/watch?v=d9lcTLTNSF4',
             },
             { id: '1', src: '57', type: 'Image' },
             { id: '2', chapters: '51|1-2', type: 'Chapter' },
@@ -4617,10 +4618,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1 Thessalonians',
+              title: 'Vidéo : 1 Thessaloniciens',
               description:
-                'Paul comforts the Thessalonian Christians in the midst of persecution and fear. He directs their hope to the future return of Jesus who will bring justice and make all things right.',
-              url: 'https://www.youtube.com/watch?v=No7Nq6IX23c',
+                'Paul réconforte les chrétiens de Thessalonique au milieu des persécutions et de la peur. Il dirige leur espoir vers le futur retour de Jésus qui apportera la justice et arrangera toutes choses.',
+              url: 'https://www.youtube.com/watch?v=lTz0CuviQPE',
             },
             { id: '1', src: '59a', type: 'Image' },
             { id: '2', chapters: '52|1-2', type: 'Chapter' },
@@ -4638,10 +4639,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 2 Thessalonians',
+              title: 'Vidéo : 2 Thessaloniciens',
               description:
-                "Paul brings more comfort to the persecuted Thessalonian Christians. He also clarifies his teaching about Jesus' future return and challenges people whose selfish lifestyles are causing trouble in the church.",
-              url: 'https://www.youtube.com/watch?v=kbPBDKOn1cc',
+                "Paul apporte plus de réconfort aux chrétiens persécutés de Thessalonique. Il clarifie également son enseignement sur le futur retour de Jésus et met au défi les personnes dont le style de vie égoïste cause des problèmes dans l'église.",
+              url: 'https://www.youtube.com/watch?v=CSLk-ULxAik',
             },
             { id: '1', src: '59b', type: 'Image' },
             { id: '2', chapters: '53|1-3', type: 'Chapter' },
@@ -4659,10 +4660,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1 Timothy',
+              title: 'Vidéo : 1 Timothée',
               description:
-                "Paul guides Timothy in how to restore order to the church in Ephesus. It's been disrupted by corrupt leaders who are leading the people astray. Here Paul offers a wholistic vision of the church's purpose and mission in the world.",
-              url: 'https://www.youtube.com/watch?v=7RoqnGcEjcs',
+                "Paul guide Timothée dans la manière de rétablir l'ordre dans l'église d'Éphèse. Elle a été perturbée par des dirigeants corrompus qui égarent le peuple. Paul offre ici une vision globale du but et de la mission de l'église dans le monde.",
+              url: 'https://www.youtube.com/watch?v=2diOsOpbZU4',
             },
             { id: '1', src: '60', type: 'Image' },
             { id: '2', chapters: '54|1-2', type: 'Chapter' },
@@ -4680,10 +4681,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 2 Timothy',
+              title: 'Vidéo : 2 Timothée',
               description:
-                "Paul writes his final letter from prison, asking Timothy to come visit him before he's executed. Paul offers a personal challenge to Timothy and shows us that following Jesus requires sacrifice and risk.",
-              url: 'https://www.youtube.com/watch?v=urlvnxCaL00',
+                'Paul écrit sa dernière lettre depuis la prison, demandant à Timothy de lui rendre visite avant son exécution. Paul propose un défi personnel à Timothée et nous montre que suivre Jésus exige sacrifice et risque.',
+              url: 'https://www.youtube.com/watch?v=ybNEUUSEfoI',
             },
             { id: '1', src: '61', type: 'Image' },
             { id: '2', chapters: '55|1-4', type: 'Chapter' },
@@ -4701,10 +4702,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Hebrews',
+              title: 'Vidéo : Hébreux',
               description:
-                'Hebrew is a powerful and pastoral teaching showing how Jesus is the perfect representation and expression of the Creator God. We are challenged to follow him at all costs.',
-              url: 'https://www.youtube.com/watch?v=z9wqN-nwSzE',
+                "L'hébreu est un enseignement puissant et pastoral qui montre comment Jésus est la représentation et l'expression parfaites du Dieu créateur. Nous sommes mis au défi de le suivre à tout prix.",
+              url: 'https://www.youtube.com/watch?v=scvkhZ5DyhQ',
             },
             { id: '1', src: '63', type: 'Image' },
             { id: '2', chapters: '58|1-2', type: 'Chapter' },
@@ -4737,10 +4738,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 2 Corinthians',
+              title: 'Vidéo : 2 Corinthiens',
               description:
-                'Paul repairs his relationship with the Corinthians, showing them how the scandalous message of the crucified Jesus opens up a totally new way of life.',
-              url: 'https://www.youtube.com/watch?v=3lfPK2vfC54',
+                'Paul répare sa relation avec les Corinthiens, en leur montrant comment le scandaleux message de Jésus crucifié ouvre un tout nouveau mode de vie.',
+              url: 'https://www.youtube.com/watch?v=e0ivaY94HjA',
             },
             { id: '1', src: '53', type: 'Image' },
             { id: '2', chapters: '47|1-2', type: 'Chapter' },
@@ -4758,10 +4759,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Titus',
+              title: 'Vidéo : Tite',
               description:
-                "Paul comissions Titus to bring order to the house churches on the Island of Crete. He shows how the Gospel can transform Cretan culture from within as Jesus' followers depend on the Spirit to empower a totally new way of life.",
-              url: 'https://www.youtube.com/watch?v=qgAZH5ExwrM',
+                "Paul charge Tite de mettre de l'ordre dans les églises des maisons de l'île de Crète. Il montre comment l'Évangile peut transformer la culture crétoise de l'intérieur, car les disciples de Jésus dépendent de l'Esprit pour donner à leur vie un tout nouveau sens.",
+              url: 'https://www.youtube.com/watch?v=2aNe6TsB64w',
             },
             { id: '1', src: '62', type: 'Image' },
             { id: '2', chapters: '56|1-3', type: 'Chapter' },
@@ -4779,10 +4780,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Philemon',
+              title: 'Vidéo : Philémon',
               description:
-                'Paul mediates between Philemon and his escaped former slave Onesimus. He shows how the Gospel has made them brothers in the Messiah, and demands that their relationship be healed and transformed.',
-              url: 'https://www.youtube.com/watch?v=aW9Q3Jt6Yvk',
+                "Paul sert de médiateur entre Philémon et son ancien esclave Onésime, qui s'est échappé. Il montre comment l'Evangile a fait d'eux des frères dans le Messie, et exige que leur relation soit guérie et transformée.",
+              url: 'https://www.youtube.com/watch?v=6FHGUa1Usfc',
             },
             { id: '1', src: '58', type: 'Image' },
             { id: '2', chapters: '57|1', type: 'Chapter' },
@@ -4800,10 +4801,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 2 Peter',
+              title: 'Vidéo : 2 Pierre',
               description:
-                "Peter confronts corrupt teachers who have distorted the message about Jesus and lead others astray. He points Christians to the hope of Jesus' return which can motivate faithfulness.",
-              url: 'https://www.youtube.com/watch?v=wWLv_ITyKYc',
+                "Pierre affronte des enseignants corrompus qui ont déformé le message sur Jésus et qui ont égaré les autres. Il indique aux chrétiens l'espoir du retour de Jésus qui peut motiver la fidélité.",
+              url: 'https://www.youtube.com/watch?v=w6JiduuSdnQ',
             },
             { id: '1', src: '66', type: 'Image' },
             { id: '2', chapters: '61|1-3', type: 'Chapter' },
@@ -4899,10 +4900,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Romans 5-16',
+              title: 'Vidéo : Romains 5-16',
               description:
-                'This video explores the main ideas and flow of thought in chapters 5-16 of The Letter to the Romans, Paul the Apostle’s most epic work.',
-              url: 'https://www.youtube.com/watch?v=0SVTl4Xa5fY',
+                "Cette vidéo explore les idées principales et le flux de pensée des chapitres 5 à 16 de La Lettre aux Romains, l'œuvre la plus épique de l'apôtre Paul.",
+              url: 'https://www.youtube.com/watch?v=TYxbJrDgZRg',
             },
             { id: '1', src: '51', type: 'Image' },
             { id: '2', chapters: '45|5-6', type: 'Chapter' },
@@ -5167,10 +5168,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Philippians',
+              title: 'Vidéo : Phillipiens',
               description:
-                "Paul thanks the Christians in Philppi for their support, and he shows how Jesus' self-giving love is the model for the Christian way of life.",
-              url: 'https://www.youtube.com/watch?v=oE9qqW1-BkU',
+                "Paul remercie les chrétiens de Philadelphie pour leur soutien, et il montre comment l'amour du don de soi de Jésus est le modèle du mode de vie chrétien.",
+              url: 'https://www.youtube.com/watch?v=ei_5jKbrUJM',
             },
             { id: '1', src: '56', type: 'Image' },
             { id: '2', chapters: '50|1-2', type: 'Chapter' },
@@ -5318,10 +5319,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: James',
+              title: 'Vidéo : Jacques',
               description:
-                'James combines the wisdom of his brother Jesus and the book of Proverbs into his own challenging call to life of whole-hearted devotion to God.',
-              url: 'https://www.youtube.com/watch?v=qn-hLHWwRYY',
+                'Jacques combine la sagesse de son frère Jésus et le livre des Proverbes dans son propre appel stimulant à une vie de dévotion totale à Dieu.',
+              url: 'https://www.youtube.com/watch?v=_hXVE65I2tw',
             },
             { id: '1', src: '64', type: 'Image' },
             { id: '2', chapters: '59|1-3', type: 'Chapter' },
@@ -5339,10 +5340,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1 Peter',
+              title: 'Vidéo : 1 Pierre',
               description:
-                'Peter offers hope to Christians suffering persecution and guides them with practical instruction about the way of life consistent with following Jesus.',
-              url: 'https://www.youtube.com/watch?v=WhP7AZQlzCg',
+                "Pierre offre de l'espoir aux chrétiens qui souffrent de persécution et les guide par des instructions pratiques sur le mode de vie compatible avec le fait de suivre Jésus.",
+              url: 'https://www.youtube.com/watch?v=Pd_6DiSLRAI',
             },
             { id: '1', src: '65', type: 'Image' },
             { id: '2', chapters: '60|1-2', type: 'Chapter' },
@@ -5360,10 +5361,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: 1-3 John',
+              title: 'Vidéo : 1-3 Jean',
               description:
-                "John calls followers of Jesus to share in God's own life and love by devoting themselves to loving one another. ",
-              url: 'https://www.youtube.com/watch?v=l3QkE6nKylM',
+                "Jean appelle les disciples de Jésus à partager la vie et l'amour de Dieu en se consacrant à s'aimer les uns les autres.",
+              url: 'https://www.youtube.com/watch?v=N-q8TaM8opA',
             },
             { id: '1', src: '67', type: 'Image' },
             { id: '2', chapters: '62|1-2', type: 'Chapter' },
@@ -5381,10 +5382,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Jude',
+              title: 'Vidéo : Jude',
               description:
-                'Jude confronts corrupt teachers who distort the message about Jesus his brother and lead others astray.',
-              url: 'https://www.youtube.com/watch?v=6UoCmakZmys',
+                'Jude affronte des enseignants corrompus qui déforment le message sur Jésus son frère et égarent les autres.',
+              url: 'https://www.youtube.com/watch?v=whrJ5C45tgU',
             },
             { id: '1', src: '68', type: 'Image' },
             { id: '2', chapters: '65|1', type: 'Chapter' },
@@ -5410,10 +5411,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Revelation 1-11',
+              title: 'Vidéo : Apocalypse 1-11',
               description:
                 'John addresses seven churches with a challenge to remain faithful to Jesus despite persecution and the temptation to apathy. His visions open up an alternate vision of human history, showing how Jesus is the true king of history.',
-              url: 'https://www.youtube.com/watch?v=5nvVVcYD-0w',
+              url: 'https://www.youtube.com/watch?v=whrJ5C45tgU',
             },
             { id: '1', src: '69', type: 'Image' },
             { id: '2', chapters: '66|1-3', type: 'Chapter' },
@@ -5444,10 +5445,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Revelation 12-22',
+              title: 'Vidéo : Apocalypse 12-22',
               description:
-                "John recounts his visions about Jesus' exalted rule over the world and how he will in due time bring final justice on the world's evil and return to bring renewal to all creation.",
-              url: 'https://www.youtube.com/watch?v=QpnIrbq2bKo',
+                'Jean raconte ses visions sur le règne exalté de Jésus sur le monde et comment il apportera en temps voulu la justice finale sur le mal du monde et reviendra pour apporter le renouveau à toute la création.',
+              url: 'https://www.youtube.com/watch?v=HIfJZA9fwbM',
             },
             { id: '1', src: '70', type: 'Image' },
             { id: '2', chapters: '66|12-13', type: 'Chapter' },
@@ -5530,10 +5531,10 @@ export const bibleProjectPlan: Plan = {
             {
               id: '0',
               type: 'Video',
-              title: 'Video: Heaven and Earth',
+              title: 'Vidéo : Le ciel et la terre',
               description:
-                'Your journey through the Bible is nearly complete! Now is a great time to watch the Heaven and Earth theme video. The union of heaven and earth is what the story is all about. In Revelation we are about to get an idea of what this will look like. ',
-              url: 'https://www.youtube.com/watch?v=Zy2AQlK6C5k',
+                "Plus qu'une liste ennuyeuse de spécifications de construction, ces chapitres sur le Tabernacle nous indiquent l'important thème biblique de la restauration du ciel et de la terre par Dieu.",
+              url: 'https://www.youtube.com/watch?v=PZ-CmV2Xg6A',
             },
             { id: '1', src: '70', type: 'Image' },
             { id: '2', chapters: '66|19-20', type: 'Chapter' },

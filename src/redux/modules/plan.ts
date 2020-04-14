@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Plan, OngoingPlan, ReadingSlice } from '~common/types'
 import { bibleProjectPlan } from '../../features/plans/bible-project-plan'
-import { bibleProjectPlanMini } from '~features/plans/bible-project-plan-mini'
 import { USER_LOGIN_SUCCESS, USER_LOGOUT } from './user'
 
 type ImageModel = { [key: string]: string }
@@ -14,7 +13,7 @@ interface PlanModel {
 }
 
 const initialState: PlanModel = {
-  myPlans: [bibleProjectPlan, bibleProjectPlanMini],
+  myPlans: [bibleProjectPlan],
   onlinePlans: [],
   ongoingPlans: [],
   images: {},

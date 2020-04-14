@@ -11,8 +11,10 @@ project/*
 config.js
 app.json
 
+
 .expo/
 src/assets/db/
+src/features/plans/bible-project-plan.ts
 
 # Xcode
 !**/*.xcodeproj

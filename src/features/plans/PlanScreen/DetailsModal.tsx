@@ -8,6 +8,7 @@ import Box from '~common/ui/Box'
 import { ComputedPlanItem } from '~common/types'
 import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
+import { useFireStorage } from '../plan.hooks'
 
 const CircleImage = styled(Box)(({ theme }) => ({
   width: 100,
@@ -30,6 +31,8 @@ const DetailsModal = ({
   author,
 }: Omit<ComputedPlanItem, 'status' | 'progress'> & Props) => {
   const theme: Theme = useTheme()
+  const cacheImage = useFireStorage(image)
+
   return (
     <Modalize
       ref={modalRefDetails}
@@ -37,13 +40,13 @@ const DetailsModal = ({
       modalStyle={{ backgroundColor: theme.colors.lightGrey }}
     >
       <Box paddingHorizontal={20} paddingVertical={50}>
-        {image && (
+        {cacheImage && (
           <Box center marginBottom={20}>
             <CircleImage center>
               <FastImage
                 style={{ width: 100, height: 100 }}
                 source={{
-                  uri: image,
+                  uri: cacheImage,
                 }}
               />
             </CircleImage>
