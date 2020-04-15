@@ -14,7 +14,6 @@ public class BasePackageList {
         new expo.modules.font.FontLoaderPackage(),
         new expo.modules.haptics.HapticsPackage(),
         new expo.modules.lineargradient.LinearGradientPackage(),
-        new expo.modules.network.NetworkPackage(),
         new expo.modules.permissions.PermissionsPackage(),
         new expo.modules.securestore.SecureStorePackage(),
         new expo.modules.sharing.SharingPackage()

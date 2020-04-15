@@ -163,7 +163,6 @@ PODS:
     - AppAuth/ExternalUserAgent (= 1.3.0)
   - AppAuth/Core (1.3.0)
   - AppAuth/ExternalUserAgent (1.3.0)
-  - Base64 (1.1.2)
   - boost-for-react-native (1.63.0)
   - BoringSSL-GRPC (0.0.3):
     - BoringSSL-GRPC/Implementation (= 0.0.3)
@@ -171,11 +170,6 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.3):
     - BoringSSL-GRPC/Interface (= 0.0.3)
   - BoringSSL-GRPC/Interface (0.0.3)
-  - CodePush (6.1.0):
-    - Base64 (~> 1.1)
-    - JWT (~> 3.0.0-beta.7)
-    - React
-    - SSZipArchive (~> 2.1)
   - DoubleConversion (1.1.6)
   - EXAppleAuthentication (2.0.0):
     - UMCore
@@ -197,8 +191,6 @@ PODS:
   - EXHaptics (8.0.0):
     - UMCore
   - EXLinearGradient (8.0.0):
-    - UMCore
-  - EXNetwork (2.0.0):
     - UMCore
   - EXPermissions (8.0.0):
     - UMCore
@@ -359,8 +351,6 @@ PODS:
   - GTMSessionFetcher/Core (1.3.1)
   - GTMSessionFetcher/Full (1.3.1):
     - GTMSessionFetcher/Core (= 1.3.1)
-  - JWT (3.0.0-beta.12):
-    - Base64 (~> 1.1.2)
   - leveldb-library (1.22)
   - libwebp (1.1.0):
     - libwebp/demux (= 1.1.0)
@@ -653,7 +643,7 @@ PODS:
     - React
   - RNScreens (2.0.0-beta.4):
     - React
-  - RNSentry (1.3.1):
+  - RNSentry (1.3.7):
     - React
     - Sentry (~> 4.4.0)
   - RNSVG (9.13.3):
@@ -693,7 +683,6 @@ PODS:
   - Yoga (1.14.0)
 
 DEPENDENCIES:
-  - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - EXAppLoaderProvider (from `../node_modules/expo-app-loader-provider/ios`)
@@ -704,7 +693,6 @@ DEPENDENCIES:
   - EXFont (from `../node_modules/expo-font/ios`)
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
-  - EXNetwork (from `../node_modules/expo-network/ios`)
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
@@ -781,7 +769,6 @@ SPEC REPOS:
   trunk:
     - abseil
     - AppAuth
-    - Base64
     - boost-for-react-native
     - BoringSSL-GRPC
     - FBSDKCoreKit
@@ -806,7 +793,6 @@ SPEC REPOS:
     - gRPC-Core
     - GTMAppAuth
     - GTMSessionFetcher
-    - JWT
     - leveldb-library
     - libwebp
     - nanopb
@@ -816,8 +802,6 @@ SPEC REPOS:
     - SSZipArchive
 
 EXTERNAL SOURCES:
-  CodePush:
-    :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXAppleAuthentication:
@@ -847,9 +831,6 @@ EXTERNAL SOURCES:
   EXLinearGradient:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-linear-gradient/ios"
-  EXNetwork:
-    :path: !ruby/object:Pathname
-    path: "../node_modules/expo-network/ios"
   EXPermissions:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-permissions/ios"
@@ -1005,10 +986,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   abseil: 18063d773f5366ff8736a050fe035a28f635fd27
   AppAuth: 73574f3013a1e65b9601a3ddc8b3158cce68c09d
-  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BoringSSL-GRPC: db8764df3204ccea016e1c8dd15d9a9ad63ff318
-  CodePush: 4168faf8315b3629f047929b3c161f64c24861be
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
   EXAppleAuthentication: 7d20ab4397f595d22c2fe61ca6abfca16a346a72
   EXAppLoaderProvider: ebdb6bc2632c1ccadbe49f5e4104d8d690969c49
@@ -1019,7 +998,6 @@ SPEC CHECKSUMS:
   EXFont: 6187b5ab46ee578d5f8e7f2ea092752e78772235
   EXHaptics: 24438d930bd1fbef68e9eec47facea5dc2dab8a9
   EXLinearGradient: 75f302f9d6484267a3f6d3252df2e7a5f00e716a
-  EXNetwork: a52f713ced4b05a2634eb88a1f1f8678fcb8b69c
   EXPermissions: 9bc08859a675d291e89be9a0870155c27c16ac35
   EXSecureStore: 1448b90d665c9400aaaf6655fccb464da14698f6
   EXSharing: 5c9aa8f3cc1c117de74e50ccef862c52f57af2d7
@@ -1049,7 +1027,6 @@ SPEC CHECKSUMS:
   gRPC-Core: c9aef9a261a1247e881b18059b84d597293c9947
   GTMAppAuth: 4deac854479704f348309e7b66189e604cf5e01e
   GTMSessionFetcher: cea130bbfe5a7edc8d06d3f0d17288c32ffe9925
-  JWT: 9b5c05abbcc1a0e69c3c91e1655b3387fc7e581d
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   lottie-ios: 496ac5cea1bbf1a7bd1f1f472f3232eb1b8d744b
@@ -1098,7 +1075,7 @@ SPEC CHECKSUMS:
   RNGoogleSignin: a00f87261ea13df9a5cea8deafa6927d6f2c3562
   RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
   RNScreens: 6053a007667bea81a69087caadf103bba04c032e
-  RNSentry: 6458ba85aa3f8ae291abed4f72abbd7080839c71
+  RNSentry: 370623102247ebea20191b5fb549ecc7a275b324
   RNSVG: f6177f8d7c095fada7cfee2e4bb7388ba426064c
   RNZipArchive: 87111bb6130a38edd68c8d2059d46ac94d53ffe4
   SDWebImage: a99471f452bdfa0ca52ddf5b1adf2b61cab1d1eb
