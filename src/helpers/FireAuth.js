@@ -9,7 +9,7 @@ import appleAuth, {
   AppleAuthRequestScope,
   AppleAuthRequestOperation,
 } from '@invertase/react-native-apple-authentication'
-import * as Network from 'expo-network'
+import NetInfo from '@react-native-community/netinfo'
 
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
@@ -49,7 +49,7 @@ const FireAuth = class {
     })
 
     auth().onAuthStateChanged(async user => {
-      const { isConnected } = await Network.getNetworkStateAsync()
+      const { isConnected } = await NetInfo.fetch()
       if (!isConnected) {
         return
       }

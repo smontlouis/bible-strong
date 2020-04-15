@@ -8978,11 +8978,6 @@ expo-linear-gradient@~8.0.0:
   resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-8.0.0.tgz#972d33e92714d4a4485635683b5bfa357ecec41b"
   integrity sha512-5G3ePGAHUoyBWbGITw5RtdJpssH8TXhCgt55cV+5LTTFjr51OZcuOmGua1vRoVFKBC/9ibLW465GEx9H/HS07Q==
 
-expo-network@~2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/expo-network/-/expo-network-2.0.0.tgz#4a6019f613bb3dcbe933973d0bd2fcd4cb07ef7d"
-  integrity sha512-LgWu0CqWzSRYbtIK9egHDGEHG07QaZ51LVMENmIuuZ5w7qJAdrM6MXdOB5nJcfjj1npXxX3TMlR6VoYkUWYU/Q==
-
 expo-optimize@^0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/expo-optimize/-/expo-optimize-0.0.1.tgz#2ab920d22b52bdd4f319300c199345ac600a608c"

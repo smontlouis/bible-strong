@@ -82,7 +82,6 @@
     "expo-font": "~8.0.0",
     "expo-haptics": "~8.0.0",
     "expo-linear-gradient": "~8.0.0",
-    "expo-network": "~2.0.0",
     "expo-permissions": "~8.0.0",
     "expo-secure-store": "~8.0.0",
     "expo-sharing": "~8.0.0",
