@@ -9,7 +9,7 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { withTheme } from 'emotion-theming'
 import SnackBar from '~common/SnackBar'
 
-import oldAudioBooks from '~helpers/topBibleOldAudioBook'
+import { audioV2, audioSay, audioDefault } from '~helpers/topBibleAudio'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import Box from '~common/ui/Box'
@@ -157,9 +157,18 @@ class BibleViewer extends Component {
       throw new Error('I crashed!')
     }
 
-    const audioBaseUrl = oldAudioBooks.find(a => a == book.Numero)
-      ? 'https://s.topchretien.com/media/topbible/bible_say/'
-      : 'https://s.topchretien.com/media/topbible/bible/'
+    const audioBaseUrl = (() => {
+      console.log(book.Numero)
+      if (audioV2.includes(book.Numero.toString())) {
+        return 'https://s.topchretien.com/media/topbible/bible_v2/'
+      }
+
+      if (audioDefault.includes(book.Numero.toString())) {
+        return 'https://s.topchretien.com/media/topbible/bible/'
+      }
+
+      return 'https://s.topchretien.com/media/topbible/bible_say/'
+    })()
 
     this.setState({
       isLoading: false,
