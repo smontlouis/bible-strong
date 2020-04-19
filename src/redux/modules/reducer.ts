@@ -1,5 +1,7 @@
 import { combineReducers } from 'redux'
-import FSStorage from 'redux-persist-fs-storage'
+import FilesystemStorage from 'redux-persist-filesystem-storage'
+import AsyncStorage from '@react-native-community/async-storage'
+
 import { persistReducer } from 'redux-persist'
 
 import bible from './bible'
@@ -7,8 +9,9 @@ import user from './user'
 import plan from './plan'
 
 const planPersistConfig = {
-  key: 'auth',
-  storage: FSStorage(),
+  key: 'plan',
+  keyPrefix: '',
+  storage: FilesystemStorage,
   blacklist: ['onlinePlans', 'onlineStatus'],
 }
 

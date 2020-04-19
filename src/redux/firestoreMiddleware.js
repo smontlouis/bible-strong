@@ -27,7 +27,7 @@ import {
 // TODO - DO IT FOR COLOR SETTINGS ?
 
 import { firebaseDb } from '../helpers/firebase'
-import { markAsRead, resetPlan, fetchPlan } from './modules/plan'
+import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
 import { RootState } from '~redux/modules/reducer'
 
 const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
@@ -47,6 +47,7 @@ export default store => next => async action => {
   const studyCollection = firebaseDb.collection('studies')
 
   switch (action.type) {
+    case removePlan.type:
     case fetchPlan.fulfilled.type:
     case resetPlan.type:
     case markAsRead.type: {
