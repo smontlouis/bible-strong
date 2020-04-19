@@ -7,16 +7,19 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import { EntitySlice as EntitySliceProps, PlanStatus } from '~common/types'
-import { Theme } from '~themes/'
+import { Theme } from '~themes'
+import truncate from '~helpers/truncate'
 
 const extractTitle = (props: EntitySliceProps) => {
   switch (props.type) {
     case 'Text':
-      return `Méditation: ${props.title}`
+      return `${truncate(props.description, 20)}`
     case 'Video':
       return `${props.title}`
     case 'Verse':
       return verseToReference(props.verses, { isPlan: true })
+    case 'Title':
+      return props.title
     case 'Chapter':
       return chapterToReference(props.chapters)
     default:
@@ -55,7 +58,6 @@ const renderIcon = (
       )
 
     default:
-      console.log(`No type found for this item: ${props.type}`)
       return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
       ) : isNext ? null : (
@@ -127,6 +129,10 @@ const EntitySlice = (props: EntitySliceProps & Props) => {
   const isNext = status === 'Next'
   const title = extractTitle(props)
 
+  if ((props.type === 'Text' && !props.title) || props.type === 'Image') {
+    return null
+  }
+
   return (
     <Box row>
       <Box marginRight={25} center>
@@ -145,7 +151,13 @@ const EntitySlice = (props: EntitySliceProps & Props) => {
           />
         )}
       </Box>
-      <Text opacity={isComplete || isNext ? 1 : 0.6}>{title}</Text>
+      <Text
+        style={{ flex: 1 }}
+        numberOfLines={1}
+        opacity={isComplete || isNext ? 1 : 0.6}
+      >
+        {title}
+      </Text>
     </Box>
   )
 }

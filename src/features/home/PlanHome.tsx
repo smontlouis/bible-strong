@@ -12,6 +12,7 @@ import Text from '~common/ui/Text'
 import {
   useComputedPlanItems,
   useFireStorage,
+  useUpdatePlans,
 } from '~features/plans/plan.hooks'
 import { Theme } from '~themes'
 
@@ -20,58 +21,66 @@ const LinkBox = Box.withComponent(Link)
 const PlanHome = () => {
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress, status } =
-    plans.find(p => p.status === 'Progress') || plans[0]
+    plans.find(p => p.status === 'Progress') || plans[0] || {}
   const cacheImage = useFireStorage(image)
   const theme: Theme = useTheme()
+
+  useUpdatePlans()
 
   return (
     <Box grey>
       <Box row rounded height={80} lightShadow margin={20}>
-        <LinkBox
-          flex
-          row
-          center
-          route="Plan"
-          params={{ plan: { id, title, image, description, author } }}
-        >
-          <ProgressCircle
-            style={{ marginHorizontal: 15 }}
-            size={40}
-            progress={progress}
-            borderWidth={0}
-            color={
-              status === 'Completed'
-                ? theme.colors.success
-                : theme.colors.primary
-            }
-            unfilledColor={theme.colors.lightGrey}
-            thickness={2}
+        {id ? (
+          <LinkBox
+            flex
+            row
+            center
+            route="Plan"
+            params={{ plan: { id, title, image, description, author } }}
           >
-            <Box style={StyleSheet.absoluteFillObject} center>
-              <CircleImage size={35} center>
-                {cacheImage && (
-                  <FastImage
-                    style={{ width: 35, height: 35 }}
-                    source={{
-                      uri: cacheImage,
-                    }}
-                  />
-                )}
-              </CircleImage>
+            <ProgressCircle
+              style={{ marginHorizontal: 15 }}
+              size={40}
+              progress={progress}
+              borderWidth={0}
+              color={
+                status === 'Completed'
+                  ? theme.colors.success
+                  : theme.colors.primary
+              }
+              unfilledColor={theme.colors.lightGrey}
+              thickness={2}
+            >
+              <Box style={StyleSheet.absoluteFillObject} center>
+                <CircleImage size={35} center>
+                  {cacheImage && (
+                    <FastImage
+                      style={{ width: 35, height: 35 }}
+                      source={{
+                        uri: cacheImage,
+                      }}
+                    />
+                  )}
+                </CircleImage>
+              </Box>
+            </ProgressCircle>
+            <Box flex justifyContent="center">
+              <Paragraph fontFamily="title" scale={-2} scaleLineHeight={-2}>
+                {title}
+              </Paragraph>
+              <Paragraph scale={-3} fontFamily="text" color="grey">
+                Continuer ce plan
+              </Paragraph>
             </Box>
-          </ProgressCircle>
-          <Box flex justifyContent="center">
-            <Paragraph fontFamily="title" scale={-2} scaleLineHeight={-2}>
-              {title}
-            </Paragraph>
-            <Paragraph scale={-3} fontFamily="text" color="grey">
-              Continuer ce plan
-            </Paragraph>
+          </LinkBox>
+        ) : (
+          <Box flex center>
+            <Text color="grey">Vous n'avez aucun plan</Text>
           </Box>
-        </LinkBox>
+        )}
 
         <LinkBox
-          route="MyPlanList"
+          route="Plans"
           width={80}
           backgroundColor="primary"
           center

@@ -4,14 +4,32 @@ import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
-const TabItem = styled.TouchableOpacity(({ theme, isRouteActive }) => ({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: 50,
-  borderBottomColor: isRouteActive ? theme.colors.primary : theme.colors.border,
-  borderBottomWidth: isRouteActive ? 3 : 1,
-}))
+const TabItem = styled.TouchableOpacity(
+  ({ theme, isRouteActive, isFirst, isLast }) => ({
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 35,
+    marginVertical: 5,
+    marginHorizontal: 10,
+    ...(isFirst && {
+      marginRight: 0,
+    }),
+    ...(isLast && {
+      marginLeft: 0,
+    }),
+    ...(isRouteActive && {
+      borderRadius: 8,
+      backgroundColor: theme.colors.reverse,
+      shadowColor: 'rgb(89,131,240)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 7,
+      elevation: 1,
+      overflow: 'visible',
+    }),
+  })
+)
 
 const BibleSelectTabBar = props => {
   const {
@@ -32,6 +50,8 @@ const BibleSelectTabBar = props => {
         return (
           <TabItem
             key={routeIndex}
+            isFirst={routeIndex === 0}
+            isLast={routeIndex === routes.length - 1}
             isRouteActive={isRouteActive}
             onPress={() => {
               onTabPress({ route })
@@ -41,7 +61,9 @@ const BibleSelectTabBar = props => {
             }}
             accessibilityLabel={getAccessibilityLabel({ route })}
           >
-            <Text bold>{getLabelText({ route })}</Text>
+            <Text color={isRouteActive ? 'primary' : 'grey'} bold>
+              {getLabelText({ route })}
+            </Text>
           </TabItem>
         )
       })}

@@ -36,6 +36,7 @@ import StorybookScreen from '../../storybook/StoryBookScreen'
 import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
 import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
 import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
+import PlanSelectScreen from '~features/plans/PlanSelectScreen'
 
 export default createStackNavigator(
   {
@@ -73,6 +74,7 @@ export default createStackNavigator(
     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
     Storybook: { screen: StorybookScreen },
     Plan: { screen: PlanScreen },
+    Plans: { screen: PlanSelectScreen },
     MyPlanList: { screen: MyPlanListScreen },
     PlanSlice: { screen: PlanSliceScreen },
   },

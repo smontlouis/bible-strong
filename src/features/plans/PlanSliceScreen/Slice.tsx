@@ -4,6 +4,7 @@ import ChapterSlice from './ChapterSlice'
 import VerseSlice from './VerseSlice'
 import VideoSlice from './VideoSlice'
 import ImageSlice from './ImageSlice'
+import TextSlice from './TextSlice'
 
 const Slice = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -16,6 +17,7 @@ const Slice = (slice: EntitySlice) => {
     case 'Verse':
       return <VerseSlice {...slice} />
     case 'Text':
+      return <TextSlice {...slice} />
     default:
       console.log(`No component for type ${slice.type}`)
       return null

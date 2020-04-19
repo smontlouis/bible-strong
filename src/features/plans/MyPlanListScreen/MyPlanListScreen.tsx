@@ -1,149 +1,52 @@
 import React from 'react'
-import FastImage from 'react-native-fast-image'
-import ProgressCircle from 'react-native-progress/Circle'
-import { useTheme } from 'emotion-theming'
-import Lottie from 'lottie-react-native'
 
-import styled from '~styled'
-import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Header from '~common/Header'
-import Link from '~common/Link'
 import FlatList from '~common/ui/FlatList'
-import { useComputedPlanItems, useFireStorage } from '../plan.hooks'
+import { useComputedPlanItems, useDownloadPlans } from '../plan.hooks'
 import { ComputedPlanItem } from 'src/common/types'
-import { FeatherIcon } from '~common/ui/Icon'
-import { Theme } from '~themes'
+import Box from '~common/ui/Box'
 import Spacer from '~common/ui/Spacer'
+import PlanItem from './MyPlanItem'
+import Loading from '~common/Loading'
+import Empty from '~common/Empty'
 
-export const CircleImage = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: 4,
-  right: 0,
-  left: 4,
-  bottom: 0,
-  width: 32,
-  height: 32,
-  borderRadius: 16,
-  backgroundColor: theme.colors.lightGrey,
-}))
-
-const PlanItem = ({
-  id,
-  title,
-  image,
-  description,
-  status,
-  progress,
-  author,
-}: ComputedPlanItem) => {
-  const theme: Theme = useTheme()
-  const cacheImage = useFireStorage(image)
-  const isPlanCompleted = status === 'Completed'
-  return (
-    <Link
-      route="Plan"
-      params={{
-        plan: {
-          id,
-          title,
-          image: cacheImage,
-          description,
-          status,
-          progress,
-          author,
-        },
-      }}
-    >
-      <Box
-        lightShadow
-        borderRadius={35}
-        paddingHorizontal={13}
-        paddingVertical={10}
-        row
-        center
-        {...(status === 'Progress' && {
-          borderWidth: 2,
-          borderColor: 'primary',
-        })}
-        {...(status === 'Completed' && {
-          borderWidth: 2,
-          borderColor: 'success',
-        })}
-      >
-        {isPlanCompleted ? (
-          <Lottie
-            autoPlay
-            style={{
-              width: 40,
-              height: 40,
-            }}
-            source={require('../../../assets/images/crown.json')}
-          />
-        ) : (
-          <ProgressCircle
-            size={40}
-            progress={progress}
-            borderWidth={0}
-            color={
-              status === 'Completed'
-                ? theme.colors.success
-                : theme.colors.primary
-            }
-            unfilledColor={theme.colors.lightGrey}
-            thickness={2}
-          >
-            <CircleImage center>
-              {cacheImage && (
-                <FastImage
-                  style={{ width: 32, height: 32 }}
-                  source={{
-                    uri: cacheImage,
-                  }}
-                />
-              )}
-            </CircleImage>
-          </ProgressCircle>
-        )}
-        <Box flex paddingLeft={10}>
-          <Text title>{title}</Text>
-        </Box>
-        <Box
-          backgroundColor={status === 'Completed' ? 'success' : 'primary'}
-          borderRadius={15}
-          size={30}
-          center
-          marginLeft={20}
-        >
-          <FeatherIcon
-            name="chevron-right"
-            color="reverse"
-            size={17}
-            style={{ marginLeft: 2 }}
-          />
-        </Box>
-      </Box>
-    </Link>
-  )
-}
-const PlanScreen = () => {
+const MyPlanListScreen = () => {
   const plans = useComputedPlanItems()
-  return (
-    <Container>
-      <Header title="Mes Plans" hasBackButton />
-      <FlatList
-        contentContainerStyle={{ paddingHorizontal: 20 }}
-        bg="lightGrey"
-        data={plans}
-        renderItem={({ item }: { item: ComputedPlanItem }) => (
-          <PlanItem {...item} />
-        )}
-        keyExtractor={(item: ComputedPlanItem) => item.id}
-        ItemSeparatorComponent={Spacer}
+  const { isLoading } = useDownloadPlans()
+
+  if (!plans || !plans.length) {
+    return (
+      <Empty
+        source={require('~assets/images/empty.json')}
+        message="Vous n'avez aucun plan..."
       />
-    </Container>
+    )
+  }
+
+  return (
+    <FlatList
+      ListHeaderComponent={
+        <>
+          {isLoading && (
+            <Box height={50}>
+              <Loading />
+            </Box>
+          )}
+        </>
+      }
+      contentContainerStyle={{ paddingHorizontal: 20 }}
+      bg="lightGrey"
+      data={plans}
+      renderItem={({ item }: { item: ComputedPlanItem }) => (
+        <PlanItem {...item} />
+      )}
+      keyExtractor={(item: ComputedPlanItem) => item.id}
+      ItemSeparatorComponent={Spacer}
+    />
   )
 }
 
-export default PlanScreen
+MyPlanListScreen.navigationOptions = {
+  tabBarLabel: 'Mes plans',
+}
+
+export default MyPlanListScreen

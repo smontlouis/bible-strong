@@ -1,8 +1,8 @@
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { persistStore, persistReducer, createMigrate } from 'redux-persist'
-import AsyncStorage from '@react-native-community/async-storage'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
+import FSStorage from 'redux-persist-fs-storage'
 
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
@@ -17,10 +17,12 @@ export default function configureStore() {
 
   const persistConfig = {
     key: 'root',
-    storage: AsyncStorage,
+    keyPrefix: '',
+    storage: FSStorage(),
     stateReconciler: autoMergeLevel2,
-    version: 18,
+    version: 19,
     // debug: true,
+    blacklist: ['plan'],
     migrate: createMigrate(migrations, { debug: true }),
   }
 

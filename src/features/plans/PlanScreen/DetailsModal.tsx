@@ -2,71 +2,80 @@ import React from 'react'
 import { Modalize } from 'react-native-modalize'
 import FastImage from 'react-native-fast-image'
 
-import styled from '~styled'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import { ComputedPlanItem } from '~common/types'
 import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
-import { useFireStorage } from '../plan.hooks'
+import { Image } from 'react-native'
+import { wp } from '~helpers/utils'
 
-const CircleImage = styled(Box)(({ theme }) => ({
-  width: 100,
-  height: 100,
-  borderRadius: 50,
-  backgroundColor: theme.colors.lightGrey,
-  borderWidth: 4,
-  borderColor: theme.colors.lightGrey,
-}))
+const width = wp(100) - 20
 
-interface Props {
+interface Props extends Omit<ComputedPlanItem, 'status' | 'progress'> {
   modalRefDetails: React.RefObject<Modalize<any, any>>
+  HeaderComponent?: React.ReactNode
+  FooterComponent?: React.ReactNode
 }
 
 const DetailsModal = ({
   modalRefDetails,
   image,
   title,
+  downloads,
   description,
   author,
-}: Omit<ComputedPlanItem, 'status' | 'progress'> & Props) => {
+  FooterComponent,
+  HeaderComponent,
+}: Props) => {
   const theme: Theme = useTheme()
-  const cacheImage = useFireStorage(image)
+  const [height, setHeight] = React.useState<number>()
+
+  React.useEffect(() => {
+    if (!image) return
+    Image.getSize(
+      image,
+      (imageWidth, imageHeight) => {
+        const height = (width * imageHeight) / imageWidth
+        setHeight(height)
+      },
+      () => {}
+    )
+  }, [image])
 
   return (
     <Modalize
       ref={modalRefDetails}
-      adjustToContentHeight
       modalStyle={{ backgroundColor: theme.colors.lightGrey }}
+      FooterComponent={FooterComponent}
+      HeaderComponent={HeaderComponent}
     >
-      <Box paddingHorizontal={20} paddingVertical={50}>
-        {cacheImage && (
-          <Box center marginBottom={20}>
-            <CircleImage center>
-              <FastImage
-                style={{ width: 100, height: 100 }}
-                source={{
-                  uri: cacheImage,
-                }}
-              />
-            </CircleImage>
+      <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
+        {image && (
+          <Box marginBottom={20} rounded>
+            <FastImage
+              style={{ width: '100%', height: height || 200 }}
+              source={{
+                uri: image,
+              }}
+            />
           </Box>
         )}
-        <Paragraph fontFamily="title" scale={2} textAlign="center">
+        <Paragraph fontFamily="title" scale={2}>
           {title}
         </Paragraph>
-        <Paragraph
-          marginTop={20}
-          fontFamily="text"
-          scale={-2}
-          textAlign="center"
-        >
+        {downloads && (
+          <Paragraph fontFamily="text" scale={-2} color="grey">
+            Téléchargé {downloads} fois
+          </Paragraph>
+        )}
+        <Paragraph marginTop={20} fontFamily="text" scale={-2}>
           {description}
         </Paragraph>
         {author.displayName && (
-          <Box center marginTop={40}>
+          <Box marginTop={40} row center>
             {author.photoUrl && (
-              <Box borderRadius={10} marginBottom={10}>
+              <Box borderRadius={10}>
                 <FastImage
                   style={{ width: 50, height: 50 }}
                   source={{
@@ -75,7 +84,7 @@ const DetailsModal = ({
                 />
               </Box>
             )}
-            <Paragraph fontFamily="text" scale={-3}>
+            <Paragraph marginLeft={10} flex={1} fontFamily="text" scale={-3}>
               Créé par {author.displayName}
             </Paragraph>
           </Box>

@@ -40,6 +40,7 @@ const extractTitle = (slice: EntitySlice) => {
 const PlanSliceScreen = ({ navigation }: Props) => {
   const {
     id,
+    title,
     planId,
     slices,
   }: ComputedReadingSlice & { planId: string } = navigation.getParam(
@@ -65,11 +66,11 @@ const PlanSliceScreen = ({ navigation }: Props) => {
   const mainSlice: EntitySlice | undefined = slices.find(
     s => s.type === 'Chapter' || s.type === 'Verse'
   )
-  const title = mainSlice ? extractTitle(mainSlice) : ''
+  const sliceTitle = mainSlice ? extractTitle(mainSlice) : ''
   return (
     <Container>
       <Header
-        title={title}
+        title={sliceTitle}
         hasBackButton
         rightComponent={
           <PopOverMenu
@@ -151,6 +152,11 @@ const PlanSliceScreen = ({ navigation }: Props) => {
             'Prenez une grande inspiration,\n alors que vous vous apprêtez à passer du\n temps avec Dieu'
           }
         </PauseText>
+        {title && (
+          <Box paddingHorizontal={20} marginBottom={50}>
+            <Paragraph scale={3}>{title}</Paragraph>
+          </Box>
+        )}
         {slices.map(slice => (
           <Slice key={slice.id} {...slice} />
         ))}

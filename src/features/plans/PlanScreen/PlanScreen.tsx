@@ -13,6 +13,7 @@ import DetailsModal from './DetailsModal'
 import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
 import Menu from './Menu'
+import { useFireStorage } from '../plan.hooks'
 
 interface Props {
   navigation: NavigationStackProp<{ plan: ComputedPlanItem }>
@@ -28,6 +29,7 @@ const PlanScreen = ({ navigation }: Props) => {
   }: ComputedPlanItem = navigation.getParam('plan', {})
   const modalRef = React.useRef<Modalize>(null)
   const modalRefDetails = React.useRef<Modalize>(null)
+  const cacheImage = useFireStorage(image)
 
   const plan = useComputedPlan(id)
   const progress = plan?.progress
@@ -61,7 +63,13 @@ const PlanScreen = ({ navigation }: Props) => {
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             }
-            popover={<Menu modalRefDetails={modalRefDetails} planId={id} />}
+            popover={
+              <Menu
+                modalRefDetails={modalRefDetails}
+                planId={id}
+                navigation={navigation}
+              />
+            }
           />
         }
       />
@@ -70,7 +78,7 @@ const PlanScreen = ({ navigation }: Props) => {
       <DetailsModal
         modalRefDetails={modalRefDetails}
         title={title}
-        image={image}
+        image={cacheImage}
         id={id}
         author={author}
         description={description}

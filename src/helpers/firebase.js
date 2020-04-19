@@ -3,6 +3,7 @@ import storage from '@react-native-firebase/storage'
 
 export const firebaseDb = firestore()
 export const storageRef = storage().ref()
+export const increment = firestore.FieldValue.increment(1)
 
 storage().setMaxOperationRetryTime(2000)
 storage().setMaxUploadRetryTime(2000)

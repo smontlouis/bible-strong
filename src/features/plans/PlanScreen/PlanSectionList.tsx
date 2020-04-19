@@ -61,7 +61,7 @@ const PlanSectionList = ({
             key={slice.id}
             planId={id}
             id={slice.id}
-            description={slice.description}
+            title={slice.title}
             slices={slice.slices}
             status={slice.status}
             isSectionCompleted={section.progress === 1}

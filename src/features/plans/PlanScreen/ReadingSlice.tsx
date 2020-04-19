@@ -36,6 +36,7 @@ interface Props {
 
 const ReadingSlice = ({
   id,
+  title,
   planId,
   slices,
   status,
@@ -44,7 +45,10 @@ const ReadingSlice = ({
 }: ComputedReadingSlice & Props) => {
   const isNext = status === 'Next'
   return (
-    <Link route="PlanSlice" params={{ readingSlice: { id, planId, slices } }}>
+    <Link
+      route="PlanSlice"
+      params={{ readingSlice: { id, planId, title, slices } }}
+    >
       <Box
         paddingLeft={28}
         paddingTop={15}
@@ -54,6 +58,16 @@ const ReadingSlice = ({
         <FineLine />
         <Box row marginBottom={15}>
           <Box flex>
+            {title && (
+              <EntitySlice
+                id={title}
+                status={status}
+                isSectionCompleted={isSectionCompleted}
+                title={title}
+                isLast
+                type="Title"
+              />
+            )}
             {slices
               .filter(f => f.type !== 'Image')
               .map((slice, i) => (

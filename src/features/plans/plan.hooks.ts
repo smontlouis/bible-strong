@@ -1,8 +1,10 @@
 import React from 'react'
 import * as Sentry from '@sentry/react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import to from 'await-to-js'
+
 import { storageRef } from '~helpers/firebase'
-import { cacheImage } from '~redux/modules/plan'
+import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 
 import {
   ComputedPlan,
@@ -18,6 +20,7 @@ import books from '~assets/bible_versions/books-desc'
 import getBiblePericope from '~helpers/getBiblePericope'
 import { range } from '~helpers/range'
 import loadBible from '~helpers/loadBible'
+import SnackBar from '~common/SnackBar'
 
 interface VerseContent {
   Pericope: {
@@ -199,6 +202,57 @@ export const useComputedPlanItems = (): ComputedPlanItem[] => {
   )
 
   return computedPlansItems
+}
+
+/**
+ * Download ongoing plans to local
+ */
+export const useDownloadPlans = () => {
+  const myPlans = useSelector((state: RootState) => state.plan.myPlans)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const dispatch = useDispatch()
+  const ongoingPlans = useSelector(
+    (state: RootState) => state.plan.ongoingPlans
+  )
+
+  React.useEffect(() => {
+    ;(async () => {
+      const planNeedsToBeDownloaded = ongoingPlans.filter(
+        plan => !myPlans.find(myPlan => myPlan.id === plan.id)
+      )
+
+      let err
+      ;[err] = await to(
+        Promise.all(
+          planNeedsToBeDownloaded.map(async planToDownload => {
+            setIsLoading(true)
+            return (await dispatch(fetchPlan({ id: planToDownload.id }))) as any
+          })
+        )
+      )
+
+      setIsLoading(false)
+
+      if (err) {
+        SnackBar.show(
+          'Impossible de télécharger vos plans, vérifiez votre connexion internet.'
+        )
+      }
+    })()
+  }, [])
+
+  return { isLoading }
+}
+
+/**
+ * Update myplans
+ */
+
+export const useUpdatePlans = () => {
+  const dispatch = useDispatch()
+  React.useEffect(() => {
+    dispatch(updatePlans())
+  }, [dispatch])
 }
 
 /**

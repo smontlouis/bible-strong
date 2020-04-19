@@ -249,4 +249,13 @@ export default {
       },
     }
   },
+  19: state => {
+    return {
+      ...state,
+      plan: {
+        ...state.plan,
+        onlineStatus: 'Idle',
+      },
+    }
+  },
 }

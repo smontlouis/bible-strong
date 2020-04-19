@@ -42,6 +42,7 @@ class StrongDB {
 
   delete = () => {
     this.dbStrong?._db?.close()
+    SQLite.deleteDatabase({ name: 'strong.sqlite', location: 'default' })
     this.dbStrong = undefined
   }
 }
@@ -104,16 +105,22 @@ export const getTresorDB = () => {
 
 export const deleteDictionnaireDB = () => {
   dbDictionnaire?._db?.close()
+  SQLite.deleteDatabase({ name: 'dictionnaire.sqlite', location: 'default' })
   dbDictionnaire = undefined
 }
 
 export const deleteTresorDB = () => {
   dbTresorCommentaires?._db?.close()
+  SQLite.deleteDatabase({
+    name: 'commentaires-tresor.sqlite',
+    location: 'default',
+  })
   dbTresorCommentaires = undefined
 }
 
 export const deleteInterlineaireDB = () => {
   dbInterlineaire?._db?.close()
+  SQLite.deleteDatabase({ name: 'interlineaire.sqlite', location: 'default' })
   dbInterlineaire = undefined
 }
 
@@ -140,6 +147,10 @@ class MhyDB {
 
   delete = () => {
     this.dbMhy?._db?.close()
+    SQLite.deleteDatabase({
+      name: 'commentaires-mhy.sqlite',
+      location: 'default',
+    })
     this.dbMhy = undefined
   }
 }
@@ -169,6 +180,7 @@ class NaveDB {
 
   delete = () => {
     this.dbNave?._db?.close()
+    SQLite.deleteDatabase({ name: 'naveFr.sqlite', location: 'default' })
     this.dbNave = undefined
   }
 }

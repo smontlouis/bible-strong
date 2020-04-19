@@ -15879,6 +15879,14 @@ react-native-fbsdk@^1.1.2:
   resolved "https://registry.yarnpkg.com/react-native-fbsdk/-/react-native-fbsdk-1.1.2.tgz#4264903add869d05b84ef55ade9ff720c2957781"
   integrity sha512-Sp+oja868QVsB5vpEFbwZkEcCJOSBuZgh7UGJzUhaoTCs/zwSUHA6b4QichM7GiTxtQyKfT/F31DtvLj2N/qAQ==
 
+react-native-fs@^2.14.1:
+  version "2.16.6"
+  resolved "https://registry.yarnpkg.com/react-native-fs/-/react-native-fs-2.16.6.tgz#2901789a43210a35a0ef0a098019bbef3af395fd"
+  integrity sha512-ZWOooD1AuFoAGY3HS2GY7Qx2LZo4oIg6AK0wbC68detxwvX75R/q9lRqThXNKP6vIo2VHWa0fYUo/SrLw80E8w==
+  dependencies:
+    base-64 "^0.1.0"
+    utf8 "^3.0.0"
+
 react-native-fs@^2.16.4:
   version "2.16.4"
   resolved "https://registry.yarnpkg.com/react-native-fs/-/react-native-fs-2.16.4.tgz#34c477399af9ed33fd64e869b33a587c3ad029e9"
@@ -15944,10 +15952,10 @@ react-native-modalbox@^2.0.0:
   dependencies:
     prop-types "^15.5.10"
 
-react-native-modalize@^1.3.7-rc.19:
-  version "1.3.7-rc.19"
-  resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-1.3.7-rc.19.tgz#bd9dc2c928ece9fdfd7f085b999f1fa3c0db2b08"
-  integrity sha512-JPYmZaHNpvMR7qhjtR3CP/USM6+wlHamYXLPjV66thGjrtp/WRRvpNe2OtGNMm8WMO3M8xGhTmVvmjX+qY2teA==
+react-native-modalize@1.3.7-rc.24:
+  version "1.3.7-rc.24"
+  resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-1.3.7-rc.24.tgz#02f7cda8445a84e181ff9bf29bce05b50310ecca"
+  integrity sha512-Q3ENGRq9IS9dZNKyvCedNG6bobcb4ILbzgU6lBkiCaloquzLs2KUK2tXUhIEBqEidUd/URSLhr+c+Mj+YX7svA==
 
 react-native-notifications@^3.1.2:
   version "3.1.2"
@@ -16514,6 +16522,13 @@ recursive-readdir@2.2.2:
   integrity sha512-nRCcW9Sj7NuZwa2XvH9co8NPeXUBhZP7CRKJtU+cS6PW9FpCIFoI5ib0NT1ZrbNuPoRy0ylyCaUL8Gih4LSyFg==
   dependencies:
     minimatch "3.0.4"
+
+redux-persist-fs-storage@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/redux-persist-fs-storage/-/redux-persist-fs-storage-1.3.0.tgz#395d0c4b40985e04c480512ee1c469d6d2a9abd9"
+  integrity sha512-32FMEF5apIwlm7bnBq6VTmbK7sVVZ0bpTpMt8CUw5MMDXcsSfT4BSM5t6Y15V6KBRL9O11GDKAAV8a3/Hfj2Tg==
+  dependencies:
+    react-native-fs "^2.14.1"
 
 redux-persist@^6.0.0:
   version "6.0.0"

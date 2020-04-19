@@ -8,11 +8,20 @@ export interface User {
 
 export interface Plan {
   id: string
+  lastUpdate?: number
+  downloads?: number
   title: string
   image?: string
   description?: string
   sections: Section[]
   author: User
+}
+
+type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+export interface OnlinePlan extends WithOptional<Plan, 'sections'> {
+  featured?: boolean
+  type?: string
 }
 
 export type PlanStatus = 'Idle' | 'Next' | 'Progress' | 'Completed'
@@ -45,7 +54,7 @@ export type SliceType = 'Text' | 'Image' | 'Verse' | 'Chapter' | 'Video'
 
 export interface ReadingSlice {
   id: string
-  description?: string
+  title?: string
   slices: EntitySlice[]
 }
 
@@ -54,17 +63,24 @@ export interface ComputedReadingSlice extends ReadingSlice {
 }
 
 export type EntitySlice =
+  | TitleSlice
   | TextSlice
   | VerseSlice
   | ChapterSlice
   | VideoSlice
   | ImageSlice
 
+export interface TitleSlice {
+  id: string
+  type: 'Title'
+  title: string
+}
 export interface TextSlice {
   id: string
   type: 'Text'
   title?: string
   description: string
+  subType?: string
 }
 
 export interface ImageSlice {
@@ -78,14 +94,14 @@ export interface VerseSlice {
   id: string
   type: 'Verse'
   verses: string
-  subType?: 'pray'
+  subType?: string
 }
 
 export interface ChapterSlice {
   id: string
   type: 'Chapter'
   chapters: string
-  subType?: 'pray'
+  subType?: string
 }
 
 export interface VideoSlice {

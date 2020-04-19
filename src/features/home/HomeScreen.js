@@ -2,6 +2,7 @@ import React from 'react'
 import { ScrollView as RNScrollView, Linking, Platform } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
+import useLogin from '~helpers/useLogin'
 
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
@@ -17,6 +18,7 @@ import PlanHome from './PlanHome'
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
+  const { isLogged } = useLogin()
   return (
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
@@ -46,7 +48,7 @@ const HomeScreen = () => {
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
-        <PlanHome />
+        {isLogged && <PlanHome />}
         <VerseOfTheDay />
         <Box grey>
           <Box

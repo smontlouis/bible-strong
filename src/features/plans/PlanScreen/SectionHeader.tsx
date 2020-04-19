@@ -73,13 +73,20 @@ const Section = ({
                   }}
                 />
               )}
+              {title && !cacheImage && (
+                <Box>
+                  <Text title fontSize={14} color="primary">
+                    {title.substr(0, 1)}
+                  </Text>
+                </Box>
+              )}
             </CircleImage>
           </ProgressCircle>
         )}
 
-        <Box flex paddingLeft={20}>
+        <Box flex paddingLeft={20} justifyContent="center">
           <Text>{title}</Text>
-          <Text opacity={0.6}>{subTitle}</Text>
+          {subTitle && <Text opacity={0.6}>{subTitle}</Text>}
         </Box>
         <Box width={40} center>
           <AFeatherIcon
