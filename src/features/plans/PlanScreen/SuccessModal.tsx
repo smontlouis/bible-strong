@@ -24,6 +24,9 @@ const SuccessModal = ({ modalRef, isPlanCompleted }: Props) => {
       modalStyle={{
         backgroundColor: 'transparent',
         elevation: 0,
+        maxWidth: 600,
+        marginLeft: 'auto',
+        marginRight: 'auto',
       }}
       adjustToContentHeight
       openAnimationConfig={{

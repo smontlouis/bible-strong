@@ -10,7 +10,7 @@ import { Theme } from '~themes'
 import { Image } from 'react-native'
 import { wp } from '~helpers/utils'
 
-const width = wp(100) - 20
+const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress'> {
   modalRefDetails: React.RefObject<Modalize<any, any>>
@@ -46,7 +46,12 @@ const DetailsModal = ({
   return (
     <Modalize
       ref={modalRefDetails}
-      modalStyle={{ backgroundColor: theme.colors.lightGrey }}
+      modalStyle={{
+        backgroundColor: theme.colors.lightGrey,
+        maxWidth: 600,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }}
       FooterComponent={FooterComponent}
       HeaderComponent={HeaderComponent}
     >

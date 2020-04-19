@@ -67,7 +67,12 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
   }))
   return (
     <Modalize
-      modalStyle={{ backgroundColor: theme.colors.lightGrey }}
+      modalStyle={{
+        backgroundColor: theme.colors.lightGrey,
+        maxWidth: 600,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }}
       ref={paramsModalRef}
       adjustToContentHeight
     >

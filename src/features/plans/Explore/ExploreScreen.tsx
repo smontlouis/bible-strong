@@ -40,7 +40,14 @@ const ExploreScreen = () => {
 
   return (
     <ScrollView
-      contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }}
+      contentContainerStyle={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        maxWidth: 600,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        width: '100%',
+      }}
     >
       {plans.map(plan => (
         <ExplorePlanItem key={plan.id} {...plan} />

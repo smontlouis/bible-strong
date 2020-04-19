@@ -9,11 +9,11 @@ const useMediaQueries = () => {
     return 'xs'
   }
 
-  if (width <= 768) {
+  if (width < 768) {
     return 'sm'
   }
 
-  if (width <= 1024) {
+  if (width < 1024) {
     return 'md'
   }
 

@@ -17,6 +17,7 @@ import { fetchPlan } from '~redux/modules/plan'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 import { NavigationStackProp } from 'react-navigation-stack'
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 
 const ExplorePlanItem = ({
   id,
@@ -36,6 +37,9 @@ const ExplorePlanItem = ({
     (state: RootState) => !!state.plan.myPlans.find(p => id === p.id)
   )
   const [isLoading, setIsLoading] = React.useState(false)
+  const r = useMediaQueriesArray()
+  const height = r([70, 70, 150, 200])
+  const featuredHeight = r([150, 150, 250, 250])
 
   return (
     <Box width={featured ? '100%' : '50%'}>
@@ -49,12 +53,15 @@ const ExplorePlanItem = ({
           <Box
             margin={10}
             marginBottom={0}
-            height={featured ? 150 : 80}
+            height={featured ? featuredHeight : height}
             backgroundColor="lightGrey"
             borderRadius={15}
           >
             <FastImage
-              style={{ width: '100%', height: featured ? 150 : 80 }}
+              style={{
+                width: '100%',
+                height: featured ? featuredHeight : height,
+              }}
               source={{
                 uri: planImage,
               }}
