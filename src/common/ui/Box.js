@@ -79,7 +79,6 @@ const Box = styled.View(props => {
     }),
 
     ...(props.lightShadow && {
-      backgroundColor: props.theme.colors.reverse,
       shadowColor: 'rgb(89,131,240)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,

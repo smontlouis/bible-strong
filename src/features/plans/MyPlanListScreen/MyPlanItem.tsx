@@ -53,6 +53,7 @@ const PlanItem = ({
       }}
     >
       <Box
+        bg="reverse"
         lightShadow
         borderRadius={35}
         paddingHorizontal={13}

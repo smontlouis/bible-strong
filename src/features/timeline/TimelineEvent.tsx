@@ -1,30 +1,125 @@
 import React from 'react'
-import Animated, { Extrapolate, interpolate } from 'react-native-reanimated'
+import Animated, {
+  Extrapolate,
+  interpolate,
+  multiply,
+  useCode,
+  call,
+} from 'react-native-reanimated'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { offset, rowToPx, yearsToPx, calculateEventWidth } from './constants'
+import { offset, rowToPx } from './constants'
 import { Divider } from 'react-native-paper'
 import FastImage from 'react-native-fast-image'
+import { TimelineEvent as TimelineEventProps } from './types'
 
 const AnimatedBox = Animated.createAnimatedComponent(Box)
 
-interface Props {
-  row: number
-  start: number
-  end: number
+interface Props extends TimelineEventProps {
   x: Animated.Node<number>
+  yearsToPx: (years: number) => number
+  calculateEventWidth: (
+    yearStart: number,
+    yearEnd: number,
+    isFixed?: boolean
+  ) => number
 }
 
 const descSize = 140
 const imageSize = 60
 
-const TimelineEvent = ({ row, start, end, x }: Props) => {
-  const [top, setTop] = React.useState(rowToPx(row))
-  const [left, setLeft] = React.useState(yearsToPx(start))
-  const [width, setWidth] = React.useState(calculateEventWidth(start, end))
+const calculateLabel = (start: number, end: number) => {
+  const absStart = Math.abs(start)
+  const absEnd = Math.abs(end)
+  const range = Math.abs(start - end)
 
-  const posX = interpolate(x, {
+  if (start >= 3000 && end >= 3000) {
+    return 'Après le millenium'
+  }
+
+  if (start >= 2010 && end >= 2010) {
+    return 'Futur'
+  }
+
+  if (end === 2020) {
+    return `${absStart}-Futur`
+  }
+
+  if (end === 1844) {
+    return '457 av. J.-C. à 1844'
+  }
+
+  if (start === end) {
+    return `${absStart}${start < 0 ? ' av. J.-C.' : ''}`
+  }
+
+  if (start < 0 && end < 0) {
+    return `${absStart}-${absEnd} av. J.-C.${range > 50 ? ` (${range})` : ''}`
+  }
+
+  if (start > 0 && end > 0) {
+    return `${absStart}-${absEnd}${range > 50 ? ` (${range})` : ''}`
+  }
+
+  if (start < 0 && end > 0) {
+    return `${absStart} av. J.-C à ${end}${range > 50 ? ` (${range})` : ''}`
+  }
+
+  return start
+}
+
+const TimelineEvent = ({
+  row,
+  title,
+  start,
+  image,
+  end,
+  type,
+  isFixed,
+  x,
+  yearsToPx,
+  calculateEventWidth,
+}: Props) => {
+  const { current: top } = React.useRef(rowToPx(row))
+  const { current: left } = React.useRef(yearsToPx(start))
+  const { current: width } = React.useRef(
+    calculateEventWidth(start, end, isFixed)
+  )
+
+  const label = calculateLabel(start, end)
+
+  if (type === 'minor') {
+    return (
+      <Box
+        pos="absolute"
+        h={25}
+        left={left + offset}
+        top={top}
+        rounded
+        bg="reverse"
+        lightShadow
+        row
+      >
+        <Box
+          borderTopLeftRadius={10}
+          borderBottomLeftRadius={10}
+          bg="tertiary"
+          px={10}
+          justifyContent="center"
+        >
+          <Text color="white" fontSize={10} numberOfLines={1}>
+            {title}
+          </Text>
+        </Box>
+        <Box px={10} justifyContent="center">
+          <Text fontSize={8}>{label}</Text>
+        </Box>
+      </Box>
+    )
+  }
+
+  const posX = interpolate(multiply(x, -1), {
     inputRange: [left + offset, left + width + offset - descSize - imageSize],
     outputRange: [0, width - descSize - imageSize],
     extrapolate: Extrapolate.CLAMP,
@@ -35,9 +130,10 @@ const TimelineEvent = ({ row, start, end, x }: Props) => {
       pos="absolute"
       h={60}
       w={width}
-      left={left}
+      left={left + offset}
       top={top}
       rounded
+      bg="reverse"
       lightShadow
       row
     >
@@ -52,9 +148,13 @@ const TimelineEvent = ({ row, start, end, x }: Props) => {
           transform: [{ translateX: posX }],
         }}
       >
-        <Text>SETH</Text>
+        <Text fontSize={12} numberOfLines={2}>
+          {title}
+        </Text>
         <Divider style={{ width: '100%' }} />
-        <Text fontSize={10}>3719-2814 av. J.C (905)</Text>
+        <Text fontSize={10} textAlign="center">
+          {label}
+        </Text>
       </AnimatedBox>
       <Box
         ml="auto"
@@ -65,8 +165,7 @@ const TimelineEvent = ({ row, start, end, x }: Props) => {
         <FastImage
           style={{ width: imageSize, height: '100%' }}
           source={{
-            uri:
-              'http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas2581_8-8-2013%209-50-05%20AM.jpg',
+            uri: image,
           }}
         />
       </Box>

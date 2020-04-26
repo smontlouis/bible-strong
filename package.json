@@ -146,7 +146,8 @@
     "reselect": "^4.0.0",
     "rn-fetch-blob": "^0.12.0",
     "rn-placeholder": "^3.0.0",
-    "trunc-html": "^1.1.2"
+    "trunc-html": "^1.1.2",
+    "use-memo-one": "^1.1.1"
   },
   "devDependencies": {
     "@babel/core": "~7.6.0",

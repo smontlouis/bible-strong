@@ -29,6 +29,7 @@ const OfflineNotice = () => {
     <Box
       row
       padding={10}
+      bg="reverse"
       lightShadow
       borderRadius={3}
       borderLeftWidth={4}

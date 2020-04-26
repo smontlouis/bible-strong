@@ -29,7 +29,7 @@ const PlanHome = () => {
 
   return (
     <Box grey>
-      <Box row rounded height={80} lightShadow margin={20}>
+      <Box row rounded height={80} bg="reverse" lightShadow margin={20}>
         {id ? (
           <LinkBox
             flex

@@ -1,0 +1,1 @@
+UPDATE LSGSNT2 SET Texte = replace( Texte, 'Maîre', 'Maître' ) WHERE Texte LIKE '%Maîre%';

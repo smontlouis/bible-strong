@@ -45,6 +45,7 @@ const ExplorePlanItem = ({
     <Box width={featured ? '100%' : '50%'}>
       <Link onPress={() => modalRef?.current?.open()}>
         <Box
+          bg="reverse"
           lightShadow
           borderRadius={20}
           margin={10}

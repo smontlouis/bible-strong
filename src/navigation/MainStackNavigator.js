@@ -72,7 +72,12 @@ export default createStackNavigator(
     NaveDetail: { screen: NaveDetailScreen },
     NaveWarning: { screen: NaveWarningScreen },
     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
-    Storybook: { screen: StorybookScreen },
+    Storybook: {
+      screen: StorybookScreen,
+      navigationOptions: {
+        gesturesEnabled: false,
+      },
+    },
     Plan: { screen: PlanScreen },
     Plans: { screen: PlanSelectScreen },
     MyPlanList: { screen: MyPlanListScreen },
