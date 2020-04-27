@@ -1,11 +1,13 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react-native'
 
-import { events } from './events'
-import TimelineSection from './TimelineSection'
+import { events as sections } from './events'
 import TimelineScreen from './TimelineScreen'
+import SectionImage from './SectionImage'
 
-const event = events[0]
+const { events, ...shallowSection } = sections[3]
 
 storiesOf('PlanScreen', module).add('Default', () => <TimelineScreen />)
-storiesOf('Plan', module).add('Default', () => <TimelineSection {...event} />)
+storiesOf('SectionImage', module).add('Default', () => (
+  <SectionImage {...shallowSection} direction="next" />
+))

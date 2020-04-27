@@ -12,6 +12,8 @@ export interface TimelineSection {
   events: TimelineEvent[]
 }
 
+export type ShallowTimelineSection = Omit<TimelineSection, 'events'>
+
 export interface TimelineEvent {
   id: number
   title: string

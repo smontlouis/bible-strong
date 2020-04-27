@@ -44,6 +44,11 @@ export const useTimeline = ({
     ' BC'
   )
 
+  const lineX = interpolate(x, {
+    inputRange: [-width, -width + wp(100), 0, wp(100)],
+    outputRange: [-wp(100), 0, 0, wp(100)],
+  })
+
   const {
     current: yearRange,
   }: MutableRefObject<[number, number]> = React.useRef([startYear, endYear])
@@ -75,6 +80,7 @@ export const useTimeline = ({
   return {
     x,
     y,
+    lineX,
     year,
     width,
     height,

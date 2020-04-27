@@ -1,35 +1,33 @@
 import React from 'react'
-import Box from '~common/ui/Box'
+import { AnimatedBox } from '~common/ui/Box'
 import { offset } from './constants'
 import { ReText } from 'react-native-redash'
 import Animated from 'react-native-reanimated'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
-const CurrentYear = ({ year }: { year: Animated.Node<string> }) => {
+const CurrentYear = ({
+  year,
+  lineX,
+  color,
+}: {
+  year: Animated.Node<string>
+  lineX: Animated.Node<number>
+  color: string
+}) => {
   return (
-    <>
-      <Box
-        pos="absolute"
-        b={0}
-        l={offset}
-        w={1}
-        h="100%"
-        bg="primary"
-        opacity={0.3}
-      />
-      <Box
-        pos="absolute"
-        l={offset}
-        b={0}
-        bg="primary"
-        p={10}
-        width={120}
-        transform={[{ translateX: -(120 / 2) }]}
-        center
-        rounded
-      >
-        <ReText text={year} style={{ color: 'black' }} />
-      </Box>
-    </>
+    <AnimatedBox
+      pos="absolute"
+      l={offset - 60}
+      b={getBottomSpace() + 6}
+      bg={color}
+      p={10}
+      width={120}
+      center
+      borderRadius={5}
+      style={{ transform: [{ translateX: lineX }] }}
+    >
+      <ReText text={year} style={{ color: 'white', fontWeight: 'bold' }} />
+    </AnimatedBox>
   )
 }
 

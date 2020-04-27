@@ -37,6 +37,7 @@ import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
 import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
 import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
 import PlanSelectScreen from '~features/plans/PlanSelectScreen'
+import TimelineScreen from '~features/timeline/TimelineScreen'
 
 export default createStackNavigator(
   {
@@ -82,6 +83,12 @@ export default createStackNavigator(
     Plans: { screen: PlanSelectScreen },
     MyPlanList: { screen: MyPlanListScreen },
     PlanSlice: { screen: PlanSliceScreen },
+    Timeline: {
+      screen: TimelineScreen,
+      navigationOptions: {
+        gesturesEnabled: false,
+      },
+    },
   },
   {
     headerMode: 'none',

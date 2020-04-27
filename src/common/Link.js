@@ -3,6 +3,8 @@ import { pure, compose } from 'recompose'
 import { TouchableOpacity, Linking, Share } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
+import Box from '~common/ui/Box'
+
 class Link extends Component {
   handlePress = () => {
     const {
@@ -68,5 +70,7 @@ class Link extends Component {
     )
   }
 }
+
+export const LinkBox = Box.withComponent(Link)
 
 export default compose(withNavigation, pure)(Link)

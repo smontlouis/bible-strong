@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import Animated from 'react-native-reanimated'
 
 const Box = styled.View(props => {
   return {
@@ -78,6 +78,14 @@ const Box = styled.View(props => {
       height: props.size,
     }),
 
+    ...(props.absoluteFill && {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      top: 0,
+    }),
+
     ...(props.lightShadow && {
       shadowColor: 'rgb(89,131,240)',
       shadowOffset: { width: 0, height: 2 },
@@ -89,4 +97,6 @@ const Box = styled.View(props => {
   }
 })
 
-export default withTheme(Box)
+export const AnimatedBox = Animated.createAnimatedComponent(Box)
+
+export default Box

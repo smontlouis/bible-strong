@@ -1,9 +1,18 @@
 import React, { ReactNode, memo, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { PanGestureHandler, State } from 'react-native-gesture-handler'
-import Animated, { debug } from 'react-native-reanimated'
-import { snapPoint, usePanGestureHandler } from 'react-native-redash'
-import { offset } from './constants'
+import Animated, {
+  Easing,
+  clockRunning,
+  debug,
+  or,
+} from 'react-native-reanimated'
+import {
+  snapPoint,
+  usePanGestureHandler,
+  timing,
+  delay,
+} from 'react-native-redash'
 import { wp } from '~helpers/utils'
 
 const {
@@ -28,30 +37,54 @@ const {
   sub,
   useCode,
   call,
-  neq,
   diff,
   pow,
   min,
+  timing: reTiming,
 } = Animated
 
 const friction = (ratio: Animated.Node<number>) =>
   multiply(0.7, pow(sub(1, ratio), 2))
 
-interface WithScrollYParams {
+interface AnimationProps {
+  translateX: Animated.Value<number>
+  translateY: Animated.Value<number>
+  translationX: Animated.Value<number>
+  velocityX: Animated.Value<number>
   translationY: Animated.Value<number>
   velocityY: Animated.Value<number>
   state: Animated.Value<State>
   containerHeight: number
+  containerWidth: number
+  onPrev: () => void
+  onNext: () => void
+  isFirst?: boolean
+  isLast?: boolean
+  contentWidth: number
   contentHeight: number
+  isReady: Animated.Value<number>
+  entrance: 0 | 1
+  opacity: Animated.Value<number>
 }
 
-interface WithScrollXParams {
-  translationX: Animated.Value<number>
-  velocityX: Animated.Value<number>
-  state: Animated.Value<State>
-  containerHeight: number
-  contentHeight: number
-}
+type WithScrollYParams = Pick<
+  AnimationProps,
+  'translationY' | 'velocityY' | 'state' | 'containerHeight' | 'contentHeight'
+>
+
+type WithScrollXParams = Pick<
+  AnimationProps,
+  | 'translationX'
+  | 'velocityX'
+  | 'state'
+  | 'containerWidth'
+  | 'contentWidth'
+  | 'onNext'
+  | 'onPrev'
+  | 'isFirst'
+  | 'isLast'
+  | 'entrance'
+>
 
 const withScrollY = ({
   translationY,
@@ -80,7 +113,7 @@ const withScrollY = ({
   const config = {
     ...SpringUtils.makeDefaultConfig(),
     toValue: new Value(0),
-    damping: 50,
+    damping: 150,
   }
   const overscroll = sub(
     state.position,
@@ -136,21 +169,29 @@ const withScrollX = ({
   translationX,
   velocityX,
   state: gestureState,
-  containerHeight,
-  contentHeight,
+  containerWidth,
+  contentWidth,
+  onPrev,
+  onNext,
+  isFirst,
+  isLast,
+  entrance,
 }: WithScrollXParams) => {
   const clock = new Clock()
   const delta = new Value(0)
   const isSpringing = new Value(0)
   const isDecaying = new Value(0)
+  const onPullTriggered = new Value(0)
+  const onPullTriggeredEnd = new Value(0)
+  const upperBound = 0
+  const lowerBound = -1 * (contentWidth - containerWidth)
+
   const state = {
     time: new Value(0),
-    position: new Value(0),
+    position: new Value(entrance === 0 ? lowerBound : 0),
     velocity: new Value(0),
     finished: new Value(0),
   }
-  const upperBound = 0
-  const lowerBound = -1 * (contentHeight - containerHeight)
 
   const isInBound = and(
     lessOrEq(state.position, upperBound),
@@ -159,7 +200,7 @@ const withScrollX = ({
   const config = {
     ...SpringUtils.makeDefaultConfig(),
     toValue: new Value(0),
-    damping: 50,
+    damping: 150,
   }
   const overscroll = sub(
     state.position,
@@ -180,7 +221,7 @@ const withScrollX = ({
             cond(isInBound, delta, [
               multiply(
                 delta,
-                friction(min(divide(abs(overscroll), containerHeight), 1))
+                friction(min(divide(abs(overscroll), containerWidth), 1))
               ),
             ])
           )
@@ -198,24 +239,57 @@ const withScrollX = ({
             cond(
               and(
                 not(isDecaying),
+                not(isLast),
                 lessOrEq(state.position, add(lowerBound, -100))
               ),
               [
-                call([], () => console.log('NEXT')),
+                cond(not(onPullTriggered), [
+                  call([], () => console.log('NEXT')),
+                  set(onPullTriggered, 1),
+                ]),
                 set(config.toValue, add(lowerBound, -wp(100))),
-                spring(clock, state, config),
+                reTiming(
+                  clock,
+                  { ...state, frameTime: new Value(0) },
+                  { ...config, duration: 500, easing: Easing.out(Easing.ease) }
+                ),
                 cond(
                   and(
-                    eq(state.finished, 1),
-                    eq(state.position, add(lowerBound, -wp(100)))
+                    state.finished,
+                    eq(state.position, add(lowerBound, -wp(100))),
+                    not(onPullTriggeredEnd)
                   ),
-                  [call([], () => console.log('NEXT DONE'))]
+                  [call([], onNext), set(onPullTriggeredEnd, 1)]
                 ),
               ]
             ),
-            cond(and(not(isDecaying), greaterOrEq(state.position, 100)), [
-              call([], () => console.log('PREVIOUS')),
-            ]),
+            cond(
+              and(
+                not(isDecaying),
+                not(isFirst),
+                greaterOrEq(state.position, 100)
+              ),
+              [
+                cond(not(onPullTriggered), [
+                  call([], () => console.log('PREV')),
+                  set(onPullTriggered, 1),
+                ]),
+                set(config.toValue, wp(100)),
+                reTiming(
+                  clock,
+                  { ...state, frameTime: new Value(0) },
+                  { ...config, duration: 500, easing: Easing.out(Easing.ease) }
+                ),
+                cond(
+                  and(
+                    state.finished,
+                    eq(state.position, wp(100)),
+                    not(onPullTriggeredEnd)
+                  ),
+                  [call([], onPrev), set(onPullTriggeredEnd, 1)]
+                ),
+              ]
+            ),
             set(
               config.toValue,
               snapPoint(state.position, state.velocity, [
@@ -232,6 +306,106 @@ const withScrollX = ({
   ])
 }
 
+const initAnimations = ({
+  translateX,
+  translateY,
+  state,
+  velocityX,
+  velocityY,
+  translationX,
+  translationY,
+  containerHeight,
+  contentHeight,
+  containerWidth,
+  contentWidth,
+  onPrev,
+  onNext,
+  isFirst,
+  isLast,
+  isReady,
+  entrance,
+  opacity,
+}: AnimationProps) => {
+  if (!containerHeight || !containerWidth) {
+    return
+  }
+
+  const clock = new Clock()
+  const canStartAnimation = new Value(0)
+  const lowerBound = -1 * (contentWidth - containerWidth)
+
+  const launchBlock = () =>
+    block([
+      cond(not(isReady), [
+        set(opacity, 1),
+        set(
+          translateX,
+          cond(
+            entrance,
+            timing({
+              clock,
+              duration: 1000,
+              from: wp(100),
+              to: 0,
+              easing: Easing.out(Easing.ease),
+            }),
+            timing({
+              clock,
+              duration: 1000,
+              from: lowerBound - wp(100),
+              to: lowerBound,
+              easing: Easing.out(Easing.ease),
+            })
+          )
+        ),
+      ]),
+      cond(
+        and(
+          not(isReady),
+          not(clockRunning(clock)),
+          or(eq(translateX, lowerBound), eq(translateX, 0))
+        ),
+        [set(isReady, 1)]
+      ),
+      cond(isReady, [
+        set(
+          translateY,
+          withScrollY({
+            translationY,
+            velocityY,
+            state,
+            containerHeight,
+            contentHeight,
+          })
+        ),
+        set(
+          translateX,
+          withScrollX({
+            translationX,
+            velocityX,
+            state,
+            containerWidth,
+            contentWidth,
+            onPrev,
+            onNext,
+            isFirst,
+            isLast,
+            entrance,
+          })
+        ),
+      ]),
+    ])
+
+  return block([
+    cond(canStartAnimation, 0, [
+      set(translateX, cond(entrance, wp(100), lowerBound - wp(100))),
+      delay(set(canStartAnimation, 1), 1500),
+      debug('Activated once', canStartAnimation),
+    ]),
+    cond(canStartAnimation, [launchBlock()]),
+  ])
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -244,12 +418,31 @@ interface ScrollViewProps {
   translateY: Animated.Value<number>
   width: number
   height: number
+  onPrev: () => void
+  onNext: () => void
+  isFirst?: boolean
+  isLast?: boolean
+  isReady: Animated.Value<number>
+  entrance: 0 | 1
 }
 
 export default memo(
-  ({ children, width, height, translateX, translateY }: ScrollViewProps) => {
+  ({
+    children,
+    width,
+    height,
+    translateX,
+    translateY,
+    onPrev,
+    onNext,
+    isFirst,
+    isLast,
+    isReady,
+    entrance,
+  }: ScrollViewProps) => {
     const [containerHeight, setContainerHeight] = useState(0)
     const [containerWidth, setContainerWidth] = useState(0)
+    const opacity = new Value(0)
 
     const {
       gestureHandler,
@@ -260,40 +453,27 @@ export default memo(
 
     useCode(
       () =>
-        block([
-          set(
-            translateY,
-            withScrollY({
-              translationY: translation.y,
-              velocityY: velocity.y,
-              state,
-              containerHeight,
-              contentHeight: height,
-            })
-          ),
-          set(
-            translateX,
-            withScrollX({
-              translationX: translation.x,
-              velocityX: velocity.x,
-              state,
-              containerHeight: containerWidth,
-              contentHeight: width,
-            })
-          ),
-        ]),
-      [
-        width,
-        containerHeight,
-        containerWidth,
-        state,
-        translateY,
-        translateX,
-        velocity.x,
-        velocity.y,
-        translation.y,
-        translation.x,
-      ]
+        initAnimations({
+          translateX,
+          translateY,
+          state,
+          velocityX: velocity.x,
+          velocityY: velocity.y,
+          translationX: translation.x,
+          translationY: translation.y,
+          containerHeight,
+          contentHeight: height,
+          containerWidth,
+          contentWidth: width,
+          onPrev,
+          onNext,
+          isFirst,
+          isLast,
+          isReady,
+          entrance,
+          opacity,
+        }),
+      [containerHeight, containerWidth]
     )
 
     return (
@@ -310,7 +490,12 @@ export default memo(
       >
         <PanGestureHandler {...gestureHandler}>
           <Animated.View
-            style={{ width, height, transform: [{ translateY, translateX }] }}
+            style={{
+              opacity,
+              width,
+              height,
+              transform: [{ translateY, translateX }],
+            }}
           >
             {children}
           </Animated.View>

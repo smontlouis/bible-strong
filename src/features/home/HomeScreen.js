@@ -129,9 +129,14 @@ const HomeScreen = () => {
             />
           </Box> */}
           {__DEV__ && (
-            <Box background padding={20} paddingTop={0}>
-              <Button route="Storybook">Storybook</Button>
-            </Box>
+            <>
+              <Box background padding={20} paddingTop={0}>
+                <Button route="Timeline">Timeline</Button>
+              </Box>
+              <Box background padding={20} paddingTop={0}>
+                <Button route="Storybook">Storybook</Button>
+              </Box>
+            </>
           )}
         </Box>
       </HomeScrollView>
