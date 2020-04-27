@@ -15,9 +15,8 @@ const SectionImage = ({
   sectionTitle,
   color,
   subTitle,
-  description,
   direction,
-}: ShallowTimelineSection & { direction: 'previous' | 'next' }) => {
+}: ShallowTimelineSection & { direction?: 'previous' | 'next' }) => {
   return (
     <Box flex bg="reverse" row>
       <Box width={60} center>
@@ -42,9 +41,9 @@ const SectionImage = ({
           </Text>
           <Box height={2} bg="default" />
         </Box>
-        <Box shadow row width={width} mt={50}>
+        <Box row width={width} mt={50} lightShadow borderRadius={10}>
           <FastImage
-            style={{ width, height: width }}
+            style={{ width, height: width, borderRadius: 10 }}
             source={{
               uri: image,
             }}
@@ -55,8 +54,8 @@ const SectionImage = ({
           mt={50}
           bg={color}
           width={50}
-          height={5}
-          borderRadius={3}
+          height={10}
+          borderRadius={10}
         />
       </Box>
       <Box width={60} center>

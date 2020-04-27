@@ -35,7 +35,7 @@ const TimelineHeader = ({ title, fontSize = 20, hasBackButton }: Props) => {
       <Box flex center>
         {hasBackButton && (
           <Back padding>
-            <FeatherIcon name={'arrow-left'} size={20} />
+            <FeatherIcon name={'grid'} size={20} />
           </Back>
         )}
       </Box>

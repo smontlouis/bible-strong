@@ -16,6 +16,7 @@ import { Value } from 'react-native-reanimated'
 import TimelineHeader from './TimelineHeader'
 import Line from './Line'
 import Datebar from './Datebar'
+import CurrentSectionImage from './CurrentSectionImage'
 
 interface Props extends TimelineSectionProps {
   onPrev: () => void
@@ -33,6 +34,7 @@ const Timeline = ({
   startYear,
   endYear,
   interval,
+  id,
   image,
   description,
   title,
@@ -76,6 +78,21 @@ const Timeline = ({
       {!isLast && (
         <NextSectionImage x={x} width={width} nextEvent={nextEvent} />
       )}
+      <CurrentSectionImage
+        isReady={isReady}
+        currentEvent={{
+          id,
+          image,
+          color,
+          description,
+          title,
+          sectionTitle,
+          subTitle,
+          startYear,
+          endYear,
+          interval,
+        }}
+      />
       <ScrollView
         translateX={x}
         translateY={y}
