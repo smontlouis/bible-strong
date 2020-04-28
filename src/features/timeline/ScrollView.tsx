@@ -400,7 +400,6 @@ const initAnimations = ({
     cond(canStartAnimation, 0, [
       set(translateX, cond(entrance, wp(100), lowerBound - wp(100))),
       delay(set(canStartAnimation, 1), 1500),
-      debug('Activated once', canStartAnimation),
     ]),
     cond(canStartAnimation, [launchBlock()]),
   ])

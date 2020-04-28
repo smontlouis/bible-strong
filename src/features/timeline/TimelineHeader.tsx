@@ -3,6 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import styled from '~styled'
 
 import Box from '~common/ui/Box'
+import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Back from '~common/Back'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
@@ -27,9 +28,15 @@ interface Props {
   title: string
   fontSize?: number
   hasBackButton?: boolean
+  onPress: () => void
 }
 
-const TimelineHeader = ({ title, fontSize = 20, hasBackButton }: Props) => {
+const TimelineHeader = ({
+  title,
+  fontSize = 20,
+  hasBackButton,
+  onPress,
+}: Props) => {
   return (
     <HeaderBox row>
       <Box flex center>
@@ -44,7 +51,11 @@ const TimelineHeader = ({ title, fontSize = 20, hasBackButton }: Props) => {
           {title}
         </Text>
       </Box>
-      <Box flex />
+      <Box flex center>
+        <Link paddingSmall onPress={onPress}>
+          <FeatherIcon name="info" size={20} />
+        </Link>
+      </Box>
     </HeaderBox>
   )
 }

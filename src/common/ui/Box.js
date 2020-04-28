@@ -29,6 +29,11 @@ const Box = styled.View(props => {
     borderWidth: props.borderWidth,
     borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
     transform: props.transform,
+    borderRadius: props.borderRadius,
+    borderTopLeftRadius: props.borderTopLeftRadius,
+    borderTopRightRadius: props.borderTopRightRadius,
+    borderBottomLeftRadius: props.borderBottomLeftRadius,
+    borderBottomRightRadius: props.borderBottomRightRadius,
 
     overflow: props.overflow ? 'visible' : 'hidden',
     width: props.width ?? props.w,

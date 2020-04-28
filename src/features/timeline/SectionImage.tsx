@@ -2,7 +2,6 @@ import React from 'react'
 
 import { ShallowTimelineSection } from './types'
 import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import FastImage from 'react-native-fast-image'
 import { wp, maxWidth } from '~helpers/utils'

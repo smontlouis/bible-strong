@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import Box from '~common/ui/Box'
+import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { offset, rowToPx } from './constants'
 import { Divider } from 'react-native-paper'
@@ -15,6 +16,7 @@ import FastImage from 'react-native-fast-image'
 import { TimelineEvent as TimelineEventProps } from './types'
 
 const AnimatedBox = Animated.createAnimatedComponent(Box)
+const LinkBox = Box.withComponent(Link)
 
 interface Props extends TimelineEventProps {
   x: Animated.Node<number>
@@ -70,6 +72,7 @@ const calculateLabel = (start: number, end: number) => {
 }
 
 const TimelineEvent = ({
+  slug,
   row,
   title,
   start,
@@ -89,9 +92,14 @@ const TimelineEvent = ({
 
   const label = calculateLabel(start, end)
 
+  const onOpenEvent = () => {
+    console.log(slug)
+  }
+
   if (type === 'minor') {
     return (
-      <Box
+      <LinkBox
+        onPress={onOpenEvent}
         pos="absolute"
         h={25}
         left={left + offset}
@@ -115,7 +123,7 @@ const TimelineEvent = ({
         <Box px={10} justifyContent="center">
           <Text fontSize={8}>{label}</Text>
         </Box>
-      </Box>
+      </LinkBox>
     )
   }
 
@@ -126,7 +134,8 @@ const TimelineEvent = ({
   })
 
   return (
-    <Box
+    <LinkBox
+      onPress={onOpenEvent}
       pos="absolute"
       h={60}
       w={width}
@@ -169,7 +178,7 @@ const TimelineEvent = ({
           }}
         />
       </Box>
-    </Box>
+    </LinkBox>
   )
 }
 

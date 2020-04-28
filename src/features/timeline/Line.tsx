@@ -12,6 +12,7 @@ const Line = ({
 }) => {
   return (
     <AnimatedBox
+      pointerEvents="none"
       pos="absolute"
       b={0}
       l={offset}

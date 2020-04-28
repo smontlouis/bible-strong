@@ -10,6 +10,9 @@ import {
   interpolate,
   multiply,
   Extrapolate,
+  lessOrEq,
+  cond,
+  greaterOrEq,
 } from 'react-native-reanimated'
 import { wp } from '~helpers/utils'
 
@@ -22,7 +25,7 @@ export const useTimeline = ({
   endYear: number
   interval: number
 }) => {
-  const [x, y] = useValues([0, 0], [])
+  const [x, y] = useValues([4000, 0], [])
   const { current: ratio } = React.useRef(100 / interval) // 1 year = 1px with ratio = 1
   const { current: scrollViewWidth } = React.useRef(
     Math.abs(startYear - endYear) * ratio
@@ -31,18 +34,15 @@ export const useTimeline = ({
   const width = scrollViewWidth + wp(100)
   const height = scrollViewHeight + 200
 
-  const year = concat(
-    abs(
-      round(
-        interpolate(multiply(x, -1), {
-          inputRange: [0, scrollViewWidth],
-          outputRange: [startYear, endYear],
-          extrapolate: Extrapolate.EXTEND,
-        })
-      )
-    ),
-    ' BC'
+  const yearNb = round(
+    interpolate(multiply(x, -1), {
+      inputRange: [0, scrollViewWidth],
+      outputRange: [startYear, endYear],
+      extrapolate: Extrapolate.EXTEND,
+    })
   )
+
+  const year = concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', ' av.JC'))
 
   const lineX = interpolate(x, {
     inputRange: [-width, -width + wp(100), 0, wp(100)],

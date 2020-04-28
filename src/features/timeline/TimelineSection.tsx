@@ -8,8 +8,6 @@ import {
   ShallowTimelineSection,
 } from './types'
 import CurrentYear from './CurrentYear'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
 import PrevSectionImage from './PrevSectionImage'
 import NextSectionImage from './NextSectionImage'
 import { Value } from 'react-native-reanimated'
@@ -17,6 +15,8 @@ import TimelineHeader from './TimelineHeader'
 import Line from './Line'
 import Datebar from './Datebar'
 import CurrentSectionImage from './CurrentSectionImage'
+import { Modalize } from 'react-native-modalize'
+import SectionDetailsModal from './SectionDetailsModal'
 
 interface Props extends TimelineSectionProps {
   onPrev: () => void
@@ -51,6 +51,11 @@ const Timeline = ({
   nextEvent,
 }: Props) => {
   const isReady = new Value(0)
+  const modalRef = React.useRef<Modalize>(null)
+  const onTimelineDetailsOpen = () => {
+    modalRef.current?.open()
+  }
+
   const {
     x,
     y,
@@ -72,7 +77,11 @@ const Timeline = ({
 
   return (
     <Box flex pos="absolute" left={0} bottom={0} right={0} top={0}>
-      <TimelineHeader hasBackButton title={title} />
+      <TimelineHeader
+        hasBackButton
+        title={title}
+        onPress={onTimelineDetailsOpen}
+      />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
       {!isLast && (
@@ -116,17 +125,6 @@ const Timeline = ({
                 {...event}
               />
             ))}
-
-            {/* {!isFirst && (
-              <Link onPress={onPrev}>
-                <Text>Previous</Text>
-              </Link>
-            )}
-            {!isLast && (
-              <Link onPress={onNext}>
-                <Text>Continue</Text>
-              </Link>
-            )} */}
           </Box>
         </Box>
       </ScrollView>
@@ -139,7 +137,32 @@ const Timeline = ({
         color={color}
       />
       <Line lineX={lineX} color={color} />
-      <CurrentYear year={year} lineX={lineX} color={color} />
+      <CurrentYear
+        year={year}
+        x={x}
+        width={width}
+        lineX={lineX}
+        color={color}
+        onPrev={onPrev}
+        onNext={onNext}
+        prevColor={prevEvent?.color}
+        nextColor={nextEvent?.color}
+      />
+      <SectionDetailsModal
+        modalRef={modalRef}
+        {...{
+          id,
+          image,
+          color,
+          description,
+          title,
+          sectionTitle,
+          subTitle,
+          startYear,
+          endYear,
+          interval,
+        }}
+      />
     </Box>
   )
 }

@@ -2,8 +2,8 @@ import React from 'react'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { offset } from './constants'
-import Animated from 'react-native-reanimated'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import Animated from 'react-native-reanimated'
 
 const Datebar = ({
   width,
@@ -21,7 +21,6 @@ const Datebar = ({
   color: string
 }) => {
   const [values, setValues] = React.useState<number[]>([])
-  console.log(startYear, endYear)
 
   React.useEffect(() => {
     const array = []
@@ -32,41 +31,36 @@ const Datebar = ({
   }, [startYear, endYear, interval])
 
   return (
-    <AnimatedBox
-      row
-      pos="absolute"
-      l={0}
-      b={getBottomSpace()}
-      width={width}
-      height={50}
-      paddingLeft={offset}
-      style={{ transform: [{ translateX: x }] }}
-    >
-      <Box
+    <>
+      <AnimatedBox
+        row
+        pos="absolute"
+        l={0}
+        b={getBottomSpace()}
+        width={width}
+        height={25}
+        paddingLeft={offset}
+        style={{ transform: [{ translateX: x }] }}
+        bg="reverse"
         lightShadow
-        position="absolute"
-        left={0}
-        right={0}
-        bg={color}
-        top={24}
-        height={3}
-      />
-      {values.map(value => (
-        <Box
-          key={value}
-          width={100}
-          left={-50}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Box lightShadow bg="lightPrimary" p={5} borderRadius={3}>
-            <Text color="grey" title fontWeight="bold" fontSize={10}>
-              {Math.abs(value)}
-            </Text>
+      >
+        {values.map(value => (
+          <Box
+            key={value}
+            width={100}
+            left={-50}
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            <Box p={5} borderRadius={3} mb={3}>
+              <Text color={color} title fontWeight="bold" fontSize={10}>
+                {Math.abs(value)}
+              </Text>
+            </Box>
           </Box>
-        </Box>
-      ))}
-    </AnimatedBox>
+        ))}
+      </AnimatedBox>
+    </>
   )
 }
 
