@@ -31,36 +31,34 @@ const Datebar = ({
   }, [startYear, endYear, interval])
 
   return (
-    <>
-      <AnimatedBox
-        row
-        pos="absolute"
-        l={0}
-        b={getBottomSpace()}
-        width={width}
-        height={25}
-        paddingLeft={offset}
-        style={{ transform: [{ translateX: x }] }}
-        bg="reverse"
-        lightShadow
-      >
-        {values.map(value => (
-          <Box
-            key={value}
-            width={100}
-            left={-50}
-            alignItems="center"
-            justifyContent="flex-end"
-          >
-            <Box p={5} borderRadius={3} mb={3}>
-              <Text color={color} title fontWeight="bold" fontSize={10}>
-                {Math.abs(value)}
-              </Text>
-            </Box>
+    <AnimatedBox
+      row
+      pos="absolute"
+      l={0}
+      b={getBottomSpace()}
+      width={width}
+      height={25}
+      paddingLeft={offset}
+      bg="reverse"
+      lightShadow
+      style={{ transform: [{ translateX: x }], elevation: 0 }}
+    >
+      {values.map(value => (
+        <Box
+          key={value}
+          width={100}
+          left={-50}
+          alignItems="center"
+          justifyContent="flex-end"
+        >
+          <Box p={5} borderRadius={3} mb={3}>
+            <Text color={color} title fontWeight="bold" fontSize={10}>
+              {value < 2020 ? Math.abs(value) : 'Futur'}
+            </Text>
           </Box>
-        ))}
-      </AnimatedBox>
-    </>
+        </Box>
+      ))}
+    </AnimatedBox>
   )
 }
 

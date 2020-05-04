@@ -13,6 +13,7 @@ import Link from '~common/Link'
 import { offset } from './constants'
 import { FeatherIcon } from '~common/ui/Icon'
 import { wp } from '~helpers/utils'
+import { Platform } from 'react-native'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -50,7 +51,7 @@ const CurrentYear = ({
     <AnimatedBox
       style={{ transform: [{ translateX: lineX }] }}
       pos="absolute"
-      bottom={0}
+      bottom={getBottomSpace()}
       left={0}
       right={0}
       height={30}
@@ -94,13 +95,14 @@ const CurrentYear = ({
         pointerEvents="none"
         pos="absolute"
         l={offset - 50}
-        b={getBottomSpace()}
+        b={0}
         bg={color}
         width={100}
         height={30}
         center
         borderTopLeftRadius={5}
         borderTopRightRadius={5}
+        paddingTop={Platform.OS === 'android' ? 8 : 0}
       >
         <ReText
           text={year}
@@ -108,7 +110,9 @@ const CurrentYear = ({
             color: 'white',
             width: 120,
             textAlign: 'center',
+            textAlignVertical: 'center',
             fontWeight: 'bold',
+            lineHeight: 1,
           }}
         />
       </Box>

@@ -42,7 +42,13 @@ export const useTimeline = ({
     })
   )
 
-  const year = concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', ' av.JC'))
+  const yearNow = new Date().getFullYear()
+
+  const year = cond(
+    greaterOrEq(yearNb, yearNow),
+    concat('Futur'),
+    concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', ' av.JC'))
+  )
 
   const lineX = interpolate(x, {
     inputRange: [-width, -width + wp(100), 0, wp(100)],
