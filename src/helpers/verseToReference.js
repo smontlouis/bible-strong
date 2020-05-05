@@ -27,6 +27,8 @@ const range = (start: number, end: number) => {
 // [1-1-1, 1-1-3, 1-1-4, 1-1-5]   => Genèse 1:1,3-5
 // {1-1-1: true, 1-1-2: true}
 const verseToReference = (v, options = {}) => {
+  if (!v) return ''
+
   let verses = v
 
   // Needs a special extraction
@@ -44,6 +46,10 @@ const verseToReference = (v, options = {}) => {
     verses = Object.keys(v)
   } else if (typeof verses === 'string') {
     verses = [v]
+  }
+
+  if (!verses.length) {
+    return
   }
 
   verses = orderVerses(verses)

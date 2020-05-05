@@ -82,7 +82,7 @@ const initialState = {
       fontSizeScale: 0,
       textDisplay: 'inline',
       theme: 'default',
-      press: 'shortPress',
+      press: 'longPress',
       notesDisplay: 'inline',
       commentsDisplay: false,
       colors: {

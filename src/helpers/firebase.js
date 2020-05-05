@@ -30,6 +30,9 @@ export const biblesRef = {
   BHS: storageRef.child('bibles/bible-hebrew.json'),
   SBLGNT: storageRef.child('bibles/bible-greek.json'),
   NFC: storageRef.child('bibles/bible-nfc.json'),
+  PDV2017: storageRef.child('bibles/bible-pdv2017.json'),
+  BFC: storageRef.child('bibles/bible-bfc.json'),
+  BCC1923: storageRef.child('bibles/bible-bcc1923.json'),
 }
 
 export const databasesRef = {

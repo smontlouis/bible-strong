@@ -9,7 +9,7 @@ import {
   THROW_ERROR,
   dispatch,
   NAVIGATE_TO_PERICOPE,
-  NAVIGATE_TO_VERSION
+  NAVIGATE_TO_VERSION,
 } from './dispatch'
 import Verse from './Verse'
 import Comment from './Comment'
@@ -33,12 +33,12 @@ const exists = obj => {
 
 const extractParallelVerse = (i, parallelVerses, verse, version) => [
   { version, verse },
-  ...parallelVerses.map(p => ({ version: p.id, verse: p.verses[i] }))
+  ...parallelVerses.map(p => ({ version: p.id, verse: p.verses[i] })),
 ]
 
 const extractParallelVersionTitles = (parallelVerses, currentVersion) => [
   currentVersion,
-  ...parallelVerses.map(p => p.id)
+  ...parallelVerses.map(p => p.id),
 ]
 
 const Container = styled('div')(
@@ -51,7 +51,7 @@ const Container = styled('div')(
     background: colors[theme].reverse,
     color: colors[theme].default,
     direction: rtl ? 'rtl' : 'ltr',
-    ...(rtl ? { textAlign: 'right' } : {})
+    ...(rtl ? { textAlign: 'right' } : {}),
   })
 )
 
@@ -60,7 +60,7 @@ const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
   marginBottom: 20,
   fontFamily: 'arial',
   fontSize: 13,
-  color: colors[theme].darkGrey
+  color: colors[theme].darkGrey,
 }))
 
 const Span = styled('span')({})
@@ -69,7 +69,7 @@ const H1 = styled('h1')(
   ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
     fontFamily,
     fontSize: scaleFontSize(28, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left'
+    textAlign: isHebreu ? 'right' : 'left',
   })
 )
 
@@ -77,7 +77,7 @@ const H2 = styled('h2')(
   ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
     fontFamily,
     fontSize: scaleFontSize(24, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left'
+    textAlign: isHebreu ? 'right' : 'left',
   })
 )
 
@@ -85,7 +85,7 @@ const H3 = styled('h3')(
   ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
     fontFamily,
     fontSize: scaleFontSize(20, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left'
+    textAlign: isHebreu ? 'right' : 'left',
   })
 )
 
@@ -93,7 +93,7 @@ const H4 = styled('h4')(
   ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
     fontFamily,
     fontSize: scaleFontSize(18, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left'
+    textAlign: isHebreu ? 'right' : 'left',
   })
 )
 
@@ -101,7 +101,7 @@ const VersionTitle = styled('div')(
   ({ settings: { fontSizeScale, fontFamily } }) => ({
     fontFamily,
     fontWeight: 'bold',
-    fontSize: scaleFontSize(18, fontSizeScale)
+    fontSize: scaleFontSize(18, fontSizeScale),
   })
 )
 
@@ -111,7 +111,7 @@ const VersionsContainer = styled('div')(({ settings: { theme, colors } }) => ({
   top: 0,
   background: colors[theme].reverse,
   paddingTop: '5px',
-  paddingBottom: '10px'
+  paddingBottom: '10px',
 }))
 
 const mediaQueries = ['@media (min-width: 640px)']
@@ -126,8 +126,8 @@ const ResponsivePlusIcon = styled(PlusIcon)(
     display: 'none',
 
     [mediaQueries[0]]: {
-      display: 'block'
-    }
+      display: 'block',
+    },
   })
 )
 
@@ -156,13 +156,13 @@ class VersesRenderer extends Component {
     pericopeChapter: {},
     chapter: '',
     isSelectionMode: '',
-    selectedCode: null
+    selectedCode: null,
   }
 
   componentDidMount() {
     dispatch({
       type: CONSOLE_LOG,
-      payload: 'I did mount'
+      payload: 'I did mount',
     })
 
     // ONLY FOR DEV MODE ON DESKTOP
@@ -268,7 +268,7 @@ class VersesRenderer extends Component {
                     versesInArray[versesInArray.length - 1].split('-')[2]
                   }`
                 : versesInArray[0].split('-')[2],
-            ...value
+            ...value,
           }
           if (newNotedVerses[verseNumber]) {
             newNotedVerses[verseNumber].push(verseToPush)
@@ -323,7 +323,7 @@ class VersesRenderer extends Component {
               chapter,
               isSelectionMode,
               selectedCode,
-              fontFamily
+              fontFamily,
             } = response
 
             self.setState({
@@ -347,7 +347,7 @@ class VersesRenderer extends Component {
               pericopeChapter,
               chapter,
               isSelectionMode,
-              selectedCode
+              selectedCode,
             })
             break
           }
@@ -357,7 +357,7 @@ class VersesRenderer extends Component {
       } catch (err) {
         dispatch({
           type: THROW_ERROR,
-          payload: `${err}`
+          payload: `${err}`,
         })
       }
     })
@@ -365,27 +365,27 @@ class VersesRenderer extends Component {
 
   navigateToPericope = () => {
     dispatch({
-      type: NAVIGATE_TO_PERICOPE
+      type: NAVIGATE_TO_PERICOPE,
     })
   }
 
   navigateToVersion = (version, index) => {
     dispatch({
       type: NAVIGATE_TO_VERSION,
-      payload: { version, index }
+      payload: { version, index },
     })
   }
 
   removeParallelVersion = index => {
     dispatch({
       type: REMOVE_PARALLEL_VERSION,
-      payload: index
+      payload: index,
     })
   }
 
   addParallelVersion = () => {
     dispatch({
-      type: ADD_PARALLEL_VERSION
+      type: ADD_PARALLEL_VERSION,
     })
   }
 
@@ -399,7 +399,7 @@ class VersesRenderer extends Component {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            textTransform: 'uppercase'
+            textTransform: 'uppercase',
           }}
         >
           Une erreur est survenue.
@@ -437,7 +437,7 @@ class VersesRenderer extends Component {
                 style={{
                   flex: 1,
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
                 }}
               >
                 <VersionTitle

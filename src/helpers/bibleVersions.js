@@ -164,6 +164,11 @@ export const versions = {
     name: 'Martin 1744',
     c: '1744 Libre de droit',
   },
+  BFC: {
+    id: 'BFC',
+    name: 'Bible en Français courant',
+    c: '© Alliance Biblique Française',
+  },
   FRC97: {
     id: 'FRC97',
     name: 'Français courant',
@@ -194,10 +199,16 @@ export const versions = {
     name: 'New International Version',
     c: '© NIV® 1973, 1978, 1984, 2011 Biblica',
   },
-  // BJC: {
-  //   id: 'BJC',
-  //   name: 'Bible de Jésus-Christ'
-  // },
+  BCC1923: {
+    id: 'BCC1923',
+    name: 'Bible catholique Crampon 1923',
+    c: '© mission-web.com',
+  },
+  PDV2017: {
+    id: 'PDV2017',
+    name: 'Parole de Vie 2017',
+    c: "© 2000 Société biblique française - Bibli'O",
+  },
   POV: {
     id: 'POV',
     name: 'Parole vivante (NT)',

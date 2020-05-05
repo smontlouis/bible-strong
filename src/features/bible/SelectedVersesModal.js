@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Share } from 'react-native'
-import Modal from 'react-native-modalbox'
+import { Share, ScrollView } from 'react-native'
+import { Modalize } from 'react-native-modalize'
 import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
+import Clipboard from '@react-native-community/clipboard'
 
+import SnackBar from '~common/SnackBar'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
@@ -11,38 +13,18 @@ import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
 import getVersesRef from '~helpers/getVersesRef'
 import { cleanParams } from '~helpers/utils'
+import { usePrevious } from '~helpers/usePrevious'
 
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
+import TouchableChip from './TouchableChip'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import verseToReference from '../../helpers/verseToReference'
-
-const StylizedModal = styled(Modal)(({ isSelectionMode }) => ({
-  height: 200,
-  maxWidth: 400,
-  flexDirection: 'row',
-  justifyContent: 'center',
-  alignItems: 'flex-end',
-  zIndex: 10,
-  backgroundColor: 'transparent',
-
-  ...(isSelectionMode && {
-    height: 70,
-    width: 250,
-  }),
-}))
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
   height: isSelectionMode ? 40 : 'auto',
   backgroundColor: theme.colors.reverse,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
-  alignItems: 'stretch',
-  paddingBottom: 15,
 
   ...(isSelectionMode && {
     width: 250,
@@ -76,8 +58,22 @@ const VersesModal = ({
   isSelectionMode,
   setReference,
   setNave,
+  selectAllVerses,
 }) => {
+  const isPrevVisible = usePrevious(isVisible)
+
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
+  const modalRef = React.useRef(null)
+
+  useEffect(() => {
+    if (isPrevVisible !== isVisible) {
+      if (isVisible) {
+        modalRef?.current?.open()
+      } else {
+        modalRef?.current?.close()
+      }
+    }
+  }, [isPrevVisible, isVisible])
 
   const { colors } = useSelector(state => ({
     colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
@@ -95,6 +91,13 @@ const VersesModal = ({
     if (result.action === Share.sharedAction) {
       clearSelectedVerses()
     }
+  }
+
+  const copyToClipboard = async () => {
+    const { all: message } = await getVersesRef(selectedVerses, version)
+    Clipboard.setString(message)
+    SnackBar.show('Copié dans le presse-papiers.')
+    clearSelectedVerses()
   }
 
   const showStrongDetail = () => {
@@ -162,14 +165,25 @@ const VersesModal = ({
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
 
   return (
-    <StylizedModal
-      isOpen={isVisible}
-      animationDuration={200}
-      position="bottom"
-      backdrop={false}
-      backdropPressToClose={false}
-      swipeToClose={false}
-      isSelectionMode={isSelectionMode}
+    <Modalize
+      ref={modalRef}
+      onClose={clearSelectedVerses}
+      handlePosition="inside"
+      handleStyle={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      modalStyle={{
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        paddingTop: 10,
+        maxWidth: 400,
+        width: '100%',
+
+        ...(isSelectionMode && {
+          height: 70,
+          width: 250,
+        }),
+      }}
+      adjustToContentHeight
+      withOverlay={false}
     >
       {isSelectionMode ? (
         <Container isSelectionMode={isSelectionMode}>
@@ -247,30 +261,48 @@ const VersesModal = ({
             />
           </HalfContainer>
           <HalfContainer>
-            <TouchableIcon
-              name="layers"
-              onPress={compareVerses}
-              label="Comparer"
-            />
-            <TouchableIcon
-              name="file-plus"
-              onPress={onCreateNoteClick}
-              label="Note"
-            />
-            <TouchableIcon
-              name="share-2"
-              onPress={shareVerse}
-              label="Partager"
-            />
-            <TouchableIcon
-              name="x"
-              onPress={clearSelectedVerses}
-              label="Annuler"
-            />
+            <ScrollView
+              horizontal
+              style={{ overflow: 'visible' }}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                flexDirection: 'row',
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+                overflow: 'visible',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <TouchableChip
+                name="layers"
+                onPress={compareVerses}
+                label="Comparer"
+              />
+              <TouchableChip
+                name="file-plus"
+                onPress={onCreateNoteClick}
+                label="Note"
+              />
+              <TouchableChip
+                name="copy"
+                onPress={copyToClipboard}
+                label="Copier"
+              />
+              <TouchableChip
+                name="share-2"
+                onPress={shareVerse}
+                label="Partager"
+              />
+              <TouchableChip
+                onPress={selectAllVerses}
+                label="Tout sélectionner"
+              />
+            </ScrollView>
           </HalfContainer>
         </Container>
       )}
-    </StylizedModal>
+    </Modalize>
   )
 }
 

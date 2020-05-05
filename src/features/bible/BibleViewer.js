@@ -70,6 +70,13 @@ class BibleViewer extends Component {
 
   pericope = getBiblePericope('LSG')
 
+  selectAllVerses = () => {
+    const selectedVerses = Object.fromEntries(
+      this.state.verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
+    )
+    this.props.addAllSelectedVerses(selectedVerses)
+  }
+
   setAudioMode = value => this.setState({ audioMode: value })
 
   setIsPlaying = value => this.setState({ isPlaying: value })
@@ -375,24 +382,23 @@ class BibleViewer extends Component {
             />
           </Box>
         )}
-        {modalIsVisible && (
-          <SelectedVersesModal
-            settings={settings}
-            isSelectionMode={isSelectionMode}
-            setSelectedVerse={this.props.setSelectedVerse}
-            setReference={this.setReference}
-            setNave={this.setNave}
-            onCreateNoteClick={this.toggleCreateNote}
-            isVisible={modalIsVisible}
-            isSelectedVerseHighlighted={isSelectedVerseHighlighted}
-            addHighlight={this.addHiglightAndOpenQuickTags}
-            removeHighlight={removeHighlight}
-            clearSelectedVerses={clearSelectedVerses}
-            navigation={navigation}
-            selectedVerses={selectedVerses}
-            version={version}
-          />
-        )}
+        <SelectedVersesModal
+          settings={settings}
+          isSelectionMode={isSelectionMode}
+          setSelectedVerse={this.props.setSelectedVerse}
+          setReference={this.setReference}
+          setNave={this.setNave}
+          onCreateNoteClick={this.toggleCreateNote}
+          isVisible={modalIsVisible}
+          isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+          addHighlight={this.addHiglightAndOpenQuickTags}
+          removeHighlight={removeHighlight}
+          clearSelectedVerses={clearSelectedVerses}
+          navigation={navigation}
+          selectedVerses={selectedVerses}
+          selectAllVerses={this.selectAllVerses}
+          version={version}
+        />
         <QuickTagsModal
           item={quickTagsModal}
           onClosed={() => this.setQuickTagsModal(false)}

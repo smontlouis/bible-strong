@@ -38,6 +38,10 @@ class BibleScreen extends React.Component {
     this.setState(state => ({ isBibleParamsOpen: !state.isBibleParamsOpen }))
   }
 
+  closeBibleParamsOpen = () => {
+    this.setState({ isBibleParamsOpen: false })
+  }
+
   getIfMhyCommentsNeedsDownload = async () => {
     const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
     const path = `${sqliteDirPath}/commentaires-mhy.sqlite`
@@ -113,24 +117,22 @@ class BibleScreen extends React.Component {
           fontFamily={fontFamily}
           setSettingsCommentaires={setSettingsCommentaires}
         />
-        {this.state.isBibleParamsOpen && (
-          <BibleParamsModal
-            navigation={navigation}
-            onClosed={this.toggleBibleParamsOpen}
-            isOpen={this.state.isBibleParamsOpen}
-            setSettingsAlignContent={setSettingsAlignContent}
-            setSettingsTextDisplay={setSettingsTextDisplay}
-            setSettingsTheme={setSettingsTheme}
-            setSettingsNotesDisplay={setSettingsNotesDisplay}
-            setSettingsPress={setSettingsPress}
-            setSettingsCommentaires={setSettingsCommentaires}
-            increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
-            decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
-            settings={settings}
-            fontFamily={fontFamily}
-            setFontFamily={setFontFamily}
-          />
-        )}
+        <BibleParamsModal
+          navigation={navigation}
+          onClosed={this.closeBibleParamsOpen}
+          isOpen={this.state.isBibleParamsOpen}
+          setSettingsAlignContent={setSettingsAlignContent}
+          setSettingsTextDisplay={setSettingsTextDisplay}
+          setSettingsTheme={setSettingsTheme}
+          setSettingsNotesDisplay={setSettingsNotesDisplay}
+          setSettingsPress={setSettingsPress}
+          setSettingsCommentaires={setSettingsCommentaires}
+          increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
+          decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
+          settings={settings}
+          fontFamily={fontFamily}
+          setFontFamily={setFontFamily}
+        />
       </Container>
     )
   }

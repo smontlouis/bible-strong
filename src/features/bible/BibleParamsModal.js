@@ -1,8 +1,8 @@
 import React from 'react'
-import Modal from 'react-native-modal'
 import styled from '@emotion/native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { FlatList } from 'react-native'
+import { Modalize } from 'react-native-modalize'
 
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
@@ -16,14 +16,7 @@ import IconLongPress from '~assets/images/IconLongPress'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import fonts from '~helpers/fonts'
-
-const StylizedModal = styled(Modal)({
-  backgroundColor: 'transparent',
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  justifyContent: 'center',
-  paddingTop: getStatusBarHeight() + 10,
-})
+import { usePrevious } from '~helpers/usePrevious'
 
 const Container = styled.View(({ theme }) => ({
   width: '100%',
@@ -110,6 +103,19 @@ const BibleParamsModal = ({
     commentsDisplay,
   },
 }) => {
+  const isPrevOpen = usePrevious(isOpen)
+  const modalRef = React.useRef(null)
+
+  React.useEffect(() => {
+    if (isPrevOpen !== isOpen) {
+      if (isOpen) {
+        modalRef?.current?.open()
+      } else {
+        modalRef?.current?.close()
+      }
+    }
+  }, [isPrevOpen, isOpen])
+
   const onOpenCommentaire = async () => {
     const exists = await getIfDatabaseExists('commentaires-mhy')
 
@@ -126,15 +132,34 @@ const BibleParamsModal = ({
   const fontsView = React.useRef()
 
   return (
-    <StylizedModal
-      isVisible={isOpen}
-      onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-      animationIn="slideInDown"
-      animationOut="slideOutUp"
-      backdropOpacity={0.2}
+    <Modalize
+      ref={modalRef}
+      onClose={onClosed}
+      modalStyle={{
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: 400,
+        width: '100%',
+      }}
+      adjustToContentHeight
     >
       <Container>
+        <HalfContainer border>
+          <Text flex={5}>Commentaires</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {commentsDisplayToString[commentsDisplay]}
+          </Text>
+          <TouchableIcon
+            isSelected={!commentsDisplay}
+            name="x-square"
+            onPress={() => setSettingsCommentaires(false)}
+          />
+          <TouchableIcon
+            isSelected={commentsDisplay}
+            name="archive"
+            onPress={onOpenCommentaire}
+          />
+        </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Alignement du texte</Text>
           <Text marginLeft={5} fontSize={12} bold marginRight={10}>
@@ -215,22 +240,6 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>Commentaires</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {commentsDisplayToString[commentsDisplay]}
-          </Text>
-          <TouchableIcon
-            isSelected={!commentsDisplay}
-            name="x-square"
-            onPress={() => setSettingsCommentaires(false)}
-          />
-          <TouchableIcon
-            isSelected={commentsDisplay}
-            name="archive"
-            onPress={onOpenCommentaire}
-          />
-        </HalfContainer>
-        <HalfContainer border>
           <Text flex={5}>Affichage des strongs</Text>
           <Text marginLeft={5} fontSize={12} bold>
             {pressToString[press]}
@@ -251,6 +260,11 @@ const BibleParamsModal = ({
         <Box>
           <FlatList
             ref={fontsView}
+            ListHeaderComponent={
+              <Text marginLeft={20} marginRight={50}>
+                Polices
+              </Text>
+            }
             horizontal
             getItemLayout={(data, index) => ({
               length: 100,
@@ -292,7 +306,7 @@ const BibleParamsModal = ({
           </Button>
         </HalfContainer>
       </Container>
-    </StylizedModal>
+    </Modalize>
   )
 }
 

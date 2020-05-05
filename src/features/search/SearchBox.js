@@ -1,4 +1,5 @@
 import React from 'react'
+import { Keyboard } from 'react-native'
 import { connectSearchBox } from 'react-instantsearch-native'
 
 import SearchInput from '~common/SearchInput'
@@ -17,11 +18,11 @@ const SearchBox = ({ refine, debouncedValue, value, onChange }) => {
       onChangeText={onChange}
       placeholder="Recherche par mot, phrase ou strong"
       onDelete={() => {
+        Keyboard.dismiss()
         onChange('')
       }}
-      autoFocus
       // onSubmitEditing={() => refine(searchValue)}
-      returnKeyType="send"
+      returnKeyType="search"
     />
   )
 }

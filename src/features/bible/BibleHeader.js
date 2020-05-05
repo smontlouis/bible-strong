@@ -161,54 +161,53 @@ const Header = ({
         </LinkBox>
       )}
       {!isSelectionMode && !isFullscreen && (
-        <PopOverMenu
-          element={
-            <Box
-              flexDirection="row"
-              alignItems="center"
-              justifyContent="center"
-              height={50}
-              width={50}
-              style={{
-                opacity: isFullscreen ? 0 : 1,
-              }}
-            >
-              <FeatherIcon name="more-vertical" size={18} />
-            </Box>
-          }
-          popover={
-            <>
-              <MenuOption
-                onSelect={
-                  isParallel ? removeAllParallelVersions : addParallelVersion
-                }
+        <>
+          <LinkBox onPress={onBibleParamsClick} style={{ width: 50 }}>
+            <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
+          </LinkBox>
+          <PopOverMenu
+            element={
+              <Box
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="center"
+                height={60}
+                width={50}
+                style={{
+                  opacity: isFullscreen ? 0 : 1,
+                }}
               >
-                <Box row alignItems="center">
-                  <ParallelIcon color={isParallel ? 'primary' : 'default'} />
-                  <Text marginLeft={10}>Affichage parallèle</Text>
-                </Box>
-              </MenuOption>
-              <MenuOption onSelect={() => navigation.navigate('History')}>
-                <Box row alignItems="center">
-                  <MaterialIcon name="history" size={20} />
-                  <Text marginLeft={10}>Historique</Text>
-                </Box>
-              </MenuOption>
-              <MenuOption onSelect={() => updateState('isFullscreen', true)}>
-                <Box row alignItems="center">
-                  <MaterialIcon name="fullscreen" size={20} />
-                  <Text marginLeft={10}>Plein écran</Text>
-                </Box>
-              </MenuOption>
-              <MenuOption onSelect={onBibleParamsClick}>
-                <Box row alignItems="center">
-                  <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
-                  <Text marginLeft={10}>Mise en forme</Text>
-                </Box>
-              </MenuOption>
-            </>
-          }
-        />
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            }
+            popover={
+              <>
+                <MenuOption
+                  onSelect={
+                    isParallel ? removeAllParallelVersions : addParallelVersion
+                  }
+                >
+                  <Box row alignItems="center">
+                    <ParallelIcon color={isParallel ? 'primary' : 'default'} />
+                    <Text marginLeft={10}>Affichage parallèle</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={() => navigation.navigate('History')}>
+                  <Box row alignItems="center">
+                    <MaterialIcon name="history" size={20} />
+                    <Text marginLeft={10}>Historique</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={() => updateState('isFullscreen', true)}>
+                  <Box row alignItems="center">
+                    <MaterialIcon name="fullscreen" size={20} />
+                    <Text marginLeft={10}>Plein écran</Text>
+                  </Box>
+                </MenuOption>
+              </>
+            }
+          />
+        </>
       )}
     </AnimatableHeaderBox>
   )

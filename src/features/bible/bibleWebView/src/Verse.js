@@ -8,7 +8,7 @@ import {
   NAVIGATE_TO_VERSE_NOTES,
   TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
-  CONSOLE_LOG
+  CONSOLE_LOG,
 } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
@@ -30,26 +30,26 @@ function convertHex(hex, opacity) {
 const VerseText = styled('span')(
   ({ isParallel, settings: { fontSizeScale } }) => ({
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale)
+    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
   })
 )
 
 const NumberText = styled('span')(
   ({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
-    fontSize: scaleFontSize(14, fontSizeScale)
+    fontSize: scaleFontSize(14, fontSizeScale),
   })
 )
 
 const zoom = keyframes({
   '0%': {
-    background: convertHex('#95afc0', 0)
+    background: convertHex('#95afc0', 0),
   },
   '50%': {
-    background: convertHex('#95afc0', 30)
+    background: convertHex('#95afc0', 30),
   },
   '100%': {
-    background: convertHex('#95afc0', 0)
-  }
+    background: convertHex('#95afc0', 0),
+  },
 })
 
 const ContainerText = styled('span')(
@@ -59,7 +59,7 @@ const ContainerText = styled('span')(
     isSelected,
     highlightedColor,
     isVerseToScroll,
-    settings: { theme, colors, fontFamily }
+    settings: { theme, colors, fontFamily },
   }) => {
     let background = 'transparent'
 
@@ -82,14 +82,14 @@ const ContainerText = styled('span')(
       WebkitUserSelect: 'none',
       ...(isVerseToScroll
         ? {
-            animation: `0.75s ease 0s 3 normal none running ${zoom}`
+            animation: `0.75s ease 0s 3 normal none running ${zoom}`,
           }
         : {}),
       ...(isFocused === false
         ? {
-            opacity: 0.5
+            opacity: 0.5,
           }
-        : {})
+        : {}),
     }
   }
 )
@@ -98,18 +98,18 @@ const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
   display: textDisplay,
   ...(textDisplay === 'block'
     ? {
-        marginBottom: '5px'
+        marginBottom: '5px',
       }
-    : {})
+    : {}),
 }))
 
 const Spacer = styled('div')(() => ({
-  marginTop: 5
+  marginTop: 5,
 }))
 
 class Verse extends Component {
   state = {
-    isTouched: false
+    isTouched: false,
   }
 
   componentDidMount() {
@@ -124,11 +124,11 @@ class Verse extends Component {
 
   navigateToVerseNotes = () => {
     const {
-      verse: { Livre, Chapitre, Verset }
+      verse: { Livre, Chapitre, Verset },
     } = this.props
     dispatch({
       type: NAVIGATE_TO_VERSE_NOTES,
-      payload: `${Livre}-${Chapitre}-${Verset}`
+      payload: `${Livre}-${Chapitre}-${Verset}`,
     })
   }
 
@@ -137,15 +137,15 @@ class Verse extends Component {
       type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
       params: {
         ...additionnalParams,
-        verse: this.props.verse
-      }
+        verse: this.props.verse,
+      },
     })
   }
 
   navigateToNote = id => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_NOTE,
-      payload: id
+      payload: id,
     })
   }
 
@@ -153,7 +153,7 @@ class Verse extends Component {
     const {
       isSelectedMode,
       isSelectionMode,
-      settings: { press }
+      settings: { press },
     } = this.props
 
     // If selection mode verse, always toggle on press
@@ -178,7 +178,7 @@ class Verse extends Component {
   onLongPress = () => {
     const {
       settings: { press },
-      isSelectionMode
+      isSelectionMode,
     } = this.props
 
     // If selection mode, do nothing on long press
@@ -200,11 +200,11 @@ class Verse extends Component {
 
   toggleSelectVerse = () => {
     const {
-      verse: { Livre, Chapitre, Verset }
+      verse: { Livre, Chapitre, Verset },
     } = this.props
     dispatch({
       type: TOGGLE_SELECTED_VERSE,
-      payload: `${Livre}-${Chapitre}-${Verset}`
+      payload: `${Livre}-${Chapitre}-${Verset}`,
     })
   }
 
@@ -254,7 +254,7 @@ class Verse extends Component {
       isSelectedMode,
       isFocused,
       isParallel,
-      isParallelVerse
+      isParallelVerse,
     } = this.props
     const { isTouched } = this.state
 
@@ -264,12 +264,15 @@ class Verse extends Component {
       return (
         <div style={{ display: 'flex' }}>
           {parallelVerse.map((p, i) => {
+            if (!p.verse) {
+              return null
+            }
             return (
               <div
                 style={{
                   flex: 1,
                   padding: '5px 0',
-                  paddingLeft: i === 0 ? '0px' : '10px'
+                  paddingLeft: i === 0 ? '0px' : '10px',
                 }}
               >
                 <Verse
