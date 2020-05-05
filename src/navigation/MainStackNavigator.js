@@ -37,6 +37,8 @@ import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
 import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
 import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
 import PlanSelectScreen from '~features/plans/PlanSelectScreen'
+import TimelineScreen from '~features/timeline/TimelineScreen'
+import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
 
 export default createStackNavigator(
   {
@@ -72,11 +74,23 @@ export default createStackNavigator(
     NaveDetail: { screen: NaveDetailScreen },
     NaveWarning: { screen: NaveWarningScreen },
     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
-    Storybook: { screen: StorybookScreen },
+    Storybook: {
+      screen: StorybookScreen,
+      navigationOptions: {
+        gesturesEnabled: false,
+      },
+    },
     Plan: { screen: PlanScreen },
     Plans: { screen: PlanSelectScreen },
     MyPlanList: { screen: MyPlanListScreen },
     PlanSlice: { screen: PlanSliceScreen },
+    Timeline: {
+      screen: TimelineScreen,
+      navigationOptions: {
+        gesturesEnabled: false,
+      },
+    },
+    TimelineHome: { screen: TimelineHomeScreen },
   },
   {
     headerMode: 'none',

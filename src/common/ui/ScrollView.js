@@ -5,22 +5,24 @@ import * as Animatable from 'react-native-animatable'
 
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
-const ScrollView = styled.ScrollView(({ theme, orientation }) => ({
-  backgroundColor: theme.colors.reverse,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  maxWidth: orientation.maxWidth,
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '100%',
+const ScrollView = styled.ScrollView(
+  ({ theme, orientation, backgroundColor }) => ({
+    backgroundColor: theme.colors[backgroundColor] || theme.colors.reverse,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    maxWidth: orientation.maxWidth,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '100%',
 
-  ...(orientation.tablet && {
-    marginTop: 20,
-    marginBottom: 50,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  }),
-}))
+    ...(orientation.tablet && {
+      marginTop: 20,
+      marginBottom: 50,
+      borderBottomLeftRadius: 30,
+      borderBottomRightRadius: 30,
+    }),
+  })
+)
 
 const fadeIn = {
   from: {

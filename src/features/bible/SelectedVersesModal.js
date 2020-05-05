@@ -11,6 +11,7 @@ import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
+import Box from '~common/ui/Box'
 import getVersesRef from '~helpers/getVersesRef'
 import { cleanParams } from '~helpers/utils'
 import { usePrevious } from '~helpers/usePrevious'
@@ -259,8 +260,6 @@ const VersesModal = ({
                 paddingHorizontal: 20,
                 paddingVertical: 10,
                 overflow: 'visible',
-                justifyContent: 'center',
-                alignItems: 'center',
               }}
             >
               <TouchableChip

@@ -1,3 +1,12 @@
+Object.fromEntries =
+  Object.fromEntries ||
+  function(arr) {
+    return arr.reduce(function(acc, curr) {
+      acc[curr[0]] = curr[1]
+      return acc
+    }, {})
+  }
+
 import { AppRegistry, Platform } from 'react-native'
 import App from './App'
 

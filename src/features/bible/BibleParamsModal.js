@@ -257,7 +257,7 @@ const BibleParamsModal = ({
             size={25}
           />
         </HalfContainer>
-        <Box>
+        <Box height={60}>
           <FlatList
             ref={fontsView}
             ListHeaderComponent={
