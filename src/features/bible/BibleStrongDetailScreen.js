@@ -13,6 +13,8 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import { MAX_WIDTH } from '~helpers/useDimensions'
+import MultipleTagsModal from '~common/MultipleTagsModal'
+import TagList from '~common/TagList'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -61,6 +63,7 @@ class BibleStrongDetailScreen extends React.Component {
     strongReference: null,
     versesCountByBook: [],
     concordanceLoading: true,
+    multipleTagsItem: false,
   }
 
   componentDidMount() {
@@ -148,6 +151,8 @@ class BibleStrongDetailScreen extends React.Component {
     })
   }
 
+  setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
+
   render() {
     if (this.state.error) {
       return (
@@ -171,6 +176,7 @@ class BibleStrongDetailScreen extends React.Component {
 
     const {
       strongReference,
+      multipleTagsItem,
       strongReference: {
         Code,
         Hebreu,
@@ -183,6 +189,8 @@ class BibleStrongDetailScreen extends React.Component {
         LSG,
       },
     } = this.state
+
+    const { tags } = this.props
 
     return (
       <Container>
@@ -208,6 +216,25 @@ class BibleStrongDetailScreen extends React.Component {
                     </Text>
                   )}
                 </Text>
+              </Touchable>
+              <Touchable
+                onPress={() =>
+                  this.setMultipleTagsItem({
+                    id: Code,
+                    title: Mot,
+                    entity: Grec ? 'strongsGrec' : 'strongsHebreu',
+                  })
+                }
+              >
+                <FeatherIcon
+                  style={{
+                    paddingTop: 10,
+                    paddingHorizontal: 5,
+                    marginRight: 10,
+                  }}
+                  name="tag"
+                  size={20}
+                />
               </Touchable>
               <Touchable onPress={this.shareContent}>
                 <FeatherIcon
@@ -239,6 +266,12 @@ class BibleStrongDetailScreen extends React.Component {
         </Box>
         <ScrollView style={{ paddingLeft: 20, paddingRight: 20, flex: 1 }}>
           <Box>
+            {tags && (
+              <Box marginBottom={10}>
+                <TagList tags={tags} />
+              </Box>
+            )}
+
             {!!Hebreu && (
               <ViewItem>
                 <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
@@ -290,9 +323,25 @@ class BibleStrongDetailScreen extends React.Component {
             )}
           </Box>
         </ScrollView>
+        <MultipleTagsModal
+          multiple
+          item={multipleTagsItem}
+          onClosed={() => this.setMultipleTagsItem(false)}
+        />
       </Container>
     )
   }
 }
 
-export default compose(waitForStrongDB, connect())(BibleStrongDetailScreen)
+export default compose(
+  waitForStrongDB,
+  connect((state, props) => {
+    const { strongReference, reference, book } = props.navigation.state.params
+    const code = strongReference?.Code || reference
+
+    const strongPart = book > 39 ? 'strongsGrec' : 'strongsHebreu'
+    return {
+      tags: state.user.bible[strongPart][code]?.tags,
+    }
+  })
+)(BibleStrongDetailScreen)

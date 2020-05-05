@@ -8,6 +8,16 @@ export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
 export const UPDATE_TAG = 'user/UPDATE_TAG'
 export const REMOVE_TAG = 'user/REMOVE_TAG'
 
+const entitiesArray = [
+  'highlights',
+  'notes',
+  'studies',
+  'strongsHebreu',
+  'strongsGrec',
+  'words',
+  'naves',
+]
+
 export default produce((draft, action) => {
   switch (action.type) {
     case ADD_TAG: {
@@ -21,7 +31,6 @@ export default produce((draft, action) => {
     }
     case UPDATE_TAG: {
       draft.bible.tags[action.id].name = action.value
-      const entitiesArray = ['highlights', 'notes', 'studies']
 
       entitiesArray.forEach(ent => {
         const entities = draft.bible[ent]
@@ -37,8 +46,6 @@ export default produce((draft, action) => {
     }
     case REMOVE_TAG: {
       delete draft.bible.tags[action.payload]
-
-      const entitiesArray = ['highlights', 'notes', 'studies']
 
       entitiesArray.forEach(ent => {
         const entities = draft.bible[ent]
@@ -56,8 +63,7 @@ export default produce((draft, action) => {
 
       if (item.ids) {
         const hasTag =
-          draft.bible[item.entity][Object.keys(item.ids)[0]].tags &&
-          draft.bible[item.entity][Object.keys(item.ids)[0]].tags[tagId]
+          draft.bible[item.entity][Object.keys(item.ids)[0]]?.tags[tagId]
 
         Object.keys(item.ids).forEach(id => {
           // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
@@ -86,15 +92,34 @@ export default produce((draft, action) => {
           }
         })
       } else {
-        // DELETE OPERATION
+        if (!draft.bible[item.entity][item.id]) {
+          draft.bible[item.entity][item.id] = {
+            id: item.id,
+            title: item.title,
+            tags: {},
+          }
+        }
 
+        // DELETE OPERATION
         // eslint-disable-next-line no-lonely-if
-        if (
-          draft.bible[item.entity][item.id].tags &&
-          draft.bible[item.entity][item.id].tags[tagId]
-        ) {
+        if (draft.bible[item.entity][item.id]?.tags[tagId]) {
           delete draft.bible.tags[tagId][item.entity][item.id]
           delete draft.bible[item.entity][item.id].tags[tagId]
+
+          // If words / strongs / nave, delete unused entity
+          if (
+            ['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(
+              item.entity
+            )
+          ) {
+            const hasTags = Object.keys(draft.bible[item.entity][item.id].tags)
+              .length
+
+            if (!hasTags) {
+              delete draft.bible[item.entity][item.id]
+            }
+          }
+
           // ADD OPERATION
         } else {
           if (!draft.bible.tags[tagId][item.entity]) {

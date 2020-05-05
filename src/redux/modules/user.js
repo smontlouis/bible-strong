@@ -77,6 +77,10 @@ const initialState = {
     studies: {},
     tags: {},
     history: [],
+    strongsHebreu: {},
+    strongsGrec: {},
+    words: {},
+    naves: {},
     settings: {
       alignContent: 'justify',
       fontSizeScale: 0,

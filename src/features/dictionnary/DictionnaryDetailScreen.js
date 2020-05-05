@@ -3,7 +3,7 @@ import { Share } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 
 import Button from '~common/ui/Button'
@@ -21,6 +21,8 @@ import { setHistory } from '~redux/modules/user'
 import waitForDatabase from '~common/waitForDictionnaireDB'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import Snackbar from '~common/SnackBar'
+import MultipleTagsModal from '~common/MultipleTagsModal'
+import TagList from '~common/TagList'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -40,6 +42,8 @@ const DictionnaryDetailScreen = ({ navigation }) => {
   const dispatch = useDispatch()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
   const [canReadMore, setCanReadMore] = useState(false)
+  const [multipleTagsItem, setMultipleTagsItem] = useState(false)
+  const tags = useSelector(state => state.user.bible.words[word]?.tags)
 
   useEffect(() => {
     loadDictionnaireItem(word).then(result => {
@@ -131,6 +135,25 @@ const DictionnaryDetailScreen = ({ navigation }) => {
               {word}
             </Text>
           </Back>
+          <Link
+            onPress={() =>
+              setMultipleTagsItem({
+                id: word,
+                title: word,
+                entity: 'words',
+              })
+            }
+          >
+            <FeatherIcon
+              style={{
+                paddingTop: 10,
+                paddingHorizontal: 5,
+                marginRight: 10,
+              }}
+              name="tag"
+              size={20}
+            />
+          </Link>
           <Link onPress={() => {}}>
             <FeatherIcon
               style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
@@ -151,6 +174,11 @@ const DictionnaryDetailScreen = ({ navigation }) => {
         <TitleBorder />
       </Box>
       <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
+        {tags && (
+          <Box marginBottom={10}>
+            <TagList tags={tags} />
+          </Box>
+        )}
         {dictionnaireItem && dictionnaireItem.definition && (
           <StylizedHTMLView
             value={
@@ -169,6 +197,11 @@ const DictionnaryDetailScreen = ({ navigation }) => {
           </Box>
         )}
       </ScrollView>
+      <MultipleTagsModal
+        multiple
+        item={multipleTagsItem}
+        onClosed={() => setMultipleTagsItem(false)}
+      />
     </Container>
   )
 }

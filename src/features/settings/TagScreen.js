@@ -70,7 +70,16 @@ const TagScreen = ({ navigation }) => {
   const { item } = navigation.state.params
   const dispatch = useDispatch()
 
-  const { highlights, notes, studies, tag } = useSelector(state => ({
+  const {
+    highlights,
+    notes,
+    studies,
+    tag,
+    naves,
+    words,
+    strongsGrec,
+    strongsHebreu,
+  } = useSelector(state => ({
     highlights: item.highlights
       ? sortVersesByDate(
           Object.keys(item.highlights).reduce(
@@ -89,9 +98,31 @@ const TagScreen = ({ navigation }) => {
           .map(id => state.user.bible.studies[id])
           .filter(c => c)
       : [],
+    naves: item.naves
+      ? Object.keys(item.naves)
+          .map(id => state.user.bible.naves[id])
+          .filter(c => c)
+      : [],
+    words: item.words
+      ? Object.keys(item.words)
+          .map(id => state.user.bible.words[id])
+          .filter(c => c)
+      : [],
+    strongsHebreu: item.strongsHebreu
+      ? Object.keys(item.strongsHebreu)
+          .map(id => state.user.bible.strongsHebreu[id])
+          .filter(c => c)
+      : [],
+    strongsGrec: item.strongsGrec
+      ? Object.keys(item.strongsGrec)
+          .map(id => state.user.bible.strongsGrec[id])
+          .filter(c => c)
+      : [],
     tag: state.user.bible.tags[item.id],
   }))
   const [titlePrompt, setTitlePrompt] = React.useState(false)
+
+  console.log(naves, words, strongsHebreu, strongsGrec)
 
   return (
     <Container>

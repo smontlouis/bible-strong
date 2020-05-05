@@ -3,7 +3,7 @@ import { Share } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 
 import Button from '~common/ui/Button'
@@ -20,6 +20,8 @@ import { MAX_WIDTH } from '~helpers/useDimensions'
 import waitForDatabase from '~common/waitForNaveDB'
 import loadNaveItem from '~helpers/loadNaveItem'
 import Snackbar from '~common/SnackBar'
+import MultipleTagsModal from '~common/MultipleTagsModal'
+import TagList from '~common/TagList'
 
 const MAX_CHAR = 3000
 
@@ -39,6 +41,8 @@ const NaveDetailScreen = ({ navigation }) => {
   const dispatch = useDispatch()
   const [naveItem, setNaveItem] = useState(null)
   const [canReadMore, setCanReadMore] = useState(false)
+  const [multipleTagsItem, setMultipleTagsItem] = useState(false)
+  const tags = useSelector(state => state.user.bible.naves[name_lower]?.tags)
 
   useEffect(() => {
     loadNaveItem(name_lower).then(result => {
@@ -136,6 +140,25 @@ const NaveDetailScreen = ({ navigation }) => {
               </Text>
             )}
           </Box>
+          <Link
+            onPress={() =>
+              setMultipleTagsItem({
+                id: naveItem.name_lower,
+                title: naveItem.name,
+                entity: 'naves',
+              })
+            }
+          >
+            <FeatherIcon
+              style={{
+                paddingTop: 10,
+                paddingHorizontal: 5,
+                marginRight: 10,
+              }}
+              name="tag"
+              size={20}
+            />
+          </Link>
           <Link onPress={() => {}}>
             <FeatherIcon
               style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
@@ -156,6 +179,11 @@ const NaveDetailScreen = ({ navigation }) => {
         <TitleBorder />
       </Box>
       <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
+        {tags && (
+          <Box marginBottom={10}>
+            <TagList tags={tags} />
+          </Box>
+        )}
         {naveItem && naveItem.description && (
           <NaveHTMLView
             value={
@@ -172,6 +200,11 @@ const NaveDetailScreen = ({ navigation }) => {
           </Box>
         )}
       </ScrollView>
+      <MultipleTagsModal
+        multiple
+        item={multipleTagsItem}
+        onClosed={() => setMultipleTagsItem(false)}
+      />
     </Container>
   )
 }

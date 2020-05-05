@@ -258,4 +258,19 @@ export default {
       },
     }
   },
+  20: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          strongsHebreu: {},
+          strongsGrec: {},
+          words: {},
+          naves: {},
+        },
+      },
+    }
+  },
 }
