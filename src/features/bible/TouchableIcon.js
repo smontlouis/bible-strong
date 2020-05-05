@@ -32,9 +32,15 @@ export default class TabBarIcon extends React.Component {
       noFlex = false,
       label,
       disabled,
+      ...props
     } = this.props
     return (
-      <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled}>
+      <Touchable
+        onPress={onPress}
+        noFlex={noFlex}
+        disabled={disabled}
+        {...props}
+      >
         <StyledIcon
           name={this.props.name}
           size={size}

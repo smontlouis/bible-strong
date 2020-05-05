@@ -35,6 +35,13 @@ const TagItem = ({ item, setOpen }) => {
   const notesNumber = item.notes && Object.keys(item.notes).length
   const studiesNumber = item.studies && Object.keys(item.studies).length
 
+  const strongsNumber =
+    item.strongsHebreu &&
+    Object.keys(item.strongsHebreu).length +
+      (item.strongsGrec && Object.keys(item.strongsGrec).length)
+  const wordsNumber = item.words && Object.keys(item.words).length
+  const navesNumber = item.naves && Object.keys(item.naves).length
+
   return (
     <Box>
       <Link route="Tag" params={{ item }}>
@@ -42,6 +49,27 @@ const TagItem = ({ item, setOpen }) => {
           <Box flex justifyContent="center">
             <Text bold>{item.name}</Text>
             <Box row>
+              {!!strongsNumber && (
+                <Chip>
+                  <Text fontSize={10} color="default">
+                    {strongsNumber} {`strong${highlightsNumber > 1 ? 's' : ''}`}
+                  </Text>
+                </Chip>
+              )}
+              {!!wordsNumber && (
+                <Chip>
+                  <Text fontSize={10} color="default">
+                    {wordsNumber} {`mot${wordsNumber > 1 ? 's' : ''}`}
+                  </Text>
+                </Chip>
+              )}
+              {!!navesNumber && (
+                <Chip>
+                  <Text fontSize={10} color="default">
+                    {navesNumber} {`nave${navesNumber > 1 ? 's' : ''}`}
+                  </Text>
+                </Chip>
+              )}
               {!!highlightsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">

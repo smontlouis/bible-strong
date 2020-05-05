@@ -8,6 +8,7 @@ import loadNaveBySearch from '~helpers/loadNaveBySearch'
 import { useWaitForDatabase } from '~common/waitForNaveDB'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
+import NaveResultItem from './NaveResultItem'
 
 const hideIfNoDatabase = WrappedComponent => props => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
@@ -51,50 +52,11 @@ const LexiqueResultsWidget = ({ searchValue }) => {
       {results.slice(0, limit).map(ref => {
         const { name_lower, name } = ref
         return (
-          <Link
+          <NaveResultItem
             key={name_lower}
-            route="NaveDetail"
-            params={{ name_lower, name }}
-          >
-            <Box
-              center
-              rounded
-              marginRight={10}
-              marginBottom={10}
-              height={height}
-              paddingHorizontal={10}
-            >
-              <Box
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  height,
-                  borderRadius: 3,
-                }}
-              >
-                <LinearGradient
-                  start={[0.1, 0.2]}
-                  style={{ height }}
-                  colors={[color1, color2]}
-                />
-              </Box>
-              <Box
-                backgroundColor="rgba(0,0,0,0.1)"
-                paddingHorizontal={3}
-                paddingVertical={2}
-                rounded
-              >
-                <Text fontSize={7} style={{ color: 'white' }}>
-                  Nave
-                </Text>
-              </Box>
-              <Text title fontSize={14} style={{ color: 'white' }}>
-                {name}
-              </Text>
-            </Box>
-          </Link>
+            name={name}
+            name_lower={name_lower}
+          />
         )
       })}
       {results.length > limit && (

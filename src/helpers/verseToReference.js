@@ -27,7 +27,7 @@ const range = (start: number, end: number) => {
 // [1-1-1, 1-1-3, 1-1-4, 1-1-5]   => Genèse 1:1,3-5
 // {1-1-1: true, 1-1-2: true}
 const verseToReference = (v, options = {}) => {
-  if (!v) return ''
+  if (!v || !Object.keys(v).length) return ''
 
   let verses = v
 

@@ -155,7 +155,6 @@ class BibleViewer extends Component {
     if (settings.commentsDisplay) {
       const comments = await loadMhyComments(book.Numero, chapter)
       this.setState({ comments: JSON.parse(comments.commentaires) })
-      // console.log('Comments: ', this.state.comments)
     } else if (this.state.comments) {
       this.setState({ comments: null })
     }

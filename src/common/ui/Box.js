@@ -1,49 +1,68 @@
 import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import Animated from 'react-native-reanimated'
 
 const Box = styled.View(props => {
   return {
     // container
-    position: props.position,
-    top: props.top,
-    left: props.left,
-    right: props.right,
-    bottom: props.bottom,
-    padding: props.padding,
-    paddingVertical: props.paddingVertical,
-    paddingHorizontal: props.paddingHorizontal,
-    margin: props.margin,
+    position: props.position ?? props.pos,
+    top: props.top ?? props.t,
+    left: props.left ?? props.l,
+    right: props.right ?? props.r,
+    bottom: props.bottom ?? props.b,
+
+    padding: props.padding ?? props.p,
+    paddingTop: props.paddingTop ?? props.pt,
+    paddingLeft: props.paddingLeft ?? props.pl,
+    paddingRight: props.paddingRight ?? props.pr,
+    paddingBottom: props.paddingBottom ?? props.pb,
+    paddingVertical: props.paddingVertical ?? props.py,
+    paddingHorizontal: props.paddingHorizontal ?? props.px,
+
+    margin: props.margin ?? props.m,
+    marginTop: props.marginTop ?? props.mt,
+    marginLeft: props.marginLeft ?? props.ml,
+    marginBottom: props.marginBottom ?? props.mb,
+    marginRight: props.marginRight ?? props.mr,
+    marginVertical: props.marginVertical ?? props.my,
+    marginHorizontal: props.marginHorizontal ?? props.mx,
+
     borderWidth: props.borderWidth,
-    borderColor: props.theme.colors[props.borderColor] || props.borderColor,
+    borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
+    transform: props.transform,
+    borderRadius: props.borderRadius,
+    borderTopLeftRadius: props.borderTopLeftRadius,
+    borderTopRightRadius: props.borderTopRightRadius,
+    borderBottomLeftRadius: props.borderBottomLeftRadius,
+    borderBottomRightRadius: props.borderBottomRightRadius,
 
     overflow: props.overflow ? 'visible' : 'hidden',
-    width: props.width,
-    maxWidth: props.maxWidth,
-    minWidth: props.minWidth,
-    minHeight: props.minHeight,
-    height: props.height,
+    width: props.width ?? props.w,
+    maxWidth: props.maxWidth ?? props.maxW,
+    minWidth: props.minWidth ?? props.minW,
+    minHeight: props.minHeight ?? props.minH,
+    height: props.height ?? props.h,
     // flex props
     flexGrow: props.grow === true ? 1 : props.grow,
-    flexShrink: props.shrink || 0,
-    flexBasis: props.basis || 'auto',
+    flexShrink: props.shrink ?? 0,
+    flexBasis: props.basis ?? 'auto',
     flex: props.flex === true ? 1 : props.flex,
-    justifyContent: props.justifyContent || (props.center && 'center'),
-    alignItems: props.alignItems || (props.center && 'center'),
-    alignContent: props.alignContent || 'flex-start',
+    justifyContent: props.justifyContent ?? (props.center && 'center'),
+    alignItems: props.alignItems ?? (props.center && 'center'),
+    alignContent: props.alignContent ?? 'flex-start',
     alignSelf: props.alignSelf,
     // shorthands
     flexWrap:
-      (props.wrap && 'wrap') ||
-      (props.wrapReverse && 'wrap-reverse') ||
+      (props.wrap && 'wrap') ??
+      (props.wrapReverse && 'wrap-reverse') ??
       'nowrap',
     flexDirection:
       (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
 
-    opacity: props.disabled ? 0.3 : props.opacity || 1,
+    opacity: props.disabled ? 0.3 : props.opacity ?? 1,
 
-    backgroundColor: props.theme.colors[props.backgroundColor]
-      ? props.theme.colors[props.backgroundColor]
-      : props.backgroundColor,
+    backgroundColor: props.theme.colors[props.backgroundColor ?? props.bg]
+      ? props.theme.colors[props.backgroundColor ?? props.bg]
+      : props.backgroundColor ?? props.bg,
 
     ...(props.grey && {
       backgroundColor: props.theme.colors.lightGrey,
@@ -73,8 +92,15 @@ const Box = styled.View(props => {
       height: props.size,
     }),
 
+    ...(props.absoluteFill && {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      top: 0,
+    }),
+
     ...(props.lightShadow && {
-      backgroundColor: props.theme.colors.reverse,
       shadowColor: 'rgb(89,131,240)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
@@ -85,4 +111,6 @@ const Box = styled.View(props => {
   }
 })
 
-export default withTheme(Box)
+export const AnimatedBox = Animated.createAnimatedComponent(Box)
+
+export default Box

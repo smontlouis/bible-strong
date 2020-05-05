@@ -25,6 +25,9 @@ import truncate from '~helpers/truncate'
 import TagList from '~common/TagList'
 import StudyItem from '~features/studies/StudyItem'
 import books from '~assets/bible_versions/books-desc'
+import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
+import NaveResultItem from '~features/nave/NaveResultItem'
+import DictionnaryResultItem from '~features/dictionnary/DictionnaryResultItem'
 
 const NoteItem = ({ item }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
@@ -122,8 +125,6 @@ const TagScreen = ({ navigation }) => {
   }))
   const [titlePrompt, setTitlePrompt] = React.useState(false)
 
-  console.log(naves, words, strongsHebreu, strongsGrec)
-
   return (
     <Container>
       <Header
@@ -139,11 +140,77 @@ const TagScreen = ({ navigation }) => {
         }
       />
       <ScrollView>
-        {!highlights.length && !notes.length && !studies.length && (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message="Vous n'avez rien enregistré avec cette étiquette..."
-          />
+        {!highlights.length &&
+          !notes.length &&
+          !studies.length &&
+          !naves.length &&
+          !words.length &&
+          !strongsGrec.length &&
+          !strongsHebreu.length && (
+            <Empty
+              source={require('~assets/images/empty.json')}
+              message="Vous n'avez rien enregistré avec cette étiquette..."
+            />
+          )}
+        {(!!strongsGrec.length || !!strongsHebreu.length) && (
+          <Box>
+            <Text padding={20} fontSize={20} title>
+              Strongs
+            </Text>
+            <Box row wrap px={20}>
+              {strongsGrec.map(s => {
+                return (
+                  <LexiqueResultItem
+                    key={s.id + s.title}
+                    id={s.id}
+                    title={s.title}
+                    variant="grec"
+                  />
+                )
+              })}
+              {strongsHebreu.map(s => {
+                return (
+                  <LexiqueResultItem
+                    key={s.id + s.title}
+                    id={s.id}
+                    title={s.title}
+                    variant="hebreu"
+                  />
+                )
+              })}
+            </Box>
+          </Box>
+        )}
+        {!!naves.length && (
+          <Box>
+            <Text padding={20} fontSize={20} title>
+              Thèmes nave
+            </Text>
+            <Box row wrap px={20}>
+              {naves.map(s => {
+                return (
+                  <NaveResultItem
+                    key={s.id}
+                    name_lower={s.id}
+                    name={s.title}
+                    variant="grec"
+                  />
+                )
+              })}
+            </Box>
+          </Box>
+        )}
+        {!!words.length && (
+          <Box>
+            <Text padding={20} fontSize={20} title>
+              Dictionnaire
+            </Text>
+            <Box row wrap px={20}>
+              {words.map(s => {
+                return <DictionnaryResultItem key={s.id} word={s.title} />
+              })}
+            </Box>
+          </Box>
         )}
         {!!highlights.length && (
           <Box>

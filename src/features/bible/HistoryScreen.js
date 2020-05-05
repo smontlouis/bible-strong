@@ -132,7 +132,7 @@ const HistoryItem = ({ item }) => {
           <Text bold>{name}</Text>
           <Box marginLeft="auto">
             <Chip color="quint">
-              <Text bold fontSize={8}>
+              <Text bold fontSize={8} color="white">
                 Nave
               </Text>
             </Chip>

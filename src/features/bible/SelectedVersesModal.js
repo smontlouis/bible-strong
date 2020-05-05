@@ -23,17 +23,14 @@ import verseToReference from '../../helpers/verseToReference'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
-  height: isSelectionMode ? 40 : 'auto',
   backgroundColor: theme.colors.reverse,
+  paddingTop: 10,
 
   ...(isSelectionMode && {
-    width: 250,
-    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingLeft: 10,
     paddingRight: 10,
+    paddingVertical: 30,
   }),
 }))
 
@@ -173,12 +170,10 @@ const VersesModal = ({
       modalStyle={{
         marginLeft: 'auto',
         marginRight: 'auto',
-        paddingTop: 10,
         maxWidth: 400,
         width: '100%',
 
         ...(isSelectionMode && {
-          height: 70,
           width: 250,
         }),
       }}
@@ -187,18 +182,12 @@ const VersesModal = ({
     >
       {isSelectionMode ? (
         <Container isSelectionMode={isSelectionMode}>
-          <TouchableIcon
-            name="x"
-            onPress={clearSelectedVerses}
-            color="reverse"
-            noFlex
-          />
-          <Text flex bold fontSize={15} textAlign="center" color="reverse">
+          <Text paddingTop={20} flex bold fontSize={15} textAlign="center">
             {selectedVersesTitle.toUpperCase()}
           </Text>
           <TouchableIcon
+            style={{ paddingTop: 15 }}
             name="arrow-right"
-            color="reverse"
             onPress={sendVerseData}
             noFlex
           />

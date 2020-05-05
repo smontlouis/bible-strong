@@ -63,7 +63,7 @@ export default produce((draft, action) => {
 
       if (item.ids) {
         const hasTag =
-          draft.bible[item.entity][Object.keys(item.ids)[0]]?.tags[tagId]
+          draft.bible[item.entity][Object.keys(item.ids)[0]]?.tags?.[tagId]
 
         Object.keys(item.ids).forEach(id => {
           // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
@@ -102,7 +102,7 @@ export default produce((draft, action) => {
 
         // DELETE OPERATION
         // eslint-disable-next-line no-lonely-if
-        if (draft.bible[item.entity][item.id]?.tags[tagId]) {
+        if (draft.bible[item.entity][item.id]?.tags?.[tagId]) {
           delete draft.bible.tags[tagId][item.entity][item.id]
           delete draft.bible[item.entity][item.id].tags[tagId]
 

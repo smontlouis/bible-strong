@@ -23,10 +23,10 @@ const VideoSlice = ({ title, description, url }: VideoSliceProps) => {
         height={iframeHeight}
         width={iframeWidth}
         videoId={videoId}
-        onChangeState={event => console.log(event)}
-        onReady={() => console.log('ready')}
-        onError={e => console.log(e)}
-        onPlaybackQualityChange={q => console.log(q)}
+        // onChangeState={event => console.log(event)}
+        // onReady={() => console.log('ready')}
+        // onError={e => console.log(e)}
+        // onPlaybackQualityChange={q => console.log(q)}
         placeholder={title}
       />
     </Box>
