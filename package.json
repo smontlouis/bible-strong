@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "10.5.1",
+  "version": "10.5.2",
   "scripts": {
     "start": "react-native start",
     "android": "react-native run-android --variant=devDebug --appIdSuffix=dev",
