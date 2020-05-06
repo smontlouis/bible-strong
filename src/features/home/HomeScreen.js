@@ -91,17 +91,14 @@ const HomeScreen = () => {
               >
                 FAQ
               </Button>
-              {/* <Button
+            </Box>
+          </Box>
+          {Platform.OS === 'android' && (
+            <Box background p={20} pt={0}>
+              <Button
                 color="#7ed6df"
                 title="Soutenir"
-                {...(Platform.OS === 'android'
-                  ? {
-                      route: 'Support',
-                    }
-                  : {
-                      onPress: () =>
-                        Linking.openURL('https://www.paypal.me/smontlouis'),
-                    })}
+                route="Support"
                 leftIcon={
                   <FeatherIcon
                     name="thumbs-up"
@@ -110,29 +107,14 @@ const HomeScreen = () => {
                     style={{ marginRight: 10 }}
                   />
                 }
-              /> */}
+              />
             </Box>
-          </Box>
-          {/* <Box background padding={20} paddingTop={0}>
-            <Button
-              color="#2ecc71"
-              route="FAQ"
-              title="Foire aux questions"
-              leftIcon={
-                <FeatherIcon
-                  name="help-circle"
-                  size={20}
-                  color="white"
-                  style={{ marginRight: 10 }}
-                />
-              }
-            />
-          </Box> */}
-          <Box background padding={20} paddingTop={0}>
-            <Button route="TimelineHome">Timeline</Button>
-          </Box>
+          )}
           {__DEV__ && (
             <>
+              <Box background padding={20} paddingTop={0}>
+                <Button route="TimelineHome">Timeline</Button>
+              </Box>
               <Box background padding={20} paddingTop={0}>
                 <Button route="Storybook">Storybook</Button>
               </Box>

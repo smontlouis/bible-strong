@@ -10473,6 +10473,11 @@ htmlparser2@^3.3.0:
     inherits "^2.0.1"
     readable-stream "^3.1.1"
 
+htmlsave@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/htmlsave/-/htmlsave-1.1.1.tgz#2b856f142287d4d1294db964bd33f6662344933f"
+  integrity sha512-PivHidv8YvAc0SyvFdNPnBQqo8+F0NrICWfCklDaFbHf8+P5Zi3gD2DSDtdsmvokxcnou3pn/tU3uj1n3liyBQ==
+
 http-cache-semantics@^3.8.1:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/http-cache-semantics/-/http-cache-semantics-3.8.1.tgz#39b0e16add9b605bf0a9ef3d9daaf4843b4cacd2"

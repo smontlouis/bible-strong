@@ -37,6 +37,8 @@ const TitleBorder = styled.View(({ theme }) => ({
 
 const MAX_CHAR = 3000
 
+const htmlsave = require('htmlsave')
+
 const DictionnaryDetailScreen = ({ navigation }) => {
   const { word } = navigation.state.params || {}
   const dispatch = useDispatch()
@@ -53,7 +55,9 @@ const DictionnaryDetailScreen = ({ navigation }) => {
 
       setDictionnaireItem({
         ...result,
-        definitionShort: truncHTML(result.definition, MAX_CHAR).html,
+        definitionShort: htmlsave.truncate(result.definition, MAX_CHAR, {
+          breakword: false,
+        }),
       })
 
       dispatch(

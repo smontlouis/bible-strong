@@ -27,7 +27,7 @@ const Text = styled.Text(props => {
     margin: props.margin ?? props.m,
     marginTop: props.marginTop ?? props.mt,
     marginLeft: props.marginLeft ?? props.ml,
-    marginBottom: props.marginRight ?? props.mb,
+    marginBottom: props.marginBottom ?? props.mb,
     marginRight: props.marginRight ?? props.mr,
     borderWidth: props.borderWidth,
     borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
