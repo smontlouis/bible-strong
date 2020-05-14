@@ -110,9 +110,11 @@ const CurrentYear = ({
             color: 'white',
             width: 120,
             textAlign: 'center',
-            textAlignVertical: 'center',
             fontWeight: 'bold',
-            lineHeight: 1,
+            ...(Platform.OS === 'android' && {
+              lineHeight: 1,
+              textAlignVertical: 'center',
+            }),
           }}
         />
       </Box>

@@ -6,17 +6,21 @@ import TimelineEvent from './TimelineEvent'
 import {
   TimelineSection as TimelineSectionProps,
   ShallowTimelineSection,
+  TimelineEvent as TimelineEventProps,
 } from './types'
 import CurrentYear from './CurrentYear'
 import PrevSectionImage from './PrevSectionImage'
 import NextSectionImage from './NextSectionImage'
-import { Value } from 'react-native-reanimated'
+import { Value, useCode, debug } from 'react-native-reanimated'
 import TimelineHeader from './TimelineHeader'
 import Line from './Line'
 import Datebar from './Datebar'
 import CurrentSectionImage from './CurrentSectionImage'
 import { Modalize } from 'react-native-modalize'
 import SectionDetailsModal from './SectionDetailsModal'
+import EventDetailsModal from './EventDetailsModal'
+import { useValues } from 'react-native-redash'
+import { usePrevious } from '~helpers/usePrevious'
 
 interface Props extends TimelineSectionProps {
   onPrev: () => void
@@ -50,8 +54,11 @@ const Timeline = ({
   prevEvent,
   nextEvent,
 }: Props) => {
-  const isReady = new Value(0)
+  const [isReady] = useValues([0], [isCurrent])
   const modalRef = React.useRef<Modalize>(null)
+  const eventModalRef = React.useRef<Modalize>(null)
+  const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
+
   const onTimelineDetailsOpen = () => {
     modalRef.current?.open()
   }
@@ -122,6 +129,8 @@ const Timeline = ({
                 key={i}
                 yearsToPx={yearsToPx}
                 calculateEventWidth={calculateEventWidth}
+                eventModalRef={eventModalRef}
+                setEvent={setEvent}
                 {...event}
               />
             ))}
@@ -163,6 +172,7 @@ const Timeline = ({
           interval,
         }}
       />
+      <EventDetailsModal modalRef={eventModalRef} event={event} />
     </Box>
   )
 }

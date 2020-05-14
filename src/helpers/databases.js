@@ -83,4 +83,12 @@ export const databases = {
     fileSize: 34941952,
     path: `${sqliteDirPath}/strong.sqlite`,
   },
+  TIMELINE: {
+    id: 'TIMELINE',
+    name: 'Chronologie de la Bible',
+    desc:
+      'Lexique contenu les strongs grecs et hébreu avec leur concordance et définitions',
+    fileSize: 3187836,
+    path: `${FileSystem.documentDirectory}bible-timeline-events.json`,
+  },
 }

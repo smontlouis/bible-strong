@@ -12,6 +12,7 @@ import {
   usePanGestureHandler,
   timing,
   delay,
+  useValues,
 } from 'react-native-redash'
 import { wp } from '~helpers/utils'
 
@@ -243,10 +244,7 @@ const withScrollX = ({
                 lessOrEq(state.position, add(lowerBound, -100))
               ),
               [
-                cond(not(onPullTriggered), [
-                  call([], () => console.log('NEXT')),
-                  set(onPullTriggered, 1),
-                ]),
+                cond(not(onPullTriggered), [set(onPullTriggered, 1)]),
                 set(config.toValue, add(lowerBound, -wp(100))),
                 reTiming(
                   clock,
@@ -270,10 +268,7 @@ const withScrollX = ({
                 greaterOrEq(state.position, 100)
               ),
               [
-                cond(not(onPullTriggered), [
-                  call([], () => console.log('PREV')),
-                  set(onPullTriggered, 1),
-                ]),
+                cond(not(onPullTriggered), [set(onPullTriggered, 1)]),
                 set(config.toValue, wp(100)),
                 reTiming(
                   clock,
@@ -441,7 +436,7 @@ export default memo(
   }: ScrollViewProps) => {
     const [containerHeight, setContainerHeight] = useState(0)
     const [containerWidth, setContainerWidth] = useState(0)
-    const opacity = new Value(0)
+    const [opacity] = useValues([0], [])
 
     const {
       gestureHandler,

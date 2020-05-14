@@ -42,4 +42,5 @@ export const databasesRef = {
   INTERLINEAIRE: storageRef.child('databases/interlineaire.sqlite'),
   NAVE: storageRef.child('databases/nave-fr.sqlite'),
   STRONG: storageRef.child('databases/strong.sqlite'),
+  TIMELINE: storageRef.child('databases/bible-timeline-events.json'),
 }

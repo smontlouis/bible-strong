@@ -131,6 +131,7 @@
     "react-native-splash-screen": "^3.2.0",
     "react-native-sqlite-storage": "^4.1.0",
     "react-native-svg": "9.13.3",
+    "react-native-tab-view": "^2.14.0",
     "react-native-unimodules": "~0.7.0",
     "react-native-webview": "^8.0.6",
     "react-native-zip-archive": "^5.0.1",
