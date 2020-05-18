@@ -7,7 +7,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 
 interface Props {
-  modalRef: React.RefObject<Modalize<any, any>>
+  modalRef: React.RefObject<Modalize>
   isPlanCompleted: boolean
 }
 

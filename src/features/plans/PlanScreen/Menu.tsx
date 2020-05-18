@@ -11,7 +11,7 @@ import { NavigationStackProp } from 'react-navigation-stack'
 import { NavigationParams } from 'react-navigation'
 
 interface Props {
-  modalRefDetails: React.RefObject<Modalize<any, any>>
+  modalRefDetails: React.RefObject<Modalize>
   planId: string
   navigation: NavigationStackProp<any, NavigationParams>
 }

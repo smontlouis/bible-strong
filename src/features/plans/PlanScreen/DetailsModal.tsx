@@ -13,7 +13,7 @@ import { wp } from '~helpers/utils'
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress'> {
-  modalRefDetails: React.RefObject<Modalize<any, any>>
+  modalRefDetails: React.RefObject<Modalize>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }

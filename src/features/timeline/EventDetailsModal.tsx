@@ -7,7 +7,7 @@ import { TimelineEvent as TimelineEventProps } from './types'
 import EventDetails from './EventDetails'
 
 interface Props {
-  modalRef: React.RefObject<Modalize<any, any>>
+  modalRef: React.RefObject<Modalize>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
   event: Partial<TimelineEventProps>

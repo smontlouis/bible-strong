@@ -6,7 +6,8 @@ const screen = Dimensions.get('screen')
 
 export const MAX_WIDTH = 800
 
-export const maxWidth = width => (width > MAX_WIDTH ? MAX_WIDTH : width)
+export const maxWidth = (width, maxW = MAX_WIDTH) =>
+  width > maxW ? maxW : width
 
 export default function useDimensions() {
   const [dimensions, setDimensions] = useState({

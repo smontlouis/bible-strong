@@ -12,6 +12,7 @@ import { offset, rowToPx, calculateLabel } from './constants'
 import { Divider } from 'react-native-paper'
 import FastImage from 'react-native-fast-image'
 import { TimelineEvent as TimelineEventProps } from './types'
+import { Modalize } from 'react-native-modalize'
 
 const AnimatedBox = Animated.createAnimatedComponent(Box)
 const LinkBox = Box.withComponent(Link)
@@ -19,7 +20,7 @@ const LinkBox = Box.withComponent(Link)
 interface Props extends TimelineEventProps {
   x: Animated.Node<number>
   yearsToPx: (years: number) => number
-  eventModalRef: React.RefObject<Modalize<any, any>>
+  eventModalRef: React.RefObject<Modalize>
   setEvent: (event: Partial<TimelineEventProps>) => void
   calculateEventWidth: (
     yearStart: number,

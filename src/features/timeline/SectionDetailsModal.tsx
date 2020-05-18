@@ -10,9 +10,10 @@ import { ShallowTimelineSection } from './types'
 import { maxWidth } from '~helpers/useDimensions'
 import { wp } from '~helpers/utils'
 import FastImage from 'react-native-fast-image'
+import InlineLink from '~common/InlineLink'
 
 interface Props extends ShallowTimelineSection {
-  modalRef: React.RefObject<Modalize<any, any>>
+  modalRef: React.RefObject<Modalize>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }
@@ -83,6 +84,15 @@ const SectionDetailsModal = ({
           my={50}
         />
         <Paragraph>{description}</Paragraph>
+        <Paragraph scale={-2} mt={80} textAlign="center">
+          {`Vous souhaitez aller plus loin ?\n`}
+          <InlineLink
+            scale={-2}
+            href="https://www.bibleuniverse.com/study-tools/storacles/c/3/l/french"
+          >
+            Cliquez ici
+          </InlineLink>
+        </Paragraph>
       </Box>
     </Modalize>
   )

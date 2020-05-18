@@ -22,7 +22,7 @@ import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
 
 interface Props {
-  paramsModalRef: React.RefObject<Modalize<any, any>>
+  paramsModalRef: React.RefObject<Modalize>
 }
 
 const HalfContainer = styled.View(({ border, theme }) => ({
