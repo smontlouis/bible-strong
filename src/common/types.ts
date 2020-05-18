@@ -91,8 +91,8 @@ export interface ImageSlice {
 }
 
 export interface VerseSlice {
-  id: string
-  type: 'Verse'
+  id?: string
+  type?: 'Verse'
   verses: string
   subType?: string
 }

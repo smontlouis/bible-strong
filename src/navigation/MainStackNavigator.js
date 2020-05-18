@@ -1,3 +1,5 @@
+import React from 'react'
+import { Portal } from 'react-native-paper'
 import { createStackNavigator } from 'react-navigation-stack'
 
 import MainTabNavigator from './MainTabNavigator'
@@ -40,7 +42,7 @@ import PlanSelectScreen from '~features/plans/PlanSelectScreen'
 import TimelineScreen from '~features/timeline/TimelineScreen'
 import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
 
-export default createStackNavigator(
+const MainStackNavigator = createStackNavigator(
   {
     MainTab: { screen: MainTabNavigator },
     BibleSelect: { screen: BibleSelectScreen },
@@ -96,3 +98,15 @@ export default createStackNavigator(
     headerMode: 'none',
   }
 )
+
+const MainStack = props => (
+  <>
+    <Portal.Host>
+      <MainStackNavigator {...props} />
+    </Portal.Host>
+  </>
+)
+
+MainStack.router = MainStackNavigator.router
+
+export default MainStack

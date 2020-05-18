@@ -14,7 +14,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   height: 60,
-  paddingTop: getStatusBarHeight(),
+  marginTop: getStatusBarHeight(),
   borderBottomColor: theme.colors.border,
   alignItems: 'stretch',
   zIndex: 1,

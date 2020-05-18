@@ -21,6 +21,7 @@ import getBiblePericope from '~helpers/getBiblePericope'
 import { range } from '~helpers/range'
 import loadBible from '~helpers/loadBible'
 import SnackBar from '~common/SnackBar'
+import verseToReference from '~helpers/verseToReference'
 
 interface VerseContent {
   Pericope: {
@@ -55,6 +56,15 @@ interface ChapterForPlan {
 interface VerseForPlan {
   bookName: string
   verses: VerseContent[]
+  viewMore?: {
+    route: 'BibleView'
+    params: {
+      isReadOnly: true
+      book: number
+      chapter: number
+      verse: 1
+    }
+  }
 }
 
 /**
@@ -343,7 +353,8 @@ const getVersesForPlan = async (
   version: string
 ): Promise<VerseForPlan> => {
   const [book, rest] = verses.split('|')
-  const bookName = books[Number(book) - 1].Nom
+  const bookName = verseToReference(verses, { isPlan: true })
+
   const [chapter, numberRange] = rest.split(':')
   const [startVerse, endVerse] = numberRange.split('-').map(Number)
   const versesRange: number[][] = (endVerse
@@ -365,7 +376,19 @@ const getVersesForPlan = async (
     return verseContent
   })
 
-  return { bookName, verses: content }
+  return {
+    bookName,
+    verses: content,
+    viewMore: {
+      route: 'BibleView',
+      params: {
+        isReadOnly: true,
+        book: Number(book),
+        chapter: Number(chapter),
+        verse: startVerse,
+      },
+    },
+  }
 }
 
 export const useVersesToContent = (verses: string) => {

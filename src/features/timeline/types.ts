@@ -38,4 +38,5 @@ export interface TimelineEventDetail {
   related: { slug: string; title: string }[]
   images: { caption: string; file: string }[]
   videos: { title: string; caption: string; filename: string }[]
+  scriptures: string[]
 }

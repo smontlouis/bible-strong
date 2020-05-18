@@ -1,6 +1,6 @@
 import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
-import { Provider as PaperProvider, Portal } from 'react-native-paper'
+import { Provider as PaperProvider } from 'react-native-paper'
 import { StatusBar, AppState } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
@@ -129,12 +129,10 @@ class InitApp extends React.Component<Props> {
               <DBStateProvider>
                 <>
                   <ErrorBoundary>
-                    <Portal.Host>
-                      <AppNavigator
-                        screenProps={{ theme: currentTheme }}
-                        onNavigationStateChange={this.onNavigationStateChange}
-                      />
-                    </Portal.Host>
+                    <AppNavigator
+                      screenProps={{ theme: currentTheme }}
+                      onNavigationStateChange={this.onNavigationStateChange}
+                    />
                   </ErrorBoundary>
                   <Changelog />
                   <OnBoarding />

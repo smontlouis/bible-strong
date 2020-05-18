@@ -25,6 +25,7 @@ const EventDetailsModal = ({
     <Modalize
       ref={modalRef}
       handlePosition="inside"
+      // snapPoint={400}
       modalStyle={{
         backgroundColor: theme.colors.lightGrey,
         maxWidth: 600,

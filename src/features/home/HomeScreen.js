@@ -110,11 +110,11 @@ const HomeScreen = () => {
               />
             </Box>
           )}
+          <Box background padding={20} paddingTop={0}>
+            <Button route="TimelineHome">Timeline</Button>
+          </Box>
           {__DEV__ && (
             <>
-              <Box background padding={20} paddingTop={0}>
-                <Button route="TimelineHome">Timeline</Button>
-              </Box>
               <Box background padding={20} paddingTop={0}>
                 <Button route="Storybook">Storybook</Button>
               </Box>
