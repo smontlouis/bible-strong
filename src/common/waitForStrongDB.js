@@ -44,11 +44,6 @@ export const useWaitForDatabase = () => {
         const dbPath = `${sqliteDirPath}/strong.sqlite`
         const dbFileExists = await RNFS.exists(dbPath)
 
-        console.log('File exists ? ', dbFileExists)
-        if (dbFileExists) {
-          console.log(await RNFS.stat(dbPath))
-        }
-
         const sqliteZipExists = await existsAssets('www/strong.sqlite.zip')
 
         if (!dbFileExists) {
@@ -59,9 +54,7 @@ export const useWaitForDatabase = () => {
               await RNFS.mkdir(sqliteDirPath)
             }
 
-            console.log('Unzipping...')
             await unzipAssets('www/strong.sqlite.zip', sqliteDirPath)
-            console.log('Unzipping done')
 
             await strongDB.init()
 

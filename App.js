@@ -89,8 +89,6 @@ class App extends React.Component {
        */
       requestPermissions: true,
     })
-
-    console.log('Notifications initialized')
   }
 
   loadResourcesAsync = async () => {

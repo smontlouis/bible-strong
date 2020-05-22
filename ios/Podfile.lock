@@ -190,6 +190,8 @@ PODS:
     - UMFontInterface
   - EXHaptics (8.0.0):
     - UMCore
+  - EXInAppPurchases (8.1.0):
+    - UMCore
   - EXLinearGradient (8.0.0):
     - UMCore
   - EXPermissions (8.0.0):
@@ -643,7 +645,7 @@ PODS:
   - RNGoogleSignin (3.0.4):
     - GoogleSignIn (~> 5.0.0)
     - React
-  - RNReanimated (1.7.0):
+  - RNReanimated (1.8.0):
     - React
   - RNScreens (2.0.0-beta.4):
     - React
@@ -696,6 +698,7 @@ DEPENDENCIES:
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
+  - EXInAppPurchases (from `../node_modules/expo-in-app-purchases/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
@@ -834,6 +837,9 @@ EXTERNAL SOURCES:
   EXHaptics:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-haptics/ios"
+  EXInAppPurchases:
+    :path: !ruby/object:Pathname
+    path: "../node_modules/expo-in-app-purchases/ios"
   EXLinearGradient:
     :path: !ruby/object:Pathname
     path: "../node_modules/expo-linear-gradient/ios"
@@ -1007,6 +1013,7 @@ SPEC CHECKSUMS:
   EXFileSystem: 6e0d9bb6cc4ea404dbb8f583c1a8a2dcdf4b83b6
   EXFont: 6187b5ab46ee578d5f8e7f2ea092752e78772235
   EXHaptics: 24438d930bd1fbef68e9eec47facea5dc2dab8a9
+  EXInAppPurchases: 084e1ea266b7b297010d3a1534bd1fe285fba235
   EXLinearGradient: 75f302f9d6484267a3f6d3252df2e7a5f00e716a
   EXPermissions: 9bc08859a675d291e89be9a0870155c27c16ac35
   EXSecureStore: 1448b90d665c9400aaaf6655fccb464da14698f6
@@ -1085,7 +1092,7 @@ SPEC CHECKSUMS:
   RNFS: 90d1a32d3bc8f75cc7fc3dd2f67506049664346b
   RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNGoogleSignin: a00f87261ea13df9a5cea8deafa6927d6f2c3562
-  RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
+  RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
   RNScreens: 6053a007667bea81a69087caadf103bba04c032e
   RNSentry: 370623102247ebea20191b5fb549ecc7a275b324
   RNSVG: f6177f8d7c095fada7cfee2e4bb7388ba426064c

@@ -79,17 +79,7 @@ const DictionnaireOfTheDay = ({
         </Box>
         <RandomButton onPress={() => setStartRandom(true)} />
         <Box flex={1} center>
-          <Box
-            backgroundColor="rgba(0,0,0,0.1)"
-            paddingHorizontal={5}
-            paddingVertical={3}
-            rounded
-          >
-            <Text fontSize={10} color="white">
-              Dictionnaire
-            </Text>
-          </Box>
-          <Paragraph scale={-1} color="white" scaleLineHeight={-2}>
+          <Paragraph mt={20} scale={-2} color="white" scaleLineHeight={-2}>
             {word}
           </Paragraph>
         </Box>

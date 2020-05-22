@@ -45,7 +45,7 @@ class Link extends Component {
   }
 
   render() {
-    const { padding, paddingSmall, style } = this.props
+    const { padding, paddingSmall, style, size } = this.props
     return (
       <TouchableOpacity
         activeOpacity={0.5}
@@ -61,6 +61,12 @@ class Link extends Component {
           ...(paddingSmall && {
             width: 50,
             height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }),
+          ...(size && {
+            width: size,
+            height: size,
             alignItems: 'center',
             justifyContent: 'center',
           }),

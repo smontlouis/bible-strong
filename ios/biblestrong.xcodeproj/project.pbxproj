@@ -13,6 +13,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3DE4DAD41476765101945408 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D43FF9D506E70904424FA7E9 /* libPods-biblestrong.a */; };
 		638897AE23F12D6700E7880D /* www in Resources */ = {isa = PBXBuildFile; fileRef = 638897AD23F12D6700E7880D /* www */; };
+		63D636B4247507DC003443EE /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63D636B3247507DC003443EE /* StoreKit.framework */; };
 		63D840D623ECFD3400C49B4C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D840D523ECFD3400C49B4C /* File.swift */; };
 		67C74C4344874A859571CEEF /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2213229BB143AB82AA5797 /* libz.tbd */; };
 /* End PBXBuildFile section */
@@ -33,6 +34,7 @@
 		6321EC4723EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		638897AD23F12D6700E7880D /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = biblestrong/www; sourceTree = "<group>"; };
 		63B75B6E242B2A6C0042D6EC /* Bible Strong - Dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = "Bible Strong - Dev.entitlements"; path = "biblestrong/Bible Strong - Dev.entitlements"; sourceTree = "<group>"; };
+		63D636B3247507DC003443EE /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		63D840D423ECFD3400C49B4C /* biblestrong-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "biblestrong-Bridging-Header.h"; sourceTree = "<group>"; };
 		63D840D523ECFD3400C49B4C /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		696C0E267DAB31F9E583F818 /* Pods-biblestrong.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.staging.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.staging.xcconfig"; sourceTree = "<group>"; };
@@ -50,6 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63D636B4247507DC003443EE /* StoreKit.framework in Frameworks */,
 				3DE4DAD41476765101945408 /* libPods-biblestrong.a in Frameworks */,
 				67C74C4344874A859571CEEF /* libz.tbd in Frameworks */,
 			);
@@ -77,6 +80,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				63D636B3247507DC003443EE /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
@@ -423,6 +427,8 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODEPUSH_KEY = zTevuQLKdN3lVZt6hLntxWaZcLU9DUKDDRFZRC;
 				CODE_SIGN_ENTITLEMENTS = "biblestrong/Bible Strong - Dev.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 109;
 				DEVELOPMENT_TEAM = 7PZMKGJ67J;
 				INFOPLIST_FILE = biblestrong/Info.plist;
@@ -435,6 +441,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong;
 				PRODUCT_NAME = "Bible Strong";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "biblestrong-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

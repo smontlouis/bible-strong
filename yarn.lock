@@ -8998,6 +8998,11 @@ expo-haptics@~8.0.0:
   resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-8.0.0.tgz#e52bfa8f294b2a8796e229f9b1cb2f35f6485c2d"
   integrity sha512-HscO0Mg4N7pAQEOU/GWbriNIUmzeToldnRD7MTW1KsL/JYpxeaXPuB0NvonZ/IQ3MkgF5fP0okS/tZIbvXz9Lw==
 
+expo-in-app-purchases@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/expo-in-app-purchases/-/expo-in-app-purchases-8.1.0.tgz#12e94257d1256e1b8eff5cba71319f1244eff09d"
+  integrity sha512-w6QD2HPJJyIaTBqK/Ro6s6DDk34u6HMqPuMiGcfYiclxbDz102SbR5RH8jDzoXEOuNnmJGqI6jTXaZ5ol5OPcg==
+
 expo-linear-gradient@~8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-8.0.0.tgz#972d33e92714d4a4485635683b5bfa357ecec41b"

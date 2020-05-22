@@ -71,18 +71,8 @@ const NaveOfTheDay = ({
           />
         </Box>
         <RandomButton onPress={() => setStartRandom(true)} />
-        <Box flex={1} center>
-          <Box
-            backgroundColor="rgba(0,0,0,0.1)"
-            paddingHorizontal={5}
-            paddingVertical={3}
-            rounded
-          >
-            <Text fontSize={10} style={{ color: 'white' }}>
-              Thème
-            </Text>
-          </Box>
-          <Paragraph style={{ color: 'white' }} scale={-1} scaleLineHeight={-2}>
+        <Box flex={1} center mt={20}>
+          <Paragraph style={{ color: 'white' }} scale={-2} scaleLineHeight={-2}>
             {name}
           </Paragraph>
         </Box>

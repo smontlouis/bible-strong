@@ -14,11 +14,15 @@ import NaveOfTheDay from './NaveOfTheDay'
 import UserWidget from './UserWidget'
 import Button from '~common/ui/Button'
 import PlanHome from './PlanHome'
+import TimelineWidget from './TimelineWidget'
+import { useIAP } from '~helpers/useInAppPurchases'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
   const { isLogged } = useLogin()
+  useIAP()
+
   return (
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
@@ -26,7 +30,7 @@ const HomeScreen = () => {
         <Box grey>
           <RoundedCorner />
         </Box>
-        <Box grey paddingTop={10}>
+        <Box grey paddingTop={30}>
           <RNScrollView
             horizontal
             style={{ overflow: 'visible' }}
@@ -34,7 +38,6 @@ const HomeScreen = () => {
             contentContainerStyle={{
               flexDirection: 'row',
               paddingHorizontal: 20,
-              paddingVertical: 10,
               overflow: 'visible',
             }}
           >
@@ -48,8 +51,15 @@ const HomeScreen = () => {
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
-        {isLogged && <PlanHome />}
-        <VerseOfTheDay />
+        {isLogged && (
+          <>
+            <PlanHome />
+            <TimelineWidget />
+          </>
+        )}
+        <Box grey>
+          <VerseOfTheDay />
+        </Box>
         <Box grey>
           <Box
             background
@@ -109,16 +119,6 @@ const HomeScreen = () => {
                 }
               />
             </Box>
-          )}
-          <Box background padding={20} paddingTop={0}>
-            <Button route="TimelineHome">Timeline</Button>
-          </Box>
-          {__DEV__ && (
-            <>
-              <Box background padding={20} paddingTop={0}>
-                <Button route="Storybook">Storybook</Button>
-              </Box>
-            </>
           )}
         </Box>
       </HomeScrollView>

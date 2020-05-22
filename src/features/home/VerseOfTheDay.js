@@ -85,18 +85,12 @@ const VerseOfTheDay = () => {
   }
 
   return (
-    <>
-      <AnimatableBox animation="fadeIn" padding={20} grey>
-        <Box row alignItems="center">
+    <Box rounded bg="reverse" lightShadow mx={20} my={30}>
+      <AnimatableBox animation="fadeIn" padding={20}>
+        <Box row alignItems="center" mb={5}>
           <Text title fontSize={23} flex>
             Verset du jour
           </Text>
-          <Link paddingSmall onPress={openTimePicker}>
-            <FeatherIcon size={20} name="bell" />
-          </Link>
-          <Link paddingSmall onPress={shareVerse}>
-            <FeatherIcon size={20} name="share-2" />
-          </Link>
         </Box>
         <Link
           route="BibleView"
@@ -112,29 +106,18 @@ const VerseOfTheDay = () => {
             {removeBreakLines(content)}
           </Paragraph>
         </Link>
-        <Box marginTop={20} row center>
-          <Box flex>
-            <Link
-              route="BibleVerseDetail"
-              params={{
-                verse: {
-                  Livre: book,
-                  Chapitre: chapter,
-                  Verset: verse,
-                },
-              }}
-            >
-              <Box row>
-                <LexiqueIcon />
-                <Text title color="primary" marginLeft={10}>
-                  Strong
-                </Text>
-              </Box>
-            </Link>
-          </Box>
-          <Text titleItalic fontSize={smallSize ? 10 : 12}>
+        <Box marginTop={10} row alignItems="center">
+          <Text flex titleItalic fontSize={smallSize ? 12 : 14}>
             {title} - {version}
           </Text>
+          <Box row center mt={5}>
+            <Link onPress={openTimePicker} size={30}>
+              <FeatherIcon size={16} name="bell" />
+            </Link>
+            <Link size={30} onPress={shareVerse}>
+              <FeatherIcon size={16} name="share-2" />
+            </Link>
+          </Box>
         </Box>
       </AnimatableBox>
       <ShowMoreImage imageUrls={imageUrls} verseOfTheDay={verseOfTheDay} />
@@ -146,7 +129,7 @@ const VerseOfTheDay = () => {
         onConfirm={onConfirmTimePicker}
         onCancel={() => setTimePicker(false)}
       />
-    </>
+    </Box>
   )
 }
 
