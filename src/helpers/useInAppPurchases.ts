@@ -27,7 +27,9 @@ export const productsDetails =
 
 export const useIAP = () => {
   const isInitIAP = useInitInAppPurchases()
-  useProducts(isInitIAP)
+  const { products } = useProducts(isInitIAP)
+
+  return !!products.length
 }
 
 export const useInitInAppPurchases = () => {

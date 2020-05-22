@@ -21,7 +21,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
   const { isLogged } = useLogin()
-  useIAP()
+  const hasProducts = useIAP()
 
   return (
     <Box grey>
@@ -54,7 +54,7 @@ const HomeScreen = () => {
         {isLogged && (
           <>
             <PlanHome />
-            <TimelineWidget />
+            {/* <TimelineWidget /> */}
           </>
         )}
         <Box grey>
