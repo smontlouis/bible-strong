@@ -207,6 +207,7 @@
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 7PZMKGJ67J;
 						LastSwiftMigration = 1130;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -398,6 +399,8 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODEPUSH_KEY = "";
 				CODE_SIGN_ENTITLEMENTS = "biblestrong/Bible Strong - Dev.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 109;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 7PZMKGJ67J;
@@ -411,6 +414,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong.dev;
 				PRODUCT_NAME = "Bible Strong - Dev";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "biblestrong-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
