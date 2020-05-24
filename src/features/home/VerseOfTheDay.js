@@ -85,7 +85,7 @@ const VerseOfTheDay = () => {
   }
 
   return (
-    <Box rounded bg="reverse" lightShadow mx={20} my={30}>
+    <Box rounded bg="reverse" lightShadow mx={20} mt={30}>
       <AnimatableBox animation="fadeIn" padding={20}>
         <Box row alignItems="center" mb={5}>
           <Text title fontSize={23} flex>

@@ -15,13 +15,12 @@ import UserWidget from './UserWidget'
 import Button from '~common/ui/Button'
 import PlanHome from './PlanHome'
 import TimelineWidget from './TimelineWidget'
-import { useIAP } from '~helpers/useInAppPurchases'
+import PremiumWidget from './PremiumWidget'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
   const { isLogged } = useLogin()
-  useIAP()
 
   return (
     <Box grey>
@@ -60,6 +59,7 @@ const HomeScreen = () => {
         <Box grey>
           <VerseOfTheDay />
         </Box>
+        <PremiumWidget />
         <Box grey>
           <Box
             background

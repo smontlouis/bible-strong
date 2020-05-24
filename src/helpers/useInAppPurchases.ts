@@ -1,26 +1,38 @@
 import { useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 import { Status } from '~common/types'
-import { Product, initConnection, getSubscriptions } from 'react-native-iap'
+import {
+  initConnection,
+  getSubscriptions,
+  Subscription,
+} from 'react-native-iap'
 import to from 'await-to-js'
 
-const itemSkus = Platform.select({
-  ios: ['com.smontlouis.biblestrong.dev.onemonth'],
-  android: ['com.example.coins100'],
-})
+export const subSkus = [
+  'com.smontlouis.biblestrong.onemonth',
+  'com.smontlouis.biblestrong.threemonths',
+  'com.smontlouis.biblestrong.oneyear',
+]
 
 export const useIAP = () => {
   const isInitIAP = useInitInAppPurchases()
-  useProducts(isInitIAP)
+  const { status, subscriptions } = useSubscriptions(isInitIAP)
+  console.log(status, subscriptions)
 }
 
 export const useInitInAppPurchases = () => {
   const [isInitIAP, setInitIAP] = useState(false)
   useEffect(() => {
     ;(async () => {
-      const [err] = await to(initConnection())
-      console.log('IAP initialized')
-      setInitIAP(true)
+      const [err, canMakePayments] = await to(initConnection())
+
+      if (!err && canMakePayments) {
+        setInitIAP(canMakePayments)
+        return
+      }
+
+      setInitIAP(false)
+      console.log('error')
     })()
   }, [])
 
@@ -62,27 +74,27 @@ export const useInitInAppPurchases = () => {
 //   }, [])
 // }
 
-export const useProducts = (isInitIAP: boolean) => {
-  const [products, setProducts] = useState<Product[]>([])
+export const useSubscriptions = (isInitIAP: boolean) => {
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [status, setStatus] = useState<Status>('Idle')
 
   useEffect(() => {
     ;(async () => {
       if (!isInitIAP) return
       setStatus('Pending')
-      const [err, productItems] = await to<Product[]>(
-        getSubscriptions(itemSkus)
+      const [err, subItems] = await to<Subscription[]>(
+        getSubscriptions(subSkus)
       )
 
-      console.log(productItems)
-      if (!err && productItems) {
-        setProducts(productItems)
+      if (!err && subItems) {
         setStatus('Resolved')
-      } else {
-        setStatus('Rejected')
+        setSubscriptions(subItems)
+        return
       }
+
+      setStatus('Rejected')
     })()
   }, [isInitIAP])
 
-  return { status, products }
+  return { status, subscriptions }
 }
