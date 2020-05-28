@@ -69,8 +69,13 @@ export const useWaitForDatabase = () => {
       } else {
         const path = databases.TIMELINE.path
         const data = await FileSystem.readAsStringAsync(path)
-        bibleMemoize['timeline'] = JSON.parse(data)
 
+        if (bibleMemoize['timeline']) {
+          setLoading(false)
+          return
+        }
+
+        bibleMemoize['timeline'] = JSON.parse(data)
         setLoading(false)
       }
     }

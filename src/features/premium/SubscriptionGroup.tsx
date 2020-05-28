@@ -12,11 +12,10 @@ import { requestSubscription } from 'react-native-iap'
 import { mappingSku } from './PremiumScreen'
 
 const SubscriptionGroup = () => {
-  const isInitIAP = useInitInAppPurchases()
   const [selectedSub, setSelectedSub] = React.useState(
     'com.smontlouis.biblestrong.oneyear'
   )
-  const { status, subscriptions } = useSubscriptions(isInitIAP)
+  const { status, subscriptions } = useSubscriptions()
   console.log(subscriptions)
 
   const submitSubscription = async (sku: string) => {

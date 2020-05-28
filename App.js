@@ -38,6 +38,7 @@ class App extends React.Component {
   state = {
     isLoadingComplete: false,
     isFullscreen: false,
+    isIAPInitialized: false,
   }
 
   async componentDidMount() {

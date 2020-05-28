@@ -149,6 +149,11 @@ export const versions = {
     name: 'Ostervald',
     c: '1881 Libre de droit',
   },
+  // JER: {
+  //   id: 'JER',
+  //   name: 'Bible Jérusalem',
+  //   c: '© 1966',
+  // },
   CHU: {
     id: 'CHU',
     name: 'Bible Chouraqui 1985',
@@ -219,10 +224,22 @@ export const versions = {
     name: 'Biblia Hebraica Stuttgartensia (AT)',
     c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
   },
+  LXX: {
+    id: 'LXX',
+    name: 'Septante (AT)',
+  },
   SBLGNT: {
     id: 'SBLGNT',
     name: 'SBL NT. Grec (NT)',
     c: '© 2010 Society of Bible Litterature',
+  },
+  TR1624: {
+    id: 'TR1624',
+    name: 'Elzevir Textus Receptus 1624 (NT)',
+  },
+  TR1894: {
+    id: 'TR1894',
+    name: 'Scrivener’s Textus Receptus 1894 (NT)',
   },
 }
 
@@ -244,7 +261,10 @@ export const versionsBySections = Object.values(versions).reduce(
       case 'NIV':
       case 'ESV':
       case 'BHS':
-      case 'SBLGNT': {
+      case 'SBLGNT':
+      case 'TR1624':
+      case 'TR1894':
+      case 'LXX': {
         sectionArray[2].data.push(version)
         return sectionArray
       }

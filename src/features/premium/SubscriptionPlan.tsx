@@ -29,7 +29,7 @@ const SubscriptionPlan = ({
   return (
     <LinkBox
       py={20}
-      px={15}
+      width="30%"
       bg="reverse"
       borderWidth={4}
       borderColor="reverse"
@@ -50,12 +50,12 @@ const SubscriptionPlan = ({
         >
           <Box
             bg={variant === 'primary' ? 'primary' : 'tertiary'}
-            px={8}
+            px={12}
             py={3}
             borderRadius={20}
           >
             <Text color="reverse" fontSize={11}>
-              {discount} en moins
+              -{discount}
             </Text>
           </Box>
         </Box>

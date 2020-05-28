@@ -16,11 +16,20 @@ import Button from '~common/ui/Button'
 import PlanHome from './PlanHome'
 import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
+import {
+  useRestorePurchases,
+  useInitInAppPurchases,
+} from '~helpers/useInAppPurchases'
+import usePremium from '~helpers/usePremium'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
   const { isLogged } = useLogin()
+  const hasPremium = usePremium()
+  console.log(hasPremium)
+  useInitInAppPurchases()
+  useRestorePurchases()
 
   return (
     <Box grey>
@@ -40,13 +49,13 @@ const HomeScreen = () => {
               overflow: 'visible',
             }}
           >
-            <NaveOfTheDay />
             <StrongOfTheDay type="grec" />
             <StrongOfTheDay
               type="hebreu"
               color1="rgba(248,131,121,1)"
               color2="rgba(255,77,93,1)"
             />
+            <NaveOfTheDay />
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>

@@ -8,7 +8,6 @@ import * as Sentry from '@sentry/react-native'
 import compose from 'recompose/compose'
 import analytics from '@react-native-firebase/analytics'
 import { MenuProvider } from 'react-native-popup-menu'
-import * as RNIap from 'react-native-iap'
 
 import ErrorBoundary from '~common/ErrorBoundary'
 import OnBoarding from '~common/OnBoarding'
@@ -36,8 +35,6 @@ class InitApp extends React.Component<Props> {
     this.props.dispatch(getVersionUpdate())
     this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
-    RNIap.initConnection()
-    // set purchase listener here
     AppState.addEventListener('change', this.handleAppStateChange)
   }
 

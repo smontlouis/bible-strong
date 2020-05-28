@@ -122,3 +122,5 @@ export interface OngoingReadingSlice {
   id: string
   status: PlanStatus
 }
+
+export type SubscriptionType = 'premium' | 'lifetime' | null

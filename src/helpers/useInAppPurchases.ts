@@ -1,12 +1,27 @@
-import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { useEffect, useState, useContext, useRef } from 'react'
+import { Platform, EmitterSubscription } from 'react-native'
 import { Status } from '~common/types'
+import GlobalStateContext from '~helpers/globalContext'
 import {
   initConnection,
   getSubscriptions,
   Subscription,
+  InAppPurchase,
+  SubscriptionPurchase,
+  ProductPurchase,
+  purchaseErrorListener,
+  PurchaseError,
+  finishTransaction,
+  acknowledgePurchaseAndroid,
+  finishTransactionIOS,
+  purchaseUpdatedListener,
+  Purchase,
+  getPurchaseHistory,
+  getAvailablePurchases,
 } from 'react-native-iap'
 import to from 'await-to-js'
+import { useDispatch } from 'react-redux'
+import { setSubscription } from '~redux/modules/user'
 
 export const subSkus = [
   'com.smontlouis.biblestrong.onemonth',
@@ -14,73 +29,74 @@ export const subSkus = [
   'com.smontlouis.biblestrong.oneyear',
 ]
 
-export const useIAP = () => {
-  const isInitIAP = useInitInAppPurchases()
-  const { status, subscriptions } = useSubscriptions(isInitIAP)
-  console.log(status, subscriptions)
-}
-
 export const useInitInAppPurchases = () => {
-  const [isInitIAP, setInitIAP] = useState(false)
+  const dispatch = useDispatch()
+  const purchaseUpdateSubscription = useRef<EmitterSubscription>()
+  const purchaseErrorSubscription = useRef<EmitterSubscription>()
+  const { updateState } = useContext(GlobalStateContext)
+
   useEffect(() => {
     ;(async () => {
       const [err, canMakePayments] = await to(initConnection())
 
       if (!err && canMakePayments) {
-        setInitIAP(canMakePayments)
+        updateState('isIAPInitialized', canMakePayments)
         return
       }
 
-      setInitIAP(false)
+      updateState('isIAPInitialized', false)
       console.log('error')
     })()
   }, [])
 
-  return isInitIAP
+  useEffect(() => {
+    purchaseUpdateSubscription.current = purchaseUpdatedListener(
+      (purchase: InAppPurchase | SubscriptionPurchase | ProductPurchase) => {
+        console.log('purchaseUpdatedListener', purchase)
+        const receipt = purchase.transactionReceipt
+        if (receipt) {
+          if (Platform.OS === 'ios' && purchase.transactionId) {
+            dispatch(setSubscription('premium'))
+            finishTransactionIOS(purchase.transactionId)
+          } else if (Platform.OS === 'android' && purchase.purchaseToken) {
+            dispatch(setSubscription('premium'))
+            acknowledgePurchaseAndroid(purchase.purchaseToken)
+          }
+
+          finishTransaction(purchase, false)
+        }
+      }
+    )
+
+    purchaseErrorSubscription.current = purchaseErrorListener(
+      (error: PurchaseError) => {
+        console.log('purchaseErrorListener', error)
+      }
+    )
+
+    return () => {
+      if (purchaseUpdateSubscription.current) {
+        purchaseUpdateSubscription.current.remove()
+        purchaseUpdateSubscription.current = undefined
+      }
+      if (purchaseErrorSubscription.current) {
+        purchaseErrorSubscription.current.remove()
+        purchaseErrorSubscription.current = undefined
+      }
+    }
+  }, [dispatch])
 }
 
-// export const usePurchaseListener = () => {
-//   useEffect(() => {
-//     ;(async () => {
-//       // Set purchase listener
-//       setPurchaseListener(({ responseCode, results, errorCode }) => {
-//         // Purchase was successful
-//         if (responseCode === IAPResponseCode.OK) {
-//           results.forEach(purchase => {
-//             if (!purchase.acknowledged) {
-//               console.log(`Successfully purchased ${purchase.productId}`)
-//               // Process transaction here and unlock content...
-
-//               // Then when you're done
-//               finishTransactionAsync(purchase, true)
-//             }
-//           })
-//         }
-
-//         // Else find out what went wrong
-//         if (responseCode === IAPResponseCode.USER_CANCELED) {
-//           console.log('User canceled the transaction')
-//         } else if (responseCode === IAPResponseCode.DEFERRED) {
-//           console.log(
-//             'User does not have permissions to buy but requested parental approval (iOS only)'
-//           )
-//         } else {
-//           console.warn(
-//             `Something went wrong with the purchase. Received errorCode ${errorCode}`
-//           )
-//         }
-//       })
-//     })()
-//   }, [])
-// }
-
-export const useSubscriptions = (isInitIAP: boolean) => {
+export const useSubscriptions = () => {
+  const {
+    state: { isIAPInitialized },
+  } = useContext(GlobalStateContext)
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [status, setStatus] = useState<Status>('Idle')
 
   useEffect(() => {
     ;(async () => {
-      if (!isInitIAP) return
+      if (!isIAPInitialized) return
       setStatus('Pending')
       const [err, subItems] = await to<Subscription[]>(
         getSubscriptions(subSkus)
@@ -94,7 +110,40 @@ export const useSubscriptions = (isInitIAP: boolean) => {
 
       setStatus('Rejected')
     })()
-  }, [isInitIAP])
+  }, [isIAPInitialized])
 
   return { status, subscriptions }
+}
+
+export const useRestorePurchases = () => {
+  const {
+    state: { isIAPInitialized },
+  } = useContext(GlobalStateContext)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    ;(async () => {
+      if (!isIAPInitialized) return
+      const [err, p] = await to<Purchase[]>(getAvailablePurchases())
+
+      if (!err && p) {
+        p.forEach(purchase => {
+          switch (purchase.productId) {
+            case subSkus[0]:
+            case subSkus[1]:
+            case subSkus[2]: {
+              dispatch(setSubscription('premium'))
+              break
+            }
+            default: {
+            }
+          }
+        })
+
+        if (!p.length) {
+          dispatch(setSubscription(null))
+        }
+      }
+    })()
+  }, [isIAPInitialized, dispatch])
 }

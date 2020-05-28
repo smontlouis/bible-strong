@@ -273,4 +273,13 @@ export default {
       },
     }
   },
+  21: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        subscription: null,
+      },
+    }
+  },
 }
