@@ -38,6 +38,7 @@ class App extends React.Component {
   state = {
     isLoadingComplete: false,
     isFullscreen: false,
+    isIAPInitialized: false,
   }
 
   async componentDidMount() {
@@ -89,8 +90,6 @@ class App extends React.Component {
        */
       requestPermissions: true,
     })
-
-    console.log('Notifications initialized')
   }
 
   loadResourcesAsync = async () => {

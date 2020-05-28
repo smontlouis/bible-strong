@@ -13,6 +13,9 @@ import settingsReducer from './user/settings'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
+import { SubscriptionType } from '~common/types'
+import { Dispatch } from 'react'
+import { ThunkDispatch } from 'redux-thunk'
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -49,6 +52,8 @@ export const SET_FIRST_TIME = 'user/SET_FIRST_TIME'
 export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
 export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
+export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
+
 const initialState = {
   id: '',
   email: '',
@@ -57,6 +62,7 @@ const initialState = {
   provider: '',
   isFirstTime: true,
   lastSeen: 0,
+  subscription: null,
   emailVerified: false,
   isLoading: false,
   notifications: {
@@ -103,7 +109,7 @@ const initialState = {
 const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 
 // UserReducer
-const userReducer = produce((draft, action) => {
+const userReducer = produce((draft: typeof initialState, action) => {
   switch (action.type) {
     case SET_FIRST_TIME: {
       draft.isFirstTime = action.payload
@@ -140,6 +146,7 @@ const userReducer = produce((draft, action) => {
         lastSeen,
         emailVerified,
         bible,
+        subscription,
       } = action.profile
 
       const { isLogged, localLastSeen, remoteLastSeen } = action
@@ -153,54 +160,58 @@ const userReducer = produce((draft, action) => {
       draft.emailVerified = emailVerified
       draft.isLoading = false
 
-      if (bible) {
-        if (!isLogged) {
-          console.log('User was not logged, merge data')
+      if (!isLogged) {
+        console.log('User was not logged, merge data')
+        draft.subscription = subscription
+
+        if (bible) {
           draft.bible = deepmerge(draft.bible, bible, {
             arrayMerge: overwriteMerge,
           })
-        } else if (remoteLastSeen > localLastSeen) {
-          // Remote wins
-          console.log('Remote wins')
-          draft.bible = { ...draft.bible, ...bible }
-        } else if (remoteLastSeen < localLastSeen) {
-          console.log('Local wins')
-          // Local wins - do nothing
-        } else {
-          console.log('Last seen equals remote last seen, do nothing')
         }
+      } else if (remoteLastSeen > localLastSeen) {
+        // Remote wins
+        console.log('Remote wins')
+        if (bible) {
+          draft.bible = { ...draft.bible, ...bible }
+        }
+        draft.subscription = subscription
+      } else if (remoteLastSeen < localLastSeen) {
+        console.log('Local wins')
+        // Local wins - do nothing
+      } else {
+        console.log('Last seen equals remote last seen, do nothing')
+      }
 
-        // Now take care of studies
-        if (action.studies && Object.keys(action.studies).length) {
-          if (draft.bible.studies) {
-            Object.keys(action.studies).forEach(remoteStudyId => {
-              if (draft.bible.studies[remoteStudyId]) {
-                // We have a conflict here
-                console.log(
-                  `We have a conflict with ${remoteStudyId}, pick by modified_date`
-                )
-                const localModificationDate =
-                  draft.bible.studies[remoteStudyId].modified_at
-                const remoteModificationDate =
-                  action.studies[remoteStudyId].modified_at
-                if (remoteModificationDate > localModificationDate) {
-                  console.log('Remote date is recent')
-                  draft.bible.studies[remoteStudyId] =
-                    action.studies[remoteStudyId]
-                }
-              } else {
-                // No conflicts, just put that study in there
-                console.log(
-                  `No conflicts for ${remoteStudyId}, just put that story in there`
-                )
+      // Now take care of studies
+      if (action.studies && Object.keys(action.studies).length) {
+        if (draft.bible.studies) {
+          Object.keys(action.studies).forEach(remoteStudyId => {
+            if (draft.bible.studies[remoteStudyId]) {
+              // We have a conflict here
+              console.log(
+                `We have a conflict with ${remoteStudyId}, pick by modified_date`
+              )
+              const localModificationDate =
+                draft.bible.studies[remoteStudyId].modified_at
+              const remoteModificationDate =
+                action.studies[remoteStudyId].modified_at
+              if (remoteModificationDate > localModificationDate) {
+                console.log('Remote date is recent')
                 draft.bible.studies[remoteStudyId] =
                   action.studies[remoteStudyId]
               }
-            })
-          } else {
-            draft.bible.studies = {}
-            draft.bible.studies = bible.studies
-          }
+            } else {
+              // No conflicts, just put that study in there
+              console.log(
+                `No conflicts for ${remoteStudyId}, just put that story in there`
+              )
+              draft.bible.studies[remoteStudyId] = action.studies[remoteStudyId]
+            }
+          })
+        } else {
+          draft.bible.studies = {}
+          draft.bible.studies = bible.studies
         }
       }
       break
@@ -276,6 +287,12 @@ const userReducer = produce((draft, action) => {
     }
     case GET_CHANGELOG_FAIL: {
       draft.changelog.isLoading = false
+      break
+    }
+    case SET_SUBSCRIPTION: {
+      if (<SubscriptionType>draft.subscription !== 'lifetime') {
+        draft.subscription = action.payload
+      }
       break
     }
     default: {
@@ -426,5 +443,17 @@ export function addChangelog(payload) {
   return {
     type: GET_CHANGELOG_SUCCESS,
     payload,
+  }
+}
+
+export function setSubscription(payload: SubscriptionType) {
+  return async (dispatch, getState) => {
+    const subscription = getState().user.subscription
+    if (subscription !== payload) {
+      dispatch({
+        type: SET_SUBSCRIPTION,
+        payload,
+      })
+    }
   }
 }

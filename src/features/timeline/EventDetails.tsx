@@ -108,6 +108,7 @@ const Media = ({
           </Paragraph>
           {related.map(r => (
             <Link
+              key={r.slug}
               onPress={() => {
                 const foundEvent = flattenedEvents.find(
                   ev => ev.slug === r.slug

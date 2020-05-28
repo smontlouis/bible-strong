@@ -33,6 +33,10 @@ export const biblesRef = {
   PDV2017: storageRef.child('bibles/bible-pdv2017.json'),
   BFC: storageRef.child('bibles/bible-bfc.json'),
   BCC1923: storageRef.child('bibles/bible-bcc1923.json'),
+  // JER: storageRef.child('bibles/bible-jer.json'),
+  LXX: storageRef.child('bibles/bible-lxx.json'),
+  TR1624: storageRef.child('bibles/bible-TR1624.json'),
+  TR1894: storageRef.child('bibles/bible-TR1894.json'),
 }
 
 export const databasesRef = {

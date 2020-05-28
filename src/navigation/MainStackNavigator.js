@@ -41,6 +41,7 @@ import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
 import PlanSelectScreen from '~features/plans/PlanSelectScreen'
 import TimelineScreen from '~features/timeline/TimelineScreen'
 import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
+import PremiumScreen from '~features/premium/PremiumScreen'
 
 const MainStackNavigator = createStackNavigator(
   {
@@ -93,6 +94,7 @@ const MainStackNavigator = createStackNavigator(
       },
     },
     TimelineHome: { screen: TimelineHomeScreen },
+    Premium: { screen: PremiumScreen },
   },
   {
     headerMode: 'none',

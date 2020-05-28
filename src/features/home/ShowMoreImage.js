@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import * as Animatable from 'react-native-animatable'
-import { LinearGradient } from 'expo-linear-gradient'
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
-import { useSelector } from 'react-redux'
 import { withTheme } from 'emotion-theming'
 
 import useDimensions, { maxWidth } from '~helpers/useDimensions'
@@ -32,8 +30,6 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
   let {
     screen: { width },
   } = useDimensions()
-  const [expandImage] = useState(true)
-  const themeDefault = useSelector(state => state.user.bible.settings.theme)
 
   width = maxWidth(width)
 
@@ -52,17 +48,13 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
       </Box>
     )
   }
-
-  const linearGradientColor =
-    themeDefault === 'default' ? '255, 255, 255' : '18,45,66'
-
   return (
-    <Box grey>
+    <Box pb={20}>
       <AnimatableBox
         transition="height"
         position="relative"
         style={{
-          height: width - 40,
+          height: width - 80,
           backgroundColor: theme.colors.lightGrey,
           borderRadius: 10,
           shadowColor: theme.colors.reverse,
@@ -78,8 +70,8 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
             thumbnailSource={{ uri: imageUrls.small }}
             source={{ uri: imageUrls.large, cache: 'force-cache' }}
             style={{
-              width: width - 40,
-              height: width - 40,
+              width: width - 80,
+              height: width - 80,
             }}
             resizeMode="cover"
           />
@@ -95,19 +87,6 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme }) => {
             <Text fontSize={8}>copyright bible.com</Text>
           </Box>
         </Link>
-        <LinearGradient
-          colors={[
-            `rgba(${linearGradientColor},0)`,
-            `rgba(${linearGradientColor},${expandImage ? 0 : 1})`,
-          ]}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 100,
-          }}
-        />
       </AnimatableBox>
     </Box>
   )

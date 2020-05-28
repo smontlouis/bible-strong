@@ -94,28 +94,18 @@ const StrongOfTheDay = ({
           />
         </Box>
         <RandomButton onPress={() => setStartRandom(true)} />
-        <Box flex={1} center>
-          <Box
-            backgroundColor="rgba(0,0,0,0.1)"
-            paddingHorizontal={5}
-            paddingVertical={3}
-            rounded
-          >
-            <Text fontSize={10} style={{ color: 'white' }}>
-              {type === 'grec' ? 'Grec' : 'Hébreu'}
-            </Text>
-          </Box>
+        <Box flex={1} center mt={20}>
+          <Paragraph title scale={-2} style={{ color: 'white' }}>
+            {Mot}
+          </Paragraph>
           <Paragraph
-            style={{ color: 'white' }}
-            scale={-2}
+            style={{ color: 'white', opacity: 0.5 }}
+            scale={-3}
             scaleLineHeight={-2}
             marginBottom={3}
           >
             {Grec || Hebreu}
           </Paragraph>
-          <Text title fontSize={14} style={{ color: 'white' }}>
-            {Mot}
-          </Text>
         </Box>
         <Link route="Lexique" style={{ width: '100%' }}>
           <Box
