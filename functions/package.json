@@ -7,7 +7,8 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "build": "./node_modules/.bin/tslint --project tsconfig.json && ./node_modules/.bin/tsc"
   },
   "engines": {
     "node": "8"

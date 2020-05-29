@@ -1,4 +1,4 @@
-const functions = require('firebase-functions')
+import * as functions from 'firebase-functions'
 const admin = require('firebase-admin')
 
 admin.initializeApp()
@@ -11,11 +11,7 @@ exports.grec = functions.https.onRequest(async (req, res) => {
       res.status(400).send({ error: 'id_required' })
     }
 
-    const doc = await admin
-      .firestore()
-      .collection('grec')
-      .doc(code)
-      .get()
+    const doc = await admin.firestore().collection('grec').doc(code).get()
 
     const data = doc.data()
 
@@ -37,11 +33,7 @@ exports.hebreu = functions.https.onRequest(async (req, res) => {
       res.status(400).send({ error: 'id_required' })
     }
 
-    const doc = await admin
-      .firestore()
-      .collection('hebreu')
-      .doc(code)
-      .get()
+    const doc = await admin.firestore().collection('hebreu').doc(code).get()
 
     const data = doc.data()
 
@@ -89,8 +81,8 @@ exports.count_verses = functions.https.onRequest(async (req, res) => {
       res.status(400).send({ error: 'id_required' })
     }
 
-    const part = book > 39 ? 'lsgsnt2': 'lsgsat2'
-    
+    const part = book > 39 ? 'lsgsnt2' : 'lsgsat2'
+
     const doc = await admin
       .firestore()
       .collection(part)
