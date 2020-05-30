@@ -5,5 +5,16 @@
       "npm --prefix \"$RESOURCE_DIR\" run build"
     ],
     "source": "functions"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    }
   }
 }
