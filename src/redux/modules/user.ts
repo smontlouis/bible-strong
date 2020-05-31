@@ -1,4 +1,4 @@
-import produce from 'immer'
+import produce, { Draft } from 'immer'
 import deepmerge from 'deepmerge'
 import { reduceReducers } from './utils'
 
@@ -16,6 +16,7 @@ import studiesReducer from './user/studies'
 import { SubscriptionType } from '~common/types'
 import { Dispatch } from 'react'
 import { ThunkDispatch } from 'redux-thunk'
+import { Reducer } from 'redux'
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -54,7 +55,58 @@ export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
 export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
 
-const initialState = {
+interface UserState {
+  id: string
+  email: string
+  displayName: string
+  photoURL: string
+  provider: string
+  isFirstTime: boolean
+  lastSeen: number
+  subscription?: string
+  emailVerified: boolean
+  isLoading: boolean
+  notifications: {
+    verseOfTheDay: string
+    notificationId: string
+  }
+  changelog: {
+    isLoading: boolean
+    lastSeen: number
+    data: any[]
+  }
+  needsUpdate: {}
+  fontFamily: string
+  bible: {
+    changelog: {}
+    highlights: {}
+    notes: {}
+    studies: {}
+    tags: {}
+    history: any[]
+    strongsHebreu: {}
+    strongsGrec: {}
+    words: {}
+    naves: {}
+    settings: {
+      alignContent: string
+      fontSizeScale: number
+      textDisplay: string
+      theme: string
+      press: string
+      notesDisplay: string
+      commentsDisplay: boolean
+      colors: {
+        default: typeof defaultColors
+        dark: typeof darkColors
+      }
+      compare: {
+        LSG: boolean
+      }
+    }
+  }
+}
+const initialState: UserState = {
   id: '',
   email: '',
   displayName: '',
@@ -62,7 +114,7 @@ const initialState = {
   provider: '',
   isFirstTime: true,
   lastSeen: 0,
-  subscription: null,
+  subscription: undefined,
   emailVerified: false,
   isLoading: false,
   notifications: {
@@ -109,7 +161,7 @@ const initialState = {
 const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 
 // UserReducer
-const userReducer = produce((draft: typeof initialState, action) => {
+const userReducer = produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
     case SET_FIRST_TIME: {
       draft.isFirstTime = action.payload
@@ -159,10 +211,10 @@ const userReducer = produce((draft: typeof initialState, action) => {
       draft.lastSeen = lastSeen
       draft.emailVerified = emailVerified
       draft.isLoading = false
+      draft.subscription = subscription
 
       if (!isLogged) {
         console.log('User was not logged, merge data')
-        draft.subscription = subscription
 
         if (bible) {
           draft.bible = deepmerge(draft.bible, bible, {
@@ -175,7 +227,6 @@ const userReducer = produce((draft: typeof initialState, action) => {
         if (bible) {
           draft.bible = { ...draft.bible, ...bible }
         }
-        draft.subscription = subscription
       } else if (remoteLastSeen < localLastSeen) {
         console.log('Local wins')
         // Local wins - do nothing
@@ -290,27 +341,29 @@ const userReducer = produce((draft: typeof initialState, action) => {
       break
     }
     case SET_SUBSCRIPTION: {
-      if (<SubscriptionType>draft.subscription !== 'lifetime') {
-        draft.subscription = action.payload
-      }
+      draft.subscription = action.payload
       break
     }
     default: {
       break
     }
   }
-})
+}) as Reducer<UserState>
 
-export default reduceReducers(
-  initialState,
-  userReducer,
-  notesReducer,
-  highlightsReducer,
-  settingsReducer,
-  tagsReducer,
-  versionUpdateReducer,
-  studiesReducer
+const reducers = <typeof userReducer>(
+  reduceReducers(
+    initialState,
+    userReducer,
+    notesReducer,
+    highlightsReducer,
+    settingsReducer,
+    tagsReducer,
+    versionUpdateReducer,
+    studiesReducer
+  )
 )
+
+export default reducers
 
 // First-Time
 export function setFirstTime(payload) {
@@ -447,13 +500,8 @@ export function addChangelog(payload) {
 }
 
 export function setSubscription(payload: SubscriptionType) {
-  return async (dispatch, getState) => {
-    const subscription = getState().user.subscription
-    if (subscription !== payload) {
-      dispatch({
-        type: SET_SUBSCRIPTION,
-        payload,
-      })
-    }
+  return {
+    type: SET_SUBSCRIPTION,
+    payload,
   }
 }

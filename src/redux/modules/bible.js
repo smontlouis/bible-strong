@@ -45,9 +45,9 @@ const initialState = {
 export default produce((draft, action) => {
   switch (action.type) {
     case ADD_PARALLEL_VERSION: {
-      if (draft.selectedVersion === 'INT') {
-        draft.selectedVersion = 'LSG'
-      }
+      // if (draft.selectedVersion === 'INT') {
+      //   draft.selectedVersion = 'LSG'
+      // }
       draft.parallelVersions.push('LSG')
       break
     }
@@ -112,13 +112,13 @@ export default produce((draft, action) => {
       return
     }
     case SET_VERSION: {
-      if (action.version === 'INT') {
-        draft.parallelVersions = []
-      }
+      // if (action.version === 'INT') {
+      //   draft.parallelVersions = []
+      // }
 
       if (typeof action.parallelVersionIndex !== 'undefined') {
-        draft.parallelVersions[action.parallelVersionIndex] =
-          action.version === 'INT' ? 'LSG' : action.version
+        draft.parallelVersions[action.parallelVersionIndex] = action.version
+        //  === 'INT' ? 'LSG' : action.version
       } else {
         draft.selectedVersion = action.version
       }

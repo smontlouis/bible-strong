@@ -3,12 +3,11 @@ import React from 'react'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
-import { mappingSku } from './PremiumScreen'
 
 export type subVariant = 'normal' | 'secondary' | 'primary'
 
 interface Props {
-  productId: string
+  period: string
   discount?: string
   price: string
   isSelected?: boolean
@@ -19,7 +18,7 @@ interface Props {
 const LinkBox = Box.withComponent(Link)
 
 const SubscriptionPlan = ({
-  productId,
+  period,
   discount,
   price,
   isSelected,
@@ -63,7 +62,7 @@ const SubscriptionPlan = ({
       <Text fontSize={18} bold>
         {price}
       </Text>
-      <Text>{mappingSku[productId]?.period}</Text>
+      <Text>{period}</Text>
     </LinkBox>
   )
 }

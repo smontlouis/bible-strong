@@ -8388,7 +8388,7 @@ domutils@^1.5.1, domutils@^1.7.0:
     dom-serializer "0"
     domelementtype "1"
 
-dooboolab-welcome@^1.2.0:
+dooboolab-welcome@^1.1.1, dooboolab-welcome@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/dooboolab-welcome/-/dooboolab-welcome-1.2.0.tgz#295818ce85a8e97dc90c0ec0510b4008e2d722dc"
   integrity sha512-XgEbjJHAsKLge/e8jtuHsv84Ovg1Gx0GvnOTOmOlVGV1643nduTAkT3fyo/mxKbzvyXBr47RHaJAY4R2toI0UA==
@@ -16442,12 +16442,26 @@ react-native-hooks@^0.0.6:
   dependencies:
     react "^16.7.0-alpha.0"
 
+react-native-iap@4.4.3:
+  version "4.4.3"
+  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-4.4.3.tgz#16c174b569caf3e401a4c756de249ef64dada7a9"
+  integrity sha512-vywdYj61i/F3Qw+o1U130ap77AYYkyFX3ioDnl5UzOd3xmoo2/uH36FPdlKrFZUmdYdMySoV+AYJDLh5T5ihWw==
+  dependencies:
+    dooboolab-welcome "^1.1.1"
+
 react-native-iap@^4.4.9:
   version "4.4.9"
   resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-4.4.9.tgz#dec82b12fd3165e8a86bd87c8b15fd8b510685aa"
   integrity sha512-Ptz4kUgTzIROt+N3m1Z6xgN/FfjPN3nBEkw475SQaj62dfuGB+fY66LqASM7woetvn65lolr6VEh1OsT2nbqyQ==
   dependencies:
     dooboolab-welcome "^1.2.0"
+
+react-native-iaphub@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-iaphub/-/react-native-iaphub-3.0.1.tgz#f972681f1a0d0dbbcb39e3e5bdf6b041272b12bb"
+  integrity sha512-re0hj5b/Qu+B6AzlRiMf0XjlWKpoC4D9JSso0NJWLqVKdwPDW0dxEfuNt+KjyiJVTloL9MipYhcoTx69D9LSgQ==
+  dependencies:
+    react-native-iap "4.4.3"
 
 react-native-iphone-x-helper@^1.0.3, react-native-iphone-x-helper@^1.2.1:
   version "1.2.1"

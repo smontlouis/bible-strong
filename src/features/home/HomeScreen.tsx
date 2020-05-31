@@ -16,10 +16,6 @@ import Button from '~common/ui/Button'
 import PlanHome from './PlanHome'
 import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
-import {
-  useRestorePurchases,
-  useInitInAppPurchases,
-} from '~helpers/useInAppPurchases'
 import usePremium from '~helpers/usePremium'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
@@ -27,9 +23,6 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 const HomeScreen = () => {
   const { isLogged } = useLogin()
   const hasPremium = usePremium()
-  console.log(hasPremium)
-  useInitInAppPurchases()
-  useRestorePurchases()
 
   return (
     <Box grey>

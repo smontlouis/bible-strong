@@ -2,8 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
-
-import GlobalStateContext from '~helpers/globalContext'
+import { useGlobalContext } from '~helpers/globalContext'
 import { usePrevious } from '~helpers/usePrevious'
 
 const TouchableTab = styled.TouchableOpacity(({ orientation }) => ({
@@ -64,18 +63,17 @@ const TabBar = props => {
   } = props
 
   const { routes, index: activeRouteIndex } = navigation.state
-  const prevIndex = usePrevious(activeRouteIndex)
+  // const prevIndex = usePrevious(activeRouteIndex)
   const {
-    state: { isFullscreen },
-    updateState,
-  } = React.useContext(GlobalStateContext)
+    fullscreen: [isFullscreen, setFullScreen],
+  } = useGlobalContext()
 
   // React.useEffect(() => {
   //   if (activeRouteIndex === 2 && prevIndex !== activeRouteIndex) {
-  //     updateState('isFullscreen', true)
+  //      setFullScreen(true)
   //   }
   //   if (prevIndex === 2 && prevIndex !== activeRouteIndex) {
-  //     updateState('isFullscreen', false)
+  //     setFullScreen(false)
   //   }
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [prevIndex, activeRouteIndex])

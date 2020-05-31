@@ -278,7 +278,7 @@ export default {
       ...state,
       user: {
         ...state.user,
-        subscription: null,
+        subscription: undefined,
       },
     }
   },

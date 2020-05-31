@@ -138,20 +138,11 @@ export default store => next => async action => {
       )
       break
     }
-    case SET_SUBSCRIPTION: {
-      userDoc.update(
-        r({
-          subscription: user.subscription,
-        })
-      )
-      break
-    }
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
       userDoc.update(
         r({
-          subscription: user.subscription,
           bible: sanitizeUserBible(user.bible),
           plan: plan.ongoingPlans,
         })

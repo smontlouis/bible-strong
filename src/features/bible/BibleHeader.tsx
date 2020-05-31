@@ -15,7 +15,6 @@ import { withNavigation } from 'react-navigation'
 import * as Animatable from 'react-native-animatable'
 import { useTheme } from 'emotion-theming'
 
-import GlobalStateContext from '~helpers/globalContext'
 import truncate from '~helpers/truncate'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
@@ -24,6 +23,7 @@ import Link from '~common/Link'
 import Back from '~common/Back'
 import useDimensions from '~helpers/useDimensions'
 import ParallelIcon from '~common/ParallelIcon'
+import { useGlobalContext } from '~helpers/globalContext'
 
 const { Popover } = renderers
 
@@ -103,9 +103,8 @@ const Header = ({
   const isSmall = dimensions.screen.width < 400
 
   const {
-    state: { isFullscreen },
-    updateState,
-  } = React.useContext(GlobalStateContext)
+    fullscreen: [isFullscreen, setIsFullScreen],
+  } = useGlobalContext()
 
   if (isReadOnly) {
     return (
@@ -153,10 +152,7 @@ const Header = ({
         <TextIcon>{version}</TextIcon>
       </LinkBox>
       {isFullscreen && (
-        <LinkBox
-          onPress={() => updateState('isFullscreen', false)}
-          style={{ width: 50 }}
-        >
+        <LinkBox onPress={() => setIsFullScreen(false)} style={{ width: 50 }}>
           <MaterialIcon name="fullscreen-exit" size={20} />
         </LinkBox>
       )}
@@ -198,7 +194,7 @@ const Header = ({
                     <Text marginLeft={10}>Historique</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={() => updateState('isFullscreen', true)}>
+                <MenuOption onSelect={() => setIsFullScreen(true)}>
                   <Box row alignItems="center">
                     <MaterialIcon name="fullscreen" size={20} />
                     <Text marginLeft={10}>Plein écran</Text>

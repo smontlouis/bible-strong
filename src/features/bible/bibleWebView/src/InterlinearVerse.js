@@ -5,20 +5,49 @@ import { scaleFontSize } from './scaleFontSize'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
 
 const Wrapper = styled('div')(({ settings: { textDisplay } }) => ({
-  display: textDisplay
+  display: textDisplay,
 }))
 
 const Section = styled('div')(
-  ({ isSelected, settings: { theme, colors } }) => ({
+  ({ isSelected, withPadding, settings: { theme, colors } }) => ({
     display: 'inline-block',
+    position: 'relative',
     transition: 'background 0.3s ease',
     borderRadius: 4,
-    padding: 5,
+    padding: withPadding ? 5 : '2px 4px',
     ...(isSelected
       ? {
-          background: colors[theme].primary
+          background: colors[theme].primary,
         }
-      : {})
+      : {}),
+  })
+)
+
+const AbsoluteSection = styled('div')(
+  ({ isSelected, withPadding, settings: { theme, colors } }) => ({
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translateX(-50%) translateY(-50%)',
+    transition: 'background 0.3s ease',
+    borderRadius: 8,
+    pointerEvents: 'none',
+    transition: '0.5s ease',
+    opaity: 0,
+    scale: 0.8,
+    display: 'none',
+    padding: 5,
+    background: colors[theme].reverse,
+    minWidth: '50px',
+    border: `3px solid ${colors[theme].primary}`,
+    boxShadow:
+      'rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
+    ...(isSelected && {
+      zIndex: 3,
+      display: 'block',
+      opacity: 1,
+      scale: 1,
+    }),
   })
 )
 
@@ -26,14 +55,14 @@ const NumberText = styled('span')(
   ({ settings: { fontSizeScale, fontFamily } }) => ({
     fontSize: scaleFontSize(15, fontSizeScale),
     position: 'relative',
-    bottom: 20,
+    // bottom: 20,
     fontFamily,
     padding: '0 5px',
 
     display: 'inline-flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   })
 )
 
@@ -41,20 +70,28 @@ const Hebreu = styled('div')(
   ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
     fontSize: scaleFontSize(18, fontSizeScale),
     fontFamily,
-    color: colors[theme].primary,
+    color: colors[theme].tertiary,
 
     ...(isSelected
       ? {
-          color: colors[theme].reverse
+          color: colors[theme].reverse,
         }
-      : {})
+      : {}),
+  })
+)
+
+const AbsoluteHebreu = styled('div')(
+  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+    fontSize: scaleFontSize(16, fontSizeScale),
+    fontFamily,
+    color: colors[theme].primary,
   })
 )
 
 const Code = styled('div')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(11, fontSizeScale),
+  fontSize: scaleFontSize(10, fontSizeScale),
   fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)'
+  color: 'rgba(0,0,0,0.3)',
 }))
 
 const VerseText = styled('div')(
@@ -69,7 +106,7 @@ const VerseText = styled('div')(
     background: colors[theme].lightGrey,
     borderRadius: 4,
     position: 'relative',
-    paddingRight: 30
+    paddingRight: 30,
   })
 )
 
@@ -87,36 +124,22 @@ const CloseVerseText = styled('div')(() => ({
   mozUserSelect: 'none',
   msUserSelect: 'none',
   khtmlUserSelect: 'none',
-  webkitUserSelect: 'none'
+  webkitUserSelect: 'none',
 }))
 
 const Mot = styled('div')(
   ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
-    fontSize: scaleFontSize(18, fontSizeScale),
+    fontSize: scaleFontSize(14, fontSizeScale),
     fontFamily,
     color: colors[theme].default,
-    marginTop: 5 + fontSizeScale * 0.1 * 5,
-
-    ...(isSelected
-      ? {
-          color: colors[theme].reverse
-        }
-      : {})
   })
 )
 
 const Phonetique = styled('div')(
   ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
-    fontSize: scaleFontSize(16, fontSizeScale),
+    fontSize: scaleFontSize(14, fontSizeScale),
     fontFamily,
     color: colors[theme].tertiary,
-    marginTop: 5 + fontSizeScale * 0.1 * 5,
-
-    ...(isSelected
-      ? {
-          color: colors[theme].reverse
-        }
-      : {})
   })
 )
 
@@ -124,7 +147,7 @@ const ParsingTag = styled('div')(({ settings: { fontSizeScale } }) => ({
   fontSize: scaleFontSize(10, fontSizeScale),
   lineHeight: scaleFontSize(20, fontSizeScale),
   fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)'
+  color: 'rgba(0,0,0,0.3)',
 }))
 
 const InterlinearVerse = ({
@@ -132,14 +155,14 @@ const InterlinearVerse = ({
   settings,
   isHebreu,
   secondaryVerse,
-  selectedCode
+  selectedCode,
 }) => {
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
   const navigateToStrong = (reference, isHebreu) => {
     dispatch({
       type: NAVIGATE_TO_STRONG,
-      payload: { reference, book: isHebreu ? 1 : 40 }
+      payload: { reference, book: isHebreu ? 1 : 40 },
     })
   }
 
@@ -157,8 +180,9 @@ const InterlinearVerse = ({
       <NumberText
         isHebreu={isHebreu}
         settings={settings}
-        onClick={() => setShowSecondaryVerse(s => !s)}>
-        <svg width={15} x="0px" y="0px" viewBox="0 0 54.308 54.308">
+        // onClick={() => setShowSecondaryVerse(s => !s)}
+      >
+        {/* <svg width={15} x="0px" y="0px" viewBox="0 0 54.308 54.308">
           <path
             fill={settings.colors[settings.theme].default}
             d="M53.583,25.902c-5.448-9.413-15.575-15.26-26.429-15.26S6.173,16.489,0.725,25.902L0,27.154
@@ -170,7 +194,7 @@ const InterlinearVerse = ({
 		c1.55,0.18,3.069,0.503,4.543,0.956c1.81,0.557,3.547,1.314,5.184,2.249c0.687,0.393,1.36,0.811,2.008,1.266
 		c2.608,1.829,4.888,4.145,6.681,6.865C45.83,31.178,42.117,34.323,37.843,36.302z"
           />
-        </svg>
+        </svg> */}
         {verse.Verset}{' '}
       </NumberText>
       {sections.map((section, i) => {
@@ -178,28 +202,34 @@ const InterlinearVerse = ({
         const isSelected = selectedCode && selectedCode.reference == code
 
         return (
-          <Section
-            isHebreu={isHebreu}
-            key={i}
-            onClick={() => navigateToStrong(code, isHebreu)}
-            settings={settings}
-            isSelected={isSelected}>
-            <Code settings={settings}>{code}</Code>
-            <Hebreu isSelected={isSelected} settings={settings}>
-              {hebreu}
-            </Hebreu>
-            <Mot isSelected={isSelected} settings={settings}>
-              {mot}
-            </Mot>
-            {phonetique && (
-              <Phonetique isSelected={isSelected} settings={settings}>
-                {phonetique}
-              </Phonetique>
-            )}
-            {parsingTag && (
-              <ParsingTag settings={settings}>{parsingTag}</ParsingTag>
-            )}
-          </Section>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <AbsoluteSection
+              isHebreu={isHebreu}
+              settings={settings}
+              isSelected={isSelected}
+            >
+              <Code settings={settings}>{code}</Code>
+              <AbsoluteHebreu settings={settings}>{hebreu}</AbsoluteHebreu>
+              <Mot settings={settings}>{mot}</Mot>
+              {phonetique && (
+                <Phonetique settings={settings}>{phonetique}</Phonetique>
+              )}
+              {parsingTag && (
+                <ParsingTag settings={settings}>{parsingTag}</ParsingTag>
+              )}
+            </AbsoluteSection>
+            <Section
+              isHebreu={isHebreu}
+              key={i}
+              onClick={() => navigateToStrong(code, isHebreu)}
+              settings={settings}
+              // isSelected={isSelected}
+            >
+              <Hebreu isSelected={isSelected} settings={settings}>
+                {hebreu}
+              </Hebreu>
+            </Section>
+          </div>
         )
       })}
     </Wrapper>

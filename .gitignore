@@ -9,6 +9,7 @@ keystore.txt
 src/assets/bible_versions/**
 project/*
 config.js
+config.ts
 app.json
 
 

@@ -12,8 +12,8 @@ const getBackgroundColor = type => {
       return '#2E302E'
   }
 }
-export default {
-  show(label, type = 'info', params = {}) {
+const Snackbar = {
+  show(label: string, type = 'info', params = {}) {
     SnackBar.show(label, {
       backgroundColor: getBackgroundColor(type),
       buttonColor: 'blue',
@@ -24,3 +24,5 @@ export default {
     })
   },
 }
+
+export default Snackbar
