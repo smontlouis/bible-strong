@@ -9,7 +9,7 @@ import { Status } from '~common/types'
 import useLogin from './useLogin'
 import { Dispatch } from 'redux'
 import Snackbar from '~common/SnackBar'
-import { iaphub } from 'config'
+import { iaphub } from '../../config'
 
 export const subSkus = [
   'com.smontlouis.biblestrong.onemonth',
