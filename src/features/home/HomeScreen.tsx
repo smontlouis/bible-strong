@@ -17,6 +17,7 @@ import PlanHome from './PlanHome'
 import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
 import usePremium from '~helpers/usePremium'
+import SwitchTheme from './SwitchTheme'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
@@ -62,6 +63,9 @@ const HomeScreen = () => {
           <VerseOfTheDay />
         </Box>
         <PremiumWidget />
+        <Box grey pb={30}>
+          <SwitchTheme />
+        </Box>
         <Box grey>
           <Box
             background

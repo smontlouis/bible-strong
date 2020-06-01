@@ -1,7 +1,7 @@
-import produce from 'immer'
+import produce, { Draft } from 'immer'
 import analytics from '@react-native-firebase/analytics'
 
-import books from '~assets/bible_versions/books-desc'
+import books, { Book } from '~assets/bible_versions/books-desc'
 
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
 const SET_TEMP_SELECTED_CHAPTER = 'bible/SET_TEMP_SELECTED_CHAPTER'
@@ -17,14 +17,29 @@ const REMOVE_HIGHLIGHTED_VERSE = 'bible/REMOVE_HIGHLIGHTED_VERSE'
 const CLEAR_HIGHLIGHTED_VERSES = 'bible/CLEAR_HIGHLIGHTED_VERSES'
 const GO_TO_PREV_CHAPTER = 'bible/GO_TO_PREV_CHAPTER'
 const GO_TO_NEXT_CHAPTER = 'bible/GO_TO_NEXT_CHAPTER'
-const SET_STRONG_DATABASE_HASH = 'bible/SET_STRONG_DATABASE_HASH'
-const SET_DICTIONNAIRE_DATABASE_HASH = 'bible/SET_DICTIONNAIRE_DATABASE_HASH'
-const SET_WEBVIEW_HASH = 'bible/SET_WEBVIEW_HASH'
+
 const ADD_PARALLEL_VERSION = 'bible/ADD_PARALLEL_VERSION'
 const REMOVE_PARALLEL_VERSION = 'bible/REMOVE_PARALLEL_VERSION'
 const REMOVE_ALL_PARALLEL_VERSIONS = 'bible/REMOVE_ALL_PARALLEL_VERSIONS'
 
-const initialState = {
+const TOGGLE_SELECTION_MODE = 'bible/TOGGLE_SELECTION_MODE'
+
+interface BibleState {
+  selectedVersion: string
+  selectedBook: Book
+  selectedChapter: number
+  selectedVerse: number
+  parallelVersions: string[]
+  temp: {
+    selectedBook: Book
+    selectedChapter: number
+    selectedVerse: number
+  }
+  selectedVerses: { [verse: string]: true }
+  selectionMode: 'grid' | 'list'
+}
+
+const initialState: BibleState = {
   selectedVersion: 'LSG',
   selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
   selectedChapter: 1,
@@ -36,14 +51,21 @@ const initialState = {
     selectedVerse: 1,
   },
   selectedVerses: {}, // highlighted verses,
-  strongDatabaseHash: '',
-  dictionnaireDatabaseHash: '',
-  webviewHash: '',
+  selectionMode: 'grid',
 }
 
 // BibleReducer
-export default produce((draft, action) => {
+export default produce((draft: Draft<BibleState>, action) => {
   switch (action.type) {
+    case TOGGLE_SELECTION_MODE: {
+      if (draft.selectionMode === 'grid') {
+        draft.selectionMode = 'list'
+      } else {
+        draft.selectionMode = 'grid'
+      }
+
+      break
+    }
     case ADD_PARALLEL_VERSION: {
       // if (draft.selectedVersion === 'INT') {
       //   draft.selectedVersion = 'LSG'
@@ -213,18 +235,6 @@ export default produce((draft, action) => {
 
       return
     }
-    case SET_DICTIONNAIRE_DATABASE_HASH: {
-      draft.dictionnaireDatabaseHash = action.hash
-      return
-    }
-    case SET_STRONG_DATABASE_HASH: {
-      draft.strongDatabaseHash = action.hash
-      break
-    }
-    case SET_WEBVIEW_HASH: {
-      draft.webviewHash = action.hash
-      break
-    }
     default: {
       break
     }
@@ -234,6 +244,12 @@ export default produce((draft, action) => {
 export function addParallelVersion() {
   return {
     type: ADD_PARALLEL_VERSION,
+  }
+}
+
+export function toggleSelectionMode() {
+  return {
+    type: TOGGLE_SELECTION_MODE,
   }
 }
 
@@ -248,24 +264,6 @@ export function removeAllParallelVersions() {
   return {
     type: REMOVE_ALL_PARALLEL_VERSIONS,
   }
-}
-
-export function setStrongDatabaseHash(hash) {
-  return {
-    type: SET_STRONG_DATABASE_HASH,
-    hash,
-  }
-}
-
-export function setWebviewHash(hash) {
-  return {
-    type: SET_WEBVIEW_HASH,
-    hash,
-  }
-}
-
-export function setDictionnaireDatabaseHash(hash) {
-  return { type: SET_DICTIONNAIRE_DATABASE_HASH, hash }
 }
 
 export function setTempSelectedBook(book) {

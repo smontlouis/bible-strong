@@ -92,7 +92,7 @@ interface UserState {
       alignContent: string
       fontSizeScale: number
       textDisplay: string
-      theme: string
+      theme: 'default' | 'dark'
       press: string
       notesDisplay: string
       commentsDisplay: boolean

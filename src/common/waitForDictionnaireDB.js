@@ -20,10 +20,6 @@ export const useWaitForDatabase = () => {
     dispatch,
   ] = useDBStateValue()
 
-  const dictionnaireDatabaseHash = useSelector(
-    state => state.bible.dictionnaireDatabaseHash
-  )
-
   useEffect(() => {
     if (getDictionnaireDB()) {
       dispatch({
@@ -127,7 +123,7 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [dictionnaireDatabaseHash, dispatch, startDownload])
+  }, [dispatch, startDownload])
 
   const setStartDownload = value =>
     dispatch({

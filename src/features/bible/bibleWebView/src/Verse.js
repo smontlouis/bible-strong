@@ -277,6 +277,7 @@ class Verse extends Component {
               >
                 <Verse
                   isParallel
+                  isHebreu={isHebreu}
                   verse={p.verse}
                   version={p.version}
                   settings={settings}

@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { FlatList } from 'react-native'
 import { Modalize } from 'react-native-modalize'
 
@@ -161,6 +160,22 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
+          <Text flex={5}>Thème</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {themeToString[theme]}
+          </Text>
+          <TouchableIcon
+            isSelected={theme === 'default'}
+            name="sun"
+            onPress={() => setSettingsTheme('default')}
+          />
+          <TouchableIcon
+            isSelected={theme === 'dark'}
+            name="moon"
+            onPress={() => setSettingsTheme('dark')}
+          />
+        </HalfContainer>
+        <HalfContainer border>
           <Text flex={5}>Alignement du texte</Text>
           <Text marginLeft={5} fontSize={12} bold marginRight={10}>
             {alignContentToString[alignContent]}
@@ -206,22 +221,7 @@ const BibleParamsModal = ({
             onPress={() => setSettingsTextDisplay('block')}
           />
         </HalfContainer>
-        <HalfContainer border>
-          <Text flex={5}>Thème</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {themeToString[theme]}
-          </Text>
-          <TouchableIcon
-            isSelected={theme === 'default'}
-            name="sun"
-            onPress={() => setSettingsTheme('default')}
-          />
-          <TouchableIcon
-            isSelected={theme === 'dark'}
-            name="moon"
-            onPress={() => setSettingsTheme('dark')}
-          />
-        </HalfContainer>
+
         <HalfContainer border>
           <Text flex={5}>Affichage des notes</Text>
           <Text marginLeft={5} fontSize={12} bold>

@@ -25,10 +25,6 @@ export const useWaitForDatabase = () => {
     dispatch,
   ] = useDBStateValue()
 
-  const strongDatabaseHash = useSelector(
-    state => state.bible.strongDatabaseHash
-  )
-
   useEffect(() => {
     if (strongDB.get()) {
       dispatch({
@@ -78,7 +74,7 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [strongDatabaseHash, dispatch, startDownload])
+  }, [dispatch, startDownload])
 
   const setStartDownload = value =>
     dispatch({

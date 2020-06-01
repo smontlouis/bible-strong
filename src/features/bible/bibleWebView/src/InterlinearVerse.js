@@ -88,11 +88,14 @@ const AbsoluteHebreu = styled('div')(
   })
 )
 
-const Code = styled('div')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(10, fontSizeScale),
-  fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)',
-}))
+const Code = styled('div')(
+  ({ settings: { fontSizeScale, colors, theme } }) => ({
+    fontSize: scaleFontSize(10, fontSizeScale),
+    fontFamily: 'arial',
+    color: colors[theme].default,
+    opacity: 0.3,
+  })
+)
 
 const VerseText = styled('div')(
   ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
@@ -143,12 +146,15 @@ const Phonetique = styled('div')(
   })
 )
 
-const ParsingTag = styled('div')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(10, fontSizeScale),
-  lineHeight: scaleFontSize(20, fontSizeScale),
-  fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)',
-}))
+const ParsingTag = styled('div')(
+  ({ settings: { fontSizeScale, colors, theme } }) => ({
+    fontSize: scaleFontSize(10, fontSizeScale),
+    lineHeight: scaleFontSize(20, fontSizeScale),
+    fontFamily: 'arial',
+    color: colors[theme].default,
+    opacity: 0.3,
+  })
+)
 
 const InterlinearVerse = ({
   verse,

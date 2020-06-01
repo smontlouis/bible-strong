@@ -15,6 +15,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import TagList from '~common/TagList'
+import ListenToStrong from './ListenStrong'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -274,18 +275,34 @@ class BibleStrongDetailScreen extends React.Component {
 
             {!!Hebreu && (
               <ViewItem>
-                <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
-                  Mot Hébreu:&nbsp;
-                  <Word>{Hebreu}</Word>
-                </Paragraph>
+                <Box row alignItems="center">
+                  <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
+                    Mot Hébreu:&nbsp;
+                    <Word>{Hebreu}</Word>
+                  </Paragraph>
+                  <Box ml={15} mb={4}>
+                    <ListenToStrong
+                      type={Hebreu ? 'hebreu' : 'grec'}
+                      code={Code}
+                    />
+                  </Box>
+                </Box>
               </ViewItem>
             )}
             {!!Grec && (
               <ViewItem>
-                <Paragraph>
-                  Mot Grec:&nbsp;
-                  <Word>{Grec}</Word>
-                </Paragraph>
+                <Box row alignItems="center">
+                  <Paragraph>
+                    Mot Grec:&nbsp;
+                    <Word>{Grec}</Word>
+                  </Paragraph>
+                  <Box ml={15} mb={4}>
+                    <ListenToStrong
+                      type={Hebreu ? 'hebreu' : 'grec'}
+                      code={Code}
+                    />
+                  </Box>
+                </Box>
               </ViewItem>
             )}
             {!!Definition && (

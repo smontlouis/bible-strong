@@ -7,6 +7,7 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
+import ListenToStrong from './ListenStrong'
 
 import { wp, cleanParams } from '~helpers/utils'
 import capitalize from '~helpers/capitalize'
@@ -44,8 +45,8 @@ const SubTitle = styled(Text)({
 })
 
 const SmallParagraph = styled(Paragraph)({
-  fontSize: 12,
-  lineHeight: 18,
+  fontSize: 14,
+  lineHeight: 20,
 })
 
 const Header = styled.View(() => ({
@@ -62,8 +63,8 @@ const IconFeather = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 const smallTextStyle = theme => ({
-  lineHeight: 18,
-  fontSize: 12,
+  lineHeight: 20,
+  fontSize: 14,
   color: theme.colors.default,
   fontFamily: theme.fontFamily.paragraph,
 })
@@ -130,7 +131,7 @@ class StrongCard extends React.Component {
     return (
       <Container overflow isModal={isModal}>
         {/* <Shadow overflow /> */}
-        <Box paddingTop={10}>
+        <Box paddingTop={20}>
           <Box>
             <Box row alignItems="flex-end">
               <Header>
@@ -145,23 +146,20 @@ class StrongCard extends React.Component {
                     )}
                   </Text>
                 </Link>
+                <Box mr={10} mt={3}>
+                  <ListenToStrong
+                    type={Hebreu ? 'hebreu' : 'grec'}
+                    code={Code}
+                  />
+                </Box>
                 <Link onPress={this.openStrong}>
                   {isSelectionMode ? (
                     <IconFeather name="share" size={20} />
                   ) : (
-                    <IconFeather name="maximize-2" size={20} />
+                    <IconFeather name="maximize-2" size={17} />
                   )}
                 </Link>
               </Header>
-              {onClosed && (
-                <Link
-                  paddingSmall
-                  onPress={onClosed}
-                  style={{ alignItems: 'flex-end' }}
-                >
-                  <IconFeather name="x" size={25} />
-                </Link>
-              )}
             </Box>
             <Text color="darkGrey" bold fontSize={16} textAlign="left">
               {Hebreu || Grec}

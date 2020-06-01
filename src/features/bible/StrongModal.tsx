@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { ActivityIndicator } from 'react-native'
-import Modal from 'react-native-modal'
-import styled from '@emotion/native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { withNavigation } from 'react-navigation'
 import compose from 'recompose/compose'
 
@@ -12,25 +9,8 @@ import Box from '~common/ui/Box'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { hp } from '~helpers/utils'
 import StrongCard from '~features/bible/StrongCard'
-
-const StylizedModal = styled(Modal)({
-  justifyContent: 'flex-end',
-  zIndex: 10,
-  margin: 0,
-})
-
-const Container = styled.View(({ theme }) => ({
-  height: hp(30),
-  backgroundColor: theme.colors.reverse,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: -1 },
-  shadowOpacity: 0.2,
-  shadowRadius: 7,
-  elevation: 2,
-  paddingBottom: getBottomSpace(),
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-}))
+import { Modalize } from 'react-native-modalize'
+import { usePrevious } from '~helpers/usePrevious'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ theme, navigation, selectedCode, onClosed }) => {
@@ -76,7 +56,7 @@ const StrongCardWrapper = waitForStrongModal(
 
     if (isLoading) {
       return (
-        <Box flex center>
+        <Box flex center height={200}>
           <ActivityIndicator color={theme.colors.grey} />
         </Box>
       )
@@ -94,13 +74,35 @@ const StrongCardWrapper = waitForStrongModal(
   }
 )
 
+interface StrongModalProps {
+  onClosed: () => void
+  theme: Object
+  selectedCode: Object
+  navigation: Object
+  version: string
+}
+
 const StrongModal = ({
   onClosed,
   theme,
-  selectedCode = {},
+  selectedCode,
   navigation,
   version,
-}) => {
+}: StrongModalProps) => {
+  const modalRef = React.useRef<Modalize>(null)
+  const hasSelectedCode = !!selectedCode
+  const hasPrevSelectedCode = usePrevious(hasSelectedCode)
+
+  useEffect(() => {
+    if (hasSelectedCode && !hasPrevSelectedCode) {
+      modalRef.current?.open()
+    }
+
+    if (!hasSelectedCode && hasPrevSelectedCode) {
+      modalRef.current?.close()
+    }
+  }, [hasSelectedCode, hasPrevSelectedCode])
+
   useEffect(() => {
     if (version !== 'INT' || version === 'LSGS') {
       onClosed()
@@ -109,20 +111,24 @@ const StrongModal = ({
   }, [version])
 
   return (
-    <StylizedModal
-      hasBackdrop={false}
-      backdropOpacity={0.3}
-      coverScreen={false}
-      isVisible={!!selectedCode}
-      onBackButtonPress={onClosed}
-      // swipeDirection="down"
-      // onSwipeComplete={onClosed}
-      avoidKeyboard
+    <Modalize
+      ref={modalRef}
+      onClosed={onClosed}
+      modalHeight={hp(75)}
+      handlePosition="inside"
+      closeSnapPointStraightEnabled={false}
+      modalStyle={{
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: 600,
+        width: '100%',
+        backgroundColor: theme.colors.lightGrey,
+      }}
+      snapPoint={200}
+      withOverlay={false}
     >
-      <Container>
-        <StrongCardWrapper {...{ theme, navigation, selectedCode, onClosed }} />
-      </Container>
-    </StylizedModal>
+      <StrongCardWrapper {...{ theme, navigation, selectedCode, onClosed }} />
+    </Modalize>
   )
 }
 

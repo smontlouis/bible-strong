@@ -72,8 +72,6 @@ export default {
       ...state,
       bible: {
         ...state.bible,
-        strongDatabaseHash: '',
-        dictionnaireDatabaseHash: '',
       },
     }
   },
@@ -183,7 +181,6 @@ export default {
       ...state,
       bible: {
         ...state.bible,
-        webviewHash: '', // deprecated
       },
     }
   },
@@ -279,6 +276,10 @@ export default {
       user: {
         ...state.user,
         subscription: undefined,
+      },
+      bible: {
+        ...state.bible,
+        selectionMode: 'grid',
       },
     }
   },

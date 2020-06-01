@@ -7,9 +7,8 @@ import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { withTheme } from 'emotion-theming'
-import SnackBar from '~common/SnackBar'
 
-import { audioV2, audioSay, audioDefault } from '~helpers/topBibleAudio'
+import { audioV2, audioDefault } from '~helpers/topBibleAudio'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import Box from '~common/ui/Box'
@@ -164,7 +163,6 @@ class BibleViewer extends Component {
     }
 
     const audioBaseUrl = (() => {
-      console.log(book.Numero)
       if (audioV2.includes(book.Numero.toString())) {
         return 'https://s.topchretien.com/media/topbible/bible_v2/'
       }
@@ -307,8 +305,6 @@ class BibleViewer extends Component {
       verse,
       focusVerses,
       theme,
-      webviewHash,
-      setWebviewHash,
       removeParallelVersion,
       addParallelVersion,
     } = this.props
@@ -352,8 +348,6 @@ class BibleViewer extends Component {
             setSelectedCode={this.setSelectedCode}
             selectedCode={selectedCode}
             comments={comments}
-            webviewHash={webviewHash}
-            setWebviewHash={setWebviewHash}
             removeParallelVersion={removeParallelVersion}
             addParallelVersion={addParallelVersion}
           />
@@ -456,7 +450,6 @@ export default compose(
       highlightedVerses: state.user.bible.highlights,
       notedVerses: state.user.bible.notes,
       isSelectedVerseHighlighted: !!getHighlightInSelected(state),
-      webviewHash: state.bible.webviewHash,
     }),
     { ...BibleActions, ...UserActions }
   )

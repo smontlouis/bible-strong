@@ -230,10 +230,11 @@ class BibleVerseDetailScreen extends React.Component {
       >
         <Box background paddingTop={getStatusBarHeight()} />
         <Header
+          fontSize={18}
           background
           hasBackButton
           title={`${headerTitle} ${
-            headerTitle.length < 20 ? '- Strong LSG' : ''
+            headerTitle.length < 12 ? '- Strong LSG' : ''
           }`}
           rightComponent={
             <Link
