@@ -1,9 +1,14 @@
 import React from 'react'
 import Modal from 'react-native-modal'
 import styled from '@emotion/native'
+import Text from '~common/ui/Text'
+import Box from '~common/ui/Box'
+import Link from '~common/Link'
 import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+
+const LinkBox = Box.withComponent(Link)
 
 import AnimatedCircularProgress from '~common/AnimatedCircularProgress'
 
@@ -11,7 +16,7 @@ const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   alignItems: 'center',
   margin: 0,
-  paddingBottom: 60 + getBottomSpace(),
+  paddingBottom: 100 + getBottomSpace(),
 })
 
 const WrapperIcon = styled.TouchableOpacity(({ theme }) => ({
@@ -37,7 +42,7 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
 
   React.useEffect(() => {
     if (item) {
-      progressRef.current.animate(100, 3000)
+      progressRef.current.animate(100, 5000)
     }
   }, [item])
 
@@ -71,6 +76,21 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
           </WrapperIcon>
         )}
       </AnimatedCircularProgress>
+      <LinkBox
+        bg="grey"
+        lightShadow
+        rounded
+        p={5}
+        mt={10}
+        onPress={() => {
+          onClosed()
+          setTimeout(() => {
+            setMultipleTagsItem(item)
+          }, 500)
+        }}
+      >
+        <Text color="reverse">Ajouter un tag</Text>
+      </LinkBox>
     </StylizedModal>
   )
 }

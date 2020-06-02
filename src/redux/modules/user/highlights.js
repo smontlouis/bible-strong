@@ -4,6 +4,7 @@ import { removeEntityInTags } from '../utils'
 
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
+export const CHANGE_HIGHLIGHT_COLOR = 'user/CHANGE_HIGHLIGHT_COLOR'
 
 const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
   const formattedObj = Object.keys(verses).reduce(
@@ -30,6 +31,12 @@ export default produce((draft, action) => {
         ...draft.bible.highlights,
         ...action.selectedVerses,
       }
+      break
+    }
+    case CHANGE_HIGHLIGHT_COLOR: {
+      Object.keys(action.verseIds).forEach(key => {
+        draft.bible.highlights[key].color = action.color
+      })
       break
     }
     case REMOVE_HIGHLIGHT: {
@@ -62,11 +69,18 @@ export function addHighlight(color) {
   }
 }
 
-export function removeHighlight() {
+export function removeHighlight(verseIds) {
   return (dispatch, getState) => {
     const { selectedVerses } = getState().bible
 
     dispatch(clearSelectedVerses())
-    return dispatch({ type: REMOVE_HIGHLIGHT, selectedVerses })
+    return dispatch({
+      type: REMOVE_HIGHLIGHT,
+      selectedVerses: verseIds || selectedVerses,
+    })
   }
+}
+
+export function changeHighlightColor(verseIds, color) {
+  return { type: CHANGE_HIGHLIGHT_COLOR, verseIds, color }
 }

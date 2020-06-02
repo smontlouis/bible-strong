@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Audio, AVPlaybackStatus } from 'expo-av'
-import { FeatherIcon } from '~common/ui/Icon'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Box from '~common/ui/Box'
 import { LinkBox } from '~common/Link'
 import { ActivityIndicator } from 'react-native'
@@ -105,7 +105,12 @@ const ListenToStrong = ({ type, code }: Props) => {
       )}
       {audioStatus === 'Error' && (
         <LinkBox onPress={playAudio}>
-          <FeatherIcon name="x-circle" size={20} color="grey" />
+          <MaterialIcon
+            name="error"
+            size={20}
+            color="grey"
+            style={{ opacity: 0.5 }}
+          />
         </LinkBox>
       )}
     </Box>

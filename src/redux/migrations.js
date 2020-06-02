@@ -1,5 +1,6 @@
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
+import blackColors from '~themes/blackColors'
 
 export default {
   // Added 'press' in 'settings'
@@ -280,6 +281,24 @@ export default {
       bible: {
         ...state.bible,
         selectionMode: 'grid',
+      },
+    }
+  },
+  22: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            colors: {
+              ...state.user.bible.settings.colors,
+              black: blackColors,
+            },
+          },
+        },
       },
     }
   },

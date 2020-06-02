@@ -115,7 +115,7 @@ const UserWidget = ({ theme }) => {
               <Icon.Feather
                 name="arrow-right"
                 size={20}
-                color={theme.colors.reverse}
+                color="white"
                 style={{ marginLeft: 10 }}
               />
             }

@@ -4,6 +4,7 @@ import { Modalize } from 'react-native-modalize'
 import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
 import Clipboard from '@react-native-community/clipboard'
+import { useTheme } from 'emotion-theming'
 
 import SnackBar from '~common/SnackBar'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -59,7 +60,7 @@ const VersesModal = ({
   selectAllVerses,
 }) => {
   const isPrevVisible = usePrevious(isVisible)
-
+  const theme = useTheme()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const modalRef = React.useRef(null)
 
@@ -167,7 +168,7 @@ const VersesModal = ({
       ref={modalRef}
       onClose={clearSelectedVerses}
       handlePosition="inside"
-      handleStyle={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
       modalStyle={{
         marginLeft: 'auto',
         marginRight: 'auto',
@@ -217,7 +218,10 @@ const VersesModal = ({
               onPress={() => addHighlight('color5')}
             />
             {isSelectedVerseHighlighted && (
-              <TouchableIcon name="x-circle" onPress={removeHighlight} />
+              <TouchableIcon
+                name="x-circle"
+                onPress={() => removeHighlight()}
+              />
             )}
           </HalfContainer>
           <HalfContainer>

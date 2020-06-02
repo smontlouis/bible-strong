@@ -2,6 +2,7 @@ import auth from '@react-native-firebase/auth'
 import analytics from '@react-native-firebase/analytics'
 import { GoogleSignin } from '@react-native-community/google-signin'
 import { LoginManager, AccessToken } from 'react-native-fbsdk'
+import IAPHub from 'react-native-iaphub'
 
 import * as Sentry from '@sentry/react-native'
 import appleAuth, {
@@ -328,6 +329,8 @@ const FireAuth = class {
 
   logout = () => {
     auth().signOut()
+    IAPHub.logout()
+
     // Sign-out successful.
     this.user = null
     if (this.onLogout) {

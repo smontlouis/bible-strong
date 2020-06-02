@@ -16,36 +16,56 @@ const SwitchTheme = () => {
   )
   const dispatch = useDispatch()
   return (
-    <LinkBox
-      row
-      onPress={() =>
-        dispatch(setSettingsTheme(theme === 'dark' ? 'default' : 'dark'))
-      }
-    >
-      <Box row flex center>
+    <Box row>
+      <LinkBox
+        row
+        flex
+        center
+        onPress={() => dispatch(setSettingsTheme('default'))}
+      >
         <FeatherIcon
           name="sun"
-          size={20}
+          size={18}
           color={theme === 'default' ? 'primary' : 'default'}
         />
         <Text
-          marginLeft={15}
+          marginLeft={10}
           color={theme === 'default' ? 'primary' : 'default'}
         >
           Jour
         </Text>
-      </Box>
-      <Box row flex center>
+      </LinkBox>
+      <LinkBox
+        row
+        flex
+        center
+        onPress={() => dispatch(setSettingsTheme('dark'))}
+      >
         <FeatherIcon
           color={theme === 'dark' ? 'primary' : 'default'}
           name="moon"
-          size={20}
+          size={18}
         />
-        <Text color={theme === 'dark' ? 'primary' : 'default'} marginLeft={15}>
-          Nuit
+        <Text color={theme === 'dark' ? 'primary' : 'default'} marginLeft={10}>
+          Nuit bleutée
         </Text>
-      </Box>
-    </LinkBox>
+      </LinkBox>
+      <LinkBox
+        row
+        flex
+        center
+        onPress={() => dispatch(setSettingsTheme('black'))}
+      >
+        <FeatherIcon
+          color={theme === 'black' ? 'primary' : 'default'}
+          name="circle"
+          size={18}
+        />
+        <Text color={theme === 'black' ? 'primary' : 'default'} marginLeft={10}>
+          Noir
+        </Text>
+      </LinkBox>
+    </Box>
   )
 }
 

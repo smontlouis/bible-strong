@@ -7,6 +7,8 @@ import { withNavigation } from 'react-navigation'
 import { useSelector } from 'react-redux'
 
 import TagList from '~common/TagList'
+import { FeatherIcon } from '~common/ui/Icon'
+import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
@@ -26,7 +28,6 @@ const Circle = styled(Box)(({ colors, color }) => ({
   borderRadius: 3,
   backgroundColor: colors[color],
   marginRight: 5,
-  marginTop: 5,
 }))
 
 const Container = styled(Box)(({ theme }) => ({
@@ -37,7 +38,15 @@ const Container = styled(Box)(({ theme }) => ({
   borderBottomWidth: 1,
 }))
 
-const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
+const VerseComponent = ({
+  color,
+  date,
+  verseIds,
+  stringIds,
+  tags,
+  navigation,
+  setSettings,
+}) => {
   const verses = useBibleVerses(verseIds)
   const { colors } = useSelector(state => ({
     colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
@@ -65,14 +74,31 @@ const VerseComponent = ({ color, date, verseIds, tags, navigation }) => {
       }
     >
       <Container>
-        <Box row style={{ marginBottom: 10 }}>
-          <Box flex row alignContent="center">
+        <Box row style={{ marginBottom: 10 }} alignItems="center">
+          <Box flex row alignItems="center">
             <Circle colors={colors} color={color} />
             <Text fontSize={14} marginLeft={5} title>
               {title}
             </Text>
           </Box>
           <DateText style={{ fontSize: 10 }}>Il y a {formattedDate}</DateText>
+          {setSettings && (
+            <LinkBox
+              p={4}
+              ml={10}
+              onPress={() =>
+                setSettings({
+                  stringIds,
+                  verseIds,
+                  color,
+                  date,
+                  tags,
+                })
+              }
+            >
+              <FeatherIcon name="more-vertical" size={20} />
+            </LinkBox>
+          )}
         </Box>
         <Paragraph scale={-2} medium marginBottom={15}>
           {truncate(removeBreakLines(content), 200)}

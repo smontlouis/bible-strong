@@ -7,25 +7,32 @@ import compose from 'recompose/compose'
 
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
+import Loading from '~common/Loading'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
+import Link from '~common/Link'
 import Paragraph from '~common/ui/Paragraph'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import TagList from '~common/TagList'
 import ListenToStrong from './ListenStrong'
+import FlatList from '~common/ui/FlatList'
+import ConcordanceVerse from './ConcordanceVerse'
+import Button from '~common/ui/Button'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import waitForStrongDB from '~common/waitForStrongDB'
-import OccurrencesFoundByBookList from './OccurrencesFoundByBookList'
 
 import capitalize from '~helpers/capitalize'
-import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
+import loadFirstFoundVerses from '~helpers/loadFirstFoundVerses'
+import loadStrongVersesCount from '~helpers/loadStrongVersesCount'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { setHistory } from '~redux/modules/user'
 import { timeout } from '~helpers/timeout'
+
+const LinkBox = Box.withComponent(Link)
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -62,7 +69,8 @@ class BibleStrongDetailScreen extends React.Component {
   state = {
     error: false,
     strongReference: null,
-    versesCountByBook: [],
+    verses: [],
+    count: 0,
     concordanceLoading: true,
     multipleTagsItem: false,
   }
@@ -93,11 +101,13 @@ class BibleStrongDetailScreen extends React.Component {
     this.setState({ strongReference })
 
     await timeout(1500)
-    const versesCountByBook = await loadStrongVersesCountByBook(
-      book,
-      strongReference.Code
-    )
-    this.setState({ versesCountByBook, concordanceLoading: false })
+    const verses = await loadFirstFoundVerses(book, strongReference.Code)
+    const count = await loadStrongVersesCount(book, strongReference.Code)
+    this.setState({
+      verses,
+      count: count[0]?.versesCount,
+      concordanceLoading: false,
+    })
   }
 
   shareContent = () => {
@@ -191,7 +201,8 @@ class BibleStrongDetailScreen extends React.Component {
       },
     } = this.state
 
-    const { tags } = this.props
+    const { tags, navigation } = this.props
+    const book = navigation.getParam('book', 0)
 
     return (
       <Container>
@@ -329,15 +340,74 @@ class BibleStrongDetailScreen extends React.Component {
                 />
               </ViewItem>
             )}
-            {(this.state.versesCountByBook.length > 0 ||
-              this.state.concordanceLoading) && (
-              <OccurrencesFoundByBookList
-                strongReference={strongReference}
-                navigation={this.props.navigation}
-                versesCountByBook={this.state.versesCountByBook}
-                loading={this.state.concordanceLoading}
-              />
-            )}
+            <Box marginTop={40}>
+              {this.state.concordanceLoading ? (
+                <Box row alignItems="center">
+                  <Text color="darkGrey" fontSize={16} marginRight={10}>
+                    Concordance
+                  </Text>
+                  <Loading style={{ flex: 0, marginLeft: 10 }} />
+                </Box>
+              ) : (
+                <Box>
+                  <Box row alignItems="center">
+                    <Text color="darkGrey" fontSize={16} marginBottom={3}>
+                      Concordance
+                    </Text>
+                    <Box
+                      px={10}
+                      py={5}
+                      ml={10}
+                      bg="lightPrimary"
+                      borderRadius={20}
+                    >
+                      <Text>{this.state.count}</Text>
+                    </Box>
+                    {this.state.count > 15 && (
+                      <LinkBox
+                        ml="auto"
+                        route="Concordance"
+                        params={{ strongReference, book }}
+                        bg="opacity5"
+                        borderRadius={20}
+                        px={10}
+                        py={5}
+                      >
+                        <Text>Tout voir</Text>
+                      </LinkBox>
+                    )}
+                  </Box>
+                  <FlatList
+                    removeClippedSubviews
+                    data={this.state.verses}
+                    keyExtractor={item =>
+                      `${item.Livre}-${item.Chapitre}-${item.Verset}`
+                    }
+                    renderItem={({ item }) => (
+                      <ConcordanceVerse
+                        navigation={this.props.navigation}
+                        concordanceFor={Code}
+                        verse={item}
+                      />
+                    )}
+                  />
+                  {this.state.count > 15 && (
+                    <Box>
+                      <Button
+                        onPress={() =>
+                          navigation.navigate({
+                            routeName: 'Concordance',
+                            params: { strongReference, book },
+                          })
+                        }
+                      >
+                        Tout voir
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
           </Box>
         </ScrollView>
         <MultipleTagsModal

@@ -4,6 +4,7 @@ import { reduceReducers } from './utils'
 
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
+import blackColors from '~themes/blackColors'
 
 import { firebaseDb } from '~helpers/firebase'
 
@@ -79,7 +80,15 @@ interface UserState {
   fontFamily: string
   bible: {
     changelog: {}
-    highlights: {}
+    highlights: {
+      [x: string]: {
+        color: string
+        tags: {
+          [x: string]: { id: string; name: string }
+        }
+        date: number
+      }
+    }
     notes: {}
     studies: {}
     tags: {}
@@ -92,13 +101,14 @@ interface UserState {
       alignContent: string
       fontSizeScale: number
       textDisplay: string
-      theme: 'default' | 'dark'
+      theme: 'default' | 'dark' | 'black'
       press: string
       notesDisplay: string
       commentsDisplay: boolean
       colors: {
         default: typeof defaultColors
         dark: typeof darkColors
+        black: typeof blackColors
       }
       compare: {
         LSG: boolean
@@ -150,6 +160,7 @@ const initialState: UserState = {
       colors: {
         default: defaultColors,
         dark: darkColors,
+        black: blackColors,
       },
       compare: {
         LSG: true,

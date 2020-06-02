@@ -157,6 +157,10 @@ export default compose(
             ...ownProps.theme.colors,
             ...draftState.colors.dark,
           }
+          draftState.colors.black = {
+            ...ownProps.theme.colors,
+            ...draftState.colors.black,
+          }
         }),
         app: {
           book: params?.book || bible.selectedBook,
