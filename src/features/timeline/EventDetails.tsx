@@ -167,8 +167,6 @@ const EventDetails = waitForDatabase(
       return null
     }
 
-    console.log(event)
-
     const renderScene = ({
       route,
     }: SceneRendererProps & {
