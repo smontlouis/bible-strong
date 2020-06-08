@@ -7,7 +7,7 @@ export const buildStudies = functions.firestore
     const newValue = change.after.data()
     const previousValue = change.before.data()
 
-    if (newValue.published !== previousValue.published) {
+    if (newValue.published !== previousValue.published || newValue.published) {
       await fetch(
         'https://api.zeit.co/v1/integrations/deploy/QmPr9jhLF1bhDakSDDFuLvbax4VCogXsjqzktsmTHDUMXG/FbjfTqbcO7',
         {
