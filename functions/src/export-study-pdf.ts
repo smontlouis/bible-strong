@@ -20,7 +20,7 @@ export const exportStudyPDF = functions
         const page = await browser.newPage()
 
         const result = await page.goto(
-          `https://bible-strong-web-app.now.sh/studies/${studyId}`,
+          `https://bible-strong.app/studies/${studyId}`,
           {
             waitUntil: 'networkidle0',
           }
