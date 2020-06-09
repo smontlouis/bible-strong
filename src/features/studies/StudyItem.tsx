@@ -2,7 +2,6 @@ import React from 'react'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
-import * as Icon from '@expo/vector-icons'
 import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
@@ -12,7 +11,10 @@ import Link from '~common/Link'
 import TagList from '~common/TagList'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import truncate from '~helpers/truncate'
+import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+
+export const LinkBox = Box.withComponent(Link)
 
 const StudyLink = styled(Link)(({ theme }) => ({
   position: 'relative',
@@ -41,8 +43,9 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
           padding={10}
           height={230}
           borderRadius={8}
+          position="relative"
         >
-          <Text color="darkGrey" fontSize={10}>
+          <Text color="darkGrey" fontSize={10} marginTop={10}>
             Il y a {formattedDate}
           </Text>
           {study.content ? (
@@ -66,6 +69,15 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
           <Box marginTop="auto">
             <TagList limit={1} tags={study.tags} />
           </Box>
+          <LinkBox
+            position="absolute"
+            right={0}
+            top={0}
+            p={10}
+            onPress={() => setStudySettings(study.id)}
+          >
+            <FeatherIcon color="tertiary" name="more-vertical" size={20} />
+          </LinkBox>
         </Box>
       </StudyLink>
     </Box>

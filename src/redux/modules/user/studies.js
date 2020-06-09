@@ -5,6 +5,7 @@ export const CREATE_STUDY = 'user/CREATE_STUDY'
 export const UPDATE_STUDY = 'user/UPDATE_STUDY'
 export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
 export const DELETE_STUDY = 'user/DELETE_STUDY'
+export const PUBLISH_STUDY = 'user/PUBLISH_STUDY'
 
 export default produce((draft, action) => {
   switch (action.type) {
@@ -50,6 +51,12 @@ export default produce((draft, action) => {
       removeEntityInTags(draft, 'studies', action.payload)
       break
     }
+    case PUBLISH_STUDY: {
+      const study = draft.bible.studies[action.payload]
+      study.published = action.publish
+      study.modified_at = Date.now()
+      break
+    }
     default:
       break
   }
@@ -82,5 +89,15 @@ export function deleteStudy(id) {
   return {
     type: DELETE_STUDY,
     payload: id,
+  }
+}
+
+export function publishStudy(id, publish = true) {
+  return async dispatch => {
+    await dispatch({
+      type: PUBLISH_STUDY,
+      payload: id,
+      publish,
+    })
   }
 }

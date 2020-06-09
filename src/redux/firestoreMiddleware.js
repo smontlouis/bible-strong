@@ -15,6 +15,7 @@ import {
   ADD_TAG,
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
+  PUBLISH_STUDY,
   UPLOAD_STUDY,
   DELETE_STUDY,
   UPDATE_TAG,
@@ -122,8 +123,10 @@ export default store => next => async action => {
       }
       break
     }
+    case PUBLISH_STUDY:
     case UPLOAD_STUDY: {
       const studyId = action.payload
+      console.log('hello', studyId, user.bible.studies[studyId])
       studyCollection.doc(studyId).set(r(user.bible.studies[studyId]))
       break
     }

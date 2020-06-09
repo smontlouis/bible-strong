@@ -5,10 +5,13 @@ import { Alert } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import { withTheme } from 'emotion-theming'
-import styled from '@emotion/native'
+import styled from '~styled'
 
 import Text from '~common/ui/Text'
 import { deleteStudy } from '~redux/modules/user'
+import { Theme } from '~themes'
+import { RootState } from '~redux/modules/reducer'
+import PublishStudyMenuItem from './PublishStudyMenuItem'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -33,7 +36,7 @@ const Container = styled.View(({ theme }) => ({
   paddingBottom: getBottomSpace(),
 }))
 
-const Touchy = styled.TouchableOpacity(({ theme }) => ({
+export const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'flex-start',
   justifyContent: 'center',
   padding: 20,
@@ -42,23 +45,36 @@ const Touchy = styled.TouchableOpacity(({ theme }) => ({
   overflow: 'hidden',
 }))
 
+interface Props {
+  isOpen: string
+  onClosed: () => void
+  theme: Theme
+  setTitlePrompt: (x: Object) => void
+  setMultipleTagsItem: (x: Object) => void
+}
+
 const StudySettingsModal = ({
   isOpen,
   onClosed,
   theme,
   setTitlePrompt,
   setMultipleTagsItem,
-}) => {
+}: Props) => {
   const dispatch = useDispatch()
   const studyId = isOpen
-  const study = useSelector(state => state.user.bible.studies[studyId])
+  const study = useSelector(
+    (state: RootState) => state.user.bible.studies[studyId]
+  )
 
-  const deleteStudyConfirmation = studyId => {
+  const deleteStudyConfirmation = (id: string) => {
     Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette étude?', [
       { text: 'Non', onPress: () => null, style: 'cancel' },
       {
         text: 'Oui',
-        onPress: () => dispatch(deleteStudy(studyId), onClosed()),
+        onPress: () => {
+          dispatch(deleteStudy(id))
+          onClosed()
+        },
         style: 'destructive',
       },
     ])
@@ -73,6 +89,7 @@ const StudySettingsModal = ({
       onBackdropPress={onClosed}
     >
       <Container>
+        {study && <PublishStudyMenuItem study={study} onClosed={onClosed} />}
         <Touchy
           onPress={() => {
             onClosed()
@@ -81,9 +98,7 @@ const StudySettingsModal = ({
             }, 500)
           }}
         >
-          <Text fontSize={16} bold>
-            Tags
-          </Text>
+          <Text>Éditer les tags</Text>
         </Touchy>
         <Touchy
           onPress={() => {
@@ -93,14 +108,10 @@ const StudySettingsModal = ({
             }, 500)
           }}
         >
-          <Text fontSize={16} bold>
-            Renommer
-          </Text>
+          <Text>Renommer</Text>
         </Touchy>
         <Touchy onPress={() => deleteStudyConfirmation(studyId)}>
-          <Text fontSize={16} bold color="quart">
-            Supprimer
-          </Text>
+          <Text color="quart">Supprimer</Text>
         </Touchy>
       </Container>
     </StylizedModal>

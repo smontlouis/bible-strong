@@ -56,6 +56,20 @@ export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
 export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
 
+export interface Study {
+  id: string
+  title: string
+  created_at: number
+  content: {
+    ops: string[]
+  }
+  published?: boolean
+  user: {
+    displayName: string
+    id: string
+    photoUrl: string
+  }
+}
 interface UserState {
   id: string
   email: string
@@ -90,7 +104,9 @@ interface UserState {
       }
     }
     notes: {}
-    studies: {}
+    studies: {
+      [x: string]: Study
+    }
     tags: {}
     history: any[]
     strongsHebreu: {}
@@ -243,6 +259,11 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         // Local wins - do nothing
       } else {
         console.log('Last seen equals remote last seen, do nothing')
+      }
+
+      // Take care of migratin
+      if (!draft.bible.settings.colors.black) {
+        draft.bible.settings.colors.black = blackColors
       }
 
       // Now take care of studies
