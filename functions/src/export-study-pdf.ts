@@ -19,12 +19,16 @@ export const exportStudyPDF = functions
         })
         const page = await browser.newPage()
 
-        await page.goto(
+        const result = await page.goto(
           `https://bible-strong-web-app.now.sh/studies/${studyId}`,
           {
             waitUntil: 'networkidle0',
           }
         )
+
+        if (result?.status() === 404) {
+          res.status(404).send()
+        }
 
         const buffer = await page.pdf({ format: 'A4' })
         console.log('---end')
