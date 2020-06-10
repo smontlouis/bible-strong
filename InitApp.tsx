@@ -56,7 +56,8 @@ class InitApp extends React.Component<Props> {
   }
 
   changeStatusBarStyle = () => {
-    if (this.props.theme === 'dark') StatusBar.setBarStyle('light-content')
+    if (this.props.theme === 'dark' || this.props.theme === 'black')
+      StatusBar.setBarStyle('light-content')
     else StatusBar.setBarStyle('dark-content')
   }
 

@@ -1,6 +1,7 @@
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 import blackColors from '~themes/blackColors'
+import sepiaColors from '~themes/sepiaColors'
 
 export default {
   // Added 'press' in 'settings'
@@ -296,6 +297,24 @@ export default {
             colors: {
               ...state.user.bible.settings.colors,
               black: blackColors,
+            },
+          },
+        },
+      },
+    }
+  },
+  23: state => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            colors: {
+              ...state.user.bible.settings.colors,
+              sepia: sepiaColors,
             },
           },
         },

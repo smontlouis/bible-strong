@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux'
 import useConnection from '~helpers/useConnection'
 import Clipboard from '@react-native-community/clipboard'
 import SnackBar from '~common/SnackBar'
-import { Share, Platform } from 'react-native'
+import { Share, Platform, PermissionsAndroid } from 'react-native'
 
 interface Props {
   study: Study
@@ -33,7 +33,7 @@ const shareVerse = async (url: string) => {
 
 const useStudyStatus = (study: Study) => {
   const { current: url } = React.useRef(
-    `https://bible-strong-web-app.now.sh/studies/${study.id}`
+    `https://bible-strong.app/studies/${study.id}`
   )
   const [status, setStatus] = useState<Status>('Idle')
   const [data, setData] = useState<number>()
@@ -79,18 +79,33 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
           fileCache: true,
           path: filePath,
           appendExt: 'pdf',
+          indicator: true,
         },
         android: {
-          fileCache: false,
+          fileCache: true,
           appendExt: 'pdf',
-          addAndroidDownloads: {
-            useDownloadManager: true,
-            title: 'Notification Title',
-            description: 'something',
-            mime: 'application/pdf',
-          },
+          path: filePath,
         },
       })
+
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Accès au dossier de téléchargement',
+            message:
+              'Bible Strong aimerait stocker les études dans votre dossier "Downloads"',
+            buttonNeutral: 'Demandez plus tard',
+            buttonNegative: 'Annuler',
+            buttonPositive: 'Ok',
+          }
+        )
+
+        if (granted === 'denied') {
+          setPDFStatus('Rejected')
+          return
+        }
+      }
 
       const res = await RNFetchBlob.config(options!).fetch(
         'POST',

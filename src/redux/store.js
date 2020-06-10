@@ -20,7 +20,7 @@ export default function configureStore() {
     keyPrefix: '',
     storage: AsyncStorage,
     stateReconciler: autoMergeLevel2,
-    version: 22,
+    version: 23,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations, { debug: true }),

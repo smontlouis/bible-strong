@@ -10,21 +10,19 @@ import { subVariant } from './SubscriptionPlan'
 import { subSkus } from '~helpers/useInAppPurchases'
 import SubscriptionGroup from './SubscriptionGroup'
 
-export const [oneMonthSku, threeMonthSku, oneYearSku] = subSkus
+export const [oneMonthSkuMin, oneMonthSku, oneMonthSkuMax] = subSkus
 export const mappingSku = {
-  [oneMonthSku]: {
+  [oneMonthSkuMin]: {
     period: 'par mois',
     variant: 'normal' as subVariant,
   },
-  [threeMonthSku]: {
-    period: 'par trimestre',
-    discount: '25%',
-    variant: 'secondary' as subVariant,
-  },
-  [oneYearSku]: {
-    period: 'par an',
-    discount: '35%',
+  [oneMonthSku]: {
+    period: 'par mois',
     variant: 'primary' as subVariant,
+  },
+  [oneMonthSkuMax]: {
+    period: 'par mois',
+    variant: 'normal' as subVariant,
   },
 }
 

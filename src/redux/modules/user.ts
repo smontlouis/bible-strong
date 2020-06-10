@@ -5,6 +5,7 @@ import { reduceReducers } from './utils'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 import blackColors from '~themes/blackColors'
+import sepiaColors from '~themes/sepiaColors'
 
 import { firebaseDb } from '~helpers/firebase'
 
@@ -15,8 +16,6 @@ import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
 import { SubscriptionType } from '~common/types'
-import { Dispatch } from 'react'
-import { ThunkDispatch } from 'redux-thunk'
 import { Reducer } from 'redux'
 
 export * from './user/highlights'
@@ -117,7 +116,7 @@ interface UserState {
       alignContent: string
       fontSizeScale: number
       textDisplay: string
-      theme: 'default' | 'dark' | 'black'
+      theme: 'default' | 'dark' | 'black' | 'sepia'
       press: string
       notesDisplay: string
       commentsDisplay: boolean
@@ -125,6 +124,7 @@ interface UserState {
         default: typeof defaultColors
         dark: typeof darkColors
         black: typeof blackColors
+        sepia: typeof sepiaColors
       }
       compare: {
         LSG: boolean
@@ -177,6 +177,7 @@ const initialState: UserState = {
         default: defaultColors,
         dark: darkColors,
         black: blackColors,
+        sepia: sepiaColors,
       },
       compare: {
         LSG: true,
@@ -264,6 +265,10 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       // Take care of migratin
       if (!draft.bible.settings.colors.black) {
         draft.bible.settings.colors.black = blackColors
+      }
+
+      if (!draft.bible.settings.colors.sepia) {
+        draft.bible.settings.colors.sepia = sepiaColors
       }
 
       // Now take care of studies

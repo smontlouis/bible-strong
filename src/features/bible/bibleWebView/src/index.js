@@ -12,6 +12,7 @@ import { desktopMode } from './env'
 import defaultColors from '../../../../themes/colors'
 import darkColors from '../../../../themes/darkColors'
 import blackColors from '../../../../themes/blackColors'
+import sepiaColors from '../../../../themes/sepiaColors'
 import ErrorBoundary from './ErrorBoundary'
 
 const mockSettings = {
@@ -25,6 +26,7 @@ const mockSettings = {
     default: defaultColors,
     dark: darkColors,
     black: blackColors,
+    sepia: sepiaColors,
   },
   commentsDisplay: true,
 }

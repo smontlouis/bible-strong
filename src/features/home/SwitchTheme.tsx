@@ -1,69 +1,67 @@
 import React from 'react'
 
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Link from '~common/Link'
-import { FeatherIcon } from '~common/ui/Icon'
-import { useSelector, useDispatch } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
+import { useDispatch, useSelector } from 'react-redux'
 import { setSettingsTheme } from '~redux/modules/user/settings'
+import styled from '~styled'
+import { Theme } from '~themes'
+import { RootState } from '~redux/modules/reducer'
 
 const LinkBox = Box.withComponent(Link)
 
+const Circle = styled.View(
+  ({
+    isSelected,
+    color,
+    size,
+    theme,
+  }: {
+    isSelected: boolean
+    color: string
+    size: number
+    theme: Theme
+  }) => ({
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    backgroundColor: color,
+    borderWidth: 3,
+    borderColor: isSelected ? theme.colors.primary : theme.colors.opacity5,
+    marginHorizontal: 10,
+  })
+)
+
 const SwitchTheme = () => {
-  const theme = useSelector(
+  const dispatch = useDispatch()
+  const currentTheme = useSelector(
     (state: RootState) => state.user.bible.settings.theme
   )
-  const dispatch = useDispatch()
   return (
-    <Box row>
-      <LinkBox
-        row
-        flex
-        center
-        onPress={() => dispatch(setSettingsTheme('default'))}
-      >
-        <FeatherIcon
-          name="sun"
-          size={18}
-          color={theme === 'default' ? 'primary' : 'default'}
+    <Box center row>
+      <LinkBox onPress={() => dispatch(setSettingsTheme('default'))}>
+        <Circle
+          isSelected={currentTheme === 'default'}
+          size={30}
+          color="rgb(255,255,255)"
         />
-        <Text
-          marginLeft={10}
-          color={theme === 'default' ? 'primary' : 'default'}
-        >
-          Jour
-        </Text>
       </LinkBox>
-      <LinkBox
-        row
-        flex
-        center
-        onPress={() => dispatch(setSettingsTheme('dark'))}
-      >
-        <FeatherIcon
-          color={theme === 'dark' ? 'primary' : 'default'}
-          name="moon"
-          size={18}
+      <LinkBox onPress={() => dispatch(setSettingsTheme('sepia'))}>
+        <Circle
+          isSelected={currentTheme === 'sepia'}
+          size={30}
+          color="rgb(245,242,227)"
         />
-        <Text color={theme === 'dark' ? 'primary' : 'default'} marginLeft={10}>
-          Nuit bleutée
-        </Text>
       </LinkBox>
-      <LinkBox
-        row
-        flex
-        center
-        onPress={() => dispatch(setSettingsTheme('black'))}
-      >
-        <FeatherIcon
-          color={theme === 'black' ? 'primary' : 'default'}
-          name="circle"
-          size={18}
+      <LinkBox onPress={() => dispatch(setSettingsTheme('dark'))}>
+        <Circle
+          isSelected={currentTheme === 'dark'}
+          size={30}
+          color="rgb(18,45,66)"
         />
-        <Text color={theme === 'black' ? 'primary' : 'default'} marginLeft={10}>
-          Noir
-        </Text>
+      </LinkBox>
+      <LinkBox onPress={() => dispatch(setSettingsTheme('black'))}>
+        <Circle isSelected={currentTheme === 'black'} size={30} color="black" />
       </LinkBox>
     </Box>
   )

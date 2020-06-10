@@ -33,7 +33,7 @@ const MyPlanListScreen = () => {
           )}
         </>
       }
-      contentContainerStyle={{ paddingHorizontal: 20 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20 }}
       bg="lightGrey"
       data={plans}
       renderItem={({ item }: { item: ComputedPlanItem }) => (

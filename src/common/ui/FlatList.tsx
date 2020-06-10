@@ -46,7 +46,6 @@ const AnimatedFlatList = React.forwardRef(
         <FlatList
           orientation={orientation}
           contentContainerStyle={{
-            paddingTop: 20,
             paddingBottom: 10 + getBottomSpace(),
             ...contentContainerStyle,
           }}

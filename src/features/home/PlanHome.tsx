@@ -6,7 +6,7 @@ import ProgressCircle from 'react-native-progress/Circle'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import CircleImage from '~common/ui/CircleImage'
-import { MaterialIcon } from '~common/ui/Icon'
+import { MaterialIcon, FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import {
@@ -20,9 +20,6 @@ import PlanIcon from '~common/PlanIcon'
 
 const LinkBox = Box.withComponent(Link)
 
-const color1 = 'rgb(69,150,220)'
-const color2 = 'rgb(89,131,240)'
-
 const PlanHome = () => {
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress, status } =
@@ -33,49 +30,31 @@ const PlanHome = () => {
   useUpdatePlans()
 
   return (
-    <Box grey px={20} bg="red" pt={30}>
+    <Box grey px={20} bg="red" pt={20}>
       <LinkBox
         route="Plans"
-        backgroundColor="primary"
         rounded
         lightShadow
+        bg="reverse"
         row
         p={20}
-        pl={30}
-        height={100}
+        pl={20}
+        height={80}
         position="relative"
         overflow="hidden"
+        alignItems="center"
       >
-        <Box
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            height: 100,
-            borderRadius: 10,
-          }}
-        >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height: 130 }}
-            colors={[color1, color2]}
-          />
+        <Box center size={50} bg="lightPrimary" borderRadius={25}>
+          <PlanIcon style={{ marginTop: 5 }} color="primary" size={32} />
         </Box>
-        <Box
-          center
-          size={50}
-          mb={20}
-          bg="rgba(255, 255, 255, 0.2)"
-          borderRadius={25}
-        >
-          <PlanIcon style={{ marginTop: 5 }} color="white" size={32} />
-        </Box>
-        <Text title fontSize={17} color="white" ml={20} mt={15}>
+        <Text flex title fontSize={18} color="default" ml={20}>
           Plans & Méditations
         </Text>
+        <Box>
+          <FeatherIcon color="default" name="chevron-right" size={20} />
+        </Box>
       </LinkBox>
-      <Box rounded height={60} bg="reverse" lightShadow mx={20} mt={-20}>
+      <Box rounded height={60} bg="reverse" lightShadow mt={10}>
         {id ? (
           <LinkBox
             flex
@@ -83,9 +62,10 @@ const PlanHome = () => {
             center
             route="Plan"
             params={{ plan: { id, title, image, description, author } }}
+            px={20}
           >
             <ProgressCircle
-              style={{ marginHorizontal: 15 }}
+              style={{ marginRight: 15 }}
               size={40}
               progress={progress}
               borderWidth={0}
@@ -122,6 +102,9 @@ const PlanHome = () => {
               >
                 Continuer ce plan
               </Paragraph>
+            </Box>
+            <Box>
+              <FeatherIcon color="default" name="chevron-right" size={20} />
             </Box>
           </LinkBox>
         ) : (

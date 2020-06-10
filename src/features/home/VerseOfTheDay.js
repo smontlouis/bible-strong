@@ -27,6 +27,7 @@ const VerseOfTheDay = () => {
   const verseOfTheDay = useVerseOfTheDay()
   const imageUrls = useImageUrls(verseOfTheDay)
   const dispatch = useDispatch()
+  const [open, setOpen] = useState(false)
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
   )
@@ -54,16 +55,12 @@ const VerseOfTheDay = () => {
 
   if (!verseOfTheDay) {
     return (
-      <Box padding={20} grey>
-        <Text title fontSize={23} flex>
-          Verset du jour
-        </Text>
-        <Box marginTop={20}>
+      <Box>
+        <Box marginTop={10}>
           <Placeholder Animation={Fade}>
-            <PlaceholderLine width={80} style={{ marginTop: 10 }} />
-            <PlaceholderLine style={{ marginTop: 5 }} />
-            <PlaceholderLine style={{ marginTop: 5 }} />
-            <PlaceholderLine width={30} style={{ marginTop: 5 }} />
+            <PlaceholderLine width={80} style={{ marginTop: 5 }} />
+            <PlaceholderLine style={{ marginTop: 2 }} />
+            <PlaceholderLine width={30} style={{ marginTop: 3 }} />
           </Placeholder>
         </Box>
       </Box>
@@ -85,13 +82,8 @@ const VerseOfTheDay = () => {
   }
 
   return (
-    <Box rounded bg="reverse" lightShadow mx={20} mt={30}>
-      <AnimatableBox animation="fadeIn" padding={20}>
-        <Box row alignItems="center" mb={5}>
-          <Text title fontSize={23} flex>
-            Verset du jour
-          </Text>
-        </Box>
+    <Box>
+      <AnimatableBox animation="fadeIn">
         <Link
           route="BibleView"
           params={{
@@ -102,25 +94,33 @@ const VerseOfTheDay = () => {
             focusVerses: [verse],
           }}
         >
-          <Paragraph marginTop={5} scale={-1}>
+          <Text marginTop={10} color="grey" fontSize={14} lineHeight={20}>
             {removeBreakLines(content)}
-          </Paragraph>
-        </Link>
-        <Box marginTop={10} row alignItems="center">
-          <Text flex titleItalic fontSize={smallSize ? 12 : 14}>
-            {title} - {version}
           </Text>
-          <Box row center mt={5}>
+        </Link>
+        <Box row alignItems="center">
+          {/* <Text flex color="grey" fontSize={smallSize ? 12 : 14}>
+            {title} - {version}
+          </Text> */}
+          <Box row center mt={5} opacity={0.5}>
             <Link onPress={openTimePicker} size={30}>
               <FeatherIcon size={16} name="bell" />
             </Link>
             <Link size={30} onPress={shareVerse}>
               <FeatherIcon size={16} name="share-2" />
             </Link>
+            <Link size={30} onPress={() => setOpen(s => !s)}>
+              <FeatherIcon size={16} name="image" />
+            </Link>
           </Box>
         </Box>
       </AnimatableBox>
-      <ShowMoreImage imageUrls={imageUrls} verseOfTheDay={verseOfTheDay} />
+      <ShowMoreImage
+        imageUrls={imageUrls}
+        verseOfTheDay={verseOfTheDay}
+        open={open}
+        setOpen={setOpen}
+      />
       <DateTimePicker
         date={initialDate}
         mode="time"

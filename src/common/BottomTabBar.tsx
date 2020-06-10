@@ -82,6 +82,8 @@ const TabBar = props => {
     <AnimatableContainer
       orientation={orientation}
       transition="height"
+      easing="ease-in-out"
+      duration={400}
       style={{
         overflow: isFullscreen ? 'hidden' : 'visible',
         paddingTop: activeRouteIndex === 2 ? (isFullscreen ? 0 : 15) : 0,

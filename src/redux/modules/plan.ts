@@ -261,10 +261,16 @@ const planSlice = createSlice({
     )
     builder.addCase(USER_LOGIN_SUCCESS, (state, action: any) => {
       const { plan } = action.profile
-      const { localLastSeen, remoteLastSeen } = action
+      const { localLastSeen, remoteLastSeen, isLogged } = action
 
       if (plan) {
-        if (remoteLastSeen > localLastSeen) {
+        if (!isLogged) {
+          console.log('User was not logged, merge data')
+          state.ongoingPlans = plan
+          state.myPlans = state.myPlans.filter(
+            mP => mP.id === state.ongoingPlans.find(oP => oP.id === mP.id)?.id
+          )
+        } else if (remoteLastSeen > localLastSeen) {
           // Remote wins
           console.log('Plan - Remote wins')
           state.ongoingPlans = plan

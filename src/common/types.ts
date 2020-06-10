@@ -11,6 +11,7 @@ export interface Plan {
   lastUpdate?: number
   downloads?: number
   title: string
+  subTitle?: string
   image?: string
   description?: string
   sections: Section[]

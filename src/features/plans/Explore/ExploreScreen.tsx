@@ -33,7 +33,7 @@ const ExploreScreen = () => {
     return (
       <Empty
         source={require('~assets/images/empty.json')}
-        message="Impossible de charger les plans, vérifiez votre connexion..."
+        message="Vous devez être enregistré pour accéder aux plans"
       />
     )
   }

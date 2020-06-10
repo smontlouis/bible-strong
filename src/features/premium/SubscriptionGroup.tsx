@@ -13,7 +13,7 @@ import to from 'await-to-js'
 
 const SubscriptionGroup = () => {
   const [selectedSub, setSelectedSub] = React.useState(
-    'com.smontlouis.biblestrong.oneyear'
+    'com.smontlouis.biblestrong.onemonth'
   )
   const [processing, setProcessing] = React.useState(false)
   const { status, products } = useIapUser()
@@ -50,7 +50,6 @@ const SubscriptionGroup = () => {
               price={sub.price}
               isSelected={selectedSub === sub.sku}
               variant={mappingSku[sub.sku]?.variant}
-              discount={mappingSku[sub.sku]?.discount}
               period={mappingSku[sub.sku]?.period}
               onPress={() => setSelectedSub(sub.sku)}
             />

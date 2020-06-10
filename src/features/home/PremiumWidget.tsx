@@ -3,10 +3,8 @@ import Lottie from 'lottie-react-native'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
-import { MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { LinearGradient } from 'expo-linear-gradient'
-import TimelineIcon from '~common/TimelineIcon'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -15,7 +13,7 @@ const color2 = '#13547a'
 
 const PremiumWidget = () => {
   return (
-    <Box grey px={20} bg="red" py={30}>
+    <Box grey px={20} pt={20} pb={60}>
       <LinkBox
         route="Premium"
         backgroundColor="primary"
@@ -54,18 +52,14 @@ const PremiumWidget = () => {
           }}
           source={require('../../assets/images/premium-icon.json')}
         />
-        <Text title fontSize={17} color="white" textAlign="center">
-          Bible Strong - premium
-        </Text>
-        <Text
-          marginTop={10}
-          fontSize={14}
-          textAlign="center"
-          color="white"
-          paddingHorizontal={40}
-        >
-          Supportez-nous et débloquez toutes les fonctionnalités !
-        </Text>
+        <Box pl={60}>
+          <Text title fontSize={20} color="white">
+            {'Bible Strong\nPremium'}
+          </Text>
+          <Text marginTop={5} fontSize={14} color="white">
+            Supportez-nous et débloquez toutes les fonctionnalités !
+          </Text>
+        </Box>
       </LinkBox>
     </Box>
   )

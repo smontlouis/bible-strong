@@ -17,7 +17,7 @@ const TimelineHomeScreen = () => {
     <Container>
       <Header
         hasBackButton
-        title="The Bible Timeline"
+        title="La Chronologie biblique"
         rightComponent={
           <Link paddingSmall onPress={() => modalRef.current?.open()}>
             <FeatherIcon name="info" size={20} />

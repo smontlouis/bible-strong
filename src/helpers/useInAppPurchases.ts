@@ -12,9 +12,9 @@ import Snackbar from '~common/SnackBar'
 import { iaphub } from '../../config'
 
 export const subSkus = [
+  'com.smontlouis.biblestrong.onemonth.min',
   'com.smontlouis.biblestrong.onemonth',
-  'com.smontlouis.biblestrong.threemonths',
-  'com.smontlouis.biblestrong.oneyear',
+  'com.smontlouis.biblestrong.onemonth.max',
 ]
 
 export const useInitIAP = (store: GlobalContextProps) => {
@@ -58,6 +58,9 @@ export const useIapUser = () => {
         await IAPHub.login(user.id)
         const { productsForSale, activeProducts } = await IAPHub.getUser()
         setCurrentProducts(activeProducts)
+        productsForSale.sort((a, b) => {
+          return a.priceAmount - b.priceAmount
+        })
         setProducts(productsForSale)
         setStatus('Resolved')
       } catch (e) {

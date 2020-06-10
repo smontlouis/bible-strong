@@ -148,10 +148,12 @@ export default compose(
         hasBackButton: params?.hasBackButton,
         isSelectionMode: params?.isSelectionMode,
         fontFamily: user.fontFamily,
+
+        // TODO - There is something to fix here with the colors
         settings: produce(user.bible.settings, draftState => {
           draftState.colors.default = {
             ...ownProps.theme.colors,
-            ...draftState.colors.default,
+            ...draftState.colors.default.color1,
           }
           draftState.colors.dark = {
             ...ownProps.theme.colors,
@@ -160,6 +162,10 @@ export default compose(
           draftState.colors.black = {
             ...ownProps.theme.colors,
             ...draftState.colors.black,
+          }
+          draftState.colors.sepia = {
+            ...ownProps.theme.colors,
+            ...draftState.colors.sepia,
           }
         }),
         app: {

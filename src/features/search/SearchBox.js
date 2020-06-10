@@ -16,7 +16,7 @@ const SearchBox = ({ refine, debouncedValue, value, onChange }) => {
     <SearchInput
       value={value}
       onChangeText={onChange}
-      placeholder="Recherche par mot, phrase ou strong"
+      placeholder="Mot, phrase ou strong"
       onDelete={() => {
         Keyboard.dismiss()
         onChange('')

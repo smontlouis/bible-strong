@@ -8,7 +8,6 @@ export type subVariant = 'normal' | 'secondary' | 'primary'
 
 interface Props {
   period: string
-  discount?: string
   price: string
   isSelected?: boolean
   variant?: subVariant
@@ -19,7 +18,6 @@ const LinkBox = Box.withComponent(Link)
 
 const SubscriptionPlan = ({
   period,
-  discount,
   price,
   isSelected,
   variant,
@@ -38,7 +36,7 @@ const SubscriptionPlan = ({
       onPress={onPress}
       {...(isSelected && { borderColor: 'primary' })}
     >
-      {variant !== 'normal' && (
+      {/* {variant !== 'normal' && (
         <Box
           position="absolute"
           top={-10}
@@ -54,15 +52,15 @@ const SubscriptionPlan = ({
             borderRadius={20}
           >
             <Text color="reverse" fontSize={11}>
-              -{discount}
+              Recommandé
             </Text>
           </Box>
         </Box>
-      )}
-      <Text fontSize={18} bold>
+      )} */}
+      <Text fontSize={18} bold={variant !== 'normal'}>
         {price}
       </Text>
-      <Text>{period}</Text>
+      <Text bold={variant !== 'normal'}>{period}</Text>
     </LinkBox>
   )
 }

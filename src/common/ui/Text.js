@@ -11,9 +11,26 @@ const Text = styled.Text(props => {
       props.theme.colors[props.color] ||
       props.color ||
       props.theme.colors.default,
+    lineHeight: props.lineHeight,
     fontSize: props.fontSize,
     fontWeight: props.bold ? 'bold' : undefined,
     textAlign: props.textAlign,
+
+    padding: props.padding ?? props.p,
+    paddingTop: props.paddingTop ?? props.pt,
+    paddingLeft: props.paddingLeft ?? props.pl,
+    paddingRight: props.paddingRight ?? props.pr,
+    paddingBottom: props.paddingBottom ?? props.pb,
+    paddingVertical: props.paddingVertical ?? props.py,
+    paddingHorizontal: props.paddingHorizontal ?? props.px,
+
+    margin: props.margin ?? props.m,
+    marginTop: props.marginTop ?? props.mt,
+    marginLeft: props.marginLeft ?? props.ml,
+    marginBottom: props.marginBottom ?? props.mb,
+    marginRight: props.marginRight ?? props.mr,
+    marginVertical: props.marginVertical ?? props.my,
+    marginHorizontal: props.marginHorizontal ?? props.mx,
 
     // container
     position: props.position ?? props.pos,
@@ -21,14 +38,6 @@ const Text = styled.Text(props => {
     left: props.left ?? props.l,
     right: props.right ?? props.r,
     bottom: props.bottom ?? props.b,
-    padding: props.padding ?? props.p,
-    paddingVertical: props.paddingVertical ?? props.py,
-    paddingHorizontal: props.paddingHorizontal ?? props.px,
-    margin: props.margin ?? props.m,
-    marginTop: props.marginTop ?? props.mt,
-    marginLeft: props.marginLeft ?? props.ml,
-    marginBottom: props.marginBottom ?? props.mb,
-    marginRight: props.marginRight ?? props.mr,
     borderWidth: props.borderWidth,
     borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
     transform: props.transform,

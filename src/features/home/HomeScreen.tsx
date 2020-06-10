@@ -4,10 +4,9 @@ import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import useLogin from '~helpers/useLogin'
 
-import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import { HomeScrollView } from '~common/ui/ScrollView'
-import VerseOfTheDay from './VerseOfTheDay'
 import StrongOfTheDay from './StrongOfTheDay'
 import WordOfTheDay from './WordOfTheDay'
 import NaveOfTheDay from './NaveOfTheDay'
@@ -18,6 +17,7 @@ import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
 import usePremium from '~helpers/usePremium'
 import SwitchTheme from './SwitchTheme'
+import TheBibleProject from './TheBibleProjectPlan'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
@@ -29,10 +29,20 @@ const HomeScreen = () => {
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
-        <Box grey>
-          <RoundedCorner />
+
+        <Box grey pt={20} px={20}>
+          <Text title fontSize={23} flex>
+            Apprendre
+          </Text>
+          <TheBibleProject />
+          <TimelineWidget />
         </Box>
-        <Box grey paddingTop={30}>
+        <Box grey pt={40} px={20}>
+          <Text title fontSize={23} flex>
+            Étudier
+          </Text>
+        </Box>
+        <Box grey paddingTop={20}>
           <RNScrollView
             horizontal
             style={{ overflow: 'visible' }}
@@ -53,14 +63,16 @@ const HomeScreen = () => {
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
-        {isLogged && (
-          <>
-            <PlanHome />
-            <TimelineWidget />
-          </>
-        )}
-        <Box grey>
-          <VerseOfTheDay />
+        <Box grey pt={40} px={20}>
+          <Text title fontSize={23} flex>
+            Méditer
+          </Text>
+        </Box>
+        <PlanHome />
+        <Box grey pt={40} px={20}>
+          <Text title fontSize={23} flex>
+            Aller plus loin
+          </Text>
         </Box>
         <PremiumWidget />
         <Box grey pb={30}>
