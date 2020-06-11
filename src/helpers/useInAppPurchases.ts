@@ -87,7 +87,9 @@ export const buyProduct = async (
     return
   }
 
+  console.log('Sending transaction...')
   const [error, transaction] = await to(IAPHub.buy(sku))
+  console.log('Waiting for webhooks ...')
 
   if (!error) {
     if (transaction?.webhookStatus === 'failed') {

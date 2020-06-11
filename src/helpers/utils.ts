@@ -8,13 +8,23 @@ export const { width: viewportWidth, height: viewportHeight } = Dimensions.get(
 
 export const smallSize = viewportWidth < 340
 
-export const wp = percentage => {
-  const value =
-    (percentage * (viewportWidth > MAX_WIDTH ? MAX_WIDTH : viewportWidth)) / 100
+export const wp = (percentage: number, maxWidth?: boolean | number) => {
+  let value
+  if (maxWidth === true) {
+    value =
+      (percentage * (viewportWidth > MAX_WIDTH ? MAX_WIDTH : viewportWidth)) /
+      100
+  } else if (typeof maxWidth === 'number') {
+    value =
+      (percentage * (viewportWidth > maxWidth ? maxWidth : viewportWidth)) / 100
+  } else {
+    value = (percentage * viewportWidth) / 100
+  }
+
   return Math.round(value)
 }
 
-export const hp = percentage => {
+export const hp = (percentage: number) => {
   const value = (percentage * viewportHeight) / 100
   return Math.round(value)
 }
@@ -34,4 +44,5 @@ export const cleanParams = () => ({
 
 export const removeBreakLines = str => str.replace(/\n/g, '')
 
-export const maxWidth = (width, mWidth) => (width > mWidth ? mWidth : width)
+export const maxWidth = (width, maxW = MAX_WIDTH) =>
+  width > maxW ? maxW : width

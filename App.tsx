@@ -88,11 +88,13 @@ const useGlobalState = () => {
   const fullscreen = React.useState(false)
   const iap = React.useState(false)
   const connection = React.useState(true)
+  const premiumModal = React.useState(false)
 
   const globalStore = {
     fullscreen,
     iap,
     connection,
+    premiumModal,
   }
 
   return globalStore

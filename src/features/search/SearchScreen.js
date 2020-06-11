@@ -1,7 +1,6 @@
 import React from 'react'
 import algoliasearch from 'algoliasearch/lite'
 import { InstantSearch } from 'react-instantsearch-native'
-import * as FileSystem from 'expo-file-system'
 
 import useDebounce from '~helpers/useDebounce'
 import Header from '~common/Header'
@@ -17,27 +16,9 @@ const searchClient = algoliasearch(
   algoliaConfig.apiKey
 )
 
-const useDeleteOldIndex = () => {
-  React.useEffect(() => {
-    const deleteFileIndex = async () => {
-      const path = `${FileSystem.documentDirectory}idx-light.json`
-      const file = await FileSystem.getInfoAsync(path)
-
-      if (file.exists) {
-        FileSystem.deleteAsync(file.uri)
-      }
-    }
-
-    deleteFileIndex()
-  }, [])
-}
-
 const SearchScreen = () => {
   const [searchValue, setSearchValue] = React.useState('')
   const debouncedSearchValue = useDebounce(searchValue, 500)
-
-  // Delete old index
-  useDeleteOldIndex()
 
   return (
     <>

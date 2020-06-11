@@ -5,6 +5,7 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useIsPremium } from '~helpers/usePremium'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -12,6 +13,7 @@ const color1 = '#80d0c7'
 const color2 = '#13547a'
 
 const PremiumWidget = () => {
+  const isPremium = useIsPremium()
   return (
     <Box grey px={20} pt={20} pb={60}>
       <LinkBox
@@ -54,10 +56,14 @@ const PremiumWidget = () => {
         />
         <Box pl={60}>
           <Text title fontSize={20} color="white">
-            {'Bible Strong\nPremium'}
+            {isPremium
+              ? 'Vous êtes Premium !\nMerci !'
+              : 'Bible Strong\nPremium'}
           </Text>
           <Text marginTop={5} fontSize={14} color="white">
-            Supportez-nous et débloquez toutes les fonctionnalités !
+            {isPremium
+              ? 'Voir vos avantages !'
+              : 'Supportez-nous et débloquez toutes les fonctionnalités !'}
           </Text>
         </Box>
       </LinkBox>

@@ -9,6 +9,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import { resetTempSelected, toggleSelectionMode } from '~redux/modules/bible'
 import { RootState } from '~redux/modules/reducer'
+import { MAX_WIDTH } from '~helpers/useDimensions'
 
 interface Props {
   navigation: NavigationStackProp<any>
@@ -48,10 +49,12 @@ const BibleSelect = ({ navigation }: Props) => {
           </Box>
         }
       />
-      <BibleSelectTabNavigator
-        screenProps={{ mainNavigation: navigation }}
-        navigation={navigation}
-      />
+      <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
+        <BibleSelectTabNavigator
+          screenProps={{ mainNavigation: navigation }}
+          navigation={navigation}
+        />
+      </Box>
       {/* <SelectorButtons /> */}
     </Container>
   )

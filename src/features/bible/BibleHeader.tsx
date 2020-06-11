@@ -24,6 +24,8 @@ import Back from '~common/Back'
 import useDimensions from '~helpers/useDimensions'
 import ParallelIcon from '~common/ParallelIcon'
 import { useGlobalContext } from '~helpers/globalContext'
+import SnackBar from '~common/SnackBar'
+import { getIfDatabaseExists } from '~helpers/database'
 
 const { Popover } = renderers
 
@@ -98,9 +100,23 @@ const Header = ({
   addParallelVersion,
   removeAllParallelVersions,
   isParallel,
+  setSettingsCommentaires,
+  settings: { commentsDisplay },
 }) => {
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
+
+  const onOpenCommentaire = async () => {
+    const exists = await getIfDatabaseExists('commentaires-mhy')
+
+    if (!exists) {
+      SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
+      navigation.navigate('Downloads')
+      return
+    }
+
+    setSettingsCommentaires(true)
+  }
 
   const {
     fullscreen: [isFullscreen, setIsFullScreen],
@@ -178,6 +194,22 @@ const Header = ({
             }
             popover={
               <>
+                {!commentsDisplay && (
+                  <MenuOption onSelect={onOpenCommentaire}>
+                    <Box row alignItems="center">
+                      <MaterialIcon name="chat" size={20} />
+                      <Text marginLeft={10}>Commentaire désactivé</Text>
+                    </Box>
+                  </MenuOption>
+                )}
+                {commentsDisplay && (
+                  <MenuOption onSelect={() => setSettingsCommentaires(false)}>
+                    <Box row alignItems="center">
+                      <MaterialIcon name="chat" size={20} color="primary" />
+                      <Text marginLeft={10}>Commentaire activé</Text>
+                    </Box>
+                  </MenuOption>
+                )}
                 <MenuOption
                   onSelect={
                     isParallel ? removeAllParallelVersions : addParallelVersion

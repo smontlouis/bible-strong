@@ -144,7 +144,7 @@ const Login = ({ theme }) => {
         </SocialButton>
       </Box>
       <Spacer size={2} />
-      <Box center>
+      <Box center pb={20}>
         <Link route="Register">
           <Text underline>Pas de compte ? Inscrivez-vous.</Text>
         </Link>

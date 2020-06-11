@@ -6,14 +6,14 @@ import {
   StyleSheet,
 } from 'react-native'
 import { LinkBox } from '~common/Link'
-import { MaterialIcon } from '~common/ui/Icon'
+import { MaterialIcon, FeatherIcon } from '~common/ui/Icon'
 import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import RoundedCorner from '~common/ui/RoundedCorner'
-
+import { useIsPremium } from '~helpers/usePremium'
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 import useLogin from '~helpers/useLogin'
@@ -97,6 +97,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
 
 const UserWidget = ({ theme }) => {
   const { isLogged, user } = useLogin()
+  const isPremium = useIsPremium()
   const isLoading = useSelector(state => state.user.isLoading)
   const { highlights, notes, studies, tags } = useSelector(
     ({ user: { bible } }) => ({
@@ -145,22 +146,40 @@ const UserWidget = ({ theme }) => {
         <OfflineNotice />
 
         <Box alignItems="flex-end">
-          <ProfileContainer>
-            {user.photoURL ? (
-              <ProfileImage source={{ uri: user.photoURL }} />
-            ) : (
-              <GenerateImage name={user.displayName} />
-            )}
-            {isLoading && (
+          <Box overflow="visible" position="relative">
+            <ProfileContainer>
+              {user.photoURL ? (
+                <ProfileImage source={{ uri: user.photoURL }} />
+              ) : (
+                <GenerateImage name={user.displayName} />
+              )}
+
+              {isLoading && (
+                <Box
+                  backgroundColor="rgba(255,255,255,0.8)"
+                  center
+                  style={StyleSheet.absoluteFillObject}
+                >
+                  <ActivityIndicator color="black" />
+                </Box>
+              )}
+            </ProfileContainer>
+            {isPremium && (
               <Box
-                backgroundColor="rgba(255,255,255,0.8)"
+                position="absolute"
+                bottom={0}
+                right={0}
+                width={20}
+                height={20}
                 center
-                style={StyleSheet.absoluteFillObject}
+                bg="lightGrey"
+                borderRadius={20}
+                lightShadow
               >
-                <ActivityIndicator color="black" />
+                <MaterialIcon name="star" size={16} color="secondary" />
               </Box>
             )}
-          </ProfileContainer>
+          </Box>
         </Box>
 
         <Box row alignItems="center" overflow="visible">
@@ -171,14 +190,15 @@ const UserWidget = ({ theme }) => {
           </Box>
         </Box>
 
+        <VerseOfTheDay />
         {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart">
-              Un email vous a été envoyé, merci de vérifier votre adresse.
+              Un email vous a été envoyé, merci de vérifier votre adresse. Si ce
+              message persiste, reconnectez-vous.
             </Text>
           </Box>
         )}
-        <VerseOfTheDay />
       </Box>
       <Box grey>
         <RoundedCorner />

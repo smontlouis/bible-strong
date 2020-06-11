@@ -3,13 +3,13 @@ import styled from '@emotion/native'
 import { Dimensions } from 'react-native'
 import { pure } from 'recompose'
 
-const { width: viewportWidth } = Dimensions.get('window')
+import { wp } from '~helpers/utils'
 
 const TouchableOpacity = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   height: 45,
-  width: viewportWidth / 5,
+  width: wp(100) / 5,
 }))
 
 const Text = styled.Text(({ isSelected, theme }) => ({

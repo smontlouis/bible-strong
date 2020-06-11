@@ -54,6 +54,7 @@ export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
 export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
 export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
+export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
 
 export interface Study {
   id: string
@@ -191,6 +192,10 @@ const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 // UserReducer
 const userReducer = produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
+    case EMAIL_VERIFIED: {
+      draft.emailVerified = true
+      break
+    }
     case SET_FIRST_TIME: {
       draft.isFirstTime = action.payload
       break
@@ -402,6 +407,13 @@ const reducers = <typeof userReducer>(
 
 export default reducers
 
+// Email verified
+export function verifyEmail() {
+  return {
+    type: EMAIL_VERIFIED,
+  }
+}
+
 // First-Time
 export function setFirstTime(payload) {
   return {
@@ -476,7 +488,7 @@ export function updateUserData() {
 }
 
 // Notifications
-export function setNotificationVOD(payload) {
+export function setNotificationVOD(payload: string) {
   return {
     type: SET_NOTIFICATION_VOD,
     payload,

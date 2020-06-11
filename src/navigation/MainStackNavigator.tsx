@@ -1,6 +1,7 @@
 import React from 'react'
 import { Portal } from 'react-native-paper'
 import { createStackNavigator } from 'react-navigation-stack'
+import PremiumModal from '~common/PremiumModal'
 
 import MainTabNavigator from './MainTabNavigator'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
@@ -107,6 +108,7 @@ const MainStack = props => (
   <>
     <Portal.Host>
       <MainStackNavigator {...props} />
+      <PremiumModal />
     </Portal.Host>
   </>
 )

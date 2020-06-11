@@ -14,7 +14,7 @@ import {
   cond,
   greaterOrEq,
 } from 'react-native-reanimated'
-import { wp } from '~helpers/utils'
+import { viewportWidth, wp } from '~helpers/utils'
 
 export const useTimeline = ({
   startYear,
@@ -25,7 +25,7 @@ export const useTimeline = ({
   endYear: number
   interval: number
 }) => {
-  const [x, y] = useValues([4000, 0], [])
+  const [x, y] = useValues([viewportWidth, 0], [])
   const { current: ratio } = React.useRef(100 / interval) // 1 year = 1px with ratio = 1
   const { current: scrollViewWidth } = React.useRef(
     Math.abs(startYear - endYear) * ratio

@@ -5,6 +5,36 @@ import * as Animatable from 'react-native-animatable'
 
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
+{
+  /* <ScrollView
+  {...props}
+  orientation={orientation}
+  contentContainerStyle={{
+    paddingTop: 20,
+    paddingBottom: 20,
+    ...contentContainerStyle,
+  }}
+>
+  <Box
+    maxWidth={orientation.maxWidth}
+    ml="auto"
+    mr="auto"
+    width="100%"
+    backgroundColor={theme.colors[backgroundColor] || theme.colors.reverse}
+    borderTopRightRadius={30}
+    borderTopLeftRadius={30}
+    {...(orientation.tablet && {
+      marginTop: 20,
+      marginBottom: 50,
+      borderBottomLeftRadius: 30,
+      borderBottomRightRadius: 30,
+    })}
+  >
+    {children}
+  </Box>
+</ScrollView> */
+}
+
 const ScrollView = styled.ScrollView(
   ({ theme, orientation, backgroundColor }) => ({
     backgroundColor: theme.colors[backgroundColor] || theme.colors.reverse,

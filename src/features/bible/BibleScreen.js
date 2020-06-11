@@ -102,6 +102,8 @@ class BibleScreen extends React.Component {
           isParallel={!!app.parallelVersions.length}
           addParallelVersion={addParallelVersion}
           removeAllParallelVersions={removeAllParallelVersions}
+          setSettingsCommentaires={setSettingsCommentaires}
+          settings={settings}
         />
         <BibleViewer
           isReadOnly={isReadOnly}
@@ -126,9 +128,9 @@ class BibleScreen extends React.Component {
           setSettingsTheme={setSettingsTheme}
           setSettingsNotesDisplay={setSettingsNotesDisplay}
           setSettingsPress={setSettingsPress}
-          setSettingsCommentaires={setSettingsCommentaires}
           increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
           decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
+          setSettingsCommentaires={setSettingsCommentaires}
           settings={settings}
           fontFamily={fontFamily}
           setFontFamily={setFontFamily}

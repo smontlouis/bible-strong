@@ -2,7 +2,6 @@ import React from 'react'
 import { ScrollView as RNScrollView, Linking, Platform } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
-import useLogin from '~helpers/useLogin'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -15,16 +14,12 @@ import Button from '~common/ui/Button'
 import PlanHome from './PlanHome'
 import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
-import usePremium from '~helpers/usePremium'
 import SwitchTheme from './SwitchTheme'
 import TheBibleProject from './TheBibleProjectPlan'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
-  const { isLogged } = useLogin()
-  const hasPremium = usePremium()
-
   return (
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>

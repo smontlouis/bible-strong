@@ -52,7 +52,7 @@ const zoom = keyframes({
   },
 })
 
-const ContainerText = styled('span')(
+export const ContainerText = styled('span')(
   ({
     isFocused,
     isTouched,
@@ -94,7 +94,7 @@ const ContainerText = styled('span')(
   }
 )
 
-const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
+export const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
   display: textDisplay,
   ...(textDisplay === 'block'
     ? {
@@ -269,6 +269,7 @@ class Verse extends Component {
             }
             return (
               <div
+                key={i}
                 style={{
                   flex: 1,
                   padding: '5px 0',
@@ -305,6 +306,21 @@ class Verse extends Component {
           selectedCode={selectedCode}
           verse={verse}
           settings={settings}
+          isFocused={isFocused}
+          isTouched={isTouched}
+          isSelected={isSelected}
+          isVerseToScroll={isVerseToScroll && verse.Verset != 1}
+          highlightedColor={highlightedColor}
+          onTouchStart={this.onTouchStart}
+          onTouchEnd={this.onTouchEnd}
+          onTouchMove={this.onTouchMove}
+          onTouchCancel={this.onTouchCancel}
+          notesCount={notesCount}
+          inlineNotedVerses={inlineNotedVerses}
+          isSelectionMode={isSelectionMode}
+          notesText={notesText}
+          navigateToVerseNotes={this.navigateToVerseNotes}
+          navigateToNote={this.navigateToNote}
         />
       )
     }

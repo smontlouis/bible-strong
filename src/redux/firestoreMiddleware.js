@@ -126,7 +126,6 @@ export default store => next => async action => {
     case PUBLISH_STUDY:
     case UPLOAD_STUDY: {
       const studyId = action.payload
-      console.log('hello', studyId, user.bible.studies[studyId])
       studyCollection.doc(studyId).set(r(user.bible.studies[studyId]))
       break
     }

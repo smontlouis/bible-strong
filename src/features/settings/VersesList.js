@@ -31,7 +31,7 @@ export const sortVersesByDate = p =>
     return arr
   }, [])
 
-const VersesList = ({ verseIds, setSettings }) => {
+const VersesList = React.memo(({ verseIds, setSettings }) => {
   const sortedVersesByDate = sortVersesByDate(verseIds)
 
   return (
@@ -45,6 +45,6 @@ const VersesList = ({ verseIds, setSettings }) => {
       )}
     />
   )
-}
+})
 
 export default VersesList

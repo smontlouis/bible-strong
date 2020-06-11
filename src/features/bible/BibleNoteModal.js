@@ -8,6 +8,7 @@ import { pure, compose } from 'recompose'
 import { connect } from 'react-redux'
 import { ScrollView, Alert, Share } from 'react-native'
 
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import Snackbar from '~common/SnackBar'
 import * as UserActions from '~redux/modules/user'
 import TagList from '~common/TagList'
@@ -26,9 +27,22 @@ const StylizedModal = styled(Modal)({
   justifyContent: 'center',
 })
 
-const Container = styled.View(({ theme }) => ({
-  width: 300,
-  height: 400,
+const Container = ({ ...props }) => {
+  const r = useMediaQueriesArray()
+  const modalWidth = r([300, 340, 400, 500])
+  const modalHeight = r([400, 450, 500, 600])
+
+  return (
+    <StyledContainer
+      modalHeight={modalHeight}
+      modalWidth={modalWidth}
+      {...props}
+    />
+  )
+}
+const StyledContainer = styled.View(({ theme, modalWidth, modalHeight }) => ({
+  width: modalWidth,
+  height: modalHeight,
   backgroundColor: theme.colors.reverse,
   borderRadius: 3,
   shadowColor: theme.colors.default,

@@ -4,7 +4,13 @@ import { connectSearchBox } from 'react-instantsearch-native'
 
 import SearchInput from '~common/SearchInput'
 
-const SearchBox = ({ refine, debouncedValue, value, onChange }) => {
+const SearchBox = ({
+  refine,
+  debouncedValue,
+  value,
+  onChange,
+  placeholder = 'Mot, phrase ou strong',
+}) => {
   React.useEffect(() => {
     if (debouncedValue) {
       refine(debouncedValue)
@@ -16,7 +22,7 @@ const SearchBox = ({ refine, debouncedValue, value, onChange }) => {
     <SearchInput
       value={value}
       onChangeText={onChange}
-      placeholder="Mot, phrase ou strong"
+      placeholder={placeholder}
       onDelete={() => {
         Keyboard.dismiss()
         onChange('')

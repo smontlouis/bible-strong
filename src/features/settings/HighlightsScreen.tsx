@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Container from '~common/ui/Container'
 import TagsHeader from '~common/TagsHeader'
@@ -34,14 +34,17 @@ const HighlightsScreen = () => {
   const [multipleTagsItem, setMultipleTagsItem] = React.useState(false)
   const [selectedChip, setSelectedChip] = React.useState<Chip>()
   const dispatch = useDispatch()
+  const chipId = selectedChip?.id
 
-  const filteredHighlights = Object.keys(verseIds)
-    .filter(vId =>
-      selectedChip
-        ? verseIds[vId].tags && verseIds[vId].tags[selectedChip.id]
-        : true
-    )
-    .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
+  // TODO - Performance issue here
+  const filteredHighlights = useMemo(() => {
+    console.log('updated')
+    return Object.keys(verseIds)
+      .filter(vId =>
+        selectedChip ? verseIds[vId].tags && verseIds[vId].tags[chipId] : true
+      )
+      .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
+  }, [chipId])
 
   const promptLogout = () => {
     Alert.alert(

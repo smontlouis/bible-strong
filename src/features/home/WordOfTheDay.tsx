@@ -96,7 +96,7 @@ const DictionnaireOfTheDay = ({
               color="white"
             />
             <Text color="white" bold fontSize={12}>
-              Dictionnaire
+              Dictionnaire W.
             </Text>
           </Box>
         </Link>

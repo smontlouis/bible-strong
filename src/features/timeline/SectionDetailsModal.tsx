@@ -7,7 +7,6 @@ import Paragraph from '~common/ui/Paragraph'
 import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
 import { ShallowTimelineSection } from './types'
-import { maxWidth } from '~helpers/useDimensions'
 import { wp } from '~helpers/utils'
 import FastImage from 'react-native-fast-image'
 import InlineLink from '~common/InlineLink'
@@ -18,7 +17,7 @@ interface Props extends ShallowTimelineSection {
   FooterComponent?: React.ReactNode
 }
 
-const width = maxWidth(wp(50), 500)
+const width = wp(50, 500)
 
 const SectionDetailsModal = ({
   modalRef,

@@ -7,6 +7,8 @@ import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import Back from '~common/Back'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import { Modalize } from 'react-native-modalize'
+import { useOnlyPremium } from '~helpers/usePremium'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -29,6 +31,7 @@ interface Props {
   fontSize?: number
   hasBackButton?: boolean
   onPress: () => void
+  searchModalRef: React.RefObject<Modalize>
 }
 
 const TimelineHeader = ({
@@ -36,22 +39,31 @@ const TimelineHeader = ({
   fontSize = 20,
   hasBackButton,
   onPress,
+  searchModalRef,
 }: Props) => {
+  const onlyPremium = useOnlyPremium()
+
+  const openSearch = onlyPremium(() => {
+    searchModalRef.current?.open()
+  })
   return (
     <HeaderBox row>
-      <Box flex center>
+      <Box center>
         {hasBackButton && (
           <Back padding>
             <FeatherIcon name={'grid'} size={20} />
           </Back>
         )}
       </Box>
-      <Box grow center>
+      <Box flex center>
         <Text title fontSize={fontSize}>
           {title}
         </Text>
       </Box>
-      <Box flex center>
+      <Box center row>
+        <Link paddingSmall onPress={openSearch}>
+          <FeatherIcon name="search" size={20} />
+        </Link>
         <Link paddingSmall onPress={onPress}>
           <FeatherIcon name="info" size={20} />
         </Link>

@@ -73,11 +73,6 @@ const notesDisplayToString = {
   block: 'En icone',
 }
 
-const commentsDisplayToString = {
-  false: 'Sans',
-  true: 'Avec',
-}
-
 const BibleParamsModal = ({
   isOpen,
   onClosed,
@@ -88,7 +83,6 @@ const BibleParamsModal = ({
   decreaseSettingsFontSizeScale,
   setSettingsTheme,
   setSettingsNotesDisplay,
-  setSettingsCommentaires,
   navigation,
   setFontFamily,
   fontFamily,
@@ -99,7 +93,6 @@ const BibleParamsModal = ({
     theme,
     press,
     notesDisplay,
-    commentsDisplay,
   },
 }) => {
   const isPrevOpen = usePrevious(isOpen)
@@ -114,19 +107,6 @@ const BibleParamsModal = ({
       }
     }
   }, [isPrevOpen, isOpen])
-
-  const onOpenCommentaire = async () => {
-    const exists = await getIfDatabaseExists('commentaires-mhy')
-
-    if (!exists) {
-      onClosed()
-      SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
-      navigation.navigate('Downloads')
-      return
-    }
-
-    setSettingsCommentaires(true)
-  }
 
   const fontsView = React.useRef()
 
@@ -143,22 +123,6 @@ const BibleParamsModal = ({
       adjustToContentHeight
     >
       <Container>
-        <HalfContainer border>
-          <Text flex={5}>Commentaires</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {commentsDisplayToString[commentsDisplay]}
-          </Text>
-          <TouchableIcon
-            isSelected={!commentsDisplay}
-            name="x-square"
-            onPress={() => setSettingsCommentaires(false)}
-          />
-          <TouchableIcon
-            isSelected={commentsDisplay}
-            name="archive"
-            onPress={onOpenCommentaire}
-          />
-        </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>Thème</Text>
           <Text marginLeft={5} fontSize={12} bold>

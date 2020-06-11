@@ -315,7 +315,9 @@ class BibleViewer extends Component {
         {error && (
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Désolé ! Ce chapitre n'existe pas dans cette version"
+            message={
+              "Désolé ! Une erreur est survenue:\n Ce chapitre n'existe pas dans cette version.\n Si vous êtes en mode parallème, désactivez la version concernée."
+            }
           />
         )}
         {!error && (

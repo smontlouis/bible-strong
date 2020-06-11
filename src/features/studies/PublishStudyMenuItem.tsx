@@ -15,6 +15,7 @@ import useConnection from '~helpers/useConnection'
 import Clipboard from '@react-native-community/clipboard'
 import SnackBar from '~common/SnackBar'
 import { Share, Platform, PermissionsAndroid } from 'react-native'
+import { useOnlyPremium } from '~helpers/usePremium'
 
 interface Props {
   study: Study
@@ -63,6 +64,12 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
   const [pdfStatus, setPDFStatus] = useState<Status>('Idle')
   const isConnected = useConnection()
   const dispatch = useDispatch()
+  const onlyPremium = useOnlyPremium()
+
+  const onPublishStudy = onlyPremium(
+    () => isConnected && dispatch(publishStudy(study.id)),
+    onClosed
+  )
 
   const exportPDF = async () => {
     try {
@@ -252,7 +259,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
             <LinkBox
               row
               alignItems="center"
-              onPress={() => isConnected && dispatch(publishStudy(study.id))}
+              onPress={onPublishStudy}
               disabled={!isConnected}
             >
               <Text>Publier l'étude</Text>

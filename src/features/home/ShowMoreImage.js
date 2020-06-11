@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import { withTheme } from 'emotion-theming'
 
-import useDimensions, { maxWidth } from '~helpers/useDimensions'
+import { wp } from '~helpers/utils'
 import Image from '~common/ui/Image'
 import Link, { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
@@ -17,12 +17,8 @@ import { ActivityIndicator } from 'react-native-paper'
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
 const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
-  let {
-    screen: { width },
-  } = useDimensions()
   const [shareIsLoading, setShareIsLoading] = useState(false)
-
-  width = maxWidth(width)
+  const width = wp(100, true)
 
   const shareImage = async () => {
     if (shareIsLoading) {
@@ -44,7 +40,7 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
 
   if (!imageUrls) {
     return (
-      <Box height={300} grey>
+      <Box height={50} grey>
         <Loading />
       </Box>
     )
@@ -52,7 +48,7 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
 
   if (imageUrls.error) {
     return (
-      <Box height={100} style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
+      <Box height={50} style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
         <Empty message="Impossible de charger l'image... Assurez-vous d'être connecté à Internet." />
       </Box>
     )

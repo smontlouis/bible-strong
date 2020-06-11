@@ -1,16 +1,15 @@
 import React from 'react'
 import FastImage from 'react-native-fast-image'
 import Carousel from 'react-native-snap-carousel'
-import {
-  TabView,
-  SceneRendererProps,
-  NavigationState,
-} from 'react-native-tab-view'
+// import {
+//   TabView,
+//   SceneRendererProps,
+//   NavigationState,
+// } from 'react-native-tab-view'
 import { Portal } from 'react-native-paper'
 
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import waitForDatabase from '~common/waitForTimeline'
 import { calculateLabel } from './constants'
@@ -18,8 +17,8 @@ import {
   TimelineEventDetail,
   TimelineEvent as TimelineEventProps,
 } from './types'
-import { wp, maxWidth } from '~helpers/utils'
-import EventDetailsTab from './EventDetailsTab'
+import { wp } from '~helpers/utils'
+// import EventDetailsTab from './EventDetailsTab'
 import EventDetailVerse from './EventDetailVerse'
 import EventDetailsModal from './EventDetailsModal'
 import { Modalize } from 'react-native-modalize'
@@ -27,8 +26,8 @@ import Link from '~common/Link'
 import { flattenedEvents } from './events'
 import { FeatherIcon } from '~common/ui/Icon'
 
-const imageWidth = wp(80) > 600 ? 600 : wp(80)
-const sliderWidth = maxWidth(wp(100), 600)
+const imageWidth = wp(80, true)
+const sliderWidth = wp(100, true)
 
 const Description = ({
   description,
@@ -36,7 +35,10 @@ const Description = ({
 }: Partial<TimelineEventDetail>) => {
   return (
     <Box px={20}>
-      <Paragraph fontWeight="bold" scale={-1} mt={30}>
+      <Paragraph fontFamily="title" mb={10}>
+        Description
+      </Paragraph>
+      <Paragraph fontWeight="bold" scale={-1}>
         {description}
       </Paragraph>
       <Paragraph marginTop={20} scale={-1}>
@@ -60,12 +62,12 @@ const Media = ({
   return (
     <Box py={20}>
       {!!scriptures?.length && (
-        <Box px={20}>
-          <Paragraph fontFamily="title" mb={20}>
+        <Box px={20} mt={20}>
+          <Paragraph fontFamily="title" mb={10}>
             Versets
           </Paragraph>
           {scriptures.map(scripture => (
-            <Box mb={20} key={scripture}>
+            <Box key={scripture}>
               <EventDetailVerse verses={scripture} />
             </Box>
           ))}
@@ -157,33 +159,33 @@ const EventDetails = waitForDatabase(
         e => e.slug === slug
       )
     )
-    const [index, setIndex] = React.useState(0)
-    const { current: routes } = React.useRef([
-      { key: 'description', title: 'Article' },
-      { key: 'media', title: 'En savoir plus' },
-    ])
+    // const [index, setIndex] = React.useState(0)
+    // const { current: routes } = React.useRef([
+    //   { key: 'description', title: 'Article' },
+    //   { key: 'media', title: 'En savoir plus' },
+    // ])
 
     if (!event) {
       return null
     }
 
-    const renderScene = ({
-      route,
-    }: SceneRendererProps & {
-      route: {
-        key: string
-        title: string
-      }
-    }) => {
-      switch (route.key) {
-        case 'description':
-          return <Description {...event} />
-        case 'media':
-          return <Media {...event} key={route.key} />
-        default:
-          return null
-      }
-    }
+    // const renderScene = ({
+    //   route,
+    // }: SceneRendererProps & {
+    //   route: {
+    //     key: string
+    //     title: string
+    //   }
+    // }) => {
+    //   switch (route.key) {
+    //     case 'description':
+    //       return <Description {...event} />
+    //     case 'media':
+    //       return <Media {...event} key={route.key} />
+    //     default:
+    //       return null
+    //   }
+    // }
 
     return (
       <Box py={40}>
@@ -210,7 +212,9 @@ const EventDetails = waitForDatabase(
             {date}
           </Paragraph>
         </Box>
-        <TabView
+        <Description {...event} />
+        <Media {...event} />
+        {/* <TabView
           navigationState={{ index, routes }}
           renderScene={renderScene}
           renderTabBar={(
@@ -223,7 +227,7 @@ const EventDetails = waitForDatabase(
           ) => <EventDetailsTab setIndex={setIndex} {...props} />}
           onIndexChange={setIndex}
           initialLayout={{ width: wp(100) }}
-        />
+        /> */}
       </Box>
     )
   }

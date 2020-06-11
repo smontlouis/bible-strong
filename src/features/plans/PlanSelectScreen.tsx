@@ -4,6 +4,8 @@ import PlanSelectTabNavigator from '~navigation/PlanSelectTabNavigator'
 
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
+import Box from '~common/ui/Box'
+import { MAX_WIDTH } from '~helpers/useDimensions'
 
 class PlanSelect extends Component {
   static router = PlanSelectTabNavigator.router
@@ -13,10 +15,12 @@ class PlanSelect extends Component {
     return (
       <Container>
         <Header hasBackButton title="Plans" />
-        <PlanSelectTabNavigator
-          screenProps={{ mainNavigation: navigation }}
-          navigation={navigation}
-        />
+        <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
+          <PlanSelectTabNavigator
+            screenProps={{ mainNavigation: navigation }}
+            navigation={navigation}
+          />
+        </Box>
       </Container>
     )
   }

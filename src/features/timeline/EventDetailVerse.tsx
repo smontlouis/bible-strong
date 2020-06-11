@@ -40,7 +40,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
             </Paragraph>
           </Box>
           <Paragraph>
-            {content.verses.map(c => {
+            {content.verses.slice(0, 3).map(c => {
               const { h1, h2, h3, h4 } = c.Pericope
               return (
                 <React.Fragment key={`${c.Verset}`}>
@@ -74,6 +74,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
                 </React.Fragment>
               )
             })}
+            {content.verses.length > 3 && <Paragraph>...</Paragraph>}
           </Paragraph>
         </Box>
       </Link>

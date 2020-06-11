@@ -11,7 +11,7 @@ const withFireAuth = WrappedComponent => props => {
       console.log(`Bienvenue ${profile.displayName}.`)
       dispatch(UserActions.onUserLoginSuccess(profile, remoteLastSeen, studies))
     }
-    const emailVerified = () => console.log('email has been verified')
+    const emailVerified = () => dispatch(UserActions.verifyEmail())
     const onUserChange = profile => console.log('user changed')
     const onLogout = () => dispatch(UserActions.onUserLogout())
     const onError = e => {

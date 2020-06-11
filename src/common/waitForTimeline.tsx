@@ -54,11 +54,13 @@ export const useWaitForDatabase = () => {
             return
           }
 
-          const data = await FileSystem.readAsStringAsync(file.uri)
+          const data = await FileSystem.readAsStringAsync(path)
           bibleMemoize['timeline'] = JSON.parse(data)
+          setLoading(false)
 
           setLoading(false)
         } catch (e) {
+          console.log(e)
           SnackBar.show(
             "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
             'danger'

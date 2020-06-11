@@ -87,7 +87,12 @@ const DictionnaireScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton title="Dictionnaire" noBorder />
+      <Header
+        hasBackButton
+        fontSize={18}
+        title="Dictionnaire Westphal"
+        noBorder
+      />
       <SearchInput
         placeholder="Recherche par mot"
         onChangeText={setSearchValue}

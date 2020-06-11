@@ -14,6 +14,7 @@ import { offset } from './constants'
 import { FeatherIcon } from '~common/ui/Icon'
 import { wp } from '~helpers/utils'
 import { Platform } from 'react-native'
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -38,6 +39,7 @@ const CurrentYear = ({
   prevColor?: string
   nextColor?: string
 }) => {
+  const r = useMediaQueriesArray()
   const progressInSection = concat(
     interpolate(multiply(-1, x), {
       inputRange: [0, width - wp(100)],
@@ -54,18 +56,18 @@ const CurrentYear = ({
       bottom={getBottomSpace()}
       left={0}
       right={0}
-      height={30}
+      height={r([30, 40, 60, 60])}
     >
       {prevColor && (
         <LinkBox
           onPress={onPrev}
-          height={30}
+          height={r([30, 40, 60, 60])}
+          width={r([30, 40, 60, 60])}
           borderTopRightRadius={5}
           borderTopLeftRadius={5}
           pos="absolute"
           left={0}
           bottom={0}
-          width={30}
           center
           bg="reverse"
           lightShadow
@@ -77,13 +79,13 @@ const CurrentYear = ({
         <LinkBox
           ml="auto"
           onPress={onNext}
-          height={30}
+          height={r([30, 40, 60, 60])}
+          width={r([30, 40, 60, 60])}
           borderTopRightRadius={5}
           borderTopLeftRadius={5}
           pos="absolute"
           right={0}
           bottom={0}
-          width={30}
           center
           bg="reverse"
           lightShadow

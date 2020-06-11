@@ -20,7 +20,14 @@ import { Modalize } from 'react-native-modalize'
 import SectionDetailsModal from './SectionDetailsModal'
 import EventDetailsModal from './EventDetailsModal'
 import { useValues } from 'react-native-redash'
-import { usePrevious } from '~helpers/usePrevious'
+import SearchInTimelineModal from './SearchInTimelineModal'
+import algoliasearch from 'algoliasearch/lite'
+import { InstantSearch } from 'react-instantsearch-native'
+import { algoliaConfig } from '../../../config'
+const searchClient = algoliasearch(
+  algoliaConfig.applicationId,
+  algoliaConfig.apiKey
+)
 
 interface Props extends TimelineSectionProps {
   onPrev: () => void
@@ -57,6 +64,8 @@ const Timeline = ({
   const [isReady] = useValues([0], [isCurrent])
   const modalRef = React.useRef<Modalize>(null)
   const eventModalRef = React.useRef<Modalize>(null)
+  const searchModalRef = React.useRef<Modalize>(null)
+
   const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
 
   const onTimelineDetailsOpen = () => {
@@ -88,6 +97,7 @@ const Timeline = ({
         hasBackButton
         title={title}
         onPress={onTimelineDetailsOpen}
+        searchModalRef={searchModalRef}
       />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
@@ -172,6 +182,13 @@ const Timeline = ({
           interval,
         }}
       />
+      <InstantSearch indexName="bible-timeline" searchClient={searchClient}>
+        <SearchInTimelineModal
+          modalRef={searchModalRef}
+          eventModalRef={eventModalRef}
+          setEvent={setEvent}
+        />
+      </InstantSearch>
       <EventDetailsModal modalRef={eventModalRef} event={event} />
     </Box>
   )

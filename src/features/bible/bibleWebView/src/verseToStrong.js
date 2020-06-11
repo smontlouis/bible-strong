@@ -21,7 +21,7 @@ const StyledReference = styled('div')(
 )
 
 const BibleStrongRef = ({ book, reference }) => {
-  const { selectedCode, settings } = useContext(VerseContext)
+  const { selectedCode, settings, onTouchMove } = useContext(VerseContext)
   const isSelected =
     (selectedCode && selectedCode.reference == reference) ||
     selectedCode.reference == Number(reference)
@@ -35,6 +35,8 @@ const BibleStrongRef = ({ book, reference }) => {
 
   return (
     <StyledReference
+      onTouchStart={onTouchMove}
+      onTouchEnd={onTouchMove}
       onClick={navigateToStrong}
       isSelected={isSelected}
       settings={settings}

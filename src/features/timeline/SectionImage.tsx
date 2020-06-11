@@ -4,9 +4,9 @@ import { ShallowTimelineSection } from './types'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import FastImage from 'react-native-fast-image'
-import { wp, maxWidth } from '~helpers/utils'
+import { wp } from '~helpers/utils'
 import { FeatherIcon } from '~common/ui/Icon'
-const width = maxWidth(wp(50), 500)
+const width = wp(50, 500)
 
 const SectionImage = ({
   image,

@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import Modal from 'react-native-modal'
 import { ScrollView } from 'react-native'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import Login from './Login'
 import Paragraph from '~common/ui/Paragraph'
@@ -9,10 +10,20 @@ import Box from '~common/ui/Box'
 
 import Text from '~common/ui/Text'
 
-const StylizedModal = styled(Modal)({
+const StylizedModal = styled(Modal)(({ theme }) => ({
   justifyContent: 'flex-end',
   margin: 0,
-})
+  maxWidth: 600,
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '100%',
+  shadowColor: theme.colors.default,
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 2,
+  paddingBottom: getBottomSpace(),
+}))
 
 // More like StudiesLoginModal
 
@@ -24,6 +35,8 @@ const Container = styled.View(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
   padding: 20,
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
 }))
 
 const LoginModal = ({ isVisible }) => {
