@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import { useIapUser, buyProduct } from '~helpers/useInAppPurchases'
 import SubscriptionPlan from './SubscriptionPlan'
@@ -30,7 +31,13 @@ const SubscriptionGroup = () => {
   }
 
   if (status === 'Rejected') {
-    return null
+    return (
+      <Box px={40}>
+        <Text textAlign="center" color="quart">
+          Impossible accéder aux offres d'abonnement.
+        </Text>
+      </Box>
+    )
   }
 
   if (status === 'Resolved' && products) {
@@ -57,7 +64,7 @@ const SubscriptionGroup = () => {
         </Box>
         <Box p={20} pt={40}>
           <Button isLoading={processing} onPress={onSubscription}>
-            Subscribe
+            S'abonner
           </Button>
         </Box>
       </Box>

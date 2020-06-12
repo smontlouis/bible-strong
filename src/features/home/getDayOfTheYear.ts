@@ -1,5 +1,8 @@
-export const getDayOfTheYear = () => {
+export const getDayOfTheYear = (addDay?: number) => {
   const now = new Date()
+  if (addDay) {
+    now.setDate(now.getDate() + addDay)
+  }
   const start = new Date(now.getFullYear(), 0, 0)
   const diff =
     now -

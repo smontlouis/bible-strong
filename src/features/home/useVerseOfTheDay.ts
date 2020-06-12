@@ -15,24 +15,20 @@ import VOD from '~assets/bible_versions/bible-vod'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
+import { removeBreakLines } from '~helpers/utils'
 
-export const useVerseOfTheDay = () => {
-  const { user } = useLogin()
+const useGetVerseOfTheDay = (version: string, addDay?: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
-  const version = useSelector(state => state.bible.selectedVersion)
-  const verseOfTheDayTime = useSelector(
-    state => state.user.notifications.verseOfTheDay
-  )
 
   useEffect(() => {
     const dayOfTheYear =
-      getDayOfTheYear() + 1 < 1 || getDayOfTheYear() + 1 > 366
+      getDayOfTheYear(addDay) + 1 < 1 || getDayOfTheYear(addDay) + 1 > 366
         ? 1
-        : getDayOfTheYear() + 1
+        : getDayOfTheYear(addDay) + 1
     const loadVerse = async () => {
       try {
         const [bookName, chapter, verse] = VOD[dayOfTheYear].split('.')
-        const book = booksDesc2.find(b => b[1] === bookName)[0]
+        const book = booksDesc2.find(b => b[1] === bookName)?.[0]
         const vod = await getVersesRef(`${book}-${chapter}-${verse}`, version)
         setVOD({
           v: VOD[dayOfTheYear],
@@ -48,10 +44,30 @@ export const useVerseOfTheDay = () => {
     loadVerse()
   }, [version])
 
+  return verseOfTheDay
+}
+
+export const useVerseOfTheDay = () => {
+  const { user } = useLogin()
+  const version = useSelector(state => state.bible.selectedVersion)
+  const verseOfTheDayTime = useSelector(
+    state => state.user.notifications.verseOfTheDay
+  )
+  const displayName = user?.displayName
+  const verseOfTheDay = useGetVerseOfTheDay(version)
+  const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1)
+
+  const verseOfTheDayContent = verseOfTheDay?.content
+  const verseOfTheDayPlus1Content = verseOfTheDayPlus1?.content
+
   useEffect(() => {
     const scheduleNotification = async () => {
       try {
         await PushNotification.cancelAllLocalNotifications()
+
+        if (!verseOfTheDayContent && verseOfTheDayPlus1Content) {
+          return
+        }
 
         if (!verseOfTheDayTime) {
           console.log(
@@ -62,7 +78,7 @@ export const useVerseOfTheDay = () => {
 
         const [vodHours, vodMinutes] = verseOfTheDayTime
           .split(':')
-          .map(n => Number(n))
+          .map((n: string) => Number(n))
         const nowDate = new Date(Date.now())
         const nowHour = nowDate.getHours()
         const nowMinutes = nowDate.getMinutes()
@@ -81,14 +97,21 @@ export const useVerseOfTheDay = () => {
         )(nowDate)
 
         await PushNotification.localNotificationSchedule({
-          title: `Bonjour ${extractFirstName(user.displayName)}`,
-          message: 'Découvre ton verset du jour !',
+          title: `Bonjour ${extractFirstName(displayName)}`,
+          message: !addDay
+            ? removeBreakLines(verseOfTheDayContent)
+            : removeBreakLines(verseOfTheDayPlus1Content),
           category: 'NOTIFICATIONS',
-          repeatType: 'day',
           date,
         })
 
-        console.log(`Notification set at ${verseOfTheDayTime} on ${date}`)
+        console.log(
+          `Notification set at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
+            !addDay
+              ? removeBreakLines(verseOfTheDayContent)
+              : removeBreakLines(verseOfTheDayPlus1Content)
+          }`
+        )
         // dispatch(setNotificationId(randomId))
       } catch (e) {
         Snackbar.show('Erreur de notification.')
@@ -107,8 +130,11 @@ export const useVerseOfTheDay = () => {
       }
     }
     initNotifications()
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verseOfTheDayTime])
+  }, [
+    verseOfTheDayTime,
+    verseOfTheDayContent,
+    verseOfTheDayPlus1Content,
+    displayName,
+  ])
   return verseOfTheDay
 }

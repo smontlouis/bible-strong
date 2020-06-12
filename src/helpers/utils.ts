@@ -42,7 +42,7 @@ export const cleanParams = () => ({
   verses: undefined,
 })
 
-export const removeBreakLines = str => str.replace(/\n/g, '')
+export const removeBreakLines = (str: string = '') => str.replace(/\n/g, '')
 
 export const maxWidth = (width, maxW = MAX_WIDTH) =>
   width > maxW ? maxW : width
