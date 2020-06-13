@@ -116,7 +116,7 @@ const HomeScreen = () => {
               </Button>
             </Box>
           </Box>
-          {Platform.OS === 'android' && (
+          {/* {Platform.OS === 'android' && (
             <Box background p={20} pt={0}>
               <Button
                 color="#7ed6df"
@@ -132,7 +132,7 @@ const HomeScreen = () => {
                 }
               />
             </Box>
-          )}
+          )} */}
         </Box>
       </HomeScrollView>
     </Box>
