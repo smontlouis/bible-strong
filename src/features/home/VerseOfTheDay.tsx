@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Share } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'
@@ -27,15 +27,47 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
-const VerseOfTheDay = () => {
+interface Props {
+  addDay: number
+  isFirst: boolean
+  isLast: boolean
+  currentVOD: boolean
+  setCurrentVOD: React.Dispatch<React.SetStateAction<number>>
+}
+
+const dayToAgo = (day: number) => {
+  switch (day) {
+    case -1:
+      return 'Hier'
+    case -2:
+      return 'Il y a deux jours'
+    case -3:
+      return 'Il y a trois jours'
+    case -4:
+      return 'Il y a quatre jours'
+    case -5:
+      return 'Il y a cinq jours'
+    default:
+      return undefined
+  }
+}
+
+const VerseOfTheDay = ({
+  addDay,
+  isFirst,
+  isLast,
+  currentVOD,
+  setCurrentVOD,
+}: Props) => {
   const [timerPickerOpen, setTimePicker] = useState(false)
-  const verseOfTheDay = useVerseOfTheDay()
+  const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
   const dispatch = useDispatch()
   const [open, setOpen] = useState(false)
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
+  const { current: ago } = useRef(dayToAgo(addDay))
   const notificationModalRef = React.useRef<Modalize>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime
@@ -57,6 +89,10 @@ const VerseOfTheDay = () => {
 
   const openTimePicker = () => {
     setTimePicker(true)
+  }
+
+  if (!currentVOD) {
+    return null
   }
 
   if (!verseOfTheDay) {
@@ -99,25 +135,43 @@ const VerseOfTheDay = () => {
             verse,
             focusVerses: [verse],
           }}
+          style={{ marginTop: 10 }}
         >
-          <Text marginTop={10} color="grey" fontSize={14} lineHeight={20}>
+          {ago && (
+            <Text color="grey" fontSize={10}>
+              {ago}
+            </Text>
+          )}
+          <Text color="grey" fontSize={14} lineHeight={20}>
             {removeBreakLines(content)}
           </Text>
         </Link>
         <Box row alignItems="center">
           <Box row center mt={5} opacity={0.5}>
-            <Link
-              onPress={() => notificationModalRef.current?.open()}
-              size={30}
-            >
-              <FeatherIcon size={16} name="bell" />
-            </Link>
+            {!addDay && (
+              <Link
+                onPress={() => notificationModalRef.current?.open()}
+                size={30}
+              >
+                <FeatherIcon size={16} name="bell" />
+              </Link>
+            )}
             <Link size={30} onPress={shareVerse}>
               <FeatherIcon size={16} name="share-2" />
             </Link>
             <Link size={30} onPress={() => setOpen(s => !s)}>
               <FeatherIcon size={16} name="image" />
             </Link>
+            {!isLast && (
+              <Link size={30} onPress={() => setCurrentVOD(s => s - 1)}>
+                <FeatherIcon size={16} name="chevron-left" />
+              </Link>
+            )}
+            {!isFirst && (
+              <Link size={30} onPress={() => setCurrentVOD(s => s + 1)}>
+                <FeatherIcon size={16} name="chevron-right" />
+              </Link>
+            )}
           </Box>
         </Box>
       </AnimatableBox>

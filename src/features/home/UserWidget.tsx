@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   ScrollView,
   Platform,
@@ -107,6 +107,7 @@ const UserWidget = ({ theme }) => {
       tags: Object.keys(bible.tags).length,
     })
   )
+  const [currentVOD, setCurrentVOD] = useState(0)
 
   if (!isLogged) {
     return (
@@ -189,8 +190,17 @@ const UserWidget = ({ theme }) => {
             </Text>
           </Box>
         </Box>
+        {[...Array(6).keys()].map(i => (
+          <VerseOfTheDay
+            key={i}
+            addDay={-i}
+            isFirst={i === 0}
+            isLast={i === [...Array(5).keys()].length - 1}
+            currentVOD={-i === currentVOD}
+            setCurrentVOD={setCurrentVOD}
+          />
+        ))}
 
-        <VerseOfTheDay />
         {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart">

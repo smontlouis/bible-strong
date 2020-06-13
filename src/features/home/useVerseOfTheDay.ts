@@ -17,7 +17,7 @@ import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
 
-const useGetVerseOfTheDay = (version: string, addDay?: number) => {
+const useGetVerseOfTheDay = (version: string, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
 
   useEffect(() => {
@@ -47,25 +47,27 @@ const useGetVerseOfTheDay = (version: string, addDay?: number) => {
   return verseOfTheDay
 }
 
-export const useVerseOfTheDay = () => {
+export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
   )
   const displayName = user?.displayName
-  const verseOfTheDay = useGetVerseOfTheDay(version)
-  const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1)
+  const verseOfTheDay = useGetVerseOfTheDay(version, addDay)
+  const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1 + addDay)
 
   const verseOfTheDayContent = verseOfTheDay?.content
   const verseOfTheDayPlus1Content = verseOfTheDayPlus1?.content
 
   useEffect(() => {
+    if (addDay) return // Don't do anything for old verses
+
     const scheduleNotification = async () => {
       try {
         await PushNotification.cancelAllLocalNotifications()
 
-        if (!verseOfTheDayContent && verseOfTheDayPlus1Content) {
+        if (!verseOfTheDayContent || !verseOfTheDayPlus1Content) {
           return
         }
 
@@ -135,6 +137,7 @@ export const useVerseOfTheDay = () => {
     verseOfTheDayContent,
     verseOfTheDayPlus1Content,
     displayName,
+    addDay,
   ])
   return verseOfTheDay
 }
