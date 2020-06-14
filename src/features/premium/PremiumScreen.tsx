@@ -44,7 +44,7 @@ const PremiumScreen = () => {
   const hasPremium = useIsPremium()
   const { isLogged } = useLogin()
 
-  if (!hasPremium) {
+  if (hasPremium) {
     return (
       <Container>
         <Header hasBackButton />
