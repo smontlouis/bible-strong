@@ -436,23 +436,56 @@ class BibleViewer extends Component {
 
 const getSelectedVerses = state => state.bible.selectedVerses
 const getHighlightedVerses = state => state.user.bible.highlights
+const getNotes = state => state.user.bible.notes
 
 const getHighlightInSelected = createSelector(
   [getSelectedVerses, getHighlightedVerses],
   (selected, highlighted) => Object.keys(selected).find(s => highlighted[s])
 )
 
+const getCurrentBookAndChapter = (state, props) => {
+  return `${props.book.Numero}-${props.chapter}-`
+}
+
+const getHighlightedVersesByChapter = createSelector(
+  [getCurrentBookAndChapter, getHighlightedVerses],
+  (bookAndChapter, highlighted) => {
+    let object = {}
+    for (const key in highlighted) {
+      if (key.startsWith(bookAndChapter)) {
+        object[key] = highlighted[key]
+      }
+    }
+    return object
+  }
+)
+
+const getNotesByChapter = createSelector(
+  [getCurrentBookAndChapter, getNotes],
+  (bookAndChapter, notes) => {
+    let object = {}
+    for (const key in notes) {
+      if (key.startsWith(bookAndChapter)) {
+        object[key] = notes[key]
+      }
+    }
+    return object
+  }
+)
+
 export default compose(
   pure,
   withTheme,
   connect(
-    state => ({
-      modalIsVisible: !!Object.keys(state.bible.selectedVerses).length,
-      selectedVerses: state.bible.selectedVerses,
-      highlightedVerses: state.user.bible.highlights,
-      notedVerses: state.user.bible.notes,
-      isSelectedVerseHighlighted: !!getHighlightInSelected(state),
-    }),
+    (state, props) => {
+      return {
+        modalIsVisible: !!Object.keys(state.bible.selectedVerses).length,
+        selectedVerses: state.bible.selectedVerses,
+        highlightedVerses: getHighlightedVersesByChapter(state, props),
+        notedVerses: getNotesByChapter(state, props),
+        isSelectedVerseHighlighted: !!getHighlightInSelected(state),
+      }
+    },
     { ...BibleActions, ...UserActions }
   )
 )(BibleViewer)

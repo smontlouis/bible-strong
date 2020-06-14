@@ -13,6 +13,7 @@ import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import LexiqueIcon from '~common/LexiqueIcon'
 import RandomButton from './RandomButton'
+import truncate from '~helpers/truncate'
 
 const StrongOfTheDay = ({
   type,
@@ -95,8 +96,18 @@ const StrongOfTheDay = ({
         </Box>
         <RandomButton onPress={() => setStartRandom(true)} />
         <Box flex={1} center mt={20}>
+          <Box
+            backgroundColor="rgba(0,0,0,0.1)"
+            paddingHorizontal={5}
+            paddingVertical={3}
+            rounded
+          >
+            <Text fontSize={10} style={{ color: 'white' }}>
+              {type === 'grec' ? 'Grec' : 'Hébreu'}
+            </Text>
+          </Box>
           <Paragraph title scale={-2} style={{ color: 'white' }}>
-            {Mot}
+            {truncate(Mot, 10)}
           </Paragraph>
           <Paragraph
             style={{ color: 'white', opacity: 0.5 }}
@@ -104,7 +115,7 @@ const StrongOfTheDay = ({
             scaleLineHeight={-2}
             marginBottom={3}
           >
-            {Grec || Hebreu}
+            {truncate(Grec, 10) || truncate(Hebreu, 10)}
           </Paragraph>
         </Box>
         <Link route="Lexique" style={{ width: '100%' }}>

@@ -38,13 +38,12 @@ const HighlightsScreen = () => {
 
   // TODO - Performance issue here
   const filteredHighlights = useMemo(() => {
-    console.log('updated')
     return Object.keys(verseIds)
       .filter(vId =>
         selectedChip ? verseIds[vId].tags && verseIds[vId].tags[chipId] : true
       )
       .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
-  }, [chipId])
+  }, [chipId, isChangeColorOpen])
 
   const promptLogout = () => {
     Alert.alert(
@@ -65,7 +64,6 @@ const HighlightsScreen = () => {
   }
 
   const changeColor = (color: string) => {
-    console.log(isChangeColorOpen, color)
     dispatch(changeHighlightColor(isChangeColorOpen, color))
     setIsChangeColorOpen(undefined)
   }

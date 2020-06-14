@@ -27,8 +27,11 @@ const copyToClipboard = async (url: string) => {
   SnackBar.show('Copié dans le presse-papiers.')
 }
 
-const shareVerse = async (url: string) => {
-  const result = await Share.share({ url })
+const shareVerse = async (title: string, userName: string, url: string) => {
+  const result = await Share.share({
+    message: `${title}, créé par ${userName}
+  ${url}`,
+  })
   return result
 }
 
@@ -212,7 +215,11 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               alignItems="center"
               py={10}
               onPress={async () => {
-                const result = await shareVerse(url)
+                const result = await shareVerse(
+                  study.title,
+                  study.user.displayName,
+                  url
+                )
                 if (result.action === Share.sharedAction) {
                   onClosed()
                 }

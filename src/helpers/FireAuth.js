@@ -277,6 +277,20 @@ const FireAuth = class {
       }
     })
 
+  sendEmailVerification = async () => {
+    const user = auth().currentUser
+    try {
+      await user.sendEmailVerification()
+      SnackBar.show('Email envoyé')
+    } catch (e) {
+      if (e.code === 'auth/too-many-requests') {
+        SnackBar.show('Un mail a déjà été envoyé. Réessayez plus tard')
+      } else {
+        SnackBar.show("Impossible d'envoyer l'email")
+      }
+    }
+  }
+
   resetPassword = email =>
     new Promise(async resolve => {
       try {

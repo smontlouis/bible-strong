@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native'
-import { LinkBox } from '~common/Link'
+import FireAuth from '~helpers/FireAuth'
 import { MaterialIcon, FeatherIcon } from '~common/ui/Icon'
 import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
@@ -203,10 +203,15 @@ const UserWidget = ({ theme }) => {
 
         {!user.emailVerified && (
           <Box marginTop={10}>
-            <Text color="quart">
+            <Text color="quart" mb={5}>
               Un email vous a été envoyé, merci de vérifier votre adresse. Si ce
               message persiste, reconnectez-vous.
             </Text>
+            <Link onPress={() => FireAuth.sendEmailVerification()}>
+              <Text color="grey" style={{ textDecorationLine: 'underline' }}>
+                Renvoyer le lien
+              </Text>
+            </Link>
           </Box>
         )}
       </Box>
