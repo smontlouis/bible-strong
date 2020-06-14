@@ -42,10 +42,9 @@ const SubscriptionGroup = () => {
 
   if (status === 'Resolved' && products) {
     return (
-      <Box bg="reverse" overflow="visible" pb={50}>
+      <Box overflow="visible">
         <Box
-          mt={-100}
-          pt={50}
+          pt={10}
           px={10}
           row
           justifyContent="space-around"
@@ -62,7 +61,7 @@ const SubscriptionGroup = () => {
             />
           ))}
         </Box>
-        <Box p={20} pt={40}>
+        <Box p={20}>
           <Button isLoading={processing} onPress={onSubscription}>
             S'abonner
           </Button>

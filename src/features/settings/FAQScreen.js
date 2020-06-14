@@ -142,6 +142,56 @@ const FAQScreen = () => {
               connecter et de choisir son moyen de paiement.
             </Paragraph>
           </List.Accordion>
+
+          <List.Accordion
+            titleNumberOfLines={5}
+            title={
+              <Text title fontSize={18}>
+                Pourquoi l’application contient-elle du contenu adventiste ?
+              </Text>
+            }
+          >
+            <Paragraph marginLeft={20} scale={-1}>
+              {`L’app contient du contenu adventiste, mais également du contenu d’autres confessions. Je ne me suis pas concentré sur la religion, mais plutôt sur la qualité du contenu. Par exemple, la timeline d’Amazing Facts est la seule que je connaisse qui soit aussi complète. Si vous ne partagez pas la foi adventiste, il est normal que vous puissiez être en désaccord avec certains contenus.`}
+            </Paragraph>
+          </List.Accordion>
+          <List.Accordion
+            titleNumberOfLines={5}
+            title={
+              <Text title fontSize={18}>
+                Pourquoi je ne trouve pas les livres deutérocanoniques ?
+              </Text>
+            }
+          >
+            <Paragraph marginLeft={20} scale={-1}>
+              Même si, de par ma foi, je considère ces livres comme apocryphes,
+              j’ai hésité à les intégrer, car je souhaitais tout de même donner
+              accès à l’entièreté des bibles. Cependant, étant donné la
+              complexité actuelle de les implémenter (d'un point de vue
+              technique), j’ai finalement choisi de ne pas suivre cette
+              direction.
+            </Paragraph>
+          </List.Accordion>
+          <List.Accordion
+            titleNumberOfLines={5}
+            title={
+              <Text title fontSize={18}>
+                Comment sont synchronisées mes données entre différents
+                appareils ?
+              </Text>
+            }
+          >
+            <Paragraph marginLeft={20} scale={-1}>
+              {`Bible Strong utilise la logique “dernier modifié, dernier sauvegardé”.
+
+Si par exemple l’appareil A modifie ses données (sauvegardées ensuite sur le cloud) et que vous ouvrez l’appareil B,, l’appareil B récupérera toutes les données du cloud enregistrées par l’appareil A.
+
+Cependant, si vous faites la même chose mais que l’appareil B est hors-ligne, lorsque vous modifierez vos données, il sera considéré comme le dernier modifié. De ce fait, une fois en ligne, il écrasera les données enregistrés sur le cloud par l’appareil A.
+
+C’est la raison pour laquelle il est important de ne pas utiliser deux instances de l’application Bible Strong au même moment avec le même compte, vous risquez de perdre certaines données.
+`}
+            </Paragraph>
+          </List.Accordion>
           <List.Accordion
             titleNumberOfLines={5}
             title={
@@ -152,7 +202,7 @@ const FAQScreen = () => {
           >
             <Paragraph marginLeft={20} scale={-1}>
               {
-                "Très bonne question ! Je m'appelle Stéphane, j'ai 30 ans, je fais du design et du développement web et mobile depuis 10 ans.\n\nJe viens de Martinique, je suis adventiste du 7ème jour et je vis en ce moment en Nouvelle-Zélande avec mon épouse.\n\nJ'ai décidé de créer cette application parce que je n'en trouvais aucune qui répondait à mes besoins en terme de facilité d'utilisation et d'ergonomie pour étudier la Bible. Je souhaitais organiser mes versets, rédiger mes études, prendre mes notes, les voir directement intégrées dans ma bible, créer mes tags, etc.\n\nJe souhaite donc apporter une pierre à l'édifice en proposant une application gratuite. Je n'ai pas pour objectif de monétiser l'application, cela va à l'encontre de mes convictions.\n\nJ'ai reçu gratuitement, je donne gratuitement :)."
+                "Très bonne question ! Je m'appelle Stéphane, j'ai 30 ans, je fais du design et du développement web et mobile depuis 10 ans.\n\nJe viens de Martinique, je suis adventiste du 7ème jour et je vis en ce moment en Nouvelle-Zélande avec mon épouse.\n\nJ'ai décidé de créer cette application parce que je n'en trouvais aucune qui répondait à mes besoins en terme de facilité d'utilisation et d'ergonomie pour étudier la Bible. Je souhaitais organiser mes versets, rédiger mes études, prendre mes notes, les voir directement intégrées dans ma bible, créer mes tags, etc.\n\nJe souhaite donc apporter une pierre à l'édifice en proposant une application gratuite, et financée par les dons et par une fonctionnalité premium. :)."
               }
             </Paragraph>
           </List.Accordion>

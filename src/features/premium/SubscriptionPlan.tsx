@@ -29,14 +29,14 @@ const SubscriptionPlan = ({
       width="30%"
       bg="reverse"
       borderWidth={4}
-      borderColor="reverse"
+      borderColor="lightPrimary"
       rounded
       center
       overflow="visible"
       onPress={onPress}
       {...(isSelected && { borderColor: 'primary' })}
     >
-      {/* {variant !== 'normal' && (
+      {variant !== 'normal' && (
         <Box
           position="absolute"
           top={-10}
@@ -52,11 +52,11 @@ const SubscriptionPlan = ({
             borderRadius={20}
           >
             <Text color="reverse" fontSize={11}>
-              Recommandé
+              Suggéré
             </Text>
           </Box>
         </Box>
-      )} */}
+      )}
       <Text fontSize={18} bold={variant !== 'normal'}>
         {price}
       </Text>
