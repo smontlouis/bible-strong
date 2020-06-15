@@ -5,6 +5,7 @@ import Animated, {
   Extrapolate,
   multiply,
   concat,
+  round,
 } from 'react-native-reanimated'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
@@ -41,11 +42,13 @@ const CurrentYear = ({
 }) => {
   const r = useMediaQueriesArray()
   const progressInSection = concat(
-    interpolate(multiply(-1, x), {
-      inputRange: [0, width - wp(100)],
-      outputRange: [0, 100],
-      extrapolate: Extrapolate.CLAMP,
-    }),
+    round(
+      interpolate(multiply(-1, x), {
+        inputRange: [0, width - wp(100)],
+        outputRange: [0, 100],
+        extrapolate: Extrapolate.CLAMP,
+      })
+    ),
     '%'
   )
 
