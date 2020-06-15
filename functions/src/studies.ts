@@ -55,11 +55,14 @@ export const buildStudies = functions.firestore
 
     if (newValue.published !== previousValue.published || newValue.published) {
       if (!newValue.published) {
-        const { id } = newValue
-        await bucket.file(`images/studies/${id}.jpg`).delete()
-        await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
-
-        console.log(`Files deleted for ${id}`)
+        try {
+          const { id } = newValue
+          await bucket.file(`images/studies/${id}.jpg`).delete()
+          await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
+          console.log(`Files deleted for ${id}`)
+        } catch (e) {
+          console.log(e)
+        }
       }
       await fetch(
         'https://api.zeit.co/v1/integrations/deploy/QmPr9jhLF1bhDakSDDFuLvbax4VCogXsjqzktsmTHDUMXG/FbjfTqbcO7',
@@ -73,9 +76,12 @@ export const buildStudies = functions.firestore
 export const deleteStudy = functions.firestore
   .document('studies/{studyId}')
   .onDelete(async (snap, context) => {
-    const { id } = snap.data()
-    await bucket.file(`images/studies/${id}.jpg`).delete()
-    await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
-
-    console.log(`Files deleted for ${id}`)
+    try {
+      const { id } = snap.data()
+      await bucket.file(`images/studies/${id}.jpg`).delete()
+      await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
+      console.log(`Files deleted for ${id}`)
+    } catch (e) {
+      console.log(e)
+    }
   })
