@@ -1,11 +1,15 @@
+import fetch from 'node-fetch'
 import * as functions from 'firebase-functions'
 import * as puppeteer from 'puppeteer'
 
+const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
 
 const runtimeOpts = {
   memory: '1GB' as '1GB',
 }
+
+const bucket = admin.storage().bucket('bible-strong-app.appspot.com')
 
 export const exportStudyPDF = functions
   .runWith(runtimeOpts)
@@ -41,4 +45,33 @@ export const exportStudyPDF = functions
         res.status(500).send(error)
       }
     })
+  })
+
+export const buildStudy = functions.firestore
+  .document('studies/{studyId}')
+  .onUpdate(async (change, context) => {
+    const newValue = change.after.data()
+    const previousValue = change.before.data()
+
+    if (newValue.published !== previousValue.published || newValue.published) {
+      if (!newValue.published) {
+        const { id } = newValue
+        await bucket.file(`images/studies/${id}.jpg`).delete()
+        await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
+      }
+      await fetch(
+        'https://api.zeit.co/v1/integrations/deploy/QmPr9jhLF1bhDakSDDFuLvbax4VCogXsjqzktsmTHDUMXG/FbjfTqbcO7',
+        {
+          method: 'POST',
+        }
+      )
+    }
+  })
+
+export const deleteStudy = functions.firestore
+  .document('studies/{studyId}')
+  .onDelete(async (snap, context) => {
+    const { id } = snap.data()
+    await bucket.file(`images/studies/${id}.jpg`).delete()
+    await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
   })
