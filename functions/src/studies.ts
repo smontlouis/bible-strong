@@ -58,6 +58,8 @@ export const buildStudy = functions.firestore
         const { id } = newValue
         await bucket.file(`images/studies/${id}.jpg`).delete()
         await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
+
+        console.log(`Files deleted for ${id}`)
       }
       await fetch(
         'https://api.zeit.co/v1/integrations/deploy/QmPr9jhLF1bhDakSDDFuLvbax4VCogXsjqzktsmTHDUMXG/FbjfTqbcO7',
@@ -74,4 +76,6 @@ export const deleteStudy = functions.firestore
     const { id } = snap.data()
     await bucket.file(`images/studies/${id}.jpg`).delete()
     await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
+
+    console.log(`Files deleted for ${id}`)
   })
