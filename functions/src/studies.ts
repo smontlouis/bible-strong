@@ -47,7 +47,7 @@ export const exportStudyPDF = functions
     })
   })
 
-export const buildStudy = functions.firestore
+export const buildStudies = functions.firestore
   .document('studies/{studyId}')
   .onUpdate(async (change, context) => {
     const newValue = change.after.data()
