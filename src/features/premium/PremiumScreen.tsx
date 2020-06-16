@@ -114,6 +114,10 @@ const PremiumScreen = () => {
             <ListItem>...Et plein d'autres à venir</ListItem>
           </Box>
           <Paragraph scale={-1} fontFamily="text">
+            Tous les abonnements se renouvellent mensuellement de façon
+            automatique et proposent un essai gratuit sur 7 jours.
+          </Paragraph>
+          <Paragraph scale={-1} fontFamily="text" mt={10}>
             Merci de votre confiance et bonne étude !
           </Paragraph>
         </Box>

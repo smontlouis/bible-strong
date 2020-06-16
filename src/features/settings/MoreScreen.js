@@ -18,6 +18,7 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import TagsEditModal from '~common/TagsEditModal'
 import useLogin from '~helpers/useLogin'
+import { FeatherIcon } from '~common/ui/Icon'
 
 import app from '../../../package.json'
 
@@ -204,6 +205,25 @@ const MoreScreen = () => {
               </Text>
             </LinkItem>
           )}
+        </Box>
+        <Border marginHorizontal={20} />
+        <Box paddingVertical={10}>
+          <LinkItem
+            style={{ paddingVertical: 10 }}
+            href="https://bible-strong.app/politique-de-confidentialite"
+          >
+            <Text fontSize={15} color="grey">
+              Politique de confidentialité
+            </Text>
+          </LinkItem>
+          <LinkItem
+            style={{ paddingVertical: 10 }}
+            href="https://bible-strong.app/eula"
+          >
+            <Text fontSize={15} color="grey">
+              Conditions d'utilisation
+            </Text>
+          </LinkItem>
         </Box>
       </ScrollView>
       <Box position="absolute" bottom={30} right={10}>
