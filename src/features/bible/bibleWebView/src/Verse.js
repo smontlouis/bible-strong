@@ -15,6 +15,7 @@ import { scaleFontSize } from './scaleFontSize'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import VerseTextFormatting from './VerseTextFormatting'
+import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 
 function convertHex(hex, opacity) {
@@ -255,6 +256,7 @@ class Verse extends Component {
       isFocused,
       isParallel,
       isParallelVerse,
+      isINTComplete,
     } = this.props
     const { isTouched } = this.state
 
@@ -326,6 +328,17 @@ class Verse extends Component {
     }
 
     if (version === 'INT') {
+      if (isINTComplete) {
+        return (
+          <InterlinearVerseComplete
+            secondaryVerse={secondaryVerse}
+            isHebreu={isHebreu}
+            settings={settings}
+            verse={verse}
+            selectedCode={selectedCode}
+          />
+        )
+      }
       return (
         <InterlinearVerse
           secondaryVerse={secondaryVerse}

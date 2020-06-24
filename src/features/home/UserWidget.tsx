@@ -63,9 +63,13 @@ const GenerateImageContainer = ProfileImage.withComponent(Box)
 
 const GenerateImage = ({ name }) => (
   <GenerateImageContainer>
-    <Text color="reverse" bold fontSize={24}>
-      {extractInitials(name)}
-    </Text>
+    {name ? (
+      <Text color="reverse" bold fontSize={24}>
+        {extractInitials(name)}
+      </Text>
+    ) : (
+      <FeatherIcon name="user" color="reverse" size={30} />
+    )}
   </GenerateImageContainer>
 )
 

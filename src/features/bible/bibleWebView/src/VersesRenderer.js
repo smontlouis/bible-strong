@@ -63,6 +63,14 @@ const RightDirection = styled('div')(({ settings: { theme, colors } }) => ({
   color: colors[theme].darkGrey,
 }))
 
+const IntMode = styled('div')(({ settings: { theme, colors } }) => ({
+  textAlign: 'right',
+  marginBottom: 20,
+  fontFamily: 'arial',
+  fontSize: 13,
+  color: colors[theme].default,
+}))
+
 const Span = styled('span')({})
 
 const H1 = styled('h1')(
@@ -157,6 +165,7 @@ class VersesRenderer extends Component {
     chapter: '',
     isSelectionMode: '',
     selectedCode: null,
+    isINTComplete: true,
   }
 
   componentDidMount() {
@@ -465,6 +474,16 @@ class VersesRenderer extends Component {
             )}
           </VersionsContainer>
         )}
+        {this.state.version === 'INT' && (
+          <IntMode
+            settings={this.state.settings}
+            onClick={() =>
+              this.setState({ isINTComplete: !this.state.isINTComplete })
+            }
+          >
+            {this.state.isINTComplete ? 'Mode complet' : 'Mode simple'}
+          </IntMode>
+        )}
         {isHebreu && (
           <RightDirection settings={this.state.settings}>
             Sens de la lecture ←
@@ -576,6 +595,7 @@ class VersesRenderer extends Component {
                 isVerseToScroll={isVerseToScroll}
                 selectedCode={this.state.selectedCode}
                 isFocused={isFocused}
+                isINTComplete={this.state.isINTComplete}
               />
               {/* </ErrorBoundary> */}
               {!!comment && this.state.settings.commentsDisplay && (
