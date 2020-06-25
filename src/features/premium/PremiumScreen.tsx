@@ -131,19 +131,27 @@ const PremiumScreen = () => {
             automatique. Vous avez la possibilité de les annuler quand vous le
             souhaitez.
           </Paragraph> */}
-          <Paragraph scale={-1} fontFamily="text" mt={10}>
-            Vous pouvez également me soutenir par
-            <InlineLink href="https://www.paypal.me/smontlouis">
-              {' '}
-              paypal{' '}
-            </InlineLink>{' '}
-            ou{' '}
-            <InlineLink href="https://fr.tipeee.com/smontlouis">
-              tipeee
-            </InlineLink>{' '}
-            pour devenir un sponsor. {'\n'}Merci de votre confiance et bonne
-            étude !
-          </Paragraph>
+          {Platform.OS === 'android' ? (
+            <Paragraph scale={-1} fontFamily="text" mt={10}>
+              Vous pouvez également me soutenir par
+              <InlineLink href="https://www.paypal.me/smontlouis">
+                {' '}
+                paypal{' '}
+              </InlineLink>{' '}
+              ou{' '}
+              <InlineLink href="https://fr.tipeee.com/smontlouis">
+                tipeee
+              </InlineLink>{' '}
+              pour devenir un sponsor. {'\n'}Merci de votre confiance et bonne
+              étude !
+            </Paragraph>
+          ) : (
+            <Paragraph scale={-1} fontFamily="text" mt={10}>
+              Vous pouvez également me soutenir par paypal ou tipeee pour
+              devenir un sponsor. {'\n'}Merci de votre confiance et bonne étude
+              !
+            </Paragraph>
+          )}
         </Box>
         {!isLogged ? (
           <Box px={40}>
