@@ -58,7 +58,7 @@ const PremiumWidget = () => {
           <Text title fontSize={20} color="white">
             {isPremium
               ? 'Vous êtes Premium !\nMerci !'
-              : 'Bible Strong\nPremium'}
+              : 'Devenez un sponsor !'}
           </Text>
           <Text marginTop={5} fontSize={14} color="white">
             {isPremium

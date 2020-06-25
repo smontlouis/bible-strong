@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Alert } from 'react-native'
 import styled from '@emotion/native'
 import { useSelector, useDispatch } from 'react-redux'
-import * as Icon from '@expo/vector-icons'
 
 import FabButton from '~common/ui/FabButton'
 import Header from '~common/Header'
@@ -15,6 +14,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
 import TitlePrompt from '~common/TitlePrompt'
+import { FeatherIcon } from '~common/ui/Icon'
 import { addTag, updateTag, removeTag } from '~redux/modules/user'
 
 const Chip = styled(Box)(({ theme }) => ({
@@ -95,7 +95,7 @@ const TagItem = ({ item, setOpen }) => {
             </Box>
           </Box>
           <Link onPress={() => setOpen(item)} padding>
-            <Icon.Feather name="more-vertical" size={20} />
+            <FeatherIcon name="more-vertical" size={20} />
           </Link>
         </Box>
       </Link>

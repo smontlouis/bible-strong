@@ -1,12 +1,11 @@
 import React from 'react'
-import { Platform } from 'react-native'
-import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
 import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Back from '~common/Back'
+import { FeatherIcon } from '~common/ui/Icon'
 
 const TouchableBox = styled.TouchableOpacity({
   flexDirection: 'row',
@@ -23,14 +22,6 @@ const StyledText = styled(Text)({
 const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   borderBottomColor: theme.colors.border,
-}))
-
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
 }))
 
 const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
@@ -50,7 +41,7 @@ const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
       </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
         <StyledText>{selectedChip ? selectedChip.name : 'Filtrer'}</StyledText>
-        <StyledIcon name="chevron-down" size={15} />
+        <FeatherIcon name="chevron-down" size={15} />
       </TouchableBox>
     </HeaderBox>
   )

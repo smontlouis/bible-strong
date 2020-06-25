@@ -35,6 +35,7 @@ const HighlightsScreen = () => {
   const [selectedChip, setSelectedChip] = React.useState<Chip>()
   const dispatch = useDispatch()
   const chipId = selectedChip?.id
+  const isMultipleTagsItem = !!multipleTagsItem
 
   // TODO - Performance issue here
   const filteredHighlights = useMemo(() => {
@@ -43,7 +44,7 @@ const HighlightsScreen = () => {
         selectedChip ? verseIds[vId].tags && verseIds[vId].tags[chipId] : true
       )
       .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
-  }, [chipId, isChangeColorOpen])
+  }, [chipId, isChangeColorOpen, isMultipleTagsItem])
 
   const promptLogout = () => {
     Alert.alert(

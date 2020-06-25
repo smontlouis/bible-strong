@@ -69,7 +69,7 @@ const PremiumModal = ({ navigation }: Props) => {
         <Box px={20} pb={20}>
           <Text textAlign="center">
             {
-              "Cette fonctionnalité est premium,\n vous pouvez l'essayez gratuitement pendant 7 jours !"
+              'Cette fonctionnalité est réservée aux sponsors,\n Devenez vous-même sponsor ou attendez quelques jours !'
             }
           </Text>
         </Box>
@@ -80,7 +80,7 @@ const PremiumModal = ({ navigation }: Props) => {
               navigation.navigate('Premium')
             }}
           >
-            Essai gratuit
+            Devenir sponsor
           </Button>
           <LinkBox
             onPress={() => {

@@ -4,13 +4,12 @@ import { useSelector, useDispatch } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
 import frLocale from 'date-fns/locale/fr'
 
-import * as Icon from '@expo/vector-icons'
-
 import TitlePrompt from '~common/TitlePrompt'
 import { addTag, updateTag, removeTag } from '~redux/modules/user'
 import Header from '~common/Header'
 import ScrollView from '~common/ui/ScrollView'
 import Container from '~common/ui/Container'
+import { FeatherIcon } from '~common/ui/Icon'
 import { sortVersesByDate } from '~features/settings/VersesList'
 import HighlightItem from '~features/settings/Verse'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -135,7 +134,7 @@ const TagScreen = ({ navigation }) => {
             onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })}
             padding
           >
-            <Icon.Feather size={20} name="edit-3" />
+            <FeatherIcon size={20} name="edit-3" />
           </Link>
         }
       />

@@ -14,6 +14,8 @@ import { LinkBox } from '~common/Link'
 import ScrollView from '~common/ui/ScrollView'
 import useLogin from '~helpers/useLogin'
 import Paragraph from '~common/ui/Paragraph'
+import CountdownTimer from './CountdownTimer'
+import InlineLink from '~common/InlineLink'
 
 export const [oneMonthSkuMin, oneMonthSku, oneMonthSkuMax] = subSkus
 export const mappingSku = {
@@ -61,7 +63,9 @@ const PremiumScreen = () => {
             </Box>
             <Box mt={30}>
               <ListItem>Génération des études en page Web et PDF</ListItem>
-              <ListItem>Recherche avancée dans la timeline</ListItem>
+              <ListItem>
+                Recherche avancée dans la chronologie biblique
+              </ListItem>
               <ListItem>...Et plein d'autres à venir</ListItem>
             </Box>
             <LinkBox
@@ -90,35 +94,55 @@ const PremiumScreen = () => {
       <ScrollView>
         <Box p={20} mb={40}>
           <Text fontSize={30} title>
-            Soutenez l'application: Abonnez-vous !
+            Soutenez l'application: Devenez un sponsor !
           </Text>
           <Box mt={20}>
             <Paragraph scale={-1} fontFamily="text">
-              Merci de me soutenir ! Aujourd'hui l'application évolue, et ce
-              grâce à vos retours. L'objectif de Bible Strong est de créer{' '}
+              Merci de me soutenir ! L'objectif de Bible Strong est de créer{' '}
               <Text bold>un outil complet d'études bibliques</Text> répondant à
-              vos besoins, tout en vous proposant une expérience intuitive. Vous
-              êtes nombreux à me faire part de votre satisfaction liée à la
-              qualité de l’application Bible Strong, et je vous en remercie.
+              vos besoins, tout en vous proposant une expérience exceptionnelle.
               {'\n\n'}Je souhaite donner l'opportunité à chacun de pouvoir
               s'impliquer dans l'évolution de l'application, en vous proposant
-              le <Text bold>“pay what you want”</Text>: Un système de prix libre
-              que vous choisissez et que vous estimez juste, tout en ayant accès
-              à des
-              <Text bold> fonctionnalités inédites:</Text>
+              un <Text bold>système de prix libre</Text> que vous choisissez et
+              que vous estimez juste, afin de <Text bold>sponsoriser</Text>{' '}
+              l'application.
+            </Paragraph>
+            <Box mt={20} />
+            <Paragraph scale={-1} fontFamily="text">
+              Qu'est-ce qu'un sponsor ? C'est un donateur qui soutient
+              l'application et qui a accès aux nouvelles fonctionnalités en
+              priorité. Ces nouvelles fonctionnalités sont ensuite disponibles
+              aux grand public après un certain délai.
             </Paragraph>
           </Box>
           <Box mt={30}>
-            <ListItem>Génération des études en page Web et PDF</ListItem>
-            <ListItem>Recherche avancée dans la timeline</ListItem>
+            <ListItem>
+              Génération des études en page Web et PDF{'\n'}
+              <CountdownTimer />
+            </ListItem>
+            <ListItem>
+              Recherche avancée dans la timeline{'\n'}
+              <CountdownTimer />
+            </ListItem>
             <ListItem>...Et plein d'autres à venir</ListItem>
           </Box>
-          <Paragraph scale={-1} fontFamily="text">
+          {/* <Paragraph scale={-1} fontFamily="text">
             Tous les abonnements se renouvellent mensuellement de façon
-            automatique et proposent un essai gratuit sur 7 jours.
-          </Paragraph>
+            automatique. Vous avez la possibilité de les annuler quand vous le
+            souhaitez.
+          </Paragraph> */}
           <Paragraph scale={-1} fontFamily="text" mt={10}>
-            Merci de votre confiance et bonne étude !
+            Vous pouvez également me soutenir par
+            <InlineLink href="https://www.paypal.me/smontlouis">
+              {' '}
+              paypal{' '}
+            </InlineLink>{' '}
+            ou{' '}
+            <InlineLink href="https://fr.tipeee.com/smontlouis">
+              tipeee
+            </InlineLink>{' '}
+            pour devenir un sponsor. {'\n'}Merci de votre confiance et bonne
+            étude !
           </Paragraph>
         </Box>
         {!isLogged ? (

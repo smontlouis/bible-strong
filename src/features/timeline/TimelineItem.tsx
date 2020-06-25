@@ -22,6 +22,7 @@ const TimelineItem = ({
         position="relative"
         zIndex={2}
         width="45%"
+        maxWidth={180}
         lightShadow
         borderRadius={10}
         height={180}

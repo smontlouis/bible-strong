@@ -1,7 +1,101 @@
 import styled from '@emotion/native'
 import Animated from 'react-native-reanimated'
+import { Theme } from '~themes'
 
-const Box = styled.View(props => {
+interface BoxProps {
+  position?: 'absolute' | 'relative'
+  pos?: 'absolute' | 'relative'
+  top?: number
+  t?: number
+  left?: number
+  l?: number
+  right?: number
+  r?: number
+  bottom?: number
+  b?: number
+
+  padding?: number
+  p?: number
+  paddingTop?: number
+  pt?: number
+  paddingLeft?: number
+  pl?: number
+  paddingRight?: number
+  pr?: number
+  paddingBottom?: number
+  pb?: number
+  paddingVertical?: number
+  py?: number
+  paddingHorizontal?: number
+  px?: number
+
+  margin?: number
+  m?: number
+  marginTop?: number
+  mt?: number
+  marginLeft?: number
+  ml?: number
+  marginRight?: number
+  mr?: number
+  marginBottom?: number
+  mb?: number
+  marginVertical?: number
+  my?: number
+  marginHorizontal?: number
+  mx?: number
+
+  absoluteFill?: boolean
+
+  borderWidth?: number
+  borderColor?: string
+  transform?: object
+  borderRadius?: number
+  borderTopLeftRadius?: number
+  borderTopRightRadius?: number
+  borderBottomLeftRadius?: number
+  borderBottomRightRadius?: number
+
+  overflow?: 'visible' | 'hidden'
+  width?: number
+  w?: number
+  maxWidth?: number
+  maxW?: number
+  minWidth?: number
+  minW?: number
+  minHeight?: number
+  minH?: number
+  height?: number
+  h?: number
+
+  grow?: boolean
+  shrink?: number
+  basis?: number
+  flex?: boolean | number
+  justifyContent?: string
+  center?: boolean
+  alignItems?: string
+  alignContent?: string
+  alignSelf?: string
+  wrap?: boolean
+  wrapReverse?: boolean
+  row?: boolean
+  reverse?: boolean
+  disabled?: boolean
+  opacity?: number
+
+  backgroundColor?: string
+  bg?: string
+
+  grey?: boolean
+  background?: boolean
+  rounded?: boolean
+  shadow?: boolean
+  lightShadow?: boolean
+  size?: string
+
+  theme: Theme
+}
+const Box = styled.View((props: BoxProps) => {
   return {
     // container
     position: props.position ?? props.pos,
