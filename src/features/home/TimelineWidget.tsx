@@ -4,10 +4,13 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import TimelineIcon from '~common/TimelineIcon'
 import { FeatherIcon } from '~common/ui/Icon'
+import { useTranslation } from 'react-i18next'
 
 const LinkBox = Box.withComponent(Link)
 
 const TimelineWidget = () => {
+  const { t } = useTranslation()
+
   return (
     <Box grey pt={10}>
       <LinkBox
@@ -25,7 +28,7 @@ const TimelineWidget = () => {
           <TimelineIcon color="primary" size={70} style={{ marginTop: 8 }} />
         </Box>
         <Text title fontSize={18} ml={20} flex>
-          {'La Chronologie\nde la Bible'}
+          {t('La Chronologie\nde la Bible')}
         </Text>
         <Box>
           <FeatherIcon name="chevron-right" size={20} />

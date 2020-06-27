@@ -25,6 +25,7 @@ import Link from '~common/Link'
 
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
+import { useTranslation } from 'react-i18next'
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -101,6 +102,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
 
 const UserWidget = ({ theme }) => {
   const { isLogged, user } = useLogin()
+  const { t } = useTranslation()
   const isPremium = useIsPremium()
   const isLoading = useSelector(state => state.user.isLoading)
   const { highlights, notes, studies, tags } = useSelector(
@@ -118,11 +120,12 @@ const UserWidget = ({ theme }) => {
       <Container>
         <Box paddingHorizontal={25}>
           <Text title fontSize={25} flex>
-            Bienvenue
+            {t('Bienvenue')}
           </Text>
           <Paragraph marginTop={20} marginBottom={20}>
-            Connectez-vous pour profiter de toutes les fonctionnalités de la
-            Bible Strong !
+            {t(
+              'Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !'
+            )}
           </Paragraph>
           <Button
             route="Login"
@@ -135,7 +138,7 @@ const UserWidget = ({ theme }) => {
               />
             }
           >
-            Je me connecte
+            {t('Je me connecte')}
           </Button>
         </Box>
         <Box grey>
@@ -190,7 +193,7 @@ const UserWidget = ({ theme }) => {
         <Box row alignItems="center" overflow="visible">
           <Box flex>
             <Text title fontSize={25}>
-              {`Bonjour ${extractFirstName(user.displayName)},`}
+              {`${t('Bonjour')} ${extractFirstName(user.displayName)},`}
             </Text>
           </Box>
         </Box>
@@ -208,12 +211,13 @@ const UserWidget = ({ theme }) => {
         {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart" mb={5}>
-              Un email vous a été envoyé, merci de vérifier votre adresse. Si ce
-              message persiste, reconnectez-vous.
+              {t(
+                'Un email vous a été envoyé, merci de vérifier votre adresse. Si ce message persiste, reconnectez-vous.'
+              )}
             </Text>
             <Link onPress={() => FireAuth.sendEmailVerification()}>
               <Text color="grey" style={{ textDecorationLine: 'underline' }}>
-                Renvoyer le lien
+                {t('Renvoyer le lien')}
               </Text>
             </Link>
           </Box>
@@ -235,7 +239,7 @@ const UserWidget = ({ theme }) => {
           <Chip route="History" hightlighted>
             <MaterialIcon name="history" size={20} />
             <Text mt={5} fontSize={12}>
-              Historique
+              {t('Historique')}
             </Text>
           </Chip>
           <Chip route="Highlights">
@@ -245,7 +249,9 @@ const UserWidget = ({ theme }) => {
                 {highlights}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel('surbrillance', highlights)}</Text>
+            <Text fontSize={12}>
+              {getPluriel(t('surbrillance'), highlights)}
+            </Text>
           </Chip>
           <Chip route="BibleVerseNotes">
             <Box row>
@@ -254,7 +260,7 @@ const UserWidget = ({ theme }) => {
                 {notes}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel('note', notes)}</Text>
+            <Text fontSize={12}>{getPluriel(t('note'), notes)}</Text>
           </Chip>
           <Chip route="Studies">
             <Box row>
@@ -263,7 +269,7 @@ const UserWidget = ({ theme }) => {
                 {studies}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel('étude', studies)}</Text>
+            <Text fontSize={12}>{getPluriel(t('étude'), studies)}</Text>
           </Chip>
           <Chip route="Tags">
             <Box row>
@@ -272,7 +278,7 @@ const UserWidget = ({ theme }) => {
                 {tags}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel('étiquette', tags)}</Text>
+            <Text fontSize={12}>{getPluriel(t('étiquette'), tags)}</Text>
           </Chip>
         </ScrollView>
       </Box>

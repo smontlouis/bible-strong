@@ -13,10 +13,13 @@ import {
 import { Theme } from '~themes'
 import { FeatherIcon } from '~common/ui/Icon'
 import BibleProjectIcon from '~common/BibleProjectIcon'
+import { useTranslation } from 'react-i18next'
 
 const LinkBox = Box.withComponent(Link)
 
 const TheBibleProject = () => {
+  const { t } = useTranslation()
+
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress, status, subTitle } =
     plans.find(p => p.id === 'bible-project-plan') || {}
@@ -42,7 +45,7 @@ const TheBibleProject = () => {
           </Box>
           <Box flex justifyContent="center">
             <Text title fontSize={18}>
-              The Bible Project
+              {t('The Bible Project')}
             </Text>
             <ProgressBar
               borderWidth={0}

@@ -8,6 +8,7 @@ Object.fromEntries =
   }
 
 import { AppRegistry, Platform } from 'react-native'
+import './i18n'
 import App from './App'
 
 AppRegistry.registerComponent('biblestrong', () => App)

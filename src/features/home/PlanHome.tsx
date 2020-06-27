@@ -17,10 +17,12 @@ import {
 import { Theme } from '~themes'
 import { LinearGradient } from 'expo-linear-gradient'
 import PlanIcon from '~common/PlanIcon'
+import { useTranslation } from 'react-i18next'
 
 const LinkBox = Box.withComponent(Link)
 
 const PlanHome = () => {
+  const { t } = useTranslation()
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress, status } =
     plans.find(p => p.status === 'Progress') || plans[0] || {}
@@ -48,7 +50,7 @@ const PlanHome = () => {
           <PlanIcon style={{ marginTop: 5 }} color="primary" size={32} />
         </Box>
         <Text flex title fontSize={18} color="default" ml={20}>
-          Plans & Méditations
+          {t('Plans & Méditations')}
         </Text>
         <Box>
           <FeatherIcon color="default" name="chevron-right" size={20} />
@@ -100,7 +102,7 @@ const PlanHome = () => {
                 fontFamily="text"
                 color="grey"
               >
-                Continuer ce plan
+                {t('Continuer ce plan')}
               </Paragraph>
             </Box>
             <Box>
@@ -109,7 +111,7 @@ const PlanHome = () => {
           </LinkBox>
         ) : (
           <Box flex center>
-            <Text color="grey">Vous n'avez aucun plan</Text>
+            <Text color="grey">{t("Vous n'avez aucun plan")}</Text>
           </Box>
         )}
       </Box>
