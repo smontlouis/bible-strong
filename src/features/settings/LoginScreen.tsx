@@ -8,9 +8,11 @@ import Box from '~common/ui/Box'
 import Header from '~common/Header'
 import Login from '~common/Login'
 import useLogin from '~helpers/useLogin'
+import { useTranslation } from 'react-i18next'
 
 const LoginScreen = ({ navigation }) => {
   const { isLogged } = useLogin()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isLogged) {
@@ -24,10 +26,12 @@ const LoginScreen = ({ navigation }) => {
       <ScrollView>
         <Box padding={20}>
           <Text title fontSize={30} marginBottom={30}>
-            Bienvenue !
+            {t('Bienvenue !')}
           </Text>
           <Paragraph scaleLineHeight={-2} marginBottom={0}>
-            Connectez-vous pour sauvegarder toutes vos données sur le cloud !
+            {t(
+              'Connectez-vous pour sauvegarder toutes vos données sur le cloud !'
+            )}
           </Paragraph>
           <Login />
         </Box>

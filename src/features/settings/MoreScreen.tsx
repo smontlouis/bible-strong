@@ -18,7 +18,7 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import TagsEditModal from '~common/TagsEditModal'
 import useLogin from '~helpers/useLogin'
-import { FeatherIcon } from '~common/ui/Icon'
+import { useTranslation } from 'react-i18next'
 
 import app from '../../../package.json'
 
@@ -60,35 +60,36 @@ const MoreScreen = () => {
   const hasUpdate = useSelector(state =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
+  const { t } = useTranslation()
 
   const promptLogout = () => {
-    Alert.alert('Attention', 'Voulez-vous vraiment vous déconnecter ?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      { text: 'Oui', onPress: () => logout(), style: 'destructive' },
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
     ])
   }
 
   return (
     <Container>
-      <Header title="Plus" />
+      <Header title={t('Plus')} />
       <ScrollView style={{ flex: 1 }}>
         <Box paddingVertical={10}>
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
             <Text color="primary" bold fontSize={15}>
-              Lexique
+              {t('Lexique')}
             </Text>
           </LinkItem>
           <LinkItem route="Dictionnaire">
             <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
             <Text color="secondary" bold fontSize={15}>
-              Dictionnaire
+              {t('Dictionnaire')}
             </Text>
           </LinkItem>
           <LinkItem route="Nave">
             <NaveIcon style={{ marginRight: 15 }} size={25} />
             <Text color="quint" bold fontSize={15}>
-              Bible Thématique Nave
+              {t('Bible Thématique Nave')}
             </Text>
           </LinkItem>
           {isLogged && (
@@ -99,26 +100,26 @@ const MoreScreen = () => {
                 style={{ marginRight: 15 }}
               />
               <Text bold fontSize={15}>
-                Plans
+                {t('Plans')}
               </Text>
             </LinkItem>
           )}
           <LinkItem route="Highlights">
             <StyledIcon name="edit-3" size={25} />
             <Text bold fontSize={15}>
-              Surbrillances
+              {t('Surbrillances')}
             </Text>
           </LinkItem>
           <LinkItem route="BibleVerseNotes">
             <StyledIcon name="file-text" size={25} />
             <Text bold fontSize={15}>
-              Notes
+              {t('Notes')}
             </Text>
           </LinkItem>
           <LinkItem route="Tags">
             <StyledIcon name="tag" size={25} />
             <Text bold fontSize={15}>
-              Étiquettes
+              {t('Étiquettes')}
             </Text>
           </LinkItem>
         </Box>
@@ -135,28 +136,28 @@ const MoreScreen = () => {
               )}
               <StyledIcon name="download" size={25} />
             </Box>
-            <Text fontSize={15}>Gestion des téléchargements</Text>
+            <Text fontSize={15}>{t('Gestion des téléchargements')}</Text>
           </LinkItem>
           <LinkItem route="Changelog">
             <StyledIcon name="terminal" size={25} />
-            <Text fontSize={15}>Changelog</Text>
+            <Text fontSize={15}>{t('Changelog')}</Text>
           </LinkItem>
           <LinkItem route="FAQ">
             <StyledIcon name="help-circle" size={25} />
-            <Text fontSize={15}>Foire aux questions</Text>
+            <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
           <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
             <StyledIcon name="sun" size={25} />
-            <Text fontSize={15}>Idées de fonctionnalités</Text>
+            <Text fontSize={15}>{t('Idées de fonctionnalités')}</Text>
           </LinkItem>
           <LinkItem href="https://bible-strong.canny.io/bugs">
             <StyledIcon name="alert-circle" size={25} />
-            <Text fontSize={15}>Bugs</Text>
+            <Text fontSize={15}>{t('Bugs')}</Text>
           </LinkItem>
 
           <LinkItem href="https://www.facebook.com/fr.bible.strong">
             <StyledIcon name="facebook" size={25} />
-            <Text fontSize={15}>Nous suivre sur facebook</Text>
+            <Text fontSize={15}>{t('Nous suivre sur facebook')}</Text>
           </LinkItem>
           <LinkItem
             href={
@@ -166,15 +167,15 @@ const MoreScreen = () => {
             }
           >
             <StyledIcon name="star" size={25} />
-            <Text fontSize={15}>Noter l'application</Text>
+            <Text fontSize={15}>{t("Noter l'application")}</Text>
           </LinkItem>
           <LinkItem share={shareMessage()}>
             <StyledIcon name="share-2" size={25} />
-            <Text fontSize={15}>Partager l'application</Text>
+            <Text fontSize={15}>{t("Partager l'application")}</Text>
           </LinkItem>
           <LinkItem href="mailto:s.montlouis.calixte@gmail.com">
             <StyledIcon name="send" size={25} />
-            <Text fontSize={15}>Contacter le développeur</Text>
+            <Text fontSize={15}>{t('Contacter le développeur')}</Text>
           </LinkItem>
           {/* <LinkItem
             {...(Platform.OS === 'android'
@@ -193,7 +194,7 @@ const MoreScreen = () => {
             <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />
               <Text color="primary" fontSize={15} bold>
-                Se connecter
+                {t('Se connecter')}
               </Text>
             </LinkItem>
           )}
@@ -201,7 +202,7 @@ const MoreScreen = () => {
             <LinkItem onPress={promptLogout}>
               <StyledIcon color="quart" name="log-out" size={25} />
               <Text bold color="quart" fontSize={15}>
-                Se déconnecter
+                {t('Se déconnecter')}
               </Text>
             </LinkItem>
           )}
@@ -213,7 +214,7 @@ const MoreScreen = () => {
             href="https://bible-strong.app/politique-de-confidentialite"
           >
             <Text fontSize={15} color="grey">
-              Politique de confidentialité
+              {t('Politique de confidentialité')}
             </Text>
           </LinkItem>
           <LinkItem
@@ -221,7 +222,7 @@ const MoreScreen = () => {
             href="https://bible-strong.app/eula"
           >
             <Text fontSize={15} color="grey">
-              Conditions d'utilisation
+              {t("Conditions d'utilisation")}
             </Text>
           </LinkItem>
         </Box>

@@ -12,6 +12,7 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -40,6 +41,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 }))
 
 const MultipleTagsModal = ({ item = {}, onClosed }) => {
+  const { t } = useTranslation()
   const [newTag, setNewTag] = useState('')
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
@@ -94,8 +96,10 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
         <Box padding={20} paddingBottom={0}>
           <Text bold>
             {item.entity !== 'highlights'
-              ? `Étiquettes pour "${currentItems[0].title || item.title || ''}"`
-              : `Étiquettes pour ${highlightTitle}`}
+              ? `${t('Étiquettes pour')} "${currentItems[0].title ||
+                  item.title ||
+                  ''}"`
+              : `${'Étiquettes pour'} ${highlightTitle}`}
           </Text>
         </Box>
         <Box flex>
@@ -120,7 +124,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
           ) : (
             <Box flex center>
               <Text textAlign="center" width={200} bold color="lightPrimary">
-                Créez votre premier tag puis sélectionnez-le !
+                {t('Créez votre premier tag puis sélectionnez-le !')}
               </Text>
             </Box>
           )}
@@ -128,7 +132,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
         <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
           <Box flex>
             <TextInput
-              placeholder="Créer un nouveau tag"
+              placeholder={t('Créer un nouveau tag')}
               onChangeText={setNewTag}
               onSubmitEditing={saveTag}
               returnKeyType="send"

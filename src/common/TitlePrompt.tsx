@@ -9,6 +9,7 @@ import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
 import TextInput from '~common/ui/TextInput'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -32,13 +33,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
-const TitlePrompt = ({
-  isOpen,
-  title,
-  onClosed,
-  onSave,
-  placeholder = "Nom de l'étiquettes",
-}) => {
+const TitlePrompt = ({ isOpen, title, onClosed, onSave, placeholder }) => {
   const [value, setValue] = useState(title)
 
   const onSaveTitle = () => {

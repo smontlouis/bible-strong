@@ -11,16 +11,18 @@ import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Header from '~common/Header'
 import SnackBar from '~common/SnackBar'
+import { useTranslation } from 'react-i18next'
 
 const LoginScreen = ({ theme }) => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setLoading] = useState(false)
+  const { t } = useTranslation()
 
   const onRegister = async () => {
     if (!username || !email || !password) {
-      SnackBar.show('Veuillez remplir les champs')
+      SnackBar.show(t('Veuillez remplir les champs'))
       return false
     }
     setLoading(true)
@@ -30,11 +32,11 @@ const LoginScreen = ({ theme }) => {
 
   return (
     <Container>
-      <Header hasBackButton title="Créer un compte" />
+      <Header hasBackButton title={t('Créer un compte')} />
       <ScrollView>
         <Box padding={20}>
           <TextInput
-            placeholder="Nom"
+            placeholder={t('Nom')}
             leftIcon={
               <Icon.Feather
                 name="user"
@@ -58,7 +60,7 @@ const LoginScreen = ({ theme }) => {
           />
           <Spacer />
           <TextInput
-            placeholder="Mot de passe"
+            placeholder={t('Mot de passe')}
             leftIcon={
               <Icon.Feather
                 name="lock"
@@ -71,7 +73,7 @@ const LoginScreen = ({ theme }) => {
           />
           <Spacer size={2} />
           <Button onPress={onRegister} isLoading={isLoading}>
-            Créer mon compte
+            {t('Créer mon compte')}
           </Button>
         </Box>
       </ScrollView>

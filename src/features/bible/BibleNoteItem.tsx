@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import frLocale from 'date-fns/locale/fr'
+import { fr, enGB } from 'date-fns/locale'
 import * as Icon from '@expo/vector-icons'
 
 import Box from '~common/ui/Box'
@@ -14,6 +14,7 @@ import books from '~assets/bible_versions/books-desc'
 import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
 import theme from '~themes/default'
+import { withTranslation } from 'react-i18next'
 
 const NoteLink = styled(Link)(({ theme }) => ({
   paddingVertical: 20,
@@ -24,11 +25,13 @@ const NoteLink = styled(Link)(({ theme }) => ({
 
 class BibleNoteItem extends React.Component {
   render() {
-    const { item, setNoteSettings } = this.props
+    const { item, setNoteSettings, i18n, t } = this.props
+    console.log(t)
+    const isFr = i18n.language === 'fr'
 
     const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
-      locale: frLocale,
+      locale: isFr ? fr : enGB,
     })
 
     return (
@@ -46,7 +49,8 @@ class BibleNoteItem extends React.Component {
           <Box flex>
             <Box row justifyContent="space-between">
               <Text color="darkGrey" bold fontSize={11}>
-                {item.reference} - Il y a {formattedDate}
+                {item.reference} -{' '}
+                {t('Il y a {{formattedDate}}', { formattedDate })}
               </Text>
             </Box>
             {!!item.notes.title && (
@@ -75,4 +79,4 @@ class BibleNoteItem extends React.Component {
   }
 }
 
-export default BibleNoteItem
+export default withTranslation()(BibleNoteItem)

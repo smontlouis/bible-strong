@@ -18,8 +18,10 @@ import withLoginModal from '~common/withLoginModal'
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import StudyItem from './StudyItem'
+import { useTranslation } from 'react-i18next'
 
 const StudiesScreen = () => {
+  const { t } = useTranslation()
   const { isLogged } = useLogin()
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isStudySettingsOpen, setStudySettings] = React.useState(false)
@@ -56,7 +58,7 @@ const StudiesScreen = () => {
             key={r(['xs', 'sm', 'md', 'lg'])}
             ListHeaderComponent={
               <TagsHeader
-                title="Études"
+                title={t('Études')}
                 setIsOpen={setTagsIsOpen}
                 isOpen={isTagsOpen}
                 selectedChip={selectedChip}
@@ -77,12 +79,12 @@ const StudiesScreen = () => {
         ) : (
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Aucune étude..."
+            message={t('Aucune étude...')}
           />
         )}
         {isLogged && (
           <FloatingButton
-            label="Nouvelle étude"
+            label={t('Nouvelle étude')}
             icon="plus"
             route="EditStudy"
             params={{ canEdit: true }}

@@ -11,6 +11,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Chip from '~common/ui/Chip'
 import { addTag } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -43,6 +44,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   const [newTag, setNewTag] = useState('')
   const dispatch = useDispatch()
   const tags = useSelector(state => Object.values(state.user.bible.tags))
+  const { t } = useTranslation()
 
   const saveTag = () => {
     if (!newTag.trim()) {
@@ -62,7 +64,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       <Container>
         <Box flex>
           <Box padding={20} paddingBottom={0}>
-            <Text bold>Étiquettes</Text>
+            <Text bold>{t('Étiquettes')}</Text>
           </Box>
           <ScrollView
             style={{ flex: 1 }}
@@ -70,7 +72,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
           >
             <Box row wrap>
               <Chip
-                label="Tout"
+                label={t('Tout')}
                 isSelected={!selectedChip}
                 onPress={() => onSelected(null)}
               />
@@ -88,7 +90,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
         <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
           <Box flex>
             <TextInput
-              placeholder="Créer un nouveau tag"
+              placeholder={t('Créer un nouveau tag')}
               onChangeText={setNewTag}
               onSubmitEditing={saveTag}
               returnKeyType="send"

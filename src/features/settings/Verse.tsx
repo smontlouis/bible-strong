@@ -1,7 +1,7 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import distanceInWords from 'date-fns/formatDistance'
-import frLocale from 'date-fns/locale/fr'
+import { fr, enGB } from 'date-fns/locale'
 import styled from '@emotion/native'
 import { withNavigation } from 'react-navigation'
 import { useSelector } from 'react-redux'
@@ -17,6 +17,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -48,6 +49,8 @@ const VerseComponent = ({
   setSettings,
 }) => {
   const verses = useBibleVerses(verseIds)
+  const { t, i18n } = useTranslation()
+  const isFr = i18n.language === 'fr'
   const { colors } = useSelector(state => ({
     colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
@@ -58,7 +61,7 @@ const VerseComponent = ({
 
   const { title, content } = formatVerseContent(verses)
   const formattedDate = distanceInWords(Number(date), Date.now(), {
-    locale: frLocale,
+    locale: isFr ? fr : enGB,
   })
   const { Livre, Chapitre, Verset } = verses[0]
   return (
@@ -81,7 +84,9 @@ const VerseComponent = ({
               {title}
             </Text>
           </Box>
-          <DateText style={{ fontSize: 10 }}>Il y a {formattedDate}</DateText>
+          <DateText style={{ fontSize: 10 }}>
+            {t('Il y a {{formattedDate}}', { formattedDate })}
+          </DateText>
           {setSettings && (
             <LinkBox
               p={4}

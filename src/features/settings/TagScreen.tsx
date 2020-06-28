@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import { useSelector, useDispatch } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
-import frLocale from 'date-fns/locale/fr'
+import { fr, enGB } from 'date-fns/locale'
 
 import TitlePrompt from '~common/TitlePrompt'
 import { addTag, updateTag, removeTag } from '~redux/modules/user'
@@ -27,12 +27,13 @@ import books from '~assets/bible_versions/books-desc'
 import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
 import NaveResultItem from '~features/nave/NaveResultItem'
 import DictionnaryResultItem from '~features/dictionnary/DictionnaryResultItem'
+import { useTranslation } from 'react-i18next'
 
-const NoteItem = ({ item }) => {
+const NoteItem = ({ item, t, isFR }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
-    locale: frLocale,
+    locale: isFR ? fr : enGB,
   })
 
   return (
@@ -48,7 +49,7 @@ const NoteItem = ({ item }) => {
       <Box padding={20}>
         <Box row justifyContent="space-between">
           <Text color="darkGrey" bold fontSize={11}>
-            {title} - Il y a {formattedDate}
+            {title} - {t('Il y a {{formattedDate}}', { formattedDate })}
           </Text>
         </Box>
         {!!item.title && (
@@ -71,6 +72,8 @@ const NoteItem = ({ item }) => {
 const TagScreen = ({ navigation }) => {
   const { item } = navigation.state.params
   const dispatch = useDispatch()
+  const { t, i18n } = useTranslation()
+  const isFR = i18n.language === 'fr'
 
   const {
     highlights,
@@ -148,7 +151,7 @@ const TagScreen = ({ navigation }) => {
           !strongsHebreu.length && (
             <Empty
               source={require('~assets/images/empty.json')}
-              message="Vous n'avez rien enregistré avec cette étiquette..."
+              message={t("Vous n'avez rien enregistré avec cette étiquette...")}
             />
           )}
         {(!!strongsGrec.length || !!strongsHebreu.length) && (
@@ -183,7 +186,7 @@ const TagScreen = ({ navigation }) => {
         {!!naves.length && (
           <Box>
             <Text padding={20} fontSize={20} title>
-              Thèmes nave
+              {t('Thèmes nave')}
             </Text>
             <Box row wrap px={20}>
               {naves.map(s => {
@@ -202,7 +205,7 @@ const TagScreen = ({ navigation }) => {
         {!!words.length && (
           <Box>
             <Text padding={20} fontSize={20} title>
-              Dictionnaire
+              {t('Dictionnaire')}
             </Text>
             <Box row wrap px={20}>
               {words.map(s => {
@@ -214,7 +217,7 @@ const TagScreen = ({ navigation }) => {
         {!!highlights.length && (
           <Box>
             <Text padding={20} fontSize={25} title>
-              Surbrillances
+              {t('Surbrillances')}
             </Text>
 
             {highlights.map(h => {
@@ -235,7 +238,9 @@ const TagScreen = ({ navigation }) => {
               Notes
             </Text>
             {notes.map(n => {
-              return <NoteItem key={n.date.toString()} item={n} />
+              return (
+                <NoteItem t={t} isFR={isFR} key={n.date.toString()} item={n} />
+              )
             })}
           </Box>
         )}
@@ -243,7 +248,7 @@ const TagScreen = ({ navigation }) => {
         {!!studies.length && (
           <Box>
             <Text padding={20} fontSize={25} title>
-              Études
+              {t('Études')}
             </Text>
             <Box row>
               {studies.map(item => {
@@ -254,6 +259,7 @@ const TagScreen = ({ navigation }) => {
         )}
       </ScrollView>
       <TitlePrompt
+        placeholder={t("Nom de l'étiquette")}
         isOpen={!!titlePrompt}
         title={titlePrompt.name}
         onClosed={() => setTitlePrompt(false)}

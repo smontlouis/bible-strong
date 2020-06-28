@@ -16,6 +16,7 @@ import Border from '~common/ui/Border'
 import TitlePrompt from '~common/TitlePrompt'
 import { FeatherIcon } from '~common/ui/Icon'
 import { addTag, updateTag, removeTag } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -30,6 +31,7 @@ const Chip = styled(Box)(({ theme }) => ({
 }))
 
 const TagItem = ({ item, setOpen }) => {
+  const { t } = useTranslation()
   const highlightsNumber =
     item.highlights && Object.keys(item.highlights).length
   const notesNumber = item.notes && Object.keys(item.notes).length
@@ -52,21 +54,21 @@ const TagItem = ({ item, setOpen }) => {
               {!!strongsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {strongsNumber} {`strong${highlightsNumber > 1 ? 's' : ''}`}
+                    {strongsNumber} {t('nave', { count: strongsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!wordsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {wordsNumber} {`mot${wordsNumber > 1 ? 's' : ''}`}
+                    {wordsNumber} {t('nave', { count: wordsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!navesNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {navesNumber} {`nave${navesNumber > 1 ? 's' : ''}`}
+                    {navesNumber} {t('nave', { count: navesNumber })}
                   </Text>
                 </Chip>
               )}
@@ -74,21 +76,21 @@ const TagItem = ({ item, setOpen }) => {
                 <Chip>
                   <Text fontSize={10} color="default">
                     {highlightsNumber}{' '}
-                    {`surbrillance${highlightsNumber > 1 ? 's' : ''}`}
+                    {t('surbrillance', { count: highlightsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!notesNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {notesNumber} {`note${notesNumber > 1 ? 's' : ''}`}
+                    {notesNumber} {t('note', { count: notesNumber })}
                   </Text>
                 </Chip>
               )}
               {!!studiesNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {studiesNumber} {`étude${studiesNumber > 1 ? 's' : ''}`}
+                    {studiesNumber} {t('étude', { count: studiesNumber })}
                   </Text>
                 </Chip>
               )}
@@ -105,6 +107,7 @@ const TagItem = ({ item, setOpen }) => {
 }
 
 const TagsScreen = () => {
+  const { t } = useTranslation()
   const tags = useSelector(state => Object.values(state.user.bible.tags))
   const [isOpen, setOpen] = useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
@@ -112,22 +115,26 @@ const TagsScreen = () => {
   const dispatch = useDispatch()
 
   const promptLogout = () => {
-    Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer ce tag ?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: () => {
-          dispatch(removeTag(isOpen.id))
-          setOpen(false)
+    Alert.alert(
+      t('Attention'),
+      t('Êtes-vous vraiment sur de supprimer ce tag ?'),
+      [
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
+        {
+          text: t('Oui'),
+          onPress: () => {
+            dispatch(removeTag(isOpen.id))
+            setOpen(false)
+          },
+          style: 'destructive',
         },
-        style: 'destructive',
-      },
-    ])
+      ]
+    )
   }
 
   return (
     <Container>
-      <Header hasBackButton title="Étiquettes" />
+      <Header hasBackButton title={t('Étiquettes')} />
       {tags.length ? (
         <FlatList
           data={tags}
@@ -138,7 +145,7 @@ const TagsScreen = () => {
       ) : (
         <Empty
           source={require('~assets/images/empty.json')}
-          message="Aucune étiquette..."
+          message={t('Aucune étiquette...')}
         />
       )}
 
@@ -152,13 +159,14 @@ const TagsScreen = () => {
             }, 500)
           }}
         >
-          Éditer
+          {t('Éditer')}
         </Modal.Item>
         <Modal.Item bold color="quart" onPress={promptLogout}>
-          Supprimer
+          {t('Supprimer')}
         </Modal.Item>
       </Modal.Menu>
       <TitlePrompt
+        placeholder={t("Nom de l'étiquette")}
         isOpen={!!titlePrompt}
         title={titlePrompt.name}
         onClosed={() => setTitlePrompt(false)}

@@ -6,8 +6,10 @@ import { RootState } from '~redux/modules/reducer'
 import ExplorePlanItem from './ExplorePlanItem'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
+import { useTranslation, getI18n } from 'react-i18next'
 
 const ExploreScreen = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const status = useSelector((state: RootState) => state.plan.onlineStatus)
   const plans = useSelector((state: RootState) => {
@@ -23,7 +25,7 @@ const ExploreScreen = () => {
     if (status !== 'Resolved') {
       dispatch(fetchPlans())
     }
-  }, [dispatch])
+  }, [dispatch, status])
 
   if (status === 'Pending') {
     return <Loading />
@@ -33,7 +35,7 @@ const ExploreScreen = () => {
     return (
       <Empty
         source={require('~assets/images/empty.json')}
-        message="Vous devez être enregistré pour accéder aux plans"
+        message={t('Vous devez être enregistré pour accéder aux plans')}
       />
     )
   }
@@ -57,7 +59,7 @@ const ExploreScreen = () => {
 }
 
 ExploreScreen.navigationOptions = {
-  tabBarLabel: 'Explorer',
+  tabBarLabel: getI18n().t('Explorer'),
 }
 
 export default ExploreScreen

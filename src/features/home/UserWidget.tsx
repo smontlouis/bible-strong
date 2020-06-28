@@ -250,7 +250,7 @@ const UserWidget = ({ theme }) => {
               </Text>
             </Box>
             <Text fontSize={12}>
-              {getPluriel(t('surbrillance'), highlights)}
+              {t('surbrillance', { count: highlights })}
             </Text>
           </Chip>
           <Chip route="BibleVerseNotes">
@@ -260,7 +260,7 @@ const UserWidget = ({ theme }) => {
                 {notes}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel(t('note'), notes)}</Text>
+            <Text fontSize={12}>{t('note', { count: notes })}</Text>
           </Chip>
           <Chip route="Studies">
             <Box row>
@@ -269,7 +269,7 @@ const UserWidget = ({ theme }) => {
                 {studies}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel(t('étude'), studies)}</Text>
+            <Text fontSize={12}>{t('étude', { count: studies })}</Text>
           </Chip>
           <Chip route="Tags">
             <Box row>
@@ -278,7 +278,7 @@ const UserWidget = ({ theme }) => {
                 {tags}
               </Text>
             </Box>
-            <Text fontSize={12}>{getPluriel(t('étiquette'), tags)}</Text>
+            <Text fontSize={12}> {t('étiquette', { count: tags })}</Text>
           </Chip>
         </ScrollView>
       </Box>

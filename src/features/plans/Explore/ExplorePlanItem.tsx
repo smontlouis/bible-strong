@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { useTranslation } from 'react-i18next'
 
 const ExplorePlanItem = ({
   id,
@@ -30,6 +31,7 @@ const ExplorePlanItem = ({
   navigation,
   featured,
 }: OnlinePlan & { navigation: NavigationStackProp<any, NavigationParams> }) => {
+  const { t } = useTranslation()
   const modalRef = React.useRef<Modalize>(null)
   const planImage = useFireStorage(image)
   const dispatch = useDispatch()
@@ -112,23 +114,25 @@ const ExplorePlanItem = ({
                       setIsLoading(false)
                       navigation.goBack()
                       modalRef?.current?.close()
-                      SnackBar.show('Plan ajouté avec succès')
+                      SnackBar.show(t('Plan ajouté avec succès'))
                     })
                     .catch(e => {
                       console.log(e)
                       setIsLoading(false)
                       SnackBar.show(
-                        "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+                        t(
+                          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+                        ),
                         'danger'
                       )
                     })
                 }}
               >
                 {hasAlreadyStarted
-                  ? 'Plan démarré'
+                  ? t('Plan démarré')
                   : isLoading
-                  ? 'Chargement...'
-                  : 'Démarrer ce plan'}
+                  ? t('Chargement...')
+                  : t('Démarrer ce plan')}
               </Button>
             </Box>
           }

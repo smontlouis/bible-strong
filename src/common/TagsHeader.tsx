@@ -6,6 +6,7 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Back from '~common/Back'
 import { FeatherIcon } from '~common/ui/Icon'
+import { useTranslation } from 'react-i18next'
 
 const TouchableBox = styled.TouchableOpacity({
   flexDirection: 'row',
@@ -25,6 +26,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
 }))
 
 const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
+  const { t } = useTranslation()
   return (
     <HeaderBox row>
       {hasBackButton ? (
@@ -40,7 +42,9 @@ const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
         </Text>
       </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
-        <StyledText>{selectedChip ? selectedChip.name : 'Filtrer'}</StyledText>
+        <StyledText>
+          {selectedChip ? selectedChip.name : t('Filtrer')}
+        </StyledText>
         <FeatherIcon name="chevron-down" size={15} />
       </TouchableBox>
     </HeaderBox>

@@ -2,8 +2,9 @@ import React from 'react'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
-import frLocale from 'date-fns/locale/fr'
 import * as Icon from '@expo/vector-icons'
+
+import { fr, enGB } from 'date-fns/locale'
 
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
@@ -16,6 +17,7 @@ import Empty from '~common/Empty'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { deleteHistory } from '~redux/modules/user'
+import { useTranslation, Trans } from 'react-i18next'
 
 const Chip = styled.View(({ theme, color }) => ({
   height: 15,
@@ -29,8 +31,14 @@ const Chip = styled.View(({ theme, color }) => ({
 }))
 
 const HistoryItem = ({ item }) => {
+  const { t, i18n } = useTranslation()
+  const isFr = i18n.language === 'fr'
+
   if (item.type === 'strong') {
     const { Hebreu, Grec, Mot, date, book } = item
+    const ago = distanceInWords(Number(date), Date.now(), {
+      locale: isFr ? fr : enGB,
+    })
     return (
       <Link route="BibleStrongDetail" params={{ book, strongReference: item }}>
         <Box padding={20} row alignItems="center">
@@ -47,10 +55,7 @@ const HistoryItem = ({ item }) => {
               </Text>
             </Chip>
             <Text fontSize={10} color="grey">
-              Il y a{' '}
-              {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale,
-              })}
+              <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
@@ -60,6 +65,9 @@ const HistoryItem = ({ item }) => {
   }
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
+    const ago = distanceInWords(Number(date), Date.now(), {
+      locale: isFr ? fr : enGB,
+    })
     let { title } = formatVerseContent([
       { Livre: book, Chapitre: chapter, Verset: verse },
     ])
@@ -84,14 +92,11 @@ const HistoryItem = ({ item }) => {
           <Box marginLeft="auto">
             <Chip>
               <Text bold fontSize={8}>
-                Verset
+                {t('Verset')}
               </Text>
             </Chip>
             <Text fontSize={10} color="grey">
-              Il y a{' '}
-              {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale,
-              })}
+              <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
@@ -101,6 +106,9 @@ const HistoryItem = ({ item }) => {
   }
   if (item.type === 'word') {
     const { word, date } = item
+    const ago = distanceInWords(Number(date), Date.now(), {
+      locale: isFr ? fr : enGB,
+    })
     return (
       <Link route="DictionnaryDetail" params={{ word }}>
         <Box padding={20} row alignItems="center">
@@ -108,14 +116,11 @@ const HistoryItem = ({ item }) => {
           <Box marginLeft="auto">
             <Chip color="secondary">
               <Text bold fontSize={8}>
-                Mot
+                {t('Mot')}
               </Text>
             </Chip>
             <Text fontSize={10} color="grey">
-              Il y a{' '}
-              {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale,
-              })}
+              <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
@@ -126,6 +131,9 @@ const HistoryItem = ({ item }) => {
 
   if (item.type === 'nave') {
     const { name, name_lower, date } = item
+    const ago = distanceInWords(Number(date), Date.now(), {
+      locale: isFr ? fr : enGB,
+    })
     return (
       <Link route="NaveDetail" params={{ name, name_lower }}>
         <Box padding={20} row alignItems="center">
@@ -133,14 +141,11 @@ const HistoryItem = ({ item }) => {
           <Box marginLeft="auto">
             <Chip color="quint">
               <Text bold fontSize={8} color="white">
-                Nave
+                {t('Nave')}
               </Text>
             </Chip>
             <Text fontSize={10} color="grey">
-              Il y a{' '}
-              {distanceInWords(Number(date), Date.now(), {
-                locale: frLocale,
-              })}
+              <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
@@ -157,12 +162,13 @@ const History = () => {
     colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
   const dispatch = useDispatch()
+  const { t } = useTranslation()
 
   return (
     <Container>
       <Header
         hasBackButton
-        title="Historique"
+        title={t('Historique')}
         rightComponent={
           <Link onPress={() => dispatch(deleteHistory())} padding>
             <Icon.Feather size={20} name="trash-2" color={colors.quart} />

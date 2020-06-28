@@ -9,6 +9,7 @@ import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
 import { deleteNote } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -49,19 +50,24 @@ const NotesSettingsModal = ({
   setMultipleTagsItem,
   openNoteEditor,
 }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const noteId = isOpen
   const note = useSelector(state => state.user.bible.notes[noteId])
 
   const deleteNoteConfirmation = id => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: () => dispatch(deleteNote(id), onClosed()),
-        style: 'destructive',
-      },
-    ])
+    Alert.alert(
+      t('Attention'),
+      t('Voulez-vous vraiment supprimer cette note?'),
+      [
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
+        {
+          text: t('Oui'),
+          onPress: () => dispatch(deleteNote(id), onClosed()),
+          style: 'destructive',
+        },
+      ]
+    )
   }
 
   return (
@@ -82,7 +88,7 @@ const NotesSettingsModal = ({
           }}
         >
           <Text fontSize={16} bold>
-            Éditer
+            {t('Éditer')}
           </Text>
         </Touchy>
         <Touchy
@@ -94,12 +100,12 @@ const NotesSettingsModal = ({
           }}
         >
           <Text fontSize={16} bold>
-            Tags
+            {t('Tags')}
           </Text>
         </Touchy>
         <Touchy onPress={() => deleteNoteConfirmation(noteId)}>
           <Text fontSize={16} bold color="quart">
-            Supprimer
+            {t('Supprimer')}
           </Text>
         </Touchy>
       </Container>

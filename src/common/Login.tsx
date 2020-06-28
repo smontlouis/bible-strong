@@ -14,6 +14,7 @@ import Box from '~common/ui/Box'
 import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
+import { useTranslation } from 'react-i18next'
 
 const SocialButton = styled.TouchableOpacity(({ theme, color }) => ({
   flexDirection: 'row',
@@ -37,6 +38,7 @@ const ButtonText = styled(Text)(({ theme, color }) => ({
 }))
 
 const Login = ({ theme }) => {
+  const { t } = useTranslation()
   const [isLoading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,7 +57,7 @@ const Login = ({ theme }) => {
 
   const onLogin = async () => {
     if (!email || !password) {
-      SnackBar.show('Veuillez remplir les champs')
+      SnackBar.show(t('Veuillez remplir les champs'))
       return false
     }
     setLoading(true)
@@ -71,7 +73,7 @@ const Login = ({ theme }) => {
 
   const resetPassword = async () => {
     if (!email) {
-      SnackBar.show('Veuillez remplir les champs')
+      SnackBar.show(t('Veuillez remplir les champs'))
       return false
     }
     setLoading(true)
@@ -91,7 +93,7 @@ const Login = ({ theme }) => {
         />
         <Spacer />
         <TextInput
-          placeholder="Mot de passe"
+          placeholder={t('Mot de passe')}
           leftIcon={
             <Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />
           }
@@ -100,18 +102,18 @@ const Login = ({ theme }) => {
         />
         <Box alignItems="flex-end" marginTop={10}>
           <Link onPress={resetPassword}>
-            <Text underline>Mot de passe oublié ?</Text>
+            <Text underline>{t('Mot de passe oublié ?')}</Text>
           </Link>
         </Box>
         <Spacer size={2} />
         <Button isLoading={isLoading} onPress={onLogin}>
-          Connexion
+          {t('Connexion')}
         </Button>
       </Box>
       <Spacer />
       <Box center>
         <Text titleItalic fontSize={16}>
-          - ou -
+          {t('- ou -')}
         </Text>
       </Box>
       <Spacer />
@@ -146,7 +148,7 @@ const Login = ({ theme }) => {
       <Spacer size={2} />
       <Box center pb={20}>
         <Link route="Register">
-          <Text underline>Pas de compte ? Inscrivez-vous.</Text>
+          <Text underline>{t('Pas de compte ? Inscrivez-vous.')}</Text>
         </Link>
       </Box>
     </Box>

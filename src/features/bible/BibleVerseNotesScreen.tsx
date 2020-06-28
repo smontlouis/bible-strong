@@ -17,6 +17,8 @@ import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import verseToReference from '~helpers/verseToReference'
+import { withTranslation } from 'react-i18next'
+import compose from 'recompose/compose'
 
 class BibleVerseNotes extends Component {
   componentDidMount() {
@@ -53,7 +55,7 @@ class BibleVerseNotes extends Component {
 
     if (verse) {
       title = verseToReference(verse)
-      title = `Notes sur ${title}...`
+      title = `${props.t('Notes sur')} ${title}...`
     } else {
       title = 'Notes'
     }
@@ -93,14 +95,19 @@ class BibleVerseNotes extends Component {
   }
 
   deleteNote = noteId => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: () => this.props.deleteNote(noteId),
-        style: 'destructive',
-      },
-    ])
+    const { t } = this.props
+    Alert.alert(
+      t('Attention'),
+      t('Voulez-vous vraiment supprimer cette note?'),
+      [
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
+        {
+          text: t('Oui'),
+          onPress: () => this.props.deleteNote(noteId),
+          style: 'destructive',
+        },
+      ]
+    )
   }
 
   renderNote = ({ item, index }) => {
@@ -133,7 +140,10 @@ class BibleVerseNotes extends Component {
     return (
       <Container>
         {verse ? (
-          <Header hasBackButton={withBack} title={title || 'Chargement...'} />
+          <Header
+            hasBackButton={withBack}
+            title={title || this.props.t('Chargement...')}
+          />
         ) : (
           <TagsHeader
             title="Notes"
@@ -153,7 +163,7 @@ class BibleVerseNotes extends Component {
         ) : (
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Vous n'avez pas encore de notes..."
+            message={this.props.t("Vous n'avez pas encore de notes...")}
           />
         )}
         {this.state.isEditNoteOpen && (
@@ -185,9 +195,12 @@ class BibleVerseNotes extends Component {
   }
 }
 
-export default connect(
-  state => ({
-    notes: state.user.bible.notes,
-  }),
-  { ...BibleActions, ...UserActions }
+export default compose(
+  connect(
+    state => ({
+      notes: state.user.bible.notes,
+    }),
+    { ...BibleActions, ...UserActions }
+  ),
+  withTranslation()
 )(BibleVerseNotes)
