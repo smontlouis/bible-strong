@@ -10,6 +10,7 @@ import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import { resetTempSelected, toggleSelectionMode } from '~redux/modules/bible'
 import { RootState } from '~redux/modules/reducer'
 import { MAX_WIDTH } from '~helpers/useDimensions'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   navigation: NavigationStackProp<any>
@@ -17,6 +18,7 @@ interface Props {
 
 const BibleSelect = ({ navigation }: Props) => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const selectionMode = useSelector(
     (state: RootState) => state.bible.selectionMode
   )
@@ -29,7 +31,7 @@ const BibleSelect = ({ navigation }: Props) => {
     <Container>
       <Header
         hasBackButton
-        title="Références"
+        title={t('Références')}
         rightComponent={
           <Box row mr={20}>
             <LinkBox p={5} onPress={() => dispatch(toggleSelectionMode())}>

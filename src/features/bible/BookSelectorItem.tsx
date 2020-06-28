@@ -24,9 +24,11 @@ const Text = styled.Text(({ isSelected, isNT, themeValue, theme }) => ({
   fontSize: 16,
 }))
 
-const BookSelectorItem = ({ book, isSelected, isNT, onChange }) => {
+const BookSelectorItem = ({ book, isSelected, isNT, onChange, t }) => {
   const themeValue = useSelector(state => state.user.bible.settings.theme)
-  const bookName = book.Nom.replace(/\s/g, '').substr(0, 3)
+  const bookName = t(book.Nom)
+    .replace(/\s/g, '')
+    .substr(0, 3)
   return (
     <TouchableOpacity onPress={() => onChange(book)}>
       <Text isSelected={isSelected} isNT={isNT} themeValue={themeValue}>

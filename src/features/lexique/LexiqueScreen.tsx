@@ -19,6 +19,7 @@ import { useSearchValue, useResultsByLetterOrSearch } from './useUtilities'
 
 import waitForDatabase from '~common/waitForStrongDB'
 import LexiqueItem from './LexiqueItem'
+import { useTranslation } from 'react-i18next'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -47,6 +48,7 @@ const useSectionResults = results => {
 }
 
 const LexiqueScreen = () => {
+  const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -67,14 +69,17 @@ const LexiqueScreen = () => {
   if (error) {
     return (
       <Container>
-        <Header hasBackButton title="Désolé..." />
+        <Header hasBackButton title={t('Désolé...')} />
         <Empty
           source={require('~assets/images/empty.json')}
-          message={`Impossible de charger la strong pour ce verset...${
-            error === 'CORRUPTED_DATABASE'
-              ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-              : ''
-          }`}
+          message={`${t('Impossible de charger la strong pour ce verset...')}
+            ${
+              error === 'CORRUPTED_DATABASE'
+                ? t(
+                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                  )
+                : ''
+            }`}
         />
       </Container>
     )
@@ -85,14 +90,14 @@ const LexiqueScreen = () => {
       <Header hasBackButton title="Lexique" />
       <SearchInput
         disabled={!sectionResults}
-        placeholder="Recherche par code ou par mot"
+        placeholder={t('Recherche par code ou par mot')}
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
       <Box flex paddingTop={20}>
         {isLoading ? (
-          <Loading message="Chargement..." />
+          <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({
@@ -126,7 +131,7 @@ const LexiqueScreen = () => {
         ) : (
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Aucune strong trouvée..."
+            message={t('Aucune strong trouvée...')}
           />
         )}
       </Box>

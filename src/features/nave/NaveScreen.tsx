@@ -22,6 +22,7 @@ import {
   useSearchValue,
   useResultsByLetterOrSearch,
 } from '../lexique/useUtilities'
+import { useTranslation } from 'react-i18next'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -50,6 +51,7 @@ const useSectionResults = results => {
 }
 
 const NaveScreen = () => {
+  const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -69,12 +71,14 @@ const NaveScreen = () => {
   if (error) {
     return (
       <Container>
-        <Header hasBackButton title="Désolé..." />
+        <Header hasBackButton title={t('Désolé... ')} />
         <Empty
           source={require('~assets/images/empty.json')}
-          message={`Impossible de charger la nave...${
+          message={`${t('Impossible de charger la nave...')}${
             error === 'CORRUPTED_DATABASE'
-              ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+              ? t(
+                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                )
               : ''
           }`}
         />
@@ -86,7 +90,7 @@ const NaveScreen = () => {
     <Container>
       <Header
         hasBackButton
-        title="Thématique Nave"
+        title={t('Thématique Nave')}
         noBorder
         rightComponent={
           <Link route="NaveWarning" padding>
@@ -99,14 +103,14 @@ const NaveScreen = () => {
         }
       />
       <SearchInput
-        placeholder="Recherche par mot"
+        placeholder={t('Recherche par mot')}
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
       <Box flex paddingTop={20}>
         {isLoading ? (
-          <Loading message="Chargement..." />
+          <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { name_lower, name } }) => (
@@ -139,7 +143,7 @@ const NaveScreen = () => {
         ) : (
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Aucun mot trouvé..."
+            message={t('Aucun mot trouvé...')}
           />
         )}
       </Box>

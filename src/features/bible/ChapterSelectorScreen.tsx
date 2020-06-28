@@ -6,12 +6,9 @@ import { connect } from 'react-redux'
 import * as BibleActions from '~redux/modules/bible'
 
 import SelectorItem from './SelectorItem'
+import { getI18n } from 'react-i18next'
 
 class ChapterSelector extends Component {
-  static navigationOptions = {
-    tabBarLabel: 'CHAPITRE',
-  }
-
   onChapterChange = (chapter: number) => {
     this.props.navigation.navigate('Verset')
     this.props.setTempSelectedChapter(chapter)
@@ -45,7 +42,7 @@ class ChapterSelector extends Component {
   }
 }
 
-export default compose(
+const EnhancedChapterSelector = compose(
   pure,
   connect(
     state => ({
@@ -55,3 +52,9 @@ export default compose(
     { ...BibleActions }
   )
 )(ChapterSelector)
+
+EnhancedChapterSelector.navigationOptions = {
+  tabBarLabel: getI18n().t('Chapitres'),
+}
+
+export default EnhancedChapterSelector

@@ -52,6 +52,7 @@ const useSectionResults = results => {
 }
 
 const DictionnaireScreen = () => {
+  const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -72,12 +73,14 @@ const DictionnaireScreen = () => {
   if (error) {
     return (
       <Container>
-        <Header hasBackButton title="Désolé..." />
+        <Header hasBackButton title={t('Désolé...')} />
         <Empty
           source={require('~assets/images/empty.json')}
-          message={`Impossible de charger le dictionnaire...${
+          message={`{t('Impossible de charger le dictionnaire...')}${
             error === 'CORRUPTED_DATABASE'
-              ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+              ? t(
+                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                )
               : ''
           }`}
         />
@@ -90,18 +93,18 @@ const DictionnaireScreen = () => {
       <Header
         hasBackButton
         fontSize={18}
-        title="Dictionnaire Westphal"
+        title={t('Dictionnaire Westphal')}
         noBorder
       />
       <SearchInput
-        placeholder="Recherche par mot"
+        placeholder={t('Recherche par mot')}
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
       <Box flex paddingTop={20}>
         {isLoading ? (
-          <Loading message="Chargement..." />
+          <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { id, word } }) => (
@@ -129,7 +132,7 @@ const DictionnaireScreen = () => {
         ) : (
           <Empty
             source={require('~assets/images/empty.json')}
-            message="Aucun mot trouvé..."
+            message={t('Aucun mot trouvé...')}
           />
         )}
       </Box>

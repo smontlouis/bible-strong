@@ -9,7 +9,7 @@ const SearchBox = ({
   debouncedValue,
   value,
   onChange,
-  placeholder = 'Mot, phrase ou strong',
+  placeholder,
 }) => {
   React.useEffect(() => {
     if (debouncedValue) {

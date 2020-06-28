@@ -26,6 +26,7 @@ import ParallelIcon from '~common/ParallelIcon'
 import { useGlobalContext } from '~helpers/globalContext'
 import SnackBar from '~common/SnackBar'
 import { getIfDatabaseExists } from '~helpers/database'
+import { useTranslation } from 'react-i18next'
 
 const { Popover } = renderers
 
@@ -103,6 +104,7 @@ const Header = ({
   setSettingsCommentaires,
   settings: { commentsDisplay },
 }) => {
+  const { t } = useTranslation()
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
 
@@ -110,7 +112,7 @@ const Header = ({
     const exists = await getIfDatabaseExists('commentaires-mhy')
 
     if (!exists) {
-      SnackBar.show('Téléchargez la base de commentaires Matthew Henry')
+      SnackBar.show(t('Téléchargez la base de commentaires Matthew Henry'))
       navigation.navigate('Downloads')
       return
     }
@@ -132,7 +134,7 @@ const Header = ({
         </Box>
         <Box grow center>
           <TextIcon>
-            {book.Nom} {chapter}:
+            {t(book.Nom)} {chapter}:
             {focusVerses ? formatVerses(focusVerses) : verse} - {version}
           </TextIcon>
         </Box>
@@ -156,8 +158,8 @@ const Header = ({
       <LinkBox route="BibleSelect" style={{ paddingLeft: 15, paddingRight: 0 }}>
         <TextIcon>
           {isSmall
-            ? truncate(`${book.Nom} ${chapter}`, 10)
-            : `${book.Nom} ${chapter}`}
+            ? truncate(`${t(book.Nom)} ${chapter}`, 10)
+            : `${t(book.Nom)} ${chapter}`}
         </TextIcon>
       </LinkBox>
       <LinkBox
@@ -198,7 +200,7 @@ const Header = ({
                   <MenuOption onSelect={onOpenCommentaire}>
                     <Box row alignItems="center">
                       <MaterialIcon name="chat" size={20} />
-                      <Text marginLeft={10}>Commentaire désactivé</Text>
+                      <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
                     </Box>
                   </MenuOption>
                 )}
@@ -206,7 +208,7 @@ const Header = ({
                   <MenuOption onSelect={() => setSettingsCommentaires(false)}>
                     <Box row alignItems="center">
                       <MaterialIcon name="chat" size={20} color="primary" />
-                      <Text marginLeft={10}>Commentaire activé</Text>
+                      <Text marginLeft={10}>{t('Commentaire activé')}</Text>
                     </Box>
                   </MenuOption>
                 )}
@@ -217,19 +219,19 @@ const Header = ({
                 >
                   <Box row alignItems="center">
                     <ParallelIcon color={isParallel ? 'primary' : 'default'} />
-                    <Text marginLeft={10}>Affichage parallèle</Text>
+                    <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
                   </Box>
                 </MenuOption>
                 <MenuOption onSelect={() => navigation.navigate('History')}>
                   <Box row alignItems="center">
                     <MaterialIcon name="history" size={20} />
-                    <Text marginLeft={10}>Historique</Text>
+                    <Text marginLeft={10}>{t('Historique')}</Text>
                   </Box>
                 </MenuOption>
                 <MenuOption onSelect={() => setIsFullScreen(true)}>
                   <Box row alignItems="center">
                     <MaterialIcon name="fullscreen" size={20} />
-                    <Text marginLeft={10}>Plein écran</Text>
+                    <Text marginLeft={10}>{t('Plein écran')}</Text>
                   </Box>
                 </MenuOption>
               </>

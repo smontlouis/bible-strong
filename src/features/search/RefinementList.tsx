@@ -4,6 +4,7 @@ import { connectRefinementList } from 'react-instantsearch-native'
 import DropdownMenu from '~common/DropdownMenu'
 import Box from '~common/ui/Box'
 import books from '~assets/bible_versions/books-desc'
+import { useTranslation } from 'react-i18next'
 
 const lookupTable = {
   section: {
@@ -24,15 +25,16 @@ const lookupTable = {
 }
 
 const RefinementList = ({ items, refine, attribute, ...props }) => {
+  const { t } = useTranslation()
   const currentValue = items.find(c => c.isRefined)?.label || ''
 
   const choices = [
-    { label: 'Tout', value: '' },
+    { label: t('Tout'), value: '' },
     ...items.map(item => {
       const value = item.label
       return {
         value,
-        label: lookupTable[attribute][value],
+        label: t(lookupTable[attribute][value]),
         count: item.count,
       }
     }),
@@ -50,7 +52,7 @@ const RefinementList = ({ items, refine, attribute, ...props }) => {
 
   return (
     <DropdownMenu
-      title={lookupTable[attribute].title}
+      title={t(lookupTable[attribute].title)}
       currentValue={currentValue}
       setValue={value => refine(value)}
       choices={choices}

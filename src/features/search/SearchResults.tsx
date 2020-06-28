@@ -2,13 +2,15 @@ import React from 'react'
 
 import InfiniteHits from './InfiniteHits'
 import Empty from '~common/Empty'
+import { useTranslation } from 'react-i18next'
 
 const SearchResults = ({ searchValue }) => {
+  const { t } = useTranslation()
   if (!searchValue) {
     return (
       <Empty
         source={require('~assets/images/search-loop.json')}
-        message="Faites une recherche dans la Bible !"
+        message={t('Faites une recherche dans la Bible !')}
       />
     )
   }

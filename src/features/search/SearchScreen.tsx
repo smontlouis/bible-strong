@@ -10,6 +10,7 @@ import SearchBox from './SearchBox'
 import Filters from './Filters'
 import SearchResults from './SearchResults'
 import { algoliaConfig } from '../../../config'
+import { useTranslation } from 'react-i18next'
 
 const searchClient = algoliasearch(
   algoliaConfig.applicationId,
@@ -17,6 +18,7 @@ const searchClient = algoliasearch(
 )
 
 const SearchScreen = () => {
+  const { t } = useTranslation()
   const [searchValue, setSearchValue] = React.useState('')
   const debouncedSearchValue = useDebounce(searchValue, 500)
 
@@ -24,8 +26,9 @@ const SearchScreen = () => {
     <>
       <InstantSearch indexName="bible-lsg" searchClient={searchClient}>
         <Container>
-          <Header title="Recherche dans la Bible" />
+          <Header title={t('Recherche dans la Bible')} />
           <SearchBox
+            placeholder={t('Mot, phrase ou strong')}
             debouncedValue={debouncedSearchValue}
             value={searchValue}
             onChange={setSearchValue}

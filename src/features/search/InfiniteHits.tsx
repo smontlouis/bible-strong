@@ -13,6 +13,7 @@ import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 
 import Empty from '~common/Empty'
 import Highlight from './Highlight'
+import { useTranslation } from 'react-i18next'
 
 const InfiniteHits = ({
   searchValue,
@@ -24,6 +25,7 @@ const InfiniteHits = ({
   searching,
   ...props
 }) => {
+  const { t } = useTranslation()
   return (
     <Box flex>
       <FlatList
@@ -37,14 +39,16 @@ const InfiniteHits = ({
             {error ? (
               <Empty
                 source={require('~assets/images/empty.json')}
-                message={
+                message={t(
                   "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
-                }
+                )}
               />
             ) : (
               <Box paddingHorizontal={20}>
                 <Text title fontSize={16} color="grey">
-                  {allSearchResults?.nbHits} occurences trouvées dans la bible
+                  {t('{nbHits} occurences trouvées dans la bible', {
+                    nbHits: allSearchResults?.nbHits,
+                  })}
                 </Text>
               </Box>
             )}

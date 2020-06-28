@@ -9,6 +9,7 @@ import { NavigationStackProp } from 'react-navigation-stack'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { LinkBox } from '~common/Link'
+import { useTranslation, getI18n } from 'react-i18next'
 
 interface Props {
   navigation: NavigationStackProp<any>
@@ -16,6 +17,7 @@ interface Props {
 
 const BookSelector = ({ navigation }: Props) => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const selectedBook = useSelector(
     (state: RootState) => state.bible.temp.selectedBook
   )
@@ -45,7 +47,7 @@ const BookSelector = ({ navigation }: Props) => {
             alignSelf="center"
           >
             <Text fontSize={14} color="tertiary" textAlign="center" bold>
-              {title}
+              {t(title)}
             </Text>
           </Box>
         )}
@@ -58,7 +60,7 @@ const BookSelector = ({ navigation }: Props) => {
               }
               {...(book.Numero === selectedBook.Numero && { bold: true })}
             >
-              {book.Nom}
+              {t(book.Nom)}
             </Text>
           </LinkBox>
         )}
@@ -78,6 +80,7 @@ const BookSelector = ({ navigation }: Props) => {
     >
       {Object.values(books).map(book => (
         <BookSelectorItem
+          t={t}
           isNT={book.Numero >= 40}
           key={book.Numero}
           onChange={onBookChange}
@@ -89,6 +92,8 @@ const BookSelector = ({ navigation }: Props) => {
   )
 }
 
-BookSelector.tabBarLabel = 'LIVRE'
+BookSelector.navigationOptions = {
+  tabBarLabel: getI18n().t('Livres'),
+}
 
 export default BookSelector
