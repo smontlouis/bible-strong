@@ -20,6 +20,7 @@ import {
 } from '../lexique/useUtilities'
 import waitForDatabase from '~common/waitForDictionnaireDB'
 import DictionnaireItem from './DictionnaireItem'
+import { useTranslation } from 'react-i18next'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)

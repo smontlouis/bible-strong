@@ -17,6 +17,15 @@ export default function loadBible(bible, position) {
           resolve(LSGBible)
           break
         }
+        case 'KJV': {
+          if (bibleMemoize[bible]) {
+            return resolve(bibleMemoize[bible])
+          }
+
+          const LSGBible = require('~assets/bible_versions/bible-kjv.json')
+          resolve(LSGBible)
+          break
+        }
         default: {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])

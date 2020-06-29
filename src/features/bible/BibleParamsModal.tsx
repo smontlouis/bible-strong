@@ -16,6 +16,7 @@ import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import fonts from '~helpers/fonts'
 import { usePrevious } from '~helpers/usePrevious'
+import { useTranslation, getI18n } from 'react-i18next'
 
 const Container = styled.View(({ theme }) => ({
   width: '100%',
@@ -49,28 +50,28 @@ const FontText = styled.Text(({ isSelected, theme }) => ({
 }))
 
 const alignContentToString = {
-  left: 'À gauche',
-  justify: 'Justifié',
+  left: getI18n().t('À gauche'),
+  justify: getI18n().t('Justifié'),
 }
 
 const textDisplayToString = {
-  inline: 'Continu',
-  block: 'À la ligne',
+  inline: getI18n().t('Continu'),
+  block: getI18n().t('À la ligne'),
 }
 
 const themeToString = {
-  default: 'Jour',
-  dark: 'Nuit',
+  default: getI18n().t('Jour'),
+  dark: getI18n().t('Nuit'),
 }
 
 const pressToString = {
-  shortPress: 'Appui court',
-  longPress: 'Appui long',
+  shortPress: getI18n().t('Appui court'),
+  longPress: getI18n().t('Appui long'),
 }
 
 const notesDisplayToString = {
-  inline: 'À la ligne',
-  block: 'En icone',
+  inline: getI18n().t('À la ligne'),
+  block: getI18n().t('En icone'),
 }
 
 const BibleParamsModal = ({
@@ -97,6 +98,7 @@ const BibleParamsModal = ({
 }) => {
   const isPrevOpen = usePrevious(isOpen)
   const modalRef = React.useRef(null)
+  const { t } = useTranslation()
 
   React.useEffect(() => {
     if (isPrevOpen !== isOpen) {
@@ -124,7 +126,7 @@ const BibleParamsModal = ({
     >
       <Container>
         <HalfContainer border>
-          <Text flex={5}>Thème</Text>
+          <Text flex={5}>{t('Thème')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
             {themeToString[theme]}
           </Text>
@@ -140,7 +142,7 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>Alignement du texte</Text>
+          <Text flex={5}>{t('Alignement du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold marginRight={10}>
             {alignContentToString[alignContent]}
           </Text>
@@ -156,7 +158,7 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>Taille du texte</Text>
+          <Text flex={5}>{t('Taille du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold>{`${100 +
             fontSizeScale * 10}%`}</Text>
           <TouchableIcon
@@ -170,7 +172,7 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>Mode des versets</Text>
+          <Text flex={5}>{t('Mode des versets')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
             {textDisplayToString[textDisplay]}
           </Text>
@@ -187,7 +189,7 @@ const BibleParamsModal = ({
         </HalfContainer>
 
         <HalfContainer border>
-          <Text flex={5}>Affichage des notes</Text>
+          <Text flex={5}>{t('Affichage des notes')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
             {notesDisplayToString[notesDisplay]}
           </Text>
@@ -204,7 +206,7 @@ const BibleParamsModal = ({
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>Affichage des strongs</Text>
+          <Text flex={5}>{t('Affichage des strongs')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
             {pressToString[press]}
           </Text>
@@ -226,7 +228,7 @@ const BibleParamsModal = ({
             ref={fontsView}
             ListHeaderComponent={
               <Text marginLeft={20} marginRight={50}>
-                Polices
+                {t('Polices')}
               </Text>
             }
             horizontal
@@ -256,17 +258,16 @@ const BibleParamsModal = ({
           <Border />
         </Box>
         <HalfContainer>
-          <Text flex>Couleurs des surbrillances</Text>
+          <Text flex>{t('Couleurs des surbrillances')}</Text>
           <Button
             reverse
-            title="Ouvrir"
             onPress={() => {
               navigation.navigate('ModifyColors')
               onClosed()
             }}
             small
           >
-            Ouvrir
+            {t('Ouvrir')}
           </Button>
         </HalfContainer>
       </Container>

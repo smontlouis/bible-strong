@@ -32,6 +32,8 @@ import loadStrongReference from '~helpers/loadStrongReference'
 import { setHistory } from '~redux/modules/user'
 import { timeout } from '~helpers/timeout'
 
+import { withTranslation } from 'react-i18next'
+
 const LinkBox = Box.withComponent(Link)
 
 const TitleBorder = styled.View(({ theme }) => ({
@@ -201,7 +203,7 @@ class BibleStrongDetailScreen extends React.Component {
       },
     } = this.state
 
-    const { tags, navigation } = this.props
+    const { tags, navigation, t } = this.props
     const book = navigation.getParam('book', 0)
 
     return (
@@ -288,7 +290,7 @@ class BibleStrongDetailScreen extends React.Component {
               <ViewItem>
                 <Box row alignItems="center">
                   <Paragraph color="darkGrey" style={{ fontSize: 15 }}>
-                    Mot Hébreu:&nbsp;
+                    {t('Mot Hébreu')}:&nbsp;
                     <Word>{Hebreu}</Word>
                   </Paragraph>
                   <Box ml={15} mb={4}>
@@ -304,7 +306,7 @@ class BibleStrongDetailScreen extends React.Component {
               <ViewItem>
                 <Box row alignItems="center">
                   <Paragraph>
-                    Mot Grec:&nbsp;
+                    {t('Mot Grec')}:&nbsp;
                     <Word>{Grec}</Word>
                   </Paragraph>
                   <Box ml={15} mb={4}>
@@ -318,7 +320,9 @@ class BibleStrongDetailScreen extends React.Component {
             )}
             {!!Definition && (
               <ViewItem>
-                <SubTitle color="tertiary">Définition - {Code}</SubTitle>
+                <SubTitle color="tertiary">
+                  {t('Définition')} - {Code}
+                </SubTitle>
                 <StylizedHTMLView
                   value={Definition}
                   onLinkPress={this.linkToStrong}
@@ -327,13 +331,15 @@ class BibleStrongDetailScreen extends React.Component {
             )}
             {!!LSG && (
               <ViewItem>
-                <SubTitle color="tertiary">Généralement traduit par</SubTitle>
+                <SubTitle color="tertiary">
+                  {t('Généralement traduit par')}
+                </SubTitle>
                 <Paragraph>{LSG}</Paragraph>
               </ViewItem>
             )}
             {!!Origine && (
               <ViewItem>
-                <SubTitle color="tertiary">Origine du mot</SubTitle>
+                <SubTitle color="tertiary">{t('Origine du mot')}</SubTitle>
                 <StylizedHTMLView
                   value={Origine}
                   onLinkPress={this.linkToStrong}
@@ -344,7 +350,7 @@ class BibleStrongDetailScreen extends React.Component {
               {this.state.concordanceLoading ? (
                 <Box row alignItems="center">
                   <Text color="darkGrey" fontSize={16} marginRight={10}>
-                    Concordance
+                    {t('Concordance')}
                   </Text>
                   <Loading style={{ flex: 0, marginLeft: 10 }} />
                 </Box>
@@ -352,7 +358,7 @@ class BibleStrongDetailScreen extends React.Component {
                 <Box>
                   <Box row alignItems="center">
                     <Text color="darkGrey" fontSize={16} marginBottom={3}>
-                      Concordance
+                      {t('Concordance')}
                     </Text>
                     <Box
                       px={10}
@@ -373,7 +379,7 @@ class BibleStrongDetailScreen extends React.Component {
                         px={10}
                         py={5}
                       >
-                        <Text>Tout voir</Text>
+                        <Text>{t('Tout voir')}</Text>
                       </LinkBox>
                     )}
                   </Box>
@@ -401,7 +407,7 @@ class BibleStrongDetailScreen extends React.Component {
                           })
                         }
                       >
-                        Tout voir
+                        {t('Tout voir')}
                       </Button>
                     </Box>
                   )}
@@ -421,6 +427,7 @@ class BibleStrongDetailScreen extends React.Component {
 }
 
 export default compose(
+  withTranslation(),
   waitForStrongDB,
   connect((state, props) => {
     const { strongReference, reference, book } = props.navigation.state.params

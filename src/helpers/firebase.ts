@@ -1,5 +1,5 @@
 import firestore from '@react-native-firebase/firestore'
-import storage from '@react-native-firebase/storage'
+import storage, { FirebaseStorageTypes } from '@react-native-firebase/storage'
 
 export const firebaseDb = firestore()
 export const storageRef = storage().ref()
@@ -9,7 +9,9 @@ storage().setMaxOperationRetryTime(2000)
 storage().setMaxUploadRetryTime(2000)
 storage().setMaxDownloadRetryTime(2000)
 
-export const biblesRef = {
+export const biblesRef: {
+  [version: string]: FirebaseStorageTypes.Reference
+} = {
   DBY: storageRef.child('bibles/bible-dby.json'),
   OST: storageRef.child('bibles/bible-ost.json'),
   BDS: storageRef.child('bibles/bible-bds.json'),

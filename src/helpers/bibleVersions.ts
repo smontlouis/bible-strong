@@ -2,8 +2,9 @@ import * as FileSystem from 'expo-file-system'
 import to from 'await-to-js'
 
 import { biblesRef } from '~helpers/firebase'
+import { isFR } from '../../i18n'
 
-export const getIfVersionNeedsUpdate = async versionId => {
+export const getIfVersionNeedsUpdate = async (versionId: string) => {
   if (versionId === 'LSG') {
     return false
   }
@@ -22,7 +23,7 @@ export const getIfVersionNeedsUpdate = async versionId => {
 
   const [errF, file] = await to(FileSystem.getInfoAsync(path))
 
-  if (!file.exists) {
+  if (!file?.exists) {
     return false
   }
 
@@ -33,10 +34,10 @@ export const getIfVersionNeedsUpdate = async versionId => {
     return false
   }
 
-  return file.size !== remoteFile.size
+  return file.size !== remoteFile?.size
 }
 
-export const getIfVersionNeedsDownload = async versionId => {
+export const getIfVersionNeedsDownload = async (versionId: string) => {
   if (versionId === 'LSG') {
     return false
   }
@@ -98,7 +99,16 @@ export const getIfVersionNeedsDownload = async versionId => {
   return false
 }
 
-export const versions = {
+interface Version {
+  id: string
+  name: string
+  name_en?: string
+  c?: string
+}
+
+export const versions: {
+  [x: string]: Version
+} = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910',
@@ -222,15 +232,18 @@ export const versions = {
   BHS: {
     id: 'BHS',
     name: 'Biblia Hebraica Stuttgartensia (AT)',
+    name_en: 'Biblia Hebraica Stuttgartensia (OT)',
     c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
   },
   LXX: {
     id: 'LXX',
     name: 'Septante (AT)',
+    name_en: 'Septuagint (OT)',
   },
   SBLGNT: {
     id: 'SBLGNT',
     name: 'SBL NT. Grec (NT)',
+    name_en: 'SBL NT. Greek (NT)',
     c: '© 2010 Society of Bible Litterature',
   },
   TR1624: {
@@ -243,7 +256,13 @@ export const versions = {
   },
 }
 
-export const versionsBySections = Object.values(versions).reduce(
+interface VersionsBySection {
+  title: string
+  data: Version[]
+}
+export const versionsBySections: VersionsBySection[] = Object.values(
+  versions
+).reduce(
   (sectionArray, version) => {
     switch (version.id) {
       case 'LSG':
@@ -274,9 +293,49 @@ export const versionsBySections = Object.values(versions).reduce(
       }
     }
   },
-  [
+  <VersionsBySection[]>[
     { title: 'Versions Louis Segond', data: [] },
     { title: 'Autres versions', data: [] },
     { title: 'Versions étrangères', data: [] },
   ]
 )
+
+export const versionsBySections_en: VersionsBySection[] = Object.values(
+  versions
+).reduce(
+  (sectionArray, version) => {
+    const versionEn = { ...version, name: version.name_en || version.name }
+    switch (version.id) {
+      case 'KJV':
+      case 'NKJV':
+      case 'NIV':
+      case 'ESV': {
+        sectionArray[0].data.push(versionEn)
+        return sectionArray
+      }
+      case 'BHS':
+      case 'SBLGNT':
+      case 'TR1624':
+      case 'TR1894':
+      case 'LXX': {
+        sectionArray[1].data.push(versionEn)
+        return sectionArray
+      }
+      default: {
+        return sectionArray
+      }
+    }
+  },
+  <VersionsBySection[]>[
+    { title: 'English versions', data: [] },
+    { title: 'Other versions', data: [] },
+  ]
+)
+
+export const getVersionsBySections = () => {
+  if (isFR) {
+    return versionsBySections
+  }
+
+  return versionsBySections_en
+}

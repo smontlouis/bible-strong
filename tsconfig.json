@@ -10,6 +10,7 @@
     "noEmit": true,
     "strict": true,
     "target": "esnext",
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "~assets/*": ["src/assets/*"],

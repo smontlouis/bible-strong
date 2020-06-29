@@ -25,4 +25,6 @@ i18n.use(initReactI18next).init({
   cleanCode: true,
 })
 
+export const isFR = i18n.language === 'fr'
+
 export default i18n

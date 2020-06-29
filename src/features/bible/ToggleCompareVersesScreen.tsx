@@ -10,7 +10,7 @@ import SectionList from '~common/ui/SectionList'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
 import { toggleCompareVersion } from '~redux/modules/user'
-import { versionsBySections } from '~helpers/bibleVersions'
+import { getVersionsBySections } from '~helpers/bibleVersions'
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
@@ -57,7 +57,7 @@ const ToggleCompareVersesScreen = () => {
       <SectionList
         contentContainerStyle={{ paddingTop: 0 }}
         stickySectionHeadersEnabled={false}
-        sections={versionsBySections}
+        sections={getVersionsBySections()}
         keyExtractor={item => item.id}
         renderSectionHeader={({ section: { title } }) => (
           <Box paddingHorizontal={20} marginTop={30}>

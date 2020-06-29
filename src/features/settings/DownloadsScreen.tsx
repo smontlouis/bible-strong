@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Alert } from 'react-native'
 
-import { versionsBySections } from '~helpers/bibleVersions'
+import { getVersionsBySections } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
@@ -69,7 +69,7 @@ const DLScreen = () => {
           </>
         }
         stickySectionHeadersEnabled={false}
-        sections={versionsBySections}
+        sections={getVersionsBySections()}
         keyExtractor={item => item.id}
         renderSectionHeader={({ section: { title } }) => (
           <Box paddingHorizontal={20} marginTop={20}>

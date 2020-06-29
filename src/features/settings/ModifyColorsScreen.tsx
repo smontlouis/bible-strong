@@ -10,6 +10,7 @@ import Header from '~common/Header'
 import ColorWheelModal from '~common/ColorWheelModal'
 import TouchableIcon from '../bible/TouchableIcon'
 import { changeColor } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 const ColorSquare = styled.View(({ color, size }) => ({
   width: size,
@@ -20,6 +21,7 @@ const ColorSquare = styled.View(({ color, size }) => ({
 }))
 
 const ModifyColorsScreen = () => {
+  const { t } = useTranslation()
   const [currentColor, setColorWheelOpen] = useState(null)
   const dispatch = useDispatch()
   const { colors } = useSelector(state => ({
@@ -28,7 +30,7 @@ const ModifyColorsScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton title="Modifier les couleurs" />
+      <Header hasBackButton title={t('Modifier les couleurs')} />
       <ScrollView>
         <Box padding={20}>
           {[...new Array(5)].map((_, i) => (
@@ -45,7 +47,9 @@ const ModifyColorsScreen = () => {
               >
                 <Box row padding={10} alignItems="center">
                   <ColorSquare size={30} color={colors[`color${i + 1}`]} />
-                  <Text bold>Couleur {i + 1}</Text>
+                  <Text bold>
+                    {t('Couleur')} {i + 1}
+                  </Text>
                 </Box>
               </TouchableOpacity>
               <TouchableIcon
@@ -60,6 +64,7 @@ const ModifyColorsScreen = () => {
       <ColorWheelModal
         currentColor={currentColor}
         onClosed={() => setColorWheelOpen(false)}
+        t={t}
       />
     </Container>
   )

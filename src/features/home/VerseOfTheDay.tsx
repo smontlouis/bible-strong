@@ -205,7 +205,7 @@ const VerseOfTheDay = ({
           <Box py={30} px={20} pb={30 + getBottomSpace()}>
             <Box row alignItems="center">
               <Text bold flex>
-                Recevoir une notification quotidienne
+                {t('Recevoir une notification quotidienne')}
               </Text>
               <Switch
                 value={!!verseOfTheDayTime}
@@ -220,7 +220,7 @@ const VerseOfTheDay = ({
             </Box>
             {!!verseOfTheDayTime && (
               <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
-                <Text>Choisir l'heure:</Text>
+                <Text>{t("Choisir l'heure")}:</Text>
                 <Text bold> {verseOfTheDayTime}</Text>
                 <Box ml={5}>
                   <FeatherIcon name="chevron-down" />

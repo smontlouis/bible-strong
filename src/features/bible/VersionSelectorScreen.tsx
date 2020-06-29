@@ -9,7 +9,7 @@ import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
 import * as BibleActions from '~redux/modules/bible'
-import { versionsBySections } from '~helpers/bibleVersions'
+import { getVersionsBySections } from '~helpers/bibleVersions'
 
 import VersionSelectorItem from './VersionSelectorItem'
 
@@ -32,7 +32,7 @@ const VersionSelector = ({ setVersion, navigation }) => {
       <SectionList
         contentContainerStyle={{ paddingTop: 0 }}
         stickySectionHeadersEnabled={false}
-        sections={versionsBySections}
+        sections={getVersionsBySections()}
         keyExtractor={item => item.id}
         renderSectionHeader={({ section: { title } }) => (
           <Box paddingHorizontal={20} marginTop={30}>

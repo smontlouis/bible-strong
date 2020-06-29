@@ -87,7 +87,7 @@ const LexiqueScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton title="Lexique" />
+      <Header hasBackButton title={t('Lexique')} />
       <SearchInput
         disabled={!sectionResults}
         placeholder={t('Recherche par code ou par mot')}

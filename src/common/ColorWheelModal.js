@@ -42,7 +42,7 @@ const ColorSquare = styled.View(({ color, size }) => ({
   marginRight: 10,
 }))
 
-const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
+const SelectBlockModal = ({ currentColor = {}, onClosed, t }) => {
   const [chosenColor, setChosenColor] = useState(null)
   const dispatch = useDispatch()
 
@@ -87,7 +87,7 @@ const SelectBlockModal = ({ currentColor = {}, onClosed }) => {
                   onClosed()
                 }}
               >
-                Valider
+                {t('Valider')}
               </Button>
             </Box>
           </>
