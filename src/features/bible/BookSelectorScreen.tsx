@@ -9,7 +9,8 @@ import { NavigationStackProp } from 'react-navigation-stack'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { LinkBox } from '~common/Link'
-import { useTranslation, getI18n } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import i18n from '~i18n'
 
 interface Props {
   navigation: NavigationStackProp<any>
@@ -92,8 +93,8 @@ const BookSelector = ({ navigation }: Props) => {
   )
 }
 
-BookSelector.navigationOptions = {
-  tabBarLabel: getI18n().t('Livres'),
-}
+BookSelector.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Livres'),
+})
 
 export default BookSelector

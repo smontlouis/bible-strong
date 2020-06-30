@@ -22,7 +22,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <Container>
-      <Header hasBackButton title="Se connecter" />
+      <Header hasBackButton title={t('Se connecter')} />
       <ScrollView>
         <Box padding={20}>
           <Text title fontSize={30} marginBottom={30}>

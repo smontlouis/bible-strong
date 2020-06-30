@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
 import { Provider as PaperProvider } from 'react-native-paper'
-import { StatusBar, AppState } from 'react-native'
+import { StatusBar, AppState, AppStateStatus } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
@@ -17,6 +17,7 @@ import {
   getChangelog,
   getVersionUpdate,
   getDatabaseUpdate,
+  resetCompareVersion,
 } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
@@ -24,9 +25,17 @@ import Changelog from '~common/Changelog'
 import getTheme, { Theme } from '~themes/index'
 import { paperTheme } from '~themes/default'
 import { DBStateProvider } from '~helpers/databaseState'
+import { setVersion } from '~redux/modules/bible'
+import i18n from '~i18n'
+import { RootState } from '~redux/modules/reducer'
+import { NavigationState, NavigationParams } from 'react-navigation'
+import { Persistor } from 'redux-persist'
 
 interface Props {
   theme: string
+  dispatch: Function
+  fontFamily: string
+  persistor: Persistor
 }
 
 class InitApp extends React.Component<Props> {
@@ -36,20 +45,26 @@ class InitApp extends React.Component<Props> {
     this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
     AppState.addEventListener('change', this.handleAppStateChange)
+
+    i18n.on('languageChanged', async lang => {
+      const isFR = lang === 'fr'
+      this.props.dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
+      this.props.dispatch(resetCompareVersion(isFR ? 'LSG' : 'KJV'))
+    })
   }
 
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange)
   }
 
-  handleAppStateChange = nextAppState => {
+  handleAppStateChange = (nextAppState: AppStateStatus) => {
     if (nextAppState.match(/inactive|background/)) {
       console.log('App mode - background!')
       this.props.dispatch(updateUserData())
     }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     if (prevProps.theme !== this.props.theme) {
       this.changeStatusBarStyle()
     }
@@ -61,10 +76,12 @@ class InitApp extends React.Component<Props> {
     else StatusBar.setBarStyle('dark-content')
   }
 
-  getActiveRouteName = navigationState => {
-    if (!navigationState) {
-      return null
-    }
+  getActiveRouteName = (
+    navigationState: NavigationState
+  ): {
+    route: string
+    params: NavigationParams | undefined
+  } => {
     const route = navigationState.routes[navigationState.index]
     // dive into nested navigators
     if (route.routes) {
@@ -76,7 +93,10 @@ class InitApp extends React.Component<Props> {
     }
   }
 
-  onNavigationStateChange = (prevState, currentState) => {
+  onNavigationStateChange = (
+    prevState: NavigationState,
+    currentState: NavigationState
+  ) => {
     const {
       route: currentScreen,
       params: currentParams,
@@ -148,7 +168,7 @@ class InitApp extends React.Component<Props> {
 }
 
 export default compose(
-  connect(state => ({
+  connect((state: RootState) => ({
     theme: state.user.bible.settings.theme,
     fontFamily: state.user.fontFamily,
   })),

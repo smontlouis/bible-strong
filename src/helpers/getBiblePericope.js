@@ -1,3 +1,5 @@
+import { getLangIsFr } from '~i18n'
+
 const PericopeBDS = require('../assets/bible_versions/bible-bds-pericope.json')
 const PericopeFMAR = require('../assets/bible_versions/bible-fmar-pericope.json')
 const PericopeFRC97 = require('../assets/bible_versions/bible-frc97-pericope.json')
@@ -7,6 +9,8 @@ const PericopeCHU = require('../assets/bible_versions/bible-chu-pericope.json')
 const PericopeNEG79 = require('../assets/bible_versions/bible-neg79-pericope.json')
 const PericopeNVS78P = require('../assets/bible_versions/bible-nvs78p-pericope.json')
 const PericopeS21 = require('../assets/bible_versions/bible-s21-pericope.json')
+const PericopeESV = require('../assets/bible_versions/bible-esv-pericope.json')
+const PericopeNJKV = require('../assets/bible_versions/bible-nkjv-pericope.json')
 
 const getBiblePericope = version => {
   switch (version) {
@@ -38,8 +42,14 @@ const getBiblePericope = version => {
     case 'S21': {
       return PericopeS21
     }
+    case 'ESV': {
+      return PericopeESV
+    }
+    case 'NKJV': {
+      return PericopeNJKV
+    }
     default: {
-      return PericopeLSG
+      return getLangIsFr() ? PericopeLSG : PericopeESV
     }
   }
 }

@@ -6,7 +6,8 @@ import { RootState } from '~redux/modules/reducer'
 import ExplorePlanItem from './ExplorePlanItem'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
-import { useTranslation, getI18n } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import i18n from '~i18n'
 
 const ExploreScreen = () => {
   const { t } = useTranslation()
@@ -58,8 +59,8 @@ const ExploreScreen = () => {
   )
 }
 
-ExploreScreen.navigationOptions = {
-  tabBarLabel: getI18n().t('Explorer'),
-}
+ExploreScreen.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Explorer'),
+})
 
 export default ExploreScreen

@@ -22,6 +22,7 @@ module.exports = function(api) {
             '~redux': './src/redux',
             '~themes': './src/themes',
             '~styled': './src/styled',
+            '~i18n': './i18n',
           },
         },
       ],

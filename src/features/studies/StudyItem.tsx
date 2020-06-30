@@ -14,6 +14,7 @@ import truncate from '~helpers/truncate'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 export const LinkBox = Box.withComponent(Link)
 
@@ -24,8 +25,8 @@ const StudyLink = styled(Link)(({ theme }) => ({
 }))
 
 const StudyItem = ({ study, theme, setStudySettings }) => {
-  const { t, i18n } = useTranslation()
-  const isFR = i18n.language === 'fr'
+  const { t } = useTranslation()
+  const isFR = useLanguage()
 
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
     locale: isFR ? fr : enGB,

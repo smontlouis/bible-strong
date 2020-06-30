@@ -15,6 +15,7 @@ import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
 import theme from '~themes/default'
 import { withTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const NoteLink = styled(Link)(({ theme }) => ({
   paddingVertical: 20,
@@ -25,13 +26,12 @@ const NoteLink = styled(Link)(({ theme }) => ({
 
 class BibleNoteItem extends React.Component {
   render() {
-    const { item, setNoteSettings, i18n, t } = this.props
-    console.log(t)
-    const isFr = i18n.language === 'fr'
+    const { item, setNoteSettings, t } = this.props
+    const isFR = useLanguage()
 
     const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
-      locale: isFr ? fr : enGB,
+      locale: isFR ? fr : enGB,
     })
 
     return (

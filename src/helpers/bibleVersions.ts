@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system'
 import to from 'await-to-js'
 
 import { biblesRef } from '~helpers/firebase'
-import { isFR } from '../../i18n'
+import { getLangIsFr } from '~i18n'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   if (versionId === 'LSG') {
@@ -104,6 +104,7 @@ interface Version {
   name: string
   name_en?: string
   c?: string
+  type?: 'en' | 'fr'
 }
 
 export const versions: {
@@ -113,51 +114,61 @@ export const versions: {
     id: 'LSG',
     name: 'Bible Segond 1910',
     c: '1910 - Libre de droit',
+    type: 'fr',
   },
   LSGS: {
     id: 'LSGS',
     name: 'Bible Segond 1910 + Strongs',
     c: '1910 - Libre de droit',
+    type: 'fr',
   },
   NBS: {
     id: 'NBS',
     name: 'Nouvelle Bible Segond',
     c: '© 2002 Société Biblique Française',
+    type: 'fr',
   },
   NEG79: {
     id: 'NEG79',
     name: 'Nouvelle Edition de Genève 1979',
     c: '© 1979 Société Biblique de Genève',
+    type: 'fr',
   },
   NVS78P: {
     id: 'NVS78P',
     name: 'Nouvelle Segond révisée',
     c: '© Alliance Biblique Française',
+    type: 'fr',
   },
   S21: {
     id: 'S21',
     name: 'Bible Segond 21',
     c: '© 2007 Société Biblique de Genève',
+    type: 'fr',
   },
   INT: {
     id: 'INT',
     name: 'Bible Interlinéaire',
     c: '© Editio Critica Maior',
+    type: 'fr',
   },
   KJF: {
     id: 'KJF',
     name: 'King James Française',
     c: '© 1611 Traduction française, Bible des réformateurs 2006',
+    type: 'fr',
   },
   DBY: {
     id: 'DBY',
     name: 'Bible Darby',
     c: '1890 Libre de droit',
+    type: 'fr',
   },
   OST: {
     id: 'OST',
     name: 'Ostervald',
     c: '1881 Libre de droit',
+    type: 'fr',
   },
   // JER: {
   //   id: 'JER',
@@ -168,66 +179,79 @@ export const versions: {
     id: 'CHU',
     name: 'Bible Chouraqui 1985',
     c: '© 1977 Editions Desclée de Brouwer',
+    type: 'fr',
   },
   BDS: {
     id: 'BDS',
     name: 'Bible du Semeur',
     c: '© 2000 Société Biblique Internationale',
+    type: 'fr',
   },
   FMAR: {
     id: 'FMAR',
     name: 'Martin 1744',
     c: '1744 Libre de droit',
+    type: 'fr',
   },
   BFC: {
     id: 'BFC',
     name: 'Bible en Français courant',
     c: '© Alliance Biblique Française',
+    type: 'fr',
   },
   FRC97: {
     id: 'FRC97',
     name: 'Français courant',
     c: '© Alliance Biblique Française',
+    type: 'fr',
   },
   NFC: {
     id: 'NFC',
     name: 'Nouvelle Français courant',
     c: "Alliance biblique française Bibli'0, ©2019",
+    type: 'fr',
   },
   KJV: {
     id: 'KJV',
     name: 'King James Version',
     c: '1611 Libre de droit',
+    type: 'en',
   },
   NKJV: {
     id: 'NKJV',
     name: 'New King James Version',
     c: '© 1982 Thomas Nelson, Inc',
+    type: 'en',
   },
   ESV: {
     id: 'ESV',
     name: 'English Standard Version',
     c: '© 2001 Crossway Bibles',
+    type: 'en',
   },
   NIV: {
     id: 'NIV',
     name: 'New International Version',
     c: '© NIV® 1973, 1978, 1984, 2011 Biblica',
+    type: 'en',
   },
   BCC1923: {
     id: 'BCC1923',
     name: 'Bible catholique Crampon 1923',
     c: '© mission-web.com',
+    type: 'fr',
   },
   PDV2017: {
     id: 'PDV2017',
     name: 'Parole de Vie 2017',
     c: "© 2000 Société biblique française - Bibli'O",
+    type: 'fr',
   },
   POV: {
     id: 'POV',
     name: 'Parole vivante (NT)',
     c: '© 2013',
+    type: 'fr',
   },
   BHS: {
     id: 'BHS',
@@ -254,6 +278,22 @@ export const versions: {
     id: 'TR1894',
     name: 'Scrivener’s Textus Receptus 1894 (NT)',
   },
+}
+
+export const getVersions = () => {
+  if (getLangIsFr()) {
+    return versions
+  }
+
+  const versions_en = Object.fromEntries(
+    Object.keys(versions)
+      .filter(v => versions[v].type !== 'fr')
+      .map(v => {
+        return [v, versions[v]]
+      })
+  )
+
+  return versions_en
 }
 
 interface VersionsBySection {
@@ -333,7 +373,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
 )
 
 export const getVersionsBySections = () => {
-  if (isFR) {
+  if (getLangIsFr()) {
     return versionsBySections
   }
 

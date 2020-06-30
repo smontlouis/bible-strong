@@ -28,6 +28,7 @@ import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
 import NaveResultItem from '~features/nave/NaveResultItem'
 import DictionnaryResultItem from '~features/dictionnary/DictionnaryResultItem'
 import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const NoteItem = ({ item, t, isFR }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
@@ -72,8 +73,8 @@ const NoteItem = ({ item, t, isFR }) => {
 const TagScreen = ({ navigation }) => {
   const { item } = navigation.state.params
   const dispatch = useDispatch()
-  const { t, i18n } = useTranslation()
-  const isFR = i18n.language === 'fr'
+  const { t } = useTranslation()
+  const isFR = useLanguage()
 
   const {
     highlights,

@@ -8,7 +8,8 @@ import Spacer from '~common/ui/Spacer'
 import PlanItem from './MyPlanItem'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
-import { useTranslation, getI18n } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import i18n from '~i18n'
 
 const MyPlanListScreen = () => {
   const plans = useComputedPlanItems()
@@ -47,8 +48,8 @@ const MyPlanListScreen = () => {
   )
 }
 
-MyPlanListScreen.navigationOptions = {
-  tabBarLabel: getI18n().t('Mes plans'),
-}
+MyPlanListScreen.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Mes plans'),
+})
 
 export default MyPlanListScreen

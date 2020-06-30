@@ -22,6 +22,7 @@ import TouchableIcon from './TouchableIcon'
 import TouchableChip from './TouchableChip'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import verseToReference from '../../helpers/verseToReference'
+import { useTranslation } from 'react-i18next'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
@@ -63,6 +64,7 @@ const VersesModal = ({
   const theme = useTheme()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const modalRef = React.useRef(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isPrevVisible !== isVisible) {
@@ -229,28 +231,28 @@ const VersesModal = ({
               icon={LexiqueIcon}
               color="primary"
               onPress={showStrongDetail}
-              label="Lexique"
+              label={t('Lexique')}
               disabled={moreThanOneVerseSelected}
             />
             <TouchableSvgIcon
               icon={DictionnaireIcon}
               color="secondary"
               onPress={showDictionnaryDetail}
-              label="Dictionnaire"
+              label={t('Dictionnaire')}
               disabled={moreThanOneVerseSelected}
             />
             <TouchableSvgIcon
               icon={NaveIcon}
               color="quint"
               onPress={onOpenNave}
-              label="Thèmes"
+              label={t('Thèmes')}
               disabled={moreThanOneVerseSelected}
             />
             <TouchableSvgIcon
               icon={RefIcon}
               color="quart"
               onPress={onOpenReferences}
-              label="Références"
+              label={t('Références')}
               disabled={moreThanOneVerseSelected}
             />
           </HalfContainer>
@@ -269,26 +271,26 @@ const VersesModal = ({
               <TouchableChip
                 name="layers"
                 onPress={compareVerses}
-                label="Comparer"
+                label={t('Comparer')}
               />
               <TouchableChip
                 name="file-plus"
                 onPress={onCreateNoteClick}
-                label="Note"
+                label={t('Note')}
               />
               <TouchableChip
                 name="copy"
                 onPress={copyToClipboard}
-                label="Copier"
+                label={t('Copier')}
               />
               <TouchableChip
                 name="share-2"
                 onPress={shareVerse}
-                label="Partager"
+                label={t('Partager')}
               />
               <TouchableChip
                 onPress={selectAllVerses}
-                label="Tout sélectionner"
+                label={t('Tout sélectionner')}
               />
             </ScrollView>
           </HalfContainer>

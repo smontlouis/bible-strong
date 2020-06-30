@@ -649,6 +649,8 @@ PODS:
     - React
   - RNIap (4.4.9):
     - React
+  - RNLocalize (1.4.0):
+    - React
   - RNReanimated (1.8.0):
     - React
   - RNScreens (2.0.0-beta.4):
@@ -761,6 +763,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-community/google-signin`)"
   - RNIap (from `../node_modules/react-native-iap`)
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
@@ -944,6 +947,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/google-signin"
   RNIap:
     :path: "../node_modules/react-native-iap"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -1076,6 +1081,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNGoogleSignin: a00f87261ea13df9a5cea8deafa6927d6f2c3562
   RNIap: 4c36518a34ab4cc3f5762037cc510c2e7290485c
+  RNLocalize: b6df30cc25ae736d37874f9bce13351db2f56796
   RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
   RNScreens: 6053a007667bea81a69087caadf103bba04c032e
   RNSentry: 370623102247ebea20191b5fb549ecc7a275b324

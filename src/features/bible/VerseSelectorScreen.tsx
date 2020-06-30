@@ -12,7 +12,7 @@ import { strongDB } from '~helpers/database'
 import loadCountVerses from '~helpers/loadCountVerses'
 import * as BibleActions from '~redux/modules/bible'
 import SelectorItem from './SelectorItem'
-import { getI18n } from 'react-i18next'
+import i18n from '~i18n'
 
 class VerseSelector extends Component {
   state = {
@@ -113,8 +113,8 @@ const EnhancedVerseSelector = compose(
   )
 )(VerseSelector)
 
-EnhancedVerseSelector.navigationOptions = {
-  tabBarLabel: getI18n().t('Versets'),
-}
+EnhancedVerseSelector.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Versets'),
+})
 
 export default EnhancedVerseSelector

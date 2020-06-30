@@ -16,6 +16,7 @@ import Link from '~common/Link'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import SnackBar from '~common/SnackBar'
+import { useTranslation } from 'react-i18next'
 
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
@@ -61,6 +62,7 @@ function clearEmpties(o) {
 }
 
 const PericopeScreen = ({ navigation }) => {
+  const { t } = useTranslation()
   const { initialVersion, initialBook } = useSelector(state => ({
     initialVersion: state.bible.selectedVersion,
     initialBook: state.bible.selectedBook,
@@ -88,7 +90,7 @@ const PericopeScreen = ({ navigation }) => {
         version={version}
         setVersion={setVersion}
         hasBackButton
-        title={`Péricopes ${version}`}
+        title={`${t('Péricopes')} ${version}`}
       />
       <ScrollView>
         <Box padding={20}>
@@ -111,7 +113,7 @@ const PericopeScreen = ({ navigation }) => {
                       fontSize={12}
                       marginBottom={10}
                     >
-                      CHAPITRE {chapterKey}
+                      {t('CHAPITRE')} {chapterKey}
                     </Text>
                   )}
                   {Object.entries(chapterObject).map(

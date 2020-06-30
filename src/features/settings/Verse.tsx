@@ -18,6 +18,7 @@ import books from '~assets/bible_versions/books-desc'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -49,8 +50,8 @@ const VerseComponent = ({
   setSettings,
 }) => {
   const verses = useBibleVerses(verseIds)
-  const { t, i18n } = useTranslation()
-  const isFr = i18n.language === 'fr'
+  const { t } = useTranslation()
+  const isFR = useLanguage()
   const { colors } = useSelector(state => ({
     colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
   }))
@@ -61,7 +62,7 @@ const VerseComponent = ({
 
   const { title, content } = formatVerseContent(verses)
   const formattedDate = distanceInWords(Number(date), Date.now(), {
-    locale: isFr ? fr : enGB,
+    locale: isFR ? fr : enGB,
   })
   const { Livre, Chapitre, Verset } = verses[0]
   return (

@@ -18,6 +18,7 @@ import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { deleteHistory } from '~redux/modules/user'
 import { useTranslation, Trans } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const Chip = styled.View(({ theme, color }) => ({
   height: 15,
@@ -31,13 +32,13 @@ const Chip = styled.View(({ theme, color }) => ({
 }))
 
 const HistoryItem = ({ item }) => {
-  const { t, i18n } = useTranslation()
-  const isFr = i18n.language === 'fr'
+  const { t } = useTranslation()
+  const isFR = useLanguage()
 
   if (item.type === 'strong') {
     const { Hebreu, Grec, Mot, date, book } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFr ? fr : enGB,
+      locale: isFR ? fr : enGB,
     })
     return (
       <Link route="BibleStrongDetail" params={{ book, strongReference: item }}>
@@ -66,7 +67,7 @@ const HistoryItem = ({ item }) => {
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFr ? fr : enGB,
+      locale: isFR ? fr : enGB,
     })
     let { title } = formatVerseContent([
       { Livre: book, Chapitre: chapter, Verset: verse },
@@ -107,7 +108,7 @@ const HistoryItem = ({ item }) => {
   if (item.type === 'word') {
     const { word, date } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFr ? fr : enGB,
+      locale: isFR ? fr : enGB,
     })
     return (
       <Link route="DictionnaryDetail" params={{ word }}>
@@ -132,7 +133,7 @@ const HistoryItem = ({ item }) => {
   if (item.type === 'nave') {
     const { name, name_lower, date } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFr ? fr : enGB,
+      locale: isFR ? fr : enGB,
     })
     return (
       <Link route="NaveDetail" params={{ name, name_lower }}>

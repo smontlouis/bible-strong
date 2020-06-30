@@ -1,5 +1,9 @@
 import React from 'react'
-import { ScrollView as RNScrollView, Linking, Platform } from 'react-native'
+import {
+  ScrollView as RNScrollView,
+  Linking,
+  TouchableOpacity,
+} from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 
@@ -22,12 +26,18 @@ import { useTranslation } from 'react-i18next'
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
 
 const HomeScreen = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   return (
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
-
+        <TouchableOpacity
+          onPress={() =>
+            i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
+          }
+        >
+          <Text>CHANGE ME {i18n.language}</Text>
+        </TouchableOpacity>
         <Box grey pt={20} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}

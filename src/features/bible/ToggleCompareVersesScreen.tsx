@@ -11,6 +11,7 @@ import Border from '~common/ui/Border'
 import Header from '~common/Header'
 import { toggleCompareVersion } from '~redux/modules/user'
 import { getVersionsBySections } from '~helpers/bibleVersions'
+import { useTranslation } from 'react-i18next'
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
@@ -50,10 +51,11 @@ const ToggleCompareVersesScreen = () => {
     Object.keys(state.user.bible.settings.compare)
   )
   const dispatch = useDispatch()
+  const { t } = useTranslation()
 
   return (
     <Container>
-      <Header hasBackButton title="Sélectionner les versions" />
+      <Header hasBackButton title={t('Sélectionner les versions')} />
       <SectionList
         contentContainerStyle={{ paddingTop: 0 }}
         stickySectionHeadersEnabled={false}

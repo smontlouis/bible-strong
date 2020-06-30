@@ -22,7 +22,8 @@
       "~themes/*": ["src/themes/*"],
       "~styled/*": ["src/styled/*"],
       "~themes": ["src/themes"],
-      "~styled": ["src/styled"]
+      "~styled": ["src/styled"],
+      "~i18n": ["i18n"]
     }
   },
   "exclude": [

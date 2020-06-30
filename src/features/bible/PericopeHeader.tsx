@@ -5,7 +5,7 @@ import { pure } from 'recompose'
 import styled from '@emotion/native'
 
 import Link from '~common/Link'
-import { versions } from '~helpers/bibleVersions'
+import { getVersions } from '~helpers/bibleVersions'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Back from '~common/Back'
@@ -35,7 +35,7 @@ const getPrevNextVersions = (versionsArray, version) => {
 }
 
 const Header = ({ hasBackButton, isModal, title, version, setVersion }) => {
-  const versionsArray = Object.keys(versions)
+  const versionsArray = Object.keys(getVersions())
   const [prevVersion, nextVersion] = getPrevNextVersions(versionsArray, version)
   return (
     <HeaderBox row overflow="visibility">

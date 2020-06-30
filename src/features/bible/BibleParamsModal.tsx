@@ -16,7 +16,7 @@ import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import fonts from '~helpers/fonts'
 import { usePrevious } from '~helpers/usePrevious'
-import { useTranslation, getI18n } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 const Container = styled.View(({ theme }) => ({
   width: '100%',
@@ -49,31 +49,6 @@ const FontText = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
 }))
 
-const alignContentToString = {
-  left: getI18n().t('À gauche'),
-  justify: getI18n().t('Justifié'),
-}
-
-const textDisplayToString = {
-  inline: getI18n().t('Continu'),
-  block: getI18n().t('À la ligne'),
-}
-
-const themeToString = {
-  default: getI18n().t('Jour'),
-  dark: getI18n().t('Nuit'),
-}
-
-const pressToString = {
-  shortPress: getI18n().t('Appui court'),
-  longPress: getI18n().t('Appui long'),
-}
-
-const notesDisplayToString = {
-  inline: getI18n().t('À la ligne'),
-  block: getI18n().t('En icone'),
-}
-
 const BibleParamsModal = ({
   isOpen,
   onClosed,
@@ -99,6 +74,31 @@ const BibleParamsModal = ({
   const isPrevOpen = usePrevious(isOpen)
   const modalRef = React.useRef(null)
   const { t } = useTranslation()
+
+  const alignContentToString = {
+    left: t('À gauche'),
+    justify: t('Justifié'),
+  }
+
+  const textDisplayToString = {
+    inline: t('Continu'),
+    block: t('À la ligne'),
+  }
+
+  const themeToString = {
+    default: t('Jour'),
+    dark: t('Nuit'),
+  }
+
+  const pressToString = {
+    shortPress: t('Appui court'),
+    longPress: t('Appui long'),
+  }
+
+  const notesDisplayToString = {
+    inline: t('À la ligne'),
+    block: t('En icone'),
+  }
 
   React.useEffect(() => {
     if (isPrevOpen !== isOpen) {

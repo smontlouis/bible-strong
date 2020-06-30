@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import * as BibleActions from '~redux/modules/bible'
 
 import SelectorItem from './SelectorItem'
-import { getI18n } from 'react-i18next'
+import i18n from '~i18n'
 
 class ChapterSelector extends Component {
   onChapterChange = (chapter: number) => {
@@ -53,8 +53,8 @@ const EnhancedChapterSelector = compose(
   )
 )(ChapterSelector)
 
-EnhancedChapterSelector.navigationOptions = {
-  tabBarLabel: getI18n().t('Chapitres'),
-}
+EnhancedChapterSelector.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Chapitres'),
+})
 
 export default EnhancedChapterSelector
