@@ -6,16 +6,23 @@ import Text from '~common/ui/Text'
 import FastImage from 'react-native-fast-image'
 import { wp } from '~helpers/utils'
 import { FeatherIcon } from '~common/ui/Icon'
+import useLanguage from '~helpers/useLanguage'
+
 const width = wp(50, 500)
 
 const SectionImage = ({
   image,
   title,
+  titleEn,
   sectionTitle,
+  sectionTitleEn,
   color,
   subTitle,
+  subTitleEn,
   direction,
 }: ShallowTimelineSection & { direction?: 'previous' | 'next' }) => {
+  const isFR = useLanguage()
+
   return (
     <Box flex bg="reverse" row>
       <Box width={60} center>
@@ -25,18 +32,18 @@ const SectionImage = ({
       </Box>
       <Box flex center>
         <Text title fontSize={20}>
-          {sectionTitle}
+          {isFR ? sectionTitle : sectionTitleEn}
         </Text>
 
         <Text py={10} fontSize={30} title textAlign="center">
-          {title.toUpperCase()}
+          {isFR ? title.toUpperCase() : titleEn.toUpperCase()}
         </Text>
 
         <Box>
           <Box height={2} bg="default" />
 
           <Text py={3} textAlign="center" title>
-            {subTitle}
+            {isFR ? subTitle : subTitleEn}
           </Text>
           <Box height={2} bg="default" />
         </Box>

@@ -8,7 +8,7 @@ import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 
-import { databasesRef } from '~helpers/firebase'
+import { getDatabasesRef } from '~helpers/firebase'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 
 import {
@@ -93,7 +93,7 @@ class DBSelectorItem extends React.Component {
     const { path, database } = this.props
     this.setState({ isLoading: true })
 
-    const uri = await databasesRef[database].getDownloadURL()
+    const uri = await getDatabasesRef()[database].getDownloadURL()
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -145,38 +145,37 @@ class DBSelectorItem extends React.Component {
   delete = async () => {
     const { path } = this.props
     const [, dispatch] = this.context
-    if (this.props.database !== 'SEARCH') {
-      dispatch({
-        type:
-          this.props.database === 'STRONG'
-            ? 'strong.reset'
-            : 'dictionnaire.reset',
-      })
-      switch (this.props.database) {
-        case 'STRONG': {
-          await strongDB.delete()
-          break
-        }
-        case 'DICTIONNAIRE': {
-          await deleteDictionnaireDB()
-          break
-        }
-        case 'TRESOR': {
-          await deleteTresorDB()
-          break
-        }
-        case 'MHY': {
-          await mhyDB.delete()
-          this.props.dispatch(setSettingsCommentaires(false))
-          break
-        }
-        case 'NAVE': {
-          await naveDB.delete()
-          break
-        }
-        default: {
-          console.log('Database download finished: Nothing to do')
-        }
+
+    dispatch({
+      type:
+        this.props.database === 'STRONG'
+          ? 'strong.reset'
+          : 'dictionnaire.reset',
+    })
+    switch (this.props.database) {
+      case 'STRONG': {
+        await strongDB.delete()
+        break
+      }
+      case 'DICTIONNAIRE': {
+        await deleteDictionnaireDB()
+        break
+      }
+      case 'TRESOR': {
+        await deleteTresorDB()
+        break
+      }
+      case 'MHY': {
+        await mhyDB.delete()
+        this.props.dispatch(setSettingsCommentaires(false))
+        break
+      }
+      case 'NAVE': {
+        await naveDB.delete()
+        break
+      }
+      default: {
+        console.log('Database download finished: Nothing to do')
       }
     }
 

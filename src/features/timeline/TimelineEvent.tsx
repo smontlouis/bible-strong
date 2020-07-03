@@ -13,6 +13,7 @@ import { Divider } from 'react-native-paper'
 import FastImage from 'react-native-fast-image'
 import { TimelineEvent as TimelineEventProps } from './types'
 import { Modalize } from 'react-native-modalize'
+import useLanguage from '~helpers/useLanguage'
 
 const AnimatedBox = Animated.createAnimatedComponent(Box)
 const LinkBox = Box.withComponent(Link)
@@ -36,6 +37,7 @@ const TimelineEvent = ({
   slug,
   row,
   title,
+  titleEn,
   start,
   image,
   end,
@@ -47,6 +49,7 @@ const TimelineEvent = ({
   eventModalRef,
   setEvent,
 }: Props) => {
+  const isFR = useLanguage()
   const { current: top } = React.useRef(rowToPx(row))
   const { current: left } = React.useRef(yearsToPx(start))
   const { current: width } = React.useRef(
@@ -81,7 +84,7 @@ const TimelineEvent = ({
           justifyContent="center"
         >
           <Text color="white" fontSize={10} numberOfLines={1}>
-            {title}
+            {isFR ? title : titleEn}
           </Text>
         </Box>
         <Box px={10} justifyContent="center">
@@ -122,7 +125,7 @@ const TimelineEvent = ({
         }}
       >
         <Text fontSize={12} numberOfLines={2}>
-          {title}
+          {isFR ? title : titleEn}
         </Text>
         <Divider style={{ width: '100%' }} />
         <Text fontSize={10} textAlign="center">

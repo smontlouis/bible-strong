@@ -206,6 +206,8 @@ class BibleStrongDetailScreen extends React.Component {
     const { tags, navigation, t } = this.props
     const book = navigation.getParam('book', 0)
 
+    console.log(Definition)
+
     return (
       <Container>
         <Box
@@ -334,7 +336,7 @@ class BibleStrongDetailScreen extends React.Component {
                 <SubTitle color="tertiary">
                   {t('Généralement traduit par')}
                 </SubTitle>
-                <Paragraph>{LSG}</Paragraph>
+                <StylizedHTMLView value={LSG} />
               </ViewItem>
             )}
             {!!Origine && (

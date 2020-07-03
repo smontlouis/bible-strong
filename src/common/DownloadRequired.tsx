@@ -5,7 +5,16 @@ import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Button from '~common/ui/Button'
+
+interface Props {
+  title: string
+  fileSize: number
+  setStartDownload: (value: boolean) => void
+  hasBackButton?: boolean
+  size?: number
+  small?: boolean
+  noHeader?: boolean
+}
 
 const DownloadRequired = ({
   title,
@@ -15,7 +24,7 @@ const DownloadRequired = ({
   size = 100,
   small,
   noHeader,
-}) => {
+}: Props) => {
   const padding = small ? 10 : 30
   const iconSize = small ? 20 : size
   return (

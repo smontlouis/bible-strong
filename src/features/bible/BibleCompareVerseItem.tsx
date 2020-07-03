@@ -6,7 +6,10 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import {
+  getIfVersionNeedsDownload,
+  isStrongVersion,
+} from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
 import books from '~assets/bible_versions/books-desc'
 
@@ -57,11 +60,7 @@ class CompareVerseItem extends React.Component {
       .split('-')
       .map(Number)
 
-    if (
-      (!content && versionNeedsDownload) ||
-      versionId === 'INT' ||
-      versionId === 'LSGS'
-    ) {
+    if ((!content && versionNeedsDownload) || isStrongVersion(versionId)) {
       return null
     }
 

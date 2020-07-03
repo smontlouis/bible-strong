@@ -17,7 +17,8 @@ export default function loadBible(bible, position) {
           resolve(LSGBible)
           break
         }
-        case 'KJV': {
+        case 'KJV':
+        case 'KJVS': {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])
           }

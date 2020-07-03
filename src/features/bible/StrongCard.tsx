@@ -181,7 +181,9 @@ class StrongCard extends React.Component {
                 htmlStyle={{
                   p: { ...smallTextStyle(theme) },
                   em: { ...smallTextStyle(theme) },
+                  strong: { ...smallTextStyle(theme) },
                   a: { ...smallTextStyle(theme) },
+                  i: { ...smallTextStyle(theme) },
                   li: { ...smallTextStyle(theme) },
                   ol: { ...smallTextStyle(theme) },
                   ul: { ...smallTextStyle(theme) },
@@ -194,7 +196,19 @@ class StrongCard extends React.Component {
           {!!LSG && (
             <ViewItem>
               <SubTitle color="darkGrey">Généralement traduit par</SubTitle>
-              <SmallParagraph>{LSG}</SmallParagraph>
+              <StylizedHTMLView
+                htmlStyle={{
+                  p: { ...smallTextStyle(theme) },
+                  em: { ...smallTextStyle(theme) },
+                  strong: { ...smallTextStyle(theme) },
+                  a: { ...smallTextStyle(theme) },
+                  i: { ...smallTextStyle(theme) },
+                  li: { ...smallTextStyle(theme) },
+                  ol: { ...smallTextStyle(theme) },
+                  ul: { ...smallTextStyle(theme) },
+                }}
+                value={LSG}
+              />
             </ViewItem>
           )}
         </Box>

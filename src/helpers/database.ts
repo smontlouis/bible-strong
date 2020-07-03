@@ -1,4 +1,6 @@
 import SQLite from 'react-native-sqlite-storage'
+import * as FileSystem from 'expo-file-system'
+import { databases } from './databases'
 
 const RNFS = require('react-native-fs')
 
@@ -163,7 +165,7 @@ class NaveDB {
   init = () => {
     this.dbNave = SQLite.openDatabase(
       {
-        name: 'naveFr',
+        name: 'naveFr.sqlite',
         createFromLocation: '/SQLite/naveFr.sqlite',
       },
       () => {
@@ -186,3 +188,17 @@ class NaveDB {
 }
 
 export const naveDB = new NaveDB()
+
+export const deleteAllDatabases = () => {
+  // Reload app
+  strongDB.delete()
+  deleteDictionnaireDB()
+  deleteTresorDB()
+  mhyDB.delete()
+  naveDB.delete()
+
+  Object.values(databases).map(async db => {
+    const file = await FileSystem.getInfoAsync(db.path)
+    if (file.exists) FileSystem.deleteAsync(file.uri)
+  })
+}

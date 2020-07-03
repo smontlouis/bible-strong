@@ -2,7 +2,6 @@ import React from 'react'
 import * as FileSystem from 'expo-file-system'
 import { TouchableOpacity, Alert } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
-import styled from '@emotion/native'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
@@ -13,22 +12,28 @@ import { setVersionUpdated } from '~redux/modules/user'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getIfVersionNeedsDownload, Version } from '~helpers/bibleVersions'
 import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
+import styled from '~styled'
+import { Theme } from '~themes'
+import { RootState } from '~redux/modules/reducer'
+import { isStrongVersion } from '~helpers/bibleVersions'
 
 const BIBLE_FILESIZE = 2500000
 
-const Container = styled.View(({ needsUpdate, theme }) => ({
-  padding: 20,
-  paddingTop: 10,
-  paddingBottom: 10,
-  ...(needsUpdate
-    ? {
-        borderLeftColor: theme.colors.success,
-        borderLeftWidth: 5,
-      }
-    : {}),
-}))
+const Container = styled.View(
+  ({ needsUpdate, theme }: { needsUpdate?: boolean; theme: Theme }) => ({
+    padding: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+    ...(needsUpdate
+      ? {
+          borderLeftColor: theme.colors.success,
+          borderLeftWidth: 5,
+        }
+      : {}),
+  })
+)
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -36,25 +41,31 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
-const TextVersion = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12,
-  opacity: 0.5,
-  fontWeight: 'bold',
-}))
+const TextVersion = styled.Text(
+  ({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+    fontSize: 12,
+    opacity: 0.5,
+    fontWeight: 'bold',
+  })
+)
 
-const TextCopyright = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 10,
-  backgroundColor: 'transparent',
-  opacity: 0.5,
-}))
+const TextCopyright = styled.Text(
+  ({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+    fontSize: 10,
+    backgroundColor: 'transparent',
+    opacity: 0.5,
+  })
+)
 
-const TextName = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 16,
-  backgroundColor: 'transparent',
-}))
+const TextName = styled.Text(
+  ({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+    fontSize: 16,
+    backgroundColor: 'transparent',
+  })
+)
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.quart,
@@ -64,6 +75,15 @@ const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.success,
 }))
 
+interface Props {
+  version: Version
+  isSelected?: boolean
+  onChange: (id: string) => void
+  theme: Theme
+  isParameters?: boolean
+  shareFn: (fn: () => void) => void
+}
+
 const VersionSelectorItem = ({
   version,
   isSelected,
@@ -71,18 +91,20 @@ const VersionSelectorItem = ({
   theme,
   isParameters,
   shareFn,
-}) => {
-  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState(
-    undefined
-  )
+}: Props) => {
+  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<
+    boolean
+  >()
   const [fileProgress, setFileProgress] = React.useState(0)
   const [isLoading, setIsLoading] = React.useState(false)
-  const needsUpdate = useSelector(state => state.user.needsUpdate[version.id])
+  const needsUpdate = useSelector(
+    (state: RootState) => state.user.needsUpdate[version.id]
+  )
   const dispatch = useDispatch()
 
   React.useEffect(() => {
     ;(async () => {
-      if (shareFn && version.id !== 'LSG' && version.id !== 'LSGS') {
+      if (shareFn && !isStrongVersion(version.id)) {
         shareFn(() => {
           setVersionNeedsDownload(true)
           startDownload()
@@ -95,7 +117,7 @@ const VersionSelectorItem = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const requireBiblePath = id => {
+  const requireBiblePath = (id: string) => {
     if (id === 'INT') {
       const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
       return `${sqliteDirPath}/interlineaire.sqlite`
@@ -104,7 +126,9 @@ const VersionSelectorItem = ({
     return `${FileSystem.documentDirectory}bible-${id}.json`
   }
 
-  const calculateProgress = ({ totalBytesWritten }) => {
+  const calculateProgress: FileSystem.DownloadProgressCallback = ({
+    totalBytesWritten,
+  }) => {
     const fileProgress =
       Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
     setFileProgress(fileProgress)
@@ -121,7 +145,7 @@ const VersionSelectorItem = ({
       await FileSystem.createDownloadResumable(
         uri,
         path,
-        null,
+        undefined,
         calculateProgress
       ).downloadAsync()
 

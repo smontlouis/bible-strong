@@ -1,20 +1,20 @@
 import * as FileSystem from 'expo-file-system'
 import to from 'await-to-js'
 
-import { databasesRef } from '~helpers/firebase'
+import { getDatabasesRef } from '~helpers/firebase'
 
 const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
 
-export const getIfDatabaseNeedsUpdate = async dbId => {
+export const getIfDatabaseNeedsUpdate = async (dbId: string) => {
   const { path } = databases[dbId]
 
   const [errF, file] = await to(FileSystem.getInfoAsync(path))
 
-  if (!file.exists) {
+  if (!file?.exists) {
     return false
   }
 
-  const [errRF, remoteFile] = await to(databasesRef[dbId].getMetadata())
+  const [errRF, remoteFile] = await to(getDatabasesRef()[dbId].getMetadata())
 
   if (errF || errRF) {
     console.log(`Error for${dbId}`, errF, errRF)
@@ -44,7 +44,15 @@ export const getIfDatabaseNeedsDownload = async dbId => {
   return false
 }
 
-export const databases = {
+export const databases: {
+  [DATABASEID: string]: {
+    id: string
+    name: string
+    desc: string
+    fileSize: number
+    path: string
+  }
+} = {
   DICTIONNAIRE: {
     id: 'DICTIONNAIRE',
     name: 'Dictionnaire Westphal',

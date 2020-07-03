@@ -3,9 +3,8 @@ import {
   ScrollView as RNScrollView,
   Linking,
   TouchableOpacity,
+  Alert,
 } from 'react-native'
-import * as Icon from '@expo/vector-icons'
-import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -20,22 +19,33 @@ import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
 import SwitchTheme from './SwitchTheme'
 import TheBibleProject from './TheBibleProjectPlan'
+import { FeatherIcon } from '~common/ui/Icon'
 
 import { useTranslation } from 'react-i18next'
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
+import { deleteAllDatabases } from '~helpers/database'
 
 const HomeScreen = () => {
   const { t, i18n } = useTranslation()
+
+  const confirmChangeLanguage = () => {
+    Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer ce tag ?', [
+      { text: 'Non', onPress: () => null, style: 'cancel' },
+      {
+        text: 'Oui',
+        onPress: () => {
+          i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
+          deleteAllDatabases()
+        },
+        style: 'destructive',
+      },
+    ])
+  }
+
   return (
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
-        <TouchableOpacity
-          onPress={() =>
-            i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
-          }
-        >
+        <TouchableOpacity onPress={confirmChangeLanguage}>
           <Text>CHANGE ME {i18n.language}</Text>
         </TouchableOpacity>
         <Box grey pt={20} px={20}>

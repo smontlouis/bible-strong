@@ -16,6 +16,7 @@ import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList2'
 import SectionTitle from '~common/SectionTitle'
 import waitForDatabase from '~common/waitForNaveDB'
+import useLanguage from '~helpers/useLanguage'
 
 import NaveItem from './NaveItem'
 import {
@@ -52,6 +53,7 @@ const useSectionResults = results => {
 
 const NaveScreen = () => {
   const { t } = useTranslation()
+  const isFR = useLanguage()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -93,13 +95,15 @@ const NaveScreen = () => {
         title={t('Thématique Nave')}
         noBorder
         rightComponent={
-          <Link route="NaveWarning" padding>
-            <Icon.Feather
-              size={20}
-              name="alert-triangle"
-              color="rgb(255,188,0)"
-            />
-          </Link>
+          isFR && (
+            <Link route="NaveWarning" padding>
+              <Icon.Feather
+                size={20}
+                name="alert-triangle"
+                color="rgb(255,188,0)"
+              />
+            </Link>
+          )
         }
       />
       <SearchInput

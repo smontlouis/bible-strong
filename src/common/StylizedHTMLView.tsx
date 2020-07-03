@@ -33,15 +33,20 @@ const styles = theme => ({
     fontFamily: theme.fontFamily.paragraph,
   },
   em: {
-    // color: '$color.primaryLighten',
     ...textStyle,
     fontFamily: theme.fontFamily.paragraph,
-    color: theme.colors.tertiary,
+    color: theme.colors.quart,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+  },
+  i: {
+    ...textStyle,
+    fontFamily: theme.fontFamily.paragraph,
+    color: theme.colors.quart,
     fontStyle: 'italic',
     fontWeight: 'bold',
   },
   a: {
-    // fontWeight: 'bold',
     color: theme.colors.default,
     borderStyle: 'solid',
     borderWidth: 2,
@@ -54,7 +59,7 @@ const styles = theme => ({
   },
   strong: {
     fontWeight: 'bold',
-    color: theme.colors.default,
+    color: theme.colors.quart,
     fontFamily: theme.fontFamily.paragraph,
     ...textStyle,
   },

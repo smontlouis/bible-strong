@@ -5,17 +5,22 @@ import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { TimelineSection } from './types'
 import FastImage from 'react-native-fast-image'
+import useLanguage from '~helpers/useLanguage'
 
 const LinkBox = Box.withComponent(Link)
 
 const TimelineItem = ({
   image,
   title,
+  titleEn,
   sectionTitle,
+  sectionTitleEn,
   subTitle,
+  subTitleEn,
   color,
   goTo,
 }: TimelineSection & { goTo: number }) => {
+  const isFR = useLanguage()
   return (
     <LinkBox row px={20} center mb={30} route="Timeline" params={{ goTo }}>
       <Box
@@ -32,17 +37,17 @@ const TimelineItem = ({
         justifyContent="space-between"
       >
         <Text title fontSize={12}>
-          {sectionTitle}
+          {isFR ? sectionTitle : sectionTitleEn}
         </Text>
         <Text title fontSize={18}>
-          {title}
+          {isFR ? title : titleEn}
         </Text>
 
         <Box>
           <Box height={2} bg="default" />
 
           <Text py={3} textAlign="center" fontSize={10} title>
-            {subTitle}
+            {isFR ? subTitle : subTitleEn}
           </Text>
           <Box height={2} bg="default" />
         </Box>

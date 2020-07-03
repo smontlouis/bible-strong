@@ -80,7 +80,39 @@ const styles = StyleSheet.create({
   },
 })
 
-export default class SnackBar extends Component {
+interface Props {
+  // Behaviour
+  fadeOutDuration?: number
+  duration?: string
+  isStatic?: boolean
+  tapToClose?: boolean
+
+  // Functions
+  onConfirm: () => void
+  onCancel: () => void
+  onAutoDismiss: () => void
+
+  title: string
+  textStyle: object
+  confirmText: string
+  cancelText: string
+
+  // Styles
+  style: object
+  renderContent: any
+  backgroundColor: string
+  buttonColor: string
+  textColor: string
+  position: string
+}
+
+interface State {
+  transformOffsetYTop: any
+  transformOffsetYBottom: any
+  transformOpacity: any
+}
+
+export default class SnackBar extends Component<Props, State> {
   static defaultProps = {
     // Behaviour
     fadeOutDuration: DEFAULT_FADEOUT_DURATION,
@@ -101,7 +133,7 @@ export default class SnackBar extends Component {
     position: 'bottom',
   }
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props)
 
     this.state = {
@@ -192,7 +224,7 @@ export default class SnackBar extends Component {
     })
   }
 
-  renderButton = (text, onPress, style) => {
+  renderButton = (text: string, onPress: () => void, style?: object) => {
     const { buttonColor } = this.props
 
     return (

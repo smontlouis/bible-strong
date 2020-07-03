@@ -17,6 +17,7 @@ app.json
 src/assets/db/
 src/features/plans/bible-project-plan.ts
 src/features/timeline/events.ts
+src/features/timeline/events-en.ts
 
 # Xcode
 !**/*.xcodeproj

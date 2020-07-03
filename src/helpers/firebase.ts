@@ -1,5 +1,6 @@
 import firestore from '@react-native-firebase/firestore'
 import storage, { FirebaseStorageTypes } from '@react-native-firebase/storage'
+import { getLangIsFr } from '~i18n'
 
 export const firebaseDb = firestore()
 export const storageRef = storage().ref()
@@ -49,4 +50,33 @@ export const databasesRef = {
   NAVE: storageRef.child('databases/nave-fr.sqlite'),
   STRONG: storageRef.child('databases/strong.sqlite'),
   TIMELINE: storageRef.child('databases/bible-timeline-events.json'),
+}
+
+export const databasesEnRef = {
+  MHY: storageRef.child('databases/en/commentaires-mhy.sqlite'),
+  TRESOR: storageRef.child('databases/en/commentaires-tresor.sqlite'),
+  DICTIONNAIRE: storageRef.child('databases/en/dictionnaire.sqlite'),
+  INTERLINEAIRE: storageRef.child('databases/en/interlineaire.sqlite'),
+  NAVE: storageRef.child('databases/en/nave.sqlite'),
+  STRONG: storageRef.child('databases/en/strong.sqlite'),
+  TIMELINE: storageRef.child('databases/en/bible-timeline-events.json'),
+}
+
+interface DatabasesRef {
+  [DATABASEID: string]: FirebaseStorageTypes.Reference
+  MHY: FirebaseStorageTypes.Reference
+  TRESOR: FirebaseStorageTypes.Reference
+  DICTIONNAIRE: FirebaseStorageTypes.Reference
+  INTERLINEAIRE: FirebaseStorageTypes.Reference
+  NAVE: FirebaseStorageTypes.Reference
+  STRONG: FirebaseStorageTypes.Reference
+  TIMELINE: FirebaseStorageTypes.Reference
+}
+
+export const getDatabasesRef = (): DatabasesRef => {
+  if (getLangIsFr()) {
+    return databasesRef
+  }
+
+  return databasesEnRef
 }

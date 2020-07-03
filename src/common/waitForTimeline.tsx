@@ -7,7 +7,7 @@ import SnackBar from '~common/SnackBar'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
-import { databasesRef } from '~helpers/firebase'
+import { getDatabasesRef } from '~helpers/firebase'
 import { databases } from '~helpers/databases'
 import Box from './ui/Box'
 import { hp } from '~helpers/utils'
@@ -32,7 +32,7 @@ export const useWaitForDatabase = () => {
         }
 
         try {
-          const fileUri = await databasesRef.TIMELINE.getDownloadURL()
+          const fileUri = await getDatabasesRef().TIMELINE.getDownloadURL()
 
           console.log(`Downloading ${fileUri} to ${path}`)
 

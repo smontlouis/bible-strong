@@ -8,7 +8,7 @@ const loadBibleChapter = async (bookNb, chapterNb, version = 'LSG') => {
     return res
   }
 
-  if (version === 'LSGS') {
+  if (version === 'LSGS' || version === 'KJVS') {
     const res = await loadStrongChapter(bookNb, chapterNb)
     return res
   }

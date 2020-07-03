@@ -10,7 +10,7 @@ import SectionList from '~common/ui/SectionList'
 import Border from '~common/ui/Border'
 import Header from '~common/Header'
 import { toggleCompareVersion } from '~redux/modules/user'
-import { getVersionsBySections } from '~helpers/bibleVersions'
+import { getVersionsBySections, isStrongVersion } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
@@ -27,7 +27,7 @@ const TextName = styled.Text(({ isSelected, theme }) => ({
 }))
 
 const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
-  if (version.id === 'LSGS' || version.id === 'INT') {
+  if (isStrongVersion(version.id)) {
     return null
   }
 

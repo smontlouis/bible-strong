@@ -14,7 +14,7 @@ export const getIfVersionNeedsUpdate = async (versionId: string) => {
     return false
   }
 
-  if (versionId === 'LSGS') {
+  if (versionId === 'LSGS' || versionId === 'KJVS') {
     // DO SOMETHING HERE
     return false
   }
@@ -62,7 +62,7 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
     return false
   }
 
-  if (versionId === 'LSGS') {
+  if (versionId === 'LSGS' || versionId === 'KJVS') {
     const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
     const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
@@ -99,7 +99,7 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
   return false
 }
 
-interface Version {
+export interface Version {
   id: string
   name: string
   name_en?: string
@@ -217,6 +217,12 @@ export const versions: {
     c: '1611 Libre de droit',
     type: 'en',
   },
+  KJVS: {
+    id: 'KJVS',
+    name: 'King James Version Strong',
+    c: '1611 Libre de droit',
+    type: 'en',
+  },
   NKJV: {
     id: 'NKJV',
     name: 'New King James Version',
@@ -327,6 +333,9 @@ export const versionsBySections: VersionsBySection[] = Object.values(
         sectionArray[2].data.push(version)
         return sectionArray
       }
+      case 'KJVS': {
+        return sectionArray
+      }
       default: {
         sectionArray[1].data.push(version)
         return sectionArray
@@ -347,6 +356,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':
+      case 'KJVS':
       case 'NKJV':
       case 'NIV':
       case 'ESV': {
@@ -379,3 +389,6 @@ export const getVersionsBySections = () => {
 
   return versionsBySections_en
 }
+
+export const isStrongVersion = (version: string) =>
+  version === 'INT' || version === 'LSGS' || version === 'KJVS'

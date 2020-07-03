@@ -92,7 +92,9 @@ interface UserState {
     lastSeen: number
     data: any[]
   }
-  needsUpdate: {}
+  needsUpdate: {
+    [x: string]: boolean
+  }
   fontFamily: string
   bible: {
     changelog: {}
