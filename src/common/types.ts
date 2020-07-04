@@ -16,13 +16,14 @@ export interface Plan {
   description?: string
   sections: Section[]
   author: User
+  type: 'yearly' | 'meditation'
+  lang: 'fr' | 'en'
 }
 
 type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 export interface OnlinePlan extends WithOptional<Plan, 'sections'> {
   featured?: boolean
-  type?: string
 }
 
 export type PlanStatus = 'Idle' | 'Next' | 'Progress' | 'Completed'
