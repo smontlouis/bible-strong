@@ -7,7 +7,7 @@ import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import { useDBStateValue } from '~helpers/databaseState'
 import DownloadRequired from '~common/DownloadRequired'
-import { storageRef } from '~helpers/firebase'
+import { getDatabasesRef } from '~helpers/firebase'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -60,9 +60,7 @@ export const useWaitForDatabase = () => {
             if (!window.dictionnaireDownloadHasStarted) {
               window.dictionnaireDownloadHasStarted = true
 
-              const sqliteDbUri = await storageRef
-                .child('databases/dictionnaire.sqlite')
-                .getDownloadURL()
+              const sqliteDbUri = await getDatabasesRef().DICTIONNAIRE.getDownloadURL()
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 

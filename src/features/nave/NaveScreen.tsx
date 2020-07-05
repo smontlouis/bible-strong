@@ -73,7 +73,7 @@ const NaveScreen = () => {
   if (error) {
     return (
       <Container>
-        <Header hasBackButton title={t('Désolé... ')} />
+        <Header hasBackButton title={t('Désolé...')} />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`${t('Impossible de charger la nave...')}${

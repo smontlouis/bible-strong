@@ -74,9 +74,6 @@ const useStrongZip = (dispatch: any, startDownload: any) => {
 
 const useStrongEn = (dispatch: any, startDownload: any) => {
   useEffect(() => {
-    if (getLangIsFr()) {
-      return
-    }
     if (strongDB.get()) {
       dispatch({
         type: 'strong.setLoading',
@@ -181,7 +178,7 @@ export const useWaitForDatabase = () => {
     dispatch,
   ] = useDBStateValue()
 
-  useStrongZip(dispatch, startDownload)
+  // useStrongZip(dispatch, startDownload)
   useStrongEn(dispatch, startDownload)
 
   const setStartDownload = (value: boolean) => {

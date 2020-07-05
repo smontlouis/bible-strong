@@ -2,7 +2,6 @@ import React from 'react'
 import * as FileSystem from 'expo-file-system'
 import { TouchableOpacity, Alert } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
-import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef } from '~helpers/firebase'
@@ -18,6 +17,8 @@ import styled from '~styled'
 import { Theme } from '~themes'
 import { RootState } from '~redux/modules/reducer'
 import { isStrongVersion } from '~helpers/bibleVersions'
+import { useTheme } from 'emotion-theming'
+import { FeatherIcon } from '~common/ui/Icon'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -34,10 +35,6 @@ const Container = styled.View(
       : {}),
   })
 )
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
@@ -78,20 +75,19 @@ const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
 interface Props {
   version: Version
   isSelected?: boolean
-  onChange: (id: string) => void
-  theme: Theme
+  onChange?: (id: string) => void
   isParameters?: boolean
-  shareFn: (fn: () => void) => void
+  shareFn?: (fn: () => void) => void
 }
 
 const VersionSelectorItem = ({
   version,
   isSelected,
   onChange,
-  theme,
   isParameters,
   shareFn,
 }: Props) => {
+  const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<
     boolean
   >()
@@ -206,8 +202,8 @@ const VersionSelectorItem = ({
 
   if (
     typeof versionNeedsDownload === 'undefined' ||
-    (isParameters && version.id === 'LSG') ||
-    (isParameters && version.id === 'LSGS')
+    (isParameters && version.id === 'LSGS') ||
+    (isParameters && version.id === 'KJVS')
   ) {
     return null
   }
@@ -260,9 +256,12 @@ const VersionSelectorItem = ({
               <UpdateIcon name="download" size={18} />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
-              <DeleteIcon name="trash-2" size={18} />
-            </TouchableOpacity>
+            version.id !== 'LSG' &&
+            version.id !== 'KJV' && (
+              <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
+                <DeleteIcon name="trash-2" size={18} />
+              </TouchableOpacity>
+            )
           )}
         </Box>
       </Container>
@@ -272,7 +271,7 @@ const VersionSelectorItem = ({
   return (
     <TouchableContainer
       needsUpdate={needsUpdate}
-      onPress={() => onChange(version.id)}
+      onPress={() => onChange && onChange(version.id)}
     >
       <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
       <TextName isSelected={isSelected}>{version.name}</TextName>
@@ -281,4 +280,4 @@ const VersionSelectorItem = ({
   )
 }
 
-export default withTheme(VersionSelectorItem)
+export default VersionSelectorItem

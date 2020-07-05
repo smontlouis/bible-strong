@@ -29,10 +29,12 @@ const DictionnaireRef = ({ word }) => {
         <>
           <StyledView
             activeOpacity={0.5}
-            onPress={() => setCurrent(word)}
-            isSelected={current === word}
+            onPress={() => setCurrent(word.toLowerCase())}
+            isSelected={current === word.toLowerCase()}
           >
-            <StyledText isSelected={current === word}>{word}</StyledText>
+            <StyledText isSelected={current === word.toLowerCase()}>
+              {word}
+            </StyledText>
           </StyledView>
           <Paragraph> </Paragraph>
         </>

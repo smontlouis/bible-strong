@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Carousel from 'react-native-snap-carousel'
-import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
-import compose from 'recompose/compose'
+import styled from '~styled'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import getBibleVerseText from '~helpers/getBibleVerseText'
-import BibleLSG from '~assets/bible_versions/bible-lsg-1910.json'
+import loadBible from '~helpers/loadBible'
 import formatVerseContent from '~helpers/formatVerseContent'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Container from '~common/ui/Container'
@@ -20,13 +17,16 @@ import Loading from '~common/Loading'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
 
-import dictionnaireWordsInBible from '~assets/bible_versions/dictionnaire-bible-lsg.json'
 import captureError from '~helpers/captureError'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
+import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 import DictionnaireCard from './DictionnaireCard'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import { viewportWidth, wp } from '~helpers/utils'
+import { Status } from '~common/types'
+import useLanguage from '~helpers/useLanguage'
+import { useTranslation } from 'react-i18next'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -62,12 +62,19 @@ const StyledVerse = styled.View(() => ({
   flexDirection: 'row',
 }))
 
-const verseToDictionnary = (
-  { Livre, Chapitre, Verset },
-  dictionnaryWordsInVerse
-) => {
+interface Verse {
+  Livre: string
+  Chapitre: string
+  Verset: number
+}
+
+const verseToDictionnary = async (
+  { Livre, Chapitre, Verset }: Verse,
+  dictionnaryWordsInVerse: string[],
+  bible: any
+): Promise<JSX.Element | JSX.Element[] | undefined> => {
   try {
-    const verseText = getBibleVerseText(BibleLSG, Livre, Chapitre, Verset)
+    const verseText = bible[Livre]?.[Chapitre]?.[Verset]
     if (!dictionnaryWordsInVerse.length) {
       return <Paragraph>{verseText}</Paragraph>
     }
@@ -78,7 +85,7 @@ const verseToDictionnary = (
     const splittedVerseText = verseText.split(regExp)
 
     const formattedVerseText = splittedVerseText.map((item, i) => {
-      if (dictionnaryWordsInVerse.includes(item)) {
+      if (dictionnaryWordsInVerse.includes(item.toLowerCase())) {
         return <DictionnaireVerseReference key={i} word={item} />
       }
 
@@ -98,69 +105,122 @@ const verseToDictionnary = (
   }
 }
 
-const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
-  const carousel = useRef()
+const useLoadWords = (ref: string) => {
+  const [wordsInVerse, setWordsInVerse] = useState([])
+  const [status, setStatus] = useState<Status>('Idle')
+
+  useEffect(() => {
+    ;(async () => {
+      setStatus('Pending')
+      const w = await loadDictionnaireWords(ref)
+      setStatus('Resolved')
+      setWordsInVerse(w)
+    })()
+  }, [ref])
+
+  return {
+    wordsInVerse,
+    status,
+  }
+}
+
+const useFormattedText = (
+  status: Status,
+  wordsInVerse: string[],
+  verse: Verse,
+  Livre: string,
+  Chapitre: string
+) => {
   const [error, setError] = useState(false)
-  const [formattedText, setFormattedText] = useState('')
+  const [currentWord, setCurrentWord] = useState<string>()
+  const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
+  const [formattedText, setFormattedText] = useState<
+    JSX.Element | JSX.Element[]
+  >()
   const [words, setWords] = useState([])
-  const [currentWord, setCurrentWord] = useState(null)
-  const [verse, setVerse] = useState(navigation.state.params.verse)
+  const isFR = useLanguage()
+
+  useEffect(() => {
+    ;(async () => {
+      if (status !== 'Resolved') {
+        return
+      }
+
+      if (!wordsInVerse) {
+        setError(true)
+        return
+      }
+
+      const bible = await loadBible(isFR ? 'LSG' : 'KJV')
+      const verseToDictionnaryText = await verseToDictionnary(
+        verse,
+        wordsInVerse,
+        bible
+      )
+      setFormattedText(verseToDictionnaryText)
+      setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
+
+      const loadAsyncWords = async () => {
+        const w = await Promise.all(
+          wordsInVerse.map(async w => {
+            const word = await loadDictionnaireItem(w)
+            return word
+          })
+        )
+
+        setWords(w)
+        setCurrentWord(wordsInVerse[0])
+      }
+
+      if (wordsInVerse.length) {
+        loadAsyncWords()
+      }
+    })()
+  }, [wordsInVerse, verse, status, isFR, Chapitre, Livre])
+
+  return {
+    error,
+    formattedText,
+    words,
+    currentWord,
+    setCurrentWord,
+    versesInCurrentChapter,
+  }
+}
+
+const DictionnaireVerseDetailScreen = ({ navigation }) => {
+  const { t } = useTranslation()
+  const carousel = useRef()
+  const [verse, setVerse] = useState<Verse>(navigation.state.params.verse)
   const { Livre, Chapitre, Verset } = verse
   const { title: headerTitle } = formatVerseContent([verse])
-  const versesInCurrentChapter =
-    BibleLSG[Livre] &&
-    BibleLSG[Livre][Chapitre] &&
-    Object.keys(BibleLSG[Livre][Chapitre]).length
-  const dictionnaryWordsInVerse = getBibleVerseText(
-    dictionnaireWordsInBible,
-    Livre,
-    Chapitre,
-    Verset
-  )
 
-  const updateVerse = value => {
+  const { wordsInVerse, status } = useLoadWords(
+    `${Livre}-${Chapitre}-${Verset}`
+  )
+  const {
+    error,
+    formattedText,
+    words,
+    currentWord,
+    setCurrentWord,
+    versesInCurrentChapter,
+  } = useFormattedText(status, wordsInVerse, verse, Livre, Chapitre)
+
+  const updateVerse = (value: number) => {
     setVerse(verse => ({
       ...verse,
       Verset: Number(verse.Verset) + value,
     }))
   }
 
-  useEffect(() => {
-    if (!dictionnaryWordsInVerse) {
-      setError(true)
-      return
-    }
-
-    const verseToDictionnaryText = verseToDictionnary(
-      verse,
-      dictionnaryWordsInVerse
-    )
-    setFormattedText(verseToDictionnaryText)
-
-    const loadAsyncWords = async () => {
-      const words = await Promise.all(
-        dictionnaryWordsInVerse.map(async w => {
-          const word = await loadDictionnaireItem(w)
-          return word
-        })
-      )
-
-      setWords(words)
-      setCurrentWord(dictionnaryWordsInVerse[0])
-    }
-
-    if (dictionnaryWordsInVerse.length) {
-      loadAsyncWords()
-    }
-  }, [Chapitre, Livre, dictionnaryWordsInVerse, verse])
-
   if (error) {
     return (
       <Container>
-        <Header hasBackButton title="Désolé..." />
+        <Header hasBackButton title={t('Désolé...')} />
         <Empty
           source={require('~assets/images/empty.json')}
-          message="Impossible de charger le dictionnaire pour ce verset..."
+          message={t('Impossible de charger le dictionnaire pour ce verset...')}
         />
       </Container>
     )
@@ -175,7 +235,9 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
       <Header
         background
         hasBackButton
-        title={`${headerTitle} ${headerTitle.length < 20 ? '- Dict. LSG' : ''}`}
+        title={`${headerTitle} ${
+          headerTitle.length < 20 ? t('- Dict. LSG') : ''
+        }`}
         rightComponent={
           <Link route="BibleVerseDetail" params={{ verse }} replace padding>
             <LexiqueIcon />
@@ -208,11 +270,9 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
           <RoundedCorner />
         </Box>
         <Box flex grey>
-          {dictionnaryWordsInVerse.length ? (
+          {wordsInVerse.length ? (
             <Carousel
-              firstItem={dictionnaryWordsInVerse.findIndex(
-                w => w === currentWord
-              )}
+              firstItem={wordsInVerse.findIndex(w => w === currentWord)}
               ref={carousel}
               data={words}
               renderItem={({ item, index }) => (
@@ -233,9 +293,7 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
                 overflow: 'visible',
                 flex: 1,
               }}
-              onSnapToItem={index =>
-                setCurrentWord(dictionnaryWordsInVerse[index])
-              }
+              onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
               contentContainerCustomStyle={{}}
               useScrollView={false}
               initialNumToRender={2}
@@ -252,7 +310,4 @@ const DictionnaireVerseDetailScreen = ({ theme, navigation }) => {
   )
 }
 
-export default compose(
-  withTheme,
-  waitForDictionnaireDB
-)(DictionnaireVerseDetailScreen)
+export default waitForDictionnaireDB(DictionnaireVerseDetailScreen)

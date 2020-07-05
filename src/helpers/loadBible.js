@@ -13,8 +13,13 @@ export default function loadBible(bible, position) {
             return resolve(bibleMemoize[bible])
           }
 
-          const LSGBible = require('~assets/bible_versions/bible-lsg-1910.json')
-          resolve(LSGBible)
+          const path = `${FileSystem.documentDirectory}bible-LSG.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize[bible] = JSON.parse(data)
+          resolve(bibleMemoize[bible])
+
           break
         }
         case 'KJV':
@@ -23,8 +28,13 @@ export default function loadBible(bible, position) {
             return resolve(bibleMemoize[bible])
           }
 
-          const LSGBible = require('~assets/bible_versions/bible-kjv.json')
-          resolve(LSGBible)
+          const path = `${FileSystem.documentDirectory}bible-KJV.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize[bible] = JSON.parse(data)
+          resolve(bibleMemoize[bible])
+
           break
         }
         default: {

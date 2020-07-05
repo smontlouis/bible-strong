@@ -215,9 +215,10 @@ ${this.state.description}
                   small
                   reverse
                   onPress={this.cancelEditing}
-                  title="Annuler"
                   style={{ marginRight: 10 }}
-                />
+                >
+                  Annuler
+                </Button>
                 <Button
                   small
                   disabled={submitIsDisabled}

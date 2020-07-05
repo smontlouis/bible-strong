@@ -13,6 +13,7 @@ storage().setMaxDownloadRetryTime(2000)
 export const biblesRef: {
   [version: string]: FirebaseStorageTypes.Reference
 } = {
+  LSG: storageRef.child('bibles/bible-lsg.json'),
   DBY: storageRef.child('bibles/bible-dby.json'),
   OST: storageRef.child('bibles/bible-ost.json'),
   BDS: storageRef.child('bibles/bible-bds.json'),

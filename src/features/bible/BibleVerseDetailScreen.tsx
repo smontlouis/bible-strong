@@ -13,7 +13,6 @@ import loadStrongVerse from '~helpers/loadStrongVerse'
 import waitForStrongDB from '~common/waitForStrongDB'
 import * as BibleActions from '~redux/modules/bible'
 import DictionnaryIcon from '~common/DictionnaryIcon'
-import dictionnaireWordsInBible from '~assets/bible_versions/dictionnaire-bible-lsg.json'
 import Link from '~common/Link'
 
 import Container from '~common/ui/Container'
@@ -32,6 +31,7 @@ import { viewportWidth, wp } from '~helpers/utils'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import loadCountVerses from '~helpers/loadCountVerses'
+import { withTranslation } from 'react-i18next'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -181,15 +181,6 @@ class BibleVerseDetailScreen extends React.Component {
     )
   }
 
-  countDictionnaireWords = () => {
-    const { Livre, Chapitre, Verset } = this.state.verse
-    return (
-      dictionnaireWordsInBible[Livre] &&
-      dictionnaireWordsInBible[Livre][Chapitre] &&
-      dictionnaireWordsInBible[Livre][Chapitre][Verset].length
-    )
-  }
-
   render() {
     const {
       verse,
@@ -198,19 +189,21 @@ class BibleVerseDetailScreen extends React.Component {
       versesInCurrentChapter,
     } = this.state
 
-    const { theme } = this.props
+    const { theme, t } = this.props
 
     const { title: headerTitle } = formatVerseContent([verse])
 
     if (this.state.error) {
       return (
         <Container>
-          <Header hasBackButton title="Désolé..." />
+          <Header hasBackButton title={t('Désolé...')} />
           <Empty
             source={require('~assets/images/empty.json')}
             message={`Impossible de charger la strong pour ce verset...${
               this.state.error === 'CORRUPTED_DATABASE'
-                ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                ? t(
+                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                  )
                 : ''
             }`}
           />
@@ -222,7 +215,6 @@ class BibleVerseDetailScreen extends React.Component {
       return <Loading />
     }
 
-    const countWords = this.countDictionnaireWords()
     return (
       <StyledScrollView
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -234,7 +226,7 @@ class BibleVerseDetailScreen extends React.Component {
           background
           hasBackButton
           title={`${headerTitle} ${
-            headerTitle.length < 12 ? '- Strong LSG' : ''
+            headerTitle.length < 12 ? t('- Strong LSG') : ''
           }`}
           rightComponent={
             <Link
@@ -245,11 +237,6 @@ class BibleVerseDetailScreen extends React.Component {
             >
               <Box position="relative" overflow="visibility">
                 <DictionnaryIcon color={theme.colors.secondary} />
-                <CountChip>
-                  <Text bold fontSize={8}>
-                    {countWords}
-                  </Text>
-                </CountChip>
               </Box>
             </Link>
           }
@@ -322,6 +309,7 @@ class BibleVerseDetailScreen extends React.Component {
 
 export default compose(
   withTheme,
+  withTranslation(),
   connect((state, ownProps) => {
     const { verse } = ownProps.navigation.state.params || {}
     return {

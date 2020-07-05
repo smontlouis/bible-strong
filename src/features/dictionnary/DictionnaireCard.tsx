@@ -126,6 +126,7 @@ class StrongCard extends React.Component {
                   p: { ...smallTextStyle(theme) },
                   strong: { ...smallTextStyle(theme) },
                   em: { ...smallTextStyle(theme) },
+                  i: { ...smallTextStyle(theme) },
                   a: { ...smallTextStyle(theme) },
                   li: { ...smallTextStyle(theme) },
                   ol: { ...smallTextStyle(theme) },

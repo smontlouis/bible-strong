@@ -38,10 +38,6 @@ export const getIfVersionNeedsUpdate = async (versionId: string) => {
 }
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {
-  if (versionId === 'LSG') {
-    return false
-  }
-
   if (versionId === 'INT') {
     const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
     const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)

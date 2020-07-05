@@ -21,6 +21,16 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
+interface Props {
+  background?: boolean
+  hasBackButton?: boolean
+  isModal?: boolean
+  title?: string
+  fontSize?: number
+  onTitlePress?: () => void
+  rightComponent?: JSX.Element
+}
+
 const Header = ({
   background,
   hasBackButton,
@@ -30,7 +40,7 @@ const Header = ({
   onTitlePress,
   rightComponent,
   ...props
-}) => {
+}: Props) => {
   return (
     <HeaderBox background={background} row overflow="visibility" {...props}>
       <Box flex>

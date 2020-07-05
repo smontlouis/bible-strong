@@ -5,10 +5,15 @@ const catchDBError = async fn => {
   try {
     return await fn()
   } catch (e) {
+    console.log(e)
+
+    if (!e) {
+      SnackBar.show('Une error est survenue.', 'danger', { duration: 5000 })
+      return { error: 'UNKNOWN_ERROR' }
+    }
+
     const corruptedDBError = e.toString().includes('no such table')
     const diskError = e.toString().includes('Error code 10: disk I/O error')
-
-    console.log(e)
 
     if (corruptedDBError) {
       SnackBar.show(

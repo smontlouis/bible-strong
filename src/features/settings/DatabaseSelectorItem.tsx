@@ -2,7 +2,7 @@ import React from 'react'
 import { TouchableOpacity, Alert } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { ProgressBar } from 'react-native-paper'
-import styled from '@emotion/native'
+import styled from '~styled'
 import { withTheme } from 'emotion-theming'
 import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
@@ -24,35 +24,43 @@ import {
 import { DBStateContext } from '~helpers/databaseState'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
 import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
+import { FeatherIcon } from '~common/ui/Icon'
+import { Theme } from '~themes'
 
-const Container = styled.View(({ needsUpdate, theme }) => ({
-  padding: 20,
-  paddingTop: 10,
-  paddingBottom: 10,
-  ...(needsUpdate
-    ? {
-        borderLeftColor: theme.colors.success,
-        borderLeftWidth: 5,
-      }
-    : {}),
-}))
+const Container = styled.View(
+  ({ needsUpdate, theme }: { needsUpdate: boolean; theme: Theme }) => ({
+    padding: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+    ...(needsUpdate
+      ? {
+          borderLeftColor: theme.colors.success,
+          borderLeftWidth: 5,
+        }
+      : {}),
+  })
+)
 
-const TextName = styled.Text(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 16,
-  fontWeight: 'bold',
-  backgroundColor: 'transparent',
-}))
+const TextName = styled.Text(
+  ({ isSelected, theme }: { isSelected: boolean; theme: Theme }) => ({
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+    fontSize: 16,
+    fontWeight: 'bold',
+    backgroundColor: 'transparent',
+  })
+)
 
-const TextCopyright = styled.Text(({ isSelected, theme }) => ({
-  marginTop: 5,
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12,
-  backgroundColor: 'transparent',
-  opacity: 0.5,
-}))
+const TextCopyright = styled.Text(
+  ({ isSelected, theme }: { isSelected: boolean; theme: Theme }) => ({
+    marginTop: 5,
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+    fontSize: 12,
+    backgroundColor: 'transparent',
+    opacity: 0.5,
+  })
+)
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.quart,
@@ -223,14 +231,17 @@ class DBSelectorItem extends React.Component {
               {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
             </Box>
             {!isLoading && (
-              <Button
-                reverse
-                small
-                subTitle={`⚠️ Taille de ${Math.round(fileSize / 1000000)}Mo`}
+              <TouchableOpacity
                 onPress={this.startDownload}
+                style={{ padding: 10, alignItems: 'flex-end' }}
               >
-                Télécharger
-              </Button>
+                <FeatherIcon name="download" size={20} />
+                <Box center marginTop={5}>
+                  <Text fontSize={10}>{`⚠️ Taille de ${Math.round(
+                    fileSize / 1000000
+                  )}Mo`}</Text>
+                </Box>
+              </TouchableOpacity>
             )}
             {isLoading && (
               <Box width={100} justifyContent="center">
