@@ -70,7 +70,6 @@ const PericopeScreen = ({ navigation }) => {
   const [version, setVersion] = useState(initialVersion)
   const [book, setBook] = useState(initialBook)
   const [versionNeedsDownload, setVersionNeedsDownload] = useState(false)
-  const { t } = useTranslation()
 
   const pericope = getBiblePericope(version)
   const pericopeBook = clearEmpties(pericope[book.Numero])

@@ -58,7 +58,7 @@ const SubscriptionGroup = () => {
               price={sub.price}
               isSelected={selectedSub === sub.sku}
               variant={mappingSku[sub.sku]?.variant}
-              period={mappingSku[sub.sku]?.period}
+              period={t('par mois')}
               onPress={() => setSelectedSub(sub.sku)}
             />
           ))}
