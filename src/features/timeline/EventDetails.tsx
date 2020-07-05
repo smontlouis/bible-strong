@@ -1,12 +1,8 @@
 import React from 'react'
 import FastImage from 'react-native-fast-image'
 import Carousel from 'react-native-snap-carousel'
-// import {
-//   TabView,
-//   SceneRendererProps,
-//   NavigationState,
-// } from 'react-native-tab-view'
 import { Portal } from 'react-native-paper'
+import useLanguage from '~helpers/useLanguage'
 
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Box from '~common/ui/Box'
@@ -25,6 +21,7 @@ import { Modalize } from 'react-native-modalize'
 import Link from '~common/Link'
 import { flattenedEvents } from './events'
 import { FeatherIcon } from '~common/ui/Icon'
+import { useTranslation } from 'react-i18next'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -57,6 +54,7 @@ const Media = ({
   TimelineEventDetail,
   'images' | 'scriptures' | 'videos' | 'related'
 >) => {
+  const { t } = useTranslation()
   const eventModalRef = React.useRef<Modalize>(null)
   const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
   return (
@@ -64,7 +62,7 @@ const Media = ({
       {!!scriptures?.length && (
         <Box px={20} mt={20}>
           <Paragraph fontFamily="title" mb={10}>
-            Versets
+            {t('Versets')}
           </Paragraph>
           {scriptures.map(scripture => (
             <Box key={scripture}>
@@ -76,7 +74,7 @@ const Media = ({
       {!!images?.length && (
         <Box py={20} bg="rgb(18,45,66)">
           <Paragraph fontFamily="title" mb={20} px={20} color="white">
-            Images
+            {t('Images')}
           </Paragraph>
           <Carousel
             data={images}
@@ -106,7 +104,7 @@ const Media = ({
       {!!related?.length && (
         <Box p={20}>
           <Paragraph fontFamily="title" mb={20}>
-            Évenements associés
+            {t('Évenements associés')}
           </Paragraph>
           {related.map(r => (
             <Link
@@ -147,45 +145,24 @@ const EventDetails = waitForDatabase(
     slug,
     image,
     title,
+    titleEn,
     start,
     end,
   }: Pick<
     TimelineEventProps,
-    'slug' | 'image' | 'title' | 'start' | 'end'
+    'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
   >) => {
+    const isFR = useLanguage()
     const date = calculateLabel(start, end)
     const { current: event } = React.useRef(
       (bibleMemoize.timeline as TimelineEventDetail[]).find(
         e => e.slug === slug
       )
     )
-    // const [index, setIndex] = React.useState(0)
-    // const { current: routes } = React.useRef([
-    //   { key: 'description', title: 'Article' },
-    //   { key: 'media', title: 'En savoir plus' },
-    // ])
 
     if (!event) {
       return null
     }
-
-    // const renderScene = ({
-    //   route,
-    // }: SceneRendererProps & {
-    //   route: {
-    //     key: string
-    //     title: string
-    //   }
-    // }) => {
-    //   switch (route.key) {
-    //     case 'description':
-    //       return <Description {...event} />
-    //     case 'media':
-    //       return <Media {...event} key={route.key} />
-    //     default:
-    //       return null
-    //   }
-    // }
 
     return (
       <Box py={40}>
@@ -201,7 +178,7 @@ const EventDetails = waitForDatabase(
         )}
         <Box mb={30} px={20}>
           <Paragraph textAlign="center" fontFamily="title" scale={3} flex>
-            {title}
+            {isFR ? title : titleEn}
           </Paragraph>
           <Paragraph
             color="grey"
@@ -214,20 +191,6 @@ const EventDetails = waitForDatabase(
         </Box>
         <Description {...event} />
         <Media {...event} />
-        {/* <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          renderTabBar={(
-            props: SceneRendererProps & {
-              navigationState: NavigationState<{
-                key: string
-                title: string
-              }>
-            }
-          ) => <EventDetailsTab setIndex={setIndex} {...props} />}
-          onIndexChange={setIndex}
-          initialLayout={{ width: wp(100) }}
-        /> */}
       </Box>
     )
   }

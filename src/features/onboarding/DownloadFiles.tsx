@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ScrollView, Alert } from 'react-native'
+import { Alert } from 'react-native'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -14,7 +14,7 @@ import SectionList from '~common/ui/SectionList'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import Paragraph from '~common/ui/Paragraph'
 import DBSelectorItem from '~features/settings/DatabaseSelectorItem'
-import { databases } from '~helpers/databases'
+import { getDatabases } from '~helpers/databases'
 import { wp } from '~helpers/utils'
 import { setFirstTime } from '~redux/modules/user'
 import { useDispatch } from 'react-redux'
@@ -72,11 +72,11 @@ const DownloadFiles = ({
       <SectionList
         ListHeaderComponent={
           <>
-            <Box width={wp(85)} pt={30}>
-              <Text padding={20} title fontSize={30}>
+            <Box width={wp(85)} pt={100}>
+              <Text padding={20} title fontSize={40}>
                 {t('Vous êtes presque prêt !')}
               </Text>
-              <Paragraph fontFamily="text" px={20}>
+              <Paragraph fontFamily="text" px={20} mt={20}>
                 {t(
                   'Choisissez les bases de données et les bibles que vous souhaitez télécharger.'
                 )}
@@ -85,7 +85,7 @@ const DownloadFiles = ({
                 {t('La LSG est obligatoire pour commencer.')}
               </Paragraph>
             </Box>
-            <Box padding={20}>
+            <Box padding={20} mt={100}>
               <Button onPress={onConfirmDownload}>
                 {t('Tout télécharger')}
               </Button>
@@ -93,7 +93,7 @@ const DownloadFiles = ({
             <Text padding={20} title fontSize={25}>
               {t('Bases de données')}
             </Text>
-            {Object.values(databases).map(db => (
+            {Object.values(getDatabases()).map(db => (
               <DBSelectorItem
                 key={db.id}
                 database={db.id}

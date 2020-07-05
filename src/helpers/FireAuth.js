@@ -3,6 +3,7 @@ import analytics from '@react-native-firebase/analytics'
 import { GoogleSignin } from '@react-native-community/google-signin'
 import { LoginManager, AccessToken } from 'react-native-fbsdk'
 import IAPHub from 'react-native-iaphub'
+import i18n from '~i18n'
 
 import * as Sentry from '@sentry/react-native'
 import appleAuth, {
@@ -203,10 +204,10 @@ const FireAuth = class {
           return this.onCredentialSuccess(credential, resolve)
         }
 
-        SnackBar.show('Connexion annulée.')
+        SnackBar.show(i18n.t('Connexion annulée.'))
         return resolve(false)
       } catch (e) {
-        SnackBar.show('Une erreur est survenue.')
+        SnackBar.show(i18n.t('Une erreur est survenue.'))
         console.log(e)
         Sentry.captureException(e)
         return resolve(false)
@@ -226,10 +227,10 @@ const FireAuth = class {
 
         return this.onCredentialSuccess(credential, resolve)
 
-        SnackBar.show('Connexion annulée.')
+        SnackBar.show(i18n.t('Connexion annulée.'))
         return resolve(false)
       } catch (e) {
-        SnackBar.show('Une erreur est survenue')
+        SnackBar.show(i18n.t('Une erreur est survenue'))
         console.log(e)
         Sentry.captureException(e)
         return resolve(false)
@@ -241,13 +242,13 @@ const FireAuth = class {
       const user = await auth().signInWithCredential(credential)
 
       console.log('user signed in ', user)
-      SnackBar.show('Connexion réussie')
+      SnackBar.show(i18n.t('Connexion réussie'))
       return resolve(true)
     } catch (e) {
       console.log(e.code)
       if (e.code === 'auth/account-exists-with-different-credential') {
         SnackBar.show(
-          'Cet utilisateur existe déjà avec un autre compte.',
+          i18n.t('Cet utilisateur existe déjà avec un autre compte.'),
           'danger'
         )
       }
@@ -281,12 +282,12 @@ const FireAuth = class {
     const user = auth().currentUser
     try {
       await user.sendEmailVerification()
-      SnackBar.show('Email envoyé')
+      SnackBar.show(i18n.t('Email envoyé'))
     } catch (e) {
       if (e.code === 'auth/too-many-requests') {
-        SnackBar.show('Un mail a déjà été envoyé. Réessayez plus tard')
+        SnackBar.show(i18n.t('Un mail a déjà été envoyé. Réessayez plus tard'))
       } else {
-        SnackBar.show("Impossible d'envoyer l'email")
+        SnackBar.show(i18n.t("Impossible d'envoyer l'email"))
       }
     }
   }
@@ -297,7 +298,7 @@ const FireAuth = class {
         auth()
           .sendPasswordResetEmail(email)
           .then(() => {
-            SnackBar.show('Email envoyé.')
+            SnackBar.show(i18n.t('Email envoyé.'))
             resolve(false)
           })
           .catch(err => {
@@ -350,7 +351,7 @@ const FireAuth = class {
     if (this.onLogout) {
       this.onLogout()
     }
-    SnackBar.show('Vous êtes déconnecté.')
+    SnackBar.show(i18n.t('Vous êtes déconnecté.'))
   }
 }
 

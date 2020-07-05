@@ -1,4 +1,5 @@
 import books from '~assets/bible_versions/books-desc'
+import i18n from '~i18n'
 
 const orderVerses = arrayVerses => {
   const orderedVersesList = arrayVerses.sort((key1, key2) => {
@@ -79,7 +80,7 @@ const verseToReference = (v, options = {}) => {
         return `${acc},${v}`
       }
       return acc + v
-    }, `${books[verses[0].book - 1].Nom} ${verses[0].chapter}:`)
+    }, `${i18n.t(books[verses[0].book - 1].Nom)} ${verses[0].chapter}:`)
 
   return title
 }

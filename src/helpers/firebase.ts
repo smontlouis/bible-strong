@@ -55,7 +55,7 @@ export const databasesRef = {
 
 export const databasesEnRef = {
   MHY: storageRef.child('databases/en/commentaires-mhy.sqlite'),
-  TRESOR: storageRef.child('databases/en/commentaires-tresor.sqlite'),
+  TRESOR: storageRef.child('databases/commentaires-tresor.sqlite'),
   DICTIONNAIRE: storageRef.child('databases/en/dictionnaire.sqlite'),
   INTERLINEAIRE: storageRef.child('databases/en/interlineaire.sqlite'),
   NAVE: storageRef.child('databases/en/nave.sqlite'),

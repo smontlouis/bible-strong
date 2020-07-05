@@ -19,8 +19,10 @@ import Box from '~common/ui/Box'
 import TagsEditModal from '~common/TagsEditModal'
 import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
+import { deleteAllDatabases } from '~helpers/database'
 
 import app from '../../../package.json'
+import { RootState } from '~redux/modules/reducer'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -57,16 +59,40 @@ const shareMessage = () => {
 const MoreScreen = () => {
   const { isLogged, logout } = useLogin()
   const [isEditTagsOpen, setEditTagsOpen] = useState(false)
-  const hasUpdate = useSelector(state =>
+  const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const promptLogout = () => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
     ])
+  }
+
+  const confirmChangeLanguage = () => {
+    Alert.alert(
+      t('Attention'),
+      t(
+        'Vous êtes sur le point de changer de langue, les bases de données françaises seront supprimées.'
+      ),
+      [
+        { text: 'Non', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Oui',
+          onPress: () => {
+            i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
+            deleteAllDatabases()
+            Alert.alert(
+              t('Langue changée.'),
+              t('Merci de redémarrer votre application.')
+            )
+          },
+          style: 'destructive',
+        },
+      ]
+    )
   }
 
   return (
@@ -176,6 +202,19 @@ const MoreScreen = () => {
           <LinkItem href="mailto:s.montlouis.calixte@gmail.com">
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>{t('Contacter le développeur')}</Text>
+          </LinkItem>
+          <LinkItem onPress={confirmChangeLanguage}>
+            <MaterialIcon
+              name="language"
+              size={25}
+              style={{ marginRight: 15 }}
+            />
+            <Text fontSize={15}>
+              {t('Changer la langue')} -{' '}
+              <Text bold fontSize={15} color="primary">
+                {i18n.language.toUpperCase()}
+              </Text>
+            </Text>
           </LinkItem>
           {/* <LinkItem
             {...(Platform.OS === 'android'

@@ -33,15 +33,10 @@ const Item = ({ item }: { item: Slide; index: number }) => {
           }}
         />
       )} */}
-      <Text title fontSize={30} marginTop={30}>
+      <Text title fontSize={38} marginTop={30}>
         {item.title}
       </Text>
-      <Paragraph
-        fontFamily="text"
-        scale={2}
-        marginTop={15}
-        marginBottom={r([10, 10, 40, 40])}
-      >
+      <Paragraph fontFamily="text" scale={2} marginTop={40}>
         {item.description}
       </Paragraph>
     </Box>

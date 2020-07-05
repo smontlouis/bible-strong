@@ -97,7 +97,7 @@ const VersesModal = ({
   const copyToClipboard = async () => {
     const { all: message } = await getVersesRef(selectedVerses, version)
     Clipboard.setString(message)
-    SnackBar.show('Copié dans le presse-papiers.')
+    SnackBar.show(t('Copié dans le presse-papiers.'))
     clearSelectedVerses()
   }
 

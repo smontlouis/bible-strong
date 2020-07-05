@@ -11,6 +11,8 @@ import TextInput from '~common/ui/TextInput'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import { addTag, updateTag, removeTag } from '~redux/modules/user'
+import { RootState } from '~redux/modules/reducer'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -41,7 +43,10 @@ const TagsModal = ({ isVisible, onClosed }) => {
   const [newTag, setNewTag] = useState('')
   const [selectedChip, setSelectedChip] = useState(null)
   const dispatch = useDispatch()
-  const tags = useSelector(state => Object.values(state.user.bible.tags))
+  const tags = useSelector((state: RootState) =>
+    Object.values(state.user.bible.tags)
+  )
+  const { t } = useTranslation()
 
   const saveTag = () => {
     if (!newTag.trim()) {
@@ -61,18 +66,22 @@ const TagsModal = ({ isVisible, onClosed }) => {
   }, [selectedChip])
 
   const promptLogout = () => {
-    Alert.alert('Attention', 'Êtes-vous vraiment sur de supprimer ce tag ?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: () => {
-          dispatch(removeTag(selectedChip.id))
-          setNewTag('')
-          setSelectedChip(null)
+    Alert.alert(
+      t('Attention'),
+      t('Êtes-vous vraiment sur de supprimer ce tag ?'),
+      [
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
+        {
+          text: t('Oui'),
+          onPress: () => {
+            dispatch(removeTag(selectedChip.id))
+            setNewTag('')
+            setSelectedChip(null)
+          },
+          style: 'destructive',
         },
-        style: 'destructive',
-      },
-    ])
+      ]
+    )
   }
 
   return (
@@ -104,7 +113,7 @@ const TagsModal = ({ isVisible, onClosed }) => {
           ) : (
             <Box flex center>
               <Text bold color="lightPrimary">
-                Vous n'avez pas encore de tags
+                {t("Vous n'avez pas encore de tags")}
               </Text>
             </Box>
           )}
@@ -112,7 +121,7 @@ const TagsModal = ({ isVisible, onClosed }) => {
         <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
           <Box flex>
             <TextInput
-              placeholder="Créer un nouveau tag"
+              placeholder={t('Créer un nouveau tag')}
               onChangeText={setNewTag}
               onSubmitEditing={saveTag}
               returnKeyType="send"

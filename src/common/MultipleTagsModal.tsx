@@ -99,7 +99,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
               ? `${t('Étiquettes pour')} "${currentItems[0].title ||
                   item.title ||
                   ''}"`
-              : `${'Étiquettes pour'} ${highlightTitle}`}
+              : `${t('Étiquettes pour')} ${highlightTitle}`}
           </Text>
         </Box>
         <Box flex>

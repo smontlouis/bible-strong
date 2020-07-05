@@ -60,7 +60,7 @@ const TimelineEvent = ({
 
   const onOpenEvent = () => {
     eventModalRef.current?.open()
-    setEvent({ slug, title, image, start, end })
+    setEvent({ slug, title, titleEn, image, start, end })
   }
 
   if (type === 'minor') {

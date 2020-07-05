@@ -11,11 +11,13 @@ import useLogin from '~helpers/useLogin'
 import { useDispatch } from 'react-redux'
 import SnackBar from '~common/SnackBar'
 import to from 'await-to-js'
+import { useTranslation } from 'react-i18next'
 
 const SubscriptionGroup = () => {
   const [selectedSub, setSelectedSub] = React.useState(
     'com.smontlouis.biblestrong.onemonth'
   )
+  const { t } = useTranslation()
   const [processing, setProcessing] = React.useState(false)
   const { status, products } = useIapUser()
   const { user } = useLogin()
@@ -25,7 +27,7 @@ const SubscriptionGroup = () => {
     setProcessing(true)
     const [err] = await to(buyProduct(user.id, selectedSub, dispatch))
     if (err) {
-      SnackBar.show('Une erreur est survenue.')
+      SnackBar.show(t('Une erreur est survenue.'))
     }
     setProcessing(false)
   }
@@ -34,7 +36,7 @@ const SubscriptionGroup = () => {
     return (
       <Box px={40}>
         <Text textAlign="center" color="quart">
-          Impossible accéder aux offres d'abonnement.
+          {t("Impossible accéder aux offres d'abonnement.")}
         </Text>
       </Box>
     )
@@ -63,7 +65,7 @@ const SubscriptionGroup = () => {
         </Box>
         <Box p={20}>
           <Button isLoading={processing} onPress={onSubscription}>
-            S'abonner
+            {t("S'abonner")}
           </Button>
         </Box>
       </Box>

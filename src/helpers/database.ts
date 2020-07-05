@@ -1,6 +1,6 @@
 import SQLite from 'react-native-sqlite-storage'
 import * as FileSystem from 'expo-file-system'
-import { databases } from './databases'
+import { getDatabases } from './databases'
 
 const RNFS = require('react-native-fs')
 
@@ -197,8 +197,9 @@ export const deleteAllDatabases = () => {
   mhyDB.delete()
   naveDB.delete()
 
-  Object.values(databases).map(async db => {
+  Object.values(getDatabases()).map(async db => {
     const file = await FileSystem.getInfoAsync(db.path)
+    console.log(file)
     if (file.exists) FileSystem.deleteAsync(file.uri)
   })
 }

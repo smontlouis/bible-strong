@@ -70,6 +70,7 @@ const PericopeScreen = ({ navigation }) => {
   const [version, setVersion] = useState(initialVersion)
   const [book, setBook] = useState(initialBook)
   const [versionNeedsDownload, setVersionNeedsDownload] = useState(false)
+  const { t } = useTranslation()
 
   const pericope = getBiblePericope(version)
   const pericopeBook = clearEmpties(pericope[book.Numero])
@@ -100,7 +101,9 @@ const PericopeScreen = ({ navigation }) => {
           {!Object.keys(pericopeBook).length ? (
             <Empty
               source={require('~assets/images/empty.json')}
-              message="Aucun péricope pour ce Livre, essayez avec une autre version."
+              message={t(
+                'Aucun péricope pour ce Livre, essayez avec une autre version.'
+              )}
             />
           ) : (
             Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => {
@@ -125,7 +128,9 @@ const PericopeScreen = ({ navigation }) => {
                           onPress={() =>
                             versionNeedsDownload
                               ? SnackBar.show(
-                                  'Vous devez télécharger cette version de la Bible.'
+                                  t(
+                                    'Vous devez télécharger cette version de la Bible.'
+                                  )
                                 )
                               : navigation.navigate({
                                   routeName: 'BibleView',

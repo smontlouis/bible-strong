@@ -12,6 +12,7 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { millisToMinutes } from '~helpers/millisToMinutes'
+import { useTranslation } from 'react-i18next'
 
 const Container = styled.View(({ audioMode, theme }) => ({
   position: 'absolute',
@@ -92,6 +93,7 @@ const useLoadSound = (
   const [audioObject, setAudioObject] = useState(null)
   const [error, setError] = useState(null)
   const previousAudioUrl = usePrevious(audioUrl)
+  const { t } = useTranslation()
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -150,7 +152,9 @@ const useLoadSound = (
         setError(true)
         setIsLoading(false)
         SnackBar.show(
-          'Impossible de lire le chapitre. Vérifiez votre connexion internet.'
+          t(
+            'Impossible de lire le chapitre. Vérifiez votre connexion internet.'
+          )
         )
 
         // TODO: check error to send to sentry

@@ -28,6 +28,7 @@ import Text from '~common/ui/Text'
 import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Theme } from '~themes'
+import { withTranslation } from 'react-i18next'
 
 const Container = styled.View(
   ({ needsUpdate, theme }: { needsUpdate: boolean; theme: Theme }) => ({
@@ -98,7 +99,7 @@ class DBSelectorItem extends React.Component {
   }
 
   startDownload = async () => {
-    const { path, database } = this.props
+    const { path, database, t } = this.props
     this.setState({ isLoading: true })
 
     const uri = await getDatabasesRef()[database].getDownloadURL()
@@ -143,7 +144,9 @@ class DBSelectorItem extends React.Component {
     } catch (e) {
       console.log(e)
       SnackBar.show(
-        "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+        t(
+          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+        ),
         'danger'
       )
       this.setState({ isLoading: false })
@@ -194,12 +197,14 @@ class DBSelectorItem extends React.Component {
 
   confirmDelete = () => {
     Alert.alert(
-      'Attention',
-      'Êtes-vous vraiment sur de supprimer cette base de données ?',
+      this.props.t('Attention'),
+      this.props.t(
+        'Êtes-vous vraiment sur de supprimer cette base de données ?'
+      ),
       [
-        { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: this.props.t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Oui',
+          text: this.props.t('Oui'),
           onPress: this.delete,
           style: 'destructive',
         },
@@ -215,7 +220,7 @@ class DBSelectorItem extends React.Component {
   }
 
   render() {
-    const { name, theme, fileSize, subTitle, needsUpdate } = this.props
+    const { name, theme, fileSize, subTitle, needsUpdate, t } = this.props
     const { versionNeedsDownload, isLoading, fileProgress } = this.state
 
     if (typeof versionNeedsDownload === 'undefined') {
@@ -237,7 +242,7 @@ class DBSelectorItem extends React.Component {
               >
                 <FeatherIcon name="download" size={20} />
                 <Box center marginTop={5}>
-                  <Text fontSize={10}>{`⚠️ Taille de ${Math.round(
+                  <Text fontSize={10}>{`⚠️ ${t('Taille de')} ${Math.round(
                     fileSize / 1000000
                   )}Mo`}</Text>
                 </Box>
@@ -289,6 +294,7 @@ class DBSelectorItem extends React.Component {
 }
 
 export default compose(
+  withTranslation(),
   withTheme,
   connect((state, ownProps) => ({
     needsUpdate: state.user.needsUpdate[ownProps.database],

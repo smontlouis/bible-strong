@@ -40,7 +40,7 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
 
   if (!imageUrls) {
     return (
-      <Box height={50} grey>
+      <Box height={20}>
         <Loading />
       </Box>
     )

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Alert } from 'react-native'
 
 import { getVersionsBySections } from '~helpers/bibleVersions'
-import { databases } from '~helpers/databases'
+import { getDatabases } from '~helpers/databases'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
@@ -13,19 +13,24 @@ import Button from '~common/ui/Button'
 import Header from '~common/Header'
 import DBSelectorItem from './DatabaseSelectorItem'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
+import { useTranslation } from 'react-i18next'
 
 const DLScreen = () => {
-  const [allDownloadFunc, setAllDownloadFunc] = useState([])
-  const addDownloadFunc = fn => setAllDownloadFunc(fns => [...fns, fn])
+  const { t } = useTranslation()
+  const [allDownloadFunc, setAllDownloadFunc] = useState<(() => void)[]>([])
+  const addDownloadFunc = (fn: () => void) =>
+    setAllDownloadFunc(fns => [...fns, fn])
 
   const onConfirmDownload = () => {
     Alert.alert(
-      'Attention',
-      "Vous êtes sur le point de télécharger toutes les bases de données et bibles, assurez-vous d'avoir assez d'espace.\n\n Restez sur cette page jusqu'à la fin de tous les téléchargements.",
+      t('Attention'),
+      t(
+        "Vous êtes sur le point de télécharger toutes les bases de données et bibles, assurez-vous d'avoir assez d'espace.\n\n Restez sur cette page jusqu'à la fin de tous les téléchargements."
+      ),
       [
-        { text: 'Annuler', onPress: () => null, style: 'cancel' },
+        { text: t('Annuler'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Confirmer',
+          text: t('Confirmer'),
           onPress: () => {
             allDownloadFunc.map((fn, i) => setTimeout(() => fn(), i * 200))
           },
@@ -42,16 +47,19 @@ const DLScreen = () => {
         ListHeaderComponent={
           <>
             <Text padding={20} title fontSize={25}>
-              Bases de données
+              {t('Bases de données')}
             </Text>
             <Paragraph padding={20} paddingTop={0} scale={-3}>
-              Si votre base de données a été corrompue, pensez à redémarrer
-              l'application une fois les fichiers téléchargés.
+              {t(
+                "Si votre base de données a été corrompue, pensez à redémarrer l'application une fois les fichiers téléchargés."
+              )}
             </Paragraph>
             <Box padding={20}>
-              <Button onPress={onConfirmDownload}>Tout télécharger</Button>
+              <Button onPress={onConfirmDownload}>
+                {t('Tout télécharger')}
+              </Button>
             </Box>
-            {Object.values(databases).map(db => (
+            {Object.values(getDatabases()).map(db => (
               <DBSelectorItem
                 key={db.id}
                 database={db.id}
@@ -64,7 +72,7 @@ const DLScreen = () => {
             ))}
 
             <Text padding={20} paddingBottom={0} title fontSize={25}>
-              Bibles
+              {t('Bibles')}
             </Text>
           </>
         }

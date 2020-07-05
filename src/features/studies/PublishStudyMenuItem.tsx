@@ -23,19 +23,6 @@ interface Props {
   onClosed: () => void
 }
 
-const copyToClipboard = async (url: string) => {
-  Clipboard.setString(url)
-  SnackBar.show('Copié dans le presse-papiers.')
-}
-
-const shareVerse = async (title: string, userName: string, url: string) => {
-  const result = await Share.share({
-    message: `${title}, créé par ${userName}
-  ${url}`,
-  })
-  return result
-}
-
 const useStudyStatus = (study: Study) => {
   const { current: url } = React.useRef(
     `https://bible-strong.app/studies/${study.id}`
@@ -75,6 +62,19 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
     () => isConnected && dispatch(publishStudy(study.id)),
     onClosed
   )
+
+  const copyToClipboard = async (url: string) => {
+    Clipboard.setString(url)
+    SnackBar.show(t('Copié dans le presse-papiers.'))
+  }
+
+  const shareVerse = async (title: string, userName: string, url: string) => {
+    const result = await Share.share({
+      message: `${title}, ${t('créé par')} ${userName}
+    ${url}`,
+    })
+    return result
+  }
 
   const exportPDF = async () => {
     try {

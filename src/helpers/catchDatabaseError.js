@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
+import i18n from '~i18n'
 
 const catchDBError = async fn => {
   try {
@@ -8,7 +9,9 @@ const catchDBError = async fn => {
     console.log(e)
 
     if (!e) {
-      SnackBar.show('Une error est survenue.', 'danger', { duration: 5000 })
+      SnackBar.show(i18n.t('Une error est survenue.'), 'danger', {
+        duration: 5000,
+      })
       return { error: 'UNKNOWN_ERROR' }
     }
 
@@ -17,7 +20,9 @@ const catchDBError = async fn => {
 
     if (corruptedDBError) {
       SnackBar.show(
-        'Une error est survenue, la base de données est peut-être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.',
+        i18n.t(
+          'Une error est survenue, la base de données est peut-être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+        ),
         'danger',
         { duration: 5000 }
       )
@@ -31,7 +36,7 @@ const catchDBError = async fn => {
     }
 
     if (diskError) {
-      SnackBar.show('Redémarrez votre application', 'danger', {
+      SnackBar.show(i18n.t('Redémarrez votre application'), 'danger', {
         duration: 5000,
       })
 
@@ -39,7 +44,7 @@ const catchDBError = async fn => {
     }
 
     SnackBar.show(
-      'Une error est survenue, le développeur en a été informé.',
+      i18n.t('Une error est survenue, le développeur en a été informé.'),
       'danger',
       {
         duration: 5000,

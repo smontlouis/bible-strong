@@ -11,6 +11,7 @@ import { existsAssets, unzipAssets } from '~helpers/assetUtils'
 import { getLangIsFr } from '~i18n'
 import SnackBar from '~common/SnackBar'
 import { getDatabasesRef } from '~helpers/firebase'
+import { useTranslation } from 'react-i18next'
 
 const RNFS = require('react-native-fs')
 const STRONG_FILE_SIZE = 34941952
@@ -73,6 +74,7 @@ const useStrongZip = (dispatch: any, startDownload: any) => {
 }
 
 const useStrongEn = (dispatch: any, startDownload: any) => {
+  const { t } = useTranslation()
   useEffect(() => {
     if (strongDB.get()) {
       dispatch({
@@ -143,7 +145,9 @@ const useStrongEn = (dispatch: any, startDownload: any) => {
           } catch (e) {
             console.log(e)
             SnackBar.show(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+              t(
+                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+              ),
               'danger'
             )
             dispatch({
@@ -200,6 +204,7 @@ export const useWaitForDatabase = () => {
 const waitForDatabase = (WrappedComponent: React.ComponentType) => (
   props: any
 ) => {
+  const { t } = useTranslation()
   const {
     isLoading,
     progress,
@@ -210,7 +215,7 @@ const waitForDatabase = (WrappedComponent: React.ComponentType) => (
 
   if (isLoading && startDownload) {
     return (
-      <Loading message="Téléchargement de la base strong...">
+      <Loading message={t('Téléchargement de la base strong...')}>
         <ProgressBar progress={Number(progress)} color="blue" />
       </Loading>
     )
@@ -220,7 +225,9 @@ const waitForDatabase = (WrappedComponent: React.ComponentType) => (
     return (
       <DownloadRequired
         hasBackButton
-        title="La base de données strong est requise pour accéder à cette page."
+        title={t(
+          'La base de données strong est requise pour accéder à cette page.'
+        )}
         setStartDownload={setStartDownload}
         fileSize={35}
       />
@@ -230,7 +237,7 @@ const waitForDatabase = (WrappedComponent: React.ComponentType) => (
   if (isLoading) {
     return (
       <Loading
-        message="Chargement de la base strong..."
+        message={t('Chargement de la base strong...')}
         subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
       />
     )

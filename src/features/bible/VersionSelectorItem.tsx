@@ -19,6 +19,7 @@ import { RootState } from '~redux/modules/reducer'
 import { isStrongVersion } from '~helpers/bibleVersions'
 import { useTheme } from 'emotion-theming'
 import { FeatherIcon } from '~common/ui/Icon'
+import { useTranslation } from 'react-i18next'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -87,6 +88,7 @@ const VersionSelectorItem = ({
   isParameters,
   shareFn,
 }: Props) => {
+  const { t } = useTranslation()
   const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<
     boolean
@@ -156,7 +158,9 @@ const VersionSelectorItem = ({
     } catch (e) {
       console.log(e)
       SnackBar.show(
-        "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+        t(
+          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+        ),
         'danger'
       )
       setIsLoading(false)
@@ -187,8 +191,8 @@ const VersionSelectorItem = ({
 
   const confirmDelete = () => {
     Alert.alert(
-      'Attention',
-      'Êtes-vous vraiment sur de supprimer cette version ?',
+      t('Attention'),
+      t('Êtes-vous vraiment sur de supprimer cette version ?'),
       [
         { text: 'Non', onPress: () => null, style: 'cancel' },
         {

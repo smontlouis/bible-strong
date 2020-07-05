@@ -8,10 +8,12 @@ import Loading from '~common/Loading'
 import { useDBStateValue } from '~helpers/databaseState'
 import DownloadRequired from '~common/DownloadRequired'
 import { getDatabasesRef } from '~helpers/firebase'
+import { useTranslation } from 'react-i18next'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
 export const useWaitForDatabase = () => {
+  const { t } = useTranslation()
   const [
     {
       dictionnaire: { isLoading, proposeDownload, startDownload, progress },
@@ -96,7 +98,9 @@ export const useWaitForDatabase = () => {
             }
           } catch (e) {
             SnackBar.show(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+              t(
+                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+              ),
               'danger'
             )
             dispatch({
@@ -138,6 +142,7 @@ export const useWaitForDatabase = () => {
 }
 
 const waitForDatabase = WrappedComponent => props => {
+  const { t } = useTranslation()
   const {
     isLoading,
     progress,
@@ -148,7 +153,7 @@ const waitForDatabase = WrappedComponent => props => {
 
   if (isLoading && startDownload) {
     return (
-      <Loading message="Téléchargement du dictionnaire...">
+      <Loading message={t('Téléchargement du dictionnaire...')}>
         <ProgressBar progress={progress} color="blue" />
       </Loading>
     )
@@ -158,7 +163,9 @@ const waitForDatabase = WrappedComponent => props => {
     return (
       <DownloadRequired
         hasBackButton
-        title="La base de données dictionnaire est requise pour accéder à cette page."
+        title={t(
+          'La base de données dictionnaire est requise pour accéder à cette page.'
+        )}
         setStartDownload={setStartDownload}
         fileSize={22}
       />
@@ -168,8 +175,10 @@ const waitForDatabase = WrappedComponent => props => {
   if (isLoading) {
     return (
       <Loading
-        message="Chargement du dictionnaire..."
-        subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes..."
+        message={t('Chargement du dictionnaire...')}
+        subMessage={t(
+          'Merci de patienter, la première fois peut prendre plusieurs secondes...'
+        )}
       />
     )
   }

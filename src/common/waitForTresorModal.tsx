@@ -10,10 +10,12 @@ import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { timeout } from '~helpers/timeout'
 import { storageRef } from '~helpers/firebase'
+import { useTranslation } from 'react-i18next'
 
 const STRONG_FILE_SIZE = 5434368
 
 export const useWaitForDatabase = () => {
+  const { t } = useTranslation()
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
@@ -81,7 +83,9 @@ export const useWaitForDatabase = () => {
             }
           } catch (e) {
             SnackBar.show(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+              t(
+                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+              ),
               'danger'
             )
             setProposeDownload(true)
@@ -107,6 +111,7 @@ export const useWaitForDatabase = () => {
 }
 
 const waitForDatabase = WrappedComponent => props => {
+  const { t } = useTranslation()
   const {
     isLoading,
     progress,
@@ -117,7 +122,7 @@ const waitForDatabase = WrappedComponent => props => {
 
   if (isLoading && startDownload) {
     return (
-      <Loading message="Téléchargement de la base commentaires...">
+      <Loading message={t('Téléchargement de la base commentaires...')}>
         <ProgressBar progress={Number(progress)} color="blue" />
       </Loading>
     )
@@ -128,9 +133,9 @@ const waitForDatabase = WrappedComponent => props => {
       <DownloadRequired
         noHeader
         small
-        title={
+        title={t(
           'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'
-        }
+        )}
         setStartDownload={setStartDownload}
         fileSize={5.4}
       />
@@ -140,8 +145,10 @@ const waitForDatabase = WrappedComponent => props => {
   if (isLoading) {
     return (
       <Loading
-        message="Chargement de la base de données..."
-        subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+        message={t('Chargement de la base de données...')}
+        subMessage={t(
+          "Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+        )}
       />
     )
   }

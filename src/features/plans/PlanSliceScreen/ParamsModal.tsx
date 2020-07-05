@@ -20,6 +20,7 @@ import { RootState } from '~redux/modules/reducer'
 import TouchableIcon from '~features/bible/TouchableIcon'
 import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   paramsModalRef: React.RefObject<Modalize>
@@ -50,6 +51,7 @@ const themeToString: { [x: string]: string } = {
 
 const ParamsModal = ({ paramsModalRef }: Props) => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const fontsView = React.useRef()
   const theme: Theme = useTheme()
   const {
@@ -78,7 +80,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
     >
       <Box padding={20} paddingBottom={20 + getBottomSpace()}>
         <HalfContainer border>
-          <Text flex={5}>Taille du texte</Text>
+          <Text flex={5}>{t('Taille du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold>{`${100 +
             fontSizeScale * 10}%`}</Text>
           <TouchableIcon
@@ -92,9 +94,9 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>Thème</Text>
+          <Text flex={5}>{t('Thème')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
-            {themeToString[themeType]}
+            {t(themeToString[themeType])}
           </Text>
           <TouchableIcon
             isSelected={themeType === 'default'}

@@ -11,6 +11,7 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 const LinkBox = Box.withComponent(Link)
 
 import AnimatedCircularProgress from '~common/AnimatedCircularProgress'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -39,6 +40,7 @@ const StyledIcon = styled(Icon.FontAwesome)(({ theme, isDisabled }) => ({
 
 const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
   const progressRef = React.useRef()
+  const { t } = useTranslation()
 
   React.useEffect(() => {
     if (item) {
@@ -89,7 +91,7 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
           }, 500)
         }}
       >
-        <Text color="reverse">Ajouter un tag</Text>
+        <Text color="reverse">{t('Ajouter un tag')}</Text>
       </LinkBox>
     </StylizedModal>
   )

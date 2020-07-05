@@ -20,6 +20,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
 import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
+import { withTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   flexDirection: 'row',
@@ -141,17 +142,21 @@ class BibleNoteModal extends React.Component {
   }
 
   deleteNote = noteId => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette note?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: () => {
-          this.props.deleteNote(noteId)
-          this.props.onClosed()
+    Alert.alert(
+      this.props.t('Attention'),
+      this.props.t('Voulez-vous vraiment supprimer cette note?'),
+      [
+        { text: 'Non', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Oui',
+          onPress: () => {
+            this.props.deleteNote(noteId)
+            this.props.onClosed()
+          },
+          style: 'destructive',
         },
-        style: 'destructive',
-      },
-    ])
+      ]
+    )
   }
 
   cancelEditing = () => {
@@ -172,14 +177,14 @@ ${this.state.description}
       `
       Share.share({ message })
     } catch (e) {
-      Snackbar.show('Erreur lors du partage.')
+      Snackbar.show(this.props.t('Erreur lors du partage.'))
       console.log(e)
       Sentry.captureException(e)
     }
   }
 
   render() {
-    const { isOpen, onClosed } = this.props
+    const { isOpen, onClosed, t } = this.props
     const { title, description, isEditing, id, tags } = this.state
     const submitIsDisabled = !title || !description
 
@@ -194,18 +199,18 @@ ${this.state.description}
       >
         <Container>
           <Text fontSize={16} bold color="darkGrey" marginBottom={10}>
-            Note pour {this.state.reference}
+            {t('Note pour')} {this.state.reference}
           </Text>
           {isEditing && (
             <>
               <TextInput
-                placeholder="Titre"
+                placeholder={t('Titre')}
                 onChangeText={this.onTitleChange}
                 value={title}
                 style={{ marginTop: 20 }}
               />
               <TextArea
-                placeholder="Description"
+                placeholder={t('Description')}
                 multiline
                 onChangeText={this.onDescriptionChange}
                 value={description}
@@ -217,14 +222,14 @@ ${this.state.description}
                   onPress={this.cancelEditing}
                   style={{ marginRight: 10 }}
                 >
-                  Annuler
+                  {t('Annuler')}
                 </Button>
                 <Button
                   small
                   disabled={submitIsDisabled}
                   onPress={this.onSaveNote}
                 >
-                  Sauvegarder
+                  {t('Sauvegarder')}
                 </Button>
               </Box>
             </>
@@ -271,6 +276,7 @@ ${this.state.description}
 
 export default compose(
   pure,
+  withTranslation(),
   connect(
     state => ({
       selectedVerses: state.bible.selectedVerses,
