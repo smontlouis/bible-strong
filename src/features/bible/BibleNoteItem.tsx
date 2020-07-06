@@ -26,8 +26,8 @@ const NoteLink = styled(Link)(({ theme }) => ({
 
 class BibleNoteItem extends React.Component {
   render() {
-    const { item, setNoteSettings, t } = this.props
-    const isFR = useLanguage()
+    const { item, setNoteSettings, t, i18n } = this.props
+    const isFR = i18n.language === 'fr'
 
     const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
     const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {

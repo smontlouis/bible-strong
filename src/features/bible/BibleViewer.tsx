@@ -28,6 +28,7 @@ import NaveModal from '~features/nave/NaveModal'
 import BibleFooter from './BibleFooter'
 import BibleWebView from './BibleWebView'
 import SelectedVersesModal from './SelectedVersesModal'
+import { withTranslation } from 'react-i18next'
 
 const Container = styled.View({
   flex: 1,
@@ -67,7 +68,7 @@ class BibleViewer extends Component {
     currentNave: null,
   }
 
-  pericope = getBiblePericope('LSG')
+  pericope = getBiblePericope(this.props.i18n === 'fr' ? 'LSG' : 'KJV')
 
   selectAllVerses = () => {
     const selectedVerses = Object.fromEntries(
@@ -148,7 +149,11 @@ class BibleViewer extends Component {
 
     let secondaryVerses = null
     if (version === 'INT') {
-      secondaryVerses = await loadBibleChapter(book.Numero, chapter, 'LSG')
+      secondaryVerses = await loadBibleChapter(
+        book.Numero,
+        chapter,
+        this.props.i18n.language === 'fr' ? 'LSG' : 'KJV'
+      )
     }
 
     if (settings.commentsDisplay) {
@@ -371,10 +376,9 @@ class BibleViewer extends Component {
         )}
         {isReadOnly && !error && (
           <Box center background>
-            <ReadMeButton
-              title="Ouvrir dans Bible"
-              onPress={this.openInBibleTab}
-            />
+            <ReadMeButton onPress={this.openInBibleTab}>
+              {this.props.t('Ouvrir dans Bible')}
+            </ReadMeButton>
           </Box>
         )}
         <SelectedVersesModal
@@ -476,6 +480,7 @@ const getNotesByChapter = createSelector(
 export default compose(
   pure,
   withTheme,
+  withTranslation(),
   connect(
     (state, props) => {
       return {

@@ -5,6 +5,7 @@ import styled from '~styled'
 import { setFirstTime } from '~redux/modules/user'
 import { useDispatch } from 'react-redux'
 import useLanguage from '~helpers/useLanguage'
+import { deleteAllDatabases } from '~helpers/database'
 
 import { RootState } from '~redux/modules/reducer'
 import OnBoardingSlides from './OnBoardingSlides'
@@ -27,6 +28,7 @@ const useCheckMandatoryVersions = () => {
       if (lsgNeedsDownload) {
         console.log('Needs download, open onboarding.')
         dispatch(setFirstTime(true))
+        deleteAllDatabases()
       }
     })()
   }, [dispatch, isFR])

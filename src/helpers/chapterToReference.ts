@@ -1,4 +1,5 @@
 import books from '~assets/bible_versions/books-desc'
+import i18n from '~i18n'
 
 const range = (start: number, end: number) => {
   return Array(end - start + 1)
@@ -41,7 +42,7 @@ export const chapterToReference = (chapters: string[] | string) => {
         return `${acc},${v}`
       }
       return acc + v
-    }, `${books[verses[0].book - 1].Nom} `)
+    }, `${i18n.t(books[verses[0].book - 1].Nom)} `)
 
   return title
 }
