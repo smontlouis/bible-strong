@@ -1,13 +1,28 @@
 import * as FileSystem from 'expo-file-system'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { timeout } from '~helpers/timeout'
+import i18n from '~i18n'
 
 export default function loadBible(bible, position) {
   return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {
+        case 'INT': {
+          const b = i18n.language === 'fr' ? 'LSG' : 'KJV'
+          if (bibleMemoize[b]) {
+            return resolve(bibleMemoize[b])
+          }
+
+          const path = `${FileSystem.documentDirectory}bible-${b}.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize[b] = JSON.parse(data)
+          resolve(bibleMemoize[b])
+
+          break
+        }
         case 'LSGS':
-        case 'INT':
         case 'LSG': {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])

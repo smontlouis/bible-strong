@@ -68,7 +68,7 @@ export const initDictionnaireDB = () => {
 export const initInterlineaireDB = () => {
   dbInterlineaire = SQLite.openDatabase(
     {
-      name: 'interlineraire.sqlite',
+      name: 'interlineaire.sqlite',
       createFromLocation: '/SQLite/interlineaire.sqlite',
     },
     () => {
@@ -189,13 +189,20 @@ class NaveDB {
 
 export const naveDB = new NaveDB()
 
-export const deleteAllDatabases = () => {
+export const deleteAllDatabases = async () => {
   // Reload app
   strongDB.delete()
   deleteDictionnaireDB()
   deleteTresorDB()
   mhyDB.delete()
   naveDB.delete()
+  deleteInterlineaireDB()
+
+  const intFile = await FileSystem.getInfoAsync(
+    `${FileSystem.documentDirectory}SQLite/interlineaire.sqlite`
+  )
+
+  if (intFile.exists) FileSystem.deleteAsync(intFile.uri)
 
   Object.values(getDatabases()).map(async db => {
     const file = await FileSystem.getInfoAsync(db.path)

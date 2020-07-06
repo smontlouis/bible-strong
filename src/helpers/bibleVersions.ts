@@ -5,10 +5,6 @@ import { biblesRef } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
-  if (versionId === 'LSG') {
-    return false
-  }
-
   if (versionId === 'INT') {
     // DO SOMETHING HERE
     return false
@@ -145,8 +141,8 @@ export const versions: {
   INT: {
     id: 'INT',
     name: 'Bible Interlinéaire',
-    c: '© Editio Critica Maior',
-    type: 'fr',
+    name_en: 'Interlinear Bible',
+    c: '©',
   },
   KJF: {
     id: 'KJF',
@@ -353,6 +349,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
     switch (version.id) {
       case 'KJV':
       case 'KJVS':
+      case 'INT':
       case 'NKJV':
       case 'NIV':
       case 'ESV': {

@@ -4,7 +4,7 @@ import { TouchableOpacity, Alert } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
 import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
-import { biblesRef } from '~helpers/firebase'
+import { biblesRef, getDatabasesRef } from '~helpers/firebase'
 
 import { setVersion } from '~redux/modules/bible'
 import { setVersionUpdated } from '~redux/modules/user'
@@ -20,6 +20,7 @@ import { isStrongVersion } from '~helpers/bibleVersions'
 import { useTheme } from 'emotion-theming'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -89,6 +90,7 @@ const VersionSelectorItem = ({
   shareFn,
 }: Props) => {
   const { t } = useTranslation()
+  const isFR = useLanguage()
   const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<
     boolean
@@ -136,7 +138,10 @@ const VersionSelectorItem = ({
     setIsLoading(true)
 
     const path = requireBiblePath(version.id)
-    const uri = await biblesRef[version.id].getDownloadURL()
+    const uri =
+      version.id === 'INT'
+        ? await getDatabasesRef().INTERLINEAIRE.getDownloadURL()
+        : await biblesRef[version.id].getDownloadURL()
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -182,7 +187,7 @@ const VersionSelectorItem = ({
     }
     FileSystem.deleteAsync(file.uri)
     setVersionNeedsDownload(true)
-    dispatch(setVersion('LSG'))
+    dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
 
     if (version.id === 'INT') {
       deleteInterlineaireDB()
@@ -229,7 +234,7 @@ const VersionSelectorItem = ({
               <FeatherIcon name="download" size={20} />
               {version.id === 'INT' && (
                 <Box center marginTop={5}>
-                  <Text fontSize={10}>⚠️ Taille de 20Mo</Text>
+                  <Text fontSize={10}>⚠️ {t('Taille de')} 20Mo</Text>
                 </Box>
               )}
             </TouchableOpacity>
