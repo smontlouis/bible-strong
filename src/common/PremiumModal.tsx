@@ -12,6 +12,7 @@ import { RootState } from '~redux/modules/reducer'
 import { useGlobalContext } from '~helpers/globalContext'
 import { withNavigation } from 'react-navigation'
 import { LinkBox } from './Link'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
@@ -32,6 +33,7 @@ interface Props {
 }
 
 const PremiumModal = ({ navigation }: Props) => {
+  const { t } = useTranslation()
   const isLightTheme = useSelector(
     (state: RootState) =>
       state.user.bible.settings.theme === 'default' ||
@@ -68,9 +70,9 @@ const PremiumModal = ({ navigation }: Props) => {
         </Box>
         <Box px={20} pb={20}>
           <Text textAlign="center">
-            {
+            {t(
               'Cette fonctionnalité est réservée aux sponsors,\n Devenez vous-même sponsor ou attendez quelques jours !'
-            }
+            )}
           </Text>
         </Box>
         <Box p={20}>
@@ -80,7 +82,7 @@ const PremiumModal = ({ navigation }: Props) => {
               navigation.navigate('Premium')
             }}
           >
-            Devenir sponsor
+            {t('Devenir sponsor')}
           </Button>
           <LinkBox
             onPress={() => {
@@ -89,7 +91,7 @@ const PremiumModal = ({ navigation }: Props) => {
             p={20}
             pb={0}
           >
-            <Text textAlign="center">Non merci</Text>
+            <Text textAlign="center">{t('Non merci')}</Text>
           </LinkBox>
         </Box>
       </Box>

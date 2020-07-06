@@ -1,7 +1,8 @@
 import React from 'react'
 import { connectRefinementList } from 'react-instantsearch-native'
-
 import DropdownMenu from '~common/DropdownMenu'
+import useLanguage from '~helpers/useLanguage'
+import { useTranslation } from 'react-i18next'
 
 const lookupTable = {
   period: {
@@ -23,15 +24,16 @@ const lookupTable = {
 }
 
 const RefinementList = ({ items, refine, attribute, ...props }) => {
+  const { t } = useTranslation()
   const currentValue = items.find(c => c.isRefined)?.label || ''
   items.sort((a, b) => Number(a.label) < Number(b.label))
   const choices = [
-    { label: 'Tout', value: '' },
+    { label: t('Tout'), value: '' },
     ...items.map(item => {
       const value = item.label
       return {
         value,
-        label: lookupTable[attribute][value],
+        label: t(lookupTable[attribute][value]),
         count: item.count,
       }
     }),
@@ -49,7 +51,7 @@ const RefinementList = ({ items, refine, attribute, ...props }) => {
 
   return (
     <DropdownMenu
-      title={lookupTable[attribute].title}
+      title={t(lookupTable[attribute].title)}
       currentValue={currentValue}
       setValue={value => refine(value)}
       choices={choices}

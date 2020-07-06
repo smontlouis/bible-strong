@@ -14,6 +14,7 @@ import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import Empty from '~common/Empty'
 import Highlight from './Highlight'
 import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const InfiniteHits = ({
   searchValue,
@@ -26,6 +27,7 @@ const InfiniteHits = ({
   ...props
 }) => {
   const { t } = useTranslation()
+  const isFR = useLanguage()
   return (
     <Box flex>
       <FlatList
@@ -46,7 +48,7 @@ const InfiniteHits = ({
             ) : (
               <Box paddingHorizontal={20}>
                 <Text title fontSize={16} color="grey">
-                  {t('{nbHits} occurences trouvées dans la bible', {
+                  {t('{{nbHits}} occurences trouvées dans la bible', {
                     nbHits: allSearchResults?.nbHits,
                   })}
                 </Text>
@@ -57,7 +59,9 @@ const InfiniteHits = ({
         data={hits}
         keyExtractor={item => item.objectID}
         onEndReached={() => hasMore && refine()}
-        renderItem={({ item }) => <Highlight attribute="LSG" hit={item} />}
+        renderItem={({ item }) => (
+          <Highlight attribute={isFR ? 'LSG' : 'KJV'} hit={item} />
+        )}
       />
     </Box>
   )
