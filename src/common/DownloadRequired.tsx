@@ -5,6 +5,7 @@ import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   title: string
@@ -27,11 +28,12 @@ const DownloadRequired = ({
 }: Props) => {
   const padding = small ? 10 : 30
   const iconSize = small ? 20 : size
+  const { t } = useTranslation()
   return (
     <Container pure={small} noPadding={small}>
       {!noHeader && (
         <Header
-          title="Téléchargement nécessaire"
+          title={t('Téléchargement nécessaire')}
           hasBackButton={hasBackButton}
         />
       )}
@@ -46,7 +48,7 @@ const DownloadRequired = ({
             {title}
           </Text>
           <Text bold color="primary" onPress={() => setStartDownload(true)}>
-            {`Télécharger (${fileSize}Mo)`}
+            {`${t('Télécharger')} (${fileSize}Mo)`}
           </Text>
         </Box>
       </Box>

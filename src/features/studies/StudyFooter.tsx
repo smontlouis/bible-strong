@@ -22,6 +22,7 @@ import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
 import useMediaQueries from '~helpers/useMediaQueries'
+import { useTranslation } from 'react-i18next'
 
 const { Popover } = renderers
 
@@ -50,6 +51,7 @@ const PopOverMenu = ({ element, popover, ...props }) => (
 )
 
 const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
+  const { t } = useTranslation()
   const headings = [
     { label: 'Normal', value: 0 },
     { label: 'Titre', value: 1 },
@@ -81,7 +83,7 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
           paddingHorizontal={7}
         >
           <Text fontSize={15} bold color="primary">
-            {getHeaderTitle()}
+            {t(getHeaderTitle())}
           </Text>
           <Box
             marginLeft={5}
@@ -118,7 +120,7 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
                 : 'grey'
             }
           >
-            {h.label}
+            {t(h.label)}
           </Text>
         </MenuOption>
       ))}
@@ -270,6 +272,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
 }
 
 const SelectBlock = ({ navigateBibleView }) => {
+  const { t } = useTranslation()
   return (
     <PopOverMenu
       element={
@@ -290,7 +293,7 @@ const SelectBlock = ({ navigateBibleView }) => {
                 name="link-2"
                 style={{ marginRight: 15 }}
               />
-              <Text>Insérer un lien de verset</Text>
+              <Text>{t('Insérer un lien de verset')}</Text>
             </Box>
           </MenuOption>
           <MenuOption onSelect={() => navigateBibleView('verse-block')}>
@@ -301,7 +304,7 @@ const SelectBlock = ({ navigateBibleView }) => {
                 name="short-text"
                 style={{ marginRight: 15 }}
               />
-              <Text>Insérer un texte de verset</Text>
+              <Text>{t('Insérer un texte de verset')}</Text>
             </Box>
           </MenuOption>
           <MenuOption onSelect={() => navigateBibleView('strong')}>
@@ -312,7 +315,7 @@ const SelectBlock = ({ navigateBibleView }) => {
                 name="link-2"
                 style={{ marginRight: 15 }}
               />
-              <Text>Insérer un lien de strong</Text>
+              <Text>{t('Insérer un lien de strong')}</Text>
             </Box>
           </MenuOption>
           <MenuOption onSelect={() => navigateBibleView('strong-block')}>
@@ -323,7 +326,7 @@ const SelectBlock = ({ navigateBibleView }) => {
                 name="short-text"
                 style={{ marginRight: 15 }}
               />
-              <Text>Insérer un texte de strong</Text>
+              <Text>{t('Insérer un texte de strong')}</Text>
             </Box>
           </MenuOption>
         </>

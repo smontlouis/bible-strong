@@ -11,6 +11,7 @@ import { RootState } from '~redux/modules/reducer'
 import OnBoardingSlides from './OnBoardingSlides'
 import DownloadFiles from './DownloadFiles'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { setVersion } from '~redux/modules/bible'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -28,6 +29,7 @@ const useCheckMandatoryVersions = () => {
       if (lsgNeedsDownload) {
         console.log('Needs download, open onboarding.')
         dispatch(setFirstTime(true))
+        dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
         deleteAllDatabases()
       }
     })()

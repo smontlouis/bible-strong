@@ -9,6 +9,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 
 import Text from '~common/ui/Text'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   justifyContent: 'flex-end',
@@ -40,6 +41,7 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const LoginModal = ({ isVisible }) => {
+  const { t } = useTranslation()
   return (
     <StylizedModal isVisible={isVisible} coverScreen={false}>
       <Container>
@@ -49,14 +51,14 @@ const LoginModal = ({ isVisible }) => {
             <Icon.Feather name="arrow-left" size={25} />
           </Back> */}
             <Text title fontSize={30}>
-              Études bibliques
+              {t('Études bibliques')}
             </Text>
           </Box>
           <Paragraph scaleLineHeight={-2}>
-            Rédigez vos études, sauvegardez-les dans le cloud.
+            {t('Rédigez vos études, sauvegardez-les dans le cloud.')}
           </Paragraph>
           <Paragraph scaleLineHeight={-2} marginTop={10} marginBottom={20}>
-            Rejoignez la communauté !
+            {t('Rejoignez la communauté !')}
           </Paragraph>
           <Login />
         </ScrollView>

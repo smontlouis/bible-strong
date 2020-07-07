@@ -389,6 +389,7 @@ class BibleStrongDetailScreen extends React.Component {
                     keyExtractor={item =>
                       `${item.Livre}-${item.Chapitre}-${item.Verset}`
                     }
+                    contentContainerStyle={{ paddingTop: 10 }}
                     renderItem={({ item }) => (
                       <ConcordanceVerse
                         navigation={this.props.navigation}

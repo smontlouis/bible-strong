@@ -69,7 +69,7 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
   const [naveItemsForVerse, naveItemsForChapter] = Naves || []
 
   return (
-    <Box flex>
+    <Box flex width="100%">
       <Box row height={60} alignItems="center">
         <Box flex paddingLeft={20}>
           <Text title fontSize={16} marginTop={10}>

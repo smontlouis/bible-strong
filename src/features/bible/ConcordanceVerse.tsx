@@ -6,6 +6,7 @@ import books from '~assets/bible_versions/books-desc'
 
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
+import { withTranslation } from 'react-i18next'
 
 const VerseText = styled.View(() => ({
   flex: 1,
@@ -39,7 +40,7 @@ class ConcordanceVerse extends React.Component {
   }
 
   render() {
-    const { verse, navigation } = this.props
+    const { verse, navigation, t } = this.props
 
     if (!this.state.formattedTexte) {
       return <Loading />
@@ -62,7 +63,7 @@ class ConcordanceVerse extends React.Component {
         }
       >
         <Text title fontSize={16} marginBottom={5}>
-          {books[verse.Livre - 1].Nom} {verse.Chapitre}:{verse.Verset}
+          {t(books[verse.Livre - 1].Nom)} {verse.Chapitre}:{verse.Verset}
         </Text>
         <VerseText>{this.state.formattedTexte}</VerseText>
       </Container>
@@ -70,4 +71,4 @@ class ConcordanceVerse extends React.Component {
   }
 }
 
-export default ConcordanceVerse
+export default withTranslation()(ConcordanceVerse)

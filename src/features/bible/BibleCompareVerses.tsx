@@ -24,6 +24,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 const BibleCompareVerses = ({ navigation }) => {
   const { selectedVerses: s } = navigation.state.params || {}
   const [selectedVerses, setSelectedVerses] = React.useState(s)
+  const [error, setError] = React.useState(false)
   const [prevNextItems, setPrevNextItems] = React.useState()
   const title = verseToReference(selectedVerses)
 
@@ -47,6 +48,7 @@ const BibleCompareVerses = ({ navigation }) => {
         verseNumber: verse,
         versesInCurrentChapter,
       })
+      setError(error)
     }
 
     if (hasPrevNextButtons) {
@@ -92,7 +94,7 @@ const BibleCompareVerses = ({ navigation }) => {
             ))
         )}
       </ScrollView>
-      {prevNextItems && (
+      {prevNextItems && !error && (
         <Box paddingBottom={20}>
           <BibleVerseDetailFooter
             verseNumber={prevNextItems.verseNumber}

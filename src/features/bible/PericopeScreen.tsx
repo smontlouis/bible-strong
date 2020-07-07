@@ -95,7 +95,7 @@ const PericopeScreen = ({ navigation }) => {
       <ScrollView>
         <Box padding={20}>
           <Paragraph style={{ fontSize: 30 }} marginBottom={40}>
-            {book.Nom}
+            {t(book.Nom)}
           </Paragraph>
           {!Object.keys(pericopeBook).length ? (
             <Empty

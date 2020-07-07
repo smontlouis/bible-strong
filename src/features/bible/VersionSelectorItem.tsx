@@ -226,7 +226,7 @@ const VersionSelectorItem = ({
             <TextName>{version.name}</TextName>
             <TextCopyright>{version.c}</TextCopyright>
           </Box>
-          {!isLoading && version.id !== 'LSGS' && (
+          {!isLoading && version.id !== 'LSGS' && version.id !== 'KJVS' && (
             <TouchableOpacity
               onPress={startDownload}
               style={{ padding: 10, alignItems: 'flex-end' }}

@@ -29,6 +29,8 @@ const Container = styled.View(({ theme }) => ({
   paddingBottom: getBottomSpace(),
   borderTopLeftRadius: 30,
   borderTopRightRadius: 30,
+  justifyContent: 'center',
+  alignItems: 'center',
 }))
 
 const NaveModal = ({ onClosed, theme, selectedVerse, version }) => {
