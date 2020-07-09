@@ -16,23 +16,11 @@ import Clipboard from '@react-native-community/clipboard'
 import SnackBar from '~common/SnackBar'
 import { Share, Platform, PermissionsAndroid } from 'react-native'
 import { useOnlyPremium } from '~helpers/usePremium'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   study: Study
   onClosed: () => void
-}
-
-const copyToClipboard = async (url: string) => {
-  Clipboard.setString(url)
-  SnackBar.show('Copié dans le presse-papiers.')
-}
-
-const shareVerse = async (title: string, userName: string, url: string) => {
-  const result = await Share.share({
-    message: `${title}, créé par ${userName}
-  ${url}`,
-  })
-  return result
 }
 
 const useStudyStatus = (study: Study) => {
@@ -68,11 +56,25 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
   const isConnected = useConnection()
   const dispatch = useDispatch()
   const onlyPremium = useOnlyPremium()
+  const { t } = useTranslation()
 
   const onPublishStudy = onlyPremium(
     () => isConnected && dispatch(publishStudy(study.id)),
     onClosed
   )
+
+  const copyToClipboard = async (url: string) => {
+    Clipboard.setString(url)
+    SnackBar.show(t('Copié dans le presse-papiers.'))
+  }
+
+  const shareVerse = async (title: string, userName: string, url: string) => {
+    const result = await Share.share({
+      message: `${title}, ${t('créé par')} ${userName}
+    ${url}`,
+    })
+    return result
+  }
 
   const exportPDF = async () => {
     try {
@@ -102,12 +104,13 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           {
-            title: 'Accès au dossier de téléchargement',
-            message:
-              'Bible Strong aimerait stocker les études dans votre dossier "Downloads"',
-            buttonNeutral: 'Demandez plus tard',
-            buttonNegative: 'Annuler',
-            buttonPositive: 'Ok',
+            title: t('Accès au dossier de téléchargement'),
+            message: t(
+              'Bible Strong aimerait stocker les études dans votre dossier "Downloads"'
+            ),
+            buttonNeutral: t('Demandez plus tard'),
+            buttonNegative: t('Annuler'),
+            buttonPositive: t('Ok'),
           }
         )
 
@@ -162,7 +165,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
             {status === 'Pending' && (
               <Box row alignItems="center" py={10}>
                 <ActivityIndicator size={20} />
-                <Text ml={20}>Chargement</Text>
+                <Text ml={20}>{t('Chargement')}</Text>
               </Box>
             )}
             {status === 'Resolved' && (
@@ -175,13 +178,13 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
                     onPress={() => dispatch(publishStudy(study.id, false))}
                   >
                     <FeatherIcon name="link-2" color="success" size={20} />
-                    <Text ml={20}>Dépublier l'étude</Text>
+                    <Text ml={20}>{t("Dépublier l'étude")}</Text>
                   </LinkBox>
                 ) : (
                   <Box row alignItems="center" py={10}>
                     <FeatherIcon name="link-2" color="secondary" size={20} />
                     <Text color="grey" ml={20}>
-                      Publication en cours...
+                      {t('Publication en cours...')}
                     </Text>
                   </Box>
                 )}
@@ -190,13 +193,13 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
             {status === 'Rejected' && (
               <Box row alignItems="center" py={10}>
                 <FeatherIcon name="link-2" color="quart" size={20} />
-                <Text ml={20}>Impossible de vérifier le lien</Text>
+                <Text ml={20}>{t('Impossible de vérifier le lien')}</Text>
               </Box>
             )}
 
             <LinkBox row alignItems="center" py={10} href={url}>
               <FeatherIcon name="external-link" size={20} />
-              <Text ml={20}>Ouvrir le lien</Text>
+              <Text ml={20}>{t('Ouvrir le lien')}</Text>
             </LinkBox>
             <LinkBox
               row
@@ -208,7 +211,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               }}
             >
               <FeatherIcon name="copy" size={20} />
-              <Text ml={20}>Copier le lien</Text>
+              <Text ml={20}>{t('Copier le lien')}</Text>
             </LinkBox>
             <LinkBox
               row
@@ -226,7 +229,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               }}
             >
               <FeatherIcon name="share-2" size={20} />
-              <Text ml={20}>Partager</Text>
+              <Text ml={20}>{t('Partager')}</Text>
             </LinkBox>
             {(pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
               <LinkBox
@@ -237,10 +240,10 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               >
                 <MaterialIcon name="picture-as-pdf" size={20} />
                 {pdfStatus === 'Idle' ? (
-                  <Text ml={20}>Exporter en pdf</Text>
+                  <Text ml={20}>{t('Exporter en pdf')}</Text>
                 ) : (
                   <Text color="quart" ml={20}>
-                    Une erreur s'est produite. Réessayer ?
+                    {t("Une erreur s'est produite. Réessayer ?")}
                   </Text>
                 )}
               </LinkBox>
@@ -248,13 +251,13 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
             {pdfStatus === 'Pending' && (
               <Box disabled row alignItems="center" py={10}>
                 <ActivityIndicator size={20} />
-                <Text ml={20}>Génération du pdf...</Text>
+                <Text ml={20}>{t('Génération du pdf...')}</Text>
               </Box>
             )}
             {pdfStatus === 'Resolved' && (
               <Box row alignItems="center" py={10}>
                 <MaterialIcon name="picture-as-pdf" size={20} />
-                <Text ml={20}>Ouverture du fichier...</Text>
+                <Text ml={20}>{t('Ouverture du fichier...')}</Text>
               </Box>
             )}
           </Box>
@@ -269,7 +272,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               onPress={onPublishStudy}
               disabled={!isConnected}
             >
-              <Text>Publier l'étude</Text>
+              <Text>{t("Publier l'étude")}</Text>
             </LinkBox>
           </Box>
           <Border />

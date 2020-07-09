@@ -3,8 +3,10 @@ import React from 'react'
 import { useWaitForDatabase } from '~common/waitForNaveDB'
 import DownloadRequired from '~common/DownloadRequired'
 import { DownloadingWidget, WidgetLoading, WidgetContainer } from './widget'
+import { useTranslation } from 'react-i18next'
 
 const waitForWidget = WrappedComponent => props => {
+  const { t } = useTranslation()
   const {
     isLoading,
     startDownload,
@@ -22,7 +24,7 @@ const waitForWidget = WrappedComponent => props => {
       <WidgetContainer>
         <DownloadRequired
           noHeader
-          title="Thématique nave requise"
+          title={t('Thématique nave requise')}
           setStartDownload={setStartDownload}
           fileSize={7}
           small

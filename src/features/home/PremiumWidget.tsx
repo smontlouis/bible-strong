@@ -6,6 +6,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useIsPremium } from '~helpers/usePremium'
+import { useTranslation } from 'react-i18next'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -14,6 +15,7 @@ const color2 = '#13547a'
 
 const PremiumWidget = () => {
   const isPremium = useIsPremium()
+  const { t } = useTranslation()
   return (
     <Box grey px={20} pt={20} pb={60}>
       <LinkBox
@@ -57,13 +59,13 @@ const PremiumWidget = () => {
         <Box pl={60}>
           <Text title fontSize={20} color="white">
             {isPremium
-              ? 'Vous êtes Premium !\nMerci !'
-              : 'Devenez un sponsor !'}
+              ? t('Vous êtes Premium !\nMerci !')
+              : t('Devenez un sponsor !')}
           </Text>
           <Text marginTop={5} fontSize={14} color="white">
             {isPremium
-              ? 'Voir vos avantages !'
-              : 'Supportez-nous et débloquez toutes les fonctionnalités !'}
+              ? t('Voir vos avantages !')
+              : t('Supportez-nous et débloquez toutes les fonctionnalités !')}
           </Text>
         </Box>
       </LinkBox>

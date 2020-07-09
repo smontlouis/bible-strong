@@ -12,10 +12,11 @@ import analytics from '@react-native-firebase/analytics'
 
 import SplashScreen from 'react-native-splash-screen'
 
-import configureStore from '~redux/store'
+import { store, persistor } from '~redux/store'
 import { GlobalContext } from '~helpers/globalContext'
 import InitApp from './InitApp'
 import { useInitIAP } from '~helpers/useInAppPurchases'
+import { setI18n } from './i18n'
 
 setAutoFreeze(false)
 YellowBox.ignoreWarnings([
@@ -32,8 +33,6 @@ if (!__DEV__) {
     dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
   })
 }
-
-export const { store, persistor } = configureStore()
 
 const initNotifications = () => {
   PushNotification.configure({
@@ -67,6 +66,7 @@ const useAppLoad = () => {
   useEffect(() => {
     ;(async () => {
       await loadResourcesAsync()
+      await setI18n()
       handleFinishLoading()
       initNotifications()
 

@@ -10,6 +10,8 @@ import { ShallowTimelineSection } from './types'
 import { wp } from '~helpers/utils'
 import FastImage from 'react-native-fast-image'
 import InlineLink from '~common/InlineLink'
+import useLanguage from '~helpers/useLanguage'
+import { useTranslation } from 'react-i18next'
 
 interface Props extends ShallowTimelineSection {
   modalRef: React.RefObject<Modalize>
@@ -27,14 +29,20 @@ const SectionDetailsModal = ({
   image,
   color,
   description,
+  descriptionEn,
   title,
+  titleEn,
   sectionTitle,
+  sectionTitleEn,
   subTitle,
+  subTitleEn,
   startYear,
   endYear,
   interval,
 }: Props) => {
   const theme: Theme = useTheme()
+  const isFR = useLanguage()
+  const { t } = useTranslation()
 
   return (
     <Modalize
@@ -51,18 +59,18 @@ const SectionDetailsModal = ({
     >
       <Box flex center px={50} py={60}>
         <Text title fontSize={20}>
-          {sectionTitle}
+          {isFR ? sectionTitle : sectionTitleEn}
         </Text>
 
         <Text py={30} fontSize={35} title textAlign="center">
-          {title.toUpperCase()}
+          {(isFR ? title : titleEn).toUpperCase()}
         </Text>
 
         <Box>
           <Box height={2} bg="default" />
 
           <Text py={3} textAlign="center" title>
-            {subTitle}
+            {isFR ? subTitle : subTitleEn}
           </Text>
           <Box height={2} bg="default" />
         </Box>
@@ -82,14 +90,14 @@ const SectionDetailsModal = ({
           borderRadius={10}
           my={50}
         />
-        <Paragraph>{description}</Paragraph>
+        <Paragraph>{isFR ? description : descriptionEn}</Paragraph>
         <Paragraph scale={-2} mt={80} textAlign="center">
-          {`Vous souhaitez aller plus loin ?\n`}
+          {`${t('Vous souhaitez aller plus loin ?')}\n`}
           <InlineLink
             scale={-2}
             href="https://www.bibleuniverse.com/study-tools/storacles/c/3/l/french"
           >
-            Cliquez ici
+            {t('Cliquez ici')}
           </InlineLink>
         </Paragraph>
       </Box>

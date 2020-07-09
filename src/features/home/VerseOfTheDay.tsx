@@ -24,6 +24,7 @@ import { Modalize } from 'react-native-modalize'
 import { RootState } from '~redux/modules/reducer'
 import { Portal } from 'react-native-paper'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { useTranslation } from 'react-i18next'
 
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
@@ -35,18 +36,18 @@ interface Props {
   setCurrentVOD: React.Dispatch<React.SetStateAction<number>>
 }
 
-const dayToAgo = (day: number) => {
+const dayToAgo = (day: number, t: TFunction) => {
   switch (day) {
     case -1:
-      return 'Hier'
+      return t('Hier')
     case -2:
-      return 'Il y a deux jours'
+      return t('Il y a deux jours')
     case -3:
-      return 'Il y a trois jours'
+      return t('Il y a trois jours')
     case -4:
-      return 'Il y a quatre jours'
+      return t('Il y a quatre jours')
     case -5:
-      return 'Il y a cinq jours'
+      return t('Il y a cinq jours')
     default:
       return undefined
   }
@@ -59,6 +60,7 @@ const VerseOfTheDay = ({
   currentVOD,
   setCurrentVOD,
 }: Props) => {
+  const { t } = useTranslation()
   const [timerPickerOpen, setTimePicker] = useState(false)
   const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
@@ -67,7 +69,7 @@ const VerseOfTheDay = ({
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
-  const { current: ago } = useRef(dayToAgo(addDay))
+  const { current: ago } = useRef(dayToAgo(addDay, t))
   const notificationModalRef = React.useRef<Modalize>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime
@@ -203,7 +205,7 @@ const VerseOfTheDay = ({
           <Box py={30} px={20} pb={30 + getBottomSpace()}>
             <Box row alignItems="center">
               <Text bold flex>
-                Recevoir une notification quotidienne
+                {t('Recevoir une notification quotidienne')}
               </Text>
               <Switch
                 value={!!verseOfTheDayTime}
@@ -218,7 +220,7 @@ const VerseOfTheDay = ({
             </Box>
             {!!verseOfTheDayTime && (
               <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
-                <Text>Choisir l'heure:</Text>
+                <Text>{t("Choisir l'heure")}:</Text>
                 <Text bold> {verseOfTheDayTime}</Text>
                 <Box ml={5}>
                   <FeatherIcon name="chevron-down" />

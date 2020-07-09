@@ -9,6 +9,7 @@ import { Status } from '~common/types'
 import useLogin from './useLogin'
 import { Dispatch } from 'redux'
 import Snackbar from '~common/SnackBar'
+import i18n from '~i18n'
 import { iaphub } from '../../config'
 
 export const subSkus = [
@@ -82,7 +83,9 @@ export const buyProduct = async (
 
   if (loginErr) {
     Snackbar.show(
-      'Impossible de charger les produits, vérifiez votre connexion internet.'
+      i18n.t(
+        'Impossible de charger les produits, vérifiez votre connexion internet.'
+      )
     )
     return
   }
@@ -94,32 +97,44 @@ export const buyProduct = async (
   if (!error) {
     if (transaction?.webhookStatus === 'failed') {
       Alert.alert(
-        'Achat retardé',
-        'Votre abonnement a été traité avec succès, mais nous avons besoin de plus de temps pour le valider, il devrait arriver bientôt ! Sinon, contactez-nous par mail.'
+        i18n.t('Achat retardé'),
+        i18n.t(
+          'Votre abonnement a été traité avec succès, mais nous avons besoin de plus de temps pour le valider, il devrait arriver bientôt ! Sinon, contactez-nous par mail.'
+        )
       )
     } else {
-      Alert.alert('Achat réussi', 'Merci de nous faire confiance !')
+      Alert.alert(
+        i18n.t('Achat réussi'),
+        i18n.t('Merci de nous faire confiance !')
+      )
       dispatch(setSubscription('premium'))
     }
   } else {
     const err = error as Error & { code: string }
     if (err.code === 'user_cancelled') return
     else if (err.code === 'product_already_owned') {
-      Alert.alert('Erreur', 'Il semble que vous êtes déjà abonné.')
+      Alert.alert(
+        i18n.t('Erreur'),
+        i18n.t('Il semble que vous êtes déjà abonné.')
+      )
     } else if (err.code === 'receipt_validation_failed') {
       Alert.alert(
-        "Nous n'avons pas réussi à valider votre transaction",
-        'Donnez-nous un peu de temps, nous allons réessayer de valider votre transaction dès que possible !'
+        i18n.t("Nous n'avons pas réussi à valider votre transaction"),
+        i18n.t(
+          'Donnez-nous un peu de temps, nous allons réessayer de valider votre transaction dès que possible !'
+        )
       )
     } else if (err.code === 'receipt_request_failed') {
       Alert.alert(
-        'Nous avons des difficultés à valider votre transaction',
-        'Veuillez nous contacter.'
+        i18n.t('Nous avons des difficultés à valider votre transaction'),
+        i18n.t('Veuillez nous contacter.')
       )
     } else {
       Alert.alert(
-        "Erreur d'achat",
-        'Une erreur est survenue, vérifiez votre connexion ou contactez-nous.'
+        i18n.t("Erreur d'achat"),
+        i18n.t(
+          'Une erreur est survenue, vérifiez votre connexion ou contactez-nous.'
+        )
       )
     }
   }

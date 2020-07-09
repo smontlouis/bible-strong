@@ -21,6 +21,7 @@ import ParamsModal from './ParamsModal'
 import PauseText from './PauseText'
 import ReadButton from './ReadButton'
 import Slice from './Slice'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -47,6 +48,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
     'readingSlice',
     {}
   )
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const paramsModalRef = React.useRef<Modalize>(null)
 
@@ -96,7 +98,9 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                       style={{ opacity: isRead ? 0.3 : 1 }}
                     />
                     <Text marginLeft={10}>
-                      {isRead ? 'Marquer comme non lu' : 'Marquer comme lu'}
+                      {isRead
+                        ? t('Marquer comme non lu')
+                        : t('Marquer comme lu')}
                     </Text>
                   </Box>
                 </MenuOption>
@@ -110,13 +114,13 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                 >
                   <Box row alignItems="center">
                     <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>
-                    <Text marginLeft={10}>Changer de version</Text>
+                    <Text marginLeft={10}>{t('Changer de version')}</Text>
                   </Box>
                 </MenuOption>
                 <MenuOption onSelect={() => paramsModalRef.current?.open()}>
                   <Box row alignItems="center">
                     <TextIcon>Aa</TextIcon>
-                    <Text marginLeft={10}>Mise en forme</Text>
+                    <Text marginLeft={10}>{t('Mise en forme')}</Text>
                   </Box>
                 </MenuOption>
               </>
@@ -143,14 +147,14 @@ const PlanSliceScreen = ({ navigation }: Props) => {
               fontFamily="text"
               bold
             >
-              Vous avez déjà terminé cette lecture.
+              {t('Vous avez déjà terminé cette lecture.')}
             </Paragraph>
           </Box>
         )}
         <PauseText>
-          {
+          {t(
             'Prenez une grande inspiration,\n alors que vous vous apprêtez à passer du\n temps avec Dieu'
-          }
+          )}
         </PauseText>
         {title && (
           <Box paddingHorizontal={20} marginBottom={50}>

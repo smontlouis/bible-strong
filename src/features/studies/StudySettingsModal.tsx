@@ -12,6 +12,7 @@ import { deleteStudy } from '~redux/modules/user'
 import { Theme } from '~themes'
 import { RootState } from '~redux/modules/reducer'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
+import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
@@ -60,6 +61,7 @@ const StudySettingsModal = ({
   setTitlePrompt,
   setMultipleTagsItem,
 }: Props) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const studyId = isOpen
   const study = useSelector(
@@ -67,17 +69,21 @@ const StudySettingsModal = ({
   )
 
   const deleteStudyConfirmation = (id: string) => {
-    Alert.alert('Attention', 'Voulez-vous vraiment supprimer cette étude?', [
-      { text: 'Non', onPress: () => null, style: 'cancel' },
-      {
-        text: 'Oui',
-        onPress: () => {
-          dispatch(deleteStudy(id))
-          onClosed()
+    Alert.alert(
+      t('Attention'),
+      t('Voulez-vous vraiment supprimer cette étude?'),
+      [
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
+        {
+          text: t('Oui'),
+          onPress: () => {
+            dispatch(deleteStudy(id))
+            onClosed()
+          },
+          style: 'destructive',
         },
-        style: 'destructive',
-      },
-    ])
+      ]
+    )
   }
 
   return (
@@ -98,7 +104,7 @@ const StudySettingsModal = ({
             }, 500)
           }}
         >
-          <Text>Éditer les tags</Text>
+          <Text>{t('Éditer les tags')}</Text>
         </Touchy>
         <Touchy
           onPress={() => {
@@ -108,10 +114,10 @@ const StudySettingsModal = ({
             }, 500)
           }}
         >
-          <Text>Renommer</Text>
+          <Text>{t('Renommer')}</Text>
         </Touchy>
         <Touchy onPress={() => deleteStudyConfirmation(studyId)}>
-          <Text color="quart">Supprimer</Text>
+          <Text color="quart">{t('Supprimer')}</Text>
         </Touchy>
       </Container>
     </StylizedModal>

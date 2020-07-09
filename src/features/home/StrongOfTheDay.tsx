@@ -14,12 +14,14 @@ import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import LexiqueIcon from '~common/LexiqueIcon'
 import RandomButton from './RandomButton'
 import truncate from '~helpers/truncate'
+import { useTranslation } from 'react-i18next'
 
 const StrongOfTheDay = ({
   type,
   color1 = 'rgb(69,150,220)',
   color2 = 'rgb(89,131,240)',
 }) => {
+  const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
   const [strongReference, setStrongRef] = useState(false)
@@ -54,12 +56,12 @@ const StrongOfTheDay = ({
         {error === 'NOT_FOUND' ? (
           <>
             <FeatherIcon name="slash" size={30} color="quart" />
-            <Text marginTop={5}>Pas de strong pour ce Code.</Text>
+            <Text marginTop={5}>{t('Pas de strong pour ce Code.')}</Text>
           </>
         ) : (
           <>
             <FeatherIcon name="x" size={30} color="quart" />
-            <Text marginTop={5}>Une erreur est survenue.</Text>
+            <Text marginTop={5}>{t('Une erreur est survenue.')}</Text>
           </>
         )}
       </WidgetContainer>
@@ -103,7 +105,7 @@ const StrongOfTheDay = ({
             rounded
           >
             <Text fontSize={10} style={{ color: 'white' }}>
-              {type === 'grec' ? 'Grec' : 'Hébreu'}
+              {type === 'grec' ? t('Grec') : t('Hébreu')}
             </Text>
           </Box>
           <Paragraph title scale={-2} style={{ color: 'white' }}>
@@ -127,7 +129,7 @@ const StrongOfTheDay = ({
           >
             <LexiqueIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text color="white" bold fontSize={12}>
-              Lexique
+              {t('Lexique')}
             </Text>
           </Box>
         </Link>

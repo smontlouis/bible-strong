@@ -13,6 +13,7 @@ import { removeHighlight, changeHighlightColor } from '~redux/modules/user'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import Box from '~common/ui/Box'
+import { useTranslation } from 'react-i18next'
 
 interface Chip {
   id: string
@@ -20,6 +21,7 @@ interface Chip {
 }
 
 const HighlightsScreen = () => {
+  const { t } = useTranslation()
   const verseIds = useSelector(
     (state: RootState) => state.user.bible.highlights
   )
@@ -48,12 +50,12 @@ const HighlightsScreen = () => {
 
   const promptLogout = () => {
     Alert.alert(
-      'Attention',
-      'Êtes-vous vraiment sur de supprimer cette surbrillance ?',
+      t('Attention'),
+      t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'),
       [
-        { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Oui',
+          text: t('Oui'),
           onPress: () => {
             dispatch(removeHighlight(isSettingsOpen?.stringIds))
             setIsSettingsOpen(undefined)
@@ -72,7 +74,7 @@ const HighlightsScreen = () => {
   return (
     <Container>
       <TagsHeader
-        title="Surbrillances"
+        title={t('Surbrillances')}
         setIsOpen={setTagsIsOpen}
         isOpen={isTagsOpen}
         selectedChip={selectedChip}
@@ -92,7 +94,7 @@ const HighlightsScreen = () => {
       ) : (
         <Empty
           source={require('~assets/images/empty.json')}
-          message="Vous n'avez pas encore rien surligné..."
+          message={t("Vous n'avez pas encore rien surligné...")}
         />
       )}
       <Modal.Menu
@@ -108,7 +110,7 @@ const HighlightsScreen = () => {
             }, 500)
           }}
         >
-          Changer la couleur
+          {t('Changer la couleur')}
         </Modal.Item>
         <Modal.Item
           bold
@@ -122,10 +124,10 @@ const HighlightsScreen = () => {
             }, 500)
           }}
         >
-          Éditer les tags
+          {t('Éditer les tags')}
         </Modal.Item>
         <Modal.Item bold color="quart" onPress={promptLogout}>
-          Supprimer
+          {t('Supprimer')}
         </Modal.Item>
       </Modal.Menu>
       <Modal.Menu

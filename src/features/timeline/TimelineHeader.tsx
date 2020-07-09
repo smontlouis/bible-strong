@@ -9,6 +9,7 @@ import Back from '~common/Back'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { Modalize } from 'react-native-modalize'
 import { useOnlyPremium } from '~helpers/usePremium'
+import useLanguage from '~helpers/useLanguage'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -28,6 +29,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 
 interface Props {
   title: string
+  titleEn: string
   fontSize?: number
   hasBackButton?: boolean
   onPress: () => void
@@ -36,12 +38,14 @@ interface Props {
 
 const TimelineHeader = ({
   title,
+  titleEn,
   fontSize = 20,
   hasBackButton,
   onPress,
   searchModalRef,
 }: Props) => {
   const onlyPremium = useOnlyPremium()
+  const isFR = useLanguage()
 
   const openSearch = onlyPremium(() => {
     searchModalRef.current?.open()
@@ -57,7 +61,7 @@ const TimelineHeader = ({
       </Box>
       <Box flex center>
         <Text title fontSize={fontSize}>
-          {title}
+          {isFR ? title : titleEn}
         </Text>
       </Box>
       <Box center row>

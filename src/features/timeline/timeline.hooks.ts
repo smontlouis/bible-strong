@@ -15,6 +15,7 @@ import {
   greaterOrEq,
 } from 'react-native-reanimated'
 import { viewportWidth, wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
 
 export const useTimeline = ({
   startYear,
@@ -25,6 +26,7 @@ export const useTimeline = ({
   endYear: number
   interval: number
 }) => {
+  const { t } = useTranslation()
   const [x, y] = useValues([viewportWidth, 0], [])
   const { current: ratio } = React.useRef(100 / interval) // 1 year = 1px with ratio = 1
   const { current: scrollViewWidth } = React.useRef(
@@ -46,8 +48,8 @@ export const useTimeline = ({
 
   const year = cond(
     greaterOrEq(yearNb, yearNow),
-    concat('Futur'),
-    concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', ' av.JC'))
+    concat(<string>t('Futur')),
+    concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', <string>t(' av.JC')))
   )
 
   const lineX = interpolate(x, {

@@ -1,7 +1,10 @@
 import React from 'react'
-import { ScrollView as RNScrollView, Linking, Platform } from 'react-native'
-import * as Icon from '@expo/vector-icons'
-import styled from '@emotion/native'
+import {
+  ScrollView as RNScrollView,
+  Linking,
+  TouchableOpacity,
+  Alert,
+} from 'react-native'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -16,25 +19,27 @@ import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
 import SwitchTheme from './SwitchTheme'
 import TheBibleProject from './TheBibleProjectPlan'
+import { FeatherIcon } from '~common/ui/Icon'
 
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({}))
+import { useTranslation } from 'react-i18next'
 
 const HomeScreen = () => {
+  const { t } = useTranslation()
+
   return (
     <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
-
         <Box grey pt={20} px={20}>
           <Text title fontSize={23} flex>
-            Apprendre
+            {t('Apprendre')}
           </Text>
           <TheBibleProject />
           <TimelineWidget />
         </Box>
         <Box grey pt={40} px={20}>
           <Text title fontSize={23} flex>
-            Étudier
+            {t('Étudier')}
           </Text>
         </Box>
         <Box grey paddingTop={20}>
@@ -60,13 +65,13 @@ const HomeScreen = () => {
         </Box>
         <Box grey pt={40} px={20}>
           <Text title fontSize={23} flex>
-            Méditer
+            {t('Méditer')}
           </Text>
         </Box>
         <PlanHome />
         <Box grey pt={40} px={20}>
           <Text title fontSize={23} flex>
-            Aller plus loin
+            {t('Aller plus loin')}
           </Text>
         </Box>
         <PremiumWidget />
@@ -95,7 +100,7 @@ const HomeScreen = () => {
                   />
                 }
               >
-                Suivre
+                {t('Suivre')}
               </Button>
             </Box>
             <Box width={20} />
@@ -112,7 +117,7 @@ const HomeScreen = () => {
                   />
                 }
               >
-                FAQ
+                {t('FAQ')}
               </Button>
             </Box>
           </Box>

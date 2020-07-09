@@ -8,16 +8,19 @@ import Spacer from '~common/ui/Spacer'
 import PlanItem from './MyPlanItem'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
+import { useTranslation } from 'react-i18next'
+import i18n from '~i18n'
 
 const MyPlanListScreen = () => {
   const plans = useComputedPlanItems()
   const { isLoading } = useDownloadPlans()
+  const { t } = useTranslation()
 
   if (!plans || !plans.length) {
     return (
       <Empty
         source={require('~assets/images/empty.json')}
-        message="Vous n'avez aucun plan..."
+        message={t("Vous n'avez aucun plan...")}
       />
     )
   }
@@ -45,8 +48,8 @@ const MyPlanListScreen = () => {
   )
 }
 
-MyPlanListScreen.navigationOptions = {
-  tabBarLabel: 'Mes plans',
-}
+MyPlanListScreen.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Mes plans'),
+})
 
 export default MyPlanListScreen

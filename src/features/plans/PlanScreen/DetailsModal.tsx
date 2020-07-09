@@ -9,6 +9,7 @@ import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
 import { Image } from 'react-native'
 import { wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
 
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
@@ -28,6 +29,7 @@ const DetailsModal = ({
   FooterComponent,
   HeaderComponent,
 }: Props) => {
+  const { t } = useTranslation()
   const theme: Theme = useTheme()
   const [height, setHeight] = React.useState<number>()
 
@@ -71,7 +73,7 @@ const DetailsModal = ({
         </Paragraph>
         {downloads && (
           <Paragraph fontFamily="text" scale={-2} color="grey">
-            Téléchargé {downloads} fois
+            {t('Téléchargé {{downloads}} fois', { downloads })}
           </Paragraph>
         )}
         <Paragraph marginTop={20} fontFamily="text" scale={-2}>
@@ -90,7 +92,9 @@ const DetailsModal = ({
               </Box>
             )}
             <Paragraph marginLeft={10} flex={1} fontFamily="text" scale={-3}>
-              Créé par {author.displayName}
+              {t('Créé par {{displayName}}', {
+                displayName: author.displayName,
+              })}
             </Paragraph>
           </Box>
         )}

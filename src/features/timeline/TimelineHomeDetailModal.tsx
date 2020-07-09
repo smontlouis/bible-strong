@@ -8,6 +8,7 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import InlineLink from '~common/InlineLink'
+import { useTranslation, Trans } from 'react-i18next'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -17,6 +18,7 @@ interface Props {
 
 const TimelineHomeDetailModal = ({ modalRef }: Props) => {
   const theme: Theme = useTheme()
+  const { t } = useTranslation()
 
   return (
     <Modalize
@@ -31,24 +33,26 @@ const TimelineHomeDetailModal = ({ modalRef }: Props) => {
     >
       <Box mt={20} p={20}>
         <Paragraph>
-          Traduction de la Chronologie biblique{' '}
-          <InlineLink href="http://timeline.biblehistory.com/home">
-            "The Bible Timeline"
-          </InlineLink>
-          , avec l'autorisation d'
-          <InlineLink href="https://www.bibleuniverse.com/study-tools/storacles/c/3/l/french">
-            Amazing Facts
-          </InlineLink>
+          <Trans>
+            Traduction de la Chronologie biblique{' '}
+            <InlineLink href="http://timeline.biblehistory.com/home">
+              "The Bible Timeline"
+            </InlineLink>
+            , avec l'autorisation d'
+            <InlineLink href="https://www.bibleuniverse.com/study-tools/storacles/c/3/l/french">
+              Amazing Facts
+            </InlineLink>
+          </Trans>
         </Paragraph>
         <Text mt={20} fontSize={24} fontFamily="title">
-          Questions fréquentes
+          {t('Questions fréquentes')}
         </Text>
       </Box>
       <List.Accordion
         titleNumberOfLines={5}
         title={
           <Text title fontSize={18}>
-            Qu'est-ce que la chronologie biblique ?
+            {t("Qu'est-ce que la chronologie biblique ?")}
           </Text>
         }
       >
@@ -77,8 +81,9 @@ Chacune de ces sections est divisée en périodes plus spécifiques pour facilit
         titleNumberOfLines={5}
         title={
           <Text title fontSize={18}>
-            Comment avez-vous déterminé les dates, en particulier la date de
-            création ?
+            {t(
+              'Comment avez-vous déterminé les dates, en particulier la date de création ?'
+            )}
           </Text>
         }
       >
@@ -117,12 +122,14 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
         titleNumberOfLines={5}
         title={
           <Text title fontSize={18}>
-            Quelles sont vos principales sources pour la chronologie ?
+            {t('Quelles sont vos principales sources pour la chronologie ?')}
           </Text>
         }
       >
         <Paragraph m={20} scale={-1}>
-          {`Voici une liste des sources utilisées, entre autres, pour créer la chronologie :
+          {`${t(
+            'Voici une liste des sources utilisées, entre autres, pour créer la chronologie'
+          )} :
 
 * Adam Clarke’s Commentary on the Whole Bible, 1826.
 * Bainton, Roland H. _Here I Stand: A Life of Martin Luther._ New York: Abingdon Press, 1950.
@@ -154,13 +161,14 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
         titleNumberOfLines={5}
         title={
           <Text title fontSize={18}>
-            Prévoyez-vous la date du retour du Christ ?
+            {t('Prévoyez-vous la date du retour du Christ ?')}
           </Text>
         }
       >
         <Paragraph m={20} scale={-1}>
-          {`Non. La Bible dit que quant au jour et à l'heure du retour du Christ, personne ne le sait. Voir Matthieu 24:50. De plus, le retour du Christ ne viendra qu'après que d'autres accomplissements prophétiques se soient produits - et nous ne savons pas non plus quand ils se produiront. L'objectif de la ligne du temps n'est pas de prédire quand exactement les événements futurs se produiront, mais plutôt de montrer la fiabilité de la Bible en tant que document historique, sa fiabilité en matière de prophétie et en tant qu'outil d'étude approfondie de la Bible.
-`}
+          {t(
+            "Non. La Bible dit que quant au jour et à l'heure du retour du Christ, personne ne le sait. Voir Matthieu 24;50. De plus, le retour du Christ ne viendra qu'après que d'autres accomplissements prophétiques se soient produits - et nous ne savons pas non plus quand ils se produiront. L'objectif de la ligne du temps n'est pas de prédire quand exactement les événements futurs se produiront, mais plutôt de montrer la fiabilité de la Bible en tant que document historique, sa fiabilité en matière de prophétie et en tant qu'outil d'étude approfondie de la Bible."
+          )}
         </Paragraph>
       </List.Accordion>
     </Modalize>

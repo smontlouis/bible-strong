@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const CountdownTimer = () => {
+  const { t } = useTranslation()
+  const isFR = useLanguage()
   const calculateTimeLeft = () => {
     const difference = +new Date('2020-08-01') - +new Date()
     let timeLeft = {}
 
     if (difference > 0) {
       timeLeft = {
-        jours: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        [isFR ? 'jours' : 'days']: Math.floor(
+          difference / (1000 * 60 * 60 * 24)
+        ),
         h: Math.floor((difference / (1000 * 60 * 60)) % 24),
         min: Math.floor((difference / 1000 / 60) % 60),
         s: Math.floor((difference / 1000) % 60),
@@ -35,7 +41,7 @@ const CountdownTimer = () => {
 
   return (
     <Text color="quart">
-      Disponible gratuitement dans{' '}
+      {t('Disponible gratuitement dans')}{' '}
       {Object.keys(timeLeft).map((interval: string) => {
         if (!timeLeft[interval]) {
           return null
@@ -43,7 +49,7 @@ const CountdownTimer = () => {
 
         return (
           <>
-            {timeLeft[interval]} {interval}{' '}
+            {timeLeft[interval]} {t(interval)}{' '}
           </>
         )
       })}

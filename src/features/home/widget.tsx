@@ -7,6 +7,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { wp } from '~helpers/utils'
 import { Theme } from '~themes'
+import { useTranslation } from 'react-i18next'
 
 export const itemWidth = wp(50) > 300 ? 300 : wp(50)
 export const itemHeight = 120
@@ -33,6 +34,7 @@ export const WidgetLoading = () => {
 
 export const DownloadingWidget = ({ progress }: { progress?: number }) => {
   const theme: Theme = useTheme()
+  const { t } = useTranslation()
   return (
     <WidgetContainer>
       <ProgressCircle
@@ -44,7 +46,7 @@ export const DownloadingWidget = ({ progress }: { progress?: number }) => {
         unfilledColor={theme.colors.lightGrey}
       />
       <Text color="grey" marginTop={20} fontSize={12}>
-        Téléchargement en cours
+        {t('Téléchargement en cours')}
       </Text>
     </WidgetContainer>
   )

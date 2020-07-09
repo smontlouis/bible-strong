@@ -5,11 +5,12 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "jsx": "react",
-    "lib": ["es6"],
+    "lib": ["es6", "dom"],
     "moduleResolution": "node",
     "noEmit": true,
     "strict": true,
     "target": "esnext",
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "~assets/*": ["src/assets/*"],
@@ -21,7 +22,8 @@
       "~themes/*": ["src/themes/*"],
       "~styled/*": ["src/styled/*"],
       "~themes": ["src/themes"],
-      "~styled": ["src/styled"]
+      "~styled": ["src/styled"],
+      "~i18n": ["i18n"]
     }
   },
   "exclude": [

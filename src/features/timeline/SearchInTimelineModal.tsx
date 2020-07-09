@@ -20,6 +20,7 @@ import Border from '~common/ui/Border'
 import { LinkBox } from '~common/Link'
 import FastImage from 'react-native-fast-image'
 import Empty from '~common/Empty'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -37,6 +38,7 @@ const SearchInTimelineModal = ({
   setEvent,
   eventModalRef,
 }: Props) => {
+  const { t } = useTranslation()
   const theme: Theme = useTheme()
   const [searchValue, setSearchValue] = React.useState('')
   const debouncedSearchValue = useDebounce(searchValue, 500)
@@ -62,7 +64,7 @@ const SearchInTimelineModal = ({
             debouncedValue={debouncedSearchValue}
             value={searchValue}
             onChange={setSearchValue}
-            placeholder="Rechercher un événement dans la Bible"
+            placeholder={t('Rechercher un événement dans la Bible')}
           />
           <Filters />
         </Box>
@@ -78,19 +80,21 @@ const SearchInTimelineModal = ({
         ListHeaderComponent: !debouncedSearchValue ? (
           <Empty
             source={require('~assets/images/search-loop.json')}
-            message="Faites une recherche dans la Bible !"
+            message={t('Faites une recherche dans la Bible !')}
           />
         ) : error ? (
           <Empty
             source={require('~assets/images/empty.json')}
-            message={
+            message={t(
               "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
-            }
+            )}
           />
         ) : (
           <Box paddingHorizontal={20}>
             <Text title fontSize={16} color="grey">
-              {allSearchResults?.nbHits} occurences trouvées dans la bible
+              {t('{{nbHits}} occurences trouvées dans la bible', {
+                nbHits: allSearchResults?.nbHits,
+              })}
             </Text>
           </Box>
         ),

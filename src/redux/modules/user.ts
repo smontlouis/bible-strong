@@ -8,6 +8,7 @@ import blackColors from '~themes/blackColors'
 import sepiaColors from '~themes/sepiaColors'
 
 import { firebaseDb } from '~helpers/firebase'
+import { getLangIsFr } from '~i18n'
 
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
@@ -41,6 +42,7 @@ export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
 export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
 
 export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
+export const RESET_COMPARE_VERSION = 'user/RESET_COMPARE_VERSION'
 
 export const GET_CHANGELOG = 'user/GET_CHANGELOG'
 export const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
@@ -90,7 +92,9 @@ interface UserState {
     lastSeen: number
     data: any[]
   }
-  needsUpdate: {}
+  needsUpdate: {
+    [x: string]: boolean
+  }
   fontFamily: string
   bible: {
     changelog: {}
@@ -128,11 +132,12 @@ interface UserState {
         sepia: typeof sepiaColors
       }
       compare: {
-        LSG: boolean
+        [x: string]: boolean
       }
     }
   }
 }
+
 const initialState: UserState = {
   id: '',
   email: '',
@@ -181,7 +186,7 @@ const initialState: UserState = {
         sepia: sepiaColors,
       },
       compare: {
-        LSG: true,
+        [getLangIsFr() ? 'LSG' : 'KJV']: true,
       },
     },
   },
@@ -368,6 +373,12 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       }
       break
     }
+    case RESET_COMPARE_VERSION: {
+      draft.bible.settings.compare = {
+        [action.payload]: true,
+      }
+      break
+    }
     case SET_NOTIFICATION_ID: {
       draft.notifications.notificationId = action.payload
       break
@@ -503,9 +514,16 @@ export function setNotificationId(payload) {
 }
 
 // Compare
-export function toggleCompareVersion(payload) {
+export function toggleCompareVersion(payload: string) {
   return {
     type: TOGGLE_COMPARE_VERSION,
+    payload,
+  }
+}
+
+export function resetCompareVersion(payload: 'LSG' | 'KJV') {
+  return {
+    type: RESET_COMPARE_VERSION,
     payload,
   }
 }

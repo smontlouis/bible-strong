@@ -8,9 +8,11 @@ import { useVersesToContent } from '~features/plans/plan.hooks'
 import Loading from '~common/Loading'
 import { FeatherIcon } from '~common/ui/Icon'
 import Link from '~common/Link'
+import { useTranslation } from 'react-i18next'
 
 const EventDetailVerse = ({ verses }: VerseSliceProps) => {
   const { status, content } = useVersesToContent(verses)
+  const { t } = useTranslation()
 
   if (status === 'Pending') {
     return (
@@ -24,7 +26,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
     return (
       <Box center padding={20}>
         <Paragraph scaleLineHeight={1}>
-          Il semblerait que ce chapitre n'existe pas dans cette version.
+          {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
       </Box>
     )

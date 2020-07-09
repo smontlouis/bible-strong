@@ -5,6 +5,26 @@ import Link from '~common/Link'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { Theme } from '~themes'
+
+interface Props {
+  children: React.ReactNode
+  onPress?: () => void
+  route?: string
+  style?: object
+  small?: boolean
+  reverse?: boolean
+  secondary?: boolean
+  success?: boolean
+  color?: string
+  fullWidth?: boolean
+  disabled?: boolean
+  isLoading?: boolean
+  leftIcon?: JSX.Element
+  rightIcon?: JSX.Element
+  subTitle?: string
+  theme?: Theme
+}
 
 const WrapperButton = styled.TouchableOpacity(
   ({
@@ -12,11 +32,12 @@ const WrapperButton = styled.TouchableOpacity(
     small,
     reverse,
     secondary,
-    type,
     disabled,
     color,
     success,
     fullWidth,
+  }: Partial<Props> & {
+    theme: Theme
   }) => ({
     backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
     borderWidth: reverse ? 1 : 0,
@@ -48,41 +69,48 @@ const WrapperButton = styled.TouchableOpacity(
       marginRight: 0,
       marginLeft: 0,
     }),
-    ...(type === 'secondary' && {}),
   })
 )
 
 const WrapperLink = WrapperButton.withComponent(Link)
 
-const TextButton = styled.Text(({ theme, small, reverse }) => ({
-  color: reverse ? theme.colors.darkGrey : 'white',
-  fontWeight: 'bold',
-  fontSize: 16,
+const TextButton = styled.Text(
+  ({
+    theme,
+    small,
+    reverse,
+  }: {
+    theme: Theme
+    small?: boolean
+    reverse?: boolean
+  }) => ({
+    color: reverse ? theme.colors.darkGrey : 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
 
-  ...(small && {
-    fontSize: 14,
-  }),
-}))
+    ...(small && {
+      fontSize: 14,
+    }),
+  })
+)
 
 const Button = ({
-  title,
   children,
-  subTitle,
   onPress,
   route,
   style,
   small,
   reverse,
   disabled,
-  type,
   isLoading,
   leftIcon,
   rightIcon,
   secondary,
   success,
   color,
+  subTitle,
   fullWidth,
-}) => {
+}: Props) => {
   const Component = onPress ? WrapperButton : WrapperLink
 
   return (
@@ -98,7 +126,6 @@ const Button = ({
         secondary={secondary}
         success={success}
         color={color}
-        type={type}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />
@@ -106,7 +133,7 @@ const Button = ({
           <>
             {leftIcon}
             <TextButton small={small} reverse={reverse}>
-              {title || children}
+              {children}
             </TextButton>
             {rightIcon}
           </>

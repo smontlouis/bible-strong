@@ -11,6 +11,7 @@ import { hp } from '~helpers/utils'
 import StrongCard from '~features/bible/StrongCard'
 import { Modalize } from 'react-native-modalize'
 import { usePrevious } from '~helpers/usePrevious'
+import { isStrongVersion } from '~helpers/bibleVersions'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ theme, navigation, selectedCode, onClosed }) => {
@@ -104,7 +105,7 @@ const StrongModal = ({
   }, [hasSelectedCode, hasPrevSelectedCode])
 
   useEffect(() => {
-    if (version !== 'INT' || version === 'LSGS') {
+    if (isStrongVersion(version)) {
       onClosed()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

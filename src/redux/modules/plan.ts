@@ -7,10 +7,13 @@ import {
   Status,
   OnlinePlan,
 } from '~common/types'
-import { bibleProjectPlan } from '../../features/plans/bible-project-plan'
 import { USER_LOGIN_SUCCESS, USER_LOGOUT } from './user'
 import { firebaseDb, increment } from '~helpers/firebase'
 import { RootState } from './reducer'
+import { getLangIsFr } from '~i18n'
+
+import { bibleProjectPlan } from '~features/plans/bible-project-plan'
+import { bibleProjectPlanEn } from '~features/plans/bible-project-plan-en'
 
 type ImageModel = { [key: string]: string }
 
@@ -24,7 +27,7 @@ interface PlanModel {
 
 const initialState: PlanModel = {
   onlineStatus: 'Idle',
-  myPlans: [bibleProjectPlan],
+  myPlans: [getLangIsFr() ? bibleProjectPlan : bibleProjectPlanEn],
   onlinePlans: [],
   ongoingPlans: [],
   images: {},

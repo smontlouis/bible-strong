@@ -2,6 +2,7 @@ import produce, { Draft } from 'immer'
 import analytics from '@react-native-firebase/analytics'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
+import { getLangIsFr } from '~i18n'
 
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
 const SET_TEMP_SELECTED_CHAPTER = 'bible/SET_TEMP_SELECTED_CHAPTER'
@@ -40,7 +41,7 @@ interface BibleState {
 }
 
 const initialState: BibleState = {
-  selectedVersion: 'LSG',
+  selectedVersion: getLangIsFr() ? 'LSG' : 'KJV',
   selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
   selectedChapter: 1,
   selectedVerse: 1,
@@ -70,7 +71,7 @@ export default produce((draft: Draft<BibleState>, action) => {
       // if (draft.selectedVersion === 'INT') {
       //   draft.selectedVersion = 'LSG'
       // }
-      draft.parallelVersions.push('LSG')
+      draft.parallelVersions.push(getLangIsFr() ? 'LSG' : 'KJV')
       break
     }
     case REMOVE_PARALLEL_VERSION: {
@@ -321,7 +322,7 @@ export function resetTempSelected() {
   }
 }
 
-export function setVersion(version, parallelVersionIndex) {
+export function setVersion(version: string, parallelVersionIndex?: number) {
   if (!__DEV__) {
     analytics().logEvent('version_bible', {
       version,

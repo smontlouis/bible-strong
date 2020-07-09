@@ -12,6 +12,8 @@ import waitForDictionnaireWidget from './waitForDictionnaireWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import RandomButton from './RandomButton'
+import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -22,6 +24,8 @@ const DictionnaireOfTheDay = ({
   color1 = 'rgba(86,204,242,1)',
   color2 = 'rgba(47,128,237,1)',
 }) => {
+  const { t } = useTranslation()
+  const isFR = useLanguage()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
   const [strongReference, setStrongRef] = useState(null)
@@ -29,11 +33,14 @@ const DictionnaireOfTheDay = ({
     const loadStrong = async () => {
       if (!startRandom) return
 
+      // UGLY HACK
       const strongReference = await loadDictionnaireItemByRowId(
-        randomIntFromInterval(5437, 10872)
+        isFR
+          ? randomIntFromInterval(5437, 10872)
+          : randomIntFromInterval(1, 8620)
       )
-      if (strongReference.error) {
-        setError(strongReference.error)
+      if (!strongReference || strongReference.error) {
+        setError(strongReference?.error || true)
         return
       }
 
@@ -41,13 +48,13 @@ const DictionnaireOfTheDay = ({
       setStartRandom(false)
     }
     loadStrong()
-  }, [startRandom])
+  }, [startRandom, isFR])
 
   if (error) {
     return (
       <WidgetContainer>
         <FeatherIcon name="x" size={30} color="quart" />
-        <Text marginTop={5}>Une erreur est survenue.</Text>
+        <Text marginTop={5}>{t('Une erreur est survenue.')}</Text>
       </WidgetContainer>
     )
   }
@@ -96,7 +103,7 @@ const DictionnaireOfTheDay = ({
               color="white"
             />
             <Text color="white" bold fontSize={12}>
-              Dictionnaire W.
+              {t('Dictionnaire W.')}
             </Text>
           </Box>
         </Link>

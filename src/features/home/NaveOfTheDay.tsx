@@ -12,11 +12,13 @@ import waitForNaveWidget from './waitForNaveWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import NaveIcon from '~common/NaveIcon'
 import RandomButton from './RandomButton'
+import { useTranslation } from 'react-i18next'
 
 const NaveOfTheDay = ({
   color1 = 'rgb(80, 83, 140)',
   color2 = 'rgb(48, 51, 107)',
 }) => {
+  const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
   const [naveReference, setNaveRef] = useState(null)
@@ -40,7 +42,7 @@ const NaveOfTheDay = ({
     return (
       <WidgetContainer>
         <FeatherIcon name="x" size={30} color="quart" />
-        <Text marginTop={5}>Une erreur est survenue.</Text>
+        <Text marginTop={5}>{t('Une erreur est survenue.')}</Text>
       </WidgetContainer>
     )
   }
@@ -85,7 +87,7 @@ const NaveOfTheDay = ({
           >
             <NaveIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text color="white" bold fontSize={12}>
-              Thèmes Nave
+              {t('Thèmes Nave')}
             </Text>
           </Box>
         </Link>

@@ -1,4 +1,5 @@
 import books from '~assets/bible_versions/books-desc'
+import i18n from '~i18n'
 
 export default verses => {
   if (!verses.length) {
@@ -31,7 +32,7 @@ export default verses => {
         return `${acc},${v}`
       }
       return acc + v
-    }, `${books[Number(verses[0].Livre) - 1].Nom} ${verses[0].Chapitre}:`)
+    }, `${i18n.t(books[Number(verses[0].Livre) - 1].Nom)} ${verses[0].Chapitre}:`)
 
   return { title, content }
 }

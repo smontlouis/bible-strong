@@ -301,7 +301,7 @@ class Verse extends Component {
       )
     }
 
-    if (version === 'LSGS') {
+    if (version === 'LSGS' || version === 'KJVS') {
       return (
         <VerseTextFormatting
           isParallel={isParallel}

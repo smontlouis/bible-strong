@@ -5,11 +5,11 @@ import htmlToElement from './htmlToElement'
 class HTMLView extends React.Component {
   static defaultProps = {
     onLinkPress: Linking.openURL,
-    onError: console.error.bind(console)
+    onError: console.error.bind(console),
   }
 
   state = {
-    element: null
+    element: null,
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -28,7 +28,7 @@ class HTMLView extends React.Component {
     const opts = {
       linkHandler: this.props.onLinkPress,
       styles: { ...baseStyles, ...this.props.stylesheet },
-      customRenderer: this.props.renderNode
+      customRenderer: this.props.renderNode,
     }
 
     htmlToElement(value, opts, (err, element) => {
@@ -39,7 +39,7 @@ class HTMLView extends React.Component {
 
   render() {
     if (this.state.element) {
-      return <View children={this.state.element} />
+      return <Text children={this.state.element} />
     }
     return <Text />
   }
@@ -58,8 +58,8 @@ const baseStyles = StyleSheet.create({
   code: codeStyle,
   a: {
     fontWeight: '500',
-    color: '#007AFF'
-  }
+    color: '#007AFF',
+  },
 })
 
 export default HTMLView

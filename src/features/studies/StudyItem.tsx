@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import frLocale from 'date-fns/locale/fr'
+import { fr, enGB } from 'date-fns/locale'
 import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'
@@ -13,6 +13,8 @@ import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import truncate from '~helpers/truncate'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 export const LinkBox = Box.withComponent(Link)
 
@@ -23,8 +25,11 @@ const StudyLink = styled(Link)(({ theme }) => ({
 }))
 
 const StudyItem = ({ study, theme, setStudySettings }) => {
+  const { t } = useTranslation()
+  const isFR = useLanguage()
+
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
-    locale: frLocale,
+    locale: isFR ? fr : enGB,
   })
   const r = useMediaQueriesArray()
 
@@ -46,7 +51,7 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
           position="relative"
         >
           <Text color="darkGrey" fontSize={10} marginTop={10}>
-            Il y a {formattedDate}
+            {t('Il y a {{formattedDate}}', { formattedDate })}
           </Text>
           {study.content ? (
             <>
@@ -61,7 +66,7 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
           ) : (
             <>
               <Text bold scale={-2} marginTop={4} color="border">
-                Étude vide
+                {t('Étude vide')}
               </Text>
             </>
           )}
@@ -69,15 +74,17 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
           <Box marginTop="auto">
             <TagList limit={1} tags={study.tags} />
           </Box>
-          <LinkBox
-            position="absolute"
-            right={0}
-            top={0}
-            p={10}
-            onPress={() => setStudySettings(study.id)}
-          >
-            <FeatherIcon color="tertiary" name="more-vertical" size={20} />
-          </LinkBox>
+          {!!setStudySettings && (
+            <LinkBox
+              position="absolute"
+              right={0}
+              top={0}
+              p={10}
+              onPress={() => setStudySettings(study.id)}
+            >
+              <FeatherIcon color="tertiary" name="more-vertical" size={20} />
+            </LinkBox>
+          )}
         </Box>
       </StudyLink>
     </Box>

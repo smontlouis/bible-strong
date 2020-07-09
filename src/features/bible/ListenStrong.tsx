@@ -6,6 +6,7 @@ import { LinkBox } from '~common/Link'
 import { ActivityIndicator } from 'react-native'
 import SnackBar from '~common/SnackBar'
 import to from 'await-to-js'
+import { useTranslation } from 'react-i18next'
 
 type AudioStatus = 'Idle' | 'Loading' | 'Playing' | 'Error'
 
@@ -17,6 +18,7 @@ interface Props {
 const ListenToStrong = ({ type, code }: Props) => {
   const { current: soundObject } = React.useRef(new Audio.Sound())
   const codeId = `${code}`.padStart(4, '0')
+  const { t } = useTranslation()
   const url =
     type === 'hebreu'
       ? `https://content.swncdn.com/biblestudytools/audio/lexicons/hebrew-mp3/${codeId}h.mp3`
@@ -57,7 +59,7 @@ const ListenToStrong = ({ type, code }: Props) => {
           `Encountered a fatal error during playback: ${playbackStatus.error}`
         )
         setAudioStatus('Error')
-        SnackBar.show("Impossible de lire l'audio", 'error')
+        SnackBar.show(t("Impossible de lire l'audio"), 'error')
       }
     } else {
       if (playbackStatus.isPlaying) {

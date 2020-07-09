@@ -5,6 +5,7 @@ import Lottie from 'lottie-react-native'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const SuccessModal = ({ modalRef, isPlanCompleted }: Props) => {
+  const { t } = useTranslation()
   return (
     <Modalize
       ref={modalRef}
@@ -64,25 +66,25 @@ const SuccessModal = ({ modalRef, isPlanCompleted }: Props) => {
           {isPlanCompleted ? (
             <>
               <Paragraph fontFamily="text" textAlign="center" bold>
-                Félicitations !!
+                {t('Félicitations')} !!
               </Paragraph>
               <Paragraph scale={-1} fontFamily="text" textAlign="center">
-                Vous avez complété ce plan !
+                {t('Vous avez complété ce plan')} !
               </Paragraph>
             </>
           ) : (
             <>
               <Paragraph fontFamily="text" textAlign="center" bold>
-                Félicitations !
+                {t('Félicitations')} !
               </Paragraph>
               <Paragraph scale={-1} fontFamily="text" textAlign="center">
-                Vous venez de finir votre lecture.
+                {t('Vous venez de finir votre lecture.')}
               </Paragraph>
             </>
           )}
         </Box>
         <Button fullWidth onPress={() => modalRef?.current?.close()}>
-          Continuer
+          {t('Continuer')}
         </Button>
       </Box>
     </Modalize>

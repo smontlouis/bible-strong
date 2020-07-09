@@ -7,12 +7,14 @@ import SnackBar from '~common/SnackBar'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
-import { databasesRef } from '~helpers/firebase'
-import { databases } from '~helpers/databases'
+import { getDatabasesRef } from '~helpers/firebase'
+import { getDatabases } from '~helpers/databases'
 import Box from './ui/Box'
 import { hp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
 
 export const useWaitForDatabase = () => {
+  const { t } = useTranslation()
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
@@ -21,7 +23,7 @@ export const useWaitForDatabase = () => {
 
   useEffect(() => {
     const loadDBAsync = async () => {
-      const path = databases.TIMELINE.path
+      const path = getDatabases().TIMELINE.path
       const file = await FileSystem.getInfoAsync(path)
 
       if (!file.exists) {
@@ -32,7 +34,7 @@ export const useWaitForDatabase = () => {
         }
 
         try {
-          const fileUri = await databasesRef.TIMELINE.getDownloadURL()
+          const fileUri = await getDatabasesRef().TIMELINE.getDownloadURL()
 
           console.log(`Downloading ${fileUri} to ${path}`)
 
@@ -43,7 +45,7 @@ export const useWaitForDatabase = () => {
             ({ totalBytesWritten }) => {
               const idxProgress =
                 Math.floor(
-                  (totalBytesWritten / databases.TIMELINE.fileSize) * 100
+                  (totalBytesWritten / getDatabases().TIMELINE.fileSize) * 100
                 ) / 100
               setProgress(idxProgress)
             }
@@ -62,14 +64,16 @@ export const useWaitForDatabase = () => {
         } catch (e) {
           console.log(e)
           SnackBar.show(
-            "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+            t(
+              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+            ),
             'danger'
           )
           setProposeDownload(true)
           setStartDownload(false)
         }
       } else {
-        const path = databases.TIMELINE.path
+        const path = getDatabases().TIMELINE.path
         const data = await FileSystem.readAsStringAsync(path)
 
         if (bibleMemoize['timeline']) {
@@ -95,6 +99,7 @@ export const useWaitForDatabase = () => {
 }
 
 const waitForDatabase = (WrappedComponent: React.ReactNode) => props => {
+  const { t } = useTranslation()
   const {
     isLoading,
     progress,
@@ -106,7 +111,7 @@ const waitForDatabase = (WrappedComponent: React.ReactNode) => props => {
   if (isLoading && startDownload) {
     return (
       <Box center height={hp(80)}>
-        <Loading message="Téléchargement de la chronologie...">
+        <Loading message={t('Téléchargement de la chronologie...')}>
           <ProgressBar progress={Number(progress)} color="blue" />
         </Loading>
       </Box>
@@ -117,11 +122,11 @@ const waitForDatabase = (WrappedComponent: React.ReactNode) => props => {
     return (
       <Box center height={hp(80)}>
         <DownloadRequired
-          title={
+          title={t(
             'La chronologie biblique est requise pour accéder à ce module.'
-          }
+          )}
           setStartDownload={setStartDownload}
-          fileSize={Math.round(databases.TIMELINE.fileSize / 1000000)}
+          fileSize={Math.round(getDatabases().TIMELINE.fileSize / 1000000)}
         />
       </Box>
     )
@@ -131,8 +136,10 @@ const waitForDatabase = (WrappedComponent: React.ReactNode) => props => {
     return (
       <Box height={hp(80)} center>
         <Loading
-          message="Chargement de la base de données..."
-          subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+          message={t('Chargement de la base de données...')}
+          subMessage={t(
+            "Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+          )}
         />
       </Box>
     )

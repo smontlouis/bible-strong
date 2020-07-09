@@ -1,20 +1,55 @@
 import * as FileSystem from 'expo-file-system'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { timeout } from '~helpers/timeout'
+import i18n from '~i18n'
 
 export default function loadBible(bible, position) {
   return new Promise(async (resolve, reject) => {
     try {
       switch (bible) {
+        case 'INT': {
+          const b = i18n.language === 'fr' ? 'LSG' : 'KJV'
+          if (bibleMemoize[b]) {
+            return resolve(bibleMemoize[b])
+          }
+
+          const path = `${FileSystem.documentDirectory}bible-${b}.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize[b] = JSON.parse(data)
+          resolve(bibleMemoize[b])
+
+          break
+        }
         case 'LSGS':
-        case 'INT':
         case 'LSG': {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])
           }
 
-          const LSGBible = require('~assets/bible_versions/bible-lsg-1910.json')
-          resolve(LSGBible)
+          const path = `${FileSystem.documentDirectory}bible-LSG.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize[bible] = JSON.parse(data)
+          resolve(bibleMemoize[bible])
+
+          break
+        }
+        case 'KJV':
+        case 'KJVS': {
+          if (bibleMemoize[bible]) {
+            return resolve(bibleMemoize[bible])
+          }
+
+          const path = `${FileSystem.documentDirectory}bible-KJV.json`
+          const file = await FileSystem.getInfoAsync(path)
+          const data = await FileSystem.readAsStringAsync(file.uri)
+
+          bibleMemoize[bible] = JSON.parse(data)
+          resolve(bibleMemoize[bible])
+
           break
         }
         default: {

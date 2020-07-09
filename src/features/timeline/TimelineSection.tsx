@@ -24,6 +24,8 @@ import SearchInTimelineModal from './SearchInTimelineModal'
 import algoliasearch from 'algoliasearch/lite'
 import { InstantSearch } from 'react-instantsearch-native'
 import { algoliaConfig } from '../../../config'
+import useLanguage from '~helpers/useLanguage'
+import { useTranslation } from 'react-i18next'
 const searchClient = algoliasearch(
   algoliaConfig.applicationId,
   algoliaConfig.apiKey
@@ -48,9 +50,13 @@ const Timeline = ({
   id,
   image,
   description,
+  descriptionEn,
   title,
+  titleEn,
   sectionTitle,
+  sectionTitleEn,
   subTitle,
+  subTitleEn,
   color,
   onPrev,
   onNext,
@@ -61,6 +67,7 @@ const Timeline = ({
   prevEvent,
   nextEvent,
 }: Props) => {
+  const isFR = useLanguage()
   const [isReady] = useValues([0], [isCurrent])
   const modalRef = React.useRef<Modalize>(null)
   const eventModalRef = React.useRef<Modalize>(null)
@@ -96,6 +103,7 @@ const Timeline = ({
       <TimelineHeader
         hasBackButton
         title={title}
+        titleEn={titleEn}
         onPress={onTimelineDetailsOpen}
         searchModalRef={searchModalRef}
       />
@@ -111,9 +119,13 @@ const Timeline = ({
           image,
           color,
           description,
+          descriptionEn,
           title,
+          titleEn,
           sectionTitle,
+          sectionTitleEn,
           subTitle,
+          subTitleEn,
           startYear,
           endYear,
           interval,
@@ -174,15 +186,22 @@ const Timeline = ({
           image,
           color,
           description,
+          descriptionEn,
           title,
+          titleEn,
           sectionTitle,
+          sectionTitleEn,
           subTitle,
+          subTitleEn,
           startYear,
           endYear,
           interval,
         }}
       />
-      <InstantSearch indexName="bible-timeline" searchClient={searchClient}>
+      <InstantSearch
+        indexName={isFR ? 'bible-timeline' : 'bible-timeline-en'}
+        searchClient={searchClient}
+      >
         <SearchInTimelineModal
           modalRef={searchModalRef}
           eventModalRef={eventModalRef}
