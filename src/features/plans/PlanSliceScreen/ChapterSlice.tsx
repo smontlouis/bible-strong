@@ -9,8 +9,10 @@ import Paragraph from '~common/ui/Paragraph'
 import { useChapterToContent } from '../plan.hooks'
 import PauseText from './PauseText'
 import Loading from '~common/Loading'
+import { useTranslation } from 'react-i18next'
 
 const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
+  const { t } = useTranslation()
   const { status, content } = useChapterToContent(chapters)
 
   if (status === 'Pending') {
@@ -25,7 +27,7 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
     return (
       <Box center padding={20}>
         <Paragraph scaleLineHeight={1}>
-          Il semblerait que ce chapitre n'existe pas dans cette version.
+          {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
       </Box>
     )
@@ -36,9 +38,9 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
       <Box padding={20}>
         {subType === 'pray' && (
           <PauseText>
-            {
+            {t(
               'Entrez dans un temps de prière\n et méditez sur le psaume\nsuivant'
-            }
+            )}
           </PauseText>
         )}
         <Box>

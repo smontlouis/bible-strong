@@ -7,8 +7,10 @@ import Paragraph from '~common/ui/Paragraph'
 import { useVersesToContent } from '../plan.hooks'
 import PauseText from './PauseText'
 import Loading from '~common/Loading'
+import { useTranslation } from 'react-i18next'
 
 const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
+  const { t } = useTranslation()
   const { status, content } = useVersesToContent(verses)
 
   if (status === 'Pending') {
@@ -23,7 +25,7 @@ const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
     return (
       <Box center padding={20}>
         <Paragraph scaleLineHeight={1}>
-          Il semblerait que ce chapitre n'existe pas dans cette version.
+          {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
       </Box>
     )
@@ -34,9 +36,9 @@ const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
       <Box padding={20}>
         {subType === 'pray' && (
           <PauseText>
-            {
+            {t(
               'Entrez dans un temps de prière\n et méditez sur le psaume\nsuivant'
-            }
+            )}
           </PauseText>
         )}
         <Box>
