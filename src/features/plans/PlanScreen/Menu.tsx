@@ -24,7 +24,7 @@ const Menu = ({ modalRefDetails, planId, navigation }: Props) => {
   const onResetPress = () => {
     Alert.alert(
       t('Attention'),
-      t('should ', () => {})(
+      t(
         'Êtes-vous vraiment sur de remettre à zéro votre plan ? Vous perdrez toute votre progression.'
       ),
       [

@@ -12,7 +12,6 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3DE4DAD41476765101945408 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D43FF9D506E70904424FA7E9 /* libPods-biblestrong.a */; };
-		638897AE23F12D6700E7880D /* www in Resources */ = {isa = PBXBuildFile; fileRef = 638897AD23F12D6700E7880D /* www */; };
 		63D636B4247507DC003443EE /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63D636B3247507DC003443EE /* StoreKit.framework */; };
 		63D840D623ECFD3400C49B4C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D840D523ECFD3400C49B4C /* File.swift */; };
 		67C74C4344874A859571CEEF /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2213229BB143AB82AA5797 /* libz.tbd */; };
@@ -32,7 +31,6 @@
 		6321EC4323EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6321EC4523EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6321EC4723EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		638897AD23F12D6700E7880D /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = biblestrong/www; sourceTree = "<group>"; };
 		63B75B6E242B2A6C0042D6EC /* Bible Strong - Dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = "Bible Strong - Dev.entitlements"; path = "biblestrong/Bible Strong - Dev.entitlements"; sourceTree = "<group>"; };
 		63D636B3247507DC003443EE /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		63D840D423ECFD3400C49B4C /* biblestrong-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "biblestrong-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -65,7 +63,6 @@
 			isa = PBXGroup;
 			children = (
 				63B75B6E242B2A6C0042D6EC /* Bible Strong - Dev.entitlements */,
-				638897AD23F12D6700E7880D /* www */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -235,7 +232,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				638897AE23F12D6700E7880D /* www in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
