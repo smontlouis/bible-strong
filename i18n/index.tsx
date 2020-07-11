@@ -15,7 +15,7 @@ const resources = {
   },
 }
 
-const fallback = { languageTag: 'en', isRTL: false }
+const fallback = { languageTag: 'fr', isRTL: false }
 const { languageTag } =
   RNLocalize.findBestAvailableLanguage(['en', 'fr']) || fallback
 
@@ -50,7 +50,7 @@ export const setI18n = async () =>
     .init({
       debug: __DEV__,
       resources,
-      fallbackLng: 'en',
+      fallbackLng: 'fr',
       keySeparator: false,
       interpolation: {
         escapeValue: false,
