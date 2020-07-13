@@ -14,7 +14,7 @@ import DictionnaireIcon from '~common/DictionnaryIcon'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import getVersesRef from '~helpers/getVersesRef'
-import { cleanParams } from '~helpers/utils'
+import { cleanParams, wp } from '~helpers/utils'
 import { usePrevious } from '~helpers/usePrevious'
 
 import TouchableCircle from './TouchableCircle'
@@ -114,6 +114,17 @@ const VersesModal = ({
         },
       },
       key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`,
+    })
+  }
+
+  const openCommentariesScreen = () => {
+    clearSelectedVerses()
+    const verse = Object.keys(selectedVerses)[0]
+    navigation.navigate({
+      routeName: 'Commentaries',
+      params: {
+        verse,
+      },
     })
   }
 
@@ -227,34 +238,63 @@ const VersesModal = ({
             )}
           </HalfContainer>
           <HalfContainer>
-            <TouchableSvgIcon
-              icon={LexiqueIcon}
-              color="primary"
-              onPress={showStrongDetail}
-              label={t('Lexique')}
-              disabled={moreThanOneVerseSelected}
-            />
-            <TouchableSvgIcon
-              icon={DictionnaireIcon}
-              color="secondary"
-              onPress={showDictionnaryDetail}
-              label={t('Dictionnaire')}
-              disabled={moreThanOneVerseSelected}
-            />
-            <TouchableSvgIcon
-              icon={NaveIcon}
-              color="quint"
-              onPress={onOpenNave}
-              label={t('Thèmes')}
-              disabled={moreThanOneVerseSelected}
-            />
-            <TouchableSvgIcon
-              icon={RefIcon}
-              color="quart"
-              onPress={onOpenReferences}
-              label={t('Références')}
-              disabled={moreThanOneVerseSelected}
-            />
+            <ScrollView
+              horizontal
+              style={{ overflow: 'visible' }}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                flexDirection: 'row',
+                paddingVertical: 10,
+                overflow: 'visible',
+                justifyContent: 'space-around',
+              }}
+            >
+              <Box width={wp(20)}>
+                <TouchableSvgIcon
+                  icon={LexiqueIcon}
+                  color="primary"
+                  onPress={showStrongDetail}
+                  label={t('Lexique')}
+                  disabled={moreThanOneVerseSelected}
+                />
+              </Box>
+              <Box width={wp(20)}>
+                <TouchableSvgIcon
+                  icon={DictionnaireIcon}
+                  color="secondary"
+                  onPress={showDictionnaryDetail}
+                  label={t('Dictionnaire')}
+                  disabled={moreThanOneVerseSelected}
+                />
+              </Box>
+              <Box width={wp(20)}>
+                <TouchableSvgIcon
+                  icon={NaveIcon}
+                  color="quint"
+                  onPress={onOpenNave}
+                  label={t('Thèmes')}
+                  disabled={moreThanOneVerseSelected}
+                />
+              </Box>
+              <Box width={wp(20)}>
+                <TouchableSvgIcon
+                  icon={RefIcon}
+                  color="quart"
+                  onPress={onOpenReferences}
+                  label={t('Références')}
+                  disabled={moreThanOneVerseSelected}
+                />
+              </Box>
+              <Box width={wp(20)}>
+                <TouchableSvgIcon
+                  icon={RefIcon}
+                  color="quart"
+                  onPress={openCommentariesScreen}
+                  label={t('Comment.')}
+                  disabled={moreThanOneVerseSelected}
+                />
+              </Box>
+            </ScrollView>
           </HalfContainer>
           <HalfContainer>
             <ScrollView

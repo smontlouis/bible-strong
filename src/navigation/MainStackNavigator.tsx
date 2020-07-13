@@ -44,6 +44,7 @@ import TimelineScreen from '~features/timeline/TimelineScreen'
 import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
 import PremiumScreen from '~features/premium/PremiumScreen'
 import ConcordanceScreen from '~features/bible/ConcordanceScreen'
+import CommentariesScreen from '~features/commentaries/CommentariesScreen'
 
 const MainStackNavigator = createStackNavigator(
   {
@@ -98,6 +99,7 @@ const MainStackNavigator = createStackNavigator(
     TimelineHome: { screen: TimelineHomeScreen },
     Premium: { screen: PremiumScreen },
     Concordance: { screen: ConcordanceScreen },
+    Commentaries: { screen: CommentariesScreen },
   },
   {
     headerMode: 'none',
