@@ -42,7 +42,7 @@ const useGetVerseOfTheDay = (version: string, addDay: number) => {
       }
     }
     loadVerse()
-  }, [version])
+  }, [addDay])
 
   return verseOfTheDay
 }
@@ -61,22 +61,17 @@ export const useVerseOfTheDay = (addDay: number) => {
   const verseOfTheDayPlus1Content = verseOfTheDayPlus1?.content
 
   useEffect(() => {
-    if (addDay) return // Don't do anything for old verses
+    if (
+      addDay ||
+      !verseOfTheDayContent ||
+      !verseOfTheDayPlus1Content ||
+      !verseOfTheDayTime
+    )
+      return
 
     const scheduleNotification = async () => {
       try {
         await PushNotification.cancelAllLocalNotifications()
-
-        if (!verseOfTheDayContent || !verseOfTheDayPlus1Content) {
-          return
-        }
-
-        if (!verseOfTheDayTime) {
-          console.log(
-            "User is not logged or there is not verse of the day timeset, don't do anything"
-          )
-          return
-        }
 
         const [vodHours, vodMinutes] = verseOfTheDayTime
           .split(':')

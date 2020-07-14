@@ -7,7 +7,6 @@ import {
 } from 'react-native'
 import FireAuth from '~helpers/FireAuth'
 import { MaterialIcon, FeatherIcon } from '~common/ui/Icon'
-import { withTheme } from 'emotion-theming'
 import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
@@ -26,6 +25,8 @@ import Link from '~common/Link'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
 import { useTranslation } from 'react-i18next'
+
+const vodNb = [...Array(6).keys()]
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -100,7 +101,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = ({ theme }) => {
+const UserWidget = React.memo(() => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
@@ -197,7 +198,7 @@ const UserWidget = ({ theme }) => {
             </Text>
           </Box>
         </Box>
-        {[...Array(6).keys()].map(i => (
+        {vodNb.map(i => (
           <VerseOfTheDay
             key={i}
             addDay={-i}
@@ -284,6 +285,6 @@ const UserWidget = ({ theme }) => {
       </Box>
     </Container>
   )
-}
+})
 
-export default withTheme(UserWidget)
+export default UserWidget

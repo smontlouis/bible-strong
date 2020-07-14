@@ -249,7 +249,7 @@ const VersesModal = ({
                 justifyContent: 'space-around',
               }}
             >
-              <Box width={wp(20)}>
+              <Box width={wp(25)}>
                 <TouchableSvgIcon
                   icon={LexiqueIcon}
                   color="primary"
@@ -258,7 +258,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(25)}>
                 <TouchableSvgIcon
                   icon={DictionnaireIcon}
                   color="secondary"
@@ -267,7 +267,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(25)}>
                 <TouchableSvgIcon
                   icon={NaveIcon}
                   color="quint"
@@ -276,7 +276,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(25)}>
                 <TouchableSvgIcon
                   icon={RefIcon}
                   color="quart"
@@ -285,7 +285,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              {/* <Box width={wp(20)}>
                 <TouchableSvgIcon
                   icon={RefIcon}
                   color="quart"
@@ -293,7 +293,7 @@ const VersesModal = ({
                   label={t('Comment.')}
                   disabled={moreThanOneVerseSelected}
                 />
-              </Box>
+              </Box> */}
             </ScrollView>
           </HalfContainer>
           <HalfContainer>
