@@ -153,7 +153,7 @@ class InitApp extends React.Component<Props> {
                 <>
                   <ErrorBoundary>
                     <AppNavigator
-                      screenProps={{ theme: currentTheme, popo: 'popo' }}
+                      screenProps={{ theme: currentTheme }}
                       onNavigationStateChange={this.onNavigationStateChange}
                     />
                   </ErrorBoundary>
