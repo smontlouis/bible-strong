@@ -1,15 +1,22 @@
 import React from 'react'
 import loadBible from '~helpers/loadBible'
-import useLanguage from './useLanguage'
+import { useSelector } from 'react-redux'
+
+export const verseStringToObject = arrayString => {
+  return arrayString.map(string => {
+    const [Livre, Chapitre, Verset] = string.split('-')
+    return { Livre, Chapitre, Verset }
+  })
+}
 
 const useBibleVerses = verseIds => {
   const [verses, setVerses] = React.useState([])
-  const isFR = useLanguage()
+  const version = useSelector((state: RootState) => state.bible.selectedVersion)
 
   React.useEffect(() => {
     const loadVerses = async () => {
       const { Livre, Chapitre } = verseIds[0]
-      const response = await loadBible(isFR ? 'LSG' : 'KJV')
+      const response = await loadBible(version)
       const versesByChapter = response[Livre][Chapitre]
       const versesWithText = Object.keys(versesByChapter)
         .map((v: string) => ({
@@ -18,11 +25,13 @@ const useBibleVerses = verseIds => {
           Livre: Number(Livre),
           Chapitre: Number(Chapitre),
         }))
-        .filter(v => verseIds.find(vI => vI.Verset === v.Verset))
+        .filter(v =>
+          verseIds.find(vI => Number(vI.Verset) === Number(v.Verset))
+        )
       setVerses(versesWithText)
     }
     loadVerses()
-  }, [verseIds])
+  }, [verseIds, version])
 
   return verses
 }

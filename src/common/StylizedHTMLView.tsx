@@ -1,5 +1,6 @@
 import React from 'react'
 import { withTheme } from 'emotion-theming'
+import { Text } from 'react-native'
 
 import HTMLView from '~helpers/react-native-htmlview'
 
@@ -63,6 +64,12 @@ const styles = theme => ({
     fontFamily: theme.fontFamily.paragraph,
     ...textStyle,
   },
+  b: {
+    fontWeight: 'bold',
+    color: theme.colors.quart,
+    fontFamily: theme.fontFamily.paragraph,
+    ...textStyle,
+  },
   li: {
     color: theme.colors.default,
     fontFamily: theme.fontFamily.paragraph,
@@ -80,8 +87,23 @@ const styles = theme => ({
   },
 })
 
-const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => (
-  <HTMLView stylesheet={{ ...styles(theme), ...htmlStyle }} {...props} />
-)
+const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => {
+  function renderNode(node, index, siblings, parent, defaultRenderer) {
+    if (
+      node.attribs?.class === 'greek-hebrew' ||
+      node.attribs?.class === 'translit'
+    ) {
+      return <Text key={index}>{defaultRenderer(node.children, parent)}</Text>
+    }
+  }
+
+  return (
+    <HTMLView
+      stylesheet={{ ...styles(theme), ...htmlStyle }}
+      {...props}
+      renderNode={renderNode}
+    />
+  )
+}
 
 export default withTheme(StylizedHTMLView)

@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import Header from '~common/Header'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Container from '~common/ui/Container'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
@@ -11,7 +8,11 @@ import { Status } from '~common/types'
 import to from 'await-to-js'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
+import ScrollView from '~common/ui/ScrollView'
+import Paragraph from '~common/ui/Paragraph'
 import { Comments } from './types'
+import Comment from './Comment'
+import useBibleVerses, { verseStringToObject } from '~helpers/useBibleVerses'
 
 interface Props {
   navigation: NavigationStackProp<any>
@@ -69,23 +70,28 @@ const CommentariesScreen = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const verse = navigation.getParam('verse', null)
   const { status, data } = useComments(verse)
-  console.log(verse, status, data)
-
-  if (status === 'Pending') {
-    return <Loading />
-  }
+  const { current: verseFormatted } = React.useRef(verseStringToObject([verse]))
+  const [verseText] = useBibleVerses(verseFormatted)
+  console.log(verseText)
 
   return (
     <Container>
       <Header hasBackButton title={t('Commentaires')} />
-      {status === 'Rejected' ? (
+      {status === 'Pending' ? (
+        <Loading />
+      ) : status === 'Rejected' ? (
         <Empty
           source={require('~assets/images/empty.json')}
           message={t('Une erreur est survenue')}
         />
       ) : (
         <>
-          <Text> There </Text>
+          <ScrollView>
+            <Paragraph>{verseText?.Texte}</Paragraph>
+            {data?.comments.map((comment, i) => {
+              return <Comment {...comment} key={i} />
+            })}
+          </ScrollView>
         </>
       )}
     </Container>
