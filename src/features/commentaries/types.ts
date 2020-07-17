@@ -1,5 +1,6 @@
 export interface Comments {
   id: string // 1-1-1
+  count: number
   comments: (Comment | EGWComment)[]
 }
 

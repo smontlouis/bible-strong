@@ -28,7 +28,7 @@ class TouchableSvgIcon extends React.Component {
         <Icon
           width={size}
           height={size}
-          color={disabled ? theme.colors.grey : theme.colors[color]}
+          color={disabled ? theme.colors.grey : theme.colors[color] || color}
           fill={isSelected ? theme.colors.primary : theme.colors.grey}
         />
         {label && (

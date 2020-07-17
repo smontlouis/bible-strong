@@ -21,6 +21,7 @@ import extractInitials from '~helpers/extractInitials'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Link from '~common/Link'
+import PreloadBible from './PreloadBible'
 
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
@@ -198,16 +199,18 @@ const UserWidget = React.memo(() => {
             </Text>
           </Box>
         </Box>
-        {vodNb.map(i => (
-          <VerseOfTheDay
-            key={i}
-            addDay={-i}
-            isFirst={i === 0}
-            isLast={i === [...Array(5).keys()].length - 1}
-            currentVOD={-i === currentVOD}
-            setCurrentVOD={setCurrentVOD}
-          />
-        ))}
+        <PreloadBible>
+          {vodNb.map(i => (
+            <VerseOfTheDay
+              key={i}
+              addDay={-i}
+              isFirst={i === 0}
+              isLast={i === [...Array(5).keys()].length - 1}
+              currentVOD={-i === currentVOD}
+              setCurrentVOD={setCurrentVOD}
+            />
+          ))}
+        </PreloadBible>
 
         {!user.emailVerified && (
           <Box marginTop={10}>

@@ -11,6 +11,7 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
+import CommentIcon from '~common/CommentIcon'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import getVersesRef from '~helpers/getVersesRef'
@@ -23,6 +24,7 @@ import TouchableChip from './TouchableChip'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import verseToReference from '../../helpers/verseToReference'
 import { useTranslation } from 'react-i18next'
+import { useOnlyPremium } from '~helpers/usePremium'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
@@ -65,6 +67,7 @@ const VersesModal = ({
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const modalRef = React.useRef(null)
   const { t } = useTranslation()
+  const onlyPremium = useOnlyPremium()
 
   useEffect(() => {
     if (isPrevVisible !== isVisible) {
@@ -117,7 +120,7 @@ const VersesModal = ({
     })
   }
 
-  const openCommentariesScreen = () => {
+  const openCommentariesScreen = onlyPremium(() => {
     clearSelectedVerses()
     const verse = Object.keys(selectedVerses)[0]
     navigation.navigate({
@@ -126,7 +129,7 @@ const VersesModal = ({
         verse,
       },
     })
-  }
+  })
 
   const showDictionnaryDetail = () => {
     clearSelectedVerses()
@@ -249,7 +252,7 @@ const VersesModal = ({
                 justifyContent: 'space-around',
               }}
             >
-              <Box width={wp(20)}>
+              <Box width={wp(20, 400)}>
                 <TouchableSvgIcon
                   icon={LexiqueIcon}
                   color="primary"
@@ -258,7 +261,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(20, 400)}>
                 <TouchableSvgIcon
                   icon={DictionnaireIcon}
                   color="secondary"
@@ -267,7 +270,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(20, 400)}>
                 <TouchableSvgIcon
                   icon={NaveIcon}
                   color="quint"
@@ -276,7 +279,7 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(20, 400)}>
                 <TouchableSvgIcon
                   icon={RefIcon}
                   color="quart"
@@ -285,10 +288,10 @@ const VersesModal = ({
                   disabled={moreThanOneVerseSelected}
                 />
               </Box>
-              <Box width={wp(20)}>
+              <Box width={wp(20, 400)}>
                 <TouchableSvgIcon
-                  icon={RefIcon}
-                  color="quart"
+                  icon={CommentIcon}
+                  color="#26A69A"
                   onPress={openCommentariesScreen}
                   label={t('Comment.')}
                   disabled={moreThanOneVerseSelected}

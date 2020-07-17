@@ -27,6 +27,7 @@ function htmlToElement(rawHtml, opts, done) {
       if (node.type === 'text') {
         return (
           <Text
+            selectable
             key={index}
             style={parent ? opts.styles[parent.name] : opts.styles.p}
           >
@@ -47,7 +48,7 @@ function htmlToElement(rawHtml, opts, done) {
         }
 
         return (
-          <Text key={index} onPress={linkPressHandler}>
+          <Text selectable key={index} onPress={linkPressHandler}>
             {node.name === 'pre' ? LINE_BREAK : null}
             {node.name === 'li' ? BULLET : null}
             {domToElement(node.children, node)}

@@ -4,11 +4,11 @@ import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 
-const CountdownTimer = () => {
+const CountdownTimer = ({ date }: { date: string }) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const calculateTimeLeft = () => {
-    const difference = +new Date('2020-08-01') - +new Date()
+    const difference = +new Date(date) - +new Date()
     let timeLeft = {}
 
     if (difference > 0) {
@@ -42,15 +42,15 @@ const CountdownTimer = () => {
   return (
     <Text color="quart">
       {t('Disponible gratuitement dans')}{' '}
-      {Object.keys(timeLeft).map((interval: string) => {
+      {Object.keys(timeLeft).map((interval: string, i) => {
         if (!timeLeft[interval]) {
           return null
         }
 
         return (
-          <>
+          <React.Fragment key={i}>
             {timeLeft[interval]} {t(interval)}{' '}
-          </>
+          </React.Fragment>
         )
       })}
     </Text>

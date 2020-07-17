@@ -1,5 +1,4 @@
 import React from 'react'
-import { ScrollView } from 'react-native'
 import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'

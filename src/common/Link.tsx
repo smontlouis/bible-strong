@@ -1,11 +1,24 @@
 import React, { Component } from 'react'
-import { pure, compose } from 'recompose'
 import { TouchableOpacity, Linking, Share } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
-import Box from '~common/ui/Box'
+import Box, { BoxProps } from '~common/ui/Box'
+import { NavigationStackProp } from 'react-navigation-stack'
 
-class Link extends Component {
+interface LinkProps {
+  navigation?: NavigationStackProp<any, any>
+  route?: string
+  href?: string
+  share?: string
+  params?: object
+  replace?: boolean
+  onPress?: () => void
+  padding?: boolean
+  paddingSmall?: boolean
+  style?: any
+  size?: number
+}
+class Link extends Component<LinkProps> {
   handlePress = () => {
     const {
       navigation,
@@ -21,15 +34,15 @@ class Link extends Component {
         onPress()
         setTimeout(() => {
           replace
-            ? navigation.replace(route, params)
-            : navigation.navigate(route, params)
+            ? navigation?.replace(route, params)
+            : navigation?.navigate(route, params)
         }, 300)
 
         return
       }
       replace
-        ? navigation.replace(route, params)
-        : navigation.navigate(route, params)
+        ? navigation?.replace(route, params)
+        : navigation?.navigate(route, params)
     }
     if (href) {
       Linking.openURL(href)
@@ -77,6 +90,8 @@ class Link extends Component {
   }
 }
 
-export const LinkBox = Box.withComponent(Link)
+type LinkBoxProps = React.FC<BoxProps & LinkProps>
+export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
-export default compose(withNavigation, pure)(Link)
+// @ts-ignore
+export default withNavigation(Link)

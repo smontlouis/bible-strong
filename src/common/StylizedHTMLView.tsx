@@ -89,11 +89,12 @@ const styles = theme => ({
 
 const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => {
   function renderNode(node, index, siblings, parent, defaultRenderer) {
-    if (
-      node.attribs?.class === 'greek-hebrew' ||
-      node.attribs?.class === 'translit'
-    ) {
-      return <Text key={index}>{defaultRenderer(node.children, parent)}</Text>
+    if (node.name === 'span') {
+      return (
+        <Text selectable key={index}>
+          {defaultRenderer(node.children, parent)}
+        </Text>
+      )
     }
   }
 

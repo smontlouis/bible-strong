@@ -38,21 +38,6 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
     }
   }
 
-  if (!imageUrls) {
-    return (
-      <Box height={20}>
-        <Loading />
-      </Box>
-    )
-  }
-
-  if (imageUrls.error) {
-    return (
-      <Box height={50} style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
-        <Empty message="Impossible de charger l'image... Assurez-vous d'être connecté à Internet." />
-      </Box>
-    )
-  }
   return (
     <Box>
       <AnimatableBox
@@ -71,46 +56,56 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
           elevation: 1,
         }}
       >
-        <Link onPress={() => setOpen(s => !s)}>
-          <Image
-            thumbnailSource={{ uri: imageUrls.small }}
-            source={{ uri: imageUrls.large, cache: 'force-cache' }}
-            style={{
-              width: width - 40,
-              height: width - 40,
-            }}
-            resizeMode="cover"
-          />
-          <LinkBox
-            position="absolute"
-            bottom={10}
-            left={10}
-            width={33}
-            height={33}
-            onPress={shareImage}
-            bg="reverse"
-            center
-            rounded
-            opacity={0.5}
-          >
-            {shareIsLoading ? (
-              <ActivityIndicator size={13} />
-            ) : (
-              <FeatherIcon name="share-2" size={15} />
-            )}
-          </LinkBox>
-          <Box
-            style={{
-              position: 'absolute',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              bottom: 0,
-              right: 0,
-              padding: 3,
-            }}
-          >
-            <Text fontSize={8}>copyright bible.com</Text>
+        {!imageUrls ? (
+          <Box height={20}>
+            <Loading />
           </Box>
-        </Link>
+        ) : imageUrls.error ? (
+          <Box height={50} style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
+            <Empty message="Impossible de charger l'image... Assurez-vous d'être connecté à Internet." />
+          </Box>
+        ) : (
+          <Link onPress={() => setOpen(s => !s)}>
+            <Image
+              thumbnailSource={{ uri: imageUrls.small }}
+              source={{ uri: imageUrls.large, cache: 'force-cache' }}
+              style={{
+                width: width - 40,
+                height: width - 40,
+              }}
+              resizeMode="cover"
+            />
+            <LinkBox
+              position="absolute"
+              bottom={10}
+              left={10}
+              width={33}
+              height={33}
+              onPress={shareImage}
+              bg="reverse"
+              center
+              rounded
+              opacity={0.5}
+            >
+              {shareIsLoading ? (
+                <ActivityIndicator size={13} />
+              ) : (
+                <FeatherIcon name="share-2" size={15} />
+              )}
+            </LinkBox>
+            <Box
+              style={{
+                position: 'absolute',
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                bottom: 0,
+                right: 0,
+                padding: 3,
+              }}
+            >
+              <Text fontSize={8}>copyright bible.com</Text>
+            </Box>
+          </Link>
+        )}
       </AnimatableBox>
     </Box>
   )

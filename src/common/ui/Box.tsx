@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import Animated from 'react-native-reanimated'
 import { Theme } from '~themes'
 
-interface BoxProps {
+export interface BoxProps {
   position?: 'absolute' | 'relative'
   pos?: 'absolute' | 'relative'
   top?: number
@@ -93,7 +93,7 @@ interface BoxProps {
   lightShadow?: boolean
   size?: string
 
-  theme: Theme
+  theme?: Theme
 }
 const Box = styled.View((props: BoxProps) => {
   return {

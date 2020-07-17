@@ -27,6 +27,7 @@ import { useGlobalContext } from '~helpers/globalContext'
 import SnackBar from '~common/SnackBar'
 import { getIfDatabaseExists } from '~helpers/database'
 import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const { Popover } = renderers
 
@@ -105,6 +106,7 @@ const Header = ({
   settings: { commentsDisplay },
 }) => {
   const { t } = useTranslation()
+  const isFR = useLanguage()
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
 
@@ -196,7 +198,7 @@ const Header = ({
             }
             popover={
               <>
-                {!commentsDisplay && (
+                {!commentsDisplay && isFR && (
                   <MenuOption onSelect={onOpenCommentaire}>
                     <Box row alignItems="center">
                       <MaterialIcon name="chat" size={20} />
@@ -204,7 +206,7 @@ const Header = ({
                     </Box>
                   </MenuOption>
                 )}
-                {commentsDisplay && (
+                {commentsDisplay && isFR && (
                   <MenuOption onSelect={() => setSettingsCommentaires(false)}>
                     <Box row alignItems="center">
                       <MaterialIcon name="chat" size={20} color="primary" />

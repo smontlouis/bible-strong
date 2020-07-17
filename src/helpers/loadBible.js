@@ -27,7 +27,6 @@ export default function loadBible(bible, position) {
           if (bibleMemoize[bible]) {
             return resolve(bibleMemoize[bible])
           }
-
           const path = `${FileSystem.documentDirectory}bible-LSG.json`
           const file = await FileSystem.getInfoAsync(path)
           const data = await FileSystem.readAsStringAsync(file.uri)
@@ -40,8 +39,10 @@ export default function loadBible(bible, position) {
         case 'KJV':
         case 'KJVS': {
           if (bibleMemoize[bible]) {
+            console.log('memoized')
             return resolve(bibleMemoize[bible])
           }
+          console.log('not memoized')
 
           const path = `${FileSystem.documentDirectory}bible-KJV.json`
           const file = await FileSystem.getInfoAsync(path)

@@ -42,7 +42,7 @@ const useGetVerseOfTheDay = (version: string, addDay: number) => {
       }
     }
     loadVerse()
-  }, [addDay])
+  }, [])
 
   return verseOfTheDay
 }
