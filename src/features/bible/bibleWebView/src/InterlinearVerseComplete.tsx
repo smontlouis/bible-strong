@@ -3,13 +3,20 @@ import styled from '@emotion/styled'
 
 import { scaleFontSize } from './scaleFontSize'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
+import { PropsWithDiv, SelectedCode } from './types'
+import { Verse, Settings } from './types'
 
-const Wrapper = styled('div')(({ settings: { textDisplay } }) => ({
-  display: textDisplay,
-}))
+const Wrapper = styled('div')(
+  ({ settings: { textDisplay } }: PropsWithDiv<{}>) => ({
+    display: textDisplay,
+  })
+)
 
 const Section = styled('div')(
-  ({ isSelected, settings: { theme, colors } }) => ({
+  ({
+    isSelected,
+    settings: { theme, colors },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     display: 'inline-block',
     transition: 'background 0.3s ease',
     borderRadius: 4,
@@ -23,7 +30,7 @@ const Section = styled('div')(
 )
 
 const NumberText = styled('span')(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
+  ({ settings: { fontSizeScale, fontFamily } }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(15, fontSizeScale),
     position: 'relative',
     bottom: 20,
@@ -38,7 +45,10 @@ const NumberText = styled('span')(
 )
 
 const Hebreu = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    isSelected,
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     fontSize: scaleFontSize(18, fontSizeScale),
     fontFamily,
     color: colors[theme].primary,
@@ -51,14 +61,18 @@ const Hebreu = styled('div')(
   })
 )
 
-const Code = styled('div')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(11, fontSizeScale),
-  fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)',
-}))
+const Code = styled('div')(
+  ({ settings: { fontSizeScale } }: PropsWithDiv<{}>) => ({
+    fontSize: scaleFontSize(11, fontSizeScale),
+    fontFamily: 'arial',
+    color: 'rgba(0,0,0,0.3)',
+  })
+)
 
 const VerseText = styled('div')(
-  ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(16, fontSizeScale),
     lineHeight: scaleFontSize(25, fontSizeScale),
     fontFamily,
@@ -91,7 +105,10 @@ const CloseVerseText = styled('div')(() => ({
 }))
 
 const Mot = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    isSelected,
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     fontSize: scaleFontSize(18, fontSizeScale),
     fontFamily,
     color: colors[theme].default,
@@ -106,7 +123,10 @@ const Mot = styled('div')(
 )
 
 const Phonetique = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    isSelected,
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     fontSize: scaleFontSize(16, fontSizeScale),
     fontFamily,
     color: colors[theme].tertiary,
@@ -120,12 +140,22 @@ const Phonetique = styled('div')(
   })
 )
 
-const ParsingTag = styled('div')(({ settings: { fontSizeScale } }) => ({
-  fontSize: scaleFontSize(10, fontSizeScale),
-  lineHeight: scaleFontSize(20, fontSizeScale),
-  fontFamily: 'arial',
-  color: 'rgba(0,0,0,0.3)',
-}))
+const ParsingTag = styled('div')(
+  ({ settings: { fontSizeScale } }: PropsWithDiv<{}>) => ({
+    fontSize: scaleFontSize(10, fontSizeScale),
+    lineHeight: scaleFontSize(20, fontSizeScale),
+    fontFamily: 'arial',
+    color: 'rgba(0,0,0,0.3)',
+  })
+)
+
+interface Props {
+  verse: Verse
+  settings: Settings
+  isHebreu: boolean
+  secondaryVerse?: Verse
+  selectedCode: SelectedCode
+}
 
 const InterlinearVerse = ({
   verse,
@@ -133,10 +163,10 @@ const InterlinearVerse = ({
   isHebreu,
   secondaryVerse,
   selectedCode,
-}) => {
+}: Props) => {
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
-  const navigateToStrong = (reference, isHebreu) => {
+  const navigateToStrong = (reference: string, isHebreu: boolean) => {
     dispatch({
       type: NAVIGATE_TO_STRONG,
       payload: { reference, book: isHebreu ? 1 : 40 },
@@ -155,7 +185,6 @@ const InterlinearVerse = ({
         </VerseText>
       )}
       <NumberText
-        isHebreu={isHebreu}
         settings={settings}
         onClick={() => setShowSecondaryVerse(s => !s)}
       >
@@ -176,11 +205,10 @@ const InterlinearVerse = ({
       </NumberText>
       {sections.map((section, i) => {
         const [code, hebreu, mot, parsingTag, phonetique] = section.split('#')
-        const isSelected = selectedCode && selectedCode.reference == code
+        const isSelected = selectedCode?.reference?.toString() === code
 
         return (
           <Section
-            isHebreu={isHebreu}
             key={i}
             onClick={() => navigateToStrong(code, isHebreu)}
             settings={settings}

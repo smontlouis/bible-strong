@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import styled from '@emotion/styled'
-
 import {
   ADD_PARALLEL_VERSION,
   REMOVE_PARALLEL_VERSION,
@@ -18,7 +17,7 @@ import ChevronDownIcon from './ChevronDownIcon'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
-// import { desktopMode } from './env'
+import { desktopMode } from './env'
 import { scaleFontSize } from './scaleFontSize'
 
 import './polyfills'
@@ -175,38 +174,37 @@ class VersesRenderer extends Component {
     })
 
     // ONLY FOR DEV MODE ON DESKTOP
-    // TODO: TO DELETE
-    // if (desktopMode) {
-    //   this.setState({
-    //     focusVerses: this.props.focusVerses,
-    //     verses: this.props.verses,
-    //     parallelVerses: this.props.parallelVerses,
-    //     secondaryVerses: this.props.secondaryVerses || [],
-    //     settings: this.props.settings,
-    //     verseToScroll: this.props.verseToScroll,
-    //     notedVersesCount: this.getNotedVersesCount(
-    //       this.props.verses,
-    //       this.props.notedVerses
-    //     ),
-    //     notedVersesText: this.getNotedVersesText(
-    //       this.props.verses,
-    //       this.props.notedVerses
-    //     ),
-    //     selectedVerses: this.props.selectedVerses,
-    //     version: this.props.version,
-    //     pericopeChapter: this.props.pericopeChapter,
-    //     selectedCode: this.props.selectedCode,
-    //     comments: this.transformComments(
-    //       this.props.comments,
-    //       this.props.verses.length
-    //     )
-    //   })
-    //   // // Load font
-    //   const literate = require('./literata').default
-    //   const style = document.createElement('style')
-    //   style.innerHTML = literate
-    //   document.head.appendChild(style)
-    // }
+    if (desktopMode) {
+      this.setState({
+        focusVerses: this.props.focusVerses,
+        verses: this.props.verses,
+        parallelVerses: this.props.parallelVerses,
+        secondaryVerses: this.props.secondaryVerses || [],
+        settings: this.props.settings,
+        verseToScroll: this.props.verseToScroll,
+        notedVersesCount: this.getNotedVersesCount(
+          this.props.verses,
+          this.props.notedVerses
+        ),
+        notedVersesText: this.getNotedVersesText(
+          this.props.verses,
+          this.props.notedVerses
+        ),
+        selectedVerses: this.props.selectedVerses,
+        version: this.props.version,
+        pericopeChapter: this.props.pericopeChapter,
+        selectedCode: this.props.selectedCode,
+        comments: this.transformComments(
+          this.props.comments,
+          this.props.verses.length
+        ),
+      })
+      // // Load font
+      // const literate = require('./literata').default
+      // const style = document.createElement('style')
+      // style.innerHTML = literate
+      // document.head.appendChild(style)
+    }
 
     this.receiveDataFromApp()
   }

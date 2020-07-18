@@ -3,37 +3,32 @@ import styled from '@emotion/styled'
 
 import { scaleFontSize } from './scaleFontSize'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
+import { DivProps, PropsWithDiv, Verse, Settings, SelectedCode } from './types'
 
-const Wrapper = styled('div')(({ settings: { textDisplay } }) => ({
+const Wrapper = styled('div')(({ settings: { textDisplay } }: DivProps) => ({
   display: textDisplay,
 }))
 
-const Section = styled('div')(
-  ({ isSelected, withPadding, settings: { theme, colors } }) => ({
-    display: 'inline-block',
-    position: 'relative',
-    transition: 'background 0.3s ease',
-    borderRadius: 4,
-    padding: withPadding ? 5 : '2px 4px',
-    ...(isSelected
-      ? {
-          background: colors[theme].primary,
-        }
-      : {}),
-  })
-)
+const Section = styled('div')((props: PropsWithDiv<{}>) => ({
+  display: 'inline-block',
+  position: 'relative',
+  transition: 'background 0.3s ease',
+  borderRadius: 4,
+  padding: '2px 4px',
+}))
 
 const AbsoluteSection = styled('div')(
-  ({ isSelected, withPadding, settings: { theme, colors } }) => ({
+  ({
+    isSelected,
+    settings: { theme, colors },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translateX(-50%) translateY(-50%)',
-    transition: 'background 0.3s ease',
     borderRadius: 8,
     pointerEvents: 'none',
     transition: '0.5s ease',
-    opaity: 0,
     scale: 0.8,
     display: 'none',
     padding: 5,
@@ -42,17 +37,19 @@ const AbsoluteSection = styled('div')(
     border: `3px solid ${colors[theme].primary}`,
     boxShadow:
       'rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-    ...(isSelected && {
-      zIndex: 3,
-      display: 'block',
-      opacity: 1,
-      scale: 1,
-    }),
+    ...(isSelected
+      ? {
+          zIndex: 3,
+          display: 'block',
+          opacity: 1,
+          scale: 1,
+        }
+      : {}),
   })
 )
 
 const NumberText = styled('span')(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
+  ({ settings: { fontSizeScale, fontFamily } }: DivProps) => ({
     fontSize: scaleFontSize(15, fontSizeScale),
     position: 'relative',
     // bottom: 20,
@@ -67,7 +64,10 @@ const NumberText = styled('span')(
 )
 
 const Hebreu = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    isSelected,
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     fontSize: scaleFontSize(18, fontSizeScale),
     fontFamily,
     color: colors[theme].tertiary,
@@ -81,7 +81,9 @@ const Hebreu = styled('div')(
 )
 
 const AbsoluteHebreu = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(16, fontSizeScale),
     fontFamily,
     color: colors[theme].primary,
@@ -89,7 +91,7 @@ const AbsoluteHebreu = styled('div')(
 )
 
 const Code = styled('div')(
-  ({ settings: { fontSizeScale, colors, theme } }) => ({
+  ({ settings: { fontSizeScale, colors, theme } }: DivProps) => ({
     fontSize: scaleFontSize(10, fontSizeScale),
     fontFamily: 'arial',
     color: colors[theme].default,
@@ -98,7 +100,7 @@ const Code = styled('div')(
 )
 
 const VerseText = styled('div')(
-  ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({ settings: { fontSizeScale, theme, colors, fontFamily } }: DivProps) => ({
     fontSize: scaleFontSize(16, fontSizeScale),
     lineHeight: scaleFontSize(25, fontSizeScale),
     fontFamily,
@@ -131,7 +133,9 @@ const CloseVerseText = styled('div')(() => ({
 }))
 
 const Mot = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(14, fontSizeScale),
     fontFamily,
     color: colors[theme].default,
@@ -139,7 +143,9 @@ const Mot = styled('div')(
 )
 
 const Phonetique = styled('div')(
-  ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(14, fontSizeScale),
     fontFamily,
     color: colors[theme].tertiary,
@@ -147,7 +153,7 @@ const Phonetique = styled('div')(
 )
 
 const ParsingTag = styled('div')(
-  ({ settings: { fontSizeScale, colors, theme } }) => ({
+  ({ settings: { fontSizeScale, colors, theme } }: DivProps) => ({
     fontSize: scaleFontSize(10, fontSizeScale),
     lineHeight: scaleFontSize(20, fontSizeScale),
     fontFamily: 'arial',
@@ -156,16 +162,24 @@ const ParsingTag = styled('div')(
   })
 )
 
+interface Props {
+  verse: Verse
+  settings: Settings
+  isHebreu: boolean
+  secondaryVerse?: Verse
+  selectedCode: SelectedCode
+}
+
 const InterlinearVerse = ({
   verse,
   settings,
   isHebreu,
   secondaryVerse,
   selectedCode,
-}) => {
+}: Props) => {
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
-  const navigateToStrong = (reference, isHebreu) => {
+  const navigateToStrong = (reference: string, isHebreu: boolean) => {
     dispatch({
       type: NAVIGATE_TO_STRONG,
       payload: { reference, book: isHebreu ? 1 : 40 },
@@ -183,37 +197,17 @@ const InterlinearVerse = ({
           {secondaryVerse.Verset} {secondaryVerse.Texte}
         </VerseText>
       )}
-      <NumberText
-        isHebreu={isHebreu}
-        settings={settings}
-        // onClick={() => setShowSecondaryVerse(s => !s)}
-      >
-        {/* <svg width={15} x="0px" y="0px" viewBox="0 0 54.308 54.308">
-          <path
-            fill={settings.colors[settings.theme].default}
-            d="M53.583,25.902c-5.448-9.413-15.575-15.26-26.429-15.26S6.173,16.489,0.725,25.902L0,27.154
-		l0.725,1.252c5.447,9.413,15.574,15.26,26.429,15.26s20.981-5.847,26.429-15.26l0.725-1.252L53.583,25.902z M5.826,27.154
-		c2.187-3.319,5.102-6.031,8.452-7.993c-1.198,2.126-1.889,4.574-1.889,7.183c0,3.778,1.446,7.215,3.797,9.821
-		C12.031,34.179,8.419,31.089,5.826,27.154z M37.843,36.302c2.426-2.621,3.922-6.114,3.922-9.958c0-0.999-0.102-1.974-0.293-2.917
-		c-0.432,1.268-1.207,2.377-2.222,3.208c-0.762,0.624-1.658,1.086-2.635,1.351c-0.594,0.161-1.216,0.255-1.86,0.255
-		c-3.922,0-7.101-3.179-7.101-7.101c0-1.605,0.539-3.08,1.436-4.269c0.289-0.383,0.615-0.735,0.974-1.052
-		c1.55,0.18,3.069,0.503,4.543,0.956c1.81,0.557,3.547,1.314,5.184,2.249c0.687,0.393,1.36,0.811,2.008,1.266
-		c2.608,1.829,4.888,4.145,6.681,6.865C45.83,31.178,42.117,34.323,37.843,36.302z"
-          />
-        </svg> */}
-        {verse.Verset}{' '}
-      </NumberText>
+      <NumberText settings={settings}>{verse.Verset} </NumberText>
       {sections.map((section, i) => {
         const [code, hebreu, mot, parsingTag, phonetique] = section.split('#')
-        const isSelected = selectedCode && selectedCode.reference == code
+        const isSelected = selectedCode?.reference?.toString() === code
 
         return (
-          <div style={{ position: 'relative', display: 'inline-block' }}>
-            <AbsoluteSection
-              isHebreu={isHebreu}
-              settings={settings}
-              isSelected={isSelected}
-            >
+          <div
+            key={i}
+            style={{ position: 'relative', display: 'inline-block' }}
+          >
+            <AbsoluteSection settings={settings} isSelected={isSelected}>
               <Code settings={settings}>{code}</Code>
               <AbsoluteHebreu settings={settings}>{hebreu}</AbsoluteHebreu>
               <Mot settings={settings}>{mot}</Mot>
@@ -225,11 +219,8 @@ const InterlinearVerse = ({
               )}
             </AbsoluteSection>
             <Section
-              isHebreu={isHebreu}
-              key={i}
               onClick={() => navigateToStrong(code, isHebreu)}
               settings={settings}
-              // isSelected={isSelected}
             >
               <Hebreu isSelected={isSelected} settings={settings}>
                 {hebreu}

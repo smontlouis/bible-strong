@@ -2,9 +2,14 @@ import React, { useContext } from 'react'
 import styled from '@emotion/styled'
 import VerseContext from './VerseContext'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
+import { PropsWithDiv, Verse as VerseProps } from './types'
+import Verse from './Verse'
 
 const StyledReference = styled('div')(
-  ({ isSelected, settings: { theme, colors } }) => ({
+  ({
+    isSelected,
+    settings: { theme, colors },
+  }: PropsWithDiv<{ isSelected: boolean }>) => ({
     display: 'inline-block',
     transition: 'background 0.3s ease',
     borderRadius: 4,
@@ -20,11 +25,17 @@ const StyledReference = styled('div')(
   })
 )
 
-const BibleStrongRef = ({ book, reference }) => {
+const BibleStrongRef = ({
+  book,
+  reference,
+}: {
+  book: string
+  reference: string
+}) => {
   const { selectedCode, settings, onTouchMove } = useContext(VerseContext)
   const isSelected =
-    (selectedCode && selectedCode.reference == reference) ||
-    selectedCode.reference == Number(reference)
+    selectedCode?.reference?.toString() === reference ||
+    selectedCode?.reference == Number(reference)
 
   const navigateToStrong = () => {
     dispatch({
@@ -46,7 +57,10 @@ const BibleStrongRef = ({ book, reference }) => {
   )
 }
 
-const verseToStrong = ({ Texte, Livre }) =>
+const verseToStrong = ({
+  Texte,
+  Livre,
+}: Pick<VerseProps, 'Texte' | 'Livre'>): Promise<(string | JSX.Element)[]> =>
   new Promise(resolve => {
     // STRONG
     const splittedTexte = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map(

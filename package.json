@@ -145,7 +145,7 @@
     "react-native-svg": "9.13.3",
     "react-native-tab-view": "^2.14.0",
     "react-native-unimodules": "~0.9.1",
-    "react-native-webview": "^8.0.6",
+    "react-native-webview": "^10.3.2",
     "react-native-zip-archive": "^5.0.1",
     "react-navigation": "^4.0.10",
     "react-navigation-drawer": "^2.2.2",

@@ -2,9 +2,16 @@ import React from 'react'
 import styled from '@emotion/styled'
 import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
+import { Settings, Notes } from './types'
 
 const Div = styled('span')(
-  ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+  ({
+    isParallel,
+    settings: { fontSizeScale, theme, colors, fontFamily },
+  }: {
+    isParallel: boolean
+    settings: Settings
+  }) => ({
     fontFamily,
     webkitTouchCallout: 'none',
     mozUserSelect: 'none',
@@ -12,18 +19,32 @@ const Div = styled('span')(
     khtmlUserSelect: 'none',
     webkitUserSelect: 'none',
     color: colors[theme].quart,
-
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale)
+    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
   })
 )
 
-const Verse = styled('span')(({ isParallel, settings: { fontSizeScale } }) => ({
-  paddingLeft: '3px',
-  fontSize: scaleFontSize(isParallel ? 9 : 14, fontSizeScale)
-}))
+const Verse = styled('span')(
+  ({
+    isParallel,
+    settings: { fontSizeScale },
+  }: {
+    isParallel: boolean
+    settings: Settings
+  }) => ({
+    paddingLeft: '3px',
+    fontSize: scaleFontSize(isParallel ? 9 : 14, fontSizeScale),
+  })
+)
 
-const NotesText = ({ notesText, settings, onClick, isParallel }) => {
+interface Props {
+  notesText: Notes
+  settings: Settings
+  onClick: (x: string) => void
+  isParallel: boolean
+}
+
+const NotesText = ({ notesText, settings, onClick, isParallel }: Props) => {
   return (
     <span>
       {notesText.map(note => (

@@ -1,16 +1,19 @@
 import React from 'react'
 import styled from '@emotion/styled'
+import { Settings, DivProps } from './types'
 
-const SvgContainer = styled('svg')(({ settings: { fontSizeScale } }) => ({}))
+const SvgContainer = styled(
+  'svg'
+)(({ settings: { fontSizeScale } }: DivProps) => ({}))
 
-const Div = styled('div')(({ settings: { theme } }) => ({
+const Div = styled('div')(({ settings: { theme } }: DivProps) => ({
   position: 'relative',
   display: 'inline-block',
   transform: 'translateY(5px)',
-  marginRight: '10px'
+  marginRight: '10px',
 }))
 
-const Count = styled('div')(({ settings: { theme, colors } }) => ({
+const Count = styled('div')(({ settings: { theme, colors } }: DivProps) => ({
   background: colors[theme].primary,
   position: 'absolute',
   width: '15px',
@@ -24,10 +27,16 @@ const Count = styled('div')(({ settings: { theme, colors } }) => ({
   fontWeight: 'bold',
   color: 'white',
   bottom: '0',
-  right: '0px'
+  right: '0px',
 }))
 
-const NotesCount = ({ count, settings, onClick }) => (
+interface Props {
+  count: number
+  settings: Settings
+  onClick: () => void
+}
+
+const NotesCount = ({ count, settings, onClick }: Props) => (
   <Div settings={settings}>
     <SvgContainer
       width="24"
@@ -39,7 +48,8 @@ const NotesCount = ({ count, settings, onClick }) => (
       stroke-linecap="round"
       stroke-linejoin="round"
       settings={settings}
-      onClick={onClick}>
+      onClick={onClick}
+    >
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" />
       <line x1="16" y1="13" x2="8" y2="13" />

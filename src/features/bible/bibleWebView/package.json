@@ -15,11 +15,17 @@
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.10.4",
     "@babel/plugin-transform-react-jsx": "^7.3.0",
     "@babel/preset-env": "^7.4.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@types/react": "^16.9.43",
+    "@types/react-dom": "^16.9.8",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
     "babel-loader": "^8.0.6",
     "css-loader": "^2.1.1",
-    "eslint": "^7.2.0",
+    "eslint": "^7.4.0",
     "eslint-plugin-react": "^7.20.0",
     "html-loader": "^0.5.5",
     "html-webpack-inline-source-plugin": "^0.0.10",
@@ -37,6 +43,8 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-native-push-notification": "^3.1.9",
-    "trunc-html": "^1.1.2"
+    "trunc-html": "^1.1.2",
+    "ts-loader": "^8.0.1",
+    "typescript": "^3.9.7"
   }
 }

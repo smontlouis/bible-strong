@@ -1,3 +1,5 @@
+import { CONSOLE_LOG, dispatch } from './dispatch'
+
 // https://tc39.github.io/ecma262/#sec-array.prototype.includes
 if (!Array.prototype.includes) {
   Object.defineProperty(Array.prototype, 'includes', {
@@ -51,7 +53,7 @@ if (!Array.prototype.includes) {
 
       // 8. Return false
       return false
-    }
+    },
   })
 }
 
@@ -59,6 +61,7 @@ if (!Array.prototype.includes) {
 if (!Object.entries) {
   Object.entries = function(obj) {
     const ownProps = Object.keys(obj)
+
     let i = ownProps.length
     const resArray = new Array(i) // preallocate the Array
     while (i--) resArray[i] = [ownProps[i], obj[ownProps[i]]]

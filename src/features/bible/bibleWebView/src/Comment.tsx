@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import truncHTML from 'trunc-html'
 import styled from '@emotion/styled'
 import { dispatch, NAVIGATE_TO_BIBLE_VIEW, CONSOLE_LOG } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
+import { PropsWithDiv, Settings } from './types'
 
-export function usePrevious(value) {
-  const ref = useRef()
+export function usePrevious<T>(value: T) {
+  const ref = useRef<T>()
   useEffect(() => {
     ref.current = value
   })
@@ -14,7 +14,9 @@ export function usePrevious(value) {
 }
 
 const StyledComment = styled('div')(
-  ({ settings: { fontSizeScale, fontFamily, theme, colors } }) => ({
+  ({
+    settings: { fontSizeScale, fontFamily, theme, colors },
+  }: PropsWithDiv<{}>) => ({
     padding: scaleFontSize(14, fontSizeScale),
     margin: '10px 0',
     background: colors[theme].lightGrey,
@@ -27,28 +29,28 @@ const StyledComment = styled('div')(
       fontSize: scaleFontSize(17, fontSizeScale),
       lineHeight: scaleFontSize(25, fontSizeScale),
       fontFamily,
-      margin: 0
+      margin: 0,
     },
     li: {
-      fontFamily
+      fontFamily,
     },
     'p+p': {
-      marginTop: scaleFontSize(25, fontSizeScale)
+      marginTop: scaleFontSize(25, fontSizeScale),
     },
     h3: {
       fontFamily,
       margin: 0,
       paddingBottom: scaleFontSize(25, fontSizeScale),
-      fontSize: scaleFontSize(18, fontSizeScale)
+      fontSize: scaleFontSize(18, fontSizeScale),
     },
     a: {
-      color: colors[theme].primary
-    }
+      color: colors[theme].primary,
+    },
   })
 )
 
 const ReadMore = styled('div')(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
+  ({ settings: { fontSizeScale, fontFamily } }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(15, fontSizeScale),
     fontFamily,
     textAlign: 'center',
@@ -56,32 +58,43 @@ const ReadMore = styled('div')(
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    margin: '20px 0'
+    margin: '20px 0',
   })
 )
 
-const Intro = styled('div')(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontSize: scaleFontSize(15, fontSizeScale),
-  fontFamily,
-  textAlign: 'center',
-  paddingBottom: scaleFontSize(20, fontSizeScale),
-  paddingTop: scaleFontSize(15, fontSizeScale)
-}))
+const Intro = styled('div')(
+  ({ settings: { fontSizeScale, fontFamily } }: PropsWithDiv<{}>) => ({
+    fontSize: scaleFontSize(15, fontSizeScale),
+    fontFamily,
+    textAlign: 'center',
+    paddingBottom: scaleFontSize(20, fontSizeScale),
+    paddingTop: scaleFontSize(15, fontSizeScale),
+  })
+)
 
 const Copyright = styled('div')(
-  ({ settings: { theme, colors, fontSizeScale, fontFamily } }) => ({
+  ({
+    settings: { theme, colors, fontSizeScale, fontFamily },
+  }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(10, fontSizeScale),
     fontFamily,
     textAlign: 'center',
     color: colors[theme].darkGrey,
     paddingBottom: scaleFontSize(5, fontSizeScale),
-    paddingTop: scaleFontSize(5, fontSizeScale)
+    paddingTop: scaleFontSize(5, fontSizeScale),
   })
 )
 
 const MAX_CHAR = 100
 
-const Comment = ({ id, settings, comment, isIntro }) => {
+interface Props {
+  id: string
+  settings: Settings
+  comment: string
+  isIntro: boolean
+}
+
+const Comment = ({ id, settings, comment, isIntro }: Props) => {
   const [readMore, setReadMore] = useState(false)
   const [mhyComment, setComment] = useState(comment.replace(/&amp;nbsp;/g, ' '))
   const previousReadMore = usePrevious(readMore)
@@ -95,8 +108,8 @@ const Comment = ({ id, settings, comment, isIntro }) => {
     document.querySelectorAll(`#${id} a`).forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault()
-
-        const href = e.target.attributes.href.textContent
+        //@ts-ignore
+        const href = (e.target as HTMLLinkElement).attributes.href.textContent
         const bookCode = href.substr(0, 3)
         const splittedHref = href.substr(3).split('.')
         const [chapter] = splittedHref
@@ -110,7 +123,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
           type: NAVIGATE_TO_BIBLE_VIEW,
           bookCode,
           chapter,
-          verse
+          verse,
         })
       })
     })
@@ -128,7 +141,7 @@ const Comment = ({ id, settings, comment, isIntro }) => {
       return
     }
     if (previousReadMore && !readMore) {
-      document.getElementById(id).scrollIntoView()
+      document.getElementById(id)?.scrollIntoView()
     }
   }, [comment, id, previousComment, previousReadMore, readMore])
 

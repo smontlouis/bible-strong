@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { keyframes } from '@emotion/core'
 import styled from '@emotion/styled'
+import { Verse as VerseProps, Settings, Notes, SelectedCode } from './types'
 
 import {
   dispatch,
@@ -17,8 +18,9 @@ import NotesText from './NotesText'
 import VerseTextFormatting from './VerseTextFormatting'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
+import { PropsWithDiv } from './types'
 
-function convertHex(hex, opacity) {
+function convertHex(hex: string, opacity: number) {
   hex = hex.replace('#', '')
   const r = parseInt(hex.substring(0, 2), 16)
   const g = parseInt(hex.substring(2, 4), 16)
@@ -29,14 +31,20 @@ function convertHex(hex, opacity) {
 }
 
 const VerseText = styled('span')(
-  ({ isParallel, settings: { fontSizeScale } }) => ({
+  ({
+    isParallel,
+    settings: { fontSizeScale },
+  }: PropsWithDiv<{ isParallel: boolean }>) => ({
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
     lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
   })
 )
 
 const NumberText = styled('span')(
-  ({ isFocused, settings: { fontSizeScale, theme, colors } }) => ({
+  ({
+    isFocused,
+    settings: { fontSizeScale },
+  }: PropsWithDiv<{ isFocused: boolean }>) => ({
     fontSize: scaleFontSize(14, fontSizeScale),
   })
 )
@@ -61,11 +69,18 @@ export const ContainerText = styled('span')(
     highlightedColor,
     isVerseToScroll,
     settings: { theme, colors, fontFamily },
-  }) => {
+  }: PropsWithDiv<{
+    isFocused: boolean
+    isTouched: boolean
+    isSelected: boolean
+    highlightedColor: string
+    isVerseToScroll: boolean
+  }>) => {
     let background = 'transparent'
 
     if (highlightedColor && !isSelected) {
-      background = convertHex(colors[theme][highlightedColor], 50)
+      const hexColor = colors[theme][highlightedColor]
+      background = convertHex(hexColor, 50)
     }
     if (isTouched) {
       background = 'rgba(0,0,0,0.1)'
@@ -95,23 +110,56 @@ export const ContainerText = styled('span')(
   }
 )
 
-export const Wrapper = styled('span')(({ settings: { textDisplay } }) => ({
-  display: textDisplay,
-  ...(textDisplay === 'block'
-    ? {
-        marginBottom: '5px',
-      }
-    : {}),
-}))
+export const Wrapper = styled('span')(
+  ({ settings: { textDisplay } }: PropsWithDiv<{}>) => ({
+    display: textDisplay,
+    ...(textDisplay === 'block'
+      ? {
+          marginBottom: '5px',
+        }
+      : {}),
+  })
+)
 
 const Spacer = styled('div')(() => ({
   marginTop: 5,
 }))
 
-class Verse extends Component {
+interface Props {
+  verse: VerseProps
+  isSelectedMode: boolean
+  isSelectionMode:
+    | 'inline-verse'
+    | 'block-verse'
+    | 'inline-strong'
+    | 'block-strong'
+  settings: Settings
+
+  parallelVerse?: { verse: VerseProps; version: string }[]
+  secondaryVerse?: VerseProps
+  isSelected: boolean
+  highlightedColor: string
+  notesCount: number
+  isVerseToScroll: boolean
+  notesText: Notes
+  version: string
+  isHebreu: boolean
+  selectedCode: SelectedCode
+  isFocused: boolean
+  isParallel: boolean
+  isParallelVerse?: boolean
+  isINTComplete?: boolean
+}
+
+class Verse extends Component<Props> {
   state = {
     isTouched: false,
   }
+
+  detectScroll: any
+  moved: boolean = false
+  shouldShortPress: boolean = false
+  buttonPressTimer: any
 
   componentDidMount() {
     this.detectScroll = window.addEventListener('scroll', () => {
@@ -143,7 +191,7 @@ class Verse extends Component {
     })
   }
 
-  navigateToNote = id => {
+  navigateToNote = (id: string) => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_NOTE,
       payload: id,
@@ -209,7 +257,7 @@ class Verse extends Component {
     })
   }
 
-  onTouchStart = e => {
+  onTouchStart = () => {
     this.shouldShortPress = true
     this.moved = false
 
@@ -228,11 +276,11 @@ class Verse extends Component {
     }
   }
 
-  onTouchCancel = e => {
+  onTouchCancel = () => {
     clearTimeout(this.buttonPressTimer)
   }
 
-  onTouchMove = e => {
+  onTouchMove = () => {
     this.moved = true
     if (this.state.isTouched) this.setState({ isTouched: false })
   }
@@ -262,7 +310,7 @@ class Verse extends Component {
 
     const inlineNotedVerses = settings.notesDisplay === 'inline'
 
-    if (isParallelVerse) {
+    if (isParallelVerse && parallelVerse) {
       return (
         <div style={{ display: 'flex' }}>
           {parallelVerse.map((p, i) => {
@@ -311,7 +359,7 @@ class Verse extends Component {
           isFocused={isFocused}
           isTouched={isTouched}
           isSelected={isSelected}
-          isVerseToScroll={isVerseToScroll && verse.Verset != 1}
+          isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
           highlightedColor={highlightedColor}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
@@ -350,7 +398,7 @@ class Verse extends Component {
       )
     }
 
-    let array = verse.Texte.split(/(\n)/g)
+    let array: (string | JSX.Element)[] = verse.Texte.split(/(\n)/g)
 
     if (array.length > 1) {
       array = array.map(c => (c === '\n' ? <Spacer /> : c))
@@ -363,7 +411,7 @@ class Verse extends Component {
           settings={settings}
           isTouched={isTouched}
           isSelected={isSelected}
-          isVerseToScroll={isVerseToScroll && verse.Verset != 1}
+          isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
           highlightedColor={highlightedColor}
         >
           <NumberText isFocused={isFocused} settings={settings}>

@@ -3,11 +3,11 @@ import React from 'react'
 class ErrorBoundary extends React.Component {
   state = { error: null, errorInfo: null }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Catch errors in any components below and re-render with error message
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     })
     // You can also log error messages to an error reporting service here
   }
