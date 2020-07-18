@@ -15,11 +15,12 @@ import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import Paragraph from '~common/ui/Paragraph'
 import DBSelectorItem from '~features/settings/DatabaseSelectorItem'
 import { getDatabases } from '~helpers/databases'
-import { wp } from '~helpers/utils'
+import { wp, hp } from '~helpers/utils'
 import { setFirstTime } from '~redux/modules/user'
 import { useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { FeatherIcon } from '~common/ui/Icon'
 
 const DownloadFiles = ({
   setStep,
@@ -72,21 +73,26 @@ const DownloadFiles = ({
       <SectionList
         ListHeaderComponent={
           <>
-            <Box width={wp(85)} pt={100}>
-              <Text padding={20} title fontSize={40}>
-                {t('Vous êtes presque prêt !')}
-              </Text>
-              <Paragraph fontFamily="text" px={20} mt={20}>
-                {t(
-                  'Choisissez les bases de données et les bibles que vous souhaitez télécharger.'
-                )}
-              </Paragraph>
-              <Paragraph fontFamily="text" color="quart" px={20}>
-                {t('La LSG est obligatoire pour commencer.')}
-              </Paragraph>
+            <Box pt={100} height={hp(85)}>
+              <Box width={wp(85)}>
+                <Text padding={20} title fontSize={40}>
+                  {t('Vous êtes presque prêt !')}
+                </Text>
+                <Paragraph fontFamily="text" px={20} mt={20}>
+                  {t(
+                    'Choisissez les bases de données et les bibles que vous souhaitez télécharger.'
+                  )}
+                </Paragraph>
+                <Paragraph fontFamily="text" color="quart" px={20}>
+                  {t('La LSG est obligatoire pour commencer.')}
+                </Paragraph>
+              </Box>
+              <Box center height={50} mt={100}>
+                <FeatherIcon name="arrow-down" size={60} />
+              </Box>
             </Box>
-            <Box padding={20} mt={100}>
-              <Button onPress={onConfirmDownload}>
+            <Box px={20} mt={20} paddingBottom={10}>
+              <Button reverse onPress={onConfirmDownload}>
                 {t('Tout télécharger')}
               </Button>
             </Box>

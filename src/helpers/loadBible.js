@@ -39,10 +39,8 @@ export default function loadBible(bible, position) {
         case 'KJV':
         case 'KJVS': {
           if (bibleMemoize[bible]) {
-            console.log('memoized')
             return resolve(bibleMemoize[bible])
           }
-          console.log('not memoized')
 
           const path = `${FileSystem.documentDirectory}bible-KJV.json`
           const file = await FileSystem.getInfoAsync(path)
