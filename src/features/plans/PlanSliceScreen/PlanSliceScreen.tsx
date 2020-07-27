@@ -22,6 +22,10 @@ import PauseText from './PauseText'
 import ReadButton from './ReadButton'
 import Slice from './Slice'
 import { useTranslation } from 'react-i18next'
+import * as Sentry from '@sentry/react-native'
+import Snackbar from '~common/SnackBar'
+import { Share } from 'react-native'
+import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -69,6 +73,45 @@ const PlanSliceScreen = ({ navigation }: Props) => {
     s => s.type === 'Chapter' || s.type === 'Verse'
   )
   const sliceTitle = mainSlice ? extractTitle(mainSlice) : ''
+
+  const share = async () => {
+    const textSlices = await Promise.all(
+      slices.map(async slice => {
+        switch (slice.type) {
+          case 'Chapter': {
+            return await chapterSliceToText(slice, version)
+          }
+          case 'Verse': {
+            return await verseSliceToText(slice, version)
+          }
+          case 'Video': {
+            return await videoSliceToText(slice)
+          }
+          case 'Title': {
+            return slice.title
+          }
+          case 'Text': {
+            return `${slice.description}`
+          }
+          case 'Image':
+          default: {
+            return ''
+          }
+        }
+      })
+    )
+
+    try {
+      const message = `${sliceTitle || title}\n\n${textSlices.join('\n\n')}`
+
+      Share.share({ message })
+    } catch (e) {
+      Snackbar.show('Erreur lors du partage.')
+      console.log(e)
+      Sentry.captureException(e)
+    }
+  }
+
   return (
     <Container>
       <Header
@@ -78,7 +121,6 @@ const PlanSliceScreen = ({ navigation }: Props) => {
           <PopOverMenu
             element={
               <Box
-                flexDirection="row"
                 alignItems="center"
                 justifyContent="center"
                 height={50}
@@ -121,6 +163,17 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                   <Box row alignItems="center">
                     <TextIcon>Aa</TextIcon>
                     <Text marginLeft={10}>{t('Mise en forme')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={share}>
+                  <Box row alignItems="center">
+                    <FeatherIcon
+                      name="share-2"
+                      size={17}
+                      onPress={share}
+                      style={{ marginRight: 10 }}
+                    />
+                    <Text marginLeft={10}>{t('Partager')}</Text>
                   </Box>
                 </MenuOption>
               </>

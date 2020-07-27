@@ -117,6 +117,7 @@
     "react-native-hooks": "^0.0.6",
     "react-native-iap": "^4.4.9",
     "react-native-iaphub": "^3.0.1",
+    "react-native-immersive-mode": "^1.1.0",
     "react-native-iphone-x-helper": "^1.2.1",
     "react-native-keyboard-aware-scroll-view": "^0.8.0",
     "react-native-keyboard-spacer": "^0.4.1",

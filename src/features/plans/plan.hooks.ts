@@ -2,6 +2,7 @@ import React from 'react'
 import * as Sentry from '@sentry/react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import to from 'await-to-js'
+import i18n from '~i18n'
 
 import { storageRef } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
@@ -284,12 +285,12 @@ const chapterStringToArray = (chapters: string) => {
  * @param chapters
  * @param version
  */
-const getChaptersForPlan = async (
+export const getChaptersForPlan = async (
   chapters: string,
   version: string
 ): Promise<ChapterForPlan> => {
   const book = chapters.split('|').map(Number)[0]
-  const bookName = books[book - 1].Nom
+  const bookName = i18n.t(books[book - 1].Nom)
   const chaptersRange = chapterStringToArray(chapters)
   const bible = await loadBible(version)
   const pericope = getBiblePericope(version)
@@ -304,7 +305,7 @@ const getChaptersForPlan = async (
       }))
 
       return {
-        title: `Chapitre ${chapter}`,
+        title: `${i18n.t('Chapitre')} ${chapter}`,
         verses: chapterContent,
         viewMore: {
           route: 'BibleView',
@@ -348,7 +349,7 @@ export const useChapterToContent = (chapters: string) => {
  * @param verses
  * @param version
  */
-const getVersesForPlan = async (
+export const getVersesForPlan = async (
   verses: string,
   version: string
 ): Promise<VerseForPlan> => {

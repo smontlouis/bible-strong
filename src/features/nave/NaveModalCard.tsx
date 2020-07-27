@@ -12,12 +12,14 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import NaveForVerse from './NaveModalForVerse'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
+import { useTranslation } from 'react-i18next'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
 const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [Naves, setNaves] = useState(null)
   const [error, setError] = useState(false)
@@ -76,7 +78,7 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
             {title}
           </Text>
           <Text fontSize={13} color="grey">
-            Par thèmes{' '}
+            {t('Par thèmes')}
           </Text>
         </Box>
         <Link onPress={onClosed} padding>
@@ -88,12 +90,12 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
           <>
             <NaveForVerse
               items={naveItemsForVerse}
-              label="Concernant le verset"
+              label={t('Concernant le verset')}
               onClosed={onClosed}
             />
             <NaveForVerse
               items={naveItemsForChapter}
-              label="Concernant le chapitre entier"
+              label={t('Concernant le chapitre entier')}
               onClosed={onClosed}
             />
           </>

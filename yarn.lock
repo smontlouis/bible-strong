@@ -16545,6 +16545,11 @@ react-native-iaphub@^3.0.1:
   dependencies:
     react-native-iap "4.4.3"
 
+react-native-immersive-mode@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-immersive-mode/-/react-native-immersive-mode-1.1.0.tgz#93eaa485506c4770ed271ddb760bdb3e9e948276"
+  integrity sha512-rl7bjVO+c5NLxJ2LOg3wc6xuh2mhywlHC9UK8zx3kBKZzo87ReLg6ejH1M+qFsoMDl+2O/KrAlMj2RbG63Nr5Q==
+
 react-native-iphone-x-helper@^1.0.3, react-native-iphone-x-helper@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.2.1.tgz#645e2ffbbb49e80844bb4cbbe34a126fda1e6772"

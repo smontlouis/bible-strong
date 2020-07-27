@@ -2,6 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import compose from 'recompose/compose'
 import pure from 'recompose/pure'
+import ImmersiveMode from 'react-native-immersive-mode'
 
 import {
   Menu,
@@ -172,7 +173,13 @@ const Header = ({
         <TextIcon>{version}</TextIcon>
       </LinkBox>
       {isFullscreen && (
-        <LinkBox onPress={() => setIsFullScreen(false)} style={{ width: 50 }}>
+        <LinkBox
+          onPress={() => {
+            setIsFullScreen(false)
+            ImmersiveMode.fullLayout(false)
+          }}
+          style={{ width: 50 }}
+        >
           <MaterialIcon name="fullscreen-exit" size={20} />
         </LinkBox>
       )}
@@ -230,7 +237,12 @@ const Header = ({
                     <Text marginLeft={10}>{t('Historique')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={() => setIsFullScreen(true)}>
+                <MenuOption
+                  onSelect={() => {
+                    setIsFullScreen(true)
+                    ImmersiveMode.fullLayout(true)
+                  }}
+                >
                   <Box row alignItems="center">
                     <MaterialIcon name="fullscreen" size={20} />
                     <Text marginLeft={10}>{t('Plein écran')}</Text>

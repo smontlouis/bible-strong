@@ -73,12 +73,14 @@ const DownloadFiles = ({
       <SectionList
         ListHeaderComponent={
           <>
-            <Box pt={100} height={hp(85)}>
+            <Box py={100} height={hp(100)} justifyContent="space-between">
               <Box width={wp(85)}>
                 <Text padding={20} title fontSize={40}>
                   {t('Vous êtes presque prêt !')}
                 </Text>
-                <Paragraph fontFamily="text" px={20} mt={20}>
+              </Box>
+              <Box width={wp(85)}>
+                <Paragraph fontFamily="text" px={20} mt={40}>
                   {t(
                     'Choisissez les bases de données et les bibles que vous souhaitez télécharger.'
                   )}
@@ -87,8 +89,9 @@ const DownloadFiles = ({
                   {t('La LSG est obligatoire pour commencer.')}
                 </Paragraph>
               </Box>
-              <Box center height={50} mt={100}>
-                <FeatherIcon name="arrow-down" size={60} />
+              <Box center pt={200}>
+                <Text mb={10}>{t('Scroll Down')}</Text>
+                <FeatherIcon name="arrow-down" size={40} />
               </Box>
             </Box>
             <Box px={20} mt={20} paddingBottom={10}>
@@ -134,12 +137,14 @@ const DownloadFiles = ({
             isParameters
           />
         )}
+        ListFooterComponent={
+          <Box padding={20}>
+            <Button success onPress={checkForVersion}>
+              {t('Continuer')}
+            </Button>
+          </Box>
+        }
       />
-      <Box padding={20}>
-        <Button success onPress={checkForVersion}>
-          {t('Continuer')}
-        </Button>
-      </Box>
     </Container>
   )
 }
