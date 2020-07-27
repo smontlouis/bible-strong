@@ -3,6 +3,7 @@ import styled from '@emotion/native'
 import compose from 'recompose/compose'
 import pure from 'recompose/pure'
 import ImmersiveMode from 'react-native-immersive-mode'
+import { Platform, StatusBar } from 'react-native'
 
 import {
   Menu,
@@ -149,7 +150,7 @@ const Header = ({
     <AnimatableHeaderBox
       row
       transition="height"
-      style={{ height: isFullscreen ? 25 : 60 }}
+      style={{ height: isFullscreen ? 35 : 60 }}
     >
       {(isSelectionMode || hasBackButton) && (
         <Box justifyContent="center">
@@ -176,7 +177,8 @@ const Header = ({
         <LinkBox
           onPress={() => {
             setIsFullScreen(false)
-            ImmersiveMode.fullLayout(false)
+            Platform.OS === 'android' && ImmersiveMode.setBarMode('Normal')
+            StatusBar.setHidden(false)
           }}
           style={{ width: 50 }}
         >
@@ -240,7 +242,9 @@ const Header = ({
                 <MenuOption
                   onSelect={() => {
                     setIsFullScreen(true)
-                    ImmersiveMode.fullLayout(true)
+                    Platform.OS === 'android' &&
+                      ImmersiveMode.setBarMode('FullSticky')
+                    StatusBar.setHidden(true)
                   }}
                 >
                   <Box row alignItems="center">

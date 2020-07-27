@@ -4,6 +4,8 @@ import produce from 'immer'
 import compose from 'recompose/compose'
 import { withTheme } from 'emotion-theming'
 import * as FileSystem from 'expo-file-system'
+import { Platform } from 'react-native'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
@@ -11,6 +13,7 @@ import Loading from '~common/Loading'
 import BibleViewer from './BibleViewer'
 import BibleHeader from './BibleHeader'
 import BibleParamsModal from './BibleParamsModal'
+import ImmersiveMode from 'react-native-immersive-mode'
 
 import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
@@ -19,6 +22,7 @@ class BibleScreen extends React.Component {
   state = {
     isBibleParamsOpen: false,
     isLoading: true,
+    hasPaddingTop: false,
   }
 
   async componentDidMount() {
@@ -31,6 +35,18 @@ class BibleScreen extends React.Component {
       this.setState({ isLoading: false })
     } else {
       this.setState({ isLoading: false })
+    }
+
+    if (Platform.OS === 'android') {
+      this.listen = ImmersiveMode.addEventListener(e => {
+        this.setState({ hasPaddingTop: !e.statusBar })
+      })
+    }
+  }
+
+  componentWillUnmount() {
+    if (Platform.OS === 'android') {
+      this.listen.remove()
     }
   }
 
@@ -87,7 +103,12 @@ class BibleScreen extends React.Component {
     }
 
     return (
-      <Container pure>
+      <Container
+        pure
+        style={{
+          paddingTop: this.state.hasPaddingTop ? 0 : getStatusBarHeight(),
+        }}
+      >
         <BibleHeader
           navigation={navigation}
           isReadOnly={isReadOnly}
