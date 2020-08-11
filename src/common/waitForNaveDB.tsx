@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
 
@@ -18,8 +17,7 @@ export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState(undefined)
-  const dispatch = useDispatch()
+  const [progress, setProgress] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     if (naveDB.get()) {
@@ -47,8 +45,8 @@ export const useWaitForDatabase = () => {
           }
 
           try {
-            if (!window.naveDownloadHasStarted) {
-              window.naveDownloadHasStarted = true
+            if (!(window as any).naveDownloadHasStarted) {
+              ;(window as any).naveDownloadHasStarted = true
 
               const sqliteDbUri = await getDatabasesRef().NAVE.getDownloadURL()
 
@@ -74,7 +72,7 @@ export const useWaitForDatabase = () => {
               await naveDB.init()
 
               setLoading(false)
-              window.naveDownloadHasStarted = false
+              ;(window as any).naveDownloadHasStarted = false
             }
           } catch (e) {
             SnackBar.show(
@@ -95,7 +93,7 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [dispatch, startDownload, dispatch])
+  }, [startDownload])
 
   return {
     isLoading,

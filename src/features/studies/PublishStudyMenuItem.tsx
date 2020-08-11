@@ -15,7 +15,6 @@ import useConnection from '~helpers/useConnection'
 import Clipboard from '@react-native-community/clipboard'
 import SnackBar from '~common/SnackBar'
 import { Share, Platform, PermissionsAndroid } from 'react-native'
-import { useOnlyPremium } from '~helpers/usePremium'
 import { useTranslation } from 'react-i18next'
 
 interface Props {
@@ -55,13 +54,9 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
   const [pdfStatus, setPDFStatus] = useState<Status>('Idle')
   const isConnected = useConnection()
   const dispatch = useDispatch()
-  const onlyPremium = useOnlyPremium()
   const { t } = useTranslation()
 
-  const onPublishStudy = onlyPremium(
-    () => isConnected && dispatch(publishStudy(study.id)),
-    onClosed
-  )
+  const onPublishStudy = () => isConnected && dispatch(publishStudy(study.id))
 
   const copyToClipboard = async (url: string) => {
     Clipboard.setString(url)

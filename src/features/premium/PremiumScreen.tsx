@@ -63,12 +63,6 @@ const PremiumScreen = () => {
             </Box>
             <Box mt={30}>
               <ListItem>{t('Accès aux commentaires')}</ListItem>
-              <ListItem>
-                {t('Génération des études en page Web et PDF')}
-              </ListItem>
-              <ListItem>
-                {t('Recherche avancée dans la chronologie biblique')}
-              </ListItem>
               <ListItem>{t("...Et plein d'autres à venir")}</ListItem>
             </Box>
             <LinkBox
@@ -124,17 +118,7 @@ const PremiumScreen = () => {
             <ListItem>
               {t('Accès aux commentaires')}
               {'\n'}
-              <CountdownTimer date="2020-09-01" />
-            </ListItem>
-            <ListItem>
-              {t('Génération des études en page Web et PDF')}
-              {'\n'}
-              <CountdownTimer date="2020-08-01" />
-            </ListItem>
-            <ListItem>
-              {t('Recherche avancée dans la timeline')}
-              {'\n'}
-              <CountdownTimer date="2020-08-01" />
+              <CountdownTimer date="2020-10-01" />
             </ListItem>
             <ListItem>{t("...Et plein d'autres à venir")}</ListItem>
           </Box>

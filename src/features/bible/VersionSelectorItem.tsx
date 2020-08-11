@@ -1,7 +1,7 @@
 import React from 'react'
 import * as FileSystem from 'expo-file-system'
 import { TouchableOpacity, Alert } from 'react-native'
-import { ProgressBar } from 'react-native-paper'
+import ProgressCircle from 'react-native-progress/Circle'
 import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabasesRef } from '~helpers/firebase'
@@ -240,10 +240,19 @@ const VersionSelectorItem = ({
             </TouchableOpacity>
           )}
           {isLoading && (
-            <Box width={80} justifyContent="center">
-              <ProgressBar
+            <Box
+              width={80}
+              justifyContent="center"
+              alignItems="flex-end"
+              mr={10}
+            >
+              <ProgressCircle
+                size={20}
                 progress={fileProgress}
-                color={theme.colors.default}
+                borderWidth={0}
+                thickness={3}
+                color={theme.colors.primary}
+                unfilledColor={theme.colors.lightGrey}
               />
             </Box>
           )}

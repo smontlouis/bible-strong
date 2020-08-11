@@ -8,7 +8,6 @@ import Text from '~common/ui/Text'
 import Back from '~common/Back'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { Modalize } from 'react-native-modalize'
-import { useOnlyPremium } from '~helpers/usePremium'
 import useLanguage from '~helpers/useLanguage'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
@@ -44,12 +43,11 @@ const TimelineHeader = ({
   onPress,
   searchModalRef,
 }: Props) => {
-  const onlyPremium = useOnlyPremium()
   const isFR = useLanguage()
 
-  const openSearch = onlyPremium(() => {
+  const openSearch = () => {
     searchModalRef.current?.open()
-  })
+  }
   return (
     <HeaderBox row>
       <Box center>
