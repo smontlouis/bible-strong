@@ -16,23 +16,22 @@ import Paragraph from '~common/ui/Paragraph'
 import DBSelectorItem from '~features/settings/DatabaseSelectorItem'
 import { getDatabases } from '~helpers/databases'
 import { wp, hp } from '~helpers/utils'
-import { setFirstTime } from '~redux/modules/user'
-import { useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import { FeatherIcon } from '~common/ui/Icon'
 
 const DownloadFiles = ({
   setStep,
+  setFirstTime,
 }: {
   setStep: React.Dispatch<React.SetStateAction<number>>
+  setFirstTime: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
   const [allDownloadFunc, setAllDownloadFunc] = useState<(() => void)[]>([])
   const { t } = useTranslation()
   const isFR = useLanguage()
   const addDownloadFunc = (fn: () => void) =>
     setAllDownloadFunc(fns => [...fns, fn])
-  const dispatch = useDispatch()
 
   const onConfirmDownload = () => {
     Alert.alert(
@@ -65,7 +64,7 @@ const DownloadFiles = ({
       return
     }
 
-    dispatch(setFirstTime(false))
+    setFirstTime(false)
   }
 
   return (
@@ -73,7 +72,7 @@ const DownloadFiles = ({
       <SectionList
         ListHeaderComponent={
           <>
-            <Box py={100} height={hp(100)} justifyContent="space-between">
+            <Box height={hp(100)} paddingTop={100} paddingBottom={30}>
               <Box width={wp(85)}>
                 <Text padding={20} title fontSize={40}>
                   {t('Vous êtes presque prêt !')}
@@ -89,7 +88,7 @@ const DownloadFiles = ({
                   {t('La LSG est obligatoire pour commencer.')}
                 </Paragraph>
               </Box>
-              <Box center pt={200}>
+              <Box center style={{ marginTop: 'auto' }}>
                 <Text mb={10}>{t('Scroll Down')}</Text>
                 <FeatherIcon name="arrow-down" size={40} />
               </Box>

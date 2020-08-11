@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Modal from 'react-native-modalbox'
-import { useSelector } from 'react-redux'
 import styled from '~styled'
-import { setFirstTime } from '~redux/modules/user'
 import { useDispatch } from 'react-redux'
 import useLanguage from '~helpers/useLanguage'
 import { deleteAllDatabases } from '~helpers/database'
 
-import { RootState } from '~redux/modules/reducer'
 import OnBoardingSlides from './OnBoardingSlides'
 import DownloadFiles from './DownloadFiles'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
@@ -20,6 +17,7 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
 const useCheckMandatoryVersions = () => {
   const dispatch = useDispatch()
   const isFR = useLanguage()
+  const [isFirstTime, setFirstTime] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -28,18 +26,21 @@ const useCheckMandatoryVersions = () => {
       )
       if (lsgNeedsDownload) {
         console.log('Needs download, open onboarding.')
-        dispatch(setFirstTime(true))
         dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
         deleteAllDatabases()
+        setFirstTime(true)
+      } else {
+        setFirstTime(false)
       }
     })()
   }, [dispatch, isFR])
+
+  return { isFirstTime, setFirstTime }
 }
 
 const OnBoarding = () => {
-  const isFirstTime = useSelector((state: RootState) => state.user.isFirstTime)
   const [step, setStep] = React.useState(0)
-  useCheckMandatoryVersions()
+  const { isFirstTime, setFirstTime } = useCheckMandatoryVersions()
 
   return (
     <StylizedModal
@@ -48,7 +49,9 @@ const OnBoarding = () => {
       swipeToClose={false}
     >
       {step === 0 && <OnBoardingSlides setStep={setStep} />}
-      {step === 1 && <DownloadFiles setStep={setStep} />}
+      {step === 1 && (
+        <DownloadFiles setStep={setStep} setFirstTime={setFirstTime} />
+      )}
     </StylizedModal>
   )
 }

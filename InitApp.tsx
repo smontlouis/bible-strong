@@ -18,7 +18,6 @@ import {
   getVersionUpdate,
   getDatabaseUpdate,
   resetCompareVersion,
-  setFirstTime,
 } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
@@ -51,7 +50,6 @@ class InitApp extends React.Component<Props> {
       const isFR = lang === 'fr'
       this.props.dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
       this.props.dispatch(resetCompareVersion(isFR ? 'LSG' : 'KJV'))
-      this.props.dispatch(setFirstTime(true))
     })
   }
 

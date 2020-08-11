@@ -50,8 +50,6 @@ export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
 
 export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
 
-export const SET_FIRST_TIME = 'user/SET_FIRST_TIME'
-
 export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
 export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
@@ -78,7 +76,6 @@ interface UserState {
   displayName: string
   photoURL: string
   provider: string
-  isFirstTime: boolean
   lastSeen: number
   subscription?: string
   emailVerified: boolean
@@ -144,7 +141,6 @@ const initialState: UserState = {
   displayName: '',
   photoURL: '',
   provider: '',
-  isFirstTime: true,
   lastSeen: 0,
   subscription: undefined,
   emailVerified: false,
@@ -199,10 +195,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
     case EMAIL_VERIFIED: {
       draft.emailVerified = true
-      break
-    }
-    case SET_FIRST_TIME: {
-      draft.isFirstTime = action.payload
       break
     }
     case APP_FETCH_DATA: {
@@ -422,14 +414,6 @@ export default reducers
 export function verifyEmail() {
   return {
     type: EMAIL_VERIFIED,
-  }
-}
-
-// First-Time
-export function setFirstTime(payload) {
-  return {
-    type: SET_FIRST_TIME,
-    payload,
   }
 }
 
