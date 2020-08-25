@@ -1,5 +1,8 @@
 // global.d.ts
-
+declare module 'trunc-html' {
+  const truncHTML: (x: string, limit: number) => { html: string; text: string }
+  export default truncHTML
+}
 declare module '@emotion/native' {
   import css from '@emotion/css'
   import {

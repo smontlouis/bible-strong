@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import FastImage from 'react-native-fast-image'
@@ -16,6 +16,11 @@ import { useFireStorage } from '~features/plans/plan.hooks'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
 import * as Sentry from '@sentry/react-native'
 import { useTranslation } from 'react-i18next'
+import Button from '~common/ui/Button'
+import useLanguage from '~helpers/useLanguage'
+import { Status } from '~common/types'
+import { firebaseDb } from '~helpers/firebase'
+import { deepl } from '../../../config'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -30,11 +35,60 @@ interface Props {
   comment: CommentProps | EGWComment
 }
 
+const useFrenchTranslation = (id: string) => {
+  const [status, setStatus] = useState<Status>('Idle')
+  const [contentFR, setContentFR] = useState('')
+
+  const startTranslation = async (text: string) => {
+    try {
+      setStatus('Pending')
+
+      const commentRef = await firebaseDb
+        .collection('commentaries-FR')
+        .doc(id.toString())
+        .get()
+
+      if (commentRef.exists) {
+        setContentFR(commentRef.data()!.content)
+        setStatus('Resolved')
+        return
+      }
+
+      const data = `auth_key=${deepl.auth_key}&text=${encodeURIComponent(
+        text
+      )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
+      const res = await fetch('https://api.deepl.com/v2/translate', {
+        method: 'POST',
+        body: data,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': data.length.toString(),
+        },
+      })
+      const result = await res.json()
+
+      await firebaseDb
+        .collection('commentaries-FR')
+        .doc(id.toString())
+        .set({ content: result.translations[0].text })
+
+      setContentFR(result.translations[0].text)
+      setStatus('Resolved')
+      Snackbar.show("Merci d'avoir contribué à la traduction !")
+    } catch (e) {
+      setStatus('Rejected')
+    }
+  }
+
+  return { status, contentFR, startTranslation }
+}
+
 const Comment = ({ comment, navigation }: Props) => {
-  const { resource, content, href } = comment
+  const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
   const { t } = useTranslation()
+  const isFR = useLanguage()
 
   const openLink = (href: string, innerHTML: string, type: string) => {
     if (type.includes('egwlink_bible')) {
@@ -73,6 +127,8 @@ https://bible-strong.app
       Sentry.captureException(e)
     }
   }
+
+  const { status, contentFR, startTranslation } = useFrenchTranslation(id)
 
   return (
     <Box m={20} marginBottom={0} p={20} rounded lightShadow bg="reverse">
@@ -118,7 +174,10 @@ https://bible-strong.app
       </LinkBox>
       <Box overflow="hidden" mt={10}>
         <Box height={isCollapsed ? 100 : undefined}>
-          <StylizedHTMLView value={content} onLinkPress={openLink} />
+          <StylizedHTMLView
+            value={contentFR || content}
+            onLinkPress={openLink}
+          />
           {href && (
             <Box my={20}>
               <Link href={`https://m.egwwritings.org${href}`}>
@@ -133,23 +192,38 @@ https://bible-strong.app
             </Box>
           )}
         </Box>
-        <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
-          {/* @ts-ignore */}
-          <AFeatherIcon
-            color="grey"
-            duration={500}
-            name="chevron-down"
-            size={20}
-            animation={{
-              from: {
-                rotate: isCollapsed ? '180deg' : '0deg',
-              },
-              to: {
-                rotate: !isCollapsed ? '180deg' : '0deg',
-              },
-            }}
-          />
-        </LinkBox>
+        <Box row center>
+          {isFR && !contentFR && (
+            <Box center style={{ marginRight: 'auto' }}>
+              <Button
+                reverse
+                small
+                onPress={() =>
+                  status !== 'Pending' && startTranslation(content)
+                }
+              >
+                {status === 'Pending' ? 'Traduction...' : 'Traduire'}
+              </Button>
+            </Box>
+          )}
+          <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
+            {/* @ts-ignore */}
+            <AFeatherIcon
+              color="grey"
+              duration={500}
+              name="chevron-down"
+              size={20}
+              animation={{
+                from: {
+                  rotate: isCollapsed ? '180deg' : '0deg',
+                },
+                to: {
+                  rotate: !isCollapsed ? '180deg' : '0deg',
+                },
+              }}
+            />
+          </LinkBox>
+        </Box>
       </Box>
     </Box>
   )

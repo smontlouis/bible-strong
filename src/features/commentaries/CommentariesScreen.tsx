@@ -236,7 +236,9 @@ const CommentariesScreen = ({ navigation }: Props) => {
                   bg="reverse"
                 >
                   <Text>
-                    Les commentaires sont uniquement disponible en anglais.
+                    Les commentaires sont traduits à partir de l'anglais. Une
+                    traduction manuelle peut être effectuée en appuyant sur
+                    "traduire".
                   </Text>
                 </Box>
               )}
