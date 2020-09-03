@@ -17,7 +17,6 @@ import {
   getChangelog,
   getVersionUpdate,
   getDatabaseUpdate,
-  resetCompareVersion,
 } from '~redux/modules/user'
 import withFireAuth from '~common/withFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
@@ -25,8 +24,6 @@ import Changelog from '~common/Changelog'
 import getTheme, { Theme } from '~themes/index'
 import { paperTheme } from '~themes/default'
 import { DBStateProvider } from '~helpers/databaseState'
-import { setVersion } from '~redux/modules/bible'
-import i18n from '~i18n'
 import { RootState } from '~redux/modules/reducer'
 import { NavigationState, NavigationParams } from 'react-navigation'
 import { Persistor } from 'redux-persist'
@@ -45,12 +42,6 @@ class InitApp extends React.Component<Props> {
     this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
     AppState.addEventListener('change', this.handleAppStateChange)
-
-    i18n.on('languageChanged', async lang => {
-      const isFR = lang === 'fr'
-      this.props.dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
-      this.props.dispatch(resetCompareVersion(isFR ? 'LSG' : 'KJV'))
-    })
   }
 
   componentWillUnmount() {

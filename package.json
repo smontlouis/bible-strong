@@ -83,7 +83,6 @@
     "expo-asset": "~8.1.5",
     "expo-asset-utils": "^1.2.0",
     "expo-av": "~8.1.0",
-    "expo-cli": "3.20.9",
     "expo-constants": "^9.0.0",
     "expo-error-recovery": "^1.0.0",
     "expo-file-system": "~8.0.0",

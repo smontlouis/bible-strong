@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { Platform, Alert, Linking } from 'react-native'
+import { Platform, Alert } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
 import * as Animatable from 'react-native-animatable'
-
+import { useDispatch } from 'react-redux'
+import { setVersion } from '~redux/modules/bible'
+import { resetCompareVersion } from '~redux/modules/user'
 import { MaterialIcon } from '~common/ui/Icon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -58,6 +60,7 @@ const shareMessage = () => {
 
 const MoreScreen = () => {
   const { isLogged, logout } = useLogin()
+  const dispatch = useDispatch()
   const [isEditTagsOpen, setEditTagsOpen] = useState(false)
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
@@ -82,12 +85,16 @@ const MoreScreen = () => {
         {
           text: 'Oui',
           onPress: () => {
+            const isFR = i18n.language === 'fr'
             i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
             deleteAllDatabases()
             Alert.alert(
               t('Langue changée.'),
               t('Merci de redémarrer votre application.')
             )
+
+            dispatch(setVersion(!isFR ? 'LSG' : 'KJV'))
+            dispatch(resetCompareVersion(!isFR ? 'LSG' : 'KJV'))
           },
           style: 'destructive',
         },
