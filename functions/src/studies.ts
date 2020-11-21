@@ -52,6 +52,8 @@ export const buildStudies = functions.firestore
     const newValue = change.after.data()
     const previousValue = change.before.data()
 
+    console.log({ newValue })
+
     if (newValue.published !== previousValue.published || newValue.published) {
       if (!newValue.published) {
         try {
@@ -64,10 +66,12 @@ export const buildStudies = functions.firestore
         }
       }
 
+      console.log('Fetch api hook...')
+
       await fetch(
         `https://api.vercel.com/v1/integrations/deploy/prj_KAwUl2IsZoy7aq1P1n05POGYYDjp/vcYOUS3I4W`,
         {
-          method: 'POST',
+          method: 'GET',
         }
       )
     }
