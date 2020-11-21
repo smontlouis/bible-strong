@@ -53,8 +53,6 @@ export const buildStudies = functions.firestore
     const newValue = change.after.data()
     const previousValue = change.before.data()
 
-    console.log({ newValue })
-
     if (newValue.published !== previousValue.published || newValue.published) {
       if (!newValue.published) {
         try {
