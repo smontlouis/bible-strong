@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import * as functions from 'firebase-functions'
 import * as puppeteer from 'puppeteer'
 
