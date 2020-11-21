@@ -64,12 +64,12 @@ export const buildStudies = functions.firestore
           console.log(e)
         }
       }
-      await fetch(
-        'https://api.zeit.co/v1/integrations/deploy/QmPr9jhLF1bhDakSDDFuLvbax4VCogXsjqzktsmTHDUMXG/FbjfTqbcO7',
-        {
-          method: 'POST',
-        }
-      )
+      // await fetch(
+      //   'https://api.zeit.co/v1/integrations/deploy/QmPr9jhLF1bhDakSDDFuLvbax4VCogXsjqzktsmTHDUMXG/FbjfTqbcO7',
+      //   {
+      //     method: 'POST',
+      //   }
+      // )
     }
   })
 
