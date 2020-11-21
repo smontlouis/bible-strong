@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as puppeteer from 'puppeteer'
+import fetch from 'node-fetch'
 
 const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
