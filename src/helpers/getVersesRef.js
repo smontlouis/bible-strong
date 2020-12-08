@@ -1,5 +1,6 @@
 import books from '~assets/bible_versions/books-desc'
 import loadBible from '~helpers/loadBible'
+import i18n from '~i18n'
 
 const orderVerses = verses => {
   const orderedVersesList = Object.keys(verses).sort((key1, key2) => {
@@ -42,7 +43,7 @@ const getVersesRef = versesList => {
   return versesRef
 }
 
-export default async (verses, version = 'LSG', position) => {
+export default async (verses, version = 'LSG', withVerseNumber, position) => {
   let selectedVerses = verses
 
   // if 1-1_1
@@ -61,12 +62,12 @@ export default async (verses, version = 'LSG', position) => {
   selectedVerses.map(async (key, index) => {
     const [book, chapter, verse] = key.split('-')
     if (index === 0) {
-      reference = `${books[book - 1].Nom} ${chapter}:`
+      reference = `${i18n.t(books[book - 1].Nom)} ${chapter}:`
     } else {
       toShare += ' '
     }
     try {
-      toShare += `${bible[book][chapter][verse]}`
+      toShare += `${withVerseNumber ? `\n${verse}. ` : ''}${bible[book][chapter][verse]}`
     } catch {
       toShare = 'Impossible de charger ce verset.'
     }

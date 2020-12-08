@@ -24,7 +24,6 @@ import TouchableChip from './TouchableChip'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import verseToReference from '../../helpers/verseToReference'
 import { useTranslation } from 'react-i18next'
-import { useOnlyPremium } from '~helpers/usePremium'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
@@ -67,7 +66,6 @@ const VersesModal = ({
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const modalRef = React.useRef(null)
   const { t } = useTranslation()
-  const onlyPremium = useOnlyPremium()
 
   useEffect(() => {
     if (isPrevVisible !== isVisible) {
@@ -89,7 +87,8 @@ const VersesModal = ({
   }, [selectedVerses, version])
 
   const shareVerse = async () => {
-    const { all: message } = await getVersesRef(selectedVerses, version)
+    const { all: message } = await getVersesRef(selectedVerses, version, true)
+    console.log(message)
     const result = await Share.share({ message })
     // Clear selectedverses only if succeed
     if (result.action === Share.sharedAction) {
@@ -98,7 +97,7 @@ const VersesModal = ({
   }
 
   const copyToClipboard = async () => {
-    const { all: message } = await getVersesRef(selectedVerses, version)
+    const { all: message } = await getVersesRef(selectedVerses, version, true)
     Clipboard.setString(message)
     SnackBar.show(t('Copié dans le presse-papiers.'))
     clearSelectedVerses()
@@ -120,7 +119,7 @@ const VersesModal = ({
     })
   }
 
-  const openCommentariesScreen = onlyPremium(() => {
+  const openCommentariesScreen = () => {
     clearSelectedVerses()
     const verse = Object.keys(selectedVerses)[0]
     navigation.navigate({
@@ -129,7 +128,7 @@ const VersesModal = ({
         verse,
       },
     })
-  })
+  }
 
   const showDictionnaryDetail = () => {
     clearSelectedVerses()

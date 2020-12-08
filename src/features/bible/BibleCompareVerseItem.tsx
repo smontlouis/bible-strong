@@ -29,6 +29,7 @@ class CompareVerseItem extends React.Component {
         const { content } = await getVersesRef(
           selectedVerses,
           versionId,
+          false,
           position
         )
         this.setState({ content, versionNeedsDownload })

@@ -24,6 +24,8 @@ class InlineTooltip extends Tooltip {
     })
 
     this.root.querySelector('a.ql-action').addEventListener('click', event => {
+      this.quill.focus()
+
       this.quill.setSelection(...this.linkRange)
 
       if (this.type === 'inline-verse') {

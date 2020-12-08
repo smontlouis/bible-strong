@@ -14,8 +14,6 @@ import { LinkBox } from '~common/Link'
 import ScrollView from '~common/ui/ScrollView'
 import useLogin from '~helpers/useLogin'
 import Paragraph from '~common/ui/Paragraph'
-import CountdownTimer from './CountdownTimer'
-import InlineLink from '~common/InlineLink'
 import { useTranslation, Trans } from 'react-i18next'
 
 export const [oneMonthSkuMin, oneMonthSku, oneMonthSkuMax] = subSkus
@@ -43,7 +41,8 @@ const ListItem = ({ children }: { children: React.ReactNode }) => (
 const PremiumScreen = () => {
   const hasPremium = useIsPremium()
   const { isLogged } = useLogin()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isFR = i18n.language === 'fr'
 
   if (hasPremium) {
     return (
@@ -62,7 +61,8 @@ const PremiumScreen = () => {
               </Paragraph>
             </Box>
             <Box mt={30}>
-              <ListItem>{t('Accès aux commentaires')}</ListItem>
+              {isFR && <ListItem>{t('Accès aux commentaires')}</ListItem>}
+              <ListItem>{t('Accès aux études sur le web')}</ListItem>
               <ListItem>{t("...Et plein d'autres à venir")}</ListItem>
             </Box>
             <LinkBox
@@ -115,18 +115,15 @@ const PremiumScreen = () => {
             </Paragraph>
           </Box>
           <Box mt={30}>
-            <ListItem>
-              {t('Accès aux commentaires')}
-              {'\n'}
-              <CountdownTimer date="2020-10-01" />
-            </ListItem>
+            {isFR && <ListItem>{t('Accès aux commentaires')}</ListItem>}
+            <ListItem>{t('Accès aux études sur le web')}</ListItem>
             <ListItem>{t("...Et plein d'autres à venir")}</ListItem>
           </Box>
-          {/* <Paragraph scale={-1} fontFamily="text">
-            Tous les abonnements se renouvellent mensuellement de façon
-            automatique. Vous avez la possibilité de les annuler quand vous le
-            souhaitez.
-          </Paragraph> */}
+          <Paragraph scale={-1} fontFamily="text">
+            {t(
+              'Tous les abonnements se renouvellent mensuellement de façon automatique. Vous avez la possibilité de les annuler quand vous le souhaitez.'
+            )}
+          </Paragraph>
           <Paragraph scale={-1} fontFamily="text" mt={10}>
             {t(
               'Vous pouvez également me soutenir par paypal ou tipeee pour devenir un sponsor. \nMerci de votre confiance et bonne étude!'

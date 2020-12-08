@@ -14,6 +14,7 @@ class ModuleBlockVerse extends Module {
   }
 
   receiveVerseBlock = (data) => {
+    this.quill.focus()
     dispatchConsole(`VERSE RECEIVED: ${JSON.stringify(data)}`)
 
     const { title, content, version, verses } = data
@@ -32,6 +33,7 @@ class ModuleBlockVerse extends Module {
   }
 
   receiveStrongBlock = (data) => {
+    this.quill.focus()
     dispatchConsole(`STRONG RECEIVED: ${JSON.stringify(data)}`)
 
     const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } = data

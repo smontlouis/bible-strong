@@ -23,6 +23,7 @@ class ModuleInlineVerse extends Module {
   }
 
   receiveVerseLink = ({ title, verses }) => {
+    this.quill.focus()
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
     // dispatchConsole(`Range: ${JSON.stringify(this.range)}`)
@@ -46,6 +47,7 @@ class ModuleInlineVerse extends Module {
   }
 
   receiveStrongLink = ({ title, codeStrong, book }) => {
+    this.quill.focus()
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
     // dispatchConsole(`Receive strong ${title}`)

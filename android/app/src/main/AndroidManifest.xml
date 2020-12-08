@@ -31,6 +31,7 @@
       android:roundIcon="@mipmap/ic_launcher"
       android:allowBackup="false"
       android:usesCleartextTraffic="true"
+      android:windowSoftInputMode="adjustPan"
       android:theme="@style/AppTheme">
       <activity
         android:name=".MainActivity"

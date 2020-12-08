@@ -21,6 +21,7 @@ import useLanguage from '~helpers/useLanguage'
 import { Status } from '~common/types'
 import { firebaseDb } from '~helpers/firebase'
 import { deepl } from '../../../config'
+import { useOnlyPremium } from '~helpers/usePremium'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -89,6 +90,7 @@ const Comment = ({ comment, navigation }: Props) => {
   const cacheImage = useFireStorage(resource.logo)
   const { t } = useTranslation()
   const isFR = useLanguage()
+  const onlyPremium = useOnlyPremium()
 
   const openLink = (href: string, innerHTML: string, type: string) => {
     if (type.includes('egwlink_bible')) {
@@ -198,9 +200,9 @@ https://bible-strong.app
               <Button
                 reverse
                 small
-                onPress={() =>
-                  status !== 'Pending' && startTranslation(content)
-                }
+                onPress={onlyPremium(
+                  () => status !== 'Pending' && startTranslation(content)
+                )}
               >
                 {status === 'Pending' ? 'Traduction...' : 'Traduire'}
               </Button>

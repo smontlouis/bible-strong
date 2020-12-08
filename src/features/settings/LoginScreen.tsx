@@ -28,7 +28,7 @@ const LoginScreen = ({ navigation }) => {
           <Text title fontSize={30} marginBottom={30}>
             {t('Bienvenue !')}
           </Text>
-          <Paragraph scaleLineHeight={-2} marginBottom={0}>
+          <Paragraph scaleLineHeight={-2} marginBottom={10}>
             {t(
               'Connectez-vous pour sauvegarder toutes vos données sur le cloud !'
             )}

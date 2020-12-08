@@ -260,7 +260,7 @@ const FireAuth = class {
     new Promise(async resolve => {
       try {
         auth()
-          .signInWithEmailAndPassword(email, password)
+          .signInWithEmailAndPassword(email.trim(), password.trim())
           .then(() => {
             resolve(true)
           })

@@ -252,7 +252,7 @@ class WebViewQuillEditor extends React.Component {
 
     return (
       <KeyboardAvoidingView
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{
           overflow: 'hidden',
           flex: 1,
