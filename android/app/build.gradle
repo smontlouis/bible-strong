@@ -201,7 +201,7 @@ def enableHermes = project.ext.react.get("enableHermes", false);
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
-    implementation 'androidx.appcompat:appcompat:1.2.0-alpha02'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
 
 
     addUnimodulesDependencies()
@@ -225,7 +225,7 @@ task copyDownloadableDepsToLibs(type: Copy) {
 configurations.all {
      resolutionStrategy {
        force "com.facebook.soloader:soloader:0.8.0"
-       force "androidx.appcompat:appcompat:1.0.2"
+       force "androidx.appcompat:appcompat:1.2.0"
      }
 }
 

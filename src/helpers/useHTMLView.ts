@@ -1,4 +1,5 @@
 import { useTheme } from 'emotion-theming'
+import { useCallback } from 'react'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
 
@@ -11,15 +12,15 @@ const useHTMLView = ({
 }) => {
   const theme: Theme = useTheme()
 
-  const onMessage = (event: any) => {
+  const onMessage = useCallback((event: any) => {
     const action = JSON.parse(event.nativeEvent.data)
 
     if (action.type === 'link') {
       onLinkClicked(action.payload)
     }
-  }
+  }, [])
 
-  const wrapHTML = (html: string) => {
+  const wrapHTML = useCallback((html: string) => {
     return `
     <!DOCTYPE html>
       <html lang="fr">
@@ -61,6 +62,7 @@ const useHTMLView = ({
           setTimeout(() => {
             document.querySelectorAll('a').forEach(link => {
               link.addEventListener('click', e => {
+                e.preventDefault();
                 const href = e.target.attributes.href.textContent;
                 const content = e.target.textContent;
                 const className = e.target.className;
@@ -74,7 +76,7 @@ const useHTMLView = ({
         ${html}
       </body>
     </html>`
-  }
+  }, [])
 
   return {
     webviewProps(html: string) {
