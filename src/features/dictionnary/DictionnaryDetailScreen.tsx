@@ -6,17 +6,17 @@ import truncHTML from 'trunc-html'
 import { useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 
+import { WebView } from 'react-native-webview'
 import Button from '~common/ui/Button'
 import books from '~assets/bible_versions/books-desc'
-import StylizedHTMLView from '~common/StylizedHTMLView'
 import Back from '~common/Back'
 import Link from '~common/Link'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
-import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 import { setHistory } from '~redux/modules/user'
+import useHTMLView from '~helpers/useHTMLView'
 
 import waitForDatabase from '~common/waitForDictionnaireDB'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
@@ -35,30 +35,16 @@ const TitleBorder = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.secondary,
 }))
 
-const MAX_CHAR = 3000
-
-const htmlsave = require('htmlsave')
-
 const DictionnaryDetailScreen = ({ navigation }) => {
   const { word } = navigation.state.params || {}
   const dispatch = useDispatch()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
-  const [canReadMore, setCanReadMore] = useState(false)
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
   const tags = useSelector(state => state.user.bible.words[word]?.tags)
 
   useEffect(() => {
     loadDictionnaireItem(word).then(result => {
-      if (result.definition.length > 7000) {
-        setCanReadMore(true)
-      }
-
-      setDictionnaireItem({
-        ...result,
-        definitionShort: htmlsave.truncate(result.definition, MAX_CHAR, {
-          breakword: false,
-        }),
-      })
+      setDictionnaireItem(result)
 
       dispatch(
         setHistory({
@@ -69,7 +55,7 @@ const DictionnaryDetailScreen = ({ navigation }) => {
     })
   }, [dispatch, word])
 
-  const openLink = (href, content, type) => {
+  const openLink = ({ href, content, type }) => {
     if (type === 'verse') {
       try {
         const sanitizedHref = href.replace(String.fromCharCode(160), ' ')
@@ -101,6 +87,8 @@ const DictionnaryDetailScreen = ({ navigation }) => {
     }
   }
 
+  const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
+
   const shareDefinition = () => {
     try {
       const message = `${word} \n\n${truncHTML(
@@ -118,10 +106,6 @@ const DictionnaryDetailScreen = ({ navigation }) => {
       console.log(e)
       Sentry.captureException(e)
     }
-  }
-
-  const loadRemainingText = () => {
-    setCanReadMore(false)
   }
 
   return (
@@ -177,30 +161,26 @@ const DictionnaryDetailScreen = ({ navigation }) => {
 
         <TitleBorder />
       </Box>
-      <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
-        {tags && (
-          <Box marginBottom={10}>
-            <TagList tags={tags} />
-          </Box>
-        )}
-        {dictionnaireItem && dictionnaireItem.definition && (
-          <StylizedHTMLView
-            value={
-              canReadMore
-                ? dictionnaireItem.definitionShort.replace(/\n/gi, '')
-                : dictionnaireItem.definition.replace(/\n/gi, '')
-            }
-            onLinkPress={openLink}
+      {tags && (
+        <Box mt={10} px={20}>
+          <TagList tags={tags} />
+        </Box>
+      )}
+      <Box
+        mt={10}
+        style={{
+          overflow: 'hidden',
+          flex: 1,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+        }}
+      >
+        {dictionnaireItem?.definition && (
+          <WebView
+            {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))}
           />
         )}
-        {canReadMore && (
-          <Box center marginTop={20}>
-            <Button onPress={loadRemainingText} style={{ width: 150 }}>
-              Lire plus
-            </Button>
-          </Box>
-        )}
-      </ScrollView>
+      </Box>
       <MultipleTagsModal
         multiple
         item={multipleTagsItem}

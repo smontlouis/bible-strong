@@ -275,7 +275,7 @@ class BibleWebView extends Component {
       >
         {this.state.isHTMLFileLoaded && (
           <WebView
-            useWebKit
+            style={{ backgroundColor: 'transparent' }}
             onLoad={this.sendDataToWebView}
             onMessage={this.receiveDataFromWebView}
             originWhitelist={['*']}

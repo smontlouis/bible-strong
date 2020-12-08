@@ -1,29 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Share } from 'react-native'
-import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
 import { useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
+import { WebView } from 'react-native-webview'
 
-import Button from '~common/ui/Button'
-import NaveHTMLView from '~common/NaveHTMLView'
 import Back from '~common/Back'
 import Link from '~common/Link'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
-import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import { setHistory } from '~redux/modules/user'
 import { MAX_WIDTH } from '~helpers/useDimensions'
-
+import styled from '../../styled'
 import waitForDatabase from '~common/waitForNaveDB'
 import loadNaveItem from '~helpers/loadNaveItem'
 import Snackbar from '~common/SnackBar'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import TagList from '~common/TagList'
-
-const MAX_CHAR = 3000
+import useHTMLView from '~helpers/useHTMLView'
+import { NavigationStackProp } from 'react-navigation-stack'
+import { NavigationParams } from 'react-navigation'
+import { RootState } from '~redux/modules/reducer'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -36,24 +35,23 @@ const TitleBorder = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.quint,
 }))
 
-const NaveDetailScreen = ({ navigation }) => {
+interface Props {
+  navigation: NavigationStackProp<any, NavigationParams>
+}
+
+const NaveDetailScreen = ({ navigation }: Props) => {
   const { name_lower, name } = navigation.state.params || {}
   const dispatch = useDispatch()
   const [naveItem, setNaveItem] = useState(null)
-  const [canReadMore, setCanReadMore] = useState(false)
+
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
-  const tags = useSelector(state => state.user.bible.naves[name_lower]?.tags)
+  const tags = useSelector(
+    (state: RootState) => state.user.bible.naves[name_lower]?.tags
+  )
 
   useEffect(() => {
     loadNaveItem(name_lower).then(result => {
-      if (result.description.length > 7000) {
-        setCanReadMore(true)
-      }
-
-      setNaveItem({
-        ...result,
-        descriptionShort: truncHTML(result.description, MAX_CHAR).html,
-      })
+      setNaveItem(result)
       dispatch(
         setHistory({
           name: result.name,
@@ -64,7 +62,7 @@ const NaveDetailScreen = ({ navigation }) => {
     })
   }, [dispatch, name, name_lower])
 
-  const openLink = href => {
+  const openLink = ({ href }) => {
     const [type, item] = href.split('=')
 
     if (type === 'v') {
@@ -98,6 +96,8 @@ const NaveDetailScreen = ({ navigation }) => {
     }
   }
 
+  const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
+
   const shareDefinition = () => {
     try {
       const message = `${name} \n\n${truncHTML(naveItem.description, 4000)
@@ -114,14 +114,11 @@ const NaveDetailScreen = ({ navigation }) => {
     }
   }
 
-  const loadRemainingText = () => {
-    setCanReadMore(false)
-  }
-
   return (
     <Container>
       <Box
-        padding={20}
+        px={20}
+        pt={20}
         maxWidth={MAX_WIDTH}
         width="100%"
         marginLeft="auto"
@@ -178,28 +175,24 @@ const NaveDetailScreen = ({ navigation }) => {
 
         <TitleBorder />
       </Box>
-      <ScrollView style={{ flex: 1, paddingLeft: 20, paddingRight: 20 }}>
-        {tags && (
-          <Box marginBottom={10}>
-            <TagList tags={tags} />
-          </Box>
+      {tags && (
+        <Box mt={10} px={20}>
+          <TagList tags={tags} />
+        </Box>
+      )}
+      <Box
+        mt={10}
+        style={{
+          overflow: 'hidden',
+          flex: 1,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+        }}
+      >
+        {naveItem?.description && (
+          <WebView {...webviewProps(naveItem.description)} />
         )}
-        {naveItem && naveItem.description && (
-          <NaveHTMLView
-            value={
-              canReadMore ? naveItem.descriptionShort : naveItem.description
-            }
-            onLinkPress={openLink}
-          />
-        )}
-        {canReadMore && (
-          <Box center marginTop={20}>
-            <Button onPress={loadRemainingText} style={{ width: 150 }}>
-              Lire plus
-            </Button>
-          </Box>
-        )}
-      </ScrollView>
+      </Box>
       <MultipleTagsModal
         multiple
         item={multipleTagsItem}
