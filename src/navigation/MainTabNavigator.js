@@ -64,7 +64,7 @@ export default createAnimatedBottomTabNavigator(
     },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Bible',
     activeColor: '#0ED3B9',
   }
 )

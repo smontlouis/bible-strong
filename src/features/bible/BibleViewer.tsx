@@ -327,6 +327,8 @@ class BibleViewer extends Component {
         )}
         {!error && (
           <BibleWebView
+            book={book}
+            chapter={chapter}
             isLoading={isLoading}
             navigation={navigation}
             addSelectedVerse={addSelectedVerse}
@@ -345,7 +347,6 @@ class BibleViewer extends Component {
             settings={settings}
             fontFamily={fontFamily}
             verseToScroll={verse}
-            chapter={chapter}
             pericopeChapter={getPericopeChapter(
               this.pericope,
               book.Numero,
@@ -357,6 +358,8 @@ class BibleViewer extends Component {
             comments={comments}
             removeParallelVersion={removeParallelVersion}
             addParallelVersion={addParallelVersion}
+            goToPrevChapter={goToPrevChapter}
+            goToNextChapter={goToNextChapter}
           />
         )}
         {!isReadOnly && (

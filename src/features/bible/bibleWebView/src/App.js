@@ -9,6 +9,8 @@ import {
   dispatch,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
+  SWIPE_RIGHT,
+  SWIPE_LEFT
 } from './dispatch'
 import Verse from './Verse'
 import Comment from './Comment'
@@ -21,6 +23,7 @@ import { desktopMode } from './env'
 import { scaleFontSize } from './scaleFontSize'
 
 import './polyfills'
+import './swiped-events'
 
 const exists = obj => {
   if (!obj || obj.error) {
@@ -168,6 +171,19 @@ class VersesRenderer extends Component {
   }
 
   componentDidMount() {
+
+    document.addEventListener('swiped-left', function(e) {
+      dispatch({
+        type: SWIPE_LEFT,
+      })
+    });
+
+    document.addEventListener('swiped-right', function(e) {
+      dispatch({
+        type: SWIPE_RIGHT,
+      })
+    });
+
     dispatch({
       type: CONSOLE_LOG,
       payload: 'I did mount',

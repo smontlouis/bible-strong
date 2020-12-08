@@ -21,6 +21,8 @@ import {
   THROW_ERROR,
   REMOVE_PARALLEL_VERSION,
   ADD_PARALLEL_VERSION,
+  SWIPE_RIGHT,
+  SWIPE_LEFT,
 } from './bibleWebView/src/dispatch'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -196,6 +198,34 @@ class BibleWebView extends Component {
       case CONSOLE_LOG: {
         console.log(
           `WEBVIEW: %c${action.payload}`,
+          'color:black;background-color:#81ecec'
+        )
+        break
+      }
+      case SWIPE_LEFT: {
+        const { goToNextChapter, book, chapter } = this.props
+        const hasNextChapter = !(book.Numero === 66 && chapter === 22)
+
+        if (hasNextChapter) {
+          goToNextChapter()
+        }
+
+        console.log(
+          'WEBVIEW: %cSwipe left',
+          'color:black;background-color:#81ecec'
+        )
+        break
+      }
+      case SWIPE_RIGHT: {
+        const { goToPrevChapter, book, chapter } = this.props
+        const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
+
+        if (hasPreviousChapter) {
+          goToPrevChapter()
+        }
+
+        console.log(
+          'WEBVIEW: %cSwipe right',
           'color:black;background-color:#81ecec'
         )
         break
