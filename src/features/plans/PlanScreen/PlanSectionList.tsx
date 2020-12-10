@@ -9,14 +9,7 @@ import {
 import ReadingSlice from './ReadingSlice'
 import SectionHeader from './SectionHeader'
 
-const PlanSectionList = ({
-  id,
-  title,
-  description,
-  progress,
-  image,
-  sections,
-}: ComputedPlan) => {
+const PlanSectionList = ({ id, sections }: ComputedPlan) => {
   const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>(
     []
   )

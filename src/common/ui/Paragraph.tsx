@@ -39,6 +39,7 @@ const Paragraph = ({
         children,
       }}
       {...props}
+      selectable
     />
   )
 }

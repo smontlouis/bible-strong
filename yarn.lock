@@ -12306,17 +12306,17 @@ react-native-hooks@^0.0.6:
   dependencies:
     react "^16.7.0-alpha.0"
 
-react-native-iap@^5.1.1:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-5.2.0.tgz#c629565f03440b9950a7b348a9e5a5983e34840d"
-  integrity sha512-OSABKsp+SuEY1iX1L0y3XZdUskfkJ/7vgo44sPQibJoOu7sBcUUoWWxDRaDYJoNf2Lz9Fn5hnVCcxEgzY+zcDw==
+react-native-iap@4.6.3:
+  version "4.6.3"
+  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-4.6.3.tgz#3f1a88e1561156f695f52134ee04e1ace5c37487"
+  integrity sha512-BUCnaIuUUcegarzDUbqvAwdauYaCNYqc+2ExluP8CXpKr0VdNpZxDGilHptDbBt9CCqWf7dvautNP/dsSI0J6A==
   dependencies:
     dooboolab-welcome "^1.2.0"
 
-react-native-iaphub@^5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/react-native-iaphub/-/react-native-iaphub-5.1.2.tgz#7bbc7906ec8a1b6fa9247a8c2165aa81702d8117"
-  integrity sha512-vDoijGKdOyQMXT9aueYpKHMQW/RqudssYyLm/ewD7rqqg7vTeGicv/8uQHRZwwT2oQWHn7lZ4CDrhL8V65Ybrw==
+react-native-iaphub@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-iaphub/-/react-native-iaphub-5.1.0.tgz#6457ac8b06d57f8056ed27a7300f146332706233"
+  integrity sha512-wJsIfXVyfFoHaCUx5Y/c/ep1oe6++nhah8xslSBlguTnDy3ICUuQdUn6VJS9j4rjL0veG0XKZlbx0V5llfJ8dw==
 
 react-native-immersive-mode@^1.1.0:
   version "1.1.0"

@@ -1,7 +1,13 @@
 import React, { Component } from 'react'
 import { keyframes } from '@emotion/core'
 import styled from '@emotion/styled'
-import { Verse as VerseProps, Settings, Notes, SelectedCode } from './types'
+import {
+  Verse as VerseProps,
+  Settings,
+  Notes,
+  SelectedCode,
+  TagProps,
+} from './types'
 
 import {
   dispatch,
@@ -19,6 +25,7 @@ import VerseTextFormatting from './VerseTextFormatting'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 import { PropsWithDiv } from './types'
+import VerseTags from './VerseTags'
 
 function convertHex(hex: string, opacity: number) {
   hex = hex.replace('#', '')
@@ -149,6 +156,7 @@ interface Props {
   isParallel: boolean
   isParallelVerse?: boolean
   isINTComplete?: boolean
+  tag: TagProps | undefined
 }
 
 class Verse extends Component<Props> {
@@ -305,6 +313,7 @@ class Verse extends Component<Props> {
       isParallel,
       isParallelVerse,
       isINTComplete,
+      tag,
     } = this.props
     const { isTouched } = this.state
 
@@ -341,6 +350,7 @@ class Verse extends Component<Props> {
                   isVerseToScroll={isVerseToScroll}
                   selectedCode={selectedCode}
                   isFocused={isFocused}
+                  tag={tag}
                 />
               </div>
             )
@@ -371,6 +381,7 @@ class Verse extends Component<Props> {
           notesText={notesText}
           navigateToVerseNotes={this.navigateToVerseNotes}
           navigateToNote={this.navigateToNote}
+          tag={tag}
         />
       )
     }
@@ -401,7 +412,7 @@ class Verse extends Component<Props> {
     let array: (string | JSX.Element)[] = verse.Texte.split(/(\n)/g)
 
     if (array.length > 1) {
-      array = array.map(c => (c === '\n' ? <Spacer /> : c))
+      array = array.map((c, i) => (c === '\n' ? <Spacer key={i} /> : c))
     }
 
     return (
@@ -434,6 +445,7 @@ class Verse extends Component<Props> {
           >
             {array}
           </VerseText>
+          {tag && <VerseTags settings={settings} tag={tag} />}
         </ContainerText>
         {notesText && inlineNotedVerses && !isSelectionMode && (
           <NotesText

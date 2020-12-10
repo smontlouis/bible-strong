@@ -26,7 +26,7 @@ export const getIfVersionNeedsUpdate = async (versionId: string) => {
   const [errRF, remoteFile] = await to(biblesRef[versionId].getMetadata())
 
   if (errF || errRF) {
-    console.log('Error...')
+    console.log('Error...', errF, errRF)
     return false
   }
 

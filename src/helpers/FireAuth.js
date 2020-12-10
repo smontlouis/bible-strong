@@ -344,7 +344,7 @@ const FireAuth = class {
 
   logout = () => {
     auth().signOut()
-    IAPHub.logout()
+    IAPHub.setUserId(null)
 
     // Sign-out successful.
     this.user = null

@@ -32,3 +32,11 @@ export interface SelectedCode {
 }
 
 export type Notes = { key: string; verses: string; description: string }[]
+
+export interface TagProps {
+  color: string
+  date: number
+  lastVerse: string
+  tags: { id: string; name: string }[]
+  verseIds: string[]
+}

@@ -13,7 +13,9 @@ import {
   Verse as VerseProps,
   Settings,
   Notes,
+  TagProps,
 } from './types'
+import VerseTags from './VerseTags'
 
 const VerseText = styled('span')(
   ({
@@ -57,6 +59,7 @@ interface Props {
   notesText: Notes
   navigateToNote: (id: string) => void
   navigateToVerseNotes: () => void
+  tag: TagProps | undefined
 }
 
 const VerseTextFormatting = ({
@@ -79,6 +82,7 @@ const VerseTextFormatting = ({
   notesText,
   navigateToNote,
   navigateToVerseNotes,
+  tag,
 }: Props) => {
   const [text, setText] = useState<any>(verse.Texte)
 
@@ -130,6 +134,7 @@ const VerseTextFormatting = ({
           >
             {text}
           </VerseText>
+          {tag && <VerseTags settings={settings} tag={tag} />}
         </ContainerText>
         {notesText && inlineNotedVerses && !isSelectionMode && (
           <NotesText

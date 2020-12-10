@@ -158,6 +158,7 @@ class VersesRenderer extends Component {
     focusVerses: [],
     selectedVerses: {},
     highlightedVerses: {},
+    taggedVerses: null,
     notedVersesCount: {},
     notedVersesText: {},
     settings: {},
@@ -193,8 +194,10 @@ class VersesRenderer extends Component {
     if (desktopMode) {
       this.setState({
         focusVerses: this.props.focusVerses,
+        highlightedVerses: this.props.highlightedVerses,
         verses: this.props.verses,
         parallelVerses: this.props.parallelVerses,
+        taggedVerses: this.sortVersesToTags(this.props.highlightedVerses),
         secondaryVerses: this.props.secondaryVerses || [],
         settings: this.props.settings,
         verseToScroll: this.props.verseToScroll,
@@ -249,6 +252,41 @@ class VersesRenderer extends Component {
           .scrollIntoView()
       }, 200)
     }
+  }
+
+  sortVersesToTags = (highlightedVerses) => {
+    if (!highlightedVerses) return null
+    const p = highlightedVerses
+    const taggedVerses = Object.keys(p).reduce((arr, verse, i) => {
+      const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
+      const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
+  
+      if (!arr.find(a => a.date === p[verse].date)) {
+        arr.push({
+          date: p[verse].date,
+          color: p[verse].color,
+          verseIds: [],
+          tags: {},
+        })
+      }
+
+      const dateInArray = arr.find(a => a.date === p[verse].date)
+      if (dateInArray) {
+        dateInArray.verseIds.push(verse)
+        dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
+        dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
+      }
+  
+      arr.sort((a, b) => Number(b.date) - Number(a.date))
+  
+      return arr
+    }, [])
+
+    return taggedVerses.map(verse => ({
+      ...verse,
+      lastVerse: verse.verseIds[verse.verseIds.length - 1],
+      tags: Object.values(verse.tags)
+    }))
   }
 
   getNotedVersesCount = (verses, notedVerses) => {
@@ -355,6 +393,7 @@ class VersesRenderer extends Component {
                 : null,
               parallelVerses,
               focusVerses,
+              taggedVerses: this.sortVersesToTags(highlightedVerses),
               secondaryVerses: secondaryVerses
                 ? secondaryVerses.sort((a, b) => a.Verset - b.Verset)
                 : null,
@@ -523,9 +562,13 @@ class VersesRenderer extends Component {
           const isHighlighted = !!this.state.highlightedVerses[
             `${Livre}-${Chapitre}-${Verset}`
           ]
+          const tag = this.state.taggedVerses?.find(v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`)
           const highlightedColor =
             isHighlighted &&
             this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
+
+
+            
           const notesCount = this.state.notedVersesCount[Verset]
           const notesText = this.state.notedVersesText[Verset]
           const comment = this.state.comments && this.state.comments[Verset]
@@ -610,6 +653,7 @@ class VersesRenderer extends Component {
                 selectedCode={this.state.selectedCode}
                 isFocused={isFocused}
                 isINTComplete={this.state.isINTComplete}
+                tag={tag}
               />
               {/* </ErrorBoundary> */}
               {!!comment && this.state.settings.commentsDisplay && (
