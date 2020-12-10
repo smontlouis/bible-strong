@@ -7,6 +7,7 @@ import { scaleFontSize } from './scaleFontSize'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import { Wrapper, ContainerText } from './Verse'
+import VerseTags from './VerseTags'
 import {
   PropsWithDiv,
   SelectedCode,
