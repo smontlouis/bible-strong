@@ -314,8 +314,6 @@ class BibleViewer extends Component {
       addParallelVersion,
     } = this.props
 
-    console.log(highlightedVerses)
-
     // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
     return (
       <Container>
@@ -362,6 +360,7 @@ class BibleViewer extends Component {
             addParallelVersion={addParallelVersion}
             goToPrevChapter={goToPrevChapter}
             goToNextChapter={goToNextChapter}
+            setMultipleTagsItem={this.setMultipleTagsItem}
           />
         )}
         {!isReadOnly && (

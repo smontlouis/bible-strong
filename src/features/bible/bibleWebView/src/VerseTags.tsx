@@ -28,6 +28,9 @@ interface Props {
 
 const VerseTags = ({ tag, settings }: Props) => {
   const limit = 1
+  if (!tag.tags?.length) {
+    return null
+  }
   const tags = tag.tags.slice(0, limit)
   return (
     <Div

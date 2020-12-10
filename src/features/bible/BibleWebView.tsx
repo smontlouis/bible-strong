@@ -23,6 +23,7 @@ import {
   ADD_PARALLEL_VERSION,
   SWIPE_RIGHT,
   SWIPE_LEFT,
+  OPEN_HIGHLIGHT_TAGS,
 } from './bibleWebView/src/dispatch'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -209,11 +210,6 @@ class BibleWebView extends Component {
         if (hasNextChapter) {
           goToNextChapter()
         }
-
-        console.log(
-          'WEBVIEW: %cSwipe left',
-          'color:black;background-color:#81ecec'
-        )
         break
       }
       case SWIPE_RIGHT: {
@@ -223,11 +219,16 @@ class BibleWebView extends Component {
         if (hasPreviousChapter) {
           goToPrevChapter()
         }
-
-        console.log(
-          'WEBVIEW: %cSwipe right',
-          'color:black;background-color:#81ecec'
-        )
+        break
+      }
+      case OPEN_HIGHLIGHT_TAGS: {
+        const { setMultipleTagsItem } = this.props
+        const { verseIds } = action.payload
+        const obj = {
+          entity: 'highlights',
+          ids: Object.fromEntries(verseIds.map(v => [v, true])),
+        }
+        setMultipleTagsItem(obj)
         break
       }
       case THROW_ERROR: {

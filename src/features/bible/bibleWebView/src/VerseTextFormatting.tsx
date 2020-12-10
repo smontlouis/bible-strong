@@ -15,7 +15,6 @@ import {
   Notes,
   TagProps,
 } from './types'
-import VerseTags from './VerseTags'
 
 const VerseText = styled('span')(
   ({
