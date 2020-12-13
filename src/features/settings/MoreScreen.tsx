@@ -22,6 +22,7 @@ import TagsEditModal from '~common/TagsEditModal'
 import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
 import { deleteAllDatabases } from '~helpers/database'
+import RNRestart from 'react-native-restart'
 
 import app from '../../../package.json'
 import { RootState } from '~redux/modules/reducer'
@@ -88,13 +89,10 @@ const MoreScreen = () => {
             const isFR = i18n.language === 'fr'
             i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
             deleteAllDatabases()
-            Alert.alert(
-              t('Langue changée.'),
-              t('Merci de redémarrer votre application.')
-            )
-
             dispatch(setVersion(!isFR ? 'LSG' : 'KJV'))
             dispatch(resetCompareVersion(!isFR ? 'LSG' : 'KJV'))
+
+            RNRestart.Restart()
           },
           style: 'destructive',
         },
