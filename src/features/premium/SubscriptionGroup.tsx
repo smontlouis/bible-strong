@@ -23,6 +23,8 @@ const SubscriptionGroup = () => {
   const { user } = useLogin()
   const dispatch = useDispatch()
 
+  console.log(products)
+
   const onSubscription = async () => {
     setProcessing(true)
     const [err] = await to(buyProduct(user.id, selectedSub, dispatch))
@@ -55,7 +57,7 @@ const SubscriptionGroup = () => {
           {products.map(sub => (
             <SubscriptionPlan
               key={sub.id}
-              price={sub.price}
+              price={sub.priceAmount + sub.priceCurrency}
               isSelected={selectedSub === sub.sku}
               variant={mappingSku[sub.sku]?.variant}
               period={t('par mois')}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Alert } from 'react-native'
-
+import RNRestart from 'react-native-restart'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -65,6 +65,7 @@ const DownloadFiles = ({
     }
 
     setFirstTime(false)
+    RNRestart.Restart()
   }
 
   return (
