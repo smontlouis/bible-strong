@@ -56,8 +56,9 @@ export const useIapUser = () => {
     ;(async () => {
       setStatus('Pending')
       try {
-        await IAPHub.login(user.id)
-        const { productsForSale, activeProducts } = await IAPHub.getUser()
+        await IAPHub.setUserId(user.id)
+        const productsForSale = await IAPHub.getProductsForSale()
+        const activeProducts = await IAPHub.getActiveProducts()
         setCurrentProducts(activeProducts)
         productsForSale.sort((a, b) => {
           return a.priceAmount - b.priceAmount
