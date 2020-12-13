@@ -80,7 +80,7 @@ export const buyProduct = async (
   sku: string,
   dispatch: Dispatch<any>
 ) => {
-  const [loginErr] = await to(IAPHub.login(userId))
+  const [loginErr] = await to(IAPHub.setUserId(userId))
 
   if (loginErr) {
     Snackbar.show(
