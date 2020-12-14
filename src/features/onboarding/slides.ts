@@ -38,7 +38,7 @@ export const getSlides = (t: TFunction): Slide[] => {
     {
       title: t('Vos données en sécurité'),
       description: t(
-        'Créez un compte pour synchroniser vos données dans le cloud, et cela en toute sécurité !'
+        'Créez un compte pour synchroniser vos données dans le cloud, et cela en tout sécurité !'
       ),
       image: require('../../assets/images/Bible_Strong__Fifth_Slide.png'),
     },
