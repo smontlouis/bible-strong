@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 
 import verseToReference from '~helpers/verseToReference'
-import loadCountVerses from '~helpers/loadCountVerses'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -16,6 +15,7 @@ import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
 import { versions } from '~helpers/bibleVersions'
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -24,7 +24,6 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 const BibleCompareVerses = ({ navigation }) => {
   const { selectedVerses: s } = navigation.state.params || {}
   const [selectedVerses, setSelectedVerses] = React.useState(s)
-  const [error, setError] = React.useState(false)
   const [prevNextItems, setPrevNextItems] = React.useState()
   const title = verseToReference(selectedVerses)
 
@@ -40,15 +39,11 @@ const BibleCompareVerses = ({ navigation }) => {
 
     const loadPrevNextData = async () => {
       const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-')
-      const { versesInCurrentChapter, error } = await loadCountVerses(
-        livre,
-        chapitre
-      )
+      const versesInCurrentChapter = countLsgChapters[`${livre}-${chapitre}`]
       setPrevNextItems({
         verseNumber: verse,
         versesInCurrentChapter,
       })
-      setError(error)
     }
 
     if (hasPrevNextButtons) {
@@ -94,7 +89,7 @@ const BibleCompareVerses = ({ navigation }) => {
             ))
         )}
       </ScrollView>
-      {prevNextItems && !error && (
+      {prevNextItems && (
         <Box paddingBottom={20}>
           <BibleVerseDetailFooter
             verseNumber={prevNextItems.verseNumber}

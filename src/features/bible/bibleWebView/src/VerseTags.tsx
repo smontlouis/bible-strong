@@ -43,7 +43,9 @@ const VerseTags = ({ tag, settings }: Props) => {
       }
     >
       {tags.map(t => (
-        <Tag settings={settings}>{t.name}</Tag>
+        <Tag key={t.id} settings={settings}>
+          {t.name}
+        </Tag>
       ))}
       {!!(tag.tags.length - limit) && (
         <Tag settings={settings} style={{ opacity: 0.7 }}>

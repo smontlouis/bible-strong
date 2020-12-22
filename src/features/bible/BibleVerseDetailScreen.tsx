@@ -17,7 +17,6 @@ import Link from '~common/Link'
 import Container from '~common/ui/Container'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -29,8 +28,8 @@ import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 import { viewportWidth, wp } from '~helpers/utils'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import loadCountVerses from '~helpers/loadCountVerses'
 import { withTranslation } from 'react-i18next'
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -120,14 +119,9 @@ class BibleVerseDetailScreen extends React.Component {
       return
     }
 
-    const { versesInCurrentChapter, error } = await loadCountVerses(
-      verse.Livre,
-      verse.Chapitre
-    )
-    if (error) {
-      this.setState({ error })
-      return
-    }
+    const versesInCurrentChapter =
+      countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
+
     this.setState({ versesInCurrentChapter })
 
     this.formatVerse(strongVerse)

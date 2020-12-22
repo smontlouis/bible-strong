@@ -20,12 +20,12 @@ import { LinkBox } from '~common/Link'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import useBibleVerses, { verseStringToObject } from '~helpers/useBibleVerses'
 import BibleVerseDetailFooter from '../bible/BibleVerseDetailFooter'
-import loadCountVerses from '~helpers/loadCountVerses'
 
 import { useTheme } from 'emotion-theming'
 import { Theme } from '~themes'
 import { ActivityIndicator } from 'react-native-paper'
 import useLanguage from '~helpers/useLanguage'
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -142,21 +142,13 @@ const useVerseInCurrentChapter = (book: string, chapter: string) => {
   const [versesInCurrentChapter, setVersesInCurrentChapter] = React.useState<
     number
   >()
-  const [error, setError] = React.useState()
   useEffect(() => {
     ;(async () => {
-      const { versesInCurrentChapter, error } = await loadCountVerses(
-        book,
-        chapter
-      )
-      if (error) {
-        setError(error)
-        return
-      }
-      setVersesInCurrentChapter(versesInCurrentChapter)
+      const v = countLsgChapters[`${book}-${chapter}`]
+      setVersesInCurrentChapter(v)
     })()
   }, [book, chapter])
-  return { versesInCurrentChapter, error }
+  return { versesInCurrentChapter }
 }
 
 const CommentariesScreen = ({ navigation }: Props) => {

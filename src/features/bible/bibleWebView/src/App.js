@@ -174,12 +174,14 @@ class VersesRenderer extends Component {
   componentDidMount() {
 
     document.addEventListener('swiped-left', function(e) {
+      console.log("sw-left")
       dispatch({
         type: SWIPE_LEFT,
       })
     });
 
     document.addEventListener('swiped-right', function(e) {
+      console.log("sw-right")
       dispatch({
         type: SWIPE_RIGHT,
       })

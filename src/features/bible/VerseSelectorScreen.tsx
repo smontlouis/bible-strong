@@ -2,17 +2,12 @@ import React, { Component } from 'react'
 import { ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { compose } from 'recompose'
-import waitForStrongDB from '~common/waitForStrongDB'
-
-import Container from '~common/ui/Container'
-import Header from '~common/Header'
-import Empty from '~common/Empty'
 
 import { strongDB } from '~helpers/database'
-import loadCountVerses from '~helpers/loadCountVerses'
 import * as BibleActions from '~redux/modules/bible'
 import SelectorItem from './SelectorItem'
 import i18n from '~i18n'
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 
 class VerseSelector extends Component {
   state = {
@@ -36,14 +31,8 @@ class VerseSelector extends Component {
 
   loadVerses = async () => {
     const { selectedBook, selectedChapter } = this.props
-    const { versesInCurrentChapter, error } = await loadCountVerses(
-      selectedBook.Numero,
-      selectedChapter
-    )
-    if (error) {
-      this.setState({ error })
-      return
-    }
+    const versesInCurrentChapter =
+      countLsgChapters[`${selectedBook.Numero}-${selectedChapter}`]
     this.setState({ versesInCurrentChapter })
   }
 
@@ -56,21 +45,6 @@ class VerseSelector extends Component {
   render() {
     const { versesInCurrentChapter } = this.state
     const { selectedVerse } = this.props
-
-    if (this.state.error) {
-      return (
-        <Container>
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={`Impossible de charger cette page...${
-              this.state.error === 'CORRUPTED_DATABASE'
-                ? '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                : ''
-            }`}
-          />
-        </Container>
-      )
-    }
 
     if (!versesInCurrentChapter) {
       return null
@@ -102,7 +76,6 @@ class VerseSelector extends Component {
 }
 
 const EnhancedVerseSelector = compose(
-  waitForStrongDB,
   connect(
     ({ bible: { temp } }) => ({
       selectedBook: temp.selectedBook,
