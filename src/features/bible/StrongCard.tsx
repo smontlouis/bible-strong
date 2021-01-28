@@ -8,6 +8,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import ListenToStrong from './ListenStrong'
+import { withTranslation } from 'react-i18next'
 
 import { wp, cleanParams } from '~helpers/utils'
 import capitalize from '~helpers/capitalize'
@@ -126,6 +127,7 @@ class StrongCard extends React.Component {
       theme,
       isModal,
       onClosed,
+      t,
     } = this.props
 
     return (
@@ -195,7 +197,9 @@ class StrongCard extends React.Component {
           )}
           {!!LSG && (
             <ViewItem>
-              <SubTitle color="darkGrey">Généralement traduit par</SubTitle>
+              <SubTitle color="darkGrey">
+                {t('Généralement traduit par')}
+              </SubTitle>
               <StylizedHTMLView
                 htmlStyle={{
                   p: { ...smallTextStyle(theme) },
@@ -217,4 +221,4 @@ class StrongCard extends React.Component {
   }
 }
 
-export default StrongCard
+export default withTranslation(StrongCard)

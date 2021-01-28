@@ -125,19 +125,20 @@ class BibleStrongDetailScreen extends React.Component {
         LSG,
       },
     } = this.state
+    const { t } = this.props
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
     toCopy += Type ? `${Type}\n---\n\n` : '---\n\n'
-    toCopy += Hebreu ? `Mot Hébreu: ${Hebreu}\n\n` : ''
-    toCopy += Grec ? `Mot Grec: ${Grec}\n\n` : ''
+    toCopy += Hebreu ? `${t('Mot Hébreu')}: ${Hebreu}\n\n` : ''
+    toCopy += Grec ? `${t('Mot Grec')}: ${Grec}\n\n` : ''
     if (Definition) {
       let def = Definition.replace('<p>', '')
       def = def.replace('</p>', '')
       def = def.replace(/<\/?[^>]+><\/?[^>]+>/gi, '\n')
       def = def.replace(/<\/?[^>]+>/gi, '\n')
-      toCopy += `Définition - ${Code}\n${def}\n\n`
+      toCopy += `${t('Définition')} - ${Code}\n${def}\n\n`
     }
-    toCopy += LSG ? `Généralement traduit par:\n${LSG}` : ''
+    toCopy += LSG ? `${t('Généralement traduit par')}:\n${LSG}` : ''
     toCopy += '\n\n https://bible-strong.app'
 
     Share.share({ message: toCopy })
