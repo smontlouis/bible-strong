@@ -1,6 +1,7 @@
 import loadBible from '~helpers/loadBible'
 import loadInterlineaireChapter from '~helpers/loadInterlineaireChapter'
 import loadStrongChapter from '~helpers/loadStrongChapter'
+import { strongDB } from '~helpers/database'
 
 const loadBibleChapter = async (bookNb, chapterNb, version = 'LSG') => {
   if (version === 'INT') {
@@ -9,6 +10,7 @@ const loadBibleChapter = async (bookNb, chapterNb, version = 'LSG') => {
   }
 
   if (version === 'LSGS' || version === 'KJVS') {
+    if (!strongDB.get()) await strongDB.init()
     const res = await loadStrongChapter(bookNb, chapterNb)
     return res
   }

@@ -221,4 +221,4 @@ class StrongCard extends React.Component {
   }
 }
 
-export default withTranslation(StrongCard)
+export default withTranslation()(StrongCard)

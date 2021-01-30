@@ -24,6 +24,7 @@ import {
   DELETE_HISTORY,
   UPDATE_USER_DATA,
   SET_SUBSCRIPTION,
+  SET_LAST_SEEN,
 } from './modules/user'
 
 // TODO - DO IT FOR COLOR SETTINGS ?
@@ -170,6 +171,10 @@ export default store => next => async action => {
         })
       )
 
+      break
+    }
+    case SET_LAST_SEEN: {
+      userDoc.update({ lastSeen: user.lastSeen })
       break
     }
     default:

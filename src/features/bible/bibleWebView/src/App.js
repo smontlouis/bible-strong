@@ -10,7 +10,7 @@ import {
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   SWIPE_RIGHT,
-  SWIPE_LEFT
+  SWIPE_LEFT,
 } from './dispatch'
 import Verse from './Verse'
 import Comment from './Comment'
@@ -172,20 +172,19 @@ class VersesRenderer extends Component {
   }
 
   componentDidMount() {
-
     document.addEventListener('swiped-left', function(e) {
-      console.log("sw-left")
+      console.log('sw-left')
       dispatch({
         type: SWIPE_LEFT,
       })
-    });
+    })
 
     document.addEventListener('swiped-right', function(e) {
-      console.log("sw-right")
+      console.log('sw-right')
       dispatch({
         type: SWIPE_RIGHT,
       })
-    });
+    })
 
     dispatch({
       type: CONSOLE_LOG,
@@ -256,13 +255,13 @@ class VersesRenderer extends Component {
     }
   }
 
-  sortVersesToTags = (highlightedVerses) => {
+  sortVersesToTags = highlightedVerses => {
     if (!highlightedVerses) return null
     const p = highlightedVerses
     const taggedVerses = Object.keys(p).reduce((arr, verse, i) => {
       const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
       const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
-  
+
       if (!arr.find(a => a.date === p[verse].date)) {
         arr.push({
           date: p[verse].date,
@@ -278,16 +277,16 @@ class VersesRenderer extends Component {
         dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
         dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
       }
-  
+
       arr.sort((a, b) => Number(b.date) - Number(a.date))
-  
+
       return arr
     }, [])
 
     return taggedVerses.map(verse => ({
       ...verse,
       lastVerse: verse.verseIds[verse.verseIds.length - 1],
-      tags: Object.values(verse.tags)
+      tags: Object.values(verse.tags),
     }))
   }
 
@@ -536,7 +535,7 @@ class VersesRenderer extends Component {
               this.setState({ isINTComplete: !this.state.isINTComplete })
             }
           >
-            {this.state.isINTComplete ? 'Mode complet' : 'Mode simple'}
+            {this.state.isINTComplete ? 'Mode 1' : 'Mode 2'}
           </IntMode>
         )}
         {isHebreu && (
@@ -564,13 +563,13 @@ class VersesRenderer extends Component {
           const isHighlighted = !!this.state.highlightedVerses[
             `${Livre}-${Chapitre}-${Verset}`
           ]
-          const tag = this.state.taggedVerses?.find(v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`)
+          const tag = this.state.taggedVerses?.find(
+            v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
+          )
           const highlightedColor =
             isHighlighted &&
             this.state.highlightedVerses[`${Livre}-${Chapitre}-${Verset}`].color
 
-
-            
           const notesCount = this.state.notedVersesCount[Verset]
           const notesText = this.state.notedVersesText[Verset]
           const comment = this.state.comments && this.state.comments[Verset]
