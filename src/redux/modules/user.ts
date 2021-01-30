@@ -8,7 +8,7 @@ import blackColors from '~themes/blackColors'
 import sepiaColors from '~themes/sepiaColors'
 
 import { firebaseDb } from '~helpers/firebase'
-import { getLangIsFr } from '~i18n'
+import i18n, { getLangIsFr } from '~i18n'
 
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
@@ -18,6 +18,7 @@ import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
 import { SubscriptionType } from '~common/types'
 import { Reducer } from 'redux'
+import { Alert } from 'react-native'
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -438,14 +439,40 @@ export function onUserLoginSuccess(profile, remoteLastSeen, studies) {
   return async (dispatch, getState) => {
     const { id, lastSeen } = getState().user
 
-    dispatch({
-      type: USER_LOGIN_SUCCESS,
-      isLogged: !!id,
-      localLastSeen: lastSeen,
-      profile,
-      remoteLastSeen,
-      studies,
-    })
+    const dispatchUserSuccess = (overwriteRemoteLastSeen?: boolean) =>
+      dispatch({
+        type: USER_LOGIN_SUCCESS,
+        isLogged: !!id,
+        localLastSeen: lastSeen,
+        profile,
+        remoteLastSeen: overwriteRemoteLastSeen ? 0 : remoteLastSeen,
+        studies,
+      })
+
+    // Handle conflict only when user is already logged
+    if (remoteLastSeen > lastSeen && id) {
+      console.log('handle conflict')
+
+      // * Dirty, but it works without changing a lot
+      Alert.alert(
+        i18n.t('Conflit de sauvegarde'),
+        i18n.t(
+          'Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?'
+        ),
+        [
+          {
+            text: i18n.t('Cloud'),
+            onPress: () => dispatchUserSuccess(),
+          },
+          {
+            text: i18n.t('Local'),
+            onPress: () => dispatchUserSuccess(true),
+          },
+        ]
+      )
+    } else {
+      dispatchUserSuccess()
+    }
   }
 }
 

@@ -246,12 +246,12 @@
   "Merci de nous soutenir !": "Merci de nous soutenir !",
   "Vous êtes actuellement abonné à Bible Strong premium. Vous avez accès aux fonctionnalités suivantes": "Vous êtes actuellement abonné à Bible Strong premium. Vous avez accès aux fonctionnalités suivantes",
   "Accès aux commentaires": "Accès aux commentaires en français",
+  "Accès aux études sur le web": "Accès aux études sur le web",
   "...Et plein d'autres à venir": "...Et plein d'autres à venir",
   "Annuler l'abonnement": "Annuler l'abonnement",
   "Soutenez l'application, Devenez un sponsor !": "Soutenez l'application, Devenez un sponsor !",
   "Merci de me soutenir ! L'objectif de Bible Strong est de créer <2>un outil complet d'études bibliques</2> répondant à vos besoins, tout en vous proposant une expérience exceptionnelle.\n\nJe souhaite donner l'opportunité à chacun de pouvoir s'impliquer dans l'évolution de l'application, en vous proposant un <6>système de prix libre</6> que vous choisissez et que vous estimez juste, afin de <8>sponsoriser</8> l'application.": "Merci de me soutenir ! L'objectif de Bible Strong est de créer <2>un outil complet d'études bibliques</2> répondant à vos besoins, tout en vous proposant une expérience exceptionnelle.\n\nJe souhaite donner l'opportunité à chacun de pouvoir s'impliquer dans l'évolution de l'application, en vous proposant un <6>système de prix libre</6> que vous choisissez et que vous estimez juste, afin de <8>sponsoriser</8> l'application.",
   "Qu'est-ce qu'un sponsor ? C'est un donateur qui soutient l'application et qui a accès aux nouvelles fonctionnalités en priorité. Ces nouvelles fonctionnalités sont ensuite disponibles aux grand public après un certain délai.": "Qu'est-ce qu'un sponsor ? C'est un donateur qui soutient l'application et qui a accès aux nouvelles fonctionnalités en priorité. Ces nouvelles fonctionnalités sont ensuite disponibles aux grand public après un certain délai.",
-  "Accès aux études sur le web": "Accès aux études sur le web",
   "Tous les abonnements se renouvellent mensuellement de façon automatique. Vous avez la possibilité de les annuler quand vous le souhaitez.": "Tous les abonnements se renouvellent mensuellement de façon automatique. Vous avez la possibilité de les annuler quand vous le souhaitez.",
   "Vous pouvez également me soutenir par paypal ou tipeee pour devenir un sponsor. \nMerci de votre confiance et bonne étude!": "Vous pouvez également me soutenir par paypal ou tipeee pour devenir un sponsor. \nMerci de votre confiance et bonne étude!",
   "Vous devez être enregistré pour accéder à l'offre d'abonnement.": "Vous devez être enregistré pour accéder à l'offre d'abonnement.",
@@ -297,8 +297,6 @@
   "Couleur": "Couleur",
   "Voulez-vous vraiment vous déconnecter ?": "Voulez-vous vraiment vous déconnecter ?",
   "Vous êtes sur le point de changer de langue, les bases de données françaises seront supprimées.": "Vous êtes sur le point de changer de langue, les bases de données françaises seront supprimées.",
-  "Langue changée.": "Langue changée.",
-  "Merci de redémarrer votre application.": "Merci de redémarrer votre application.",
   "Plus": "Plus",
   "Bible Thématique Nave": "Bible Thématique Nave",
   "Plans": "Plans",
@@ -405,5 +403,9 @@
   "Nous avons des difficultés à valider votre transaction": "Nous avons des difficultés à valider votre transaction",
   "Veuillez nous contacter.": "Veuillez nous contacter.",
   "Erreur d'achat": "Erreur d'achat",
-  "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.": "Une erreur est survenue, vérifiez votre connexion ou contactez-nous."
+  "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.": "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.",
+  "Conflit de sauvegarde": "Conflit de sauvegarde",
+  "Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?": "Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?",
+  "Cloud": "Cloud",
+  "Local": "Local"
 }
