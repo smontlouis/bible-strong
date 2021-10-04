@@ -1,6 +1,6 @@
 import * as Icon from '@expo/vector-icons'
 import { useTheme } from 'emotion-theming'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { Modalize } from 'react-native-modalize'
@@ -15,6 +15,9 @@ import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
 import styled from '~styled/index'
 import Modal from './Modal'
+import SearchTagInput from './SearchTagInput'
+import Spacer from './ui/Spacer'
+import Fuse from 'fuse.js'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -30,6 +33,17 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
   const tags = useSelector<RootState>(state =>
     Object.values(state.user.bible.tags)
   )
+  const fuse = useMemo(() => new Fuse(tags, { keys: ['name'] }), [])
+  const [filteredTags, setFilteredTags] = useState(tags)
+  const [searchValue, setSearchValue] = useState('')
+
+  useEffect(() => {
+    if (searchValue) {
+      setFilteredTags(fuse.search(searchValue).map(v => v.item))
+    } else {
+      setFilteredTags(tags)
+    }
+  }, [searchValue, fuse])
 
   useEffect(() => {
     if (item) {
@@ -80,9 +94,9 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
     <Modal.Menu
       isOpen={!!item}
       onClose={onClosed}
-      modalHeight={hp(60, 600)}
+      modalHeight={hp(80, 600)}
       HeaderComponent={
-        <Box padding={20}>
+        <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>
             {item.entity !== 'highlights'
               ? `${t('Étiquettes pour')} "${currentItems[0].title ||
@@ -90,6 +104,13 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
                   ''}"`
               : `${t('Étiquettes pour')} ${highlightTitle}`}
           </Text>
+          <Spacer />
+          <SearchTagInput
+            placeholder={t('Chercher une étiquette')}
+            onChangeText={setSearchValue}
+            value={searchValue}
+            returnKeyType="done"
+          />
         </Box>
       }
       FooterComponent={
@@ -118,13 +139,13 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
       }
     >
       <Box flex>
-        {tags.length ? (
+        {filteredTags.length ? (
           <ScrollView
             contentContainerStyle={{ padding: 20 }}
             style={{ flex: 1 }}
           >
             <Box row wrap>
-              {tags.map(chip => (
+              {filteredTags.map(chip => (
                 <Chip
                   key={chip.id}
                   label={chip.name}
