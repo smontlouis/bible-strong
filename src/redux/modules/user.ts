@@ -472,7 +472,7 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         console.time('Remote wins, get studies')
         const querySnapshot = await firebaseDb
           .collection('studies')
-          .where('user.id', '==', id)
+          .where('user.id', '==', profile.id)
           .get()
 
         querySnapshot.forEach(doc => {
