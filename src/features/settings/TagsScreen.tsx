@@ -149,14 +149,16 @@ const TagsScreen = () => {
         />
       )}
 
-      <Modal.Menu isOpen={!!isOpen} onClosed={() => setOpen(false)}>
+      <Modal.Menu
+        isOpen={!!isOpen}
+        onClose={() => setOpen(false)}
+        adjustToContentHeight
+      >
         <Modal.Item
           bold
           onPress={() => {
             setOpen(false)
-            setTimeout(() => {
-              setTitlePrompt({ id: isOpen.id, name: isOpen.name })
-            }, 500)
+            setTitlePrompt({ id: isOpen.id, name: isOpen.name })
           }}
         >
           {t('Éditer')}

@@ -199,8 +199,6 @@ PODS:
   - EXPermissions (8.1.0):
     - UMCore
     - UMPermissionsInterface
-  - EXSecureStore (8.1.0):
-    - UMCore
   - EXSharing (8.0.0):
     - UMCore
     - UMFileSystemInterface
@@ -557,8 +555,6 @@ PODS:
     - React
   - react-native-restart (0.0.17):
     - React
-  - react-native-safe-area-context (0.7.3):
-    - React
   - react-native-splash-screen (3.2.0):
     - React
   - react-native-sqlite-storage (4.1.0):
@@ -710,7 +706,6 @@ DEPENDENCIES:
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
-  - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
@@ -733,7 +728,6 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-restart (from `../node_modules/react-native-restart`)
-  - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -846,8 +840,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-linear-gradient/ios"
   EXPermissions:
     :path: "../node_modules/expo-permissions/ios"
-  EXSecureStore:
-    :path: "../node_modules/expo-secure-store/ios"
   EXSharing:
     :path: "../node_modules/expo-sharing/ios"
   FBLazyVector:
@@ -888,8 +880,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-notifications"
   react-native-restart:
     :path: "../node_modules/react-native-restart"
-  react-native-safe-area-context:
-    :path: "../node_modules/react-native-safe-area-context"
   react-native-splash-screen:
     :path: "../node_modules/react-native-splash-screen"
   react-native-sqlite-storage:
@@ -1009,7 +999,6 @@ SPEC CHECKSUMS:
   EXImageLoader: 5ad6896fa1ef2ee814b551873cbf7a7baccc694a
   EXLinearGradient: 97d8095d1e4ad96f7893e010e564796ed8aeea42
   EXPermissions: 24b97f734ce9172d245a5be38ad9ccfcb6135964
-  EXSecureStore: 7a03e21e80ae59bf8e86c55e7a400f60db2da639
   EXSharing: 5c9aa8f3cc1c117de74e50ccef862c52f57af2d7
   FBLazyVector: feb35a6b7f7b50f367be07f34012f34a79282fa3
   FBReactNativeSpec: 51477b84b1bf7ab6f9ef307c24e3dd675391be44
@@ -1055,7 +1044,6 @@ SPEC CHECKSUMS:
   react-native-netinfo: 3bf235d94cc291cf0673ad9fd9eaae82f84ed8a9
   react-native-notifications: f56a12d741eeb2fd4d7a418a4689111c50f7cd72
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
-  react-native-safe-area-context: e200d4433aba6b7e60b52da5f37af11f7a0b0392
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
   react-native-webview: dfd7202ff115c44d3ea401c2f36122fb3ac79f07
@@ -1112,6 +1100,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: cb890c79c63885504ddc0efd7a7d01481760aca2
   Yoga: ba3d99dbee6c15ea6bbe3783d1f0cb1ffb79af0f
 
-PODFILE CHECKSUM: 1faad13a5e1b4dc19e04a4f9aa6056e1d06ef065
+PODFILE CHECKSUM: afdb9d0cec8156f7de33b4823de719c57899b5ce
 
 COCOAPODS: 1.8.4

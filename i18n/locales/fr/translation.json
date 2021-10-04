@@ -51,6 +51,7 @@
   "Le mot de passe est trop court.": "Le mot de passe est trop court.",
   "Mot de passe invalide ou utilisateur inexistant.": "Mot de passe invalide ou utilisateur inexistant.",
   "Format email invalide.": "Format email invalide.",
+  "A network error has occurred, please try again.": "Erreur de connexion, merci de rééssayer",
   "Impossible de lire le chapitre. Vérifiez votre connexion internet.": "Impossible de lire le chapitre. Vérifiez votre connexion internet.",
   "Téléchargez la base de commentaires Matthew Henry": "Téléchargez la base de commentaires Matthew Henry",
   "Commentaire désactivé": "Commentaire désactivé",
@@ -405,7 +406,9 @@
   "Erreur d'achat": "Erreur d'achat",
   "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.": "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.",
   "Conflit de sauvegarde": "Conflit de sauvegarde",
-  "Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?": "Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?",
+  "Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?": "Nous avons trouvé une sauvegarde plus récente en ligne.\nRécupérer les donnéees en ligne ou garder les données locales ?",
+  "Dernière sauvegarde locale": "Dernière sauvegarde locale",
+  "Dernière sauvegarde en ligne": "Dernière sauvegarde en ligne",
   "Cloud": "Cloud",
   "Local": "Local"
 }

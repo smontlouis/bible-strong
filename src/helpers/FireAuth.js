@@ -4,6 +4,7 @@ import { GoogleSignin } from '@react-native-community/google-signin'
 import { LoginManager, AccessToken } from 'react-native-fbsdk'
 import IAPHub from 'react-native-iaphub'
 import i18n from '~i18n'
+import to from 'await-to-js'
 
 import * as Sentry from '@sentry/react-native'
 import appleAuth, {
@@ -17,6 +18,8 @@ import { firebaseDb } from '~helpers/firebase'
 import { APP_FETCH_DATA, APP_FETCH_DATA_FAIL } from '~redux/modules/user'
 
 const FireAuth = class {
+  authFlag = false
+
   user = null
 
   profile = null
@@ -55,6 +58,12 @@ const FireAuth = class {
         return
       }
 
+      // Skip registration call
+      if (!this.authFlag) {
+        this.authFlag = true
+        return
+      }
+
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
@@ -83,51 +92,25 @@ const FireAuth = class {
           emailVerified,
         }
 
-        let remoteLastSeen = null
-
-        const userDoc = firebaseDb.collection('users').doc(user.uid)
+        const userStatusRef = firebaseDb
+          .collection('users-status')
+          .doc(user.uid)
 
         dispatch({ type: APP_FETCH_DATA })
-        let userData
-        try {
-          userData = await userDoc.get()
-        } catch (e) {
-          dispatch({ type: APP_FETCH_DATA_FAIL })
-          console.log('Erreur')
-          console.log(e)
-        }
-        let data = userData.data()
 
-        if (data) {
-          console.log('Update profile, last seen:', data.lastSeen)
-          remoteLastSeen = data.lastSeen
+        // GET USER STATUS
+        const userStatusDoc = await userStatusRef.get()
 
-          await userDoc.update(profile)
-        } else {
-          console.log('Set profile')
-          await userDoc.set(profile)
-        }
+        const userStatus = userStatusDoc.data() || {}
+        const remoteLastSeen = userStatus.lastSeen || 0
 
-        userData = await userDoc.get()
-        data = userData.data()
+        console.log('Online last seen:', new Date(remoteLastSeen))
+        console.log('Seen now:', new Date(profile.lastSeen))
 
         if (!this.user) {
-          // Get studies - TODO: DO IT BETTER
-          const studies = {}
-          firebaseDb
-            .collection('studies')
-            .where('user.id', '==', user.uid)
-            .get()
-            .then(querySnapshot => {
-              querySnapshot.forEach(doc => {
-                const study = doc.data()
-                studies[study.id] = study
-              })
-
-              if (this.onLogin) {
-                this.onLogin(data || {}, remoteLastSeen, studies)
-              } // On login
-            })
+          if (this.onLogin) {
+            this.onLogin({ profile, remoteLastSeen })
+          } // On login
         }
 
         this.user = user // Store user

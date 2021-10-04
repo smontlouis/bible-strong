@@ -89,7 +89,12 @@ const TagScreen = ({ navigation }) => {
     highlights: item.highlights
       ? sortVersesByDate(
           Object.keys(item.highlights).reduce(
-            (arr, id) => ({ ...arr, [id]: state.user.bible.highlights[id] }),
+            (arr, id) => ({
+              ...arr,
+              ...(state.user.bible.highlights[id] && {
+                [id]: state.user.bible.highlights[id],
+              }),
+            }),
             {}
           )
         )

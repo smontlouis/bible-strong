@@ -7162,11 +7162,6 @@ expo-permissions@~8.1.0:
   resolved "https://registry.yarnpkg.com/expo-permissions/-/expo-permissions-8.1.0.tgz#a7f2ee91ba76ce3a467e7b10adaa9ca5201b226f"
   integrity sha512-QBHD+1J9+sGFnhoEGzMRchPweeEE0OJ9ehG/0l1BMRBA7qsLS9vRC1FTJ55NwjI0Kr4RTha9r6ZX1kZHT09f/w==
 
-expo-secure-store@~8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-8.1.0.tgz#1dcc4705c5264c828592a83842b8be8bbfb5f77f"
-  integrity sha512-EjCx9M2nH7iW3eNOjXl0I7oPypI0es6OStZakimR2iD8riLZp9LYHTj+39Iuz2o1m3OKi+bpwr3cHL52DxcDnA==
-
 expo-sharing@~8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/expo-sharing/-/expo-sharing-8.0.0.tgz#71195e6a24d6e36839e80d15581017d9cf02099c"
@@ -7559,6 +7554,11 @@ findup@^0.1.5:
   dependencies:
     colors "~0.6.0-1"
     commander "~2.1.0"
+
+firestore-size@^2.0.7:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/firestore-size/-/firestore-size-2.0.7.tgz#b697298029bd7b13f1cdcfba0c25fb30ee115fd2"
+  integrity sha512-K5D8e+9rrJs8YL/GIiET7ul9x5pV1WAUjK/yjZO360cF8A+71FnZg+ofO9U7g8XCr21mkbyZFM4yEf4o45FEIQ==
 
 flat-cache@^2.0.1:
   version "2.0.1"
@@ -12368,10 +12368,10 @@ react-native-modalbox@^2.0.0:
   dependencies:
     prop-types "^15.5.10"
 
-react-native-modalize@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-2.0.0.tgz#c0343d3ea87af1de68d274c9b112a9de08fac262"
-  integrity sha512-KL4UkuCCHILXgcoDPsdSKNEEhNHUGFrWLZ/183/HVAIo7F9Ll7Oi8fal0HSdRRVOOf5RVOKKXT7i+WxPVIs0SA==
+react-native-modalize@2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-2.0.8.tgz#5dcb2c56d82e3dbd271582f832e7e02ae4cbb503"
+  integrity sha512-OKdpFVExEe4YM2uFHL/aStS9p0JaC6gBupjaW1QVHkGq22T2ASYwkhDvTnMS8BLOLWPx2fC3xEBzOcn2rh7EYw==
 
 react-native-notifications@^3.1.2:
   version "3.1.2"
@@ -12450,11 +12450,6 @@ react-native-root-siblings@^2.2.0:
   integrity sha1-V7svewpTmcSOFLNtXzrnAVzT+5U=
   dependencies:
     static-container "^1.0.0"
-
-react-native-safe-area-context@^0.7.2:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/react-native-safe-area-context/-/react-native-safe-area-context-0.7.3.tgz#ad6bd4abbabe195332c53810e4ce5851eb21aa2a"
-  integrity sha512-9Uqu1vlXPi+2cKW/CW6OnHxA76mWC4kF3wvlqzq4DY8hn37AeiXtLFs2WkxH4yXQRrnJdP6ivc65Lz+MqwRZAA==
 
 react-native-safe-area-view@^0.12.0:
   version "0.12.0"

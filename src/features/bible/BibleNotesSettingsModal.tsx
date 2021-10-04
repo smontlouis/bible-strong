@@ -1,46 +1,10 @@
-import React from 'react'
-import Modal from 'react-native-modal'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-
 import { withTheme } from 'emotion-theming'
-import styled from '@emotion/native'
-
-import Text from '~common/ui/Text'
-import { deleteNote } from '~redux/modules/user'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-
-const StylizedModal = styled(Modal)({
-  justifyContent: 'flex-end',
-  margin: 0,
-})
-
-const Container = styled.View(({ theme }) => ({
-  display: 'flex',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '100%',
-  maxWidth: 600,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  backgroundColor: theme.colors.reverse,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
-  paddingBottom: getBottomSpace(),
-}))
-
-const Touchy = styled.TouchableOpacity(({ theme }) => ({
-  alignItems: 'flex-start',
-  justifyContent: 'center',
-  padding: 20,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-  overflow: 'hidden',
-}))
+import { Alert } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import Modal from '~common/Modal'
+import { deleteNote } from '~redux/modules/user'
 
 const NotesSettingsModal = ({
   isOpen,
@@ -71,45 +35,37 @@ const NotesSettingsModal = ({
   }
 
   return (
-    <StylizedModal
-      backdropOpacity={0.3}
-      isVisible={!!isOpen}
-      avoidKeyboard
-      onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-    >
-      <Container>
-        <Touchy
-          onPress={() => {
-            onClosed()
-            setTimeout(() => {
-              openNoteEditor(noteId)
-            }, 500)
-          }}
-        >
-          <Text fontSize={16} bold>
-            {t('Éditer')}
-          </Text>
-        </Touchy>
-        <Touchy
-          onPress={() => {
-            onClosed()
-            setTimeout(() => {
-              setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
-            }, 500)
-          }}
-        >
-          <Text fontSize={16} bold>
-            {t('Tags')}
-          </Text>
-        </Touchy>
-        <Touchy onPress={() => deleteNoteConfirmation(noteId)}>
-          <Text fontSize={16} bold color="quart">
-            {t('Supprimer')}
-          </Text>
-        </Touchy>
-      </Container>
-    </StylizedModal>
+    <Modal.Menu isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
+      <Modal.Item
+        onPress={() => {
+          onClosed()
+          setTimeout(() => {
+            openNoteEditor(noteId)
+          }, 500)
+        }}
+        bold
+      >
+        {t('Éditer')}
+      </Modal.Item>
+      <Modal.Item
+        onPress={() => {
+          onClosed()
+          setTimeout(() => {
+            setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
+          }, 500)
+        }}
+        bold
+      >
+        {t('Tags')}
+      </Modal.Item>
+      <Modal.Item
+        bold
+        color="quart"
+        onPress={() => deleteNoteConfirmation(noteId)}
+      >
+        {t('Supprimer')}
+      </Modal.Item>
+    </Modal.Menu>
   )
 }
 

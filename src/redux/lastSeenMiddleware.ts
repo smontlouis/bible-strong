@@ -22,6 +22,8 @@ import {
   DELETE_HISTORY,
   UPDATE_USER_DATA,
   SET_LAST_SEEN,
+  UPDATE_STUDY,
+  CREATE_STUDY,
 } from './modules/user'
 
 export default store => next => action => {
@@ -43,6 +45,8 @@ export default store => next => action => {
     case ADD_TAG:
     case REMOVE_TAG:
     case TOGGLE_TAG_ENTITY:
+    case UPDATE_STUDY:
+    case CREATE_STUDY:
     case UPLOAD_STUDY:
     case DELETE_STUDY:
     case UPDATE_TAG:

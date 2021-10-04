@@ -41,7 +41,11 @@ const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
           <StyledIcon name="chevron-down" size={15} />
         </TouchableBox>
       </Box>
-      <Modal.Menu isOpen={isOpen} onClosed={() => setOpen(false)}>
+      <Modal.Menu
+        isOpen={isOpen}
+        onClose={() => setOpen(false)}
+        adjustToContentHeight
+      >
         {choices.map(({ value, label, count }) => (
           <Modal.Item
             key={value}

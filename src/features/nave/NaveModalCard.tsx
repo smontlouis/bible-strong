@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { ActivityIndicator, ScrollView } from 'react-native'
-import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
-
-import { timeout } from '~helpers/timeout'
-import formatVerseContent from '~helpers/formatVerseContent'
-import waitForNaveModal from '~features/home/waitForNaveWidget'
-import Empty from '~common/Empty'
-import Link from '~common/Link'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import NaveForVerse from './NaveModalForVerse'
-import loadNaveByVerset from '~helpers/loadNaveByVerset'
+import * as Icon from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ActivityIndicator } from 'react-native'
+import Empty from '~common/Empty'
+import Box from '~common/ui/Box'
+import waitForNaveModal from '~features/home/waitForNaveWidget'
+import loadNaveByVerset from '~helpers/loadNaveByVerset'
+import { timeout } from '~helpers/timeout'
+import NaveForVerse from './NaveModalForVerse'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -50,7 +46,7 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
     return (
       <Empty
         source={require('~assets/images/empty.json')}
-        message="Une erreur est survenue..."
+        message={t('Une erreur est survenue...')}
       />
     )
   }
@@ -67,40 +63,24 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
     return null
   }
 
-  const { title } = formatVerseContent([selectedVerse])
   const [naveItemsForVerse, naveItemsForChapter] = Naves || []
 
   return (
-    <Box flex width="100%">
-      <Box row height={60} alignItems="center">
-        <Box flex paddingLeft={20}>
-          <Text title fontSize={16} marginTop={10}>
-            {title}
-          </Text>
-          <Text fontSize={13} color="grey">
-            {t('Par thèmes')}
-          </Text>
-        </Box>
-        <Link onPress={onClosed} padding>
-          <IconFeather name="x" size={25} />
-        </Link>
-      </Box>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-        {(!!naveItemsForChapter || !!naveItemsForVerse) && (
-          <>
-            <NaveForVerse
-              items={naveItemsForVerse}
-              label={t('Concernant le verset')}
-              onClosed={onClosed}
-            />
-            <NaveForVerse
-              items={naveItemsForChapter}
-              label={t('Concernant le chapitre entier')}
-              onClosed={onClosed}
-            />
-          </>
-        )}
-      </ScrollView>
+    <Box padding={20}>
+      {(!!naveItemsForChapter || !!naveItemsForVerse) && (
+        <>
+          <NaveForVerse
+            items={naveItemsForVerse}
+            label={t('Concernant le verset')}
+            onClosed={onClosed}
+          />
+          <NaveForVerse
+            items={naveItemsForChapter}
+            label={t('Concernant le chapitre entier')}
+            onClosed={onClosed}
+          />
+        </>
+      )}
     </Box>
   )
 })

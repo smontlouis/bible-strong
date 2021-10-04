@@ -3,7 +3,7 @@ import { bindStyles } from '~helpers/styledProps'
 import theme from '~themes/default'
 import { Theme } from '~themes'
 
-interface TextProps {
+export interface TextProps {
   color?: string
   lineHeight?: number
   fontSize?: number
@@ -100,7 +100,7 @@ interface TextProps {
   lightShadow?: boolean
   size?: string
 
-  theme: Theme
+  theme?: Theme
 
   title?: boolean
 }

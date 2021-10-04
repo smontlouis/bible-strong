@@ -2,6 +2,7 @@ import books from '~assets/bible_versions/books-desc'
 import i18n from '~i18n'
 
 export default verses => {
+  verses = verses.filter(v => v)
   if (!verses.length) {
     return { title: '', content: '' }
   }

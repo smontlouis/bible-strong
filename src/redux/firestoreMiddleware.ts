@@ -143,6 +143,12 @@ export default store => next => async action => {
     }
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
+      const { localLastSeen, remoteLastSeen } = action
+      if (remoteLastSeen >= localLastSeen) {
+        console.log('- do nothing, remote is already up to date')
+        return
+      }
+      console.log('local wins - update remote')
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
       userDoc.update(
         r({

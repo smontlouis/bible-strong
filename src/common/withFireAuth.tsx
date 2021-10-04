@@ -8,9 +8,9 @@ import i18n from '~i18n'
 const withFireAuth = WrappedComponent => props => {
   const dispatch = useDispatch()
   useEffect(() => {
-    const onLogin = (profile, remoteLastSeen, studies) => {
+    const onLogin = ({ profile, remoteLastSeen }) => {
       console.log(`Bienvenue ${profile.displayName}.`)
-      dispatch(UserActions.onUserLoginSuccess(profile, remoteLastSeen, studies))
+      dispatch(UserActions.onUserLoginSuccess({ profile, remoteLastSeen }))
     }
     const emailVerified = () => dispatch(UserActions.verifyEmail())
     const onUserChange = profile => console.log('user changed')
@@ -41,7 +41,12 @@ const withFireAuth = WrappedComponent => props => {
       if (e.code === 'auth/invalid-email') {
         SnackBar.show(i18n.t('Format email invalide.'))
       }
+
+      if (e.code === 'auth/network-request-failed') {
+        SnackBar.show(i18n.t('A network error has occurred, please try again.'))
+      }
       console.log('Error', e)
+      console.log(e.code)
     }
 
     FireAuth.init(
