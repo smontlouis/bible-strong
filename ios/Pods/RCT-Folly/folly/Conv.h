@@ -123,6 +123,7 @@
 #include <folly/Utility.h>
 #include <folly/lang/Exception.h>
 #include <folly/lang/Pretty.h>
+#include <folly/lang/ToAscii.h>
 #include <folly/portability/Math.h>
 
 namespace folly {
@@ -158,9 +159,7 @@ class ConversionError : public ConversionErrorBase {
   ConversionError(const char* str, ConversionCode code)
       : ConversionErrorBase(str), code_(code) {}
 
-  ConversionCode errorCode() const {
-    return code_;
-  }
+  ConversionCode errorCode() const { return code_; }
 
  private:
   ConversionCode code_;
@@ -244,7 +243,7 @@ to(Src&& value) {
  */
 template <class Tgt, class Src>
 typename std::enable_if<
-    std::is_arithmetic<Src>::value && !std::is_same<Tgt, Src>::value &&
+    is_arithmetic_v<Src> && !std::is_same<Tgt, Src>::value &&
         std::is_same<Tgt, bool>::value,
     Expected<Tgt, ConversionCode>>::type
 tryTo(const Src& value) {
@@ -253,7 +252,7 @@ tryTo(const Src& value) {
 
 template <class Tgt, class Src>
 typename std::enable_if<
-    std::is_arithmetic<Src>::value && !std::is_same<Tgt, Src>::value &&
+    is_arithmetic_v<Src> && !std::is_same<Tgt, Src>::value &&
         std::is_same<Tgt, bool>::value,
     Tgt>::type
 to(const Src& value) {
@@ -313,9 +312,8 @@ auto getLastElement(const Ts&... ts)
 }
 
 template <class... Ts>
-struct LastElement : std::decay<decltype(
-                         LastElementImpl<Ts...>::call(std::declval<Ts>()...))> {
-};
+struct LastElement : std::decay<decltype(LastElementImpl<Ts...>::call(
+                         std::declval<Ts>()...))> {};
 #endif
 
 } // namespace detail
@@ -329,11 +327,16 @@ namespace detail {
 
 template <typename IntegerType>
 constexpr unsigned int digitsEnough() {
-  return (unsigned int)(ceil(sizeof(IntegerType) * CHAR_BIT * M_LN2 / M_LN10));
+  // digits10 returns the number of decimal digits that this type can represent,
+  // not the number of characters required for the max value, so we need to add
+  // one. ex: char digits10 returns 2, because 256-999 cannot be represented,
+  // but we need 3.
+  auto const digits10 = std::numeric_limits<IntegerType>::digits10;
+  return static_cast<unsigned int>(digits10) + 1;
 }
 
-inline size_t
-unsafeTelescope128(char* buffer, size_t room, unsigned __int128 x) {
+inline size_t unsafeTelescope128(
+    char* buffer, size_t room, unsigned __int128 x) {
   typedef unsigned __int128 Usrc;
   size_t p = room - 1;
 
@@ -362,120 +365,6 @@ unsafeTelescope128(char* buffer, size_t room, unsigned __int128 x) {
 
 } // namespace detail
 #endif
-
-/**
- * Returns the number of digits in the base 10 representation of an
- * uint64_t. Useful for preallocating buffers and such. It's also used
- * internally, see below. Measurements suggest that defining a
- * separate overload for 32-bit integers is not worthwhile.
- */
-
-inline uint32_t digits10(uint64_t v) {
-#ifdef __x86_64__
-
-  // For this arch we can get a little help from specialized CPU instructions
-  // which can count leading zeroes; 64 minus that is appx. log (base 2).
-  // Use that to approximate base-10 digits (log_10) and then adjust if needed.
-
-  // 10^i, defined for i 0 through 19.
-  // This is 20 * 8 == 160 bytes, which fits neatly into 5 cache lines
-  // (assuming a cache line size of 64).
-  alignas(64) static const uint64_t powersOf10[20] = {
-      1,
-      10,
-      100,
-      1000,
-      10000,
-      100000,
-      1000000,
-      10000000,
-      100000000,
-      1000000000,
-      10000000000,
-      100000000000,
-      1000000000000,
-      10000000000000,
-      100000000000000,
-      1000000000000000,
-      10000000000000000,
-      100000000000000000,
-      1000000000000000000,
-      10000000000000000000UL,
-  };
-
-  // "count leading zeroes" operation not valid; for 0; special case this.
-  if (UNLIKELY(!v)) {
-    return 1;
-  }
-
-  // bits is in the ballpark of log_2(v).
-  const uint32_t leadingZeroes = __builtin_clzll(v);
-  const auto bits = 63 - leadingZeroes;
-
-  // approximate log_10(v) == log_10(2) * bits.
-  // Integer magic below: 77/256 is appx. 0.3010 (log_10(2)).
-  // The +1 is to make this the ceiling of the log_10 estimate.
-  const uint32_t minLength = 1 + ((bits * 77) >> 8);
-
-  // return that log_10 lower bound, plus adjust if input >= 10^(that bound)
-  // in case there's a small error and we misjudged length.
-  return minLength + uint32_t(v >= powersOf10[minLength]);
-
-#else
-
-  uint32_t result = 1;
-  while (true) {
-    if (LIKELY(v < 10)) {
-      return result;
-    }
-    if (LIKELY(v < 100)) {
-      return result + 1;
-    }
-    if (LIKELY(v < 1000)) {
-      return result + 2;
-    }
-    if (LIKELY(v < 10000)) {
-      return result + 3;
-    }
-    // Skip ahead by 4 orders of magnitude
-    v /= 10000U;
-    result += 4;
-  }
-
-#endif
-}
-
-/**
- * Copies the ASCII base 10 representation of v into buffer and
- * returns the number of bytes written. Does NOT append a \0. Assumes
- * the buffer points to digits10(v) bytes of valid memory. Note that
- * uint64 needs at most 20 bytes, uint32_t needs at most 10 bytes,
- * uint16_t needs at most 5 bytes, and so on. Measurements suggest
- * that defining a separate overload for 32-bit integers is not
- * worthwhile.
- *
- * This primitive is unsafe because it makes the size assumption and
- * because it does not add a terminating \0.
- */
-
-inline uint32_t uint64ToBufferUnsafe(uint64_t v, char* const buffer) {
-  auto const result = digits10(v);
-  // WARNING: using size_t or pointer arithmetic for pos slows down
-  // the loop below 20x. This is because several 32-bit ops can be
-  // done in parallel, but only fewer 64-bit ones.
-  uint32_t pos = result - 1;
-  while (v >= 10) {
-    // Keep these together so a peephole optimization "sees" them and
-    // computes them in one shot.
-    auto const q = v / 10;
-    auto const r = v % 10;
-    buffer[pos--] = static_cast<char>('0' + r);
-    v = q;
-  }
-  // Last digit is trivial to handle
-  buffer[pos] = static_cast<char>(v + '0');
-  return result;
-}
 
 /**
  * A single char gets appended.
@@ -568,8 +457,7 @@ toAppend(const Src& value, Tgt* result) {
  */
 template <class Tgt>
 typename std::enable_if<IsSomeString<Tgt>::value>::type toAppend(
-    StringPiece value,
-    Tgt* result) {
+    StringPiece value, Tgt* result) {
   result->append(value.data(), value.size());
 }
 
@@ -579,8 +467,7 @@ typename std::enable_if<IsSomeString<Tgt>::value>::type toAppend(
  */
 template <class Tgt>
 typename std::enable_if<IsSomeString<Tgt>::value>::type toAppend(
-    const fbstring& value,
-    Tgt* result) {
+    const fbstring& value, Tgt* result) {
   result->append(value.data(), value.size());
 }
 
@@ -641,34 +528,27 @@ constexpr typename std::
  */
 template <class Tgt, class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && std::is_signed<Src>::value &&
-    IsSomeString<Tgt>::value && sizeof(Src) >= 4>::type
+    is_integral_v<Src> && is_signed_v<Src> && IsSomeString<Tgt>::value &&
+    sizeof(Src) >= 4>::type
 toAppend(Src value, Tgt* result) {
-  char buffer[20];
+  char buffer[to_ascii_size_max_decimal<uint64_t>];
+  auto uvalue = value < 0 ? ~static_cast<uint64_t>(value) + 1
+                          : static_cast<uint64_t>(value);
   if (value < 0) {
     result->push_back('-');
-    result->append(
-        buffer,
-        uint64ToBufferUnsafe(~static_cast<uint64_t>(value) + 1, buffer));
-  } else {
-    result->append(buffer, uint64ToBufferUnsafe(uint64_t(value), buffer));
   }
+  result->append(buffer, to_ascii_decimal(buffer, uvalue));
 }
 
 template <class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && std::is_signed<Src>::value &&
-        sizeof(Src) >= 4 && sizeof(Src) < 16,
+    is_integral_v<Src> && is_signed_v<Src> && sizeof(Src) >= 4 &&
+        sizeof(Src) < 16,
     size_t>::type
 estimateSpaceNeeded(Src value) {
-  if (value < 0) {
-    // When "value" is the smallest negative, negating it would evoke
-    // undefined behavior, so, instead of writing "-value" below, we write
-    // "~static_cast<uint64_t>(value) + 1"
-    return 1 + digits10(~static_cast<uint64_t>(value) + 1);
-  }
-
-  return digits10(static_cast<uint64_t>(value));
+  auto uvalue = value < 0 ? ~static_cast<uint64_t>(value) + 1
+                          : static_cast<uint64_t>(value);
+  return size_t(value < 0) + to_ascii_size_decimal(uvalue);
 }
 
 /**
@@ -676,20 +556,20 @@ estimateSpaceNeeded(Src value) {
  */
 template <class Tgt, class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && !std::is_signed<Src>::value &&
-    IsSomeString<Tgt>::value && sizeof(Src) >= 4>::type
+    is_integral_v<Src> && !is_signed_v<Src> && IsSomeString<Tgt>::value &&
+    sizeof(Src) >= 4>::type
 toAppend(Src value, Tgt* result) {
-  char buffer[20];
-  result->append(buffer, uint64ToBufferUnsafe(value, buffer));
+  char buffer[to_ascii_size_max_decimal<uint64_t>];
+  result->append(buffer, to_ascii_decimal(buffer, value));
 }
 
 template <class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && !std::is_signed<Src>::value &&
-        sizeof(Src) >= 4 && sizeof(Src) < 16,
+    is_integral_v<Src> && !is_signed_v<Src> && sizeof(Src) >= 4 &&
+        sizeof(Src) < 16,
     size_t>::type
 estimateSpaceNeeded(Src value) {
-  return digits10(value);
+  return to_ascii_size_decimal(value);
 }
 
 /**
@@ -698,24 +578,20 @@ estimateSpaceNeeded(Src value) {
  */
 template <class Tgt, class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && IsSomeString<Tgt>::value &&
-    sizeof(Src) < 4>::type
+    is_integral_v<Src> && IsSomeString<Tgt>::value && sizeof(Src) < 4>::type
 toAppend(Src value, Tgt* result) {
-  typedef
-      typename std::conditional<std::is_signed<Src>::value, int64_t, uint64_t>::
-          type Intermediate;
+  typedef typename std::conditional<is_signed_v<Src>, int64_t, uint64_t>::type
+      Intermediate;
   toAppend<Tgt>(static_cast<Intermediate>(value), result);
 }
 
 template <class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && sizeof(Src) < 4 &&
-        !std::is_same<Src, char>::value,
+    is_integral_v<Src> && sizeof(Src) < 4 && !std::is_same<Src, char>::value,
     size_t>::type
 estimateSpaceNeeded(Src value) {
-  typedef
-      typename std::conditional<std::is_signed<Src>::value, int64_t, uint64_t>::
-          type Intermediate;
+  typedef typename std::conditional<is_signed_v<Src>, int64_t, uint64_t>::type
+      Intermediate;
   return estimateSpaceNeeded(static_cast<Intermediate>(value));
 }
 
@@ -992,15 +868,14 @@ typename std::enable_if<IsSomeString<Tgt>::value>::type toAppend(
  */
 template <class Delimiter, class Tgt>
 typename std::enable_if<IsSomeString<Tgt>::value>::type toAppendDelim(
-    const Delimiter& /* delim */,
-    Tgt* /* result */) {}
+    const Delimiter& /* delim */, Tgt* /* result */) {}
 
 /**
  * 1 element: same as toAppend.
  */
 template <class Delimiter, class T, class Tgt>
-typename std::enable_if<IsSomeString<Tgt>::value>::type
-toAppendDelim(const Delimiter& /* delim */, const T& v, Tgt* tgt) {
+typename std::enable_if<IsSomeString<Tgt>::value>::type toAppendDelim(
+    const Delimiter& /* delim */, const T& v, Tgt* tgt) {
   toAppend(v, tgt);
 }
 
@@ -1118,43 +993,35 @@ template <class Tgt>
 Expected<Tgt, ConversionCode> digits_to(const char* b, const char* e) noexcept;
 
 extern template Expected<char, ConversionCode> digits_to<char>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<signed char, ConversionCode> digits_to<signed char>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<unsigned char, ConversionCode>
 digits_to<unsigned char>(const char*, const char*) noexcept;
 
 extern template Expected<short, ConversionCode> digits_to<short>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<unsigned short, ConversionCode>
 digits_to<unsigned short>(const char*, const char*) noexcept;
 
 extern template Expected<int, ConversionCode> digits_to<int>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<unsigned int, ConversionCode> digits_to<unsigned int>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 
 extern template Expected<long, ConversionCode> digits_to<long>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<unsigned long, ConversionCode>
 digits_to<unsigned long>(const char*, const char*) noexcept;
 
 extern template Expected<long long, ConversionCode> digits_to<long long>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<unsigned long long, ConversionCode>
 digits_to<unsigned long long>(const char*, const char*) noexcept;
 
 #if FOLLY_HAVE_INT128_T
 extern template Expected<__int128, ConversionCode> digits_to<__int128>(
-    const char*,
-    const char*) noexcept;
+    const char*, const char*) noexcept;
 extern template Expected<unsigned __int128, ConversionCode>
 digits_to<unsigned __int128>(const char*, const char*) noexcept;
 #endif
@@ -1213,7 +1080,7 @@ convertTo(StringPiece* src) noexcept {
 
 template <typename T>
 typename std::enable_if<
-    std::is_integral<T>::value && !std::is_same<T, bool>::value,
+    is_integral_v<T> && !std::is_same<T, bool>::value,
     Expected<T, ConversionCode>>::type
 convertTo(StringPiece* src) noexcept {
   return str_to_integral<T>(src);
@@ -1227,15 +1094,15 @@ convertTo(StringPiece* src) noexcept {
  */
 template <typename Tgt>
 typename std::enable_if<
-    std::is_integral<Tgt>::value && !std::is_same<Tgt, bool>::value,
+    is_integral_v<Tgt> && !std::is_same<Tgt, bool>::value,
     Expected<Tgt, ConversionCode>>::type
 tryTo(const char* b, const char* e) {
   return detail::digits_to<Tgt>(b, e);
 }
 
 template <typename Tgt>
-typename std::enable_if<
-    std::is_integral<Tgt>::value && !std::is_same<Tgt, bool>::value,
+typename std::enable_if< //
+    is_integral_v<Tgt> && !std::is_same<Tgt, bool>::value,
     Tgt>::type
 to(const char* b, const char* e) {
   return tryTo<Tgt>(b, e).thenOrThrow(
@@ -1253,8 +1120,8 @@ to(const char* b, const char* e) {
  * Parsing strings to numeric types.
  */
 template <typename Tgt>
-FOLLY_NODISCARD inline typename std::enable_if<
-    std::is_arithmetic<Tgt>::value,
+FOLLY_NODISCARD inline typename std::enable_if< //
+    is_arithmetic_v<Tgt>,
     Expected<StringPiece, ConversionCode>>::type
 parseTo(StringPiece src, Tgt& out) {
   return detail::convertTo<Tgt>(&src).then(
@@ -1275,7 +1142,7 @@ namespace detail {
 template <class Tgt>
 typename std::enable_if<
     !std::is_same<Tgt, bool>::value &&
-        (std::is_integral<Tgt>::value || std::is_floating_point<Tgt>::value),
+        (is_integral_v<Tgt> || std::is_floating_point<Tgt>::value),
     Expected<Tgt, ConversionCode>>::type
 convertTo(const bool& value) noexcept {
   return static_cast<Tgt>(value ? 1 : 0);
@@ -1288,20 +1155,19 @@ convertTo(const bool& value) noexcept {
  */
 template <class Tgt, class Src>
 typename std::enable_if<
-    std::is_integral<Src>::value && !std::is_same<Tgt, Src>::value &&
-        !std::is_same<Tgt, bool>::value && std::is_integral<Tgt>::value,
+    is_integral_v<Src> && !std::is_same<Tgt, Src>::value &&
+        !std::is_same<Tgt, bool>::value && is_integral_v<Tgt>,
     Expected<Tgt, ConversionCode>>::type
 convertTo(const Src& value) noexcept {
   if /* constexpr */ (
-      std::make_unsigned_t<Tgt>(std::numeric_limits<Tgt>::max()) <
-      std::make_unsigned_t<Src>(std::numeric_limits<Src>::max())) {
+      make_unsigned_t<Tgt>(std::numeric_limits<Tgt>::max()) <
+      make_unsigned_t<Src>(std::numeric_limits<Src>::max())) {
     if (greater_than<Tgt, std::numeric_limits<Tgt>::max()>(value)) {
       return makeUnexpected(ConversionCode::ARITH_POSITIVE_OVERFLOW);
     }
   }
   if /* constexpr */ (
-      std::is_signed<Src>::value &&
-      (!std::is_signed<Tgt>::value || sizeof(Src) > sizeof(Tgt))) {
+      is_signed_v<Src> && (!is_signed_v<Tgt> || sizeof(Src) > sizeof(Tgt))) {
     if (less_than<Tgt, std::numeric_limits<Tgt>::min()>(value)) {
       return makeUnexpected(ConversionCode::ARITH_NEGATIVE_OVERFLOW);
     }
@@ -1338,7 +1204,7 @@ convertTo(const Src& value) noexcept {
  */
 template <typename Tgt, typename Src>
 inline typename std::enable_if<
-    std::is_floating_point<Src>::value && std::is_integral<Tgt>::value &&
+    std::is_floating_point<Src>::value && is_integral_v<Tgt> &&
         !std::is_same<Tgt, bool>::value,
     bool>::type
 checkConversion(const Src& value) {
@@ -1353,7 +1219,7 @@ checkConversion(const Src& value) {
         std::numeric_limits<Tgt>::max() - static_cast<Tgt>(mmax)) {
       return false;
     }
-  } else if (std::is_signed<Tgt>::value && value <= tgtMinAsSrc) {
+  } else if (is_signed_v<Tgt> && value <= tgtMinAsSrc) {
     if (value < tgtMinAsSrc) {
       return false;
     }
@@ -1369,7 +1235,7 @@ checkConversion(const Src& value) {
 // Integers can always safely be converted to floating point values
 template <typename Tgt, typename Src>
 constexpr typename std::enable_if<
-    std::is_integral<Src>::value && std::is_floating_point<Tgt>::value,
+    is_integral_v<Src> && std::is_floating_point<Tgt>::value,
     bool>::type
 checkConversion(const Src&) {
   return true;
@@ -1394,8 +1260,8 @@ checkConversion(const Src&) {
  */
 template <typename Tgt, typename Src>
 typename std::enable_if<
-    (std::is_integral<Src>::value && std::is_floating_point<Tgt>::value) ||
-        (std::is_floating_point<Src>::value && std::is_integral<Tgt>::value),
+    (is_integral_v<Src> && std::is_floating_point<Tgt>::value) ||
+        (std::is_floating_point<Src>::value && is_integral_v<Tgt>),
     Expected<Tgt, ConversionCode>>::type
 convertTo(const Src& value) noexcept {
   if (LIKELY(checkConversion<Tgt>(value))) {
@@ -1418,7 +1284,7 @@ inline std::string errorValue(const Src& value) {
 template <typename Tgt, typename Src>
 using IsArithToArith = bool_constant<
     !std::is_same<Tgt, Src>::value && !std::is_same<Tgt, bool>::value &&
-    std::is_arithmetic<Src>::value && std::is_arithmetic<Tgt>::value>;
+    is_arithmetic_v<Src> && is_arithmetic_v<Tgt>>;
 
 } // namespace detail
 
@@ -1465,28 +1331,50 @@ parseTo(StringPiece in, T& out) noexcept {
 
 FOLLY_NODISCARD
 inline Expected<StringPiece, ConversionCode> parseTo(
-    StringPiece in,
-    StringPiece& out) noexcept {
+    StringPiece in, StringPiece& out) noexcept {
   out = in;
   return StringPiece{in.end(), in.end()};
 }
 
-FOLLY_NODISCARD
-inline Expected<StringPiece, ConversionCode> parseTo(
-    StringPiece in,
-    std::string& out) {
+namespace detail {
+
+template <class Str>
+FOLLY_ERASE Expected<StringPiece, ConversionCode> parseToStr(
+    StringPiece in, Str& out) {
   out.clear();
   out.append(in.data(), in.size()); // TODO try/catch?
   return StringPiece{in.end(), in.end()};
 }
 
+} // namespace detail
+
 FOLLY_NODISCARD
 inline Expected<StringPiece, ConversionCode> parseTo(
-    StringPiece in,
-    fbstring& out) {
-  out.clear();
-  out.append(in.data(), in.size()); // TODO try/catch?
+    StringPiece in, std::string& out) {
+  return detail::parseToStr(in, out);
+}
+
+#if FOLLY_HAS_STRING_VIEW
+FOLLY_NODISCARD
+inline Expected<StringPiece, ConversionCode> parseTo(
+    StringPiece in, std::string_view& out) {
+  out = std::string_view(in.data(), in.size());
   return StringPiece{in.end(), in.end()};
+}
+#endif
+
+FOLLY_NODISCARD
+inline Expected<StringPiece, ConversionCode> parseTo(
+    StringPiece in, fbstring& out) {
+  return detail::parseToStr(in, out);
+}
+
+template <class Str>
+FOLLY_NODISCARD inline typename std::enable_if<
+    IsSomeString<Str>::value,
+    Expected<StringPiece, ConversionCode>>::type
+parseTo(StringPiece in, Str& out) {
+  return detail::parseToStr(in, out);
 }
 
 namespace detail {
@@ -1531,8 +1419,8 @@ parseToWrap(StringPiece sp, Tgt& out) {
 }
 
 template <typename Tgt>
-using ParseToError = ExpectedErrorType<decltype(
-    detail::parseToWrap(StringPiece{}, std::declval<Tgt&>()))>;
+using ParseToError = ExpectedErrorType<decltype(detail::parseToWrap(
+    StringPiece{}, std::declval<Tgt&>()))>;
 
 } // namespace detail
 
@@ -1549,7 +1437,7 @@ tryTo(StringPiece src) {
   Tgt result{};
   using Error = detail::ParseToError<Tgt>;
   using Check = typename std::conditional<
-      std::is_arithmetic<Tgt>::value,
+      is_arithmetic_v<Tgt>,
       detail::CheckTrailingSpace,
       detail::ReturnUnit<Error>>::type;
   return parseTo(src, result).then(Check(), [&](Unit) {
@@ -1572,7 +1460,7 @@ inline
   Tgt result{};
   using Error = detail::ParseToError<Tgt>;
   using Check = typename std::conditional<
-      std::is_arithmetic<Tgt>::value,
+      is_arithmetic_v<Tgt>,
       detail::CheckTrailingSpace,
       detail::ReturnUnit<Error>>::type;
   auto tmp = detail::parseToWrap(src, result);

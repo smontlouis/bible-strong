@@ -59,8 +59,8 @@ class SkipListNode {
       typename U,
       typename =
           typename std::enable_if<std::is_convertible<U, T>::value>::type>
-  static SkipListNode*
-  create(NodeAlloc& alloc, int height, U&& data, bool isHead = false) {
+  static SkipListNode* create(
+      NodeAlloc& alloc, int height, U&& data, bool isHead = false) {
     DCHECK(height >= 1 && height < 64) << height;
 
     size_t size =
@@ -76,7 +76,8 @@ class SkipListNode {
     size_t size = sizeof(SkipListNode) +
         node->height_ * sizeof(std::atomic<SkipListNode*>);
     node->~SkipListNode();
-    std::allocator_traits<NodeAlloc>::deallocate(alloc, node, size);
+    std::allocator_traits<NodeAlloc>::deallocate(
+        alloc, typename std::allocator_traits<NodeAlloc>::pointer(node), size);
   }
 
   template <typename NodeAlloc>
@@ -96,7 +97,7 @@ class SkipListNode {
 
   inline SkipListNode* skip(int layer) const {
     DCHECK_LT(layer, height_);
-    return skip_[layer].load(std::memory_order_consume);
+    return skip_[layer].load(std::memory_order_acquire);
   }
 
   // next valid node as in the linked list
@@ -113,39 +114,21 @@ class SkipListNode {
     skip_[h].store(next, std::memory_order_release);
   }
 
-  value_type& data() {
-    return data_;
-  }
-  const value_type& data() const {
-    return data_;
-  }
-  int maxLayer() const {
-    return height_ - 1;
-  }
-  int height() const {
-    return height_;
-  }
+  value_type& data() { return data_; }
+  const value_type& data() const { return data_; }
+  int maxLayer() const { return height_ - 1; }
+  int height() const { return height_; }
 
   std::unique_lock<MicroSpinLock> acquireGuard() {
     return std::unique_lock<MicroSpinLock>(spinLock_);
   }
 
-  bool fullyLinked() const {
-    return getFlags() & FULLY_LINKED;
-  }
-  bool markedForRemoval() const {
-    return getFlags() & MARKED_FOR_REMOVAL;
-  }
-  bool isHeadNode() const {
-    return getFlags() & IS_HEAD_NODE;
-  }
+  bool fullyLinked() const { return getFlags() & FULLY_LINKED; }
+  bool markedForRemoval() const { return getFlags() & MARKED_FOR_REMOVAL; }
+  bool isHeadNode() const { return getFlags() & IS_HEAD_NODE; }
 
-  void setIsHeadNode() {
-    setFlags(uint16_t(getFlags() | IS_HEAD_NODE));
-  }
-  void setFullyLinked() {
-    setFlags(uint16_t(getFlags() | FULLY_LINKED));
-  }
+  void setIsHeadNode() { setFlags(uint16_t(getFlags() | IS_HEAD_NODE)); }
+  void setFullyLinked() { setFlags(uint16_t(getFlags() | FULLY_LINKED)); }
   void setMarkedForRemoval() {
     setFlags(uint16_t(getFlags() | MARKED_FOR_REMOVAL));
   }
@@ -172,9 +155,7 @@ class SkipListNode {
     }
   }
 
-  uint16_t getFlags() const {
-    return flags_.load(std::memory_order_consume);
-  }
+  uint16_t getFlags() const { return flags_.load(std::memory_order_acquire); }
   void setFlags(uint16_t flags) {
     flags_.store(flags, std::memory_order_release);
   }
@@ -219,9 +200,7 @@ class SkipListRandomHeight {
   }
 
  private:
-  SkipListRandomHeight() {
-    initLookupTable();
-  }
+  SkipListRandomHeight() { initLookupTable(); }
 
   void initLookupTable() {
     // set skip prob = 1/E
@@ -268,9 +247,7 @@ class NodeRecycler<
     lock_.init();
   }
 
-  explicit NodeRecycler() : refs_(0), dirty_(false) {
-    lock_.init();
-  }
+  explicit NodeRecycler() : refs_(0), dirty_(false) { lock_.init(); }
 
   ~NodeRecycler() {
     CHECK_EQ(refs(), 0);
@@ -292,55 +269,47 @@ class NodeRecycler<
     dirty_.store(true, std::memory_order_relaxed);
   }
 
-  int addRef() {
-    return refs_.fetch_add(1, std::memory_order_relaxed);
-  }
+  int addRef() { return refs_.fetch_add(1, std::memory_order_acq_rel); }
 
   int releaseRef() {
-    // We don't expect to clean the recycler immediately everytime it is OK
-    // to do so. Here, it is possible that multiple accessors all release at
-    // the same time but nobody would clean the recycler here. If this
-    // happens, the recycler will usually still get cleaned when
-    // such a race doesn't happen. The worst case is the recycler will
-    // eventually get deleted along with the skiplist.
-    if (LIKELY(!dirty_.load(std::memory_order_relaxed) || refs() > 1)) {
-      return refs_.fetch_add(-1, std::memory_order_relaxed);
+    // This if statement is purely an optimization. It's possible that this
+    // misses an opportunity to delete, but that's OK, we'll try again at
+    // the next opportunity. It does not harm the thread safety. For this
+    // reason, we can use relaxed loads to make the decision.
+    if (!dirty_.load(std::memory_order_relaxed) || refs() > 1) {
+      return refs_.fetch_add(-1, std::memory_order_acq_rel);
     }
 
     std::unique_ptr<std::vector<NodeType*>> newNodes;
+    int ret;
     {
+      // The order at which we lock, add, swap, is very important for
+      // correctness.
       std::lock_guard<MicroSpinLock> g(lock_);
-      if (nodes_.get() == nullptr || refs() > 1) {
-        return refs_.fetch_add(-1, std::memory_order_relaxed);
+      ret = refs_.fetch_add(-1, std::memory_order_acq_rel);
+      if (ret == 0) {
+        // When refs_ reachs 0, it is safe to remove all the current nodes
+        // in the recycler, as we already acquired the lock here so no more
+        // new nodes can be added, even though new accessors may be added
+        // after this.
+        newNodes.swap(nodes_);
+        dirty_.store(false, std::memory_order_relaxed);
       }
-      // once refs_ reaches 1 and there is no other accessor, it is safe to
-      // remove all the current nodes in the recycler, as we already acquired
-      // the lock here so no more new nodes can be added, even though new
-      // accessors may be added after that.
-      newNodes.swap(nodes_);
-      dirty_.store(false, std::memory_order_relaxed);
     }
-
     // TODO(xliu) should we spawn a thread to do this when there are large
     // number of nodes in the recycler?
-    for (auto& node : *newNodes) {
-      NodeType::destroy(alloc_, node);
+    if (newNodes) {
+      for (auto& node : *newNodes) {
+        NodeType::destroy(alloc_, node);
+      }
     }
-
-    // decrease the ref count at the very end, to minimize the
-    // chance of other threads acquiring lock_ to clear the deleted
-    // nodes again.
-    return refs_.fetch_add(-1, std::memory_order_relaxed);
+    return ret;
   }
 
-  NodeAlloc& alloc() {
-    return alloc_;
-  }
+  NodeAlloc& alloc() { return alloc_; }
 
  private:
-  int refs() const {
-    return refs_.load(std::memory_order_relaxed);
-  }
+  int refs() const { return refs_.load(std::memory_order_relaxed); }
 
   std::unique_ptr<std::vector<NodeType*>> nodes_;
   std::atomic<int32_t> refs_; // current number of visitors to the list
@@ -365,9 +334,7 @@ class NodeRecycler<
 
   void add(NodeType* /* node */) {}
 
-  NodeAlloc& alloc() {
-    return alloc_;
-  }
+  NodeAlloc& alloc() { return alloc_; }
 
  private:
   NodeAlloc alloc_;

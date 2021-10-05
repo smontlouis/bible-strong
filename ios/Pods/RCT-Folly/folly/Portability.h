@@ -16,20 +16,22 @@
 
 #pragma once
 
-// MSCV 2017 __cplusplus definition by default does not track the C++ version.
-// https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
-#if !defined(_MSC_VER) || _MSC_VER >= 2000
-static_assert(__cplusplus >= 201402L, "__cplusplus >= 201402L");
-#endif
-
-#if defined(__GNUC__) && !defined(__clang__)
-static_assert(__GNUC__ >= 5, "__GNUC__ >= 5");
-#endif
-
 #include <cstddef>
 
 #include <folly/CPortability.h>
 #include <folly/portability/Config.h>
+
+#if defined(_MSC_VER)
+#define FOLLY_CPLUSPLUS _MSVC_LANG
+#else
+#define FOLLY_CPLUSPLUS __cplusplus
+#endif
+
+static_assert(FOLLY_CPLUSPLUS >= 201402L, "__cplusplus >= 201402L");
+
+#if defined(__GNUC__) && !defined(__clang__)
+static_assert(__GNUC__ >= 5, "__GNUC__ >= 5");
+#endif
 
 // Unaligned loads and stores
 namespace folly {
@@ -107,11 +109,18 @@ constexpr bool kHasUnalignedAccess = false;
 #define FOLLY_PPC64 0
 #endif
 
+#if defined(__s390x__)
+#define FOLLY_S390X 1
+#else
+#define FOLLY_S390X 0
+#endif
+
 namespace folly {
 constexpr bool kIsArchArm = FOLLY_ARM == 1;
 constexpr bool kIsArchAmd64 = FOLLY_X64 == 1;
 constexpr bool kIsArchAArch64 = FOLLY_AARCH64 == 1;
 constexpr bool kIsArchPPC64 = FOLLY_PPC64 == 1;
+constexpr bool kIsArchS390X = FOLLY_S390X == 1;
 } // namespace folly
 
 namespace folly {
@@ -163,16 +172,7 @@ constexpr bool kIsSanitize = false;
 #endif
 
 // Generalize warning push/pop.
-#if defined(_MSC_VER)
-#define FOLLY_PUSH_WARNING __pragma(warning(push))
-#define FOLLY_POP_WARNING __pragma(warning(pop))
-// Disable the GCC warnings.
-#define FOLLY_GNU_DISABLE_WARNING(warningName)
-#define FOLLY_GCC_DISABLE_WARNING(warningName)
-#define FOLLY_CLANG_DISABLE_WARNING(warningName)
-#define FOLLY_MSVC_DISABLE_WARNING(warningNumber) \
-  __pragma(warning(disable : warningNumber))
-#elif defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 // Clang & GCC
 #define FOLLY_PUSH_WARNING _Pragma("GCC diagnostic push")
 #define FOLLY_POP_WARNING _Pragma("GCC diagnostic pop")
@@ -190,6 +190,15 @@ constexpr bool kIsSanitize = false;
   FOLLY_GNU_DISABLE_WARNING(warningName)
 #endif
 #define FOLLY_MSVC_DISABLE_WARNING(warningNumber)
+#elif defined(_MSC_VER)
+#define FOLLY_PUSH_WARNING __pragma(warning(push))
+#define FOLLY_POP_WARNING __pragma(warning(pop))
+// Disable the GCC warnings.
+#define FOLLY_GNU_DISABLE_WARNING(warningName)
+#define FOLLY_GCC_DISABLE_WARNING(warningName)
+#define FOLLY_CLANG_DISABLE_WARNING(warningName)
+#define FOLLY_MSVC_DISABLE_WARNING(warningNumber) \
+  __pragma(warning(disable : warningNumber))
 #else
 #define FOLLY_PUSH_WARNING
 #define FOLLY_POP_WARNING
@@ -206,27 +215,6 @@ constexpr bool kIsSanitize = false;
   FOLLY_GNU_DISABLE_WARNING("-Wshadow")
 #else
 #define FOLLY_GCC_DISABLE_NEW_SHADOW_WARNINGS /* empty */
-#endif
-
-/* Platform specific TLS support
- * gcc implements __thread
- * msvc implements __declspec(thread)
- * the semantics are the same
- * (but remember __thread has different semantics when using emutls (ex. apple))
- */
-#if defined(_MSC_VER)
-#define FOLLY_TLS __declspec(thread)
-#elif defined(__GNUC__)
-#define FOLLY_TLS __thread
-#else
-#error cannot define platform specific thread local storage
-#endif
-
-// disable FOLLY_TLS on 32 bit Apple/iOS
-#if defined(__APPLE__) && FOLLY_MOBILE
-#if (__SIZEOF_POINTER__ == 4)
-#undef FOLLY_TLS
-#endif
 #endif
 
 // It turns out that GNU libstdc++ and LLVM libc++ differ on how they implement
@@ -327,6 +315,15 @@ constexpr auto kIsLittleEndian = __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__;
 constexpr auto kIsBigEndian = !kIsLittleEndian;
 } // namespace folly
 
+// Weak
+namespace folly {
+#if FOLLY_HAVE_WEAK_SYMBOLS
+constexpr auto kHasWeakSymbols = true;
+#else
+constexpr auto kHasWeakSymbols = false;
+#endif
+} // namespace folly
+
 #ifndef FOLLY_SSE
 #if defined(__SSE4_2__)
 #define FOLLY_SSE 4
@@ -352,6 +349,14 @@ constexpr auto kIsBigEndian = !kIsLittleEndian;
 #endif
 #endif
 
+#ifndef FOLLY_SSSE
+#if defined(__SSSE3__)
+#define FOLLY_SSSE 3
+#else
+#define FOLLY_SSSE 0
+#endif
+#endif
+
 #define FOLLY_SSE_PREREQ(major, minor) \
   (FOLLY_SSE > major || FOLLY_SSE == major && FOLLY_SSE_MINOR >= minor)
 
@@ -366,11 +371,6 @@ namespace FOLLY_GFLAGS_NAMESPACE {}
 namespace gflags {
 using namespace FOLLY_GFLAGS_NAMESPACE;
 } // namespace gflags
-#endif
-
-// for TARGET_OS_IPHONE
-#ifdef __APPLE__
-#include <TargetConditionals.h> // @manual
 #endif
 
 // RTTI may not be enabled for this compilation unit.
@@ -392,6 +392,30 @@ constexpr bool const kHasRtti = FOLLY_HAS_RTTI;
 // This priority is already used by JEMalloc and other memory allocators so
 // we will take the next one.
 #define FOLLY_STATIC_CTOR_PRIORITY_MAX __attribute__((__init_priority__(102)))
+#endif
+
+#if defined(__APPLE__) && TARGET_OS_IOS
+#define FOLLY_APPLE_IOS 1
+#else
+#define FOLLY_APPLE_IOS 0
+#endif
+
+#if defined(__APPLE__) && TARGET_OS_OSX
+#define FOLLY_APPLE_MACOS 1
+#else
+#define FOLLY_APPLE_MACOS 0
+#endif
+
+#if defined(__APPLE__) && TARGET_OS_TV
+#define FOLLY_APPLE_TVOS 1
+#else
+#define FOLLY_APPLE_TVOS 0
+#endif
+
+#if defined(__APPLE__) && TARGET_OS_WATCH
+#define FOLLY_APPLE_WATCHOS 1
+#else
+#define FOLLY_APPLE_WATCHOS 0
 #endif
 
 namespace folly {
@@ -419,6 +443,17 @@ constexpr auto kIsWindows = true;
 #else
 constexpr auto kIsWindows = false;
 #endif
+
+#if defined(__APPLE__)
+constexpr auto kIsApple = true;
+#else
+constexpr auto kIsApple = false;
+#endif
+
+constexpr bool kIsAppleIOS = FOLLY_APPLE_IOS == 1;
+constexpr bool kIsAppleMacOS = FOLLY_APPLE_MACOS == 1;
+constexpr bool kIsAppleTVOS = FOLLY_APPLE_TVOS == 1;
+constexpr bool kIsAppleWatchOS = FOLLY_APPLE_WATCHOS == 1;
 
 #if __GLIBCXX__
 constexpr auto kIsGlibcxx = true;
@@ -458,8 +493,10 @@ constexpr auto kGnuc = 0;
 
 #if __clang__
 constexpr auto kIsClang = true;
+constexpr auto kClangVerMajor = __clang_major__;
 #else
 constexpr auto kIsClang = false;
+constexpr auto kClangVerMajor = 0;
 #endif
 
 #if FOLLY_MICROSOFT_ABI_VER
@@ -496,7 +533,19 @@ constexpr auto kCpplibVer = 0;
 
 #if __cplusplus >= 201703L
 // folly::coro requires C++17 support
-#if __cpp_coroutines >= 201703L && __has_include(<experimental/coroutine>)
+#if defined(_WIN32) && defined(__clang__) && !defined(LLVM_COROUTINES)
+// LLVM and MSVC coroutines are ABI incompatible, so for the MSVC implementation
+// of <experimental/coroutine> on Windows we *don't* have coroutines.
+//
+// LLVM_COROUTINES indicates that LLVM compatible header is added to include
+// path and can be used.
+//
+// Worse, if we define FOLLY_HAS_COROUTINES 1 we will include
+// <experimental/coroutine> which will conflict with anyone who wants to load
+// the LLVM implementation of coroutines on Windows.
+#define FOLLY_HAS_COROUTINES 0
+#elif (__cpp_coroutines >= 201703L || __cpp_impl_coroutine >= 201902L) && \
+    (__has_include(<coroutine>) || __has_include(<experimental/coroutine>))
 #define FOLLY_HAS_COROUTINES 1
 // This is mainly to workaround bugs triggered by LTO, when stack allocated
 // variables in await_suspend end up on a coroutine frame.
@@ -527,18 +576,9 @@ constexpr auto kCpplibVer = 0;
 #endif
 
 // feature test __cpp_lib_string_view is defined in <string>, which is
-// too heavy to include here.  MSVC __has_include support arrived later
-// than string_view, so we need an alternate case for it.
-#ifdef __has_include
-#if __has_include(<string_view>) && __cplusplus >= 201703L
+// too heavy to include here.
+#if __has_include(<string_view>) && FOLLY_CPLUSPLUS >= 201703L
 #define FOLLY_HAS_STRING_VIEW 1
 #else
 #define FOLLY_HAS_STRING_VIEW 0
 #endif
-#else // __has_include
-#if _MSC_VER >= 1910 && (_MSVC_LANG > 201402 || __cplusplus > 201402)
-#define FOLLY_HAS_STRING_VIEW 1
-#else
-#define FOLLY_HAS_STRING_VIEW 0
-#endif
-#endif // __has_include

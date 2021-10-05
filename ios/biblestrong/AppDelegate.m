@@ -26,6 +26,7 @@
 #import <FlipperKitNetworkPlugin/FlipperKitNetworkPlugin.h>
 #import <SKIOSNetworkPlugin/SKIOSNetworkAdapter.h>
 #import <FlipperKitReactPlugin/FlipperKitReactPlugin.h>
+
 static void InitializeFlipper(UIApplication *application) {
   FlipperClient *client = [FlipperClient sharedClient];
   SKDescriptorMapper *layoutDescriptorMapper = [[SKDescriptorMapper alloc] initWithDefaults];
@@ -37,6 +38,13 @@ static void InitializeFlipper(UIApplication *application) {
 }
 #endif
 
+@interface AppDelegate () <RCTBridgeDelegate>
+ 
+@property (nonatomic, strong) UMModuleRegistryAdapter *moduleRegistryAdapter;
+ 
+@end
+ 
+
 @implementation AppDelegate
 
 @synthesize window = _window;
@@ -47,8 +55,7 @@ static void InitializeFlipper(UIApplication *application) {
     InitializeFlipper(application);
   #endif
 
-  self.moduleRegistryAdapter = [[UMModuleRegistryAdapter alloc] initWithModuleRegistryProvider:[[UMModuleRegistryProvider alloc] init]];
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  self.moduleRegistryAdapter = [[UMModuleRegistryAdapter alloc] initWithModuleRegistryProvider:[[UMModuleRegistryProvider alloc] init]];  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"biblestrong" initialProperties:nil];
   if (@available(iOS 13.0, *)) {
       rootView.backgroundColor = [UIColor systemBackgroundColor];
@@ -73,10 +80,9 @@ static void InitializeFlipper(UIApplication *application) {
 
 - (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge
 {
-  NSArray<id<RCTBridgeModule>> *extraModules = [_moduleRegistryAdapter extraModulesForBridge:bridge];
-  // You can inject any extra modules that you would like here, more information at:
-  // https://facebook.github.io/react-native/docs/native-modules-ios.html#dependency-injection
-  return extraModules;
+    NSArray<id<RCTBridgeModule>> *extraModules = [_moduleRegistryAdapter extraModulesForBridge:bridge];
+    // If you'd like to export some custom RCTBridgeModules that are not Expo modules, add them here!
+    return extraModules;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge {

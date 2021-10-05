@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <sstream>
 #include <type_traits>
 
 #include <boost/algorithm/string.hpp>
@@ -29,6 +30,7 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 #include <folly/Unicode.h>
+#include <folly/Utility.h>
 #include <folly/lang/Bits.h>
 #include <folly/portability/Constexpr.h>
 
@@ -53,20 +55,67 @@ parse_error make_parse_error(
 }
 
 struct Printer {
+  // Context class is allows to restore the path to element that we are about to
+  // print so that if error happens we can throw meaningful exception.
+  class Context {
+   public:
+    Context(const Context* parent_context, const dynamic& key)
+        : parent_context_(parent_context), key_(key), is_key_(false) {}
+    Context(const Context* parent_context, const dynamic& key, bool is_key)
+        : parent_context_(parent_context), key_(key), is_key_(is_key) {}
+
+    // Return location description of a context as a chain of keys
+    // ex., '"outherKey"->"innerKey"'.
+    std::string locationDescription() const {
+      std::vector<std::string> keys;
+      const Context* ptr = parent_context_;
+      while (ptr) {
+        keys.push_back(ptr->getName());
+        ptr = ptr->parent_context_;
+      }
+      keys.push_back(getName());
+      std::ostringstream stream;
+      std::reverse_copy(
+          keys.begin(),
+          keys.end() - 1,
+          std::ostream_iterator<std::string>(stream, "->"));
+
+      // Add current key.
+      stream << keys.back();
+      return stream.str();
+    }
+    std::string getName() const {
+      return Printer::toStringOr(key_, "<unprintable>");
+    }
+    std::string typeDescription() const { return is_key_ ? "key" : "value"; }
+
+   private:
+    const Context* const parent_context_;
+    const dynamic& key_;
+    bool is_key_;
+  };
+
   explicit Printer(
-      std::string& out,
-      unsigned* indentLevel,
-      serialization_opts const* opts)
+      std::string& out, unsigned* indentLevel, serialization_opts const* opts)
       : out_(out), indentLevel_(indentLevel), opts_(*opts) {}
 
-  void operator()(dynamic const& v) const {
+  void operator()(dynamic const& v, const Context& context) const {
+    (*this)(v, &context);
+  }
+  void operator()(dynamic const& v, const Context* context) const {
     switch (v.type()) {
       case dynamic::DOUBLE:
-        if (!opts_.allow_nan_inf &&
-            (std::isnan(v.asDouble()) || std::isinf(v.asDouble()))) {
-          throw json::parse_error(
-              "folly::toJson: JSON object value was a "
-              "NaN or INF");
+        if (!opts_.allow_nan_inf) {
+          if (std::isnan(v.asDouble())) {
+            throw json::print_error(
+                "folly::toJson: JSON object value was a NaN when serializing " +
+                contextDescription(context));
+          }
+          if (std::isinf(v.asDouble())) {
+            throw json::print_error(
+                "folly::toJson: JSON object value was an INF when serializing " +
+                contextDescription(context));
+          }
         }
         toAppend(
             v.asDouble(), &out_, opts_.double_mode, opts_.double_num_digits);
@@ -91,10 +140,10 @@ struct Printer {
         escapeString(v.asString(), out_, opts_);
         break;
       case dynamic::OBJECT:
-        printObject(v);
+        printObject(v, context);
         break;
       case dynamic::ARRAY:
-        printArray(v);
+        printArray(v, context);
         break;
       default:
         CHECK(0) << "Bad type " << v.type();
@@ -102,28 +151,33 @@ struct Printer {
   }
 
  private:
-  void printKV(const std::pair<const dynamic, dynamic>& p) const {
+  void printKV(
+      const std::pair<const dynamic, dynamic>& p,
+      const Context* context) const {
     if (!opts_.allow_non_string_keys && !p.first.isString()) {
-      throw json::parse_error(
-          "folly::toJson: JSON object key was not a "
-          "string");
+      throw json::print_error(
+          "folly::toJson: JSON object key " +
+          toStringOr(p.first, "<unprintable key>") +
+          " was not a string when serializing key at " +
+          Context(context, p.first, true).locationDescription());
     }
-    (*this)(p.first);
+    (*this)(p.first, Context(context, p.first, true)); // Key
     mapColon();
-    (*this)(p.second);
+    (*this)(p.second, Context(context, p.first, false)); // Value
   }
 
   template <typename Iterator>
-  void printKVPairs(Iterator begin, Iterator end) const {
-    printKV(*begin);
+  void printKVPairs(
+      Iterator begin, Iterator end, const Context* context) const {
+    printKV(*begin, context);
     for (++begin; begin != end; ++begin) {
       out_ += ',';
       newline();
-      printKV(*begin);
+      printKV(*begin, context);
     }
   }
 
-  void printObject(dynamic const& o) const {
+  void printObject(dynamic const& o, const Context* context) const {
     if (o.empty()) {
       out_ += "{}";
       return;
@@ -146,16 +200,38 @@ struct Printer {
       } else {
         sort_keys_by(refs.begin(), refs.end(), std::less<>());
       }
-      printKVPairs(refs.cbegin(), refs.cend());
+      printKVPairs(refs.cbegin(), refs.cend(), context);
     } else {
-      printKVPairs(o.items().begin(), o.items().end());
+      printKVPairs(o.items().begin(), o.items().end(), context);
     }
     outdent();
     newline();
     out_ += '}';
   }
 
-  void printArray(dynamic const& a) const {
+  static std::string toStringOr(dynamic const& v, const char* placeholder) {
+    try {
+      std::string result;
+      unsigned indentLevel = 0;
+      serialization_opts opts;
+      opts.allow_nan_inf = true;
+      opts.allow_non_string_keys = true;
+      Printer printer(result, &indentLevel, &opts);
+      printer(v, nullptr);
+      return result;
+    } catch (...) {
+      return placeholder;
+    }
+  }
+
+  static std::string contextDescription(const Context* context) {
+    if (!context) {
+      return "<undefined location>";
+    }
+    return context->typeDescription() + " at " + context->locationDescription();
+  }
+
+  void printArray(dynamic const& a, const Context* context) const {
     if (a.empty()) {
       out_ += "[]";
       return;
@@ -164,11 +240,11 @@ struct Printer {
     out_ += '[';
     indent();
     newline();
-    (*this)(a[0]);
-    for (auto& val : range(std::next(a.begin()), a.end())) {
+    (*this)(a[0], Context(context, dynamic(0)));
+    for (auto it = std::next(a.begin()); it != a.end(); ++it) {
       out_ += ',';
       newline();
-      (*this)(val);
+      (*this)(*it, Context(context, dynamic(std::distance(a.begin(), it))));
     }
     outdent();
     newline();
@@ -190,13 +266,12 @@ struct Printer {
 
   void newline() const {
     if (indentLevel_) {
-      out_ += to<std::string>('\n', std::string(*indentLevel_ * 2, ' '));
+      auto indent = *indentLevel_ * opts_.pretty_formatting_indent_width;
+      out_ += to<std::string>('\n', std::string(indent, ' '));
     }
   }
 
-  void mapColon() const {
-    out_ += indentLevel_ ? ": " : ":";
-  }
+  void mapColon() const { out_ += indentLevel_ ? ": " : ":"; }
 
  private:
   std::string& out_;
@@ -216,13 +291,9 @@ struct Input {
   Input(Input const&) = delete;
   Input& operator=(Input const&) = delete;
 
-  char const* begin() const {
-    return range_.begin();
-  }
+  char const* begin() const { return range_.begin(); }
 
-  unsigned getLineNum() const {
-    return lineNum_;
-  }
+  unsigned getLineNum() const { return lineNum_; }
 
   // Parse ahead for as long as the supplied predicate is satisfied,
   // returning a range of what was skipped.
@@ -287,13 +358,9 @@ struct Input {
     ++*this;
   }
 
-  std::size_t size() const {
-    return range_.size();
-  }
+  std::size_t size() const { return range_.size(); }
 
-  int operator*() const {
-    return current_;
-  }
+  int operator*() const { return current_; }
 
   void operator++() {
     range_.pop_front();
@@ -326,9 +393,7 @@ struct Input {
     throw json::make_parse_error(lineNum_, context(), what);
   }
 
-  json::serialization_opts const& getOpts() {
-    return opts_;
-  }
+  json::serialization_opts const& getOpts() { return opts_; }
 
   void incrementRecursionLevel() {
     if (currentRecursionLevel_ > opts_.recursion_limit) {
@@ -337,14 +402,10 @@ struct Input {
     currentRecursionLevel_++;
   }
 
-  void decrementRecursionLevel() {
-    currentRecursionLevel_--;
-  }
+  void decrementRecursionLevel() { currentRecursionLevel_--; }
 
  private:
-  void storeCurrent() {
-    current_ = range_.empty() ? EOF : range_.front();
-  }
+  void storeCurrent() { current_ = range_.empty() ? EOF : range_.front(); }
 
  private:
   StringPiece range_;
@@ -360,9 +421,7 @@ class RecursionGuard {
     in_.incrementRecursionLevel();
   }
 
-  ~RecursionGuard() {
-    in_.decrementRecursionLevel();
-  }
+  ~RecursionGuard() { in_.decrementRecursionLevel(); }
 
  private:
   Input& in_;
@@ -374,10 +433,7 @@ dynamic parseNumber(Input& in);
 
 template <class K>
 void parseObjectKeyValue(
-    Input& in,
-    dynamic& ret,
-    K&& key,
-    json::metadata_map* map) {
+    Input& in, dynamic& ret, K&& key, json::metadata_map* map) {
   auto keyLineNumber = in.getLineNum();
   in.skipWhitespace();
   in.expect(':');
@@ -557,24 +613,24 @@ std::string decodeUnicodeEscape(Input& in) {
     return ret;
   };
 
-  /*
-   * If the value encoded is in the surrogate pair range, we need to
-   * make sure there is another escape that we can use also.
-   */
-  uint32_t codePoint = readHex();
-  if (codePoint >= 0xd800 && codePoint <= 0xdbff) {
+  //  If the value encoded is in the surrogate pair range, we need to make
+  //  sure there is another escape that we can use also.
+  //
+  //  See the explanation in folly/Unicode.h.
+  uint16_t prefix = readHex();
+  char32_t codePoint = prefix;
+  if (utf16_code_unit_is_high_surrogate(prefix)) {
     if (!in.consume("\\u")) {
       in.error(
           "expected another unicode escape for second half of "
           "surrogate pair");
     }
-    uint16_t second = readHex();
-    if (second >= 0xdc00 && second <= 0xdfff) {
-      codePoint = 0x10000 + ((codePoint & 0x3ff) << 10) + (second & 0x3ff);
-    } else {
+    uint16_t suffix = readHex();
+    if (!utf16_code_unit_is_low_surrogate(suffix)) {
       in.error("second character in surrogate pair is invalid");
     }
-  } else if (codePoint >= 0xdc00 && codePoint <= 0xdfff) {
+    codePoint = unicode_code_point_from_utf16_surrogate_pair(prefix, suffix);
+  } else if (!utf16_code_unit_is_bmp(prefix)) {
     in.error("invalid unicode code point (in range [0xdc00,0xdfff])");
   }
 
@@ -676,7 +732,7 @@ std::string serialize(dynamic const& dyn, serialization_opts const& opts) {
   std::string ret;
   unsigned indentLevel = 0;
   Printer p(ret, opts.pretty_formatting ? &indentLevel : nullptr, &opts);
-  p(dyn);
+  p(dyn, nullptr);
   return ret;
 }
 
@@ -740,9 +796,7 @@ size_t firstEscapableInWord(T s, const serialization_opts& opts) {
 // Escape a string so that it is legal to print it in JSON text.
 template <bool EnableExtraAsciiEscapes>
 void escapeStringImpl(
-    StringPiece input,
-    std::string& out,
-    const serialization_opts& opts) {
+    StringPiece input, std::string& out, const serialization_opts& opts) {
   auto hexDigit = [](uint8_t c) -> char {
     return c < 10 ? c + '0' : c - 10 + 'a';
   };
@@ -758,7 +812,7 @@ void escapeStringImpl(
     // it literally into the output string.
     auto firstEsc = p;
     while (firstEsc < e) {
-      auto avail = e - firstEsc;
+      auto avail = to_unsigned(e - firstEsc);
       uint64_t word = 0;
       if (avail >= 8) {
         word = folly::loadUnaligned<uint64_t>(firstEsc);
@@ -876,9 +930,7 @@ void escapeStringImpl(
 }
 
 void escapeString(
-    StringPiece input,
-    std::string& out,
-    const serialization_opts& opts) {
+    StringPiece input, std::string& out, const serialization_opts& opts) {
   if (FOLLY_UNLIKELY(
           opts.extra_ascii_to_escape_bitmap[0] ||
           opts.extra_ascii_to_escape_bitmap[1])) {

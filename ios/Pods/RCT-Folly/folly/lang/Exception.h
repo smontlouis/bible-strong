@@ -23,6 +23,9 @@
 #include <folly/CPortability.h>
 #include <folly/CppAttributes.h>
 #include <folly/Portability.h>
+#include <folly/Traits.h>
+#include <folly/Utility.h>
+#include <folly/lang/TypeInfo.h>
 
 namespace folly {
 
@@ -48,52 +51,75 @@ template <typename Ex>
   throw_exception(static_cast<Ex&&>(ex));
 }
 
-// clang-format off
 namespace detail {
-template <typename T>
-FOLLY_ERASE T&& to_exception_arg_(T&& t) {
-  return static_cast<T&&>(t);
-}
-template <std::size_t N>
-FOLLY_ERASE char const* to_exception_arg_(
-    char const (&array)[N]) {
-  return static_cast<char const*>(array);
-}
+
+struct throw_exception_arg_array_ {
+  template <typename R>
+  using v = std::remove_extent_t<std::remove_reference_t<R>>;
+  template <typename R>
+  using apply = std::enable_if_t<std::is_same<char const, v<R>>::value, v<R>*>;
+};
+struct throw_exception_arg_trivial_ {
+  template <typename R>
+  using apply = remove_cvref_t<R>;
+};
+struct throw_exception_arg_base_ {
+  template <typename R>
+  using apply = R;
+};
+template <typename R>
+using throw_exception_arg_ = //
+    conditional_t<
+        std::is_array<std::remove_reference_t<R>>::value,
+        throw_exception_arg_array_,
+        conditional_t<
+            is_trivially_copyable_v<remove_cvref_t<R>>,
+            throw_exception_arg_trivial_,
+            throw_exception_arg_base_>>;
+template <typename R>
+using throw_exception_arg_t =
+    typename throw_exception_arg_<R>::template apply<R>;
+
 template <typename Ex, typename... Args>
-[[noreturn]] FOLLY_NOINLINE FOLLY_COLD void throw_exception_(Args&&... args) {
-  throw_exception(Ex(static_cast<Args&&>(args)...));
+[[noreturn]] FOLLY_NOINLINE FOLLY_COLD void throw_exception_(Args... args) {
+  throw_exception(Ex(static_cast<Args>(args)...));
 }
 template <typename Ex, typename... Args>
 [[noreturn]] FOLLY_NOINLINE FOLLY_COLD void terminate_with_(
-    Args&&... args) noexcept {
-  throw_exception(Ex(static_cast<Args&&>(args)...));
+    Args... args) noexcept {
+  throw_exception(Ex(static_cast<Args>(args)...));
 }
+
 } // namespace detail
-// clang-format on
 
 /// throw_exception
 ///
 /// Construct and throw an exception if exceptions are enabled, or terminate if
 /// compiled with -fno-exceptions.
 ///
-/// Converts any arguments of type `char const[N]` to `char const*`.
+/// Does not perfectly forward all its arguments. Instead, in the interest of
+/// minimizing common-case inline code size, decays its arguments as follows:
+/// * refs to arrays of char const are decayed to char const*
+/// * refs to arrays are otherwise invalid
+/// * refs to trivial types are decayed to values
+///
+/// The reason for treating refs to arrays as invalid is to avoid having two
+/// behaviors for refs to arrays, one for the general case and one for where the
+/// inner type is char const. Having two behaviors can be surprising, so avoid.
 template <typename Ex, typename... Args>
 [[noreturn]] FOLLY_ERASE void throw_exception(Args&&... args) {
-  detail::throw_exception_<Ex>(
-      detail::to_exception_arg_(static_cast<Args&&>(args))...);
+  detail::throw_exception_<Ex, detail::throw_exception_arg_t<Args&&>...>(
+      static_cast<Args&&>(args)...);
 }
 
 /// terminate_with
 ///
-/// Terminates as if by forwarding to throw_exception but in a noexcept context.
-// clang-format off
+/// Terminates as if by forwarding to throw_exception within a noexcept context.
 template <typename Ex, typename... Args>
-[[noreturn]] FOLLY_ERASE void
-terminate_with(Args&&... args) noexcept {
-  detail::terminate_with_<Ex>(
-      detail::to_exception_arg_(static_cast<Args&&>(args))...);
+[[noreturn]] FOLLY_ERASE void terminate_with(Args&&... args) {
+  detail::terminate_with_<Ex, detail::throw_exception_arg_t<Args>...>(
+      static_cast<Args&&>(args)...);
 }
-// clang-format on
 
 /// invoke_cold
 ///
@@ -101,7 +127,9 @@ terminate_with(Args&&... args) noexcept {
 ///
 /// Usage note:
 /// Passing extra values as arguments rather than capturing them allows smaller
-/// inlined native at the call-site.
+/// inlined native code at the call-site. Passing function-pointers or function-
+/// references rather than general callables with captures allows allows smaller
+/// inlined native code at the call-site as well.
 ///
 /// Example:
 ///
@@ -114,10 +142,25 @@ terminate_with(Args&&... args) noexcept {
 ///         },
 ///         i);
 ///   }
-template <typename F, typename... A>
-FOLLY_NOINLINE FOLLY_COLD auto invoke_cold(F&& f, A&&... a)
-    -> decltype(static_cast<F&&>(f)(static_cast<A&&>(a)...)) {
+template <
+    typename F,
+    typename... A,
+    typename FD = std::remove_pointer_t<std::decay_t<F>>,
+    std::enable_if_t<!std::is_function<FD>::value, int> = 0,
+    typename R = decltype(FOLLY_DECLVAL(F &&)(FOLLY_DECLVAL(A &&)...))>
+FOLLY_NOINLINE FOLLY_COLD R invoke_cold(F&& f, A&&... a) //
+    noexcept(noexcept(static_cast<F&&>(f)(static_cast<A&&>(a)...))) {
   return static_cast<F&&>(f)(static_cast<A&&>(a)...);
+}
+template <
+    typename F,
+    typename... A,
+    typename FD = std::remove_pointer_t<std::decay_t<F>>,
+    std::enable_if_t<std::is_function<FD>::value, int> = 0,
+    typename R = decltype(FOLLY_DECLVAL(F &&)(FOLLY_DECLVAL(A &&)...))>
+FOLLY_ERASE R invoke_cold(F&& f, A&&... a) //
+    noexcept(noexcept(f(static_cast<A&&>(a)...))) {
+  return f(static_cast<A&&>(a)...);
 }
 
 /// invoke_noreturn_cold
@@ -146,8 +189,7 @@ FOLLY_NOINLINE FOLLY_COLD auto invoke_cold(F&& f, A&&... a)
 ///   }
 template <typename F, typename... A>
 [[noreturn]] FOLLY_NOINLINE FOLLY_COLD void invoke_noreturn_cold(
-    F&& f,
-    A&&... a) {
+    F&& f, A&&... a) {
   static_cast<F&&>(f)(static_cast<A&&>(a)...);
   std::terminate();
 }
@@ -180,12 +222,16 @@ template <typename F, typename... A>
 ///      [](auto&& e, int num) { return num; },
 ///      def);
 ///  assert(result == input < 0 ? def : input);
-template <typename E, typename Try, typename Catch, typename... CatchA>
-FOLLY_ERASE_TRYCATCH auto catch_exception(Try&& t, Catch&& c, CatchA&&... a) ->
-    typename std::common_type<
-        decltype(static_cast<Try&&>(t)()),
-        decltype(static_cast<Catch&&>(
-            c)(std::declval<E>(), static_cast<CatchA&&>(a)...))>::type {
+template <
+    typename E,
+    typename Try,
+    typename Catch,
+    typename... CatchA,
+    typename R = std::common_type_t<
+        decltype(FOLLY_DECLVAL(Try &&)()),
+        decltype(FOLLY_DECLVAL(Catch &&)(
+            FOLLY_DECLVAL(E&), FOLLY_DECLVAL(CatchA&&)...))>>
+FOLLY_ERASE_TRYCATCH R catch_exception(Try&& t, Catch&& c, CatchA&&... a) {
 #if FOLLY_HAS_EXCEPTIONS
   try {
     return static_cast<Try&&>(t)();
@@ -220,11 +266,14 @@ FOLLY_ERASE_TRYCATCH auto catch_exception(Try&& t, Catch&& c, CatchA&&... a) ->
 ///      [](int num) { return num; },
 ///      def);
 ///  assert(result == input < 0 ? def : input);
-template <typename Try, typename Catch, typename... CatchA>
-FOLLY_ERASE_TRYCATCH auto catch_exception(Try&& t, Catch&& c, CatchA&&... a) ->
-    typename std::common_type<
-        decltype(static_cast<Try&&>(t)()),
-        decltype(static_cast<Catch&&>(c)(static_cast<CatchA&&>(a)...))>::type {
+template <
+    typename Try,
+    typename Catch,
+    typename... CatchA,
+    typename R = std::common_type_t<
+        decltype(FOLLY_DECLVAL(Try &&)()),
+        decltype(FOLLY_DECLVAL(Catch &&)(FOLLY_DECLVAL(CatchA &&)...))>>
+FOLLY_ERASE_TRYCATCH R catch_exception(Try&& t, Catch&& c, CatchA&&... a) {
 #if FOLLY_HAS_EXCEPTIONS
   try {
     return static_cast<Try&&>(t)();
@@ -235,6 +284,58 @@ FOLLY_ERASE_TRYCATCH auto catch_exception(Try&& t, Catch&& c, CatchA&&... a) ->
   [](auto&&...) {}(c, a...); // ignore
   return static_cast<Try&&>(t)();
 #endif
+}
+
+/// rethrow_current_exception
+///
+/// Equivalent to:
+///
+///   throw;
+[[noreturn]] FOLLY_ERASE void rethrow_current_exception() {
+#if FOLLY_HAS_EXCEPTIONS
+  throw;
+#else
+  std::terminate();
+#endif
+}
+
+//  exception_ptr_get_type
+//
+//  Returns the true runtime type info of the exception as stored.
+std::type_info const* exception_ptr_get_type(
+    std::exception_ptr const&) noexcept;
+
+//  exception_ptr_get_object
+//
+//  Returns the address of the stored exception as if it were upcast to the
+//  given type, if it could be upcast to that type. If no type is passed,
+//  returns the address of the stored exception without upcasting.
+//
+//  Note that the stored exception is always a copy of the thrown exception, and
+//  on some platforms caught exceptions may be copied from the stored exception.
+//  The address is only the address of the object as stored, not as thrown and
+//  not as caught.
+void* exception_ptr_get_object(
+    std::exception_ptr const&, std::type_info const*) noexcept;
+
+//  exception_ptr_get_object
+//
+//  Returns the true address of the exception as stored without upcasting.
+inline void* exception_ptr_get_object( //
+    std::exception_ptr const& ptr) noexcept {
+  return exception_ptr_get_object(ptr, nullptr);
+}
+
+//  exception_ptr_get_object
+//
+//  Returns the address of the stored exception as if it were upcast to the
+//  given type, if it could be upcast to that type.
+template <typename T>
+T* exception_ptr_get_object(std::exception_ptr const& ptr) noexcept {
+  static_assert(!std::is_reference<T>::value, "is a reference");
+  auto target = type_info_of<T>();
+  auto object = !target ? nullptr : exception_ptr_get_object(ptr, target);
+  return static_cast<T*>(object);
 }
 
 } // namespace folly

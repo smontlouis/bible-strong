@@ -70,8 +70,8 @@ struct ValueTypeForTransparentConversionToRange {
 template <typename T>
 struct ValueTypeForTransparentConversionToRange<
     T,
-    void_t<decltype(
-        std::declval<hasher<Range<typename T::value_type const*>>>()(
+    void_t<
+        decltype(std::declval<hasher<Range<typename T::value_type const*>>>()(
             std::declval<Range<typename T::value_type const*>>()))>> {
   using type = std::remove_const_t<typename T::value_type>;
 };
@@ -142,6 +142,27 @@ struct TransparentRangeHash {
 #endif
   }
 };
+
+template <
+    typename TableKey,
+    typename Hasher,
+    typename KeyEqual,
+    typename ArgKey>
+struct EligibleForHeterogeneousFind
+    : Conjunction<
+          is_transparent<Hasher>,
+          is_transparent<KeyEqual>,
+          is_invocable<Hasher, ArgKey const&>,
+          is_invocable<KeyEqual, ArgKey const&, TableKey const&>> {};
+
+template <
+    typename TableKey,
+    typename Hasher,
+    typename KeyEqual,
+    typename ArgKey>
+using EligibleForHeterogeneousInsert = Conjunction<
+    EligibleForHeterogeneousFind<TableKey, Hasher, KeyEqual, ArgKey>,
+    std::is_constructible<TableKey, ArgKey>>;
 
 } // namespace detail
 

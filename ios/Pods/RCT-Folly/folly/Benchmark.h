@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include <folly/BenchmarkUtil.h>
 #include <folly/Portability.h>
 #include <folly/Preprocessor.h> // for FB_ANONYMOUS_VARIABLE
+#include <folly/Range.h>
 #include <folly/ScopeGuard.h>
 #include <folly/Traits.h>
 #include <folly/functional/Invoke.h>
@@ -95,10 +97,13 @@ struct BenchmarkResult {
  * internally. Pass by value is intentional.
  */
 void addBenchmarkImpl(
-    const char* file,
-    const char* name,
-    BenchmarkFun,
-    bool useCounter);
+    const char* file, StringPiece name, BenchmarkFun, bool useCounter);
+
+/**
+ * Runs all benchmarks defined in the program, doesn't print by default.
+ * Usually used when customized printing of results is desired.
+ */
+std::vector<BenchmarkResult> runBenchmarksWithResults();
 
 } // namespace detail
 
@@ -110,9 +115,12 @@ struct BenchmarkSuspender {
   using TimePoint = Clock::time_point;
   using Duration = Clock::duration;
 
-  BenchmarkSuspender() {
-    start = Clock::now();
-  }
+  struct DismissedTag {};
+  static inline constexpr DismissedTag Dismissed{};
+
+  BenchmarkSuspender() : start(Clock::now()) {}
+
+  explicit BenchmarkSuspender(DismissedTag) : start(TimePoint{}) {}
 
   BenchmarkSuspender(const BenchmarkSuspender&) = delete;
   BenchmarkSuspender(BenchmarkSuspender&& rhs) noexcept {
@@ -121,7 +129,7 @@ struct BenchmarkSuspender {
   }
 
   BenchmarkSuspender& operator=(const BenchmarkSuspender&) = delete;
-  BenchmarkSuspender& operator=(BenchmarkSuspender&& rhs) {
+  BenchmarkSuspender& operator=(BenchmarkSuspender&& rhs) noexcept {
     if (start != TimePoint{}) {
       tally();
     }
@@ -149,9 +157,7 @@ struct BenchmarkSuspender {
 
   template <class F>
   auto dismissing(F f) -> invoke_result_t<F> {
-    SCOPE_EXIT {
-      rehire();
-    };
+    SCOPE_EXIT { rehire(); };
     dismiss();
     return f();
   }
@@ -160,9 +166,7 @@ struct BenchmarkSuspender {
    * This is for use inside of if-conditions, used in BENCHMARK macros.
    * If-conditions bypass the explicit on operator bool.
    */
-  explicit operator bool() const {
-    return false;
-  }
+  explicit operator bool() const { return false; }
 
   /**
    * Accumulates time spent outside benchmark.
@@ -187,8 +191,8 @@ struct BenchmarkSuspender {
  * function).
  */
 template <typename Lambda>
-typename std::enable_if<folly::is_invocable<Lambda, unsigned>::value>::type
-addBenchmark(const char* file, const char* name, Lambda&& lambda) {
+typename std::enable_if<folly::is_invocable_v<Lambda, unsigned>>::type
+addBenchmark(const char* file, StringPiece name, Lambda&& lambda) {
   auto execute = [=](unsigned int times) {
     BenchmarkSuspender::timeSpent = {};
     unsigned int niter;
@@ -212,8 +216,8 @@ addBenchmark(const char* file, const char* name, Lambda&& lambda) {
  * (iteration occurs outside the function).
  */
 template <typename Lambda>
-typename std::enable_if<folly::is_invocable<Lambda>::value>::type
-addBenchmark(const char* file, const char* name, Lambda&& lambda) {
+typename std::enable_if<folly::is_invocable_v<Lambda>>::type addBenchmark(
+    const char* file, StringPiece name, Lambda&& lambda) {
   addBenchmark(file, name, [=](unsigned int times) {
     unsigned int niter = 0;
     while (times-- > 0) {
@@ -229,8 +233,8 @@ addBenchmark(const char* file, const char* name, Lambda&& lambda) {
  */
 template <typename Lambda>
 typename std::enable_if<
-    folly::is_invocable<Lambda, UserCounters&, unsigned>::value>::type
-addBenchmark(const char* file, const char* name, Lambda&& lambda) {
+    folly::is_invocable_v<Lambda, UserCounters&, unsigned>>::type
+addBenchmark(const char* file, StringPiece name, Lambda&& lambda) {
   auto execute = [=](unsigned int times) {
     BenchmarkSuspender::timeSpent = {};
     unsigned int niter;
@@ -253,8 +257,8 @@ addBenchmark(const char* file, const char* name, Lambda&& lambda) {
 }
 
 template <typename Lambda>
-typename std::enable_if<folly::is_invocable<Lambda, UserCounters&>::value>::type
-addBenchmark(const char* file, const char* name, Lambda&& lambda) {
+typename std::enable_if<folly::is_invocable_v<Lambda, UserCounters&>>::type
+addBenchmark(const char* file, StringPiece name, Lambda&& lambda) {
   addBenchmark(file, name, [=](UserCounters& counters, unsigned int times) {
     unsigned int niter = 0;
     while (times-- > 0) {
@@ -264,102 +268,13 @@ addBenchmark(const char* file, const char* name, Lambda&& lambda) {
   });
 }
 
-/**
- * Call doNotOptimizeAway(var) to ensure that var will be computed even
- * post-optimization.  Use it for variables that are computed during
- * benchmarking but otherwise are useless. The compiler tends to do a
- * good job at eliminating unused variables, and this function fools it
- * into thinking var is in fact needed.
- *
- * Call makeUnpredictable(var) when you don't want the optimizer to use
- * its knowledge of var to shape the following code.  This is useful
- * when constant propagation or power reduction is possible during your
- * benchmark but not in real use cases.
- */
-
-#ifdef _MSC_VER
-
-#pragma optimize("", off)
-
-inline void doNotOptimizeDependencySink(const void*) {}
-
-#pragma optimize("", on)
-
-template <class T>
-void doNotOptimizeAway(const T& datum) {
-  doNotOptimizeDependencySink(&datum);
-}
-
-template <typename T>
-void makeUnpredictable(T& datum) {
-  doNotOptimizeDependencySink(&datum);
-}
-
-#else
-
-namespace detail {
-template <typename T>
-struct DoNotOptimizeAwayNeedsIndirect {
-  using Decayed = typename std::decay<T>::type;
-
-  // First two constraints ensure it can be an "r" operand.
-  // std::is_pointer check is because callers seem to expect that
-  // doNotOptimizeAway(&x) is equivalent to doNotOptimizeAway(x).
-  constexpr static bool value = !folly::is_trivially_copyable<Decayed>::value ||
-      sizeof(Decayed) > sizeof(long) || std::is_pointer<Decayed>::value;
-};
-} // namespace detail
-
-template <typename T>
-auto doNotOptimizeAway(const T& datum) -> typename std::enable_if<
-    !detail::DoNotOptimizeAwayNeedsIndirect<T>::value>::type {
-  // The "r" constraint forces the compiler to make datum available
-  // in a register to the asm block, which means that it must have
-  // computed/loaded it.  We use this path for things that are <=
-  // sizeof(long) (they have to fit), trivial (otherwise the compiler
-  // doesn't want to put them in a register), and not a pointer (because
-  // doNotOptimizeAway(&foo) would otherwise be a foot gun that didn't
-  // necessarily compute foo).
-  //
-  // An earlier version of this method had a more permissive input operand
-  // constraint, but that caused unnecessary variation between clang and
-  // gcc benchmarks.
-  asm volatile("" ::"r"(datum));
-}
-
-template <typename T>
-auto doNotOptimizeAway(const T& datum) -> typename std::enable_if<
-    detail::DoNotOptimizeAwayNeedsIndirect<T>::value>::type {
-  // This version of doNotOptimizeAway tells the compiler that the asm
-  // block will read datum from memory, and that in addition it might read
-  // or write from any memory location.  If the memory clobber could be
-  // separated into input and output that would be preferrable.
-  asm volatile("" ::"m"(datum) : "memory");
-}
-
-template <typename T>
-auto makeUnpredictable(T& datum) -> typename std::enable_if<
-    !detail::DoNotOptimizeAwayNeedsIndirect<T>::value>::type {
-  asm volatile("" : "+r"(datum));
-}
-
-template <typename T>
-auto makeUnpredictable(T& datum) -> typename std::enable_if<
-    detail::DoNotOptimizeAwayNeedsIndirect<T>::value>::type {
-  asm volatile("" ::"m"(datum) : "memory");
-}
-
-#endif
-
 struct dynamic;
 
 void benchmarkResultsToDynamic(
-    const std::vector<detail::BenchmarkResult>& data,
-    dynamic&);
+    const std::vector<detail::BenchmarkResult>& data, dynamic&);
 
 void benchmarkResultsFromDynamic(
-    const dynamic&,
-    std::vector<detail::BenchmarkResult>&);
+    const dynamic&, std::vector<detail::BenchmarkResult>&);
 
 void printResultComparison(
     const std::vector<detail::BenchmarkResult>& base,
