@@ -1,4 +1,12 @@
 module.exports = {
+  transformer: {
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: true,
+      },
+    }),
+  },
   resolver: {
     assetExts: [
       'db',
@@ -11,7 +19,7 @@ module.exports = {
       'jpeg',
       'json',
       'txt',
-      'html'
-    ]
-  }
+      'html',
+    ],
+  },
 }
