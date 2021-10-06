@@ -1,1 +1,0 @@
-../../../../../../../../BoringSSL-GRPC/ssl/test/runner/curve25519/const_amd64.h

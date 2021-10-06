@@ -1,1 +1,0 @@
-../../../../../node_modules/react-native-fbsdk/ios/RCTFBSDK/share/RCTFBSDKMessageDialog.h

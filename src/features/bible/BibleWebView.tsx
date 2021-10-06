@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Alert, View, Platform } from 'react-native'
-import AssetUtils from 'expo-asset-utils'
+import * as AssetUtils from 'expo-asset-utils'
 import { WebView } from 'react-native-webview'
 import * as Sentry from '@sentry/react-native'
 
@@ -70,6 +70,7 @@ class BibleWebView extends Component {
       SnackBar.show('Erreur lors de la lecture du fichier')
       Sentry.captureException(e)
     })
+
     this.fileUri = fileUri
 
     this.setState({ isHTMLFileLoaded: true })

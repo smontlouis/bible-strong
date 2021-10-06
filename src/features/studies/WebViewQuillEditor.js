@@ -3,7 +3,7 @@ import { withNavigation } from 'react-navigation'
 import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
-import AssetUtils from 'expo-asset-utils'
+import * as AssetUtils from 'expo-asset-utils'
 import * as Sentry from '@sentry/react-native'
 
 import books from '~assets/bible_versions/books-desc'
@@ -40,6 +40,7 @@ class WebViewQuillEditor extends React.Component {
     const { localUri } = await AssetUtils.resolveAsync(
       require('~features/studies/studiesWebView/dist/index.html')
     )
+    console.log({ p })
     this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
 
     this.setState({ isHTMLFileLoaded: true })

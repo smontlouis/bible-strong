@@ -1,6 +1,6 @@
 import 'react-native-root-siblings'
 import React, { useState, useEffect } from 'react'
-import { YellowBox, ActivityIndicator, View, StatusBar } from 'react-native'
+import { LogBox, ActivityIndicator, View, StatusBar } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
@@ -10,8 +10,6 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
 
-import SplashScreen from 'react-native-splash-screen'
-
 import { store, persistor } from '~redux/store'
 import { GlobalContext } from '~helpers/globalContext'
 import InitApp from './InitApp'
@@ -19,13 +17,15 @@ import { useInitIAP } from '~helpers/useInAppPurchases'
 import { setI18n } from './i18n'
 
 setAutoFreeze(false)
-YellowBox.ignoreWarnings([
-  'Require cycle:',
+LogBox.ignoreLogs([
+  'Require cycle',
   'LottieAnimation',
   'LottieAnimationView',
   'Setting a timer',
   'expoConstants',
   "Cannot read property 'name' of null",
+  'EventEmitter.removeListener',
+  'useNativeDriver',
 ])
 
 if (!__DEV__) {
@@ -78,7 +78,6 @@ const useAppLoad = () => {
 
   const handleFinishLoading = () => {
     setIsLoadingCompleted(true)
-    SplashScreen.hide()
   }
 
   return isLoadingCompleted
@@ -123,4 +122,4 @@ const App = () => {
   )
 }
 
-export default App
+export default Sentry.wrap(App)

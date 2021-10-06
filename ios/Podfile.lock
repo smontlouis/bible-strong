@@ -170,39 +170,43 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.3):
     - BoringSSL-GRPC/Interface (= 0.0.3)
   - BoringSSL-GRPC/Interface (0.0.3)
-  - CocoaAsyncSocket (7.6.5)
   - DoubleConversion (1.1.6)
-  - EXAppleAuthentication (2.0.0):
+  - EXAppleAuthentication (3.2.1):
     - UMCore
-  - EXAV (8.1.0):
+  - EXAV (9.2.3):
+    - ExpoModulesCore
     - UMCore
-    - UMFileSystemInterface
-    - UMPermissionsInterface
-  - EXConstants (9.0.0):
-    - UMConstantsInterface
+  - EXConstants (11.0.2):
+    - ExpoModulesCore
     - UMCore
-  - EXErrorRecovery (1.0.0):
+  - EXErrorRecovery (2.2.0):
     - UMCore
-  - EXFileSystem (8.1.0):
+  - EXFileSystem (11.1.3):
+    - ExpoModulesCore
     - UMCore
-    - UMFileSystemInterface
-  - EXFont (8.0.0):
+  - EXFont (9.2.1):
+    - ExpoModulesCore
     - UMCore
-    - UMFontInterface
-  - EXHaptics (8.0.0):
+  - EXHaptics (10.1.0):
     - UMCore
-  - EXImageLoader (1.0.1):
+  - EXImageLoader (2.2.0):
+    - ExpoModulesCore
     - React-Core
     - UMCore
-    - UMImageLoaderInterface
-  - EXLinearGradient (8.1.0):
+  - EXLinearGradient (9.2.0):
     - UMCore
-  - EXPermissions (8.1.0):
+  - ExpoModulesCore (0.2.0):
+    - ExpoModulesCore/Core (= 0.2.0)
+    - ExpoModulesCore/Interfaces (= 0.2.0)
     - UMCore
-    - UMPermissionsInterface
-  - EXSharing (8.0.0):
+  - ExpoModulesCore/Core (0.2.0):
     - UMCore
-    - UMFileSystemInterface
+  - ExpoModulesCore/Interfaces (0.2.0):
+    - ExpoModulesCore/Core
+    - UMCore
+  - EXSharing (9.2.1):
+    - ExpoModulesCore
+    - UMCore
   - FBLazyVector (0.66.0)
   - FBReactNativeSpec (0.66.0):
     - RCT-Folly (= 2021.06.28.00-v2)
@@ -225,6 +229,8 @@ PODS:
     - FBSDKShareKit/Share (= 5.8.0)
   - FBSDKShareKit/Share (5.8.0):
     - FBSDKCoreKit (~> 5.0)
+  - Firebase/Analytics (6.13.0):
+    - Firebase/Core
   - Firebase/Auth (6.13.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 6.4.0)
@@ -288,66 +294,6 @@ PODS:
     - FirebaseAuthInterop (~> 1.0)
     - FirebaseCore (~> 6.0)
     - GTMSessionFetcher/Core (~> 1.1)
-  - Flipper (0.99.0):
-    - Flipper-Folly (~> 2.6)
-    - Flipper-RSocket (~> 1.4)
-  - Flipper-Boost-iOSX (1.76.0.1.11)
-  - Flipper-DoubleConversion (3.1.7)
-  - Flipper-Fmt (7.1.7)
-  - Flipper-Folly (2.6.7):
-    - Flipper-Boost-iOSX
-    - Flipper-DoubleConversion
-    - Flipper-Fmt (= 7.1.7)
-    - Flipper-Glog
-    - libevent (~> 2.1.12)
-    - OpenSSL-Universal (= 1.1.180)
-  - Flipper-Glog (0.3.6)
-  - Flipper-PeerTalk (0.0.4)
-  - Flipper-RSocket (1.4.3):
-    - Flipper-Folly (~> 2.6)
-  - FlipperKit (0.99.0):
-    - FlipperKit/Core (= 0.99.0)
-  - FlipperKit/Core (0.99.0):
-    - Flipper (~> 0.99.0)
-    - FlipperKit/CppBridge
-    - FlipperKit/FBCxxFollyDynamicConvert
-    - FlipperKit/FBDefines
-    - FlipperKit/FKPortForwarding
-  - FlipperKit/CppBridge (0.99.0):
-    - Flipper (~> 0.99.0)
-  - FlipperKit/FBCxxFollyDynamicConvert (0.99.0):
-    - Flipper-Folly (~> 2.6)
-  - FlipperKit/FBDefines (0.99.0)
-  - FlipperKit/FKPortForwarding (0.99.0):
-    - CocoaAsyncSocket (~> 7.6)
-    - Flipper-PeerTalk (~> 0.0.4)
-  - FlipperKit/FlipperKitHighlightOverlay (0.99.0)
-  - FlipperKit/FlipperKitLayoutHelpers (0.99.0):
-    - FlipperKit/Core
-    - FlipperKit/FlipperKitHighlightOverlay
-    - FlipperKit/FlipperKitLayoutTextSearchable
-  - FlipperKit/FlipperKitLayoutIOSDescriptors (0.99.0):
-    - FlipperKit/Core
-    - FlipperKit/FlipperKitHighlightOverlay
-    - FlipperKit/FlipperKitLayoutHelpers
-    - YogaKit (~> 1.18)
-  - FlipperKit/FlipperKitLayoutPlugin (0.99.0):
-    - FlipperKit/Core
-    - FlipperKit/FlipperKitHighlightOverlay
-    - FlipperKit/FlipperKitLayoutHelpers
-    - FlipperKit/FlipperKitLayoutIOSDescriptors
-    - FlipperKit/FlipperKitLayoutTextSearchable
-    - YogaKit (~> 1.18)
-  - FlipperKit/FlipperKitLayoutTextSearchable (0.99.0)
-  - FlipperKit/FlipperKitNetworkPlugin (0.99.0):
-    - FlipperKit/Core
-  - FlipperKit/FlipperKitReactPlugin (0.99.0):
-    - FlipperKit/Core
-  - FlipperKit/FlipperKitUserDefaultsPlugin (0.99.0):
-    - FlipperKit/Core
-  - FlipperKit/SKIOSNetworkPlugin (0.99.0):
-    - FlipperKit/Core
-    - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
   - glog (0.3.5)
   - GoogleAppMeasurement (6.1.6):
@@ -399,25 +345,22 @@ PODS:
     - gRPC-Core/Interface (= 1.21.0)
     - nanopb (~> 0.3)
   - gRPC-Core/Interface (1.21.0)
-  - GTMAppAuth (1.0.0):
-    - AppAuth/Core (~> 1.0)
-    - GTMSessionFetcher (~> 1.1)
-  - GTMSessionFetcher (1.4.0):
-    - GTMSessionFetcher/Full (= 1.4.0)
-  - GTMSessionFetcher/Core (1.4.0)
-  - GTMSessionFetcher/Full (1.4.0):
-    - GTMSessionFetcher/Core (= 1.4.0)
-  - leveldb-library (1.22)
+  - GTMAppAuth (1.2.2):
+    - AppAuth/Core (~> 1.4)
+    - GTMSessionFetcher/Core (~> 1.5)
+  - GTMSessionFetcher/Core (1.7.0)
+  - hermes-engine (0.9.0)
+  - leveldb-library (1.22.1)
   - libevent (2.1.12)
-  - libwebp (1.1.0):
-    - libwebp/demux (= 1.1.0)
-    - libwebp/mux (= 1.1.0)
-    - libwebp/webp (= 1.1.0)
-  - libwebp/demux (1.1.0):
+  - libwebp (1.2.1):
+    - libwebp/demux (= 1.2.1)
+    - libwebp/mux (= 1.2.1)
+    - libwebp/webp (= 1.2.1)
+  - libwebp/demux (1.2.1):
     - libwebp/webp
-  - libwebp/mux (1.1.0):
+  - libwebp/mux (1.2.1):
     - libwebp/demux
-  - libwebp/webp (1.1.0)
+  - libwebp/webp (1.2.1)
   - lottie-ios (3.2.3)
   - lottie-react-native (4.1.3):
     - lottie-ios (~> 3.2.3)
@@ -427,7 +370,6 @@ PODS:
     - nanopb/encode (= 0.3.9011)
   - nanopb/decode (0.3.9011)
   - nanopb/encode (0.3.9011)
-  - OpenSSL-Universal (1.1.180)
   - PromisesObjC (1.2.12)
   - RCT-Folly (2021.06.28.00-v2):
     - boost
@@ -440,6 +382,12 @@ PODS:
     - DoubleConversion
     - fmt (~> 6.2.1)
     - glog
+  - RCT-Folly/Futures (2021.06.28.00-v2):
+    - boost
+    - DoubleConversion
+    - fmt (~> 6.2.1)
+    - glog
+    - libevent
   - RCTRequired (0.66.0)
   - RCTTypeSafety (0.66.0):
     - FBLazyVector (= 0.66.0)
@@ -606,6 +554,17 @@ PODS:
     - React-logger (= 0.66.0)
     - React-perflogger (= 0.66.0)
     - React-runtimeexecutor (= 0.66.0)
+  - React-hermes (0.66.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2021.06.28.00-v2)
+    - RCT-Folly/Futures (= 2021.06.28.00-v2)
+    - React-cxxreact (= 0.66.0)
+    - React-jsi (= 0.66.0)
+    - React-jsiexecutor (= 0.66.0)
+    - React-jsinspector (= 0.66.0)
+    - React-perflogger (= 0.66.0)
   - React-jsi (0.66.0):
     - boost (= 1.76.0)
     - DoubleConversion
@@ -641,17 +600,15 @@ PODS:
   - react-native-fbsdk/Share (1.1.2):
     - FBSDKShareKit (= 5.8)
     - React
-  - react-native-netinfo (5.5.1):
-    - React
-  - react-native-notifications (3.1.2):
-    - React
+  - react-native-netinfo (5.9.10):
+    - React-Core
+  - react-native-notifications (3.5.0):
+    - React-Core
   - react-native-restart (0.0.17):
-    - React
-  - react-native-splash-screen (3.2.0):
     - React
   - react-native-sqlite-storage (4.1.0):
     - React
-  - react-native-webview (11.0.2):
+  - react-native-webview (11.14.0):
     - React-Core
   - React-perflogger (0.66.0)
   - React-RCTActionSheet (0.66.0):
@@ -724,33 +681,34 @@ PODS:
     - React-Core
   - RNAppleAuthentication (0.2.0):
     - React
-  - RNCAsyncStorage (1.7.1):
+  - RNCAsyncStorage (1.12.1):
+    - React-Core
+  - RNCClipboard (1.5.1):
+    - React-Core
+  - RNCMaskedView (0.1.11):
     - React
-  - RNCClipboard (1.2.2):
+  - RNCPushNotificationIOS (1.10.1):
+    - React-Core
+  - RNDateTimePicker (2.6.2):
     - React
-  - RNCMaskedView (0.1.6):
-    - React
-  - RNCPushNotificationIOS (1.0.6):
-    - React
-  - RNDateTimePicker (2.2.1):
-    - React
-  - RNFastImage (8.1.5):
-    - React
-    - SDWebImage (~> 5.0)
-    - SDWebImageWebPCoder (~> 0.4.1)
-  - RNFBAnalytics (6.3.4):
+  - RNFastImage (8.5.11):
+    - React-Core
+    - SDWebImage (~> 5.11.1)
+    - SDWebImageWebPCoder (~> 0.8.4)
+  - RNFBAnalytics (6.7.2):
+    - Firebase/Analytics (~> 6.13.0)
     - Firebase/Core (~> 6.13.0)
     - React
     - RNFBApp
-  - RNFBApp (6.3.4):
+  - RNFBApp (6.7.1):
     - Firebase/Core (~> 6.13.0)
     - React
-  - RNFBAuth (6.3.4):
+  - RNFBAuth (6.7.1):
     - Firebase/Auth (~> 6.13.0)
     - Firebase/Core (~> 6.13.0)
     - React
     - RNFBApp
-  - RNFBFirestore (6.3.4):
+  - RNFBFirestore (6.7.1):
     - Firebase/Core (~> 6.13.0)
     - Firebase/Firestore (~> 6.13.0)
     - React
@@ -760,7 +718,7 @@ PODS:
     - Firebase/Storage (~> 6.13.0)
     - React
     - RNFBApp
-  - RNFS (2.16.4):
+  - RNFS (2.18.0):
     - React
   - RNGestureHandler (1.10.3):
     - React-Core
@@ -769,93 +727,63 @@ PODS:
     - React
   - RNIap (5.1.3):
     - React-Core
-  - RNLocalize (1.4.0):
-    - React
-  - RNReanimated (1.8.0):
-    - React
-  - RNScreens (2.15.0):
+  - RNLocalize (1.4.3):
     - React-Core
-  - RNSentry (1.3.7):
-    - React
-    - Sentry (~> 4.4.0)
+  - RNReanimated (1.13.3):
+    - React-Core
+  - RNScreens (2.18.1):
+    - React-Core
+  - RNSentry (3.1.1):
+    - React-Core
+    - Sentry (= 7.3.0)
   - RNSVG (9.13.3):
     - React
-  - RNZipArchive (5.0.1):
+  - RNZipArchive (5.0.6):
     - React
-    - RNZipArchive/Core (= 5.0.1)
+    - RNZipArchive/Core (= 5.0.6)
     - SSZipArchive (= 2.2.2)
-  - RNZipArchive/Core (5.0.1):
+  - RNZipArchive/Core (5.0.6):
     - React
     - SSZipArchive (= 2.2.2)
-  - SDWebImage (5.9.0):
-    - SDWebImage/Core (= 5.9.0)
-  - SDWebImage/Core (5.9.0)
-  - SDWebImageWebPCoder (0.4.1):
+  - SDWebImage (5.11.1):
+    - SDWebImage/Core (= 5.11.1)
+  - SDWebImage/Core (5.11.1)
+  - SDWebImageWebPCoder (0.8.4):
     - libwebp (~> 1.0)
-    - SDWebImage/Core (~> 5.5)
-  - Sentry (4.4.3):
-    - Sentry/Core (= 4.4.3)
-  - Sentry/Core (4.4.3)
+    - SDWebImage/Core (~> 5.10)
+  - Sentry (7.3.0):
+    - Sentry/Core (= 7.3.0)
+  - Sentry/Core (7.3.0)
   - SSZipArchive (2.2.2)
-  - UMAppLoader (1.0.2)
-  - UMBarCodeScannerInterface (5.1.0)
-  - UMCameraInterface (5.1.0)
-  - UMConstantsInterface (5.1.0)
-  - UMCore (5.1.2)
-  - UMFaceDetectorInterface (5.1.0)
-  - UMFileSystemInterface (5.1.0)
-  - UMFontInterface (5.1.0)
-  - UMImageLoaderInterface (5.1.0)
-  - UMPermissionsInterface (5.1.0):
-    - UMCore
-  - UMReactNativeAdapter (5.2.0):
+  - UMAppLoader (2.2.0)
+  - UMCore (7.1.2)
+  - UMReactNativeAdapter (6.3.9):
+    - ExpoModulesCore
     - React-Core
     - UMCore
-    - UMFontInterface
-  - UMSensorsInterface (5.1.0)
-  - UMTaskManagerInterface (5.1.0)
+  - UMTaskManagerInterface (6.2.0):
+    - UMCore
   - Yoga (1.14.0)
-  - YogaKit (1.18.1):
-    - Yoga (~> 1.14)
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - EXAV (from `../node_modules/expo-av/ios`)
-  - EXConstants (from `../node_modules/expo-constants/ios`)
+  - EXConstants (from `../node_modules/react-native-unimodules/node_modules/expo-constants/ios`)
   - EXErrorRecovery (from `../node_modules/expo-error-recovery/ios`)
-  - EXFileSystem (from `../node_modules/react-native-unimodules/node_modules/expo-file-system/ios`)
+  - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
-  - EXPermissions (from `../node_modules/expo-permissions/ios`)
+  - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
-  - Flipper (= 0.99.0)
-  - Flipper-Boost-iOSX (= 1.76.0.1.11)
-  - Flipper-DoubleConversion (= 3.1.7)
-  - Flipper-Fmt (= 7.1.7)
-  - Flipper-Folly (= 2.6.7)
-  - Flipper-Glog (= 0.3.6)
-  - Flipper-PeerTalk (= 0.0.4)
-  - Flipper-RSocket (= 1.4.3)
-  - FlipperKit (= 0.99.0)
-  - FlipperKit/Core (= 0.99.0)
-  - FlipperKit/CppBridge (= 0.99.0)
-  - FlipperKit/FBCxxFollyDynamicConvert (= 0.99.0)
-  - FlipperKit/FBDefines (= 0.99.0)
-  - FlipperKit/FKPortForwarding (= 0.99.0)
-  - FlipperKit/FlipperKitHighlightOverlay (= 0.99.0)
-  - FlipperKit/FlipperKitLayoutPlugin (= 0.99.0)
-  - FlipperKit/FlipperKitLayoutTextSearchable (= 0.99.0)
-  - FlipperKit/FlipperKitNetworkPlugin (= 0.99.0)
-  - FlipperKit/FlipperKitReactPlugin (= 0.99.0)
-  - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.99.0)
-  - FlipperKit/SKIOSNetworkPlugin (= 0.99.0)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - hermes-engine (~> 0.9.0)
+  - libevent (~> 2.1.12)
   - lottie-ios (from `../node_modules/lottie-ios`)
   - lottie-react-native (from `../node_modules/lottie-react-native`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -868,6 +796,7 @@ DEPENDENCIES:
   - React-Core/RCTWebSocket (from `../node_modules/react-native/`)
   - React-CoreModules (from `../node_modules/react-native/React/CoreModules`)
   - React-cxxreact (from `../node_modules/react-native/ReactCommon/cxxreact`)
+  - React-hermes (from `../node_modules/react-native/ReactCommon/hermes`)
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
@@ -876,7 +805,6 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-restart (from `../node_modules/react-native-restart`)
-  - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -916,17 +844,8 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - UMBarCodeScannerInterface (from `../node_modules/unimodules-barcode-scanner-interface/ios`)
-  - UMCameraInterface (from `../node_modules/unimodules-camera-interface/ios`)
-  - UMConstantsInterface (from `../node_modules/unimodules-constants-interface/ios`)
   - "UMCore (from `../node_modules/@unimodules/core/ios`)"
-  - UMFaceDetectorInterface (from `../node_modules/unimodules-face-detector-interface/ios`)
-  - UMFileSystemInterface (from `../node_modules/unimodules-file-system-interface/ios`)
-  - UMFontInterface (from `../node_modules/unimodules-font-interface/ios`)
-  - UMImageLoaderInterface (from `../node_modules/unimodules-image-loader-interface/ios`)
-  - UMPermissionsInterface (from `../node_modules/unimodules-permissions-interface/ios`)
   - "UMReactNativeAdapter (from `../node_modules/@unimodules/react-native-adapter/ios`)"
-  - UMSensorsInterface (from `../node_modules/unimodules-sensors-interface/ios`)
   - UMTaskManagerInterface (from `../node_modules/unimodules-task-manager-interface/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -935,7 +854,6 @@ SPEC REPOS:
     - abseil
     - AppAuth
     - BoringSSL-GRPC
-    - CocoaAsyncSocket
     - FBSDKCoreKit
     - FBSDKLoginKit
     - FBSDKShareKit
@@ -949,15 +867,6 @@ SPEC REPOS:
     - FirebaseFirestore
     - FirebaseInstanceID
     - FirebaseStorage
-    - Flipper
-    - Flipper-Boost-iOSX
-    - Flipper-DoubleConversion
-    - Flipper-Fmt
-    - Flipper-Folly
-    - Flipper-Glog
-    - Flipper-PeerTalk
-    - Flipper-RSocket
-    - FlipperKit
     - fmt
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -968,17 +877,16 @@ SPEC REPOS:
     - gRPC-Core
     - GTMAppAuth
     - GTMSessionFetcher
+    - hermes-engine
     - leveldb-library
     - libevent
     - libwebp
     - nanopb
-    - OpenSSL-Universal
     - PromisesObjC
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
     - SSZipArchive
-    - YogaKit
 
 EXTERNAL SOURCES:
   boost:
@@ -990,11 +898,11 @@ EXTERNAL SOURCES:
   EXAV:
     :path: "../node_modules/expo-av/ios"
   EXConstants:
-    :path: "../node_modules/expo-constants/ios"
+    :path: "../node_modules/react-native-unimodules/node_modules/expo-constants/ios"
   EXErrorRecovery:
     :path: "../node_modules/expo-error-recovery/ios"
   EXFileSystem:
-    :path: "../node_modules/react-native-unimodules/node_modules/expo-file-system/ios"
+    :path: "../node_modules/expo-file-system/ios"
   EXFont:
     :path: "../node_modules/expo-font/ios"
   EXHaptics:
@@ -1003,8 +911,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-loader/ios"
   EXLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
-  EXPermissions:
-    :path: "../node_modules/expo-permissions/ios"
+  ExpoModulesCore:
+    :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
     :path: "../node_modules/expo-sharing/ios"
   FBLazyVector:
@@ -1033,6 +941,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/CoreModules"
   React-cxxreact:
     :path: "../node_modules/react-native/ReactCommon/cxxreact"
+  React-hermes:
+    :path: "../node_modules/react-native/ReactCommon/hermes"
   React-jsi:
     :path: "../node_modules/react-native/ReactCommon/jsi"
   React-jsiexecutor:
@@ -1049,8 +959,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-notifications"
   react-native-restart:
     :path: "../node_modules/react-native-restart"
-  react-native-splash-screen:
-    :path: "../node_modules/react-native-splash-screen"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
   react-native-webview:
@@ -1129,28 +1037,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-zip-archive"
   UMAppLoader:
     :path: "../node_modules/unimodules-app-loader/ios"
-  UMBarCodeScannerInterface:
-    :path: "../node_modules/unimodules-barcode-scanner-interface/ios"
-  UMCameraInterface:
-    :path: "../node_modules/unimodules-camera-interface/ios"
-  UMConstantsInterface:
-    :path: "../node_modules/unimodules-constants-interface/ios"
   UMCore:
     :path: "../node_modules/@unimodules/core/ios"
-  UMFaceDetectorInterface:
-    :path: "../node_modules/unimodules-face-detector-interface/ios"
-  UMFileSystemInterface:
-    :path: "../node_modules/unimodules-file-system-interface/ios"
-  UMFontInterface:
-    :path: "../node_modules/unimodules-font-interface/ios"
-  UMImageLoaderInterface:
-    :path: "../node_modules/unimodules-image-loader-interface/ios"
-  UMPermissionsInterface:
-    :path: "../node_modules/unimodules-permissions-interface/ios"
   UMReactNativeAdapter:
     :path: "../node_modules/@unimodules/react-native-adapter/ios"
-  UMSensorsInterface:
-    :path: "../node_modules/unimodules-sensors-interface/ios"
   UMTaskManagerInterface:
     :path: "../node_modules/unimodules-task-manager-interface/ios"
   Yoga:
@@ -1161,19 +1051,18 @@ SPEC CHECKSUMS:
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   BoringSSL-GRPC: db8764df3204ccea016e1c8dd15d9a9ad63ff318
-  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: 831926d9b8bf8166fd87886c4abab286c2422662
-  EXAppleAuthentication: 7d20ab4397f595d22c2fe61ca6abfca16a346a72
-  EXAV: 2edd9cd30fe98d04b55325303c7ff01db02d1d0f
-  EXConstants: 5304709b1bea70a4828f48ba4c7fc3ec3b2d9b17
-  EXErrorRecovery: d36db99ec6a3808f313f01b0890eb443796dd1c2
-  EXFileSystem: cf4232ba7c62dc49b78c2d36005f97b6fddf0b01
-  EXFont: 6187b5ab46ee578d5f8e7f2ea092752e78772235
-  EXHaptics: 24438d930bd1fbef68e9eec47facea5dc2dab8a9
-  EXImageLoader: 5ad6896fa1ef2ee814b551873cbf7a7baccc694a
-  EXLinearGradient: 97d8095d1e4ad96f7893e010e564796ed8aeea42
-  EXPermissions: 24b97f734ce9172d245a5be38ad9ccfcb6135964
-  EXSharing: 5c9aa8f3cc1c117de74e50ccef862c52f57af2d7
+  EXAppleAuthentication: e8c537fcbe80670dd76fde7a07acb94af70ada00
+  EXAV: 67bcc1d0afeb1fab854b206c84b9f2afbd61d0cd
+  EXConstants: 4cb52b6d8f636c767104a44bf7db3873e9c01a6f
+  EXErrorRecovery: 404d827bc7d42f306c062d58a60b06afc4d082b3
+  EXFileSystem: 0a04aba8da751b9ac954065911bcf166503f8267
+  EXFont: 9846ba1bb6f5f5aed44e20eea3ac70693323832d
+  EXHaptics: 6dc4307ab0794fe7a87ec8d7d1c299cf103d6cb3
+  EXImageLoader: d3531a3fe530b22925c19977cb53bb43e3821fe6
+  EXLinearGradient: f9ea3259f096b27008860ca50764184225dc71c9
+  ExpoModulesCore: 2734852616127a6c1fc23012197890a6f3763dc7
+  EXSharing: 567f4b9f38a5266ec2f51973e2efe3b4aaf0bf69
   FBLazyVector: 6816ca39e1cc8beffd2a96783f518296789d1c48
   FBReactNativeSpec: 3b1e86618e902743fde35b40cf9ebd100fd655b7
   FBSDKCoreKit: e7dcac0aabcfb09d0166998edd95fe3b05a0ce5d
@@ -1189,15 +1078,6 @@ SPEC CHECKSUMS:
   FirebaseFirestore: 52120e2833f804a874ba1a9f59aab864a8ae2286
   FirebaseInstanceID: ebd2ea79ee38db0cb5f5167b17a0d387e1cc7b6e
   FirebaseStorage: 93fe2f8190a01bfb2b2c4932df7d679744c4ef1d
-  Flipper: 30e8eeeed6abdc98edaf32af0cda2f198be4b733
-  Flipper-Boost-iOSX: fd1e2b8cbef7e662a122412d7ac5f5bea715403c
-  Flipper-DoubleConversion: 57ffbe81ef95306cc9e69c4aa3aeeeeb58a6a28c
-  Flipper-Fmt: 60cbdd92fc254826e61d669a5d87ef7015396a9b
-  Flipper-Folly: 83af37379faa69497529e414bd43fbfc7cae259a
-  Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
-  Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
-  Flipper-RSocket: d9d9ade67cbecf6ac10730304bf5607266dd2541
-  FlipperKit: d8d346844eca5d9120c17d441a2f38596e8ed2b9
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 5337263514dd6f09803962437687240c5dc39aa4
   GoogleAppMeasurement: dfe55efa543e899d906309eaaac6ca26d249862f
@@ -1207,15 +1087,15 @@ SPEC CHECKSUMS:
   GoogleUtilities: 7f2f5a07f888cdb145101d6042bc4422f57e70b3
   "gRPC-C++": 9dfe7b44821e7b3e44aacad2af29d2c21f7cde83
   gRPC-Core: c9aef9a261a1247e881b18059b84d597293c9947
-  GTMAppAuth: 4deac854479704f348309e7b66189e604cf5e01e
-  GTMSessionFetcher: 6f5c8abbab8a9bce4bb3f057e317728ec6182b10
-  leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
+  GTMAppAuth: ad5c2b70b9a8689e1a04033c9369c4915bfcbe89
+  GTMSessionFetcher: 43748f93435c2aa068b1cbe39655aaf600652e91
+  hermes-engine: bf7577d12ac6ccf53ab8b5af3c6ccf0dd8458c5c
+  leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
-  libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
+  libwebp: 98a37e597e40bfdb4c911fc98f2c53d0b12d05fc
   lottie-ios: c058aeafa76daa4cf64d773554bccc8385d0150e
   lottie-react-native: b561920bba7ec727ec94a473b683cffba00faece
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
-  OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   RCT-Folly: a21c126816d8025b547704b777a2ba552f3d9fa9
   RCTRequired: e4a18a90004e0ed97bba9081099104fd0f658dc9
@@ -1225,17 +1105,17 @@ SPEC CHECKSUMS:
   React-Core: 45e4b3c57b0b5fdbb24bc6a63a964870c0405955
   React-CoreModules: d7bb1ae3436eddd85a7eb6d5e928f8c1655d87db
   React-cxxreact: 60c850e9997b21ee302757c36a460efc944183e7
+  React-hermes: 80f8b14e571f240370dc55c2133783ee58f8e932
   React-jsi: 38d68cb1b53843703100830d530342b32f8e0878
   React-jsiexecutor: 6a05173dc0142abc582bd4edd2d23146b8cc218a
   React-jsinspector: be95ad424ba9f7b817aff22732eb9b1b810a000a
   React-logger: 9a9cd87d4ea681ae929b32ef580638ff1b50fb24
   react-native-fbsdk: c35d42169e64aaf66f01713c1e18d0674f7f6519
-  react-native-netinfo: 3bf235d94cc291cf0673ad9fd9eaae82f84ed8a9
-  react-native-notifications: f56a12d741eeb2fd4d7a418a4689111c50f7cd72
+  react-native-netinfo: 30fb89fa913c342be82a887b56e96be6d71201dd
+  react-native-notifications: 89a73cd2cd2648e1734fa10e3507681c9e4f14de
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
-  react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
-  react-native-webview: dfd7202ff115c44d3ea401c2f36122fb3ac79f07
+  react-native-webview: d70bc760daaa0e2667dec569b93014882565819c
   React-perflogger: 1f554c2b684e2f484f9edcdfdaeedab039fbaca8
   React-RCTActionSheet: 610d5a5d71ab4808734782c8bca6a12ec3563672
   React-RCTAnimation: ec6ed97370ace32724c253f29f0586cafcab8126
@@ -1251,47 +1131,37 @@ SPEC CHECKSUMS:
   ReactNativeART: 78edc68dd4a1e675338cd0cd113319cf3a65f2ab
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAppleAuthentication: e875711ddda0361c2b7fca28fb6c64cdd94f7968
-  RNCAsyncStorage: 44395cb9c7c1523104c2b499eb426ef7aff82bca
-  RNCClipboard: 8148e21ac347c51fd6cd4b683389094c216bb543
-  RNCMaskedView: a88953beefbd347a29072d9eba90e42945fe291e
-  RNCPushNotificationIOS: 05262c52fcfb861a2b79aa8e51cad66263c9ea52
-  RNDateTimePicker: 1a251f8b276abda796d8119a96bcd1763a76f6b0
-  RNFastImage: 35ae972d6727c84ee3f5c6897e07f84d0a3445e9
-  RNFBAnalytics: b8bad44e6653af73219b1a7af24bf3452cb02c1b
-  RNFBApp: 7d4006751de8bb5cafa2e8d2e7d94ee250df81db
-  RNFBAuth: ed8b865db45f7ded9dbf535e390cba2ba672aede
-  RNFBFirestore: 04c1eb90463c208ee072988d463c74bec09d08c1
+  RNCAsyncStorage: b03032fdbdb725bea0bd9e5ec5a7272865ae7398
+  RNCClipboard: 41d8d918092ae8e676f18adada19104fa3e68495
+  RNCMaskedView: 0e1bc4bfa8365eba5fbbb71e07fbdc0555249489
+  RNCPushNotificationIOS: 87b8d16d3ede4532745e05b03c42cff33a36cc45
+  RNDateTimePicker: 968ccf716b3b6aee07849641966005924de5c0f9
+  RNFastImage: 1f2cab428712a4baaf78d6169eaec7f622556dd7
+  RNFBAnalytics: 29bc4baf70da8dc04238d2e1c050367264d2f440
+  RNFBApp: 7b539bb25520fa73d6a240f5c6ea569e27683645
+  RNFBAuth: c292603069a09065a1b4d3336148beff83e4c897
+  RNFBFirestore: 23757ad7c33d81587a5d7d7d77f3ea22a1103372
   RNFBStorage: 3628afb1f3dd0b3395fc15c95967b9f080897aec
-  RNFS: 90d1a32d3bc8f75cc7fc3dd2f67506049664346b
+  RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNGoogleSignin: a00f87261ea13df9a5cea8deafa6927d6f2c3562
   RNIap: 3569bc87ca2aea8dc514608d9e88a6ffb274a7ef
-  RNLocalize: b6df30cc25ae736d37874f9bce13351db2f56796
-  RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
-  RNScreens: 2ad555d4d9fa10b91bb765ca07fe9b29d59573f0
-  RNSentry: 370623102247ebea20191b5fb549ecc7a275b324
+  RNLocalize: 7c7aeda16c01db7a0918981c14875c0a53be9b79
+  RNReanimated: 514a11da3a2bcc6c3dfd9de32b38e2b9bf101926
+  RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
+  RNSentry: 49abc89b0190b4c8afe0fa5d065f98e36cb53233
   RNSVG: f6177f8d7c095fada7cfee2e4bb7388ba426064c
-  RNZipArchive: 87111bb6130a38edd68c8d2059d46ac94d53ffe4
-  SDWebImage: 62ae4a18473520c67b79e9724c31a63599cc9423
-  SDWebImageWebPCoder: 36f8f47bd9879a8aea6044765c1351120fd8e3a8
-  Sentry: 14bdd673870e8cf64932b149fad5bbbf39a9b390
+  RNZipArchive: 9dfdaa1d1ad49a423e83df505f292e0ae8126a5d
+  SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
+  SDWebImageWebPCoder: f93010f3f6c031e2f8fb3081ca4ee6966c539815
+  Sentry: 9a4e621430e2dae4477d791f2f7e905720b6efbf
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
-  UMAppLoader: ee77a072f9e15128f777ccd6d2d00f52ab4387e6
-  UMBarCodeScannerInterface: 9dc692b87e5f20fe277fa57aa47f45d418c3cc6c
-  UMCameraInterface: 625878bbf2ba188a8548675e1d1d2e438a653e6d
-  UMConstantsInterface: 64060cf86587bcd90b1dbd804cceb6d377a308c1
-  UMCore: eb200e882eadafcd31ead290770835fd648c0945
-  UMFaceDetectorInterface: d6677d6ddc9ab95a0ca857aa7f8ba76656cc770f
-  UMFileSystemInterface: c70ea7147198b9807080f3597f26236be49b0165
-  UMFontInterface: d9d3b27af698c5389ae9e20b99ef56a083f491fb
-  UMImageLoaderInterface: 14dd2c46c67167491effc9e91250e9510f12709e
-  UMPermissionsInterface: 5e83a9167c177e4a0f0a3539345983cc749efb3e
-  UMReactNativeAdapter: 126da3486c1a1f11945b649d557d6c2ebb9407b2
-  UMSensorsInterface: 48941f70175e2975af1a9386c6d6cb16d8126805
-  UMTaskManagerInterface: cb890c79c63885504ddc0efd7a7d01481760aca2
+  UMAppLoader: 21af63390e55c82e037fb9752d93114a80ecf16e
+  UMCore: ce3a4faa010239063b8343895b29a6d97b01069d
+  UMReactNativeAdapter: d03cefd0e4e4179ab8c490408589f1c8a6c8b785
+  UMTaskManagerInterface: 2be431101b73604e64fbfffcf759336f9d8fccbb
   Yoga: c11abbf5809216c91fcd62f5571078b83d9b6720
-  YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 5825cc37a60930f7370521ce27314350c5aec9e0
+PODFILE CHECKSUM: 23b6cf6a8bf2992879d2f11eb09d65f477403465
 
 COCOAPODS: 1.11.2

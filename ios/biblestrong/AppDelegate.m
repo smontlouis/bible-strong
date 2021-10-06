@@ -8,8 +8,6 @@
 #import "AppDelegate.h"
 #import <Firebase.h>
 #import <RNCPushNotificationIOS.h>
-#import "RNSplashScreen.h"
-
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
@@ -19,7 +17,7 @@
 #import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
 
 
-#if DEBUG
+#ifdef FB_SONARKIT_ENABLED
 #import <FlipperKit/FlipperClient.h>
 #import <FlipperKitLayoutPlugin/FlipperKitLayoutPlugin.h>
 #import <FlipperKitUserDefaultsPlugin/FKUserDefaultsPlugin.h>
@@ -51,11 +49,12 @@ static void InitializeFlipper(UIApplication *application) {
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  #if DEBUG
+  #ifdef FB_SONARKIT_ENABLED
     InitializeFlipper(application);
   #endif
 
-  self.moduleRegistryAdapter = [[UMModuleRegistryAdapter alloc] initWithModuleRegistryProvider:[[UMModuleRegistryProvider alloc] init]];  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  self.moduleRegistryAdapter = [[UMModuleRegistryAdapter alloc] initWithModuleRegistryProvider:[[UMModuleRegistryProvider alloc] init]];
+  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"biblestrong" initialProperties:nil];
   if (@available(iOS 13.0, *)) {
       rootView.backgroundColor = [UIColor systemBackgroundColor];
@@ -74,7 +73,6 @@ static void InitializeFlipper(UIApplication *application) {
     [FIRApp configure];
   }
 
-  [RNSplashScreen show];
   return YES;
 }
 
