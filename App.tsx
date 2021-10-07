@@ -71,7 +71,10 @@ const useAppLoad = () => {
       initNotifications()
 
       if (!__DEV__) {
-        analytics().setCurrentScreen('Bible', 'Bible')
+        analytics().logScreenView({
+          screen_class: 'Bible',
+          screen_name: 'Bible',
+        })
       }
     })()
   }, [])

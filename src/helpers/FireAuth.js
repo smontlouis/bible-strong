@@ -98,9 +98,6 @@ const FireAuth = class {
         const userStatus = userStatusDoc.data() || {}
         const remoteLastSeen = userStatus.lastSeen || 0
 
-        console.log('Online last seen:', new Date(remoteLastSeen))
-        console.log('Seen now:', new Date(profile.lastSeen))
-
         if (!this.user) {
           if (this.onLogin) {
             this.onLogin({ profile, remoteLastSeen })

@@ -447,6 +447,9 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
   return async (dispatch: any, getState: any) => {
     const { id, lastSeen } = getState().user
 
+    console.log('Online last seen:', new Date(remoteLastSeen))
+    console.log('Local last seen:', new Date(lastSeen))
+
     const dispatchUserSuccess = async (overwriteRemoteLastSeen?: boolean) => {
       const userRef = firebaseDb.collection('users').doc(profile.id)
       const userStatusRef = firebaseDb
@@ -509,7 +512,7 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
           {
             locale: getLangIsFr() ? fr : enGB,
           }
-        )}
+        )}\n
         ${i18n.t('Dernière sauvegarde en ligne')}: ${format(
           new Date(remoteLastSeen),
           'PPPPpppp',

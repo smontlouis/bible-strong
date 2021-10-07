@@ -96,7 +96,10 @@ class InitApp extends React.Component<Props> {
 
     if (prevScreen !== currentScreen) {
       if (!__DEV__) {
-        analytics().setCurrentScreen(currentScreen, currentScreen)
+        analytics().logScreenView({
+          screen_class: currentScreen,
+          screen_name: currentScreen,
+        })
       }
 
       Sentry.addBreadcrumb({
