@@ -13,7 +13,6 @@ import ErrorBoundary from '~common/ErrorBoundary'
 import OnBoarding from '~features/onboarding/OnBoarding'
 
 import {
-  updateUserData,
   getChangelog,
   getVersionUpdate,
   getDatabaseUpdate,
@@ -51,7 +50,6 @@ class InitApp extends React.Component<Props> {
   handleAppStateChange = (nextAppState: AppStateStatus) => {
     if (nextAppState.match(/inactive|background/)) {
       console.log('App mode - background!')
-      this.props.dispatch(updateUserData())
     }
   }
 

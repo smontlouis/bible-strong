@@ -8,7 +8,7 @@ export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
 export const UPDATE_TAG = 'user/UPDATE_TAG'
 export const REMOVE_TAG = 'user/REMOVE_TAG'
 
-const entitiesArray = [
+export const entitiesArray = [
   'highlights',
   'notes',
   'studies',
@@ -16,7 +16,7 @@ const entitiesArray = [
   'strongsGrec',
   'words',
   'naves',
-]
+] as const
 
 export default produce((draft, action) => {
   switch (action.type) {

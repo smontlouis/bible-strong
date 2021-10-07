@@ -18,7 +18,7 @@ import settingsReducer from './user/settings'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
-import { SubscriptionType } from '~common/types'
+import { SubscriptionType, Tag } from '~common/types'
 import { Reducer } from 'redux'
 import { Alert } from 'react-native'
 
@@ -37,7 +37,6 @@ export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
 export const SET_HISTORY = 'user/SET_HISTORY'
 export const DELETE_HISTORY = 'user/DELETE_HISTORY'
-export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
 
 export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
@@ -72,6 +71,7 @@ export interface Study {
     id: string
     photoUrl: string
   }
+  tags?: { [x: string]: Tag }
 }
 interface UserState {
   id: string
@@ -102,7 +102,7 @@ interface UserState {
       [x: string]: {
         color: string
         tags: {
-          [x: string]: { id: string; name: string }
+          [x: string]: Tag
         }
         date: number
       }
@@ -560,12 +560,6 @@ export function setHistory(item) {
 export function deleteHistory() {
   return {
     type: DELETE_HISTORY,
-  }
-}
-
-export function updateUserData() {
-  return {
-    type: UPDATE_USER_DATA,
   }
 }
 

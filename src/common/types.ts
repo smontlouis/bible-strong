@@ -133,3 +133,8 @@ export interface Verse {
   Verset: string
   Texte: string
 }
+
+export interface Tag {
+  id: string
+  name: string
+}

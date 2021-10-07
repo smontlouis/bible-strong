@@ -83,10 +83,8 @@ const FireAuth = class {
         const profile = {
           id: user.uid,
           email: user.email,
-          ...(user.providerData[0].displayName && {
-            displayName: user.providerData[0].displayName,
-          }),
-          photoURL: user.providerData[0].photoURL,
+          displayName: user.providerData[0].displayName || '',
+          photoURL: user.providerData[0].photoURL || '',
           provider: user.providerData[0].providerId,
           lastSeen: Date.now(),
           emailVerified,
@@ -327,7 +325,7 @@ const FireAuth = class {
 
   logout = () => {
     auth().signOut()
-    IAPHub.setUserId(null)
+    // IAPHub.setUserId(null)
 
     // Sign-out successful.
     this.user = null
