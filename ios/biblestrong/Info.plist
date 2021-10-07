@@ -61,6 +61,8 @@
 	<string>$(CODE_PUSH)</string>
 	<key>FacebookAppID</key>
 	<string>312719079612015</string>
+	<key>FacebookClientToken</key>
+	<string>c5dbe48fa71a4ce7066ce64f16d075b9</string>
 	<key>FacebookDisplayName</key>
 	<string>Bible Strong App</string>
 	<key>LSApplicationQueriesSchemes</key>

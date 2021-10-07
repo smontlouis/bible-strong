@@ -1,21 +1,17 @@
-import auth from '@react-native-firebase/auth'
-import analytics from '@react-native-firebase/analytics'
-import { GoogleSignin } from '@react-native-community/google-signin'
-import { LoginManager, AccessToken } from 'react-native-fbsdk'
-import IAPHub from 'react-native-iaphub'
-import i18n from '~i18n'
-import to from 'await-to-js'
-
-import * as Sentry from '@sentry/react-native'
 import appleAuth, {
-  AppleAuthRequestScope,
   AppleAuthRequestOperation,
+  AppleAuthRequestScope,
 } from '@invertase/react-native-apple-authentication'
+import { GoogleSignin } from '@react-native-community/google-signin'
 import NetInfo from '@react-native-community/netinfo'
-
+import analytics from '@react-native-firebase/analytics'
+import auth from '@react-native-firebase/auth'
+import * as Sentry from '@sentry/react-native'
+import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
-import { APP_FETCH_DATA, APP_FETCH_DATA_FAIL } from '~redux/modules/user'
+import i18n from '~i18n'
+import { APP_FETCH_DATA } from '~redux/modules/user'
 
 const FireAuth = class {
   authFlag = false
@@ -76,7 +72,7 @@ const FireAuth = class {
         const emailVerified =
           !user.providerData ||
           !user.providerData.length ||
-          user.providerData[0].providerId != 'password' ||
+          user.providerData[0].providerId !== 'password' ||
           user.emailVerified
 
         // TODO - Revoir ça pour connexion Apple
@@ -207,9 +203,6 @@ const FireAuth = class {
         )
 
         return this.onCredentialSuccess(credential, resolve)
-
-        SnackBar.show(i18n.t('Connexion annulée.'))
-        return resolve(false)
       } catch (e) {
         SnackBar.show(i18n.t('Une erreur est survenue'))
         console.log(e)

@@ -43,7 +43,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
     } else {
       setFilteredTags(tags)
     }
-  }, [searchValue, fuse])
+  }, [searchValue, fuse, tags.length])
 
   useEffect(() => {
     if (item) {

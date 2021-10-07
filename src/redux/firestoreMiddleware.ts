@@ -114,13 +114,14 @@ export default store => next => async action => {
         return
       }
       console.log('local wins - update remote')
-      const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-      userDoc.update(
-        r({
-          bible: sanitizeUserBible(user.bible),
-          plan: plan.ongoingPlans,
-        })
-      )
+      // ! TODO - Try if firestore offline actually work
+      // const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+      // userDoc.update(
+      //   r({
+      //     bible: sanitizeUserBible(user.bible),
+      //     plan: plan.ongoingPlans,
+      //   })
+      // )
       break
     }
     case SET_LAST_SEEN: {

@@ -35,7 +35,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
     } else {
       setFilteredTags(tags)
     }
-  }, [searchValue, fuse])
+  }, [searchValue, fuse, tags.length])
 
   const saveTag = () => {
     if (!newTag.trim()) {
