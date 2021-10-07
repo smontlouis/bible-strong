@@ -2,7 +2,7 @@ import appleAuth, {
   AppleAuthRequestOperation,
   AppleAuthRequestScope,
 } from '@invertase/react-native-apple-authentication'
-import { GoogleSignin } from '@react-native-community/google-signin'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import NetInfo from '@react-native-community/netinfo'
 import analytics from '@react-native-firebase/analytics'
 import auth from '@react-native-firebase/auth'
@@ -195,14 +195,8 @@ const FireAuth = class {
     new Promise(async resolve => {
       try {
         const { idToken } = await GoogleSignin.signIn()
-        const { accessToken } = await GoogleSignin.getTokens()
-
-        const credential = auth.GoogleAuthProvider.credential(
-          idToken,
-          accessToken
-        )
-
-        return this.onCredentialSuccess(credential, resolve)
+        const googleCredential = auth.GoogleAuthProvider.credential(idToken)
+        return this.onCredentialSuccess(googleCredential, resolve)
       } catch (e) {
         SnackBar.show(i18n.t('Une erreur est survenue'))
         console.log(e)

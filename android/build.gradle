@@ -10,6 +10,7 @@ buildscript {
         androidXAnnotation = "1.1.0"
         androidXBrowser = "1.0.0"
         ndkVersion = "21.4.7075529"
+        googlePlayServicesAuthVersion = "19.2.0"
     }
     repositories {
         google()

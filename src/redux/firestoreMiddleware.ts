@@ -80,7 +80,6 @@ export default store => next => async action => {
     case UPDATE_STUDY:
     case PUBLISH_STUDY:
     case UPLOAD_STUDY:
-    case DELETE_STUDY:
     case ADD_NOTE:
     case REMOVE_NOTE:
     case ADD_HIGHLIGHT:
@@ -104,6 +103,18 @@ export default store => next => async action => {
         })
       }
 
+      break
+    }
+    case DELETE_STUDY: {
+      if (!diffState?.user?.bible) return
+      const { studies } = diffState.user.bible
+
+      if (studies) {
+        Object.entries(studies).forEach(([studyId]) => {
+          const studyDoc = firebaseDb.collection('studies').doc(studyId)
+          studyDoc.delete()
+        })
+      }
       break
     }
     case USER_UPDATE_PROFILE:
