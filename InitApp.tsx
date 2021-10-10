@@ -10,6 +10,7 @@ import analytics from '@react-native-firebase/analytics'
 import { MenuProvider } from 'react-native-popup-menu'
 
 import ErrorBoundary from '~common/ErrorBoundary'
+import ConflictModal from '~common/ConflictModal'
 import OnBoarding from '~features/onboarding/OnBoarding'
 
 import {
@@ -149,6 +150,7 @@ class InitApp extends React.Component<Props> {
                   </ErrorBoundary>
                   <Changelog />
                   <OnBoarding />
+                  <ConflictModal />
                 </>
               </DBStateProvider>
             </PersistGate>

@@ -276,6 +276,7 @@ const planSlice = createSlice({
         } else if (remoteLastSeen > localLastSeen) {
           // Remote wins
           console.log('Plan - Remote wins')
+          console.log(plan)
           state.ongoingPlans = plan
           state.myPlans = state.myPlans.filter(
             mP => mP.id === plan.find(oP => oP.id === mP.id)?.id

@@ -103,6 +103,7 @@ export interface TextProps {
   theme?: Theme
 
   title?: boolean
+  text?: boolean
 }
 
 const Text = styled.Text((props: TextProps) => {

@@ -21,6 +21,9 @@ import studiesReducer from './user/studies'
 import { SubscriptionType, Tag } from '~common/types'
 import { Reducer } from 'redux'
 import { Alert } from 'react-native'
+import { detailedDiff } from '~helpers/deep-obj'
+import { conflictStateProxy } from '../../state/app'
+import { isEmpty } from '../../helpers/deep-obj/utils'
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -73,7 +76,7 @@ export interface Study {
   }
   tags?: { [x: string]: Tag }
 }
-interface UserState {
+export interface UserState {
   id: string
   email: string
   displayName: string
@@ -193,6 +196,16 @@ const initialState: UserState = {
 
 const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 
+const ignoreOfflineData = (data: Partial<UserState>) =>
+  produce(data, draft => {
+    delete draft.notifications
+    delete draft.changelog
+    delete draft.needsUpdate
+    delete draft.fontFamily
+    delete draft.isLoading
+    delete draft.bible.changelog
+  })
+
 // UserReducer
 const userReducer = produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -234,41 +247,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         bible,
       } = action.profile
 
-      const getStudies = () => {
-        // Now take care of studies
-        if (action.studies && Object.keys(action.studies).length) {
-          if (draft.bible.studies) {
-            Object.keys(action.studies).forEach(remoteStudyId => {
-              if (draft.bible.studies[remoteStudyId]) {
-                // We have a conflict here
-                console.log(
-                  `We have a conflict with ${remoteStudyId}, pick by modified_date`
-                )
-                const localModificationDate =
-                  draft.bible.studies[remoteStudyId].modified_at
-                const remoteModificationDate =
-                  action.studies[remoteStudyId].modified_at
-                if (remoteModificationDate > localModificationDate) {
-                  console.log('Remote date is recent')
-                  draft.bible.studies[remoteStudyId] =
-                    action.studies[remoteStudyId]
-                }
-              } else {
-                // No conflicts, just put that study in there
-                console.log(
-                  `No conflicts for ${remoteStudyId}, just put that story in there`
-                )
-                draft.bible.studies[remoteStudyId] =
-                  action.studies[remoteStudyId]
-              }
-            })
-          } else {
-            draft.bible.studies = {}
-            draft.bible.studies = bible.studies
-          }
-        }
-      }
-
       const { isLogged, localLastSeen, remoteLastSeen } = action
 
       draft.id = id
@@ -288,14 +266,16 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           draft.bible = deepmerge(draft.bible, bible, {
             arrayMerge: overwriteMerge,
           })
-          getStudies()
+          draft.bible.studies = action.studies
         }
       } else if (remoteLastSeen > localLastSeen) {
         // Remote wins
         console.log('Remote wins')
         if (bible) {
-          draft.bible = { ...draft.bible, ...bible }
-          getStudies()
+          draft.bible = deepmerge(draft.bible, bible, {
+            arrayMerge: overwriteMerge,
+          })
+          draft.bible.studies = action.studies
         }
       } else if (remoteLastSeen < localLastSeen) {
         console.log('Local wins')
@@ -358,7 +338,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           }
         }
       }
-
+      if (!Array.isArray(draft.bible.history)) {
+        draft.bible.history = Object.values(draft.bible.history)
+      }
       draft.bible.history.unshift({
         ...action.payload,
         date: Date.now(),
@@ -446,43 +428,31 @@ export function saveAllLogsAsSeen(payload) {
 export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
   return async (dispatch: any, getState: any) => {
     const { id, lastSeen } = getState().user
+    const userRef = firebaseDb.collection('users').doc(profile.id)
+    const studiesRef = firebaseDb
+      .collection('studies')
+      .where('user.id', '==', profile.id)
+    const studies = {}
+    let userData = null
+    const isLogged = !!id
 
-    console.log('Online last seen:', new Date(remoteLastSeen))
     console.log('Local last seen:', new Date(lastSeen))
+    console.log('Online last seen:', new Date(remoteLastSeen))
 
-    const dispatchUserSuccess = async (overwriteRemoteLastSeen?: boolean) => {
-      const userRef = firebaseDb.collection('users').doc(profile.id)
+    const dispatchUserSuccess = (u, s) => async (
+      overwriteRemoteLastSeen?: boolean
+    ) => {
       const userStatusRef = firebaseDb
         .collection('users-status')
         .doc(profile.id)
-      const isLogged = !!id
-      const studies = {}
       remoteLastSeen = overwriteRemoteLastSeen ? 0 : remoteLastSeen
 
-      if (isLogged) {
-        userRef.set(profile, { merge: true })
-        userStatusRef.set({ lastSeen: profile.lastSeen }, { merge: true })
-      }
+      userRef.set(profile, { merge: true })
+      userStatusRef.set({ lastSeen: profile.lastSeen }, { merge: true })
 
       if (remoteLastSeen > lastSeen || !isLogged) {
-        console.time('Remote wins, get user')
-        const userDoc = await userRef.get()
-        const userData = userDoc.data()
-        profile = { ...profile, ...userData }
-        console.log({ id: profile.id, userData })
-        console.timeEnd('Remote wins, get user')
-
-        console.time('Remote wins, get studies')
-        const querySnapshot = await firebaseDb
-          .collection('studies')
-          .where('user.id', '==', profile.id)
-          .get()
-
-        querySnapshot.forEach(doc => {
-          const study = doc.data()
-          studies[study.id] = study
-        })
-        console.timeEnd('Remote wins, get studies')
+        profile = { ...profile, ...u }
+        console.log({ id: profile.id, u })
       }
 
       return dispatch({
@@ -491,7 +461,7 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         localLastSeen: lastSeen,
         profile,
         remoteLastSeen,
-        studies,
+        studies: s,
       })
     }
 
@@ -499,42 +469,83 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
     if (remoteLastSeen > lastSeen && id) {
       console.log('Handle conflict.')
 
-      // * Dirty, but it works without changing a lot
-      Alert.alert(
-        i18n.t('Conflit de sauvegarde'),
-        `${i18n.t(
-          'Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?'
-        )}
-        
-        ${i18n.t('Dernière sauvegarde locale')}: ${format(
-          new Date(lastSeen),
-          'PPPPpppp',
-          {
-            locale: getLangIsFr() ? fr : enGB,
-          }
-        )}\n
-        ${i18n.t('Dernière sauvegarde en ligne')}: ${format(
-          new Date(remoteLastSeen),
-          'PPPPpppp',
-          {
-            locale: getLangIsFr() ? fr : enGB,
-          }
-        )}
+      const oldUserData = ignoreOfflineData({
+        ...getState().user,
+        bible: {
+          ...getState().user.bible,
+          plan: getState().plan.ongoingPlans,
+        },
+        plan: undefined,
+      })
 
-        `,
-        [
+      // Merge online data with redux state so we can compare fairly
+      const userDoc = await userRef.get()
+      userData = userDoc.data()
+      const querySnapshot = await studiesRef.get()
+      querySnapshot.forEach(doc => {
+        const study = doc.data()
+        studies[study.id] = study
+      })
+      const newUserData = ignoreOfflineData(
+        deepmerge(
+          initialState,
           {
-            text: i18n.t('Cloud'),
-            onPress: () => dispatchUserSuccess(),
-          },
+            ...userData,
+            bible: {
+              ...userData?.bible,
+              studies,
+              plan: userData?.plan || [],
+            },
+            plan: undefined,
+          } as any,
           {
-            text: i18n.t('Local'),
-            onPress: () => dispatchUserSuccess(true),
-          },
-        ]
+            arrayMerge: overwriteMerge,
+          }
+        )
       )
+
+      const obj = detailedDiff(oldUserData, newUserData, true)
+      delete obj?.added?.bible?.history
+      delete obj?.updated?.bible?.history
+      delete obj?.deleted?.bible?.history
+      delete obj?.updated?.lastSeen
+
+      console.log({ oldUserData, newUserData })
+      console.log(obj)
+
+      if (
+        (isEmpty(obj?.added) ||
+          (Object.keys(obj?.added).length === 1 &&
+            isEmpty(obj?.added?.bible))) &&
+        (isEmpty(obj?.updated) ||
+          (Object.keys(obj?.added).length === 1 &&
+            isEmpty(obj?.added?.bible))) &&
+        (isEmpty(obj?.deleted) ||
+          (Object.keys(obj?.added).length === 1 && isEmpty(obj?.added?.bible)))
+      ) {
+        dispatchUserSuccess(userData, studies)()
+        return
+      }
+
+      conflictStateProxy.diff = obj
+      conflictStateProxy.onDispatchUserSuccess = dispatchUserSuccess(
+        userData,
+        studies
+      )
+      conflictStateProxy.lastSeen = lastSeen
+      conflictStateProxy.remoteLastSeen = remoteLastSeen
     } else {
-      dispatchUserSuccess()
+      if (!isLogged) {
+        console.log('GET INFOS')
+        const userDoc = await userRef.get()
+        userData = userDoc.data()
+        const querySnapshot = await studiesRef.get()
+        querySnapshot.forEach(doc => {
+          const study = doc.data()
+          studies[study.id] = study
+        })
+      }
+      dispatchUserSuccess(userData, studies)()
     }
   }
 }

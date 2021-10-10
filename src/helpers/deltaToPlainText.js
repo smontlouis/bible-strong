@@ -1,4 +1,6 @@
-export const deltaToPlainText = delta =>
+export const deltaToPlainText = delta => {
+  // handle array weird form from diff object
+  delta = Array.isArray(delta) ? delta : Object.values(delta)
   delta.reduce((text, op) => {
     if (!op.insert) {
       return `${text} `
@@ -8,3 +10,4 @@ export const deltaToPlainText = delta =>
     }
     return text + op.insert
   }, '')
+}

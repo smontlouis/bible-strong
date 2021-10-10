@@ -66,7 +66,7 @@ const FireAuth = class {
       }
 
       if (user) {
-        console.log('User exists: ', user)
+        console.log('------ User exists: ', user)
 
         // Determine if user needs to verify email
         const emailVerified =
@@ -289,7 +289,7 @@ const FireAuth = class {
             firebaseDb
               .collection('users')
               .doc(user.uid)
-              .set({ displayName: username })
+              .set({ displayName: username }, { merge: true })
             user.sendEmailVerification()
             return resolve(true)
           })

@@ -52,6 +52,7 @@ export default store => next => async action => {
 
   const { user, plan }: RootState = state
   const userDoc = firebaseDb.collection('users').doc(user.id)
+  const userStatusRef = firebaseDb.collection('users-status').doc(user.id)
 
   switch (action.type) {
     case removePlan.type:
@@ -93,12 +94,28 @@ export default store => next => async action => {
 
       const { studies, ...diffStateUserBible } = diffState.user.bible
       console.log(diffState.user.bible)
-      userDoc.set({ bible: diffStateUserBible }, { merge: true })
+
+      if (Object.keys(diffStateUserBible).length !== 0) {
+        userDoc.set({ bible: diffStateUserBible }, { merge: true })
+      }
 
       if (studies) {
         Object.entries(studies).forEach(([studyId, obj]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)
-          studyDoc.set(obj, { merge: true })
+          studyDoc.set(
+            {
+              ...obj,
+              content: {
+                // handle array weird form from diff object
+                ops: obj?.content?.ops
+                  ? Array.isArray(obj.content.ops)
+                    ? obj.content.ops
+                    : Object.values(obj.content.ops)
+                  : [],
+              },
+            },
+            { merge: true }
+          )
           console.log('Studies updated')
         })
       }
@@ -120,23 +137,25 @@ export default store => next => async action => {
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const { localLastSeen, remoteLastSeen } = action
+
       if (remoteLastSeen >= localLastSeen) {
         console.log('- do nothing, remote is already up to date')
         return
       }
       console.log('local wins - update remote')
-      // ! TODO - Try if firestore offline actually work
-      // const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-      // userDoc.update(
-      //   r({
-      //     bible: sanitizeUserBible(user.bible),
-      //     plan: plan.ongoingPlans,
-      //   })
-      // )
+      const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+      userDoc.update(
+        r({
+          bible: sanitizeUserBible(user.bible),
+          plan: plan.ongoingPlans,
+        })
+      )
+
       break
     }
     case SET_LAST_SEEN: {
-      userDoc.update({ lastSeen: user.lastSeen })
+      userDoc.set({ lastSeen: user.lastSeen }, { merge: true })
+      userStatusRef.set({ lastSeen: user.lastSeen }, { merge: true })
       break
     }
     default:

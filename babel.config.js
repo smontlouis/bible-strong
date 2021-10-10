@@ -23,6 +23,7 @@ module.exports = function(api) {
             '~themes': './src/themes',
             '~styled': './src/styled',
             '~i18n': './i18n',
+            '~state': './state',
           },
         },
       ],
