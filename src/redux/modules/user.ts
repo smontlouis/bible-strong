@@ -272,9 +272,10 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         // Remote wins
         console.log('Remote wins')
         if (bible) {
-          draft.bible = deepmerge(draft.bible, bible, {
-            arrayMerge: overwriteMerge,
-          })
+          draft.bible = {
+            ...draft.bible,
+            ...bible,
+          }
           draft.bible.studies = action.studies
         }
       } else if (remoteLastSeen < localLastSeen) {

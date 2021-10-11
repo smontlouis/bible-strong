@@ -331,12 +331,19 @@ const useReadableConflict = (diffObj?: Diff) => {
           } as ConflictItem
         }
 
+        if (value.tag) {
+          return {
+            content: i18n.t('conflict.studyTagDeleted'),
+            children: Object.keys(value.tags).map(v => ({
+              content: tags?.[v]?.name,
+            })),
+          } as ConflictItem
+        }
+
         return {
-          // * TODO get study name
-          content: i18n.t('conflict.studyTagDeleted'),
-          children: Object.keys(value.tags).map(v => ({
-            content: tags?.[v]?.name,
-          })),
+          content: i18n.t('conflict.studyDeleted', {
+            study: studies?.[key]?.title,
+          }),
         } as ConflictItem
       })
 
