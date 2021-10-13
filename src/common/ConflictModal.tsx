@@ -2,7 +2,7 @@ import format from 'date-fns/format'
 import { enGB, fr } from 'date-fns/locale'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity } from 'react-native'
+import { Alert, TouchableOpacity } from 'react-native'
 import Modal from 'react-native-modalbox'
 import { useSnapshot } from 'valtio'
 import Text from '~common/ui/Text'
@@ -21,10 +21,11 @@ import Box from './ui/Box'
 import ScrollView from './ui/ScrollView'
 import { RootState } from '~redux/modules/reducer'
 import DiffComponent from './DiffComponent'
+import { FeatherIcon } from './ui/Icon'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
-  height: 400,
-  width: '80%',
+  height: 500,
+  width: '95%',
   maxWidth: 500,
   minWidth: 300,
   backgroundColor: theme.colors.reverse,
@@ -34,6 +35,7 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
   shadowOpacity: 0.3,
   shadowRadius: 4,
   elevation: 2,
+  overflow: 'hidden',
 }))
 
 const useReadableConflict = (diffObj?: Diff) => {
@@ -414,70 +416,114 @@ const ConflictModal = () => {
       swipeToClose={false}
     >
       <ScrollView
-        style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 20 }}
+        contentContainerStyle={{ paddingVertical: 40, paddingHorizontal: 20 }}
       >
         <Text title fontSize={19} marginBottom={20}>
           {t('conflict.title')}
         </Text>
         <Text text>{t('conflict.description')}</Text>
-        <Text marginTop={10} text fontSize={12} bold color="grey">
-          {t('conflict.lastLocalSave').toUpperCase()}:
-        </Text>
-        <Text text fontSize={12}>
-          {format(new Date(lastSeen || 0), 'PPpp', {
-            locale: isFR ? fr : enGB,
-          })}
-        </Text>
-        <Text marginTop={10} text bold color="grey" fontSize={12}>
-          {t('conflict.lastOnlineSave').toUpperCase()}:
-        </Text>
-        <Text text fontSize={12}>
-          {format(new Date(remoteLastSeen || 0), 'PPpp', {
-            locale: isFR ? fr : enGB,
-          })}
-        </Text>
         <DiffComponent type="added" data={added} />
         <DiffComponent type="updated" data={updated} />
         <DiffComponent type="deleted" data={deleted} />
-      </ScrollView>
-      <Box row borderColor="border" style={{ borderTopWidth: 1 }}>
+
+        <Text text marginTop={20}>
+          {t('conflict.whattodo')}
+        </Text>
+
         <TouchableOpacity
-          style={{ flex: 1 }}
           onPress={() => {
-            onDispatchUserSuccess?.(true)
-            conflictStateProxy.diff = undefined
-            conflictStateProxy.onDispatchUserSuccess = undefined
-            conflictStateProxy.lastSeen = undefined
-            conflictStateProxy.remoteLastSeen = undefined
+            Alert.alert(t('Attention'), t('app.areyousure'), [
+              { text: t('Non'), onPress: () => null, style: 'cancel' },
+              {
+                text: t('Oui'),
+                onPress: () => {
+                  onDispatchUserSuccess?.(true)
+                  conflictStateProxy.diff = undefined
+                  conflictStateProxy.onDispatchUserSuccess = undefined
+                  conflictStateProxy.lastSeen = undefined
+                  conflictStateProxy.remoteLastSeen = undefined
+                },
+                style: 'destructive',
+              },
+            ])
           }}
         >
           <Box
-            center
-            padding={10}
+            marginTop={20}
+            row
+            alignItems="center"
+            borderRadius={8}
             bg="lightGrey"
-            borderColor="border"
-            style={{ borderRightWidth: 1 }}
+            padding={10}
           >
-            <Text bold>{t('conflict.local')}</Text>
+            <Box paddingRight={10}>
+              <FeatherIcon name="save" size={24} color="grey" />
+            </Box>
+            <Box>
+              <Text marginBottom={10}>{t('conflict.local')}</Text>
+              <Text fontSize={12}>{t('conflict.localDescription')}</Text>
+              <Box marginTop={5} row justifyContent="flex-end">
+                <Text text fontSize={10} bold color="grey">
+                  {t('conflict.lastLocalSave').toUpperCase()}:&nbsp;
+                </Text>
+                <Text text fontSize={10}>
+                  {format(new Date(lastSeen || 0), 'PPpp', {
+                    locale: isFR ? fr : enGB,
+                  })}
+                </Text>
+              </Box>
+            </Box>
           </Box>
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ flex: 1 }}
           onPress={() => {
-            onDispatchUserSuccess?.()
-            conflictStateProxy.diff = undefined
-            conflictStateProxy.onDispatchUserSuccess = undefined
-            conflictStateProxy.lastSeen = undefined
-            conflictStateProxy.remoteLastSeen = undefined
+            Alert.alert(t('Attention'), t('app.areyousure'), [
+              { text: t('Non'), onPress: () => null, style: 'cancel' },
+              {
+                text: t('Oui'),
+                onPress: () => {
+                  onDispatchUserSuccess?.()
+                  conflictStateProxy.diff = undefined
+                  conflictStateProxy.onDispatchUserSuccess = undefined
+                  conflictStateProxy.lastSeen = undefined
+                  conflictStateProxy.remoteLastSeen = undefined
+                },
+                style: 'destructive',
+              },
+            ])
           }}
         >
-          <Box center padding={10} bg="lightPrimary">
-            <Text bold color="primary">
-              {t('conflict.cloud')}
-            </Text>
+          <Box
+            row
+            alignItems="center"
+            marginTop={20}
+            borderRadius={8}
+            bg="lightPrimary"
+            padding={10}
+          >
+            <Box paddingRight={10}>
+              <FeatherIcon name="cloud" size={24} color="primary" />
+            </Box>
+
+            <Box>
+              <Text marginBottom={10} bold color="primary">
+                {t('conflict.cloud')}
+              </Text>
+              <Text fontSize={12}>{t('conflict.cloudDescription')}</Text>
+              <Box marginTop={5} row justifyContent="flex-end">
+                <Text text fontSize={10} bold color="grey">
+                  {t('conflict.lastOnlineSave').toUpperCase()}:&nbsp;
+                </Text>
+                <Text text fontSize={10}>
+                  {format(new Date(remoteLastSeen || 0), 'PPpp', {
+                    locale: isFR ? fr : enGB,
+                  })}
+                </Text>
+              </Box>
+            </Box>
           </Box>
         </TouchableOpacity>
-      </Box>
+      </ScrollView>
     </StylizedModal>
   )
 }

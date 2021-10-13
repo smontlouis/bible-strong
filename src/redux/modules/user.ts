@@ -20,7 +20,6 @@ import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
 import { SubscriptionType, Tag } from '~common/types'
 import { Reducer } from 'redux'
-import { Alert } from 'react-native'
 import { detailedDiff } from '~helpers/deep-obj'
 import { conflictStateProxy } from '../../state/app'
 import { isEmpty } from '../../helpers/deep-obj/utils'
@@ -508,22 +507,30 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
       const obj = detailedDiff(oldUserData, newUserData, true)
       delete obj?.added?.bible?.history
       delete obj?.updated?.bible?.history
+      delete obj?.updated?.bible?.settings?.theme
       delete obj?.deleted?.bible?.history
       delete obj?.updated?.lastSeen
+
+      if (isEmpty(obj?.added?.bible)) {
+        delete obj?.added?.bible
+      }
+
+      if (isEmpty(obj?.updated?.bible?.settings)) {
+        delete obj?.updated?.bible?.settings
+      }
+
+      if (isEmpty(obj?.updated?.bible)) {
+        delete obj?.updated?.bible
+      }
+
+      if (isEmpty(obj?.deleted?.bible)) {
+        delete obj?.deleted?.bible
+      }
 
       console.log({ oldUserData, newUserData })
       console.log(obj)
 
-      if (
-        (isEmpty(obj?.added) ||
-          (Object.keys(obj?.added).length === 1 &&
-            isEmpty(obj?.added?.bible))) &&
-        (isEmpty(obj?.updated) ||
-          (Object.keys(obj?.added).length === 1 &&
-            isEmpty(obj?.added?.bible))) &&
-        (isEmpty(obj?.deleted) ||
-          (Object.keys(obj?.added).length === 1 && isEmpty(obj?.added?.bible)))
-      ) {
+      if (isEmpty(obj?.updated) && isEmpty(obj?.deleted)) {
         dispatchUserSuccess(userData, studies)()
         return
       }

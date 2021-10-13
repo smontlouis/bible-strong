@@ -146,9 +146,9 @@ class BibleNoteModal extends React.Component {
       this.props.t('Attention'),
       this.props.t('Voulez-vous vraiment supprimer cette note?'),
       [
-        { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: this.props.t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Oui',
+          text: this.props.t('Oui'),
           onPress: () => {
             this.props.deleteNote(noteId)
             this.props.onClosed()

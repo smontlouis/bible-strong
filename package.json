@@ -135,6 +135,7 @@
     "react-native-redash": "^12.4.2",
     "react-native-restart": "^0.0.17",
     "react-native-root-siblings": "3.2.3",
+    "react-native-splash-screen": "^3.2.0",
     "react-native-screens": "^2.15.0",
     "react-native-section-list-get-item-layout": "^2.2.3",
     "react-native-snackbar-dialog": "^1.4.1",

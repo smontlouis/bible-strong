@@ -83,9 +83,9 @@ const MoreScreen = () => {
         'Vous êtes sur le point de changer de langue, les bases de données françaises seront supprimées.'
       ),
       [
-        { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Oui',
+          text: t('Oui'),
           onPress: () => {
             const isFR = i18n.language === 'fr'
             i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')

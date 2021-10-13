@@ -77,7 +77,7 @@ const DiffComponent = ({ type, data }: DiffProps) => {
   if (!data?.length) return null
   return (
     <Box marginTop={20}>
-      <Text title fontSize={18} color={getTitleColor(type)}>
+      <Text marginBottom={10} color={getTitleColor(type)}>
         {title}
       </Text>
       {data.map((t, i) => (
