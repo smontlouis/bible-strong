@@ -12,6 +12,7 @@
 #import <RNGoogleSignin/RNGoogleSignin.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import "RNSplashScreen.h"
 
 #import <UMCore/UMModuleRegistry.h>
 #import <UMReactNativeAdapter/UMNativeModulesProxy.h>
@@ -76,6 +77,7 @@ static void InitializeFlipper(UIApplication *application) {
     [FIRApp configure];
   }
 
+  [RNSplashScreen show];
   return YES;
 }
 

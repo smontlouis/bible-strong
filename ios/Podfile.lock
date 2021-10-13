@@ -793,6 +793,8 @@ PODS:
     - React-Core
   - react-native-restart (0.0.17):
     - React
+  - react-native-splash-screen (3.2.0):
+    - React
   - react-native-sqlite-storage (4.1.0):
     - React
   - react-native-webview (11.14.0):
@@ -985,6 +987,7 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-restart (from `../node_modules/react-native-restart`)
+  - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1132,6 +1135,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-notifications"
   react-native-restart:
     :path: "../node_modules/react-native-restart"
+  react-native-splash-screen:
+    :path: "../node_modules/react-native-splash-screen"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
   react-native-webview:
@@ -1281,6 +1286,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: 30fb89fa913c342be82a887b56e96be6d71201dd
   react-native-notifications: 89a73cd2cd2648e1734fa10e3507681c9e4f14de
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
+  react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
   react-native-webview: d70bc760daaa0e2667dec569b93014882565819c
   React-perflogger: 1f554c2b684e2f484f9edcdfdaeedab039fbaca8
