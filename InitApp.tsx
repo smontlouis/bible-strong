@@ -5,9 +5,11 @@ import { StatusBar, AppState, AppStateStatus } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
+import * as Updates from 'expo-updates'
 import compose from 'recompose/compose'
 import analytics from '@react-native-firebase/analytics'
 import { MenuProvider } from 'react-native-popup-menu'
+import { withTranslation } from 'react-i18next'
 
 import ErrorBoundary from '~common/ErrorBoundary'
 import ConflictModal from '~common/ConflictModal'
@@ -27,6 +29,7 @@ import { DBStateProvider } from '~helpers/databaseState'
 import { RootState } from '~redux/modules/reducer'
 import { NavigationState, NavigationParams } from 'react-navigation'
 import { Persistor } from 'redux-persist'
+import SnackBar from '~common/SnackBar/SnackBar'
 
 interface Props {
   theme: string
@@ -41,6 +44,9 @@ class InitApp extends React.Component<Props> {
     this.props.dispatch(getVersionUpdate())
     this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
+    if (!__DEV__) {
+      this.updateApp()
+    }
     AppState.addEventListener('change', this.handleAppStateChange)
   }
 
@@ -51,6 +57,23 @@ class InitApp extends React.Component<Props> {
   handleAppStateChange = (nextAppState: AppStateStatus) => {
     if (nextAppState.match(/inactive|background/)) {
       console.log('App mode - background!')
+    }
+  }
+
+  updateApp = async () => {
+    try {
+      Updates.checkForUpdateAsync()
+      const update = await Updates.checkForUpdateAsync()
+
+      if (update.isAvailable) {
+        SnackBar.show(this.props.t('app.updateAvailable'))
+        await Updates.fetchUpdateAsync()
+
+        SnackBar.show(this.props.t('app.updateReady'))
+        Updates.reloadAsync()
+      }
+    } catch (e) {
+      // handle or log error
     }
   }
 
@@ -166,5 +189,6 @@ export default compose(
     theme: state.user.bible.settings.theme,
     fontFamily: state.user.fontFamily,
   })),
-  withFireAuth
+  withFireAuth,
+  withTranslation()
 )(InitApp)

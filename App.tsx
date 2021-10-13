@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react'
 import { LogBox, ActivityIndicator, View, StatusBar } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
-import * as Updates from 'expo-updates'
 import { Provider } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import { setAutoFreeze } from 'immer'
@@ -65,28 +64,10 @@ const loadResourcesAsync = async () => {
   ])
 }
 
-const updateApp = async (t: any) => {
-  try {
-    const update = await Updates.checkForUpdateAsync()
-
-    if (update.isAvailable) {
-      SnackBar.show(t('app.updateAvailable'))
-      await Updates.fetchUpdateAsync()
-
-      SnackBar.show('app.updateReady')
-      Updates.reloadAsync()
-    }
-  } catch (e) {
-    // handle or log error
-  }
-}
-
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
-  const { t } = useTranslation()
   useEffect(() => {
     ;(async () => {
-      await updateApp(t)
       await loadResourcesAsync()
       await setI18n()
       handleFinishLoading()
