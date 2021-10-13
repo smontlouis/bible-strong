@@ -4,7 +4,7 @@ import { LogBox, ActivityIndicator, View, StatusBar } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
+import * as Sentry from 'sentry-expo'
 import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification from 'react-native-push-notification'
@@ -129,4 +129,4 @@ const App = () => {
   )
 }
 
-export default Sentry.wrap(App)
+export default App
