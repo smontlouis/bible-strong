@@ -387,6 +387,14 @@ PODS:
   - EXSharing (9.2.1):
     - ExpoModulesCore
     - UMCore
+  - EXStructuredHeaders (1.1.1):
+    - UMCore
+  - EXUpdates (0.8.5):
+    - EXStructuredHeaders
+    - EXUpdatesInterface
+    - React-Core
+    - UMCore
+  - EXUpdatesInterface (0.2.2)
   - FBLazyVector (0.66.0)
   - FBReactNativeSpec (0.66.0):
     - RCT-Folly (= 2021.06.28.00-v2)
@@ -964,6 +972,9 @@ DEPENDENCIES:
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
+  - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
+  - EXUpdates (from `../node_modules/expo-updates/ios`)
+  - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
@@ -1093,6 +1104,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
     :path: "../node_modules/expo-sharing/ios"
+  EXStructuredHeaders:
+    :path: "../node_modules/expo-structured-headers/ios"
+  EXUpdates:
+    :path: "../node_modules/expo-updates/ios"
+  EXUpdatesInterface:
+    :path: "../node_modules/expo-updates-interface/ios"
   FBLazyVector:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
@@ -1241,6 +1258,9 @@ SPEC CHECKSUMS:
   EXLinearGradient: f9ea3259f096b27008860ca50764184225dc71c9
   ExpoModulesCore: 2734852616127a6c1fc23012197890a6f3763dc7
   EXSharing: 567f4b9f38a5266ec2f51973e2efe3b4aaf0bf69
+  EXStructuredHeaders: e52b880264d15b8ad07d36670226c29476af6334
+  EXUpdates: 013d26649cb6ab4f8d8d80c35d3d4be150b47e7c
+  EXUpdatesInterface: b68e78b912a03fff7901a5f46ec200c45e3506a5
   FBLazyVector: 6816ca39e1cc8beffd2a96783f518296789d1c48
   FBReactNativeSpec: 3b1e86618e902743fde35b40cf9ebd100fd655b7
   FBSDKCoreKit: 0d1ae58388a458b8222f72025804cdc84eb5d0c3

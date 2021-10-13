@@ -5,6 +5,8 @@
   "Fermer": "Close",
   "Valider": "Validate",
   "app.areyousure": "Are you sure ?",
+  "app.updateAvailable": "An update is available, downloading...",
+  "app.updateReady": "Update installed. Rebooting...",
   "conflict.highlightAdded": "{{highlight}} created",
   "conflict.tagAdded": "Tag \"{{tag}}\" created",
   "conflict.tagInEntity": "New tags {{name}}",

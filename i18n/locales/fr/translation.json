@@ -5,6 +5,8 @@
   "Fermer": "Fermer",
   "Valider": "Valider",
   "app.areyousure": "Êtes-vous sur ?",
+  "app.updateAvailable": "Une mise à jour est disponible, téléchargement...",
+  "app.updateReady": "Mise à jour installée. Redémarrage...",
   "conflict.highlightAdded": "{{highlight}} créé",
   "conflict.tagAdded": "Etiquette \"{{tag}}\" créée",
   "conflict.tagInEntity": "Nouv. étiquettes {{name}}",
