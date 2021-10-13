@@ -12,9 +12,20 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		85D57EE048799AEAEB015060 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5202DF9FD6581E4C4802D5BC /* libPods-biblestrong.a */; };
-		F4C4E07B2717640100A66794 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = F4C4E07A2717640100A66794 /* Expo.plist */; };
 		F4F2A6B6270D62B200021E46 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F2A6B5270D62B100021E46 /* File.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F4DE5C4027178F7A001D6697 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
@@ -40,7 +51,6 @@
 		E288B88B3076F322580DCD2A /* Pods-biblestrong.dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.dev.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.dev.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
-		F4C4E07A2717640100A66794 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		F4F2A6B5270D62B100021E46 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,7 +69,7 @@
 		13B07FAE1A68108700A75B9A /* biblestrong */ = {
 			isa = PBXGroup;
 			children = (
-				F4C4E0792717640100A66794 /* Supporting */,
+				F4DE5C4327179099001D6697 /* Supporting */,
 				63B75B6E242B2A6C0042D6EC /* Bible Strong - Dev.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -162,13 +172,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F4C4E0792717640100A66794 /* Supporting */ = {
+		F4DE5C4327179099001D6697 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
-				F4C4E07A2717640100A66794 /* Expo.plist */,
 			);
-			name = Supporting;
-			path = biblestrong/Supporting;
+			path = Supporting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,11 +191,13 @@
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				6321EC4823EF53A4007CB036 /* Setup firebase environment GoogleService-Info.plist */,
+				F4DE5C4127178F86001D6697 /* Setup expo environment Expo.plist */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				BAE98BAC0BF34B598839A137 /* Upload Debug Symbols to Sentry */,
 				6760A510F55ED80A3DEB9719 /* [CP] Copy Pods Resources */,
 				8E0BEB1083C4A6ABF6284FC4 /* [CP-User] [RNFB] Core Configuration */,
+				F4DE5C4027178F7A001D6697 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -238,7 +248,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4C4E07B2717640100A66794 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
@@ -351,6 +360,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export SENTRY_PROPERTIES=sentry.properties\n\n../node_modules/@sentry/cli/bin/sentry-cli upload-dif \"$DWARF_DSYM_FOLDER_PATH\"\n";
+		};
+		F4DE5C4127178F86001D6697 /* Setup expo environment Expo.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Setup expo environment Expo.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Name of the resource we're selectively copying\nEXPO_PLIST=Expo.plist\n\nEXPO_DEV=${PROJECT_DIR}/expo/dev/${GOOGLESERVICE_INFO_PLIST}\nEXPO_STAGING=${PROJECT_DIR}/expo/staging/${GOOGLESERVICE_INFO_PLIST}\nEXPO_PROD=${PROJECT_DIR}/firebase/prod/${GOOGLESERVICE_INFO_PLIST}\n\n# Check if dev file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_DEV}\"\nif [ ! -f $GOOGLESERVICE_INFO_DEV ]\nthen\n    echo \"No Development GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n# Check if staging file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_STAGING}\"\nif [ ! -f $GOOGLESERVICE_INFO_STAGING ]\nthen\n    echo \"No Staging GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n# Check if prod file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_PROD}\"\nif [ ! -f $GOOGLESERVICE_INFO_PROD ]\nthen\n    echo \"No Production GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n\n# Get a reference to the destination location for the GoogleService-Info.plist\nPLIST_DESTINATION=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\necho \"Will copy ${GOOGLESERVICE_INFO_PLIST} to final destination: ${PLIST_DESTINATION}\"\n\nif [ \"${CONFIGURATION}\" == \"Dev\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_DEV}\"\n    cp \"${GOOGLESERVICE_INFO_DEV}\" \"${PLIST_DESTINATION}\"\nfi\n\nif [ \"${CONFIGURATION}\" == \"Staging\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_STAGING}\"\n    cp \"${GOOGLESERVICE_INFO_STAGING}\" \"${PLIST_DESTINATION}\"\nfi\n\nif [ \"${CONFIGURATION}\" == \"Prod\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_PROD}\"\n    cp \"${GOOGLESERVICE_INFO_PROD}\" \"${PLIST_DESTINATION}\"\nfi\n";
 		};
 		FD4C38642228810C00325AF5 /* Start Packager */ = {
 			isa = PBXShellScriptBuildPhase;
