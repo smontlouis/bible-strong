@@ -7,6 +7,6 @@
         <key>EXUpdatesURL</key>
         <string>https://exp.host/@smontlouis/bible-strong</string>
         <key>EXUpdatesReleaseChannel</key>
-        <string>${EX_UPDATES_RELEASE_CHANNEL}</string>
+        <string>$(EX_UPDATES_RELEASE_CHANNEL)</string>
 </dict>
 </plist>

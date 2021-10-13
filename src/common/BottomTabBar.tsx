@@ -85,6 +85,7 @@ const TabBar = props => {
       easing="ease-in-out"
       duration={400}
       style={{
+        backgroundColor: 'red',
         overflow: isFullscreen ? 'hidden' : 'visible',
         paddingTop: activeRouteIndex === 2 ? (isFullscreen ? 0 : 15) : 0,
         height:
