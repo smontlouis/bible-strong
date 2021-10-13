@@ -126,8 +126,8 @@ android {
         applicationId "com.smontlouis.biblestrong"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 153
-        versionName "14.5.5"
+        versionCode 154
+        versionName "14.5.6"
         manifestPlaceholders = [appAuthRedirectScheme: 'com.redirectScheme.comm']
     }
     splits {
