@@ -82,26 +82,17 @@ project.ext.react = [
 
 apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 apply from: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../react.gradle")
-apply from: new File(["node", "--print", "require.resolve('expo-updates/package.json')"].execute().text.trim(), "../scripts/create-manifest-android.gradle")project.ext.sentryCli = [
+apply from: new File(["node", "--print", "require.resolve('expo-updates/package.json')"].execute().text.trim(), "../scripts/create-manifest-android.gradle")
+project.ext.sentryCli = [
     logLevel: "debug"
 ]
 apply from: "../../node_modules/@sentry/react-native/sentry.gradle"
 
-/**
- * Set this to true to create two separate APKs instead of one:
- *   - An APK that only works on ARM devices
- *   - An APK that only works on x86 devices
- * The advantage is the size of the APK is reduced by about 4MB.
- * Upload all the APKs to the Play Store and people will download
- * the correct one based on the CPU architecture of their device.
- */
 def enableSeparateBuildPerCPUArchitecture = true
-
-/**
- * Run Proguard to shrink the Java bytecode in release builds.
- */
 def enableProguardInReleaseBuilds = false
-
+def jscFlavor = 'org.webkit:android-jsc:+'
+def enableHermes = project.ext.react.get("enableHermes", false);
+def nativeArchitectures = project.getProperties().get("reactNativeDebugArchitectures")
 def getPassword(String currentUser, String keyChain) {
    def stdout = new ByteArrayOutputStream()
    def stderr = new ByteArrayOutputStream()
@@ -191,11 +182,6 @@ android {
         }
     }
 }
-
-def jscFlavor = 'org.webkit:android-jsc:+'
-
-def enableHermes = project.ext.react.get("enableHermes", false);
-
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules

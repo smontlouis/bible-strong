@@ -8,5 +8,7 @@
         <string>https://exp.host/@smontlouis/bible-strong</string>
         <key>EXUpdatesReleaseChannel</key>
         <string>dev</string>
+        <key>EXUpdatesCheckOnLaunch</key>
+        <string>NEVER</string>
 </dict>
 </plist>
