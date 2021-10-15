@@ -2066,7 +2066,7 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-5.9.10.tgz#97d3a9fa62a3a4838ec7a6ec91cfec5a26e365b6"
   integrity sha512-1NPlBA2Hu/KWc3EnQcDRPRX0x8Dg9tuQlQQVWVQjlg+u+PjCq7ANEtbikOFKp5yQqfF8tqzU5+84/IfDO8zpiA==
 
-"@react-native-community/push-notification-ios@^1.0.6", "@react-native-community/push-notification-ios@^1.2.0":
+"@react-native-community/push-notification-ios@^1.10.1":
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.10.1.tgz#d52a6d69ac1112df0f79e1d17978077629b76784"
   integrity sha512-k6bZWUKLif4GjenyTD3aQLwA2VT3bNmt22INO/34lexnpmqkPDZF7nreqbckTHG0Zso9wDTe4N/AZJUC/d8iRg==
@@ -2909,10 +2909,10 @@
     "@types/react" "*"
     "@types/react-native" "*"
 
-"@types/react-native-push-notification@^3.0.9":
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/@types/react-native-push-notification/-/react-native-push-notification-3.0.9.tgz#d93f182aa40e773caccde85af6222f71e3288a74"
-  integrity sha512-1JheyPe4kNFHJveoOfnhFskPccngfysQnckJ36uk8a4lylaMgyOxWObkWmy+PKCSCBfzY0ustFV13icTvXXotg==
+"@types/react-native-push-notification@^7.3.2":
+  version "7.3.2"
+  resolved "https://registry.yarnpkg.com/@types/react-native-push-notification/-/react-native-push-notification-7.3.2.tgz#fa4ca52925ac82f8c2520b1524e02310493369c1"
+  integrity sha512-iTJJMdC8US/s8Q9VmMyHTsQl9ivAYijH0eHG2XU8LzxYBg0ItJmM7E5xzZcdARiJK8Hui2PDxceEHqS31BETvA==
 
 "@types/react-native-snap-carousel@^3.8.1":
   version "3.8.4"
@@ -7352,6 +7352,13 @@ expo-modules-core@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-0.2.0.tgz#68e5b6e53d0afbf8d131578831aed657589a2d42"
   integrity sha512-inpfZ5X/BaTtbj2wG9PA9AC0MN8VyId6KSRlVuEg7+ziurHBy/kKDFxpOddUokhwiln2uhoYPSStJjR/tKypdw==
+
+expo-permissions@^12.1.1:
+  version "12.1.1"
+  resolved "https://registry.yarnpkg.com/expo-permissions/-/expo-permissions-12.1.1.tgz#93fd8569d4106ff9dd66d67619cb69a0aa895482"
+  integrity sha512-fHBB4A/aWMcvdmDY79gpgQt0ufKG8F1gwTgO3+RjjudVe5kovNy5TeXdHrCa0MksFVKjktqLjJrgiBITJXjg+g==
+  dependencies:
+    expo-modules-core "~0.2.0"
 
 expo-sharing@~9.2.1:
   version "9.2.1"
@@ -12679,11 +12686,6 @@ react-native-modalize@2.0.8:
   resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-2.0.8.tgz#5dcb2c56d82e3dbd271582f832e7e02ae4cbb503"
   integrity sha512-OKdpFVExEe4YM2uFHL/aStS9p0JaC6gBupjaW1QVHkGq22T2ASYwkhDvTnMS8BLOLWPx2fC3xEBzOcn2rh7EYw==
 
-react-native-notifications@^3.1.2:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.5.0.tgz#3a5bff5d2bb140ca09bef831b7d9bd805200fb1d"
-  integrity sha512-uoFvV0jhn+5TcFlGUYEk/nBNyy9I6lWbmjNYvUYrShWyxHl3peeULxuu/A1z2hwhAV9JtJEqEZQrahoX1aT+2g==
-
 react-native-paper@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/react-native-paper/-/react-native-paper-3.0.0.tgz#b7d667dcb38f5e69552db140c398f50ea46ee98e"
@@ -12713,12 +12715,10 @@ react-native-progress@^4.1.0:
     "@react-native-community/art" "^1.1.2"
     prop-types "^15.7.2"
 
-react-native-push-notification@^3.1.9:
-  version "3.5.2"
-  resolved "https://registry.yarnpkg.com/react-native-push-notification/-/react-native-push-notification-3.5.2.tgz#5f6226d12a00c25c15279325b57c5fbddd5b1c82"
-  integrity sha512-eh9l7WeL7Lxq17ntsafCrNQF6aW8XS6b7PG/s1Y8amAqpDt8GJ8hz125z566N1jsj3PDh9pfd4SjNS+tLaV47A==
-  dependencies:
-    "@react-native-community/push-notification-ios" "^1.2.0"
+react-native-push-notification@^8.1.1:
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-push-notification/-/react-native-push-notification-8.1.1.tgz#a41d20c70ea5a7709417e96261b225461f8dc73a"
+  integrity sha512-XpBtG/w+a6WXTxu6l1dNYyTiHnbgnvjoc3KxPTxYkaIABRmvuJZkFxqruyGvfCw7ELAlZEAJO+dthdTabCe1XA==
 
 react-native-reanimated@^1.8.0:
   version "1.13.3"

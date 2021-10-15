@@ -16,6 +16,7 @@ import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
+import i18n from '~i18n'
 
 const useGetVerseOfTheDay = (version: string, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -94,12 +95,15 @@ export const useVerseOfTheDay = (addDay: number) => {
         )(nowDate)
 
         await PushNotification.localNotificationSchedule({
-          title: `Bonjour ${extractFirstName(displayName)}`,
+          channelId: 'vod-notifications',
+          title: `${i18n.t('Bonjour')} ${extractFirstName(displayName)}`,
           message: !addDay
             ? removeBreakLines(verseOfTheDayContent)
             : removeBreakLines(verseOfTheDayPlus1Content),
           category: 'NOTIFICATIONS',
+          allowWhileIdle: true,
           date,
+          repeatType: 'day',
         })
 
         console.log(
