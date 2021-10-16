@@ -452,7 +452,6 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
 
       if (remoteLastSeen > lastSeen || !isLogged) {
         profile = { ...profile, ...u }
-        console.log({ id: profile.id, u })
       }
 
       return dispatch({
@@ -527,7 +526,6 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         delete obj?.deleted?.bible
       }
 
-      console.log({ oldUserData, newUserData })
       console.log(obj)
 
       if (isEmpty(obj?.updated) && isEmpty(obj?.deleted)) {
@@ -544,7 +542,6 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
       conflictStateProxy.remoteLastSeen = remoteLastSeen
     } else {
       if (!isLogged) {
-        console.log('GET INFOS')
         const userDoc = await userRef.get()
         userData = userDoc.data()
         const querySnapshot = await studiesRef.get()

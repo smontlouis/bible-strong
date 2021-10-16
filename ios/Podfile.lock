@@ -379,6 +379,9 @@ PODS:
     - UMCore
   - EXLinearGradient (9.2.0):
     - UMCore
+  - EXPermissions (12.1.1):
+    - ExpoModulesCore
+    - UMCore
   - ExpoModulesCore (0.2.0):
     - ExpoModulesCore/Core (= 0.2.0)
     - ExpoModulesCore/Interfaces (= 0.2.0)
@@ -799,9 +802,9 @@ PODS:
   - react-native-fbsdk-next/Share (4.6.0):
     - FBSDKShareKit (~> 9.3)
     - React-Core
-  - react-native-netinfo (5.9.10):
+  - react-native-music-control (1.4.0):
     - React-Core
-  - react-native-notifications (3.5.0):
+  - react-native-netinfo (5.9.10):
     - React-Core
   - react-native-restart (0.0.17):
     - React
@@ -976,6 +979,7 @@ DEPENDENCIES:
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
+  - EXPermissions (from `../node_modules/expo-permissions/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
@@ -1001,8 +1005,8 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
+  - react-native-music-control (from `../node_modules/react-native-music-control`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
-  - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
@@ -1110,6 +1114,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-loader/ios"
   EXLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
+  EXPermissions:
+    :path: "../node_modules/expo-permissions/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
@@ -1156,10 +1162,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-fbsdk-next:
     :path: "../node_modules/react-native-fbsdk-next"
+  react-native-music-control:
+    :path: "../node_modules/react-native-music-control"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
-  react-native-notifications:
-    :path: "../node_modules/react-native-notifications"
   react-native-restart:
     :path: "../node_modules/react-native-restart"
   react-native-splash-screen:
@@ -1268,6 +1274,7 @@ SPEC CHECKSUMS:
   EXHaptics: 6dc4307ab0794fe7a87ec8d7d1c299cf103d6cb3
   EXImageLoader: d3531a3fe530b22925c19977cb53bb43e3821fe6
   EXLinearGradient: f9ea3259f096b27008860ca50764184225dc71c9
+  EXPermissions: 916efb5b817cb0a40160c0cd2f369af3c23a78be
   ExpoModulesCore: 2734852616127a6c1fc23012197890a6f3763dc7
   EXSharing: 567f4b9f38a5266ec2f51973e2efe3b4aaf0bf69
   EXStructuredHeaders: e52b880264d15b8ad07d36670226c29476af6334
@@ -1315,8 +1322,8 @@ SPEC CHECKSUMS:
   React-jsinspector: be95ad424ba9f7b817aff22732eb9b1b810a000a
   React-logger: 9a9cd87d4ea681ae929b32ef580638ff1b50fb24
   react-native-fbsdk-next: a0dd8905af573ec4d21b7bc398423ccaa2ce2b07
+  react-native-music-control: 93b521377efdf2e49b46ccade8457f9503359b38
   react-native-netinfo: 30fb89fa913c342be82a887b56e96be6d71201dd
-  react-native-notifications: 89a73cd2cd2648e1734fa10e3507681c9e4f14de
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe

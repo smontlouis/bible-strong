@@ -36,7 +36,6 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
   return (
     <Box width={r(['50%', '50%', '33%', '33%'])}>
       <StudyLink
-        onLongPress={() => setStudySettings(study.id)}
         key={study.id}
         route="EditStudy"
         params={{ studyId: study.id }}
