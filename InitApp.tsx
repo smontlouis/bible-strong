@@ -62,7 +62,6 @@ class InitApp extends React.Component<Props> {
 
   updateApp = async () => {
     try {
-      Updates.checkForUpdateAsync()
       const update = await Updates.checkForUpdateAsync()
 
       if (update.isAvailable) {
@@ -74,6 +73,7 @@ class InitApp extends React.Component<Props> {
       }
     } catch (e) {
       // handle or log error
+      console.log(e)
     }
   }
 
