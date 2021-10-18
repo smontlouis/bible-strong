@@ -29,7 +29,7 @@ import { DBStateProvider } from '~helpers/databaseState'
 import { RootState } from '~redux/modules/reducer'
 import { NavigationState, NavigationParams } from 'react-navigation'
 import { Persistor } from 'redux-persist'
-import SnackBar from '~common/SnackBar/SnackBar'
+import SnackBar from '~common/SnackBar'
 
 interface Props {
   theme: string
@@ -59,11 +59,9 @@ class InitApp extends React.Component<Props> {
   }
 
   updateApp = async () => {
-    Alert.alert('Wil start update', 'Oh yes')
-
+    SnackBar.show('hello')
     const update = await Updates.checkForUpdateAsync()
-
-    Alert.alert('Updates', JSON.stringify(update))
+    Alert.alert('Updates', update.isAvailable.toString())
 
     if (update.isAvailable) {
       SnackBar.show(this.props.t('app.updateAvailable'))
