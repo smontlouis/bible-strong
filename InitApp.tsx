@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
 import { Provider as PaperProvider } from 'react-native-paper'
-import { StatusBar, AppState, AppStateStatus } from 'react-native'
+import { StatusBar, AppState, AppStateStatus, Alert } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
@@ -59,7 +59,11 @@ class InitApp extends React.Component<Props> {
   }
 
   updateApp = async () => {
+    Alert.alert('Wil start update', 'Oh yes')
+
     const update = await Updates.checkForUpdateAsync()
+
+    Alert.alert('Updates', JSON.stringify(update))
 
     if (update.isAvailable) {
       SnackBar.show(this.props.t('app.updateAvailable'))
