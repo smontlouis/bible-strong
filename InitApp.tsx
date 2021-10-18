@@ -44,9 +44,7 @@ class InitApp extends React.Component<Props> {
     this.props.dispatch(getVersionUpdate())
     this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
-    if (!__DEV__) {
-      this.updateApp()
-    }
+    this.updateApp()
     AppState.addEventListener('change', this.handleAppStateChange)
   }
 
@@ -61,19 +59,14 @@ class InitApp extends React.Component<Props> {
   }
 
   updateApp = async () => {
-    try {
-      const update = await Updates.checkForUpdateAsync()
+    const update = await Updates.checkForUpdateAsync()
 
-      if (update.isAvailable) {
-        SnackBar.show(this.props.t('app.updateAvailable'))
-        await Updates.fetchUpdateAsync()
+    if (update.isAvailable) {
+      SnackBar.show(this.props.t('app.updateAvailable'))
+      await Updates.fetchUpdateAsync()
 
-        SnackBar.show(this.props.t('app.updateReady'))
-        Updates.reloadAsync()
-      }
-    } catch (e) {
-      // handle or log error
-      console.log(e)
+      SnackBar.show(this.props.t('app.updateReady'))
+      Updates.reloadAsync()
     }
   }
 

@@ -11,7 +11,7 @@
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
     "platforms": ["ios", "android"],
-    "version": "14.5.8",
+    "version": "14.5.10",
     "orientation": "default",
     "updates": {
       "fallbackToCacheTimeout": 0,
