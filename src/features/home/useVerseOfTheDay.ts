@@ -7,7 +7,7 @@ import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
 import Snackbar from '~common/SnackBar'
-// import { setNotificationId } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 import useLogin from '~helpers/useLogin'
 import extractFirstName from '~helpers/extractFirstName'
@@ -50,6 +50,7 @@ const useGetVerseOfTheDay = (version: string, addDay: number) => {
 
 export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
+  const { t } = useTranslation()
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
@@ -126,8 +127,11 @@ export const useVerseOfTheDay = (addDay: number) => {
       })
 
       console.log('has permissions', hasPermissions)
+
       if (hasPermissions) {
         scheduleNotification()
+      } else {
+        Snackbar.show(t('home.notificationPermissionNeeded'))
       }
     }
     initNotifications()

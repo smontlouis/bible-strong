@@ -148,6 +148,7 @@
     "react-native-tab-view": "^2.14.0",
     "react-native-unimodules": "~0.14.8",
     "react-native-webview": "^11.0.2",
+    "react-native-youtube-iframe": "^2.1.2",
     "react-native-zip-archive": "^5.0.1",
     "react-navigation": "^4.0.10",
     "react-navigation-drawer": "^2.2.2",

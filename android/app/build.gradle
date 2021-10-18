@@ -191,6 +191,9 @@ dependencies {
     implementation project(':@sentry_react-native')
     implementation project(':react-native-push-notification')
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+    implementation "com.squareup.okhttp3:okhttp"
+    implementation "com.squareup.okhttp3:okhttp-bom:4.4.1"
     
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
@@ -222,12 +225,6 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-configurations.all {
-     resolutionStrategy {
-       force "com.facebook.soloader:soloader:0.8.0"
-       force "androidx.appcompat:appcompat:1.2.0"
-     }
-}
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 apply plugin: 'com.google.gms.google-services'

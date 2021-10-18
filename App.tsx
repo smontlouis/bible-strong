@@ -52,9 +52,11 @@ PushNotification.configure({
 PushNotification.createChannel(
   {
     channelId: 'vod-notifications',
-    channelName: 'Notifications versets du jour', // (required)
-    channelDescription: 'Notifications pour recevoir les versets du jour', // (optional) default: undefined.
-    importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
+    channelName: 'Notifications versets du jour',
+    channelDescription: 'Notifications pour recevoir les versets du jour',
+    importance: Importance.HIGH,
+    playSound: true,
+    vibrate: true,
   },
   created => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
 )

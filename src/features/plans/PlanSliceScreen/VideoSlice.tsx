@@ -1,5 +1,6 @@
 import React from 'react'
-import YoutubePlayer from '~helpers/react-native-youtube-iframe'
+// import YoutubePlayer from '~helpers/react-native-youtube-iframe'
+import YoutubePlayer from "react-native-youtube-iframe";
 
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
@@ -12,6 +13,7 @@ const iframeHeight = (iframeWidth * 9) / 16
 
 const VideoSlice = ({ title, description, url }: VideoSliceProps) => {
   const videoId = url.replace('https://www.youtube.com/watch?v=', '')
+  console.log(videoId)
   return (
     <Box marginBottom={40}>
       {description && (
@@ -24,8 +26,8 @@ const VideoSlice = ({ title, description, url }: VideoSliceProps) => {
         width={iframeWidth}
         videoId={videoId}
         // onChangeState={event => console.log(event)}
-        // onReady={() => console.log('ready')}
-        // onError={e => console.log(e)}
+        onReady={() => console.log('ready')}
+        onError={e => console.log(e)}
         // onPlaybackQualityChange={q => console.log(q)}
         placeholder={title}
       />

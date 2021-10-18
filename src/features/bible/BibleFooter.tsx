@@ -5,7 +5,7 @@ import { Audio } from 'expo-av'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { pure } from 'recompose'
-
+import MusicControl, { Command } from 'react-native-music-control'
 import SnackBar from '~common/SnackBar'
 import { usePrevious } from '~helpers/usePrevious'
 import Link from '~common/Link'
@@ -13,6 +13,8 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { millisToMinutes } from '~helpers/millisToMinutes'
 import { useTranslation } from 'react-i18next'
+import books from '~assets/bible_versions/books-desc'
+import { getVersions } from '~helpers/bibleVersions'
 
 const Container = styled.View(({ audioMode, theme }) => ({
   position: 'absolute',
@@ -79,7 +81,7 @@ const Progress = styled(Box)(({ progress, theme }) => ({
   backgroundColor: theme.colors.primary,
 }))
 
-const useLoadSound = (
+const useLoadSound = ({
   audioMode,
   audioUrl,
   isPlaying,
@@ -87,14 +89,18 @@ const useLoadSound = (
   canPlayAudio,
   setIsPlaying,
   setAudioMode,
-  goToNextChapter
-) => {
+  goToNextChapter,
+  goToPrevChapter,
+  audioTitle,
+  audioSubtitle,
+}) => {
   const [soundObject, setSoundObject] = useState(null)
   const [audioObject, setAudioObject] = useState(null)
   const [error, setError] = useState(null)
   const previousAudioUrl = usePrevious(audioUrl)
   const { t } = useTranslation()
 
+  // Audio init
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -105,8 +111,19 @@ const useLoadSound = (
       staysActiveInBackground: true,
       playThroughEarpieceAndroid: false,
     })
+
+    MusicControl.enableBackgroundMode(true)
+    MusicControl.on(Command.play, () => setIsPlaying(true))
+    MusicControl.on(Command.pause, () => setIsPlaying(false))
+    MusicControl.on(Command.nextTrack, () => {
+      goToNextChapter()
+    })
+    MusicControl.on(Command.previousTrack, () => {
+      goToPrevChapter()
+    })
   }, [])
 
+  // Audio mode + audio url
   useEffect(() => {
     const loadSound = async () => {
       if (!audioUrl) {
@@ -144,6 +161,7 @@ const useLoadSound = (
         setIsLoading(false)
         setIsPlaying(true)
         s.playAsync()
+
         setError(false)
         setSoundObject(s)
       } catch (error) {
@@ -166,11 +184,41 @@ const useLoadSound = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl, audioMode])
 
+  // Update music controls when duration is available
+  useEffect(() => {
+    if (audioObject?.durationMillis) {
+      MusicControl.enableControl('play', true)
+      MusicControl.enableControl('pause', true)
+      MusicControl.enableControl('changePlaybackPosition', true)
+      MusicControl.enableControl('skipForward', false)
+      MusicControl.enableControl('skipBackward', false)
+      MusicControl.enableControl('nextTrack', true)
+      MusicControl.enableControl('previousTrack', true)
+
+      MusicControl.setNowPlaying({
+        title: audioTitle,
+        artwork: require('~assets/images/icon.png'),
+        artist: audioSubtitle,
+        duration: audioObject.durationMillis / 1000,
+      })
+      MusicControl.updatePlayback({
+        state: MusicControl.STATE_PLAYING,
+        elapsedTime: audioObject.positionMillis / 1000,
+      })
+    } else {
+      MusicControl.resetNowPlaying()
+    }
+  }, [audioObject?.durationMillis])
+
   useEffect(() => {
     const playSound = async () => {
       if (isPlaying && soundObject) {
         try {
           await soundObject.playAsync()
+          MusicControl.updatePlayback({
+            state: MusicControl.STATE_PLAYING,
+            elapsedTime: audioObject.positionMillis / 1000,
+          })
         } catch (e) {
           console.log(e)
         }
@@ -179,6 +227,10 @@ const useLoadSound = (
       if (!isPlaying && soundObject) {
         try {
           await soundObject.pauseAsync()
+          MusicControl.updatePlayback({
+            state: MusicControl.STATE_PAUSED,
+            elapsedTime: audioObject.positionMillis / 1000,
+          })
         } catch (e) {
           console.log(e)
         }
@@ -197,6 +249,7 @@ const useLoadSound = (
       soundObject.unloadAsync()
       setSoundObject(null)
       setAudioMode(false)
+      MusicControl.resetNowPlaying()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canPlayAudio])
@@ -213,7 +266,29 @@ const useLoadSound = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioObject?.didJustFinish])
 
-  return [soundObject, audioObject, error]
+  const setPosition = milli => {
+    if (soundObject) {
+      const position = audioObject.positionMillis + milli
+      if (position < 0) {
+        soundObject.setPositionAsync(0)
+        MusicControl.updatePlayback({
+          elapsedTime: 0,
+        })
+      } else if (position > audioObject.durationMillis) {
+        soundObject.setPositionAsync(audioObject.durationMillis)
+        MusicControl.updatePlayback({
+          elapsedTime: audioObject.durationMillis / 1000,
+        })
+      } else {
+        soundObject.setPositionAsync(position)
+        MusicControl.updatePlayback({
+          elapsedTime: position / 1000,
+        })
+      }
+    }
+  }
+
+  return [soundObject, audioObject, error, setPosition]
 }
 
 const AudioBar = ({ audioObject }) => {
@@ -327,7 +402,11 @@ const BibleFooter = ({
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
   const canPlayAudio = version === 'LSG'
   const [isLoading, setIsLoading] = useState(true)
-  const [soundObject, audioObject, error] = useLoadSound(
+  const { t } = useTranslation()
+  const audioTitle = `${t(book.Nom)} ${chapter} ${version}`
+  const audioSubtitle = getVersions()[version].name
+
+  const [soundObject, audioObject, error, setPosition] = useLoadSound({
     audioMode,
     audioUrl,
     isPlaying,
@@ -335,23 +414,13 @@ const BibleFooter = ({
     canPlayAudio,
     setIsPlaying,
     setAudioMode,
-    hasNextChapter && goToNextChapter
-  )
+    goToNextChapter: hasNextChapter && goToNextChapter,
+    goToPrevChapter: hasPreviousChapter && goToPrevChapter,
+    audioTitle,
+    audioSubtitle,
+  })
 
   const isBuffering = isPlaying && !audioObject?.isPlaying
-
-  const setPosition = milli => {
-    if (soundObject) {
-      const position = audioObject.positionMillis + milli
-      if (position < 0) {
-        soundObject.setPositionAsync(0)
-      } else if (position > audioObject.durationMillis) {
-        soundObject.setPositionAsync(audioObject.durationMillis)
-      } else {
-        soundObject.setPositionAsync(position)
-      }
-    }
-  }
 
   return (
     <Container audioMode={audioMode}>
