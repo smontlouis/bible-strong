@@ -12854,6 +12854,11 @@ react-native-tab-view@^2.14.0, react-native-tab-view@^2.15.2:
   resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.16.0.tgz#cae72c7084394bd328fac5fefb86cd966df37a86"
   integrity sha512-ac2DmT7+l13wzIFqtbfXn4wwfgtPoKzWjjZyrK1t+T8sdemuUvD4zIt+UImg03fu3s3VD8Wh/fBrIdcqQyZJWg==
 
+react-native-track-player@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-track-player/-/react-native-track-player-2.1.1.tgz#21474d7e8758d6459f1e7384bb4ab1f9c0031bbe"
+  integrity sha512-N+hilbML2O/H+29yoQY3OfMCggFwoab5TkfXbuD5NMJVa2iDnzL68BQ/Arz0nKp0eKbXitdcWS9Qg1MYUqJXTg==
+
 react-native-unimodules@~0.14.8:
   version "0.14.8"
   resolved "https://registry.yarnpkg.com/react-native-unimodules/-/react-native-unimodules-0.14.8.tgz#8bf859ac1a4e06122e0331ddf9dec62019884432"

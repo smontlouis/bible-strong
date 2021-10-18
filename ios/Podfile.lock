@@ -379,9 +379,6 @@ PODS:
     - UMCore
   - EXLinearGradient (9.2.0):
     - UMCore
-  - EXPermissions (12.1.1):
-    - ExpoModulesCore
-    - UMCore
   - ExpoModulesCore (0.2.0):
     - ExpoModulesCore/Core (= 0.2.0)
     - ExpoModulesCore/Interfaces (= 0.2.0)
@@ -812,6 +809,9 @@ PODS:
     - React
   - react-native-sqlite-storage (4.1.0):
     - React
+  - react-native-track-player (2.1.1):
+    - React-Core
+    - SwiftAudioEx (= 0.14.2)
   - react-native-webview (11.14.0):
     - React-Core
   - React-perflogger (0.66.0)
@@ -955,6 +955,7 @@ PODS:
     - Sentry/Core (= 7.3.0)
   - Sentry/Core (7.3.0)
   - SSZipArchive (2.2.2)
+  - SwiftAudioEx (0.14.2)
   - UMAppLoader (2.2.0)
   - UMCore (7.1.2)
   - UMReactNativeAdapter (6.3.9):
@@ -979,7 +980,6 @@ DEPENDENCIES:
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
-  - EXPermissions (from `../node_modules/expo-permissions/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
@@ -1010,6 +1010,7 @@ DEPENDENCIES:
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
+  - react-native-track-player (from `../node_modules/react-native-track-player`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -1086,6 +1087,7 @@ SPEC REPOS:
     - SDWebImageWebPCoder
     - Sentry
     - SSZipArchive
+    - SwiftAudioEx
 
 EXTERNAL SOURCES:
   boost:
@@ -1114,8 +1116,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-loader/ios"
   EXLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
-  EXPermissions:
-    :path: "../node_modules/expo-permissions/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
@@ -1172,6 +1172,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-splash-screen"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
+  react-native-track-player:
+    :path: "../node_modules/react-native-track-player"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-perflogger:
@@ -1274,7 +1276,6 @@ SPEC CHECKSUMS:
   EXHaptics: 6dc4307ab0794fe7a87ec8d7d1c299cf103d6cb3
   EXImageLoader: d3531a3fe530b22925c19977cb53bb43e3821fe6
   EXLinearGradient: f9ea3259f096b27008860ca50764184225dc71c9
-  EXPermissions: 916efb5b817cb0a40160c0cd2f369af3c23a78be
   ExpoModulesCore: 2734852616127a6c1fc23012197890a6f3763dc7
   EXSharing: 567f4b9f38a5266ec2f51973e2efe3b4aaf0bf69
   EXStructuredHeaders: e52b880264d15b8ad07d36670226c29476af6334
@@ -1327,6 +1328,7 @@ SPEC CHECKSUMS:
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
+  react-native-track-player: 8a3e5dd0ac608dd3ba9888dac93901b7691c69c4
   react-native-webview: d70bc760daaa0e2667dec569b93014882565819c
   React-perflogger: 1f554c2b684e2f484f9edcdfdaeedab039fbaca8
   React-RCTActionSheet: 610d5a5d71ab4808734782c8bca6a12ec3563672
@@ -1368,6 +1370,7 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: f93010f3f6c031e2f8fb3081ca4ee6966c539815
   Sentry: 9a4e621430e2dae4477d791f2f7e905720b6efbf
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
+  SwiftAudioEx: df9d62dcae6c2eca358bc36eb972ebac440cd943
   UMAppLoader: 21af63390e55c82e037fb9752d93114a80ecf16e
   UMCore: ce3a4faa010239063b8343895b29a6d97b01069d
   UMReactNativeAdapter: d03cefd0e4e4179ab8c490408589f1c8a6c8b785

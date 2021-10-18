@@ -13,7 +13,6 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { millisToMinutes } from '~helpers/millisToMinutes'
 import { useTranslation } from 'react-i18next'
-import books from '~assets/bible_versions/books-desc'
 import { getVersions } from '~helpers/bibleVersions'
 
 const Container = styled.View(({ audioMode, theme }) => ({
@@ -116,10 +115,10 @@ const useLoadSound = ({
     MusicControl.on(Command.play, () => setIsPlaying(true))
     MusicControl.on(Command.pause, () => setIsPlaying(false))
     MusicControl.on(Command.nextTrack, () => {
-      goToNextChapter()
+      goToNextChapter?.()
     })
     MusicControl.on(Command.previousTrack, () => {
-      goToPrevChapter()
+      goToPrevChapter?.()
     })
   }, [])
 

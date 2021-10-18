@@ -462,11 +462,11 @@ const ConflictModal = () => {
             <Box>
               <Text marginBottom={10}>{t('conflict.local')}</Text>
               <Text fontSize={12}>{t('conflict.localDescription')}</Text>
-              <Box marginTop={5} row justifyContent="flex-end">
-                <Text text fontSize={10} bold color="grey">
+              <Box marginTop={5} row>
+                <Text text fontSize={9} bold color="grey">
                   {t('conflict.lastLocalSave').toUpperCase()}:&nbsp;
                 </Text>
-                <Text text fontSize={10}>
+                <Text text fontSize={9}>
                   {format(new Date(lastSeen || 0), 'PPpp', {
                     locale: isFR ? fr : enGB,
                   })}
@@ -510,11 +510,11 @@ const ConflictModal = () => {
                 {t('conflict.cloud')}
               </Text>
               <Text fontSize={12}>{t('conflict.cloudDescription')}</Text>
-              <Box marginTop={5} row justifyContent="flex-end">
-                <Text text fontSize={10} bold color="grey">
+              <Box marginTop={5} row>
+                <Text text fontSize={9} bold color="grey">
                   {t('conflict.lastOnlineSave').toUpperCase()}:&nbsp;
                 </Text>
-                <Text text fontSize={10}>
+                <Text text fontSize={9}>
                   {format(new Date(remoteLastSeen || 0), 'PPpp', {
                     locale: isFR ? fr : enGB,
                   })}
