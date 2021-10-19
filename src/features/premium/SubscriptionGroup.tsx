@@ -30,6 +30,7 @@ const SubscriptionGroup = () => {
     const [err] = await to(buyProduct(user.id, selectedSub, dispatch))
     if (err) {
       SnackBar.show(t('Une erreur est survenue.'))
+      console.log(err)
     }
     setProcessing(false)
   }

@@ -80,17 +80,6 @@ export const buyProduct = async (
   sku: string,
   dispatch: Dispatch<any>
 ) => {
-  const [loginErr] = await to(IAPHub.setUserId(userId))
-
-  if (loginErr) {
-    Snackbar.show(
-      i18n.t(
-        'Impossible de charger les produits, vérifiez votre connexion internet.'
-      )
-    )
-    return
-  }
-
   console.log('Sending transaction...')
   const [error, transaction] = await to(IAPHub.buy(sku))
   console.log('Waiting for webhooks ...')
@@ -131,6 +120,7 @@ export const buyProduct = async (
         i18n.t('Veuillez nous contacter.')
       )
     } else {
+      console.log(err.code)
       Alert.alert(
         i18n.t("Erreur d'achat"),
         i18n.t(
