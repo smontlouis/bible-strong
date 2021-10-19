@@ -24,8 +24,12 @@ export const wp = (percentage: number, maxWidth?: boolean | number) => {
   return Math.round(value)
 }
 
-export const hp = (percentage: number) => {
-  const value = (percentage * viewportHeight) / 100
+export const hp = (percentage: number, maxHeight?: number) => {
+  let value = (percentage * viewportHeight) / 100
+  if (maxHeight) {
+    value = value > maxHeight ? maxHeight : value
+  }
+  value = (percentage * viewportHeight) / 100
   return Math.round(value)
 }
 

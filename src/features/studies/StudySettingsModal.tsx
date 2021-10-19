@@ -1,63 +1,25 @@
-import React from 'react'
-import Modal from 'react-native-modal'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-
 import { withTheme } from 'emotion-theming'
-import styled from '~styled'
-
-import Text from '~common/ui/Text'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Alert } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import Modal from '~common/Modal'
+import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
 import { Theme } from '~themes'
-import { RootState } from '~redux/modules/reducer'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
-import { useTranslation } from 'react-i18next'
-
-const StylizedModal = styled(Modal)({
-  justifyContent: 'flex-end',
-  margin: 0,
-})
-
-const Container = styled.View(({ theme }) => ({
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '100%',
-  maxWidth: 600,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-
-  display: 'flex',
-  backgroundColor: theme.colors.reverse,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
-  paddingBottom: getBottomSpace(),
-}))
-
-export const Touchy = styled.TouchableOpacity(({ theme }) => ({
-  alignItems: 'flex-start',
-  justifyContent: 'center',
-  padding: 20,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-  overflow: 'hidden',
-}))
 
 interface Props {
-  isOpen: string
+  isOpen: boolean
   onClosed: () => void
   theme: Theme
-  setTitlePrompt: (x: Object) => void
-  setMultipleTagsItem: (x: Object) => void
+  setTitlePrompt: React.Dispatch<React.SetStateAction<boolean>>
+  setMultipleTagsItem: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const StudySettingsModal = ({
   isOpen,
   onClosed,
-  theme,
   setTitlePrompt,
   setMultipleTagsItem,
 }: Props) => {
@@ -87,40 +49,31 @@ const StudySettingsModal = ({
   }
 
   return (
-    <StylizedModal
-      backdropOpacity={0.3}
-      isVisible={!!isOpen}
-      avoidKeyboard
-      onBackButtonPress={onClosed}
-      onBackdropPress={onClosed}
-    >
-      <Container>
-        {study && <PublishStudyMenuItem study={study} onClosed={onClosed} />}
-        <Touchy
-          onPress={() => {
-            onClosed()
-            setTimeout(() => {
-              setMultipleTagsItem({ ...study, entity: 'studies' })
-            }, 500)
-          }}
-        >
-          <Text>{t('Éditer les tags')}</Text>
-        </Touchy>
-        <Touchy
-          onPress={() => {
-            onClosed()
-            setTimeout(() => {
-              setTitlePrompt({ id: study.id, title: study.title })
-            }, 500)
-          }}
-        >
-          <Text>{t('Renommer')}</Text>
-        </Touchy>
-        <Touchy onPress={() => deleteStudyConfirmation(studyId)}>
-          <Text color="quart">{t('Supprimer')}</Text>
-        </Touchy>
-      </Container>
-    </StylizedModal>
+    <Modal.Menu isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
+      {study && <PublishStudyMenuItem study={study} onClosed={onClosed} />}
+      <Modal.Item
+        onPress={() => {
+          onClosed()
+          setMultipleTagsItem({ ...study, entity: 'studies' })
+        }}
+      >
+        {t('Éditer les tags')}
+      </Modal.Item>
+      <Modal.Item
+        onPress={() => {
+          onClosed()
+          setTitlePrompt({ id: study.id, title: study.title })
+        }}
+      >
+        {t('Renommer')}
+      </Modal.Item>
+      <Modal.Item
+        color="quart"
+        onPress={() => deleteStudyConfirmation(studyId)}
+      >
+        {t('Supprimer')}
+      </Modal.Item>
+    </Modal.Menu>
   )
 }
 

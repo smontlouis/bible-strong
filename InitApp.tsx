@@ -1,19 +1,21 @@
 import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
 import { Provider as PaperProvider } from 'react-native-paper'
-import { StatusBar, AppState, AppStateStatus } from 'react-native'
+import { StatusBar, AppState, AppStateStatus, Alert } from 'react-native'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
+import * as Updates from 'expo-updates'
 import compose from 'recompose/compose'
 import analytics from '@react-native-firebase/analytics'
 import { MenuProvider } from 'react-native-popup-menu'
+import { withTranslation } from 'react-i18next'
 
 import ErrorBoundary from '~common/ErrorBoundary'
+import ConflictModal from '~common/ConflictModal'
 import OnBoarding from '~features/onboarding/OnBoarding'
 
 import {
-  updateUserData,
   getChangelog,
   getVersionUpdate,
   getDatabaseUpdate,
@@ -27,6 +29,7 @@ import { DBStateProvider } from '~helpers/databaseState'
 import { RootState } from '~redux/modules/reducer'
 import { NavigationState, NavigationParams } from 'react-navigation'
 import { Persistor } from 'redux-persist'
+import SnackBar from '~common/SnackBar'
 
 interface Props {
   theme: string
@@ -41,6 +44,7 @@ class InitApp extends React.Component<Props> {
     this.props.dispatch(getVersionUpdate())
     this.props.dispatch(getDatabaseUpdate())
     this.changeStatusBarStyle()
+    this.updateApp()
     AppState.addEventListener('change', this.handleAppStateChange)
   }
 
@@ -51,7 +55,17 @@ class InitApp extends React.Component<Props> {
   handleAppStateChange = (nextAppState: AppStateStatus) => {
     if (nextAppState.match(/inactive|background/)) {
       console.log('App mode - background!')
-      this.props.dispatch(updateUserData())
+    }
+  }
+
+  updateApp = async () => {
+    const update = await Updates.checkForUpdateAsync()
+
+    if (update.isAvailable) {
+      SnackBar.show(this.props.t('app.updateAvailable'))
+      await Updates.fetchUpdateAsync()
+      SnackBar.show(this.props.t('app.updateReady'))
+      Updates.reloadAsync()
     }
   }
 
@@ -98,7 +112,10 @@ class InitApp extends React.Component<Props> {
 
     if (prevScreen !== currentScreen) {
       if (!__DEV__) {
-        analytics().setCurrentScreen(currentScreen, currentScreen)
+        analytics().logScreenView({
+          screen_class: currentScreen,
+          screen_name: currentScreen,
+        })
       }
 
       Sentry.addBreadcrumb({
@@ -148,6 +165,7 @@ class InitApp extends React.Component<Props> {
                   </ErrorBoundary>
                   <Changelog />
                   <OnBoarding />
+                  <ConflictModal />
                 </>
               </DBStateProvider>
             </PersistGate>
@@ -163,5 +181,6 @@ export default compose(
     theme: state.user.bible.settings.theme,
     fontFamily: state.user.fontFamily,
   })),
-  withFireAuth
+  withFireAuth,
+  withTranslation()
 )(InitApp)

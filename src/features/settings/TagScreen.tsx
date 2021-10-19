@@ -89,7 +89,12 @@ const TagScreen = ({ navigation }) => {
     highlights: item.highlights
       ? sortVersesByDate(
           Object.keys(item.highlights).reduce(
-            (arr, id) => ({ ...arr, [id]: state.user.bible.highlights[id] }),
+            (arr, id) => ({
+              ...arr,
+              ...(state.user.bible.highlights[id] && {
+                [id]: state.user.bible.highlights[id],
+              }),
+            }),
             {}
           )
         )
@@ -251,7 +256,7 @@ const TagScreen = ({ navigation }) => {
             <Text padding={20} fontSize={25} title>
               {t('Études')}
             </Text>
-            <Box row>
+            <Box row style={{ flexWrap: 'wrap' }}>
               {studies.map(item => {
                 return <StudyItem key={item.id} study={item} />
               })}

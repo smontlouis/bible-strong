@@ -7,7 +7,7 @@ import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
 import Snackbar from '~common/SnackBar'
-// import { setNotificationId } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 import useLogin from '~helpers/useLogin'
 import extractFirstName from '~helpers/extractFirstName'
@@ -16,6 +16,7 @@ import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
+import i18n from '~i18n'
 
 const useGetVerseOfTheDay = (version: string, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -49,6 +50,7 @@ const useGetVerseOfTheDay = (version: string, addDay: number) => {
 
 export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
+  const { t } = useTranslation()
   const version = useSelector(state => state.bible.selectedVersion)
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
@@ -94,12 +96,15 @@ export const useVerseOfTheDay = (addDay: number) => {
         )(nowDate)
 
         await PushNotification.localNotificationSchedule({
-          title: `Bonjour ${extractFirstName(displayName)}`,
+          channelId: 'vod-notifications',
+          title: `${i18n.t('Bonjour')} ${extractFirstName(displayName)}`,
           message: !addDay
             ? removeBreakLines(verseOfTheDayContent)
             : removeBreakLines(verseOfTheDayPlus1Content),
           category: 'NOTIFICATIONS',
+          allowWhileIdle: true,
           date,
+          repeatType: 'day',
         })
 
         console.log(
@@ -122,8 +127,11 @@ export const useVerseOfTheDay = (addDay: number) => {
       })
 
       console.log('has permissions', hasPermissions)
+
       if (hasPermissions) {
         scheduleNotification()
+      } else {
+        Snackbar.show(t('home.notificationPermissionNeeded'))
       }
     }
     initNotifications()

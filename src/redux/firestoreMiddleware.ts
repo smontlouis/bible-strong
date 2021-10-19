@@ -1,3 +1,4 @@
+import firestore from '@react-native-firebase/firestore'
 import {
   ADD_HIGHLIGHT,
   REMOVE_HIGHLIGHT,
@@ -10,34 +11,38 @@ import {
   SET_SETTINGS_THEME,
   SET_SETTINGS_PRESS,
   SET_SETTINGS_NOTES_DISPLAY,
+  SET_SETTINGS_COMMENTS_DISPLAY,
+  CHANGE_COLOR,
   ADD_NOTE,
   REMOVE_NOTE,
   ADD_TAG,
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
-  PUBLISH_STUDY,
+  CREATE_STUDY,
+  UPDATE_STUDY,
   UPLOAD_STUDY,
   DELETE_STUDY,
+  PUBLISH_STUDY,
   UPDATE_TAG,
-  CHANGE_COLOR,
   SET_HISTORY,
   DELETE_HISTORY,
-  UPDATE_USER_DATA,
-  SET_SUBSCRIPTION,
   SET_LAST_SEEN,
+  CHANGE_HIGHLIGHT_COLOR,
 } from './modules/user'
-
-// TODO - DO IT FOR COLOR SETTINGS ?
 
 import { firebaseDb } from '../helpers/firebase'
 import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
 import { RootState } from '~redux/modules/reducer'
+import { diff } from '~helpers/deep-obj'
 
 const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
 export default store => next => async action => {
+  const oldState = store.getState()
   const result = next(action)
   const state = store.getState()
+
+  const diffState: any = diff(oldState, state, firestore.FieldValue.delete())
 
   const isLogged = !!state.user.id
 
@@ -47,7 +52,7 @@ export default store => next => async action => {
 
   const { user, plan }: RootState = state
   const userDoc = firebaseDb.collection('users').doc(user.id)
-  const studyCollection = firebaseDb.collection('studies')
+  const userStatusRef = firebaseDb.collection('users-status').doc(user.id)
 
   switch (action.type) {
     case removePlan.type:
@@ -61,88 +66,83 @@ export default store => next => async action => {
       )
       break
     }
-    case ADD_HIGHLIGHT:
-    case REMOVE_HIGHLIGHT: {
-      const { highlights } = user.bible
-      const { tags } = user.bible
-      userDoc.update(
-        r({
-          'bible.highlights': highlights,
-          'bible.tags': tags,
-        })
-      )
-      break
-    }
-    case UPDATE_TAG:
-    case REMOVE_TAG: {
-      const { tags, notes, highlights, studies } = user.bible
-      userDoc.update(
-        r({
-          'bible.tags': tags,
-          'bible.notes': notes,
-          'bible.highlights': highlights,
-        })
-      )
-
-      const batch = firebaseDb.batch()
-      Object.keys(studies).forEach(studyId => {
-        const studyDoc = firebaseDb.collection('studies').doc(studyId)
-        batch.update(studyDoc, r({ tags: studies[studyId].tags || {} }))
-      })
-      batch.commit().then(() => console.log('Batch studies success'))
-      break
-    }
-    case ADD_NOTE:
-    case REMOVE_NOTE: {
-      const { notes } = user.bible
-      const { tags } = user.bible
-      userDoc.update(
-        r({
-          'bible.notes': notes,
-          'bible.tags': tags,
-        })
-      )
-      break
-    }
-    case ADD_TAG: {
-      const { tags } = user.bible
-      userDoc.update(r({ 'bible.tags': tags }))
-      break
-    }
-    case TOGGLE_TAG_ENTITY: {
-      const { tags } = user.bible
-      userDoc.update(r({ 'bible.tags': tags }))
-
-      // Maybe refacto this ? For now firestore is free we don't care
-      const entities = user.bible[action.payload.item.entity]
-
-      if (action.payload.item.entity === 'studies') {
-        const study = user.bible.studies[action.payload.item.id]
-        studyCollection.doc(study.id).set(r(study))
-      } else {
-        userDoc.update(r({ [`bible.${action.payload.item.entity}`]: entities }))
-      }
-      break
-    }
+    case SET_SETTINGS_ALIGN_CONTENT:
+    case INCREASE_SETTINGS_FONTSIZE_SCALE:
+    case DECREASE_SETTINGS_FONTSIZE_SCALE:
+    case SET_SETTINGS_TEXT_DISPLAY:
+    case SET_SETTINGS_THEME:
+    case SET_SETTINGS_PRESS:
+    case SET_SETTINGS_NOTES_DISPLAY:
+    case SET_SETTINGS_COMMENTS_DISPLAY:
+    case CHANGE_COLOR:
+    case SET_HISTORY:
+    case DELETE_HISTORY:
+    case CREATE_STUDY:
+    case UPDATE_STUDY:
     case PUBLISH_STUDY:
-    case UPLOAD_STUDY: {
-      const studyId = action.payload
-      studyCollection.doc(studyId).set(r(user.bible.studies[studyId]))
+    case UPLOAD_STUDY:
+    case ADD_NOTE:
+    case REMOVE_NOTE:
+    case ADD_HIGHLIGHT:
+    case CHANGE_HIGHLIGHT_COLOR:
+    case ADD_TAG:
+    case REMOVE_HIGHLIGHT:
+    case TOGGLE_TAG_ENTITY:
+    case REMOVE_TAG:
+    case UPDATE_TAG: {
+      if (!diffState?.user?.bible) return
+
+      const { studies, ...diffStateUserBible } = diffState.user.bible
+      console.log(diffState.user.bible)
+
+      if (Object.keys(diffStateUserBible).length !== 0) {
+        userDoc.set({ bible: diffStateUserBible }, { merge: true })
+      }
+
+      if (studies) {
+        Object.entries(studies).forEach(([studyId, obj]) => {
+          const studyDoc = firebaseDb.collection('studies').doc(studyId)
+          studyDoc.set(
+            {
+              ...obj,
+              content: {
+                // handle array weird form from diff object
+                ops: obj?.content?.ops
+                  ? Array.isArray(obj.content.ops)
+                    ? obj.content.ops
+                    : Object.values(obj.content.ops)
+                  : [],
+              },
+            },
+            { merge: true }
+          )
+          console.log('Studies updated')
+        })
+      }
+
       break
     }
     case DELETE_STUDY: {
-      const studyId = action.payload
-      studyCollection.doc(studyId).delete()
-      const { tags } = user.bible
-      userDoc.update(
-        r({
-          'bible.tags': tags,
+      if (!diffState?.user?.bible) return
+      const { studies } = diffState.user.bible
+
+      if (studies) {
+        Object.entries(studies).forEach(([studyId]) => {
+          const studyDoc = firebaseDb.collection('studies').doc(studyId)
+          studyDoc.delete()
         })
-      )
+      }
       break
     }
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
+      const { localLastSeen, remoteLastSeen } = action
+
+      if (remoteLastSeen >= localLastSeen) {
+        console.log('- do nothing, remote is already up to date')
+        return
+      }
+      console.log('local wins - update remote')
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
       userDoc.update(
         r({
@@ -150,31 +150,12 @@ export default store => next => async action => {
           plan: plan.ongoingPlans,
         })
       )
-      break
-    }
-
-    // TODO: When there will be too much data to update.
-    case UPDATE_USER_DATA: {
-      const {
-        changelog,
-        highlights,
-        notes,
-        studies,
-        tags,
-        history,
-        settings,
-      } = user.bible
-      userDoc.update(
-        r({
-          'bible.history': history,
-          'bible.settings': settings,
-        })
-      )
 
       break
     }
     case SET_LAST_SEEN: {
-      userDoc.update({ lastSeen: user.lastSeen })
+      userDoc.set({ lastSeen: user.lastSeen }, { merge: true })
+      userStatusRef.set({ lastSeen: user.lastSeen }, { merge: true })
       break
     }
     default:

@@ -37,11 +37,14 @@ const ButtonText = styled(Text)(({ theme, color }) => ({
   color: color || theme.colors.defaut,
 }))
 
+const defaultEmail = __DEV__ ? 'test@test.com' : ''
+const defaultPassword = __DEV__ ? 'testtest' : ''
+
 const Login = ({ theme }) => {
   const { t } = useTranslation()
   const [isLoading, setLoading] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState(defaultEmail)
+  const [password, setPassword] = useState(defaultPassword)
 
   const onGoogleLogin = async () => {
     setLoading(true)
@@ -90,6 +93,7 @@ const Login = ({ theme }) => {
             <Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />
           }
           onChangeText={setEmail}
+          value={email}
         />
         <Spacer />
         <TextInput
@@ -99,6 +103,7 @@ const Login = ({ theme }) => {
           }
           secureTextEntry
           onChangeText={setPassword}
+          value={password}
         />
         <Box alignItems="flex-end" marginTop={10}>
           <Link onPress={resetPassword}>

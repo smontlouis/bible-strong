@@ -43,21 +43,27 @@ const Header = ({
 }: Props) => {
   return (
     <HeaderBox background={background} row overflow="visibility" {...props}>
-      <Box flex>
-        {hasBackButton && (
+      <Box>
+        {hasBackButton ? (
           <Back padding>
             <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
           </Back>
+        ) : (
+          <Box width={60} />
         )}
       </Box>
-      <Box grow center>
-        <Text title fontSize={smallSize ? 16 : fontSize} onPress={onTitlePress}>
+      <Box flex center>
+        <Text
+          numberOfLines={1}
+          title
+          fontSize={smallSize ? 16 : fontSize}
+          onPress={onTitlePress}
+        >
           {title}
         </Text>
       </Box>
       {rightComponent ? (
         <Box
-          flex
           justifyContent="center"
           alignItems="flex-end"
           overflow="visibility"
@@ -65,7 +71,7 @@ const Header = ({
           {rightComponent}
         </Box>
       ) : (
-        <Box flex />
+        <Box width={60} />
       )}
     </HeaderBox>
   )

@@ -1,0 +1,29 @@
+{
+  "displayName": "Bible Strong",
+  "name": "biblestrong",
+
+  "expo": {
+    "name": "Bible Strong",
+    "description": "Bible strong for french people",
+    "slug": "bible-strong",
+    "privacy": "unlisted",
+    "sdkVersion": "42.0.0",
+    "primaryColor": "#fff",
+    "githubUrl": "https://github.com/bulby97/bible-strong",
+    "platforms": ["ios", "android"],
+    "version": "14.5.13",
+    "orientation": "default",
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "smontlouis",
+            "project": "bible-strong",
+            "authToken": "87f5b33659ef43e498fb00d8cc80fdc14f971e1c45c140bab4283c056dbac749"
+          }
+        }
+      ]
+    }
+  }
+}

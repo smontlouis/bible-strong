@@ -1,6 +1,8 @@
 import produce, { Draft } from 'immer'
 import deepmerge from 'deepmerge'
 import { reduceReducers } from './utils'
+import { fr, enGB } from 'date-fns/locale'
+import format from 'date-fns/format'
 
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
@@ -16,9 +18,11 @@ import settingsReducer from './user/settings'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import studiesReducer from './user/studies'
-import { SubscriptionType } from '~common/types'
+import { SubscriptionType, Tag } from '~common/types'
 import { Reducer } from 'redux'
-import { Alert } from 'react-native'
+import { detailedDiff } from '~helpers/deep-obj'
+import { conflictStateProxy } from '../../state/app'
+import { isEmpty } from '../../helpers/deep-obj/utils'
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -35,7 +39,6 @@ export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
 export const SET_HISTORY = 'user/SET_HISTORY'
 export const DELETE_HISTORY = 'user/DELETE_HISTORY'
-export const UPDATE_USER_DATA = 'user/UPDATE_USER_DATA'
 
 export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
@@ -70,8 +73,9 @@ export interface Study {
     id: string
     photoUrl: string
   }
+  tags?: { [x: string]: Tag }
 }
-interface UserState {
+export interface UserState {
   id: string
   email: string
   displayName: string
@@ -100,7 +104,7 @@ interface UserState {
       [x: string]: {
         color: string
         tags: {
-          [x: string]: { id: string; name: string }
+          [x: string]: Tag
         }
         date: number
       }
@@ -191,6 +195,16 @@ const initialState: UserState = {
 
 const overwriteMerge = (destinationArray, sourceArray) => sourceArray
 
+const ignoreOfflineData = (data: Partial<UserState>) =>
+  produce(data, draft => {
+    delete draft.notifications
+    delete draft.changelog
+    delete draft.needsUpdate
+    delete draft.fontFamily
+    delete draft.isLoading
+    delete draft.bible.changelog
+  })
+
 // UserReducer
 const userReducer = produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -228,8 +242,8 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         provider,
         lastSeen,
         emailVerified,
-        bible,
         subscription,
+        bible,
       } = action.profile
 
       const { isLogged, localLastSeen, remoteLastSeen } = action
@@ -251,12 +265,17 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           draft.bible = deepmerge(draft.bible, bible, {
             arrayMerge: overwriteMerge,
           })
+          draft.bible.studies = action.studies
         }
       } else if (remoteLastSeen > localLastSeen) {
         // Remote wins
         console.log('Remote wins')
         if (bible) {
-          draft.bible = { ...draft.bible, ...bible }
+          draft.bible = {
+            ...draft.bible,
+            ...bible,
+          }
+          draft.bible.studies = action.studies
         }
       } else if (remoteLastSeen < localLastSeen) {
         console.log('Local wins')
@@ -274,37 +293,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         draft.bible.settings.colors.sepia = sepiaColors
       }
 
-      // Now take care of studies
-      if (action.studies && Object.keys(action.studies).length) {
-        if (draft.bible.studies) {
-          Object.keys(action.studies).forEach(remoteStudyId => {
-            if (draft.bible.studies[remoteStudyId]) {
-              // We have a conflict here
-              console.log(
-                `We have a conflict with ${remoteStudyId}, pick by modified_date`
-              )
-              const localModificationDate =
-                draft.bible.studies[remoteStudyId].modified_at
-              const remoteModificationDate =
-                action.studies[remoteStudyId].modified_at
-              if (remoteModificationDate > localModificationDate) {
-                console.log('Remote date is recent')
-                draft.bible.studies[remoteStudyId] =
-                  action.studies[remoteStudyId]
-              }
-            } else {
-              // No conflicts, just put that study in there
-              console.log(
-                `No conflicts for ${remoteStudyId}, just put that story in there`
-              )
-              draft.bible.studies[remoteStudyId] = action.studies[remoteStudyId]
-            }
-          })
-        } else {
-          draft.bible.studies = {}
-          draft.bible.studies = bible.studies
-        }
-      }
       break
     }
     case USER_LOGOUT: {
@@ -350,7 +338,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           }
         }
       }
-
+      if (!Array.isArray(draft.bible.history)) {
+        draft.bible.history = Object.values(draft.bible.history)
+      }
       draft.bible.history.unshift({
         ...action.payload,
         date: Date.now(),
@@ -435,43 +425,132 @@ export function saveAllLogsAsSeen(payload) {
 }
 
 // USERS
-export function onUserLoginSuccess(profile, remoteLastSeen, studies) {
-  return async (dispatch, getState) => {
+export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
+  return async (dispatch: any, getState: any) => {
     const { id, lastSeen } = getState().user
+    const userRef = firebaseDb.collection('users').doc(profile.id)
+    const studiesRef = firebaseDb
+      .collection('studies')
+      .where('user.id', '==', profile.id)
+    const studies = {}
+    let userData = null
+    const isLogged = !!id
 
-    const dispatchUserSuccess = (overwriteRemoteLastSeen?: boolean) =>
-      dispatch({
+    console.log('Local last seen:', new Date(lastSeen))
+    console.log('Online last seen:', new Date(remoteLastSeen))
+
+    const dispatchUserSuccess = (u, s) => async (
+      overwriteRemoteLastSeen?: boolean
+    ) => {
+      const userStatusRef = firebaseDb
+        .collection('users-status')
+        .doc(profile.id)
+      remoteLastSeen = overwriteRemoteLastSeen ? 0 : remoteLastSeen
+
+      userRef.set(profile, { merge: true })
+      userStatusRef.set({ lastSeen: profile.lastSeen }, { merge: true })
+
+      if (remoteLastSeen > lastSeen || !isLogged) {
+        profile = { ...profile, ...u }
+      }
+
+      return dispatch({
         type: USER_LOGIN_SUCCESS,
         isLogged: !!id,
         localLastSeen: lastSeen,
         profile,
-        remoteLastSeen: overwriteRemoteLastSeen ? 0 : remoteLastSeen,
-        studies,
+        remoteLastSeen,
+        studies: s,
       })
+    }
 
     // Handle conflict only when user is already logged
     if (remoteLastSeen > lastSeen && id) {
-      console.log('handle conflict')
+      console.log('Handle conflict.')
 
-      // * Dirty, but it works without changing a lot
-      Alert.alert(
-        i18n.t('Conflit de sauvegarde'),
-        i18n.t(
-          'Nous avons trouvé une sauvegarde plus récente sur le cloud.\nRécupérer les donnéees du cloud ou garder les données locales ?'
-        ),
-        [
+      const oldUserData = ignoreOfflineData({
+        ...getState().user,
+        bible: {
+          ...getState().user.bible,
+          plan: getState().plan.ongoingPlans,
+        },
+        plan: undefined,
+      })
+
+      // Merge online data with redux state so we can compare fairly
+      const userDoc = await userRef.get()
+      userData = userDoc.data()
+      const querySnapshot = await studiesRef.get()
+      querySnapshot.forEach(doc => {
+        const study = doc.data()
+        studies[study.id] = study
+      })
+      const newUserData = ignoreOfflineData(
+        deepmerge(
+          initialState,
           {
-            text: i18n.t('Cloud'),
-            onPress: () => dispatchUserSuccess(),
-          },
+            ...userData,
+            bible: {
+              ...userData?.bible,
+              studies,
+              plan: userData?.plan || [],
+            },
+            plan: undefined,
+          } as any,
           {
-            text: i18n.t('Local'),
-            onPress: () => dispatchUserSuccess(true),
-          },
-        ]
+            arrayMerge: overwriteMerge,
+          }
+        )
       )
+
+      const obj = detailedDiff(oldUserData, newUserData, true)
+      delete obj?.added?.bible?.history
+      delete obj?.updated?.bible?.history
+      delete obj?.updated?.bible?.settings?.theme
+      delete obj?.deleted?.bible?.history
+      delete obj?.updated?.lastSeen
+
+      if (isEmpty(obj?.added?.bible)) {
+        delete obj?.added?.bible
+      }
+
+      if (isEmpty(obj?.updated?.bible?.settings)) {
+        delete obj?.updated?.bible?.settings
+      }
+
+      if (isEmpty(obj?.updated?.bible)) {
+        delete obj?.updated?.bible
+      }
+
+      if (isEmpty(obj?.deleted?.bible)) {
+        delete obj?.deleted?.bible
+      }
+
+      console.log(obj)
+
+      if (isEmpty(obj?.updated) && isEmpty(obj?.deleted)) {
+        dispatchUserSuccess(userData, studies)()
+        return
+      }
+
+      conflictStateProxy.diff = obj
+      conflictStateProxy.onDispatchUserSuccess = dispatchUserSuccess(
+        userData,
+        studies
+      )
+      conflictStateProxy.lastSeen = lastSeen
+      conflictStateProxy.remoteLastSeen = remoteLastSeen
     } else {
-      dispatchUserSuccess()
+      if (!isLogged) {
+        const userDoc = await userRef.get()
+        userData = userDoc.data()
+        const querySnapshot = await studiesRef.get()
+        querySnapshot.forEach(doc => {
+          const study = doc.data()
+          studies[study.id] = study
+        })
+      }
+      dispatchUserSuccess(userData, studies)()
     }
   }
 }
@@ -500,12 +579,6 @@ export function setHistory(item) {
 export function deleteHistory() {
   return {
     type: DELETE_HISTORY,
-  }
-}
-
-export function updateUserData() {
-  return {
-    type: UPDATE_USER_DATA,
   }
 }
 

@@ -1,22 +1,21 @@
-import auth from '@react-native-firebase/auth'
-import analytics from '@react-native-firebase/analytics'
-import { GoogleSignin } from '@react-native-community/google-signin'
-import { LoginManager, AccessToken } from 'react-native-fbsdk'
-import IAPHub from 'react-native-iaphub'
-import i18n from '~i18n'
-
-import * as Sentry from '@sentry/react-native'
 import appleAuth, {
-  AppleAuthRequestScope,
   AppleAuthRequestOperation,
+  AppleAuthRequestScope,
 } from '@invertase/react-native-apple-authentication'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import NetInfo from '@react-native-community/netinfo'
-
+import analytics from '@react-native-firebase/analytics'
+import auth from '@react-native-firebase/auth'
+import * as Sentry from '@sentry/react-native'
+import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
-import { APP_FETCH_DATA, APP_FETCH_DATA_FAIL } from '~redux/modules/user'
+import i18n from '~i18n'
+import { APP_FETCH_DATA } from '~redux/modules/user'
 
 const FireAuth = class {
+  authFlag = false
+
   user = null
 
   profile = null
@@ -55,79 +54,54 @@ const FireAuth = class {
         return
       }
 
+      // Skip registration call
+      if (!this.authFlag) {
+        this.authFlag = true
+        return
+      }
+
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
       }
 
       if (user) {
-        console.log('User exists: ', user)
+        console.log('------ User exists: ', user)
 
         // Determine if user needs to verify email
         const emailVerified =
           !user.providerData ||
           !user.providerData.length ||
-          user.providerData[0].providerId != 'password' ||
+          user.providerData[0].providerId !== 'password' ||
           user.emailVerified
 
         // TODO - Revoir ça pour connexion Apple
         const profile = {
           id: user.uid,
           email: user.email,
-          ...(user.providerData[0].displayName && {
-            displayName: user.providerData[0].displayName,
-          }),
-          photoURL: user.providerData[0].photoURL,
+          displayName: user.providerData[0].displayName || '',
+          photoURL: user.providerData[0].photoURL || '',
           provider: user.providerData[0].providerId,
           lastSeen: Date.now(),
           emailVerified,
         }
 
-        let remoteLastSeen = null
-
-        const userDoc = firebaseDb.collection('users').doc(user.uid)
+        const userStatusRef = firebaseDb
+          .collection('users-status')
+          .doc(user.uid)
 
         dispatch({ type: APP_FETCH_DATA })
-        let userData
-        try {
-          userData = await userDoc.get()
-        } catch (e) {
-          dispatch({ type: APP_FETCH_DATA_FAIL })
-          console.log('Erreur')
-          console.log(e)
-        }
-        let data = userData.data()
 
-        if (data) {
-          console.log('Update profile, last seen:', data.lastSeen)
-          remoteLastSeen = data.lastSeen
+        // GET USER STATUS
+        const userStatusDoc = await userStatusRef.get()
 
-          await userDoc.update(profile)
-        } else {
-          console.log('Set profile')
-          await userDoc.set(profile)
-        }
-
-        userData = await userDoc.get()
-        data = userData.data()
+        const userStatus = userStatusDoc.data() || {}
+        const remoteLastSeen = userStatus.lastSeen || 0
 
         if (!this.user) {
-          // Get studies - TODO: DO IT BETTER
-          const studies = {}
-          firebaseDb
-            .collection('studies')
-            .where('user.id', '==', user.uid)
-            .get()
-            .then(querySnapshot => {
-              querySnapshot.forEach(doc => {
-                const study = doc.data()
-                studies[study.id] = study
-              })
-
-              if (this.onLogin) {
-                this.onLogin(data || {}, remoteLastSeen, studies)
-              } // On login
-            })
+          if (this.onLogin) {
+            this.onLogin({ profile, remoteLastSeen })
+          } // On login
         }
 
         this.user = user // Store user
@@ -218,17 +192,8 @@ const FireAuth = class {
     new Promise(async resolve => {
       try {
         const { idToken } = await GoogleSignin.signIn()
-        const { accessToken } = await GoogleSignin.getTokens()
-
-        const credential = auth.GoogleAuthProvider.credential(
-          idToken,
-          accessToken
-        )
-
-        return this.onCredentialSuccess(credential, resolve)
-
-        SnackBar.show(i18n.t('Connexion annulée.'))
-        return resolve(false)
+        const googleCredential = auth.GoogleAuthProvider.credential(idToken)
+        return this.onCredentialSuccess(googleCredential, resolve)
       } catch (e) {
         SnackBar.show(i18n.t('Une erreur est survenue'))
         console.log(e)
@@ -324,7 +289,7 @@ const FireAuth = class {
             firebaseDb
               .collection('users')
               .doc(user.uid)
-              .set({ displayName: username })
+              .set({ displayName: username }, { merge: true })
             user.sendEmailVerification()
             return resolve(true)
           })
@@ -344,7 +309,7 @@ const FireAuth = class {
 
   logout = () => {
     auth().signOut()
-    IAPHub.setUserId(null)
+    // IAPHub.setUserId(null)
 
     // Sign-out successful.
     this.user = null

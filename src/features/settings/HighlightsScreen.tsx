@@ -99,15 +99,14 @@ const HighlightsScreen = () => {
       )}
       <Modal.Menu
         isOpen={!!isSettingsOpen}
-        onClosed={() => setIsSettingsOpen(undefined)}
+        onClose={() => setIsSettingsOpen(undefined)}
+        adjustToContentHeight
       >
         <Modal.Item
           bold
           onPress={() => {
             setIsSettingsOpen(undefined)
-            setTimeout(() => {
-              setIsChangeColorOpen(isSettingsOpen?.stringIds)
-            }, 500)
+            setIsChangeColorOpen(isSettingsOpen?.stringIds)
           }}
         >
           {t('Changer la couleur')}
@@ -116,12 +115,10 @@ const HighlightsScreen = () => {
           bold
           onPress={() => {
             setIsSettingsOpen(undefined)
-            setTimeout(() => {
-              setMultipleTagsItem({
-                entity: 'highlights',
-                ids: isSettingsOpen?.stringIds,
-              })
-            }, 500)
+            setMultipleTagsItem({
+              entity: 'highlights',
+              ids: isSettingsOpen?.stringIds,
+            })
           }}
         >
           {t('Éditer les tags')}
@@ -132,7 +129,8 @@ const HighlightsScreen = () => {
       </Modal.Menu>
       <Modal.Menu
         isOpen={!!isChangeColorOpen}
-        onClosed={() => setIsChangeColorOpen(undefined)}
+        onClose={() => setIsChangeColorOpen(undefined)}
+        adjustToContentHeight
       >
         <Box row my={20} mx={20}>
           <TouchableCircle
@@ -158,7 +156,6 @@ const HighlightsScreen = () => {
         </Box>
       </Modal.Menu>
       <MultipleTagsModal
-        multiple
         item={multipleTagsItem}
         onClosed={() => setMultipleTagsItem(false)}
       />

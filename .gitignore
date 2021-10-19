@@ -10,7 +10,6 @@ src/assets/bible_versions/**
 project/*
 config.js
 config.ts
-app.json
 
 
 .expo/
@@ -43,6 +42,7 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 ios/build/
+ios/Pods/
 
 # Gradle
 /build/

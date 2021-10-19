@@ -41,17 +41,6 @@ const StudiesScreen = () => {
 
   return (
     <Container>
-      <TagsModal
-        isVisible={isTagsOpen}
-        onClosed={() => setTagsIsOpen(false)}
-        onSelected={chip => setSelectedChip(chip)}
-        selectedChip={selectedChip}
-      />
-      <MultipleTagsModal
-        multiple
-        item={multipleTagsItem}
-        onClosed={() => setMultipleTagsItem(false)}
-      />
       <Box flex>
         {filteredStudies.length ? (
           <FlatList
@@ -77,10 +66,18 @@ const StudiesScreen = () => {
             )}
           />
         ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('Aucune étude...')}
-          />
+          <>
+            <TagsHeader
+              title={t('Études')}
+              setIsOpen={setTagsIsOpen}
+              isOpen={isTagsOpen}
+              selectedChip={selectedChip}
+            />
+            <Empty
+              source={require('~assets/images/empty.json')}
+              message={t('Aucune étude...')}
+            />
+          </>
         )}
         {isLogged && (
           <FloatingButton
@@ -91,6 +88,16 @@ const StudiesScreen = () => {
           />
         )}
       </Box>
+      <TagsModal
+        isVisible={isTagsOpen}
+        onClosed={() => setTagsIsOpen(false)}
+        onSelected={chip => setSelectedChip(chip)}
+        selectedChip={selectedChip}
+      />
+      <MultipleTagsModal
+        item={multipleTagsItem}
+        onClosed={() => setMultipleTagsItem(false)}
+      />
       <StudySettingsModal
         isOpen={isStudySettingsOpen}
         onClosed={() => setStudySettings(false)}

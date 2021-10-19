@@ -3,7 +3,7 @@ import { withNavigation } from 'react-navigation'
 import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
-import AssetUtils from 'expo-asset-utils'
+import * as AssetUtils from 'expo-asset-utils'
 import * as Sentry from '@sentry/react-native'
 
 import books from '~assets/bible_versions/books-desc'

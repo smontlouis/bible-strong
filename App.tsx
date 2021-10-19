@@ -1,15 +1,14 @@
 import 'react-native-root-siblings'
 import React, { useState, useEffect } from 'react'
-import { YellowBox, ActivityIndicator, View, StatusBar } from 'react-native'
+import { LogBox, ActivityIndicator, View, StatusBar } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
+import * as Sentry from 'sentry-expo'
 import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
-import PushNotification from 'react-native-push-notification'
+import PushNotification, { Importance } from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
-
 import SplashScreen from 'react-native-splash-screen'
 
 import { store, persistor } from '~redux/store'
@@ -19,13 +18,15 @@ import { useInitIAP } from '~helpers/useInAppPurchases'
 import { setI18n } from './i18n'
 
 setAutoFreeze(false)
-YellowBox.ignoreWarnings([
-  'Require cycle:',
+LogBox.ignoreLogs([
+  'Require cycle',
   'LottieAnimation',
   'LottieAnimationView',
   'Setting a timer',
   'expoConstants',
   "Cannot read property 'name' of null",
+  'EventEmitter.removeListener',
+  'useNativeDriver',
 ])
 
 if (!__DEV__) {
@@ -34,22 +35,31 @@ if (!__DEV__) {
   })
 }
 
-const initNotifications = () => {
-  PushNotification.configure({
-    onRegister() {},
-    onNotification(notification) {
-      notification.finish(PushNotificationIOS.FetchResult.NoData)
-    },
-    senderID: 'YOUR GCM (OR FCM) SENDER ID',
-    permissions: {
-      alert: true,
-      badge: true,
-      sound: true,
-    },
-    popInitialNotification: true,
-    requestPermissions: true,
-  })
-}
+PushNotification.configure({
+  onRegister() {},
+  onNotification(notification) {
+    notification.finish(PushNotificationIOS.FetchResult.NoData)
+  },
+  permissions: {
+    alert: true,
+    badge: true,
+    sound: true,
+  },
+  popInitialNotification: true,
+  requestPermissions: true,
+})
+
+PushNotification.createChannel(
+  {
+    channelId: 'vod-notifications',
+    channelName: 'Notifications versets du jour',
+    channelDescription: 'Notifications pour recevoir les versets du jour',
+    importance: Importance.HIGH,
+    playSound: true,
+    vibrate: true,
+  },
+  created => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+)
 
 const loadResourcesAsync = async () => {
   return Promise.all([
@@ -68,10 +78,12 @@ const useAppLoad = () => {
       await loadResourcesAsync()
       await setI18n()
       handleFinishLoading()
-      initNotifications()
 
       if (!__DEV__) {
-        analytics().setCurrentScreen('Bible', 'Bible')
+        analytics().logScreenView({
+          screen_class: 'Bible',
+          screen_name: 'Bible',
+        })
       }
     })()
   }, [])

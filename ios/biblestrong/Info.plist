@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>14.5.4</string>
+	<string>14.5.13</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -56,11 +56,13 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>44</string>
+	<string>53</string>
 	<key>CodePushDeploymentKey</key>
 	<string>$(CODE_PUSH)</string>
 	<key>FacebookAppID</key>
 	<string>312719079612015</string>
+	<key>FacebookClientToken</key>
+	<string>c5dbe48fa71a4ce7066ce64f16d075b9</string>
 	<key>FacebookDisplayName</key>
 	<string>Bible Strong App</string>
 	<key>LSApplicationQueriesSchemes</key>
@@ -122,6 +124,10 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false />
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

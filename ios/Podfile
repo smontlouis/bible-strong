@@ -1,6 +1,8 @@
-platform :ios, '10.0'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
-require_relative '../node_modules/react-native-unimodules/cocoapods'
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
+require File.join(File.dirname(`node --print "require.resolve('react-native-unimodules/package.json')"`), "cocoapods")
+
+platform :ios, '11.0'
 
 project 'biblestrong',
         'Dev' => :debug,
@@ -9,43 +11,24 @@ project 'biblestrong',
 
 target 'biblestrong' do
 
-  rnPrefix = "../node_modules/react-native"
-  
-  # React Native and its dependencies
-  pod 'FBLazyVector', :path => "#{rnPrefix}/Libraries/FBLazyVector"
-  pod 'FBReactNativeSpec', :path => "#{rnPrefix}/Libraries/FBReactNativeSpec"
-  pod 'RCTRequired', :path => "#{rnPrefix}/Libraries/RCTRequired"
-  pod 'RCTTypeSafety', :path => "#{rnPrefix}/Libraries/TypeSafety"
-  pod 'React', :path => "#{rnPrefix}/"
-  pod 'React-Core', :path => "#{rnPrefix}/"
-  pod 'React-CoreModules', :path => "#{rnPrefix}/React/CoreModules"
-  pod 'React-RCTActionSheet', :path => "#{rnPrefix}/Libraries/ActionSheetIOS"
-  pod 'React-RCTAnimation', :path => "#{rnPrefix}/Libraries/NativeAnimation"
-  pod 'React-RCTBlob', :path => "#{rnPrefix}/Libraries/Blob"
-  pod 'React-RCTImage', :path => "#{rnPrefix}/Libraries/Image"
-  pod 'React-RCTLinking', :path => "#{rnPrefix}/Libraries/LinkingIOS"
-  pod 'React-RCTNetwork', :path => "#{rnPrefix}/Libraries/Network"
-  pod 'React-RCTSettings', :path => "#{rnPrefix}/Libraries/Settings"
-  pod 'React-RCTText', :path => "#{rnPrefix}/Libraries/Text"
-  pod 'React-RCTVibration', :path => "#{rnPrefix}/Libraries/Vibration"
-  pod 'React-Core/RCTWebSocket', :path => "#{rnPrefix}/"
-  pod 'React-Core/DevSupport', :path => "#{rnPrefix}/"
-  pod 'React-cxxreact', :path => "#{rnPrefix}/ReactCommon/cxxreact"
-  pod 'React-jsi', :path => "#{rnPrefix}/ReactCommon/jsi"
-  pod 'React-jsiexecutor', :path => "#{rnPrefix}/ReactCommon/jsiexecutor"
-  pod 'React-jsinspector', :path => "#{rnPrefix}/ReactCommon/jsinspector"
-  pod 'ReactCommon/jscallinvoker', :path => "#{rnPrefix}/ReactCommon"
-  pod 'ReactCommon/turbomodule/core', :path => "#{rnPrefix}/ReactCommon"
-  pod 'Yoga', :path => "#{rnPrefix}/ReactCommon/yoga"
-  pod 'DoubleConversion', :podspec => "#{rnPrefix}/third-party-podspecs/DoubleConversion.podspec"
-  pod 'glog', :podspec => "#{rnPrefix}/third-party-podspecs/glog.podspec"
-  pod 'Folly', :podspec => "#{rnPrefix}/third-party-podspecs/Folly.podspec"
-
-  # Other native modules
-
-  # Automatically detect installed unimodules
   use_unimodules!
-  use_native_modules!
+  config = use_native_modules!
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # to enable hermes on iOS, change `false` to `true` and then install pods
+    :hermes_enabled => false
+  )
+
+  # Enables Flipper.
+  #
+  # Note that if you have use_frameworks! enabled, Flipper will not work and
+  # you should disable these next few lines.
+  # use_flipper!(configurations: ['Dev', 'Staging'])
+  # post_install do |installer|
+  #   react_native_post_install(installer)
+  #   __apply_Xcode_12_5_M1_post_install_workaround(installer)
+  # end
 
 
 end
+

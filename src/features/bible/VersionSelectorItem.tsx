@@ -199,9 +199,9 @@ const VersionSelectorItem = ({
       t('Attention'),
       t('Êtes-vous vraiment sur de supprimer cette version ?'),
       [
-        { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Oui',
+          text: t('Oui'),
           onPress: deleteVersion,
           style: 'destructive',
         },

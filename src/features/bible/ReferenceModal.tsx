@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
-import Modal from 'react-native-modal'
 import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { withNavigation } from 'react-navigation'
@@ -20,31 +19,10 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { hp } from '~helpers/utils'
-
-const StylizedModal = styled(Modal)({
-  justifyContent: 'flex-end',
-  zIndex: 10,
-  margin: 0,
-  alignItems: 'center',
-})
+import Modal from '~common/Modal'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
-}))
-
-const Container = styled.View(({ theme }) => ({
-  height: hp(60),
-  maxWidth: 600,
-  width: '100%',
-  backgroundColor: theme.colors.reverse,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: -1 },
-  shadowOpacity: 0.2,
-  shadowRadius: 7,
-  elevation: 2,
-  paddingBottom: getBottomSpace(),
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
 }))
 
 const ReferenceItem = ({ reference, version, onClosed }) => {
@@ -136,7 +114,6 @@ const CardWrapper = waitForTresorModal(
       return null
     }
 
-    const { title } = formatVerseContent([selectedVerse])
     const renderReferences = () => {
       const refs = references.commentaires
         ? JSON.parse(references.commentaires)
@@ -180,6 +157,23 @@ const CardWrapper = waitForTresorModal(
 
     return (
       <Box flex>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+          {renderReferences()}
+        </ScrollView>
+      </Box>
+    )
+  }
+)
+
+const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
+  const { title } = formatVerseContent([selectedVerse])
+
+  return (
+    <Modal.Menu
+      isOpen={!!selectedVerse}
+      onClose={onClosed}
+      adjustToContentHeight
+      HeaderComponent={
         <Box row height={60} alignItems="center">
           <Box flex paddingLeft={20}>
             <Text title fontSize={16} marginTop={10}>
@@ -193,26 +187,10 @@ const CardWrapper = waitForTresorModal(
             <IconFeather name="x" size={25} />
           </Link>
         </Box>
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-          {renderReferences()}
-        </ScrollView>
-      </Box>
-    )
-  }
-)
-
-const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
-  return (
-    <StylizedModal
-      backdropOpacity={0.3}
-      isVisible={!!selectedVerse}
-      onBackdropPress={onClosed}
-      onBackButtonPress={onClosed}
+      }
     >
-      <Container>
-        <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
-      </Container>
-    </StylizedModal>
+      <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
+    </Modal.Menu>
   )
 }
 

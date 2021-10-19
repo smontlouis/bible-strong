@@ -23,6 +23,7 @@ import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
 import { deleteAllDatabases } from '~helpers/database'
 import RNRestart from 'react-native-restart'
+import sizeof from 'firestore-size'
 
 import app from '../../../package.json'
 import { RootState } from '~redux/modules/reducer'
@@ -62,10 +63,10 @@ const shareMessage = () => {
 const MoreScreen = () => {
   const { isLogged, logout } = useLogin()
   const dispatch = useDispatch()
-  const [isEditTagsOpen, setEditTagsOpen] = useState(false)
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
+  const bibleJSON = useSelector((state: RootState) => state.user.bible)
   const { t, i18n } = useTranslation()
 
   const promptLogout = () => {
@@ -82,9 +83,9 @@ const MoreScreen = () => {
         'Vous êtes sur le point de changer de langue, les bases de données françaises seront supprimées.'
       ),
       [
-        { text: 'Non', onPress: () => null, style: 'cancel' },
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: 'Oui',
+          text: t('Oui'),
           onPress: () => {
             const isFR = i18n.language === 'fr'
             i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
@@ -177,14 +178,14 @@ const MoreScreen = () => {
             <StyledIcon name="help-circle" size={25} />
             <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
-          <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
+          {/* <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
             <StyledIcon name="sun" size={25} />
             <Text fontSize={15}>{t('Idées de fonctionnalités')}</Text>
           </LinkItem>
           <LinkItem href="https://bible-strong.canny.io/bugs">
             <StyledIcon name="alert-circle" size={25} />
             <Text fontSize={15}>{t('Bugs')}</Text>
-          </LinkItem>
+          </LinkItem> */}
 
           <LinkItem href="https://www.facebook.com/fr.bible.strong">
             <StyledIcon name="facebook" size={25} />
@@ -204,7 +205,7 @@ const MoreScreen = () => {
             <StyledIcon name="share-2" size={25} />
             <Text fontSize={15}>{t("Partager l'application")}</Text>
           </LinkItem>
-          <LinkItem href="mailto:s.montlouis.calixte@gmail.com">
+          <LinkItem href="mailto:s.montlouis.calixte+bible-strong@gmail.com">
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>{t('Contacter le développeur')}</Text>
           </LinkItem>
@@ -271,15 +272,14 @@ const MoreScreen = () => {
           </LinkItem>
         </Box>
       </ScrollView>
-      <Box position="absolute" bottom={30} right={10}>
-        <Text color="grey" fontSize={12}>
+      <Box position="absolute" bottom={30} right={10} row alignItems="flex-end">
+        <Text color="grey" fontSize={9} marginRight={10}>
+          {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
+        </Text>
+        <Text color="grey" fontSize={9}>
           Version: {app.version}
         </Text>
       </Box>
-      <TagsEditModal
-        isVisible={isEditTagsOpen}
-        onClosed={() => setEditTagsOpen(false)}
-      />
     </Container>
   )
 }

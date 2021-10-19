@@ -9,8 +9,10 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
 
 const TouchableBox = styled.TouchableOpacity({
+  flex: 1,
   flexDirection: 'row',
   alignItems: 'center',
+  justifyContent: 'flex-end',
   paddingRight: 15,
   paddingVertical: 15,
 })
@@ -42,7 +44,7 @@ const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
         </Text>
       </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
-        <StyledText>
+        <StyledText numberOfLines={1}>
           {selectedChip ? selectedChip.name : t('Filtrer')}
         </StyledText>
         <FeatherIcon name="chevron-down" size={15} />
