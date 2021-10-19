@@ -46,6 +46,8 @@ const FireAuth = class {
 
     GoogleSignin.configure({
       scopes: ['profile', 'email', 'openid'],
+      webClientId:
+        '204116128917-56eubi7hu2f0k3rnb6dn8q3sfv23588l.apps.googleusercontent.com',
     })
 
     auth().onAuthStateChanged(async user => {
@@ -191,6 +193,7 @@ const FireAuth = class {
   googleLogin = () =>
     new Promise(async resolve => {
       try {
+        await GoogleSignin.hasPlayServices()
         const { idToken } = await GoogleSignin.signIn()
         const googleCredential = auth.GoogleAuthProvider.credential(idToken)
         return this.onCredentialSuccess(googleCredential, resolve)

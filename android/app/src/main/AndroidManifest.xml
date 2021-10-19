@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <permission android:name="${applicationId}.permission.C2D_MESSAGE" android:protectionLevel="signature" />
     <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
-    
+
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -27,7 +27,9 @@
         <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="https://exp.host/@smontlouis/bible-strong" />
         <meta-data android:name="expo.modules.updates.EXPO_SDK_VERSION" android:value="42.0.0" />
         <meta-data android:name="expo.modules.updates.EXPO_RELEASE_CHANNEL" android:value="@string/release_channel" />
-        <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH	" android:value="NEVER" />
+        <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="NEVER" />
+        <meta-data android:name="expo.modules.updates.ENABLED" android:value="true" />
+        <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0" />
         <activity android:name=".MainActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,7 +38,7 @@
         </activity>
         <meta-data android:name="io.sentry.anr.enable" android:value="false" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id" />
-        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token" />
         <activity android:name="com.facebook.FacebookActivity" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" android:label="@string/app_name" />
         <activity android:name="com.facebook.CustomTabActivity" android:exported="true">
             <intent-filter>
@@ -47,8 +49,7 @@
             </intent-filter>
         </activity>
         <provider android:authorities="@string/content_provider" android:name="com.facebook.FacebookContentProvider" android:exported="true" />
-        <meta-data  android:name="com.dieam.reactnativepushnotification.notification_foreground"
-        android:value="true"/>
+        <meta-data android:name="com.dieam.reactnativepushnotification.notification_foreground" android:value="true" />
         <!-- Change the resource name to your App's accent color - or any other color you want -->
         <meta-data android:name="com.dieam.reactnativepushnotification.notification_color" android:resource="@android:color/white" />
         <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" />
@@ -57,13 +58,11 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 
-        <service
-            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
-            android:exported="false" >
+        <service android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService" android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
