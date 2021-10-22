@@ -403,7 +403,7 @@ const BibleFooter = ({
   const [isLoading, setIsLoading] = useState(true)
   const { t } = useTranslation()
   const audioTitle = `${t(book.Nom)} ${chapter} ${version}`
-  const audioSubtitle = getVersions()[version].name
+  const audioSubtitle = getVersions()?.[version]?.name
 
   const [soundObject, audioObject, error, setPosition] = useLoadSound({
     audioMode,

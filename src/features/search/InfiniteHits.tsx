@@ -20,7 +20,7 @@ const InfiniteHits = ({
   searchValue,
   hits,
   hasMore,
-  refine,
+  refineNext,
   allSearchResults,
   error,
   searching,
@@ -58,7 +58,7 @@ const InfiniteHits = ({
         }
         data={hits}
         keyExtractor={item => item.objectID}
-        onEndReached={() => hasMore && refine()}
+        onEndReached={() => hasMore && refineNext()}
         renderItem={({ item }) => (
           <Highlight attribute={isFR ? 'LSG' : 'KJV'} hit={item} />
         )}

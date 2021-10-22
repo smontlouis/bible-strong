@@ -59,6 +59,8 @@ class InitApp extends React.Component<Props> {
   }
 
   updateApp = async () => {
+    if (__DEV__) return
+
     const update = await Updates.checkForUpdateAsync()
 
     if (update.isAvailable) {
