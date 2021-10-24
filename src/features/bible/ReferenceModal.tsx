@@ -114,56 +114,54 @@ const CardWrapper = waitForTresorModal(
       return null
     }
 
-    const renderReferences = () => {
-      const refs = references.commentaires
-        ? JSON.parse(references.commentaires)
-        : []
-
-      if (!refs.length) {
-        return (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message="Aucune référence pour ce verset..."
-          />
-        )
-      }
-
-      return refs.map((ref, i) => {
-        const splittedRef = ref.split('-')
-        if (splittedRef.length === 3) {
-          return (
-            <ReferenceItem
-              key={ref + i}
-              reference={ref}
-              version={version}
-              onClosed={onClosed}
-            />
-          )
-        }
-
-        return (
-          <Text
-            title
-            key={ref}
-            fontSize={20}
-            marginBottom={5}
-            color="lightPrimary"
-          >
-            {splittedRef}
-          </Text>
-        )
-      })
-    }
-
     return (
       <Box flex>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-          {renderReferences()}
+          <References
+            references={references}
+            version={version}
+            onClosed={onClosed}
+          />
         </ScrollView>
       </Box>
     )
   }
 )
+
+const References = ({ references, version, onClosed }) => {
+  const refs = references.commentaires
+    ? JSON.parse(references.commentaires)
+    : []
+
+  if (!refs.length) {
+    return (
+      <Empty
+        source={require('~assets/images/empty.json')}
+        message="Aucune référence pour ce verset..."
+      />
+    )
+  }
+
+  return refs.map((ref, i) => {
+    const splittedRef = ref.split('-')
+    if (splittedRef.length === 3) {
+      return (
+        <ReferenceItem
+          key={ref + i}
+          reference={ref}
+          version={version}
+          onClosed={onClosed}
+        />
+      )
+    }
+
+    return (
+      <Text title key={ref} fontSize={20} marginBottom={5} color="lightPrimary">
+        {splittedRef}
+      </Text>
+    )
+  })
+}
 
 const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
   const { title } = formatVerseContent([selectedVerse])
@@ -172,7 +170,6 @@ const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
     <Modal.Menu
       isOpen={!!selectedVerse}
       onClose={onClosed}
-      adjustToContentHeight
       HeaderComponent={
         <Box row height={60} alignItems="center">
           <Box flex paddingLeft={20}>
