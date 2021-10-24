@@ -18,6 +18,7 @@ export const databasesRef = {
   NAVE: storageRef.child('databases/nave-fr.sqlite'),
   STRONG: storageRef.child('databases/strong.sqlite'),
   TIMELINE: storageRef.child('databases/bible-timeline-events.json'),
+  SEARCH: storageRef.child('databases/idx-light.json'),
 }
 
 export const databasesEnRef = {
@@ -28,6 +29,7 @@ export const databasesEnRef = {
   NAVE: storageRef.child('databases/en/nave.sqlite'),
   STRONG: storageRef.child('databases/en/strong.sqlite'),
   TIMELINE: storageRef.child('databases/en/bible-timeline-events.json'),
+  SEARCH: storageRef.child('databases/en/idx-light.json'),
 }
 
 interface DatabasesRef {
@@ -39,6 +41,7 @@ interface DatabasesRef {
   NAVE: FirebaseStorageTypes.Reference
   STRONG: FirebaseStorageTypes.Reference
   TIMELINE: FirebaseStorageTypes.Reference
+  SEARCH: FirebaseStorageTypes.Reference
 }
 
 export const getDatabasesRef = (): DatabasesRef => {

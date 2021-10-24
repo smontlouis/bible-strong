@@ -1,24 +1,22 @@
-import React from 'react'
 import algoliasearch from 'algoliasearch/lite'
-import { InstantSearch, Configure } from 'react-instantsearch-native'
-
-import useDebounce from '~helpers/useDebounce'
-import Header from '~common/Header'
-import Container from '~common/ui/Container'
-
-import SearchBox from './SearchBox'
-import Filters from './Filters'
-import SearchResults from './SearchResults'
-import { algoliaConfig } from '../../../config'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { Configure, InstantSearch } from 'react-instantsearch-native'
+import Container from '~common/ui/Container'
+import useDebounce from '~helpers/useDebounce'
 import useLanguage from '~helpers/useLanguage'
+import i18n from '~i18n'
+import { algoliaConfig } from '../../../config'
+import Filters from './Filters'
+import SearchBox from './SearchBox'
+import SearchResults from './SearchResults'
 
 const searchClient = algoliasearch(
   algoliaConfig.applicationId,
   algoliaConfig.apiKey
 )
 
-const SearchScreen = () => {
+const SearchScreen = ({ navigation }) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const [searchValue, setSearchValue] = React.useState('')
@@ -29,7 +27,6 @@ const SearchScreen = () => {
       <InstantSearch indexName="bible-lsg" searchClient={searchClient}>
         <Configure restrictSearchableAttributes={isFR ? ['LSG'] : ['KJV']} />
         <Container>
-          <Header title={t('Recherche dans la Bible')} />
           <SearchBox
             placeholder={t('Mot, phrase ou strong')}
             debouncedValue={debouncedSearchValue}
@@ -43,5 +40,9 @@ const SearchScreen = () => {
     </>
   )
 }
+
+SearchScreen.navigationOptions = () => ({
+  tabBarLabel: i18n.t('Rechercher'),
+})
 
 export default SearchScreen

@@ -108,6 +108,13 @@ export const databases = (): {
       fileSize: 3187836,
       path: `${FileSystem.documentDirectory}bible-timeline-events.json`,
     },
+    SEARCH: {
+      id: 'SEARCH',
+      name: i18n.t('Index de recherche'),
+      desc: i18n.t('Index permettant une recherche hors-ligne dans la Bible'),
+      fileSize: 16795170,
+      path: `${FileSystem.documentDirectory}idx-light.json`,
+    },
   }
 }
 

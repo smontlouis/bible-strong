@@ -31,6 +31,7 @@ import TagsScreen from '../features/settings/TagsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
 import SearchScreen from '~features/search/SearchScreen'
+import LocalSearchScreen from '~features/search/LocalSearchScreen'
 import NaveScreen from '~features/nave/NaveScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
 import NaveWarningScreen from '~features/nave/NaveWarningScreen'
@@ -73,6 +74,7 @@ const MainStackNavigator = createStackNavigator(
     Tag: { screen: TagScreen },
     Downloads: { screen: DownloadsScreen },
     Search: { screen: SearchScreen },
+    LocalSearch: { screen: LocalSearchScreen },
     Register: { screen: RegisterScreen },
     Dictionnaire: { screen: DictionnaryScreen },
     FAQ: { screen: FAQScreen },

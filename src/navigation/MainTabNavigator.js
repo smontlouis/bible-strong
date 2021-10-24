@@ -1,12 +1,11 @@
 import React from 'react'
-
-import createAnimatedBottomTabNavigator from '~navigation/createAnimatedBottomTabNavigator'
+import TabBarIcon from '~common/TabBarIcon'
 import BibleScreen from '~features/bible/BibleScreen'
+import HomeScreen from '~features/home/HomeScreen'
+import SearchSelect from '~features/search/SearchSelectScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
-import HomeScreen from '~features/home/HomeScreen'
-import SearchScreen from '~features/search/SearchScreen'
-import TabBarIcon from '~common/TabBarIcon'
+import createAnimatedBottomTabNavigator from '~navigation/createAnimatedBottomTabNavigator'
 import getTheme from '~themes'
 
 export default createAnimatedBottomTabNavigator(
@@ -23,7 +22,7 @@ export default createAnimatedBottomTabNavigator(
       },
     },
     Search: {
-      screen: SearchScreen,
+      screen: SearchSelect,
       navigationOptions: ({ screenProps }) => {
         return {
           title: 'Recherche',
