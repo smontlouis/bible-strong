@@ -3,12 +3,14 @@
 <plist version="1.0">
 <dict>
         <key>EXUpdatesSDKVersion</key>
-        <string>42.0.0</string>
+        <string>43.0.0</string>
         <key>EXUpdatesURL</key>
         <string>https://exp.host/@smontlouis/bible-strong</string>
         <key>EXUpdatesReleaseChannel</key>
         <string>dev</string>
         <key>EXUpdatesCheckOnLaunch</key>
         <string>NEVER</string>
+        <key>EXUpdatesAutoSetup</key>
+        <false/>
 </dict>
 </plist>

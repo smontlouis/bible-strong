@@ -54,7 +54,7 @@ public class MainApplication extends Application implements ReactApplication {
       return "index";
     }
 
-    @Override
+        @Override
         protected @Nullable String getJSBundleFile() {
           if (BuildConfig.DEBUG) {
             return super.getJSBundleFile();
