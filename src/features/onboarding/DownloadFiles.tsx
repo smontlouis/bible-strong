@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import RNRestart from 'react-native-restart'
 import Container from '~common/ui/Container'
@@ -32,6 +32,8 @@ const DownloadFiles = ({
   const isFR = useLanguage()
   const addDownloadFunc = (fn: () => void) =>
     setAllDownloadFunc(fns => [...fns, fn])
+
+  const databases = useRef(getDatabases())
 
   const onConfirmDownload = () => {
     Alert.alert(
@@ -102,7 +104,7 @@ const DownloadFiles = ({
             <Text padding={20} title fontSize={25}>
               {t('Bases de données')}
             </Text>
-            {Object.values(getDatabases()).map(db => (
+            {Object.values(databases.current).map(db => (
               <DBSelectorItem
                 key={db.id}
                 database={db.id}
