@@ -12,35 +12,11 @@ import SnackBar from '~common/SnackBar'
 import Container from '~common/ui/Container'
 import loadBible from '~helpers/loadBible'
 import useDebounce from '~helpers/useDebounce'
+import useLanguage from '~helpers/useLanguage'
 import i18n from '~i18n'
 import loadIndexCache from './loadIndexCache'
 import LocalSearchResults from './LocalSearchResults'
 import waitForIndex from './waitForIndex'
-
-// Lazynesss
-const books = [
-  {
-    Numero: 0,
-    Nom: 'Tout',
-    Chapitres: 0,
-  },
-  ...booksDesc,
-].map(book => ({
-  value: book.Numero,
-  label: book.Nom,
-}))
-// End lazyness
-
-const sectionValues = [
-  { value: '', label: 'Tout' },
-  { value: 'at', label: 'Ancien Testament' },
-  { value: 'nt', label: 'Nouveau Testament' },
-]
-
-const orderValues = [
-  { value: '', label: 'Par pertinence' },
-  { value: 'a', label: 'Par ordre alphabétique' },
-]
 
 const timeout = ms => new Promise(r => setTimeout(r, ms))
 
@@ -48,6 +24,7 @@ export let bibleLSG
 
 const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
   const { t } = useTranslation()
+  const isFR = useLanguage()
   const index = useRef<FileSystem.FileInfo>()
   const [isLoading, setLoading] = useState(true)
   const [searchValue, setSearchValue] = useState('')
@@ -58,11 +35,49 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
   const [order, setOrder] = useState('')
   const [book, setBook] = useState(0)
 
+  const books = [
+    {
+      Numero: 0,
+      Nom: t('Tout'),
+      Chapitres: 0,
+    },
+    ...booksDesc,
+  ].map(book => ({
+    value: book.Numero,
+    label: book.Nom,
+  }))
+
+  const sectionValues = [
+    {
+      value: '',
+      label: t('Tout'),
+    },
+    {
+      value: 'at',
+      label: t('Ancien Testament'),
+    },
+    {
+      value: 'nt',
+      label: t('Nouveau Testament'),
+    },
+  ]
+
+  const orderValues = [
+    {
+      value: '',
+      label: t('Par pertinence'),
+    },
+    {
+      value: 'a',
+      label: t('Par ordre alphabétique'),
+    },
+  ]
+
   useEffect(() => {
     const setIndexCache = async () => {
       await timeout(500)
       index.current = await loadIndexCache(idxFile)
-      bibleLSG = await loadBible('LSG')
+      bibleLSG = await loadBible(isFR ? 'LSG' : 'KJV')
       setLoading(false)
     }
     setIndexCache()
@@ -149,32 +164,12 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
         try {
           const val = debouncedSearchValue.toLowerCase()
 
-          const results = index.current.query(q => {
-            // look for an exact match and apply a large positive boost
-            q.term(val, {
-              usePipeline: true,
-              boost: 100,
-            })
+          const results = index.current.search(val)
+          console.log(val, results)
 
-            // look for terms that match the beginning of this queryTerm and apply a medium boost
-            q.term(val + '*', {
-              usePipeline: true,
-              boost: 10,
-            })
-
-            // look for terms that match with an edit distance of 2 and apply a small boost
-            q.term(val, {
-              usePipeline: true,
-              editDistance: 2,
-              boost: 1,
-            })
-          })
-          console.log(debouncedSearchValue.toLowerCase(), results)
           setResults(filterResults(results))
         } catch (e) {
-          Sentry.captureException(e)
-          console.log(e)
-          SnackBar.show(t('Une erreur est survenue.'), 'danger')
+          setResults([])
         }
       } else {
         setResults(null)
@@ -189,14 +184,17 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
   return (
     <Container>
       <SearchInput
-        placeholder={t('Recherche par mot ou phrase')}
+        placeholder={t('search.placeholder')}
         onChangeText={setSearchValue}
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
       <ScrollView
         horizontal
-        style={{ maxHeight: 55, paddingHorizontal: 10 }}
+        style={{
+          maxHeight: 55,
+          paddingHorizontal: 10,
+        }}
         contentContainerStyle={{
           flexDirection: 'row',
         }}
@@ -221,7 +219,7 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
         />
       </ScrollView>
       {debouncedSearchValue && Array.isArray(results) ? (
-        <LocalSearchResults results={results} />
+        <LocalSearchResults searchValue={searchValue} results={results} />
       ) : (
         <Empty
           source={require('~assets/images/search-loop.json')}

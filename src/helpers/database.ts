@@ -201,12 +201,13 @@ export const deleteAllDatabases = async () => {
   const intFile = await FileSystem.getInfoAsync(
     `${FileSystem.documentDirectory}SQLite/interlineaire.sqlite`
   )
-
   if (intFile.exists) FileSystem.deleteAsync(intFile.uri)
 
-  Object.values(getDatabases()).map(async db => {
-    const file = await FileSystem.getInfoAsync(db.path)
-    console.log(file)
-    if (file.exists) FileSystem.deleteAsync(file.uri)
-  })
+  await Promise.all(
+    Object.values(getDatabases()).map(async db => {
+      const file = await FileSystem.getInfoAsync(db.path)
+      console.log(file, db.path)
+      if (file.exists) await FileSystem.deleteAsync(file.uri)
+    })
+  )
 }

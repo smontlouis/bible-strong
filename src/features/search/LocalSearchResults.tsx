@@ -9,28 +9,48 @@ import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
 import LocalSearchItem from './LocalSearchItem'
-import Empty from '~common/Empty'
 import { bibleLSG } from './LocalSearchScreen'
+import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
+import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
+import NaveResultsWidget from '~features/nave/NaveResultsWidget'
+import { useTranslation } from 'react-i18next'
+import VerseResultWidget from '~features/bible/VerseResultWidget'
 
-const LocalSearchResults = ({ results, navigation, page, setPage, theme }) => {
-  if (!results || !results.length) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message="Désolé je n'ai rien trouvé..."
-      />
-    )
-  }
+const LocalSearchResults = ({
+  results = [],
+  searchValue,
+  navigation,
+  theme,
+}) => {
+  const { t } = useTranslation()
 
   const nbResults = results.length
 
   return (
     <KeyboardAwareFlatList
+      ListHeaderComponent={
+        <Box>
+          <Box row wrap paddingVertical={20}>
+            <LexiqueResultsWidget searchValue={searchValue} />
+            <DictionnaryResultsWidget searchValue={searchValue} />
+            <NaveResultsWidget searchValue={searchValue} />
+            <VerseResultWidget searchValue={searchValue} />
+          </Box>
+          <Box>
+            <Text title fontSize={16} color="grey">
+              {t('{{nbHits}} occurences trouvées dans la bible', {
+                nbHits: nbResults,
+              })}
+            </Text>
+          </Box>
+        </Box>
+      }
       enableOnAndroid={true}
       keyboardShouldPersistTaps={'handled'}
       enableResetScrollToCoords={false}
       style={{
         padding: 20,
+        paddingTop: 0,
         paddingBottom: 40,
         flex: 1,
         backgroundColor: theme.colors.reverse,
@@ -39,13 +59,6 @@ const LocalSearchResults = ({ results, navigation, page, setPage, theme }) => {
       }}
       removeClippedSubviews
       data={results}
-      ListHeaderComponent={
-        <Box marginBottom={10}>
-          <Text title fontSize={20}>
-            {nbResults} occurences trouvées
-          </Text>
-        </Box>
-      }
       keyExtractor={result => result.ref}
       renderItem={({ item: result, index }) => {
         const [book, chapter, verse] = result.ref.split('-')

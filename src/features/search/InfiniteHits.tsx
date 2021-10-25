@@ -15,6 +15,17 @@ import Empty from '~common/Empty'
 import Highlight from './Highlight'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import VerseResultWidget from '~features/bible/VerseResultWidget'
+
+interface Props {
+  searchValue: string
+  hits: any
+  hasMore: boolean
+  refineNext: () => void
+  allSearchResults: any
+  error?: boolean
+  searching: boolean
+}
 
 const InfiniteHits = ({
   searchValue,
@@ -23,9 +34,7 @@ const InfiniteHits = ({
   refineNext,
   allSearchResults,
   error,
-  searching,
-  ...props
-}) => {
+}: Props) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   return (
@@ -37,6 +46,7 @@ const InfiniteHits = ({
               <LexiqueResultsWidget searchValue={searchValue} />
               <DictionnaryResultsWidget searchValue={searchValue} />
               <NaveResultsWidget searchValue={searchValue} />
+              <VerseResultWidget searchValue={searchValue} />
             </Box>
             {error ? (
               <Empty

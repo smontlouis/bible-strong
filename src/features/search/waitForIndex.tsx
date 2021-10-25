@@ -7,6 +7,7 @@ import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
 import { getDatabasesRef } from '~helpers/firebase'
+import { useTranslation } from 'react-i18next'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
@@ -86,6 +87,7 @@ export const useWaitForIndex = () => {
 }
 
 const waitForIndex = WrappedComponent => props => {
+  const { t } = useTranslation()
   const {
     isLoading,
     idxFile,
@@ -97,7 +99,7 @@ const waitForIndex = WrappedComponent => props => {
 
   if (isLoading && startDownload) {
     return (
-      <Loading message="Téléchargement de l'index..">
+      <Loading message={t("Téléchargement de l'index...")}>
         <ProgressBar progress={progress} color="blue" />
       </Loading>
     )
@@ -106,7 +108,7 @@ const waitForIndex = WrappedComponent => props => {
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        title="L'index de recherche est requis pour accéder à cette page."
+        title={t("L'index de recherche est requis pour accéder à cette page.")}
         setStartDownload={setStartDownload}
         fileSize={16}
       />
@@ -117,7 +119,7 @@ const waitForIndex = WrappedComponent => props => {
     return <WrappedComponent idxFile={idxFile} {...props} />
   }
 
-  return <Loading message="Chargement..." />
+  return <Loading message={t('Chargement...')} />
 }
 
 export default waitForIndex

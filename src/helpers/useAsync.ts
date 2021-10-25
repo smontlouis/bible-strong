@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Status } from '~common/types'
 import to from 'await-to-js'
 
-const useAsync = (fn: () => Promise<any>) => {
+const useAsync = (fn: () => Promise<any>, deps: any[] = []) => {
   const [status, setStatus] = useState<Status>('Idle')
   const [data, setData] = useState()
   const [error, setError] = useState<Error>()
@@ -19,7 +19,7 @@ const useAsync = (fn: () => Promise<any>) => {
         setError(err)
       }
     })()
-  }, [])
+  }, deps)
 
   return { status, data, error }
 }

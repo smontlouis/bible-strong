@@ -11,6 +11,7 @@ const RouteConfigs = {
 }
 
 const TabNavigatorConfig = {
+  lazy: true,
   optimizationsEnabled: true,
   swipeEnabled: true,
   animationEnabled: true,

@@ -86,14 +86,17 @@ const MoreScreen = () => {
         { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
           text: t('Oui'),
-          onPress: () => {
+          onPress: async () => {
             const isFR = i18n.language === 'fr'
-            i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
-            deleteAllDatabases()
+            await deleteAllDatabases()
             dispatch(setVersion(!isFR ? 'LSG' : 'KJV'))
             dispatch(resetCompareVersion(!isFR ? 'LSG' : 'KJV'))
 
-            RNRestart.Restart()
+            i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
+
+            setTimeout(() => {
+              RNRestart.Restart()
+            }, 1000)
           },
           style: 'destructive',
         },

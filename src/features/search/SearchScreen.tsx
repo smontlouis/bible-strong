@@ -28,7 +28,7 @@ const SearchScreen = ({ navigation }) => {
         <Configure restrictSearchableAttributes={isFR ? ['LSG'] : ['KJV']} />
         <Container>
           <SearchBox
-            placeholder={t('Mot, phrase ou strong')}
+            placeholder={t('search.placeholder')}
             debouncedValue={debouncedSearchValue}
             value={searchValue}
             onChange={setSearchValue}
