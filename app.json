@@ -5,13 +5,11 @@
     "name": "Bible Strong",
     "description": "Bible strong for french people",
     "slug": "bible-strong",
+    "sdkVersion": "43.0.0",
     "privacy": "unlisted",
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "14.5.17",
     "orientation": "default",
     "hooks": {

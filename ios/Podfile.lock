@@ -351,54 +351,45 @@ PODS:
     - BoringSSL-GRPC/Interface (= 0.0.7)
   - BoringSSL-GRPC/Interface (0.0.7)
   - DoubleConversion (1.1.6)
-  - EXAppleAuthentication (3.2.1):
-    - UMCore
-  - EXApplication (3.2.0):
-    - UMCore
-  - EXAV (9.2.3):
+  - EXAppleAuthentication (4.0.3):
     - ExpoModulesCore
-    - UMCore
-  - EXConstants (11.0.2):
+  - EXApplication (4.0.0):
     - ExpoModulesCore
-    - UMCore
-  - EXDevice (3.3.0):
-    - UMCore
-  - EXErrorRecovery (2.2.0):
-    - UMCore
-  - EXFileSystem (11.1.3):
+  - EXAV (10.1.2):
     - ExpoModulesCore
-    - UMCore
-  - EXFont (9.2.1):
+  - EXConstants (12.1.3):
     - ExpoModulesCore
-    - UMCore
-  - EXHaptics (10.1.0):
-    - UMCore
-  - EXImageLoader (2.2.0):
+  - EXDevice (4.0.3):
     - ExpoModulesCore
+  - EXErrorRecovery (3.0.3):
+    - ExpoModulesCore
+  - EXFileSystem (13.0.3):
+    - ExpoModulesCore
+  - EXFont (10.0.3):
+    - ExpoModulesCore
+  - EXHaptics (11.0.3):
+    - ExpoModulesCore
+  - EXJSONUtils (0.2.0)
+  - EXKeepAwake (10.0.0):
+    - ExpoModulesCore
+  - EXLinearGradient (10.0.3):
+    - ExpoModulesCore
+  - EXManifests (0.2.2):
+    - EXJSONUtils
+  - Expo (43.0.1):
+    - ExpoModulesCore
+  - ExpoModulesCore (0.4.5):
     - React-Core
-    - UMCore
-  - EXLinearGradient (9.2.0):
-    - UMCore
-  - ExpoModulesCore (0.2.0):
-    - ExpoModulesCore/Core (= 0.2.0)
-    - ExpoModulesCore/Interfaces (= 0.2.0)
-    - UMCore
-  - ExpoModulesCore/Core (0.2.0):
-    - UMCore
-  - ExpoModulesCore/Interfaces (0.2.0):
-    - ExpoModulesCore/Core
-    - UMCore
-  - EXSharing (9.2.1):
+  - EXSharing (10.0.3):
     - ExpoModulesCore
-    - UMCore
-  - EXStructuredHeaders (1.1.1):
-    - UMCore
-  - EXUpdates (0.8.5):
+  - EXStructuredHeaders (2.0.0)
+  - EXUpdates (0.10.5):
+    - EXManifests
+    - ExpoModulesCore
     - EXStructuredHeaders
     - EXUpdatesInterface
     - React-Core
-    - UMCore
-  - EXUpdatesInterface (0.2.2)
+  - EXUpdatesInterface (0.4.0)
   - FBLazyVector (0.66.0)
   - FBReactNativeSpec (0.66.0):
     - RCT-Folly (= 2021.06.28.00-v2)
@@ -512,7 +503,7 @@ PODS:
     - GoogleUtilities/Network (~> 7.4)
     - "GoogleUtilities/NSData+zlib (~> 7.4)"
     - nanopb (~> 2.30908.0)
-  - GoogleDataTransport (9.1.0):
+  - GoogleDataTransport (9.1.2):
     - GoogleUtilities/Environment (~> 7.2)
     - nanopb (~> 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
@@ -520,24 +511,24 @@ PODS:
     - AppAuth (~> 1.4)
     - GTMAppAuth (~> 1.0)
     - GTMSessionFetcher/Core (~> 1.1)
-  - GoogleUtilities/AppDelegateSwizzler (7.5.2):
+  - GoogleUtilities/AppDelegateSwizzler (7.6.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.5.2):
+  - GoogleUtilities/Environment (7.6.0):
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.5.2):
+  - GoogleUtilities/Logger (7.6.0):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (7.5.2):
+  - GoogleUtilities/MethodSwizzler (7.6.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (7.5.2):
+  - GoogleUtilities/Network (7.6.0):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.5.2)"
-  - GoogleUtilities/Reachability (7.5.2):
+  - "GoogleUtilities/NSData+zlib (7.6.0)"
+  - GoogleUtilities/Reachability (7.6.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.5.2):
+  - GoogleUtilities/UserDefaults (7.6.0):
     - GoogleUtilities/Logger
   - "gRPC-C++ (1.28.2)":
     - "gRPC-C++/Implementation (= 1.28.2)"
@@ -809,10 +800,10 @@ PODS:
     - React
   - react-native-sqlite-storage (4.1.0):
     - React
-  - react-native-track-player (2.1.1):
+  - react-native-track-player (2.1.2):
     - React-Core
-    - SwiftAudioEx (= 0.14.2)
-  - react-native-webview (11.14.0):
+    - SwiftAudioEx (= 0.14.5)
+  - react-native-webview (11.13.0):
     - React-Core
   - React-perflogger (0.66.0)
   - React-RCTActionSheet (0.66.0):
@@ -899,18 +890,18 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNFBAnalytics (12.9.0):
+  - RNFBAnalytics (12.9.3):
     - Firebase/Analytics (= 8.8.0)
     - React-Core
     - RNFBApp
-  - RNFBApp (12.9.0):
+  - RNFBApp (12.9.3):
     - Firebase/CoreOnly (= 8.8.0)
     - React-Core
-  - RNFBAuth (12.9.0):
+  - RNFBAuth (12.9.3):
     - Firebase/Auth (= 8.8.0)
     - React-Core
     - RNFBApp
-  - RNFBFirestore (12.9.0):
+  - RNFBFirestore (12.9.3):
     - Firebase/Firestore (= 8.8.0)
     - React-Core
     - RNFBApp
@@ -955,15 +946,7 @@ PODS:
     - Sentry/Core (= 7.3.0)
   - Sentry/Core (7.3.0)
   - SSZipArchive (2.2.2)
-  - SwiftAudioEx (0.14.2)
-  - UMAppLoader (2.2.0)
-  - UMCore (7.1.2)
-  - UMReactNativeAdapter (6.3.9):
-    - ExpoModulesCore
-    - React-Core
-    - UMCore
-  - UMTaskManagerInterface (6.2.0):
-    - UMCore
+  - SwiftAudioEx (0.14.5)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -972,14 +955,17 @@ DEPENDENCIES:
   - EXAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - EXApplication (from `../node_modules/expo-application/ios`)
   - EXAV (from `../node_modules/expo-av/ios`)
-  - EXConstants (from `../node_modules/react-native-unimodules/node_modules/expo-constants/ios`)
+  - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXDevice (from `../node_modules/expo-device/ios`)
   - EXErrorRecovery (from `../node_modules/expo-error-recovery/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
   - EXHaptics (from `../node_modules/expo-haptics/ios`)
-  - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
+  - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
+  - EXKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
+  - EXManifests (from `../node_modules/expo-manifests/ios`)
+  - Expo (from `../node_modules/expo/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
@@ -1048,10 +1034,6 @@ DEPENDENCIES:
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNZipArchive (from `../node_modules/react-native-zip-archive`)
-  - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - "UMCore (from `../node_modules/@unimodules/core/ios`)"
-  - "UMReactNativeAdapter (from `../node_modules/@unimodules/react-native-adapter/ios`)"
-  - UMTaskManagerInterface (from `../node_modules/unimodules-task-manager-interface/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1101,7 +1083,7 @@ EXTERNAL SOURCES:
   EXAV:
     :path: "../node_modules/expo-av/ios"
   EXConstants:
-    :path: "../node_modules/react-native-unimodules/node_modules/expo-constants/ios"
+    :path: "../node_modules/expo-constants/ios"
   EXDevice:
     :path: "../node_modules/expo-device/ios"
   EXErrorRecovery:
@@ -1112,10 +1094,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-font/ios"
   EXHaptics:
     :path: "../node_modules/expo-haptics/ios"
-  EXImageLoader:
-    :path: "../node_modules/expo-image-loader/ios"
+  EXJSONUtils:
+    :path: "../node_modules/expo-json-utils/ios"
+  EXKeepAwake:
+    :path: "../node_modules/expo-keep-awake/ios"
   EXLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
+  EXManifests:
+    :path: "../node_modules/expo-manifests/ios"
+  Expo:
+    :path: "../node_modules/expo/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
@@ -1248,14 +1236,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   RNZipArchive:
     :path: "../node_modules/react-native-zip-archive"
-  UMAppLoader:
-    :path: "../node_modules/unimodules-app-loader/ios"
-  UMCore:
-    :path: "../node_modules/@unimodules/core/ios"
-  UMReactNativeAdapter:
-    :path: "../node_modules/@unimodules/react-native-adapter/ios"
-  UMTaskManagerInterface:
-    :path: "../node_modules/unimodules-task-manager-interface/ios"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -1265,22 +1245,25 @@ SPEC CHECKSUMS:
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
   DoubleConversion: 831926d9b8bf8166fd87886c4abab286c2422662
-  EXAppleAuthentication: e8c537fcbe80670dd76fde7a07acb94af70ada00
-  EXApplication: 9ff2a206009d6e55bca6c20b3f33d07986b51ef3
-  EXAV: 67bcc1d0afeb1fab854b206c84b9f2afbd61d0cd
-  EXConstants: 4cb52b6d8f636c767104a44bf7db3873e9c01a6f
-  EXDevice: 6f1eed02c099f5b382a12a40406c58868892aba6
-  EXErrorRecovery: 404d827bc7d42f306c062d58a60b06afc4d082b3
-  EXFileSystem: 0a04aba8da751b9ac954065911bcf166503f8267
-  EXFont: 9846ba1bb6f5f5aed44e20eea3ac70693323832d
-  EXHaptics: 6dc4307ab0794fe7a87ec8d7d1c299cf103d6cb3
-  EXImageLoader: d3531a3fe530b22925c19977cb53bb43e3821fe6
-  EXLinearGradient: f9ea3259f096b27008860ca50764184225dc71c9
-  ExpoModulesCore: 2734852616127a6c1fc23012197890a6f3763dc7
-  EXSharing: 567f4b9f38a5266ec2f51973e2efe3b4aaf0bf69
-  EXStructuredHeaders: e52b880264d15b8ad07d36670226c29476af6334
-  EXUpdates: 013d26649cb6ab4f8d8d80c35d3d4be150b47e7c
-  EXUpdatesInterface: b68e78b912a03fff7901a5f46ec200c45e3506a5
+  EXAppleAuthentication: 1852eb070102106305516dea9bd82811e8d5f6e5
+  EXApplication: 0e15240e4d125b62f1cae48759ffbbd32b9286a6
+  EXAV: d6d4a3337edbcdfdbfd6d3e5942dabdfcf3e5d0a
+  EXConstants: 6d585d93723b18d7a8c283591a335609e3bc153e
+  EXDevice: d19bbef7ab8ee4669ef1d6424c538f8d8fe7d6e9
+  EXErrorRecovery: ac2622400a32be84604591f70d0efff416e4b9a2
+  EXFileSystem: 99aac7962c11c680681819dd9cbca24e20e5b1e7
+  EXFont: 2e1c6fe726d008a039db80df95f48b4921b7fe59
+  EXHaptics: f52df335f17192e440d9639c971ebcbb3fb91dec
+  EXJSONUtils: f515cf71710855d7ba5bfc6752af3b9a6f6aad01
+  EXKeepAwake: 8aa32396a5972d26e75e538603aad0f032396503
+  EXLinearGradient: 4d727eacb53d19ef25b02dd810e0199b453489ce
+  EXManifests: 50e42e01335df4e54109dee7be5a91bfd37347db
+  Expo: cb542da0f7c8565a58231488066262f079eb1831
+  ExpoModulesCore: 5b6115660c3400f019f75093c061ae0d8c690f8a
+  EXSharing: 9c58d207a43c2661b2f5b78a644d9c7642f19de9
+  EXStructuredHeaders: 873e7f329c2f6279c1b1e0229df59c9861560b53
+  EXUpdates: 964b7932e8fb332403170cb7cd438f48f6d6c64e
+  EXUpdatesInterface: e1c01b4f5ec76bd1d6cc714938f9edf5ef6379b9
   FBLazyVector: 6816ca39e1cc8beffd2a96783f518296789d1c48
   FBReactNativeSpec: 3b1e86618e902743fde35b40cf9ebd100fd655b7
   FBSDKCoreKit: 0d1ae58388a458b8222f72025804cdc84eb5d0c3
@@ -1297,9 +1280,9 @@ SPEC CHECKSUMS:
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 5337263514dd6f09803962437687240c5dc39aa4
   GoogleAppMeasurement: 5ba1164e3c844ba84272555e916d0a6d3d977e91
-  GoogleDataTransport: 85fd18ff3019bb85d3f2c551d04c481dedf71fc9
+  GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleSignIn: fd381840dbe7c1137aa6dc30849a5c3e070c034a
-  GoogleUtilities: 8de2a97a17e15b6b98e38e8770e2d129a57c0040
+  GoogleUtilities: 684ee790a24f73ebb2d1d966e9711c203f2a4237
   "gRPC-C++": 13d8ccef97d5c3c441b7e3c529ef28ebee86fad2
   gRPC-Core: 4afa11bfbedf7cdecd04de535a9e046893404ed5
   GTMAppAuth: ad5c2b70b9a8689e1a04033c9369c4915bfcbe89
@@ -1328,8 +1311,8 @@ SPEC CHECKSUMS:
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
-  react-native-track-player: 8a3e5dd0ac608dd3ba9888dac93901b7691c69c4
-  react-native-webview: d70bc760daaa0e2667dec569b93014882565819c
+  react-native-track-player: 23dd515aacf1d36a0e522ef7fdbc55f13f26d4fb
+  react-native-webview: 133a6a5149f963259646e710b4545c67ef35d7c9
   React-perflogger: 1f554c2b684e2f484f9edcdfdaeedab039fbaca8
   React-RCTActionSheet: 610d5a5d71ab4808734782c8bca6a12ec3563672
   React-RCTAnimation: ec6ed97370ace32724c253f29f0586cafcab8126
@@ -1351,10 +1334,10 @@ SPEC CHECKSUMS:
   RNCPushNotificationIOS: 87b8d16d3ede4532745e05b03c42cff33a36cc45
   RNDateTimePicker: 968ccf716b3b6aee07849641966005924de5c0f9
   RNFastImage: 1f2cab428712a4baaf78d6169eaec7f622556dd7
-  RNFBAnalytics: 3529535d627b4a9b481dac75f2a0c43ede3ae1c0
-  RNFBApp: d11e8ae04b9b6230f3a28b70761f2edd185deaa8
-  RNFBAuth: 5398407c7991175f0f3a8d0a9581ab6d326d3762
-  RNFBFirestore: 8891f315a65da5ace3c5a70a6f1b33cdc8dac5bd
+  RNFBAnalytics: f76bfa164ac235b00505deb9fc1776634056898c
+  RNFBApp: 729c0666395b1953198dc4a1ec6deb8fbe1c302e
+  RNFBAuth: 7718be1152f5d1d0bb970a8d33094d010f1ac21c
+  RNFBFirestore: eef5fd4cfbe35316af559631db06a34b8391628a
   RNFBStorage: 7c916ae95017ea260791f9e84b5aa0cc6686c741
   RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
@@ -1370,13 +1353,9 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: f93010f3f6c031e2f8fb3081ca4ee6966c539815
   Sentry: 9a4e621430e2dae4477d791f2f7e905720b6efbf
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
-  SwiftAudioEx: df9d62dcae6c2eca358bc36eb972ebac440cd943
-  UMAppLoader: 21af63390e55c82e037fb9752d93114a80ecf16e
-  UMCore: ce3a4faa010239063b8343895b29a6d97b01069d
-  UMReactNativeAdapter: d03cefd0e4e4179ab8c490408589f1c8a6c8b785
-  UMTaskManagerInterface: 2be431101b73604e64fbfffcf759336f9d8fccbb
+  SwiftAudioEx: bfaff9894c885aded7edfb0793e25165d55053d4
   Yoga: c11abbf5809216c91fcd62f5571078b83d9b6720
 
-PODFILE CHECKSUM: 568f03b29f2a100aef052a31cb07ca56c3c77118
+PODFILE CHECKSUM: 35ae1f51fcee144bb8baae4cdb27a39ef40e57de
 
 COCOAPODS: 1.11.2

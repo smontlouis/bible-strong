@@ -9,8 +9,6 @@
         <key>EXUpdatesReleaseChannel</key>
         <string>staging</string>
         <key>EXUpdatesCheckOnLaunch</key>
-        <string>NEVER</string>
-        <key>EXUpdatesAutoSetup</key>
         <false/>
 </dict>
 </plist>
