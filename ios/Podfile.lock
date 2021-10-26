@@ -382,6 +382,9 @@ PODS:
     - React-Core
   - EXSharing (10.0.3):
     - ExpoModulesCore
+  - EXSplashScreen (0.13.4):
+    - ExpoModulesCore
+    - React-Core
   - EXStructuredHeaders (2.0.0)
   - EXUpdates (0.10.5):
     - EXManifests
@@ -987,6 +990,7 @@ DEPENDENCIES:
   - Expo (from `../node_modules/expo/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
+  - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
   - EXUpdates (from `../node_modules/expo-updates/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
@@ -1132,6 +1136,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
     :path: "../node_modules/expo-sharing/ios"
+  EXSplashScreen:
+    :path: "../node_modules/expo-splash-screen/ios"
   EXStructuredHeaders:
     :path: "../node_modules/expo-structured-headers/ios"
   EXUpdates:
@@ -1287,6 +1293,7 @@ SPEC CHECKSUMS:
   Expo: cb542da0f7c8565a58231488066262f079eb1831
   ExpoModulesCore: 5b6115660c3400f019f75093c061ae0d8c690f8a
   EXSharing: 9c58d207a43c2661b2f5b78a644d9c7642f19de9
+  EXSplashScreen: 68390ddb65a5def66ce8cf46a1e14a9b33cdac70
   EXStructuredHeaders: 873e7f329c2f6279c1b1e0229df59c9861560b53
   EXUpdates: 964b7932e8fb332403170cb7cd438f48f6d6c64e
   EXUpdatesInterface: e1c01b4f5ec76bd1d6cc714938f9edf5ef6379b9
