@@ -87,8 +87,8 @@ const useAppLoad = () => {
       await loadResourcesAsync()
       setStatus('Set i18n')
       await setI18n()
-      setIsLoadingCompleted(true)
       await SplashScreen.hideAsync()
+      setIsLoadingCompleted(true)
 
       if (!__DEV__) {
         analytics().logScreenView({
