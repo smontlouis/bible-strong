@@ -2,6 +2,7 @@ import React from 'react'
 import { ThemeProvider } from 'emotion-theming'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { StatusBar, AppState, AppStateStatus, Alert } from 'react-native'
+import to from 'await-to-js'
 import { PersistGate } from 'redux-persist/integration/react'
 import { connect } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
@@ -65,9 +66,12 @@ class InitApp extends React.Component<Props> {
 
     if (update.isAvailable) {
       SnackBar.show(this.props.t('app.updateAvailable'))
-      await Updates.fetchUpdateAsync()
+      const [err] = await to(Updates.fetchUpdateAsync())
+      if (err) {
+        SnackBar.show('Erreur')
+      }
       SnackBar.show(this.props.t('app.updateReady'))
-      Updates.reloadAsync()
+      await Updates.reloadAsync()
     }
   }
 
