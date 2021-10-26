@@ -1,6 +1,6 @@
 import 'react-native-root-siblings'
 import React, { useState, useEffect } from 'react'
-import { LogBox, ActivityIndicator, View, StatusBar } from 'react-native'
+import { LogBox, ActivityIndicator, View, StatusBar, Text } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import * as Font from 'expo-font'
 import { Provider } from 'react-redux'
@@ -72,10 +72,14 @@ const loadResourcesAsync = async () => {
 
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
+  const [status, setStatus] = useState('')
   useEffect(() => {
     ;(async () => {
-      await loadResourcesAsync()
+      // setStatus('load resources')
+      // await loadResourcesAsync()
+      setStatus('Set i18n')
       await setI18n()
+      setStatus('Done')
       handleFinishLoading()
 
       if (!__DEV__) {
@@ -91,7 +95,7 @@ const useAppLoad = () => {
     setIsLoadingCompleted(true)
   }
 
-  return isLoadingCompleted
+  return { isLoadingCompleted, status }
 }
 
 const useGlobalState = () => {
@@ -111,7 +115,7 @@ const useGlobalState = () => {
 }
 
 const App = () => {
-  const isLoadingCompleted = useAppLoad()
+  const { isLoadingCompleted, status } = useAppLoad()
   const globalStore = useGlobalState()
   useInitIAP(globalStore)
 
@@ -119,6 +123,7 @@ const App = () => {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator />
+        <Text>{status}</Text>
       </View>
     )
   }
