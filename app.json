@@ -9,7 +9,10 @@
     "privacy": "unlisted",
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "14.5.22",
     "orientation": "default",
     "hooks": {
@@ -25,10 +28,10 @@
       ]
     },
     "android": {
-      "versionCode": 4
+      "versionCode": 5
     },
     "ios": {
-      "buildNumber": "4",
+      "buildNumber": "5",
       "jsEngine": "hermes"
     }
   }
