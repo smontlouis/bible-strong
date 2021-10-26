@@ -1,3 +1,110 @@
+diff --git a/node_modules/react-native-version/README.md b/node_modules/react-native-version/README.md
+index 1f3aa85..2b2add8 100644
+--- a/node_modules/react-native-version/README.md
++++ b/node_modules/react-native-version/README.md
+@@ -2,7 +2,7 @@
+ 
+ [![license](https://badgen.net/github/license/stovmascript/react-native-version)](https://github.com/stovmascript/react-native-version/blob/master/LICENSE)
+ [![npm](https://badgen.net/npm/v/react-native-version)](https://www.npmjs.com/package/react-native-version)
+-[![travis](https://badgen.net/travis/stovmascript/react-native-version)](https://travis-ci.org/stovmascript/react-native-version)
++[![test](https://github.com/stovmascript/react-native-version/workflows/Test/badge.svg)](https://github.com/stovmascript/react-native-version/actions)
+ [![david](https://badgen.net/david/dep/stovmascript/react-native-version)](https://github.com/stovmascript/react-native-version/network/dependencies)
+ 
+ Seamlessly shadows the behaviour of [`npm version`](https://docs.npmjs.com/cli/version).
+@@ -59,20 +59,58 @@ $ react-native-version
+ <!-- START cli -->
+ 
+     -V, --version                output the version number
+-    -a, --amend                  Amend the previous commit. This is done automatically when react-native-version is run from the "version" or "postversion" npm script. Use "--never-amend" if you never want to amend. Also, if the previous commit is a valid npm-version commit, react-native-version will update the Git tag pointing to this commit.
+-    --skip-tag                   For use with "--amend", if you don't want to update Git tags. Use this option if you have git-tag-version set to false in your npm config or you use "--no-git-tag-version" during npm-version.
++    -a, --amend                  Amend the previous commit. This is done
++    automatically when react-native-version is run
++    from the "version" or "postversion" npm script.
++    Use "--never-amend" if you never want to amend.
++    Also, if the previous commit is a valid
++    npm-version commit, react-native-version will
++    update the Git tag pointing to this commit.
++    --skip-tag                   For use with "--amend", if you don't want to
++    update Git tags. Use this option if you have
++    git-tag-version set to false in your npm config
++    or you use "--no-git-tag-version" during
++    npm-version.
+     -A, --never-amend            Never amend the previous commit.
+     -b, --increment-build        Only increment build number.
+     -B, --never-increment-build  Never increment build number.
+-    -d, --android [path]         Path to your "android/app/build.gradle" file. (default: "android/app/build.gradle")
++    -d, --android [path]         Path to your "android/app/build.gradle" file.
++    (default: "android/app/build.gradle")
+     -i, --ios [path]             Path to your "ios/" folder. (default: "ios")
+-    -L, --legacy                 Version iOS using agvtool (macOS only). Requires Xcode Command Line Tools.
++    -L, --legacy                 Version iOS using agvtool (macOS only). Requires
++    Xcode Command Line Tools.
++    --is-bare-expo-workflow      Bare workflow expo apps want to update
++    *everything*. This will update the app.json
++    values and the /android and the /ios values.
++    --is-self-hosting-bundles    This will increment the values in the postExport
++    hook inside the app.json to what Sentry expects
++    when uploading sourcemaps. This value
++    auto-tracks your build version/build number.
+     -q, --quiet                  Be quiet, only report errors.
+-    -r, --reset-build            Reset build number back to "1" (iOS only). Unlike Android's "versionCode", iOS doesn't require you to bump the "CFBundleVersion", as long as "CFBundleShortVersionString" changes. To make it consistent across platforms, react-native-version bumps both by default. You can use this option if you prefer to keep the build number value at "1" after every version change. If you then need to push another build under the same version, you can use "-bt ios" to increment.
+-    -s, --set-build <number>     Set a build number. WARNING: Watch out when setting high values. This option follows Android's app versioning specifics - the value has to be an integer and cannot be greater than 2100000000. You cannot decrement this value after publishing to Google Play! More info at: https://developer.android.com/studio/publish/versioning.html#appversioning
+-    --generate-build             Generate build number from the package version number. (e.g. build number for version 1.22.3 will be 1022003)
+-    -t, --target <platforms>     Only version specified platforms, e.g. "--target android,ios".
+-    -h, --help                   output usage information
++    -r, --reset-build            Reset build number back to "1" (iOS only).
++    Unlike Android's "versionCode", iOS doesn't
++    require you to bump the "CFBundleVersion", as
++    long as "CFBundleShortVersionString" changes. To
++    make it consistent across platforms,
++    react-native-version bumps both by default. You
++    can use this option if you prefer to keep the
++    build number value at "1" after every version
++    change. If you then need to push another build
++    under the same version, you can use "-bt ios" to
++    increment.
++    -s, --set-build <number>     Set a build number. WARNING: Watch out when
++    setting high values. This option follows
++    Android's app versioning specifics - the value
++    has to be an integer and cannot be greater than
++    2100000000. You cannot decrement this value
++    after publishing to Google Play! More info at:
++    https://developer.android.com/studio/publish/versioning.html#appversioning
++    --generate-build             Generate build number from the package version
++    number. (e.g. build number for version 1.22.3
++    will be 1022003)
++    -t, --target <platforms>     Only version specified platforms, e.g. "--target
++    android,ios".
++    -h, --help                   display help for command
+ 
+ <!-- END cli -->
+ 
+@@ -124,7 +162,7 @@ import { version } from "react-native-version";
+ 
+ async function doSomething() {
+   const versionResult = await version({
+-    amend: true
++    amend: true,
+     // ...
+   });
+ }
+@@ -132,13 +170,13 @@ async function doSomething() {
+ // or
+ 
+ version({
+-  amend: true
++  amend: true,
+   // ...
+ })
+-  .then(commitHash => {
++  .then((commitHash) => {
+     console.log(commitHash);
+   })
+-  .catch(err => {
++  .catch((err) => {
+     console.error(err);
+   });
+ ```
 diff --git a/node_modules/react-native-version/cli.js b/node_modules/react-native-version/cli.js
 index 15f4c32..05b5d99 100755
 --- a/node_modules/react-native-version/cli.js
@@ -12,27 +119,172 @@ index 15f4c32..05b5d99 100755
  	.option(
  		"-r, --reset-build",
 diff --git a/node_modules/react-native-version/index.js b/node_modules/react-native-version/index.js
-index e2dbb66..667c1f1 100644
+index e2dbb66..d7d86ac 100644
 --- a/node_modules/react-native-version/index.js
 +++ b/node_modules/react-native-version/index.js
-@@ -170,6 +170,7 @@ function version(program, projectPath) {
+@@ -23,7 +23,7 @@ const Xcode = require("pbxproj-dom/xcode").Xcode;
+  */
+ 
+ const env = {
+-	target: process.env.RNV && list(process.env.RNV)
++	target: process.env.RNV && list(process.env.RNV),
+ };
+ 
+ /**
+@@ -34,7 +34,7 @@ const env = {
+ function getDefaults() {
+ 	return {
+ 		android: "android/app/build.gradle",
+-		ios: "ios"
++		ios: "ios",
+ 	};
+ }
+ 
+@@ -47,10 +47,10 @@ function getDefaults() {
+ function getPlistFilenames(xcode) {
+ 	return unique(
+ 		flattenDeep(
+-			xcode.document.projects.map(project => {
+-				return project.targets.filter(Boolean).map(target => {
++			xcode.document.projects.map((project) => {
++				return project.targets.filter(Boolean).map((target) => {
+ 					return target.buildConfigurationsList.buildConfigurations.map(
+-						config => {
++						(config) => {
+ 							return config.ast.value.get("buildSettings").get("INFOPLIST_FILE")
+ 								.text;
+ 						}
+@@ -95,6 +95,20 @@ function getNewVersionCode(programOpts, versionCode, versionName, resetBuild) {
+ 	return versionCode ? versionCode + 1 : 1;
+ }
+ 
++/**
++ * CFBundleShortVersionString must be a string composed of three period-separated integers.
++ * @private
++ * @param {String} versionName The full version string
++ * @return {String} e.g. returns '1.2.3' for given '1.2.3-beta.1'. Returns `versionName` if no match is found.
++ */
++function getCFBundleShortVersionString(versionName) {
++	const match =
++		versionName && typeof versionName === "string"
++			? versionName.match(/\d*\.\d*.\d*/g)
++			: [];
++	return match && match[0] ? match[0] : versionName;
++}
++
+ /**
+  * Determines whether the project is an Expo app or a plain React Native app
+  * @private
+@@ -127,7 +141,7 @@ function version(program, projectPath) {
+ 
+ 	const programOpts = Object.assign({}, prog, {
+ 		android: path.join(projPath, prog.android),
+-		ios: path.join(projPath, prog.ios)
++		ios: path.join(projPath, prog.ios),
+ 	});
+ 
+ 	const targets = [].concat(programOpts.target, env.target).filter(Boolean);
+@@ -140,24 +154,24 @@ function version(program, projectPath) {
+ 		if (err.message === "Cannot find module 'react-native'") {
+ 			log({
+ 				style: "red",
+-				text: `Is this the right folder? ${err.message} in ${projPath}`
++				text: `Is this the right folder? ${err.message} in ${projPath}`,
+ 			});
+ 		} else {
+ 			log({
+ 				style: "red",
+-				text: err.message
++				text: err.message,
+ 			});
+ 
+ 			log({
+ 				style: "red",
+ 				text:
+-					"Is this the right folder? Looks like there isn't a package.json here"
++					"Is this the right folder? Looks like there isn't a package.json here",
+ 			});
+ 		}
+ 
+ 		log({
+ 			style: "yellow",
+-			text: "Pass the project path as an argument, see --help for usage"
++			text: "Pass the project path as an argument, see --help for usage",
+ 		});
+ 
+ 		if (program.outputHelp) {
+@@ -170,6 +184,8 @@ function version(program, projectPath) {
  	var appJSON;
  	const appJSONPath = path.join(projPath, "app.json");
  	const isExpoApp = isExpoProject(projPath);
 +	const isBareExpoWorkflow = programOpts.isBareExpoWorkflow;
++	const isSelfHostingBundles = programOpts.isSelfHostingBundles;
  
  	isExpoApp && log({ text: "Expo detected" }, programOpts.quiet);
  
-@@ -210,7 +211,7 @@ function version(program, projectPath) {
+@@ -179,8 +195,8 @@ function version(program, projectPath) {
+ 		if (isExpoApp && !programOpts.incrementBuild) {
+ 			appJSON = Object.assign({}, appJSON, {
+ 				expo: Object.assign({}, appJSON.expo, {
+-					version: appPkg.version
+-				})
++					version: appPkg.version,
++				}),
+ 			});
+ 		}
+ 	} catch (err) {}
+@@ -189,11 +205,10 @@ function version(program, projectPath) {
+ 	var ios;
+ 
+ 	if (!targets.length || targets.indexOf("android") > -1) {
+-		android = new Promise(function(resolve, reject) {
++		android = new Promise(function (resolve, reject) {
+ 			log({ text: "Versioning Android..." }, programOpts.quiet);
+ 
+ 			var gradleFile;
+-
+ 			try {
+ 				gradleFile = fs.readFileSync(programOpts.android, "utf8");
+ 			} catch (err) {
+@@ -201,16 +216,16 @@ function version(program, projectPath) {
+ 					reject([
+ 						{
+ 							style: "red",
+-							text: "No gradle file found at " + programOpts.android
++							text: "No gradle file found at " + programOpts.android,
+ 						},
+ 						{
+ 							style: "yellow",
+-							text: 'Use the "--android" option to specify the path manually'
+-						}
++							text: 'Use the "--android" option to specify the path manually',
++						},
  					]);
  			}
  
 -			if (!programOpts.incrementBuild && !isExpoApp) {
-+			if ((!programOpts.incrementBuild && !isExpoApp) || isBareExpoWorkflow) {
++			if ((!programOpts.incrementBuild && !isExpoApp) || isBareExpoWorkflow) {
  				gradleFile = gradleFile.replace(
  					/versionName (["'])(.*)["']/,
  					"versionName $1" + appPkg.version + "$1"
-@@ -248,6 +249,33 @@ function version(program, projectPath) {
+@@ -228,12 +243,12 @@ function version(program, projectPath) {
+ 									programOpts,
+ 									versionCode,
+ 									appPkg.version
+-								)
+-							})
+-						})
++								),
++							}),
++						}),
+ 					});
+ 				} else {
+-					gradleFile = gradleFile.replace(/versionCode (\d+)/, function(
++					gradleFile = gradleFile.replace(/versionCode (\d+)/, function (
+ 						match,
+ 						cg1
+ 					) {
+@@ -248,6 +263,33 @@ function version(program, projectPath) {
  				}
  			}
  
@@ -66,8 +318,12 @@ index e2dbb66..667c1f1 100644
  			if (isExpoApp) {
  				fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
  			} else {
-@@ -263,25 +291,47 @@ function version(program, projectPath) {
- 		ios = new Promise(function(resolve, reject) {
+@@ -260,53 +302,103 @@ function version(program, projectPath) {
+ 	}
+ 
+ 	if (!targets.length || targets.indexOf("ios") > -1) {
+-		ios = new Promise(function(resolve, reject) {
++		ios = new Promise(function (resolve, reject) {
  			log({ text: "Versioning iOS..." }, programOpts.quiet);
  
 -			if (isExpoApp) {
@@ -90,15 +346,47 @@ index e2dbb66..667c1f1 100644
 -									appPkg.version,
 -									programOpts.resetBuild
 -								).toString()
+-							})
+-						})
 +								buildNumber: newBuildVersion,
- 							})
- 						})
++							}),
++						}),
  					});
- 				}
+-				}
  
++					if (isSelfHostingBundles && appJSON.expo.hooks) {
++						appJSON = Object.assign({}, appJSON, {
++							expo: Object.assign({}, appJSON.expo, {
++								hooks: Object.assign({}, appJSON.expo.hooks, {
++									// someone can add their own postPub
++									postExport: appJSON.expo.hooks.postExport.map(function (
++										hook
++									) {
++										if (hook.file === "sentry-expo/upload-sourcemaps") {
++											return {
++												file: "sentry-expo/upload-sourcemaps",
++												config: Object.assign({}, hook.config, {
++													release:
++														appJSON.expo.ios.bundleIdentifier +
++														"@" +
++														appPkg.version +
++														"+" +
++														newBuildVersion,
++													distribution: newBuildVersion,
++												}),
++											};
++										} else {
++											return hook;
++										}
++									}),
++								}),
++							}),
++						});
++					}
++				}
  				fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
-+
-+				if (isExpoApp && !isBareExpoWorkflow) {
++			}
++			if (isExpoApp && !isBareExpoWorkflow) {
 +				if (!programOpts.neverIncrementBuild) {
 +					const buildNumber = dottie.get(appJSON, "expo.ios.buildNumber");
 +					const newBuildVersion = getNewVersionCode(
@@ -117,11 +405,184 @@ index e2dbb66..667c1f1 100644
 +					});
 +					fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
 +				}
-+
  			} else if (program.legacy) {
  				try {
  					child.execSync("xcode-select --print-path", {
-@@ -556,7 +606,11 @@ function version(program, projectPath) {
+-						stdio: ["ignore", "ignore", "pipe"]
++						stdio: ["ignore", "ignore", "pipe"],
+ 					});
+ 				} catch (err) {
+ 					reject([
+ 						{
+ 							style: "red",
+-							text: err
++							text: err,
+ 						},
+ 						{
+ 							style: "yellow",
+-							text: "Looks like Xcode Command Line Tools aren't installed"
++							text: "Looks like Xcode Command Line Tools aren't installed",
+ 						},
+ 						{
+-							text: "\n  Install:\n\n    $ xcode-select --install\n"
+-						}
++							text: "\n  Install:\n\n    $ xcode-select --install\n",
++						},
+ 					]);
+ 
+ 					return;
+ 				}
+ 
+ 				const agvtoolOpts = {
+-					cwd: programOpts.ios
++					cwd: programOpts.ios,
+ 				};
+ 
+ 				try {
+@@ -319,18 +411,18 @@ function version(program, projectPath) {
+ 							? [
+ 									{
+ 										style: "red",
+-										text: "No project folder found at " + programOpts.ios
++										text: "No project folder found at " + programOpts.ios,
+ 									},
+ 									{
+ 										style: "yellow",
+-										text: 'Use the "--ios" option to specify the path manually'
+-									}
++										text: 'Use the "--ios" option to specify the path manually',
++									},
+ 							  ]
+ 							: [
+ 									{
+ 										style: "red",
+-										text: stdout
+-									}
++										text: stdout,
++									},
+ 							  ]
+ 					);
+ 
+@@ -370,7 +462,7 @@ function version(program, projectPath) {
+ 				// Find any folder ending in .xcodeproj
+ 				const xcodeProjects = fs
+ 					.readdirSync(programOpts.ios)
+-					.filter(file => /\.xcodeproj$/i.test(file));
++					.filter((file) => /\.xcodeproj$/i.test(file));
+ 
+ 				if (xcodeProjects.length < 1) {
+ 					throw new Error(`Xcode project not found in "${programOpts.ios}"`);
+@@ -380,11 +472,11 @@ function version(program, projectPath) {
+ 				const xcode = Xcode.open(path.join(projectFolder, "project.pbxproj"));
+ 				const plistFilenames = getPlistFilenames(xcode);
+ 
+-				xcode.document.projects.forEach(project => {
++				xcode.document.projects.forEach((project) => {
+ 					!programOpts.neverIncrementBuild &&
+-						project.targets.filter(Boolean).forEach(target => {
++						project.targets.filter(Boolean).forEach((target) => {
+ 							target.buildConfigurationsList.buildConfigurations.forEach(
+-								config => {
++								(config) => {
+ 									if (target.name === appPkg.name) {
+ 										const CURRENT_PROJECT_VERSION = getNewVersionCode(
+ 											programOpts,
+@@ -400,22 +492,22 @@ function version(program, projectPath) {
+ 
+ 										config.patch({
+ 											buildSettings: {
+-												CURRENT_PROJECT_VERSION
+-											}
++												CURRENT_PROJECT_VERSION,
++											},
+ 										});
+ 									}
+ 								}
+ 							);
+ 						});
+ 
+-					const plistFiles = plistFilenames.map(filename => {
++					const plistFiles = plistFilenames.map((filename) => {
+ 						return fs.readFileSync(
+ 							path.join(programOpts.ios, filename),
+ 							"utf8"
+ 						);
+ 					});
+ 
+-					const parsedPlistFiles = plistFiles.map(file => {
++					const parsedPlistFiles = plistFiles.map((file) => {
+ 						return plist.parse(file);
+ 					});
+ 
+@@ -428,7 +520,9 @@ function version(program, projectPath) {
+ 									json,
+ 									!programOpts.incrementBuild
+ 										? {
+-												CFBundleShortVersionString: appPkg.version
++												CFBundleShortVersionString: getCFBundleShortVersionString(
++													appPkg.version
++												),
+ 										  }
+ 										: {},
+ 									!programOpts.neverIncrementBuild
+@@ -438,7 +532,7 @@ function version(program, projectPath) {
+ 													parseInt(json.CFBundleVersion, 10),
+ 													appPkg.version,
+ 													programOpts.resetBuild
+-												).toString()
++												).toString(),
+ 										  }
+ 										: {}
+ 								)
+@@ -483,21 +577,21 @@ function version(program, projectPath) {
+ 	}
+ 
+ 	return pSettle([android, ios].filter(Boolean))
+-		.then(function(result) {
++		.then(function (result) {
+ 			const errs = result
+-				.filter(function(item) {
++				.filter(function (item) {
+ 					return item.isRejected;
+ 				})
+-				.map(function(item) {
++				.map(function (item) {
+ 					return item.reason;
+ 				});
+ 
+ 			if (errs.length) {
+ 				errs
+-					.reduce(function(a, b) {
++					.reduce(function (a, b) {
+ 						return a.concat(b);
+ 					}, [])
+-					.forEach(function(err) {
++					.forEach(function (err) {
+ 						if (program.outputHelp) {
+ 							log(
+ 								Object.assign({ style: "red", text: err.toString() }, err),
+@@ -511,9 +605,9 @@ function version(program, projectPath) {
+ 				}
+ 
+ 				throw errs
+-					.map(function(errGrp, index) {
++					.map(function (errGrp, index) {
+ 						return errGrp
+-							.map(function(err) {
++							.map(function (err) {
+ 								return err.text;
+ 							})
+ 							.join(", ");
+@@ -522,7 +616,7 @@ function version(program, projectPath) {
+ 			}
+ 
+ 			const gitCmdOpts = {
+-				cwd: projPath
++				cwd: projPath,
+ 			};
+ 
+ 			if (
+@@ -556,7 +650,11 @@ function version(program, projectPath) {
  						child.spawnSync(
  							"git",
  							["add"].concat(
@@ -134,3 +595,40 @@ index e2dbb66..667c1f1 100644
  							),
  							gitCmdOpts
  						);
+@@ -581,7 +679,7 @@ function version(program, projectPath) {
+ 			log(
+ 				{
+ 					style: "green",
+-					text: "Done"
++					text: "Done",
+ 				},
+ 				programOpts.quiet
+ 			);
+@@ -592,14 +690,14 @@ function version(program, projectPath) {
+ 
+ 			return child.execSync("git log -1 --pretty=%H", gitCmdOpts).toString();
+ 		})
+-		.catch(function(err) {
++		.catch(function (err) {
+ 			if (process.env.RNV_ENV === "ava") {
+ 				console.error(err);
+ 			}
+ 
+ 			log({
+ 				style: "red",
+-				text: "Done, with errors."
++				text: "Done, with errors.",
+ 			});
+ 
+ 			process.exit(1);
+@@ -607,8 +705,9 @@ function version(program, projectPath) {
+ }
+ 
+ module.exports = {
++	getCFBundleShortVersionString: getCFBundleShortVersionString,
+ 	getDefaults: getDefaults,
+ 	getPlistFilenames: getPlistFilenames,
+ 	isExpoProject: isExpoProject,
+-	version: version
++	version: version,
+ };
