@@ -75,11 +75,10 @@ const useAppLoad = () => {
   const [status, setStatus] = useState('')
   useEffect(() => {
     ;(async () => {
-      // setStatus('load resources')
-      // await loadResourcesAsync()
+      setStatus('Load resources')
+      await loadResourcesAsync()
       setStatus('Set i18n')
       await setI18n()
-      setStatus('Done')
       handleFinishLoading()
 
       if (!__DEV__) {

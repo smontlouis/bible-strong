@@ -11,7 +11,7 @@
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
     "platforms": ["ios", "android"],
-    "version": "14.5.22",
+    "version": "14.5.23",
     "orientation": "default",
     "assetBundlePatterns": [
       "assets/images/*",
