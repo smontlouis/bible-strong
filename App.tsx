@@ -9,12 +9,20 @@ import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
+import * as SplashScreen from 'expo-splash-screen'
 
 import { store, persistor } from '~redux/store'
 import { GlobalContext } from '~helpers/globalContext'
 import InitApp from './InitApp'
 import { useInitIAP } from '~helpers/useInAppPurchases'
 import { setI18n } from './i18n'
+
+// Prevent native splash screen from autohiding before App component declaration
+SplashScreen.preventAutoHideAsync()
+  .then(result =>
+    console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
+  )
+  .catch(console.warn) // it's good to explicitly catch and inspect any error
 
 setAutoFreeze(false)
 LogBox.ignoreLogs([
@@ -79,7 +87,8 @@ const useAppLoad = () => {
       await loadResourcesAsync()
       setStatus('Set i18n')
       await setI18n()
-      handleFinishLoading()
+      setIsLoadingCompleted(true)
+      await SplashScreen.hideAsync()
 
       if (!__DEV__) {
         analytics().logScreenView({
@@ -89,10 +98,6 @@ const useAppLoad = () => {
       }
     })()
   }, [])
-
-  const handleFinishLoading = () => {
-    setIsLoadingCompleted(true)
-  }
 
   return { isLoadingCompleted, status }
 }

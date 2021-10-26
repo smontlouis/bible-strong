@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">Bible Strong</string>
-    <string name="facebook_app_id">312719079612015</string>
-    <string name="facebook_client_token">c5dbe48fa71a4ce7066ce64f16d075b9</string>
-    <string name="fb_login_protocol_scheme">fb312719079612015</string>
-    <string name="release_channel">prod</string>
+  <!-- Below line is handled by '@expo/configure-splash-screen' command and it's discouraged to modify it manually -->
+  <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
+  <string name="app_name">Bible Strong</string>
+  <string name="facebook_app_id">312719079612015</string>
+  <string name="facebook_client_token">c5dbe48fa71a4ce7066ce64f16d075b9</string>
+  <string name="fb_login_protocol_scheme">fb312719079612015</string>
+  <string name="release_channel">prod</string>
 </resources>
