@@ -8,7 +8,7 @@
     "android-prod": "react-native run-android --variant=prodRelease",
     "ios": "react-native run-ios",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll",
-    "postversion": "react-native-version",
+    "postversion": "react-native-version --is-bare-expo-workflow",
     "clean": "rm -rf yarn-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && yarn install && say I love react native",
     "postinstall": "patch-package && jetify && rndebugger-open",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
