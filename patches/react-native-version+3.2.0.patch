@@ -1,0 +1,136 @@
+diff --git a/node_modules/react-native-version/cli.js b/node_modules/react-native-version/cli.js
+index 15f4c32..05b5d99 100755
+--- a/node_modules/react-native-version/cli.js
++++ b/node_modules/react-native-version/cli.js
+@@ -32,6 +32,8 @@ program
+ 		"-L, --legacy",
+ 		"Version iOS using agvtool (macOS only). Requires Xcode Command Line Tools."
+ 	)
++	.option("--is-bare-expo-workflow", "Bare workflow expo apps want to update *everything*. This will update the app.json values and the /android and the /ios values.")
++	.option("--is-self-hosting-bundles", "This will increment the values in the postExport hook inside the app.json to what Sentry expects when uploading sourcemaps. This value auto-tracks your build version/build number.")
+ 	.option("-q, --quiet", "Be quiet, only report errors.")
+ 	.option(
+ 		"-r, --reset-build",
+diff --git a/node_modules/react-native-version/index.js b/node_modules/react-native-version/index.js
+index e2dbb66..667c1f1 100644
+--- a/node_modules/react-native-version/index.js
++++ b/node_modules/react-native-version/index.js
+@@ -170,6 +170,7 @@ function version(program, projectPath) {
+ 	var appJSON;
+ 	const appJSONPath = path.join(projPath, "app.json");
+ 	const isExpoApp = isExpoProject(projPath);
++	const isBareExpoWorkflow = programOpts.isBareExpoWorkflow;
+ 
+ 	isExpoApp && log({ text: "Expo detected" }, programOpts.quiet);
+ 
+@@ -210,7 +211,7 @@ function version(program, projectPath) {
+ 					]);
+ 			}
+ 
+-			if (!programOpts.incrementBuild && !isExpoApp) {
++			if ((!programOpts.incrementBuild && !isExpoApp) || isBareExpoWorkflow) {
+ 				gradleFile = gradleFile.replace(
+ 					/versionName (["'])(.*)["']/,
+ 					"versionName $1" + appPkg.version + "$1"
+@@ -248,6 +249,33 @@ function version(program, projectPath) {
+ 				}
+ 			}
+ 
++			if (isBareExpoWorkflow) {
++				// if bare expo workflow, combine the two exclusive blocks above
++				const versionCode = parseInt(
++					dottie.get(appJSON, "expo.android.versionCode")
++				);
++				const newVersionCode = getNewVersionCode(
++					programOpts,
++					versionCode,
++					appPkg.version
++				);
++				appJSON = Object.assign({}, appJSON, {
++					expo: Object.assign({}, appJSON.expo, {
++						android: Object.assign({}, appJSON.expo.android, {
++							versionCode: newVersionCode,
++						}),
++					}),
++				});
++				gradleFile = gradleFile.replace(/versionCode (\d+)/, function (
++					match,
++					cg1
++				) {
++					return "versionCode " + newVersionCode;
++				});
++				fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
++				fs.writeFileSync(programOpts.android, gradleFile);
++			}
++
+ 			if (isExpoApp) {
+ 				fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
+ 			} else {
+@@ -263,25 +291,47 @@ function version(program, projectPath) {
+ 		ios = new Promise(function(resolve, reject) {
+ 			log({ text: "Versioning iOS..." }, programOpts.quiet);
+ 
+-			if (isExpoApp) {
++			if (isBareExpoWorkflow) {
+ 				if (!programOpts.neverIncrementBuild) {
+ 					const buildNumber = dottie.get(appJSON, "expo.ios.buildNumber");
++					const newBuildVersion = getNewVersionCode(
++						programOpts,
++						parseInt(buildNumber, 10),
++						appPkg.version,
++						programOpts.resetBuild
++					).toString();
+ 
+ 					appJSON = Object.assign({}, appJSON, {
+ 						expo: Object.assign({}, appJSON.expo, {
+ 							ios: Object.assign({}, appJSON.expo.ios, {
+-								buildNumber: getNewVersionCode(
+-									programOpts,
+-									parseInt(buildNumber, 10),
+-									appPkg.version,
+-									programOpts.resetBuild
+-								).toString()
++								buildNumber: newBuildVersion,
+ 							})
+ 						})
+ 					});
+ 				}
+ 
+ 				fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
++
++				if (isExpoApp && !isBareExpoWorkflow) {
++				if (!programOpts.neverIncrementBuild) {
++					const buildNumber = dottie.get(appJSON, "expo.ios.buildNumber");
++					const newBuildVersion = getNewVersionCode(
++						programOpts,
++						parseInt(buildNumber, 10),
++						appPkg.version,
++						programOpts.resetBuild
++					).toString();
++
++					appJSON = Object.assign({}, appJSON, {
++						expo: Object.assign({}, appJSON.expo, {
++							ios: Object.assign({}, appJSON.expo.ios, {
++								buildNumber: newBuildVersion,
++							}),
++						}),
++					});
++					fs.writeFileSync(appJSONPath, JSON.stringify(appJSON, null, 2));
++				}
++
+ 			} else if (program.legacy) {
+ 				try {
+ 					child.execSync("xcode-select --print-path", {
+@@ -556,7 +606,11 @@ function version(program, projectPath) {
+ 						child.spawnSync(
+ 							"git",
+ 							["add"].concat(
+-								isExpoApp ? appJSONPath : [programOpts.android, programOpts.ios]
++								isBareExpoWorkflow
++									? [appJSONPath, programOpts.android, programOpts.ios]
++									: isExpoApp
++									? appJSONPath
++									: [programOpts.android, programOpts.ios]
+ 							),
+ 							gitCmdOpts
+ 						);
