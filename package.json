@@ -101,7 +101,7 @@
     "hoist-non-react-statics": "^3.3.0",
     "htmlsave": "^1.1.1",
     "i18next": "^19.5.1",
-    "immer": "^3.2.0",
+    "immer": "^9.0.6",
     "intl": "^1.2.5",
     "intl-locales-supported": "^1.6.0",
     "jotai": "^1.4.2",
