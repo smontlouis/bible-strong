@@ -66,10 +66,7 @@ class InitApp extends React.Component<Props> {
 
     if (update.isAvailable) {
       SnackBar.show(this.props.t('app.updateAvailable'))
-      const [err] = await to(Updates.fetchUpdateAsync())
-      if (err) {
-        SnackBar.show('Erreur')
-      }
+      await Updates.fetchUpdateAsync()
       SnackBar.show(this.props.t('app.updateReady'))
       await Updates.reloadAsync()
     }
