@@ -1,18 +1,18 @@
-import React from 'react'
-import Modal from 'react-native-modalbox'
-import styled from '~styled'
 import Lottie from 'lottie-react-native'
-import Box from './ui/Box'
-import Text from './ui/Text'
-import { Paragraph } from 'react-native-paper'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import Modal from 'react-native-modalbox'
+import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
-import Button from './ui/Button'
 import { useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
-import { useGlobalContext } from '~helpers/globalContext'
-import { withNavigation } from 'react-navigation'
+import { premiumModalAtom } from '../state/app'
+import styled from '~styled'
 import { LinkBox } from './Link'
-import { useTranslation } from 'react-i18next'
+import Box from './ui/Box'
+import Button from './ui/Button'
+import Text from './ui/Text'
+import { useAtom } from 'jotai'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
@@ -39,9 +39,7 @@ const PremiumModal = ({ navigation }: Props) => {
       state.user.bible.settings.theme === 'default' ||
       state.user.bible.settings.theme === 'sepia'
   )
-  const {
-    premiumModal: [showPremiumModal, setShowPremiumModal],
-  } = useGlobalContext()
+  const [showPremiumModal, setShowPremiumModal] = useAtom(premiumModalAtom)
 
   return (
     <StylizedModal

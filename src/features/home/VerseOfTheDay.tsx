@@ -1,30 +1,26 @@
-import React, { useState, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useRef, useState } from 'react'
+import { TFunction, useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
-import DateTimePicker from 'react-native-modal-datetime-picker'
-import { Placeholder, PlaceholderLine, Fade } from 'rn-placeholder'
 import * as Animatable from 'react-native-animatable'
-import { Switch } from 'react-native-paper'
-
-import SnackBar from '~common/SnackBar'
-import { setNotificationVOD } from '~redux/modules/user'
-import { zeroFill } from '~helpers/zeroFill'
-import LexiqueIcon from '~common/LexiqueIcon'
-import { FeatherIcon } from '~common/ui/Icon'
-import Link, { LinkBox } from '~common/Link'
-import Text from '~common/ui/Text'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import DateTimePicker from 'react-native-modal-datetime-picker'
+import { Modalize } from 'react-native-modalize'
+import { Portal, Switch } from 'react-native-paper'
+import { useDispatch, useSelector } from 'react-redux'
+import { Fade, Placeholder, PlaceholderLine } from 'rn-placeholder'
 import Empty from '~common/Empty'
-import Paragraph from '~common/ui/Paragraph'
+import Link, { LinkBox } from '~common/Link'
+import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
-import { smallSize, removeBreakLines } from '~helpers/utils'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { removeBreakLines } from '~helpers/utils'
+import { zeroFill } from '~helpers/zeroFill'
+import { RootState } from '~redux/modules/reducer'
+import { setNotificationVOD } from '~redux/modules/user'
 import ShowMoreImage from './ShowMoreImage'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
-import { Modalize } from 'react-native-modalize'
-import { RootState } from '~redux/modules/reducer'
-import { Portal } from 'react-native-paper'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { useTranslation } from 'react-i18next'
 
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
@@ -36,7 +32,7 @@ interface Props {
   setCurrentVOD: React.Dispatch<React.SetStateAction<number>>
 }
 
-const dayToAgo = (day: number, t: TFunction) => {
+const dayToAgo = (day: number, t: TFunction<'translation'>) => {
   switch (day) {
     case -1:
       return t('Hier')

@@ -7,7 +7,7 @@ import Header from '~common/Header'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Linking, Platform } from 'react-native'
 import { subVariant } from './SubscriptionPlan'
-import { subSkus } from '~helpers/useInAppPurchases'
+import { subSkus, useInitIAP } from '~helpers/useInAppPurchases'
 import SubscriptionGroup from './SubscriptionGroup'
 import { useIsPremium } from '~helpers/usePremium'
 import { LinkBox } from '~common/Link'
@@ -42,6 +42,8 @@ const PremiumScreen = () => {
   const hasPremium = useIsPremium()
   const { isLogged } = useLogin()
   const { t, i18n } = useTranslation()
+  useInitIAP()
+
   const isFR = i18n.language === 'fr'
 
   if (hasPremium) {

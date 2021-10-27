@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
-import { useGlobalContext } from './globalContext'
+import { premiumModalAtom } from '../state/app'
+import { useAtom } from 'jotai'
 
 export const useIsPremium = () => {
   const hasPremium = useSelector((state: RootState) => state.user.subscription)
@@ -9,9 +10,7 @@ export const useIsPremium = () => {
 
 export const useOnlyPremium = () => {
   const hasPremium = useIsPremium()
-  const {
-    premiumModal: [, setShowPremiumModal],
-  } = useGlobalContext()
+  const [, setShowPremiumModal] = useAtom(premiumModalAtom)
 
   return (fn: () => void, failCb?: () => void) => () => {
     if (hasPremium) {

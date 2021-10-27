@@ -87,3 +87,8 @@ declare module '@emotion/native' {
   const styled: Styled
   export default styled
 }
+
+declare module '~assets/bible_versions/bible-vod.json' {
+  const VOD: { [x: string]: string }
+  export default VOD
+}

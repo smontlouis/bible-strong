@@ -12,9 +12,7 @@ import analytics from '@react-native-firebase/analytics'
 import * as SplashScreen from 'expo-splash-screen'
 
 import { store, persistor } from '~redux/store'
-import { GlobalContext } from '~helpers/globalContext'
 import InitApp from './InitApp'
-import { useInitIAP } from '~helpers/useInAppPurchases'
 import { setI18n } from './i18n'
 
 // Prevent native splash screen from autohiding before App component declaration
@@ -103,26 +101,8 @@ const useAppLoad = () => {
   return { isLoadingCompleted, status }
 }
 
-const useGlobalState = () => {
-  const fullscreen = React.useState(false)
-  const iap = React.useState(false)
-  const connection = React.useState(true)
-  const premiumModal = React.useState(false)
-
-  const globalStore = {
-    fullscreen,
-    iap,
-    connection,
-    premiumModal,
-  }
-
-  return globalStore
-}
-
 const App = () => {
   const { isLoadingCompleted, status } = useAppLoad()
-  const globalStore = useGlobalState()
-  useInitIAP(globalStore)
 
   const onLayoutRootView = useCallback(async () => {
     if (isLoadingCompleted) {
@@ -145,14 +125,12 @@ const App = () => {
   }
 
   return (
-    <GlobalContext.Provider value={globalStore}>
-      <Provider store={store}>
-        <StatusBar translucent />
-        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-          <InitApp persistor={persistor} />
-        </View>
-      </Provider>
-    </GlobalContext.Provider>
+    <Provider store={store}>
+      <StatusBar translucent />
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <InitApp persistor={persistor} />
+      </View>
+    </Provider>
   )
 }
 

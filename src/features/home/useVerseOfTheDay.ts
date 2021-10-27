@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 
 import useLogin from '~helpers/useLogin'
 import extractFirstName from '~helpers/extractFirstName'
-import VOD from '~assets/bible_versions/bible-vod'
+import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'

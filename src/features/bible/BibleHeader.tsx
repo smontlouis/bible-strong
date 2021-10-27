@@ -25,11 +25,12 @@ import Link from '~common/Link'
 import Back from '~common/Back'
 import useDimensions from '~helpers/useDimensions'
 import ParallelIcon from '~common/ParallelIcon'
-import { useGlobalContext } from '~helpers/globalContext'
+import { useAtom } from 'jotai'
 import SnackBar from '~common/SnackBar'
 import { getIfDatabaseExists } from '~helpers/database'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { fullscreenAtom } from '../../state/app'
 
 const { Popover } = renderers
 
@@ -124,9 +125,7 @@ const Header = ({
     setSettingsCommentaires(true)
   }
 
-  const {
-    fullscreen: [isFullscreen, setIsFullScreen],
-  } = useGlobalContext()
+  const [isFullscreen, setIsFullScreen] = useAtom(fullscreenAtom)
 
   if (isReadOnly) {
     return (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import i18n from '~i18n'
 
 export const useImageUrls = verseOfTheDay => {
   const [imageUrls, setImageUrls] = useState(null)
@@ -6,7 +7,7 @@ export const useImageUrls = verseOfTheDay => {
     const loadImageUrls = async () => {
       try {
         const imageRes = await fetch(
-          `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseOfTheDay.v}&language_tag=fr`
+          `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseOfTheDay.v}&language_tag=${i18n.language}`
         )
         const imageJSON = await imageRes.json()
         setImageUrls({

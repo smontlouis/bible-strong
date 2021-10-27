@@ -138,3 +138,10 @@ export interface Tag {
   id: string
   name: string
 }
+
+export interface VerseRefContent {
+  title: string
+  version: string
+  content: string
+  all: string
+}

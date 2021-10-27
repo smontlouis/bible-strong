@@ -1,16 +1,15 @@
+import to from 'await-to-js'
+import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { Alert } from 'react-native'
 import IAPHub from 'react-native-iaphub'
-import to from 'await-to-js'
-import { useDispatch } from 'react-redux'
-import { setSubscription } from '~redux/modules/user'
-import { useGlobalContext, GlobalContextProps } from '~helpers/globalContext'
-import { Status } from '~common/types'
-import useLogin from './useLogin'
 import { Dispatch } from 'redux'
-import Snackbar from '~common/SnackBar'
+import { Status } from '~common/types'
 import i18n from '~i18n'
+import { setSubscription } from '~redux/modules/user'
 import { iaphub } from '../../config'
+import { IAPInitializedAtom } from '../state/app'
+import useLogin from './useLogin'
 
 export const subSkus = [
   'com.smontlouis.biblestrong.onemonth.min',
@@ -18,10 +17,8 @@ export const subSkus = [
   'com.smontlouis.biblestrong.onemonth.max',
 ]
 
-export const useInitIAP = (store: GlobalContextProps) => {
-  const {
-    iap: [isIAPInitialized, setIsIAPInitialized],
-  } = store
+export const useInitIAP = () => {
+  const [isIAPInitialized, setIsIAPInitialized] = useAtom(IAPInitializedAtom)
 
   useEffect(() => {
     ;(async () => {
@@ -46,6 +43,8 @@ export const useInitIAP = (store: GlobalContextProps) => {
 
 export const useIapUser = () => {
   const { user } = useLogin()
+  const [isIAPInitialized] = useAtom(IAPInitializedAtom)
+
   const [status, setStatus] = useState<Status>('Idle')
   const [products, setProducts] = useState<IAPHub.IapHubProductInformation[]>()
   const [currentProduct, setCurrentProducts] = useState<
@@ -54,6 +53,8 @@ export const useIapUser = () => {
 
   useEffect(() => {
     ;(async () => {
+      if (!isIAPInitialized) return
+
       setStatus('Pending')
       try {
         await IAPHub.setUserId(user.id)
@@ -70,7 +71,7 @@ export const useIapUser = () => {
         setStatus('Rejected')
       }
     })()
-  }, [])
+  }, [isIAPInitialized, user.id])
 
   return { status, products, currentProduct }
 }

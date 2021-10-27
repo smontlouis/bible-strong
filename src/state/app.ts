@@ -1,4 +1,5 @@
 import { proxy } from 'valtio'
+import { atom } from 'jotai'
 
 export interface Diff {
   added?: {
@@ -41,3 +42,7 @@ export const conflictStateProxy: Conflict = proxy({
   lastSeen: undefined,
   remoteLastSeen: undefined,
 })
+
+export const IAPInitializedAtom = atom(false)
+export const fullscreenAtom = atom(false)
+export const premiumModalAtom = atom(false)

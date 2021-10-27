@@ -1,4 +1,5 @@
 import books from '~assets/bible_versions/books-desc'
+import { VerseRefContent } from '~common/types'
 import loadBible from '~helpers/loadBible'
 import i18n from '~i18n'
 
@@ -43,7 +44,12 @@ const getVersesRef = versesList => {
   return versesRef
 }
 
-export default async (verses, version = 'LSG', withVerseNumber, position) => {
+export default async (
+  verses,
+  version = 'LSG',
+  withVerseNumber,
+  position
+): Promise<VerseRefContent> => {
   let selectedVerses = verses
 
   // if 1-1_1
@@ -67,7 +73,9 @@ export default async (verses, version = 'LSG', withVerseNumber, position) => {
       toShare += ' '
     }
     try {
-      toShare += `${withVerseNumber ? `\n${verse}. ` : ''}${bible[book][chapter][verse]}`
+      toShare += `${withVerseNumber ? `\n${verse}. ` : ''}${
+        bible[book][chapter][verse]
+      }`
     } catch {
       toShare = 'Impossible de charger ce verset.'
     }
