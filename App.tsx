@@ -88,9 +88,6 @@ const useAppLoad = () => {
       setStatus('Set i18n')
       await setI18n()
       setIsLoadingCompleted(true)
-      setTimeout(async () => {
-        await SplashScreen.hideAsync()
-      }, 300)
 
       if (!__DEV__) {
         analytics().logScreenView({
@@ -107,6 +104,17 @@ const useAppLoad = () => {
 const App = () => {
   const { isLoadingCompleted, status } = useAppLoad()
 
+  const onLayoutRootView = useCallback(async () => {
+    if (isLoadingCompleted) {
+      // This tells the splash screen to hide immediately! If we call this after
+      // `setAppIsReady`, then we may see a blank screen while the app is
+      // loading its initial state and rendering its first pixels. So instead,
+      // we hide the splash screen once we know the root view has already
+      // performed layout.
+      await SplashScreen.hideAsync()
+    }
+  }, [isLoadingCompleted])
+
   if (!isLoadingCompleted) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -119,7 +127,9 @@ const App = () => {
   return (
     <Provider store={store}>
       <StatusBar translucent />
-      <InitApp persistor={persistor} />
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <InitApp persistor={persistor} />
+      </View>
     </Provider>
   )
 }
