@@ -406,9 +406,6 @@ const ConflictModal = () => {
 
   const { added, updated, deleted } = useReadableConflict(diff)
 
-  if (diff) {
-    console.log({ added, updated, deleted })
-  }
   return (
     <StylizedModal
       isOpen={!!diff}

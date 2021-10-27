@@ -171,8 +171,6 @@ const FireAuth = class {
           'email',
         ])
 
-        console.log(result)
-
         if (!result.isCancelled) {
           const { accessToken } = await AccessToken.getCurrentAccessToken()
           // Build Firebase credential with the Facebook access token.

@@ -206,7 +206,6 @@ export const deleteAllDatabases = async () => {
   await Promise.all(
     Object.values(getDatabases()).map(async db => {
       const file = await FileSystem.getInfoAsync(db.path)
-      console.log(file, db.path)
       if (file.exists) await FileSystem.deleteAsync(file.uri)
     })
   )

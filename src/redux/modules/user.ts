@@ -526,8 +526,6 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         delete obj?.deleted?.bible
       }
 
-      console.log(obj)
-
       if (isEmpty(obj?.updated) && isEmpty(obj?.deleted)) {
         dispatchUserSuccess(userData, studies)()
         return

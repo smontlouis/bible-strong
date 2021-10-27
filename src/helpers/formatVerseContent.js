@@ -33,7 +33,7 @@ export default verses => {
         return `${acc},${v}`
       }
       return acc + v
-    }, `${i18n.t(books[Number(verses[0].Livre) - 1].Nom)} ${verses[0].Chapitre}:`)
+    }, `${i18n.t(books[Number(verses[0].Livre) - 1]?.Nom)} ${verses[0].Chapitre}:`)
 
   return { title, content }
 }

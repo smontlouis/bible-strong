@@ -88,7 +88,6 @@ const VersesModal = ({
 
   const shareVerse = async () => {
     const { all: message } = await getVersesRef(selectedVerses, version, true)
-    console.log(message)
     const result = await Share.share({ message })
     // Clear selectedverses only if succeed
     if (result.action === Share.sharedAction) {

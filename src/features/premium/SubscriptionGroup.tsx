@@ -23,8 +23,6 @@ const SubscriptionGroup = () => {
   const { user } = useLogin()
   const dispatch = useDispatch()
 
-  console.log(products)
-
   const onSubscription = async () => {
     setProcessing(true)
     const [err] = await to(buyProduct(user.id, selectedSub, dispatch))

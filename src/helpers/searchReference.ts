@@ -11,7 +11,6 @@ export interface VerseBase {
 export const searchReference = async (
   ref?: string
 ): Promise<VerseBase | null> => {
-  console.log(ref)
   if (!ref) return null
   let reference = ref.trim().toLowerCase()
   const bible = await loadBible(getLangIsFr() ? 'LSG' : 'KJV')

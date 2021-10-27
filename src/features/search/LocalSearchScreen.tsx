@@ -165,7 +165,6 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
           const val = debouncedSearchValue.toLowerCase()
 
           const results = index.current.search(val)
-          console.log(val, results)
 
           setResults(filterResults(results))
         } catch (e) {
