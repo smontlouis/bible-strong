@@ -212,6 +212,7 @@
     "jetifier": "~1.6.4",
     "metro-react-native-babel-preset": "~0.66.2",
     "prettier": "^1.18.2",
+    "react-native-bundle-visualizer": "^3.0.0",
     "react-native-debugger-open": "^0.3.24",
     "react-native-storybook-loader": "^1.8.1",
     "react-native-version": "^3.2.0",

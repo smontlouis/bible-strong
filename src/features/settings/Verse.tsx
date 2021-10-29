@@ -1,7 +1,9 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import distanceInWords from 'date-fns/formatDistance'
-import { fr, enGB } from 'date-fns/locale'
+import fr from 'date-fns/locale/fr'
+import enGB from 'date-fns/locale/en-GB'
+
 import styled from '@emotion/native'
 import { withNavigation } from 'react-navigation'
 import { useSelector } from 'react-redux'

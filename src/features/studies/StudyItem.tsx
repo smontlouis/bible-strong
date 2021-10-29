@@ -1,7 +1,9 @@
 import React from 'react'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import { fr, enGB } from 'date-fns/locale'
+import fr from 'date-fns/locale/fr'
+import enGB from 'date-fns/locale/en-GB'
+
 import { withTheme } from 'emotion-theming'
 
 import Box from '~common/ui/Box'

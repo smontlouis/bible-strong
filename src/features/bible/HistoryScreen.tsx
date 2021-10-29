@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
 import * as Icon from '@expo/vector-icons'
 
-import { fr, enGB } from 'date-fns/locale'
+import fr from 'date-fns/locale/fr'
+import enGB from 'date-fns/locale/en-GB'
 
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'

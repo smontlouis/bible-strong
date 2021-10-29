@@ -3,7 +3,9 @@ import { ScrollView } from 'react-native'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import { fr, enGB } from 'date-fns/locale'
+import fr from 'date-fns/locale/fr'
+import enGB from 'date-fns/locale/en-GB'
+
 import { useSelector, useDispatch } from 'react-redux'
 
 import Button from '~common/ui/Button'

@@ -479,6 +479,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong.dev;
 				PRODUCT_NAME = "dev - BIble Strong";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "biblestrong-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -511,6 +512,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong;
 				PRODUCT_NAME = "Bible Strong";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "biblestrong-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -589,6 +591,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong.staging;
 				PRODUCT_NAME = "staging - Bible Strong";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "biblestrong-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

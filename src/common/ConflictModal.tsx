@@ -1,5 +1,6 @@
 import format from 'date-fns/format'
-import { enGB, fr } from 'date-fns/locale'
+import fr from 'date-fns/locale/fr'
+import enGB from 'date-fns/locale/en-GB'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, TouchableOpacity } from 'react-native'
