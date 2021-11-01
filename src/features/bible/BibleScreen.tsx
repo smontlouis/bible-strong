@@ -176,7 +176,7 @@ export default compose(
         settings: produce(user.bible.settings, draftState => {
           draftState.colors.default = {
             ...ownProps.theme.colors,
-            ...draftState.colors.default.color1,
+            ...draftState.colors.default,
           }
           draftState.colors.dark = {
             ...ownProps.theme.colors,
