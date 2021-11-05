@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import styled from '@emotion/styled'
+import { useState } from 'preact/hooks'
+import { styled } from 'goober'
 
 import { scaleFontSize } from './scaleFontSize'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'

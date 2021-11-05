@@ -1,5 +1,5 @@
-import React, { useContext } from 'react'
-import styled from '@emotion/styled'
+import { useContext } from 'preact/hooks'
+import { styled } from 'goober'
 import VerseContext from './VerseContext'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
 import { PropsWithDiv, Verse as VerseProps } from './types'

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import styled from '@emotion/styled'
+import { useState, useEffect } from 'preact/hooks'
+import { styled } from 'goober'
 
 import verseToStrong from './verseToStrong'
 import { VerseProvider } from './VerseContext'

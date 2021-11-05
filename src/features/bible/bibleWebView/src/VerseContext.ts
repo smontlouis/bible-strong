@@ -1,4 +1,4 @@
-import React from 'react'
+import { createContext } from 'preact'
 import { SelectedCode, Settings } from './types'
 
 interface VerseContextProps {
@@ -7,7 +7,7 @@ interface VerseContextProps {
   onTouchMove: (event: React.TouchEvent<HTMLSpanElement>) => void
 }
 
-const VerseContext = React.createContext<VerseContextProps>(undefined!)
+const VerseContext = createContext<VerseContextProps>(undefined!)
 
 export const VerseProvider = VerseContext.Provider
 export const VerseConsumer = VerseContext.Consumer

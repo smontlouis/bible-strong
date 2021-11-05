@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import styled from '@emotion/styled'
+import { Component } from 'preact'
+import { styled } from 'goober'
 import {
   ADD_PARALLEL_VERSION,
   REMOVE_PARALLEL_VERSION,
@@ -216,7 +216,7 @@ class VersesRenderer extends Component {
         selectedCode: this.props.selectedCode,
         comments: this.transformComments(
           this.props.comments,
-          this.props.verses.length
+          this.props.verses?.length
         ),
       })
       // // Load font
@@ -237,7 +237,7 @@ class VersesRenderer extends Component {
     ) {
       window.scrollTo(0, 0)
     }
-    if (prevState && prevState.settings.theme !== this.state.settings.theme) {
+    if (prevState && prevState.settings?.theme !== this.state.settings?.theme) {
       document.body.style.backgroundColor = this.state.settings.colors[
         this.state.settings.theme
       ].reverse
@@ -250,7 +250,7 @@ class VersesRenderer extends Component {
       setTimeout(() => {
         document
           .querySelector(`#verset-${this.state.verseToScroll}`)
-          .scrollIntoView()
+          ?.scrollIntoView()
       }, 200)
     }
   }
@@ -292,7 +292,7 @@ class VersesRenderer extends Component {
 
   getNotedVersesCount = (verses, notedVerses) => {
     const newNotedVerses = {}
-    if (verses.length) {
+    if (verses?.length) {
       const { Livre, Chapitre } = verses[0]
       Object.keys(notedVerses).map(key => {
         const firstVerseRef = key.split('/')[0]
@@ -311,7 +311,7 @@ class VersesRenderer extends Component {
 
   getNotedVersesText = (verses, notedVerses) => {
     const newNotedVerses = {}
-    if (verses.length) {
+    if (verses?.length) {
       const { Livre, Chapitre } = verses[0]
       Object.entries(notedVerses).map(([key, value]) => {
         const versesInArray = key.split('/')

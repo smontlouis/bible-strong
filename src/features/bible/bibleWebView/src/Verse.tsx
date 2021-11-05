@@ -1,6 +1,5 @@
-import React, { Component } from 'react'
-import { keyframes } from '@emotion/core'
-import styled from '@emotion/styled'
+import { Component } from 'preact'
+import { keyframes, styled } from 'goober'
 import {
   Verse as VerseProps,
   Settings,

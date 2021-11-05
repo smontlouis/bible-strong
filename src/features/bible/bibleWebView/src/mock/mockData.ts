@@ -1,7 +1,7 @@
-import defaultColors from '../../../../../themes/colors'
-import darkColors from '../../../../../themes/darkColors'
-import blackColors from '../../../../../themes/blackColors'
-import sepiaColors from '../../../../../themes/sepiaColors'
+import defaultColors from './themes/colors'
+import darkColors from './themes/darkColors'
+import blackColors from './themes/blackColors'
+import sepiaColors from './themes/sepiaColors'
 
 export const mockSettings = {
   alignContent: 'justify',

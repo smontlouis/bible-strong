@@ -1,6 +1,5 @@
-import React from 'react'
 import { DivProps, Settings, TagProps } from './types'
-import styled from '@emotion/styled'
+import { styled } from 'goober'
 import { scaleFontSize } from './scaleFontSize'
 import { OPEN_HIGHLIGHT_TAGS, dispatch } from './dispatch'
 
