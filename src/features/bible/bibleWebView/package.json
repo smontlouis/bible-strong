@@ -4,7 +4,8 @@
   "scripts": {
     "start": "wmr --public src",
     "build": "wmr build --public src",
-    "serve": "wmr serve"
+    "serve": "wmr serve",
+    "postbuild": "cp ./dist/index.html ../../../../android/app/src/main/assets/index.html"
   },
   "eslintConfig": {
     "extends": "preact"
