@@ -12,7 +12,7 @@ const StyledReference = styled('div')(
   }: PropsWithDiv<{ isSelected: boolean }>) => ({
     display: 'inline-block',
     transition: 'background 0.3s ease',
-    borderRadius: 4,
+    borderRadius: '4px',
     padding: '0 5px',
     background: colors[theme].lightPrimary,
 

@@ -12,7 +12,7 @@ const Tag = styled('div')(
   ({ settings: { theme, colors, fontSizeScale } }: DivProps) => ({
     fontFamily: 'arial',
     padding: '2px 4px',
-    borderRadius: 40,
+    borderRadius: '40px',
     color: colors[theme].default,
     backgroundColor: colors[theme].lightGrey,
     fontSize: scaleFontSize(12, fontSizeScale),

@@ -19,8 +19,8 @@ const Section = styled('div')(
   }: PropsWithDiv<{ isSelected: boolean }>) => ({
     display: 'inline-block',
     transition: 'background 0.3s ease',
-    borderRadius: 4,
-    padding: 5,
+    borderRadius: '4px',
+    padding: '5px',
     ...(isSelected
       ? {
           background: colors[theme].primary,
@@ -33,7 +33,7 @@ const NumberText = styled('span')(
   ({ settings: { fontSizeScale, fontFamily } }: PropsWithDiv<{}>) => ({
     fontSize: scaleFontSize(15, fontSizeScale),
     position: 'relative',
-    bottom: 20,
+    bottom: '20px',
     fontFamily,
     padding: '0 5px',
 
@@ -81,22 +81,22 @@ const VerseText = styled('div')(
     padding: '10px',
     margin: '10px 0',
     background: colors[theme].lightGrey,
-    borderRadius: 4,
+    borderRadius: '4px',
     position: 'relative',
-    paddingRight: 30,
+    paddingRight: '30px',
   })
 )
 
 const CloseVerseText = styled('div')(() => ({
-  width: 30,
-  height: 30,
-  top: 5,
-  right: 5,
+  width: '30px',
+  height: '30px',
+  top: '5px',
+  right: '5px',
   position: 'absolute',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: 17,
+  fontSize: '17px',
   webkitTouchCallout: 'none',
   mozUserSelect: 'none',
   msUserSelect: 'none',

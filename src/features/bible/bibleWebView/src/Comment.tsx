@@ -20,7 +20,7 @@ const StyledComment = styled('div')(
     padding: scaleFontSize(14, fontSizeScale),
     margin: '10px 0',
     background: colors[theme].lightGrey,
-    borderRadius: 4,
+    borderRadius: '4px',
     position: 'relative',
     overflow: 'hidden',
     textAlign: 'left',

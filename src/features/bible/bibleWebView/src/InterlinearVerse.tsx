@@ -13,7 +13,7 @@ const Section = styled('div')((props: PropsWithDiv<{}>) => ({
   display: 'inline-block',
   position: 'relative',
   transition: 'background 0.3s ease',
-  borderRadius: 4,
+  borderRadius: '4px',
   padding: '2px 4px',
 }))
 
@@ -26,12 +26,12 @@ const AbsoluteSection = styled('div')(
     top: '50%',
     left: '50%',
     transform: 'translateX(-50%) translateY(-50%)',
-    borderRadius: 8,
+    borderRadius: '8px',
     pointerEvents: 'none',
     transition: '0.5s ease',
     scale: 0.8,
     display: 'none',
-    padding: 5,
+    padding: '5px',
     background: colors[theme].reverse,
     minWidth: '50px',
     border: `3px solid ${colors[theme].primary}`,
@@ -109,7 +109,7 @@ const VerseText = styled('div')(
     padding: '10px',
     margin: '10px 0',
     background: colors[theme].lightGrey,
-    borderRadius: 4,
+    borderRadius: '4px',
     position: 'relative',
     paddingRight: 30,
   })
