@@ -6,7 +6,6 @@ import { VerseProvider } from './VerseContext'
 import { scaleFontSize } from './scaleFontSize'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
-import { Wrapper, ContainerText } from './Verse'
 import VerseTags from './VerseTags'
 import {
   PropsWithDiv,
@@ -16,6 +15,18 @@ import {
   Notes,
   TagProps,
 } from './types'
+import { ContainerText } from './ContainerText'
+
+export const Wrapper = styled('span')(
+  ({ settings: { textDisplay } }: PropsWithDiv<{}>) => ({
+    display: textDisplay,
+    ...(textDisplay === 'block'
+      ? {
+          marginBottom: '5px',
+        }
+      : {}),
+  })
+)
 
 const VerseText = styled('span')(
   ({

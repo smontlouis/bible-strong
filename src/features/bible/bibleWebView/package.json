@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "wmr",
+    "start": "wmr --public src",
     "build": "wmr build --public src",
     "serve": "wmr serve"
   },

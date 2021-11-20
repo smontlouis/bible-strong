@@ -1,6 +1,5 @@
 import { render, h } from 'preact'
 import { setup } from 'goober'
-import './index.css'
 import App from './App'
 
 setup(h)
@@ -14,6 +13,7 @@ setup(h)
 // } from './mock/mockData'
 
 // import mockVerses from './mock/mockVerses'
+// import mockVerses from './mock/mockINTVerses'
 
 // render(
 //   <App

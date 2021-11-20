@@ -25,16 +25,7 @@ import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 import { PropsWithDiv } from './types'
 import VerseTags from './VerseTags'
-
-function convertHex(hex: string, opacity: number) {
-  hex = hex.replace('#', '')
-  const r = parseInt(hex.substring(0, 2), 16)
-  const g = parseInt(hex.substring(2, 4), 16)
-  const b = parseInt(hex.substring(4, 6), 16)
-
-  const result = `rgba(${r},${g},${b},${opacity / 100})`
-  return result
-}
+import { ContainerText } from './ContainerText'
 
 const VerseText = styled('span')(
   ({
@@ -55,68 +46,7 @@ const NumberText = styled('span')(
   })
 )
 
-const zoom = keyframes({
-  '0%': {
-    background: convertHex('#95afc0', 0),
-  },
-  '50%': {
-    background: convertHex('#95afc0', 30),
-  },
-  '100%': {
-    background: convertHex('#95afc0', 0),
-  },
-})
-
-export const ContainerText = styled('span')(
-  ({
-    isFocused,
-    isTouched,
-    isSelected,
-    highlightedColor,
-    isVerseToScroll,
-    settings: { theme, colors, fontFamily },
-  }: PropsWithDiv<{
-    isFocused: boolean
-    isTouched: boolean
-    isSelected: boolean
-    highlightedColor: string
-    isVerseToScroll: boolean
-  }>) => {
-    let background = 'transparent'
-
-    if (highlightedColor && !isSelected) {
-      const hexColor = colors[theme][highlightedColor]
-      background = convertHex(hexColor, 50)
-    }
-    if (isTouched) {
-      background = 'rgba(0,0,0,0.1)'
-    }
-    return {
-      fontFamily,
-      transition: 'background 0.3s ease',
-      background,
-      padding: '4px',
-      borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none',
-      WebkitTouchCallout: 'none',
-      MozUserSelect: 'none',
-      msUserSelect: 'none',
-      KhtmlUserSelect: 'none',
-      WebkitUserSelect: 'none',
-      ...(isVerseToScroll
-        ? {
-            animation: `0.75s ease 0s 3 normal none running ${zoom}`,
-          }
-        : {}),
-      ...(isFocused === false
-        ? {
-            opacity: 0.5,
-          }
-        : {}),
-    }
-  }
-)
-
-export const Wrapper = styled('span')(
+const Wrapper = styled('span')(
   ({ settings: { textDisplay } }: PropsWithDiv<{}>) => ({
     display: textDisplay,
     ...(textDisplay === 'block'
@@ -128,7 +58,7 @@ export const Wrapper = styled('span')(
 )
 
 const Spacer = styled('div')(() => ({
-  marginTop: 5,
+  marginTop: '5px',
 }))
 
 interface Props {
