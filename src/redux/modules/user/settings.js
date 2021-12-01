@@ -53,13 +53,13 @@ export default produce((draft, action) => {
       break
     }
     case INCREASE_SETTINGS_FONTSIZE_SCALE: {
-      if (draft.bible.settings.fontSizeScale < 3) {
+      if (draft.bible.settings.fontSizeScale < 5) {
         draft.bible.settings.fontSizeScale += 1
       }
       break
     }
     case DECREASE_SETTINGS_FONTSIZE_SCALE: {
-      if (draft.bible.settings.fontSizeScale > -3) {
+      if (draft.bible.settings.fontSizeScale > -5) {
         draft.bible.settings.fontSizeScale -= 1
       }
       break
