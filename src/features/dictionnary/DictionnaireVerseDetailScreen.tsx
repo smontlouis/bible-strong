@@ -188,6 +188,10 @@ const useFormattedText = (
   }
 }
 
+const StyledScrollView = styled.ScrollView(({ theme }) => ({
+  backgroundColor: theme.colors.lightGrey,
+}))
+
 const DictionnaireVerseDetailScreen = ({ navigation }) => {
   const { t } = useTranslation()
   const carousel = useRef()
@@ -231,82 +235,87 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
   }
 
   return (
-    <Box flex paddingTop={getStatusBarHeight()}>
-      <Header
-        background
-        hasBackButton
-        title={`${headerTitle} ${
-          headerTitle.length < 20 ? t('- Dict. LSG') : ''
-        }`}
-        rightComponent={
-          <Link route="BibleVerseDetail" params={{ verse }} replace padding>
-            <LexiqueIcon />
-          </Link>
-        }
-      />
-      <Box flex>
-        <Box background paddingTop={10}>
-          <StyledVerse>
-            <VersetWrapper>
-              <NumberText>{verse.Verset}</NumberText>
-            </VersetWrapper>
-            <CarouselProvider
-              value={{
-                current: currentWord,
-                setCurrent: setCurrentWord,
-              }}
-            >
-              <VerseText>{formattedText}</VerseText>
-            </CarouselProvider>
-          </StyledVerse>
-          <BibleVerseDetailFooter
-            verseNumber={Verset}
-            versesInCurrentChapter={versesInCurrentChapter}
-            goToNextVerse={() => updateVerse(+1)}
-            goToPrevVerse={() => updateVerse(-1)}
-          />
-        </Box>
-        <Box grey>
-          <RoundedCorner />
-        </Box>
-        <Box flex grey>
-          {wordsInVerse.length ? (
-            <Carousel
-              firstItem={wordsInVerse.findIndex(w => w === currentWord)}
-              ref={carousel}
-              data={words}
-              renderItem={({ item, index }) => (
-                <DictionnaireCard
-                  navigation={navigation}
-                  dictionnaireRef={item}
-                  index={index}
-                />
-              )}
-              activeSlideAlignment="start"
-              sliderWidth={sliderWidth}
-              itemWidth={itemWidth}
-              inactiveSlideScale={1}
-              inactiveSlideOpacity={0.3}
-              containerCustomStyle={{
-                marginTop: 15,
-                paddingLeft: 20,
-                overflow: 'visible',
-                flex: 1,
-              }}
-              onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
-              contentContainerCustomStyle={{}}
-              useScrollView={false}
-              initialNumToRender={2}
+    <StyledScrollView
+      contentContainerStyle={{ paddingBottom: 20 }}
+      scrollIndicatorInsets={{ right: 1 }}
+    >
+      <Box flex paddingTop={getStatusBarHeight()}>
+        <Header
+          background
+          hasBackButton
+          title={`${headerTitle} ${
+            headerTitle.length < 20 ? t('- Dict. LSG') : ''
+          }`}
+          rightComponent={
+            <Link route="BibleVerseDetail" params={{ verse }} replace padding>
+              <LexiqueIcon />
+            </Link>
+          }
+        />
+        <Box flex>
+          <Box background paddingTop={10}>
+            <StyledVerse>
+              <VersetWrapper>
+                <NumberText>{verse.Verset}</NumberText>
+              </VersetWrapper>
+              <CarouselProvider
+                value={{
+                  current: currentWord,
+                  setCurrent: setCurrentWord,
+                }}
+              >
+                <VerseText>{formattedText}</VerseText>
+              </CarouselProvider>
+            </StyledVerse>
+            <BibleVerseDetailFooter
+              verseNumber={Verset}
+              versesInCurrentChapter={versesInCurrentChapter}
+              goToNextVerse={() => updateVerse(+1)}
+              goToPrevVerse={() => updateVerse(-1)}
             />
-          ) : (
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message="Pas de mot pour ce verset..."
-            />
-          )}
+          </Box>
+          <Box grey>
+            <RoundedCorner />
+          </Box>
+          <Box flex grey>
+            {wordsInVerse.length ? (
+              <Carousel
+                firstItem={wordsInVerse.findIndex(w => w === currentWord)}
+                ref={carousel}
+                data={words}
+                renderItem={({ item, index }) => (
+                  <DictionnaireCard
+                    navigation={navigation}
+                    dictionnaireRef={item}
+                    index={index}
+                  />
+                )}
+                activeSlideAlignment="start"
+                sliderWidth={sliderWidth}
+                itemWidth={itemWidth}
+                inactiveSlideScale={1}
+                inactiveSlideOpacity={0.3}
+                containerCustomStyle={{
+                  marginTop: 15,
+                  paddingLeft: 20,
+                  overflow: 'visible',
+                  flex: 1,
+                }}
+                onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
+                contentContainerCustomStyle={{}}
+                useScrollView={false}
+                initialNumToRender={2}
+              />
+            ) : (
+              <Empty
+                source={require('~assets/images/empty.json')}
+                message="Pas de mot pour ce verset..."
+              />
+            )}
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </StyledScrollView>
   )
 }
 
