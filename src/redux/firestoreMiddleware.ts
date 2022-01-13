@@ -35,7 +35,7 @@ import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { diff } from '~helpers/deep-obj'
 
-const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+export const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
 export default store => next => async action => {
   const oldState = store.getState()

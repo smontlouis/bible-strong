@@ -24,9 +24,12 @@ import { useTranslation } from 'react-i18next'
 import { deleteAllDatabases } from '~helpers/database'
 import RNRestart from 'react-native-restart'
 import sizeof from 'firestore-size'
+import SnackBar from '~common/SnackBar'
 
 import app from '../../../package.json'
 import { RootState } from '~redux/modules/reducer'
+import { firebaseDb } from '~helpers/firebase'
+import { r } from '~redux/firestoreMiddleware'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -66,6 +69,13 @@ const MoreScreen = () => {
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
+  const [isSyncing, setIsSyncing] = useState(false)
+  const { user, plan } = useSelector((state: RootState) => ({
+    user: state.user,
+    plan: state.plan,
+  }))
+  const userDoc = firebaseDb.collection('users').doc(user.id)
+
   const bibleJSON = useSelector((state: RootState) => state.user.bible)
   const { t, i18n } = useTranslation()
 
@@ -74,6 +84,45 @@ const MoreScreen = () => {
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
     ])
+  }
+
+  const sync = async () => {
+    SnackBar.show(t('app.syncing'))
+    setIsSyncing(true)
+    const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+    await userDoc.update(
+      r({
+        bible: sanitizeUserBible(user.bible),
+        plan: plan.ongoingPlans,
+      })
+    )
+    console.log('User synced')
+
+    const studies = user.bible.studies
+    if (studies) {
+      await Promise.all(
+        Object.entries(studies).map(async ([studyId, obj]) => {
+          const studyDoc = firebaseDb.collection('studies').doc(studyId)
+          await studyDoc.set(
+            {
+              ...obj,
+              content: {
+                // handle array weird form from diff object
+                ops: obj?.content?.ops
+                  ? Array.isArray(obj.content.ops)
+                    ? obj.content.ops
+                    : Object.values(obj.content.ops)
+                  : [],
+              },
+            },
+            { merge: true }
+          )
+        })
+      )
+      console.log('Studies synced')
+    }
+    SnackBar.show(t('app.synced'))
+    setIsSyncing(false)
   }
 
   const confirmChangeLanguage = () => {
@@ -238,6 +287,14 @@ const MoreScreen = () => {
             <StyledIcon name="thumbs-up" size={25} color="secondary" />
             <Text fontSize={15}>Soutenir le développeur</Text>
           </LinkItem> */}
+          {isLogged && (
+            <LinkItem onPress={isSyncing ? () => {} : sync}>
+              <StyledIcon name="upload-cloud" size={25} />
+              <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
+                {t('app.sync')}
+              </Text>
+            </LinkItem>
+          )}
           {!isLogged && (
             <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />

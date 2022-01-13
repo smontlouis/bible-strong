@@ -4,6 +4,10 @@
   "Il y a {{formattedDate}}": "{{formattedDate}} ago",
   "Fermer": "Close",
   "Valider": "Validate",
+  "app.syncing": "Save in progress...",
+  "app.synced": "Save done !",
+  "app.sync": "Manual sync",
+
   "app.areyousure": "Are you sure ?",
   "app.updateAvailable": "An update is available, downloading...",
   "app.updateReady": "Update installed. Rebooting...",
@@ -471,5 +475,6 @@
   "L'index de recherche est requis pour accéder à cette page.": "The search index is required to access this page.",
   "Téléchargement de l'index...": "Downloading the index ...",
   "Par pertinence": "Relevant",
-  "Par ordre alphabétique": "In alphabetical order"
+  "Par ordre alphabétique": "In alphabetical order",
+  "Suggéré": "Recommended"
 }

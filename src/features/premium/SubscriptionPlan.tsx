@@ -3,6 +3,7 @@ import React from 'react'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
+import { useTranslation } from 'react-i18next'
 
 export type subVariant = 'normal' | 'secondary' | 'primary'
 
@@ -23,6 +24,8 @@ const SubscriptionPlan = ({
   variant,
   onPress,
 }: Props) => {
+  const { t } = useTranslation()
+
   return (
     <LinkBox
       py={20}
@@ -52,7 +55,7 @@ const SubscriptionPlan = ({
             borderRadius={20}
           >
             <Text color="reverse" fontSize={11}>
-              Suggéré
+              {t('Suggéré')}
             </Text>
           </Box>
         </Box>

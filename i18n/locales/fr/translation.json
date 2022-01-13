@@ -4,6 +4,10 @@
   "Il y a {{formattedDate}}": "Il y a {{formattedDate}}",
   "Fermer": "Fermer",
   "Valider": "Valider",
+  "app.syncing": "Synchronisation en cours...",
+  "app.synced": "Synchronisation finie !",
+  "app.sync": "Sauvegarde manuelle",
+
   "app.areyousure": "Êtes-vous sur ?",
   "app.updateAvailable": "Une mise à jour est disponible, téléchargement...",
   "app.updateReady": "Mise à jour installée. Redémarrage...",
@@ -472,5 +476,6 @@
   "L'index de recherche est requis pour accéder à cette page.": "L'index de recherche est requis pour accéder à cette page.",
   "Téléchargement de l'index...": "Téléchargement de l'index...",
   "Par pertinence": "Par pertinence",
-  "Par ordre alphabétique": "Par ordre alphabétique"
+  "Par ordre alphabétique": "Par ordre alphabétique",
+  "Suggéré": "Suggéré"
 }

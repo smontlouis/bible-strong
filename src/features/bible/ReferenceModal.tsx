@@ -20,6 +20,7 @@ import Paragraph from '~common/ui/Paragraph'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { hp } from '~helpers/utils'
 import Modal from '~common/Modal'
+import { useTranslation } from 'react-i18next'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -165,6 +166,7 @@ const References = ({ references, version, onClosed }) => {
 
 const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
   const { title } = formatVerseContent([selectedVerse])
+  const { t } = useTranslation()
 
   return (
     <Modal.Menu
@@ -177,7 +179,7 @@ const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
               {title}
             </Text>
             <Text fontSize={13} color="grey">
-              Références croisées{' '}
+              {t('Références croisées')}
             </Text>
           </Box>
           <Link onPress={onClosed} padding>
