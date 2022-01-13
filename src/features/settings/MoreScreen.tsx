@@ -101,22 +101,9 @@ const MoreScreen = () => {
     const studies = user.bible.studies
     if (studies) {
       await Promise.all(
-        Object.entries(studies).map(async ([studyId, obj]) => {
+        Object.entries(studies).map(async ([studyId, study]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)
-          await studyDoc.set(
-            {
-              ...obj,
-              content: {
-                // handle array weird form from diff object
-                ops: obj?.content?.ops
-                  ? Array.isArray(obj.content.ops)
-                    ? obj.content.ops
-                    : Object.values(obj.content.ops)
-                  : [],
-              },
-            },
-            { merge: true }
-          )
+          await studyDoc.set(study, { merge: true })
         })
       )
       console.log('Studies synced')
