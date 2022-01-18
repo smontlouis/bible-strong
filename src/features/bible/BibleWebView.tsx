@@ -328,14 +328,16 @@ class BibleWebView extends Component {
             allowUniversalAccessFromFileURLs
             allowFileAccessFromFileURLs
             allowFileAccess
-            onContentProcessDidTerminate={e => {
+            onContentProcessDidTerminate={syntheticEvent => {
+              const { nativeEvent } = syntheticEvent
               console.warn('Content process terminated, reloading...')
               this.webview?.reload()
-              Sentry.captureException(e)
+              Sentry.captureException(nativeEvent)
             }}
-            onRenderProcessGone={e => {
+            onRenderProcessGone={syntheticEvent => {
+              const { nativeEvent } = syntheticEvent
               this.webview?.reload()
-              Sentry.captureException(e)
+              Sentry.captureException(nativeEvent)
             }}
           />
         )}
