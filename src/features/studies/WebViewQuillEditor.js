@@ -279,6 +279,15 @@ class WebViewQuillEditor extends React.Component {
           bounces={false}
           scrollEnabled={false}
           hideKeyboardAccessoryView
+          onContentProcessDidTerminate={e => {
+            console.warn('Content process terminated, reloading...')
+            this.webViewRef?.reload()
+            Sentry.captureException(e)
+          }}
+          onRenderProcessGone={e => {
+            this.webViewRef?.reload()
+            Sentry.captureException(e)
+          }}
         />
         {this.state.isKeyboardOpened && (
           <StudyFooter

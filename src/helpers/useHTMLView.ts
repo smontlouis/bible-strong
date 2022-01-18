@@ -1,7 +1,8 @@
 import { useTheme } from 'emotion-theming'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
+import * as Sentry from '@sentry/react-native'
 
 const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
@@ -11,6 +12,7 @@ const useHTMLView = ({
   onLinkClicked: (href: string) => void
 }) => {
   const theme: Theme = useTheme()
+  const ref = useRef()
 
   const onMessage = useCallback((event: any) => {
     const action = JSON.parse(event.nativeEvent.data)
@@ -81,10 +83,20 @@ const useHTMLView = ({
   return {
     webviewProps(html: string) {
       return {
+        ref,
         style: { backgroundColor: 'transparent' },
         originWhitelist: ['*'],
         source: { html: wrapHTML(html) },
         onMessage,
+        onContentProcessDidTerminate: e => {
+          console.warn('Content process terminated, reloading...')
+          ref.current?.reload()
+          Sentry.captureException(e)
+        },
+        onRenderProcessGone: e => {
+          ref.current?.reload()
+          Sentry.captureException(e)
+        },
       }
     },
   }
