@@ -212,7 +212,7 @@ const UserWidget = React.memo(() => {
           ))}
         </PreloadBible>
 
-        {!user.emailVerified && (
+        {/* {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart" mb={5}>
               {t(
@@ -225,7 +225,7 @@ const UserWidget = React.memo(() => {
               </Text>
             </Link>
           </Box>
-        )}
+        )} */}
       </Box>
       <Box grey>
         <RoundedCorner />
