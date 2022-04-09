@@ -104,11 +104,15 @@ const Comment = ({ comment, navigation }: Props) => {
       book = findBookNumber(book.substr(0, 3).toUpperCase())
       const [chapter, verse] = numbers.split('.')
 
-      navigation.navigate('BibleView', {
-        isReadOnly: true,
-        book: Number(book),
-        chapter: Number(chapter),
-        verse: Number(verse),
+      navigation.navigate({
+        routeName: 'BibleView',
+        params: {
+          isReadOnly: true,
+          book: Number(book),
+          chapter: Number(chapter),
+          verse: Number(verse),
+        },
+        key: `bible-view-${book}-${chapter}-${verse}`,
       })
     }
   }

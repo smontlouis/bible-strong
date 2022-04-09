@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -12,6 +12,8 @@ import { useDispatch } from 'react-redux'
 import SnackBar from '~common/SnackBar'
 import to from 'await-to-js'
 import { useTranslation } from 'react-i18next'
+import { useIsPremium } from '~helpers/usePremium'
+import { setSubscription } from '~redux/modules/user'
 
 const SubscriptionGroup = () => {
   const [selectedSub, setSelectedSub] = React.useState(
@@ -19,9 +21,10 @@ const SubscriptionGroup = () => {
   )
   const { t } = useTranslation()
   const [processing, setProcessing] = React.useState(false)
-  const { status, products } = useIapUser()
+  const { status, products, currentProduct } = useIapUser()
   const { user } = useLogin()
   const dispatch = useDispatch()
+  const hasPremium = useIsPremium()
 
   const onSubscription = async () => {
     setProcessing(true)
@@ -32,6 +35,13 @@ const SubscriptionGroup = () => {
     }
     setProcessing(false)
   }
+
+  // ! For whatever reason, sometimes the premium status is not updated
+  useEffect(() => {
+    if (currentProduct && !hasPremium) {
+      dispatch(setSubscription('premium'))
+    }
+  }, [currentProduct, dispatch, hasPremium])
 
   if (status === 'Rejected') {
     return (

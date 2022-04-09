@@ -126,6 +126,7 @@ const VersesModal = ({
       params: {
         verse,
       },
+      key: `commentaries-${verse}`,
     })
   }
 

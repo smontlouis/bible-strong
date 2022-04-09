@@ -44,7 +44,7 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
     ...booksDesc,
   ].map(book => ({
     value: book.Numero,
-    label: book.Nom,
+    label: t(book.Nom),
   }))
 
   const sectionValues = [

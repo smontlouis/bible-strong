@@ -406,6 +406,7 @@ class BibleStrongDetailScreen extends React.Component {
                           navigation.navigate({
                             routeName: 'Concordance',
                             params: { strongReference, book },
+                            key: `concordance-${strongReference}-${book}`,
                           })
                         }
                       >

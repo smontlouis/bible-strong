@@ -1,9 +1,8 @@
 import firestore from '@react-native-firebase/firestore'
 import {
-  ADD_HIGHLIGHT,
-  REMOVE_HIGHLIGHT,
   USER_LOGIN_SUCCESS,
   USER_UPDATE_PROFILE,
+  //
   SET_SETTINGS_ALIGN_CONTENT,
   INCREASE_SETTINGS_FONTSIZE_SCALE,
   DECREASE_SETTINGS_FONTSIZE_SCALE,
@@ -12,22 +11,33 @@ import {
   SET_SETTINGS_PRESS,
   SET_SETTINGS_NOTES_DISPLAY,
   SET_SETTINGS_COMMENTS_DISPLAY,
+  //
   CHANGE_COLOR,
+  //
   ADD_NOTE,
   REMOVE_NOTE,
+  //
   ADD_TAG,
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
+  UPDATE_TAG,
+  //
   CREATE_STUDY,
   UPDATE_STUDY,
   UPLOAD_STUDY,
   DELETE_STUDY,
   PUBLISH_STUDY,
-  UPDATE_TAG,
+  //
   SET_HISTORY,
   DELETE_HISTORY,
   SET_LAST_SEEN,
+  //
+  ADD_HIGHLIGHT,
+  REMOVE_HIGHLIGHT,
   CHANGE_HIGHLIGHT_COLOR,
+  //
+  TOGGLE_COMPARE_VERSION,
+  RESET_COMPARE_VERSION,
 } from './modules/user'
 
 import { firebaseDb } from '../helpers/firebase'
@@ -88,6 +98,8 @@ export default store => next => async action => {
     case ADD_TAG:
     case REMOVE_HIGHLIGHT:
     case TOGGLE_TAG_ENTITY:
+    case TOGGLE_COMPARE_VERSION:
+    case RESET_COMPARE_VERSION:
     case REMOVE_TAG:
     case UPDATE_TAG: {
       if (!diffState?.user?.bible) return

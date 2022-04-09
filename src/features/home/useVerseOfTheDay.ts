@@ -104,7 +104,6 @@ export const useVerseOfTheDay = (addDay: number) => {
           category: 'NOTIFICATIONS',
           allowWhileIdle: true,
           date,
-          repeatType: 'day',
         })
 
         console.log(

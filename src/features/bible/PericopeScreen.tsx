@@ -140,6 +140,7 @@ const PericopeScreen = ({ navigation }) => {
                                     version,
                                     verse: 1,
                                   },
+                                  key: `bible-view-${book}-${chapterKey}-1-${version}`,
                                 })
                           }
                         >

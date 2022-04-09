@@ -156,9 +156,14 @@ const useReadableConflict = (diffObj?: Diff) => {
               entity,
               children: getStudyValues(values as any),
             }
-          case 'plan':
-          case 'settings': {
+          case 'plan': {
             return
+          }
+          case 'settings': {
+            return {
+              entity,
+              content: i18n.t('conflict.settingsModified'),
+            }
           }
         }
       })
@@ -382,9 +387,14 @@ const useReadableConflict = (diffObj?: Diff) => {
               entity,
               children: getStudyValues(values as any),
             }
-          case 'plan':
-          case 'settings': {
+          case 'plan': {
             return
+          }
+          case 'settings': {
+            return {
+              entity,
+              content: i18n.t('conflict.settingsModified'),
+            }
           }
         }
       })
