@@ -38,6 +38,8 @@ import {
   //
   TOGGLE_COMPARE_VERSION,
   RESET_COMPARE_VERSION,
+  //
+  SET_SUBSCRIPTION,
 } from './modules/user'
 
 import { firebaseDb } from '../helpers/firebase'
@@ -163,6 +165,10 @@ export default store => next => async action => {
         })
       )
 
+      break
+    }
+    case SET_SUBSCRIPTION: {
+      userDoc.set({ subscription: user.subscription }, { merge: true })
       break
     }
     case SET_LAST_SEEN: {
