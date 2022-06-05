@@ -116,21 +116,18 @@ export default store => next => async action => {
       if (studies) {
         Object.entries(studies).forEach(([studyId, obj]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)
+          const studyContent = state.user.bible.studies[studyId]?.content?.ops
           studyDoc.set(
             {
               ...obj,
               content: {
                 // handle array weird form from diff object
-                ops: obj?.content?.ops
-                  ? Array.isArray(obj.content.ops)
-                    ? obj.content.ops
-                    : Object.values(obj.content.ops)
-                  : [],
+                ops: studyContent || [],
               },
             },
             { merge: true }
           )
-          console.log('Studies updated')
+          console.log('Studies updated', studyContent)
         })
       }
 
