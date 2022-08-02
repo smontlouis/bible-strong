@@ -1,6 +1,6 @@
-import React from 'react'
+import { Component } from 'react'
 
-class ErrorBoundary extends React.Component {
+class ErrorBoundary extends Component {
   state = { error: null, errorInfo: null }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {

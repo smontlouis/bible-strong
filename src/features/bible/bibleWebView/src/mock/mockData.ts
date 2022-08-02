@@ -1,7 +1,7 @@
-import defaultColors from '../../../../../themes/colors'
-import darkColors from '../../../../../themes/darkColors'
-import blackColors from '../../../../../themes/blackColors'
-import sepiaColors from '../../../../../themes/sepiaColors'
+import defaultColors from './themes/colors'
+import darkColors from './themes/darkColors'
+import blackColors from './themes/blackColors'
+import sepiaColors from './themes/sepiaColors'
 
 export const mockSettings = {
   alignContent: 'justify',
@@ -25,7 +25,7 @@ export const mockSelectedVerses = {
 
 export const verseToScroll = 4
 
-export const version = 'LSG'
+export const version = 'INT'
 
 export const mockNotedVerses = {
   '1-4-1': {

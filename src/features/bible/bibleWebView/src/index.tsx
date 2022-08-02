@@ -1,28 +1,32 @@
-import React from 'react'
-import { render } from 'react-dom'
-
-import './index.css'
+import { render, h } from 'preact'
+import { setup } from 'goober'
 import App from './App'
-import {
-  mockHighlightedVerses,
-  mockNotedVerses,
-  mockSettings,
-  verseToScroll,
-  version,
-} from './mock/mockData'
+
+setup(h)
+
+// import {
+//   mockHighlightedVerses,
+//   mockNotedVerses,
+//   mockSettings,
+//   verseToScroll,
+//   version,
+// } from './mock/mockData'
+
+// import mockVerses from './mock/mockVerses'
+// import mockVerses from './mock/mockINTVerses'
 
 // render(
 //   <App
 //     focusVerses={undefined}
 //     highlightedVerses={mockHighlightedVerses}
-//     verses={require('./mock/mockVerses').default}
+//     verses={mockVerses}
 //     notedVerses={mockNotedVerses}
 //     settings={mockSettings}
 //     verseToScroll={verseToScroll}
 //     selectedVerses={{}}
 //     version={version}
 //   />,
-//   document.getElementById('app')
+//   document.body
 // )
 
-render(<App />, document.getElementById('app'))
+render(<App />, document.body)

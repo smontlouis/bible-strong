@@ -1,5 +1,4 @@
-import React from 'react'
-import styled from '@emotion/styled'
+import { styled } from 'goober'
 import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 import { Settings, Notes } from './types'

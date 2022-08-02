@@ -1,5 +1,4 @@
-import React from 'react'
-import styled from '@emotion/styled'
+import { styled } from 'goober'
 import { Settings, DivProps } from './types'
 
 const SvgContainer = styled(

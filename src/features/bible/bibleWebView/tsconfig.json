@@ -1,14 +1,22 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react",
-    "lib": ["ES6", "DOM"],
-    "moduleResolution": "node",
-    "strict": true,
-    "target": "ES5",
-    "baseUrl": ".",
-    "outDir": "dist"
-  },
-  "exclude": ["node_modules", "dist"]
+	"compileOnSave": false,
+	"compilerOptions": {
+		"jsx": "preserve",
+		"jsxFactory": "preact.h",
+		"jsxFragmentFactory": "preact.Fragment",
+		"allowJs": true,
+		"checkJs": true,
+		// "strict": true,
+		"noEmit": true,
+		"moduleResolution": "node",
+		"target": "ESNext",
+		"module": "esnext",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"downlevelIteration": true
+	},
+	"include": ["node_modules/wmr/types.d.ts", "**/*"],
+	"typeAcquisition": {
+		"enable": true
+	}
 }

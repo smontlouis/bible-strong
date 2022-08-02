@@ -1,6 +1,5 @@
-import React from 'react'
 import { DivProps, Settings, TagProps } from './types'
-import styled from '@emotion/styled'
+import { styled } from 'goober'
 import { scaleFontSize } from './scaleFontSize'
 import { OPEN_HIGHLIGHT_TAGS, dispatch } from './dispatch'
 
@@ -13,7 +12,7 @@ const Tag = styled('div')(
   ({ settings: { theme, colors, fontSizeScale } }: DivProps) => ({
     fontFamily: 'arial',
     padding: '2px 4px',
-    borderRadius: 40,
+    borderRadius: '40px',
     color: colors[theme].default,
     backgroundColor: colors[theme].lightGrey,
     fontSize: scaleFontSize(12, fontSizeScale),

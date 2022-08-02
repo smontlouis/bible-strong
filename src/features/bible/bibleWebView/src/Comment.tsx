@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled from '@emotion/styled'
+import { useState, useEffect, useRef } from 'preact/hooks'
+import { styled } from 'goober'
 import { dispatch, NAVIGATE_TO_BIBLE_VIEW, CONSOLE_LOG } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
@@ -20,7 +20,7 @@ const StyledComment = styled('div')(
     padding: scaleFontSize(14, fontSizeScale),
     margin: '10px 0',
     background: colors[theme].lightGrey,
-    borderRadius: 4,
+    borderRadius: '4px',
     position: 'relative',
     overflow: 'hidden',
     textAlign: 'left',

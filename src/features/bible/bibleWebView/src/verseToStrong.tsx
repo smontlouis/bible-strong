@@ -1,5 +1,5 @@
-import React, { useContext } from 'react'
-import styled from '@emotion/styled'
+import { useContext } from 'preact/hooks'
+import { styled } from 'goober'
 import VerseContext from './VerseContext'
 import { dispatch, NAVIGATE_TO_STRONG } from './dispatch'
 import { PropsWithDiv, Verse as VerseProps } from './types'
@@ -12,7 +12,7 @@ const StyledReference = styled('div')(
   }: PropsWithDiv<{ isSelected: boolean }>) => ({
     display: 'inline-block',
     transition: 'background 0.3s ease',
-    borderRadius: 4,
+    borderRadius: '4px',
     padding: '0 5px',
     background: colors[theme].lightPrimary,
 
