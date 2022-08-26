@@ -173,8 +173,6 @@ const useReadableConflict = (diffObj?: Diff) => {
   const getUpdatedReadableConflict = (
     diff?: Diff
   ): ConflictParent[] | undefined => {
-    if (!diff?.updated?.bible) return
-
     const getHighlightValues = (values: { [x: string]: any }) =>
       Object.entries(values).map(([key, value]) => {
         const { title } = formatVerseContent([key])
@@ -214,7 +212,7 @@ const useReadableConflict = (diffObj?: Diff) => {
         } as ConflictItem
       })
 
-    return Object.entries(diff?.updated?.bible)
+    const bibleObj = Object.entries(diff?.updated?.bible || [])
       .map(([entity, values]) => {
         switch (entity) {
           case 'highlights':
@@ -250,6 +248,17 @@ const useReadableConflict = (diffObj?: Diff) => {
         }
       })
       .filter(x => x) as ConflictParent[]
+
+    const photoObj: ConflictParent[] = diff?.updated.photoURL
+      ? [
+          {
+            entity: 'photoURL',
+            content: i18n.t('conflict.photoModified'),
+          },
+        ]
+      : []
+
+    return [...bibleObj, ...photoObj]
   }
 
   const getDeletedReadableConflict = (
@@ -416,6 +425,8 @@ const ConflictModal = () => {
   const isFR = useLanguage()
 
   const { added, updated, deleted } = useReadableConflict(diff)
+
+  console.log(updated)
 
   return (
     <StylizedModal

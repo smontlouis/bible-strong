@@ -20,6 +20,7 @@ export type ConflictEntity =
   | 'studies'
   | 'plan'
   | 'settings'
+  | 'photoURL'
 
 export interface ConflictItem {
   content: string

@@ -32,6 +32,7 @@
   "conflict.notesModified": "Notes",
   "conflict.studiesModified": "Studys",
   "conflict.settingsModified": "Settings",
+  "conflict.photoModified": "Profile image",
   "conflict.tagInEntityDeleted": "Tags deleted in {{entity}}",
   "conflict.highlightDeleted": "Highlight {{highlight}} deleted",
   "conflict.tagDeleted": "Tag {{tag}} deleted",

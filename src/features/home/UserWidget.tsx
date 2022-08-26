@@ -1,31 +1,30 @@
-import React, { useState } from 'react'
-import {
-  ScrollView,
-  Platform,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native'
-import FireAuth from '~helpers/FireAuth'
-import { MaterialIcon, FeatherIcon } from '~common/ui/Icon'
-import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import React, { useState } from 'react'
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
-import RoundedCorner from '~common/ui/RoundedCorner'
-import { useIsPremium } from '~helpers/usePremium'
-import Paragraph from '~common/ui/Paragraph'
+import { useSelector } from 'react-redux'
+import Link from '~common/Link'
+import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import useLogin from '~helpers/useLogin'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
+import RoundedCorner from '~common/ui/RoundedCorner'
+import Text from '~common/ui/Text'
 import extractFirstName from '~helpers/extractFirstName'
 import extractInitials from '~helpers/extractInitials'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Link from '~common/Link'
+import useLogin from '~helpers/useLogin'
+import { useIsPremium } from '~helpers/usePremium'
 import PreloadBible from './PreloadBible'
 
+import { useTranslation } from 'react-i18next'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
-import { useTranslation } from 'react-i18next'
 
 const vodNb = [...Array(6).keys()]
 

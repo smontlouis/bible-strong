@@ -123,6 +123,7 @@ const useComments = (verse: string) => {
       reset()
       setStatus('Pending')
       const [err, res] = await to(fetchComments(verse))
+      console.log({ err })
       if (err) {
         setError(err)
         setStatus('Rejected')

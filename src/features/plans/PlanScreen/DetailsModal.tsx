@@ -58,7 +58,7 @@ const DetailsModal = ({
       HeaderComponent={HeaderComponent}
     >
       <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
-        {image && (
+        {!!image && (
           <Box marginBottom={20} rounded>
             <FastImage
               style={{ width: '100%', height: height || 200 }}
@@ -71,7 +71,7 @@ const DetailsModal = ({
         <Paragraph fontFamily="title" scale={2}>
           {title}
         </Paragraph>
-        {downloads && (
+        {!!downloads && (
           <Paragraph fontFamily="text" scale={-2} color="grey">
             {t('Téléchargé {{downloads}} fois', { downloads })}
           </Paragraph>
@@ -79,7 +79,7 @@ const DetailsModal = ({
         <Paragraph marginTop={20} fontFamily="text" scale={-2}>
           {description}
         </Paragraph>
-        {author.displayName && (
+        {!!author.displayName && (
           <Box marginTop={40} row center>
             {author.photoUrl && (
               <Box borderRadius={10}>

@@ -1,27 +1,26 @@
+import * as Sentry from '@sentry/react-native'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Linking, Share } from 'react-native'
+import * as Animatable from 'react-native-animatable'
+import FastImage from 'react-native-fast-image'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
-import FastImage from 'react-native-fast-image'
-import { Linking, Share } from 'react-native'
 import truncHTML from 'trunc-html'
-import Snackbar from '~common/SnackBar'
-import * as Animatable from 'react-native-animatable'
-import Box from '~common/ui/Box'
-import Link, { LinkBox } from '~common/Link'
-import Text from '~common/ui/Text'
-import { FeatherIcon } from '~common/ui/Icon'
-import StylizedHTMLView from '~common/StylizedHTMLView'
-import { Comment as CommentProps, EGWComment } from './types'
-import { useFireStorage } from '~features/plans/plan.hooks'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
-import * as Sentry from '@sentry/react-native'
-import { useTranslation } from 'react-i18next'
-import Button from '~common/ui/Button'
-import useLanguage from '~helpers/useLanguage'
+import Link, { LinkBox } from '~common/Link'
+import Snackbar from '~common/SnackBar'
+import StylizedHTMLView from '~common/StylizedHTMLView'
 import { Status } from '~common/types'
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
+import useLanguage from '~helpers/useLanguage'
 import { deepl } from '../../../config'
-import { useOnlyPremium } from '~helpers/usePremium'
+import { Comment as CommentProps, EGWComment } from './types'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -90,7 +89,6 @@ const Comment = ({ comment, navigation }: Props) => {
   const cacheImage = useFireStorage(resource.logo)
   const { t } = useTranslation()
   const isFR = useLanguage()
-  const onlyPremium = useOnlyPremium()
 
   const openLink = (href: string, innerHTML: string, type: string) => {
     if (type.includes('egwlink_bible')) {
@@ -149,7 +147,7 @@ https://bible-strong.app
         </Box>
         <Box ml={10} flex>
           <Text title fontSize={20}>
-            {resource.author}
+            {resource.author === 'Ellen G. White' ? 'EGW' : resource.author}
           </Text>
           <Text color="grey" fontSize={14}>
             {resource.name}
@@ -204,9 +202,9 @@ https://bible-strong.app
               <Button
                 reverse
                 small
-                onPress={onlyPremium(
-                  () => status !== 'Pending' && startTranslation(content)
-                )}
+                onPress={() =>
+                  status !== 'Pending' && startTranslation(content)
+                }
               >
                 {status === 'Pending' ? 'Traduction...' : 'Traduire'}
               </Button>

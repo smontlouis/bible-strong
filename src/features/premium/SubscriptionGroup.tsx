@@ -1,19 +1,17 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Button from '~common/ui/Button'
-import { useIapUser, buyProduct } from '~helpers/useInAppPurchases'
-import SubscriptionPlan from './SubscriptionPlan'
-import Loading from '~common/Loading'
-import { mappingSku } from './PremiumScreen'
-import useLogin from '~helpers/useLogin'
-import { useDispatch } from 'react-redux'
-import SnackBar from '~common/SnackBar'
 import to from 'await-to-js'
 import { useTranslation } from 'react-i18next'
-import { useIsPremium } from '~helpers/usePremium'
-import { setSubscription } from '~redux/modules/user'
+import { useDispatch } from 'react-redux'
+import Loading from '~common/Loading'
+import SnackBar from '~common/SnackBar'
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
+import { buyProduct, useIapUser } from '~helpers/useInAppPurchases'
+import useLogin from '~helpers/useLogin'
+import { mappingSku } from './PremiumScreen'
+import SubscriptionPlan from './SubscriptionPlan'
 
 const SubscriptionGroup = () => {
   const [selectedSub, setSelectedSub] = React.useState(
@@ -21,10 +19,9 @@ const SubscriptionGroup = () => {
   )
   const { t } = useTranslation()
   const [processing, setProcessing] = React.useState(false)
-  const { status, products, currentProduct } = useIapUser()
+  const { status, products } = useIapUser()
   const { user } = useLogin()
   const dispatch = useDispatch()
-  const hasPremium = useIsPremium()
 
   const onSubscription = async () => {
     setProcessing(true)
@@ -35,13 +32,6 @@ const SubscriptionGroup = () => {
     }
     setProcessing(false)
   }
-
-  // ! For whatever reason, sometimes the premium status is not updated
-  useEffect(() => {
-    if (currentProduct && !hasPremium) {
-      dispatch(setSubscription('premium'))
-    }
-  }, [currentProduct, dispatch, hasPremium])
 
   if (status === 'Rejected') {
     return (
