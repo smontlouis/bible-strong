@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import to from 'await-to-js'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
@@ -38,6 +39,7 @@ interface Props {
 const useFrenchTranslation = (id: string) => {
   const [status, setStatus] = useState<Status>('Idle')
   const [contentFR, setContentFR] = useState('')
+  const { t } = useTranslation()
 
   const startTranslation = async (text: string) => {
     try {
@@ -57,15 +59,27 @@ const useFrenchTranslation = (id: string) => {
       const data = `auth_key=${deepl.auth_key}&text=${encodeURIComponent(
         text
       )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
-      const res = await fetch('https://api.deepl.com/v2/translate', {
-        method: 'POST',
-        body: data,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': data.length.toString(),
-        },
-      })
-      const result = await res.json()
+      const [err, res] = await to(
+        fetch('https://api.deepl.com/v2/translate', {
+          method: 'POST',
+          body: data,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': data.length.toString(),
+          },
+        })
+      )
+
+      if (err) {
+        console.log('Error', err)
+        return
+      }
+
+      const result = await res?.json()
+
+      if (result.message === 'Quota Exceeded') {
+        Snackbar.show(t('comment.quotaExceeded'))
+      }
 
       await firebaseDb
         .collection('commentaries-FR')
@@ -74,7 +88,7 @@ const useFrenchTranslation = (id: string) => {
 
       setContentFR(result.translations[0].text)
       setStatus('Resolved')
-      Snackbar.show("Merci d'avoir contribué à la traduction !")
+      Snackbar.show(t('comment.thanksTranslation'))
     } catch (e) {
       setStatus('Rejected')
     }

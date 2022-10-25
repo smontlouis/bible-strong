@@ -471,7 +471,7 @@
 				DEVELOPMENT_TEAM = 7PZMKGJ67J;
 				EX_UPDATES_RELEASE_CHANNEL = dev;
 				INFOPLIST_FILE = biblestrong/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 8.2.1;
 				OTHER_LDFLAGS = (
@@ -504,7 +504,7 @@
 				DEVELOPMENT_TEAM = 7PZMKGJ67J;
 				EX_UPDATES_RELEASE_CHANNEL = prod;
 				INFOPLIST_FILE = biblestrong/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 8.2.1;
 				OTHER_LDFLAGS = (
@@ -584,7 +584,7 @@
 				DEVELOPMENT_TEAM = 7PZMKGJ67J;
 				EX_UPDATES_RELEASE_CHANNEL = staging;
 				INFOPLIST_FILE = biblestrong/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 8.2.1;
 				OTHER_LDFLAGS = (

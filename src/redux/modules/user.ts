@@ -155,7 +155,7 @@ const initialState: UserState = {
     data: [],
   },
   needsUpdate: {},
-  fontFamily: 'Literata Book',
+  fontFamily: 'Avenir',
   bible: {
     changelog: {},
     highlights: {},

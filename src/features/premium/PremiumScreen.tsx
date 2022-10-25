@@ -1,20 +1,20 @@
 import React from 'react'
 
-import Text from '~common/ui/Text'
-import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
-import Header from '~common/Header'
-import { FeatherIcon } from '~common/ui/Icon'
+import { Trans, useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
-import { subVariant } from './SubscriptionPlan'
-import { subSkus, useInitIAP } from '~helpers/useInAppPurchases'
-import SubscriptionGroup from './SubscriptionGroup'
-import { useIsPremium } from '~helpers/usePremium'
+import Header from '~common/Header'
+import InlineLink from '~common/InlineLink'
 import { LinkBox } from '~common/Link'
-import ScrollView from '~common/ui/ScrollView'
-import useLogin from '~helpers/useLogin'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
-import { useTranslation, Trans } from 'react-i18next'
+import ScrollView from '~common/ui/ScrollView'
+import Text from '~common/ui/Text'
+import { subSkus, useInitIAP } from '~helpers/useInAppPurchases'
+import useLogin from '~helpers/useLogin'
+import { useIsPremium } from '~helpers/usePremium'
+import SubscriptionGroup from './SubscriptionGroup'
+import { subVariant } from './SubscriptionPlan'
 
 export const [oneMonthSkuMin, oneMonthSku, oneMonthSkuMax] = subSkus
 export const mappingSku = {
@@ -29,22 +29,11 @@ export const mappingSku = {
   },
 }
 
-const ListItem = ({ children }: { children: React.ReactNode }) => (
-  <Box row pb={20} lightShadow>
-    <FeatherIcon name="check" size={25} color="success" />
-    <Text flex wrap marginLeft={20} fontSize={16}>
-      {children}
-    </Text>
-  </Box>
-)
-
 const PremiumScreen = () => {
   const hasPremium = useIsPremium()
   const { isLogged } = useLogin()
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   useInitIAP()
-
-  const isFR = i18n.language === 'fr'
 
   if (hasPremium) {
     return (
@@ -57,15 +46,8 @@ const PremiumScreen = () => {
             </Text>
             <Box mt={20}>
               <Paragraph scale={-1} fontFamily="text">
-                {t(
-                  'Vous êtes actuellement abonné à Bible Strong premium. Vous avez accès aux fonctionnalités suivantes'
-                )}
+                {t('premium.description')}
               </Paragraph>
-            </Box>
-            <Box mt={30}>
-              {isFR && <ListItem>{t('Accès aux commentaires')}</ListItem>}
-              <ListItem>{t('Accès aux études sur le web')}</ListItem>
-              <ListItem>{t("...Et plein d'autres à venir")}</ListItem>
             </Box>
             <LinkBox
               mt={30}
@@ -98,7 +80,7 @@ const PremiumScreen = () => {
           <Box mt={20}>
             <Paragraph scale={-1} fontFamily="text">
               <Trans>
-                Merci de me soutenir ! L'objectif de Bible Strong est de créer{' '}
+                Merci de nous soutenir ! L'objectif de Bible Strong est de créer{' '}
                 <Text bold>un outil complet d'études bibliques</Text> répondant
                 à vos besoins, tout en vous proposant une expérience
                 exceptionnelle.
@@ -111,15 +93,8 @@ const PremiumScreen = () => {
             </Paragraph>
             <Box mt={20} />
             <Paragraph scale={-1} fontFamily="text">
-              {t(
-                "Qu'est-ce qu'un sponsor ? C'est un donateur qui soutient l'application et qui a accès aux nouvelles fonctionnalités en priorité. Ces nouvelles fonctionnalités sont ensuite disponibles aux grand public après un certain délai."
-              )}{' '}
+              {t('app.whatIsASponsor')}
             </Paragraph>
-          </Box>
-          <Box mt={30}>
-            {isFR && <ListItem>{t('Accès aux commentaires')}</ListItem>}
-            <ListItem>{t('Accès aux études sur le web')}</ListItem>
-            <ListItem>{t("...Et plein d'autres à venir")}</ListItem>
           </Box>
           <Paragraph scale={-1} fontFamily="text">
             {t(
@@ -127,9 +102,19 @@ const PremiumScreen = () => {
             )}
           </Paragraph>
           <Paragraph scale={-1} fontFamily="text" mt={10}>
-            {t(
-              'Vous pouvez également me soutenir par paypal ou tipeee pour devenir un sponsor. \nMerci de votre confiance et bonne étude!'
-            )}
+            <Trans>
+              Vous pouvez également me soutenir par
+              <InlineLink href="https://www.paypal.me/smontlouis">
+                {' '}
+                paypal{' '}
+              </InlineLink>{' '}
+              ou{' '}
+              <InlineLink href="https://fr.tipeee.com/smontlouis">
+                virement
+              </InlineLink>{' '}
+              pour devenir un sponsor. {'\n'}Merci de votre confiance et bonne
+              étude !
+            </Trans>
           </Paragraph>
         </Box>
         {!isLogged ? (

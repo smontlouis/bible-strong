@@ -18,9 +18,6 @@ import migrations from './migrations'
 import reducer from '~redux/modules/reducer'
 
 function configureStore() {
-  const composeEnhancers =
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-
   const persistConfig = {
     key: 'root',
     keyPrefix: '',
@@ -47,8 +44,13 @@ function configureStore() {
     thunk,
   ]
 
+  if (__DEV__) {
+    const createDebugger = require('redux-flipper').default
+    middleware.push(createDebugger())
+  }
+
   const persistedReducer = persistReducer(persistConfig, reducer)
-  const store = composeEnhancers(applyMiddleware(...middleware))(createStore)(
+  const store = compose(applyMiddleware(...middleware))(createStore)(
     persistedReducer
   )
   const persistor = persistStore(store)
