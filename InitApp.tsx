@@ -1,36 +1,35 @@
-import React from 'react'
-import { ThemeProvider } from 'emotion-theming'
-import { Provider as PaperProvider } from 'react-native-paper'
-import { StatusBar, AppState, AppStateStatus, Alert } from 'react-native'
-import to from 'await-to-js'
-import { PersistGate } from 'redux-persist/integration/react'
-import { connect } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
-import * as Updates from 'expo-updates'
-import compose from 'recompose/compose'
 import analytics from '@react-native-firebase/analytics'
-import { MenuProvider } from 'react-native-popup-menu'
+import * as Sentry from '@sentry/react-native'
+import { ThemeProvider } from 'emotion-theming'
+import * as Updates from 'expo-updates'
+import React from 'react'
 import { withTranslation } from 'react-i18next'
+import { AppState, AppStateStatus, StatusBar } from 'react-native'
+import { Provider as PaperProvider } from 'react-native-paper'
+import { MenuProvider } from 'react-native-popup-menu'
+import { connect } from 'react-redux'
+import compose from 'recompose/compose'
+import { PersistGate } from 'redux-persist/integration/react'
 
-import ErrorBoundary from '~common/ErrorBoundary'
 import ConflictModal from '~common/ConflictModal'
+import ErrorBoundary from '~common/ErrorBoundary'
 import OnBoarding from '~features/onboarding/OnBoarding'
 
+import { NavigationParams, NavigationState } from 'react-navigation'
+import { Persistor } from 'redux-persist'
+import Changelog from '~common/Changelog'
+import SnackBar from '~common/SnackBar'
+import withFireAuth from '~common/withFireAuth'
+import { DBStateProvider } from '~helpers/databaseState'
+import AppNavigator from '~navigation/AppNavigator'
+import { RootState } from '~redux/modules/reducer'
 import {
   getChangelog,
-  getVersionUpdate,
   getDatabaseUpdate,
+  getVersionUpdate,
 } from '~redux/modules/user'
-import withFireAuth from '~common/withFireAuth'
-import AppNavigator from '~navigation/AppNavigator'
-import Changelog from '~common/Changelog'
-import getTheme, { Theme } from '~themes/index'
 import { paperTheme } from '~themes/default'
-import { DBStateProvider } from '~helpers/databaseState'
-import { RootState } from '~redux/modules/reducer'
-import { NavigationState, NavigationParams } from 'react-navigation'
-import { Persistor } from 'redux-persist'
-import SnackBar from '~common/SnackBar'
+import getTheme, { Theme } from '~themes/index'
 
 interface Props {
   theme: string
@@ -159,17 +158,15 @@ class InitApp extends React.Component<Props> {
           >
             <PersistGate loading={null} persistor={persistor}>
               <DBStateProvider>
-                <>
-                  <ErrorBoundary>
-                    <AppNavigator
-                      screenProps={{ theme: currentTheme }}
-                      onNavigationStateChange={this.onNavigationStateChange}
-                    />
-                  </ErrorBoundary>
-                  <Changelog />
-                  <OnBoarding />
-                  <ConflictModal />
-                </>
+                <ErrorBoundary>
+                  <AppNavigator
+                    screenProps={{ theme: currentTheme }}
+                    onNavigationStateChange={this.onNavigationStateChange}
+                  />
+                </ErrorBoundary>
+                <Changelog />
+                <OnBoarding />
+                <ConflictModal />
               </DBStateProvider>
             </PersistGate>
           </MenuProvider>

@@ -6,7 +6,7 @@ import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
-import { premiumModalAtom } from '../state/app'
+import { quotaModalAtom } from '../state/app'
 import styled from '~styled'
 import { LinkBox } from './Link'
 import Box from './ui/Box'
@@ -32,19 +32,19 @@ interface Props {
   navigation: NavigationStackProp<any>
 }
 
-const PremiumModal = ({ navigation }: Props) => {
+const QuotaModal = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const isLightTheme = useSelector(
     (state: RootState) =>
       state.user.bible.settings.theme === 'default' ||
       state.user.bible.settings.theme === 'sepia'
   )
-  const [showPremiumModal, setShowPremiumModal] = useAtom(premiumModalAtom)
+  const [showQuotaModal, setShowQuotaModal] = useAtom(quotaModalAtom)
 
   return (
     <StylizedModal
-      isOpen={showPremiumModal}
-      onClosed={() => setShowPremiumModal(false)}
+      isOpen={showQuotaModal}
+      onClosed={() => setShowQuotaModal(false)}
       animationDuration={200}
       position="center"
       backdropOpacity={0.3}
@@ -56,8 +56,8 @@ const PremiumModal = ({ navigation }: Props) => {
           <Lottie
             autoPlay
             style={{
-              width: '100%',
-              height: 280,
+              width: 100,
+              height: 100,
             }}
             source={
               isLightTheme
@@ -67,16 +67,12 @@ const PremiumModal = ({ navigation }: Props) => {
           />
         </Box>
         <Box px={20} pb={20}>
-          <Text textAlign="center">
-            {t(
-              'Cette fonctionnalité est réservée aux sponsors,\n Devenez vous-même sponsor ou attendez quelques jours !'
-            )}
-          </Text>
+          <Text textAlign="center">{t('sponsor.quotaReached')}</Text>
         </Box>
         <Box p={20}>
           <Button
             onPress={() => {
-              setShowPremiumModal(false)
+              setShowQuotaModal(false)
               navigation.navigate('Premium')
             }}
           >
@@ -84,7 +80,7 @@ const PremiumModal = ({ navigation }: Props) => {
           </Button>
           <LinkBox
             onPress={() => {
-              setShowPremiumModal(false)
+              setShowQuotaModal(false)
             }}
             p={20}
             pb={0}
@@ -97,4 +93,4 @@ const PremiumModal = ({ navigation }: Props) => {
   )
 }
 
-export default withNavigation(PremiumModal)
+export default withNavigation(QuotaModal)

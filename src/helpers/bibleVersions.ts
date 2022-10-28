@@ -251,6 +251,42 @@ export const versions: {
     c: '© 2013',
     type: 'fr',
   },
+  NASB2020: {
+    id: 'NASB2020',
+    name: 'New American Standard Bible 2020',
+    c: '© 2020 The Lockman Foundation',
+    type: 'en',
+  },
+  NET: {
+    id: 'NET',
+    name: 'New English Translation',
+    c: '© 1996-2016 Biblical Studies Press, L.L.C.',
+    type: 'en',
+  },
+  GW: {
+    id: 'GW',
+    name: 'God’s Word Translation',
+    c: '© 1995 God’s Word to the Nations Bible Society',
+    type: 'en',
+  },
+  CSB: {
+    id: 'CSB',
+    name: 'Christian Standard Bible',
+    c: '© 2017 Holman Bible Publishers',
+    type: 'en',
+  },
+  NLT: {
+    id: 'NLT',
+    name: 'New Living Translation',
+    c: '© 1996, 2004, 2015 Tyndale House Foundation',
+    type: 'en',
+  },
+  AMP: {
+    id: 'AMP',
+    name: 'Amplified Bible',
+    c: '© 2015 by The Lockman Foundation, La Habra, CA 90631',
+    type: 'en',
+  },
   BHS: {
     id: 'BHS',
     name: 'Biblia Hebraica Stuttgartensia (AT)',
@@ -275,6 +311,11 @@ export const versions: {
   TR1894: {
     id: 'TR1894',
     name: 'Scrivener’s Textus Receptus 1894 (NT)',
+  },
+  DEL: {
+    id: 'DEL',
+    name: "Tanach and Delitzsch's Hebrew New Testament",
+    c: '© Bible Society in Israel, 2018.',
   },
 }
 
@@ -321,6 +362,13 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'SBLGNT':
       case 'TR1624':
       case 'TR1894':
+      case 'AMP':
+      case 'NASB2020':
+      case 'NET':
+      case 'GW':
+      case 'CSB':
+      case 'NLT':
+      case 'DEL':
       case 'LXX': {
         sectionArray[2].data.push(version)
         return sectionArray
@@ -352,6 +400,12 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
       case 'INT':
       case 'NKJV':
       case 'NIV':
+      case 'AMP':
+      case 'NASB2020':
+      case 'NET':
+      case 'GW':
+      case 'CSB':
+      case 'NLT':
       case 'ESV': {
         sectionArray[0].data.push(versionEn)
         return sectionArray
@@ -360,6 +414,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
       case 'SBLGNT':
       case 'TR1624':
       case 'TR1894':
+      case 'DEL':
       case 'LXX': {
         sectionArray[1].data.push(versionEn)
         return sectionArray

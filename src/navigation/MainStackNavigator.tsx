@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Portal } from 'react-native-paper'
 import { createStackNavigator } from 'react-navigation-stack'
-import PremiumModal from '~common/PremiumModal'
+import QuotaModal from '~common/QuotaModal'
 
 import MainTabNavigator from './MainTabNavigator'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
@@ -46,6 +46,9 @@ import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
 import PremiumScreen from '~features/premium/PremiumScreen'
 import ConcordanceScreen from '~features/bible/ConcordanceScreen'
 import CommentariesScreen from '~features/commentaries/CommentariesScreen'
+import AtomsPreloader from '~common/AtomsPreloader'
+import Box from '~common/ui/Box'
+import { Provider } from 'jotai'
 
 const MainStackNavigator = createStackNavigator(
   {
@@ -111,8 +114,14 @@ const MainStackNavigator = createStackNavigator(
 const MainStack = props => (
   <>
     <Portal.Host>
-      <MainStackNavigator {...props} />
-      <PremiumModal />
+      <Provider>
+        <Suspense fallback={null}>
+          <AtomsPreloader />
+          <Box style={{ flex: 1 }} bg="blue" />
+          {/* <MainStackNavigator {...props} /> */}
+          <QuotaModal />
+        </Suspense>
+      </Provider>
     </Portal.Host>
   </>
 )

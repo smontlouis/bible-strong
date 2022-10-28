@@ -9,7 +9,7 @@ export const textStyle = {
   fontSize: 19,
 }
 
-const styles = theme => ({
+export const styles = theme => ({
   h1: {
     fontWeight: 'bold',
     fontSize: 24,

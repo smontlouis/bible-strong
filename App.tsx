@@ -1,19 +1,20 @@
-import 'react-native-root-siblings'
-import React, { useState, useEffect, useCallback } from 'react'
-import { LogBox, ActivityIndicator, View, StatusBar, Text } from 'react-native'
 import * as Icon from '@expo/vector-icons'
-import * as Font from 'expo-font'
-import { Provider } from 'react-redux'
-import * as Sentry from 'sentry-expo'
-import { setAutoFreeze } from 'immer'
 import PushNotificationIOS from '@react-native-community/push-notification-ios'
-import PushNotification, { Importance } from 'react-native-push-notification'
 import analytics from '@react-native-firebase/analytics'
+import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
+import { setAutoFreeze } from 'immer'
+import React, { Suspense, useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
+import PushNotification, { Importance } from 'react-native-push-notification'
+import 'react-native-root-siblings'
+import { Provider as ReduxProvider } from 'react-redux'
+import * as Sentry from 'sentry-expo'
+import AtomsPreloader from '~common/AtomsPreloader'
 
-import { store, persistor } from '~redux/store'
-import InitApp from './InitApp'
+import { persistor, store } from '~redux/store'
 import { setI18n } from './i18n'
+import InitApp from './InitApp'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -123,12 +124,12 @@ const App = () => {
   }
 
   return (
-    <Provider store={store}>
+    <ReduxProvider store={store}>
       <StatusBar translucent />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <InitApp persistor={persistor} />
       </View>
-    </Provider>
+    </ReduxProvider>
   )
 }
 

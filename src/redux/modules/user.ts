@@ -528,7 +528,7 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         return
       }
 
-      console.log(obj)
+      // console.log(obj)
       conflictStateProxy.diff = obj
       conflictStateProxy.onDispatchUserSuccess = dispatchUserSuccess(
         userData,
@@ -548,26 +548,6 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
       }
       dispatchUserSuccess(userData, studies)()
     }
-  }
-}
-
-export function getUserData() {
-  return async (dispatch: any, getState: any) => {
-    const { id } = getState().user
-    if (!id) {
-      return
-    }
-
-    const userRef = firebaseDb.collection('users').doc(id)
-    const userDoc = await userRef.get()
-    const userData = userDoc.data()
-
-    console.log(userData)
-    // dispatch({
-    //   type: USER_DATA_SUCCESS,
-    //   profile: userData,
-    //   studies,
-    // })
   }
 }
 

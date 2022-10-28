@@ -1,10 +1,12 @@
 import algoliasearch from 'algoliasearch/lite'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Configure, InstantSearch } from 'react-instantsearch-native'
 import Container from '~common/ui/Container'
 import useDebounce from '~helpers/useDebounce'
 import useLanguage from '~helpers/useLanguage'
+import { useQuota } from '~helpers/usePremium'
+import { usePrevious } from '~helpers/usePrevious'
 import i18n from '~i18n'
 import { algoliaConfig } from '../../../config'
 import Filters from './Filters'
@@ -21,6 +23,22 @@ const SearchScreen = ({ navigation }) => {
   const isFR = useLanguage()
   const [searchValue, setSearchValue] = React.useState('')
   const debouncedSearchValue = useDebounce(searchValue, 500)
+  const previousValue = usePrevious(debouncedSearchValue)
+  const checkSearchQuota = useQuota('bibleSearch')
+  const [canQuery, setCanQuery] = React.useState(true)
+
+  useEffect(() => {
+    if (previousValue !== debouncedSearchValue && debouncedSearchValue) {
+      checkSearchQuota(
+        () => {
+          setCanQuery(true)
+        },
+        () => {
+          setCanQuery(false)
+        }
+      )
+    }
+  }, [debouncedSearchValue, previousValue, checkSearchQuota])
 
   return (
     <>
@@ -34,7 +52,10 @@ const SearchScreen = ({ navigation }) => {
             onChange={setSearchValue}
           />
           <Filters />
-          <SearchResults searchValue={debouncedSearchValue} />
+          <SearchResults
+            canQuery={canQuery}
+            searchValue={debouncedSearchValue}
+          />
         </Container>
       </InstantSearch>
     </>
