@@ -2156,6 +2156,11 @@
     redux-thunk "^2.3.0"
     reselect "^4.0.0"
 
+"@rnx-kit/dep-check@^1.13.3":
+  version "1.13.3"
+  resolved "https://registry.yarnpkg.com/@rnx-kit/dep-check/-/dep-check-1.13.3.tgz#0d963b33ffd6b380037fbec34b37b727811cd43e"
+  integrity sha512-gVVCFKFNCGWxDaZGBi2t80Lr5h3kNyLBRmXhMZVd5EVaWkPdCjWzeS2P8XfBTFGZJbCgen/LK+qYVCc0JJHeGw==
+
 "@sentry/browser@6.12.0":
   version "6.12.0"
   resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-6.12.0.tgz#970cd68fa117a1e1336fdb373e3b1fa76cd63e2d"

@@ -184,6 +184,7 @@
     "@babel/plugin-proposal-optional-chaining": "^7.6.0",
     "@babel/runtime": "7.12.18",
     "@react-native-community/eslint-config": "^1.0.0",
+    "@rnx-kit/dep-check": "^1.13.3",
     "@storybook/addon-actions": "^5.3.18",
     "@storybook/addon-links": "^5.3.18",
     "@storybook/addons": "^5.3.18",
@@ -224,5 +225,29 @@
   "resolutions": {
     "@babel/core": "7.12.*",
     "@babel/runtime": "7.12.*"
+  },
+  "rnx-kit": {
+    "reactNativeVersion": "^0.66",
+    "kitType": "app",
+    "capabilities": [
+      "animation",
+      "babel-preset-react-native",
+      "core",
+      "core-android",
+      "core-ios",
+      "datetime-picker",
+      "filesystem",
+      "gestures",
+      "jest",
+      "modal",
+      "netinfo",
+      "react",
+      "react-dom",
+      "react-test-renderer",
+      "screens",
+      "sqlite",
+      "svg",
+      "webview"
+    ]
   }
 }
