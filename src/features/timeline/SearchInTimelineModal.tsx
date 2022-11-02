@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Modalize } from 'react-native-modalize'
 import { Theme } from '~themes'
 import { useTheme } from 'emotion-theming'
@@ -21,6 +21,8 @@ import { LinkBox } from '~common/Link'
 import FastImage from 'react-native-fast-image'
 import Empty from '~common/Empty'
 import { useTranslation } from 'react-i18next'
+import { usePrevious } from '~helpers/usePrevious'
+import { useQuota } from '~helpers/usePremium'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -42,6 +44,22 @@ const SearchInTimelineModal = ({
   const theme: Theme = useTheme()
   const [searchValue, setSearchValue] = React.useState('')
   const debouncedSearchValue = useDebounce(searchValue, 500)
+  const previousValue = usePrevious(debouncedSearchValue)
+  const checkSearchQuota = useQuota('timelineSearch')
+  const [canQuery, setCanQuery] = React.useState(true)
+
+  useEffect(() => {
+    if (previousValue !== debouncedSearchValue && debouncedSearchValue) {
+      checkSearchQuota(
+        () => {
+          setCanQuery(true)
+        },
+        () => {
+          setCanQuery(false)
+        }
+      )
+    }
+  }, [debouncedSearchValue, previousValue, checkSearchQuota])
 
   const onOpenEvent = event => {
     eventModalRef.current?.open()
@@ -77,27 +95,28 @@ const SearchInTimelineModal = ({
         onEndReached: () => {
           hasMore && refine()
         },
-        ListHeaderComponent: !debouncedSearchValue ? (
-          <Empty
-            source={require('~assets/images/search-loop.json')}
-            message={t('Faites une recherche dans la Bible !')}
-          />
-        ) : error ? (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t(
-              "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
-            )}
-          />
-        ) : (
-          <Box paddingHorizontal={20}>
-            <Text title fontSize={16} color="grey">
-              {t('{{nbHits}} occurences trouvées dans la bible', {
-                nbHits: allSearchResults?.nbHits,
-              })}
-            </Text>
-          </Box>
-        ),
+        ListHeaderComponent:
+          !debouncedSearchValue || !canQuery ? (
+            <Empty
+              source={require('~assets/images/search-loop.json')}
+              message={t('Faites une recherche dans la Bible !')}
+            />
+          ) : error ? (
+            <Empty
+              source={require('~assets/images/empty.json')}
+              message={t(
+                "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
+              )}
+            />
+          ) : (
+            <Box paddingHorizontal={20}>
+              <Text title fontSize={16} color="grey">
+                {t('{{nbHits}} occurences trouvées dans la bible', {
+                  nbHits: allSearchResults?.nbHits,
+                })}
+              </Text>
+            </Box>
+          ),
         renderItem: ({ item }) => (
           <LinkBox mx={20} my={20} onPress={() => onOpenEvent(item)} row>
             {item.image && (

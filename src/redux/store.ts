@@ -23,7 +23,7 @@ function configureStore() {
     keyPrefix: '',
     storage: FilesystemStorage,
     stateReconciler: autoMergeLevel2,
-    version: 23,
+    version: 24,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations, { debug: true }),

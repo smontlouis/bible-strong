@@ -1,54 +1,52 @@
-import React, { Suspense } from 'react'
+import React from 'react'
 import { Portal } from 'react-native-paper'
 import { createStackNavigator } from 'react-navigation-stack'
 import QuotaModal from '~common/QuotaModal'
 
-import MainTabNavigator from './MainTabNavigator'
+import Box from '~common/ui/Box'
+import BibleCompareVerses from '~features/bible/BibleCompareVerses'
+import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
-import VersionSelectorScreen from '~features/bible/VersionSelectorScreen'
+import BibleStrongDetailScreen from '~features/bible/BibleStrongDetailScreen'
 import BibleVerseDetailScreen from '~features/bible/BibleVerseDetailScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
-import BibleStrongDetailScreen from '~features/bible/BibleStrongDetailScreen'
 import ConcordanceByBookScreen from '~features/bible/ConcordanceByBookScreen'
-import BibleViewScreen from '~features/bible/BibleScreen'
-import BibleCompareVerses from '~features/bible/BibleCompareVerses'
-import LexiqueScreen from '~features/lexique/LexiqueScreen'
-import StudiesScreen from '~features/studies/StudiesScreen'
-import EditStudyScreen from '~features/studies/EditStudyScreen'
-import HighlightScreen from '~features/settings/HighlightsScreen'
+import ConcordanceScreen from '~features/bible/ConcordanceScreen'
+import HistoryScreen from '~features/bible/HistoryScreen'
+import ToggleCompareVersesScreen from '~features/bible/ToggleCompareVersesScreen'
+import VersionSelectorScreen from '~features/bible/VersionSelectorScreen'
+import CommentariesScreen from '~features/commentaries/CommentariesScreen'
+import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
 import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
-import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
+import LexiqueScreen from '~features/lexique/LexiqueScreen'
+import NaveDetailScreen from '~features/nave/NaveDetailScreen'
+import NaveScreen from '~features/nave/NaveScreen'
+import NaveWarningScreen from '~features/nave/NaveWarningScreen'
+import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
+import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
+import PlanSelectScreen from '~features/plans/PlanSelectScreen'
+import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
+import PremiumScreen from '~features/premium/PremiumScreen'
+import LocalSearchScreen from '~features/search/LocalSearchScreen'
+import SearchScreen from '~features/search/SearchScreen'
+import FAQScreen from '~features/settings/FAQScreen'
+import HighlightScreen from '~features/settings/HighlightsScreen'
 import LoginScreen from '~features/settings/LoginScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
 import SupportScreen from '~features/settings/SupportScreen'
-import FAQScreen from '~features/settings/FAQScreen'
-import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
-import ChangelogScreen from '../features/settings/ChangelogScreen'
-import PericopeScreen from '../features/bible/PericopeScreen'
-import HistoryScreen from '~features/bible/HistoryScreen'
-import TagsScreen from '../features/settings/TagsScreen'
-import TagScreen from '../features/settings/TagScreen'
-import DownloadsScreen from '../features/settings/DownloadsScreen'
-import SearchScreen from '~features/search/SearchScreen'
-import LocalSearchScreen from '~features/search/LocalSearchScreen'
-import NaveScreen from '~features/nave/NaveScreen'
-import NaveDetailScreen from '~features/nave/NaveDetailScreen'
-import NaveWarningScreen from '~features/nave/NaveWarningScreen'
-import ToggleCompareVersesScreen from '~features/bible/ToggleCompareVersesScreen'
-import StorybookScreen from '../../storybook/StoryBookScreen'
-import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
-import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
-import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
-import PlanSelectScreen from '~features/plans/PlanSelectScreen'
-import TimelineScreen from '~features/timeline/TimelineScreen'
+import EditStudyScreen from '~features/studies/EditStudyScreen'
+import StudiesScreen from '~features/studies/StudiesScreen'
 import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
-import PremiumScreen from '~features/premium/PremiumScreen'
-import ConcordanceScreen from '~features/bible/ConcordanceScreen'
-import CommentariesScreen from '~features/commentaries/CommentariesScreen'
-import AtomsPreloader from '~common/AtomsPreloader'
-import Box from '~common/ui/Box'
-import { Provider } from 'jotai'
+import TimelineScreen from '~features/timeline/TimelineScreen'
+import StorybookScreen from '../../storybook/StoryBookScreen'
+import PericopeScreen from '../features/bible/PericopeScreen'
+import ChangelogScreen from '../features/settings/ChangelogScreen'
+import DownloadsScreen from '../features/settings/DownloadsScreen'
+import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
+import TagScreen from '../features/settings/TagScreen'
+import TagsScreen from '../features/settings/TagsScreen'
+import MainTabNavigator from './MainTabNavigator'
 
 const MainStackNavigator = createStackNavigator(
   {
@@ -114,14 +112,8 @@ const MainStackNavigator = createStackNavigator(
 const MainStack = props => (
   <>
     <Portal.Host>
-      <Provider>
-        <Suspense fallback={null}>
-          <AtomsPreloader />
-          <Box style={{ flex: 1 }} bg="blue" />
-          {/* <MainStackNavigator {...props} /> */}
-          <QuotaModal />
-        </Suspense>
-      </Provider>
+      <MainStackNavigator {...props} />
+      <QuotaModal />
     </Portal.Host>
   </>
 )

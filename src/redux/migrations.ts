@@ -2,10 +2,11 @@ import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 import blackColors from '~themes/blackColors'
 import sepiaColors from '~themes/sepiaColors'
+import { RootState } from './modules/reducer'
 
 export default {
   // Added 'press' in 'settings'
-  0: state => {
+  0: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -20,7 +21,7 @@ export default {
       },
     }
   },
-  1: state => {
+  1: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -32,7 +33,7 @@ export default {
       },
     }
   },
-  2: state => {
+  2: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -47,7 +48,7 @@ export default {
       },
     }
   },
-  3: state => {
+  3: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -60,7 +61,7 @@ export default {
       },
     }
   },
-  4: state => {
+  4: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -69,7 +70,7 @@ export default {
       },
     }
   },
-  5: state => {
+  5: (state: RootState) => {
     return {
       ...state,
       bible: {
@@ -77,7 +78,7 @@ export default {
       },
     }
   },
-  6: state => {
+  6: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -95,7 +96,7 @@ export default {
       },
     }
   },
-  7: state => {
+  7: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -107,7 +108,7 @@ export default {
       },
     }
   },
-  8: state => {
+  8: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -118,7 +119,7 @@ export default {
       },
     }
   },
-  9: state => {
+  9: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -133,7 +134,7 @@ export default {
       },
     }
   },
-  10: state => {
+  10: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -163,7 +164,7 @@ export default {
       },
     }
   },
-  11: state => {
+  11: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -178,7 +179,7 @@ export default {
       },
     }
   },
-  12: state => {
+  12: (state: RootState) => {
     return {
       ...state,
       bible: {
@@ -186,7 +187,7 @@ export default {
       },
     }
   },
-  13: state => {
+  13: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -198,7 +199,7 @@ export default {
       },
     }
   },
-  14: state => {
+  14: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -212,7 +213,7 @@ export default {
       },
     }
   },
-  15: state => {
+  15: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -221,7 +222,7 @@ export default {
       },
     }
   },
-  16: state => {
+  16: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -230,7 +231,7 @@ export default {
       },
     }
   },
-  17: state => {
+  17: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -239,7 +240,7 @@ export default {
       },
     }
   },
-  18: state => {
+  18: (state: RootState) => {
     return {
       ...state,
       bible: {
@@ -248,7 +249,7 @@ export default {
       },
     }
   },
-  19: state => {
+  19: (state: RootState) => {
     return {
       ...state,
       plan: {
@@ -257,7 +258,7 @@ export default {
       },
     }
   },
-  20: state => {
+  20: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -272,7 +273,7 @@ export default {
       },
     }
   },
-  21: state => {
+  21: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -285,7 +286,7 @@ export default {
       },
     }
   },
-  22: state => {
+  22: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -303,7 +304,7 @@ export default {
       },
     }
   },
-  23: state => {
+  23: (state: RootState) => {
     return {
       ...state,
       user: {
@@ -317,6 +318,25 @@ export default {
               sepia: sepiaColors,
             },
           },
+        },
+      },
+    }
+  },
+  24: (state: RootState) => {
+    return {
+      ...state,
+      quota: {
+        bibleSearch: {
+          remaining: 10,
+          lastDate: 0,
+        },
+        timelineSearch: {
+          remaining: 10,
+          lastDate: 0,
+        },
+        translateComments: {
+          remaining: 10,
+          lastDate: 0,
         },
       },
     }

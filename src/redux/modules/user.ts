@@ -54,6 +54,9 @@ export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
 
 export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
 export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
+export const UPDATE_QUOTA = 'user/UPDATE_QUOTA'
+
+export const RESET_QUOTA = 'user/RESET_QUOTA'
 
 export interface Study {
   id: string
@@ -133,6 +136,18 @@ export interface UserState {
       }
     }
   }
+  quota: {
+    bibleSearch: QuotaProps
+    timelineSearch: QuotaProps
+    translateComments: QuotaProps
+  }
+}
+
+export type QuotaType = keyof UserState['quota']
+
+export type QuotaProps = {
+  remaining: number
+  lastDate: number
 }
 
 const initialState: UserState = {
@@ -184,6 +199,20 @@ const initialState: UserState = {
       compare: {
         [getLangIsFr() ? 'LSG' : 'KJV']: true,
       },
+    },
+  },
+  quota: {
+    bibleSearch: {
+      remaining: 10,
+      lastDate: 0,
+    },
+    timelineSearch: {
+      remaining: 10,
+      lastDate: 0,
+    },
+    translateComments: {
+      remaining: 10,
+      lastDate: 0,
     },
   },
 }
@@ -373,6 +402,52 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
     case SET_SUBSCRIPTION: {
       draft.subscription = action.payload
+      break
+    }
+
+    case UPDATE_QUOTA: {
+      const quotaType = action.payload as QuotaType
+      draft.quota[quotaType].remaining = draft.quota[quotaType].remaining - 1
+      draft.quota[quotaType].lastDate = Date.now()
+      break
+    }
+    case RESET_QUOTA: {
+      const now = Date.now()
+      const today = new Date(now)
+      today.setHours(0, 0, 0, 0)
+      const todayTimestamp = today.getTime()
+
+      const bibleSearchQuota = draft.quota.bibleSearch
+      const timelineSearchQuota = draft.quota.timelineSearch
+      const translateCommentsQuota = draft.quota.translateComments
+
+      console.log({
+        bibleSearchQuota,
+        timelineSearchQuota,
+        translateCommentsQuota,
+      })
+
+      if (bibleSearchQuota.lastDate < todayTimestamp) {
+        draft.quota.bibleSearch = {
+          remaining: 10,
+          lastDate: todayTimestamp,
+        }
+      }
+
+      if (timelineSearchQuota.lastDate < todayTimestamp) {
+        draft.quota.timelineSearch = {
+          remaining: 10,
+          lastDate: todayTimestamp,
+        }
+      }
+
+      if (translateCommentsQuota.lastDate < todayTimestamp) {
+        draft.quota.translateComments = {
+          remaining: 10,
+          lastDate: todayTimestamp,
+        }
+      }
+
       break
     }
     default: {
@@ -650,5 +725,19 @@ export function setSubscription(payload: SubscriptionType) {
   return {
     type: SET_SUBSCRIPTION,
     payload,
+  }
+}
+
+// Quota
+export function updateQuota(payload: QuotaType) {
+  return {
+    type: UPDATE_QUOTA,
+    payload,
+  }
+}
+
+export function resetQuotaEveryDay() {
+  return {
+    type: RESET_QUOTA,
   }
 }

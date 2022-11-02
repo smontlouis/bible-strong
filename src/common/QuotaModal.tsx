@@ -13,6 +13,7 @@ import Box from './ui/Box'
 import Button from './ui/Button'
 import Text from './ui/Text'
 import { useAtom } from 'jotai'
+import useResetQuotaEveryDay from '~helpers/useResetQuotas'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
@@ -34,6 +35,8 @@ interface Props {
 
 const QuotaModal = ({ navigation }: Props) => {
   const { t } = useTranslation()
+  useResetQuotaEveryDay()
+
   const isLightTheme = useSelector(
     (state: RootState) =>
       state.user.bible.settings.theme === 'default' ||

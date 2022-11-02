@@ -1,25 +1,20 @@
 import React from 'react'
-import {
-  ScrollView as RNScrollView,
-  Linking,
-  TouchableOpacity,
-  Alert,
-} from 'react-native'
+import { Linking, ScrollView as RNScrollView } from 'react-native'
 
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { HomeScrollView } from '~common/ui/ScrollView'
-import StrongOfTheDay from './StrongOfTheDay'
-import WordOfTheDay from './WordOfTheDay'
-import NaveOfTheDay from './NaveOfTheDay'
-import UserWidget from './UserWidget'
 import Button from '~common/ui/Button'
+import { FeatherIcon } from '~common/ui/Icon'
+import { HomeScrollView } from '~common/ui/ScrollView'
+import Text from '~common/ui/Text'
+import NaveOfTheDay from './NaveOfTheDay'
 import PlanHome from './PlanHome'
-import TimelineWidget from './TimelineWidget'
 import PremiumWidget from './PremiumWidget'
+import StrongOfTheDay from './StrongOfTheDay'
 import SwitchTheme from './SwitchTheme'
 import TheBibleProject from './TheBibleProjectPlan'
-import { FeatherIcon } from '~common/ui/Icon'
+import TimelineWidget from './TimelineWidget'
+import UserWidget from './UserWidget'
+import WordOfTheDay from './WordOfTheDay'
 
 import { useTranslation } from 'react-i18next'
 

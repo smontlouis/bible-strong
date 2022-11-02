@@ -1,7 +1,6 @@
 import React from 'react'
 import { ScrollView } from 'react-native'
 import Modal from 'react-native-modalbox'
-import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
@@ -16,6 +15,8 @@ import { logTypes } from '~helpers/changelog'
 import { saveAllLogsAsSeen } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import styled from '~styled/index'
+import { RootState } from '~redux/modules/reducer'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
@@ -31,7 +32,9 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
   elevation: 2,
 }))
 
-const getTagColor = type => {
+type LogType = keyof typeof logTypes
+
+const getTagColor = (type: LogType) => {
   switch (type) {
     case logTypes.BUG: {
       return '#e74c3c'
@@ -50,14 +53,14 @@ const getTagColor = type => {
   }
 }
 
-const Tag = styled.View(({ type, theme }) => ({
+const Tag = styled.View(({ type }: { type: LogType }) => ({
   marginLeft: 10,
   padding: 3,
   backgroundColor: getTagColor(type),
   borderRadius: 3,
 }))
 
-const hasNewLogs = (seenLogs, changelog) => {
+const hasNewLogs = (seenLogs: string[], changelog: any) => {
   if (!changelog.length) {
     return false
   }
@@ -70,17 +73,19 @@ const hasNewLogs = (seenLogs, changelog) => {
   return !!newLogs.length
 }
 
-const findNewLogs = (seenLogs, changeLog) =>
-  changeLog.filter(log => !seenLogs.find(c => c === log.date))
+const findNewLogs = (seenLogs: string[], changeLog: any) =>
+  changeLog.filter((log: any) => !seenLogs.find(c => c === log.date))
 
 const Changelog = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const isFR = useLanguage()
-  const seenLogs = useSelector(state => Object.keys(state.user.bible.changelog))
-  const changelog = useSelector(state => state.user.changelog.data)
+  const seenLogs = useSelector((state: RootState) =>
+    Object.keys(state.user.bible.changelog)
+  )
+  const changelog = useSelector((state: RootState) => state.user.changelog.data)
   const changelogIsLoading = useSelector(
-    state => state.user.changelog.isLoading
+    (state: RootState) => state.user.changelog.isLoading
   )
 
   if (!changelogIsLoading && hasNewLogs(seenLogs, changelog)) {
@@ -106,7 +111,7 @@ const Changelog = () => {
             </Text>
             <Border marginTop={15} />
             <Box marginTop={10}>
-              {newLogs.map(log => {
+              {newLogs.map((log: any) => {
                 const formattedDate = distanceInWords(
                   Number(log.date),
                   Date.now(),
