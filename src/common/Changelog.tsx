@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import styled from '~styled/index'
 import { RootState } from '~redux/modules/reducer'
+import { ChangelogItem, LogType } from './types'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
@@ -31,8 +32,6 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
 }))
-
-type LogType = keyof typeof logTypes
 
 const getTagColor = (type: LogType) => {
   switch (type) {
@@ -53,14 +52,14 @@ const getTagColor = (type: LogType) => {
   }
 }
 
-const Tag = styled.View(({ type }: { type: LogType }) => ({
+export const ChangelogTag = styled.View(({ type }: { type: LogType }) => ({
   marginLeft: 10,
   padding: 3,
   backgroundColor: getTagColor(type),
   borderRadius: 3,
 }))
 
-const hasNewLogs = (seenLogs: string[], changelog: any) => {
+const hasNewLogs = (seenLogs: string[], changelog: ChangelogItem[]) => {
   if (!changelog.length) {
     return false
   }
@@ -73,8 +72,8 @@ const hasNewLogs = (seenLogs: string[], changelog: any) => {
   return !!newLogs.length
 }
 
-const findNewLogs = (seenLogs: string[], changeLog: any) =>
-  changeLog.filter((log: any) => !seenLogs.find(c => c === log.date))
+const findNewLogs = (seenLogs: string[], changeLog: ChangelogItem[]) =>
+  changeLog.filter(log => !seenLogs.find(c => c === log.date))
 
 const Changelog = () => {
   const dispatch = useDispatch()
@@ -87,6 +86,14 @@ const Changelog = () => {
   const changelogIsLoading = useSelector(
     (state: RootState) => state.user.changelog.isLoading
   )
+
+  const getAttribute = (log: ChangelogItem, attr: keyof ChangelogItem) => {
+    if (isFR) {
+      return log[attr]
+    }
+
+    return log[`${attr}_en` as keyof ChangelogItem] || log[attr]
+  }
 
   if (!changelogIsLoading && hasNewLogs(seenLogs, changelog)) {
     const newLogs = findNewLogs(seenLogs, changelog)
@@ -111,7 +118,7 @@ const Changelog = () => {
             </Text>
             <Border marginTop={15} />
             <Box marginTop={10}>
-              {newLogs.map((log: any) => {
+              {newLogs.map(log => {
                 const formattedDate = distanceInWords(
                   Number(log.date),
                   Date.now(),
@@ -123,18 +130,20 @@ const Changelog = () => {
                   <Box key={log.date} marginTop={10} marginBottom={10}>
                     <Box row alignItems="flex-start">
                       <Text fontSize={16} bold flex>
-                        {log.title}
+                        {getAttribute(log, 'title')}
                       </Text>
-                      <Tag type={log.type}>
+                      <ChangelogTag type={log.type}>
                         <Text fontSize={11} bold color="reverse">
                           {log.type}
                         </Text>
-                      </Tag>
+                      </ChangelogTag>
                     </Box>
                     <Text fontSize={10} color="grey">
                       {t('Il y a {{formattedDate}}', { formattedDate })}
                     </Text>
-                    <Text marginTop={10}>{log.description}</Text>
+                    <Text marginTop={10}>
+                      {getAttribute(log, 'description')}
+                    </Text>
                   </Box>
                 )
               })}

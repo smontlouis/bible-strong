@@ -1,7 +1,7 @@
 import deepmerge from 'deepmerge'
 import produce, { Draft } from 'immer'
 import { Reducer } from 'redux'
-import { SubscriptionType, Tag } from '~common/types'
+import { ChangelogItem, SubscriptionType, Tag } from '~common/types'
 import { detailedDiff } from '~helpers/deep-obj'
 import { firebaseDb } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
@@ -90,7 +90,7 @@ export interface UserState {
   changelog: {
     isLoading: boolean
     lastSeen: number
-    data: any[]
+    data: ChangelogItem[]
   }
   needsUpdate: {
     [x: string]: boolean

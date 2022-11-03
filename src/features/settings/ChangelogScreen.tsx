@@ -12,38 +12,13 @@ import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
-import { logTypes } from '~helpers/changelog'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
-
-const getTagColor = type => {
-  switch (type) {
-    case logTypes.BUG: {
-      return '#e74c3c'
-    }
-    case logTypes.FEATURE: {
-      return '#3498db'
-    }
-    case logTypes.NEW: {
-      return '#2ecc71'
-    }
-    case logTypes.INFO: {
-      return '#2c3e50'
-    }
-    default:
-      return '#2c3e50'
-  }
-}
-
-const Tag = styled.View(({ type }) => ({
-  marginLeft: 10,
-  padding: 3,
-  backgroundColor: getTagColor(type),
-  borderRadius: 3,
-}))
+import { RootState } from '~redux/modules/reducer'
+import { ChangelogTag } from '~common/Changelog'
 
 const Changelog = () => {
-  const changelog = useSelector(state => state.user.changelog.data)
+  const changelog = useSelector((state: RootState) => state.user.changelog.data)
   const { t } = useTranslation()
   const isFR = useLanguage()
 
@@ -76,11 +51,11 @@ const Changelog = () => {
                     <Text fontSize={16} bold flex>
                       {log.title}
                     </Text>
-                    <Tag type={log.type}>
+                    <ChangelogTag type={log.type}>
                       <Text fontSize={11} bold color="reverse">
                         {log.type}
                       </Text>
-                    </Tag>
+                    </ChangelogTag>
                   </Box>
                   <Text fontSize={10} color="grey">
                     {t('Il y a {{formattedDate}}', { formattedDate })}

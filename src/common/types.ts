@@ -1,3 +1,5 @@
+import { logTypes } from '~helpers/changelog'
+
 export type Status = 'Idle' | 'Pending' | 'Resolved' | 'Rejected'
 
 export interface User {
@@ -144,4 +146,15 @@ export interface VerseRefContent {
   version: string
   content: string
   all: string
+}
+
+export type LogType = keyof typeof logTypes
+
+export interface ChangelogItem {
+  date: string
+  description: string
+  description_en: string
+  title: string
+  title_en: string
+  type: LogType
 }
