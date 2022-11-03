@@ -2,13 +2,12 @@ import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 import { ThemeProvider } from 'emotion-theming'
 import * as Updates from 'expo-updates'
-import React from 'react'
-import { withTranslation } from 'react-i18next'
+import React, { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, StatusBar } from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
-import { connect } from 'react-redux'
-import compose from 'recompose/compose'
+import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import ConflictModal from '~common/ConflictModal'
@@ -19,8 +18,8 @@ import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
 import Changelog from '~common/Changelog'
 import SnackBar from '~common/SnackBar'
-import withFireAuth from '~common/withFireAuth'
 import { DBStateProvider } from '~helpers/databaseState'
+import useInitFireAuth from '~helpers/useInitFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -32,58 +31,46 @@ import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
 
 interface Props {
-  theme: string
-  dispatch: Function
-  fontFamily: string
   persistor: Persistor
 }
 
-class InitApp extends React.Component<Props> {
-  componentDidMount() {
-    this.props.dispatch(getChangelog())
-    this.props.dispatch(getVersionUpdate())
-    this.props.dispatch(getDatabaseUpdate())
-    this.changeStatusBarStyle()
-    this.updateApp()
-    AppState.addEventListener('change', this.handleAppStateChange)
-  }
+const InitApp = ({ persistor }: Props) => {
+  useInitFireAuth()
+  const dispatch = useDispatch()
+  const { t } = useTranslation()
+  const { theme: currentTheme, fontFamily } = useSelector(
+    (state: RootState) => ({
+      theme: state.user.bible.settings.theme,
+      fontFamily: state.user.fontFamily,
+    })
+  )
 
-  componentWillUnmount() {
-    AppState.removeEventListener('change', this.handleAppStateChange)
-  }
-
-  handleAppStateChange = (nextAppState: AppStateStatus) => {
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
     if (nextAppState.match(/inactive|background/)) {
       console.log('App mode - background!')
     }
   }
 
-  updateApp = async () => {
+  const updateApp = async () => {
     if (__DEV__) return
 
     const update = await Updates.checkForUpdateAsync()
 
     if (update.isAvailable) {
-      SnackBar.show(this.props.t('app.updateAvailable'))
+      SnackBar.show(t('app.updateAvailable'))
       await Updates.fetchUpdateAsync()
-      SnackBar.show(this.props.t('app.updateReady'))
+      SnackBar.show(t('app.updateReady'))
       await Updates.reloadAsync()
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.theme !== this.props.theme) {
-      this.changeStatusBarStyle()
-    }
-  }
-
-  changeStatusBarStyle = () => {
-    if (this.props.theme === 'dark' || this.props.theme === 'black')
+  const changeStatusBarStyle = () => {
+    if (theme === 'dark' || theme === 'black')
       StatusBar.setBarStyle('light-content')
     else StatusBar.setBarStyle('dark-content')
   }
 
-  getActiveRouteName = (
+  const getActiveRouteName = (
     navigationState: NavigationState
   ): {
     route: string
@@ -92,7 +79,7 @@ class InitApp extends React.Component<Props> {
     const route = navigationState.routes[navigationState.index]
     // dive into nested navigators
     if (route.routes) {
-      return this.getActiveRouteName(route)
+      return getActiveRouteName(route)
     }
     return {
       route: route.routeName,
@@ -100,15 +87,14 @@ class InitApp extends React.Component<Props> {
     }
   }
 
-  onNavigationStateChange = (
+  const onNavigationStateChange = (
     prevState: NavigationState,
     currentState: NavigationState
   ) => {
-    const {
-      route: currentScreen,
-      params: currentParams,
-    } = this.getActiveRouteName(currentState)
-    const { route: prevScreen, params: prevParams } = this.getActiveRouteName(
+    const { route: currentScreen, params: currentParams } = getActiveRouteName(
+      currentState
+    )
+    const { route: prevScreen, params: prevParams } = getActiveRouteName(
       prevState
     )
 
@@ -131,56 +117,58 @@ class InitApp extends React.Component<Props> {
     }
   }
 
-  render() {
-    const { theme: currentTheme, fontFamily, persistor } = this.props
+  useEffect(() => {
+    dispatch(getChangelog())
+    dispatch(getVersionUpdate())
+    dispatch(getDatabaseUpdate())
+    changeStatusBarStyle()
+    updateApp()
+    AppState.addEventListener('change', handleAppStateChange)
 
-    const defaultTheme: Theme = getTheme[currentTheme]
-
-    const theme = {
-      ...defaultTheme,
-      fontFamily: {
-        ...defaultTheme.fontFamily,
-        paragraph: fontFamily,
-      },
+    return () => {
+      AppState.removeEventListener('change', handleAppStateChange)
     }
+  }, [])
 
-    return (
-      <ThemeProvider theme={theme}>
-        <PaperProvider theme={paperTheme}>
-          <MenuProvider
-            backHandler
-            customStyles={{
-              backdrop: {
-                backgroundColor: 'black',
-                opacity: 0.2,
-              },
-            }}
-          >
-            <PersistGate loading={null} persistor={persistor}>
-              <DBStateProvider>
-                <ErrorBoundary>
-                  <AppNavigator
-                    screenProps={{ theme: currentTheme }}
-                    onNavigationStateChange={this.onNavigationStateChange}
-                  />
-                </ErrorBoundary>
-                <Changelog />
-                <OnBoarding />
-                <ConflictModal />
-              </DBStateProvider>
-            </PersistGate>
-          </MenuProvider>
-        </PaperProvider>
-      </ThemeProvider>
-    )
+  const defaultTheme: Theme = getTheme[currentTheme]
+
+  const theme = {
+    ...defaultTheme,
+    fontFamily: {
+      ...defaultTheme.fontFamily,
+      paragraph: fontFamily,
+    },
   }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <PaperProvider theme={paperTheme}>
+        <MenuProvider
+          backHandler
+          customStyles={{
+            backdrop: {
+              backgroundColor: 'black',
+              opacity: 0.2,
+            },
+          }}
+        >
+          <PersistGate loading={null} persistor={persistor}>
+            <DBStateProvider>
+              <ErrorBoundary>
+                <AppNavigator
+                  screenProps={{ theme: currentTheme }}
+                  onNavigationStateChange={onNavigationStateChange}
+                />
+              </ErrorBoundary>
+              <Changelog />
+              <OnBoarding />
+              <ConflictModal />
+            </DBStateProvider>
+          </PersistGate>
+        </MenuProvider>
+      </PaperProvider>
+    </ThemeProvider>
+  )
 }
 
-export default compose(
-  connect((state: RootState) => ({
-    theme: state.user.bible.settings.theme,
-    fontFamily: state.user.fontFamily,
-  })),
-  withFireAuth,
-  withTranslation()
-)(InitApp)
+export default InitApp

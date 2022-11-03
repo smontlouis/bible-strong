@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import * as UserActions from '~redux/modules/user'
-import FireAuth from '~helpers/FireAuth'
 import SnackBar from '~common/SnackBar'
+import FireAuth from '~helpers/FireAuth'
 import i18n from '~i18n'
+import * as UserActions from '~redux/modules/user'
 
-const withFireAuth = WrappedComponent => props => {
+const useInitFireAuth = () => {
   const dispatch = useDispatch()
   useEffect(() => {
     const onLogin = ({ profile, remoteLastSeen }) => {
@@ -58,8 +58,6 @@ const withFireAuth = WrappedComponent => props => {
       dispatch
     )
   }, [dispatch])
-
-  return <WrappedComponent {...props} />
 }
 
-export default withFireAuth
+export default useInitFireAuth
