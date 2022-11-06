@@ -85,6 +85,8 @@ export const biblesRef: {
   AMP: storageRef.child('bibles/bible-amp.json'),
   DEL: storageRef.child('bibles/bible-del.json'),
   NASB2020: storageRef.child('bibles/bible-nasb2020.json'),
+  EASY: storageRef.child('bibles/bible-easy.json'),
+  TLV: storageRef.child('bibles/bible-tlv.json'),
   NET: storageRef.child('bibles/bible-net.json'),
   GW: storageRef.child('bibles/bible-gw.json'),
   CSB: storageRef.child('bibles/bible-csb.json'),

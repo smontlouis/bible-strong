@@ -70,9 +70,6 @@ const HomeScreen = () => {
           </Text>
         </Box>
         <PremiumWidget />
-        <Box grey pb={30}>
-          <SwitchTheme />
-        </Box>
         <Box grey>
           <Box
             background

@@ -339,6 +339,18 @@ export default {
           lastDate: 0,
         },
       },
-    }
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            preferredColorScheme: 'auto',
+            preferredLightTheme: 'default',
+            preferredDarkTheme: 'dark',
+          },
+        },
+      },
+    } as RootState
   },
 }

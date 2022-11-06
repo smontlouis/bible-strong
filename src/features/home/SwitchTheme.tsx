@@ -10,7 +10,7 @@ import { RootState } from '~redux/modules/reducer'
 
 const LinkBox = Box.withComponent(Link)
 
-const Circle = styled.View(
+export const Circle = styled.View(
   ({
     isSelected,
     color,
@@ -26,9 +26,9 @@ const Circle = styled.View(
     height: size,
     borderRadius: size / 2,
     backgroundColor: color,
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: isSelected ? theme.colors.primary : theme.colors.opacity5,
-    marginHorizontal: 10,
+    marginLeft: 10,
   })
 )
 

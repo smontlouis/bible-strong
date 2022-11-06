@@ -6,7 +6,6 @@ const useResetQuotaEveryDay = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    console.log('RESET QUOTA')
     dispatch(resetQuotaEveryDay())
   }, [dispatch])
 }

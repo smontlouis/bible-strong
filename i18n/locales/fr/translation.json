@@ -472,5 +472,13 @@
   "Téléchargement de l'index...": "Téléchargement de l'index...",
   "Par pertinence": "Par pertinence",
   "Par ordre alphabétique": "Par ordre alphabétique",
-  "Suggéré": "Suggéré"
+  "Suggéré": "Suggéré",
+
+  "Auto": "Auto",
+  "Blanc": "Blanc",
+  "Sépia": "Sépia",
+  "Sombre": "Sombre",
+  "Noir": "Noir",
+  "Couleur Jour": "Couleur Jour",
+  "Couleur Nuit": "Couleur Nuit"
 }

@@ -1,7 +1,15 @@
 import deepmerge from 'deepmerge'
 import produce, { Draft } from 'immer'
 import { Reducer } from 'redux'
-import { ChangelogItem, SubscriptionType, Tag } from '~common/types'
+import {
+  ChangelogItem,
+  CurrentTheme,
+  PreferredColorScheme,
+  PreferredDarkTheme,
+  PreferredLightTheme,
+  SubscriptionType,
+  Tag,
+} from '~common/types'
 import { detailedDiff } from '~helpers/deep-obj'
 import { firebaseDb } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
@@ -118,12 +126,15 @@ export interface UserState {
     words: {}
     naves: {}
     settings: {
-      alignContent: string
+      alignContent: 'left' | 'justify'
       fontSizeScale: number
-      textDisplay: string
-      theme: 'default' | 'dark' | 'black' | 'sepia'
-      press: string
-      notesDisplay: string
+      textDisplay: 'inline' | 'block'
+      preferredColorScheme: PreferredColorScheme
+      preferredLightTheme: PreferredLightTheme
+      preferredDarkTheme: PreferredDarkTheme
+      theme: CurrentTheme
+      press: 'shortPress' | 'longPress'
+      notesDisplay: 'inline' | 'block'
       commentsDisplay: boolean
       colors: {
         default: typeof defaultColors
@@ -186,6 +197,9 @@ const initialState: UserState = {
       alignContent: 'justify',
       fontSizeScale: 0,
       textDisplay: 'inline',
+      preferredColorScheme: 'auto',
+      preferredLightTheme: 'default',
+      preferredDarkTheme: 'dark',
       theme: 'default',
       press: 'longPress',
       notesDisplay: 'inline',
@@ -420,12 +434,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       const bibleSearchQuota = draft.quota.bibleSearch
       const timelineSearchQuota = draft.quota.timelineSearch
       const translateCommentsQuota = draft.quota.translateComments
-
-      console.log({
-        bibleSearchQuota,
-        timelineSearchQuota,
-        translateCommentsQuota,
-      })
 
       if (bibleSearchQuota.lastDate < todayTimestamp) {
         draft.quota.bibleSearch = {

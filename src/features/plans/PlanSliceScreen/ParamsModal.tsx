@@ -1,72 +1,66 @@
-import React from 'react'
-import { Modalize } from 'react-native-modalize'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { FlatList } from 'react-native'
+/**
+ * @TODO - Merge this with BibleParamsModal
+ */
 
-import fonts from '~helpers/fonts'
-import Link from '~common/Link'
-import styled from '~styled'
-import Paragraph from '~common/ui/Paragraph'
+import React from 'react'
+import { FlatList } from 'react-native'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { Modalize } from 'react-native-modalize'
+
+import { useTheme } from 'emotion-theming'
+import { useTranslation } from 'react-i18next'
+import { useDispatch, useSelector } from 'react-redux'
+import Link, { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import {
-  increaseSettingsFontSizeScale,
-  decreaseSettingsFontSizeScale,
-  setSettingsTheme,
-  setFontFamily,
-} from '~redux/modules/user'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
+  FontText,
+  HalfContainer,
+  useParamsModalLabels,
+} from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
-import { useTheme } from 'emotion-theming'
+import { Circle } from '~features/home/SwitchTheme'
+import fonts from '~helpers/fonts'
+import { RootState } from '~redux/modules/reducer'
+import {
+  decreaseSettingsFontSizeScale,
+  increaseSettingsFontSizeScale,
+  setFontFamily,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsPreferredLightTheme,
+} from '~redux/modules/user'
 import { Theme } from '~themes'
-import { useTranslation } from 'react-i18next'
 
 interface Props {
   paramsModalRef: React.RefObject<Modalize>
 }
 
-const HalfContainer = styled.View(({ border, theme }) => ({
-  paddingHorizontal: 20,
-  paddingRight: 10,
-  paddingVertical: 15,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: border ? 1 : 0,
-  flexDirection: 'row',
-  alignItems: 'center',
-}))
-
-const FontText = styled(Paragraph)(
-  ({ isSelected, theme }: { isSelected: boolean } & typeof Text) => ({
-    paddingLeft: 15,
-    paddingRight: 15,
-    color: isSelected ? theme.colors.primary : theme.colors.default,
-  })
-)
-
-const themeToString: { [x: string]: string } = {
-  default: 'Jour',
-  dark: 'Nuit',
-}
-
 const ParamsModal = ({ paramsModalRef }: Props) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const fontsView = React.useRef()
+  const fontsViewRef = React.useRef(null)
   const theme: Theme = useTheme()
   const {
     fontFamily,
     fontSizeScale,
-    themeType,
-  }: {
-    fontFamily: string
-    fontSizeScale: number
-    themeType: string
+    preferredColorScheme,
+    preferredDarkTheme,
+    preferredLightTheme,
   } = useSelector(({ user }: RootState) => ({
     fontFamily: user.fontFamily,
     fontSizeScale: user.bible.settings.fontSizeScale,
-    themeType: user.bible.settings.theme,
+    preferredColorScheme: user.bible.settings.preferredColorScheme,
+    preferredLightTheme: user.bible.settings.preferredLightTheme,
+    preferredDarkTheme: user.bible.settings.preferredDarkTheme,
   }))
+
+  const {
+    preferredColorSchemeToString,
+    preferredLightThemeToString,
+    preferredDarkThemeToString,
+  } = useParamsModalLabels()
+
   return (
     <Modalize
       modalStyle={{
@@ -96,22 +90,75 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
         <HalfContainer border>
           <Text flex={5}>{t('Thème')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
-            {t(themeToString[themeType])}
+            {preferredColorSchemeToString[preferredColorScheme]}
           </Text>
           <TouchableIcon
-            isSelected={themeType === 'default'}
+            isSelected={preferredColorScheme === 'light'}
             name="sun"
-            onPress={() => dispatch(setSettingsTheme('default'))}
+            onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
           />
           <TouchableIcon
-            isSelected={themeType === 'dark'}
+            isSelected={preferredColorScheme === 'dark'}
             name="moon"
-            onPress={() => dispatch(setSettingsTheme('dark'))}
+            onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
           />
+          <TouchableIcon
+            isSelected={preferredColorScheme === 'auto'}
+            name="sunrise"
+            onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Couleur Jour')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredLightThemeToString[preferredLightTheme]}
+          </Text>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'default'}
+              size={20}
+              color="rgb(255,255,255)"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'sepia'}
+              size={20}
+              color="rgb(245,242,227)"
+            />
+          </LinkBox>
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Couleur Nuit')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredDarkThemeToString[preferredDarkTheme]}
+          </Text>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'dark'}
+              size={20}
+              color="rgb(18,45,66)"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'black'}
+              size={20}
+              color="black"
+            />
+          </LinkBox>
         </HalfContainer>
         <Box>
           <FlatList
-            ref={fontsView}
+            ref={fontsViewRef}
             horizontal
             getItemLayout={(data, index) => ({
               length: 100,

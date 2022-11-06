@@ -3,8 +3,13 @@ import * as Sentry from '@sentry/react-native'
 import { ThemeProvider } from 'emotion-theming'
 import * as Updates from 'expo-updates'
 import React, { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { AppState, AppStateStatus, StatusBar } from 'react-native'
+import { TFunction, useTranslation } from 'react-i18next'
+import {
+  AppState,
+  AppStateStatus,
+  StatusBar,
+  useColorScheme,
+} from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
@@ -26,6 +31,7 @@ import {
   getChangelog,
   getDatabaseUpdate,
   getVersionUpdate,
+  setSettingsTheme,
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
@@ -34,101 +40,144 @@ interface Props {
   persistor: Persistor
 }
 
+const handleAppStateChange = (nextAppState: AppStateStatus) => {
+  if (nextAppState.match(/inactive|background/)) {
+    console.log('App mode - background!')
+  }
+}
+
+const getActiveRouteName = (
+  navigationState: NavigationState
+): {
+  route: string
+  params: NavigationParams | undefined
+} => {
+  const route = navigationState.routes[navigationState.index]
+  // dive into nested navigators
+  if (route.routes) {
+    return getActiveRouteName(route)
+  }
+  return {
+    route: route.routeName,
+    params: route.params,
+  }
+}
+
+const onNavigationStateChange = (
+  prevState: NavigationState,
+  currentState: NavigationState
+) => {
+  const { route: currentScreen, params: currentParams } = getActiveRouteName(
+    currentState
+  )
+  const { route: prevScreen, params: prevParams } = getActiveRouteName(
+    prevState
+  )
+
+  if (prevScreen !== currentScreen) {
+    if (!__DEV__) {
+      analytics().logScreenView({
+        screen_class: currentScreen,
+        screen_name: currentScreen,
+      })
+    }
+
+    Sentry.addBreadcrumb({
+      category: 'screen',
+      message: `From: ${prevScreen} To: ${currentScreen}`,
+      data: {
+        prevRoute: { prevScreen, prevParams },
+        currentRoute: { currentScreen, currentParams },
+      },
+    })
+  }
+}
+
+const changeStatusBarStyle = (
+  currentTheme: 'dark' | 'black' | 'default' | 'sepia'
+) => {
+  if (currentTheme === 'dark' || currentTheme === 'black')
+    StatusBar.setBarStyle('light-content')
+  else StatusBar.setBarStyle('dark-content')
+}
+
+const updateApp = async (t: TFunction<'translation'>) => {
+  if (__DEV__) return
+
+  const update = await Updates.checkForUpdateAsync()
+
+  if (update.isAvailable) {
+    SnackBar.show(t('app.updateAvailable'))
+    await Updates.fetchUpdateAsync()
+    SnackBar.show(t('app.updateReady'))
+    await Updates.reloadAsync()
+  }
+}
+
+const useComputeTheme = () => {
+  const dispatch = useDispatch()
+
+  const {
+    preferredColorScheme,
+    preferredDarkTheme,
+    preferredLightTheme,
+  } = useSelector((state: RootState) => ({
+    theme: state.user.bible.settings.theme,
+    preferredColorScheme: state.user.bible.settings.preferredColorScheme,
+    preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
+    preferredLightTheme: state.user.bible.settings.preferredLightTheme,
+  }))
+
+  const systemColorScheme = useColorScheme()
+
+  const computedTheme = (() => {
+    if (preferredColorScheme === 'auto') {
+      if (systemColorScheme === 'dark') {
+        return preferredDarkTheme
+      }
+      return preferredLightTheme
+    }
+
+    if (preferredColorScheme === 'dark') return preferredDarkTheme
+    return preferredLightTheme
+  })()
+
+  /*
+   * We could potentially use the computed theme instead of setting it in redux,
+   * but we keep it in redux for now to avoid any backward compatibility issues
+   */
+  useEffect(() => {
+    dispatch(setSettingsTheme(computedTheme))
+  }, [computedTheme, dispatch])
+}
+
 const InitApp = ({ persistor }: Props) => {
   useInitFireAuth()
-  const dispatch = useDispatch()
   const { t } = useTranslation()
+  const dispatch = useDispatch()
   const { theme: currentTheme, fontFamily } = useSelector(
     (state: RootState) => ({
       theme: state.user.bible.settings.theme,
+      preferredColorScheme: state.user.bible.settings.preferredColorScheme,
+      preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
+      preferredLightTheme: state.user.bible.settings.preferredLightTheme,
       fontFamily: state.user.fontFamily,
     })
   )
-
-  const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    if (nextAppState.match(/inactive|background/)) {
-      console.log('App mode - background!')
-    }
-  }
-
-  const updateApp = async () => {
-    if (__DEV__) return
-
-    const update = await Updates.checkForUpdateAsync()
-
-    if (update.isAvailable) {
-      SnackBar.show(t('app.updateAvailable'))
-      await Updates.fetchUpdateAsync()
-      SnackBar.show(t('app.updateReady'))
-      await Updates.reloadAsync()
-    }
-  }
-
-  const changeStatusBarStyle = () => {
-    if (theme === 'dark' || theme === 'black')
-      StatusBar.setBarStyle('light-content')
-    else StatusBar.setBarStyle('dark-content')
-  }
-
-  const getActiveRouteName = (
-    navigationState: NavigationState
-  ): {
-    route: string
-    params: NavigationParams | undefined
-  } => {
-    const route = navigationState.routes[navigationState.index]
-    // dive into nested navigators
-    if (route.routes) {
-      return getActiveRouteName(route)
-    }
-    return {
-      route: route.routeName,
-      params: route.params,
-    }
-  }
-
-  const onNavigationStateChange = (
-    prevState: NavigationState,
-    currentState: NavigationState
-  ) => {
-    const { route: currentScreen, params: currentParams } = getActiveRouteName(
-      currentState
-    )
-    const { route: prevScreen, params: prevParams } = getActiveRouteName(
-      prevState
-    )
-
-    if (prevScreen !== currentScreen) {
-      if (!__DEV__) {
-        analytics().logScreenView({
-          screen_class: currentScreen,
-          screen_name: currentScreen,
-        })
-      }
-
-      Sentry.addBreadcrumb({
-        category: 'screen',
-        message: `From: ${prevScreen} To: ${currentScreen}`,
-        data: {
-          prevRoute: { prevScreen, prevParams },
-          currentRoute: { currentScreen, currentParams },
-        },
-      })
-    }
-  }
+  useComputeTheme()
 
   useEffect(() => {
     dispatch(getChangelog())
     dispatch(getVersionUpdate())
     dispatch(getDatabaseUpdate())
-    changeStatusBarStyle()
-    updateApp()
+    changeStatusBarStyle(currentTheme)
+    updateApp(t)
     AppState.addEventListener('change', handleAppStateChange)
 
     return () => {
       AppState.removeEventListener('change', handleAppStateChange)
     }
-  }, [])
+  }, [currentTheme, dispatch, t])
 
   const defaultTheme: Theme = getTheme[currentTheme]
 
@@ -156,7 +205,9 @@ const InitApp = ({ persistor }: Props) => {
             <DBStateProvider>
               <ErrorBoundary>
                 <AppNavigator
-                  screenProps={{ theme: currentTheme }}
+                  screenProps={{
+                    theme: currentTheme,
+                  }}
                   onNavigationStateChange={onNavigationStateChange}
                 />
               </ErrorBoundary>

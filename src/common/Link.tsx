@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, PropsWithChildren } from 'react'
 import { TouchableOpacity, Linking, Share } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
@@ -94,4 +94,6 @@ type LinkBoxProps = React.FC<BoxProps & LinkProps>
 export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
 // @ts-ignore
-export default withNavigation(Link)
+export default withNavigation(Link) as (
+  x: PropsWithChildren<LinkProps>
+) => JSX.Element

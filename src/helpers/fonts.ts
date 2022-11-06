@@ -14,4 +14,4 @@ const fonts = {
   ],
 }
 
-export default fonts[Platform.OS]
+export default fonts[Platform.OS as 'ios' | 'android']

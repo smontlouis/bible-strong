@@ -78,15 +78,7 @@ class BibleScreen extends React.Component {
       navigation,
       isReadOnly,
       isSelectionMode,
-      setSettingsAlignContent,
-      setSettingsTextDisplay,
-      setSettingsPress,
-      setSettingsTheme,
-      setSettingsNotesDisplay,
       setSettingsCommentaires,
-      increaseSettingsFontSizeScale,
-      decreaseSettingsFontSizeScale,
-      setFontFamily,
       settings,
       fontFamily,
       hasBackButton,
@@ -144,17 +136,6 @@ class BibleScreen extends React.Component {
           navigation={navigation}
           onClosed={this.closeBibleParamsOpen}
           isOpen={this.state.isBibleParamsOpen}
-          setSettingsAlignContent={setSettingsAlignContent}
-          setSettingsTextDisplay={setSettingsTextDisplay}
-          setSettingsTheme={setSettingsTheme}
-          setSettingsNotesDisplay={setSettingsNotesDisplay}
-          setSettingsPress={setSettingsPress}
-          increaseSettingsFontSizeScale={increaseSettingsFontSizeScale}
-          decreaseSettingsFontSizeScale={decreaseSettingsFontSizeScale}
-          setSettingsCommentaires={setSettingsCommentaires}
-          settings={settings}
-          fontFamily={fontFamily}
-          setFontFamily={setFontFamily}
         />
       </Container>
     )

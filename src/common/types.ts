@@ -158,3 +158,8 @@ export interface ChangelogItem {
   title_en: string
   type: LogType
 }
+
+export type PreferredColorScheme = 'light' | 'dark' | 'auto'
+export type PreferredLightTheme = 'default' | 'sepia'
+export type PreferredDarkTheme = 'dark' | 'black'
+export type CurrentTheme = PreferredLightTheme | PreferredDarkTheme

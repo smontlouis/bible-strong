@@ -1,22 +1,36 @@
 import React from 'react'
-import styled from '@emotion/native'
 import { FlatList } from 'react-native'
 import { Modalize } from 'react-native-modalize'
 
-import Box from '~common/ui/Box'
-import Link from '~common/Link'
-import Border from '~common/ui/Border'
-import Text from '~common/ui/Text'
-import Button from '~common/ui/Button'
-import SnackBar from '~common/SnackBar'
-import { getIfDatabaseExists } from '~helpers/database'
-import IconShortPress from '~assets/images/IconShortPress'
+import { useTranslation } from 'react-i18next'
 import IconLongPress from '~assets/images/IconLongPress'
-import TouchableIcon from './TouchableIcon'
-import TouchableSvgIcon from './TouchableSvgIcon'
+import IconShortPress from '~assets/images/IconShortPress'
+import Link, { LinkBox } from '~common/Link'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
+import { Circle } from '~features/home/SwitchTheme'
 import fonts from '~helpers/fonts'
 import { usePrevious } from '~helpers/usePrevious'
-import { useTranslation } from 'react-i18next'
+import { RootState } from '~redux/modules/reducer'
+import styled from '~styled/index'
+import TouchableIcon from './TouchableIcon'
+import TouchableSvgIcon from './TouchableSvgIcon'
+import Paragraph from '~common/ui/Paragraph'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  decreaseSettingsFontSizeScale,
+  increaseSettingsFontSizeScale,
+  setFontFamily,
+  setSettingsAlignContent,
+  setSettingsNotesDisplay,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPress,
+  setSettingsTextDisplay,
+} from '~redux/modules/user'
 
 const Container = styled.View(({ theme }) => ({
   width: '100%',
@@ -32,47 +46,28 @@ const Container = styled.View(({ theme }) => ({
   justifyContent: 'space-between',
 }))
 
-const HalfContainer = styled.View(({ border, theme }) => ({
-  paddingHorizontal: 20,
-  paddingRight: 10,
-  paddingVertical: 15,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: border ? 1 : 0,
-  flexDirection: 'row',
-  alignItems: 'center',
-}))
+export const HalfContainer = styled.View<{ border?: boolean }>(
+  ({ border, theme }) => ({
+    paddingHorizontal: 20,
+    paddingRight: 10,
+    paddingVertical: 15,
+    borderBottomColor: theme.colors.border,
+    borderBottomWidth: border ? 1 : 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+  })
+)
 
-const FontText = styled.Text(({ isSelected, theme }) => ({
-  fontSize: 16,
-  paddingLeft: 15,
-  paddingRight: 15,
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-}))
+export const FontText = styled(Paragraph)<{ isSelected: boolean }>(
+  ({ isSelected, theme }) => ({
+    fontSize: 16,
+    paddingLeft: 15,
+    paddingRight: 15,
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+  })
+)
 
-const BibleParamsModal = ({
-  isOpen,
-  onClosed,
-  setSettingsAlignContent,
-  setSettingsTextDisplay,
-  setSettingsPress,
-  increaseSettingsFontSizeScale,
-  decreaseSettingsFontSizeScale,
-  setSettingsTheme,
-  setSettingsNotesDisplay,
-  navigation,
-  setFontFamily,
-  fontFamily,
-  settings: {
-    alignContent,
-    fontSizeScale,
-    textDisplay,
-    theme,
-    press,
-    notesDisplay,
-  },
-}) => {
-  const isPrevOpen = usePrevious(isOpen)
-  const modalRef = React.useRef(null)
+export const useParamsModalLabels = () => {
   const { t } = useTranslation()
 
   const alignContentToString = {
@@ -85,9 +80,20 @@ const BibleParamsModal = ({
     block: t('À la ligne'),
   }
 
-  const themeToString = {
-    default: t('Jour'),
+  const preferredColorSchemeToString = {
+    light: t('Jour'),
     dark: t('Nuit'),
+    auto: t('Auto'),
+  }
+
+  const preferredLightThemeToString = {
+    default: t('Blanc'),
+    sepia: t('Sépia'),
+  }
+
+  const preferredDarkThemeToString = {
+    dark: t('Sombre'),
+    black: t('Noir'),
   }
 
   const pressToString = {
@@ -100,6 +106,60 @@ const BibleParamsModal = ({
     block: t('En icone'),
   }
 
+  return {
+    alignContentToString,
+    textDisplayToString,
+    preferredColorSchemeToString,
+    preferredLightThemeToString,
+    preferredDarkThemeToString,
+    pressToString,
+    notesDisplayToString,
+  }
+}
+
+interface BibleParamsModalprops {
+  isOpen: boolean
+  onClosed: () => void
+  navigation: any
+}
+
+const BibleParamsModal = ({
+  isOpen,
+  onClosed,
+  navigation,
+}: BibleParamsModalprops) => {
+  const isPrevOpen = usePrevious(isOpen)
+  const modalRef = React.useRef<Modalize>(null)
+  const { t } = useTranslation()
+
+  const {
+    alignContentToString,
+    textDisplayToString,
+    preferredColorSchemeToString,
+    preferredLightThemeToString,
+    preferredDarkThemeToString,
+    pressToString,
+    notesDisplayToString,
+  } = useParamsModalLabels()
+
+  const dispatch = useDispatch()
+  const {
+    fontFamily,
+    settings: {
+      fontSizeScale,
+      preferredColorScheme,
+      preferredDarkTheme,
+      preferredLightTheme,
+      alignContent,
+      textDisplay,
+      notesDisplay,
+      press,
+    },
+  } = useSelector(({ user }: RootState) => ({
+    fontFamily: user.fontFamily,
+    settings: user.bible.settings,
+  }))
+
   React.useEffect(() => {
     if (isPrevOpen !== isOpen) {
       if (isOpen) {
@@ -110,7 +170,7 @@ const BibleParamsModal = ({
     }
   }, [isPrevOpen, isOpen])
 
-  const fontsView = React.useRef()
+  const fontsViewRef = React.useRef(null)
 
   return (
     <Modalize
@@ -128,18 +188,71 @@ const BibleParamsModal = ({
         <HalfContainer border>
           <Text flex={5}>{t('Thème')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
-            {themeToString[theme]}
+            {preferredColorSchemeToString[preferredColorScheme]}
           </Text>
           <TouchableIcon
-            isSelected={theme === 'default'}
+            isSelected={preferredColorScheme === 'light'}
             name="sun"
-            onPress={() => setSettingsTheme('default')}
+            onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
           />
           <TouchableIcon
-            isSelected={theme === 'dark'}
+            isSelected={preferredColorScheme === 'dark'}
             name="moon"
-            onPress={() => setSettingsTheme('dark')}
+            onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
           />
+          <TouchableIcon
+            isSelected={preferredColorScheme === 'auto'}
+            name="sunrise"
+            onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Couleur Jour')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredLightThemeToString[preferredLightTheme]}
+          </Text>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'default'}
+              size={20}
+              color="rgb(255,255,255)"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'sepia'}
+              size={20}
+              color="rgb(245,242,227)"
+            />
+          </LinkBox>
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Couleur Nuit')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredDarkThemeToString[preferredDarkTheme]}
+          </Text>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'dark'}
+              size={20}
+              color="rgb(18,45,66)"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'black'}
+              size={20}
+              color="black"
+            />
+          </LinkBox>
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>{t('Alignement du texte')}</Text>
@@ -149,12 +262,12 @@ const BibleParamsModal = ({
           <TouchableIcon
             isSelected={alignContent === 'justify'}
             name="align-justify"
-            onPress={() => setSettingsAlignContent('justify')}
+            onPress={() => dispatch(setSettingsAlignContent('justify'))}
           />
           <TouchableIcon
             isSelected={alignContent === 'left'}
             name="align-left"
-            onPress={() => setSettingsAlignContent('left')}
+            onPress={() => dispatch(setSettingsAlignContent('left'))}
           />
         </HalfContainer>
         <HalfContainer border>
@@ -164,11 +277,11 @@ const BibleParamsModal = ({
           <TouchableIcon
             name="type"
             size={15}
-            onPress={() => decreaseSettingsFontSizeScale()}
+            onPress={() => dispatch(decreaseSettingsFontSizeScale())}
           />
           <TouchableIcon
             name="type"
-            onPress={() => increaseSettingsFontSizeScale()}
+            onPress={() => dispatch(increaseSettingsFontSizeScale())}
           />
         </HalfContainer>
         <HalfContainer border>
@@ -179,12 +292,12 @@ const BibleParamsModal = ({
           <TouchableIcon
             isSelected={textDisplay === 'inline'}
             name="menu"
-            onPress={() => setSettingsTextDisplay('inline')}
+            onPress={() => dispatch(setSettingsTextDisplay('inline'))}
           />
           <TouchableIcon
             isSelected={textDisplay === 'block'}
             name="list"
-            onPress={() => setSettingsTextDisplay('block')}
+            onPress={() => dispatch(setSettingsTextDisplay('block'))}
           />
         </HalfContainer>
 
@@ -197,12 +310,12 @@ const BibleParamsModal = ({
           <TouchableIcon
             isSelected={notesDisplay === 'inline'}
             name="align-left"
-            onPress={() => setSettingsNotesDisplay('inline')}
+            onPress={() => dispatch(setSettingsNotesDisplay('inline'))}
           />
           <TouchableIcon
             isSelected={notesDisplay === 'block'}
             name="file-text"
-            onPress={() => setSettingsNotesDisplay('block')}
+            onPress={() => dispatch(setSettingsNotesDisplay('block'))}
           />
         </HalfContainer>
         <HalfContainer border>
@@ -213,19 +326,19 @@ const BibleParamsModal = ({
           <TouchableSvgIcon
             icon={IconShortPress}
             isSelected={press === 'shortPress'}
-            onPress={() => setSettingsPress('shortPress')}
+            onPress={() => dispatch(setSettingsPress('shortPress'))}
             size={25}
           />
           <TouchableSvgIcon
             icon={IconLongPress}
             isSelected={press === 'longPress'}
-            onPress={() => setSettingsPress('longPress')}
+            onPress={() => dispatch(setSettingsPress('longPress'))}
             size={25}
           />
         </HalfContainer>
         <Box height={60}>
           <FlatList
-            ref={fontsView}
+            ref={fontsViewRef}
             ListHeaderComponent={
               <Text marginLeft={20} marginRight={50}>
                 {t('Polices')}
@@ -244,7 +357,7 @@ const BibleParamsModal = ({
             renderItem={({ item }) => {
               const isSelected = fontFamily === item
               return (
-                <Link onPress={() => setFontFamily(item)}>
+                <Link onPress={() => dispatch(setFontFamily(item))}>
                   <FontText
                     isSelected={isSelected}
                     style={{ fontFamily: item }}

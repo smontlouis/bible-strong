@@ -471,5 +471,13 @@
   "Téléchargement de l'index...": "Downloading the index ...",
   "Par pertinence": "Relevant",
   "Par ordre alphabétique": "In alphabetical order",
-  "Suggéré": "Recommended"
+  "Suggéré": "Recommended",
+
+  "Auto": "Auto",
+  "Blanc": "White",
+  "Sépia": "Sepia",
+  "Sombre": "Dark",
+  "Noir": "Black",
+  "Couleur Jour": "Day Color",
+  "Couleur Nuit": "Night Color"
 }

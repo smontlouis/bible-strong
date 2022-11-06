@@ -251,6 +251,18 @@ export const versions: {
     c: '© 2013',
     type: 'fr',
   },
+  EASY: {
+    id: 'EASY',
+    name: 'EasyEnglish Bible 2018',
+    c: 'Copyright © MissionAssist 2018',
+    type: 'en',
+  },
+  TLV: {
+    id: 'TLV',
+    name: 'Tree of Life Version',
+    c: '© 2015 The Messianic Jewish Family Bible Society',
+    type: 'en',
+  },
   NASB2020: {
     id: 'NASB2020',
     name: 'New American Standard Bible 2020',
@@ -364,6 +376,8 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'TR1894':
       case 'AMP':
       case 'NASB2020':
+      case 'EASY':
+      case 'TLV':
       case 'NET':
       case 'GW':
       case 'CSB':
@@ -402,6 +416,8 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
       case 'NIV':
       case 'AMP':
       case 'NASB2020':
+      case 'EASY':
+      case 'TLV':
       case 'NET':
       case 'GW':
       case 'CSB':
