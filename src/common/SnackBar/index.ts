@@ -1,5 +1,4 @@
 import SnackBarManager from './SnackBarManager'
-// import theme from '~themes/default'
 const SnackBar = new SnackBarManager()
 
 const getBackgroundColor = type => {

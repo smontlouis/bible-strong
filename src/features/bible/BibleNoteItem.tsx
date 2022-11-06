@@ -15,9 +15,10 @@ import books from '~assets/bible_versions/books-desc'
 
 import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
-import theme from '~themes/default'
 import { withTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { withTheme } from 'emotion-theming'
+import { compose } from 'recompose'
 
 const NoteLink = styled(Link)(({ theme }) => ({
   paddingVertical: 20,
@@ -28,7 +29,7 @@ const NoteLink = styled(Link)(({ theme }) => ({
 
 class BibleNoteItem extends React.Component {
   render() {
-    const { item, setNoteSettings, t, i18n } = this.props
+    const { item, setNoteSettings, t, i18n, theme } = this.props
     const isFR = i18n.language === 'fr'
 
     const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
@@ -81,4 +82,4 @@ class BibleNoteItem extends React.Component {
   }
 }
 
-export default withTranslation()(BibleNoteItem)
+export default compose(withTranslation(), withTheme)(BibleNoteItem)

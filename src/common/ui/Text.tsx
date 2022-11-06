@@ -1,6 +1,5 @@
-import styled from '~styled'
 import { bindStyles } from '~helpers/styledProps'
-import theme from '~themes/default'
+import styled from '~styled'
 import { Theme } from '~themes'
 
 export interface TextProps {
@@ -107,7 +106,7 @@ export interface TextProps {
 }
 
 const Text = styled.Text((props: TextProps) => {
-  const s = bindStyles(theme)
+  const s = bindStyles(props.theme)
   return {
     fontFamily: s.fontFamily(props),
 

@@ -2,6 +2,10 @@ import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 import blackColors from '~themes/blackColors'
 import sepiaColors from '~themes/sepiaColors'
+import natureColors from '~themes/natureColors'
+import sunsetColors from '~themes/sunsetColors'
+import mauveColors from '~themes/mauveColors'
+import nightColors from '~themes/nightColors'
 import { RootState } from './modules/reducer'
 
 export default {
@@ -348,6 +352,13 @@ export default {
             preferredColorScheme: 'auto',
             preferredLightTheme: 'default',
             preferredDarkTheme: 'dark',
+            colors: {
+              ...state.user.bible.settings.colors,
+              nature: natureColors,
+              sunset: sunsetColors,
+              mauve: mauveColors,
+              night: nightColors,
+            },
           },
         },
       },

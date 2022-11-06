@@ -31,6 +31,7 @@ export const SET_SETTINGS_PREFERRED_DARK_THEME =
 
 export default produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
+    // !TODO: Fix change color
     case CHANGE_COLOR: {
       const currentTheme = draft.bible.settings.theme
       const color =

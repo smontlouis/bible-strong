@@ -89,11 +89,15 @@ export const useParamsModalLabels = () => {
   const preferredLightThemeToString = {
     default: t('Blanc'),
     sepia: t('Sépia'),
+    nature: t('Nature'),
+    sunset: t('Soleil couchant'),
   }
 
   const preferredDarkThemeToString = {
     dark: t('Sombre'),
     black: t('Noir'),
+    mauve: t('Mauve'),
+    night: t('Bleu nuit'),
   }
 
   const pressToString = {
@@ -229,6 +233,24 @@ const BibleParamsModal = ({
               color="rgb(245,242,227)"
             />
           </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'nature'}
+              size={20}
+              color="#EAF9EC"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'sunset'}
+              size={20}
+              color="#FAE0D5"
+            />
+          </LinkBox>
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>{t('Couleur Nuit')}</Text>
@@ -251,6 +273,24 @@ const BibleParamsModal = ({
               isSelected={preferredDarkTheme === 'black'}
               size={20}
               color="black"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'mauve'}
+              size={20}
+              color="rgb(51,4,46)"
+            />
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'night'}
+              size={20}
+              color="rgb(0,50,100)"
             />
           </LinkBox>
         </HalfContainer>

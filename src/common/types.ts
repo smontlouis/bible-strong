@@ -160,6 +160,6 @@ export interface ChangelogItem {
 }
 
 export type PreferredColorScheme = 'light' | 'dark' | 'auto'
-export type PreferredLightTheme = 'default' | 'sepia'
-export type PreferredDarkTheme = 'dark' | 'black'
+export type PreferredLightTheme = 'default' | 'sepia' | 'nature' | 'sunset'
+export type PreferredDarkTheme = 'dark' | 'black' | 'night' | 'mauve'
 export type CurrentTheme = PreferredLightTheme | PreferredDarkTheme

@@ -17,6 +17,10 @@ import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
 import sepiaColors from '~themes/sepiaColors'
+import natureColors from '~themes/natureColors'
+import nightColors from '~themes/nightColors'
+import mauveColors from '~themes/mauveColors'
+import sunsetColors from '~themes/sunsetColors'
 import { isEmpty } from '../../helpers/deep-obj/utils'
 import { conflictStateProxy } from '../../state/app'
 import highlightsReducer from './user/highlights'
@@ -141,6 +145,10 @@ export interface UserState {
         dark: typeof darkColors
         black: typeof blackColors
         sepia: typeof sepiaColors
+        nature: typeof natureColors
+        sunset: typeof sunsetColors
+        mauve: typeof mauveColors
+        night: typeof nightColors
       }
       compare: {
         [x: string]: boolean
@@ -209,6 +217,10 @@ const initialState: UserState = {
         dark: darkColors,
         black: blackColors,
         sepia: sepiaColors,
+        nature: natureColors,
+        sunset: sunsetColors,
+        mauve: mauveColors,
+        night: nightColors,
       },
       compare: {
         [getLangIsFr() ? 'LSG' : 'KJV']: true,

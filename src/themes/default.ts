@@ -3,7 +3,6 @@ import { DefaultTheme } from 'react-native-paper'
 import colors from './colors'
 
 const theme = {
-  colors,
   measures: {
     headerHeight: 60,
     headerMarginTop: Platform.OS === 'ios' ? 0 : 25,

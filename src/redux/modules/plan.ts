@@ -56,16 +56,12 @@ export const fetchPlan = createAsyncThunk(
       planRef.update({ downloads: increment })
     }
 
-    console.log('do some')
-
     const snapshot = await firebaseDb
       .collection('plans')
       .doc(id)
       .collection('plan-sections')
       .get()
     const sections = snapshot.docs.map(x => x.data()) as Section[]
-
-    console.log('heyyy')
 
     return { ...plan, sections }
   }

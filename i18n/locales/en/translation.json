@@ -476,8 +476,12 @@
   "Auto": "Auto",
   "Blanc": "White",
   "Sépia": "Sepia",
+  "Nature": "Nature",
+  "Soleil couchant": "Sunset",
   "Sombre": "Dark",
   "Noir": "Black",
+  "Bleu nuit": "Night blue",
+  "Mauve": "Mauve",
   "Couleur Jour": "Day Color",
   "Couleur Nuit": "Night Color"
 }

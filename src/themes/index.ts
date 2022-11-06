@@ -1,19 +1,54 @@
 import defaultTheme from './default'
-import darkTheme from './dark'
-import blackTheme from './black'
-import sepiaTheme from './sepia'
+import colors from './colors'
+import sepiaColors from './sepiaColors'
+import darkColors from './darkColors'
+import blackColors from './blackColors'
+import natureColors from './natureColors'
+import sunsetColors from './sunsetColors'
+import mauveColors from './mauveColors'
+import nightColors from './nightColors'
 
 interface GetTheme {
   [theme: string]: Theme
 }
 
+const baseTheme = {
+  ...defaultTheme,
+  colors,
+}
+
 const getTheme: GetTheme = {
-  default: defaultTheme,
-  dark: darkTheme,
-  black: blackTheme,
-  sepia: sepiaTheme,
+  default: baseTheme,
+  sepia: {
+    ...baseTheme,
+    colors: sepiaColors,
+  },
+  nature: {
+    ...baseTheme,
+    colors: natureColors,
+  },
+  sunset: {
+    ...baseTheme,
+    colors: sunsetColors,
+  },
+  black: {
+    ...baseTheme,
+    colors: blackColors,
+  },
+  dark: {
+    ...baseTheme,
+    colors: darkColors,
+  },
+  mauve: {
+    ...baseTheme,
+    colors: mauveColors,
+  },
+  night: {
+    ...baseTheme,
+    colors: nightColors,
+  },
 }
 
 export default getTheme
 
-export type Theme = typeof defaultTheme
+export type Theme = typeof baseTheme
