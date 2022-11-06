@@ -35,6 +35,7 @@ import {
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
+import { CurrentTheme } from '~common/types'
 
 interface Props {
   persistor: Persistor
@@ -93,10 +94,8 @@ const onNavigationStateChange = (
   }
 }
 
-const changeStatusBarStyle = (
-  currentTheme: 'dark' | 'black' | 'default' | 'sepia'
-) => {
-  if (currentTheme === 'dark' || currentTheme === 'black')
+const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
+  if (['mauve', 'dark', 'night', 'black'].includes(currentTheme))
     StatusBar.setBarStyle('light-content')
   else StatusBar.setBarStyle('dark-content')
 }
