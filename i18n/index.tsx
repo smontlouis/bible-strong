@@ -1,17 +1,18 @@
 import i18n from 'i18next'
 import * as RNLocalize from 'react-native-localize'
 import { initReactI18next } from 'react-i18next'
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 const enTranslation = require('./locales/en/translation.json')
 const enBooksTranslation = require('./locales/en/translation_book.json')
 const frTranslation = require('./locales/fr/translation.json')
+const frBooksTranslation = require('./locales/fr/translation_book.json')
 
 const resources = {
   en: {
     translation: { ...enTranslation, ...enBooksTranslation },
   },
   fr: {
-    translation: frTranslation,
+    translation: { ...frTranslation, ...frBooksTranslation },
   },
 }
 

@@ -7,7 +7,7 @@ import {
   getStoredState,
 } from 'redux-persist'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
 
 import firestoreMiddleware from './firestoreMiddleware'

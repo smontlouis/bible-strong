@@ -7,29 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		20B0CEFCE9B0AF317B9B6430 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AD758EA8C784202F3409E86 /* libPods-biblestrong.a */; };
 		AB6CA71FEEB1A7BED98965AA /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45938ADA15546B95E53155C3 /* ExpoModulesProvider.swift */; };
-		C7B3B961CB70B4A5AE300545 /* libPods-biblestrong.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C068A18CD11BAEE5DC929E /* libPods-biblestrong.a */; };
 		EEC8BAB91D004D2E9516436D /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C60A3799A70D41728A4ECD70 /* SplashScreen.storyboard */; };
+		F431F0BB2918B2E600F32165 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F431F0BA2918B2E600F32165 /* AppDelegate.mm */; };
 		F4F2A6B6270D62B200021E46 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F2A6B5270D62B100021E46 /* File.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
+		0FC924C9E5E33866B94760C1 /* Pods-biblestrong.dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.dev.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.dev.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* dev - BIble Strong.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "dev - BIble Strong.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = biblestrong/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = biblestrong/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = biblestrong/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = biblestrong/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = biblestrong/main.m; sourceTree = "<group>"; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		45938ADA15546B95E53155C3 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-biblestrong/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		4A5B3757EEAFAE0B18E9B93C /* Pods-biblestrong.prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.prod.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.prod.xcconfig"; sourceTree = "<group>"; };
-		4C7B36A0A2B3E478DD3BEEB7 /* Pods-biblestrong.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.staging.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.staging.xcconfig"; sourceTree = "<group>"; };
+		4AD758EA8C784202F3409E86 /* libPods-biblestrong.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-biblestrong.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6321EC4323EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6321EC4523EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6321EC4723EF5361007CB036 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -37,14 +36,15 @@
 		63D636B3247507DC003443EE /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		63D840D423ECFD3400C49B4C /* biblestrong-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "biblestrong-Bridging-Header.h"; sourceTree = "<group>"; };
 		63D840D523ECFD3400C49B4C /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
-		84660B6539CF284CD683AF59 /* Pods-biblestrong.dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.dev.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.dev.xcconfig"; sourceTree = "<group>"; };
+		7D2DC3FBFF5A735C9470CAA6 /* Pods-biblestrong.prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.prod.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.prod.xcconfig"; sourceTree = "<group>"; };
 		BE2213229BB143AB82AA5797 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		C60A3799A70D41728A4ECD70 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = biblestrong/SplashScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
+		F431F0BA2918B2E600F32165 /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = biblestrong/AppDelegate.mm; sourceTree = "<group>"; };
 		F4DE5C4627179BF1001D6697 /* Expo.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Expo.plist; path = expo/staging/Expo.plist; sourceTree = "<group>"; };
 		F4F2A6B5270D62B100021E46 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
-		F9C068A18CD11BAEE5DC929E /* libPods-biblestrong.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-biblestrong.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F663A8D6DB90C6F7C10FB13D /* Pods-biblestrong.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-biblestrong.staging.xcconfig"; path = "Target Support Files/Pods-biblestrong/Pods-biblestrong.staging.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7B3B961CB70B4A5AE300545 /* libPods-biblestrong.a in Frameworks */,
+				20B0CEFCE9B0AF317B9B6430 /* libPods-biblestrong.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,10 +62,10 @@
 		13B07FAE1A68108700A75B9A /* biblestrong */ = {
 			isa = PBXGroup;
 			children = (
+				F431F0BA2918B2E600F32165 /* AppDelegate.mm */,
 				63B75B6E242B2A6C0042D6EC /* Bible Strong - Dev.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
@@ -91,7 +91,7 @@
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
 				BE2213229BB143AB82AA5797 /* libz.tbd */,
-				F9C068A18CD11BAEE5DC929E /* libPods-biblestrong.a */,
+				4AD758EA8C784202F3409E86 /* libPods-biblestrong.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -133,9 +133,9 @@
 		72E5486571395D51695C2A02 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				84660B6539CF284CD683AF59 /* Pods-biblestrong.dev.xcconfig */,
-				4A5B3757EEAFAE0B18E9B93C /* Pods-biblestrong.prod.xcconfig */,
-				4C7B36A0A2B3E478DD3BEEB7 /* Pods-biblestrong.staging.xcconfig */,
+				0FC924C9E5E33866B94760C1 /* Pods-biblestrong.dev.xcconfig */,
+				7D2DC3FBFF5A735C9470CAA6 /* Pods-biblestrong.prod.xcconfig */,
+				F663A8D6DB90C6F7C10FB13D /* Pods-biblestrong.staging.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -190,7 +190,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "biblestrong" */;
 			buildPhases = (
-				8D7B083D12623FF28FB295B7 /* [CP] Check Pods Manifest.lock */,
+				347163288CC90C14D0B4E35E /* [CP] Check Pods Manifest.lock */,
 				FD4C38642228810C00325AF5 /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
@@ -199,9 +199,9 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				BAE98BAC0BF34B598839A137 /* Upload Debug Symbols to Sentry */,
-				D0DB130D07999B7FEF4A719A /* [CP] Embed Pods Frameworks */,
-				0BCEA6BC1384C6F651B93A53 /* [CP] Copy Pods Resources */,
-				DBCA2F82EA9591B8AF7967FA /* [CP-User] [RNFB] Core Configuration */,
+				CBC7E16FC3EC6046B279EB9C /* [CP] Embed Pods Frameworks */,
+				81D8BC1C04DE833CABD04A64 /* [CP] Copy Pods Resources */,
+				DD2A9514D421017F0F550843 /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -275,7 +275,47 @@
 			shellPath = /bin/sh;
 			shellScript = "export SENTRY_PROPERTIES=sentry.properties\nexport EXTRA_PACKAGER_ARGS=\"--sourcemap-output $DERIVED_FILE_DIR/main.jsbundle.map\"\nexport NODE_BINARY=node\n../node_modules/@sentry/cli/bin/sentry-cli react-native xcode ../node_modules/react-native/scripts/react-native-xcode.sh\n\n`node --print \"require.resolve('expo-updates/package.json').slice(0, -13) + '/scripts/create-manifest-ios.sh'\"`\n";
 		};
-		0BCEA6BC1384C6F651B93A53 /* [CP] Copy Pods Resources */ = {
+		347163288CC90C14D0B4E35E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-biblestrong-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6321EC4823EF53A4007CB036 /* Setup firebase environment GoogleService-Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Setup firebase environment GoogleService-Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Name of the resource we're selectively copying\nGOOGLESERVICE_INFO_PLIST=GoogleService-Info.plist\n\nGOOGLESERVICE_INFO_DEV=${PROJECT_DIR}/firebase/dev/${GOOGLESERVICE_INFO_PLIST}\nGOOGLESERVICE_INFO_STAGING=${PROJECT_DIR}/firebase/staging/${GOOGLESERVICE_INFO_PLIST}\nGOOGLESERVICE_INFO_PROD=${PROJECT_DIR}/firebase/prod/${GOOGLESERVICE_INFO_PLIST}\n\n# Check if dev file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_DEV}\"\nif [ ! -f $GOOGLESERVICE_INFO_DEV ]\nthen\n    echo \"No Development GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n# Check if staging file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_STAGING}\"\nif [ ! -f $GOOGLESERVICE_INFO_STAGING ]\nthen\n    echo \"No Staging GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n# Check if prod file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_PROD}\"\nif [ ! -f $GOOGLESERVICE_INFO_PROD ]\nthen\n    echo \"No Production GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n\n# Get a reference to the destination location for the GoogleService-Info.plist\nPLIST_DESTINATION=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\necho \"Will copy ${GOOGLESERVICE_INFO_PLIST} to final destination: ${PLIST_DESTINATION}\"\n\nif [ \"${CONFIGURATION}\" == \"Dev\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_DEV}\"\n    cp \"${GOOGLESERVICE_INFO_DEV}\" \"${PLIST_DESTINATION}\"\nfi\n\nif [ \"${CONFIGURATION}\" == \"Staging\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_STAGING}\"\n    cp \"${GOOGLESERVICE_INFO_STAGING}\" \"${PLIST_DESTINATION}\"\nfi\n\nif [ \"${CONFIGURATION}\" == \"Prod\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_PROD}\"\n    cp \"${GOOGLESERVICE_INFO_PROD}\" \"${PLIST_DESTINATION}\"\nfi\n";
+		};
+		81D8BC1C04DE833CABD04A64 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -303,46 +343,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-biblestrong/Pods-biblestrong-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		6321EC4823EF53A4007CB036 /* Setup firebase environment GoogleService-Info.plist */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Setup firebase environment GoogleService-Info.plist";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Name of the resource we're selectively copying\nGOOGLESERVICE_INFO_PLIST=GoogleService-Info.plist\n\nGOOGLESERVICE_INFO_DEV=${PROJECT_DIR}/firebase/dev/${GOOGLESERVICE_INFO_PLIST}\nGOOGLESERVICE_INFO_STAGING=${PROJECT_DIR}/firebase/staging/${GOOGLESERVICE_INFO_PLIST}\nGOOGLESERVICE_INFO_PROD=${PROJECT_DIR}/firebase/prod/${GOOGLESERVICE_INFO_PLIST}\n\n# Check if dev file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_DEV}\"\nif [ ! -f $GOOGLESERVICE_INFO_DEV ]\nthen\n    echo \"No Development GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n# Check if staging file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_STAGING}\"\nif [ ! -f $GOOGLESERVICE_INFO_STAGING ]\nthen\n    echo \"No Staging GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n# Check if prod file exists\necho \"Looking for ${GOOGLESERVICE_INFO_PLIST} in ${GOOGLESERVICE_INFO_PROD}\"\nif [ ! -f $GOOGLESERVICE_INFO_PROD ]\nthen\n    echo \"No Production GoogleService-Info.plist found. Please ensure it's in the proper directory.\"\n    exit 1\nfi\n\n\n# Get a reference to the destination location for the GoogleService-Info.plist\nPLIST_DESTINATION=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\necho \"Will copy ${GOOGLESERVICE_INFO_PLIST} to final destination: ${PLIST_DESTINATION}\"\n\nif [ \"${CONFIGURATION}\" == \"Dev\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_DEV}\"\n    cp \"${GOOGLESERVICE_INFO_DEV}\" \"${PLIST_DESTINATION}\"\nfi\n\nif [ \"${CONFIGURATION}\" == \"Staging\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_STAGING}\"\n    cp \"${GOOGLESERVICE_INFO_STAGING}\" \"${PLIST_DESTINATION}\"\nfi\n\nif [ \"${CONFIGURATION}\" == \"Prod\" ]\nthen\n    echo \"Using ${GOOGLESERVICE_INFO_PROD}\"\n    cp \"${GOOGLESERVICE_INFO_PROD}\" \"${PLIST_DESTINATION}\"\nfi\n";
-		};
-		8D7B083D12623FF28FB295B7 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-biblestrong-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		BAE98BAC0BF34B598839A137 /* Upload Debug Symbols to Sentry */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -357,7 +357,7 @@
 			shellPath = /bin/sh;
 			shellScript = "export SENTRY_PROPERTIES=sentry.properties\n\n../node_modules/@sentry/cli/bin/sentry-cli upload-dif \"$DWARF_DSYM_FOLDER_PATH\"\n";
 		};
-		D0DB130D07999B7FEF4A719A /* [CP] Embed Pods Frameworks */ = {
+		CBC7E16FC3EC6046B279EB9C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -365,12 +365,14 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-biblestrong/Pods-biblestrong-frameworks.sh",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-DoubleConversion/double-conversion.framework/double-conversion",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Flipper-Glog/glog.framework/glog",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/hermes.framework/hermes",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/double-conversion.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/glog.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
@@ -379,7 +381,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-biblestrong/Pods-biblestrong-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DBCA2F82EA9591B8AF7967FA /* [CP-User] [RNFB] Core Configuration */ = {
+		DD2A9514D421017F0F550843 /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -437,8 +439,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4F2A6B6270D62B200021E46 /* File.swift in Sources */,
-				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				F431F0BB2918B2E600F32165 /* AppDelegate.mm in Sources */,
 				AB6CA71FEEB1A7BED98965AA /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -460,7 +462,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 84660B6539CF284CD683AF59 /* Pods-biblestrong.dev.xcconfig */;
+			baseConfigurationReference = 0FC924C9E5E33866B94760C1 /* Pods-biblestrong.dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -479,6 +481,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong.dev;
 				PRODUCT_NAME = "dev - BIble Strong";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -493,7 +496,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Prod */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4A5B3757EEAFAE0B18E9B93C /* Pods-biblestrong.prod.xcconfig */;
+			baseConfigurationReference = 7D2DC3FBFF5A735C9470CAA6 /* Pods-biblestrong.prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -512,6 +515,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong;
 				PRODUCT_NAME = "Bible Strong";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -575,7 +579,7 @@
 		};
 		6321EC4023EF3FFF007CB036 /* Staging */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4C7B36A0A2B3E478DD3BEEB7 /* Pods-biblestrong.staging.xcconfig */;
+			baseConfigurationReference = F663A8D6DB90C6F7C10FB13D /* Pods-biblestrong.staging.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -592,6 +596,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong.staging;
 				PRODUCT_NAME = "staging - Bible Strong";
 				SUPPORTS_MACCATALYST = YES;

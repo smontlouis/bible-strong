@@ -32,6 +32,7 @@ LogBox.ignoreLogs([
   "Cannot read property 'name' of null",
   'EventEmitter.removeListener',
   'useNativeDriver',
+  'ViewPropTypes',
 ])
 
 if (!__DEV__) {

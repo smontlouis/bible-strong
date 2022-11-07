@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { persistReducer } from 'redux-persist'
 
