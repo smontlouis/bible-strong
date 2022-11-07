@@ -56,7 +56,6 @@ export default produce((draft: Draft<UserState>, action) => {
       break
     }
     case SET_SETTINGS_PREFERRED_COLOR_SCHEME: {
-      console.log('DO STUFF')
       draft.bible.settings.preferredColorScheme = action.payload
       break
     }

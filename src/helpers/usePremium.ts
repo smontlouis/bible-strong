@@ -19,7 +19,6 @@ export const useQuota = (quotaType: QuotaType) => {
 
   return useCallback(
     (fn: () => void, failCb?: () => void) => {
-      console.log(quota)
       if (isPremium) {
         fn()
         return
