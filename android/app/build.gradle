@@ -76,12 +76,10 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    entryFile: "index.js",
-    cliPath: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../cli.js"),
     enableHermes: (findProperty('expo.jsEngine') ?: "jsc") == "hermes",
 ]
 
-apply from: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../react.gradle")
+apply from: "../../node_modules/react-native/react.gradle"
 
 project.ext.sentryCli = [
     logLevel: "debug"
@@ -269,40 +267,27 @@ dependencies {
     implementation project(':@sentry_react-native')
     implementation project(':react-native-push-notification')
 
-
-    def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
-    def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
-    def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
-
-    // If your app supports Android versions before Ice Cream Sandwich (API level 14)
-    // All fresco packages should use the same version
-    if (isGifEnabled || isWebpEnabled) {
-        implementation 'com.facebook.fresco:fresco:2.0.0'
-        implementation 'com.facebook.fresco:imagepipeline-okhttp3:2.0.0'
+    implementation("androidx.core:core:1.7.0") {
+        force = true
     }
 
-    if (isGifEnabled) {
-        // For animated gif support
-        implementation 'com.facebook.fresco:animated-gif:2.0.0'
+    implementation("androidx.core:core-ktx:1.7.0") {
+        force = true
     }
 
-    if (isWebpEnabled) {
-        // For webp support
-        implementation 'com.facebook.fresco:webpsupport:2.0.0'
-        if (isWebpAnimatedEnabled) {
-            // Animated webp support
-            implementation 'com.facebook.fresco:animated-webp:2.0.0'
-        }
+    implementation("androidx.annotation:annotation-experimental:1.2.0") {
+        force = true
+    }
+
+    implementation("androidx.browser:browser:1.4.0") {
+        force = true
     }
 
 
 
 
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
-    implementation "com.squareup.okhttp3:okhttp"
-    implementation "com.squareup.okhttp3:okhttp-bom:4.4.1"
-    
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
     }
@@ -317,11 +302,14 @@ dependencies {
 
 
     if (enableHermes) {
-        debugImplementation files(new File(["node", "--print", "require.resolve('hermes-engine/package.json')"].execute().text.trim(), "../android/hermes-debug.aar"))
-        releaseImplementation files(new File(["node", "--print", "require.resolve('hermes-engine/package.json')"].execute().text.trim(), "../android/hermes-release.aar"))
+        def hermesPath = "../../node_modules/hermes-engine/android/";
+        debugImplementation files(hermesPath + "hermes-debug.aar")
+        releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {
         implementation jscFlavor
     }
+
+
 }
 
 if (isNewArchitectureEnabled()) {
@@ -344,8 +332,8 @@ task copyDownloadableDepsToLibs(type: Copy) {
 }
 
 
-apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute().text.trim(), "../native_modules.gradle");
-applyNativeModulesAppBuildGradle(project)
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
 apply plugin: 'com.google.gms.google-services'
 
 def isNewArchitectureEnabled() {
@@ -355,3 +343,4 @@ def isNewArchitectureEnabled() {
     // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
     return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
 }
+

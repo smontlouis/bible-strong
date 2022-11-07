@@ -56,6 +56,7 @@
       android:name="com.facebook.FacebookActivity"
       android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
       android:label="@string/app_name"
+      android:exported="true"
     />
     <activity android:name="com.facebook.CustomTabActivity" android:exported="true">
       <intent-filter>
@@ -73,9 +74,9 @@
     <meta-data android:name="com.dieam.reactnativepushnotification.notification_foreground" android:value="true"/>
     <!-- Change the resource name to your App's accent color - or any other color you want -->
     <meta-data android:name="com.dieam.reactnativepushnotification.notification_color" android:resource="@android:color/white"/>
-    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions"/>
-    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher"/>
-    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" android:exported="true"/>
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" android:exported="true"/>
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver" android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
         <action android:name="android.intent.action.QUICKBOOT_POWERON"/>

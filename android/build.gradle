@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -5,13 +7,9 @@ buildscript {
         buildToolsVersion = "31.0.0"
         minSdkVersion = 21
         compileSdkVersion = 31
-        targetSdkVersion = 31
-        androidXCore = "1.0.2"
-        androidXAnnotation = "1.1.0"
-        androidXBrowser = "1.0.0"
+        targetSdkVersion = 33
         ndkVersion = "21.4.7075529"
-        googlePlayServicesAuthVersion = "19.2.0"
-        kotlinVersion = "1.5.31"
+        kotlinVersion = "1.7.20"
 
         if (System.properties['os.arch'] == "aarch64") {
             // For M1 Users we need to use the NDK 24 which added support for aarch64
@@ -26,7 +24,6 @@ buildscript {
         }
     }
     repositories {
-        maven { url 'https://google.bintray.com/exoplayer/' }
         google()
         mavenCentral()
     }
@@ -45,14 +42,13 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'https://google.bintray.com/exoplayer/' }
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-            url(new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../android"))
+            url("$rootDir/../node_modules/react-native/android")
         }
         maven {
             // Android JSC is installed from npm
-            url(new File(["node", "--print", "require.resolve('jsc-android/package.json')"].execute().text.trim(), "../dist"))
+            url("$rootDir/../node_modules/jsc-android/dist")
         }
         mavenCentral {
             // We don't want to fetch react-native from Maven Central as there are
@@ -63,7 +59,6 @@ allprojects {
         }
         google()
         maven { url 'https://www.jitpack.io' }
-        jcenter()
     }
 }
 
@@ -71,4 +66,10 @@ allprojects {
 wrapper {
     gradleVersion = '4.4'
     distributionUrl = distributionUrl.replace("bin", "all")
+}
+
+subprojects { subproject ->
+    if(project['name'] == 'react-native-reanimated'){
+        project.configurations { compile { } }
+    }
 }
