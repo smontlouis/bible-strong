@@ -107,7 +107,7 @@ export default store => next => async action => {
       if (!diffState?.user?.bible) return
 
       const { studies, ...diffStateUserBible } = diffState.user.bible
-      console.log(diffState.user.bible)
+      // console.log(diffState.user.bible)
 
       if (Object.keys(diffStateUserBible).length !== 0) {
         userDoc.set({ bible: diffStateUserBible }, { merge: true })

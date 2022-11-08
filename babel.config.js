@@ -28,6 +28,7 @@ module.exports = function(api) {
         },
       ],
       '@babel/plugin-proposal-optional-chaining',
+      '@babel/plugin-proposal-unicode-property-regex',
     ],
     env: {
       production: {

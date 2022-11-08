@@ -13,6 +13,8 @@ project 'biblestrong',
         'Staging' => :release, 
         'Prod' => :release
 
+production = ENV["PRODUCTION"] == "1"
+
 target 'biblestrong' do
 
   use_expo_modules!
@@ -32,16 +34,12 @@ target 'biblestrong' do
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
+    :production => production,
     :fabric_enabled => flags[:fabric_enabled],
+    :flipper_configuration => FlipperConfiguration.enabled(["Debug", "Staging"], { 'Flipper' => '0.171.1' })
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  # Enables Flipper.
-  #
-  # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable these next few lines.
-  use_flipper!({'Flipper' => '0.171.1'}, configurations: ['Dev', 'Staging'])
 
 end
 
