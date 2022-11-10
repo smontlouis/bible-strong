@@ -27,7 +27,11 @@ import { conflictStateProxy } from '../../state/app'
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
 import settingsReducer from './user/settings'
-import studiesReducer from './user/studies'
+import studiesReducer, {
+  createStudy,
+  deleteStudy,
+  updateStudy,
+} from './user/studies'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import { reduceReducers } from './utils'
@@ -70,6 +74,8 @@ export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
 export const UPDATE_QUOTA = 'user/UPDATE_QUOTA'
 
 export const RESET_QUOTA = 'user/RESET_QUOTA'
+
+let isFirstSnapshotListener = true
 
 export interface Study {
   id: string
@@ -263,6 +269,7 @@ const ignoreOfflineData = (data: Partial<UserState>) =>
     delete draft.needsUpdate
     delete draft.fontFamily
     delete draft.isLoading
+    delete draft.lastSeen
     delete draft.bible.changelog
     delete draft.quota
   })
@@ -306,7 +313,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         displayName,
         photoURL,
         provider,
-        lastSeen,
         emailVerified,
       } = action.profile as FireAuthProfile
 
@@ -321,7 +327,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.displayName = displayName
       draft.photoURL = photoURL
       draft.provider = provider
-      draft.lastSeen = lastSeen
+      draft.lastSeen = Date.now()
       draft.emailVerified = emailVerified
 
       // Update draft subscription only if it exists when remote data is fetched
@@ -339,7 +345,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           draft.bible = deepmerge(draft.bible, bible, {
             arrayMerge: overwriteMerge,
           })
-          draft.bible.studies = action.studies
+          if (action.studies) {
+            draft.bible.studies = action.studies
+          }
         }
 
         /**
@@ -355,7 +363,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
             ...draft.bible,
             ...bible,
           }
-          draft.bible.studies = action.studies
+          if (action.studies) {
+            draft.bible.studies = action.studies
+          }
         }
       } else if (remoteLastSeen < localLastSeen) {
         // Local wins - do nothing
@@ -553,8 +563,8 @@ export function onUserLoginSuccess({
   return async (dispatch: any, getState: any) => {
     const { id, lastSeen } = getState().user
 
-    const userStatusRef = firebaseDb.collection('users-status').doc(profile.id)
     const userRef = firebaseDb.collection('users').doc(profile.id)
+
     const studiesRef = firebaseDb
       .collection('studies')
       .where('user.id', '==', profile.id)
@@ -584,9 +594,79 @@ export function onUserLoginSuccess({
       })
 
       /**
-       * 3.b Pass data to USER_LOGIN_SUCCESS reducer
+       * 3.b Subscribe for live updates
        */
-      console.log('3.b Pass data to USER_LOGIN_SUCCESS reducer')
+      firebaseDb
+        .collection('users')
+        .doc(profile.id)
+        .onSnapshot(doc => {
+          const source = doc.metadata.hasPendingWrites ? 'Local' : 'Server'
+
+          /**
+           * Ignore local changes
+           */
+          if (source === 'Local') return
+
+          console.log('await 3.b received live update')
+          const userData = doc.data() as FireStoreUserData
+
+          return dispatch({
+            type: USER_LOGIN_SUCCESS,
+            isLogged: !!id,
+            localLastSeen: lastSeen,
+            profile,
+            remoteUserData: userData,
+            remoteLastSeen: Date.now(),
+            studies: undefined,
+          })
+        })
+
+      firebaseDb
+        .collection('studies')
+        .where('user.id', '==', profile.id)
+        .onSnapshot(querySnapshot => {
+          const source = querySnapshot.metadata.hasPendingWrites
+            ? 'Local'
+            : 'Server'
+          if (source === 'Local') return
+
+          querySnapshot.docChanges().forEach(change => {
+            // Ignore first listener adding all documents
+            if (isFirstSnapshotListener) return
+
+            if (change.type === 'added') {
+              console.log('New study: ', change.doc.data().id)
+              dispatch(
+                createStudy({
+                  id: change.doc.data().id,
+                  content: change.doc.data().content,
+                  title: change.doc.data().title,
+                })
+              )
+            }
+            if (change.type === 'modified') {
+              console.log('Modified study: ', change.doc.data().id)
+              dispatch(
+                updateStudy({
+                  id: change.doc.data().id,
+                  content: change.doc.data().content,
+                  title: change.doc.data().title,
+                })
+              )
+            }
+            if (change.type === 'removed') {
+              console.log('Removed study: ', change.doc.data().id)
+              dispatch(deleteStudy(change.doc.data().id))
+            }
+          })
+
+          isFirstSnapshotListener = false
+        })
+
+      /**
+       * 3.c Pass data to USER_LOGIN_SUCCESS reducer
+       */
+      console.log('3.c Pass data to USER_LOGIN_SUCCESS reducer')
       return dispatch({
         type: USER_LOGIN_SUCCESS,
         isLogged: !!id,

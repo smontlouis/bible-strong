@@ -23,7 +23,6 @@ import {
   //
   CREATE_STUDY,
   UPDATE_STUDY,
-  UPLOAD_STUDY,
   DELETE_STUDY,
   PUBLISH_STUDY,
   //
@@ -96,7 +95,6 @@ export default store => next => async action => {
     case CREATE_STUDY:
     case UPDATE_STUDY:
     case PUBLISH_STUDY:
-    case UPLOAD_STUDY:
     case ADD_NOTE:
     case REMOVE_NOTE:
     case ADD_HIGHLIGHT:
@@ -173,7 +171,6 @@ export default store => next => async action => {
       break
     }
     case SET_LAST_SEEN: {
-      userDoc.set({ lastSeen: user.lastSeen }, { merge: true })
       userStatusRef.set({ lastSeen: user.lastSeen }, { merge: true })
       break
     }

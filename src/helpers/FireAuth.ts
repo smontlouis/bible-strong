@@ -19,7 +19,6 @@ export type FireAuthProfile = {
   displayName: string
   photoURL: string
   provider: string
-  lastSeen: number
   emailVerified: boolean
 }
 
@@ -96,7 +95,6 @@ const FireAuth = class {
           displayName: user.providerData[0].displayName || '',
           photoURL: user.providerData[0].photoURL || '',
           provider: user.providerData[0].providerId,
-          lastSeen: Date.now(),
           emailVerified,
         }
 

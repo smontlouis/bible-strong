@@ -4,7 +4,7 @@ import compose from 'recompose/compose'
 import { useDispatch, connect } from 'react-redux'
 import generateUUID from '~helpers/generateUUID'
 
-import { createStudy, updateStudy, uploadStudy } from '~redux/modules/user'
+import { createStudy, updateStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import WebViewQuillEditor from '~features/studies/WebViewQuillEditor'
@@ -26,7 +26,7 @@ const withStudy = Component => props => {
     } else {
       // Create Study
       const studyId = generateUUID()
-      dispatch(createStudy(studyId))
+      dispatch(createStudy({ id: studyId }))
       setStudyId(studyId)
     }
   }, [dispatch, studyIdParam])
@@ -64,9 +64,6 @@ class EditStudyScreen extends React.Component {
   onDeltaChangeCallback = (delta, deltaChange, deltaOld, changeSource) => {
     const { dispatch, currentStudy } = this.props
     dispatch(updateStudy({ id: currentStudy.id, content: delta }))
-
-    // TODO: See if it's soo expensive
-    dispatch(uploadStudy(this.props.currentStudy.id))
   }
 
   navigateBibleView = type => {
@@ -113,7 +110,6 @@ class EditStudyScreen extends React.Component {
                 entity: 'studies',
               },
             })
-            this.props.dispatch(uploadStudy(this.props.currentStudy.id))
           }}
           title={this.props.currentStudy.title}
         />
@@ -131,7 +127,6 @@ class EditStudyScreen extends React.Component {
           onClosed={() => this.setTitlePrompt(false)}
           onSave={(id, title) => {
             this.props.dispatch(updateStudy({ id, title }))
-            this.props.dispatch(uploadStudy(id))
           }}
         />
         <QuickTagsModal

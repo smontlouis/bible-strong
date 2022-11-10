@@ -14,7 +14,6 @@ import {
   ADD_TAG,
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
-  UPLOAD_STUDY,
   DELETE_STUDY,
   UPDATE_TAG,
   CHANGE_COLOR,
@@ -44,12 +43,12 @@ export default store => next => action => {
     case TOGGLE_TAG_ENTITY:
     case UPDATE_STUDY:
     case CREATE_STUDY:
-    case UPLOAD_STUDY:
     case DELETE_STUDY:
     case UPDATE_TAG:
     case CHANGE_COLOR:
     case USER_LOGIN_SUCCESS:
     case DELETE_HISTORY: {
+      console.log('lastSeenMiddleware', action.type)
       store.dispatch({ type: SET_LAST_SEEN })
       break
     }

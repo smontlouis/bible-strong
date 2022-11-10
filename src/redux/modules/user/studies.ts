@@ -3,19 +3,19 @@ import { removeEntityInTags } from '../utils'
 
 export const CREATE_STUDY = 'user/CREATE_STUDY'
 export const UPDATE_STUDY = 'user/UPDATE_STUDY'
-export const UPLOAD_STUDY = 'user/UPLOAD_STUDY'
 export const DELETE_STUDY = 'user/DELETE_STUDY'
 export const PUBLISH_STUDY = 'user/PUBLISH_STUDY'
 
 export default produce((draft, action) => {
   switch (action.type) {
     case CREATE_STUDY: {
-      draft.bible.studies[action.payload] = {
-        id: action.payload,
+      const { id, content, title } = action.payload
+      draft.bible.studies[id] = {
+        id,
         created_at: Date.now(),
         modified_at: Date.now(),
-        title: 'Document sans titre',
-        content: null,
+        title: title || 'Document sans titre',
+        content: content || null,
         user: {
           id: draft.id,
           displayName: draft.displayName,
@@ -64,28 +64,37 @@ export default produce((draft, action) => {
 
 // STUDIES
 
-export function createStudy(id) {
+export function createStudy({
+  id,
+  content,
+  title,
+}: {
+  id: string
+  content: string
+  title: string
+}) {
   return {
     type: CREATE_STUDY,
-    payload: id,
+    payload: { id, content, title },
   }
 }
 
-export function updateStudy({ id, content, title }) {
+export function updateStudy({
+  id,
+  content,
+  title,
+}: {
+  id: string
+  content: string
+  title: string
+}) {
   return {
     type: UPDATE_STUDY,
     payload: { id, content, title },
   }
 }
 
-export function uploadStudy(id) {
-  return {
-    type: UPLOAD_STUDY,
-    payload: id,
-  }
-}
-
-export function deleteStudy(id) {
+export function deleteStudy(id: string) {
   return {
     type: DELETE_STUDY,
     payload: id,

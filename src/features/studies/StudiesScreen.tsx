@@ -12,7 +12,7 @@ import FloatingButton from '~common/ui/FloatingButton'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import MultipleTagsModal from '~common/MultipleTagsModal'
-import { updateStudy, uploadStudy } from '~redux/modules/user'
+import { updateStudy } from '~redux/modules/user'
 import withLoginModal from '~common/withLoginModal'
 
 import StudySettingsModal from './StudySettingsModal'
@@ -109,7 +109,6 @@ const StudiesScreen = () => {
         onClosed={() => setTitlePrompt(false)}
         onSave={(id, title) => {
           dispatch(updateStudy({ id, title }))
-          dispatch(uploadStudy(id))
         }}
       />
     </Container>
