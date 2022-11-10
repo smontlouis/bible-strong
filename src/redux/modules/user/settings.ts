@@ -16,7 +16,6 @@ export const INCREASE_SETTINGS_FONTSIZE_SCALE =
 export const DECREASE_SETTINGS_FONTSIZE_SCALE =
   'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
-export const SET_SETTINGS_THEME = 'user/SET_SETTINGS_THEME'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
 export const SET_SETTINGS_COMMENTS_DISPLAY =
@@ -49,10 +48,6 @@ export default produce((draft: Draft<UserState>, action) => {
     }
     case SET_SETTINGS_TEXT_DISPLAY: {
       draft.bible.settings.textDisplay = action.payload
-      break
-    }
-    case SET_SETTINGS_THEME: {
-      draft.bible.settings.theme = action.payload
       break
     }
     case SET_SETTINGS_PREFERRED_COLOR_SCHEME: {
@@ -107,13 +102,6 @@ export function setSettingsAlignContent(payload: string) {
 export function setSettingsTextDisplay(payload: string) {
   return {
     type: SET_SETTINGS_TEXT_DISPLAY,
-    payload,
-  }
-}
-
-export function setSettingsTheme(payload: CurrentTheme) {
-  return {
-    type: SET_SETTINGS_THEME,
     payload,
   }
 }

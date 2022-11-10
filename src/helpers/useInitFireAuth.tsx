@@ -1,14 +1,20 @@
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import SnackBar from '~common/SnackBar'
-import FireAuth from '~helpers/FireAuth'
+import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
 import i18n from '~i18n'
 import * as UserActions from '~redux/modules/user'
 
 const useInitFireAuth = () => {
   const dispatch = useDispatch()
   useEffect(() => {
-    const onLogin = ({ profile, remoteLastSeen }) => {
+    const onLogin = ({
+      profile,
+      remoteLastSeen,
+    }: {
+      profile: FireAuthProfile
+      remoteLastSeen: number
+    }) => {
       console.log(`Bienvenue ${profile.displayName}.`)
       dispatch(UserActions.onUserLoginSuccess({ profile, remoteLastSeen }))
     }

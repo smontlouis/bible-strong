@@ -24,6 +24,8 @@ import TouchableChip from './TouchableChip'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import verseToReference from '../../helpers/verseToReference'
 import { useTranslation } from 'react-i18next'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { RootState } from '~redux/modules/reducer'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
@@ -77,8 +79,9 @@ const VersesModal = ({
     }
   }, [isPrevVisible, isVisible])
 
-  const { colors } = useSelector(state => ({
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
+  const { theme: currentTheme } = useCurrentThemeSelector()
+  const { colors } = useSelector((state: RootState) => ({
+    colors: state.user.bible.settings.colors[currentTheme],
   }))
 
   useEffect(() => {

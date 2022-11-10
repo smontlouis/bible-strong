@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer'
 import { Reducer } from 'redux'
 import {
   ChangelogItem,
-  CurrentTheme,
+  OngoingPlan,
   PreferredColorScheme,
   PreferredDarkTheme,
   PreferredLightTheme,
@@ -11,15 +11,16 @@ import {
   Tag,
 } from '~common/types'
 import { detailedDiff } from '~helpers/deep-obj'
+import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
-import sepiaColors from '~themes/sepiaColors'
+import mauveColors from '~themes/mauveColors'
 import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
-import mauveColors from '~themes/mauveColors'
+import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 import { isEmpty } from '../../helpers/deep-obj/utils'
 import { conflictStateProxy } from '../../state/app'
@@ -85,6 +86,18 @@ export interface Study {
   }
   tags?: { [x: string]: Tag }
 }
+
+export interface FireStoreUserData {
+  id: string
+  email: string
+  displayName: string
+  photoURL: string
+  provider: string
+  lastSeen: number
+  subscription?: string
+  bible: UserState['bible']
+  plan: OngoingPlan[]
+}
 export interface UserState {
   id: string
   email: string
@@ -136,7 +149,6 @@ export interface UserState {
       preferredColorScheme: PreferredColorScheme
       preferredLightTheme: PreferredLightTheme
       preferredDarkTheme: PreferredDarkTheme
-      theme: CurrentTheme
       press: 'shortPress' | 'longPress'
       notesDisplay: 'inline' | 'block'
       commentsDisplay: boolean
@@ -208,7 +220,6 @@ const initialState: UserState = {
       preferredColorScheme: 'auto',
       preferredLightTheme: 'default',
       preferredDarkTheme: 'dark',
-      theme: 'default',
       press: 'longPress',
       notesDisplay: 'inline',
       commentsDisplay: false,
@@ -253,6 +264,7 @@ const ignoreOfflineData = (data: Partial<UserState>) =>
     delete draft.fontFamily
     delete draft.isLoading
     delete draft.bible.changelog
+    delete draft.quota
   })
 
 // UserReducer
@@ -282,6 +294,10 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.lastSeen = Date.now()
       break
     }
+
+    /**
+     * 4. Update user profile
+     */
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const {
@@ -292,9 +308,11 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         provider,
         lastSeen,
         emailVerified,
-        subscription,
-        bible,
-      } = action.profile
+      } = action.profile as FireAuthProfile
+
+      const bible = (action.remoteUserData as FireStoreUserData)?.bible
+      const subscription = (action.remoteUserData as FireStoreUserData)
+        ?.subscription
 
       const { isLogged, localLastSeen, remoteLastSeen } = action
 
@@ -305,11 +323,17 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.lastSeen = lastSeen
       draft.emailVerified = emailVerified
-      draft.isLoading = false
-      draft.subscription = subscription
 
+      // Update draft subscription only if it exists when remote data is fetched
+      if (typeof subscription !== 'undefined') {
+        draft.subscription = subscription
+      }
+
+      /**
+       * 4.a. - NOT LOGGED - User was not logged, merge data
+       */
       if (!isLogged) {
-        console.log('User was not logged, merge data')
+        console.log('4.a - Reducer - User was not logged - Merge data')
 
         if (bible) {
           draft.bible = deepmerge(draft.bible, bible, {
@@ -317,9 +341,15 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           })
           draft.bible.studies = action.studies
         }
+
+        /**
+         *  4.a. - LOGGED - User is logged
+         */
       } else if (remoteLastSeen > localLastSeen) {
         // Remote wins
-        console.log('Remote wins')
+        console.log(
+          '4.a. - Reducer - Remote wins - Save bible and studies data'
+        )
         if (bible) {
           draft.bible = {
             ...draft.bible,
@@ -328,20 +358,15 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           draft.bible.studies = action.studies
         }
       } else if (remoteLastSeen < localLastSeen) {
-        console.log('Local wins')
         // Local wins - do nothing
+        console.log('4.a. - Reducer - Local wins - do nothing')
       } else {
-        console.log('Last seen equals remote last seen, do nothing')
+        console.log(
+          '4.a. - Reducer - Last seen equals remote last seen, do nothing'
+        )
       }
 
-      // Take care of migratin
-      if (!draft.bible.settings.colors.black) {
-        draft.bible.settings.colors.black = blackColors
-      }
-
-      if (!draft.bible.settings.colors.sepia) {
-        draft.bible.settings.colors.sepia = sepiaColors
-      }
+      draft.isLoading = false
 
       break
     }
@@ -515,49 +540,73 @@ export function saveAllLogsAsSeen(payload) {
 }
 
 // USERS
-export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
+/**
+ * 2. onUserLoginSuccess call
+ */
+export function onUserLoginSuccess({
+  profile,
+  remoteLastSeen,
+}: {
+  profile: FireAuthProfile
+  remoteLastSeen: number
+}) {
   return async (dispatch: any, getState: any) => {
     const { id, lastSeen } = getState().user
+
+    const userStatusRef = firebaseDb.collection('users-status').doc(profile.id)
     const userRef = firebaseDb.collection('users').doc(profile.id)
     const studiesRef = firebaseDb
       .collection('studies')
       .where('user.id', '==', profile.id)
-    const studies = {}
-    let userData = null
+
     const isLogged = !!id
 
     console.log('Local last seen:', new Date(lastSeen))
     console.log('Online last seen:', new Date(remoteLastSeen))
 
-    const dispatchUserSuccess = (u, s) => async (
-      overwriteRemoteLastSeen?: boolean
-    ) => {
-      const userStatusRef = firebaseDb
-        .collection('users-status')
-        .doc(profile.id)
+    /**
+     * 3. Dispatch user success function prepare
+     */
+    const dispatchUserSuccess = (
+      remoteUserData?: FireStoreUserData,
+      remoteStudiesData?: {
+        [key: string]: Study
+      }
+    ) => async (overwriteRemoteLastSeen?: boolean) => {
       remoteLastSeen = overwriteRemoteLastSeen ? 0 : remoteLastSeen
 
-      userRef.set(profile, { merge: true })
-      userStatusRef.set({ lastSeen: profile.lastSeen }, { merge: true })
+      /**
+       * 3.a Update firebase user status and profile
+       */
+      console.log('3.a Update firebase profile')
+      userRef.set(profile, {
+        merge: true,
+      })
 
-      if (remoteLastSeen > lastSeen || !isLogged) {
-        profile = { ...profile, ...u }
-      }
-
+      /**
+       * 3.b Pass data to USER_LOGIN_SUCCESS reducer
+       */
+      console.log('3.b Pass data to USER_LOGIN_SUCCESS reducer')
       return dispatch({
         type: USER_LOGIN_SUCCESS,
         isLogged: !!id,
         localLastSeen: lastSeen,
         profile,
+        remoteUserData,
         remoteLastSeen,
-        studies: s,
+        studies: remoteStudiesData,
       })
     }
 
-    // Handle conflict only when user is already logged
+    /**
+     * 2.a1 - Handle conflict only when user is logged and data online is newer
+     */
     if (remoteLastSeen > lastSeen && id) {
-      console.log('Handle conflict.')
+      console.log('2.a1 - remoteLastSeen > lastSeen && id - handle conflict')
 
+      /**
+       * 2.a2 - Get local user data in firestore format
+       */
       const oldUserData = ignoreOfflineData({
         ...getState().user,
         bible: {
@@ -567,14 +616,23 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         plan: undefined,
       })
 
-      // Merge online data with redux state so we can compare fairly
+      // Get remote data - expensive (1mb max)
+      console.log('2.a2 - Get remote data - expensive (1mb max)')
       const userDoc = await userRef.get()
-      userData = userDoc.data()
+      const userData = userDoc.data() as FireStoreUserData
+
+      // Get remote studies
+      console.log('2.a2 - Get remote studies')
+      const studies = {} as { [key: string]: Study }
       const querySnapshot = await studiesRef.get()
       querySnapshot.forEach(doc => {
-        const study = doc.data()
+        const study = doc.data() as Study
         studies[study.id] = study
       })
+
+      /**
+       * 2.a3 - Merge remote data with redux state so we can compare fairly
+       */
       const newUserData = ignoreOfflineData(
         deepmerge(
           initialState,
@@ -593,6 +651,10 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
         )
       )
 
+      /**
+       * 2.a4 - Compare local and remote data
+       * Remove useless data from diff object
+       */
       const obj = detailedDiff(oldUserData, newUserData, true)
       delete obj?.added?.bible?.history
       delete obj?.updated?.bible?.history
@@ -617,13 +679,27 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
       if (isEmpty(obj?.deleted?.bible)) {
         delete obj?.deleted?.bible
       }
+      // End of conflict handling
 
+      /**
+       * 2.a5 - If there is no conflict, dispatch user success with data from firestore
+       */
       if (isEmpty(obj?.updated) && isEmpty(obj?.deleted)) {
+        console.log(
+          '2.a5 - If there is no conflict, dispatch user success with data from firestore'
+        )
         dispatchUserSuccess(userData, studies)()
         return
       }
 
-      // console.log(obj)
+      /**
+       * 2.a6 - If there is a conflict, dispatch conflict action
+       * Pass the diff object and onDispatchUserSuccess to conflict state proxy in ConflictModal
+       */
+      console.log(
+        '2.a6 - If there is a conflict, dispatch conflict action',
+        obj
+      )
       conflictStateProxy.diff = obj
       conflictStateProxy.onDispatchUserSuccess = dispatchUserSuccess(
         userData,
@@ -631,17 +707,37 @@ export function onUserLoginSuccess({ profile, remoteLastSeen }: any) {
       )
       conflictStateProxy.lastSeen = lastSeen
       conflictStateProxy.remoteLastSeen = remoteLastSeen
+
+      /**
+       * 2.b1 - Local data is newer
+       */
     } else {
+      /**
+       * 2.b2 - Not Logged - User is not logged, get remote data
+       */
       if (!isLogged) {
         const userDoc = await userRef.get()
-        userData = userDoc.data()
+        const userData = userDoc.data() as FireStoreUserData
+
+        const studies = {} as { [key: string]: Study }
         const querySnapshot = await studiesRef.get()
         querySnapshot.forEach(doc => {
-          const study = doc.data()
+          const study = doc.data() as Study
           studies[study.id] = study
         })
+
+        /**
+         * 2.b1 - Logged - Dispatch user success with data from firestore
+         */
+        dispatchUserSuccess(userData, studies)()
+        return
       }
-      dispatchUserSuccess(userData, studies)()
+
+      /**
+       * 2.b2 - Logged - User is logged, dispatch user success with no remote data
+       */
+      console.log('2.b2 - Logged - User is logged - no conflict')
+      dispatchUserSuccess()()
     }
   }
 }

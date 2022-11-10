@@ -1,8 +1,8 @@
-import React from 'react'
 import styled from '@emotion/native'
-import { useSelector } from 'react-redux'
+import React from 'react'
 import { pure } from 'recompose'
 
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { wp } from '~helpers/utils'
 
 const TouchableOpacity = styled.TouchableOpacity(() => ({
@@ -25,13 +25,13 @@ const Text = styled.Text(({ isSelected, isNT, themeValue, theme }) => ({
 }))
 
 const BookSelectorItem = ({ book, isSelected, isNT, onChange, t }) => {
-  const themeValue = useSelector(state => state.user.bible.settings.theme)
+  const { theme } = useCurrentThemeSelector()
   const bookName = t(book.Nom)
     .replace(/\s/g, '')
     .substr(0, 3)
   return (
     <TouchableOpacity onPress={() => onChange(book)}>
-      <Text isSelected={isSelected} isNT={isNT} themeValue={themeValue}>
+      <Text isSelected={isSelected} isNT={isNT} themeValue={theme}>
         {bookName}
       </Text>
     </TouchableOpacity>

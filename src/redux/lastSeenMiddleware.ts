@@ -7,7 +7,6 @@ import {
   INCREASE_SETTINGS_FONTSIZE_SCALE,
   DECREASE_SETTINGS_FONTSIZE_SCALE,
   SET_SETTINGS_TEXT_DISPLAY,
-  SET_SETTINGS_THEME,
   SET_SETTINGS_PRESS,
   SET_SETTINGS_NOTES_DISPLAY,
   ADD_NOTE,
@@ -36,7 +35,6 @@ export default store => next => action => {
     case INCREASE_SETTINGS_FONTSIZE_SCALE:
     case DECREASE_SETTINGS_FONTSIZE_SCALE:
     case SET_SETTINGS_TEXT_DISPLAY:
-    case SET_SETTINGS_THEME:
     case SET_SETTINGS_PRESS:
     case SET_SETTINGS_NOTES_DISPLAY:
     case ADD_NOTE:
@@ -50,6 +48,7 @@ export default store => next => action => {
     case DELETE_STUDY:
     case UPDATE_TAG:
     case CHANGE_COLOR:
+    case USER_LOGIN_SUCCESS:
     case DELETE_HISTORY: {
       store.dispatch({ type: SET_LAST_SEEN })
       break

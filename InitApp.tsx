@@ -4,12 +4,7 @@ import { ThemeProvider } from 'emotion-theming'
 import * as Updates from 'expo-updates'
 import React, { useEffect } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
-import {
-  AppState,
-  AppStateStatus,
-  StatusBar,
-  useColorScheme,
-} from 'react-native'
+import { AppState, AppStateStatus, StatusBar } from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
@@ -23,7 +18,9 @@ import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
 import Changelog from '~common/Changelog'
 import SnackBar from '~common/SnackBar'
+import { CurrentTheme } from '~common/types'
 import { DBStateProvider } from '~helpers/databaseState'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
@@ -31,11 +28,9 @@ import {
   getChangelog,
   getDatabaseUpdate,
   getVersionUpdate,
-  setSettingsTheme,
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
-import { CurrentTheme } from '~common/types'
 
 interface Props {
   persistor: Persistor
@@ -113,57 +108,18 @@ const updateApp = async (t: TFunction<'translation'>) => {
   }
 }
 
-const useComputeTheme = () => {
-  const dispatch = useDispatch()
-
-  const {
-    preferredColorScheme,
-    preferredDarkTheme,
-    preferredLightTheme,
-  } = useSelector((state: RootState) => ({
-    theme: state.user.bible.settings.theme,
-    preferredColorScheme: state.user.bible.settings.preferredColorScheme,
-    preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
-    preferredLightTheme: state.user.bible.settings.preferredLightTheme,
-  }))
-
-  const systemColorScheme = useColorScheme()
-
-  const computedTheme = (() => {
-    if (preferredColorScheme === 'auto') {
-      if (systemColorScheme === 'dark') {
-        return preferredDarkTheme
-      }
-      return preferredLightTheme
-    }
-
-    if (preferredColorScheme === 'dark') return preferredDarkTheme
-    return preferredLightTheme
-  })()
-
-  /*
-   * We could potentially use the computed theme instead of setting it in redux,
-   * but we keep it in redux for now to avoid any backward compatibility issues
-   */
-  useEffect(() => {
-    dispatch(setSettingsTheme(computedTheme))
-  }, [computedTheme, dispatch])
-}
-
 const InitApp = ({ persistor }: Props) => {
   useInitFireAuth()
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const { theme: currentTheme, fontFamily } = useSelector(
-    (state: RootState) => ({
-      theme: state.user.bible.settings.theme,
-      preferredColorScheme: state.user.bible.settings.preferredColorScheme,
-      preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
-      preferredLightTheme: state.user.bible.settings.preferredLightTheme,
-      fontFamily: state.user.fontFamily,
-    })
-  )
-  useComputeTheme()
+  const { fontFamily } = useSelector((state: RootState) => ({
+    preferredColorScheme: state.user.bible.settings.preferredColorScheme,
+    preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
+    preferredLightTheme: state.user.bible.settings.preferredLightTheme,
+    fontFamily: state.user.fontFamily,
+  }))
+
+  const { theme: currentTheme } = useCurrentThemeSelector()
 
   useEffect(() => {
     dispatch(getChangelog())

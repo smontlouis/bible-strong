@@ -14,6 +14,7 @@ import MultipleTagsModal from '~common/MultipleTagsModal'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import Box from '~common/ui/Box'
 import { useTranslation } from 'react-i18next'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 interface Chip {
   id: string
@@ -25,9 +26,9 @@ const HighlightsScreen = () => {
   const verseIds = useSelector(
     (state: RootState) => state.user.bible.highlights
   )
+  const { theme: currentTheme } = useCurrentThemeSelector()
   const colors = useSelector(
-    (state: RootState) =>
-      state.user.bible.settings.colors[state.user.bible.settings.theme]
+    (state: RootState) => state.user.bible.settings.colors[currentTheme]
   )
 
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)

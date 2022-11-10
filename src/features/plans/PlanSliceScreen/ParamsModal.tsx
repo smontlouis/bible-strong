@@ -19,7 +19,6 @@ import {
   useParamsModalLabels,
 } from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
-import { Circle } from '~features/home/SwitchTheme'
 import fonts from '~helpers/fonts'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -31,6 +30,7 @@ import {
   setSettingsPreferredLightTheme,
 } from '~redux/modules/user'
 import { Theme } from '~themes'
+import Circle from '~common/ui/Circle'
 
 interface Props {
   paramsModalRef: React.RefObject<Modalize>

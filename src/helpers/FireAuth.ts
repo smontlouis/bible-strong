@@ -13,6 +13,16 @@ import { firebaseDb } from '~helpers/firebase'
 import i18n from '~i18n'
 import { APP_FETCH_DATA } from '~redux/modules/user'
 
+export type FireAuthProfile = {
+  id: string
+  email: string
+  displayName: string
+  photoURL: string
+  provider: string
+  lastSeen: number
+  emailVerified: boolean
+}
+
 const FireAuth = class {
   authFlag = false
 
@@ -68,7 +78,7 @@ const FireAuth = class {
       }
 
       if (user) {
-        console.log('------ User exists: ', user)
+        console.log('------ User exists: ')
 
         // Determine if user needs to verify email
         const emailVerified =
@@ -77,10 +87,12 @@ const FireAuth = class {
           user.providerData[0].providerId !== 'password' ||
           user.emailVerified
 
-        // TODO - Revoir ça pour connexion Apple
-        const profile = {
+        /**
+         * 1.a. We retrieve the firebase Auth user profile
+         */
+        const profile: FireAuthProfile = {
           id: user.uid,
-          email: user.email,
+          email: user.email!,
           displayName: user.providerData[0].displayName || '',
           photoURL: user.providerData[0].photoURL || '',
           provider: user.providerData[0].providerId,
@@ -94,27 +106,31 @@ const FireAuth = class {
 
         dispatch({ type: APP_FETCH_DATA })
 
-        // GET USER STATUS
+        /**
+         * 1.b. We retrieve the user last seen status
+         */
         const userStatusDoc = await userStatusRef.get()
-
         const userStatus = userStatusDoc.data() || {}
-        const remoteLastSeen = userStatus.lastSeen || 0
+        const remoteLastSeen: number = userStatus.lastSeen || 0
 
         if (!this.user) {
           if (this.onLogin) {
+            /**
+             * 1.c. We call the onLogin callback dispatching onUserLoginSuccess
+             */
             this.onLogin({ profile, remoteLastSeen })
-          } // On login
-        }
+          }
 
-        this.user = user // Store user
+          this.user = user // Store user
 
-        if (!__DEV__) {
-          analytics().setUserId(profile.id)
+          if (!__DEV__) {
+            analytics().setUserId(profile.id)
+          }
+          Sentry.configureScope(scope => {
+            scope.setUser(profile)
+          })
+          return
         }
-        Sentry.configureScope(scope => {
-          scope.setUser(profile)
-        })
-        return
       }
 
       console.log('No user, do nothing...')

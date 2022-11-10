@@ -6,6 +6,7 @@ import { withTheme } from 'emotion-theming'
 import * as FileSystem from 'expo-file-system'
 import { Platform } from 'react-native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import { Appearance } from 'react-native'
 
 import books from '~assets/bible_versions/books-desc'
 import Container from '~common/ui/Container'
@@ -171,6 +172,24 @@ export default compose(
             ...ownProps.theme.colors,
             ...draftState.colors.sepia,
           }
+
+          const preferredColorScheme = draftState.preferredColorScheme
+          const preferredDarkTheme = draftState.preferredDarkTheme
+          const preferredLightTheme = draftState.preferredLightTheme
+          const systemColorScheme = Appearance.getColorScheme()
+
+          // Provide derived theme as a settings now that we removed it from the redux store
+          draftState.theme = (() => {
+            if (preferredColorScheme === 'auto') {
+              if (systemColorScheme === 'dark') {
+                return preferredDarkTheme
+              }
+              return preferredLightTheme
+            }
+
+            if (preferredColorScheme === 'dark') return preferredDarkTheme
+            return preferredLightTheme
+          })()
         }),
         app: {
           book: params?.book || bible.selectedBook,

@@ -10,7 +10,6 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
-import { Circle } from '~features/home/SwitchTheme'
 import fonts from '~helpers/fonts'
 import { usePrevious } from '~helpers/usePrevious'
 import { RootState } from '~redux/modules/reducer'
@@ -31,6 +30,7 @@ import {
   setSettingsPress,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
+import Circle from '~common/ui/Circle'
 
 const Container = styled.View(({ theme }) => ({
   width: '100%',

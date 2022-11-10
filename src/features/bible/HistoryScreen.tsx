@@ -20,6 +20,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { deleteHistory } from '~redux/modules/user'
 import { useTranslation, Trans } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 const Chip = styled.View(({ theme, color }) => ({
   height: 15,
@@ -159,9 +160,10 @@ const HistoryItem = ({ item }) => {
 }
 
 const History = () => {
+  const { theme } = useCurrentThemeSelector()
   const { history, colors } = useSelector(state => ({
     history: state.user.bible.history,
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
+    colors: state.user.bible.settings.colors[theme],
   }))
   const dispatch = useDispatch()
   const { t } = useTranslation()

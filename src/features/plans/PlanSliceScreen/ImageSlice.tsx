@@ -8,20 +8,19 @@ import { ImageSlice as ImageSliceProps } from '~common/types'
 import Loading from '~common/Loading'
 import { RootState } from '~redux/modules/reducer'
 import { useFireStorage } from '../plan.hooks'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 const imageWidth = wp(100) > 600 ? 600 : wp(100)
 
 const ImageSlice = ({ src }: ImageSliceProps) => {
   const imageUrl = useFireStorage(src)
-  const isDarkTheme = useSelector(
-    (state: RootState) => state.user.bible.settings.theme === 'dark'
-  )
+  const { colorScheme } = useCurrentThemeSelector()
 
   return (
     <Box
       width={imageWidth}
       height={imageWidth}
-      {...(isDarkTheme && {
+      {...(colorScheme === 'dark' && {
         borderRadius: 20,
       })}
     >

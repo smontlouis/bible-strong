@@ -11,6 +11,7 @@ import ColorWheelModal from '~common/ColorWheelModal'
 import TouchableIcon from '../bible/TouchableIcon'
 import { changeColor } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 const ColorSquare = styled.View(({ color, size }) => ({
   width: size,
@@ -24,8 +25,9 @@ const ModifyColorsScreen = () => {
   const { t } = useTranslation()
   const [currentColor, setColorWheelOpen] = useState(null)
   const dispatch = useDispatch()
+  const { theme: currentTheme } = useCurrentThemeSelector()
   const { colors } = useSelector(state => ({
-    colors: state.user.bible.settings.colors[state.user.bible.settings.theme],
+    colors: state.user.bible.settings.colors[currentTheme],
   }))
 
   return (

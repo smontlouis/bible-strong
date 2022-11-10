@@ -106,7 +106,7 @@
     "intl": "^1.2.5",
     "intl-locales-supported": "^1.6.0",
     "jotai": "^1.9.0",
-    "lottie-ios": "3.5.0",
+    "lottie-ios": "3.4.0",
     "lottie-react-native": "5.1.4",
     "lunr": "^2.3.9",
     "lunr-languages": "^1.9.0",

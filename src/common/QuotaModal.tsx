@@ -1,19 +1,18 @@
+import { useAtom } from 'jotai'
 import Lottie from 'lottie-react-native'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Modal from 'react-native-modalbox'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
-import { useSelector } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
-import { quotaModalAtom } from '../state/app'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import useResetQuotaEveryDay from '~helpers/useResetQuotas'
 import styled from '~styled'
+import { quotaModalAtom } from '../state/app'
 import { LinkBox } from './Link'
 import Box from './ui/Box'
 import Button from './ui/Button'
 import Text from './ui/Text'
-import { useAtom } from 'jotai'
-import useResetQuotaEveryDay from '~helpers/useResetQuotas'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
@@ -37,11 +36,7 @@ const QuotaModal = ({ navigation }: Props) => {
   const { t } = useTranslation()
   useResetQuotaEveryDay()
 
-  const isLightTheme = useSelector(
-    (state: RootState) =>
-      state.user.bible.settings.theme === 'default' ||
-      state.user.bible.settings.theme === 'sepia'
-  )
+  const { colorScheme } = useCurrentThemeSelector()
   const [showQuotaModal, setShowQuotaModal] = useAtom(quotaModalAtom)
 
   return (
@@ -63,7 +58,7 @@ const QuotaModal = ({ navigation }: Props) => {
               height: 100,
             }}
             source={
-              isLightTheme
+              colorScheme === 'light'
                 ? require('../assets/images/lock.json')
                 : require('../assets/images/lock-white.json')
             }
