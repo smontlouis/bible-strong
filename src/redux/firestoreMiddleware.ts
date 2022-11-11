@@ -116,7 +116,7 @@ export default store => next => async action => {
       }
 
       if (studies) {
-        if (!action.updateRemote) return
+        if (!action.payload.updateRemote) return
 
         Object.entries(studies).forEach(([studyId, obj]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)

@@ -74,11 +74,11 @@ export function createStudy({
   id,
   content,
   title,
-  updateRemote,
+  updateRemote = true,
 }: StudyMutation) {
   return {
     type: CREATE_STUDY,
-    payload: { id, content, title, updateRemote: updateRemote ?? true },
+    payload: { id, content, title, updateRemote },
   }
 }
 
@@ -86,11 +86,11 @@ export function updateStudy({
   id,
   content,
   title,
-  updateRemote,
+  updateRemote = true,
 }: StudyMutation) {
   return {
     type: UPDATE_STUDY,
-    payload: { id, content, title, updateRemote: updateRemote ?? true },
+    payload: { id, content, title, updateRemote },
   }
 }
 
