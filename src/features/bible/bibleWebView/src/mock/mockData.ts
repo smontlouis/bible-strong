@@ -25,7 +25,7 @@ export const mockSelectedVerses = {
 
 export const verseToScroll = 4
 
-export const version = 'INT'
+export const version = 'LSG'
 
 export const mockNotedVerses = {
   '1-4-1': {
