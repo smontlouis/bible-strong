@@ -57,6 +57,7 @@ const ModifyColorsScreen = () => {
               <TouchableIcon
                 noFlex
                 name="refresh-cw"
+                // Reset color
                 onPress={() => dispatch(changeColor({ name: `color${i + 1}` }))}
               />
             </Box>

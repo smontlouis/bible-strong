@@ -1,4 +1,5 @@
 import produce, { Draft } from 'immer'
+import { Appearance } from 'react-native'
 import {
   CurrentTheme,
   PreferredColorScheme,
@@ -7,7 +8,14 @@ import {
 } from '~common/types'
 
 import defaultColors from '~themes/colors'
+import blackColors from '~themes/blackColors'
+import mauveColors from '~themes/mauveColors'
+import natureColors from '~themes/natureColors'
+import nightColors from '~themes/nightColors'
+import sepiaColors from '~themes/sepiaColors'
+import sunsetColors from '~themes/sunsetColors'
 import darkColors from '~themes/darkColors'
+
 import { UserState } from '../user'
 
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
@@ -32,14 +40,54 @@ export default produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
     // !TODO: Fix change color
     case CHANGE_COLOR: {
-      const currentTheme = draft.bible.settings.theme
-      const color =
-        action.color ||
-        (currentTheme === 'dark'
-          ? darkColors[action.name as keyof typeof darkColors]
-          : defaultColors[action.name as keyof typeof defaultColors])
+      const preferredColorScheme = draft.bible.settings.preferredColorScheme
+      const preferredDarkTheme = draft.bible.settings.preferredDarkTheme
+      const preferredLightTheme = draft.bible.settings.preferredLightTheme
+      const systemColorScheme = Appearance.getColorScheme()
+
+      // Provide derived theme
+      const currentTheme = (() => {
+        if (preferredColorScheme === 'auto') {
+          if (systemColorScheme === 'dark') {
+            return preferredDarkTheme
+          }
+          return preferredLightTheme
+        }
+
+        if (preferredColorScheme === 'dark') return preferredDarkTheme
+        return preferredLightTheme
+      })()
+
+      const getColor = () => {
+        if (action.color) {
+          return action.color as string
+        }
+        if (currentTheme === 'black') {
+          return blackColors[action.name as keyof typeof blackColors]
+        }
+        if (currentTheme === 'mauve') {
+          return mauveColors[action.name as keyof typeof mauveColors]
+        }
+        if (currentTheme === 'nature') {
+          return natureColors[action.name as keyof typeof natureColors]
+        }
+        if (currentTheme === 'night') {
+          return nightColors[action.name as keyof typeof nightColors]
+        }
+        if (currentTheme === 'sepia') {
+          return sepiaColors[action.name as keyof typeof sepiaColors]
+        }
+        if (currentTheme === 'sunset') {
+          return sunsetColors[action.name as keyof typeof sunsetColors]
+        }
+        if (currentTheme === 'dark') {
+          return darkColors[action.name as keyof typeof darkColors]
+        }
+        return defaultColors[action.name as keyof typeof defaultColors]
+      }
+
       // @ts-ignore
-      draft.bible.settings.colors[currentTheme][action.name] = color
+      draft.bible.settings.colors[currentTheme][action.name] = getColor()
       break
     }
     case SET_SETTINGS_ALIGN_CONTENT: {
