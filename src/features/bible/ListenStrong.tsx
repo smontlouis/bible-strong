@@ -47,6 +47,7 @@ const ListenToStrong = ({ type, code }: Props) => {
         soundObject.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
         setAudioStatus('Idle')
       } catch (error) {
+        console.log(error)
         setAudioStatus('Error')
       }
     })()

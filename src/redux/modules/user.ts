@@ -653,6 +653,7 @@ export function onUserLoginSuccess({
                   id: change.doc.data().id,
                   content: change.doc.data().content,
                   title: change.doc.data().title,
+                  tags: change.doc.data().tags,
                   updateRemote: false,
                 })
               )

@@ -34,6 +34,9 @@ export default produce((draft, action) => {
         if (action.payload.title) {
           study.title = action.payload.title
         }
+        if (action.payload.tags) {
+          study.tags = action.payload.tags
+        }
 
         // Just in case
         study.user = {
@@ -67,6 +70,7 @@ export type StudyMutation = {
   id: string
   content?: string
   title?: string
+  tags?: any
   updateRemote?: boolean
 }
 
@@ -86,11 +90,12 @@ export function updateStudy({
   id,
   content,
   title,
+  tags,
   updateRemote = true,
 }: StudyMutation) {
   return {
     type: UPDATE_STUDY,
-    payload: { id, content, title, updateRemote },
+    payload: { id, content, title, updateRemote, tags },
   }
 }
 

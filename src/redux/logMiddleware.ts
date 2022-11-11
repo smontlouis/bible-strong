@@ -6,7 +6,9 @@ export const logger = store => next => action => {
     message: action.type,
     data: action,
   })
-  console.log('redux - ', action.type)
+  if (__DEV__) {
+    console.log('redux - ', action.type)
+  }
 
   const result = next(action)
   return result

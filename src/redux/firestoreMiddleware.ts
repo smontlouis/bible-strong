@@ -105,14 +105,18 @@ export default store => next => async action => {
       if (!diffState?.user?.bible) return
 
       const { studies, ...diffStateUserBible } = diffState.user.bible
-      // console.log(diffState.user.bible)
 
       if (Object.keys(diffStateUserBible).length !== 0) {
         userDoc.set({ bible: diffStateUserBible }, { merge: true })
       }
 
       if (studies) {
-        if (!action.payload.updateRemote) return
+        if (
+          ['user/UPDATE_STUDY', 'user/CREATE_STUDY'].includes(action.type) &&
+          action.payload.updateRemote === false
+        ) {
+          return
+        }
 
         Object.entries(studies).forEach(([studyId, obj]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)
