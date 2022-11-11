@@ -48,7 +48,6 @@ export default store => next => action => {
     case CHANGE_COLOR:
     case USER_LOGIN_SUCCESS:
     case DELETE_HISTORY: {
-      console.log('lastSeenMiddleware', action.type)
       store.dispatch({ type: SET_LAST_SEEN })
       break
     }

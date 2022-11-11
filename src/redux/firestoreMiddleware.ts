@@ -88,7 +88,6 @@ export default store => next => async action => {
     case SET_SETTINGS_NOTES_DISPLAY:
     case SET_SETTINGS_COMMENTS_DISPLAY:
     case CHANGE_COLOR:
-    case DELETE_HISTORY:
     case CREATE_STUDY:
     case UPDATE_STUDY:
     case PUBLISH_STUDY:
