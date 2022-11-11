@@ -63,19 +63,22 @@ export default produce((draft, action) => {
 })
 
 // STUDIES
+export type StudyMutation = {
+  id: string
+  content?: string
+  title?: string
+  updateRemote?: boolean
+}
 
 export function createStudy({
   id,
   content,
   title,
-}: {
-  id: string
-  content: string
-  title: string
-}) {
+  updateRemote,
+}: StudyMutation) {
   return {
     type: CREATE_STUDY,
-    payload: { id, content, title },
+    payload: { id, content, title, updateRemote: updateRemote ?? true },
   }
 }
 
@@ -83,14 +86,11 @@ export function updateStudy({
   id,
   content,
   title,
-}: {
-  id: string
-  content: string
-  title: string
-}) {
+  updateRemote,
+}: StudyMutation) {
   return {
     type: UPDATE_STUDY,
-    payload: { id, content, title },
+    payload: { id, content, title, updateRemote: updateRemote ?? true },
   }
 }
 
