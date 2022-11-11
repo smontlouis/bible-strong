@@ -600,12 +600,12 @@ export function onUserLoginSuccess({
         .collection('users')
         .doc(profile.id)
         .onSnapshot(doc => {
-          const source = doc.metadata.hasPendingWrites ? 'Local' : 'Server'
+          const source = doc?.metadata.hasPendingWrites ? 'Local' : 'Server'
 
           /**
            * Ignore local changes
            */
-          if (source === 'Local') return
+          if (source === 'Local' || !doc) return
 
           console.log('await 3.b received live update')
           const userData = doc.data() as FireStoreUserData
@@ -625,10 +625,10 @@ export function onUserLoginSuccess({
         .collection('studies')
         .where('user.id', '==', profile.id)
         .onSnapshot(querySnapshot => {
-          const source = querySnapshot.metadata.hasPendingWrites
+          const source = querySnapshot?.metadata.hasPendingWrites
             ? 'Local'
             : 'Server'
-          if (source === 'Local') return
+          if (source === 'Local' || !querySnapshot) return
 
           querySnapshot.docChanges().forEach(change => {
             // Ignore first listener adding all documents
