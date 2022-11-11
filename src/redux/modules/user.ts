@@ -271,6 +271,7 @@ const ignoreOfflineData = (data: Partial<UserState>) =>
     delete draft.isLoading
     delete draft.lastSeen
     delete draft.bible.changelog
+    delete draft.bible.history
     delete draft.quota
   })
 
@@ -738,10 +739,7 @@ export function onUserLoginSuccess({
        * Remove useless data from diff object
        */
       const obj = detailedDiff(oldUserData, newUserData, true)
-      delete obj?.added?.bible?.history
-      delete obj?.updated?.bible?.history
       delete obj?.updated?.bible?.settings?.theme
-      delete obj?.deleted?.bible?.history
       delete obj?.updated?.lastSeen
       delete obj?.updated?.emailVerified
       delete obj?.updated?.subscription

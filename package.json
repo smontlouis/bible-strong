@@ -121,7 +121,7 @@
     "react-native-collapsible": "^1.5.2",
     "react-native-fast-image": "^8.1.5",
     "react-native-fbsdk-next": "^4.6.0",
-    "react-native-flipper": "^0.171.1",
+    "react-native-flipper": "^0.174.0",
     "react-native-fs": "^2.16.4",
     "react-native-gesture-handler": "^1.5.6",
     "react-native-hooks": "^0.0.6",

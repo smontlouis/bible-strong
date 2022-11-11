@@ -26,8 +26,6 @@ import {
   DELETE_STUDY,
   PUBLISH_STUDY,
   //
-  SET_HISTORY,
-  DELETE_HISTORY,
   SET_LAST_SEEN,
   //
   ADD_HIGHLIGHT,
@@ -90,7 +88,6 @@ export default store => next => async action => {
     case SET_SETTINGS_NOTES_DISPLAY:
     case SET_SETTINGS_COMMENTS_DISPLAY:
     case CHANGE_COLOR:
-    case SET_HISTORY:
     case DELETE_HISTORY:
     case CREATE_STUDY:
     case UPDATE_STUDY:
