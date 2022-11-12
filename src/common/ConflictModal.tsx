@@ -114,14 +114,24 @@ const useReadableConflict = (diffObj?: Diff) => {
           } as ConflictItem
         }
 
-        return {
-          content: i18n.t('conflict.studyTagAdded', {
-            study: studies?.[key]?.title,
-          }),
-          children: Object.values(value.tags).map(v => ({
-            content: `${v.name}`,
-          })),
-        } as ConflictItem
+        if (value.published) {
+          return {
+            content: i18n.t('conflict.studyPublished', {
+              study: studies?.[key]?.title,
+            }),
+          } as ConflictItem
+        }
+
+        if (value.tags) {
+          return {
+            content: i18n.t('conflict.studyTagAdded', {
+              study: studies?.[key]?.title,
+            }),
+            children: Object.values(value.tags).map(v => ({
+              content: `${v.name}`,
+            })),
+          } as ConflictItem
+        }
       })
 
     return Object.entries(diff?.added?.bible)
