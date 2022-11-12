@@ -32,7 +32,7 @@ const Circle = styled(Box)(({ colors, color }) => ({
   width: 15,
   height: 15,
   borderRadius: 3,
-  backgroundColor: colors[color],
+  backgroundColor: colors[color || 'opacity5'],
   marginRight: 5,
 }))
 

@@ -8,19 +8,18 @@ export const CHANGE_HIGHLIGHT_COLOR = 'user/CHANGE_HIGHLIGHT_COLOR'
 
 const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
   const date = Date.now()
-  const formattedObj = Object.keys(verses).reduce(
-    (obj, verse) => ({
+  const formattedObj = Object.keys(verses).reduce((obj, verse) => {
+    return {
       ...obj,
       [verse]: {
-        color,
+        color: color || highlightedVerses[verse]?.color,
         date,
         ...(highlightedVerses[verse] && {
           tags: highlightedVerses[verse].tags || {},
         }),
       },
-    }),
-    {}
-  )
+    }
+  }, {})
 
   return formattedObj
 }

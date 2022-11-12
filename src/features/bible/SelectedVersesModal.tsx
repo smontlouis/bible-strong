@@ -52,6 +52,7 @@ const VersesModal = ({
   isVisible,
   isSelectedVerseHighlighted,
   addHighlight,
+  addTag,
   removeHighlight,
   clearSelectedVerses,
   navigation,
@@ -318,6 +319,7 @@ const VersesModal = ({
                 onPress={compareVerses}
                 label={t('Comparer')}
               />
+              <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
               <TouchableChip
                 name="file-plus"
                 onPress={onCreateNoteClick}

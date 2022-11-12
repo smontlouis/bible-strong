@@ -232,6 +232,16 @@ class BibleViewer extends Component {
     addHighlight(color)
   }
 
+  addTag = () => {
+    const { addHighlight, selectedVerses } = this.props
+
+    addHighlight()
+    this.setMultipleTagsItem({
+      entity: 'highlights',
+      ids: selectedVerses,
+    })
+  }
+
   toggleCreateNote = () => {
     this.setState(state => ({
       isCreateNoteOpen: !state.isCreateNoteOpen,
@@ -395,6 +405,7 @@ class BibleViewer extends Component {
           isVisible={modalIsVisible}
           isSelectedVerseHighlighted={isSelectedVerseHighlighted}
           addHighlight={this.addHiglightAndOpenQuickTags}
+          addTag={this.addTag}
           removeHighlight={removeHighlight}
           clearSelectedVerses={clearSelectedVerses}
           navigation={navigation}
