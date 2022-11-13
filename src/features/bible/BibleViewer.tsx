@@ -94,7 +94,6 @@ class BibleViewer extends Component {
         this.setState({ error: true, isLoading: false })
       })
     }, 200)
-    this.props.clearSelectedVerses()
   }
 
   UNSAFE_componentWillReceiveProps(oldProps) {
