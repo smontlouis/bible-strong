@@ -10,7 +10,6 @@ import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
-import ConflictModal from '~common/ConflictModal'
 import ErrorBoundary from '~common/ErrorBoundary'
 import OnBoarding from '~features/onboarding/OnBoarding'
 
@@ -127,14 +126,17 @@ const InitApp = ({ persistor }: Props) => {
     dispatch(getChangelog())
     dispatch(getVersionUpdate())
     dispatch(getDatabaseUpdate())
-    changeStatusBarStyle(currentTheme)
     updateApp(t)
     AppState.addEventListener('change', handleAppStateChange)
 
     return () => {
       AppState.removeEventListener('change', handleAppStateChange)
     }
-  }, [currentTheme, dispatch, t])
+  }, [dispatch, t])
+
+  useEffect(() => {
+    changeStatusBarStyle(currentTheme)
+  }, [currentTheme])
 
   const defaultTheme: Theme = getTheme[currentTheme]
 
@@ -170,7 +172,6 @@ const InitApp = ({ persistor }: Props) => {
               </ErrorBoundary>
               <Changelog />
               <OnBoarding />
-              <ConflictModal />
             </DBStateProvider>
           </PersistGate>
         </MenuProvider>

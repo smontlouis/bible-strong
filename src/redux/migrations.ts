@@ -373,4 +373,13 @@ export default {
       },
     }
   },
+  26: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        lastSeen: undefined,
+      },
+    }
+  },
 }

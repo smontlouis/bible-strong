@@ -8,15 +8,9 @@ import * as UserActions from '~redux/modules/user'
 const useInitFireAuth = () => {
   const dispatch = useDispatch()
   useEffect(() => {
-    const onLogin = ({
-      profile,
-      remoteLastSeen,
-    }: {
-      profile: FireAuthProfile
-      remoteLastSeen: number
-    }) => {
+    const onLogin = ({ profile }: { profile: FireAuthProfile }) => {
       console.log(`Bienvenue ${profile.displayName}.`)
-      dispatch(UserActions.onUserLoginSuccess({ profile, remoteLastSeen }))
+      dispatch(UserActions.onUserLoginSuccess({ profile }))
     }
     const emailVerified = () => dispatch(UserActions.verifyEmail())
     const onUserChange = profile => console.log('user changed')

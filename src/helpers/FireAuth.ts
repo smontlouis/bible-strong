@@ -97,23 +97,12 @@ const FireAuth = class {
           emailVerified,
         }
 
-        const userStatusRef = firebaseDb
-          .collection('users-status')
-          .doc(user.uid)
-
-        /**
-         * 1.b. We retrieve the user last seen status
-         */
-        const userStatusDoc = await userStatusRef.get()
-        const userStatus = userStatusDoc.data() || {}
-        const remoteLastSeen: number = userStatus.lastSeen || 0
-
         if (!this.user) {
           if (this.onLogin) {
             /**
-             * 1.c. We call the onLogin callback dispatching onUserLoginSuccess
+             * 1.b. We call the onLogin callback dispatching onUserLoginSuccess
              */
-            this.onLogin({ profile, remoteLastSeen })
+            this.onLogin({ profile })
           }
 
           this.user = user // Store user

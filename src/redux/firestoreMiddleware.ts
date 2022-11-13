@@ -1,6 +1,5 @@
 import firestore from '@react-native-firebase/firestore'
 import {
-  USER_LOGIN_SUCCESS,
   USER_UPDATE_PROFILE,
   //
   SET_SETTINGS_ALIGN_CONTENT,
@@ -26,7 +25,6 @@ import {
   DELETE_STUDY,
   PUBLISH_STUDY,
   //
-  SET_LAST_SEEN,
   //
   ADD_HIGHLIGHT,
   REMOVE_HIGHLIGHT,
@@ -63,7 +61,6 @@ export default store => next => async action => {
 
   const { user, plan }: RootState = state
   const userDoc = firebaseDb.collection('users').doc(user.id)
-  const userStatusRef = firebaseDb.collection('users-status').doc(user.id)
 
   switch (action.type) {
     case removePlan.type:
@@ -144,10 +141,6 @@ export default store => next => async action => {
     case USER_UPDATE_PROFILE:
     case SET_SUBSCRIPTION: {
       userDoc.set({ subscription: user.subscription }, { merge: true })
-      break
-    }
-    case SET_LAST_SEEN: {
-      userStatusRef.set({ lastSeen: user.lastSeen }, { merge: true })
       break
     }
     default:

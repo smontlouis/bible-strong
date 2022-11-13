@@ -104,7 +104,6 @@ export interface UserState {
   displayName: string
   photoURL: string
   provider: string
-  lastSeen: number
   subscription?: string
   emailVerified: boolean
   isLoading: boolean
@@ -187,7 +186,6 @@ const initialState: UserState = {
   displayName: '',
   photoURL: '',
   provider: '',
-  lastSeen: 0,
   subscription: undefined,
   emailVerified: false,
   isLoading: true,
@@ -277,10 +275,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.notifications.verseOfTheDay = action.payload
       break
     }
-    case SET_LAST_SEEN: {
-      draft.lastSeen = Date.now()
-      break
-    }
 
     case RECEIVE_LIVE_UPDATES: {
       const { id, email, displayName, photoURL, provider, bible } = action
@@ -319,7 +313,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.displayName = displayName
       draft.photoURL = photoURL
       draft.provider = provider
-      draft.lastSeen = Date.now()
       draft.emailVerified = emailVerified
       draft.isLoading = false
 
@@ -498,12 +491,7 @@ export function saveAllLogsAsSeen(payload) {
 /**
  * 2. onUserLoginSuccess call
  */
-export function onUserLoginSuccess({
-  profile,
-}: {
-  profile: FireAuthProfile
-  remoteLastSeen: number
-}) {
+export function onUserLoginSuccess({ profile }: { profile: FireAuthProfile }) {
   return {
     type: USER_LOGIN_SUCCESS,
     profile,

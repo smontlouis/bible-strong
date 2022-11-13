@@ -12,7 +12,6 @@ import FilesystemStorage from 'redux-persist-filesystem-storage'
 
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
-import lastSeenMiddleware from './lastSeenMiddleware'
 import migrations from './migrations'
 
 import reducer from '~redux/modules/reducer'
@@ -23,7 +22,7 @@ function configureStore() {
     keyPrefix: '',
     storage: FilesystemStorage,
     stateReconciler: autoMergeLevel2,
-    version: 25,
+    version: 26,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations, { debug: true }),
@@ -36,13 +35,7 @@ function configureStore() {
     })
   }
 
-  const middleware = [
-    logger,
-    lastSeenMiddleware,
-    crashReporter,
-    firestoreMiddleware,
-    thunk,
-  ]
+  const middleware = [logger, crashReporter, firestoreMiddleware, thunk]
 
   if (__DEV__) {
     const createDebugger = require('redux-flipper').default
