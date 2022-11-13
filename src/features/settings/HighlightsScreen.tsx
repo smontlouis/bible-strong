@@ -47,7 +47,12 @@ const HighlightsScreen = () => {
         selectedChip ? verseIds[vId].tags && verseIds[vId].tags[chipId] : true
       )
       .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
-  }, [chipId, isChangeColorOpen, isMultipleTagsItem])
+  }, [
+    chipId,
+    isChangeColorOpen,
+    isMultipleTagsItem,
+    Object.keys(verseIds).length,
+  ])
 
   const promptLogout = () => {
     Alert.alert(
