@@ -8,45 +8,31 @@ export const PUBLISH_STUDY = 'user/PUBLISH_STUDY'
 
 export default produce((draft, action) => {
   switch (action.type) {
-    case CREATE_STUDY: {
-      const { id, content, title } = action.payload
+    case UPDATE_STUDY: {
+      const {
+        id,
+        content,
+        title,
+        modified_at,
+        created_at,
+        tags,
+      } = action.payload
+
       draft.bible.studies[id] = {
         id,
-        created_at: Date.now(),
-        modified_at: Date.now(),
-        title: title || 'Document sans titre',
-        content: content || null,
+        ...draft.bible.studies[id],
+        ...(created_at && { created_at }),
+        ...(modified_at && { modified_at }),
+        ...(title && { title }),
+        ...(content && { content }),
+        ...(tags && { tags }),
         user: {
           id: draft.id,
           displayName: draft.displayName,
           photoUrl: draft.photoURL,
         },
       }
-      break
-    }
-    case UPDATE_STUDY: {
-      const study = draft.bible.studies[action.payload.id]
-      if (study) {
-        study.modified_at = Date.now()
-        if (action.payload.content) {
-          study.content = action.payload.content
-        }
-        if (action.payload.title) {
-          study.title = action.payload.title
-        }
-        if (action.payload.tags) {
-          study.tags = action.payload.tags
-        }
 
-        // Just in case
-        study.user = {
-          id: draft.id,
-          displayName: draft.displayName,
-          photoUrl: draft.photoURL,
-        }
-      } else {
-        throw new Error(`Cannot find study: ${action.payload.id}`)
-      }
       break
     }
     case DELETE_STUDY: {
@@ -68,34 +54,17 @@ export default produce((draft, action) => {
 // STUDIES
 export type StudyMutation = {
   id: string
-  content?: string
+  created_at?: number
+  modified_at?: number
   title?: string
+  content?: string | null
   tags?: any
-  updateRemote?: boolean
 }
 
-export function createStudy({
-  id,
-  content,
-  title,
-  updateRemote = true,
-}: StudyMutation) {
-  return {
-    type: CREATE_STUDY,
-    payload: { id, content, title, updateRemote },
-  }
-}
-
-export function updateStudy({
-  id,
-  content,
-  title,
-  tags,
-  updateRemote = true,
-}: StudyMutation) {
+export function updateStudy(payload: StudyMutation) {
   return {
     type: UPDATE_STUDY,
-    payload: { id, content, title, updateRemote, tags },
+    payload,
   }
 }
 

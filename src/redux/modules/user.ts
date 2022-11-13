@@ -94,7 +94,6 @@ export interface FireStoreUserData {
   displayName: string
   photoURL: string
   provider: string
-  lastSeen: number
   subscription?: string
   bible: UserState['bible']
   plan: OngoingPlan[]
@@ -255,21 +254,6 @@ const initialState: UserState = {
   },
 }
 
-const overwriteMerge = (destinationArray, sourceArray) => sourceArray
-
-const ignoreOfflineData = (data: Partial<UserState>) =>
-  produce(data, draft => {
-    delete draft.notifications
-    delete draft.changelog
-    delete draft.needsUpdate
-    delete draft.fontFamily
-    delete draft.isLoading
-    delete draft.lastSeen
-    delete draft.bible.changelog
-    delete draft.bible.history
-    delete draft.quota
-  })
-
 // UserReducer
 const userReducer = produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -307,7 +291,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.displayName = displayName
       draft.photoURL = photoURL
       draft.provider = provider
-      draft.lastSeen = Date.now()
 
       draft.bible = {
         ...draft.bible,
@@ -331,12 +314,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         emailVerified,
       } = action.profile as FireAuthProfile
 
-      const bible = (action.remoteUserData as FireStoreUserData)?.bible
-      const subscription = (action.remoteUserData as FireStoreUserData)
-        ?.subscription
-
-      const { isLogged, localLastSeen, remoteLastSeen } = action
-
       draft.id = id
       draft.email = email
       draft.displayName = displayName
@@ -344,53 +321,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.lastSeen = Date.now()
       draft.emailVerified = emailVerified
-
-      // Update draft subscription only if it exists when remote data is fetched
-      if (typeof subscription !== 'undefined') {
-        draft.subscription = subscription
-      }
-
-      /**
-       * 4.a. - NOT LOGGED - User was not logged, merge data
-       */
-      if (!isLogged) {
-        console.log('4.a - Reducer - User was not logged - Merge data')
-
-        if (bible) {
-          draft.bible = deepmerge(draft.bible, bible, {
-            arrayMerge: overwriteMerge,
-          })
-          if (action.studies) {
-            draft.bible.studies = action.studies
-          }
-        }
-
-        /**
-         *  4.a. - LOGGED - User is logged
-         */
-      } else if (remoteLastSeen > localLastSeen) {
-        // Remote wins
-        console.log(
-          '4.a. - Reducer - Remote wins - Save bible and studies data'
-        )
-        if (bible) {
-          draft.bible = {
-            ...draft.bible,
-            ...bible,
-          }
-          if (action.studies) {
-            draft.bible.studies = action.studies
-          }
-        }
-      } else if (remoteLastSeen < localLastSeen) {
-        // Local wins - do nothing
-        console.log('4.a. - Reducer - Local wins - do nothing')
-      } else {
-        console.log(
-          '4.a. - Reducer - Last seen equals remote last seen, do nothing'
-        )
-      }
-
       draft.isLoading = false
 
       break
@@ -570,202 +500,13 @@ export function saveAllLogsAsSeen(payload) {
  */
 export function onUserLoginSuccess({
   profile,
-  remoteLastSeen,
 }: {
   profile: FireAuthProfile
   remoteLastSeen: number
 }) {
-  return async (dispatch: any, getState: any) => {
-    const { id, lastSeen } = getState().user
-
-    const userRef = firebaseDb.collection('users').doc(profile.id)
-
-    const studiesRef = firebaseDb
-      .collection('studies')
-      .where('user.id', '==', profile.id)
-
-    const isLogged = !!id
-
-    console.log('Local last seen:', new Date(lastSeen))
-    console.log('Online last seen:', new Date(remoteLastSeen))
-
-    /**
-     * 3. Dispatch user success function prepare
-     */
-    const dispatchUserSuccess = (
-      remoteUserData?: FireStoreUserData,
-      remoteStudiesData?: {
-        [key: string]: Study
-      }
-    ) => async (overwriteRemoteLastSeen?: boolean) => {
-      remoteLastSeen = overwriteRemoteLastSeen ? 0 : remoteLastSeen
-
-      /**
-       * 3.a Update firebase user status and profile
-       */
-      console.log('3.a Update firebase profile')
-      userRef.set(profile, {
-        merge: true,
-      })
-
-      /**
-       * 3.b Subscribe for live updates
-       * IN HOOK
-       */
-
-      /**
-       * 3.c Pass data to USER_LOGIN_SUCCESS reducer
-       */
-      console.log('3.c Pass data to USER_LOGIN_SUCCESS reducer')
-      dispatch({
-        type: USER_LOGIN_SUCCESS,
-        isLogged: !!id,
-        localLastSeen: lastSeen,
-        profile,
-        remoteUserData,
-        remoteLastSeen,
-        studies: remoteStudiesData,
-      })
-    }
-
-    /**
-     * 2.a1 - Handle conflict only when user is logged and data online is newer
-     */
-    if (remoteLastSeen > lastSeen && id) {
-      console.log('2.a1 - remoteLastSeen > lastSeen && id - handle conflict')
-
-      /**
-       * 2.a2 - Get local user data in firestore format
-       */
-      const oldUserData = ignoreOfflineData({
-        ...getState().user,
-        bible: {
-          ...getState().user.bible,
-          plan: getState().plan.ongoingPlans,
-        },
-        plan: undefined,
-      })
-
-      // Get remote data - expensive (1mb max)
-      console.log('2.a2 - Get remote data - expensive (1mb max)')
-      const userDoc = await userRef.get()
-      const userData = userDoc.data() as FireStoreUserData
-
-      // Get remote studies
-      console.log('2.a2 - Get remote studies')
-      const studies = {} as { [key: string]: Study }
-      const querySnapshot = await studiesRef.get()
-      querySnapshot.forEach(doc => {
-        const study = doc.data() as Study
-        studies[study.id] = study
-      })
-
-      /**
-       * 2.a3 - Merge remote data with redux state so we can compare fairly
-       */
-      const newUserData = ignoreOfflineData(
-        deepmerge(
-          initialState,
-          {
-            ...userData,
-            bible: {
-              ...userData?.bible,
-              studies,
-              plan: userData?.plan || [],
-            },
-            plan: undefined,
-          } as any,
-          {
-            arrayMerge: overwriteMerge,
-          }
-        )
-      )
-
-      /**
-       * 2.a4 - Compare local and remote data
-       * Remove useless data from diff object
-       */
-      const obj = detailedDiff(oldUserData, newUserData, true)
-      delete obj?.updated?.bible?.settings?.theme
-      delete obj?.updated?.lastSeen
-      delete obj?.updated?.emailVerified
-      delete obj?.updated?.subscription
-
-      if (isEmpty(obj?.added?.bible)) {
-        delete obj?.added?.bible
-      }
-
-      if (isEmpty(obj?.updated?.bible?.settings)) {
-        delete obj?.updated?.bible?.settings
-      }
-
-      if (isEmpty(obj?.updated?.bible)) {
-        delete obj?.updated?.bible
-      }
-
-      if (isEmpty(obj?.deleted?.bible)) {
-        delete obj?.deleted?.bible
-      }
-      // End of conflict handling
-
-      /**
-       * 2.a5 - If there is no conflict, dispatch user success with data from firestore
-       */
-      if (isEmpty(obj?.updated) && isEmpty(obj?.deleted)) {
-        console.log(
-          '2.a5 - If there is no conflict, dispatch user success with data from firestore'
-        )
-        dispatchUserSuccess(userData, studies)()
-        return
-      }
-
-      /**
-       * 2.a6 - If there is a conflict, dispatch conflict action
-       * Pass the diff object and onDispatchUserSuccess to conflict state proxy in ConflictModal
-       */
-      console.log(
-        '2.a6 - If there is a conflict, dispatch conflict action',
-        obj
-      )
-      conflictStateProxy.diff = obj
-      conflictStateProxy.onDispatchUserSuccess = dispatchUserSuccess(
-        userData,
-        studies
-      )
-      conflictStateProxy.lastSeen = lastSeen
-      conflictStateProxy.remoteLastSeen = remoteLastSeen
-
-      /**
-       * 2.b1 - Local data is newer
-       */
-    } else {
-      /**
-       * 2.b2 - Not Logged - User is not logged, get remote data
-       */
-      if (!isLogged) {
-        const userDoc = await userRef.get()
-        const userData = userDoc.data() as FireStoreUserData
-
-        const studies = {} as { [key: string]: Study }
-        const querySnapshot = await studiesRef.get()
-        querySnapshot.forEach(doc => {
-          const study = doc.data() as Study
-          studies[study.id] = study
-        })
-
-        /**
-         * 2.b1 - Logged - Dispatch user success with data from firestore
-         */
-        dispatchUserSuccess(userData, studies)()
-        return
-      }
-
-      /**
-       * 2.b2 - Logged - User is logged, dispatch user success with no remote data
-       */
-      console.log('2.b2 - Logged - User is logged - no conflict')
-      dispatchUserSuccess()()
-    }
+  return {
+    type: USER_LOGIN_SUCCESS,
+    profile,
   }
 }
 

@@ -111,13 +111,6 @@ export default store => next => async action => {
       }
 
       if (studies) {
-        if (
-          ['user/UPDATE_STUDY', 'user/CREATE_STUDY'].includes(action.type) &&
-          action.payload.updateRemote === false
-        ) {
-          break
-        }
-
         Object.entries(studies).forEach(([studyId, obj]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)
           const studyContent = state.user.bible.studies[studyId]?.content?.ops
@@ -131,7 +124,6 @@ export default store => next => async action => {
             },
             { merge: true }
           )
-          console.log('Studies updated', studyContent)
         })
       }
 
@@ -150,28 +142,6 @@ export default store => next => async action => {
       break
     }
     case USER_UPDATE_PROFILE:
-    /**
-     * Since we're using firestore offline, we don't need to update remote data manually
-     */
-    // case USER_LOGIN_SUCCESS: {
-    //   const { localLastSeen, remoteLastSeen } = action
-
-    //   if (remoteLastSeen >= localLastSeen) {
-    //     console.log('----- do nothing, remote is already up to date')
-    //     break
-    //   }
-
-    //   console.log('-----local wins - update remote')
-    //   const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-    //   userDoc.update(
-    //     r({
-    //       bible: sanitizeUserBible(user.bible),
-    //       plan: plan.ongoingPlans,
-    //     })
-    //   )
-
-    //   break
-    // }
     case SET_SUBSCRIPTION: {
       userDoc.set({ subscription: user.subscription }, { merge: true })
       break

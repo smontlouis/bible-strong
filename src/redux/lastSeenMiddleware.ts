@@ -47,7 +47,8 @@ export default store => next => action => {
     case UPDATE_TAG:
     case CHANGE_COLOR:
     case USER_LOGIN_SUCCESS:
-    case DELETE_HISTORY: {
+    case DELETE_HISTORY:
+    case 'plan/markAsRead': {
       store.dispatch({ type: SET_LAST_SEEN })
       break
     }

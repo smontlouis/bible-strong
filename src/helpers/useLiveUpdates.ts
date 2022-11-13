@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 import {
-  createStudy,
   deleteStudy,
   FireStoreUserData,
   receiveLiveUpdates,
+  StudyMutation,
   updateStudy,
 } from '~redux/modules/user'
 import { firebaseDb } from './firebase'
@@ -23,21 +23,17 @@ const useLiveUpdates = () => {
     let unsuscribeUsers: (() => void) | undefined
     let unsuscribeStudies: (() => void) | undefined
 
-    console.log({ isLogged, isLoading })
-
     if (isLogged && isLoading === false) {
       unsuscribeUsers = firebaseDb
         .collection('users')
         .doc(user.id)
         .onSnapshot(doc => {
-          const source = doc?.metadata.hasPendingWrites ? 'Local' : 'Server'
-
           /**
            * Ignore local changes
            */
+          const source = doc?.metadata.hasPendingWrites ? 'Local' : 'Server'
           if (source === 'Local' || !doc) return
 
-          console.log('await 3.b received live update')
           const userData = doc.data() as FireStoreUserData
 
           return dispatch(receiveLiveUpdates({ remoteUserData: userData }))
@@ -47,6 +43,9 @@ const useLiveUpdates = () => {
         .collection('studies')
         .where('user.id', '==', user.id)
         .onSnapshot(querySnapshot => {
+          /**
+           * Ignore local changes
+           */
           const source = querySnapshot?.metadata.hasPendingWrites
             ? 'Local'
             : 'Server'
@@ -57,30 +56,20 @@ const useLiveUpdates = () => {
             if (isFirstSnapshotListener) return
 
             if (change.type === 'added') {
-              console.log('New study: ', change.doc.data().id)
               dispatch(
-                createStudy({
-                  id: change.doc.data().id,
-                  content: change.doc.data().content,
-                  title: change.doc.data().title,
-                  updateRemote: false,
+                updateStudy({
+                  ...(change.doc.data() as StudyMutation),
                 })
               )
             }
             if (change.type === 'modified') {
-              console.log('Modified study: ', change.doc.data().id)
               dispatch(
                 updateStudy({
-                  id: change.doc.data().id,
-                  content: change.doc.data().content,
-                  title: change.doc.data().title,
-                  tags: change.doc.data().tags,
-                  updateRemote: false,
+                  ...(change.doc.data() as StudyMutation),
                 })
               )
             }
             if (change.type === 'removed') {
-              console.log('Removed study: ', change.doc.data().id)
               dispatch(deleteStudy(change.doc.data().id))
             }
           })

@@ -4,7 +4,7 @@ import compose from 'recompose/compose'
 import { useDispatch, connect } from 'react-redux'
 import generateUUID from '~helpers/generateUUID'
 
-import { createStudy, updateStudy } from '~redux/modules/user'
+import { updateStudy } from '~redux/modules/user'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import WebViewQuillEditor from '~features/studies/WebViewQuillEditor'
@@ -26,7 +26,15 @@ const withStudy = Component => props => {
     } else {
       // Create Study
       const studyId = generateUUID()
-      dispatch(createStudy({ id: studyId }))
+      dispatch(
+        updateStudy({
+          id: studyId,
+          title: 'Document sans Titre',
+          content: null,
+          created_at: Date.now(),
+          modified_at: Date.now(),
+        })
+      )
       setStudyId(studyId)
     }
   }, [dispatch, studyIdParam])
@@ -63,7 +71,13 @@ class EditStudyScreen extends React.Component {
 
   onDeltaChangeCallback = (delta, deltaChange, deltaOld, changeSource) => {
     const { dispatch, currentStudy } = this.props
-    dispatch(updateStudy({ id: currentStudy.id, content: delta }))
+    dispatch(
+      updateStudy({
+        id: currentStudy.id,
+        content: delta,
+        modified_at: Date.now(),
+      })
+    )
   }
 
   navigateBibleView = type => {
@@ -126,7 +140,9 @@ class EditStudyScreen extends React.Component {
           titlePrompt={titlePrompt}
           onClosed={() => this.setTitlePrompt(false)}
           onSave={(id, title) => {
-            this.props.dispatch(updateStudy({ id, title }))
+            this.props.dispatch(
+              updateStudy({ id, title, modified_at: Date.now() })
+            )
           }}
         />
         <QuickTagsModal

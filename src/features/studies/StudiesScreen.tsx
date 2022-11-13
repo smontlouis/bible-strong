@@ -108,7 +108,7 @@ const StudiesScreen = () => {
         titlePrompt={titlePrompt}
         onClosed={() => setTitlePrompt(false)}
         onSave={(id, title) => {
-          dispatch(updateStudy({ id, title }))
+          dispatch(updateStudy({ id, title, modified_at: Date.now() }))
         }}
       />
     </Container>
