@@ -6,7 +6,7 @@ export const logger = store => next => action => {
     message: action.type,
     data: action,
   })
-  if (__DEV__) {
+  if (__DEV__ && typeof action !== 'function') {
     console.log('redux - ', action.type)
   }
 

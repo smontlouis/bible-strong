@@ -31,6 +31,7 @@ import {
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
+import useLiveUpdates from '~helpers/useLiveUpdates'
 
 interface Props {
   persistor: Persistor
@@ -110,6 +111,7 @@ const updateApp = async (t: TFunction<'translation'>) => {
 
 const InitApp = ({ persistor }: Props) => {
   useInitFireAuth()
+  useLiveUpdates()
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const { fontFamily } = useSelector((state: RootState) => ({

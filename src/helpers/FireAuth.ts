@@ -11,7 +11,6 @@ import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
 import i18n from '~i18n'
-import { APP_FETCH_DATA } from '~redux/modules/user'
 
 export type FireAuthProfile = {
   id: string
@@ -101,8 +100,6 @@ const FireAuth = class {
         const userStatusRef = firebaseDb
           .collection('users-status')
           .doc(user.uid)
-
-        dispatch({ type: APP_FETCH_DATA })
 
         /**
          * 1.b. We retrieve the user last seen status

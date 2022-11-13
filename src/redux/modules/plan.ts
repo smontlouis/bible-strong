@@ -263,7 +263,7 @@ const planSlice = createSlice({
       }
     )
     builder.addCase(USER_LOGIN_SUCCESS, (state, action: any) => {
-      const { plan } = action.remoteUserData
+      const plan = action.remoteUserData?.plan
       const { localLastSeen, remoteLastSeen, isLogged } = action
 
       if (plan) {

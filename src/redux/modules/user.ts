@@ -27,11 +27,7 @@ import { conflictStateProxy } from '../../state/app'
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
 import settingsReducer from './user/settings'
-import studiesReducer, {
-  createStudy,
-  deleteStudy,
-  updateStudy,
-} from './user/studies'
+import studiesReducer from './user/studies'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import { reduceReducers } from './utils'
@@ -43,8 +39,8 @@ export * from './user/studies'
 export * from './user/tags'
 export * from './user/versionUpdate'
 
-export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS'
-export const USER_UPDATE_PROFILE = 'USER_UPDATE_PROFILE'
+export const USER_LOGIN_SUCCESS = 'user/USER_LOGIN_SUCCESS'
+export const USER_UPDATE_PROFILE = 'user/USER_UPDATE_PROFILE'
 export const USER_LOGOUT = 'USER_LOGOUT'
 
 export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
@@ -74,8 +70,7 @@ export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
 export const UPDATE_QUOTA = 'user/UPDATE_QUOTA'
 
 export const RESET_QUOTA = 'user/RESET_QUOTA'
-
-let isFirstSnapshotListener = true
+export const RECEIVE_LIVE_UPDATES = 'user/RECEIVE_LIVE_UPDATES'
 
 export interface Study {
   id: string
@@ -196,7 +191,7 @@ const initialState: UserState = {
   lastSeen: 0,
   subscription: undefined,
   emailVerified: false,
-  isLoading: false,
+  isLoading: true,
   notifications: {
     verseOfTheDay: '07:00',
     notificationId: '',
@@ -300,6 +295,31 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
     case SET_LAST_SEEN: {
       draft.lastSeen = Date.now()
+      break
+    }
+
+    case RECEIVE_LIVE_UPDATES: {
+      const {
+        id,
+        email,
+        displayName,
+        photoURL,
+        provider,
+        bible,
+      } = action.remoteUserData as FireStoreUserData
+
+      draft.id = id
+      draft.email = email
+      draft.displayName = displayName
+      draft.photoURL = photoURL
+      draft.provider = provider
+      draft.lastSeen = Date.now()
+
+      draft.bible = {
+        ...draft.bible,
+        ...bible,
+      }
+
       break
     }
 
@@ -596,90 +616,14 @@ export function onUserLoginSuccess({
 
       /**
        * 3.b Subscribe for live updates
+       * IN HOOK
        */
-      let unsuscribeUsers: (() => void) | undefined
-      let unsuscribeStudies: (() => void) | undefined
-
-      if (isLogged) {
-        unsuscribeUsers = firebaseDb
-          .collection('users')
-          .doc(profile.id)
-          .onSnapshot(doc => {
-            const source = doc?.metadata.hasPendingWrites ? 'Local' : 'Server'
-
-            /**
-             * Ignore local changes
-             */
-            if (source === 'Local' || !doc) return
-
-            console.log('await 3.b received live update')
-            const userData = doc.data() as FireStoreUserData
-
-            return dispatch({
-              type: USER_LOGIN_SUCCESS,
-              isLogged: !!id,
-              localLastSeen: lastSeen,
-              profile,
-              remoteUserData: userData,
-              remoteLastSeen: Date.now(),
-              studies: undefined,
-            })
-          })
-
-        unsuscribeStudies = firebaseDb
-          .collection('studies')
-          .where('user.id', '==', profile.id)
-          .onSnapshot(querySnapshot => {
-            const source = querySnapshot?.metadata.hasPendingWrites
-              ? 'Local'
-              : 'Server'
-            if (source === 'Local' || !querySnapshot) return
-
-            querySnapshot.docChanges().forEach(change => {
-              // Ignore first listener adding all documents
-              if (isFirstSnapshotListener) return
-
-              if (change.type === 'added') {
-                console.log('New study: ', change.doc.data().id)
-                dispatch(
-                  createStudy({
-                    id: change.doc.data().id,
-                    content: change.doc.data().content,
-                    title: change.doc.data().title,
-                    updateRemote: false,
-                  })
-                )
-              }
-              if (change.type === 'modified') {
-                console.log('Modified study: ', change.doc.data().id)
-                dispatch(
-                  updateStudy({
-                    id: change.doc.data().id,
-                    content: change.doc.data().content,
-                    title: change.doc.data().title,
-                    tags: change.doc.data().tags,
-                    updateRemote: false,
-                  })
-                )
-              }
-              if (change.type === 'removed') {
-                console.log('Removed study: ', change.doc.data().id)
-                dispatch(deleteStudy(change.doc.data().id))
-              }
-            })
-
-            isFirstSnapshotListener = false
-          })
-      } else {
-        unsuscribeUsers?.()
-        unsuscribeStudies?.()
-      }
 
       /**
        * 3.c Pass data to USER_LOGIN_SUCCESS reducer
        */
       console.log('3.c Pass data to USER_LOGIN_SUCCESS reducer')
-      return dispatch({
+      dispatch({
         type: USER_LOGIN_SUCCESS,
         isLogged: !!id,
         localLastSeen: lastSeen,
@@ -841,6 +785,17 @@ export function onUserUpdateProfile(profile) {
   return {
     type: USER_UPDATE_PROFILE,
     payload: profile,
+  }
+}
+
+export function receiveLiveUpdates({
+  remoteUserData,
+}: {
+  remoteUserData: FireStoreUserData
+}) {
+  return {
+    type: RECEIVE_LIVE_UPDATES,
+    payload: { remoteUserData },
   }
 }
 

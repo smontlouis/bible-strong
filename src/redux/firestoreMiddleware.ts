@@ -102,7 +102,7 @@ export default store => next => async action => {
     case RESET_COMPARE_VERSION:
     case REMOVE_TAG:
     case UPDATE_TAG: {
-      if (!diffState?.user?.bible) return
+      if (!diffState?.user?.bible) break
 
       const { studies, ...diffStateUserBible } = diffState.user.bible
 
@@ -115,7 +115,7 @@ export default store => next => async action => {
           ['user/UPDATE_STUDY', 'user/CREATE_STUDY'].includes(action.type) &&
           action.payload.updateRemote === false
         ) {
-          return
+          break
         }
 
         Object.entries(studies).forEach(([studyId, obj]) => {
@@ -150,24 +150,28 @@ export default store => next => async action => {
       break
     }
     case USER_UPDATE_PROFILE:
-    case USER_LOGIN_SUCCESS: {
-      const { localLastSeen, remoteLastSeen } = action
+    /**
+     * Since we're using firestore offline, we don't need to update remote data manually
+     */
+    // case USER_LOGIN_SUCCESS: {
+    //   const { localLastSeen, remoteLastSeen } = action
 
-      if (remoteLastSeen >= localLastSeen) {
-        console.log('- do nothing, remote is already up to date')
-        return
-      }
-      console.log('local wins - update remote')
-      const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-      userDoc.update(
-        r({
-          bible: sanitizeUserBible(user.bible),
-          plan: plan.ongoingPlans,
-        })
-      )
+    //   if (remoteLastSeen >= localLastSeen) {
+    //     console.log('----- do nothing, remote is already up to date')
+    //     break
+    //   }
 
-      break
-    }
+    //   console.log('-----local wins - update remote')
+    //   const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+    //   userDoc.update(
+    //     r({
+    //       bible: sanitizeUserBible(user.bible),
+    //       plan: plan.ongoingPlans,
+    //     })
+    //   )
+
+    //   break
+    // }
     case SET_SUBSCRIPTION: {
       userDoc.set({ subscription: user.subscription }, { merge: true })
       break

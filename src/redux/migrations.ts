@@ -329,20 +329,6 @@ export default {
   24: (state: RootState) => {
     return {
       ...state,
-      quota: {
-        bibleSearch: {
-          remaining: 10,
-          lastDate: 0,
-        },
-        timelineSearch: {
-          remaining: 10,
-          lastDate: 0,
-        },
-        translateComments: {
-          remaining: 10,
-          lastDate: 0,
-        },
-      },
       user: {
         ...state.user,
         bible: {
@@ -361,7 +347,30 @@ export default {
             },
           },
         },
+        quota: {
+          bibleSearch: {
+            remaining: 10,
+            lastDate: 0,
+          },
+          timelineSearch: {
+            remaining: 10,
+            lastDate: 0,
+          },
+          translateComments: {
+            remaining: 10,
+            lastDate: 0,
+          },
+        },
       },
     } as RootState
+  },
+  25: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        isLoading: true,
+      },
+    }
   },
 }
