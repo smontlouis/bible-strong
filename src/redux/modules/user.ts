@@ -299,14 +299,8 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
 
     case RECEIVE_LIVE_UPDATES: {
-      const {
-        id,
-        email,
-        displayName,
-        photoURL,
-        provider,
-        bible,
-      } = action.remoteUserData as FireStoreUserData
+      const { id, email, displayName, photoURL, provider, bible } = action
+        .payload.remoteUserData as FireStoreUserData
 
       draft.id = id
       draft.email = email
