@@ -216,32 +216,58 @@ const VersesModal = ({
       ) : (
         <Container>
           <HalfContainer border>
-            <TouchableCircle
-              color={colors.color1}
-              onPress={() => addHighlight('color1')}
-            />
-            <TouchableCircle
-              color={colors.color2}
-              onPress={() => addHighlight('color2')}
-            />
-            <TouchableCircle
-              color={colors.color3}
-              onPress={() => addHighlight('color3')}
-            />
-            <TouchableCircle
-              color={colors.color4}
-              onPress={() => addHighlight('color4')}
-            />
-            <TouchableCircle
-              color={colors.color5}
-              onPress={() => addHighlight('color5')}
-            />
-            {isSelectedVerseHighlighted && (
-              <TouchableIcon
-                name="x-circle"
-                onPress={() => removeHighlight()}
-              />
-            )}
+            <ScrollView
+              horizontal
+              style={{ overflow: 'visible' }}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                flexDirection: 'row',
+                paddingVertical: 10,
+                overflow: 'visible',
+              }}
+            >
+              {isSelectedVerseHighlighted && (
+                <Box width={wp(16.6, 400)}>
+                  <TouchableIcon
+                    name="x-circle"
+                    onPress={() => removeHighlight()}
+                  />
+                </Box>
+              )}
+              <Box width={wp(16.6, 400)}>
+                <TouchableCircle
+                  color={colors.color1}
+                  onPress={() => addHighlight('color1')}
+                />
+              </Box>
+              <Box width={wp(16.6, 400)}>
+                <TouchableCircle
+                  color={colors.color2}
+                  onPress={() => addHighlight('color2')}
+                />
+              </Box>
+              <Box width={wp(16.6, 400)}>
+                <TouchableCircle
+                  color={colors.color3}
+                  onPress={() => addHighlight('color3')}
+                />
+              </Box>
+              <Box width={wp(16.6, 400)}>
+                <TouchableCircle
+                  color={colors.color4}
+                  onPress={() => addHighlight('color4')}
+                />
+              </Box>
+              <Box width={wp(16.6, 400)}>
+                <TouchableCircle
+                  color={colors.color5}
+                  onPress={() => addHighlight('color5')}
+                />
+              </Box>
+              <Box width={wp(16.6, 400)}>
+                <TouchableIcon name="plus-circle" onPress={() => {}} />
+              </Box>
+            </ScrollView>
           </HalfContainer>
           <HalfContainer>
             <ScrollView
