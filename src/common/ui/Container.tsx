@@ -1,22 +1,17 @@
-import styled from '@emotion/native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import { Theme } from '~themes'
+import styled from '@emotion/native'
+import { ViewProps } from 'react-native'
 
-const Container = styled.View(
-  ({
-    theme,
-    pure,
-    noPadding = false,
-  }: {
-    theme: Theme
+const Container = styled.View<
+  {
     pure?: boolean
     noPadding?: boolean
-  }) => ({
-    paddingTop: noPadding ? 0 : getStatusBarHeight(),
-    position: 'relative',
-    flex: 1,
-    backgroundColor: pure ? theme.colors.reverse : theme.colors.lightGrey,
-  })
-)
+  } & ViewProps
+>(({ theme, pure, noPadding = false }) => ({
+  paddingTop: noPadding ? 0 : getStatusBarHeight(),
+  position: 'relative',
+  flex: 1,
+  backgroundColor: pure ? theme.colors.reverse : theme.colors.lightGrey,
+}))
 
 export default Container

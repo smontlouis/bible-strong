@@ -59,6 +59,7 @@ class Link extends Component<LinkProps> {
 
   render() {
     const { padding, paddingSmall, style, size } = this.props
+
     return (
       <TouchableOpacity
         activeOpacity={0.5}
@@ -83,7 +84,7 @@ class Link extends Component<LinkProps> {
             alignItems: 'center',
             justifyContent: 'center',
           }),
-          ...style,
+          ...(Array.isArray(style) ? Object.assign({}, ...style) : style),
         }}
       />
     )

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
 
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { Theme } from '~themes'
 import { List } from 'react-native-paper'
 import Text from '~common/ui/Text'

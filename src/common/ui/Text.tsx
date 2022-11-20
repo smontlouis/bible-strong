@@ -1,8 +1,10 @@
 import { bindStyles } from '~helpers/styledProps'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { Theme } from '~themes'
+import { TextProps as BaseTextProps } from 'react-native'
 
-export interface TextProps {
+export interface TextProps extends BaseTextProps {
+  children?: React.ReactNode
   color?: string
   lineHeight?: number
   fontSize?: number

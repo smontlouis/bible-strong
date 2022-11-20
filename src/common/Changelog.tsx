@@ -15,7 +15,7 @@ import { logTypes } from '~helpers/changelog'
 import { saveAllLogsAsSeen } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
-import styled from '~styled/index'
+import styled from '@emotion/native'
 import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
 

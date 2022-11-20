@@ -21,7 +21,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const BibleCompareVerses = ({ navigation }) => {
+const BibleCompareVersesScreen = ({ navigation }) => {
   const { selectedVerses: s } = navigation.state.params || {}
   const [selectedVerses, setSelectedVerses] = React.useState(s)
   const [prevNextItems, setPrevNextItems] = React.useState()
@@ -102,4 +102,4 @@ const BibleCompareVerses = ({ navigation }) => {
     </Container>
   )
 }
-export default BibleCompareVerses
+export default BibleCompareVersesScreen

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-native-modalbox'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { useDispatch } from 'react-redux'
 import useLanguage from '~helpers/useLanguage'
 import { deleteAllDatabases } from '~helpers/database'

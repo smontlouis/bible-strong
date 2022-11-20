@@ -17,7 +17,7 @@ import truncate from '~helpers/truncate'
 import Paragraph from '~common/ui/Paragraph'
 import { withTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import { compose } from 'recompose'
 
 const NoteLink = styled(Link)(({ theme }) => ({

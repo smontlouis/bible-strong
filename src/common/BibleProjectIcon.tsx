@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Svg, { G, Path } from 'react-native-svg'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { Theme } from '~themes'
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 

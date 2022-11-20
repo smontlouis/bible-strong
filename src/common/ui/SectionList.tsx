@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, SectionListProps } from 'react-native'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 import { Theme } from '~themes'

@@ -3,6 +3,8 @@ import Animated from 'react-native-reanimated'
 import { Theme } from '~themes'
 
 export interface BoxProps {
+  children?: React.ReactNode
+
   position?: 'absolute' | 'relative'
   pos?: 'absolute' | 'relative'
   top?: number
@@ -47,6 +49,7 @@ export interface BoxProps {
   absoluteFill?: boolean
 
   borderWidth?: number
+  borderBottomWidth?: number
   borderColor?: string
   transform?: object
   borderRadius?: number
@@ -121,6 +124,7 @@ const Box = styled.View((props: BoxProps) => {
     marginHorizontal: props.marginHorizontal ?? props.mx,
 
     borderWidth: props.borderWidth,
+    borderBottomWidth: props.borderBottomWidth,
     borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
     transform: props.transform,
     borderRadius: props.borderRadius,

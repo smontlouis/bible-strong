@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 import { ScrollView } from 'react-native'
 import * as Icon from '@expo/vector-icons'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import truncHTML from 'trunc-html'
 
 import Empty from '~common/Empty'

@@ -1,6 +1,6 @@
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import { ThemeProvider } from 'emotion-theming'
+import { ThemeProvider } from '@emotion/react'
 import * as Updates from 'expo-updates'
 import React, { useEffect } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'

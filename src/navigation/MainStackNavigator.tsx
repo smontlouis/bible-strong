@@ -4,7 +4,7 @@ import { createStackNavigator } from 'react-navigation-stack'
 import QuotaModal from '~common/QuotaModal'
 
 import Box from '~common/ui/Box'
-import BibleCompareVerses from '~features/bible/BibleCompareVerses'
+import BibleCompareVersesScreen from '~features/bible/BibleCompareVersesScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
 import BibleStrongDetailScreen from '~features/bible/BibleStrongDetailScreen'
@@ -60,7 +60,7 @@ const MainStackNavigator = createStackNavigator(
     DictionnaireVerseDetail: { screen: DictionnaireVerseDetailScreen },
     ConcordanceByBook: { screen: ConcordanceByBookScreen },
     BibleView: { screen: BibleViewScreen },
-    BibleCompareVerses: { screen: BibleCompareVerses },
+    BibleCompareVerses: { screen: BibleCompareVersesScreen },
     Studies: { screen: StudiesScreen },
     Lexique: { screen: LexiqueScreen },
     EditStudy: { screen: EditStudyScreen },

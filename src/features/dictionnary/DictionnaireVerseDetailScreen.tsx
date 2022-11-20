@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Carousel from 'react-native-snap-carousel'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'

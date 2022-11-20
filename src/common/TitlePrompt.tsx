@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'

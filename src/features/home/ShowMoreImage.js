@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import * as Animatable from 'react-native-animatable'
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 import { wp } from '~helpers/utils'
 import Image from '~common/ui/Image'

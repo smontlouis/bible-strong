@@ -4,7 +4,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
 
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'

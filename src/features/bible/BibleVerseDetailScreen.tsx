@@ -3,7 +3,7 @@ import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import verseToStrong from '~helpers/verseToStrong'

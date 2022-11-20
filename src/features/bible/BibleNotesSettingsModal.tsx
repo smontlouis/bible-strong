@@ -1,4 +1,4 @@
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'

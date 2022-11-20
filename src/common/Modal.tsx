@@ -1,11 +1,10 @@
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import React, { forwardRef, useEffect } from 'react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
 import { Portal } from 'react-native-paper'
 import Text, { TextProps } from '~common/ui/Text'
-import styled from '~styled/index'
-import { Theme } from '~themes/index'
+import styled from '@emotion/native'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -37,7 +36,7 @@ interface ItemProps {
 }
 
 const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
-  const theme = useTheme<Theme>()
+  const theme = useTheme()
 
   return (
     <Modalize

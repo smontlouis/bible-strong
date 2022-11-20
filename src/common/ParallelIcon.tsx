@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import Svg, { Path } from 'react-native-svg'
 
 function SvgComponent({ color, theme, ...props }) {

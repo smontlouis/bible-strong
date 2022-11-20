@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
 
 const TextInput = styled.TextInput(({ theme, noBorder, leftIcon }) => ({

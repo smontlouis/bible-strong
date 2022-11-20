@@ -1,9 +1,8 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { useTheme, withTheme } from 'emotion-theming'
+import { useTheme, withTheme } from '@emotion/react'
 
 import Text from '~common/ui/Text'
-import { Theme } from '~themes/index'
 import { SvgProps } from 'react-native-svg'
 
 const Touchable = styled.TouchableOpacity(({ disabled }) => ({
@@ -31,7 +30,7 @@ const TouchableSvgIcon = ({
   label?: string
   disabled?: boolean
 }) => {
-  const theme = useTheme<Theme>()
+  const theme = useTheme()
   return (
     <Touchable onPress={onPress} disabled={disabled}>
       <Icon

@@ -182,7 +182,7 @@ export function setSettingsNotesDisplay(payload: string) {
   }
 }
 
-export function setSettingsCommentaires(payload: string) {
+export function setSettingsCommentaires(payload: boolean) {
   return {
     type: SET_SETTINGS_COMMENTS_DISPLAY,
     payload,

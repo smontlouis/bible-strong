@@ -2,7 +2,7 @@ import React from 'react'
 import * as Icon from '@expo/vector-icons'
 
 import Text from '~common/ui/Text'
-import styled from '~styled/index'
+import styled from '@emotion/native'
 
 const Touchable = styled.TouchableOpacity<{
   noFlex?: boolean

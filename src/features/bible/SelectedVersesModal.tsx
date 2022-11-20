@@ -4,7 +4,7 @@ import { Modalize } from 'react-native-modalize'
 import styled from '@emotion/native'
 import { useSelector } from 'react-redux'
 import Clipboard from '@react-native-community/clipboard'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 
 import SnackBar from '~common/SnackBar'
 import LexiqueIcon from '~common/LexiqueIcon'

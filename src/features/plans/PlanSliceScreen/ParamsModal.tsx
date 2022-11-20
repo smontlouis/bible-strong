@@ -7,7 +7,7 @@ import { FlatList } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize } from 'react-native-modalize'
 
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import Link, { LinkBox } from '~common/Link'

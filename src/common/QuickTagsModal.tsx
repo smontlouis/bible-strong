@@ -5,7 +5,7 @@ import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import * as Icon from '@expo/vector-icons'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const LinkBox = Box.withComponent(Link)

@@ -1,6 +1,6 @@
 import React from 'react'
 import Svg, { Path } from 'react-native-svg'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 const SvgComponent = ({ color, theme, ...props }) => (
   <Svg width={20} height={20} viewBox="0 0 18 18" {...props}>

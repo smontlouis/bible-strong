@@ -1,31 +1,35 @@
+import { PrimitiveAtom } from 'jotai'
 import React, { useEffect } from 'react'
-import { NavigationStackProp } from 'react-navigation-stack'
-import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { NavigationStackScreenProps } from 'react-navigation-stack'
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
-import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
-import { resetTempSelected, toggleSelectionMode } from '~redux/modules/bible'
-import { RootState } from '~redux/modules/reducer'
 import { MAX_WIDTH } from '~helpers/useDimensions'
-import { useTranslation } from 'react-i18next'
+import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
+import { BibleTab, useBibleTabActions } from '../../state/tabs'
 
-interface Props {
-  navigation: NavigationStackProp<any>
+interface BibleSelectProps {
+  bibleAtom: PrimitiveAtom<BibleTab>
 }
 
-const BibleSelect = ({ navigation }: Props) => {
-  const dispatch = useDispatch()
+const BibleSelect = ({
+  navigation,
+}: NavigationStackScreenProps<BibleSelectProps>) => {
+  const bibleAtom = navigation.getParam('bibleAtom')
+  const [bible, actions] = useBibleTabActions(bibleAtom)
+
+  const {
+    data: { selectionMode },
+  } = bible
+
   const { t } = useTranslation()
-  const selectionMode = useSelector(
-    (state: RootState) => state.bible.selectionMode
-  )
 
   useEffect(() => {
-    dispatch(resetTempSelected())
-  }, [dispatch])
+    actions.resetTempSelected()
+  }, [])
 
   return (
     <Container>
@@ -34,14 +38,14 @@ const BibleSelect = ({ navigation }: Props) => {
         title={t('Références')}
         rightComponent={
           <Box row mr={20}>
-            <LinkBox p={5} onPress={() => dispatch(toggleSelectionMode())}>
+            <LinkBox p={5} onPress={actions.toggleSelectionMode}>
               <FeatherIcon
                 name="grid"
                 size={16}
                 color={selectionMode === 'grid' ? 'primary' : 'default'}
               />
             </LinkBox>
-            <LinkBox p={5} onPress={() => dispatch(toggleSelectionMode())}>
+            <LinkBox p={5} onPress={actions.toggleSelectionMode}>
               <FeatherIcon
                 name="menu"
                 size={16}
@@ -53,7 +57,7 @@ const BibleSelect = ({ navigation }: Props) => {
       />
       <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
         <BibleSelectTabNavigator
-          screenProps={{ mainNavigation: navigation }}
+          screenProps={{ mainNavigation: navigation, bibleAtom }}
           navigation={navigation}
         />
       </Box>

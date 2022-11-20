@@ -1,35 +1,33 @@
-import React from 'react'
 import styled from '@emotion/native'
-import compose from 'recompose/compose'
-import pure from 'recompose/pure'
-import ImmersiveMode from 'react-native-immersive-mode'
+import React, { useEffect } from 'react'
 import { Platform, StatusBar } from 'react-native'
+import ImmersiveMode from 'react-native-immersive-mode'
 
+import { useTheme } from '@emotion/react'
+import * as Animatable from 'react-native-animatable'
 import {
   Menu,
-  MenuOptions,
   MenuOption,
+  MenuOptions,
   MenuTrigger,
   renderers,
-  withMenuContext,
 } from 'react-native-popup-menu'
-import { withNavigation } from 'react-navigation'
-import * as Animatable from 'react-native-animatable'
-import { useTheme } from 'emotion-theming'
 
-import truncate from '~helpers/truncate'
-import Text from '~common/ui/Text'
+import { PrimitiveAtom, useAtom } from 'jotai'
+import { useTranslation } from 'react-i18next'
+import { NavigationStackProp } from 'react-navigation-stack'
+import Back from '~common/Back'
+import Link from '~common/Link'
+import ParallelIcon from '~common/ParallelIcon'
+import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
-import Link from '~common/Link'
-import Back from '~common/Back'
-import useDimensions from '~helpers/useDimensions'
-import ParallelIcon from '~common/ParallelIcon'
-import { useAtom } from 'jotai'
-import SnackBar from '~common/SnackBar'
+import Text from '~common/ui/Text'
 import { getIfDatabaseExists } from '~helpers/database'
-import { useTranslation } from 'react-i18next'
+import truncate from '~helpers/truncate'
+import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
+import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { fullscreenAtom } from '../../state/app'
 
 const { Popover } = renderers
@@ -91,27 +89,44 @@ const formatVerses = verses =>
     return acc + v
   }, '')
 
+interface BibleHeaderProps {
+  navigation: NavigationStackProp
+  bibleAtom: PrimitiveAtom<BibleTab>
+  hasBackButton?: boolean
+  onBibleParamsClick: () => void
+  setSettingsCommentaires: (x: boolean) => void
+  commentsDisplay?: boolean
+}
 const Header = ({
   navigation,
-  isReadOnly,
-  isSelectionMode,
   hasBackButton,
-  book,
-  chapter,
-  verse,
-  focusVerses,
-  version,
+  bibleAtom,
   onBibleParamsClick,
-  addParallelVersion,
-  removeAllParallelVersions,
-  isParallel,
   setSettingsCommentaires,
-  settings: { commentsDisplay },
-}) => {
+  commentsDisplay,
+}: BibleHeaderProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
+  const [bible, actions] = useBibleTabActions(bibleAtom)
+
+  const {
+    data: {
+      selectedVersion: version,
+      selectedBook: book,
+      selectedChapter: chapter,
+      selectedVerse: verse,
+      isReadOnly,
+      isSelectionMode,
+      focusVerses,
+      parallelVersions,
+    },
+  } = bible
+
+  const isParallel = parallelVersions.length > 0
+
+  const { addParallelVersion, removeAllParallelVersions } = actions
 
   const onOpenCommentaire = async () => {
     const exists = await getIfDatabaseExists('commentaires-mhy')
@@ -158,7 +173,11 @@ const Header = ({
           </Back>
         </Box>
       )}
-      <LinkBox route="BibleSelect" style={{ paddingLeft: 15, paddingRight: 0 }}>
+      <LinkBox
+        route="BibleSelect"
+        params={{ bibleAtom }}
+        style={{ paddingLeft: 15, paddingRight: 0 }}
+      >
         <TextIcon>
           {isSmall
             ? truncate(`${t(book.Nom)} ${chapter}`, 10)
@@ -167,7 +186,7 @@ const Header = ({
       </LinkBox>
       <LinkBox
         route="VersionSelector"
-        params={{ version }}
+        params={{ bibleAtom }}
         style={{ marginRight: 'auto' }}
       >
         <TextIcon>{version}</TextIcon>
@@ -192,14 +211,12 @@ const Header = ({
           <PopOverMenu
             element={
               <Box
-                flexDirection="row"
+                row
                 alignItems="center"
                 justifyContent="center"
                 height={60}
                 width={50}
-                style={{
-                  opacity: isFullscreen ? 0 : 1,
-                }}
+                opacity={isFullscreen ? 0 : 1}
               >
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
@@ -260,4 +277,4 @@ const Header = ({
   )
 }
 
-export default compose(pure, withMenuContext, withNavigation)(Header)
+export default Header

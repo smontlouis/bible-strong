@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 const Div = styled.View(() => ({
   flex: 1,

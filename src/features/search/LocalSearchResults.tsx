@@ -2,7 +2,7 @@ import React from 'react'
 import { withNavigation } from 'react-navigation'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 import compose from 'recompose/compose'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'

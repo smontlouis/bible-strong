@@ -1,5 +1,5 @@
 import React from 'react'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import { Text } from 'react-native'
 
 import HTMLView from '~helpers/react-native-htmlview'

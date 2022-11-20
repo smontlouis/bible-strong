@@ -1,12 +1,12 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import * as Animatable from 'react-native-animatable'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import Color from 'color'
 
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { Theme } from '~themes'
 
 const Circle = styled.View({

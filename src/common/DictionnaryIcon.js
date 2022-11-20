@@ -1,5 +1,5 @@
 import React from 'react'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import Svg, { G, Path } from 'react-native-svg'
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 

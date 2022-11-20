@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import appleAuth, {
   AppleButton,
 } from '@invertase/react-native-apple-authentication'

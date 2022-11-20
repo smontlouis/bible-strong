@@ -1,7 +1,7 @@
 import React from 'react'
 import { TextInput } from 'react-native'
 import * as Icon from '@expo/vector-icons'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'

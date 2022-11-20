@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import { useSelector } from 'react-redux'
 import * as Animatable from 'react-native-animatable'
 

@@ -1,4 +1,4 @@
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { useCallback, useRef } from 'react'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
