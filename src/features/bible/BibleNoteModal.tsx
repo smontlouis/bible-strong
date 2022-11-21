@@ -131,8 +131,9 @@ class BibleNoteModal extends React.Component {
     const { noteVerses, selectedVerses } = this.props
     this.props.addNote(
       { title, description, date: Date.now(), ...(tags && { tags }) },
-      noteVerses
+      noteVerses || selectedVerses
     )
+    // TODO - clear selected verses
     this.props.onClosed()
 
     const orderedVerses = orderVerses(noteVerses || selectedVerses)
@@ -279,7 +280,6 @@ export default compose(
   withTranslation(),
   connect(
     state => ({
-      selectedVerses: state.bible.selectedVerses,
       notes: state.user.bible.notes,
     }),
     { ...UserActions }

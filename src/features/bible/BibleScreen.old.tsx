@@ -18,10 +18,10 @@ import { NavigationStackScreenProps } from 'react-navigation-stack'
 import {
   addParallelVersion,
   removeAllParallelVersions,
-} from '~redux/modules/bible'
+} from '~redux/modules/bible.old'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
-import { VersionCode } from '~state/tabs'
+import { VersionCode } from '../../state/tabs'
 
 interface BibleTabScreenProps {
   focusVerses?: string[]

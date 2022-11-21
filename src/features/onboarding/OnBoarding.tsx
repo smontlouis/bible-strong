@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-native-modalbox'
 import styled from '@emotion/native'
-import { useDispatch } from 'react-redux'
 import useLanguage from '~helpers/useLanguage'
 import { deleteAllDatabases } from '~helpers/database'
 
 import OnBoardingSlides from './OnBoardingSlides'
 import DownloadFiles from './DownloadFiles'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import { setVersion } from '~redux/modules/bible'
+import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
 }))
 
 const useCheckMandatoryVersions = () => {
-  const dispatch = useDispatch()
   const isFR = useLanguage()
   const [isFirstTime, setFirstTime] = useState(false)
+
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [, actions] = useBibleTabActions(defaultBibleAtom)
 
   useEffect(() => {
     ;(async () => {
@@ -26,14 +27,14 @@ const useCheckMandatoryVersions = () => {
       )
       if (lsgNeedsDownload) {
         console.log('Needs download, open onboarding.')
-        dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
+        actions.setSelectedVersion(isFR ? 'LSG' : 'KJV')
         deleteAllDatabases()
         setFirstTime(true)
       } else {
         setFirstTime(false)
       }
     })()
-  }, [dispatch, isFR])
+  }, [isFR])
 
   return { isFirstTime, setFirstTime }
 }

@@ -10,7 +10,6 @@ import verseToStrong from '~helpers/verseToStrong'
 import loadStrongReferences from '~helpers/loadStrongReferences'
 import loadStrongVerse from '~helpers/loadStrongVerse'
 import waitForStrongDB from '~common/waitForStrongDB'
-import * as BibleActions from '~redux/modules/bible'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
 
@@ -308,6 +307,6 @@ export default compose(
     return {
       verse,
     }
-  }, BibleActions),
+  }),
   waitForStrongDB
 )(BibleVerseDetailScreen)

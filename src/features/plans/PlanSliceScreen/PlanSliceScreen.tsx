@@ -26,6 +26,8 @@ import * as Sentry from '@sentry/react-native'
 import Snackbar from '~common/SnackBar'
 import { Share } from 'react-native'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
+import { useGetDefaultBibleTabAtom } from '../../../state/tabs'
+import { useAtom } from 'jotai'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -62,7 +64,9 @@ const PlanSliceScreen = ({ navigation }: Props) => {
         id
       ] === 'Completed'
   )
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id, planId }))

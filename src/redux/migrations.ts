@@ -382,4 +382,8 @@ export default {
       },
     }
   },
+  // @ts-ignore
+  27: ({ bible, ...state }: RootState) => {
+    return state
+  },
 }

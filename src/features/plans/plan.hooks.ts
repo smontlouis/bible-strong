@@ -23,6 +23,8 @@ import { range } from '~helpers/range'
 import loadBible from '~helpers/loadBible'
 import SnackBar from '~common/SnackBar'
 import verseToReference from '~helpers/verseToReference'
+import { useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { useAtom } from 'jotai'
 
 interface VerseContent {
   Pericope: {
@@ -326,7 +328,10 @@ export const getChaptersForPlan = async (
 export const useChapterToContent = (chapters: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<ChapterForPlan>()
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   React.useEffect(() => {
     ;(async () => {
@@ -395,7 +400,10 @@ export const getVersesForPlan = async (
 export const useVersesToContent = (verses: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<VerseForPlan>()
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   React.useEffect(() => {
     ;(async () => {

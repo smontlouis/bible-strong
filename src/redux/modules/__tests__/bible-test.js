@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-import reducer, * as BibleActions from '../bible'
+import reducer, * as BibleActions from '../bible.old'
 import booksDesc from '~assets/bible_versions/books-desc'
 
 const initialState = {

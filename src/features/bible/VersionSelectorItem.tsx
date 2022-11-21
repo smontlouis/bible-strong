@@ -6,7 +6,6 @@ import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabasesRef } from '~helpers/firebase'
 
-import { setVersion } from '~redux/modules/bible'
 import { setVersionUpdated } from '~redux/modules/user'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
@@ -187,7 +186,6 @@ const VersionSelectorItem = ({
     }
     FileSystem.deleteAsync(file.uri)
     setVersionNeedsDownload(true)
-    dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
 
     if (version.id === 'INT') {
       deleteInterlineaireDB()

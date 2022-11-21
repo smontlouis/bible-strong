@@ -1,35 +1,33 @@
-import React, { useState } from 'react'
-import { Platform, Alert } from 'react-native'
-import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
-import { useSelector } from 'react-redux'
-import * as Animatable from 'react-native-animatable'
-import { useDispatch } from 'react-redux'
-import { setVersion } from '~redux/modules/bible'
-import { resetCompareVersion } from '~redux/modules/user'
-import { MaterialIcon } from '~common/ui/Icon'
-import LexiqueIcon from '~common/LexiqueIcon'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import NaveIcon from '~common/NaveIcon'
-import Container from '~common/ui/Container'
-import Border from '~common/ui/Border'
-import Header from '~common/Header'
-import ScrollView from '~common/ui/ScrollView'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
-import TagsEditModal from '~common/TagsEditModal'
-import useLogin from '~helpers/useLogin'
-import { useTranslation } from 'react-i18next'
-import { deleteAllDatabases } from '~helpers/database'
-import RNRestart from 'react-native-restart'
+import * as Icon from '@expo/vector-icons'
 import sizeof from 'firestore-size'
+import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Alert, Platform } from 'react-native'
+import * as Animatable from 'react-native-animatable'
+import RNRestart from 'react-native-restart'
+import { useDispatch, useSelector } from 'react-redux'
+import DictionnaireIcon from '~common/DictionnaryIcon'
+import Header from '~common/Header'
+import LexiqueIcon from '~common/LexiqueIcon'
+import Link from '~common/Link'
+import NaveIcon from '~common/NaveIcon'
 import SnackBar from '~common/SnackBar'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import { MaterialIcon } from '~common/ui/Icon'
+import ScrollView from '~common/ui/ScrollView'
+import Text from '~common/ui/Text'
+import { deleteAllDatabases } from '~helpers/database'
+import useLogin from '~helpers/useLogin'
+import { resetCompareVersion } from '~redux/modules/user'
 
-import app from '../../../package.json'
-import { RootState } from '~redux/modules/reducer'
 import { firebaseDb } from '~helpers/firebase'
 import { r } from '~redux/firestoreMiddleware'
+import { RootState } from '~redux/modules/reducer'
+import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
+import app from '../../../package.json'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -69,6 +67,9 @@ const MoreScreen = () => {
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [, actions] = useBibleTabActions(defaultBibleAtom)
+
   const [isSyncing, setIsSyncing] = useState(false)
   const { user, plan } = useSelector((state: RootState) => ({
     user: state.user,
@@ -125,7 +126,7 @@ const MoreScreen = () => {
           onPress: async () => {
             const isFR = i18n.language === 'fr'
             await deleteAllDatabases()
-            dispatch(setVersion(!isFR ? 'LSG' : 'KJV'))
+            actions.setSelectedVersion(!isFR ? 'LSG' : 'KJV')
             dispatch(resetCompareVersion(!isFR ? 'LSG' : 'KJV'))
 
             i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')

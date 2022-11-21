@@ -1,5 +1,7 @@
 import produce from 'immer'
-import { clearSelectedVerses } from '../bible'
+import { Dispatch } from 'redux'
+import { SelectedVerses } from '../../state/tabs'
+import { clearSelectedVerses } from '../bible.old'
 import { removeEntityInTags } from '../utils'
 
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
@@ -52,12 +54,16 @@ export default produce((draft, action) => {
 })
 
 // HIGHLIGHTS
-export function addHighlight(color) {
-  return (dispatch, getState) => {
-    const { selectedVerses } = getState().bible
+export function addHighlight({
+  color,
+  selectedVerses,
+}: {
+  color?: string
+  selectedVerses: SelectedVerses
+}) {
+  return (dispatch: Dispatch, getState) => {
     const highlightedVerses = getState().user.bible.highlights
 
-    dispatch(clearSelectedVerses())
     return dispatch({
       type: ADD_HIGHLIGHT,
       selectedVerses: addDateAndColorToVerses(
@@ -69,15 +75,14 @@ export function addHighlight(color) {
   }
 }
 
-export function removeHighlight(verseIds) {
-  return (dispatch, getState) => {
-    const { selectedVerses } = getState().bible
-
-    dispatch(clearSelectedVerses())
-    return dispatch({
-      type: REMOVE_HIGHLIGHT,
-      selectedVerses: verseIds || selectedVerses,
-    })
+export function removeHighlight({
+  selectedVerses,
+}: {
+  selectedVerses: SelectedVerses
+}) {
+  return {
+    type: REMOVE_HIGHLIGHT,
+    selectedVerses,
   }
 }
 

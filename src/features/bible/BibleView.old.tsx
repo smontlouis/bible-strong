@@ -17,7 +17,7 @@ import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
-import * as BibleActions from '~redux/modules/bible'
+import * as BibleActions from '~redux/modules/bible.old'
 import * as UserActions from '~redux/modules/user'
 import { zeroFill } from '~helpers/zeroFill'
 

@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 
-import { Audio } from 'expo-av'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { pure } from 'recompose'
+import { Audio } from 'expo-av'
+import { useTranslation } from 'react-i18next'
 import MusicControl, { Command } from 'react-native-music-control'
-import SnackBar from '~common/SnackBar'
-import { usePrevious } from '~helpers/usePrevious'
 import Link from '~common/Link'
+import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { millisToMinutes } from '~helpers/millisToMinutes'
-import { useTranslation } from 'react-i18next'
 import { getVersions } from '~helpers/bibleVersions'
+import { millisToMinutes } from '~helpers/millisToMinutes'
+import { usePrevious } from '~helpers/usePrevious'
 
 const Container = styled.View(({ audioMode, theme }) => ({
   position: 'absolute',
@@ -523,4 +522,4 @@ const BibleFooter = ({
   )
 }
 
-export default pure(BibleFooter)
+export default memo(BibleFooter)

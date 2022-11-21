@@ -1,5 +1,4 @@
 import produce from 'immer'
-import { clearSelectedVerses } from '../bible'
 import orderVerses from '~helpers/orderVerses'
 import { removeEntityInTags } from '../utils'
 
@@ -26,18 +25,14 @@ export default produce((draft, action) => {
 })
 
 // NOTES
-export function addNote(note, noteVerses) {
-  return (dispatch, getState) => {
-    let selectedVerses = noteVerses || getState().bible.selectedVerses
-    selectedVerses = orderVerses(selectedVerses)
-    const key = Object.keys(selectedVerses).join('/')
-    dispatch(clearSelectedVerses())
+export function addNote(note, selectedVerses) {
+  selectedVerses = orderVerses(selectedVerses)
+  const key = Object.keys(selectedVerses).join('/')
 
-    if (!key) {
-      return
-    }
-    return dispatch({ type: ADD_NOTE, payload: { [key]: note } })
+  if (!key) {
+    return
   }
+  return { type: ADD_NOTE, payload: { [key]: note } }
 }
 
 export function deleteNote(noteId) {

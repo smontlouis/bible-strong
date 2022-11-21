@@ -10,7 +10,6 @@ import Header from '~common/Header'
 import Empty from '~common/Empty'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 
-import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
 import TagsHeader from '~common/TagsHeader'
@@ -200,7 +199,7 @@ export default compose(
     state => ({
       notes: state.user.bible.notes,
     }),
-    { ...BibleActions, ...UserActions }
+    UserActions
   ),
   withTranslation()
 )(BibleVerseNotes)

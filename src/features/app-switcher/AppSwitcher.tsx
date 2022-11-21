@@ -1,5 +1,5 @@
 import { PrimitiveAtom, useAtom } from 'jotai'
-import { TabItem, tabsAtomsAtom } from '~state/tabs'
+import { TabItem, tabsAtomsAtom } from '../../state/tabs'
 
 const AppSwitcher = () => {
   const [tabsAtoms] = useAtom(tabsAtomsAtom)

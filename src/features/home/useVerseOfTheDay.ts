@@ -17,6 +17,8 @@ import getVersesRef from '~helpers/getVersesRef'
 import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
+import { useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { useAtom } from 'jotai'
 
 const useGetVerseOfTheDay = (version: string, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -51,7 +53,10 @@ const useGetVerseOfTheDay = (version: string, addDay: number) => {
 export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
   const { t } = useTranslation()
-  const version = useSelector(state => state.bible.selectedVersion)
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
+
   const verseOfTheDayTime = useSelector(
     state => state.user.notifications.verseOfTheDay
   )

@@ -21,6 +21,7 @@ import loadTresorReferences from '~helpers/loadTresorReferences'
 import { hp } from '~helpers/utils'
 import Modal from '~common/Modal'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '@emotion/react'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -164,9 +165,10 @@ const References = ({ references, version, onClosed }) => {
   })
 }
 
-const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
+const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
   const { title } = formatVerseContent([selectedVerse])
   const { t } = useTranslation()
+  const theme = useTheme()
 
   return (
     <Modal.Menu
@@ -193,4 +195,4 @@ const ReferenceModal = ({ onClosed, theme, selectedVerse, version }) => {
   )
 }
 
-export default compose(withNavigation)(ReferenceModal)
+export default withNavigation(ReferenceModal)

@@ -5,8 +5,14 @@ import books, { Book } from '~assets/bible_versions/books-desc'
 
 import { atom } from 'jotai'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
-import { BibleTab, defaultBibleTab, VersionCode } from '../../state/tabs'
+import {
+  BibleTab,
+  defaultBibleTab,
+  useGetDefaultBibleTabAtom,
+  VersionCode,
+} from '../../state/tabs'
 import BibleTabScreen from './BibleTabScreen'
+import { isEmpty } from '~helpers/deep-obj/utils'
 
 interface BibleScreenProps {
   focusVerses?: string[]
@@ -45,7 +51,12 @@ const BibleScreen = ({
     if (isReadOnly) draft.data.isReadOnly = isReadOnly
   })
 
-  const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
+  const onTheFlyAtom = useMemo(() => atom<BibleTab>(initialValues), [])
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+
+  const bibleAtom = isEmpty(navigation.state.params)
+    ? defaultBibleAtom
+    : onTheFlyAtom
 
   return <BibleTabScreen bibleAtom={bibleAtom} navigation={navigation} />
 }

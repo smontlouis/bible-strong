@@ -1,13 +1,16 @@
+import { useAtom } from 'jotai'
 import React, { PropsWithChildren } from 'react'
-import { useSelector } from 'react-redux'
-import useAsync from '~helpers/useAsync'
-import loadBible from '~helpers/loadBible'
-import { RootState } from '~redux/modules/reducer'
-import Box from '~common/ui/Box'
 import Loading from '~common/Loading'
+import Box from '~common/ui/Box'
+import loadBible from '~helpers/loadBible'
+import useAsync from '~helpers/useAsync'
+import { useGetDefaultBibleTabAtom } from '../../state/tabs'
 
 const PreloadBible = ({ children }: PropsWithChildren<{}>) => {
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
+
   const { status } = useAsync(async () => await loadBible(version))
 
   if (status === 'Resolved') {

@@ -1,8 +1,8 @@
+import { useAtom } from 'jotai'
 import React from 'react'
-import loadBible from '~helpers/loadBible'
-import { useSelector } from 'react-redux'
 import { Verse } from '~common/types'
-import { RootState } from '~redux/modules/reducer'
+import loadBible from '~helpers/loadBible'
+import { useGetDefaultBibleTabAtom } from '../state/tabs'
 
 export const verseStringToObject = (
   arrayString: string[]
@@ -15,7 +15,10 @@ export const verseStringToObject = (
 
 const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
   const [verses, setVerses] = React.useState<Verse[]>([])
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   React.useEffect(() => {
     const loadVerses = async () => {

@@ -93,7 +93,10 @@ const BibleViewer = ({
   const [audioChapterUrl, setAudioChapterUrl] = useState('')
   const [audioMode, setAudioMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [selectedCode, setSelectedCode] = useState(null)
+  const [selectedCode, setSelectedCode] = useState<{
+    reference: string
+    book: number
+  } | null>(null)
   const [currentNave, setNave] = useState(null)
   const [reference, setReference] = useState(null)
 
@@ -120,7 +123,7 @@ const BibleViewer = ({
     const selectedVersesToAdd: { [verse: string]: true } = Object.fromEntries(
       verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
     )
-    actions.addSelectedVerses(selectedVersesToAdd)
+    actions.selectAllVerses(selectedVersesToAdd)
   }
 
   const modalIsVisible = !!Object.keys(selectedVerses).length
@@ -151,9 +154,9 @@ const BibleViewer = ({
     return object
   })
 
-  const isSelectedVerseHighlighted = useSelector((state: RootState) => {
+  const isSelectedVerseHighlighted = useSelector((state: RootState) =>
     Object.keys(selectedVerses).find(s => state.user.bible.highlights[s])
-  })
+  )
 
   useEffect(() => {
     // Settimeout ?
@@ -261,11 +264,14 @@ const BibleViewer = ({
       setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
     }, 300)
 
-    dispatch(addHighlight(color))
+    dispatch(addHighlight({ color, selectedVerses }))
+    actions.clearSelectedVerses()
   }
 
   const addTag = () => {
-    addHighlight()
+    addHighlight({ selectedVerses })
+    actions.clearSelectedVerses()
+
     setMultipleTagsItem({
       entity: 'highlights',
       ids: selectedVerses,
@@ -382,7 +388,10 @@ const BibleViewer = ({
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
-        removeHighlight={h => dispatch(removeHighlight(h))}
+        removeHighlight={() => {
+          dispatch(removeHighlight({ selectedVerses }))
+          actions.clearSelectedVerses()
+        }}
         clearSelectedVerses={actions.clearSelectedVerses}
         navigation={navigation}
         selectedVerses={selectedVerses}
@@ -395,7 +404,6 @@ const BibleViewer = ({
         setMultipleTagsItem={setMultipleTagsItem}
       />
       <MultipleTagsModal
-        multiple
         item={multipleTagsItem}
         onClosed={() => setMultipleTagsItem(false)}
       />
@@ -404,26 +412,21 @@ const BibleViewer = ({
           onClosed={toggleCreateNote}
           isOpen={isCreateNoteOpen}
           noteVerses={noteVerses}
+          selectedVerses={selectedVerses}
           onSaveNote={onSaveNote}
         />
       )}
       <StrongModal
         version={version}
-        theme={theme}
         selectedCode={selectedCode}
-        onClosed={() => setSelectedCode(false)}
+        onClosed={() => setSelectedCode(null)}
       />
       <ReferenceModal
         version={version}
         selectedVerse={reference}
-        theme={theme}
         onClosed={() => setReference(null)}
       />
-      <NaveModal
-        selectedVerse={currentNave}
-        theme={theme}
-        onClosed={() => setNave(null)}
-      />
+      <NaveModal selectedVerse={currentNave} onClosed={() => setNave(null)} />
     </Container>
   )
 }

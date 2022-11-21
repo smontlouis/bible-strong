@@ -12,9 +12,11 @@ import StrongCard from '~features/bible/StrongCard'
 import { Modalize } from 'react-native-modalize'
 import { usePrevious } from '~helpers/usePrevious'
 import { isStrongVersion } from '~helpers/bibleVersions'
+import { useTheme } from '@emotion/react'
 
 const StrongCardWrapper = waitForStrongModal(
-  ({ theme, navigation, selectedCode, onClosed }) => {
+  ({ navigation, selectedCode, onClosed }) => {
+    const theme = useTheme()
     const [isLoading, setIsLoading] = useState(true)
     const [strongReference, setStrongReference] = useState(null)
     const [error, setError] = useState(false)
@@ -64,7 +66,6 @@ const StrongCardWrapper = waitForStrongModal(
     }
     return (
       <StrongCard
-        theme={theme}
         navigation={navigation}
         book={selectedCode.book}
         strongReference={strongReference}
@@ -77,20 +78,22 @@ const StrongCardWrapper = waitForStrongModal(
 
 interface StrongModalProps {
   onClosed: () => void
-  theme: Object
-  selectedCode: Object
-  navigation: Object
+  selectedCode: {
+    reference: string
+    book: number
+  } | null
+  navigation?: Object
   version: string
 }
 
 const StrongModal = ({
   onClosed,
-  theme,
   selectedCode,
   navigation,
   version,
 }: StrongModalProps) => {
   const modalRef = React.useRef<Modalize>(null)
+  const theme = useTheme()
   const hasSelectedCode = !!selectedCode
   const hasPrevSelectedCode = usePrevious(hasSelectedCode)
 
@@ -128,9 +131,9 @@ const StrongModal = ({
       snapPoint={200}
       withOverlay={false}
     >
-      <StrongCardWrapper {...{ theme, navigation, selectedCode, onClosed }} />
+      <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
     </Modalize>
   )
 }
 
-export default compose(withNavigation)(StrongModal)
+export default withNavigation(StrongModal)
