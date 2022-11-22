@@ -103,7 +103,7 @@ export const defaultBibleTab: BibleTab = {
   },
 }
 
-const storage = createJSONStorage(() => AsyncStorage)
+const storage = { ...createJSONStorage(() => AsyncStorage), delayInit: true }
 
 export const tabsAtom = atomWithStorage<TabItem[]>(
   'tabsAtom',
@@ -112,6 +112,7 @@ export const tabsAtom = atomWithStorage<TabItem[]>(
 )
 
 // export const tabsAtom = atom<TabItem[]>([defaultBibleTab])
+
 export const tabsAtomsAtom = splitAtom(tabsAtom)
 
 const checkTabType = <Type extends TabItem>(
