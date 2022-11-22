@@ -19,7 +19,9 @@ const ChapterSelector = ({
   const [bible, actions] = useBibleTabActions(screenProps.bibleAtom)
 
   const {
-    data: { selectedChapter, selectedBook },
+    data: {
+      temp: { selectedChapter, selectedBook },
+    },
   } = bible
 
   const onChapterChange = (chapter: number) => {

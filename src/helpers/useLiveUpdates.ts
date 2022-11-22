@@ -2,20 +2,27 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 import {
+  addStudies,
   deleteStudy,
   FireStoreUserData,
   receiveLiveUpdates,
+  Study,
   StudyMutation,
   updateStudy,
 } from '~redux/modules/user'
 import { firebaseDb } from './firebase'
 import useLogin from './useLogin'
+import { usePrevious } from './usePrevious'
 
 let isFirstSnapshotListener = true
 
 const useLiveUpdates = () => {
   const { isLogged, user } = useLogin()
+  const isLoggedPrev = usePrevious(isLogged)
   const dispatch = useDispatch()
+
+  const isNewlyLogged =
+    isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
 
   const isLoading = useSelector((state: RootState) => state.user.isLoading)
 
@@ -51,32 +58,48 @@ const useLiveUpdates = () => {
             : 'Server'
           if (source === 'Local' || !querySnapshot) return
 
-          querySnapshot.docChanges().forEach(change => {
-            // Ignore first listener adding all documents
-            if (isFirstSnapshotListener) return
+          if (isNewlyLogged) {
+            const studies = {} as { [key: string]: Study }
+            querySnapshot.forEach(doc => {
+              const study = doc.data() as Study
+              studies[study.id] = study
+            })
 
-            if (change.type === 'added') {
-              dispatch(
-                updateStudy({
-                  ...(change.doc.data() as StudyMutation),
-                })
-              )
-            }
-            if (change.type === 'modified') {
-              dispatch(
-                updateStudy({
-                  ...(change.doc.data() as StudyMutation),
-                })
-              )
-            }
-            if (change.type === 'removed') {
-              dispatch(deleteStudy(change.doc.data().id))
-            }
-          })
+            console.log('add all studies')
+            dispatch(addStudies(studies))
+          } else {
+            querySnapshot.docChanges().forEach(change => {
+              // Ignore first listener adding all documents
+              if (isFirstSnapshotListener) return
+
+              if (change.type === 'added') {
+                console.log('added study: ', change.doc.data().id)
+
+                dispatch(
+                  updateStudy({
+                    ...(change.doc.data() as StudyMutation),
+                  })
+                )
+              }
+              if (change.type === 'modified') {
+                console.log('modified study: ', change.doc.data().id)
+                dispatch(
+                  updateStudy({
+                    ...(change.doc.data() as StudyMutation),
+                  })
+                )
+              }
+              if (change.type === 'removed') {
+                console.log('removed study: ', change.doc.data().id)
+                dispatch(deleteStudy(change.doc.data().id))
+              }
+            })
+          }
 
           isFirstSnapshotListener = false
         })
     } else {
+      isFirstSnapshotListener = true
       unsuscribeUsers?.()
       unsuscribeStudies?.()
     }

@@ -1,6 +1,5 @@
 // @flow
 import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
@@ -66,7 +65,6 @@ const BibleViewer = ({
   fontFamily,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
-  const theme = useTheme()
 
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -105,6 +103,7 @@ const BibleViewer = ({
   const pericope = useRef(getBiblePericope(isFR ? 'LSG' : 'KJV'))
 
   const [bible, actions] = useBibleTabActions(bibleAtom)
+
   const {
     data: {
       selectedVersion: version,
@@ -182,8 +181,6 @@ const BibleViewer = ({
     setIsLoading(true)
 
     const versesToLoad = await loadBibleChapter(book.Numero, chapter, version)
-    // console.log('Verses: ', verses)
-
     const parallelVersesToLoad = []
     if (parallelVersions.length) {
       for (const p of parallelVersions) {

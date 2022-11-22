@@ -4,7 +4,7 @@ import analytics from '@react-native-firebase/analytics'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Suspense, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import 'react-native-root-siblings'
@@ -126,7 +126,9 @@ const App = () => {
     <ReduxProvider store={store}>
       <StatusBar translucent />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <InitApp persistor={persistor} />
+        <Suspense>
+          <InitApp persistor={persistor} />
+        </Suspense>
       </View>
     </ReduxProvider>
   )

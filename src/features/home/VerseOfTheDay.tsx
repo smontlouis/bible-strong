@@ -131,6 +131,7 @@ const VerseOfTheDay = ({
             book,
             chapter,
             verse,
+            version,
             focusVerses: [verse],
           }}
           style={{ marginTop: 10 }}

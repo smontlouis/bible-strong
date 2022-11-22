@@ -48,7 +48,7 @@ import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import MainTabNavigator from './MainTabNavigator'
 
-const MainStackNavigator = createStackNavigator(
+export const MainStackNavigator = createStackNavigator(
   {
     MainTab: { screen: MainTabNavigator },
     BibleSelect: { screen: BibleSelectScreen },
@@ -83,12 +83,12 @@ const MainStackNavigator = createStackNavigator(
     NaveDetail: { screen: NaveDetailScreen },
     NaveWarning: { screen: NaveWarningScreen },
     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
-    Storybook: {
-      screen: StorybookScreen,
-      navigationOptions: {
-        gesturesEnabled: false,
-      },
-    },
+    // Storybook: {
+    //   screen: StorybookScreen,
+    //   navigationOptions: {
+    //     gesturesEnabled: false,
+    //   },
+    // },
     Plan: { screen: PlanScreen },
     Plans: { screen: PlanSelectScreen },
     MyPlanList: { screen: MyPlanListScreen },

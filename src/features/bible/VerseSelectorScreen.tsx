@@ -23,7 +23,9 @@ const VerseSelector = ({
   const [bible, actions] = useBibleTabActions(screenProps.bibleAtom)
 
   const {
-    data: { selectedChapter, selectedBook, selectedVerse },
+    data: {
+      temp: { selectedChapter, selectedBook, selectedVerse },
+    },
   } = bible
   const versesInCurrentChapter =
     countLsgChapters[`${selectedBook.Numero}-${selectedChapter}`]

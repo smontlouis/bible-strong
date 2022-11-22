@@ -1,10 +1,12 @@
 import produce from 'immer'
+import { Study } from '../user'
 import { removeEntityInTags } from '../utils'
 
 export const CREATE_STUDY = 'user/CREATE_STUDY'
 export const UPDATE_STUDY = 'user/UPDATE_STUDY'
 export const DELETE_STUDY = 'user/DELETE_STUDY'
 export const PUBLISH_STUDY = 'user/PUBLISH_STUDY'
+export const ADD_STUDIES = 'user/ADD_STUDIES'
 
 export default produce((draft, action) => {
   switch (action.type) {
@@ -46,6 +48,10 @@ export default produce((draft, action) => {
       study.modified_at = Date.now()
       break
     }
+    case ADD_STUDIES: {
+      draft.bible.studies = action.payload
+      break
+    }
     default:
       break
   }
@@ -64,6 +70,13 @@ export type StudyMutation = {
 export function updateStudy(payload: StudyMutation) {
   return {
     type: UPDATE_STUDY,
+    payload,
+  }
+}
+
+export function addStudies(payload: { [key: string]: Study }) {
+  return {
+    type: ADD_STUDIES,
     payload,
   }
 }

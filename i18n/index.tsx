@@ -59,6 +59,7 @@ export const setI18n = async () =>
       cleanCode: true,
     })
 
-export const getLangIsFr = () => i18n.language === 'fr'
+export const getLangIsFr = () =>
+  i18n.language ? i18n.language === 'fr' : languageTag === 'fr'
 
 export default i18n

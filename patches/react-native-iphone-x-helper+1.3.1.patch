@@ -1,0 +1,65 @@
+diff --git a/node_modules/react-native-iphone-x-helper/index.d.ts b/node_modules/react-native-iphone-x-helper/index.d.ts
+index ad49012..9688bcb 100644
+--- a/node_modules/react-native-iphone-x-helper/index.d.ts
++++ b/node_modules/react-native-iphone-x-helper/index.d.ts
+@@ -1,4 +1,5 @@
+ export function isIphoneX(): boolean;
++export function hasIsland(): boolean;
+ export function ifIphoneX<T, U>(iphoneXVal: T, regularVal: U): T | U;
+ export function ifIphoneX<T>(iphoneXVal: T): T;
+ export function getStatusBarHeight(safe?: boolean): number;
+diff --git a/node_modules/react-native-iphone-x-helper/index.js b/node_modules/react-native-iphone-x-helper/index.js
+index afd571f..20abf0b 100644
+--- a/node_modules/react-native-iphone-x-helper/index.js
++++ b/node_modules/react-native-iphone-x-helper/index.js
+@@ -1,16 +1,29 @@
+ import { Dimensions, Platform, StatusBar } from 'react-native';
+ 
++function isIphone() {
++    return Platform.OS === 'ios' && !Platform.isPad && !Platform.isTV;
++}
++
+ export function isIphoneX() {
+     const dimen = Dimensions.get('window');
+     return (
+-        Platform.OS === 'ios' &&
+-        !Platform.isPad &&
+-        !Platform.isTVOS &&
++        isIphone() &&
+         ((dimen.height === 780 || dimen.width === 780)
+-          || (dimen.height === 812 || dimen.width === 812)
+-          || (dimen.height === 844 || dimen.width === 844)
+-          || (dimen.height === 896 || dimen.width === 896)
+-          || (dimen.height === 926 || dimen.width === 926))
++            || (dimen.height === 812 || dimen.width === 812)
++            || (dimen.height === 844 || dimen.width === 844)
++            || (dimen.height === 896 || dimen.width === 896)
++            || (dimen.height === 926 || dimen.width === 926)
++            || (dimen.height === 852 || dimen.width === 852) // 14 Pro
++            || (dimen.height === 932 || dimen.width === 932)) // 14 Pro Max
++    );
++}
++
++export function hasIsland() {
++    const dimen = Dimensions.get('window');
++    return (
++        isIphone() &&
++        ((dimen.height === 852 || dimen.width === 852) // 14 Pro
++            || (dimen.height === 932 || dimen.width === 932)) // 14 Pro Max
+     );
+ }
+ 
+@@ -22,8 +35,12 @@ export function ifIphoneX(iphoneXStyle, regularStyle) {
+ }
+ 
+ export function getStatusBarHeight(safe) {
++    function safeHeight(hasIsland) {
++        // FIXME: There are more height values depending on the model (iPhone 12/13 -> 47, 13 mini -> 50, ..)
++        return hasIsland ? 59 : 44
++    }
+     return Platform.select({
+-        ios: ifIphoneX(safe ? 44 : 30, 20),
++        ios: ifIphoneX(safe ? safeHeight(hasIsland()) : 30, 20),
+         android: StatusBar.currentHeight,
+         default: 0
+     });

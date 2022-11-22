@@ -1,6 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import produce from 'immer'
-import { Atom, atom, PrimitiveAtom, useAtom } from 'jotai'
-import { selectAtom, splitAtom } from 'jotai/utils'
+import { atom, PrimitiveAtom, useAtom } from 'jotai'
+import { atomWithStorage, createJSONStorage, splitAtom } from 'jotai/utils'
 import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -102,7 +103,15 @@ export const defaultBibleTab: BibleTab = {
   },
 }
 
-export const tabsAtom = atom<TabItem[]>([defaultBibleTab])
+const storage = createJSONStorage(() => AsyncStorage)
+
+export const tabsAtom = atomWithStorage<TabItem[]>(
+  'tabsAtom',
+  [defaultBibleTab],
+  storage as any
+)
+
+// export const tabsAtom = atom<TabItem[]>([defaultBibleTab])
 export const tabsAtomsAtom = splitAtom(tabsAtom)
 
 const checkTabType = <Type extends TabItem>(
