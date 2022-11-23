@@ -1,7 +1,7 @@
 import React from 'react'
 import { ReText } from 'react-native-redash'
 import Animated, {
-  interpolate,
+  interpolateNode,
   Extrapolate,
   multiply,
   concat,
@@ -43,7 +43,7 @@ const CurrentYear = ({
   const r = useMediaQueriesArray()
   const progressInSection = concat(
     round(
-      interpolate(multiply(-1, x), {
+      interpolateNode(multiply(-1, x), {
         inputRange: [0, width - wp(100)],
         outputRange: [0, 100],
         extrapolate: Extrapolate.CLAMP,

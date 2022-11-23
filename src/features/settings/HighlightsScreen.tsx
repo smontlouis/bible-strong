@@ -63,7 +63,9 @@ const HighlightsScreen = () => {
         {
           text: t('Oui'),
           onPress: () => {
-            dispatch(removeHighlight(isSettingsOpen?.stringIds))
+            dispatch(
+              removeHighlight({ selectedVerses: isSettingsOpen?.stringIds })
+            )
             setIsSettingsOpen(undefined)
           },
           style: 'destructive',
