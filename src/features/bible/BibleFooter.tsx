@@ -102,10 +102,10 @@ const useLoadSound = ({
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+      interruptionModeIOS: 0,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+      interruptionModeAndroid: 2,
       staysActiveInBackground: true,
       playThroughEarpieceAndroid: false,
     })

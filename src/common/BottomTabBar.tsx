@@ -4,6 +4,13 @@ import * as Animatable from 'react-native-animatable'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useAtom } from 'jotai'
 import { fullscreenAtom } from '../state/app'
+import { activeTabIndexAtom, activeTabPropertiesAtom } from '../state/tabs'
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated'
+import { tabTimingConfig } from '~features/app-switcher/TabScreen'
 
 const TouchableTab = styled.TouchableOpacity(({ orientation }) => ({
   position: 'relative',
@@ -34,12 +41,24 @@ const AnimatableCircle = Animatable.createAnimatableComponent(Circle)
 
 const Container = styled.View(({ theme, orientation }) => ({
   flexDirection: 'row',
-  overflow: 'visible',
   paddingBottom: getBottomSpace(),
+  paddingTop: 15,
   backgroundColor: theme.colors.reverse,
   paddingHorizontal: 20,
   alignItems: 'flex-end',
   justifyContent: 'space-around',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+
+  borderTopLeftRadius: 10,
+  borderTopRightRadius: 10,
+
+  shadowColor: theme.colors.default,
+  shadowOffset: { width: 0, height: 0 },
+  shadowOpacity: 0.2,
+  shadowRadius: 7,
 
   // ...(orientation.landscape && {
   //   overflow: 'hidden',
@@ -48,7 +67,7 @@ const Container = styled.View(({ theme, orientation }) => ({
   // })
 }))
 
-const AnimatableContainer = Animatable.createAnimatableComponent(Container)
+const AnimatableContainer = Animated.createAnimatedComponent(Container)
 
 const TabBar = props => {
   const {
@@ -65,7 +84,12 @@ const TabBar = props => {
   const { routes, index: activeRouteIndex } = navigation.state
   // const prevIndex = usePrevious(activeRouteIndex)
   const [isFullscreen] = useAtom(fullscreenAtom)
+  const [activeTabIndex, setActiveTabIndex] = useAtom(activeTabIndexAtom)
 
+  const [activeTabProperties, setActiveTabProperties] = useAtom(
+    activeTabPropertiesAtom
+  )
+  const { animationProgress } = activeTabProperties || {}
   // React.useEffect(() => {
   //   if (activeRouteIndex === 2 && prevIndex !== activeRouteIndex) {
   //      setFullScreen(true)
@@ -76,23 +100,32 @@ const TabBar = props => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [prevIndex, activeRouteIndex])
 
+  const onClose = () => {
+    setActiveTabIndex(undefined)
+    setActiveTabProperties(undefined)
+  }
+
+  const isHidden =
+    isFullscreen || (activeRouteIndex === 2 && activeTabIndex === undefined)
+
+  const height = (() => {
+    if (isHidden) {
+      return 60 + getBottomSpace()
+    }
+    return 0
+  })()
+
+  const style = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: withTiming(height),
+        },
+      ],
+    }
+  })
   return (
-    <AnimatableContainer
-      orientation={orientation}
-      transition="height"
-      easing="ease-in-out"
-      duration={400}
-      style={{
-        overflow: isFullscreen ? 'hidden' : 'visible',
-        paddingTop: activeRouteIndex === 2 ? (isFullscreen ? 0 : 15) : 0,
-        height:
-          activeRouteIndex === 2
-            ? isFullscreen
-              ? 0
-              : 60 + getBottomSpace()
-            : 40 + getBottomSpace(),
-      }}
-    >
+    <AnimatableContainer orientation={orientation} style={style}>
       {routes.map((route, routeIndex) => {
         const isRouteActive = routeIndex === activeRouteIndex
         const tintColor = isRouteActive ? activeTintColor : inactiveTintColor
@@ -102,6 +135,19 @@ const TabBar = props => {
             key={routeIndex}
             // orientation={orientation}
             onPress={() => {
+              if (route.routeName === 'AppSwitcher' && isRouteActive) {
+                if (animationProgress?.value) {
+                  animationProgress.value = withTiming(
+                    0,
+                    tabTimingConfig,
+                    () => {
+                      runOnJS(onClose)()
+                    }
+                  )
+
+                  return
+                }
+              }
               onTabPress({ route })
             }}
             accessibilityLabel={getAccessibilityLabel({ route })}

@@ -28,10 +28,10 @@ const ListenToStrong = ({ type, code }: Props) => {
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DUCK_OTHERS,
+      interruptionModeIOS: 0,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+      interruptionModeAndroid: 2,
       staysActiveInBackground: true,
       playThroughEarpieceAndroid: false,
     })

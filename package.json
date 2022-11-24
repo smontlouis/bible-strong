@@ -224,8 +224,7 @@
   },
   "private": true,
   "resolutions": {
-    "@babel/core": "7.12.*",
-    "@babel/runtime": "7.12.*"
+    "@types/react": "^18.0.0"
   },
   "rnx-kit": {
     "reactNativeVersion": "^0.66",

@@ -3,6 +3,7 @@ import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
 import { atomWithStorage, createJSONStorage, splitAtom } from 'jotai/utils'
 import { useCallback, useMemo } from 'react'
+import Animated from 'react-native-reanimated'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { versions } from '~helpers/bibleVersions'
@@ -77,6 +78,12 @@ export type TabItem =
   | DictionaryTab
   | StudyTab
 
+export type TabProperties = {
+  x: Animated.SharedValue<number>
+  y: Animated.SharedValue<number>
+  animationProgress: Animated.SharedValue<number>
+}
+
 export type BibleTabProps = {}
 
 export const defaultBibleTab: BibleTab = {
@@ -103,19 +110,47 @@ export const defaultBibleTab: BibleTab = {
   },
 }
 
-const storage = { ...createJSONStorage(() => AsyncStorage), delayInit: true }
+// const storage = { ...createJSONStorage(() => AsyncStorage), delayInit: true }
 
-export const tabsAtom = atomWithStorage<TabItem[]>(
-  'tabsAtom',
-  [defaultBibleTab],
-  storage as any
+// export const tabsAtom = atomWithStorage<TabItem[]>(
+//   'tabsAtom',
+//   [defaultBibleTab],
+//   storage as any
+// )
+
+export const activeTabIndexAtom = atom<number | undefined>(1)
+export const activeTabPropertiesAtom = atom<TabProperties | undefined>(
+  undefined
 )
 
-// export const tabsAtom = atom<TabItem[]>([defaultBibleTab])
+export const tabsAtom = atom<TabItem[]>([
+  defaultBibleTab,
+  {
+    id: 'aaaaa',
+    name: 'Comparer',
+    isRemovable: true,
+    type: 'compare',
+    data: {},
+  },
+  {
+    id: 'bbbbb',
+    name: 'Lexique',
+    isRemovable: true,
+    type: 'strong',
+    data: {},
+  },
+  {
+    id: 'cccc',
+    name: 'Nave',
+    isRemovable: true,
+    type: 'nave',
+    data: {},
+  },
+])
 
 export const tabsAtomsAtom = splitAtom(tabsAtom)
 
-const checkTabType = <Type extends TabItem>(
+export const checkTabType = <Type extends TabItem>(
   tab: TabItem | undefined,
   type: TabItem['type']
 ): tab is Type => {

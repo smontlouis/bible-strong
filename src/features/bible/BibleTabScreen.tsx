@@ -115,10 +115,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
     }
   }, [dispatch, settings.commentsDisplay])
 
-  if (isLoading) {
-    return <Loading />
-  }
-
   return (
     <Container
       pure

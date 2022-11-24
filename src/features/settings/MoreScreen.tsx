@@ -142,7 +142,7 @@ const MoreScreen = () => {
   }
 
   return (
-    <Container>
+    <Container bottomTabBarPadding>
       <Header title={t('Plus')} />
       <ScrollView style={{ flex: 1 }}>
         <Box paddingVertical={10}>

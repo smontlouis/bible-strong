@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts b/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts
+index 0ad6d92..2177d7c 100644
+--- a/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts
++++ b/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts
+@@ -51,7 +51,7 @@ export interface TapGestureHandlerProps extends BaseGestureHandlerProps<TapGestu
+     maxDist?: number;
+ }
+ export declare type TapGestureHandler = typeof TapGestureHandler;
+-export declare const TapGestureHandler: React.ComponentType<TapGestureHandlerProps & React.RefAttributes<any>>;
++export declare const TapGestureHandler: React.ComponentType<TapGestureHandlerProps & { children?: React.ReactNode } & React.RefAttributes<any>>;
+ export declare type FlingGestureHandlerEventPayload = {
+     x: number;
+     y: number;

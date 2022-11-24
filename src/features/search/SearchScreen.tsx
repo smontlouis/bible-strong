@@ -44,7 +44,7 @@ const SearchScreen = ({ navigation }) => {
     <>
       <InstantSearch indexName="bible-lsg" searchClient={searchClient}>
         <Configure restrictSearchableAttributes={isFR ? ['LSG'] : ['KJV']} />
-        <Container>
+        <Container bottomTabBarPadding>
           <SearchBox
             placeholder={t('search.placeholder')}
             debouncedValue={debouncedSearchValue}

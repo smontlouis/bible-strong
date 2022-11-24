@@ -40,7 +40,7 @@ const StudiesScreen = () => {
   filteredStudies.sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
 
   return (
-    <Container>
+    <Container bottomTabBarPadding>
       <Box flex>
         {filteredStudies.length ? (
           <FlatList

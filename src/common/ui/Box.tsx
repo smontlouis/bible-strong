@@ -1,4 +1,5 @@
 import styled from '@emotion/native'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Animated from 'react-native-reanimated'
 import { Theme } from '~themes'
 
@@ -97,6 +98,7 @@ export interface BoxProps {
   size?: string
 
   theme?: Theme
+  bottomTabBarPadding?: boolean
 }
 const Box = styled.View((props: BoxProps) => {
   return {
@@ -111,7 +113,9 @@ const Box = styled.View((props: BoxProps) => {
     paddingTop: props.paddingTop ?? props.pt,
     paddingLeft: props.paddingLeft ?? props.pl,
     paddingRight: props.paddingRight ?? props.pr,
-    paddingBottom: props.paddingBottom ?? props.pb,
+    paddingBottom: props.bottomTabBarPadding
+      ? 40 + getBottomSpace()
+      : props.paddingBottom ?? props.pb,
     paddingVertical: props.paddingVertical ?? props.py,
     paddingHorizontal: props.paddingHorizontal ?? props.px,
 

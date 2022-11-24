@@ -1,5 +1,6 @@
 import React from 'react'
 import TabBarIcon from '~common/TabBarIcon'
+import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen'
 import BibleScreen from '~features/bible/BibleScreen'
 import HomeScreen from '~features/home/HomeScreen'
 import SearchSelect from '~features/search/SearchSelectScreen'
@@ -32,11 +33,11 @@ export default createAnimatedBottomTabNavigator(
         }
       },
     },
-    Bible: {
-      screen: BibleScreen,
+    AppSwitcher: {
+      screen: AppSwitcherScreen,
       navigationOptions: ({ screenProps }) => {
         return {
-          title: 'Bible',
+          title: 'App Switcher',
           tabBarIcon: props => <TabBarIcon {...props} name="book-open" />,
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary,
@@ -63,7 +64,7 @@ export default createAnimatedBottomTabNavigator(
     },
   },
   {
-    initialRouteName: 'Bible',
+    initialRouteName: 'AppSwitcher',
     activeColor: '#0ED3B9',
   }
 )
