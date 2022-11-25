@@ -316,6 +316,7 @@ const BibleViewer = ({
       )}
       {!error && (
         <BibleWebView
+          bibleAtom={bibleAtom}
           book={book}
           chapter={chapter}
           isLoading={isLoading}

@@ -7,7 +7,6 @@ import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { useDispatch, useSelector } from 'react-redux'
 
 import ImmersiveMode from 'react-native-immersive-mode'
-import Loading from '~common/Loading'
 import Container from '~common/ui/Container'
 import BibleHeader from './BibleHeader'
 import BibleParamsModal from './BibleParamsModal'
@@ -18,7 +17,7 @@ import { NavigationStackProp } from 'react-navigation-stack'
 import { PrimitiveAtom } from 'jotai'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
-import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import { BibleTab } from '../../state/tabs'
 
 interface BibleTabScreenProps {
   navigation: NavigationStackProp
@@ -27,7 +26,6 @@ interface BibleTabScreenProps {
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const [isBibleParamsOpen, setIsBibleParamsOpen] = React.useState(false)
-  const [isLoading, setIsLoading] = React.useState(true)
   const [hasPaddingTop, setHasPaddingTop] = React.useState(false)
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -96,11 +94,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
           console.log('Error with commentaires, deactivating...')
           dispatch(setSettingsCommentaires(false))
         }
-        setIsLoading(false)
-      } else {
-        setIsLoading(false)
       }
-
       if (Platform.OS === 'android') {
         listen = ImmersiveMode.addEventListener(e => {
           setHasPaddingTop(!e.statusBar)

@@ -32,7 +32,7 @@ const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType }) => {
   return (
     // That's why : `const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'` - Ok this is not the best implementation
     <Link
-      route="BibleStrongDetail"
+      route="Strong"
       params={{ book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code }}
     >
       <SectionItem>

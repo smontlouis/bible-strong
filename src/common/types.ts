@@ -163,3 +163,18 @@ export type PreferredColorScheme = 'light' | 'dark' | 'auto'
 export type PreferredLightTheme = 'default' | 'sepia' | 'nature' | 'sunset'
 export type PreferredDarkTheme = 'dark' | 'black' | 'night' | 'mauve'
 export type CurrentTheme = PreferredLightTheme | PreferredDarkTheme
+
+export type StrongReference = {
+  Hebreu: string
+  Grec: string
+  Mot: string
+  Code: string
+  Phonetique: string
+  Definition: string
+  Type: string
+  LSG: string
+  Origine: string
+  date: string
+  book: string
+  error?: string
+}

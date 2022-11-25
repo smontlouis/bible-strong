@@ -154,7 +154,7 @@ class WebViewQuillEditor extends React.Component {
           return
         }
         case 'VIEW_BIBLE_STRONG': {
-          navigation.navigate('BibleStrongDetail', msgData.payload)
+          navigation.navigate('Strong', msgData.payload)
           return
         }
         case 'SELECT_BIBLE_VERSE': {

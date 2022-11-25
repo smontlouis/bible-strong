@@ -12,9 +12,15 @@ import { NavigationStackProp } from 'react-navigation-stack'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleTabScreen from '~features/bible/BibleTabScreen'
-import { activeTabPropertiesAtom, BibleTab, TabItem } from '../../state/tabs'
+import CompareVersesTabScreen from '~features/bible/CompareVersesTabScreen'
+import {
+  activeTabPropertiesAtom,
+  BibleTab,
+  CompareTab,
+  TabItem,
+} from '../../state/tabs'
 import { TAB_PREVIEW_SCALE } from './AppSwitcherScreen'
-import { AnimatedBox } from './TabPreview'
+import TabScreenWrapper from './TabScreenWrapper'
 
 export const tabTimingConfig = {
   duration: 400,
@@ -87,20 +93,31 @@ const TabScreen = ({
 
   if (tab.type === 'bible') {
     return (
-      <AnimatedBox style={imageStyles}>
+      <TabScreenWrapper style={imageStyles}>
         <BibleTabScreen
           bibleAtom={tabAtom as PrimitiveAtom<BibleTab>}
           navigation={navigation}
         />
-      </AnimatedBox>
+      </TabScreenWrapper>
+    )
+  }
+
+  if (tab.type === 'compare') {
+    return (
+      <TabScreenWrapper style={imageStyles}>
+        <CompareVersesTabScreen
+          navigation={navigation}
+          compareAtom={tabAtom as PrimitiveAtom<CompareTab>}
+        />
+      </TabScreenWrapper>
     )
   }
   return (
-    <AnimatedBox style={imageStyles}>
+    <TabScreenWrapper style={imageStyles}>
       <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
         <Text>{tab.name}</Text>
       </Box>
-    </AnimatedBox>
+    </TabScreenWrapper>
   )
 }
 

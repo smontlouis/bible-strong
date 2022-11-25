@@ -114,7 +114,7 @@ const Box = styled.View((props: BoxProps) => {
     paddingLeft: props.paddingLeft ?? props.pl,
     paddingRight: props.paddingRight ?? props.pr,
     paddingBottom: props.bottomTabBarPadding
-      ? 40 + getBottomSpace()
+      ? 53 + getBottomSpace()
       : props.paddingBottom ?? props.pb,
     paddingVertical: props.paddingVertical ?? props.py,
     paddingHorizontal: props.paddingHorizontal ?? props.px,

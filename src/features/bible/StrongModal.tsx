@@ -13,6 +13,7 @@ import { Modalize } from 'react-native-modalize'
 import { usePrevious } from '~helpers/usePrevious'
 import { isStrongVersion } from '~helpers/bibleVersions'
 import { useTheme } from '@emotion/react'
+import { Portal } from 'react-native-paper'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ navigation, selectedCode, onClosed }) => {
@@ -66,6 +67,7 @@ const StrongCardWrapper = waitForStrongModal(
     }
     return (
       <StrongCard
+        theme={theme}
         navigation={navigation}
         book={selectedCode.book}
         strongReference={strongReference}
@@ -115,24 +117,26 @@ const StrongModal = ({
   }, [version])
 
   return (
-    <Modalize
-      ref={modalRef}
-      onClosed={onClosed}
-      modalHeight={hp(75)}
-      handlePosition="inside"
-      closeSnapPointStraightEnabled={false}
-      modalStyle={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 600,
-        width: '100%',
-        backgroundColor: theme.colors.lightGrey,
-      }}
-      snapPoint={200}
-      withOverlay={false}
-    >
-      <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
-    </Modalize>
+    <Portal>
+      <Modalize
+        ref={modalRef}
+        onClosed={onClosed}
+        modalHeight={hp(75)}
+        handlePosition="inside"
+        closeSnapPointStraightEnabled={false}
+        modalStyle={{
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          maxWidth: 600,
+          width: '100%',
+          backgroundColor: theme.colors.lightGrey,
+        }}
+        snapPoint={200}
+        withOverlay={false}
+      >
+        <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
+      </Modalize>
+    </Portal>
   )
 }
 

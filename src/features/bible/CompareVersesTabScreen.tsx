@@ -16,13 +16,31 @@ import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
 import { versions } from '~helpers/bibleVersions'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
+import { NavigationStackProp } from 'react-navigation-stack'
+import { PrimitiveAtom, useAtomValue } from 'jotai'
+import { CompareTab } from '~state/tabs'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const BibleCompareVersesScreen = ({ navigation }) => {
-  const { selectedVerses: s } = navigation.state.params || {}
+interface CompareVersesTabScreenProps {
+  navigation: NavigationStackProp
+  compareAtom: PrimitiveAtom<CompareTab>
+}
+
+const CompareVersesTabScreen = ({
+  compareAtom,
+  navigation,
+}: CompareVersesTabScreenProps) => {
+  const compareTab = useAtomValue(compareAtom)
+
+  const {
+    hasBackButton,
+    data: { selectedVerses: s },
+  } = compareTab
+
   const [selectedVerses, setSelectedVerses] = React.useState(s)
   const [prevNextItems, setPrevNextItems] = React.useState()
   const title = verseToReference(selectedVerses)
@@ -58,7 +76,7 @@ const BibleCompareVersesScreen = ({ navigation }) => {
   return (
     <Container>
       <Header
-        hasBackButton
+        hasBackButton={hasBackButton}
         fontSize={16}
         title={title}
         rightComponent={
@@ -90,7 +108,7 @@ const BibleCompareVersesScreen = ({ navigation }) => {
         )}
       </ScrollView>
       {prevNextItems && (
-        <Box paddingBottom={20}>
+        <Box paddingBottom={getBottomSpace()} bg="reverse">
           <BibleVerseDetailFooter
             verseNumber={prevNextItems.verseNumber}
             goToNextVerse={() => goToVerse(+1)}
@@ -102,4 +120,4 @@ const BibleCompareVersesScreen = ({ navigation }) => {
     </Container>
   )
 }
-export default BibleCompareVersesScreen
+export default CompareVersesTabScreen

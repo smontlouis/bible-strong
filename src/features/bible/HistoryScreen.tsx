@@ -43,7 +43,7 @@ const HistoryItem = ({ item }) => {
       locale: isFR ? fr : enGB,
     })
     return (
-      <Link route="BibleStrongDetail" params={{ book, strongReference: item }}>
+      <Link route="Strong" params={{ book, strongReference: item }}>
         <Box padding={20} row alignItems="center">
           <Box>
             <Text bold>{Mot}</Text>

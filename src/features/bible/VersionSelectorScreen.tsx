@@ -65,7 +65,12 @@ const VersionSelector = ({
           <VersionSelectorItem
             onChange={vers => setAndClose(vers, parallelVersionIndex)}
             version={item}
-            isSelected={item.id === bible.data.selectedVersion}
+            isSelected={
+              item.id ===
+              (parallelVersionIndex === undefined
+                ? bible.data.selectedVersion
+                : bible.data.parallelVersions[parallelVersionIndex])
+            }
           />
         )}
       />

@@ -38,6 +38,7 @@ const BibleScreen = ({
   } = navigation.state.params || {}
 
   const initialValues = produce(defaultBibleTab, draft => {
+    draft.id = `bible-${Date.now()}`
     if (book)
       draft.data.selectedBook = Number.isInteger(book)
         ? books[(book as number) - 1]

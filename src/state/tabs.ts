@@ -13,6 +13,7 @@ export type TabBase = {
   id: string
   name: string
   isRemovable: boolean
+  hasBackButton?: boolean
 }
 
 export type VersionCode = keyof typeof versions
@@ -46,7 +47,9 @@ export interface SearchTab extends TabBase {
 
 export interface CompareTab extends TabBase {
   type: 'compare'
-  data: {}
+  data: {
+    selectedVerses: SelectedVerses
+  }
 }
 
 export interface StrongTab extends TabBase {
@@ -118,7 +121,7 @@ export const defaultBibleTab: BibleTab = {
 //   storage as any
 // )
 
-export const activeTabIndexAtom = atom<number | undefined>(1)
+export const activeTabIndexAtom = atom<number | undefined>(0)
 export const activeTabPropertiesAtom = atom<TabProperties | undefined>(
   undefined
 )
@@ -126,21 +129,25 @@ export const activeTabPropertiesAtom = atom<TabProperties | undefined>(
 export const tabsAtom = atom<TabItem[]>([
   defaultBibleTab,
   {
-    id: 'aaaaa',
+    id: `compare-${Date.now()}`,
     name: 'Comparer',
     isRemovable: true,
     type: 'compare',
-    data: {},
+    data: {
+      selectedVerses: {
+        '1-1-1': true,
+      },
+    },
   },
   {
-    id: 'bbbbb',
+    id: `strong-${Date.now()}`,
     name: 'Lexique',
     isRemovable: true,
     type: 'strong',
     data: {},
   },
   {
-    id: 'cccc',
+    id: `nave-${Date.now()}`,
     name: 'Nave',
     isRemovable: true,
     type: 'nave',

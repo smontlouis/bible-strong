@@ -126,12 +126,12 @@ class BibleWebView extends Component {
         break
       }
       case NAVIGATE_TO_VERSION: {
-        const { navigation } = this.props
+        const { navigation, bibleAtom } = this.props
         const { version, index } = action.payload
 
         // index = 0 is Default one
         navigation.navigate('VersionSelector', {
-          version,
+          bibleAtom,
           parallelVersionIndex: index === 0 ? undefined : index - 1,
         })
         break
