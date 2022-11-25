@@ -62,7 +62,7 @@ const AppSwitcherScreen = ({
             key={i}
             index={i}
             tabAtom={tabAtom}
-            marginRight={i !== 4 ? 20 : 0}
+            marginRight={i !== tabsAtoms.length - 1 ? 20 : 0}
             tapGestureRef={tapGestureRefs.current[i]}
             simultaneousHandlers={scrollViewRef}
           />

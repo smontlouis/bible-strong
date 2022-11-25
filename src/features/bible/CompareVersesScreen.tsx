@@ -18,7 +18,7 @@ const CompareVersesScreen = ({
     () =>
       atom<CompareTab>({
         id: `compare-${Date.now()}`,
-        name: 'Comparer',
+        title: 'Comparer',
         isRemovable: true,
         hasBackButton: true,
         type: 'compare',

@@ -38,17 +38,24 @@ const TabBarIcon = props => {
     <Animatable.View
       style={{
         position: 'relative',
-        marginTop: props.focused ? -8 : -3,
+        marginTop: props.focused ? -6 : -3,
       }}
       duration={400}
       easing="ease-in-out-expo"
       transition="marginTop"
     >
-      <Icon.Feather
-        name={props.name}
-        size={23}
-        color={props.focused ? theme.colors.primary : theme.colors.tertiary}
-      />
+      {props.CustomIcon ? (
+        <props.CustomIcon
+          color={props.focused ? theme.colors.primary : theme.colors.tertiary}
+        />
+      ) : (
+        <Icon.Feather
+          name={props.name}
+          size={23}
+          color={props.focused ? theme.colors.primary : theme.colors.tertiary}
+        />
+      )}
+
       {props.name === 'menu' && hasUpdate && (
         <AnimatedCircle
           animation="pulse"

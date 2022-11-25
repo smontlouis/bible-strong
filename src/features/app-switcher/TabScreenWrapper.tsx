@@ -10,7 +10,7 @@ interface TabScreenWrapperProps {
 
 const TabScreenWrapper = ({ style, children }: TabScreenWrapperProps) => {
   return (
-    <AnimatedBox style={style} bottomTabBarPadding>
+    <AnimatedBox style={style} bg="reverse" bottomTabBarPadding>
       {children}
     </AnimatedBox>
   )

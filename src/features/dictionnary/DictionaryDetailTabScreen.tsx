@@ -23,6 +23,9 @@ import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import Snackbar from '~common/SnackBar'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import TagList from '~common/TagList'
+import { PrimitiveAtom, useAtom } from 'jotai'
+import { DictionaryTab } from '~state/tabs'
+import { NavigationStackProp } from 'react-navigation-stack'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -35,8 +38,22 @@ const TitleBorder = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.secondary,
 }))
 
-const DictionnaryDetailScreen = ({ navigation }) => {
-  const { word } = navigation.state.params || {}
+interface DictionaryDetailScreenProps {
+  navigation: NavigationStackProp
+  dictionaryAtom: PrimitiveAtom<DictionaryTab>
+}
+
+const DictionnaryDetailScreen = ({
+  navigation,
+  dictionaryAtom,
+}: DictionaryDetailScreenProps) => {
+  const [dictionaryTab] = useAtom(dictionaryAtom)
+
+  const {
+    hasBackButton,
+    data: { word },
+  } = dictionaryTab
+
   const dispatch = useDispatch()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
@@ -118,11 +135,19 @@ const DictionnaryDetailScreen = ({ navigation }) => {
         marginRight="auto"
       >
         <Box style={{ flexDirection: 'row' }}>
-          <Back style={{ flex: 1 }}>
-            <Text title fontSize={22} flex>
+          {hasBackButton && (
+            <Back>
+              <Box paddingRight={20}>
+                <FeatherIcon name={'arrow-left'} size={20} />
+              </Box>
+            </Back>
+          )}
+          <Box marginTop={-5} flex>
+            <Text title fontSize={22}>
               {word}
             </Text>
-          </Back>
+            <TitleBorder />
+          </Box>
           <Link
             onPress={() =>
               setMultipleTagsItem({
@@ -150,16 +175,7 @@ const DictionnaryDetailScreen = ({ navigation }) => {
               onPress={shareDefinition}
             />
           </Link>
-          <Back>
-            <FeatherIcon
-              style={{ paddingTop: 10, paddingHorizontal: 5 }}
-              name="minimize-2"
-              size={20}
-            />
-          </Back>
         </Box>
-
-        <TitleBorder />
       </Box>
       {tags && (
         <Box mt={10} px={20}>

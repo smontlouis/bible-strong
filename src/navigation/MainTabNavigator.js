@@ -1,7 +1,7 @@
 import React from 'react'
 import TabBarIcon from '~common/TabBarIcon'
+import AppSwitcherIcon from '~common/icons/AppSwitcherIcon'
 import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen'
-import BibleScreen from '~features/bible/BibleScreen'
 import HomeScreen from '~features/home/HomeScreen'
 import SearchSelect from '~features/search/SearchSelectScreen'
 import MoreScreen from '~features/settings/MoreScreen'
@@ -38,7 +38,9 @@ export default createAnimatedBottomTabNavigator(
       navigationOptions: ({ screenProps }) => {
         return {
           title: 'App Switcher',
-          tabBarIcon: props => <TabBarIcon {...props} name="book-open" />,
+          tabBarIcon: props => (
+            <TabBarIcon CustomIcon={AppSwitcherIcon} {...props} />
+          ),
           tabBarColor: getTheme[screenProps.theme].colors.reverse,
           activeColor: getTheme[screenProps.theme].colors.primary,
         }

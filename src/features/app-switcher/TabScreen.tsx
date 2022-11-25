@@ -13,10 +13,20 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleTabScreen from '~features/bible/BibleTabScreen'
 import CompareVersesTabScreen from '~features/bible/CompareVersesTabScreen'
+import StrongTabScreen from '~features/bible/StrongTabScreen'
+import CommentariesTabScreen from '~features/commentaries/CommentariesTabScreen'
+import DictionaryDetailTabScreen from '~features/dictionnary/DictionaryDetailTabScreen'
+import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
+import SearchTabScreen from '~features/search/SearchTabScreen'
 import {
   activeTabPropertiesAtom,
   BibleTab,
+  CommentaryTab,
   CompareTab,
+  DictionaryTab,
+  NaveTab,
+  SearchTab,
+  StrongTab,
   TabItem,
 } from '../../state/tabs'
 import { TAB_PREVIEW_SCALE } from './AppSwitcherScreen'
@@ -112,10 +122,66 @@ const TabScreen = ({
       </TabScreenWrapper>
     )
   }
+
+  if (tab.type === 'strong') {
+    return (
+      <TabScreenWrapper style={imageStyles}>
+        <StrongTabScreen
+          navigation={navigation}
+          strongAtom={tabAtom as PrimitiveAtom<StrongTab>}
+        />
+      </TabScreenWrapper>
+    )
+  }
+
+  if (tab.type === 'nave') {
+    return (
+      <TabScreenWrapper style={imageStyles}>
+        <NaveDetailTabScreen
+          navigation={navigation}
+          naveAtom={tabAtom as PrimitiveAtom<NaveTab>}
+        />
+      </TabScreenWrapper>
+    )
+  }
+
+  if (tab.type === 'dictionary') {
+    return (
+      <TabScreenWrapper style={imageStyles}>
+        <DictionaryDetailTabScreen
+          navigation={navigation}
+          dictionaryAtom={tabAtom as PrimitiveAtom<DictionaryTab>}
+        />
+      </TabScreenWrapper>
+    )
+  }
+
+  if (tab.type === 'commentary') {
+    return (
+      <TabScreenWrapper style={imageStyles}>
+        <CommentariesTabScreen
+          navigation={navigation}
+          commentaryAtom={tabAtom as PrimitiveAtom<CommentaryTab>}
+        />
+      </TabScreenWrapper>
+    )
+  }
+
+  if (tab.type === 'search') {
+    return (
+      <TabScreenWrapper style={imageStyles}>
+        <SearchTabScreen
+          navigation={navigation}
+          searchAtom={tabAtom as PrimitiveAtom<SearchTab>}
+        />
+      </TabScreenWrapper>
+    )
+  }
+
   return (
     <TabScreenWrapper style={imageStyles}>
       <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
-        <Text>{tab.name}</Text>
+        <Text>{tab.title}</Text>
       </Box>
     </TabScreenWrapper>
   )

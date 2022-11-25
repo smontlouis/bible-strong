@@ -1,25 +1,26 @@
-import React from 'react'
-import * as Icon from '@expo/vector-icons'
-import { useSelector } from 'react-redux'
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
+import React from 'react'
+import { useSelector } from 'react-redux'
 
 import verseToReference from '~helpers/verseToReference'
 
-import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
 import Empty from '~common/Empty'
-import ScrollView from '~common/ui/ScrollView'
 import Header from '~common/Header'
 import Link from '~common/Link'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import ScrollView from '~common/ui/ScrollView'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
-import { versions } from '~helpers/bibleVersions'
-import countLsgChapters from '~assets/bible_versions/countLsgChapters'
-import { NavigationStackProp } from 'react-navigation-stack'
-import { PrimitiveAtom, useAtomValue } from 'jotai'
-import { CompareTab } from '~state/tabs'
+import { PrimitiveAtom, useAtom } from 'jotai'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { NavigationStackProp } from 'react-navigation-stack'
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
+import { versions } from '~helpers/bibleVersions'
+import { CompareTab, SelectedVerses } from '~state/tabs'
+import produce from 'immer'
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -34,14 +35,20 @@ const CompareVersesTabScreen = ({
   compareAtom,
   navigation,
 }: CompareVersesTabScreenProps) => {
-  const compareTab = useAtomValue(compareAtom)
+  const [compareTab, setCompareTab] = useAtom(compareAtom)
+
+  const setSelectedVerses = (v: SelectedVerses) =>
+    setCompareTab(
+      produce(draft => {
+        draft.data.selectedVerses = v
+      })
+    )
 
   const {
     hasBackButton,
-    data: { selectedVerses: s },
+    data: { selectedVerses },
   } = compareTab
 
-  const [selectedVerses, setSelectedVerses] = React.useState(s)
   const [prevNextItems, setPrevNextItems] = React.useState()
   const title = verseToReference(selectedVerses)
 
@@ -85,7 +92,7 @@ const CompareVersesTabScreen = ({
           </Link>
         }
       />
-      <ScrollView key={title}>
+      <ScrollView>
         {!Object.entries(versions).filter(([versionId]) =>
           versionsToCompare.includes(versionId)
         ).length ? (
@@ -98,7 +105,7 @@ const CompareVersesTabScreen = ({
             .filter(([versionId]) => versionsToCompare.includes(versionId))
             .map(([versionId, obj], position) => (
               <BibleCompareVerseItem
-                key={versionId}
+                key={`${versionId}-${title}`}
                 versionId={versionId}
                 name={obj.name}
                 selectedVerses={selectedVerses}

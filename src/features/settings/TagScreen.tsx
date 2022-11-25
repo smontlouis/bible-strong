@@ -27,7 +27,7 @@ import StudyItem from '~features/studies/StudyItem'
 import books from '~assets/bible_versions/books-desc'
 import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
 import NaveResultItem from '~features/nave/NaveResultItem'
-import DictionnaryResultItem from '~features/dictionnary/DictionnaryResultItem'
+import DictionnaryResultItem from '~features/dictionnary/DictionaryResultItem'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 

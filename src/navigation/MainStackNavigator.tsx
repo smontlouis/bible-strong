@@ -17,8 +17,8 @@ import ToggleCompareVersesScreen from '~features/bible/ToggleCompareVersesScreen
 import VersionSelectorScreen from '~features/bible/VersionSelectorScreen'
 import CommentariesScreen from '~features/commentaries/CommentariesScreen'
 import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
-import DictionnaryDetailScreen from '~features/dictionnary/DictionnaryDetailScreen'
-import DictionnaryScreen from '~features/dictionnary/DictionnaryScreen'
+import DictionnaryDetailScreen from '~features/dictionnary/DictionaryDetailScreen'
+import DictionaryScreen from '~features/dictionnary/DictionaryScreen'
 import LexiqueScreen from '~features/lexique/LexiqueScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
 import NaveScreen from '~features/nave/NaveScreen'
@@ -77,7 +77,7 @@ export const MainStackNavigator = createStackNavigator(
     Search: { screen: SearchScreen },
     LocalSearch: { screen: LocalSearchScreen },
     Register: { screen: RegisterScreen },
-    Dictionnaire: { screen: DictionnaryScreen },
+    Dictionnaire: { screen: DictionaryScreen },
     FAQ: { screen: FAQScreen },
     Nave: { screen: NaveScreen },
     NaveDetail: { screen: NaveDetailScreen },

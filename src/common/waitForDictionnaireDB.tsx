@@ -141,7 +141,9 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase = WrappedComponent => props => {
+const waitForDatabase = <T,>(
+  WrappedComponent: React.ComponentType<T>
+): React.ComponentType<T> => (props: any) => {
   const { t } = useTranslation()
   const {
     isLoading,

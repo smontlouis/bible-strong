@@ -6,12 +6,13 @@ import { useCallback, useMemo } from 'react'
 import Animated from 'react-native-reanimated'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
+import { StrongReference } from '~common/types'
 import { versions } from '~helpers/bibleVersions'
 import { getLangIsFr } from '~i18n'
 
 export type TabBase = {
   id: string
-  name: string
+  title: string
   isRemovable: boolean
   hasBackButton?: boolean
 }
@@ -42,7 +43,9 @@ export interface BibleTab extends TabBase {
 
 export interface SearchTab extends TabBase {
   type: 'search'
-  data: {}
+  data: {
+    searchValue: string
+  }
 }
 
 export interface CompareTab extends TabBase {
@@ -54,22 +57,42 @@ export interface CompareTab extends TabBase {
 
 export interface StrongTab extends TabBase {
   type: 'strong'
-  data: {}
+  data:
+    | {
+        book: number
+        reference: string
+      }
+    | {
+        book: number
+        strongReference: StrongReference
+      }
 }
 
 export interface NaveTab extends TabBase {
   type: 'nave'
-  data: {}
+  data: {
+    name_lower: string
+    name?: string
+  }
 }
 
 export interface DictionaryTab extends TabBase {
   type: 'dictionary'
-  data: {}
+  data: {
+    word: string
+  }
 }
 
 export interface StudyTab extends TabBase {
   type: 'study'
   data: {}
+}
+
+export interface CommentaryTab extends TabBase {
+  type: 'commentary'
+  data: {
+    verse: string
+  }
 }
 
 export type TabItem =
@@ -80,6 +103,7 @@ export type TabItem =
   | NaveTab
   | DictionaryTab
   | StudyTab
+  | CommentaryTab
 
 export type TabProperties = {
   x: Animated.SharedValue<number>
@@ -92,7 +116,7 @@ export type BibleTabProps = {}
 export const defaultBibleTab: BibleTab = {
   id: 'bible',
   isRemovable: false,
-  name: 'Genèse 1:1',
+  title: 'Genèse 1:1',
   type: 'bible',
   data: {
     selectedVersion: getLangIsFr() ? 'LSG' : 'KJV',
@@ -130,7 +154,7 @@ export const tabsAtom = atom<TabItem[]>([
   defaultBibleTab,
   {
     id: `compare-${Date.now()}`,
-    name: 'Comparer',
+    title: 'Comparer',
     isRemovable: true,
     type: 'compare',
     data: {
@@ -141,17 +165,50 @@ export const tabsAtom = atom<TabItem[]>([
   },
   {
     id: `strong-${Date.now()}`,
-    name: 'Lexique',
+    title: 'Lexique',
     isRemovable: true,
     type: 'strong',
-    data: {},
+    data: {
+      book: 40,
+      reference: '1594',
+    },
   },
   {
     id: `nave-${Date.now()}`,
-    name: 'Nave',
+    title: 'Nave',
     isRemovable: true,
     type: 'nave',
-    data: {},
+    data: {
+      name: 'Abaddon',
+      name_lower: 'abaddon',
+    },
+  },
+  {
+    id: `dictionary-${Date.now()}`,
+    title: 'Dictionary',
+    isRemovable: true,
+    type: 'dictionary',
+    data: {
+      word: 'abaddon',
+    },
+  },
+  {
+    id: `commentary-${Date.now()}`,
+    title: 'Commentaire',
+    isRemovable: true,
+    type: 'commentary',
+    data: {
+      verse: '1-1-1',
+    },
+  },
+  {
+    id: `search-${Date.now()}`,
+    title: 'Recherche',
+    isRemovable: true,
+    type: 'search',
+    data: {
+      searchValue: 'Salut',
+    },
   },
 ])
 
