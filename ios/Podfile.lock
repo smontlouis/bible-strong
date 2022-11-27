@@ -906,6 +906,8 @@ PODS:
     - React
   - react-native-sqlite-storage (4.1.0):
     - React
+  - react-native-view-shot (3.3.0):
+    - React-Core
   - react-native-webview (11.23.1):
     - React-Core
   - React-perflogger (0.69.7)
@@ -1188,6 +1190,7 @@ DEPENDENCIES:
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
+  - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -1379,6 +1382,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-splash-screen"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
+  react-native-view-shot:
+    :path: "../node_modules/react-native-view-shot"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-perflogger:
@@ -1548,6 +1553,7 @@ SPEC CHECKSUMS:
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
+  react-native-view-shot: da768466e1cd371de50a3a5c722d1e95456b5b2c
   react-native-webview: d33e2db8925d090871ffeb232dfa50cb3a727581
   React-perflogger: 8e832d4e21fdfa613033c76d58d7e617341e804b
   React-RCTActionSheet: 9ca778182a9523991bff6381045885b6e808bb73

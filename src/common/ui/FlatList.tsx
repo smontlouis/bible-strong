@@ -37,22 +37,15 @@ const AnimatedFlatList = React.forwardRef(
   ({ contentContainerStyle, ...props }, ref) => {
     const orientation = useDeviceOrientation()
     return (
-      <Animatable.View
-        style={{ flex: 1 }}
-        animation={fadeIn}
-        delay={300}
-        duration={500}
-      >
-        <FlatList
-          orientation={orientation}
-          contentContainerStyle={{
-            paddingBottom: 10 + getBottomSpace(),
-            ...contentContainerStyle,
-          }}
-          ref={ref}
-          {...props}
-        />
-      </Animatable.View>
+      <FlatList
+        orientation={orientation}
+        contentContainerStyle={{
+          paddingBottom: 10 + getBottomSpace(),
+          ...contentContainerStyle,
+        }}
+        ref={ref}
+        {...props}
+      />
     )
   }
 )

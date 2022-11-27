@@ -1,5 +1,5 @@
-import React from 'react'
-import { ViewStyle, ImageStyle, TextStyle } from 'react-native'
+import React, { forwardRef } from 'react'
+import { ImageStyle, TextStyle, View, ViewStyle } from 'react-native'
 import { AnimatedStyleProp } from 'react-native-reanimated'
 import { AnimatedBox } from './TabPreview'
 
@@ -8,12 +8,14 @@ interface TabScreenWrapperProps {
   style: AnimatedStyleProp<ViewStyle | ImageStyle | TextStyle>
 }
 
-const TabScreenWrapper = ({ style, children }: TabScreenWrapperProps) => {
-  return (
-    <AnimatedBox style={style} bg="reverse" bottomTabBarPadding>
-      {children}
-    </AnimatedBox>
-  )
-}
+const TabScreenWrapper = forwardRef<View, TabScreenWrapperProps>(
+  ({ style, children }, ref) => {
+    return (
+      <AnimatedBox style={style} bg="reverse" bottomTabBarPadding ref={ref}>
+        {children}
+      </AnimatedBox>
+    )
+  }
+)
 
 export default TabScreenWrapper

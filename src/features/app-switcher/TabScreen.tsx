@@ -1,6 +1,6 @@
 import { PrimitiveAtom, useAtom } from 'jotai'
-import React, { useEffect } from 'react'
-import { StyleSheet, useWindowDimensions } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import {
   Easing,
   Extrapolate,
@@ -20,13 +20,7 @@ import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
 import {
   activeTabPropertiesAtom,
-  BibleTab,
-  CommentaryTab,
-  CompareTab,
-  DictionaryTab,
-  NaveTab,
-  SearchTab,
-  StrongTab,
+  activeTabRefAtom,
   TabItem,
 } from '../../state/tabs'
 import { TAB_PREVIEW_SCALE } from './AppSwitcherScreen'
@@ -37,6 +31,46 @@ export const tabTimingConfig = {
   easing: Easing.bezierFn(0.33, 0.01, 0, 1),
 }
 
+const getComponentTab = (tab: TabItem) => {
+  switch (tab.type) {
+    case 'bible':
+      return {
+        component: BibleTabScreen,
+        atomName: 'bibleAtom',
+      }
+    case 'compare':
+      return {
+        component: CompareVersesTabScreen,
+        atomName: 'compareAtom',
+      }
+    case 'strong':
+      return {
+        component: StrongTabScreen,
+        atomName: 'strongAtom',
+      }
+    case 'commentary':
+      return {
+        component: CommentariesTabScreen,
+        atomName: 'commentaryAtom',
+      }
+    case 'dictionary':
+      return {
+        component: DictionaryDetailTabScreen,
+        atomName: 'dictionaryAtom',
+      }
+    case 'nave':
+      return {
+        component: NaveDetailTabScreen,
+        atomName: 'naveAtom',
+      }
+    case 'search':
+      return {
+        component: SearchTabScreen,
+        atomName: 'searchAtom',
+      }
+  }
+}
+
 const TabScreen = ({
   tabAtom,
   navigation,
@@ -45,6 +79,8 @@ const TabScreen = ({
   navigation: NavigationStackProp
 }) => {
   const [tab] = useAtom(tabAtom)
+  const tabScreenRef = useRef<View>(null)
+  const [, setActiveTabRef] = useAtom(activeTabRefAtom)
   const [activeTabProperties] = useAtom(activeTabPropertiesAtom)
   const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
 
@@ -52,8 +88,16 @@ const TabScreen = ({
     if (activeTabProperties) {
       const { x, y, animationProgress } = activeTabProperties
 
-      const interpolateProgress = (range: [number, number]) =>
-        interpolate(animationProgress.value, [0, 1], range, Extrapolate.CLAMP)
+      const interpolateProgress = (
+        range: [number, number],
+        easingFn = (val: number) => val
+      ) =>
+        interpolate(
+          easingFn(animationProgress.value),
+          [0, 1],
+          range,
+          Extrapolate.CLAMP
+        )
 
       const top = interpolateProgress([
         y.value === 0
@@ -79,8 +123,8 @@ const TabScreen = ({
             scale: interpolateProgress([TAB_PREVIEW_SCALE, 1]),
           },
         ],
-        borderRadius: interpolateProgress([30, 0]),
-        opacity: interpolateProgress([0, 1]),
+        borderRadius: interpolateProgress([30, 0], Easing.in(Easing.exp)),
+        opacity: interpolateProgress([0, 1], Easing.bezierFn(1, 0, 0.75, 0)),
       }
     }
 
@@ -101,85 +145,32 @@ const TabScreen = ({
     }
   }, [activeTabProperties])
 
-  if (tab.type === 'bible') {
-    return (
-      <TabScreenWrapper style={imageStyles}>
-        <BibleTabScreen
-          bibleAtom={tabAtom as PrimitiveAtom<BibleTab>}
-          navigation={navigation}
-        />
-      </TabScreenWrapper>
-    )
-  }
+  useEffect(() => {
+    setActiveTabRef(tabScreenRef)
 
-  if (tab.type === 'compare') {
-    return (
-      <TabScreenWrapper style={imageStyles}>
-        <CompareVersesTabScreen
-          navigation={navigation}
-          compareAtom={tabAtom as PrimitiveAtom<CompareTab>}
-        />
-      </TabScreenWrapper>
-    )
-  }
+    return () => {
+      setActiveTabRef(undefined)
+    }
+  }, [setActiveTabRef])
 
-  if (tab.type === 'strong') {
-    return (
-      <TabScreenWrapper style={imageStyles}>
-        <StrongTabScreen
-          navigation={navigation}
-          strongAtom={tabAtom as PrimitiveAtom<StrongTab>}
-        />
-      </TabScreenWrapper>
-    )
-  }
+  const { component: Component, atomName } = getComponentTab(tab) || {}
 
-  if (tab.type === 'nave') {
+  if (Component && atomName) {
     return (
-      <TabScreenWrapper style={imageStyles}>
-        <NaveDetailTabScreen
-          navigation={navigation}
-          naveAtom={tabAtom as PrimitiveAtom<NaveTab>}
-        />
-      </TabScreenWrapper>
-    )
-  }
-
-  if (tab.type === 'dictionary') {
-    return (
-      <TabScreenWrapper style={imageStyles}>
-        <DictionaryDetailTabScreen
-          navigation={navigation}
-          dictionaryAtom={tabAtom as PrimitiveAtom<DictionaryTab>}
-        />
-      </TabScreenWrapper>
-    )
-  }
-
-  if (tab.type === 'commentary') {
-    return (
-      <TabScreenWrapper style={imageStyles}>
-        <CommentariesTabScreen
-          navigation={navigation}
-          commentaryAtom={tabAtom as PrimitiveAtom<CommentaryTab>}
-        />
-      </TabScreenWrapper>
-    )
-  }
-
-  if (tab.type === 'search') {
-    return (
-      <TabScreenWrapper style={imageStyles}>
-        <SearchTabScreen
-          navigation={navigation}
-          searchAtom={tabAtom as PrimitiveAtom<SearchTab>}
+      <TabScreenWrapper style={imageStyles} ref={tabScreenRef}>
+        {/* @ts-ignore */}
+        <Component
+          {...{
+            [atomName]: tabAtom,
+            navigation,
+          }}
         />
       </TabScreenWrapper>
     )
   }
 
   return (
-    <TabScreenWrapper style={imageStyles}>
+    <TabScreenWrapper style={imageStyles} ref={tabScreenRef}>
       <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
         <Text>{tab.title}</Text>
       </Box>

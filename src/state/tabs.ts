@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
 import { atomWithStorage, createJSONStorage, splitAtom } from 'jotai/utils'
-import { useCallback, useMemo } from 'react'
+import { captureRef } from 'react-native-view-shot'
+import { RefObject, useCallback, useMemo } from 'react'
+import { View } from 'react-native'
 import Animated from 'react-native-reanimated'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -15,6 +17,7 @@ export type TabBase = {
   title: string
   isRemovable: boolean
   hasBackButton?: boolean
+  base64Preview?: string
 }
 
 export type VersionCode = keyof typeof versions
@@ -145,10 +148,34 @@ export const defaultBibleTab: BibleTab = {
 //   storage as any
 // )
 
+export const activeTabRefAtom = atom<RefObject<View> | undefined>(undefined)
 export const activeTabIndexAtom = atom<number | undefined>(0)
 export const activeTabPropertiesAtom = atom<TabProperties | undefined>(
   undefined
 )
+
+export const tabActiveTabSnapshotAtom = atom(null, async (get, set) => {
+  const currentIndex = get(activeTabIndexAtom)
+  const currentTabRef = get(activeTabRefAtom)
+
+  if (!currentTabRef || typeof currentIndex === 'undefined') {
+    throw new Error('No active tab')
+  }
+
+  const data = await captureRef(currentTabRef, {
+    result: 'base64',
+    format: 'png',
+  })
+  const resolution = /^(\d+):(\d+)\|/g.exec(data)
+  const base64 = data.substr((resolution || [''])[0].length || 0)
+
+  set(
+    tabsAtom,
+    produce(draft => {
+      draft[currentIndex].base64Preview = base64
+    })
+  )
+})
 
 export const tabsAtom = atom<TabItem[]>([
   defaultBibleTab,

@@ -89,23 +89,16 @@ export const HomeScrollView = ({
 export default ({ children, contentContainerStyle = {}, ...props }) => {
   const orientation = useDeviceOrientation()
   return (
-    <Animatable.View
-      style={{ flex: 1 }}
-      animation={fadeIn}
-      delay={300}
-      duration={500}
+    <ScrollView
+      {...props}
+      orientation={orientation}
+      contentContainerStyle={{
+        paddingTop: 20,
+        paddingBottom: 10 + getBottomSpace(),
+        ...contentContainerStyle,
+      }}
     >
-      <ScrollView
-        {...props}
-        orientation={orientation}
-        contentContainerStyle={{
-          paddingTop: 20,
-          paddingBottom: 10 + getBottomSpace(),
-          ...contentContainerStyle,
-        }}
-      >
-        {children}
-      </ScrollView>
-    </Animatable.View>
+      {children}
+    </ScrollView>
   )
 }

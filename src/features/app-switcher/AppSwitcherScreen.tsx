@@ -40,7 +40,7 @@ const AppSwitcherScreen = ({
   }, [])
 
   return (
-    <Box flex={1} bg="lightGrey">
+    <Box flex={1} bg="border">
       <ScrollView
         ref={scrollViewRef}
         simultaneousHandlers={tapGestureRefs}

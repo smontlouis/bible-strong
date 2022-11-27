@@ -1,6 +1,5 @@
 import { useColorScheme } from 'react-native'
 import { useSelector } from 'react-redux'
-import { PreferredLightTheme } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 
 const useCurrentThemeSelector = () => {

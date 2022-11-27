@@ -1,11 +1,12 @@
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useEffect } from 'react'
-import { useWindowDimensions } from 'react-native'
+import { Image, useWindowDimensions } from 'react-native'
 import {
   TapGestureHandler,
   TapGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler'
 import Animated, {
+  Easing,
   Extrapolate,
   interpolate,
   measure,
@@ -13,7 +14,6 @@ import Animated, {
   useAnimatedGestureHandler,
   useAnimatedRef,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
 import Box, { BoxProps } from '~common/ui/Box'
@@ -85,13 +85,20 @@ const TabPreview = ({
   }
 
   const styles = useAnimatedStyle(() => {
-    const interpolateProgress = (range: [number, number]) =>
-      interpolate(animationProgress.value, [0, 1], range, Extrapolate.CLAMP)
-
+    const interpolateProgress = (
+      range: [number, number],
+      easingFn = (val: number) => val
+    ) =>
+      interpolate(
+        easingFn(animationProgress.value),
+        [0, 1],
+        range,
+        Extrapolate.CLAMP
+      )
     return {
       width: WIDTH * TAB_PREVIEW_SCALE,
       height: HEIGHT * TAB_PREVIEW_SCALE,
-      opacity: 1 - animationProgress.value,
+      opacity: interpolateProgress([1, 0], Easing.bezierFn(1, 0, 1, 0)),
       transform: [
         {
           scale: interpolateProgress([1, 1 / TAB_PREVIEW_SCALE]),
@@ -125,7 +132,14 @@ const TabPreview = ({
         style={styles}
         {...props}
       >
-        <Text>{tab.type}</Text>
+        {tab.base64Preview ? (
+          <Image
+            style={{ width: '100%', height: '100%' }}
+            source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
+          />
+        ) : (
+          <Text>{tab.type}</Text>
+        )}
       </AnimatedBox>
     </TapGestureHandler>
   )

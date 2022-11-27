@@ -1,16 +1,20 @@
 import styled from '@emotion/native'
+import { useAtom } from 'jotai'
 import React from 'react'
 import * as Animatable from 'react-native-animatable'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { useAtom } from 'jotai'
-import { fullscreenAtom } from '../state/app'
-import { activeTabIndexAtom, activeTabPropertiesAtom } from '../state/tabs'
 import Animated, {
   runOnJS,
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated'
 import { tabTimingConfig } from '~features/app-switcher/TabScreen'
+import { fullscreenAtom } from '../state/app'
+import {
+  activeTabIndexAtom,
+  activeTabPropertiesAtom,
+  tabActiveTabSnapshotAtom,
+} from '../state/tabs'
 
 const TouchableTab = styled.TouchableOpacity(({ orientation }) => ({
   position: 'relative',
@@ -85,20 +89,12 @@ const TabBar = props => {
   // const prevIndex = usePrevious(activeRouteIndex)
   const [isFullscreen] = useAtom(fullscreenAtom)
   const [activeTabIndex, setActiveTabIndex] = useAtom(activeTabIndexAtom)
+  const [, tabActiveTabSnapshot] = useAtom(tabActiveTabSnapshotAtom)
 
   const [activeTabProperties, setActiveTabProperties] = useAtom(
     activeTabPropertiesAtom
   )
   const { animationProgress } = activeTabProperties || {}
-  // React.useEffect(() => {
-  //   if (activeRouteIndex === 2 && prevIndex !== activeRouteIndex) {
-  //      setFullScreen(true)
-  //   }
-  //   if (prevIndex === 2 && prevIndex !== activeRouteIndex) {
-  //     setFullScreen(false)
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [prevIndex, activeRouteIndex])
 
   const onClose = () => {
     setActiveTabIndex(undefined)
@@ -134,19 +130,18 @@ const TabBar = props => {
           <TouchableTab
             key={routeIndex}
             // orientation={orientation}
-            onPress={() => {
-              if (route.routeName === 'AppSwitcher' && isRouteActive) {
-                if (animationProgress?.value) {
-                  animationProgress.value = withTiming(
-                    0,
-                    tabTimingConfig,
-                    () => {
-                      runOnJS(onClose)()
-                    }
-                  )
+            onPress={async () => {
+              if (
+                route.routeName === 'AppSwitcher' &&
+                isRouteActive &&
+                animationProgress?.value
+              ) {
+                await tabActiveTabSnapshot(activeTabIndex)
+                animationProgress.value = withTiming(0, tabTimingConfig, () => {
+                  runOnJS(onClose)()
+                })
 
-                  return
-                }
+                return
               }
               onTabPress({ route })
             }}

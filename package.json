@@ -153,6 +153,7 @@
     "react-native-sqlite-storage": "^4.1.0",
     "react-native-svg": "12.3.0",
     "react-native-tab-view": "^2.14.0",
+    "react-native-view-shot": "3.3.0",
     "react-native-webview": "11.23.1",
     "react-native-youtube-iframe": "^2.1.2",
     "react-native-zip-archive": "^5.0.1",

@@ -1,6 +1,9 @@
 import { useTheme } from '@emotion/react'
 import React, { forwardRef, useEffect } from 'react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import {
+  getBottomSpace,
+  getStatusBarHeight,
+} from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
 import { Portal } from 'react-native-paper'
 import Text, { TextProps } from '~common/ui/Text'
@@ -42,6 +45,7 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
     <Modalize
       ref={ref}
       handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
+      modalTopOffset={getStatusBarHeight()}
       modalStyle={{
         marginLeft: 'auto',
         marginRight: 'auto',
