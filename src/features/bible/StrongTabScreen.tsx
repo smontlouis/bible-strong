@@ -31,16 +31,14 @@ import loadStrongVersesCount from '~helpers/loadStrongVersesCount'
 import { timeout } from '~helpers/timeout'
 import { setHistory } from '~redux/modules/user'
 
+import produce from 'immer'
+import { PrimitiveAtom, useAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import {
-  NavigationStackProp,
-  NavigationStackScreenProps,
-} from 'react-navigation-stack'
+import { NavigationStackProp } from 'react-navigation-stack'
+import Back from '~common/Back'
 import { StrongReference } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { StrongTab } from '~state/tabs'
-import { PrimitiveAtom, useAtom } from 'jotai'
-import Back from '~common/Back'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -81,7 +79,7 @@ interface StrongScreenProps {
 }
 
 const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
-  const [strongTab] = useAtom(strongAtom)
+  const [strongTab, setStrongTab] = useAtom(strongAtom)
 
   let {
     hasBackButton,
@@ -114,6 +112,21 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
     // @ts-ignore
     return state.user.bible[strongPart][code]?.tags
   })
+
+  const setTitle = (title: string) =>
+    setStrongTab(
+      produce(draft => {
+        draft.title = title
+      })
+    )
+
+  useEffect(() => {
+    setTitle(
+      `${strongReference?.Hebreu ? t('Hébreu') : t('Grec')} ${
+        strongReference?.Mot
+      }`
+    )
+  }, [strongReference?.Mot, strongReference?.Hebreu, t])
 
   useEffect(() => {
     loadData()

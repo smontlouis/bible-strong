@@ -124,6 +124,10 @@ const Header = ({
     },
   } = bible
 
+  useEffect(() => {
+    actions.setTitle(`${t(book.Nom)} ${chapter} - ${version}`)
+  }, [actions, book.Nom, chapter, version, t])
+
   const isParallel = parallelVersions.length > 0
 
   const { addParallelVersion, removeAllParallelVersions } = actions

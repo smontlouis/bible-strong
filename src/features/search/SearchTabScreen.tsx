@@ -44,6 +44,16 @@ const SearchTabScreen = ({ navigation, searchAtom }: SearchScreenProps) => {
       })
     )
 
+  const setTitle = (title: string) =>
+    setSearchTab(
+      produce(draft => {
+        draft.title = title
+      })
+    )
+
+  useEffect(() => {
+    setTitle(searchValue || t('Recherche'))
+  }, [searchValue])
   const debouncedSearchValue = useDebounce(searchValue, 500)
   const previousValue = usePrevious(debouncedSearchValue)
   const checkSearchQuota = useQuota('bibleSearch')

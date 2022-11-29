@@ -1,11 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
-import { atomWithStorage, createJSONStorage, splitAtom } from 'jotai/utils'
-import { captureRef } from 'react-native-view-shot'
+import { splitAtom } from 'jotai/utils'
 import { RefObject, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { captureRef } from 'react-native-view-shot'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { StrongReference } from '~common/types'
@@ -91,6 +90,11 @@ export interface StudyTab extends TabBase {
   data: {}
 }
 
+export interface NewTab extends TabBase {
+  type: 'new'
+  data: {}
+}
+
 export interface CommentaryTab extends TabBase {
   type: 'commentary'
   data: {
@@ -107,6 +111,7 @@ export type TabItem =
   | DictionaryTab
   | StudyTab
   | CommentaryTab
+  | NewTab
 
 export type TabProperties = {
   x: Animated.SharedValue<number>
@@ -239,7 +244,7 @@ export const tabsAtom = atom<TabItem[]>([
   },
 ])
 
-export const tabsAtomsAtom = splitAtom(tabsAtom)
+export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 
 export const checkTabType = <Type extends TabItem>(
   tab: TabItem | undefined,
@@ -442,6 +447,17 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     [setBibleTab]
   )
 
+  const setTitle = useCallback(
+    (title: string) => {
+      setBibleTab(
+        produce(draft => {
+          draft.title = title
+        })
+      )
+    },
+    [setBibleTab]
+  )
+
   const clearSelectedVerses = useCallback(() => {
     setBibleTab(
       produce(draft => {
@@ -586,6 +602,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       goToPrevChapter,
 
       setAllAndValidateSelected,
+      setTitle,
     }),
     []
   )

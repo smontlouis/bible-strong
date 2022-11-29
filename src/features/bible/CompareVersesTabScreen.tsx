@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
 import verseToReference from '~helpers/verseToReference'
@@ -21,6 +21,7 @@ import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { versions } from '~helpers/bibleVersions'
 import { CompareTab, SelectedVerses } from '~state/tabs'
 import produce from 'immer'
+import { useTranslation } from 'react-i18next'
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -36,11 +37,18 @@ const CompareVersesTabScreen = ({
   navigation,
 }: CompareVersesTabScreenProps) => {
   const [compareTab, setCompareTab] = useAtom(compareAtom)
-
+  const { t } = useTranslation()
   const setSelectedVerses = (v: SelectedVerses) =>
     setCompareTab(
       produce(draft => {
         draft.data.selectedVerses = v
+      })
+    )
+
+  const setTitle = (title: string) =>
+    setCompareTab(
+      produce(draft => {
+        draft.title = title
       })
     )
 
@@ -51,6 +59,10 @@ const CompareVersesTabScreen = ({
 
   const [prevNextItems, setPrevNextItems] = React.useState()
   const title = verseToReference(selectedVerses)
+
+  useEffect(() => {
+    setTitle(`${t('Comparer')} ${title}`)
+  }, [title])
 
   const goToVerse = value => {
     const [livre, chapitre, verse] = Object.keys(selectedVerses)[0]

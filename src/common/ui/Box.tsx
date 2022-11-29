@@ -99,6 +99,8 @@ export interface BoxProps {
 
   theme?: Theme
   bottomTabBarPadding?: boolean
+
+  zIndex?: number
 }
 const Box = styled.View((props: BoxProps) => {
   return {
@@ -152,6 +154,7 @@ const Box = styled.View((props: BoxProps) => {
     alignItems: props.alignItems ?? (props.center && 'center'),
     alignContent: props.alignContent ?? 'flex-start',
     alignSelf: props.alignSelf,
+    zIndex: props.zIndex,
     // shorthands
     flexWrap:
       (props.wrap && 'wrap') ??

@@ -26,6 +26,7 @@ import TagList from '~common/TagList'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import { DictionaryTab } from '~state/tabs'
 import { NavigationStackProp } from 'react-navigation-stack'
+import produce from 'immer'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -47,7 +48,7 @@ const DictionnaryDetailScreen = ({
   navigation,
   dictionaryAtom,
 }: DictionaryDetailScreenProps) => {
-  const [dictionaryTab] = useAtom(dictionaryAtom)
+  const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
 
   const {
     hasBackButton,
@@ -58,6 +59,17 @@ const DictionnaryDetailScreen = ({
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
   const tags = useSelector(state => state.user.bible.words[word]?.tags)
+
+  const setTitle = (title: string) =>
+    setDictionaryTab(
+      produce(draft => {
+        draft.title = title
+      })
+    )
+
+  useEffect(() => {
+    setTitle(word)
+  }, [word])
 
   useEffect(() => {
     loadDictionnaireItem(word).then(result => {

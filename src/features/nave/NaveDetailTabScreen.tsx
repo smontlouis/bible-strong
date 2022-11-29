@@ -25,6 +25,7 @@ import { NavigationParams } from 'react-navigation'
 import { RootState } from '~redux/modules/reducer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import { NaveTab } from '~state/tabs'
+import produce from 'immer'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -43,7 +44,7 @@ interface NaveDetailScreenProps {
 }
 
 const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
-  const [naveTab] = useAtom(naveAtom)
+  const [naveTab, setNaveTab] = useAtom(naveAtom)
 
   const {
     hasBackButton,
@@ -57,6 +58,17 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   const tags = useSelector(
     (state: RootState) => state.user.bible.naves[name_lower]?.tags
   )
+
+  const setTitle = (title: string) =>
+    setNaveTab(
+      produce(draft => {
+        draft.title = title
+      })
+    )
+
+  useEffect(() => {
+    setTitle(naveItem?.name || name)
+  }, [naveItem?.name, name])
 
   useEffect(() => {
     loadNaveItem(name_lower).then(result => {

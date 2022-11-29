@@ -177,6 +177,13 @@ const CommentariesTabScreen = ({
       })
     )
 
+  const setTitle = (title: string) =>
+    setCommentaryTab(
+      produce(draft => {
+        draft.title = title
+      })
+    )
+
   const { status, data, loadMore, canLoad, moreStatus } = useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
   const { title: headerTitle } = verseFormatted
@@ -191,6 +198,10 @@ const CommentariesTabScreen = ({
     const [b, c, v] = verse.split('-').map(Number)
     setVerse(`${b}-${c}-${v + value}`)
   }
+
+  useEffect(() => {
+    setTitle(headerTitle)
+  }, [headerTitle])
 
   return (
     <>
