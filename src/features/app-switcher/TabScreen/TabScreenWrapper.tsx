@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react'
 import { ImageStyle, TextStyle, View, ViewStyle } from 'react-native'
 import { AnimatedStyleProp } from 'react-native-reanimated'
-import { AnimatedBox } from './TabPreview'
+import { AnimatedBox } from '~common/ui/Box'
 
 interface TabScreenWrapperProps {
   children: React.ReactNode

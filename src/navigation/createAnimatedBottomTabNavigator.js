@@ -5,7 +5,7 @@ import { Animated, StyleSheet } from 'react-native'
 import { createTabNavigator } from 'react-navigation-tabs'
 import { ScreenContainer } from 'react-native-screens'
 
-import BottomTabBar from '~common/BottomTabBar'
+import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import withDeviceOrientation from '~helpers/withDeviceOrientation'
 
 const Container = styled.View(({ orientation }) => ({

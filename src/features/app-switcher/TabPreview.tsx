@@ -8,7 +8,7 @@ import {
 import { Layout, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
-import Animated, {
+import {
   Easing,
   Extrapolate,
   interpolate,
@@ -24,7 +24,7 @@ import CommentIcon from '~common/CommentIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
-import Box, { BoxProps } from '~common/ui/Box'
+import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import {
@@ -33,7 +33,8 @@ import {
   TabItem,
   TabProperties,
 } from '../../state/tabs'
-import { TAB_PREVIEW_SCALE } from './AppSwitcherScreen'
+import { TAB_PREVIEW_SCALE } from './AppSwitcherScreen/AppSwitcherScreen'
+import { useAppSwitcherContext } from './AppSwitcherProvider'
 
 interface TabPreviewProps {
   index: number
@@ -43,8 +44,6 @@ interface TabPreviewProps {
   onPress: (x: TabProperties & { index: number }) => void
   onDelete: (idx: number) => void
 }
-
-export const AnimatedBox = Animated.createAnimatedComponent(Box)
 
 const getIconType = (type: TabItem['type'], size = 18) => {
   switch (type) {
@@ -88,7 +87,7 @@ const TabPreview = forwardRef<any, TabPreviewProps & BoxProps>(
 
     // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
     const ref = useAnimatedRef<AnimatedBox>()
-
+    const { isBottomTabBarVisible } = useAppSwitcherContext()
     const animationProgress = useSharedValue(isActiveTabNotInitialized ? 1 : 0)
     const x = useSharedValue(0)
     const y = useSharedValue(0)
@@ -122,9 +121,11 @@ const TabPreview = forwardRef<any, TabPreviewProps & BoxProps>(
     })
 
     function handlePress() {
+      isBottomTabBarVisible.value = withTiming(1)
       onPress({ index, x, y, animationProgress })
     }
 
+    // @ts-ignore
     useImperativeHandle(tapGestureRef, () => ({
       open: handlePress,
     }))

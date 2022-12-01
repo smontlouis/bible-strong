@@ -3,22 +3,22 @@ import { Portal } from 'react-native-paper'
 import { createStackNavigator } from 'react-navigation-stack'
 import QuotaModal from '~common/QuotaModal'
 
-import Box from '~common/ui/Box'
-import BibleCompareVersesScreen from '~features/bible/CompareVersesScreen'
+import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
-import StrongScreen from '~features/bible/StrongScreen'
 import BibleVerseDetailScreen from '~features/bible/BibleVerseDetailScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
+import BibleCompareVersesScreen from '~features/bible/CompareVersesScreen'
 import ConcordanceByBookScreen from '~features/bible/ConcordanceByBookScreen'
 import ConcordanceScreen from '~features/bible/ConcordanceScreen'
 import HistoryScreen from '~features/bible/HistoryScreen'
+import StrongScreen from '~features/bible/StrongScreen'
 import ToggleCompareVersesScreen from '~features/bible/ToggleCompareVersesScreen'
 import VersionSelectorScreen from '~features/bible/VersionSelectorScreen'
 import CommentariesScreen from '~features/commentaries/CommentariesScreen'
-import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionaryDetailScreen'
 import DictionaryScreen from '~features/dictionnary/DictionaryScreen'
+import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
 import LexiqueScreen from '~features/lexique/LexiqueScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
 import NaveScreen from '~features/nave/NaveScreen'
@@ -39,18 +39,20 @@ import EditStudyScreen from '~features/studies/EditStudyScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
 import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
 import TimelineScreen from '~features/timeline/TimelineScreen'
-import StorybookScreen from '../../storybook/StoryBookScreen'
 import PericopeScreen from '../features/bible/PericopeScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
-import MainTabNavigator from './MainTabNavigator'
+import MoreScreen from '~features/settings/MoreScreen'
+import HomeScreen from '~features/home/HomeScreen'
 
 export const MainStackNavigator = createStackNavigator(
   {
-    MainTab: { screen: MainTabNavigator },
+    AppSwitcher: { screen: AppSwitcherScreen },
+    More: { screen: MoreScreen },
+    Home: { screen: HomeScreen },
     BibleSelect: { screen: BibleSelectScreen },
     VersionSelector: { screen: VersionSelectorScreen },
     BibleVerseDetail: { screen: BibleVerseDetailScreen },
@@ -83,12 +85,6 @@ export const MainStackNavigator = createStackNavigator(
     NaveDetail: { screen: NaveDetailScreen },
     NaveWarning: { screen: NaveWarningScreen },
     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
-    // Storybook: {
-    //   screen: StorybookScreen,
-    //   navigationOptions: {
-    //     gesturesEnabled: false,
-    //   },
-    // },
     Plan: { screen: PlanScreen },
     Plans: { screen: PlanSelectScreen },
     MyPlanList: { screen: MyPlanListScreen },
@@ -106,6 +102,7 @@ export const MainStackNavigator = createStackNavigator(
   },
   {
     headerMode: 'none',
+    initialRouteName: 'AppSwitcher',
   }
 )
 

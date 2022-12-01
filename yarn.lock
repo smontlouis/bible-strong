@@ -15321,11 +15321,6 @@ react-native@0.69.7:
     whatwg-fetch "^3.0.0"
     ws "^6.1.4"
 
-react-navigation-drawer@^2.2.2:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/react-navigation-drawer/-/react-navigation-drawer-2.7.1.tgz#b025be11f612e8215f15f9f605851d281606fe82"
-  integrity sha512-W36XDl+Ts5uGNr6Ryt1xGrQ5JTeddPmvR31bNX7o6Oo7OsdPZ3b1+oMDoRClGca0d6Ggo7btIqiWUsUshm+p/g==
-
 react-navigation-material-bottom-tabs@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-navigation-material-bottom-tabs/-/react-navigation-material-bottom-tabs-1.1.1.tgz#17e12719958c1d6770b3138789608f54d5cb7f57"

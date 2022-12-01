@@ -25,6 +25,7 @@ import PreloadBible from './PreloadBible'
 import { useTranslation } from 'react-i18next'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
+import Back from '~common/Back'
 
 const vodNb = [...Array(6).keys()]
 
@@ -120,7 +121,10 @@ const UserWidget = React.memo(() => {
     return (
       <Container>
         <Box paddingHorizontal={25}>
-          <Text title fontSize={25} flex>
+          <Back>
+            <FeatherIcon name={'arrow-left'} size={20} />
+          </Back>
+          <Text marginTop={20} title fontSize={25} flex>
             {t('Bienvenue')}
           </Text>
           <Paragraph marginTop={20} marginBottom={20}>
@@ -154,7 +158,10 @@ const UserWidget = React.memo(() => {
       <Box flex paddingHorizontal={20} overflow="visible">
         <OfflineNotice />
 
-        <Box alignItems="flex-end">
+        <Box alignItems="center" row justifyContent="space-between">
+          <Back>
+            <FeatherIcon name={'arrow-left'} size={20} />
+          </Back>
           <Box overflow="visible" position="relative">
             <ProfileContainer>
               {user.photoURL ? (

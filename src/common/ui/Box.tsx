@@ -1,11 +1,10 @@
 import styled from '@emotion/native'
+import { TouchableOpacity } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Animated from 'react-native-reanimated'
-import { Theme } from '~themes'
+import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 
 export interface BoxProps {
-  children?: React.ReactNode
-
   position?: 'absolute' | 'relative'
   pos?: 'absolute' | 'relative'
   top?: number
@@ -51,6 +50,7 @@ export interface BoxProps {
 
   borderWidth?: number
   borderBottomWidth?: number
+  borderTopWidth?: number
   borderColor?: string
   transform?: object
   borderRadius?: number
@@ -93,16 +93,26 @@ export interface BoxProps {
   grey?: boolean
   background?: boolean
   rounded?: boolean
-  shadow?: boolean
   lightShadow?: boolean
-  size?: string
+  size?: number
 
-  theme?: Theme
   bottomTabBarPadding?: boolean
 
   zIndex?: number
+
+  shadow?: {
+    shadowColor: string
+    shadowOffset: {
+      width: number
+      height: number
+    }
+    shadowOpacity: number
+    shadowRadius: number
+
+    elevation: number
+  }
 }
-const Box = styled.View((props: BoxProps) => {
+const Box = styled.View<BoxProps>(props => {
   return {
     // container
     position: props.position ?? props.pos,
@@ -116,7 +126,7 @@ const Box = styled.View((props: BoxProps) => {
     paddingLeft: props.paddingLeft ?? props.pl,
     paddingRight: props.paddingRight ?? props.pr,
     paddingBottom: props.bottomTabBarPadding
-      ? 53 + getBottomSpace()
+      ? TAB_ICON_SIZE + getBottomSpace()
       : props.paddingBottom ?? props.pb,
     paddingVertical: props.paddingVertical ?? props.py,
     paddingHorizontal: props.paddingHorizontal ?? props.px,
@@ -131,7 +141,11 @@ const Box = styled.View((props: BoxProps) => {
 
     borderWidth: props.borderWidth,
     borderBottomWidth: props.borderBottomWidth,
-    borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
+    borderTopWidth: props.borderTopWidth,
+    borderColor:
+      props.theme.colors[
+        props.borderColor as keyof typeof props.theme.colors
+      ] ?? props.borderColor,
     transform: props.transform,
     borderRadius: props.borderRadius,
     borderTopLeftRadius: props.borderTopLeftRadius,
@@ -165,8 +179,12 @@ const Box = styled.View((props: BoxProps) => {
 
     opacity: props.disabled ? 0.3 : props.opacity ?? 1,
 
-    backgroundColor: props.theme.colors[props.backgroundColor ?? props.bg]
-      ? props.theme.colors[props.backgroundColor ?? props.bg]
+    backgroundColor: props.theme.colors[
+      (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
+    ]
+      ? props.theme.colors[
+          (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
+        ]
       : props.backgroundColor ?? props.bg,
 
     ...(props.grey && {
@@ -179,17 +197,6 @@ const Box = styled.View((props: BoxProps) => {
 
     ...(props.rounded && {
       borderRadius: 10,
-    }),
-
-    ...(props.shadow && {
-      backgroundColor: props.theme.colors.reverse,
-      shadowColor: props.theme.colors.default,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
-      elevation: 2,
-      borderRadius: 5,
-      overflow: 'visible',
     }),
 
     ...(props.size && {
@@ -213,9 +220,12 @@ const Box = styled.View((props: BoxProps) => {
       elevation: 1,
       overflow: 'visible',
     }),
+
+    ...props.shadow,
   }
 })
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
+export const TouchableBox = Box.withComponent(TouchableOpacity)
 
 export default Box

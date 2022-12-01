@@ -5,10 +5,7 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "jsx": "react",
-    "lib": [
-      "es6",
-      "dom"
-    ],
+    "lib": ["es6", "dom"],
     "moduleResolution": "node",
     "noEmit": true,
     "strict": true,
@@ -16,45 +13,18 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "~assets/*": [
-        "src/assets/*"
-      ],
-      "~common/*": [
-        "src/common/*"
-      ],
-      "~features/*": [
-        "src/features/*"
-      ],
-      "~helpers/*": [
-        "src/helpers/*"
-      ],
-      "~navigation/*": [
-        "src/navigation/*"
-      ],
-      "~redux/*": [
-        "src/redux/*"
-      ],
-      "~state/*": [
-        "src/state/*"
-      ],
-      "~state": [
-        "src/state"
-      ],
-      "~themes/*": [
-        "src/themes/*"
-      ],
-      "~styled/*": [
-        "src/styled/*"
-      ],
-      "~themes": [
-        "src/themes"
-      ],
-      "~styled": [
-        "src/styled"
-      ],
-      "~i18n": [
-        "i18n"
-      ]
+      "~assets/*": ["src/assets/*"],
+      "~common/*": ["src/common/*"],
+      "~features/*": ["src/features/*"],
+      "~helpers/*": ["src/helpers/*"],
+      "~navigation/*": ["src/navigation/*"],
+      "~redux/*": ["src/redux/*"],
+      "~state/*": ["src/state/*"],
+      "~themes/*": ["src/themes/*"],
+      "~styled/*": ["src/styled/*"],
+      "~themes": ["src/themes"],
+      "~styled": ["src/styled"],
+      "~i18n": ["i18n"]
     }
   },
   "exclude": [

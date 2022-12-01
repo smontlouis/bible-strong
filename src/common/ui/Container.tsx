@@ -2,7 +2,6 @@ import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import styled from '@emotion/native'
 import Box from './Box'
 
-console.log('coucou', getStatusBarHeight())
 const Container = styled(Box)<{
   pure?: boolean
   noPadding?: boolean

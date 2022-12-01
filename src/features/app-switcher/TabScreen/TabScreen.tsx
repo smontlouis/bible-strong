@@ -8,6 +8,7 @@ import {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated'
+
 import { NavigationStackProp } from 'react-navigation-stack'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -22,8 +23,9 @@ import {
   activeTabPropertiesAtom,
   activeTabRefAtom,
   TabItem,
-} from '../../state/tabs'
-import { TAB_PREVIEW_SCALE } from './AppSwitcherScreen'
+} from '../../../state/tabs'
+import { TAB_PREVIEW_SCALE } from '../AppSwitcherScreen/AppSwitcherScreen'
+
 import TabScreenWrapper from './TabScreenWrapper'
 
 export const tabTimingConfig = {

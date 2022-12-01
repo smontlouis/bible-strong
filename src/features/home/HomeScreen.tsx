@@ -21,7 +21,7 @@ const HomeScreen = () => {
   const { t } = useTranslation()
 
   return (
-    <Box grey bottomTabBarPadding>
+    <Box grey>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
         <Box grey pt={20} px={20}>
