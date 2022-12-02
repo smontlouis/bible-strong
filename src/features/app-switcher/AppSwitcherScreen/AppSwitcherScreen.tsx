@@ -57,16 +57,18 @@ const AppSwitcherScreen = ({
     <AppSwitcherProvider>
       <DrawerLayout
         ref={homeDrawerRef}
-        drawerWidth={wp(98, 450)}
+        drawerWidth={wp(100, 450)}
         drawerPosition="left"
         drawerType="slide"
+        overlayColor="transparent"
         renderNavigationView={() => <HomeScreen closeMenu={closeMenu} />}
       >
         <DrawerLayout
           ref={moreDrawerRef}
-          drawerWidth={wp(98, 450)}
+          drawerWidth={wp(100, 450)}
           drawerPosition="right"
           drawerType="slide"
+          overlayColor="transparent"
           renderNavigationView={() => <MoreScreen closeMenu={closeMenu} />}
         >
           <Box flex={1} bg="lightGrey" center>
