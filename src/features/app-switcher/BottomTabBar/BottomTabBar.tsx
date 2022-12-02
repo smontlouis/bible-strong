@@ -8,7 +8,12 @@ import SearchButton from '../BottomTabBarButtons/SearchButton'
 import TabButton from '../BottomTabBarButtons/TabButton'
 import useBottomBarStyles from './useBottomTabBarStyles'
 
-const BottomTabBar = () => {
+type BottomTabBarProps = {
+  openMenu: () => void
+  openHome: () => void
+}
+
+const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { style } = useBottomBarStyles()
   return (
     <AnimatedBox
@@ -26,11 +31,11 @@ const BottomTabBar = () => {
       borderColor="border"
       style={style}
     >
-      <HomeButton />
+      <HomeButton openHome={openHome} />
       <SearchButton />
       <BibleButton />
       <TabButton />
-      <MenuButton />
+      <MenuButton openMenu={openMenu} />
     </AnimatedBox>
   )
 }

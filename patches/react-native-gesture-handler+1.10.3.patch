@@ -1,3 +1,15 @@
+diff --git a/node_modules/react-native-gesture-handler/lib/typescript/components/DrawerLayout.d.ts b/node_modules/react-native-gesture-handler/lib/typescript/components/DrawerLayout.d.ts
+index ca77372..1e054f7 100644
+--- a/node_modules/react-native-gesture-handler/lib/typescript/components/DrawerLayout.d.ts
++++ b/node_modules/react-native-gesture-handler/lib/typescript/components/DrawerLayout.d.ts
+@@ -29,6 +29,7 @@ export interface DrawerLayoutProps {
+     enableTrackpadTwoFingerGesture?: boolean;
+     onDrawerSlide?: (position: number) => void;
+     onGestureRef?: (ref: PanGestureHandler) => void;
++    children?: React.ReactNode;
+ }
+ export declare type DrawerLayoutState = {
+     dragX: Animated.Value;
 diff --git a/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts b/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts
 index 0ad6d92..2177d7c 100644
 --- a/node_modules/react-native-gesture-handler/lib/typescript/handlers/gestureHandlers.d.ts

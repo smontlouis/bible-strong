@@ -29,6 +29,7 @@ interface Props {
   fontSize?: number
   onTitlePress?: () => void
   rightComponent?: JSX.Element
+  onCustomBackPress?: () => void
 }
 
 const Header = ({
@@ -39,13 +40,14 @@ const Header = ({
   fontSize = 20,
   onTitlePress,
   rightComponent,
+  onCustomBackPress,
   ...props
 }: Props) => {
   return (
     <HeaderBox background={background} row overflow="visibility" {...props}>
       <Box>
         {hasBackButton ? (
-          <Back padding>
+          <Back onCustomPress={onCustomBackPress} padding>
             <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
           </Back>
         ) : (

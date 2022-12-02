@@ -121,9 +121,6 @@ const UserWidget = React.memo(() => {
     return (
       <Container>
         <Box paddingHorizontal={25}>
-          <Back>
-            <FeatherIcon name={'arrow-left'} size={20} />
-          </Back>
           <Text marginTop={20} title fontSize={25} flex>
             {t('Bienvenue')}
           </Text>
@@ -158,10 +155,7 @@ const UserWidget = React.memo(() => {
       <Box flex paddingHorizontal={20} overflow="visible">
         <OfflineNotice />
 
-        <Box alignItems="center" row justifyContent="space-between">
-          <Back>
-            <FeatherIcon name={'arrow-left'} size={20} />
-          </Back>
+        <Box alignItems="center" row justifyContent="flex-end">
           <Box overflow="visible" position="relative">
             <ProfileContainer>
               {user.photoURL ? (

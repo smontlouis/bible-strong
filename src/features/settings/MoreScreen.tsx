@@ -61,7 +61,11 @@ const shareMessage = () => {
   return `Bible Strong App ${appUrl}`
 }
 
-const MoreScreen = () => {
+type MoreScreenProps = {
+  closeMenu: () => void
+}
+
+const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   const { isLogged, logout } = useLogin()
   const dispatch = useDispatch()
   const hasUpdate = useSelector((state: RootState) =>
@@ -142,8 +146,8 @@ const MoreScreen = () => {
   }
 
   return (
-    <Container>
-      <Header hasBackButton title={t('Plus')} />
+    <Container pure>
+      <Header onCustomBackPress={closeMenu} title={t('Plus')} />
       <ScrollView style={{ flex: 1 }}>
         <Box paddingVertical={10}>
           <LinkItem route="Lexique">

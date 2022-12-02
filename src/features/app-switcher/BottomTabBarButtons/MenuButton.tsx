@@ -1,8 +1,6 @@
 import styled from '@emotion/native'
 import React from 'react'
 import * as Animatable from 'react-native-animatable'
-import { withNavigation } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
 import { useSelector } from 'react-redux'
 
 import { FeatherIcon } from '~common/ui/Icon'
@@ -22,18 +20,14 @@ const Circle = styled.View(({ theme }) => ({
 
 const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
 
-const MenuButton = ({ navigation }: { navigation: NavigationStackProp }) => {
+const MenuButton = ({ openMenu }: { openMenu: () => void }) => {
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
 
   return (
-    <TouchableBox
-      center
-      size={TAB_ICON_SIZE}
-      onPress={() => navigation.navigate('More')}
-    >
-      <FeatherIcon name="menu" size={23} color="tertiary" />
+    <TouchableBox center size={TAB_ICON_SIZE} onPress={openMenu}>
+      <FeatherIcon name="more-horizontal" size={28} color="tertiary" />
 
       {hasUpdate && (
         <AnimatedCircle
@@ -46,4 +40,4 @@ const MenuButton = ({ navigation }: { navigation: NavigationStackProp }) => {
   )
 }
 
-export default withNavigation(MenuButton)
+export default MenuButton

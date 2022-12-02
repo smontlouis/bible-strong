@@ -10,11 +10,7 @@ const BibleButton = ({}: BibleButtonProps) => {
   const { onPress, isActive } = useBibleButtonPress()
   return (
     <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
-      <FeatherIcon
-        name="book-open"
-        size={23}
-        color={isActive ? 'primary' : 'tertiary'}
-      />
+      <FeatherIcon name="book-open" size={23} color={'tertiary'} />
     </TouchableBox>
   )
 }
