@@ -16,13 +16,21 @@ import UserWidget from './UserWidget'
 import WordOfTheDay from './WordOfTheDay'
 
 import { useTranslation } from 'react-i18next'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
+import BackBottomTabBar from '~features/app-switcher/BottomTabBar/BackBottomTabBar'
 
-const HomeScreen = () => {
+const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()
 
   return (
     <Box grey>
-      <HomeScrollView showsVerticalScrollIndicator={false}>
+      <HomeScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: getBottomSpace() + TAB_ICON_SIZE + 20,
+        }}
+      >
         <UserWidget />
         <Box grey pt={20} px={20}>
           <Text title fontSize={23} flex>
@@ -131,6 +139,7 @@ const HomeScreen = () => {
           )} */}
         </Box>
       </HomeScrollView>
+      <BackBottomTabBar onClose={closeHome} direction="right" />
     </Box>
   )
 }

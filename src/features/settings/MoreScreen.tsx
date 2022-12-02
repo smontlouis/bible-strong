@@ -28,6 +28,9 @@ import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
 import app from '../../../package.json'
+import BackBottomTabBar from '~features/app-switcher/BottomTabBar/BackBottomTabBar'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -146,9 +149,14 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   }
 
   return (
-    <Container pure>
-      <Header onCustomBackPress={closeMenu} title={t('Plus')} />
-      <ScrollView style={{ flex: 1 }}>
+    <Container>
+      <Header title={t('Plus')} />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingBottom: getBottomSpace() + TAB_ICON_SIZE + 20,
+        }}
+      >
         <Box paddingVertical={10}>
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
@@ -323,15 +331,16 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             </Text>
           </LinkItem>
         </Box>
+        <Box row justifyContent="flex-end" px={10}>
+          <Text color="grey" fontSize={9} marginRight={10}>
+            {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
+          </Text>
+          <Text color="grey" fontSize={9}>
+            Version: {app.version}
+          </Text>
+        </Box>
       </ScrollView>
-      <Box position="absolute" bottom={30} right={10} row alignItems="flex-end">
-        <Text color="grey" fontSize={9} marginRight={10}>
-          {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
-        </Text>
-        <Text color="grey" fontSize={9}>
-          Version: {app.version}
-        </Text>
-      </Box>
+      <BackBottomTabBar onClose={closeMenu} direction="left" />
     </Container>
   )
 }

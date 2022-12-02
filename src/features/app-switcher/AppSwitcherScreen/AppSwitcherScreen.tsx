@@ -1,21 +1,21 @@
 import { useAtom } from 'jotai'
-import React, { useEffect, useRef } from 'react'
-import { Text, useWindowDimensions, View } from 'react-native'
+import React, { useRef } from 'react'
+import { useWindowDimensions } from 'react-native'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
+import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
 import Animated from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
-import { tabsAtomsAtom } from '../../../state/tabs'
-import AddTab from '../AddTab'
-import useAppSwitcher from './useAppSwitcher'
-import TabPreview from '../TabPreview'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
-import TabScreen from '../TabScreen/TabScreen'
-import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
-import { AppSwitcherProvider } from '../AppSwitcherProvider'
+import HomeScreen from '~features/home/HomeScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
-import HomeScreen from '~features/home/HomeScreen'
+import { tabsAtomsAtom } from '../../../state/tabs'
+import AddTab from '../AddTab'
+import { AppSwitcherProvider } from '../AppSwitcherProvider'
+import TabPreview from '../TabPreview'
+import TabScreen from '../TabScreen/TabScreen'
+import useAppSwitcher from './useAppSwitcher'
 
 interface AppSwitcherProps {}
 
@@ -53,6 +53,10 @@ const AppSwitcherScreen = ({
     homeDrawerRef.current?.openDrawer()
   }
 
+  const closeHome = () => {
+    homeDrawerRef.current?.closeDrawer()
+  }
+
   return (
     <AppSwitcherProvider>
       <DrawerLayout
@@ -61,7 +65,8 @@ const AppSwitcherScreen = ({
         drawerPosition="left"
         drawerType="slide"
         overlayColor="transparent"
-        renderNavigationView={() => <HomeScreen closeMenu={closeMenu} />}
+        renderNavigationView={() => <HomeScreen closeHome={closeHome} />}
+        drawerLockMode="locked-closed"
       >
         <DrawerLayout
           ref={moreDrawerRef}
@@ -70,6 +75,7 @@ const AppSwitcherScreen = ({
           drawerType="slide"
           overlayColor="transparent"
           renderNavigationView={() => <MoreScreen closeMenu={closeMenu} />}
+          drawerLockMode="locked-closed"
         >
           <Box flex={1} bg="lightGrey" center>
             <AddTab />
