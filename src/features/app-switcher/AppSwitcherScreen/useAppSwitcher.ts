@@ -88,7 +88,7 @@ const useAppSwitcher = () => {
     }
   })
 
-  const scrollViexBoxStyle = useAnimatedStyle(() => {
+  const scrollViewBoxStyle = useAnimatedStyle(() => {
     return { paddingRight: scrollViewPadding.value }
   })
 
@@ -110,7 +110,7 @@ const useAppSwitcher = () => {
     onDeleteItem,
     scrollHandler,
     PADDING_HORIZONTAL,
-    scrollViexBoxStyle,
+    scrollViewBoxStyle,
     activeAtom,
   }
 }

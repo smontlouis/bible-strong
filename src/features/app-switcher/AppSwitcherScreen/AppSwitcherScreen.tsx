@@ -37,7 +37,7 @@ const AppSwitcherScreen = ({
     onDeleteItem,
     scrollHandler,
     PADDING_HORIZONTAL,
-    scrollViexBoxStyle,
+    scrollViewBoxStyle,
     activeAtom,
   } = useAppSwitcher()
 
@@ -95,7 +95,7 @@ const AppSwitcherScreen = ({
                 paddingRight: PADDING_HORIZONTAL,
               }}
             >
-              <AnimatedBox overflow="visible" row style={scrollViexBoxStyle}>
+              <AnimatedBox overflow="visible" row style={scrollViewBoxStyle}>
                 {tabsAtoms.map((tabAtom, i) => (
                   <TabPreview
                     key={`${tabAtom}`}
