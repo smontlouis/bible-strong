@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai'
 import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 import { QuotaType, updateQuota } from '~redux/modules/user'
 import { quotaModalAtom } from '../state/app'
@@ -12,7 +12,10 @@ export const useIsPremium = () => {
 
 export const useQuota = (quotaType: QuotaType) => {
   const dispatch = useDispatch()
-  const quota = useSelector((state: RootState) => state.user.quota[quotaType])
+  const quota = useSelector(
+    (state: RootState) => state.user.quota[quotaType],
+    shallowEqual
+  )
   const isPremium = useIsPremium()
   const hasQuota = quota.remaining > 0
   const [, setShowQuotaModal] = useAtom(quotaModalAtom)

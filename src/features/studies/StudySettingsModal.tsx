@@ -2,7 +2,7 @@ import { withTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
@@ -27,7 +27,8 @@ const StudySettingsModal = ({
   const dispatch = useDispatch()
   const studyId = isOpen
   const study = useSelector(
-    (state: RootState) => state.user.bible.studies[studyId]
+    (state: RootState) => state.user.bible.studies[studyId],
+    shallowEqual
   )
 
   const deleteStudyConfirmation = (id: string) => {

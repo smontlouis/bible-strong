@@ -531,9 +531,14 @@ export function receiveLiveUpdates({
 
 // HISTORY
 export function setHistory(item) {
-  return {
-    type: SET_HISTORY,
-    payload: item,
+  return dispatch => {
+    // Wait for animation to finish
+    setTimeout(() => {
+      dispatch({
+        type: SET_HISTORY,
+        payload: item,
+      })
+    }, 600)
   }
 }
 

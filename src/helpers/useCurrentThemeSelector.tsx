@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import { useColorScheme } from 'react-native'
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 
 const useCurrentThemeSelector = () => {
@@ -7,15 +8,18 @@ const useCurrentThemeSelector = () => {
     preferredColorScheme,
     preferredDarkTheme,
     preferredLightTheme,
-  } = useSelector((state: RootState) => ({
-    preferredColorScheme: state.user.bible.settings.preferredColorScheme,
-    preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
-    preferredLightTheme: state.user.bible.settings.preferredLightTheme,
-  }))
+  } = useSelector(
+    (state: RootState) => ({
+      preferredColorScheme: state.user.bible.settings.preferredColorScheme,
+      preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
+      preferredLightTheme: state.user.bible.settings.preferredLightTheme,
+    }),
+    shallowEqual
+  )
 
   const systemColorScheme = useColorScheme()
 
-  const computedTheme = (() => {
+  const computedTheme = useMemo(() => {
     if (preferredColorScheme === 'auto') {
       if (systemColorScheme === 'dark') {
         return preferredDarkTheme
@@ -25,16 +29,26 @@ const useCurrentThemeSelector = () => {
 
     if (preferredColorScheme === 'dark') return preferredDarkTheme
     return preferredLightTheme
-  })()
+  }, [
+    preferredColorScheme,
+    preferredDarkTheme,
+    preferredLightTheme,
+    systemColorScheme,
+  ])
 
-  return {
-    theme: computedTheme,
-    colorScheme: (['default', 'sepia', 'nature', 'sunset'].includes(
-      computedTheme
-    )
-      ? 'light'
-      : 'dark') as 'light' | 'dark',
-  }
+  const memoizedResponse = useMemo(
+    () => ({
+      theme: computedTheme,
+      colorScheme: (['default', 'sepia', 'nature', 'sunset'].includes(
+        computedTheme
+      )
+        ? 'light'
+        : 'dark') as 'light' | 'dark',
+    }),
+    [computedTheme]
+  )
+
+  return memoizedResponse
 }
 
 export default useCurrentThemeSelector

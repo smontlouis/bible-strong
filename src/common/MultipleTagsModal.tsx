@@ -1,6 +1,6 @@
 import * as Icon from '@expo/vector-icons'
 import { useTheme } from '@emotion/react'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { Modalize } from 'react-native-modalize'
@@ -169,4 +169,4 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
   )
 }
 
-export default MultipleTagsModal
+export default memo(MultipleTagsModal)

@@ -27,6 +27,7 @@ import { PrimitiveAtom, useAtom } from 'jotai'
 import { DictionaryTab } from '~state/tabs'
 import { NavigationStackProp } from 'react-navigation-stack'
 import produce from 'immer'
+import { shallowEqual } from 'recompose'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -58,7 +59,10 @@ const DictionnaryDetailScreen = ({
   const dispatch = useDispatch()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
-  const tags = useSelector(state => state.user.bible.words[word]?.tags)
+  const tags = useSelector(
+    state => state.user.bible.words[word]?.tags,
+    shallowEqual
+  )
 
   const setTitle = (title: string) =>
     setDictionaryTab(

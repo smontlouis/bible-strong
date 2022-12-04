@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -26,9 +26,12 @@ const ModifyColorsScreen = () => {
   const [currentColor, setColorWheelOpen] = useState(null)
   const dispatch = useDispatch()
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const { colors } = useSelector(state => ({
-    colors: state.user.bible.settings.colors[currentTheme],
-  }))
+  const { colors } = useSelector(
+    state => ({
+      colors: state.user.bible.settings.colors[currentTheme],
+    }),
+    shallowEqual
+  )
 
   return (
     <Container>

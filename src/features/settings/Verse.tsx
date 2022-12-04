@@ -6,7 +6,7 @@ import enGB from 'date-fns/locale/en-GB'
 
 import styled from '@emotion/native'
 import { withNavigation } from 'react-navigation'
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 
 import TagList from '~common/TagList'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -57,9 +57,12 @@ const VerseComponent = ({
   const { t } = useTranslation()
   const isFR = useLanguage()
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const { colors } = useSelector((state: RootState) => ({
-    colors: state.user.bible.settings.colors[currentTheme],
-  }))
+  const { colors } = useSelector(
+    (state: RootState) => ({
+      colors: state.user.bible.settings.colors[currentTheme],
+    }),
+    shallowEqual
+  )
 
   if (!verses.length) {
     return null

@@ -1,6 +1,6 @@
 import React from 'react'
 import { FlatList } from 'react-native'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import compose from 'recompose/compose'
 
 import useLogin from '~helpers/useLogin'
@@ -30,7 +30,10 @@ const StudiesScreen = () => {
   const r = useMediaQueriesArray()
 
   const [selectedChip, setSelectedChip] = React.useState(null)
-  const studies = useSelector(state => Object.values(state.user.bible.studies))
+  const studies = useSelector(
+    state => Object.values(state.user.bible.studies),
+    shallowEqual
+  )
 
   const [multipleTagsItem, setMultipleTagsItem] = React.useState(false)
 

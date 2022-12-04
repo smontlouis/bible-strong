@@ -14,7 +14,7 @@ type BottomTabBarProps = {
 }
 
 const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
-  const { style } = useBottomBarStyles()
+  // const { style } = useBottomBarStyles()
   return (
     <AnimatedBox
       row
@@ -29,7 +29,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       right={0}
       borderTopWidth={1}
       borderColor="border"
-      style={style}
+      // style={style}
     >
       <HomeButton openHome={openHome} />
       <SearchButton />

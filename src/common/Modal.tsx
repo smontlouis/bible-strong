@@ -5,9 +5,9 @@ import {
   getStatusBarHeight,
 } from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
-import { Portal } from 'react-native-paper'
 import Text, { TextProps } from '~common/ui/Text'
 import styled from '@emotion/native'
+import { Portal } from '@gorhom/portal'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',

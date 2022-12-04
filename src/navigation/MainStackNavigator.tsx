@@ -1,9 +1,8 @@
 import React from 'react'
-import { Portal } from 'react-native-paper'
 import { createStackNavigator } from 'react-navigation-stack'
 import QuotaModal from '~common/QuotaModal'
-
-import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
+import { PortalProvider } from '@gorhom/portal'
+import AppSwitcherScreen from '~features/app-switcher/v/AppSwitcherScreen/AppSwitcherScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
 import BibleVerseDetailScreen from '~features/bible/BibleVerseDetailScreen'
@@ -107,12 +106,10 @@ export const MainStackNavigator = createStackNavigator(
 )
 
 const MainStack = props => (
-  <>
-    <Portal.Host>
-      <MainStackNavigator {...props} />
-      <QuotaModal />
-    </Portal.Host>
-  </>
+  <PortalProvider>
+    <MainStackNavigator {...props} />
+    <QuotaModal />
+  </PortalProvider>
 )
 
 MainStack.router = MainStackNavigator.router

@@ -17,7 +17,7 @@ import styled from '@emotion/native'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import Paragraph from '~common/ui/Paragraph'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
@@ -31,7 +31,7 @@ import {
   setSettingsTextDisplay,
 } from '~redux/modules/user'
 import Circle from '~common/ui/Circle'
-import { Portal } from 'react-native-paper'
+import { Portal } from '@gorhom/portal'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const Container = styled.View(({ theme }) => ({
@@ -162,10 +162,13 @@ const BibleParamsModal = ({
       notesDisplay,
       press,
     },
-  } = useSelector(({ user }: RootState) => ({
-    fontFamily: user.fontFamily,
-    settings: user.bible.settings,
-  }))
+  } = useSelector(
+    ({ user }: RootState) => ({
+      fontFamily: user.fontFamily,
+      settings: user.bible.settings,
+    }),
+    shallowEqual
+  )
 
   React.useEffect(() => {
     if (isPrevOpen !== isOpen) {

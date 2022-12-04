@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
 import * as Icon from '@expo/vector-icons'
 
@@ -161,10 +161,13 @@ const HistoryItem = ({ item }) => {
 
 const History = () => {
   const { theme } = useCurrentThemeSelector()
-  const { history, colors } = useSelector(state => ({
-    history: state.user.bible.history,
-    colors: state.user.bible.settings.colors[theme],
-  }))
+  const { history, colors } = useSelector(
+    state => ({
+      history: state.user.bible.history,
+      colors: state.user.bible.settings.colors[theme],
+    }),
+    shallowEqual
+  )
   const dispatch = useDispatch()
   const { t } = useTranslation()
 

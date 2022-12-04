@@ -2,7 +2,7 @@ import React from 'react'
 import { Modalize } from 'react-native-modalize'
 import { MenuOption } from 'react-native-popup-menu'
 import { NavigationStackProp } from 'react-navigation-stack'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Container from '~common/ui/Container'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
@@ -24,11 +24,13 @@ interface Chip {
 const HighlightsScreen = () => {
   const { t } = useTranslation()
   const verseIds = useSelector(
-    (state: RootState) => state.user.bible.highlights
+    (state: RootState) => state.user.bible.highlights,
+    shallowEqual
   )
   const { theme: currentTheme } = useCurrentThemeSelector()
   const colors = useSelector(
-    (state: RootState) => state.user.bible.settings.colors[currentTheme]
+    (state: RootState) => state.user.bible.settings.colors[currentTheme],
+    shallowEqual
   )
 
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)

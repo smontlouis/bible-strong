@@ -5,16 +5,13 @@ import {
   interpolate,
   Extrapolate,
 } from 'react-native-reanimated'
-import { activeTabPropertiesAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 
 const useBottomBarStyles = () => {
-  const [activeTabProperties] = useAtom(activeTabPropertiesAtom)
   const { isBottomTabBarVisible } = useAppSwitcherContext()
   const TAB_BAR_HEIGHT = 60 + getBottomSpace()
 
   const style = useAnimatedStyle(() => {
-    if (!activeTabProperties?.animationProgress) return {}
     return {
       transform: [
         {

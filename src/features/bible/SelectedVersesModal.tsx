@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Share, ScrollView } from 'react-native'
 import { Modalize } from 'react-native-modalize'
 import styled from '@emotion/native'
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 import Clipboard from '@react-native-community/clipboard'
 import { useTheme } from '@emotion/react'
 
@@ -26,7 +26,7 @@ import verseToReference from '../../helpers/verseToReference'
 import { useTranslation } from 'react-i18next'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
-import { Portal } from 'react-native-paper'
+import { Portal } from '@gorhom/portal'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
@@ -84,9 +84,12 @@ const VersesModal = ({
   }, [isPrevVisible, isVisible])
 
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const { colors } = useSelector((state: RootState) => ({
-    colors: state.user.bible.settings.colors[currentTheme],
-  }))
+  const { colors } = useSelector(
+    (state: RootState) => ({
+      colors: state.user.bible.settings.colors[currentTheme],
+    }),
+    shallowEqual
+  )
 
   useEffect(() => {
     const title = verseToReference(selectedVerses)

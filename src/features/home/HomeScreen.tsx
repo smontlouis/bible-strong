@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
 
 import Box from '~common/ui/Box'
@@ -143,4 +143,4 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
     </Box>
   )
 }
-export default HomeScreen
+export default memo(HomeScreen)

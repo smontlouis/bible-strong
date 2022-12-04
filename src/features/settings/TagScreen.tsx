@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
@@ -86,52 +86,55 @@ const TagScreen = ({ navigation }) => {
     words,
     strongsGrec,
     strongsHebreu,
-  } = useSelector(state => ({
-    highlights: item.highlights
-      ? sortVersesByDate(
-          Object.keys(item.highlights).reduce(
-            (arr, id) => ({
-              ...arr,
-              ...(state.user.bible.highlights[id] && {
-                [id]: state.user.bible.highlights[id],
+  } = useSelector(
+    state => ({
+      highlights: item.highlights
+        ? sortVersesByDate(
+            Object.keys(item.highlights).reduce(
+              (arr, id) => ({
+                ...arr,
+                ...(state.user.bible.highlights[id] && {
+                  [id]: state.user.bible.highlights[id],
+                }),
               }),
-            }),
-            {}
+              {}
+            )
           )
-        )
-      : [],
-    notes: item.notes
-      ? Object.keys(item.notes)
-          .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
-          .filter(c => c)
-      : [],
-    studies: item.studies
-      ? Object.keys(item.studies)
-          .map(id => state.user.bible.studies[id])
-          .filter(c => c)
-      : [],
-    naves: item.naves
-      ? Object.keys(item.naves)
-          .map(id => state.user.bible.naves[id])
-          .filter(c => c)
-      : [],
-    words: item.words
-      ? Object.keys(item.words)
-          .map(id => state.user.bible.words[id])
-          .filter(c => c)
-      : [],
-    strongsHebreu: item.strongsHebreu
-      ? Object.keys(item.strongsHebreu)
-          .map(id => state.user.bible.strongsHebreu[id])
-          .filter(c => c)
-      : [],
-    strongsGrec: item.strongsGrec
-      ? Object.keys(item.strongsGrec)
-          .map(id => state.user.bible.strongsGrec[id])
-          .filter(c => c)
-      : [],
-    tag: state.user.bible.tags[item.id],
-  }))
+        : [],
+      notes: item.notes
+        ? Object.keys(item.notes)
+            .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
+            .filter(c => c)
+        : [],
+      studies: item.studies
+        ? Object.keys(item.studies)
+            .map(id => state.user.bible.studies[id])
+            .filter(c => c)
+        : [],
+      naves: item.naves
+        ? Object.keys(item.naves)
+            .map(id => state.user.bible.naves[id])
+            .filter(c => c)
+        : [],
+      words: item.words
+        ? Object.keys(item.words)
+            .map(id => state.user.bible.words[id])
+            .filter(c => c)
+        : [],
+      strongsHebreu: item.strongsHebreu
+        ? Object.keys(item.strongsHebreu)
+            .map(id => state.user.bible.strongsHebreu[id])
+            .filter(c => c)
+        : [],
+      strongsGrec: item.strongsGrec
+        ? Object.keys(item.strongsGrec)
+            .map(id => state.user.bible.strongsGrec[id])
+            .filter(c => c)
+        : [],
+      tag: state.user.bible.tags[item.id],
+    }),
+    shallowEqual
+  )
   const [titlePrompt, setTitlePrompt] = React.useState(false)
 
   return (

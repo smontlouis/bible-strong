@@ -17,7 +17,10 @@ const NotesSettingsModal = ({
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const noteId = isOpen
-  const note = useSelector(state => state.user.bible.notes[noteId])
+  const note = useSelector(
+    state => state.user.bible.notes[noteId],
+    shallowEqual
+  )
 
   const deleteNoteConfirmation = id => {
     Alert.alert(

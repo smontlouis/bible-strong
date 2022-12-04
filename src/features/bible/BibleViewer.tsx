@@ -31,6 +31,7 @@ import BibleWebView from './BibleWebView'
 import ReferenceModal from './ReferenceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import { shallowEqual } from 'recompose'
 
 const Container = styled.View({
   flex: 1,
@@ -138,7 +139,7 @@ const BibleViewer = ({
       }
     }
     return object
-  })
+  }, shallowEqual)
 
   const notesByChapter = useSelector((state: RootState) => {
     const notes = state.user.bible.notes
@@ -151,7 +152,7 @@ const BibleViewer = ({
       }
     }
     return object
-  })
+  }, shallowEqual)
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
     Object.keys(selectedVerses).find(s => state.user.bible.highlights[s])

@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import sizeof from 'firestore-size'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
@@ -31,6 +31,7 @@ import app from '../../../package.json'
 import BackBottomTabBar from '~features/app-switcher/BottomTabBar/BackBottomTabBar'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
+import { shallowEqual } from 'recompose'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -78,10 +79,13 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   const [, actions] = useBibleTabActions(defaultBibleAtom)
 
   const [isSyncing, setIsSyncing] = useState(false)
-  const { user, plan } = useSelector((state: RootState) => ({
-    user: state.user,
-    plan: state.plan,
-  }))
+  const { user, plan } = useSelector(
+    (state: RootState) => ({
+      user: state.user,
+      plan: state.plan,
+    }),
+    shallowEqual
+  )
   const userDoc = firebaseDb.collection('users').doc(user.id)
 
   const bibleJSON = useSelector((state: RootState) => state.user.bible)
@@ -344,4 +348,4 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     </Container>
   )
 }
-export default MoreScreen
+export default memo(MoreScreen)

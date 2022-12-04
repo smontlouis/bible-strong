@@ -1,8 +1,8 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -78,6 +78,9 @@ interface StrongScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
+const keyExtractor = item => `${item.Livre}-${item.Chapitre}-${item.Verset}`
+const flatListStyle = { paddingTop: 10 }
+
 const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   const [strongTab, setStrongTab] = useAtom(strongAtom)
 
@@ -111,7 +114,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
     // @ts-ignore
     return state.user.bible[strongPart][code]?.tags
-  })
+  }, shallowEqual)
 
   const setTitle = (title: string) =>
     setStrongTab(
@@ -202,6 +205,29 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
     })
   }
 
+  const {
+    Code,
+    Hebreu,
+    Grec,
+    Mot,
+    Phonetique,
+    Definition,
+    Origine,
+    Type,
+    LSG,
+  } = strongReference || {}
+
+  const flatListRenderItem = useCallback(
+    ({ item }) => (
+      <ConcordanceVerse
+        navigation={navigation}
+        concordanceFor={Code}
+        verse={item}
+      />
+    ),
+    [navigation, Code]
+  )
+
   if (error) {
     return (
       <Container>
@@ -221,18 +247,6 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   if (!strongReference) {
     return null
   }
-
-  const {
-    Code,
-    Hebreu,
-    Grec,
-    Mot,
-    Phonetique,
-    Definition,
-    Origine,
-    Type,
-    LSG,
-  } = strongReference
 
   return (
     <Container>
@@ -404,17 +418,9 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                 <FlatList
                   removeClippedSubviews
                   data={verses}
-                  keyExtractor={item =>
-                    `${item.Livre}-${item.Chapitre}-${item.Verset}`
-                  }
-                  contentContainerStyle={{ paddingTop: 10 }}
-                  renderItem={({ item }) => (
-                    <ConcordanceVerse
-                      navigation={navigation}
-                      concordanceFor={Code}
-                      verse={item}
-                    />
-                  )}
+                  keyExtractor={keyExtractor}
+                  contentContainerStyle={flatListStyle}
+                  renderItem={flatListRenderItem}
                 />
                 {count > 15 && (
                   <Box>

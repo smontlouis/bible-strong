@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ScrollView, RefreshControl } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { fetchPlans } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import ExplorePlanItem from './ExplorePlanItem'
@@ -51,7 +51,7 @@ const ExploreScreen = () => {
     )
 
     return onlinePlans
-  })
+  }, shallowEqual)
 
   React.useEffect(() => {
     dispatch(fetchPlans())

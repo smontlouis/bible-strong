@@ -1,47 +1,42 @@
 import { useAtom } from 'jotai'
 import { useEffect } from 'react'
 import {
-  withTiming,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withSequence,
   withDelay,
+  withSequence,
+  withTiming,
 } from 'react-native-reanimated'
 import {
   activeTabIndexAtom,
   tabActiveTabSnapshotAtom,
-  activeTabPropertiesAtom,
   tabsAtom,
 } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import { tabTimingConfig } from '../TabScreen/TabScreen'
+import { tabTimingConfig } from '../utils/constants'
 
 const useTabButtonPress = () => {
   const [activeTabIndex, setActiveTabIndex] = useAtom(activeTabIndexAtom)
-  const { isBottomTabBarVisible } = useAppSwitcherContext()
+
+  const { activeTabPreview, activeTabScreen } = useAppSwitcherContext()
+
   const [tabs] = useAtom(tabsAtom)
   const [, tabActiveTabSnapshot] = useAtom(tabActiveTabSnapshotAtom)
-  const [activeTabProperties, setActiveTabProperties] = useAtom(
-    activeTabPropertiesAtom
-  )
-  const { animationProgress } = activeTabProperties || {}
   const tabsLength = tabs.length
   const scale = useSharedValue(1)
 
-  const onClose = () => {
-    setActiveTabIndex(undefined)
-    setActiveTabProperties(undefined)
-  }
-
   const onPress = async () => {
-    if (animationProgress?.value) {
-      await tabActiveTabSnapshot(activeTabIndex)
-      isBottomTabBarVisible.value = withTiming(0)
-      animationProgress.value = withTiming(0, tabTimingConfig, () => {
-        runOnJS(onClose)()
-      })
-    }
+    await tabActiveTabSnapshot(activeTabIndex)
+    activeTabScreen.opacity.value = withTiming(0)
+    activeTabPreview.animationProgress.value = withTiming(
+      0,
+      tabTimingConfig,
+      () => {
+        activeTabPreview.zIndex.value = 2
+      }
+    )
+    runOnJS(setActiveTabIndex)(undefined)
   }
 
   const iconStyle = useAnimatedStyle(() => ({

@@ -4,7 +4,7 @@ import produce from 'immer'
 import React, { useEffect } from 'react'
 import { Appearance, EmitterSubscription, Platform } from 'react-native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import ImmersiveMode from 'react-native-immersive-mode'
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -52,53 +52,56 @@ const BibleTabScreen = ({
     version,
   } = navigation.state.params || {}
 
-  const { app, settings, fontFamily } = useSelector((state: RootState) => ({
-    app: {
-      book: book || state.bible.selectedBook,
-      chapter: chapter || state.bible.selectedChapter,
-      verse: verse || state.bible.selectedVerse,
-      version: version || state.bible.selectedVersion,
-      parallelVersions:
-        isSelectionMode || isReadOnly ? [] : state.bible.parallelVersions,
-    },
-    settings: produce(state.user.bible.settings, draftState => {
-      draftState.colors.default = {
-        ...theme.colors,
-        ...draftState.colors.default,
-      }
-      draftState.colors.dark = {
-        ...theme.colors,
-        ...draftState.colors.dark,
-      }
-      draftState.colors.black = {
-        ...theme.colors,
-        ...draftState.colors.black,
-      }
-      draftState.colors.sepia = {
-        ...theme.colors,
-        ...draftState.colors.sepia,
-      }
-
-      const preferredColorScheme = draftState.preferredColorScheme
-      const preferredDarkTheme = draftState.preferredDarkTheme
-      const preferredLightTheme = draftState.preferredLightTheme
-      const systemColorScheme = Appearance.getColorScheme()
-
-      // Provide derived theme as a settings now that we removed it from the redux store
-      draftState.theme = (() => {
-        if (preferredColorScheme === 'auto') {
-          if (systemColorScheme === 'dark') {
-            return preferredDarkTheme
-          }
-          return preferredLightTheme
+  const { app, settings, fontFamily } = useSelector(
+    (state: RootState) => ({
+      app: {
+        book: book || state.bible.selectedBook,
+        chapter: chapter || state.bible.selectedChapter,
+        verse: verse || state.bible.selectedVerse,
+        version: version || state.bible.selectedVersion,
+        parallelVersions:
+          isSelectionMode || isReadOnly ? [] : state.bible.parallelVersions,
+      },
+      settings: produce(state.user.bible.settings, draftState => {
+        draftState.colors.default = {
+          ...theme.colors,
+          ...draftState.colors.default,
+        }
+        draftState.colors.dark = {
+          ...theme.colors,
+          ...draftState.colors.dark,
+        }
+        draftState.colors.black = {
+          ...theme.colors,
+          ...draftState.colors.black,
+        }
+        draftState.colors.sepia = {
+          ...theme.colors,
+          ...draftState.colors.sepia,
         }
 
-        if (preferredColorScheme === 'dark') return preferredDarkTheme
-        return preferredLightTheme
-      })()
+        const preferredColorScheme = draftState.preferredColorScheme
+        const preferredDarkTheme = draftState.preferredDarkTheme
+        const preferredLightTheme = draftState.preferredLightTheme
+        const systemColorScheme = Appearance.getColorScheme()
+
+        // Provide derived theme as a settings now that we removed it from the redux store
+        draftState.theme = (() => {
+          if (preferredColorScheme === 'auto') {
+            if (systemColorScheme === 'dark') {
+              return preferredDarkTheme
+            }
+            return preferredLightTheme
+          }
+
+          if (preferredColorScheme === 'dark') return preferredDarkTheme
+          return preferredLightTheme
+        })()
+      }),
+      fontFamily: state.user.fontFamily,
     }),
-    fontFamily: state.user.fontFamily,
-  }))
+    shallowEqual
+  )
 
   const getIfMhyCommentsNeedsDownload = async () => {
     const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`

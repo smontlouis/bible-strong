@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
@@ -36,13 +36,17 @@ const fadeIn = {
 const AnimatedFlatList = React.forwardRef(
   ({ contentContainerStyle, ...props }, ref) => {
     const orientation = useDeviceOrientation()
+    const style = useMemo(
+      () => ({
+        paddingBottom: 10 + getBottomSpace(),
+        ...contentContainerStyle,
+      }),
+      []
+    )
     return (
       <FlatList
         orientation={orientation}
-        contentContainerStyle={{
-          paddingBottom: 10 + getBottomSpace(),
-          ...contentContainerStyle,
-        }}
+        contentContainerStyle={style}
         ref={ref}
         {...props}
       />

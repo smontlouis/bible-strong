@@ -1,8 +1,8 @@
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { activeTabIndexAtom, tabsAtom } from '../../../state/tabs'
 
 const useBibleButtonPress = () => {
-  const [activeTabIndex, setActiveTabIndex] = useAtom(activeTabIndexAtom)
+  const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const [tabs] = useAtom(tabsAtom)
 
   const onPress = () => {
@@ -10,7 +10,6 @@ const useBibleButtonPress = () => {
   }
 
   return {
-    isActive: activeTabIndex === tabs.findIndex(tab => tab.id === 'bible'),
     onPress,
   }
 }

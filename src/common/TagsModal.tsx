@@ -14,6 +14,7 @@ import Modal from './Modal'
 import SearchTagInput from './SearchTagInput'
 import Spacer from './ui/Spacer'
 import Fuse from 'fuse.js'
+import { shallowEqual } from 'recompose'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -23,7 +24,10 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   const [newTag, setNewTag] = useState('')
   const dispatch = useDispatch()
-  const tags = useSelector(state => Object.values(state.user.bible.tags))
+  const tags = useSelector(
+    state => Object.values(state.user.bible.tags),
+    shallowEqual
+  )
   const fuse = useMemo(() => new Fuse(tags, { keys: ['name'] }), [])
   const [filteredTags, setFilteredTags] = useState(tags)
   const { t } = useTranslation()

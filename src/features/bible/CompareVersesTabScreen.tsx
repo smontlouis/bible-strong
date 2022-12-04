@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 
 import verseToReference from '~helpers/verseToReference'
 
@@ -88,8 +88,9 @@ const CompareVersesTabScreen = ({
     }
   }, [selectedVerses])
 
-  const versionsToCompare = useSelector(state =>
-    Object.keys(state.user.bible.settings.compare)
+  const versionsToCompare = useSelector(
+    state => Object.keys(state.user.bible.settings.compare),
+    shallowEqual
   )
 
   return (

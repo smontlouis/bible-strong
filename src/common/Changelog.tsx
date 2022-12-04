@@ -5,7 +5,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
 
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
@@ -79,10 +79,14 @@ const Changelog = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const isFR = useLanguage()
-  const seenLogs = useSelector((state: RootState) =>
-    Object.keys(state.user.bible.changelog)
+  const seenLogs = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.changelog),
+    shallowEqual
   )
-  const changelog = useSelector((state: RootState) => state.user.changelog.data)
+  const changelog = useSelector(
+    (state: RootState) => state.user.changelog.data,
+    shallowEqual
+  )
   const changelogIsLoading = useSelector(
     (state: RootState) => state.user.changelog.isLoading
   )

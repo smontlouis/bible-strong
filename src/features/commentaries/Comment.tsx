@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
-import React, { useState } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
 import * as Animatable from 'react-native-animatable'
@@ -108,10 +108,18 @@ const useFrenchTranslation = (id: string) => {
   return { status, contentFR, startTranslation }
 }
 
+const fastImageStyle = { width: 40, height: 40 }
+
 const Comment = ({ comment, navigation }: Props) => {
   const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
+  const fastImageSource = useMemo(
+    () => ({
+      uri: cacheImage,
+    }),
+    [cacheImage]
+  )
   const { t } = useTranslation()
   const isFR = useLanguage()
 
@@ -163,12 +171,9 @@ https://bible-strong.app
     <Box m={20} marginBottom={0} p={20} rounded lightShadow bg="reverse">
       <LinkBox row onPress={() => setCollapsed(s => !s)}>
         <Box center width={40} height={40} borderRadius={20}>
-          <FastImage
-            style={{ width: 40, height: 40 }}
-            source={{
-              uri: cacheImage,
-            }}
-          />
+          {cacheImage && (
+            <FastImage style={fastImageStyle} source={fastImageSource} />
+          )}
         </Box>
         <Box ml={10} flex>
           <Text title fontSize={20}>
@@ -258,4 +263,4 @@ https://bible-strong.app
   )
 }
 
-export default withNavigation(Comment)
+export default withNavigation(memo(Comment))

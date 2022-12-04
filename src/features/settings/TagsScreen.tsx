@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Alert } from 'react-native'
 import styled from '@emotion/native'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import FabButton from '~common/ui/FabButton'
 import Header from '~common/Header'
@@ -108,7 +108,10 @@ const TagItem = ({ item, setOpen }) => {
 
 const TagsScreen = () => {
   const { t } = useTranslation()
-  const tags = useSelector(state => Object.values(state.user.bible.tags))
+  const tags = useSelector(
+    state => Object.values(state.user.bible.tags),
+    shallowEqual
+  )
   const [isOpen, setOpen] = useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
 

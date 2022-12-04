@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import {
   ActivityIndicator,
   Platform,
@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
 import Back from '~common/Back'
+import { shallowEqual } from 'recompose'
 
 const vodNb = [...Array(6).keys()]
 
@@ -102,7 +103,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = React.memo(() => {
+const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
@@ -113,7 +114,8 @@ const UserWidget = React.memo(() => {
       notes: Object.keys(bible.notes).length,
       studies: Object.keys(bible.studies).length,
       tags: Object.keys(bible.tags).length,
-    })
+    }),
+    shallowEqual
   )
   const [currentVOD, setCurrentVOD] = useState(0)
 
@@ -288,6 +290,6 @@ const UserWidget = React.memo(() => {
       </Box>
     </Container>
   )
-})
+}
 
-export default UserWidget
+export default memo(UserWidget)

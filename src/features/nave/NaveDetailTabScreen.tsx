@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Share } from 'react-native'
 import * as Icon from '@expo/vector-icons'
 import truncHTML from 'trunc-html'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import { WebView } from 'react-native-webview'
 
@@ -56,7 +56,8 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
   const tags = useSelector(
-    (state: RootState) => state.user.bible.naves[name_lower]?.tags
+    (state: RootState) => state.user.bible.naves[name_lower]?.tags,
+    shallowEqual
   )
 
   const setTitle = (title: string) =>
@@ -135,6 +136,8 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     }
   }
 
+  const onClosed = useCallback(() => setMultipleTagsItem(false), [])
+
   return (
     <Container>
       <Box
@@ -211,11 +214,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
           <WebView {...webviewProps(naveItem.description)} />
         )}
       </Box>
-      <MultipleTagsModal
-        multiple
-        item={multipleTagsItem}
-        onClosed={() => setMultipleTagsItem(false)}
-      />
+      <MultipleTagsModal multiple item={multipleTagsItem} onClosed={onClosed} />
     </Container>
   )
 }

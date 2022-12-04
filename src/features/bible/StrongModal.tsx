@@ -13,7 +13,7 @@ import { Modalize } from 'react-native-modalize'
 import { usePrevious } from '~helpers/usePrevious'
 import { isStrongVersion } from '~helpers/bibleVersions'
 import { useTheme } from '@emotion/react'
-import { Portal } from 'react-native-paper'
+import { Portal } from '@gorhom/portal'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ navigation, selectedCode, onClosed }) => {

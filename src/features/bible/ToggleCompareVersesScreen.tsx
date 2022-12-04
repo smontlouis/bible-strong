@@ -47,8 +47,9 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
 })
 
 const ToggleCompareVersesScreen = () => {
-  const versionsToCompare = useSelector(state =>
-    Object.keys(state.user.bible.settings.compare)
+  const versionsToCompare = useSelector(
+    state => Object.keys(state.user.bible.settings.compare),
+    shallowEqual
   )
   const dispatch = useDispatch()
   const { t } = useTranslation()

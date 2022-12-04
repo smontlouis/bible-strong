@@ -7,7 +7,7 @@ import { TFunction, useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, StatusBar } from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import ErrorBoundary from '~common/ErrorBoundary'
@@ -113,13 +113,7 @@ const InitApp = ({ persistor }: Props) => {
   useLiveUpdates()
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const { fontFamily } = useSelector((state: RootState) => ({
-    preferredColorScheme: state.user.bible.settings.preferredColorScheme,
-    preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
-    preferredLightTheme: state.user.bible.settings.preferredLightTheme,
-    fontFamily: state.user.fontFamily,
-  }))
-
+  const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
 
   useEffect(() => {
@@ -164,9 +158,6 @@ const InitApp = ({ persistor }: Props) => {
             <DBStateProvider>
               <ErrorBoundary>
                 <AppNavigator
-                  screenProps={{
-                    theme: currentTheme,
-                  }}
                   onNavigationStateChange={onNavigationStateChange}
                 />
               </ErrorBoundary>
