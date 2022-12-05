@@ -1,7 +1,6 @@
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useEffect } from 'react'
 import {
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -12,14 +11,13 @@ import {
   activeTabIndexAtom,
   tabActiveTabSnapshotAtom,
   tabsAtom,
-} from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import { tabTimingConfig } from '../utils/constants'
+} from '../../../../state/tabs'
+import { useTabAnimations } from '../../utils/worklets'
 
 const useTabButtonPress = () => {
-  const [activeTabIndex, setActiveTabIndex] = useAtom(activeTabIndexAtom)
+  const activeTabIndex = useAtomValue(activeTabIndexAtom)
 
-  const { activeTabPreview, activeTabScreen } = useAppSwitcherContext()
+  const { minimizeTab } = useTabAnimations()
 
   const [tabs] = useAtom(tabsAtom)
   const [, tabActiveTabSnapshot] = useAtom(tabActiveTabSnapshotAtom)
@@ -28,15 +26,7 @@ const useTabButtonPress = () => {
 
   const onPress = async () => {
     await tabActiveTabSnapshot(activeTabIndex)
-    activeTabScreen.opacity.value = withTiming(0)
-    activeTabPreview.animationProgress.value = withTiming(
-      0,
-      tabTimingConfig,
-      () => {
-        activeTabPreview.zIndex.value = 2
-      }
-    )
-    runOnJS(setActiveTabIndex)(undefined)
+    minimizeTab()
   }
 
   const iconStyle = useAnimatedStyle(() => ({

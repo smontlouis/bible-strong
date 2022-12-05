@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux'
 
 import { FeatherIcon } from '~common/ui/Icon'
 import { RootState } from '~redux/modules/reducer'
-import { TouchableBox } from '../../../common/ui/Box'
-import { TAB_ICON_SIZE } from '../utils/constants'
+import { TouchableBox } from '../../../../common/ui/Box'
+import { TAB_ICON_SIZE } from '../../utils/constants'
 
 const Circle = styled.View(({ theme }) => ({
   position: 'absolute',

@@ -1,4 +1,4 @@
-import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
+import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { memo } from 'react'
 import { Image } from 'react-native'
 import {
@@ -16,7 +16,6 @@ import {
   useAnimatedGestureHandler,
   useAnimatedRef,
   useAnimatedStyle,
-  withTiming,
 } from 'react-native-reanimated'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
@@ -25,10 +24,10 @@ import NaveIcon from '~common/NaveIcon'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { tabTimingConfig } from '~features/app-switcher/utils/constants'
-import { activeTabIndexAtom, TabItem } from '../../../../state/tabs'
-import { useAppSwitcherContext } from '../../AppSwitcherProvider'
-import useTabConstants from './useTabConstants'
+import { useTabAnimations } from '~features/app-switcher/utils/worklets'
+import { TabItem } from '../../../state/tabs'
+import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import useTabConstants from '../utils/useTabConstants'
 
 interface TabPreviewProps {
   index: number
@@ -68,20 +67,19 @@ const TabPreview = ({
   ...props
 }: TabPreviewProps & BoxProps) => {
   const [tab] = useAtom(tabAtom)
-  const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const theme = useTheme()
 
   // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
   const ref = useAnimatedRef<AnimatedBox>()
-  const { activeTabPreview, activeTabScreen } = useAppSwitcherContext()
-
-  const { animationProgress } = activeTabPreview
+  const { activeTabPreview } = useAppSwitcherContext()
+  const { expandTab } = useTabAnimations()
 
   const {
     GAP,
     TAB_PREVIEW_WIDTH,
     TAB_PREVIEW_HEIGHT,
     TAB_BORDER_RADIUS,
+    TEXTBOX_HEIGHT,
     WIDTH,
     HEIGHT,
   } = useTabConstants()
@@ -95,15 +93,7 @@ const TabPreview = ({
       // measure the image
       // width/height and position to animate from it to the full screen one
       const measurements = measure(ref)
-
-      activeTabPreview.zIndex.value = 3
-      activeTabPreview.left.value = measurements.pageX
-      activeTabPreview.top.value = measurements.pageY
-      activeTabPreview.index.value = index
-      animationProgress.value = withTiming(1, tabTimingConfig, () => {
-        runOnJS(setActiveTabIndex)(index)
-        activeTabScreen.opacity.value = withTiming(1)
-      })
+      expandTab({ index, left: measurements.pageX, top: measurements.pageY })
     },
   })
 
@@ -130,22 +120,22 @@ const TabPreview = ({
     if (activeTabPreview.index.value === index) {
       return {
         width: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [TAB_PREVIEW_WIDTH, WIDTH]
         ),
         height: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [TAB_PREVIEW_HEIGHT, HEIGHT]
         ),
         top: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [0, -activeTabPreview.top.value]
         ),
         left: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [0, -activeTabPreview.left.value]
         ),
@@ -166,17 +156,17 @@ const TabPreview = ({
     if (activeTabPreview.index.value === index) {
       return {
         top: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [0, -activeTabPreview.top.value]
         ),
         left: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [0, -activeTabPreview.left.value]
         ),
         opacity: interpolate(
-          animationProgress.value,
+          activeTabPreview.animationProgress.value,
           [0, 1],
           [1, 0],
           Extrapolate.CLAMP
@@ -190,7 +180,7 @@ const TabPreview = ({
   const xStyles = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
-        animationProgress.value,
+        activeTabPreview.animationProgress.value,
         [0, 1],
         [1, 0],
         Extrapolate.CLAMP
@@ -210,9 +200,9 @@ const TabPreview = ({
         exiting={ZoomOut}
         overflow="visible"
         style={boxStyles}
-        marginBottom={GAP + 20}
+        marginBottom={GAP}
         width={TAB_PREVIEW_WIDTH}
-        height={TAB_PREVIEW_HEIGHT}
+        height={TAB_PREVIEW_HEIGHT + TEXTBOX_HEIGHT}
         {...props}
       >
         <AnimatedBox
@@ -226,8 +216,8 @@ const TabPreview = ({
               backgroundColor: theme.colors.reverse,
               shadowColor: theme.colors.default,
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.1,
-              shadowRadius: 20,
+              shadowOpacity: 0.3,
+              shadowRadius: 10,
               elevation: 2,
             },
           ]}
@@ -243,22 +233,24 @@ const TabPreview = ({
           {tab.isRemovable && (
             <TapGestureHandler onGestureEvent={closeButtonHandler}>
               <AnimatedBox
-                bg="reverse"
-                width={24}
-                height={24}
-                borderRadius={12}
+                position="absolute"
+                top={0}
+                right={0}
+                width={40}
+                height={40}
                 center
-                lightShadow
-                style={[
-                  xStyles,
-                  {
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                  },
-                ]}
+                style={xStyles}
               >
-                <FeatherIcon name="x" size={14} />
+                <Box
+                  bg="reverse"
+                  width={24}
+                  height={24}
+                  borderRadius={12}
+                  center
+                  lightShadow
+                >
+                  <FeatherIcon name="x" size={16} />
+                </Box>
               </AnimatedBox>
             </TapGestureHandler>
           )}

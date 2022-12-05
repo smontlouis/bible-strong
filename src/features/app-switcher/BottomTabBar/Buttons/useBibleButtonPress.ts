@@ -1,5 +1,5 @@
 import { useAtom, useSetAtom } from 'jotai'
-import { activeTabIndexAtom, tabsAtom } from '../../../state/tabs'
+import { activeTabIndexAtom, tabsAtom } from '../../../../state/tabs'
 
 const useBibleButtonPress = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)

@@ -1,7 +1,7 @@
 import React from 'react'
 import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { TAB_ICON_SIZE } from '../utils/constants'
+import { TAB_ICON_SIZE } from '../../utils/constants'
 import useTabButtonPress from './useTabButtonPress'
 
 export interface TabButtonProps {}

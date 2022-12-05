@@ -1,11 +1,11 @@
 import React from 'react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { AnimatedBox } from '~common/ui/Box'
-import BibleButton from '../BottomTabBarButtons/BibleButton'
-import HomeButton from '../BottomTabBarButtons/HomeButton'
-import MenuButton from '../BottomTabBarButtons/MenuButton'
-import SearchButton from '../BottomTabBarButtons/SearchButton'
-import TabButton from '../BottomTabBarButtons/TabButton'
+import BibleButton from './Buttons/BibleButton'
+import HomeButton from './Buttons/HomeButton'
+import MenuButton from './Buttons/MenuButton'
+import SearchButton from './Buttons/SearchButton'
+import TabButton from './Buttons/TabButton'
 import useBottomBarStyles from './useBottomTabBarStyles'
 
 type BottomTabBarProps = {

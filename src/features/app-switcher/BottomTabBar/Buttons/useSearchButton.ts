@@ -4,9 +4,9 @@ import {
   activeTabIndexAtom,
   tabActiveTabSnapshotAtom,
   tabsAtomsAtom,
-} from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import { tabTimingConfig } from '../utils/constants'
+} from '../../../../state/tabs'
+import { useAppSwitcherContext } from '../../AppSwitcherProvider'
+import { tabTimingConfig } from '../../utils/constants'
 
 const useSearchButtonPress = () => {
   const [, dispatch] = useAtom(tabsAtomsAtom)

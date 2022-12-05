@@ -6,6 +6,7 @@ const useTabConstants = () => {
   const TABS_PER_ROW = 2
   const SCREEN_MARGIN = 20
   const GAP = 20
+  const TEXTBOX_HEIGHT = 20
   const HEIGHT_REDUCER_COEFFICIENT = 0.62
   const TAB_PREVIEW_WIDTH =
     (WIDTH - SCREEN_MARGIN * 2 - (TABS_PER_ROW - 1) * GAP) / TABS_PER_ROW
@@ -22,6 +23,7 @@ const useTabConstants = () => {
     TAB_BORDER_RADIUS,
     WIDTH,
     HEIGHT,
+    TEXTBOX_HEIGHT,
   }
 }
 

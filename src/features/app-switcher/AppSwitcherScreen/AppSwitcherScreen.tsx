@@ -1,27 +1,25 @@
 import { useAtom } from 'jotai'
 import React, { memo, useCallback, useRef } from 'react'
-import { LogBox, useWindowDimensions } from 'react-native'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
-import Animated from 'react-native-reanimated'
-import Box, { AnimatedBox } from '~common/ui/Box'
-import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
-import HomeScreen from '~features/home/HomeScreen'
-import MoreScreen from '~features/settings/MoreScreen'
-import { wp } from '~helpers/utils'
-import { tabsAtomsAtom } from '../../../../state/tabs'
-import AddTab from '../../AddTab'
-import { AppSwitcherProvider } from '../../AppSwitcherProvider'
-import VTabPreview from './TabPreview'
-import TabScreen from '../../TabScreen/TabScreen'
-import useAppSwitcher from './useAppSwitcher'
-import useTabConstants from './useTabConstants'
 import {
   getBottomSpace,
   getStatusBarHeight,
 } from 'react-native-iphone-x-helper'
+import Animated from 'react-native-reanimated'
+import Box, { AnimatedBox } from '~common/ui/Box'
+import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
+import HomeScreen from '~features/home/HomeScreen'
+import MoreScreen from '~features/settings/MoreScreen'
+import { wp } from '~helpers/utils'
+import { tabsAtomsAtom } from '../../../state/tabs'
+import { AppSwitcherProvider } from '../AppSwitcherProvider'
+import TabScreen from '../TabScreen/TabScreen'
+import useTabConstants from '../utils/useTabConstants'
+import VTabPreview from './TabPreview'
+import useAppSwitcher from './useAppSwitcher'
 
 interface AppSwitcherProps {
   openMenu: () => void
