@@ -8,6 +8,7 @@ import {
   useSharedValue,
 } from 'react-native-reanimated'
 import { activeTabIndexAtom, tabsAtomsAtom } from '../../state/tabs'
+import useTabConstants from './utils/useTabConstants'
 
 type AppSwitcherContextValues = {
   isBottomTabBarVisible: SharedValue<number>
@@ -31,6 +32,10 @@ type AppSwitcherContextValues = {
     gestureRefs: React.RefObject<TapGestureHandler>[]
     refs: React.RefObject<View>[]
   }
+  tabPreviewCarousel: {
+    translateY: SharedValue<number>
+    opacity: SharedValue<number>
+  }
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
@@ -43,6 +48,7 @@ export const AppSwitcherProvider = memo(
     const tabScreenRef = React.useRef<View>(null)
     const tabsAtoms = useAtomValue(tabsAtomsAtom)
     const activeTabIndex = useAtomValue(activeTabIndexAtom)
+    const { HEIGHT } = useTabConstants()
 
     const tabPreviewGestureRefs = useMemo(
       () => tabsAtoms.map(() => React.createRef<TapGestureHandler>()),
@@ -79,6 +85,12 @@ export const AppSwitcherProvider = memo(
       opacity: useSharedValue(1),
     }
 
+    const tabPreviewCarousel = {
+      // No need to mount/unmount the carousel, just visually hide it
+      translateY: useSharedValue(HEIGHT),
+      opacity: useSharedValue(0),
+    }
+
     const contextValue: AppSwitcherContextValues = React.useMemo(
       () => ({
         isBottomTabBarVisible,
@@ -86,6 +98,7 @@ export const AppSwitcherProvider = memo(
         activeTabScreen,
         scrollView,
         tabPreviews,
+        tabPreviewCarousel,
       }),
       [tabsAtoms]
     )

@@ -2,8 +2,9 @@ import { useAtomValue } from 'jotai'
 import { useEffect } from 'react'
 import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'
-import { tabsCountAtom } from '../../../state/tabs'
+import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import useMeasureTabPreview from './useMesureTabPreview'
+import useSlideToIndex from './useSlideToIndex'
 import { useTabAnimations } from './worklets'
 
 const useNewTab = () => {
@@ -11,6 +12,8 @@ const useNewTab = () => {
   const prevTabsCount = usePrevious(tabsCount)
   const { expandTab } = useTabAnimations()
   const measureTabPreview = useMeasureTabPreview()
+  const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
+  const slideToIndex = useSlideToIndex()
 
   useEffect(() => {
     const isNewTab =
@@ -20,15 +23,21 @@ const useNewTab = () => {
       ;(async () => {
         await wait(0)
         const index = tabsCount - 1
-        const { pageX, pageY } = await measureTabPreview(index)
-        expandTab({
-          index,
-          left: pageX,
-          top: pageY,
-        })
+
+        if (appSwitcherMode === 'list') {
+          const { pageX, pageY } = await measureTabPreview(index)
+          expandTab({
+            index,
+            left: pageX,
+            top: pageY,
+          })
+        }
+        if (appSwitcherMode === 'view') {
+          slideToIndex(index)
+        }
       })()
     }
-  }, [tabsCount, prevTabsCount])
+  }, [tabsCount, prevTabsCount, appSwitcherMode])
 }
 
 export default useNewTab

@@ -21,9 +21,10 @@ import {
 } from '../AppSwitcherProvider'
 import TabScreen from '../TabScreen/TabScreen'
 import useTabConstants from '../utils/useTabConstants'
-import VTabPreview from './TabPreview'
+import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
 import useNewTab from '../utils/useNewTab'
+import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -85,11 +86,11 @@ const AppSwitcherScreen = memo(
             ]}
           >
             {tabsAtoms.map((tabAtom, i) => (
-              <VTabPreview
+              <TabPreview
                 key={`${tabAtom}`}
                 index={i}
                 tabAtom={tabAtom}
-                marginRight={i % TABS_PER_ROW ? 0 : GAP}
+                marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
                 tapGestureRef={tabPreviews.gestureRefs[i]}
                 simultaneousHandlers={scrollView.ref}
                 onDelete={onDeleteItem}
@@ -100,6 +101,7 @@ const AppSwitcherScreen = memo(
         {activeAtom && (
           <TabScreen tabAtom={activeAtom} navigation={navigation} />
         )}
+        <TabPreviewCarousel tabsAtoms={tabsAtoms} />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>
     )

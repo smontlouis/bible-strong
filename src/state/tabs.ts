@@ -167,6 +167,15 @@ export const tabsAtom = atom<TabItem[]>([
     },
   },
   {
+    id: `search-${Date.now()}`,
+    title: 'Recherche',
+    isRemovable: true,
+    type: 'search',
+    data: {
+      searchValue: 'Salut',
+    },
+  },
+  {
     id: `strong-${Date.now()}`,
     title: 'Lexique',
     isRemovable: true,
@@ -205,12 +214,12 @@ export const tabsAtom = atom<TabItem[]>([
     },
   },
   {
-    id: `search-${Date.now()}`,
+    id: `search-2-${Date.now()}`,
     title: 'Recherche',
     isRemovable: true,
     type: 'search',
     data: {
-      searchValue: 'Salut',
+      searchValue: 'coucou',
     },
   },
 ])

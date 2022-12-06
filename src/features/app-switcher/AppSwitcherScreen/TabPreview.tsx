@@ -107,11 +107,7 @@ const TabPreview = ({
   }, [])
 
   const onTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onFinish: (_evt, _ctx, isCanceledOrFailed) => {
-      if (isCanceledOrFailed) {
-        return
-      }
-
+    onEnd: () => {
       // measure the image
       // width/height and position to animate from it to the full screen one
       const measurements = measure(ref)
@@ -122,7 +118,7 @@ const TabPreview = ({
   const closeButtonHandler = useAnimatedGestureHandler<
     TapGestureHandlerGestureEvent
   >({
-    onFinish: () => {
+    onEnd: () => {
       activeTabPreview.zIndex.value = 1
       runOnJS(onDelete)(index)
     },
@@ -135,7 +131,10 @@ const TabPreview = ({
         zIndex: activeTabPreview.zIndex.value,
       }
     }
-    return {}
+    return {
+      position: 'relative',
+      zIndex: 2,
+    }
   })
 
   const previewImageStyles = useAnimatedStyle(() => {
@@ -216,6 +215,7 @@ const TabPreview = ({
       ref={tapGestureRef}
       simultaneousHandlers={simultaneousHandlers}
       maxDist={1}
+      maxDurationMs={500}
     >
       <AnimatedBox
         layout={Layout}
@@ -253,7 +253,11 @@ const TabPreview = ({
             <Box opacity={0.3}>{getIconType(tab.type, 30)}</Box>
           )}
           {tab.isRemovable && (
-            <TapGestureHandler onGestureEvent={closeButtonHandler}>
+            <TapGestureHandler
+              onGestureEvent={closeButtonHandler}
+              maxDist={1}
+              maxDurationMs={500}
+            >
               <AnimatedBox
                 position="absolute"
                 top={0}
