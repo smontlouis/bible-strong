@@ -1,22 +1,10 @@
-import { PrimitiveAtom, useAtom } from 'jotai'
-import React, { memo, useEffect } from 'react'
+import { PrimitiveAtom, useAtomValue } from 'jotai'
+import React, { memo } from 'react'
 import { Image } from 'react-native'
-import {
-  TapGestureHandler,
-  TapGestureHandlerGestureEvent,
-} from 'react-native-gesture-handler'
-import { Layout, runOnUI, scrollTo, ZoomOut } from 'react-native-reanimated'
+import { TapGestureHandler } from 'react-native-gesture-handler'
+import { Layout, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
-import {
-  Extrapolate,
-  interpolate,
-  measure,
-  runOnJS,
-  useAnimatedGestureHandler,
-  useAnimatedRef,
-  useAnimatedStyle,
-} from 'react-native-reanimated'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -24,12 +12,9 @@ import NaveIcon from '~common/NaveIcon'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useTabAnimations } from '~features/app-switcher/utils/worklets'
 import { TabItem } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useTabConstants from '../utils/useTabConstants'
-import useMeasureTabPreview from '../utils/useMesureTabPreview'
-import wait from '~helpers/wait'
+import useTabPreview from './useTabPreview'
 
 interface TabPreviewProps {
   index: number
@@ -68,145 +53,27 @@ const TabPreview = ({
   onDelete,
   ...props
 }: TabPreviewProps & BoxProps) => {
-  const [tab] = useAtom(tabAtom)
   const theme = useTheme()
-
-  const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
-  const measureTabPreview = useMeasureTabPreview()
-  // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
-  tabPreviews.refs[index] = useAnimatedRef<AnimatedBox>()
-  const ref = tabPreviews.refs[index]
-
-  const { expandTab } = useTabAnimations()
+  const tab = useAtomValue(tabAtom)
 
   const {
     GAP,
     TAB_PREVIEW_WIDTH,
     TAB_PREVIEW_HEIGHT,
-    TAB_BORDER_RADIUS,
     TEXTBOX_HEIGHT,
-    WIDTH,
-    HEIGHT,
-    STATUS_BAR_HEIGHT,
-    SCREEN_MARGIN,
   } = useTabConstants()
 
-  // On mount, measure the initial tab preview
-  useEffect(() => {
-    if (index === activeTabPreview.index.value) {
-      ;(async () => {
-        await wait(300)
-        const { pageX, pageY } = await measureTabPreview(index)
-        activeTabPreview.top.value = pageY
-        activeTabPreview.left.value = pageX
-
-        const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
-        runOnUI(scrollTo)(scrollView.ref, 0, scrollToTop, false)
-      })()
-    }
-  }, [])
-
-  const onTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onEnd: () => {
-      // measure the image
-      // width/height and position to animate from it to the full screen one
-      const measurements = measure(ref)
-      expandTab({ index, left: measurements.pageX, top: measurements.pageY })
-    },
-  })
-
-  const closeButtonHandler = useAnimatedGestureHandler<
-    TapGestureHandlerGestureEvent
-  >({
-    onEnd: () => {
-      activeTabPreview.zIndex.value = 1
-      runOnJS(onDelete)(index)
-    },
-  })
-
-  const boxStyles = useAnimatedStyle(() => {
-    if (activeTabPreview.index.value === index) {
-      return {
-        position: 'relative',
-        zIndex: activeTabPreview.zIndex.value,
-      }
-    }
-    return {
-      position: 'relative',
-      zIndex: 2,
-    }
-  })
-
-  const previewImageStyles = useAnimatedStyle(() => {
-    if (activeTabPreview.index.value === index) {
-      return {
-        width: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [TAB_PREVIEW_WIDTH, WIDTH]
-        ),
-        height: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [TAB_PREVIEW_HEIGHT, HEIGHT]
-        ),
-        top: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [0, -activeTabPreview.top.value]
-        ),
-        left: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [0, -activeTabPreview.left.value]
-        ),
-        borderRadius: TAB_BORDER_RADIUS,
-      }
-    }
-
-    return {
-      width: TAB_PREVIEW_WIDTH,
-      height: TAB_PREVIEW_HEIGHT,
-      top: 0,
-      left: 0,
-      borderRadius: TAB_BORDER_RADIUS,
-    }
-  })
-
-  const textStyles = useAnimatedStyle(() => {
-    if (activeTabPreview.index.value === index) {
-      return {
-        top: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [0, -activeTabPreview.top.value]
-        ),
-        left: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [0, -activeTabPreview.left.value]
-        ),
-        opacity: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [1, 0],
-          Extrapolate.CLAMP
-        ),
-      }
-    }
-
-    return {}
-  })
-
-  const xStyles = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(
-        activeTabPreview.animationProgress.value,
-        [0, 1],
-        [1, 0],
-        Extrapolate.CLAMP
-      ),
-    }
+  const {
+    ref,
+    boxStyles,
+    previewImageStyles,
+    textStyles,
+    xStyles,
+    onTap,
+    onClose,
+  } = useTabPreview({
+    index,
+    onDelete,
   })
 
   return (
@@ -235,7 +102,6 @@ const TabPreview = ({
           style={[
             previewImageStyles,
             {
-              backgroundColor: theme.colors.reverse,
               shadowColor: theme.colors.default,
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
@@ -254,7 +120,7 @@ const TabPreview = ({
           )}
           {tab.isRemovable && (
             <TapGestureHandler
-              onGestureEvent={closeButtonHandler}
+              onGestureEvent={onClose}
               maxDist={1}
               maxDurationMs={500}
             >

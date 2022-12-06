@@ -1,5 +1,4 @@
 import { useAtomValue } from 'jotai'
-import { useEffect } from 'react'
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -8,6 +7,7 @@ import {
   withTiming,
 } from 'react-native-reanimated'
 import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActiveTabSnapshot'
+import useDidUpdate from '~helpers/useDidUpdate'
 import { activeTabIndexAtom, tabsCountAtom } from '../../../../state/tabs'
 import { useTabAnimations } from '../../utils/worklets'
 
@@ -33,7 +33,7 @@ const useTabButtonPress = () => {
     ],
   }))
 
-  useEffect(() => {
+  useDidUpdate(() => {
     scale.value = withDelay(
       300,
       withSequence(
