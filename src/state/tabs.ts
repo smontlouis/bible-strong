@@ -153,34 +153,7 @@ export const defaultBibleTab: BibleTab = {
 //   storage as any
 // )
 
-export const activeTabRefAtom = atom<RefObject<View> | undefined>(undefined)
 export const activeTabIndexAtom = atom<number | undefined>(0)
-export const activeTabPropertiesAtom = atom<TabProperties | undefined>(
-  undefined
-)
-
-export const tabActiveTabSnapshotAtom = atom(null, async (get, set) => {
-  const currentIndex = get(activeTabIndexAtom)
-  const currentTabRef = get(activeTabRefAtom)
-
-  if (!currentTabRef || typeof currentIndex === 'undefined') {
-    throw new Error('No active tab')
-  }
-
-  const data = await captureRef(currentTabRef, {
-    result: 'base64',
-    format: 'png',
-  })
-  const resolution = /^(\d+):(\d+)\|/g.exec(data)
-  const base64 = data.substr((resolution || [''])[0].length || 0)
-
-  set(
-    tabsAtom,
-    produce(draft => {
-      draft[currentIndex].base64Preview = base64
-    })
-  )
-})
 
 export const tabsAtom = atom<TabItem[]>([
   defaultBibleTab,
@@ -245,6 +218,7 @@ export const tabsAtom = atom<TabItem[]>([
 ])
 
 export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
+export const tabsCountAtom = atom(get => get(tabsAtom).length)
 
 export const checkTabType = <Type extends TabItem>(
   tab: TabItem | undefined,
@@ -609,3 +583,6 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   return [bibleTab, actions] as [BibleTab, typeof actions]
 }
+
+export type AppSwitcherMode = 'list' | 'view'
+export const appSwitcherModeAtom = atom<AppSwitcherMode>('view')

@@ -1,13 +1,13 @@
 import { useSetAtom } from 'jotai'
 import { useCallback } from 'react'
 import { runOnJS, withTiming } from 'react-native-reanimated'
-import { activeTabIndexAtom } from '../../../state/tabs'
+import { activeTabIndexAtom, appSwitcherModeAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
-
+  const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
   const { activeTabPreview, activeTabScreen } = useAppSwitcherContext()
 
   const minimizeTab = useCallback(() => {
@@ -20,13 +20,21 @@ export const useTabAnimations = () => {
         activeTabPreview.zIndex.value = 2
       }
     )
-
+    runOnJS(setAppSwitcherMode)('list')
     runOnJS(setActiveTabIndex)(undefined)
   }, [])
 
   const expandTab = useCallback(
-    ({ index, left, top }: { index: number; left: number; top: number }) => {
+    (
+      { index, left, top }: { index: number; left: number; top: number } = {
+        index: activeTabPreview.index.value,
+        left: activeTabPreview.left.value,
+        top: activeTabPreview.top.value,
+      }
+    ) => {
       'worklet'
+
+      runOnJS(setAppSwitcherMode)('view')
       activeTabPreview.zIndex.value = 3
       activeTabPreview.left.value = left
       activeTabPreview.top.value = top

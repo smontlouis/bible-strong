@@ -7,7 +7,7 @@ import useTabButtonPress from './useTabButtonPress'
 export interface TabButtonProps {}
 
 const TabButton = ({}: TabButtonProps) => {
-  const { onPress, tabsLength, iconStyle } = useTabButtonPress()
+  const { onPress, tabsCount, iconStyle } = useTabButtonPress()
   return (
     <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
       <AnimatedBox
@@ -19,7 +19,7 @@ const TabButton = ({}: TabButtonProps) => {
         style={iconStyle}
       >
         <Text fontSize={12} color="tertiary">
-          {tabsLength}
+          {tabsCount}
         </Text>
       </AnimatedBox>
     </TouchableBox>

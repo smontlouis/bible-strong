@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtomValue } from 'jotai'
 import { useEffect } from 'react'
 import {
   useAnimatedStyle,
@@ -7,25 +7,21 @@ import {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import {
-  activeTabIndexAtom,
-  tabActiveTabSnapshotAtom,
-  tabsAtom,
-} from '../../../../state/tabs'
+import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActiveTabSnapshot'
+import { activeTabIndexAtom, tabsCountAtom } from '../../../../state/tabs'
 import { useTabAnimations } from '../../utils/worklets'
 
 const useTabButtonPress = () => {
   const activeTabIndex = useAtomValue(activeTabIndexAtom)
+  const tabsCount = useAtomValue(tabsCountAtom)
+  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
   const { minimizeTab } = useTabAnimations()
 
-  const [tabs] = useAtom(tabsAtom)
-  const [, tabActiveTabSnapshot] = useAtom(tabActiveTabSnapshotAtom)
-  const tabsLength = tabs.length
   const scale = useSharedValue(1)
 
   const onPress = async () => {
-    await tabActiveTabSnapshot(activeTabIndex)
+    await takeActiveTabSnapshot(activeTabIndex)
     minimizeTab()
   }
 
@@ -45,9 +41,9 @@ const useTabButtonPress = () => {
         withTiming(1, { duration: 500 })
       )
     )
-  }, [tabsLength, scale])
+  }, [tabsCount, scale])
 
-  return { onPress, tabsLength, iconStyle }
+  return { onPress, tabsCount, iconStyle }
 }
 
 export default useTabButtonPress

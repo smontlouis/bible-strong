@@ -43,7 +43,6 @@ const AppSwitcherScreen = memo(
       scrollViewRef,
       tapGestureRefs,
       onDeleteItem,
-      scrollHandler,
       PADDING_HORIZONTAL,
       scrollViewBoxStyle,
       activeAtom,
@@ -56,7 +55,6 @@ const AppSwitcherScreen = memo(
           ref={scrollViewRef}
           simultaneousHandlers={tapGestureRefs}
           showsVerticalScrollIndicator={false}
-          // onScroll={scrollHandler}
           contentContainerStyle={{
             paddingTop: getStatusBarHeight() + SCREEN_MARGIN,
             paddingLeft: PADDING_HORIZONTAL,

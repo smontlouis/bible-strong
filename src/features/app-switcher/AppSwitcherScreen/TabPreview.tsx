@@ -1,5 +1,5 @@
 import { PrimitiveAtom, useAtom } from 'jotai'
-import React, { memo } from 'react'
+import React, { memo, useEffect } from 'react'
 import { Image } from 'react-native'
 import {
   TapGestureHandler,
@@ -83,6 +83,18 @@ const TabPreview = ({
     WIDTH,
     HEIGHT,
   } = useTabConstants()
+
+  // On mount, measure the initial tab preview
+  useEffect(() => {
+    if (index === activeTabPreview.index.value) {
+      setTimeout(() => {
+        ref.current.measure((x, y, width, height, pageX, pageY) => {
+          activeTabPreview.top.value = pageY
+          activeTabPreview.left.value = pageX
+        })
+      }, 300)
+    }
+  }, [])
 
   const onTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onFinish: (_evt, _ctx, isCanceledOrFailed) => {

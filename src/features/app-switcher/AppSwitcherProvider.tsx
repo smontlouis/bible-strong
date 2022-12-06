@@ -1,4 +1,5 @@
 import React, { createContext, memo, useContext } from 'react'
+import { View } from 'react-native'
 import { SharedValue, useSharedValue } from 'react-native-reanimated'
 
 type AppSwitcherContextValues = {
@@ -12,7 +13,7 @@ type AppSwitcherContextValues = {
     zIndex: SharedValue<number>
   }
   activeTabScreen: {
-    animationProgress: SharedValue<number>
+    ref: React.RefObject<View>
     opacity: SharedValue<number>
   }
 }
@@ -23,6 +24,8 @@ const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
 
 export const AppSwitcherProvider = memo(
   ({ children }: { children: React.ReactNode }) => {
+    const tabScreenRef = React.useRef<View>(null)
+
     const isBottomTabBarVisible = useSharedValue(1)
 
     const activeTabPreview = {
@@ -30,12 +33,12 @@ export const AppSwitcherProvider = memo(
       top: useSharedValue(0),
       left: useSharedValue(0),
       opacity: useSharedValue(0),
-      animationProgress: useSharedValue(0),
+      animationProgress: useSharedValue(1),
       zIndex: useSharedValue(2),
     }
 
     const activeTabScreen = {
-      animationProgress: useSharedValue(0),
+      ref: tabScreenRef,
       opacity: useSharedValue(1),
     }
 

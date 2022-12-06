@@ -1,6 +1,6 @@
 import { PrimitiveAtom, useAtom } from 'jotai'
-import React, { memo, useEffect, useRef } from 'react'
-import { StyleSheet, useWindowDimensions, View } from 'react-native'
+import React, { memo } from 'react'
+import { StyleSheet, useWindowDimensions } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'
 
 import { NavigationStackProp } from 'react-navigation-stack'
@@ -13,7 +13,7 @@ import CommentariesTabScreen from '~features/commentaries/CommentariesTabScreen'
 import DictionaryDetailTabScreen from '~features/dictionnary/DictionaryDetailTabScreen'
 import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
-import { activeTabRefAtom, TabItem } from '../../../state/tabs'
+import { TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 
 import TabScreenWrapper from './TabScreenWrapper'
@@ -66,8 +66,6 @@ const TabScreen = ({
   navigation: NavigationStackProp
 }) => {
   const [tab] = useAtom(tabAtom)
-  const tabScreenRef = useRef<View>(null)
-  const [, setActiveTabRef] = useAtom(activeTabRefAtom)
   const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
   const { activeTabScreen } = useAppSwitcherContext()
 
@@ -82,19 +80,11 @@ const TabScreen = ({
     }
   })
 
-  useEffect(() => {
-    setActiveTabRef(tabScreenRef)
-
-    return () => {
-      setActiveTabRef(undefined)
-    }
-  }, [setActiveTabRef])
-
   const { component: Component, atomName } = getComponentTab(tab) || {}
 
   if (Component && atomName) {
     return (
-      <TabScreenWrapper style={imageStyles} ref={tabScreenRef}>
+      <TabScreenWrapper style={imageStyles} ref={activeTabScreen.ref}>
         {/* @ts-ignore */}
         <Component
           {...{
@@ -107,7 +97,7 @@ const TabScreen = ({
   }
 
   return (
-    <TabScreenWrapper style={imageStyles} ref={tabScreenRef}>
+    <TabScreenWrapper style={imageStyles} ref={activeTabScreen.ref}>
       <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
         <Text>{tab.title}</Text>
       </Box>
