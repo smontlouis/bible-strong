@@ -1,14 +1,21 @@
 import { useSetAtom } from 'jotai'
 import { useCallback } from 'react'
-import { runOnJS, withTiming } from 'react-native-reanimated'
+import { runOnJS, scrollTo, withTiming } from 'react-native-reanimated'
 import { activeTabIndexAtom, appSwitcherModeAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
+import useTabConstants from './useTabConstants'
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
-  const { activeTabPreview, activeTabScreen } = useAppSwitcherContext()
+  const {
+    activeTabPreview,
+    activeTabScreen,
+    scrollView,
+  } = useAppSwitcherContext()
+
+  const { SCREEN_MARGIN, STATUS_BAR_HEIGHT } = useTabConstants()
 
   const minimizeTab = useCallback(() => {
     'worklet'
@@ -25,13 +32,7 @@ export const useTabAnimations = () => {
   }, [])
 
   const expandTab = useCallback(
-    (
-      { index, left, top }: { index: number; left: number; top: number } = {
-        index: activeTabPreview.index.value,
-        left: activeTabPreview.left.value,
-        top: activeTabPreview.top.value,
-      }
-    ) => {
+    ({ index, left, top }: { index: number; left: number; top: number }) => {
       'worklet'
 
       runOnJS(setAppSwitcherMode)('view')
@@ -39,12 +40,18 @@ export const useTabAnimations = () => {
       activeTabPreview.left.value = left
       activeTabPreview.top.value = top
       activeTabPreview.index.value = index
+
       activeTabPreview.animationProgress.value = withTiming(
         1,
         tabTimingConfig,
         () => {
           runOnJS(setActiveTabIndex)(index)
-          activeTabScreen.opacity.value = withTiming(1)
+          activeTabScreen.opacity.value = withTiming(1, undefined, () => {
+            if (top >= STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
+              const scrollToTop = top - STATUS_BAR_HEIGHT - SCREEN_MARGIN
+              scrollTo(scrollView.ref, 0, scrollToTop, false)
+            }
+          })
         }
       )
     },

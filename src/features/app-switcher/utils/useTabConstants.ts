@@ -1,4 +1,5 @@
 import { useWindowDimensions } from 'react-native'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 const useTabConstants = () => {
   const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
@@ -13,6 +14,7 @@ const useTabConstants = () => {
   const TAB_PREVIEW_HEIGHT =
     ((TAB_PREVIEW_WIDTH * HEIGHT) / WIDTH) * HEIGHT_REDUCER_COEFFICIENT
   const TAB_BORDER_RADIUS = (TAB_PREVIEW_WIDTH * 40) / WIDTH
+  const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
   return {
     TABS_PER_ROW,
@@ -24,6 +26,7 @@ const useTabConstants = () => {
     WIDTH,
     HEIGHT,
     TEXTBOX_HEIGHT,
+    STATUS_BAR_HEIGHT,
   }
 }
 

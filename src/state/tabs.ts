@@ -1,10 +1,8 @@
 import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
 import { splitAtom } from 'jotai/utils'
-import { RefObject, useCallback, useMemo } from 'react'
-import { View } from 'react-native'
+import { useCallback, useMemo } from 'react'
 import Animated from 'react-native-reanimated'
-import { captureRef } from 'react-native-view-shot'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { StrongReference } from '~common/types'
@@ -153,7 +151,7 @@ export const defaultBibleTab: BibleTab = {
 //   storage as any
 // )
 
-export const activeTabIndexAtom = atom<number | undefined>(0)
+export const activeTabIndexAtom = atom<number | undefined>(3)
 
 export const tabsAtom = atom<TabItem[]>([
   defaultBibleTab,

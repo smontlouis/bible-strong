@@ -15,11 +15,15 @@ import HomeScreen from '~features/home/HomeScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
 import { tabsAtomsAtom } from '../../../state/tabs'
-import { AppSwitcherProvider } from '../AppSwitcherProvider'
+import {
+  AppSwitcherProvider,
+  useAppSwitcherContext,
+} from '../AppSwitcherProvider'
 import TabScreen from '../TabScreen/TabScreen'
 import useTabConstants from '../utils/useTabConstants'
 import VTabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
+import useNewTab from '../utils/useNewTab'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -39,22 +43,27 @@ const AppSwitcherScreen = memo(
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
 
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
+
     const {
-      scrollViewRef,
-      tapGestureRefs,
       onDeleteItem,
       PADDING_HORIZONTAL,
       scrollViewBoxStyle,
       activeAtom,
     } = useAppSwitcher()
 
+    const { scrollView, tabPreviews } = useAppSwitcherContext()
+
+    useNewTab()
+
     return (
       <Box flex={1} bg="lightGrey">
         <AnimatedScrollView
           // @ts-ignore
-          ref={scrollViewRef}
-          simultaneousHandlers={tapGestureRefs}
+          ref={scrollView.ref}
+          simultaneousHandlers={tabPreviews.gestureRefs}
           showsVerticalScrollIndicator={false}
+          // onScroll={scrollHandler}
+          // scrollEventThrottle={16}
           contentContainerStyle={{
             paddingTop: getStatusBarHeight() + SCREEN_MARGIN,
             paddingLeft: PADDING_HORIZONTAL,
@@ -81,8 +90,8 @@ const AppSwitcherScreen = memo(
                 index={i}
                 tabAtom={tabAtom}
                 marginRight={i % TABS_PER_ROW ? 0 : GAP}
-                tapGestureRef={tapGestureRefs[i]}
-                simultaneousHandlers={scrollViewRef}
+                tapGestureRef={tabPreviews.gestureRefs[i]}
+                simultaneousHandlers={scrollView.ref}
                 onDelete={onDeleteItem}
               />
             ))}

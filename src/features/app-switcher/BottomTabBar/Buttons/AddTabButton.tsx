@@ -10,7 +10,7 @@ export interface AddTabButtonProps {}
 const AddTabButton = ({}: AddTabButtonProps) => {
   const dispatch = useSetAtom(tabsAtomsAtom)
 
-  const onPress = () =>
+  const onPress = () => {
     dispatch({
       type: 'insert',
       value: {
@@ -21,6 +21,7 @@ const AddTabButton = ({}: AddTabButtonProps) => {
         data: {},
       },
     })
+  }
 
   return (
     <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>

@@ -5,7 +5,7 @@ import {
   TapGestureHandler,
   TapGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler'
-import { Layout, ZoomOut } from 'react-native-reanimated'
+import { Layout, runOnUI, scrollTo, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
 import {
@@ -28,6 +28,8 @@ import { useTabAnimations } from '~features/app-switcher/utils/worklets'
 import { TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useTabConstants from '../utils/useTabConstants'
+import useMeasureTabPreview from '../utils/useMesureTabPreview'
+import wait from '~helpers/wait'
 
 interface TabPreviewProps {
   index: number
@@ -69,9 +71,12 @@ const TabPreview = ({
   const [tab] = useAtom(tabAtom)
   const theme = useTheme()
 
+  const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
+  const measureTabPreview = useMeasureTabPreview()
   // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
-  const ref = useAnimatedRef<AnimatedBox>()
-  const { activeTabPreview } = useAppSwitcherContext()
+  tabPreviews.refs[index] = useAnimatedRef<AnimatedBox>()
+  const ref = tabPreviews.refs[index]
+
   const { expandTab } = useTabAnimations()
 
   const {
@@ -82,17 +87,22 @@ const TabPreview = ({
     TEXTBOX_HEIGHT,
     WIDTH,
     HEIGHT,
+    STATUS_BAR_HEIGHT,
+    SCREEN_MARGIN,
   } = useTabConstants()
 
   // On mount, measure the initial tab preview
   useEffect(() => {
     if (index === activeTabPreview.index.value) {
-      setTimeout(() => {
-        ref.current.measure((x, y, width, height, pageX, pageY) => {
-          activeTabPreview.top.value = pageY
-          activeTabPreview.left.value = pageX
-        })
-      }, 300)
+      ;(async () => {
+        await wait(300)
+        const { pageX, pageY } = await measureTabPreview(index)
+        activeTabPreview.top.value = pageY
+        activeTabPreview.left.value = pageX
+
+        const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
+        runOnUI(scrollTo)(scrollView.ref, 0, scrollToTop, false)
+      })()
     }
   }, [])
 

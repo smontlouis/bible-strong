@@ -1,6 +1,13 @@
-import React, { createContext, memo, useContext } from 'react'
-import { View } from 'react-native'
-import { SharedValue, useSharedValue } from 'react-native-reanimated'
+import { useAtomValue } from 'jotai'
+import React, { createContext, memo, useContext, useMemo } from 'react'
+import { ScrollView, View } from 'react-native'
+import { TapGestureHandler } from 'react-native-gesture-handler'
+import {
+  SharedValue,
+  useAnimatedRef,
+  useSharedValue,
+} from 'react-native-reanimated'
+import { activeTabIndexAtom, tabsAtomsAtom } from '../../state/tabs'
 
 type AppSwitcherContextValues = {
   isBottomTabBarVisible: SharedValue<number>
@@ -16,6 +23,14 @@ type AppSwitcherContextValues = {
     ref: React.RefObject<View>
     opacity: SharedValue<number>
   }
+  scrollView: {
+    ref: React.RefObject<ScrollView>
+    y: SharedValue<number>
+  }
+  tabPreviews: {
+    gestureRefs: React.RefObject<TapGestureHandler>[]
+    refs: React.RefObject<View>[]
+  }
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
@@ -24,12 +39,34 @@ const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
 
 export const AppSwitcherProvider = memo(
   ({ children }: { children: React.ReactNode }) => {
+    const scrollViewRef = useAnimatedRef<ScrollView>()
     const tabScreenRef = React.useRef<View>(null)
+    const tabsAtoms = useAtomValue(tabsAtomsAtom)
+    const activeTabIndex = useAtomValue(activeTabIndexAtom)
+
+    const tabPreviewGestureRefs = useMemo(
+      () => tabsAtoms.map(() => React.createRef<TapGestureHandler>()),
+      [tabsAtoms]
+    )
+
+    const tabPreviewRefs = useMemo(() => new Array(tabsAtoms.length), [
+      tabsAtoms,
+    ])
 
     const isBottomTabBarVisible = useSharedValue(1)
 
+    const scrollView = {
+      ref: scrollViewRef,
+      y: useSharedValue(0),
+    }
+
+    const tabPreviews = {
+      gestureRefs: tabPreviewGestureRefs,
+      refs: tabPreviewRefs,
+    }
+
     const activeTabPreview = {
-      index: useSharedValue(0),
+      index: useSharedValue(activeTabIndex || 0),
       top: useSharedValue(0),
       left: useSharedValue(0),
       opacity: useSharedValue(0),
@@ -42,13 +79,15 @@ export const AppSwitcherProvider = memo(
       opacity: useSharedValue(1),
     }
 
-    const contextValue = React.useMemo(
+    const contextValue: AppSwitcherContextValues = React.useMemo(
       () => ({
         isBottomTabBarVisible,
         activeTabPreview,
         activeTabScreen,
+        scrollView,
+        tabPreviews,
       }),
-      []
+      [tabsAtoms]
     )
 
     return (
