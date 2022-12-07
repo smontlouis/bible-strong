@@ -1,11 +1,11 @@
 import { useAtomValue, useSetAtom } from 'jotai'
-import useSlideToIndex from '~features/app-switcher/utils/useSlideToIndex'
+import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
 import { tabsAtom, tabsAtomsAtom } from '../../../../state/tabs'
 
 const useSearchButtonPress = () => {
   const dispatch = useSetAtom(tabsAtomsAtom)
   const tabs = useAtomValue(tabsAtom)
-  const slideToIndex = useSlideToIndex()
+  const { slideToIndex } = useTabAnimations()
 
   const onPress = () => {
     const searchIndex = tabs.findIndex(tab => tab.type === 'search')

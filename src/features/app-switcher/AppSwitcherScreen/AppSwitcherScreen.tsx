@@ -19,13 +19,12 @@ import {
   AppSwitcherProvider,
   useAppSwitcherContext,
 } from '../AppSwitcherProvider'
-import TabScreen from '../TabScreen/TabScreen'
+import CachedTabScreens from '../CachedTabScreens'
+import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
+import useNewTab from '../utils/useNewTab'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
-import useNewTab from '../utils/useNewTab'
-import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
-import CachedTabScreens from '../CachedTabScreens'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -46,12 +45,7 @@ const AppSwitcherScreen = memo(
 
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
 
-    const {
-      onDeleteItem,
-      PADDING_HORIZONTAL,
-      scrollViewBoxStyle,
-      activeAtom,
-    } = useAppSwitcher()
+    const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
 
     const { scrollView, tabPreviews } = useAppSwitcherContext()
 
@@ -94,15 +88,11 @@ const AppSwitcherScreen = memo(
                 marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
                 tapGestureRef={tabPreviews.gestureRefs[i]}
                 simultaneousHandlers={scrollView.ref}
-                onDelete={onDeleteItem}
               />
             ))}
           </AnimatedBox>
         </AnimatedScrollView>
-        <CachedTabScreens
-          activeAtomId={activeAtom?.toString()}
-          navigation={navigation}
-        />
+        <CachedTabScreens navigation={navigation} />
         <TabPreviewCarousel tabsAtoms={tabsAtoms} />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>

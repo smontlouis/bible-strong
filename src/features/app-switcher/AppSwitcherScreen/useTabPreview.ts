@@ -1,3 +1,4 @@
+import { PrimitiveAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { TapGestureHandlerGestureEvent } from 'react-native-gesture-handler'
 import {
@@ -10,22 +11,27 @@ import {
   useAnimatedGestureHandler,
   useAnimatedRef,
   useAnimatedStyle,
+  withTiming,
 } from 'react-native-reanimated'
 import wait from '~helpers/wait'
+import { TabItem, tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import useTabConstants from '../utils/useTabConstants'
-import { useTabAnimations } from '../utils/worklets'
+import { useTabAnimations } from '../utils/useTabAnimations'
 
 const useTabPreview = ({
   index,
-  onDelete,
+  tabAtom,
 }: {
   index: number
-  onDelete: (idx: number) => void
+  tabAtom: PrimitiveAtom<TabItem>
 }) => {
   const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
+  const dispatch = useSetAtom(tabsAtomsAtom)
+  const tabsCount = useAtomValue(tabsCountAtom)
+
   // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
   tabPreviews.refs[index] = useAnimatedRef<AnimatedBox>()
   const ref = tabPreviews.refs[index]
@@ -40,6 +46,7 @@ const useTabPreview = ({
     HEIGHT,
     STATUS_BAR_HEIGHT,
     SCREEN_MARGIN,
+    GAP,
   } = useTabConstants()
 
   // On mount, measure the initial tab preview
@@ -70,13 +77,22 @@ const useTabPreview = ({
     },
   })
 
+  const onDelete = () => {
+    scrollView.padding.value = TAB_PREVIEW_HEIGHT + GAP + 20
+    dispatch({
+      type: 'remove',
+      atom: tabAtom,
+    })
+    scrollView.padding.value = withTiming(0)
+  }
+
   const onClose = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onEnd: () => {
       activeTabPreview.zIndex.value = 1
-      runOnJS(onDelete)(index)
+      runOnJS(onDelete)()
 
       // If deleting last tab, choose the previous one
-      if (tabPreviews.refs.length - 1 === activeTabPreview.index.value) {
+      if (tabsCount - 1 === activeTabPreview.index.value) {
         activeTabPreview.index.value -= 1
       }
     },

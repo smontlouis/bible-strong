@@ -2,7 +2,7 @@ import { PrimitiveAtom, useAtomValue } from 'jotai'
 import React, { memo } from 'react'
 import { Image } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'
-import { Layout, ZoomOut } from 'react-native-reanimated'
+import { FadeIn, Layout, ZoomIn, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
 import CommentIcon from '~common/CommentIcon'
@@ -21,7 +21,6 @@ interface TabPreviewProps {
   tabAtom: PrimitiveAtom<TabItem>
   tapGestureRef: React.RefObject<TapGestureHandler>
   simultaneousHandlers?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
-  onDelete: (idx: number) => void
 }
 
 const getIconType = (type: TabItem['type'], size = 14) => {
@@ -50,7 +49,6 @@ const TabPreview = ({
   tabAtom,
   tapGestureRef,
   simultaneousHandlers,
-  onDelete,
   ...props
 }: TabPreviewProps & BoxProps) => {
   const theme = useTheme()
@@ -73,7 +71,7 @@ const TabPreview = ({
     onClose,
   } = useTabPreview({
     index,
-    onDelete,
+    tabAtom,
   })
 
   return (
@@ -86,6 +84,7 @@ const TabPreview = ({
     >
       <AnimatedBox
         layout={Layout}
+        entering={FadeIn}
         exiting={ZoomOut}
         overflow="visible"
         style={boxStyles}

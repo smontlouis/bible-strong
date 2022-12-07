@@ -13,7 +13,7 @@ import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
-import { useTabAnimations } from '../utils/worklets'
+import { useTabAnimations } from '../utils/useTabAnimations'
 
 type Animation = {
   animatedValue: SharedValue<number>

@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai'
+import { unstable_createStore } from 'jotai'
 import React, { createContext, memo, useContext, useMemo } from 'react'
 import { ScrollView, View } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'
@@ -7,11 +7,7 @@ import {
   useAnimatedRef,
   useSharedValue,
 } from 'react-native-reanimated'
-import {
-  activeTabIndexAtom,
-  cachedTabIdsAtom,
-  tabsAtomsAtom,
-} from '../../state/tabs'
+import { activeTabIndexAtom, tabsAtomsAtom } from '../../state/tabs'
 import useTabConstants from './utils/useTabConstants'
 
 type AppSwitcherContextValues = {
@@ -26,10 +22,12 @@ type AppSwitcherContextValues = {
   }
   activeTabScreen: {
     opacity: SharedValue<number>
+    atomId: SharedValue<string | null>
   }
   scrollView: {
     ref: React.RefObject<ScrollView>
     y: SharedValue<number>
+    padding: SharedValue<number>
   }
   tabPreviews: {
     gestureRefs: React.RefObject<TapGestureHandler>[]
@@ -39,47 +37,34 @@ type AppSwitcherContextValues = {
     translateY: SharedValue<number>
     opacity: SharedValue<number>
   }
-  cachedTabScreens: {
-    refs: {
-      [k: string]: React.RefObject<View>
-    }
-  }
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
   undefined
 )
 
+const store = unstable_createStore()
+
 export const AppSwitcherProvider = memo(
   ({ children }: { children: React.ReactNode }) => {
     const scrollViewRef = useAnimatedRef<ScrollView>()
-    const tabsAtoms = useAtomValue(tabsAtomsAtom)
-    const cachedTabIds = useAtomValue(cachedTabIdsAtom)
-    const activeTabIndex = useAtomValue(activeTabIndexAtom)
+    const tabsAtoms = store.get(tabsAtomsAtom)!
+    const activeTabIndex = store.get(activeTabIndexAtom)!
     const { HEIGHT } = useTabConstants()
 
     const tabPreviewGestureRefs = useMemo(
-      () => tabsAtoms.map(() => React.createRef<TapGestureHandler>()),
-      [tabsAtoms]
+      () => new Array(100).fill(React.createRef<TapGestureHandler>()),
+      []
     )
 
-    const tabPreviewRefs = useMemo(() => new Array(tabsAtoms.length), [
-      tabsAtoms,
-    ])
-
-    const cachedTabIdsRefs = useMemo(
-      () =>
-        Object.fromEntries(
-          cachedTabIds.map(tabId => [tabId, React.createRef<View>()])
-        ),
-      [cachedTabIds]
-    )
+    const tabPreviewRefs = useMemo(() => new Array(100), [])
 
     const isBottomTabBarVisible = useSharedValue(1)
 
     const scrollView = {
       ref: scrollViewRef,
       y: useSharedValue(0),
+      padding: useSharedValue(0),
     }
 
     const tabPreviews = {
@@ -98,16 +83,13 @@ export const AppSwitcherProvider = memo(
 
     const activeTabScreen = {
       opacity: useSharedValue(1),
+      atomId: useSharedValue(tabsAtoms[activeTabIndex || 0].toString()),
     }
 
     const tabPreviewCarousel = {
       // No need to mount/unmount the carousel, just visually hide it
       translateY: useSharedValue(HEIGHT),
       opacity: useSharedValue(0),
-    }
-
-    const cachedTabScreens = {
-      refs: cachedTabIdsRefs,
     }
 
     const contextValue: AppSwitcherContextValues = React.useMemo(
@@ -118,9 +100,8 @@ export const AppSwitcherProvider = memo(
         scrollView,
         tabPreviews,
         tabPreviewCarousel,
-        cachedTabScreens,
       }),
-      [tabsAtoms, cachedTabIdsRefs]
+      []
     )
 
     return (

@@ -9,7 +9,7 @@ import {
 import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActiveTabSnapshot'
 import useDidUpdate from '~helpers/useDidUpdate'
 import { activeTabIndexAtom, tabsCountAtom } from '../../../../state/tabs'
-import { useTabAnimations } from '../../utils/worklets'
+import { useTabAnimations } from '../../utils/useTabAnimations'
 
 const useTabButtonPress = () => {
   const activeTabIndex = useAtomValue(activeTabIndexAtom)

@@ -1,46 +1,45 @@
-import { useAtom } from 'jotai'
-import React, { memo, useEffect } from 'react'
+import { useAtom, useAtomValue } from 'jotai'
+import React, { memo, useEffect, useMemo, useRef } from 'react'
+import { View } from 'react-native'
 import { NavigationStackProp } from 'react-navigation-stack'
+import useDynamicRefs from '~helpers/useDynamicRefs'
 import { cachedTabIdsAtom, tabsAtomsAtom } from '../../state/tabs'
-import { useAppSwitcherContext } from './AppSwitcherProvider'
-import TabScreen from './TabScreen/TabScreen'
+import TabScreen, { TabScreenProps } from './TabScreen/TabScreen'
+import useOnce from './utils/useOnce'
 
 export interface ChachedTabScreensProps {
-  activeAtomId?: string
   navigation: NavigationStackProp
 }
 
-const CachedTabScreens = ({
-  activeAtomId,
-  navigation,
-}: ChachedTabScreensProps) => {
+const CachedTabScreens = ({ navigation }: ChachedTabScreensProps) => {
   const [cachedTabIds, setCachedTabIds] = useAtom(cachedTabIdsAtom)
-  const [tabsAtoms] = useAtom(tabsAtomsAtom)
-  const { cachedTabScreens } = useAppSwitcherContext()
+  const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
   // Little hack to have atomWithDefault but override default value
-  useEffect(() => {
+  useOnce(() => {
     setCachedTabIds(cachedTabIds)
-  }, [])
-
-  console.log(cachedTabIds)
-  console.log(cachedTabScreens.refs)
+  })
 
   return (
     <>
       {tabsAtoms
         .filter(tabAtom => cachedTabIds.includes(tabAtom.toString()))
         .map(tabAtom => (
-          <TabScreen
-            isActive={activeAtomId === tabAtom.toString()}
+          <TabScreenRefMemoize
             key={tabAtom.toString()}
             tabAtom={tabAtom}
             navigation={navigation}
-            ref={cachedTabScreens.refs[tabAtom.toString()]}
           />
         ))}
     </>
   )
+}
+
+const TabScreenRefMemoize = (props: TabScreenProps) => {
+  const [, setRef] = useDynamicRefs<View>()
+  const ref = useMemo(() => setRef(props.tabAtom.toString()), [])
+
+  return <TabScreen {...props} ref={ref} />
 }
 
 export default memo(CachedTabScreens)

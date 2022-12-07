@@ -153,7 +153,7 @@ export const defaultBibleTab: BibleTab = {
 
 const maxCachedTabs = 5
 
-export const activeTabIndexAtomOriginal = atom<number | undefined>(3)
+export const activeTabIndexAtomOriginal = atom<number | undefined>(1)
 export const activeTabIndexAtom = atom(
   get => get(activeTabIndexAtomOriginal),
   (get, set, value: number | undefined) => {
@@ -252,6 +252,10 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
   }
   const tabsAtoms = get(tabsAtomsAtom)
 
+  // If activeTab is bible tab, only cache it
+  if (activeTabIndex === 0) {
+    return [tabsAtoms[0].toString()]
+  }
   // Cache the first tab (bible) and the active tab
   return [tabsAtoms[0].toString(), tabsAtoms[activeTabIndex].toString()]
 })

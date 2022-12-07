@@ -1,7 +1,11 @@
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback } from 'react'
-import { runOnJS, scrollTo, withTiming } from 'react-native-reanimated'
-import { activeTabIndexAtom, appSwitcherModeAtom } from '../../../state/tabs'
+import { runOnJS, withTiming } from 'react-native-reanimated'
+import {
+  activeTabIndexAtom,
+  appSwitcherModeAtom,
+  tabsAtomsAtom,
+} from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 import useTabConstants from './useTabConstants'
@@ -9,13 +13,22 @@ import useTabConstants from './useTabConstants'
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
+  const tabsAtom = useAtomValue(tabsAtomsAtom)
+  const { HEIGHT } = useTabConstants()
+
   const {
     activeTabPreview,
     activeTabScreen,
-    scrollView,
+    tabPreviewCarousel,
   } = useAppSwitcherContext()
 
-  const { SCREEN_MARGIN, STATUS_BAR_HEIGHT } = useTabConstants()
+  const setAtomId = useCallback(
+    (index: number) => {
+      const atomId = tabsAtom[index].toString()
+      activeTabScreen.atomId.value = atomId
+    },
+    [tabsAtom, activeTabScreen.atomId]
+  )
 
   const minimizeTab = useCallback(() => {
     'worklet'
@@ -29,6 +42,7 @@ export const useTabAnimations = () => {
     )
     runOnJS(setAppSwitcherMode)('list')
     runOnJS(setActiveTabIndex)(undefined)
+    activeTabScreen.atomId.value = null
   }, [])
 
   const expandTab = useCallback(
@@ -46,6 +60,8 @@ export const useTabAnimations = () => {
         tabTimingConfig,
         () => {
           runOnJS(setActiveTabIndex)(index)
+          runOnJS(setAtomId)(index)
+
           activeTabScreen.opacity.value = withTiming(1, undefined, () => {
             // !TODO - Fix scroll to top
             // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
@@ -57,8 +73,34 @@ export const useTabAnimations = () => {
         }
       )
     },
-    []
+    [setAtomId]
   )
 
-  return { minimizeTab, expandTab }
+  const slideToIndex = (index: number) => {
+    if (activeTabPreview.index.value === index) {
+      return
+    }
+
+    tabPreviewCarousel.opacity.value = 1
+    tabPreviewCarousel.translateY.value = 0
+    activeTabScreen.atomId.value = null
+
+    activeTabPreview.index.value = withTiming(
+      index,
+      { duration: 600 },
+      finished => {
+        if (!finished) return
+
+        runOnJS(setActiveTabIndex)(index)
+        runOnJS(setAtomId)(index)
+
+        tabPreviewCarousel.opacity.value = withTiming(0, undefined, () => {
+          tabPreviewCarousel.translateY.value = HEIGHT
+          activeTabPreview.zIndex.value = 3
+        })
+      }
+    )
+  }
+
+  return { minimizeTab, expandTab, slideToIndex }
 }

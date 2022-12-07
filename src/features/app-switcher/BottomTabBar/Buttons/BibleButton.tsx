@@ -2,7 +2,7 @@ import { useAtomValue } from 'jotai'
 import React from 'react'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import useSlideToIndex from '~features/app-switcher/utils/useSlideToIndex'
+import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
 import { tabsAtom } from '../../../../state/tabs'
 import { TAB_ICON_SIZE } from '../../utils/constants'
 
@@ -11,7 +11,7 @@ export interface BibleButtonProps {}
 const BibleButton = ({}: BibleButtonProps) => {
   const tabs = useAtomValue(tabsAtom)
   const bibleIndex = tabs.findIndex(tab => tab.id === 'bible')
-  const slideToIndex = useSlideToIndex()
+  const { slideToIndex } = useTabAnimations()
 
   const onPress = () => {
     slideToIndex(bibleIndex)

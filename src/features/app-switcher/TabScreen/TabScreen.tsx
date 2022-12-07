@@ -1,4 +1,4 @@
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom, useAtomValue } from 'jotai'
 import React, { forwardRef, memo } from 'react'
 import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'
@@ -58,53 +58,58 @@ const getComponentTab = (tab: TabItem) => {
   }
 }
 
-const TabScreen = forwardRef<
-  View,
-  {
-    isActive: boolean
-    tabAtom: PrimitiveAtom<TabItem>
-    navigation: NavigationStackProp
-  }
->(({ tabAtom, navigation, isActive }, ref) => {
-  const [tab] = useAtom(tabAtom)
-  const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
-  const { activeTabScreen } = useAppSwitcherContext()
+export type TabScreenProps = {
+  tabAtom: PrimitiveAtom<TabItem>
+  navigation: NavigationStackProp
+}
 
-  const imageStyles = useAnimatedStyle(() => {
-    return {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: WIDTH,
-      height: HEIGHT,
-      opacity: activeTabScreen.opacity.value,
-      transform: [{ translateY: isActive ? 0 : HEIGHT }],
+const TabScreen = forwardRef<View, TabScreenProps>(
+  ({ tabAtom, navigation }, ref) => {
+    const tab = useAtomValue(tabAtom)
+    const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
+    const { activeTabScreen } = useAppSwitcherContext()
+    const tabAtomId = tabAtom.toString()
+
+    const imageStyles = useAnimatedStyle(() => {
+      return {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: WIDTH,
+        height: HEIGHT,
+        opacity: activeTabScreen.opacity.value,
+        transform: [
+          {
+            translateY: activeTabScreen.atomId.value === tabAtomId ? 0 : HEIGHT,
+          },
+        ],
+      }
+    })
+
+    const { component: Component, atomName } = getComponentTab(tab) || {}
+
+    if (Component && atomName) {
+      return (
+        <TabScreenWrapper style={imageStyles} ref={ref}>
+          {/* @ts-ignore */}
+          <Component
+            {...{
+              [atomName]: tabAtom,
+              navigation,
+            }}
+          />
+        </TabScreenWrapper>
+      )
     }
-  })
 
-  const { component: Component, atomName } = getComponentTab(tab) || {}
-
-  if (Component && atomName) {
     return (
       <TabScreenWrapper style={imageStyles} ref={ref}>
-        {/* @ts-ignore */}
-        <Component
-          {...{
-            [atomName]: tabAtom,
-            navigation,
-          }}
-        />
+        <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
+          <Text>{tab.title}</Text>
+        </Box>
       </TabScreenWrapper>
     )
   }
-
-  return (
-    <TabScreenWrapper style={imageStyles} ref={ref}>
-      <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
-        <Text>{tab.title}</Text>
-      </Box>
-    </TabScreenWrapper>
-  )
-})
+)
 
 export default memo(TabScreen)

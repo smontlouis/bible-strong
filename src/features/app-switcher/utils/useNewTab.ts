@@ -4,8 +4,7 @@ import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'
 import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import useMeasureTabPreview from './useMesureTabPreview'
-import useSlideToIndex from './useSlideToIndex'
-import { useTabAnimations } from './worklets'
+import { useTabAnimations } from './useTabAnimations'
 
 const useNewTab = () => {
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -13,7 +12,7 @@ const useNewTab = () => {
   const { expandTab } = useTabAnimations()
   const measureTabPreview = useMeasureTabPreview()
   const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
-  const slideToIndex = useSlideToIndex()
+  const { slideToIndex } = useTabAnimations()
 
   useEffect(() => {
     const isNewTab =
