@@ -1,6 +1,6 @@
 import { PrimitiveAtom, useAtom } from 'jotai'
-import React, { memo } from 'react'
-import { StyleSheet, useWindowDimensions } from 'react-native'
+import React, { forwardRef, memo } from 'react'
+import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'
 
 import { NavigationStackProp } from 'react-navigation-stack'
@@ -58,13 +58,14 @@ const getComponentTab = (tab: TabItem) => {
   }
 }
 
-const TabScreen = ({
-  tabAtom,
-  navigation,
-}: {
-  tabAtom: PrimitiveAtom<TabItem>
-  navigation: NavigationStackProp
-}) => {
+const TabScreen = forwardRef<
+  View,
+  {
+    isActive: boolean
+    tabAtom: PrimitiveAtom<TabItem>
+    navigation: NavigationStackProp
+  }
+>(({ tabAtom, navigation, isActive }, ref) => {
   const [tab] = useAtom(tabAtom)
   const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
   const { activeTabScreen } = useAppSwitcherContext()
@@ -77,6 +78,7 @@ const TabScreen = ({
       width: WIDTH,
       height: HEIGHT,
       opacity: activeTabScreen.opacity.value,
+      transform: [{ translateY: isActive ? 0 : HEIGHT }],
     }
   })
 
@@ -84,7 +86,7 @@ const TabScreen = ({
 
   if (Component && atomName) {
     return (
-      <TabScreenWrapper style={imageStyles} ref={activeTabScreen.ref}>
+      <TabScreenWrapper style={imageStyles} ref={ref}>
         {/* @ts-ignore */}
         <Component
           {...{
@@ -97,12 +99,12 @@ const TabScreen = ({
   }
 
   return (
-    <TabScreenWrapper style={imageStyles} ref={activeTabScreen.ref}>
+    <TabScreenWrapper style={imageStyles} ref={ref}>
       <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
         <Text>{tab.title}</Text>
       </Box>
     </TabScreenWrapper>
   )
-}
+})
 
 export default memo(TabScreen)

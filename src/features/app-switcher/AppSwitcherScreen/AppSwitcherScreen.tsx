@@ -25,6 +25,7 @@ import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
 import useNewTab from '../utils/useNewTab'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
+import CachedTabScreens from '../CachedTabScreens'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -98,9 +99,10 @@ const AppSwitcherScreen = memo(
             ))}
           </AnimatedBox>
         </AnimatedScrollView>
-        {activeAtom && (
-          <TabScreen tabAtom={activeAtom} navigation={navigation} />
-        )}
+        <CachedTabScreens
+          activeAtomId={activeAtom?.toString()}
+          navigation={navigation}
+        />
         <TabPreviewCarousel tabsAtoms={tabsAtoms} />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>

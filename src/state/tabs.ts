@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
-import { splitAtom } from 'jotai/utils'
+import { atomWithDefault, splitAtom } from 'jotai/utils'
 import { useCallback, useMemo } from 'react'
 import Animated from 'react-native-reanimated'
 
@@ -151,7 +151,25 @@ export const defaultBibleTab: BibleTab = {
 //   storage as any
 // )
 
-export const activeTabIndexAtom = atom<number | undefined>(3)
+const maxCachedTabs = 5
+
+export const activeTabIndexAtomOriginal = atom<number | undefined>(3)
+export const activeTabIndexAtom = atom(
+  get => get(activeTabIndexAtomOriginal),
+  (get, set, value: number | undefined) => {
+    set(activeTabIndexAtomOriginal, value)
+
+    if (typeof value !== 'undefined') {
+      const tabsAtoms = get(tabsAtomsAtom)
+      const atomId = tabsAtoms[value].toString()
+
+      const cachedTabIds = get(cachedTabIdsAtom)
+      if (!cachedTabIds.includes(atomId)) {
+        set(cachedTabIdsAtom, [atomId, ...cachedTabIds].slice(0, maxCachedTabs))
+      }
+    }
+  }
+)
 
 export const tabsAtom = atom<TabItem[]>([
   defaultBibleTab,
@@ -226,6 +244,17 @@ export const tabsAtom = atom<TabItem[]>([
 
 export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 export const tabsCountAtom = atom(get => get(tabsAtom).length)
+
+export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
+  const activeTabIndex = get(activeTabIndexAtom)
+  if (!activeTabIndex) {
+    return []
+  }
+  const tabsAtoms = get(tabsAtomsAtom)
+
+  // Cache the first tab (bible) and the active tab
+  return [tabsAtoms[0].toString(), tabsAtoms[activeTabIndex].toString()]
+})
 
 export const checkTabType = <Type extends TabItem>(
   tab: TabItem | undefined,

@@ -7,7 +7,11 @@ import {
   useAnimatedRef,
   useSharedValue,
 } from 'react-native-reanimated'
-import { activeTabIndexAtom, tabsAtomsAtom } from '../../state/tabs'
+import {
+  activeTabIndexAtom,
+  cachedTabIdsAtom,
+  tabsAtomsAtom,
+} from '../../state/tabs'
 import useTabConstants from './utils/useTabConstants'
 
 type AppSwitcherContextValues = {
@@ -21,7 +25,6 @@ type AppSwitcherContextValues = {
     zIndex: SharedValue<number>
   }
   activeTabScreen: {
-    ref: React.RefObject<View>
     opacity: SharedValue<number>
   }
   scrollView: {
@@ -36,6 +39,11 @@ type AppSwitcherContextValues = {
     translateY: SharedValue<number>
     opacity: SharedValue<number>
   }
+  cachedTabScreens: {
+    refs: {
+      [k: string]: React.RefObject<View>
+    }
+  }
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
@@ -45,8 +53,8 @@ const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
 export const AppSwitcherProvider = memo(
   ({ children }: { children: React.ReactNode }) => {
     const scrollViewRef = useAnimatedRef<ScrollView>()
-    const tabScreenRef = React.useRef<View>(null)
     const tabsAtoms = useAtomValue(tabsAtomsAtom)
+    const cachedTabIds = useAtomValue(cachedTabIdsAtom)
     const activeTabIndex = useAtomValue(activeTabIndexAtom)
     const { HEIGHT } = useTabConstants()
 
@@ -58,6 +66,14 @@ export const AppSwitcherProvider = memo(
     const tabPreviewRefs = useMemo(() => new Array(tabsAtoms.length), [
       tabsAtoms,
     ])
+
+    const cachedTabIdsRefs = useMemo(
+      () =>
+        Object.fromEntries(
+          cachedTabIds.map(tabId => [tabId, React.createRef<View>()])
+        ),
+      [cachedTabIds]
+    )
 
     const isBottomTabBarVisible = useSharedValue(1)
 
@@ -81,7 +97,6 @@ export const AppSwitcherProvider = memo(
     }
 
     const activeTabScreen = {
-      ref: tabScreenRef,
       opacity: useSharedValue(1),
     }
 
@@ -89,6 +104,10 @@ export const AppSwitcherProvider = memo(
       // No need to mount/unmount the carousel, just visually hide it
       translateY: useSharedValue(HEIGHT),
       opacity: useSharedValue(0),
+    }
+
+    const cachedTabScreens = {
+      refs: cachedTabIdsRefs,
     }
 
     const contextValue: AppSwitcherContextValues = React.useMemo(
@@ -99,8 +118,9 @@ export const AppSwitcherProvider = memo(
         scrollView,
         tabPreviews,
         tabPreviewCarousel,
+        cachedTabScreens,
       }),
-      [tabsAtoms]
+      [tabsAtoms, cachedTabIdsRefs]
     )
 
     return (
