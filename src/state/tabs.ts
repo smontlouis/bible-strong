@@ -1,11 +1,11 @@
 import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
-import { atomWithDefault, splitAtom } from 'jotai/utils'
+import { atomWithDefault, loadable, splitAtom } from 'jotai/utils'
 import { useCallback, useMemo } from 'react'
-import Animated from 'react-native-reanimated'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { StrongReference } from '~common/types'
+import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { versions } from '~helpers/bibleVersions'
 import { getLangIsFr } from '~i18n'
 
@@ -111,13 +111,16 @@ export type TabItem =
   | CommentaryTab
   | NewTab
 
-export type TabProperties = {
-  x: Animated.SharedValue<number>
-  y: Animated.SharedValue<number>
-  animationProgress: Animated.SharedValue<number>
-}
-
-export type BibleTabProps = {}
+export const tabTypes = [
+  'bible',
+  'search',
+  'compare',
+  'study',
+  'strong',
+  'nave',
+  'dictionary',
+  'commentary',
+] as const
 
 export const defaultBibleTab: BibleTab = {
   id: 'bible',
@@ -143,23 +146,68 @@ export const defaultBibleTab: BibleTab = {
   },
 }
 
-// const storage = { ...createJSONStorage(() => AsyncStorage), delayInit: true }
-
-// export const tabsAtom = atomWithStorage<TabItem[]>(
-//   'tabsAtom',
-//   [defaultBibleTab],
-//   storage as any
-// )
+export const getDefaultData = <T extends TabItem>(type: TabItem['type']) => {
+  switch (type) {
+    case 'bible': {
+      return defaultBibleTab.data as T['data']
+    }
+    case 'search': {
+      return {
+        searchValue: '',
+      } as T['data']
+    }
+    case 'compare': {
+      return {
+        selectedVerses: {
+          '1-1-1': true,
+        },
+      } as T['data']
+    }
+    case 'strong': {
+      return {
+        book: 1,
+        reference: '1',
+      } as T['data']
+    }
+    case 'nave': {
+      return {
+        name_lower: 'aaron',
+      } as T['data']
+    }
+    case 'dictionary': {
+      return {
+        word: 'aaron',
+      } as T['data']
+    }
+    case 'study': {
+      return {} as T['data']
+    }
+    case 'commentary': {
+      return {
+        verse: '1-1-1',
+      } as T['data']
+    }
+  }
+}
 
 const maxCachedTabs = 5
 
-export const activeTabIndexAtomOriginal = atom<number | undefined>(1)
+export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
+  'activeTabIndexAtomOriginal',
+  0
+)
+export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [
+  defaultBibleTab,
+])
+export const loadableActiveIndexAtom = loadable(activeTabIndexAtomOriginal)
+export const loadableTabsAtom = loadable(tabsAtom)
+
 export const activeTabIndexAtom = atom(
   get => get(activeTabIndexAtomOriginal),
-  (get, set, value: number | undefined) => {
+  (get, set, value: number) => {
     set(activeTabIndexAtomOriginal, value)
 
-    if (typeof value !== 'undefined') {
+    if (value !== -1) {
       const tabsAtoms = get(tabsAtomsAtom)
       const atomId = tabsAtoms[value].toString()
 
@@ -171,83 +219,12 @@ export const activeTabIndexAtom = atom(
   }
 )
 
-export const tabsAtom = atom<TabItem[]>([
-  defaultBibleTab,
-  {
-    id: `compare-${Date.now()}`,
-    title: 'Comparer',
-    isRemovable: true,
-    type: 'compare',
-    data: {
-      selectedVerses: {
-        '1-1-1': true,
-      },
-    },
-  },
-  {
-    id: `search-${Date.now()}`,
-    title: 'Recherche',
-    isRemovable: true,
-    type: 'search',
-    data: {
-      searchValue: 'Salut',
-    },
-  },
-  {
-    id: `strong-${Date.now()}`,
-    title: 'Lexique',
-    isRemovable: true,
-    type: 'strong',
-    data: {
-      book: 40,
-      reference: '1594',
-    },
-  },
-  {
-    id: `nave-${Date.now()}`,
-    title: 'Nave',
-    isRemovable: true,
-    type: 'nave',
-    data: {
-      name: 'Abaddon',
-      name_lower: 'abaddon',
-    },
-  },
-  {
-    id: `dictionary-${Date.now()}`,
-    title: 'Dictionary',
-    isRemovable: true,
-    type: 'dictionary',
-    data: {
-      word: 'abaddon',
-    },
-  },
-  {
-    id: `commentary-${Date.now()}`,
-    title: 'Commentaire',
-    isRemovable: true,
-    type: 'commentary',
-    data: {
-      verse: '1-1-1',
-    },
-  },
-  {
-    id: `search-2-${Date.now()}`,
-    title: 'Recherche',
-    isRemovable: true,
-    type: 'search',
-    data: {
-      searchValue: 'coucou',
-    },
-  },
-])
-
 export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 export const tabsCountAtom = atom(get => get(tabsAtom).length)
 
 export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
   const activeTabIndex = get(activeTabIndexAtom)
-  if (!activeTabIndex) {
+  if (activeTabIndex === -1) {
     return []
   }
   const tabsAtoms = get(tabsAtomsAtom)

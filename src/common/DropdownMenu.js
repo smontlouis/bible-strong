@@ -41,7 +41,7 @@ const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
           <StyledIcon name="chevron-down" size={15} />
         </TouchableBox>
       </Box>
-      <Modal.Menu
+      <Modal.Body
         isOpen={isOpen}
         onClose={() => setOpen(false)}
         adjustToContentHeight
@@ -55,7 +55,7 @@ const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
             {label}
           </Modal.Item>
         ))}
-      </Modal.Menu>
+      </Modal.Body>
     </>
   )
 }

@@ -485,5 +485,15 @@
   "Bleu nuit": "Night blue",
   "Mauve": "Mauve",
   "Couleur Jour": "Day Color",
-  "Couleur Nuit": "Night Color"
+  "Couleur Nuit": "Night Color",
+
+  "tabs.new": "New tab",
+  "tabs.bible": "Bible",
+  "tabs.search": "Search",
+  "tabs.compare": "Compare",
+  "tabs.strong": "Strong",
+  "tabs.nave": "Nave",
+  "tabs.dictionary": "Dictionary",
+  "tabs.study": "Study",
+  "tabs.commentary": "Commentary"
 }

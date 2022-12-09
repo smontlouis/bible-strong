@@ -2,46 +2,22 @@ import { PrimitiveAtom, useAtomValue } from 'jotai'
 import React, { memo } from 'react'
 import { Image } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'
-import { FadeIn, Layout, ZoomIn, ZoomOut } from 'react-native-reanimated'
+import { FadeIn, Layout, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
-import CommentIcon from '~common/CommentIcon'
-import DictionnaryIcon from '~common/DictionnaryIcon'
-import LexiqueIcon from '~common/LexiqueIcon'
-import NaveIcon from '~common/NaveIcon'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
+import getIconByTabType from '../utils/getIconByTabType'
 
 interface TabPreviewProps {
   index: number
   tabAtom: PrimitiveAtom<TabItem>
   tapGestureRef: React.RefObject<TapGestureHandler>
   simultaneousHandlers?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
-}
-
-const getIconType = (type: TabItem['type'], size = 14) => {
-  switch (type) {
-    case 'bible':
-      return <FeatherIcon name="book-open" size={size} />
-    case 'compare':
-      return <FeatherIcon name="repeat" size={size} />
-    case 'strong':
-      return <LexiqueIcon width={size} height={size} />
-    case 'commentary':
-      return <CommentIcon width={size} height={size} color="#26A69A" />
-    case 'dictionary':
-      return <DictionnaryIcon width={size} height={size} />
-    case 'search':
-      return <FeatherIcon name="search" size={size} />
-    case 'nave':
-      return <NaveIcon width={size} height={size} />
-    default:
-      return <FeatherIcon name="x" size={size} />
-  }
 }
 
 const TabPreview = ({
@@ -115,7 +91,7 @@ const TabPreview = ({
               source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
             />
           ) : (
-            <Box opacity={0.3}>{getIconType(tab.type, 30)}</Box>
+            <Box opacity={0.3}>{getIconByTabType(tab.type, 30)}</Box>
           )}
           {tab.isRemovable && (
             <TapGestureHandler
@@ -152,9 +128,16 @@ const TabPreview = ({
           row
           alignItems="center"
           justifyContent="center"
+          overflow="visible"
         >
-          {getIconType(tab.type)}
-          <Text ml={8} fontSize={12} title>
+          {getIconByTabType(tab.type, 18)}
+          <Text
+            ml={8}
+            fontSize={14}
+            title
+            numberOfLines={1}
+            ellipsizeMode="middle"
+          >
             {tab.title}
           </Text>
         </AnimatedBox>

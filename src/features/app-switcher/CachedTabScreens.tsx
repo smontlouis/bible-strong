@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai'
-import React, { memo, useEffect, useMemo, useRef } from 'react'
+import React, { memo, useMemo } from 'react'
 import { View } from 'react-native'
 import { NavigationStackProp } from 'react-navigation-stack'
 import useDynamicRefs from '~helpers/useDynamicRefs'

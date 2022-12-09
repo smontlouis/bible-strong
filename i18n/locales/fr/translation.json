@@ -486,5 +486,15 @@
   "Bleu nuit": "Bleu nuit",
   "Mauve": "Mauve",
   "Couleur Jour": "Couleur Jour",
-  "Couleur Nuit": "Couleur Nuit"
+  "Couleur Nuit": "Couleur Nuit",
+
+  "tabs.new": "Nouvel onglet",
+  "tabs.bible": "Bible",
+  "tabs.search": "Recherche",
+  "tabs.compare": "Comparaison",
+  "tabs.strong": "Lexique",
+  "tabs.nave": "Nave",
+  "tabs.dictionary": "Dictionnaire",
+  "tabs.study": "Étude",
+  "tabs.commentary": "Commentaire"
 }

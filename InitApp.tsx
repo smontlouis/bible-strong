@@ -1,13 +1,13 @@
+import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import { ThemeProvider } from '@emotion/react'
 import * as Updates from 'expo-updates'
 import React, { useEffect } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, StatusBar } from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import ErrorBoundary from '~common/ErrorBoundary'
@@ -21,6 +21,7 @@ import { CurrentTheme } from '~common/types'
 import { DBStateProvider } from '~helpers/databaseState'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import useInitFireAuth from '~helpers/useInitFireAuth'
+import useLiveUpdates from '~helpers/useLiveUpdates'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -30,7 +31,6 @@ import {
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
-import useLiveUpdates from '~helpers/useLiveUpdates'
 
 interface Props {
   persistor: Persistor

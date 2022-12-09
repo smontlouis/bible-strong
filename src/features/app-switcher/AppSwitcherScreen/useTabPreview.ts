@@ -169,7 +169,9 @@ const useTabPreview = ({
       }
     }
 
-    return {}
+    return {
+      opacity: 1,
+    }
   })
 
   const xStyles = useAnimatedStyle(() => {

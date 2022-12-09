@@ -267,7 +267,7 @@ const BibleViewer = ({
   }
 
   const addTag = () => {
-    addHighlight({ selectedVerses })
+    dispatch(addHighlight({ selectedVerses }))
     actions.clearSelectedVerses()
 
     setMultipleTagsItem({

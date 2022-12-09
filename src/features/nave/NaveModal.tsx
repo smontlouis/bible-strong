@@ -16,7 +16,7 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
   const { title } = formatVerseContent([selectedVerse])
 
   return (
-    <Modal.Menu
+    <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
       adjustToContentHeight
@@ -37,7 +37,7 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
       }
     >
       <CardWrapper {...{ theme, selectedVerse, onClosed }} />
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

@@ -1,4 +1,3 @@
-import { unstable_createStore } from 'jotai'
 import React, { createContext, memo, useContext, useMemo } from 'react'
 import { ScrollView, View } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'
@@ -7,7 +6,6 @@ import {
   useAnimatedRef,
   useSharedValue,
 } from 'react-native-reanimated'
-import { activeTabIndexAtom, tabsAtomsAtom } from '../../state/tabs'
 import useTabConstants from './utils/useTabConstants'
 
 type AppSwitcherContextValues = {
@@ -43,14 +41,18 @@ const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
   undefined
 )
 
-const store = unstable_createStore()
+interface AppSwitcherProviderProps {
+  children: React.ReactNode
+  initialAtomId: string
+  initialTabIndex: number
+}
 
 export const AppSwitcherProvider = memo(
-  ({ children }: { children: React.ReactNode }) => {
+  ({ children, initialAtomId, initialTabIndex }: AppSwitcherProviderProps) => {
     const scrollViewRef = useAnimatedRef<ScrollView>()
-    const tabsAtoms = store.get(tabsAtomsAtom)!
-    const activeTabIndex = store.get(activeTabIndexAtom)!
     const { HEIGHT } = useTabConstants()
+
+    console.log({ initialAtomId, initialTabIndex })
 
     const tabPreviewGestureRefs = useMemo(
       () => new Array(100).fill(React.createRef<TapGestureHandler>()),
@@ -73,7 +75,7 @@ export const AppSwitcherProvider = memo(
     }
 
     const activeTabPreview = {
-      index: useSharedValue(activeTabIndex || 0),
+      index: useSharedValue(initialTabIndex),
       top: useSharedValue(0),
       left: useSharedValue(0),
       opacity: useSharedValue(0),
@@ -83,7 +85,7 @@ export const AppSwitcherProvider = memo(
 
     const activeTabScreen = {
       opacity: useSharedValue(1),
-      atomId: useSharedValue(tabsAtoms[activeTabIndex || 0].toString()),
+      atomId: useSharedValue(initialAtomId),
     }
 
     const tabPreviewCarousel = {

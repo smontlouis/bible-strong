@@ -152,7 +152,7 @@ const TagsScreen = () => {
         />
       )}
 
-      <Modal.Menu
+      <Modal.Body
         isOpen={!!isOpen}
         onClose={() => setOpen(false)}
         adjustToContentHeight
@@ -169,7 +169,7 @@ const TagsScreen = () => {
         <Modal.Item bold color="quart" onPress={promptLogout}>
           {t('Supprimer')}
         </Modal.Item>
-      </Modal.Menu>
+      </Modal.Body>
       <TitlePrompt
         placeholder={t("Nom de l'étiquette")}
         isOpen={!!titlePrompt}

@@ -15,6 +15,7 @@ import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
 import { TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import NewTabScreen from './NewTab/NewTabScreen'
 
 import TabScreenWrapper from './TabScreenWrapper'
 
@@ -54,6 +55,11 @@ const getComponentTab = (tab: TabItem) => {
       return {
         component: SearchTabScreen,
         atomName: 'searchAtom',
+      }
+    case 'new':
+      return {
+        component: NewTabScreen,
+        atomName: 'newAtom',
       }
   }
 }
@@ -105,7 +111,7 @@ const TabScreen = forwardRef<View, TabScreenProps>(
     return (
       <TabScreenWrapper style={imageStyles} ref={ref}>
         <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
-          <Text>{tab.title}</Text>
+          <Text>{tab.title} - need component</Text>
         </Box>
       </TabScreenWrapper>
     )

@@ -62,6 +62,7 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
         shadowRadius: 4,
         elevation: 2,
         paddingBottom: getBottomSpace(),
+        ...props.modalStyle,
       }}
       handlePosition="inside"
       {...props}
@@ -69,7 +70,7 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
   )
 })
 
-const Menu = ({
+const Body = ({
   isOpen,
   onClose,
   children,
@@ -107,7 +108,7 @@ const Item = ({ children, tag, onPress, ...props }: ItemProps & TextProps) => (
 )
 
 export default {
-  Menu,
+  Body,
   Item,
   Container,
 }

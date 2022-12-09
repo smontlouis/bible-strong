@@ -50,7 +50,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   }
 
   return (
-    <Modal.Menu
+    <Modal.Body
       isOpen={isVisible}
       onClose={onClosed}
       HeaderComponent={
@@ -102,7 +102,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
           </Box>
         </ScrollView>
       </Box>
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

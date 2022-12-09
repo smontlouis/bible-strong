@@ -50,7 +50,7 @@ const StudySettingsModal = ({
   }
 
   return (
-    <Modal.Menu isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
+    <Modal.Body isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
       {study && <PublishStudyMenuItem study={study} onClosed={onClosed} />}
       <Modal.Item
         onPress={() => {
@@ -74,7 +74,7 @@ const StudySettingsModal = ({
       >
         {t('Supprimer')}
       </Modal.Item>
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

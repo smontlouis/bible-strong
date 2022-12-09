@@ -171,7 +171,7 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
   const theme = useTheme()
 
   return (
-    <Modal.Menu
+    <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
       HeaderComponent={
@@ -191,7 +191,7 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
       }
     >
       <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

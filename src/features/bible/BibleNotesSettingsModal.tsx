@@ -38,7 +38,7 @@ const NotesSettingsModal = ({
   }
 
   return (
-    <Modal.Menu isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
+    <Modal.Body isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
       <Modal.Item
         onPress={() => {
           onClosed()
@@ -68,7 +68,7 @@ const NotesSettingsModal = ({
       >
         {t('Supprimer')}
       </Modal.Item>
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

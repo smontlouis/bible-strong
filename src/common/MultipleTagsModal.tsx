@@ -91,7 +91,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
   }, [item])
 
   return (
-    <Modal.Menu
+    <Modal.Body
       isOpen={!!item}
       onClose={onClosed}
       modalHeight={hp(80, 600)}
@@ -165,7 +165,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
           </Box>
         )}
       </Box>
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

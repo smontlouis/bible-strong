@@ -1,5 +1,5 @@
 import { useAtom } from 'jotai'
-import React, { memo, useCallback, useRef } from 'react'
+import React, { memo, useCallback, useMemo, useRef } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
@@ -14,7 +14,7 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import HomeScreen from '~features/home/HomeScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
-import { tabsAtomsAtom } from '../../../state/tabs'
+import { activeTabIndexAtom, tabsAtomsAtom } from '../../../state/tabs'
 import {
   AppSwitcherProvider,
   useAppSwitcherContext,
@@ -25,6 +25,7 @@ import useNewTab from '../utils/useNewTab'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
+import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -100,9 +101,21 @@ const AppSwitcherScreen = memo(
   }
 )
 
-export default (props: any) => {
+const useOnceAtoms = () => {
+  const [tabsAtoms] = useAtom(tabsAtomsAtom)
+  const [tabIndex] = useAtom(activeTabIndexAtom)
+  const initialAtomId = useRef(tabsAtoms[tabIndex]?.toString())
+  const initialTabIndex = useRef(tabIndex)
+  return {
+    initialAtomId: initialAtomId.current,
+    initialTabIndex: initialTabIndex.current,
+  }
+}
+
+const AppSwitcherScreenWrapper = (props: any) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
+  const { initialAtomId, initialTabIndex } = useOnceAtoms()
 
   const openMenu = useCallback(() => {
     moreDrawerRef.current?.openDrawer()
@@ -130,6 +143,13 @@ export default (props: any) => {
     [closeMenu]
   )
 
+  const children = useMemo(
+    () => (
+      <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
+    ),
+    []
+  )
+
   return (
     <DrawerLayout
       ref={homeDrawerRef}
@@ -149,14 +169,17 @@ export default (props: any) => {
         renderNavigationView={renderMoreScreen}
         drawerLockMode="locked-closed"
       >
-        <AppSwitcherProvider>
-          <AppSwitcherScreen
-            openHome={openHome}
-            openMenu={openMenu}
-            {...props}
-          />
-        </AppSwitcherProvider>
+        <AppSwitcherProvider
+          initialAtomId={initialAtomId}
+          initialTabIndex={initialTabIndex}
+          children={children}
+        />
       </DrawerLayout>
     </DrawerLayout>
   )
 }
+
+export default AppSwitcherScreenWrapper
+
+// * TODO might be dangerous
+AppSwitcherScreenWrapper.router = BibleSelectTabNavigator.router

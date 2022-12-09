@@ -107,7 +107,7 @@ const HighlightsScreen = () => {
           message={t("Vous n'avez pas encore rien surligné...")}
         />
       )}
-      <Modal.Menu
+      <Modal.Body
         isOpen={!!isSettingsOpen}
         onClose={() => setIsSettingsOpen(undefined)}
         adjustToContentHeight
@@ -136,8 +136,8 @@ const HighlightsScreen = () => {
         <Modal.Item bold color="quart" onPress={promptLogout}>
           {t('Supprimer')}
         </Modal.Item>
-      </Modal.Menu>
-      <Modal.Menu
+      </Modal.Body>
+      <Modal.Body
         isOpen={!!isChangeColorOpen}
         onClose={() => setIsChangeColorOpen(undefined)}
         adjustToContentHeight
@@ -164,7 +164,7 @@ const HighlightsScreen = () => {
             onPress={() => changeColor('color5')}
           />
         </Box>
-      </Modal.Menu>
+      </Modal.Body>
       <MultipleTagsModal
         item={multipleTagsItem}
         onClosed={() => setMultipleTagsItem(false)}
