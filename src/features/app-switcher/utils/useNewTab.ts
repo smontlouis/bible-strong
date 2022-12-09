@@ -2,17 +2,24 @@ import { useAtomValue } from 'jotai'
 import { useEffect } from 'react'
 import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'
-import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
+import {
+  activeTabIndexAtom,
+  appSwitcherModeAtom,
+  tabsCountAtom,
+} from '../../../state/tabs'
 import useMeasureTabPreview from './useMesureTabPreview'
 import { useTabAnimations } from './useTabAnimations'
+import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
 
 const useNewTab = () => {
   const tabsCount = useAtomValue(tabsCountAtom)
+  const activeTabIndex = useAtomValue(activeTabIndexAtom)
   const prevTabsCount = usePrevious(tabsCount)
   const { expandTab } = useTabAnimations()
   const measureTabPreview = useMeasureTabPreview()
   const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
   const { slideToIndex } = useTabAnimations()
+  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
   useEffect(() => {
     const isNewTab =
@@ -32,6 +39,7 @@ const useNewTab = () => {
           })
         }
         if (appSwitcherMode === 'view') {
+          await takeActiveTabSnapshot(activeTabIndex)
           slideToIndex(index)
         }
       })()

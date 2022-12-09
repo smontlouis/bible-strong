@@ -3,17 +3,21 @@ import React from 'react'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
-import { tabsAtom } from '../../../../state/tabs'
+import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActiveTabSnapshot'
+import { activeTabIndexAtom, tabsAtom } from '../../../../state/tabs'
 import { TAB_ICON_SIZE } from '../../utils/constants'
 
 export interface BibleButtonProps {}
 
 const BibleButton = ({}: BibleButtonProps) => {
   const tabs = useAtomValue(tabsAtom)
+  const activeTabIndex = useAtomValue(activeTabIndexAtom)
   const bibleIndex = tabs.findIndex(tab => tab.id === 'bible')
   const { slideToIndex } = useTabAnimations()
+  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
-  const onPress = () => {
+  const onPress = async () => {
+    await takeActiveTabSnapshot(activeTabIndex)
     slideToIndex(bibleIndex)
   }
 
