@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import * as FileSystem from 'expo-file-system'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +7,6 @@ import DropdownMenu from '~common/DropdownMenu'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
-import SnackBar from '~common/SnackBar'
 import Container from '~common/ui/Container'
 import loadBible from '~helpers/loadBible'
 import useDebounce from '~helpers/useDebounce'
@@ -22,12 +20,17 @@ const timeout = ms => new Promise(r => setTimeout(r, ms))
 
 export let bibleLSG
 
-const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
+type Props = {
+  idxFile: FileSystem.FileInfo
+  searchValue: string
+  setSearchValue: (value: string) => void
+}
+
+const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const index = useRef<FileSystem.FileInfo>()
   const [isLoading, setLoading] = useState(true)
-  const [searchValue, setSearchValue] = useState('')
   const debouncedSearchValue = useDebounce(searchValue, 300)
   const [results, setResults] = useState(null)
 
@@ -84,6 +87,8 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
   }, [idxFile])
 
   useEffect(() => {
+    if (isLoading) return
+
     const filterResults = results => {
       if (!section && !book && !order) {
         return results
@@ -174,14 +179,14 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
         setResults(null)
       }
     }
-  }, [book, debouncedSearchValue, index, order, section, setResults])
+  }, [book, debouncedSearchValue, index, order, section, setResults, isLoading])
 
   if (isLoading) {
     return <Loading message={t("Chargement de l'index...")} />
   }
 
   return (
-    <Container>
+    <>
       <SearchInput
         placeholder={t('search.placeholder')}
         onChangeText={setSearchValue}
@@ -218,21 +223,20 @@ const LocalSearchScreen = ({ idxFile }: { idxFile: FileSystem.FileInfo }) => {
         />
       </ScrollView>
       {debouncedSearchValue && Array.isArray(results) ? (
-        <LocalSearchResults searchValue={searchValue} results={results} />
+        <LocalSearchResults
+          searchValue={debouncedSearchValue}
+          results={results}
+        />
       ) : (
         <Empty
           source={require('~assets/images/search-loop.json')}
           message={t('Fais une recherche dans la Bible !')}
         />
       )}
-    </Container>
+    </>
   )
 }
 
 const LocalSearchScreenWrapper = waitForIndex(LocalSearchScreen)
-
-LocalSearchScreenWrapper.navigationOptions = () => ({
-  tabBarLabel: i18n.t('Hors-ligne'),
-})
 
 export default LocalSearchScreenWrapper

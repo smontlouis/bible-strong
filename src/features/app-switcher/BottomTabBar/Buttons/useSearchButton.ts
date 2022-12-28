@@ -22,6 +22,7 @@ const useSearchButtonPress = () => {
         type: 'search',
         data: {
           searchValue: '',
+          searchMode: 'online',
         },
       },
     })

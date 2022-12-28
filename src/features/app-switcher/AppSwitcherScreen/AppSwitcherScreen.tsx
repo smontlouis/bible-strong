@@ -165,7 +165,7 @@ const AppSwitcherScreenWrapper = (props: any) => {
       ref={homeDrawerRef}
       drawerWidth={wp(95, 450)}
       drawerPosition="left"
-      drawerType="slide"
+      drawerType="back"
       overlayColor="rgba(0,0,0,0.1)"
       renderNavigationView={renderHomeScreen}
       drawerLockMode="locked-closed"

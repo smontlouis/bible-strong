@@ -315,6 +315,8 @@
   "Faites une recherche dans la Bible !": "Search the Bible!",
   "Recherche dans la Bible": "Search the Bible",
   "search.placeholder": "Word, verse or strong",
+  "search.offline": "offline",
+  "search.online": "en ligne",
   "Êtes-vous vraiment sur de supprimer cette base de données ?": "Are you sure you want to delete this database?",
   "Si votre base de données a été corrompue, pensez à redémarrer l'application une fois les fichiers téléchargés.": "If your database has been corrupted, remember to restart the application once the files have been downloaded.",
   "J'ai regroupé ici la plupart des questions qui me sont régulièrement posées.": "I have grouped here most of the questions that are regularly asked to me.",

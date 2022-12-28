@@ -29,30 +29,7 @@ import useLanguage from '~helpers/useLanguage'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { fullscreenAtom } from '../../state/app'
 import MenuOption from '~common/ui/MenuOption'
-
-const { Popover } = renderers
-
-const PopOverMenu = ({ element, popover, ...props }) => {
-  const theme = useTheme()
-  return (
-    <Menu renderer={Popover} rendererProps={{ placement: 'bottom' }} {...props}>
-      <MenuTrigger>{element}</MenuTrigger>
-      <MenuOptions
-        optionsContainerStyle={{
-          backgroundColor: theme.colors.reverse,
-          shadowColor: 'rgb(89,131,240)',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 7,
-          elevation: 1,
-          borderRadius: 8,
-        }}
-      >
-        <Box padding={10}>{popover}</Box>
-      </MenuOptions>
-    </Menu>
-  )
-}
+import PopOverMenu from '~common/PopOverMenu'
 
 const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',
