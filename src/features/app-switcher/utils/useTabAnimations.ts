@@ -84,6 +84,7 @@ export const useTabAnimations = () => {
     tabPreviewCarousel.opacity.value = 1
     tabPreviewCarousel.translateY.value = 0
     activeTabScreen.atomId.value = null
+    runOnJS(setActiveTabIndex)(index)
 
     activeTabPreview.index.value = withTiming(
       index,
@@ -91,10 +92,12 @@ export const useTabAnimations = () => {
       finished => {
         if (!finished) return
 
-        runOnJS(setActiveTabIndex)(index)
         runOnJS(setAtomId)(index)
-
-        tabPreviewCarousel.opacity.value = withTiming(0, undefined, () => {
+        tabPreviewCarousel.opacity.value = withTiming(0, undefined, finish => {
+          if (!finish) {
+            tabPreviewCarousel.opacity.value = 1
+            return
+          }
           tabPreviewCarousel.translateY.value = HEIGHT
           activeTabPreview.zIndex.value = 3
         })

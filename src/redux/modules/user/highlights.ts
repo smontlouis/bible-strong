@@ -14,7 +14,7 @@ const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
     return {
       ...obj,
       [verse]: {
-        color: color || highlightedVerses[verse]?.color,
+        color: color || highlightedVerses[verse]?.color || '',
         date,
         ...(highlightedVerses[verse] && {
           tags: highlightedVerses[verse].tags || {},
@@ -58,7 +58,7 @@ export function addHighlight({
   color,
   selectedVerses,
 }: {
-  color?: string
+  color: string
   selectedVerses: SelectedVerses
 }) {
   return (dispatch: Dispatch, getState) => {

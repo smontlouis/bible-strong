@@ -153,8 +153,8 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   }
 
   return (
-    <Container>
-      <Header title={t('Plus')} />
+    <Container borderLeftWidth={1} borderColor="border" pure>
+      <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -344,7 +344,6 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
           </Text>
         </Box>
       </ScrollView>
-      <BackBottomTabBar onClose={closeMenu} direction="left" />
     </Container>
   )
 }

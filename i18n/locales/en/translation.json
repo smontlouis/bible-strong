@@ -161,7 +161,7 @@
   "Notes sur": "Notes on",
   "Chargement...": "Loading...",
   "Vous n'avez pas encore de notes...": "You don't have any notes yet ...",
-  "Ouvrir dans Bible": "Open in Bible",
+  "tab.openInNewTab": "Open in new tab",
   "Livres": "Books",
   "Chapitres": "Chapters",
   "Il y a {{ago}}": "{{ago}} ago",
@@ -495,5 +495,8 @@
   "tabs.nave": "Nave",
   "tabs.dictionary": "Dictionary",
   "tabs.study": "Study",
-  "tabs.commentary": "Commentary"
+  "tabs.commentary": "Commentary",
+
+  "common.goTo": "Go to",
+  "common.chooseCompareVersions": "Choose versions to compare"
 }

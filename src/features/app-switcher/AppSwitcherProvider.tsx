@@ -52,8 +52,6 @@ export const AppSwitcherProvider = memo(
     const scrollViewRef = useAnimatedRef<ScrollView>()
     const { HEIGHT } = useTabConstants()
 
-    console.log({ initialAtomId, initialTabIndex })
-
     const tabPreviewGestureRefs = useMemo(
       () => new Array(100).fill(React.createRef<TapGestureHandler>()),
       []
@@ -75,11 +73,11 @@ export const AppSwitcherProvider = memo(
     }
 
     const activeTabPreview = {
-      index: useSharedValue(initialTabIndex),
+      index: useSharedValue(initialTabIndex === -1 ? 0 : initialTabIndex),
       top: useSharedValue(0),
       left: useSharedValue(0),
       opacity: useSharedValue(0),
-      animationProgress: useSharedValue(1),
+      animationProgress: useSharedValue(initialTabIndex === -1 ? 0 : 1),
       zIndex: useSharedValue(2),
     }
 

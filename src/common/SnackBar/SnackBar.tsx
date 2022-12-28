@@ -20,7 +20,7 @@ const TO_POSITION_BOTTOM: number = 180
 const TO_POSITION_TOP: number = -360
 
 const STYLE_BANNER_COLOR: string = '#000000'
-const TEXT_COLOR_ACCENT: string = '#0088ff'
+const TEXT_COLOR_ACCENT: string = '#fff'
 
 const { width } = Dimensions.get('window')
 
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
 
   button: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: 'bold',
     marginLeft: 8,
   },
 
@@ -228,7 +228,13 @@ export default class SnackBar extends Component<Props, State> {
     const { buttonColor } = this.props
 
     return (
-      <TouchableOpacity style={styles.buttonContainer} onPress={onPress}>
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={() => {
+          onPress()
+          this.hide()
+        }}
+      >
         <Text style={[styles.button, style, { color: buttonColor }]}>
           {text}
         </Text>

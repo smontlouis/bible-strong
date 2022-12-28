@@ -1,11 +1,11 @@
-import { useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useEffect } from 'react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
   SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
   WithTimingConfig,
 } from 'react-native-reanimated'
 import { usePrevious } from '~helpers/usePrevious'
@@ -42,7 +42,7 @@ const fromTo = (animations: Animation[]) => {
 }
 
 const useBottomTabBar = () => {
-  const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
+  const [appSwitcherMode, setAppSwitcherMode] = useAtom(appSwitcherModeAtom)
   const prevAppSwitcherMode = usePrevious(appSwitcherMode)
 
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -66,6 +66,15 @@ const useBottomTabBar = () => {
       top: pageY,
     })
   }
+
+  useEffect(() => {
+    if (
+      activeTabPreview.index.value === 0 &&
+      activeTabPreview.animationProgress.value === 0
+    ) {
+      setAppSwitcherMode('list')
+    }
+  }, [])
 
   useEffect(() => {
     // From view to list

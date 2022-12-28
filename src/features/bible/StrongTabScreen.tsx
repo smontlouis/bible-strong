@@ -39,6 +39,11 @@ import Back from '~common/Back'
 import { StrongReference } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { StrongTab } from '~state/tabs'
+import PopOverMenu from '~common/PopOverMenu'
+import MenuOption from '~common/ui/MenuOption'
+import DetailedHeader from '~common/DetailedHeader'
+import SnackBar from '~common/SnackBar'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -107,6 +112,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   const dispatch = useDispatch()
   const { t } = useTranslation()
+  const openInNewTab = useOpenInNewTab()
 
   const tags = useSelector((state: RootState) => {
     const code = strongReferenceParam?.Code || reference
@@ -250,72 +256,59 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   return (
     <Container>
-      <Box
-        padding={20}
-        maxWidth={MAX_WIDTH}
-        width="100%"
-        marginLeft="auto"
-        marginRight="auto"
-      >
-        <Box>
-          <Box style={{ flexDirection: 'row' }}>
-            {hasBackButton && (
-              <Back>
-                <Box paddingRight={20}>
-                  <FeatherIcon name={'arrow-left'} size={20} />
-                </Box>
-              </Back>
-            )}
-            <Box flex marginTop={-5}>
-              <Text title fontSize={22}>
-                {capitalize(Mot)}
-                {!!Phonetique && (
-                  <Text title color="darkGrey" fontSize={16}>
-                    {' '}
-                    {Phonetique}
-                  </Text>
-                )}
-              </Text>
-              {!!Type && (
-                <Text titleItalic color="darkGrey">
-                  {Type}
-                </Text>
-              )}
-              <TitleBorder />
-            </Box>
-            <Touchable
-              onPress={() =>
-                setMultipleTagsItem({
-                  id: Code,
-                  title: Mot,
-                  entity: Grec ? 'strongsGrec' : 'strongsHebreu',
-                })
-              }
-            >
-              <FeatherIcon
-                style={{
-                  paddingTop: 10,
-                  paddingHorizontal: 5,
-                  marginRight: 10,
-                }}
-                name="tag"
-                size={20}
-              />
-            </Touchable>
-            <Touchable onPress={shareContent}>
-              <FeatherIcon
-                style={{
-                  paddingTop: 10,
-                  paddingHorizontal: 5,
-                  marginRight: 10,
-                }}
-                name="share-2"
-                size={20}
-              />
-            </Touchable>
-          </Box>
-        </Box>
-      </Box>
+      <DetailedHeader
+        hasBackButton={hasBackButton}
+        title={capitalize(Mot)}
+        detail={Phonetique}
+        subtitle={Type}
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <MenuOption
+                  onSelect={() =>
+                    setMultipleTagsItem({
+                      id: Code,
+                      title: Mot,
+                      entity: Grec ? 'strongsGrec' : 'strongsHebreu',
+                    })
+                  }
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="tag" size={15} />
+                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={shareContent}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="share-2" size={15} />
+                    <Text marginLeft={10}>{t('Partager')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption
+                  onSelect={() => {
+                    openInNewTab({
+                      id: `strong-${Date.now()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'strong',
+                      data: {
+                        book,
+                        reference: strongReference.Code,
+                      },
+                    })
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="external-link" size={15} />
+                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                  </Box>
+                </MenuOption>
+              </>
+            }
+          />
+        }
+      />
       <ScrollView style={{ paddingLeft: 20, paddingRight: 20, flex: 1 }}>
         <Box>
           {tags && (

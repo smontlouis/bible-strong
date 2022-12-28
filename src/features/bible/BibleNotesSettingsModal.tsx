@@ -2,7 +2,7 @@ import { withTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import { deleteNote } from '~redux/modules/user'
 

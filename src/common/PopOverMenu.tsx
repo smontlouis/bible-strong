@@ -9,31 +9,55 @@ import {
 
 import Box from '~common/ui/Box'
 import { Theme } from '~themes'
+import { FeatherIcon } from './ui/Icon'
 
 const { Popover } = renderers
 
 interface Props {
-  element: React.ReactNode
+  element?: React.ReactNode
   popover: React.ReactNode
 }
 
 const PopOverMenu = ({ element, popover, ...props }: Props) => {
   const theme: Theme = useTheme()
   return (
-    <Menu renderer={Popover} rendererProps={{ placement: 'bottom' }} {...props}>
-      <MenuTrigger>{element}</MenuTrigger>
-      <MenuOptions
-        optionsContainerStyle={{
-          backgroundColor: theme.colors.reverse,
-          shadowColor: 'rgb(89,131,240)',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 7,
-          elevation: 1,
-          borderRadius: 8,
+    <Menu
+      renderer={Popover}
+      rendererProps={{
+        placement: 'bottom',
+        anchorStyle: { backgroundColor: theme.colors.reverse },
+      }}
+      {...props}
+    >
+      <MenuTrigger
+        customStyles={{
+          triggerTouchable: {
+            borderRadius: 25,
+            activeOpacity: 0.5,
+            underlayColor: 'transparent',
+          },
         }}
       >
-        <Box padding={10}>{popover}</Box>
+        {element || (
+          <Box row center height={60} width={60}>
+            <FeatherIcon name="more-vertical" size={18} />
+          </Box>
+        )}
+      </MenuTrigger>
+      <MenuOptions
+        customStyles={{
+          optionsContainer: {
+            backgroundColor: theme.colors.reverse,
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            borderRadius: 8,
+          },
+        }}
+      >
+        <Box paddingVertical={10}>{popover}</Box>
       </MenuOptions>
     </Menu>
   )

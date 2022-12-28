@@ -52,17 +52,6 @@ const PlanScreen = ({ navigation }: Props) => {
         hasBackButton
         rightComponent={
           <PopOverMenu
-            element={
-              <Box
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="center"
-                height={50}
-                width={50}
-              >
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            }
             popover={
               <Menu
                 modalRefDetails={modalRefDetails}

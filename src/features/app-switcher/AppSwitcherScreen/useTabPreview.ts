@@ -171,6 +171,8 @@ const useTabPreview = ({
 
     return {
       opacity: 1,
+      top: 0,
+      left: 0,
     }
   })
 

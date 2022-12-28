@@ -7,7 +7,6 @@ import { useTheme } from '@emotion/react'
 import * as Animatable from 'react-native-animatable'
 import {
   Menu,
-  MenuOption,
   MenuOptions,
   MenuTrigger,
   renderers,
@@ -29,6 +28,7 @@ import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { fullscreenAtom } from '../../state/app'
+import MenuOption from '~common/ui/MenuOption'
 
 const { Popover } = renderers
 
@@ -216,8 +216,7 @@ const Header = ({
             element={
               <Box
                 row
-                alignItems="center"
-                justifyContent="center"
+                center
                 height={60}
                 width={50}
                 opacity={isFullscreen ? 0 : 1}

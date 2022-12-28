@@ -26,17 +26,12 @@ import { RootState } from '~redux/modules/reducer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import { NaveTab } from '~state/tabs'
 import produce from 'immer'
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
-
-const TitleBorder = styled.View(({ theme }) => ({
-  marginTop: 10,
-  width: 35,
-  height: 3,
-  backgroundColor: theme.colors.quint,
-}))
+import DetailedHeader from '~common/DetailedHeader'
+import PopOverMenu from '~common/PopOverMenu'
+import MenuOption from '~common/ui/MenuOption'
+import { useTranslation } from 'react-i18next'
+import { FeatherIcon } from '~common/ui/Icon'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 interface NaveDetailScreenProps {
   navigation: NavigationStackProp
@@ -53,12 +48,13 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
   const dispatch = useDispatch()
   const [naveItem, setNaveItem] = useState(null)
-
+  const { t } = useTranslation()
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
   const tags = useSelector(
     (state: RootState) => state.user.bible.naves[name_lower]?.tags,
     shallowEqual
   )
+  const openInNewTab = useOpenInNewTab()
 
   const setTitle = (title: string) =>
     setNaveTab(
@@ -140,62 +136,59 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
   return (
     <Container>
-      <Box
-        px={20}
-        pt={20}
-        maxWidth={MAX_WIDTH}
-        width="100%"
-        marginLeft="auto"
-        marginRight="auto"
-      >
-        <Box style={{ flexDirection: 'row' }}>
-          {hasBackButton && (
-            <Back>
-              <Box paddingRight={20}>
-                <FeatherIcon name={'arrow-left'} size={20} />
-              </Box>
-            </Back>
-          )}
-          <Box flex marginTop={-5}>
-            <Text title fontSize={22}>
-              {naveItem?.name || name}
-            </Text>
-            {naveItem?.name_lower && (
-              <Text color="grey" fontSize={12}>
-                ({naveItem.name_lower})
-              </Text>
-            )}
-            <TitleBorder />
-          </Box>
-          <Link
-            onPress={() =>
-              setMultipleTagsItem({
-                id: naveItem.name_lower,
-                title: naveItem.name,
-                entity: 'naves',
-              })
+      <DetailedHeader
+        hasBackButton={hasBackButton}
+        title={naveItem?.name || name}
+        subtitle={naveItem?.name_lower}
+        borderColor="quint"
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <MenuOption
+                  onSelect={() =>
+                    setMultipleTagsItem({
+                      id: naveItem.name_lower,
+                      title: naveItem.name,
+                      entity: 'naves',
+                    })
+                  }
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="tag" size={15} />
+                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={shareDefinition}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="share-2" size={15} />
+                    <Text marginLeft={10}>{t('Partager')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption
+                  onSelect={() => {
+                    openInNewTab({
+                      id: `nave-${Date.now()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'nave',
+                      data: {
+                        name,
+                        name_lower,
+                      },
+                    })
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="external-link" size={15} />
+                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                  </Box>
+                </MenuOption>
+              </>
             }
-          >
-            <FeatherIcon
-              style={{
-                paddingTop: 10,
-                paddingHorizontal: 5,
-                marginRight: 10,
-              }}
-              name="tag"
-              size={20}
-            />
-          </Link>
-          <Link onPress={() => {}}>
-            <FeatherIcon
-              style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
-              name="share-2"
-              size={20}
-              onPress={shareDefinition}
-            />
-          </Link>
-        </Box>
-      </Box>
+          />
+        }
+      />
       {tags && (
         <Box mt={10} px={20}>
           <TagList tags={tags} />

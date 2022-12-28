@@ -79,15 +79,15 @@ const TabPreview = ({
             {
               shadowColor: theme.colors.default,
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 10,
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
               elevation: 2,
             },
           ]}
         >
           {tab.base64Preview ? (
             <Image
-              style={{ width: '100%', height: '100%', borderRadius: 25 }}
+              style={{ width: '100%', height: '100%', borderRadius: 20 }}
               source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
             />
           ) : (
@@ -130,10 +130,10 @@ const TabPreview = ({
           justifyContent="center"
           overflow="visible"
         >
-          {getIconByTabType(tab.type, 18)}
+          {getIconByTabType(tab.type, 16)}
           <Text
             ml={8}
-            fontSize={14}
+            fontSize={12}
             title
             numberOfLines={1}
             ellipsizeMode="middle"

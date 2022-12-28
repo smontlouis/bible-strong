@@ -12,6 +12,7 @@ import FastImage from 'react-native-fast-image'
 import InlineLink from '~common/InlineLink'
 import useLanguage from '~helpers/useLanguage'
 import { useTranslation } from 'react-i18next'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 interface Props extends ShallowTimelineSection {
   modalRef: React.RefObject<Modalize>
@@ -47,6 +48,7 @@ const SectionDetailsModal = ({
   return (
     <Modalize
       ref={modalRef}
+      modalTopOffset={getStatusBarHeight()}
       modalStyle={{
         backgroundColor: theme.colors.lightGrey,
         maxWidth: 600,

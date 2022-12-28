@@ -58,7 +58,7 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
       return
     }
     // @ts-ignore
-    setTab({ ...tab, type, data: getDefaultData(type) })
+    setTab({ ...tab, type, ...getDefaultData(type) })
   }
 
   return {

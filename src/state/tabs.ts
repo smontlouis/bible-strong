@@ -7,7 +7,7 @@ import books, { Book } from '~assets/bible_versions/books-desc'
 import { StrongReference } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { versions } from '~helpers/bibleVersions'
-import { getLangIsFr } from '~i18n'
+import i18n, { getLangIsFr } from '~i18n'
 
 export type TabBase = {
   id: string
@@ -68,6 +68,21 @@ export interface StrongTab extends TabBase {
       }
 }
 
+export interface StrongsTab extends TabBase {
+  type: 'strongs'
+  data: {}
+}
+
+export interface NavesTab extends TabBase {
+  type: 'naves'
+  data: {}
+}
+
+export interface DictionariesTab extends TabBase {
+  type: 'dictionaries'
+  data: {}
+}
+
 export interface NaveTab extends TabBase {
   type: 'nave'
   data: {
@@ -105,6 +120,9 @@ export type TabItem =
   | SearchTab
   | CompareTab
   | StrongTab
+  | StrongsTab
+  | NavesTab
+  | DictionariesTab
   | NaveTab
   | DictionaryTab
   | StudyTab
@@ -116,9 +134,9 @@ export const tabTypes = [
   'search',
   'compare',
   'study',
-  'strong',
-  'nave',
-  'dictionary',
+  'strongs',
+  'naves',
+  'dictionaries',
   'commentary',
 ] as const
 
@@ -146,46 +164,81 @@ export const defaultBibleTab: BibleTab = {
   },
 }
 
-export const getDefaultData = <T extends TabItem>(type: TabItem['type']) => {
+export const getDefaultData = <T extends TabItem>(
+  type: TabItem['type']
+): { title?: TabItem['title']; data: T['data'] } => {
   switch (type) {
     case 'bible': {
-      return defaultBibleTab.data as T['data']
+      return { data: defaultBibleTab.data }
     }
     case 'search': {
       return {
-        searchValue: '',
-      } as T['data']
+        data: {
+          searchValue: '',
+        },
+      }
     }
     case 'compare': {
       return {
-        selectedVerses: {
-          '1-1-1': true,
+        data: {
+          selectedVerses: {
+            '1-1-1': true,
+          },
         },
-      } as T['data']
+      }
+    }
+    case 'strongs': {
+      return {
+        title: i18n.t('Lexique'),
+        data: {},
+      }
     }
     case 'strong': {
       return {
-        book: 1,
-        reference: '1',
-      } as T['data']
+        data: {
+          book: 1,
+          reference: '1',
+        },
+      }
     }
     case 'nave': {
       return {
-        name_lower: 'aaron',
-      } as T['data']
+        data: {
+          name_lower: 'aaron',
+        },
+      }
+    }
+    case 'naves': {
+      return {
+        title: i18n.t('Thèmes Nave'),
+        data: {},
+      }
     }
     case 'dictionary': {
       return {
-        word: 'aaron',
-      } as T['data']
+        data: {
+          word: 'aaron',
+        },
+      }
+    }
+    case 'dictionaries': {
+      return {
+        title: i18n.t('Dictionnaire'),
+        data: {},
+      }
     }
     case 'study': {
-      return {} as T['data']
+      return { data: {} }
     }
     case 'commentary': {
       return {
-        verse: '1-1-1',
-      } as T['data']
+        data: {
+          verse: '1-1-1',
+        },
+      }
+    }
+    default: {
+      return { data: {} }
     }
   }
 }

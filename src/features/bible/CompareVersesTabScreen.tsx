@@ -1,5 +1,3 @@
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useEffect } from 'react'
 import { shallowEqual, useSelector } from 'react-redux'
 
@@ -7,25 +5,25 @@ import verseToReference from '~helpers/verseToReference'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
-import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
+import produce from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
+import { useTranslation } from 'react-i18next'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { NavigationStackProp } from 'react-navigation-stack'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
+import PopOverMenu from '~common/PopOverMenu'
+import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
+import Text from '~common/ui/Text'
 import { versions } from '~helpers/bibleVersions'
 import { CompareTab, SelectedVerses } from '~state/tabs'
-import produce from 'immer'
-import { useTranslation } from 'react-i18next'
-
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 interface CompareVersesTabScreenProps {
   navigation: NavigationStackProp
@@ -59,7 +57,7 @@ const CompareVersesTabScreen = ({
 
   const [prevNextItems, setPrevNextItems] = React.useState()
   const title = verseToReference(selectedVerses)
-
+  const openInNewTab = useOpenInNewTab()
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
   }, [title])
@@ -100,9 +98,40 @@ const CompareVersesTabScreen = ({
         fontSize={16}
         title={title}
         rightComponent={
-          <Link route="ToggleCompareVerses" padding>
-            <StyledIcon name="check-square" size={20} />
-          </Link>
+          <PopOverMenu
+            popover={
+              <>
+                <MenuOption
+                  onSelect={() => navigation.navigate('ToggleCompareVerses')}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="check-square" size={15} />
+                    <Text marginLeft={10}>
+                      {t('common.chooseCompareVersions')}
+                    </Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption
+                  onSelect={() => {
+                    openInNewTab({
+                      id: `compare-${Date.now()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'compare',
+                      data: {
+                        selectedVerses,
+                      },
+                    })
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="external-link" size={15} />
+                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                  </Box>
+                </MenuOption>
+              </>
+            }
+          />
         }
       />
       <ScrollView>

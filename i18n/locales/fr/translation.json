@@ -161,7 +161,7 @@
   "Notes sur": "Notes sur",
   "Chargement...": "Chargement...",
   "Vous n'avez pas encore de notes...": "Vous n'avez pas encore de notes...",
-  "Ouvrir dans Bible": "Ouvrir dans Bible",
+  "tab.openInNewTab": "Ouvrir dans un nouvel onglet",
   "Livres": "Livres",
   "Chapitres": "Chapitres",
   "Il y a {{ago}}": "Il y a {{ago}}",
@@ -493,8 +493,14 @@
   "tabs.search": "Recherche",
   "tabs.compare": "Comparaison",
   "tabs.strong": "Lexique",
+  "tabs.strongs": "Lexique",
   "tabs.nave": "Nave",
+  "tabs.naves": "Nave",
   "tabs.dictionary": "Dictionnaire",
+  "tabs.dictionaries": "Dictionnaire",
   "tabs.study": "Étude",
-  "tabs.commentary": "Commentaire"
+  "tabs.commentary": "Commentaire",
+
+  "common.goTo": "Aller à",
+  "common.chooseCompareVersions": "Choisir les versions à comparer"
 }

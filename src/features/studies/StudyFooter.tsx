@@ -5,12 +5,12 @@ import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import {
   Menu,
-  MenuOption,
   MenuOptions,
   MenuTrigger,
   renderers,
   withMenuContext,
 } from 'react-native-popup-menu'
+import MenuOption from '~common/ui/MenuOption'
 
 import { useTranslation } from 'react-i18next'
 import BackgroundIcon from '~assets/images/BackgroundIcon'

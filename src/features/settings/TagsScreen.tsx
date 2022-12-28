@@ -17,6 +17,7 @@ import TitlePrompt from '~common/TitlePrompt'
 import { FeatherIcon } from '~common/ui/Icon'
 import { addTag, updateTag, removeTag } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
+import tags from '~redux/modules/user/tags'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -46,7 +47,7 @@ const TagItem = ({ item, setOpen }) => {
 
   return (
     <Box>
-      <Link route="Tag" params={{ item }}>
+      <Link route="Tag" params={{ tagId: item.id }}>
         <Box padding={20} row paddingRight={0}>
           <Box flex justifyContent="center">
             <Text bold>{item.name}</Text>

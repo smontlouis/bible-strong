@@ -103,7 +103,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = () => {
+const UserWidget = ({ closeHome }: { closeHome }) => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
@@ -157,7 +157,7 @@ const UserWidget = () => {
       <Box flex paddingHorizontal={20} overflow="visible">
         <OfflineNotice />
 
-        <Box alignItems="center" row justifyContent="flex-end">
+        <Box alignItems="center" row justifyContent="space-between">
           <Box overflow="visible" position="relative">
             <ProfileContainer>
               {user.photoURL ? (
@@ -192,6 +192,9 @@ const UserWidget = () => {
               </Box>
             )}
           </Box>
+          <Back onCustomPress={closeHome} padding>
+            <FeatherIcon name={'arrow-right'} size={20} />
+          </Back>
         </Box>
 
         <Box row alignItems="center" overflow="visible">

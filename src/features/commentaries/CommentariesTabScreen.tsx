@@ -29,6 +29,10 @@ import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import { CommentaryTab } from '~state/tabs'
 import produce from 'immer'
+import PopOverMenu from '~common/PopOverMenu'
+import MenuOption from '~common/ui/MenuOption'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { FeatherIcon } from '~common/ui/Icon'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -165,6 +169,8 @@ const CommentariesTabScreen = ({
 
   const [commentaryTab, setCommentaryTab] = useAtom(commentaryAtom)
 
+  const openInNewTab = useOpenInNewTab()
+
   const {
     hasBackButton,
     data: { verse },
@@ -206,7 +212,37 @@ const CommentariesTabScreen = ({
   return (
     <>
       <Box background paddingTop={getStatusBarHeight()} />
-      <Header background hasBackButton={hasBackButton} title={headerTitle} />
+      <Header
+        background
+        hasBackButton={hasBackButton}
+        title={headerTitle}
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <MenuOption
+                  onSelect={() => {
+                    openInNewTab({
+                      id: `commentary-${Date.now()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'commentary',
+                      data: {
+                        verse,
+                      },
+                    })
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="external-link" size={15} />
+                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                  </Box>
+                </MenuOption>
+              </>
+            }
+          />
+        }
+      />
       <ScrollView
         style={{ backgroundColor: theme.colors.lightGrey }}
         contentContainerStyle={{ paddingBottom: 20 }}

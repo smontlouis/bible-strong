@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { Switch } from 'react-native-paper'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'

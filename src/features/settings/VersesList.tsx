@@ -34,6 +34,12 @@ export const sortVersesByDate = p =>
 const VersesList = React.memo(({ verseIds, setSettings }) => {
   const sortedVersesByDate = sortVersesByDate(verseIds)
 
+  sortedVersesByDate.map(verse => {
+    if (!verse.date) {
+      console.log(verse)
+    }
+  })
+
   return (
     <FlatList
       data={sortedVersesByDate}

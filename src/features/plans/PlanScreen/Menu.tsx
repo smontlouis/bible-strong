@@ -1,7 +1,7 @@
 import React from 'react'
 import { Alert } from 'react-native'
 import { Modalize } from 'react-native-modalize'
-import { MenuOption } from 'react-native-popup-menu'
+import MenuOption from '~common/ui/MenuOption'
 import { useDispatch } from 'react-redux'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'

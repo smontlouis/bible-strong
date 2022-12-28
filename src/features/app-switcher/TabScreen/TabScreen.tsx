@@ -11,7 +11,10 @@ import CompareVersesTabScreen from '~features/bible/CompareVersesTabScreen'
 import StrongTabScreen from '~features/bible/StrongTabScreen'
 import CommentariesTabScreen from '~features/commentaries/CommentariesTabScreen'
 import DictionaryDetailTabScreen from '~features/dictionnary/DictionaryDetailTabScreen'
+import DictionaryTabScreen from '~features/dictionnary/DictionaryTabScreen'
+import LexiqueTabScreen from '~features/lexique/LexiqueTabScreen'
 import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
+import NaveTabScreen from '~features/nave/NaveTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
 import { TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -35,6 +38,21 @@ const getComponentTab = (tab: TabItem) => {
       return {
         component: StrongTabScreen,
         atomName: 'strongAtom',
+      }
+    case 'strongs':
+      return {
+        component: LexiqueTabScreen,
+        atomName: 'strongsAtom',
+      }
+    case 'naves':
+      return {
+        component: NaveTabScreen,
+        atomName: 'navesAtom',
+      }
+    case 'dictionaries':
+      return {
+        component: DictionaryTabScreen,
+        atomName: 'dictionariesAtom',
       }
     case 'commentary':
       return {

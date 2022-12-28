@@ -1,35 +1,35 @@
-import React from 'react'
-import styled from '@emotion/native'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
-import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
+import fr from 'date-fns/locale/fr'
+import React from 'react'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
-import TitlePrompt from '~common/TitlePrompt'
-import { addTag, updateTag, removeTag } from '~redux/modules/user'
 import Header from '~common/Header'
-import ScrollView from '~common/ui/ScrollView'
+import TitlePrompt from '~common/TitlePrompt'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
-import { sortVersesByDate } from '~features/settings/VersesList'
+import ScrollView from '~common/ui/ScrollView'
 import HighlightItem from '~features/settings/Verse'
+import { sortVersesByDate } from '~features/settings/VersesList'
 import formatVerseContent from '~helpers/formatVerseContent'
+import { updateTag } from '~redux/modules/user'
 
-import Link from '~common/Link'
-import Empty from '~common/Empty'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import Border from '~common/ui/Border'
-import truncate from '~helpers/truncate'
-import TagList from '~common/TagList'
-import StudyItem from '~features/studies/StudyItem'
+import { useTranslation } from 'react-i18next'
 import books from '~assets/bible_versions/books-desc'
+import Empty from '~common/Empty'
+import Link from '~common/Link'
+import TagList from '~common/TagList'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import DictionnaryResultItem from '~features/dictionnary/DictionaryResultItem'
 import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
 import NaveResultItem from '~features/nave/NaveResultItem'
-import DictionnaryResultItem from '~features/dictionnary/DictionaryResultItem'
-import { useTranslation } from 'react-i18next'
+import StudyItem from '~features/studies/StudyItem'
+import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
+import { RootState } from '~redux/modules/reducer'
 
 const NoteItem = ({ item, t, isFR }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
@@ -72,25 +72,29 @@ const NoteItem = ({ item, t, isFR }) => {
 }
 
 const TagScreen = ({ navigation }) => {
-  const { item } = navigation.state.params
+  const tagId = navigation.getParam('tagId')
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const isFR = useLanguage()
+
+  const tag = useSelector(
+    (state: RootState) => state.user.bible.tags[tagId],
+    shallowEqual
+  )
 
   const {
     highlights,
     notes,
     studies,
-    tag,
     naves,
     words,
     strongsGrec,
     strongsHebreu,
   } = useSelector(
     state => ({
-      highlights: item.highlights
+      highlights: tag.highlights
         ? sortVersesByDate(
-            Object.keys(item.highlights).reduce(
+            Object.keys(tag.highlights).reduce(
               (arr, id) => ({
                 ...arr,
                 ...(state.user.bible.highlights[id] && {
@@ -101,37 +105,36 @@ const TagScreen = ({ navigation }) => {
             )
           )
         : [],
-      notes: item.notes
-        ? Object.keys(item.notes)
+      notes: tag.notes
+        ? Object.keys(tag.notes)
             .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
             .filter(c => c)
         : [],
-      studies: item.studies
-        ? Object.keys(item.studies)
+      studies: tag.studies
+        ? Object.keys(tag.studies)
             .map(id => state.user.bible.studies[id])
             .filter(c => c)
         : [],
-      naves: item.naves
-        ? Object.keys(item.naves)
+      naves: tag.naves
+        ? Object.keys(tag.naves)
             .map(id => state.user.bible.naves[id])
             .filter(c => c)
         : [],
-      words: item.words
-        ? Object.keys(item.words)
+      words: tag.words
+        ? Object.keys(tag.words)
             .map(id => state.user.bible.words[id])
             .filter(c => c)
         : [],
-      strongsHebreu: item.strongsHebreu
-        ? Object.keys(item.strongsHebreu)
+      strongsHebreu: tag.strongsHebreu
+        ? Object.keys(tag.strongsHebreu)
             .map(id => state.user.bible.strongsHebreu[id])
             .filter(c => c)
         : [],
-      strongsGrec: item.strongsGrec
-        ? Object.keys(item.strongsGrec)
+      strongsGrec: tag.strongsGrec
+        ? Object.keys(tag.strongsGrec)
             .map(id => state.user.bible.strongsGrec[id])
             .filter(c => c)
         : [],
-      tag: state.user.bible.tags[item.id],
     }),
     shallowEqual
   )
@@ -262,7 +265,7 @@ const TagScreen = ({ navigation }) => {
             </Text>
             <Box row style={{ flexWrap: 'wrap' }}>
               {studies.map(item => {
-                return <StudyItem key={item.id} study={item} />
+                return <StudyItem key={tag.id} study={item} />
               })}
             </Box>
           </Box>

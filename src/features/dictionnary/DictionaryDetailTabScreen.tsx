@@ -28,16 +28,14 @@ import { DictionaryTab } from '~state/tabs'
 import { NavigationStackProp } from 'react-navigation-stack'
 import produce from 'immer'
 import { shallowEqual } from 'recompose'
+import DetailedHeader from '~common/DetailedHeader'
+import PopOverMenu from '~common/PopOverMenu'
+import { useTranslation } from 'react-i18next'
+import MenuOption from '~common/ui/MenuOption'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
-}))
-
-const TitleBorder = styled.View(({ theme }) => ({
-  marginTop: 10,
-  width: 35,
-  height: 3,
-  backgroundColor: theme.colors.secondary,
 }))
 
 interface DictionaryDetailScreenProps {
@@ -57,6 +55,8 @@ const DictionnaryDetailScreen = ({
   } = dictionaryTab
 
   const dispatch = useDispatch()
+  const openInNewTab = useOpenInNewTab()
+  const { t } = useTranslation()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
   const [multipleTagsItem, setMultipleTagsItem] = useState(false)
   const tags = useSelector(
@@ -143,56 +143,57 @@ const DictionnaryDetailScreen = ({
 
   return (
     <Container>
-      <Box
-        padding={20}
-        maxWidth={MAX_WIDTH}
-        width="100%"
-        marginLeft="auto"
-        marginRight="auto"
-      >
-        <Box style={{ flexDirection: 'row' }}>
-          {hasBackButton && (
-            <Back>
-              <Box paddingRight={20}>
-                <FeatherIcon name={'arrow-left'} size={20} />
-              </Box>
-            </Back>
-          )}
-          <Box marginTop={-5} flex>
-            <Text title fontSize={22}>
-              {word}
-            </Text>
-            <TitleBorder />
-          </Box>
-          <Link
-            onPress={() =>
-              setMultipleTagsItem({
-                id: word,
-                title: word,
-                entity: 'words',
-              })
+      <DetailedHeader
+        hasBackButton={hasBackButton}
+        title={word}
+        borderColor="secondary"
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <MenuOption
+                  onSelect={() =>
+                    setMultipleTagsItem({
+                      id: word,
+                      title: word,
+                      entity: 'words',
+                    })
+                  }
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="tag" size={15} />
+                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={shareDefinition}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="share-2" size={15} />
+                    <Text marginLeft={10}>{t('Partager')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption
+                  onSelect={() => {
+                    openInNewTab({
+                      id: `dictionary-${Date.now()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'dictionary',
+                      data: {
+                        word,
+                      },
+                    })
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="external-link" size={15} />
+                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                  </Box>
+                </MenuOption>
+              </>
             }
-          >
-            <FeatherIcon
-              style={{
-                paddingTop: 10,
-                paddingHorizontal: 5,
-                marginRight: 10,
-              }}
-              name="tag"
-              size={20}
-            />
-          </Link>
-          <Link onPress={() => {}}>
-            <FeatherIcon
-              style={{ paddingTop: 10, paddingHorizontal: 5, marginRight: 10 }}
-              name="share-2"
-              size={20}
-              onPress={shareDefinition}
-            />
-          </Link>
-        </Box>
-      </Box>
+          />
+        }
+      />
       {tags && (
         <Box mt={10} px={20}>
           <TagList tags={tags} />

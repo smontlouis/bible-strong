@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
-import { MenuOption } from 'react-native-popup-menu'
+import MenuOption from '~common/ui/MenuOption'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
@@ -123,16 +123,6 @@ const PlanSliceScreen = ({ navigation }: Props) => {
         hasBackButton
         rightComponent={
           <PopOverMenu
-            element={
-              <Box
-                alignItems="center"
-                justifyContent="center"
-                height={50}
-                width={50}
-              >
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            }
             popover={
               <>
                 <MenuOption onSelect={onMarkAsReadSelect}>
@@ -154,7 +144,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                   onSelect={() =>
                     navigation.navigate({
                       routeName: 'VersionSelector',
-                      params: { version },
+                      params: { bibleAtom: defaultBibleAtom },
                     })
                   }
                 >

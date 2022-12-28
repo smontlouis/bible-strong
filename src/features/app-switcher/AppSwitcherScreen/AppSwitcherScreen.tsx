@@ -1,5 +1,5 @@
-import { useAtom } from 'jotai'
-import React, { memo, useCallback, useMemo, useRef } from 'react'
+import { useAtom, useAtomValue } from 'jotai'
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
@@ -14,14 +14,18 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import HomeScreen from '~features/home/HomeScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
-import { activeTabIndexAtom, tabsAtomsAtom } from '../../../state/tabs'
+import {
+  activeTabIndexAtom,
+  tabsAtomsAtom,
+  tabsCountAtom,
+} from '../../../state/tabs'
 import {
   AppSwitcherProvider,
   useAppSwitcherContext,
 } from '../AppSwitcherProvider'
 import CachedTabScreens from '../CachedTabScreens'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
-import useNewTab from '../utils/useNewTab'
+import useExpandNewTab from '../utils/useExpandNewTab'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
@@ -50,7 +54,7 @@ const AppSwitcherScreen = memo(
 
     const { scrollView, tabPreviews } = useAppSwitcherContext()
 
-    useNewTab()
+    useExpandNewTab()
 
     return (
       <Box flex={1} bg="lightGrey">
@@ -116,6 +120,7 @@ const AppSwitcherScreenWrapper = (props: any) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
   const { initialAtomId, initialTabIndex } = useOnceAtoms()
+  const tabsCount = useAtomValue(tabsCountAtom)
 
   const openMenu = useCallback(() => {
     moreDrawerRef.current?.openDrawer()
@@ -132,6 +137,11 @@ const AppSwitcherScreenWrapper = (props: any) => {
   const closeHome = useCallback(() => {
     homeDrawerRef.current?.closeDrawer()
   }, [])
+
+  // Not the best, but when adding a new tab, close home drawer
+  useEffect(() => {
+    closeHome()
+  }, [tabsCount, closeHome])
 
   const renderHomeScreen = useCallback(
     () => <HomeScreen closeHome={closeHome} />,
@@ -153,19 +163,19 @@ const AppSwitcherScreenWrapper = (props: any) => {
   return (
     <DrawerLayout
       ref={homeDrawerRef}
-      drawerWidth={wp(100, 450)}
+      drawerWidth={wp(95, 450)}
       drawerPosition="left"
       drawerType="slide"
-      overlayColor="transparent"
+      overlayColor="rgba(0,0,0,0.1)"
       renderNavigationView={renderHomeScreen}
       drawerLockMode="locked-closed"
     >
       <DrawerLayout
         ref={moreDrawerRef}
-        drawerWidth={wp(100, 450)}
+        drawerWidth={wp(95, 450)}
         drawerPosition="right"
         drawerType="slide"
-        overlayColor="transparent"
+        overlayColor="rgba(0,0,0,0.1)"
         renderNavigationView={renderMoreScreen}
         drawerLockMode="locked-closed"
       >

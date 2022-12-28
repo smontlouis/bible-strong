@@ -54,6 +54,7 @@ const StudiesScreen = () => {
                 setIsOpen={setTagsIsOpen}
                 isOpen={isTagsOpen}
                 selectedChip={selectedChip}
+                hasBackButton
               />
             }
             numColumns={r([2, 2, 3, 3])}
@@ -75,6 +76,7 @@ const StudiesScreen = () => {
               setIsOpen={setTagsIsOpen}
               isOpen={isTagsOpen}
               selectedChip={selectedChip}
+              hasBackButton
             />
             <Empty
               source={require('~assets/images/empty.json')}

@@ -16,7 +16,7 @@ import loadMhyComments from '~helpers/loadMhyComments'
 import { audioDefault, audioV2 } from '~helpers/topBibleAudio'
 import { zeroFill } from '~helpers/zeroFill'
 
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom, useSetAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { Verse } from '~common/types'
@@ -24,7 +24,13 @@ import NaveModal from '~features/nave/NaveModal'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight, setHistory } from '~redux/modules/user'
-import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
+import {
+  BibleTab,
+  defaultBibleTab,
+  tabsAtomsAtom,
+  useBibleTabActions,
+  VersionCode,
+} from '../../state/tabs'
 import BibleFooter from './BibleFooter'
 import BibleNoteModal from './BibleNoteModal'
 import BibleWebView from './BibleWebView'
@@ -32,6 +38,7 @@ import ReferenceModal from './ReferenceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import { shallowEqual } from 'recompose'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 const Container = styled.View({
   flex: 1,
@@ -101,6 +108,7 @@ const BibleViewer = ({
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
+  const openInNewTab = useOpenInNewTab()
   const pericope = useRef(getBiblePericope(isFR ? 'LSG' : 'KJV'))
 
   const [bible, actions] = useBibleTabActions(bibleAtom)
@@ -248,13 +256,19 @@ const BibleViewer = ({
   }
 
   const openInBibleTab = () => {
-    actions.setAllAndValidateSelected({
-      book,
-      chapter,
-      verse,
-      version,
+    openInNewTab({
+      id: `bible-${Date.now()}`,
+      title: t('tabs.new'),
+      isRemovable: true,
+      type: 'bible',
+      data: {
+        ...defaultBibleTab.data,
+        selectedBook: book,
+        selectedChapter: chapter,
+        selectedVerse: verse,
+        selectedVersion: version,
+      },
     })
-    navigation.navigate('Bible')
   }
 
   const addHiglightAndOpenQuickTags = (color: string) => {
@@ -267,7 +281,7 @@ const BibleViewer = ({
   }
 
   const addTag = () => {
-    dispatch(addHighlight({ selectedVerses }))
+    dispatch(addHighlight({ color: '', selectedVerses }))
     actions.clearSelectedVerses()
 
     setMultipleTagsItem({
@@ -372,7 +386,7 @@ const BibleViewer = ({
       {isReadOnly && !error && (
         <Box center background>
           <ReadMeButton onPress={openInBibleTab}>
-            {t('Ouvrir dans Bible')}
+            {t('tab.openInNewTab')}
           </ReadMeButton>
         </Box>
       )}
