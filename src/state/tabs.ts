@@ -101,7 +101,9 @@ export interface DictionaryTab extends TabBase {
 
 export interface StudyTab extends TabBase {
   type: 'study'
-  data: {}
+  data: {
+    studyId?: string
+  }
 }
 
 export interface NewTab extends TabBase {
@@ -230,7 +232,10 @@ export const getDefaultData = <T extends TabItem>(
       }
     }
     case 'study': {
-      return { data: {} }
+      return {
+        title: i18n.t('Études'),
+        data: {},
+      }
     }
     case 'commentary': {
       return {

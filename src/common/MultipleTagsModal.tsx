@@ -18,13 +18,19 @@ import Modal from './Modal'
 import SearchTagInput from './SearchTagInput'
 import Spacer from './ui/Spacer'
 import Fuse from 'fuse.js'
+import { useAtom } from 'jotai'
+import { multipleTagsModalAtom } from '../state/app'
+import { Tag } from './types'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
   color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
-const MultipleTagsModal = ({ item = {}, onClosed }) => {
+const MultipleTagsModal = () => {
+  const [item, setItem] = useAtom(multipleTagsModalAtom)
+  const onClosed = () => setItem(false)
+
   const { t } = useTranslation()
   const [newTag, setNewTag] = useState('')
   const [highlightTitle, setHighlightTitle] = useState('')
@@ -32,7 +38,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
   const modalRef = React.useRef<Modalize>(null)
   const tags = useSelector<RootState>(state =>
     Object.values(state.user.bible.tags)
-  )
+  ) as Tag[]
   const fuse = useMemo(() => new Fuse(tags, { keys: ['name'] }), [])
   const [filteredTags, setFilteredTags] = useState(tags)
   const [searchValue, setSearchValue] = useState('')

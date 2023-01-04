@@ -46,6 +46,9 @@ import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import HomeScreen from '~features/home/HomeScreen'
+import ChangelogModal from '~common/Changelog'
+import OnBoardingModal from '~features/onboarding/OnBoarding'
+import MultipleTagsModal from '~common/MultipleTagsModal'
 
 export const MainStackNavigator = createStackNavigator(
   {
@@ -109,6 +112,9 @@ const MainStack = props => (
   <PortalProvider>
     <MainStackNavigator {...props} />
     <QuotaModal />
+    <ChangelogModal />
+    <OnBoardingModal />
+    <MultipleTagsModal />
   </PortalProvider>
 )
 

@@ -1,38 +1,35 @@
-import React, { useEffect, useState } from 'react'
-import { Share } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import truncHTML from 'trunc-html'
-import { useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
+import React, { useEffect, useState } from 'react'
+import { Share } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
-import Button from '~common/ui/Button'
 import books from '~assets/bible_versions/books-desc'
-import Back from '~common/Back'
-import Link from '~common/Link'
+import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
-import { MAX_WIDTH } from '~helpers/useDimensions'
-import { setHistory } from '~redux/modules/user'
 import useHTMLView from '~helpers/useHTMLView'
+import { setHistory } from '~redux/modules/user'
 
-import waitForDatabase from '~common/waitForDictionnaireDB'
-import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
-import Snackbar from '~common/SnackBar'
-import MultipleTagsModal from '~common/MultipleTagsModal'
-import TagList from '~common/TagList'
-import { PrimitiveAtom, useAtom } from 'jotai'
-import { DictionaryTab } from '~state/tabs'
-import { NavigationStackProp } from 'react-navigation-stack'
 import produce from 'immer'
+import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
+import { useTranslation } from 'react-i18next'
+import { NavigationStackProp } from 'react-navigation-stack'
 import { shallowEqual } from 'recompose'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { useTranslation } from 'react-i18next'
+import Snackbar from '~common/SnackBar'
+import TagList from '~common/TagList'
 import MenuOption from '~common/ui/MenuOption'
+import waitForDatabase from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
+import { DictionaryTab } from '~state/tabs'
+import { multipleTagsModalAtom } from '../../state/app'
+import { RootState } from '~redux/modules/reducer'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -58,9 +55,10 @@ const DictionnaryDetailScreen = ({
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
-  const [multipleTagsItem, setMultipleTagsItem] = useState(false)
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+
   const tags = useSelector(
-    state => state.user.bible.words[word]?.tags,
+    (state: RootState) => state.user.bible.words[word]?.tags,
     shallowEqual
   )
 
@@ -214,11 +212,6 @@ const DictionnaryDetailScreen = ({
           />
         )}
       </Box>
-      <MultipleTagsModal
-        multiple
-        item={multipleTagsItem}
-        onClosed={() => setMultipleTagsItem(false)}
-      />
     </Container>
   )
 }

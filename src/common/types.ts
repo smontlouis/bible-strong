@@ -178,3 +178,9 @@ export type StrongReference = {
   book: string
   error?: string
 }
+
+export type StudyNavigateBibleType =
+  | 'verse'
+  | 'verse-block'
+  | 'strong'
+  | 'strong-block'

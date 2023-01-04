@@ -134,7 +134,9 @@ export interface UserState {
     studies: {
       [x: string]: Study
     }
-    tags: {}
+    tags: {
+      [x: string]: Tag
+    }
     history: any[]
     strongsHebreu: {}
     strongsGrec: {}

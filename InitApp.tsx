@@ -11,11 +11,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import ErrorBoundary from '~common/ErrorBoundary'
-import OnBoarding from '~features/onboarding/OnBoarding'
 
 import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
-import Changelog from '~common/Changelog'
 import SnackBar from '~common/SnackBar'
 import { CurrentTheme } from '~common/types'
 import { DBStateProvider } from '~helpers/databaseState'
@@ -161,8 +159,6 @@ const InitApp = ({ persistor }: Props) => {
                   onNavigationStateChange={onNavigationStateChange}
                 />
               </ErrorBoundary>
-              <Changelog />
-              <OnBoarding />
             </DBStateProvider>
           </PersistGate>
         </MenuProvider>

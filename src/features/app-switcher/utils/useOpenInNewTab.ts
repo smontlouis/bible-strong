@@ -9,7 +9,10 @@ export const useOpenInNewTab = () => {
   const { t } = useTranslation()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
 
-  const openInNewTab = (data?: TabItem) => {
+  const openInNewTab = (
+    data?: TabItem,
+    params: { autoRedirect?: true } = {}
+  ) => {
     dispatchTabs({
       type: 'insert',
       value: {
@@ -22,12 +25,14 @@ export const useOpenInNewTab = () => {
       },
     })
 
-    Snackbar.show('Onglet créé', 'info', {
-      confirmText: t('common.goTo'),
-      onConfirm: () => {
-        navigation.navigate('AppSwitcher')
-      },
-    })
+    if (!params.autoRedirect) {
+      Snackbar.show('Onglet créé', 'info', {
+        confirmText: t('common.goTo'),
+        onConfirm: () => {
+          navigation.navigate('AppSwitcher')
+        },
+      })
+    }
   }
 
   return openInNewTab

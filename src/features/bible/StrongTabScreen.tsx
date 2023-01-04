@@ -8,7 +8,6 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Loading from '~common/Loading'
-import MultipleTagsModal from '~common/MultipleTagsModal'
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -17,7 +16,6 @@ import FlatList from '~common/ui/FlatList'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { MAX_WIDTH } from '~helpers/useDimensions'
 import ConcordanceVerse from './ConcordanceVerse'
 import ListenToStrong from './ListenStrong'
 
@@ -32,27 +30,19 @@ import { timeout } from '~helpers/timeout'
 import { setHistory } from '~redux/modules/user'
 
 import produce from 'immer'
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
-import Back from '~common/Back'
+import DetailedHeader from '~common/DetailedHeader'
+import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
+import MenuOption from '~common/ui/MenuOption'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { RootState } from '~redux/modules/reducer'
 import { StrongTab } from '~state/tabs'
-import PopOverMenu from '~common/PopOverMenu'
-import MenuOption from '~common/ui/MenuOption'
-import DetailedHeader from '~common/DetailedHeader'
-import SnackBar from '~common/SnackBar'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { multipleTagsModalAtom } from '../../state/app'
 
 const LinkBox = Box.withComponent(Link)
-
-const TitleBorder = styled.View(({ theme }) => ({
-  marginTop: 10,
-  width: 35,
-  height: 3,
-  backgroundColor: theme.colors.primary,
-}))
 
 const ViewItem = styled.View(() => ({
   marginTop: 15,
@@ -67,11 +57,6 @@ const Word = styled(Text)(({ theme }) => ({
   fontSize: 18,
   fontWeight: 'bold',
   color: theme.colors.default,
-}))
-
-const Touchable = styled.TouchableOpacity(() => ({
-  flexDirection: 'row',
-  alignItems: 'flex-start',
 }))
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -101,14 +86,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   const [verses, setVerses] = useState([])
   const [count, setCount] = useState(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
-  const [multipleTagsItem, setMultipleTagsItem] = useState<
-    | {
-        id: string
-        title: string
-        entity: string
-      }
-    | false
-  >(false)
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
   const dispatch = useDispatch()
   const { t } = useTranslation()
@@ -435,10 +413,6 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
           </Box>
         </Box>
       </ScrollView>
-      <MultipleTagsModal
-        item={multipleTagsItem}
-        onClosed={() => setMultipleTagsItem(false)}
-      />
     </Container>
   )
 }

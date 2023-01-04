@@ -6,7 +6,6 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import MultipleTagsModal from '~common/MultipleTagsModal'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -19,15 +18,17 @@ import { zeroFill } from '~helpers/zeroFill'
 import { PrimitiveAtom, useSetAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
+import { shallowEqual } from 'recompose'
 import { Verse } from '~common/types'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import NaveModal from '~features/nave/NaveModal'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight, setHistory } from '~redux/modules/user'
+import { multipleTagsModalAtom } from '../../state/app'
 import {
   BibleTab,
   defaultBibleTab,
-  tabsAtomsAtom,
   useBibleTabActions,
   VersionCode,
 } from '../../state/tabs'
@@ -37,8 +38,6 @@ import BibleWebView from './BibleWebView'
 import ReferenceModal from './ReferenceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
-import { shallowEqual } from 'recompose'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 const Container = styled.View({
   flex: 1,
@@ -82,11 +81,7 @@ const BibleViewer = ({
   >(null)
   const [secondaryVerses, setSecondaryVerses] = useState(null)
   const [comments, setComments] = useState(null)
-  const [multipleTagsItem, setMultipleTagsItem] = useState<
-    | { ids: { [verse: string]: true }; entity: string }
-    | { id: string; entity: string }
-    | false
-  >(false)
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [quickTagsModal, setQuickTagsModal] = useState<
     | { ids: { [verse: string]: true }; entity: string }
     | { id: string; entity: string }
@@ -415,10 +410,6 @@ const BibleViewer = ({
         item={quickTagsModal}
         onClosed={() => setQuickTagsModal(false)}
         setMultipleTagsItem={setMultipleTagsItem}
-      />
-      <MultipleTagsModal
-        item={multipleTagsItem}
-        onClosed={() => setMultipleTagsItem(false)}
       />
       {isCreateNoteOpen && (
         <BibleNoteModal

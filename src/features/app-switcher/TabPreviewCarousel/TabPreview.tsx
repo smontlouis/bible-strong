@@ -9,32 +9,12 @@ import NaveIcon from '~common/NaveIcon'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { TabItem } from '../../../state/tabs'
+import getIconByTabType from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 
 interface TabPreviewProps {
   index: number
   tabAtom: PrimitiveAtom<TabItem>
-}
-
-const getIconType = (type: TabItem['type'], size = 14) => {
-  switch (type) {
-    case 'bible':
-      return <FeatherIcon name="book-open" size={size} />
-    case 'compare':
-      return <FeatherIcon name="repeat" size={size} />
-    case 'strong':
-      return <LexiqueIcon width={size} height={size} />
-    case 'commentary':
-      return <CommentIcon width={size} height={size} color="#26A69A" />
-    case 'dictionary':
-      return <DictionnaryIcon width={size} height={size} />
-    case 'search':
-      return <FeatherIcon name="search" size={size} />
-    case 'nave':
-      return <NaveIcon width={size} height={size} />
-    default:
-      return <FeatherIcon name="x" size={size} />
-  }
 }
 
 const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
@@ -56,7 +36,7 @@ const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
           source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
         />
       ) : (
-        <Box opacity={0.3}>{getIconType(tab.type, 30)}</Box>
+        <Box opacity={0.3}>{getIconByTabType(tab.type, 30)}</Box>
       )}
     </AnimatedBox>
   )

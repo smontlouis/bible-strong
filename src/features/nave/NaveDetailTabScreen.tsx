@@ -1,37 +1,31 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { Share } from 'react-native'
-import * as Icon from '@expo/vector-icons'
-import truncHTML from 'trunc-html'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
+import React, { useEffect, useState } from 'react'
+import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import truncHTML from 'trunc-html'
 
-import Back from '~common/Back'
-import Link from '~common/Link'
-import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
-import { setHistory } from '~redux/modules/user'
-import { MAX_WIDTH } from '~helpers/useDimensions'
-import styled from '@emotion/native'
-import waitForDatabase from '~common/waitForNaveDB'
-import loadNaveItem from '~helpers/loadNaveItem'
-import Snackbar from '~common/SnackBar'
-import MultipleTagsModal from '~common/MultipleTagsModal'
-import TagList from '~common/TagList'
-import useHTMLView from '~helpers/useHTMLView'
-import { NavigationStackProp } from 'react-navigation-stack'
-import { NavigationParams } from 'react-navigation'
-import { RootState } from '~redux/modules/reducer'
-import { PrimitiveAtom, useAtom } from 'jotai'
-import { NaveTab } from '~state/tabs'
 import produce from 'immer'
+import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
+import { useTranslation } from 'react-i18next'
+import { NavigationStackProp } from 'react-navigation-stack'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import MenuOption from '~common/ui/MenuOption'
-import { useTranslation } from 'react-i18next'
+import Snackbar from '~common/SnackBar'
+import TagList from '~common/TagList'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
+import Text from '~common/ui/Text'
+import waitForDatabase from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import loadNaveItem from '~helpers/loadNaveItem'
+import useHTMLView from '~helpers/useHTMLView'
+import { RootState } from '~redux/modules/reducer'
+import { setHistory } from '~redux/modules/user'
+import { multipleTagsModalAtom } from '../../state/app'
+import { NaveTab } from '~state/tabs'
 
 interface NaveDetailScreenProps {
   navigation: NavigationStackProp
@@ -49,7 +43,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   const dispatch = useDispatch()
   const [naveItem, setNaveItem] = useState(null)
   const { t } = useTranslation()
-  const [multipleTagsItem, setMultipleTagsItem] = useState(false)
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const tags = useSelector(
     (state: RootState) => state.user.bible.naves[name_lower]?.tags,
     shallowEqual
@@ -132,8 +126,6 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     }
   }
 
-  const onClosed = useCallback(() => setMultipleTagsItem(false), [])
-
   return (
     <Container>
       <DetailedHeader
@@ -207,7 +199,6 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
           <WebView {...webviewProps(naveItem.description)} />
         )}
       </Box>
-      <MultipleTagsModal multiple item={multipleTagsItem} onClosed={onClosed} />
     </Container>
   )
 }

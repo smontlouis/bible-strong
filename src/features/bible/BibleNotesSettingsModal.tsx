@@ -1,17 +1,18 @@
 import { withTheme } from '@emotion/react'
+import { useSetAtom } from 'jotai'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import { deleteNote } from '~redux/modules/user'
+import { multipleTagsModalAtom } from '../../state/app'
 
 const NotesSettingsModal = ({
   isOpen,
   onClosed,
   theme,
   setTitlePrompt,
-  setMultipleTagsItem,
   openNoteEditor,
 }) => {
   const { t } = useTranslation()
@@ -21,6 +22,7 @@ const NotesSettingsModal = ({
     state => state.user.bible.notes[noteId],
     shallowEqual
   )
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
   const deleteNoteConfirmation = id => {
     Alert.alert(
@@ -59,7 +61,7 @@ const NotesSettingsModal = ({
         }}
         bold
       >
-        {t('Tags')}
+        {t('Éditer les tags')}
       </Modal.Item>
       <Modal.Item
         bold

@@ -16,6 +16,7 @@ import LexiqueTabScreen from '~features/lexique/LexiqueTabScreen'
 import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
 import NaveTabScreen from '~features/nave/NaveTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
+import StudiesTabScreen from '~features/studies/StudiesTabScreen'
 import { TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import NewTabScreen from './NewTab/NewTabScreen'
@@ -78,6 +79,11 @@ const getComponentTab = (tab: TabItem) => {
       return {
         component: NewTabScreen,
         atomName: 'newAtom',
+      }
+    case 'study':
+      return {
+        component: StudiesTabScreen,
+        atomName: 'studyAtom',
       }
   }
 }

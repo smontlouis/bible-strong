@@ -1,10 +1,10 @@
 import React from 'react'
 import {
-  MenuOptionsProps,
   MenuOption as BaseMenuOption,
+  MenuOptionProps,
 } from 'react-native-popup-menu'
 
-const MenuOption = (props: MenuOptionsProps) => {
+const MenuOption = (props: MenuOptionProps) => {
   return (
     <BaseMenuOption
       {...props}
