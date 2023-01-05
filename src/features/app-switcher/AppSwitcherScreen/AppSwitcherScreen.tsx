@@ -39,14 +39,9 @@ const AppSwitcherScreen = memo(
     openHome,
   }: NavigationStackScreenProps<{}> & AppSwitcherProps) => {
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
-
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
-
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
-
     const { scrollView, tabPreviews } = useAppSwitcherContext()
-
-    // useExpandNewTab()
 
     return (
       <Box flex={1} bg="lightGrey">

@@ -41,7 +41,7 @@ export const useTabAnimations = () => {
       }
     )
     runOnJS(setAppSwitcherMode)('list')
-    runOnJS(setActiveTabIndex)(-1)
+    // runOnJS(setActiveTabIndex)(-1)
     activeTabScreen.atomId.value = null
   }, [])
 

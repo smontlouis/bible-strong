@@ -6,6 +6,7 @@ import {
   useAnimatedRef,
   useSharedValue,
 } from 'react-native-reanimated'
+import { useOnceAtoms } from './utils/useOnceAtoms'
 import useTabConstants from './utils/useTabConstants'
 
 type AppSwitcherContextValues = {
@@ -43,13 +44,13 @@ const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(
 
 interface AppSwitcherProviderProps {
   children: React.ReactNode
-  initialAtomId: string
-  initialTabIndex: number
 }
 
 export const AppSwitcherProvider = memo(
-  ({ children, initialAtomId, initialTabIndex }: AppSwitcherProviderProps) => {
+  ({ children }: AppSwitcherProviderProps) => {
     const scrollViewRef = useAnimatedRef<ScrollView>()
+    const { initialAtomId, initialTabIndex } = useOnceAtoms()
+    const memoizedChildren = useMemo(() => children, [])
     const { HEIGHT } = useTabConstants()
 
     const tabPreviewGestureRefs = useMemo(
@@ -106,7 +107,7 @@ export const AppSwitcherProvider = memo(
 
     return (
       <AppSwitcherContext.Provider value={contextValue}>
-        {children}
+        {memoizedChildren}
       </AppSwitcherContext.Provider>
     )
   }
