@@ -29,6 +29,8 @@ import {
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
+import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
+import { useOnceAtoms } from '~features/app-switcher/utils/useOnceAtoms'
 
 interface Props {
   persistor: Persistor
@@ -113,6 +115,7 @@ const InitApp = ({ persistor }: Props) => {
   const dispatch = useDispatch()
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
+  const { initialAtomId, initialTabIndex } = useOnceAtoms()
 
   useEffect(() => {
     dispatch(getChangelog())
@@ -155,9 +158,14 @@ const InitApp = ({ persistor }: Props) => {
           <PersistGate loading={null} persistor={persistor}>
             <DBStateProvider>
               <ErrorBoundary>
-                <AppNavigator
-                  onNavigationStateChange={onNavigationStateChange}
-                />
+                <AppSwitcherProvider
+                  initialAtomId={initialAtomId}
+                  initialTabIndex={initialTabIndex}
+                >
+                  <AppNavigator
+                    onNavigationStateChange={onNavigationStateChange}
+                  />
+                </AppSwitcherProvider>
               </ErrorBoundary>
             </DBStateProvider>
           </PersistGate>

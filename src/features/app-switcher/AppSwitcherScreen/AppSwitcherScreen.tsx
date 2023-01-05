@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai'
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { memo, useCallback, useEffect, useRef } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
@@ -14,22 +14,14 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import HomeScreen from '~features/home/HomeScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
-import {
-  activeTabIndexAtom,
-  tabsAtomsAtom,
-  tabsCountAtom,
-} from '../../../state/tabs'
-import {
-  AppSwitcherProvider,
-  useAppSwitcherContext,
-} from '../AppSwitcherProvider'
+import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
+import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
+import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import CachedTabScreens from '../CachedTabScreens'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
-import useExpandNewTab from '../utils/useExpandNewTab'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
-import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -54,7 +46,7 @@ const AppSwitcherScreen = memo(
 
     const { scrollView, tabPreviews } = useAppSwitcherContext()
 
-    useExpandNewTab()
+    // useExpandNewTab()
 
     return (
       <Box flex={1} bg="lightGrey">
@@ -105,21 +97,9 @@ const AppSwitcherScreen = memo(
   }
 )
 
-const useOnceAtoms = () => {
-  const [tabsAtoms] = useAtom(tabsAtomsAtom)
-  const [tabIndex] = useAtom(activeTabIndexAtom)
-  const initialAtomId = useRef(tabsAtoms[tabIndex]?.toString())
-  const initialTabIndex = useRef(tabIndex)
-  return {
-    initialAtomId: initialAtomId.current,
-    initialTabIndex: initialTabIndex.current,
-  }
-}
-
 const AppSwitcherScreenWrapper = (props: any) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
-  const { initialAtomId, initialTabIndex } = useOnceAtoms()
   const tabsCount = useAtomValue(tabsCountAtom)
 
   const openMenu = useCallback(() => {
@@ -153,13 +133,6 @@ const AppSwitcherScreenWrapper = (props: any) => {
     [closeMenu]
   )
 
-  const children = useMemo(
-    () => (
-      <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
-    ),
-    []
-  )
-
   return (
     <DrawerLayout
       ref={homeDrawerRef}
@@ -179,11 +152,7 @@ const AppSwitcherScreenWrapper = (props: any) => {
         renderNavigationView={renderMoreScreen}
         drawerLockMode="locked-closed"
       >
-        <AppSwitcherProvider
-          initialAtomId={initialAtomId}
-          initialTabIndex={initialTabIndex}
-          children={children}
-        />
+        <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
       </DrawerLayout>
     </DrawerLayout>
   )

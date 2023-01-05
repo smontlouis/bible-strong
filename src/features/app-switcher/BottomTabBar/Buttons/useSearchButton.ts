@@ -1,11 +1,13 @@
 import { useAtomValue, useSetAtom } from 'jotai'
+import { useSlideNewTab } from '~features/app-switcher/utils/useSlideNewTab'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
 import { tabsAtom, tabsAtomsAtom } from '../../../../state/tabs'
 
 const useSearchButtonPress = () => {
-  const dispatch = useSetAtom(tabsAtomsAtom)
+  const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const tabs = useAtomValue(tabsAtom)
   const { slideToIndex } = useTabAnimations()
+  const { triggerSlideNewTab } = useSlideNewTab()
 
   const onPress = async () => {
     const searchIndex = tabs.findIndex(tab => tab.type === 'search')
@@ -13,10 +15,12 @@ const useSearchButtonPress = () => {
       slideToIndex(searchIndex)
       return
     }
-    dispatch({
+    const newTabId = `search-${Date.now()}`
+
+    dispatchTabs({
       type: 'insert',
       value: {
-        id: `search-${Date.now()}`,
+        id: newTabId,
         title: 'New Search',
         isRemovable: true,
         type: 'search',
@@ -26,6 +30,7 @@ const useSearchButtonPress = () => {
         },
       },
     })
+    triggerSlideNewTab(newTabId)
   }
 
   return { onPress }

@@ -29,7 +29,7 @@ const useTabPreview = ({
 }) => {
   const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
-  const dispatch = useSetAtom(tabsAtomsAtom)
+  const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const tabsCount = useAtomValue(tabsCountAtom)
 
   // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
@@ -79,7 +79,7 @@ const useTabPreview = ({
 
   const onDelete = () => {
     scrollView.padding.value = TAB_PREVIEW_HEIGHT + GAP + 20
-    dispatch({
+    dispatchTabs({
       type: 'remove',
       atom: tabAtom,
     })
