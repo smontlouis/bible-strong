@@ -1,3 +1,4 @@
+import { useTheme } from '@emotion/react'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useEffect } from 'react'
@@ -19,6 +20,7 @@ interface SearchScreenProps {
 
 const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
 
   const [searchTab, setSearchTab] = useAtom(searchAtom)
 
@@ -55,10 +57,11 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
   return (
     <Container>
       <Header
-        title={t('Recherche') + ' ' + t(`search.${searchMode}`)}
+        title={t('Rechercher') + ' ' + t(`search.${searchMode}`)}
         rightComponent={
           <Box mr={20}>
             <Switch
+              color={theme.colors.primary}
               value={searchMode === 'online'}
               onValueChange={toggleSearchMode}
             />

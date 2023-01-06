@@ -4,6 +4,7 @@
   "Il y a {{formattedDate}}": "Il y a {{formattedDate}}",
   "Fermer": "Fermer",
   "Valider": "Valider",
+  "app.youAreOffline": "Vous êtes hors ligne",
   "app.syncing": "Synchronisation en cours...",
   "app.synced": "Synchronisation finie !",
   "app.sync": "Sauvegarde manuelle",

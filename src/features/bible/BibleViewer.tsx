@@ -28,7 +28,7 @@ import { addHighlight, removeHighlight, setHistory } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import {
   BibleTab,
-  defaultBibleTab,
+  getDefaultBibleTab,
   useBibleTabActions,
   VersionCode,
 } from '../../state/tabs'
@@ -257,7 +257,7 @@ const BibleViewer = ({
       isRemovable: true,
       type: 'bible',
       data: {
-        ...defaultBibleTab.data,
+        ...getDefaultBibleTab().data,
         selectedBook: book,
         selectedChapter: chapter,
         selectedVerse: verse,

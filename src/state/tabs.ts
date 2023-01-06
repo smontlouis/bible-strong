@@ -143,7 +143,7 @@ export const tabTypes = [
   'commentary',
 ] as const
 
-export const defaultBibleTab: BibleTab = {
+export const getDefaultBibleTab = (): BibleTab => ({
   id: 'bible',
   isRemovable: false,
   title: 'Genèse 1:1',
@@ -165,14 +165,14 @@ export const defaultBibleTab: BibleTab = {
     isSelectionMode: false,
     isReadOnly: false,
   },
-}
+})
 
 export const getDefaultData = <T extends TabItem>(
   type: TabItem['type']
 ): { title?: TabItem['title']; data: T['data'] } => {
   switch (type) {
     case 'bible': {
-      return { data: defaultBibleTab.data }
+      return { data: getDefaultBibleTab().data }
     }
     case 'search': {
       return {
@@ -257,13 +257,19 @@ export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
   0
 )
 export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [
-  defaultBibleTab,
+  getDefaultBibleTab(),
 ])
 export const loadableActiveIndexAtom = loadable(activeTabIndexAtomOriginal)
 export const loadableTabsAtom = loadable(tabsAtom)
 
 export const activeTabIndexAtom = atom(
-  get => get(activeTabIndexAtomOriginal),
+  get => {
+    const tabsAtoms = get(tabsAtomsAtom)
+    if (get(activeTabIndexAtomOriginal) !== 0 && tabsAtoms.length === 1) {
+      return 0
+    }
+    return get(activeTabIndexAtomOriginal)
+  },
   (get, set, value: number) => {
     set(activeTabIndexAtomOriginal, value)
 
@@ -290,7 +296,7 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
   const tabsAtoms = get(tabsAtomsAtom)
 
   // If activeTab is bible tab, only cache it
-  if (activeTabIndex === 0) {
+  if (activeTabIndex === 0 || tabsAtoms.length === 1) {
     return [tabsAtoms[0].toString()]
   }
   // Cache the first tab (bible) and the active tab

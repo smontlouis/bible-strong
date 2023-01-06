@@ -6,7 +6,7 @@ import Modal from '~common/Modal'
 import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import {
   BibleTab,
-  defaultBibleTab,
+  getDefaultBibleTab,
   useBibleTabActions,
 } from '../../../../state/tabs'
 
@@ -17,7 +17,7 @@ export interface SelectBibleReferenceModalProps {
   navigation: NavigationStackProp
 }
 
-const bibleAtom = atom(defaultBibleTab)
+const bibleAtom = atom(getDefaultBibleTab())
 
 const SelectBibleReferenceModal = ({
   isOpen,

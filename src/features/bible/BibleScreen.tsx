@@ -7,7 +7,7 @@ import { atom } from 'jotai'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import {
   BibleTab,
-  defaultBibleTab,
+  getDefaultBibleTab,
   useGetDefaultBibleTabAtom,
   VersionCode,
 } from '../../state/tabs'
@@ -37,7 +37,7 @@ const BibleScreen = ({
     version,
   } = navigation.state.params || {}
 
-  const initialValues = produce(defaultBibleTab, draft => {
+  const initialValues = produce(getDefaultBibleTab(), draft => {
     draft.id = `bible-${Date.now()}`
     if (book)
       draft.data.selectedBook = Number.isInteger(book)

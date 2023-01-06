@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback } from 'react'
-import { runOnJS, withTiming } from 'react-native-reanimated'
+import { runOnJS, withDelay, withTiming } from 'react-native-reanimated'
 import {
   activeTabIndexAtom,
   appSwitcherModeAtom,
@@ -41,7 +41,6 @@ export const useTabAnimations = () => {
       }
     )
     runOnJS(setAppSwitcherMode)('list')
-    // runOnJS(setActiveTabIndex)(-1)
     activeTabScreen.atomId.value = null
   }, [])
 
@@ -61,15 +60,15 @@ export const useTabAnimations = () => {
         () => {
           runOnJS(setActiveTabIndex)(index)
           runOnJS(setAtomId)(index)
-
-          activeTabScreen.opacity.value = withTiming(1, undefined, () => {
-            // !TODO - Fix scroll to top
-            // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
-            //   const scrollToTop =
-            //     Math.round(top) - STATUS_BAR_HEIGHT - SCREEN_MARGIN
-            //   scrollTo(scrollView.ref, 0, scrollToTop, false)
-            // }
-          })
+          activeTabScreen.opacity.value = 1
+          // activeTabScreen.opacity.value = withTiming(1, undefined, () => {
+          //   // !TODO - Fix scroll to top
+          //   // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
+          //   //   const scrollToTop =
+          //   //     Math.round(top) - STATUS_BAR_HEIGHT - SCREEN_MARGIN
+          //   //   scrollTo(scrollView.ref, 0, scrollToTop, false)
+          //   // }
+          // })
         }
       )
     },
@@ -93,14 +92,17 @@ export const useTabAnimations = () => {
         if (!finished) return
 
         runOnJS(setAtomId)(index)
-        tabPreviewCarousel.opacity.value = withTiming(0, undefined, finish => {
-          if (!finish) {
-            tabPreviewCarousel.opacity.value = 1
-            return
-          }
-          tabPreviewCarousel.translateY.value = HEIGHT
-          activeTabPreview.zIndex.value = 3
-        })
+        tabPreviewCarousel.opacity.value = withDelay(
+          200,
+          withTiming(0, undefined, finish => {
+            if (!finish) {
+              tabPreviewCarousel.opacity.value = 1
+              return
+            }
+            tabPreviewCarousel.translateY.value = HEIGHT
+            activeTabPreview.zIndex.value = 3
+          })
+        )
       }
     )
   }

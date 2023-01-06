@@ -9,7 +9,7 @@ import {
   BibleTab,
   getDefaultData,
   NewTab,
-  defaultBibleTab,
+  getDefaultBibleTab,
   TabItem,
 } from '../../../../state/tabs'
 import SelectBibleReferenceModal from './SelectBibleReferenceModal'
@@ -42,7 +42,8 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
         }
       }
 
-      return { ...defaultBibleTab.data, ...data }
+      console.log(data, getDefaultBibleTab().data)
+      return { ...getDefaultBibleTab().data, ...data }
     }
     setTab({
       ...tab,

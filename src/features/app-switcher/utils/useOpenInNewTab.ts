@@ -32,10 +32,13 @@ export const useOpenInNewTab = () => {
       Snackbar.show('Onglet créé', 'info', {
         confirmText: t('common.goTo'),
         onConfirm: () => {
-          triggerSlideNewTab(newTabId)
           navigation.navigate('AppSwitcher')
+          triggerSlideNewTab(newTabId)
         },
       })
+    } else {
+      triggerSlideNewTab(newTabId)
+      navigation.navigate('AppSwitcher')
     }
   }
 

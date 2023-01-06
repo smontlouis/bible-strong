@@ -7,23 +7,20 @@ import { useTabAnimations } from './useTabAnimations'
 
 export const useSlideNewTab = () => {
   const tabsCount = useAtomValue(tabsCountAtom)
-  const prevTabsCount = usePrevious(tabsCount)
   const { slideToIndex } = useTabAnimations()
 
   const [tabId, setTabId] = useState<string | null>(null)
 
   useEffect(() => {
-    const isNewTab =
-      tabsCount > prevTabsCount && typeof prevTabsCount !== 'undefined'
     ;(async () => {
-      if (isNewTab && tabId) {
+      if (tabId) {
         await wait(0)
         const index = tabsCount - 1
         slideToIndex(index)
         setTabId(null)
       }
     })()
-  }, [tabId, tabsCount, prevTabsCount])
+  }, [tabId, tabsCount])
 
   return { triggerSlideNewTab: setTabId }
 }
