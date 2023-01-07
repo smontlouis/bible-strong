@@ -13,7 +13,7 @@
       "ios",
       "android"
     ],
-    "version": "16.0.8",
+    "version": "16.0.9",
     "orientation": "default",
     "assetBundlePatterns": [
       "assets/images/*",
@@ -36,10 +36,10 @@
       ]
     },
     "android": {
-      "versionCode": 233
+      "versionCode": 235
     },
     "ios": {
-      "buildNumber": "91"
+      "buildNumber": "92"
     }
   }
 }
