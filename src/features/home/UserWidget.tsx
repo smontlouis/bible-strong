@@ -7,7 +7,6 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useSelector } from 'react-redux'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -23,32 +22,32 @@ import { useIsPremium } from '~helpers/usePremium'
 import PreloadBible from './PreloadBible'
 
 import { useTranslation } from 'react-i18next'
+import { shallowEqual } from 'recompose'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
-import Back from '~common/Back'
-import { shallowEqual } from 'recompose'
+import Spacer from '~common/ui/Spacer'
 
 const vodNb = [...Array(6).keys()]
 
 const Container = styled.View(({ theme }) => ({
-  backgroundColor: theme.colors.reverse,
-  paddingTop: getBottomSpace() + Platform.OS === 'ios' ? 20 : 45,
+  backgroundColor: theme.colors.lightGrey,
+  paddingTop: Platform.OS === 'ios' ? 20 : 45,
   paddingBottom: 0,
 }))
 
 const ProfileImage = styled.Image(({ theme }) => ({
-  width: 40,
-  height: 40,
-  borderRadius: 20,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
   backgroundColor: theme.colors.tertiary,
   alignItems: 'center',
   justifyContent: 'center',
 }))
 
 const ProfileContainer = styled.View(({ theme }) => ({
-  width: 50,
-  height: 50,
-  borderRadius: 25,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
   shadowColor: theme.colors.primary,
   shadowOffset: { width: 0, height: 3 },
   shadowOpacity: 0.3,
@@ -85,10 +84,10 @@ const Chip = styled(Link)(({ theme, hightlighted }) => ({
   paddingVertical: 10,
   paddingHorizontal: 13,
   marginRight: 10,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 3 },
-  shadowOpacity: 0.08,
-  shadowRadius: 4,
+  shadowColor: 'rgb(89,131,240)',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 7,
   elevation: 1,
   overflow: 'visible',
 
@@ -103,7 +102,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = ({ closeHome }: { closeHome }) => {
+const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
@@ -154,7 +153,15 @@ const UserWidget = ({ closeHome }: { closeHome }) => {
 
   return (
     <Container>
-      <Box flex paddingHorizontal={20} overflow="visible">
+      <Box
+        flex
+        paddingHorizontal={20}
+        overflow="visible"
+        borderRadius={30}
+        marginHorizontal={20}
+        bg="reverse"
+        py={20}
+      >
         <OfflineNotice />
 
         <Box alignItems="center" row justifyContent="space-between">
@@ -192,11 +199,8 @@ const UserWidget = ({ closeHome }: { closeHome }) => {
               </Box>
             )}
           </Box>
-          <Back onCustomPress={closeHome} padding>
-            <FeatherIcon name={'arrow-right'} size={20} />
-          </Back>
         </Box>
-
+        <Spacer />
         <Box row alignItems="center" overflow="visible">
           <Box flex>
             <Text title fontSize={25}>
@@ -233,7 +237,6 @@ const UserWidget = ({ closeHome }: { closeHome }) => {
         )} */}
       </Box>
       <Box grey>
-        <RoundedCorner />
         <ScrollView
           horizontal
           style={{ maxHeight: 95, overflow: 'visible', marginTop: 10 }}

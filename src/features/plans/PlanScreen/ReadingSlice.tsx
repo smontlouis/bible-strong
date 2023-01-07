@@ -52,7 +52,7 @@ const ReadingSlice = ({
       <Box
         paddingLeft={28}
         paddingTop={15}
-        backgroundColor="lightGrey"
+        backgroundColor="reverse"
         position="relative"
       >
         <FineLine />

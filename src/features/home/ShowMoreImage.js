@@ -73,7 +73,7 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
                 width: width - 40,
                 height: width - 40,
               }}
-              resizeMode="cover"
+              resizeMode="contain"
             />
             <LinkBox
               position="absolute"

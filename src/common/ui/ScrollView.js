@@ -1,9 +1,13 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import {
+  getBottomSpace,
+  getStatusBarHeight,
+} from 'react-native-iphone-x-helper'
 import * as Animatable from 'react-native-animatable'
 
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
+import { useTheme } from '@emotion/react'
 
 {
   /* <ScrollView
@@ -71,13 +75,15 @@ export const HomeScrollView = ({
   ...props
 }) => {
   const orientation = useDeviceOrientation()
+  const theme = useTheme()
   return (
     <ScrollView
       {...props}
       orientation={orientation}
+      backgroundColor="lightGrey"
       contentContainerStyle={{
-        paddingTop: 20,
-        paddingBottom: 20,
+        paddingTop: getStatusBarHeight() || 20,
+        backgroundColor: theme.colors.lightGrey,
         ...contentContainerStyle,
       }}
     >
