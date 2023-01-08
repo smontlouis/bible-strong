@@ -482,7 +482,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = com.smontlouis.biblestrong;
 				PRODUCT_NAME = "dev - BIble Strong";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = YES;

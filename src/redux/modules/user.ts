@@ -181,7 +181,7 @@ export type QuotaProps = {
   lastDate: number
 }
 
-const initialState: UserState = {
+const getInitialState = (): UserState => ({
   id: '',
   email: '',
   displayName: '',
@@ -251,7 +251,7 @@ const initialState: UserState = {
       lastDate: 0,
     },
   },
-}
+})
 
 // UserReducer
 const userReducer = produce((draft: Draft<UserState>, action) => {
@@ -286,7 +286,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         provider,
         bible,
         subscription,
-      } = (action.payload.remoteUserData as FireStoreUserData) || {}
+      } = action.payload.remoteUserData as FireStoreUserData
 
       draft.id = id
       draft.email = email
@@ -329,12 +329,14 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
     case USER_LOGOUT: {
       return {
-        ...initialState,
+        ...getInitialState(),
         bible: {
-          ...initialState.bible,
+          ...getInitialState().bible,
           // Keep changelog
           changelog: draft.bible.changelog,
         },
+        // Keep quota
+        quota: draft.quota,
       }
     }
     case SAVE_ALL_LOGS_AS_SEEN: {
@@ -460,7 +462,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
 const reducers = <typeof userReducer>(
   reduceReducers(
-    initialState,
+    getInitialState(),
     userReducer,
     notesReducer,
     highlightsReducer,

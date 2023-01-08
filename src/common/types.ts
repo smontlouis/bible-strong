@@ -22,6 +22,12 @@ export interface Plan {
   lang: 'fr' | 'en'
 }
 
+export interface OngoingPlan {
+  id: string
+  status: PlanStatus
+  readingSlices: { [id: string]: PlanStatus }
+}
+
 type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 export interface OnlinePlan extends WithOptional<Plan, 'sections'> {
@@ -114,12 +120,6 @@ export interface VideoSlice {
   title: string
   description?: string
   url: string
-}
-
-export interface OngoingPlan {
-  id: string
-  status: PlanStatus
-  readingSlices: { [id: string]: PlanStatus }
 }
 
 export interface OngoingReadingSlice {

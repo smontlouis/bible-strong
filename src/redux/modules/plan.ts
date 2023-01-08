@@ -1,16 +1,16 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {
-  Plan,
-  Section,
   OngoingPlan,
-  ReadingSlice,
-  Status,
   OnlinePlan,
+  Plan,
+  ReadingSlice,
+  Section,
+  Status,
 } from '~common/types'
-import { USER_LOGIN_SUCCESS, USER_LOGOUT } from './user'
 import { firebaseDb, increment } from '~helpers/firebase'
-import { RootState } from './reducer'
 import { getLangIsFr } from '~i18n'
+import { RootState } from './reducer'
+import { FireStoreUserData, RECEIVE_LIVE_UPDATES, USER_LOGOUT } from './user'
 
 import { bibleProjectPlan } from '~features/plans/bible-project-plan'
 import { bibleProjectPlanEn } from '~features/plans/bible-project-plan-en'
@@ -262,32 +262,13 @@ const planSlice = createSlice({
         state.onlinePlans = action.payload
       }
     )
-    // builder.addCase(USER_LOGIN_SUCCESS, (state, action: any) => {
-    //   const plan = action.remoteUserData?.plan
-    //   const { localLastSeen, remoteLastSeen, isLogged } = action
+    builder.addCase(RECEIVE_LIVE_UPDATES, (state, action: any) => {
+      const { plan } = action.payload.remoteUserData as FireStoreUserData
 
-    //   if (plan) {
-    //     if (!isLogged) {
-    //       console.log('User was not logged, merge data')
-    //       state.ongoingPlans = plan
-    //       state.myPlans = state.myPlans.filter(
-    //         mP => mP.id === plan.find(oP => oP.id === mP.id)?.id
-    //       )
-    //     } else if (remoteLastSeen > localLastSeen) {
-    //       // Remote wins
-    //       console.log('Plan - Remote wins')
-    //       state.ongoingPlans = plan
-    //       state.myPlans = state.myPlans.filter(
-    //         mP => mP.id === plan.find(oP => oP.id === mP.id)?.id
-    //       )
-    //     } else if (remoteLastSeen < localLastSeen) {
-    //       console.log('Plan - Local wins')
-    //       // Local wins - do nothing
-    //     } else {
-    //       console.log('Plan - Last seen equals remote last seen, do nothing')
-    //     }
-    //   }
-    // })
+      if (plan) {
+        state.ongoingPlans = plan
+      }
+    })
     builder.addCase(USER_LOGOUT, state => {
       state.ongoingPlans = initialState.ongoingPlans
       state.myPlans = initialState.myPlans

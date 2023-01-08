@@ -12,16 +12,16 @@ import { activeTabIndexAtom, tabsCountAtom } from '../../../../state/tabs'
 import { useTabAnimations } from '../../utils/useTabAnimations'
 
 const useTabButtonPress = () => {
-  const activeTabIndex = useAtomValue(activeTabIndexAtom)
+  // const activeTabIndex = useAtomValue(activeTabIndexAtom)
   const tabsCount = useAtomValue(tabsCountAtom)
-  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
+  // const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
   const { minimizeTab } = useTabAnimations()
 
   const scale = useSharedValue(1)
 
   const onPress = async () => {
-    await takeActiveTabSnapshot(activeTabIndex)
+    // await takeActiveTabSnapshot(activeTabIndex)
     minimizeTab()
   }
 
