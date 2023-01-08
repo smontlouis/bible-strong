@@ -1,8 +1,11 @@
+import { useAtomValue } from 'jotai'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { fullscreenAtom } from '../../../state/app'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import AddTabButton from './Buttons/AddTabButton'
 import BibleButton from './Buttons/BibleButton'
@@ -20,8 +23,20 @@ type BottomTabBarProps = {
 const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, listStyles, viewStyles, tabsCount } = useBottomTabBar()
   const { t } = useTranslation()
+  const isFullscreen = useAtomValue(fullscreenAtom)
+  const bottomBarHeight = TAB_ICON_SIZE + getBottomSpace()
+  const bottomBarStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: withTiming(isFullscreen ? bottomBarHeight : 0),
+        },
+      ],
+    }
+  })
+
   return (
-    <Box
+    <AnimatedBox
       pb={getBottomSpace()}
       bg="reverse"
       position="absolute"
@@ -30,7 +45,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       right={0}
       borderTopWidth={1}
       borderColor="border"
-      height={TAB_ICON_SIZE + getBottomSpace()}
+      height={bottomBarHeight}
+      style={bottomBarStyles}
     >
       <AnimatedBox
         row
@@ -68,7 +84,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
           <Text bold>OK</Text>
         </TouchableBox>
       </AnimatedBox>
-    </Box>
+    </AnimatedBox>
   )
 }
 

@@ -1,6 +1,6 @@
 import { PrimitiveAtom, useAtomValue } from 'jotai'
 import React, { memo } from 'react'
-import { Image } from 'react-native'
+import { Image, StyleSheet } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'
 import { FadeIn, Layout, ZoomOut } from 'react-native-reanimated'
 
@@ -85,12 +85,19 @@ const TabPreview = ({
             },
           ]}
         >
-          {tab.base64Preview ? (
-            <Image
-              style={{ width: '100%', height: '100%', borderRadius: 20 }}
-              source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
-            />
-          ) : (
+          <>
+            {tab.base64Preview && (
+              <Image
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 20,
+                  opacity: 0.15,
+                  ...StyleSheet.absoluteFillObject,
+                }}
+                source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
+              />
+            )}
             <Box
               center
               width={80}
@@ -98,9 +105,10 @@ const TabPreview = ({
               borderRadius={40}
               backgroundColor="lightGrey"
             >
-              <Box opacity={0.3}>{getIconByTabType(tab.type, 30)}</Box>
+              <Box>{getIconByTabType(tab.type, 30)}</Box>
             </Box>
-          )}
+          </>
+
           {tab.isRemovable && (
             <TapGestureHandler
               onGestureEvent={onClose}

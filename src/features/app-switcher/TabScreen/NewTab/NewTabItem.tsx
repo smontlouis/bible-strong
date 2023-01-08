@@ -59,7 +59,7 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
       return
     }
     // @ts-ignore
-    setTab({ ...tab, type, ...getDefaultData(type) })
+    setTab({ ...tab, base64Preview: '', type, ...getDefaultData(type) })
   }
 
   return {

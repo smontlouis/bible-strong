@@ -8,20 +8,27 @@ import {
 } from 'react-native-reanimated'
 import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActiveTabSnapshot'
 import useDidUpdate from '~helpers/useDidUpdate'
-import { activeTabIndexAtom, tabsCountAtom } from '../../../../state/tabs'
+import {
+  activeTabIndexAtom,
+  tabsAtom,
+  tabsCountAtom,
+} from '../../../../state/tabs'
 import { useTabAnimations } from '../../utils/useTabAnimations'
 
 const useTabButtonPress = () => {
-  // const activeTabIndex = useAtomValue(activeTabIndexAtom)
+  const activeTabIndex = useAtomValue(activeTabIndexAtom)
+  const tabs = useAtomValue(tabsAtom)
   const tabsCount = useAtomValue(tabsCountAtom)
-  // const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
+  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
   const { minimizeTab } = useTabAnimations()
 
   const scale = useSharedValue(1)
 
   const onPress = async () => {
-    // await takeActiveTabSnapshot(activeTabIndex)
+    if (!tabs[activeTabIndex].base64Preview) {
+      await takeActiveTabSnapshot(activeTabIndex)
+    }
     minimizeTab()
   }
 

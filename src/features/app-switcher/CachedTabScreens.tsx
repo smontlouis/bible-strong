@@ -15,6 +15,8 @@ const CachedTabScreens = ({ navigation }: ChachedTabScreensProps) => {
   const [cachedTabIds, setCachedTabIds] = useAtom(cachedTabIdsAtom)
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
+  console.log(cachedTabIds)
+
   // Little hack to have atomWithDefault but override default value
   useOnce(() => {
     setCachedTabIds(cachedTabIds)
