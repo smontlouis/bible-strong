@@ -11,6 +11,7 @@ const useLogin = () => {
       email: state.user.email,
       displayName: state.user.displayName,
       photoURL: state.user.photoURL,
+      emailVerified: state.user.emailVerified,
     }),
     shallowEqual
   )

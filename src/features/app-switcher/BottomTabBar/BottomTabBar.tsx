@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -18,6 +19,7 @@ type BottomTabBarProps = {
 
 const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, listStyles, viewStyles, tabsCount } = useBottomTabBar()
+  const { t } = useTranslation()
   return (
     <Box
       pb={getBottomSpace()}
@@ -58,7 +60,9 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       >
         <AddTabButton />
         <Box flex center>
-          <Text>{tabsCount} onglets</Text>
+          <Text>
+            {tabsCount} {t('tabs.tab', { count: tabsCount })}
+          </Text>
         </Box>
         <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
           <Text bold>OK</Text>

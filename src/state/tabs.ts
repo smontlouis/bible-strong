@@ -256,16 +256,22 @@ export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
   'activeTabIndexAtomOriginal',
   0
 )
+
 export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [
   getDefaultBibleTab(),
 ])
+
 export const loadableActiveIndexAtom = loadable(activeTabIndexAtomOriginal)
+
 export const loadableTabsAtom = loadable(tabsAtom)
 
 export const activeTabIndexAtom = atom(
   get => {
     const tabsAtoms = get(tabsAtomsAtom)
-    if (get(activeTabIndexAtomOriginal) !== 0 && tabsAtoms.length === 1) {
+    if (
+      (get(activeTabIndexAtomOriginal) !== 0 && tabsAtoms.length === 1) ||
+      get(activeTabIndexAtomOriginal) > tabsAtoms.length - 1
+    ) {
       return 0
     }
     return get(activeTabIndexAtomOriginal)
@@ -289,10 +295,12 @@ export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 export const tabsCountAtom = atom(get => get(tabsAtom).length)
 
 export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
-  const activeTabIndex = get(activeTabIndexAtom)
+  let activeTabIndex = get(activeTabIndexAtom)
+
   if (activeTabIndex === -1) {
     return []
   }
+
   const tabsAtoms = get(tabsAtomsAtom)
 
   // If activeTab is bible tab, only cache it

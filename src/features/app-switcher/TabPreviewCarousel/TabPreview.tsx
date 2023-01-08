@@ -36,7 +36,15 @@ const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
           source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
         />
       ) : (
-        <Box opacity={0.3}>{getIconByTabType(tab.type, 30)}</Box>
+        <Box
+          center
+          width={80}
+          height={80}
+          borderRadius={40}
+          backgroundColor="lightGrey"
+        >
+          <Box opacity={0.3}>{getIconByTabType(tab.type, 30)}</Box>
+        </Box>
       )}
     </AnimatedBox>
   )

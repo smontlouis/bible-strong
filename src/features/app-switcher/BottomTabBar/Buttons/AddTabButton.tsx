@@ -5,6 +5,7 @@ import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { useExpandNewTab } from '~features/app-switcher/utils/useExpandNewTab'
+import { useTabsQuota } from '~helpers/usePremium'
 import { tabsAtomsAtom } from '../../../../state/tabs'
 
 export interface AddTabButtonProps {}
@@ -13,20 +14,23 @@ const AddTabButton = ({}: AddTabButtonProps) => {
   const { t } = useTranslation()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const { triggerExpandNewTab } = useExpandNewTab()
+  const checkTabsQuota = useTabsQuota()
 
   const onPress = () => {
-    const newTabId = `new-${Date.now()}`
-    dispatchTabs({
-      type: 'insert',
-      value: {
-        id: newTabId,
-        title: t('tabs.new'),
-        isRemovable: true,
-        type: 'new',
-        data: {},
-      },
+    checkTabsQuota(() => {
+      const newTabId = `new-${Date.now()}`
+      dispatchTabs({
+        type: 'insert',
+        value: {
+          id: newTabId,
+          title: t('tabs.new'),
+          isRemovable: true,
+          type: 'new',
+          data: {},
+        },
+      })
+      triggerExpandNewTab(newTabId)
     })
-    triggerExpandNewTab(newTabId)
   }
 
   return (

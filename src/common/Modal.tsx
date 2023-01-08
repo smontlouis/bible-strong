@@ -62,7 +62,7 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
         shadowRadius: 4,
         elevation: 2,
         paddingBottom: getBottomSpace(),
-        ...props.modalStyle,
+        ...props.style,
       }}
       handlePosition="inside"
       {...props}

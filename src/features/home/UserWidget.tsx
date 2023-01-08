@@ -13,7 +13,6 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
-import RoundedCorner from '~common/ui/RoundedCorner'
 import Text from '~common/ui/Text'
 import extractFirstName from '~helpers/extractFirstName'
 import extractInitials from '~helpers/extractInitials'
@@ -23,9 +22,10 @@ import PreloadBible from './PreloadBible'
 
 import { useTranslation } from 'react-i18next'
 import { shallowEqual } from 'recompose'
+import Spacer from '~common/ui/Spacer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
-import Spacer from '~common/ui/Spacer'
+import FireAuth from '~helpers/FireAuth'
 
 const vodNb = [...Array(6).keys()]
 
@@ -121,7 +121,13 @@ const UserWidget = () => {
   if (!isLogged) {
     return (
       <Container>
-        <Box paddingHorizontal={25}>
+        <Box
+          paddingHorizontal={20}
+          borderRadius={30}
+          marginHorizontal={20}
+          bg="reverse"
+          py={20}
+        >
           <Text marginTop={20} title fontSize={25} flex>
             {t('Bienvenue')}
           </Text>
@@ -143,9 +149,6 @@ const UserWidget = () => {
           >
             {t('Je me connecte')}
           </Button>
-        </Box>
-        <Box grey>
-          <RoundedCorner />
         </Box>
       </Container>
     )
@@ -224,9 +227,7 @@ const UserWidget = () => {
         {/* {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart" mb={5}>
-              {t(
-                'Un email vous a été envoyé, merci de vérifier votre adresse. Si ce message persiste, reconnectez-vous.'
-              )}
+              {t('app.emailNotVerified')}
             </Text>
             <Link onPress={() => FireAuth.sendEmailVerification()}>
               <Text color="grey" style={{ textDecorationLine: 'underline' }}>

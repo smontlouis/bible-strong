@@ -286,11 +286,11 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         provider,
         bible,
         subscription,
-      } = action.payload.remoteUserData as FireStoreUserData
+      } = (action.payload.remoteUserData as FireStoreUserData) || {}
 
       draft.id = id
       draft.email = email
-      draft.displayName = displayName
+      draft.displayName = draft.displayName || displayName
       draft.photoURL = photoURL
       draft.provider = provider
       draft.subscription = subscription
@@ -319,7 +319,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
       draft.id = id
       draft.email = email
-      draft.displayName = displayName
+      draft.displayName = draft.displayName || displayName
       draft.photoURL = photoURL
       draft.provider = provider
       draft.emailVerified = emailVerified

@@ -52,11 +52,7 @@ const SelectBibleReferenceModal = ({
     bibleAtom,
   }
   return (
-    <Modal.Body
-      isOpen={isOpen}
-      onClose={onClose}
-      modalStyle={{ paddingTop: 40 }}
-    >
+    <Modal.Body isOpen={isOpen} onClose={onClose} style={{ paddingTop: 40 }}>
       <BibleSelectTabNavigator
         screenProps={screenProps}
         navigation={navigation}

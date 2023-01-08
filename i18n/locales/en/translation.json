@@ -79,9 +79,12 @@
   "Chercher une étiquette": "Search a tag",
   "Créer un nouveau tag": "Create a new tag",
   "Créez votre premier tag puis sélectionnez-le !": "Create your first tag then select it!",
-  "sponsor.quotaReached": "You have reached your free usage quota limited to 10 requests per day.\nYou can become a sponsor to have unlimited access, or wait tomorrow.",
+  "sponsor.quotaReachedDaily": "You have reached your free usage quota limited to 10 requests per day.\nYou can become a sponsor to have unlimited access and support the app, or wait tomorrow.",
+  "sponsor.quotaReached": "You have reached your free usage quota for this feature.\nPlease become a sponsor to have unlimited access and support the app.",
   "Devenir sponsor": "Become a sponsor",
-  "Non merci": "I'll wait, thanks",
+  "app.noThankYou": "No, thank you",
+  "app.noIllWait": "I'll wait, thanks",
+  "app.emailNotVerified": "Your email address is not verified. Please check your inbox and click on the link to verify your email address.",
   "Ajouter un tag": "Add tag",
   "Filtrer": "Filter",
   "Étiquettes": "Tags",
@@ -502,6 +505,8 @@
   "tabs.dictionaries": "Dictionary",
   "tabs.study": "Studies",
   "tabs.commentary": "Commentary",
+  "tabs.tab": "tab",
+  "tabs.tab_plural": "tabs",
 
   "common.goTo": "Go to",
   "common.chooseCompareVersions": "Choose versions to compare"

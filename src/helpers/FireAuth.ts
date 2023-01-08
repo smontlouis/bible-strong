@@ -291,6 +291,7 @@ const FireAuth = class {
               .collection('users')
               .doc(user.uid)
               .set({ displayName: username }, { merge: true })
+
             user.sendEmailVerification()
             return resolve(true)
           })

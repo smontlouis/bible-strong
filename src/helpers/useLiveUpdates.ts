@@ -41,9 +41,13 @@ const useLiveUpdates = () => {
           const source = doc?.metadata.hasPendingWrites ? 'Local' : 'Server'
           if (source === 'Local' || !doc) return
 
-          const userData = doc.data() as FireStoreUserData
+          const userData = doc.data() as FireStoreUserData | undefined
 
-          return dispatch(receiveLiveUpdates({ remoteUserData: userData }))
+          if (!userData?.id) {
+            return
+          }
+
+          dispatch(receiveLiveUpdates({ remoteUserData: userData }))
         })
 
       unsuscribeStudies = firebaseDb

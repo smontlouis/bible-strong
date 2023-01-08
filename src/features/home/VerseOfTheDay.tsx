@@ -1,3 +1,4 @@
+import { useTheme } from '@emotion/react'
 import React, { memo, useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
@@ -61,6 +62,7 @@ const VerseOfTheDay = ({
   const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
   const dispatch = useDispatch()
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
@@ -196,6 +198,7 @@ const VerseOfTheDay = ({
             marginRight: 'auto',
             maxWidth: 400,
             width: '100%',
+            backgroundColor: theme.colors.reverse,
           }}
           adjustToContentHeight
         >
