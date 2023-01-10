@@ -1,5 +1,6 @@
 {
   "functions": {
+    "runtime": "nodejs16",
     "predeploy": [
       "npm --prefix \"$RESOURCE_DIR\" run lint",
       "npm --prefix \"$RESOURCE_DIR\" run build"

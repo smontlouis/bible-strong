@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions'
 import * as puppeteer from 'puppeteer'
-import fetch from 'node-fetch'
 
 const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
@@ -47,7 +46,8 @@ export const exportStudyPDF = functions
     })
   })
 
-export const buildStudies = functions.firestore
+// ! TODO - Generate meta image for study
+export const onStudyUpdate = functions.firestore
   .document('studies/{studyId}')
   .onUpdate(async (change, context) => {
     const newValue = change.after.data()
@@ -64,15 +64,6 @@ export const buildStudies = functions.firestore
           console.log(e)
         }
       }
-
-      console.log('Fetch api hook...')
-
-      await fetch(
-        `https://api.vercel.com/v1/integrations/deploy/prj_KAwUl2IsZoy7aq1P1n05POGYYDjp/vcYOUS3I4W`,
-        {
-          method: 'GET',
-        }
-      )
     }
   })
 

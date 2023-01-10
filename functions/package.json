@@ -10,9 +10,6 @@
     "logs": "firebase functions:log",
     "serve-db": "firebase emulators:start --only firestore  --import=../mydirectory/test"
   },
-  "engines": {
-    "node": "10"
-  },
   "main": "lib/index.js",
   "dependencies": {
     "@types/express": "^4.17.6",
