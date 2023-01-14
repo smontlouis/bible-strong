@@ -16,6 +16,7 @@ import { persistor, store } from '~redux/store'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -133,9 +134,11 @@ const App = () => {
     <ReduxProvider store={store}>
       <StatusBar translucent />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <Suspense>
-          <InitApp persistor={persistor} />
-        </Suspense>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Suspense>
+            <InitApp persistor={persistor} />
+          </Suspense>
+        </GestureHandlerRootView>
       </View>
     </ReduxProvider>
   )

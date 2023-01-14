@@ -8,13 +8,14 @@ import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
-import { buyProduct, useIapUser } from '~helpers/useInAppPurchases'
+import { buyProduct, SubSku, useIapUser } from '~helpers/useInAppPurchases'
 import useLogin from '~helpers/useLogin'
 import { mappingSku } from './PremiumScreen'
+import SubscriptionDetails from './SubscriptionDetails'
 import SubscriptionPlan from './SubscriptionPlan'
 
 const SubscriptionGroup = () => {
-  const [selectedSub, setSelectedSub] = React.useState(
+  const [selectedSub, setSelectedSub] = React.useState<SubSku>(
     'com.smontlouis.biblestrong.onemonth'
   )
   const { t } = useTranslation()
@@ -64,6 +65,7 @@ const SubscriptionGroup = () => {
             />
           ))}
         </Box>
+        <SubscriptionDetails sub={selectedSub} />
         <Box p={20}>
           <Button isLoading={processing} onPress={onSubscription}>
             {t("S'abonner")}

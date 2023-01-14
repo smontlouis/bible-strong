@@ -25,7 +25,7 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const theme = useTheme()
 
   return (
-    <Box grey borderRightWidth={1} borderColor="border" flex={1}>
+    <Box grey flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
         <Box grey pt={20} px={20}>
@@ -144,15 +144,15 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
         </Box>
         <TouchableBox
           center
-          width={60}
-          height={60}
+          width={50}
+          height={50}
           borderRadius={30}
           bg="reverse"
           lightShadow
           activeOpacity={0.8}
           onPress={closeHome}
         >
-          <FeatherIcon name="x" size={28} color="grey" />
+          <FeatherIcon name="x" size={24} color="grey" />
         </TouchableBox>
       </Box>
     </Box>

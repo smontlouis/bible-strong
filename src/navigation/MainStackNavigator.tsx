@@ -27,6 +27,7 @@ import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
 import PlanSelectScreen from '~features/plans/PlanSelectScreen'
 import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
 import PremiumScreen from '~features/premium/PremiumScreen'
+import PremiumMoreScreen from '~features/premium/PremiumMoreScreen'
 import LocalSearchScreen from '~features/search/LocalSearchScreen'
 import SearchScreen from '~features/search/SearchScreen'
 import FAQScreen from '~features/settings/FAQScreen'
@@ -99,6 +100,7 @@ export const MainStackNavigator = createStackNavigator(
     },
     TimelineHome: { screen: TimelineHomeScreen },
     Premium: { screen: PremiumScreen },
+    PremiumMore: { screen: PremiumMoreScreen },
     Concordance: { screen: ConcordanceScreen },
     Commentaries: { screen: CommentariesScreen },
   },

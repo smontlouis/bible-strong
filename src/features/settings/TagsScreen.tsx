@@ -1,23 +1,25 @@
+import styled from '@emotion/native'
 import React, { useState } from 'react'
 import { Alert } from 'react-native'
-import styled from '@emotion/native'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
-import FabButton from '~common/ui/FabButton'
-import Header from '~common/Header'
-import Container from '~common/ui/Container'
-import FlatList from '~common/ui/FlatList'
-import Modal from '~common/Modal'
-import Link from '~common/Link'
-import Empty from '~common/Empty'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Border from '~common/ui/Border'
-import TitlePrompt from '~common/TitlePrompt'
-import { FeatherIcon } from '~common/ui/Icon'
-import { addTag, updateTag, removeTag } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
-import tags from '~redux/modules/user/tags'
+import Empty from '~common/Empty'
+import Header from '~common/Header'
+import Link from '~common/Link'
+import Modal from '~common/Modal'
+import TitlePrompt from '~common/TitlePrompt'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import FabButton from '~common/ui/FabButton'
+import FlatList from '~common/ui/FlatList'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { RootState } from '~redux/modules/reducer'
+import { addTag, removeTag, updateTag } from '~redux/modules/user'
+import useFuzzy from '~helpers/useFuzzy'
+import SearchTagInput from '~common/SearchTagInput'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -110,12 +112,17 @@ const TagItem = ({ item, setOpen }) => {
 const TagsScreen = () => {
   const { t } = useTranslation()
   const tags = useSelector(
-    state => Object.values(state.user.bible.tags),
+    (state: RootState) =>
+      Object.values(state.user.bible.tags).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
     shallowEqual
   )
   const [isOpen, setOpen] = useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
-
+  const { keyword, result, search, resetSearch } = useFuzzy(tags, {
+    keys: ['name'],
+  })
   const dispatch = useDispatch()
 
   const promptLogout = () => {
@@ -138,10 +145,20 @@ const TagsScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton title={t('Étiquettes')} />
-      {tags.length ? (
+      <Header hasBackButton title={t('Étiquettes')}>
+        <Box pb={10} px={20}>
+          <SearchTagInput
+            placeholder={t('Chercher une étiquette')}
+            onChangeText={search}
+            onDelete={resetSearch}
+            value={keyword}
+            returnKeyType="done"
+          />
+        </Box>
+      </Header>
+      {result.length ? (
         <FlatList
-          data={tags}
+          data={result}
           renderItem={({ item }) => <TagItem setOpen={setOpen} item={item} />}
           keyExtractor={item => item.id}
           contentContainerStyle={{ paddingBottom: 70 }}

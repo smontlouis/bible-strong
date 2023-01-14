@@ -2,7 +2,7 @@ const colors = {
   default: 'rgb(228,194,225)',
   opacity5: 'rgba(200,200,200,0.05)',
   reverse: 'rgb(51,4,46)',
-  border: 'rgb(100,53,95)',
+  border: 'rgb(72, 19, 66)',
   lightGrey: 'rgb(66, 14, 60)',
   grey: 'rgb(150,150,150)',
   darkGrey: 'rgba(255, 255, 255, 0.5)',

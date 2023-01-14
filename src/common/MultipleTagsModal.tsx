@@ -1,26 +1,26 @@
+import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
+import Fuse from 'fuse.js'
+import { useAtom } from 'jotai'
 import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { Modalize } from 'react-native-modalize'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
+import useFuzzy from '~helpers/useFuzzy'
 import { hp } from '~helpers/utils'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
-import styled from '@emotion/native'
+import { multipleTagsModalAtom } from '../state/app'
 import Modal from './Modal'
 import SearchTagInput from './SearchTagInput'
-import Spacer from './ui/Spacer'
-import Fuse from 'fuse.js'
-import { useAtom } from 'jotai'
-import { multipleTagsModalAtom } from '../state/app'
 import { Tag } from './types'
+import Spacer from './ui/Spacer'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -36,20 +36,16 @@ const MultipleTagsModal = () => {
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
   const modalRef = React.useRef<Modalize>(null)
-  const tags = useSelector<RootState>(state =>
-    Object.values(state.user.bible.tags)
-  ) as Tag[]
-  const fuse = useMemo(() => new Fuse(tags, { keys: ['name'] }), [])
-  const [filteredTags, setFilteredTags] = useState(tags)
-  const [searchValue, setSearchValue] = useState('')
-
-  useEffect(() => {
-    if (searchValue) {
-      setFilteredTags(fuse.search(searchValue).map(v => v.item))
-    } else {
-      setFilteredTags(tags)
-    }
-  }, [searchValue, fuse, tags.length])
+  const tags = useSelector(
+    (state: RootState) =>
+      Object.values(state.user.bible.tags).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+    shallowEqual
+  )
+  const { keyword, result, search, resetSearch } = useFuzzy(tags, {
+    keys: ['name'],
+  })
 
   useEffect(() => {
     if (item) {
@@ -61,7 +57,7 @@ const MultipleTagsModal = () => {
 
   let currentItems = []
 
-  currentItems = useSelector<RootState>(state => {
+  currentItems = useSelector((state: RootState) => {
     if (item.ids) {
       return Object.keys(item.ids).map(id => ({
         id,
@@ -113,8 +109,9 @@ const MultipleTagsModal = () => {
           <Spacer />
           <SearchTagInput
             placeholder={t('Chercher une étiquette')}
-            onChangeText={setSearchValue}
-            value={searchValue}
+            onChangeText={search}
+            onDelete={resetSearch}
+            value={keyword}
             returnKeyType="done"
           />
         </Box>
@@ -145,13 +142,13 @@ const MultipleTagsModal = () => {
       }
     >
       <Box flex>
-        {filteredTags.length ? (
+        {result.length ? (
           <ScrollView
             contentContainerStyle={{ padding: 20 }}
             style={{ flex: 1 }}
           >
             <Box row wrap>
-              {filteredTags.map(chip => (
+              {result.map(chip => (
                 <Chip
                   key={chip.id}
                   label={chip.name}

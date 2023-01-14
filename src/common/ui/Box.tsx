@@ -62,16 +62,16 @@ export interface BoxProps {
   borderBottomRightRadius?: number
 
   overflow?: 'visible' | 'hidden'
-  width?: number
-  w?: number
-  maxWidth?: number
-  maxW?: number
-  minWidth?: number
-  minW?: number
-  minHeight?: number
-  minH?: number
-  height?: number
-  h?: number
+  width?: number | string
+  w?: number | string
+  maxWidth?: number | string
+  maxW?: number | string
+  minWidth?: number | string
+  minW?: number | string
+  minHeight?: number | string
+  minH?: number | string
+  height?: number | string
+  h?: number | string
 
   grow?: boolean
   shrink?: number

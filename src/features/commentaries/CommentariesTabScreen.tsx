@@ -323,9 +323,6 @@ const CommentariesTabScreen = ({
                       <Text color="primary" fontSize={15}>
                         {t('Plus de résultats')}
                       </Text>
-                      <Text fontSize={11} color="grey">
-                        {t('(Contenu adventiste)')}
-                      </Text>
                     </>
                   )}
                 </LinkBox>

@@ -35,7 +35,7 @@ const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
                 width: '100%',
                 height: '100%',
                 borderRadius: 25,
-                opacity: 0.15,
+                opacity: 0.1,
                 ...StyleSheet.absoluteFillObject,
               }}
               source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}

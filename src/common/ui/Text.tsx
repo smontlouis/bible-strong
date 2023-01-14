@@ -105,6 +105,7 @@ export interface TextProps extends BaseTextProps {
 
   title?: boolean
   text?: boolean
+  textTransform?: string
 }
 
 const Text = styled.Text((props: TextProps) => {
@@ -121,6 +122,7 @@ const Text = styled.Text((props: TextProps) => {
     fontWeight: props.bold ? 'bold' : undefined,
     textAlign: props.textAlign,
 
+    textTransform: props.textTransform,
     padding: props.padding ?? props.p,
     paddingTop: props.paddingTop ?? props.pt,
     paddingLeft: props.paddingLeft ?? props.pl,

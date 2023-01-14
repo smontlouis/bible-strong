@@ -1,20 +1,21 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual } from 'recompose'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
+import useFuzzy from '~helpers/useFuzzy'
 import { hp } from '~helpers/utils'
+import { RootState } from '~redux/modules/reducer'
 import { addTag } from '~redux/modules/user'
 import Modal from './Modal'
 import SearchTagInput from './SearchTagInput'
 import Spacer from './ui/Spacer'
-import Fuse from 'fuse.js'
-import { shallowEqual } from 'recompose'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -25,21 +26,16 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   const [newTag, setNewTag] = useState('')
   const dispatch = useDispatch()
   const tags = useSelector(
-    state => Object.values(state.user.bible.tags),
+    (state: RootState) =>
+      Object.values(state.user.bible.tags).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
     shallowEqual
   )
-  const fuse = useMemo(() => new Fuse(tags, { keys: ['name'] }), [])
-  const [filteredTags, setFilteredTags] = useState(tags)
+  const { keyword, result, search, resetSearch } = useFuzzy(tags, {
+    keys: ['name'],
+  })
   const { t } = useTranslation()
-  const [searchValue, setSearchValue] = useState('')
-
-  useEffect(() => {
-    if (searchValue) {
-      setFilteredTags(fuse.search(searchValue).map(v => v.item))
-    } else {
-      setFilteredTags(tags)
-    }
-  }, [searchValue, fuse, tags.length])
 
   const saveTag = () => {
     if (!newTag.trim()) {
@@ -59,8 +55,9 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
           <Spacer />
           <SearchTagInput
             placeholder={t('Chercher une étiquette')}
-            onChangeText={setSearchValue}
-            value={searchValue}
+            onChangeText={search}
+            onDelete={resetSearch}
+            value={keyword}
             returnKeyType="done"
           />
         </Box>
@@ -91,7 +88,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
               isSelected={!selectedChip}
               onPress={() => onSelected(null)}
             />
-            {filteredTags.map(chip => (
+            {result.map(chip => (
               <Chip
                 key={chip.id}
                 label={chip.name}

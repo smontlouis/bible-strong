@@ -57,6 +57,7 @@ const AppSwitcherScreen = memo(
             paddingLeft: PADDING_HORIZONTAL,
             paddingRight: PADDING_HORIZONTAL,
             paddingBottom: getBottomSpace() + TAB_ICON_SIZE,
+            minHeight: '100%',
           }}
         >
           <AnimatedBox
@@ -133,7 +134,7 @@ const AppSwitcherScreenWrapper = (props: any) => {
       ref={homeDrawerRef}
       drawerWidth={wp(95, 450)}
       drawerPosition="left"
-      drawerType="back"
+      drawerType="slide"
       overlayColor="rgba(0,0,0,0.1)"
       renderNavigationView={renderHomeScreen}
       drawerLockMode="locked-closed"

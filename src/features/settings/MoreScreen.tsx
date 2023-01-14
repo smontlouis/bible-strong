@@ -23,15 +23,15 @@ import { deleteAllDatabases } from '~helpers/database'
 import useLogin from '~helpers/useLogin'
 import { resetCompareVersion } from '~redux/modules/user'
 
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { shallowEqual } from 'recompose'
+import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { firebaseDb } from '~helpers/firebase'
+import { useIsPremium } from '~helpers/usePremium'
 import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
-import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
 import app from '../../../package.json'
-import BackBottomTabBar from '~features/app-switcher/BottomTabBar/BackBottomTabBar'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
-import { shallowEqual } from 'recompose'
+import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -71,6 +71,8 @@ type MoreScreenProps = {
 
 const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   const { isLogged, logout } = useLogin()
+  const isPremium = useIsPremium()
+
   const dispatch = useDispatch()
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
@@ -234,15 +236,18 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             <StyledIcon name="help-circle" size={25} />
             <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
-          {/* <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
-            <StyledIcon name="sun" size={25} />
-            <Text fontSize={15}>{t('Idées de fonctionnalités')}</Text>
-          </LinkItem>
-          <LinkItem href="https://bible-strong.canny.io/bugs">
-            <StyledIcon name="alert-circle" size={25} />
-            <Text fontSize={15}>{t('Bugs')}</Text>
-          </LinkItem> */}
-
+          {isPremium && (
+            <>
+              <LinkItem href="https://bible-strong.canny.io/feature-requests">
+                <StyledIcon name="sun" size={25} />
+                <Text fontSize={15}>{t('app.featureIdeas')}</Text>
+              </LinkItem>
+              <LinkItem href="https://bible-strong.canny.io/bugs">
+                <StyledIcon name="alert-circle" size={25} />
+                <Text fontSize={15}>{t('app.bugs')}</Text>
+              </LinkItem>
+            </>
+          )}
           <LinkItem href="https://www.facebook.com/fr.bible.strong">
             <StyledIcon name="facebook" size={25} />
             <Text fontSize={15}>{t('Nous suivre sur facebook')}</Text>
@@ -261,10 +266,12 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             <StyledIcon name="share-2" size={25} />
             <Text fontSize={15}>{t("Partager l'application")}</Text>
           </LinkItem>
-          <LinkItem href="mailto:s.montlouis.calixte+bible-strong@gmail.com">
-            <StyledIcon name="send" size={25} />
-            <Text fontSize={15}>{t('Contacter le développeur')}</Text>
-          </LinkItem>
+          {isPremium && (
+            <LinkItem href="mailto:s.montlouis.calixte+bible-strong@gmail.com">
+              <StyledIcon name="send" size={25} />
+              <Text fontSize={15}>{t('Contacter le développeur')}</Text>
+            </LinkItem>
+          )}
           <LinkItem onPress={confirmChangeLanguage}>
             <MaterialIcon
               name="language"

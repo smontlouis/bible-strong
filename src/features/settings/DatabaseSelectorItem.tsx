@@ -109,7 +109,7 @@ class DBSelectorItem extends React.Component {
       await FileSystem.createDownloadResumable(
         uri,
         path,
-        null,
+        undefined,
         this.calculateProgress
       ).downloadAsync()
 
