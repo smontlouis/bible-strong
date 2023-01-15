@@ -29,7 +29,7 @@ import {
   getVersionUpdate,
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
-import getTheme, { Theme } from '~themes/index'
+import getTheme, { baseTheme, Theme } from '~themes/index'
 
 interface Props {
   persistor: Persistor
@@ -131,7 +131,7 @@ const InitApp = ({ persistor }: Props) => {
     changeStatusBarStyle(currentTheme)
   }, [currentTheme])
 
-  const defaultTheme: Theme = getTheme[currentTheme]
+  const defaultTheme: Theme = getTheme[currentTheme] || baseTheme
 
   const theme = {
     ...defaultTheme,

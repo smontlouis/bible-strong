@@ -12,7 +12,7 @@ interface GetTheme {
   [theme: string]: Theme
 }
 
-const baseTheme = {
+export const baseTheme = {
   ...defaultTheme,
   colors,
 }
