@@ -3,6 +3,8 @@ import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { Alert } from 'react-native'
 import IAPHub from 'react-native-iaphub'
+import ActiveProduct from 'react-native-iaphub/lib/typescript/models/active-product'
+import Product from 'react-native-iaphub/lib/typescript/models/product'
 import { Dispatch } from 'redux'
 import { Status } from '~common/types'
 import i18n from '~i18n'
@@ -26,7 +28,7 @@ export const useInitIAP = () => {
     ;(async () => {
       if (!isIAPInitialized) {
         try {
-          await IAPHub.init({
+          await IAPHub.start({
             appId: iaphub.appId,
             apiKey: iaphub.apiKey,
             environment: 'production',
@@ -48,10 +50,8 @@ export const useIapUser = () => {
   const [isIAPInitialized] = useAtom(IAPInitializedAtom)
 
   const [status, setStatus] = useState<Status>('Idle')
-  const [products, setProducts] = useState<IAPHub.IapHubProductInformation[]>()
-  const [currentProduct, setCurrentProducts] = useState<
-    IAPHub.IapHubProductInformation[]
-  >()
+  const [products, setProducts] = useState<Product[]>()
+  const [currentProduct, setCurrentProducts] = useState<ActiveProduct[]>()
 
   useEffect(() => {
     ;(async () => {
@@ -59,12 +59,12 @@ export const useIapUser = () => {
 
       setStatus('Pending')
       try {
-        await IAPHub.setUserId(user.id)
+        await IAPHub.login(user.id)
         const productsForSale = await IAPHub.getProductsForSale()
         const activeProducts = await IAPHub.getActiveProducts()
         setCurrentProducts(activeProducts)
         productsForSale.sort((a, b) => {
-          return a.priceAmount - b.priceAmount
+          return a.price - b.price
         })
         setProducts(productsForSale)
         setStatus('Resolved')

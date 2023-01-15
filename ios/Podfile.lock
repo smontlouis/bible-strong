@@ -632,6 +632,7 @@ PODS:
     - GTMSessionFetcher/Core (< 3.0, >= 1.5)
   - GTMSessionFetcher/Core (1.7.2)
   - hermes-engine (0.69.7)
+  - Iaphub (4.1.0)
   - leveldb-library (1.22.1)
   - libevent (2.1.12)
   - libwebp (1.2.4):
@@ -896,6 +897,9 @@ PODS:
     - React-Core
   - react-native-flipper (0.163.0):
     - React-Core
+  - react-native-iaphub (8.4.0):
+    - Iaphub (= 4.1.0)
+    - React-Core
   - react-native-music-control (1.4.0):
     - React-Core
   - react-native-netinfo (9.3.0):
@@ -1053,8 +1057,6 @@ PODS:
   - RNGoogleSignin (7.0.1):
     - GoogleSignIn (~> 6.0.0)
     - React-Core
-  - RNIap (5.1.3):
-    - React-Core
   - RNLocalize (1.4.3):
     - React-Core
   - RNReanimated (2.13.0):
@@ -1185,6 +1187,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - react-native-flipper (from `../node_modules/react-native-flipper`)
+  - react-native-iaphub (from `../node_modules/react-native-iaphub`)
   - react-native-music-control (from `../node_modules/react-native-music-control`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-restart (from `../node_modules/react-native-restart`)
@@ -1221,7 +1224,6 @@ DEPENDENCIES:
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
-  - RNIap (from `../node_modules/react-native-iap`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -1266,6 +1268,7 @@ SPEC REPOS:
     - gRPC-Core
     - GTMAppAuth
     - GTMSessionFetcher
+    - Iaphub
     - leveldb-library
     - libevent
     - libwebp
@@ -1372,6 +1375,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fbsdk-next"
   react-native-flipper:
     :path: "../node_modules/react-native-flipper"
+  react-native-iaphub:
+    :path: "../node_modules/react-native-iaphub"
   react-native-music-control:
     :path: "../node_modules/react-native-music-control"
   react-native-netinfo:
@@ -1444,8 +1449,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
-  RNIap:
-    :path: "../node_modules/react-native-iap"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
   RNReanimated:
@@ -1523,6 +1526,7 @@ SPEC CHECKSUMS:
   GTMAppAuth: 0ff230db599948a9ad7470ca667337803b3fc4dd
   GTMSessionFetcher: 5595ec75acf5be50814f81e9189490412bad82ba
   hermes-engine: 51aaceb1f6dc1aed44b8bbf866f52ec146c00a89
+  Iaphub: e85f4e74af063eea00a771d430c87eb841e739d2
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: f62cb61d0a484ba548448a4bd52aabf150ff6eef
@@ -1548,6 +1552,7 @@ SPEC CHECKSUMS:
   React-logger: 1e7ac909607ee65fd5c4d8bea8c6e644f66b8843
   react-native-fbsdk-next: a0dd8905af573ec4d21b7bc398423ccaa2ce2b07
   react-native-flipper: 2d552a8178d839ef378220101fb7f0cd5b2a8003
+  react-native-iaphub: 7ed655d383bc973d2d5714c4facbddf52345d19e
   react-native-music-control: 93b521377efdf2e49b46ccade8457f9503359b38
   react-native-netinfo: 129bd99f607a2dc5bb096168f3e5c150fd1f1c95
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
@@ -1584,7 +1589,6 @@ SPEC CHECKSUMS:
   RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNGoogleSignin: a51c9c7419262c75748ddcee3f735bb42da5def1
-  RNIap: 3569bc87ca2aea8dc514608d9e88a6ffb274a7ef
   RNLocalize: 7c7aeda16c01db7a0918981c14875c0a53be9b79
   RNReanimated: f0d66bda3d074c43c72a18f4fd4f4c26687bc1fd
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
