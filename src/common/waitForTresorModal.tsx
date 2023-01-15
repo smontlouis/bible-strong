@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
+import React, { useEffect, useState } from 'react'
+import { ProgressBar } from 'react-native-paper'
+import { useDispatch } from 'react-redux'
 
 import SnackBar from '~common/SnackBar'
 
-import { initTresorDB, getTresorDB } from '~helpers/database'
-import Loading from '~common/Loading'
-import DownloadRequired from '~common/DownloadRequired'
-import { timeout } from '~helpers/timeout'
-import { storageRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
+import DownloadRequired from '~common/DownloadRequired'
+import Loading from '~common/Loading'
+import { getTresorDB, initTresorDB } from '~helpers/database'
+import { getStaticUrl } from '~helpers/firebase'
+import { timeout } from '~helpers/timeout'
 
 const STRONG_FILE_SIZE = 5434368
 
@@ -52,9 +52,9 @@ export const useWaitForDatabase = () => {
             if (!window.tresorDownloadHasStarted) {
               window.tresorDownloadHasStarted = true
 
-              const sqliteDbUri = await storageRef
-                .child('databases/commentaires-tresor.sqlite')
-                .getDownloadURL()
+              const sqliteDbUri = getStaticUrl(
+                'databases/commentaires-tresor.sqlite'
+              )
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 

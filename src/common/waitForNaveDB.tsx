@@ -48,7 +48,7 @@ export const useWaitForDatabase = () => {
             if (!(window as any).naveDownloadHasStarted) {
               ;(window as any).naveDownloadHasStarted = true
 
-              const sqliteDbUri = await getDatabasesRef().NAVE.getDownloadURL()
+              const sqliteDbUri = getDatabasesRef().NAVE
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 

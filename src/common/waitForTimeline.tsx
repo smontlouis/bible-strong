@@ -34,7 +34,7 @@ export const useWaitForDatabase = () => {
         }
 
         try {
-          const fileUri = await getDatabasesRef().TIMELINE.getDownloadURL()
+          const fileUri = getDatabasesRef().TIMELINE
 
           console.log(`Downloading ${fileUri} to ${path}`)
 

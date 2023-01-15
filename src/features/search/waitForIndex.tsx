@@ -40,7 +40,7 @@ export const useWaitForIndex = () => {
           return
         }
 
-        const idxUri = await getDatabasesRef().SEARCH.getDownloadURL()
+        const idxUri = getDatabasesRef().SEARCH
 
         console.log(`Downloading ${idxUri} to ${idxPath}`)
 

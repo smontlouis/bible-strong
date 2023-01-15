@@ -62,7 +62,7 @@ export const useWaitForDatabase = () => {
             if (!window.dictionnaireDownloadHasStarted) {
               window.dictionnaireDownloadHasStarted = true
 
-              const sqliteDbUri = await getDatabasesRef().DICTIONNAIRE.getDownloadURL()
+              const sqliteDbUri = getDatabasesRef().DICTIONNAIRE
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 

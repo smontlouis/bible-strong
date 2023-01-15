@@ -139,8 +139,8 @@ const VersionSelectorItem = ({
     const path = requireBiblePath(version.id)
     const uri =
       version.id === 'INT'
-        ? await getDatabasesRef().INTERLINEAIRE.getDownloadURL()
-        : await biblesRef[version.id].getDownloadURL()
+        ? getDatabasesRef().INTERLINEAIRE
+        : biblesRef[version.id]
 
     console.log(`Downloading ${uri} to ${path}`)
     try {

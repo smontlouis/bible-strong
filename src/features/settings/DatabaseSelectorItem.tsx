@@ -102,7 +102,7 @@ class DBSelectorItem extends React.Component {
     const { path, database, t } = this.props
     this.setState({ isLoading: true })
 
-    const uri = await getDatabasesRef()[database].getDownloadURL()
+    const uri = getDatabasesRef()[database]
 
     console.log(`Downloading ${uri} to ${path}`)
     try {

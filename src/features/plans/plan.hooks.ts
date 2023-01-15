@@ -1,31 +1,31 @@
-import React from 'react'
 import * as Sentry from '@sentry/react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import to from 'await-to-js'
+import React from 'react'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
-import { storageRef } from '~helpers/firebase'
+import { getStaticUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 
+import { useAtom } from 'jotai'
+import isEqual from 'lodash/isEqual'
 import {
   ComputedPlan,
   ComputedPlanItem,
   ComputedSection,
-  Section,
   OngoingReadingSlice,
   ReadingSlice,
+  Section,
   Status,
 } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
-import getBiblePericope from '~helpers/getBiblePericope'
-import { range } from '~helpers/range'
-import loadBible from '~helpers/loadBible'
 import SnackBar from '~common/SnackBar'
+import getBiblePericope from '~helpers/getBiblePericope'
+import loadBible from '~helpers/loadBible'
+import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
 import { useGetDefaultBibleTabAtom } from '../../state/tabs'
-import { useAtom } from 'jotai'
-import isEqual from 'lodash/isEqual'
 
 interface VerseContent {
   Pericope: {
@@ -442,7 +442,7 @@ export const useFireStorage = (src?: string) => {
       }
 
       try {
-        const uri = await storageRef.child(`images/${src}.png`).getDownloadURL()
+        const uri = getStaticUrl(`images/${src}.png`)
         setImageUrl(uri)
         dispatch(cacheImage({ id: src, value: uri }))
       } catch (e) {

@@ -109,7 +109,7 @@ const useStrongEn = (dispatch: any, startDownload: any) => {
             if (!(window as any).strongDownloadHasStarted) {
               ;(window as any).strongDownloadHasStarted = true
 
-              const sqliteDbUri = await getDatabasesRef().STRONG.getDownloadURL()
+              const sqliteDbUri = getDatabasesRef().STRONG
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
