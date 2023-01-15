@@ -75,10 +75,7 @@ const StrongOfTheDay = ({
   const { Grec, Hebreu, Mot } = strongReference
 
   return (
-    <Link
-      route="BibleStrongDetail"
-      params={{ book: Grec ? 40 : 1, strongReference }}
-    >
+    <Link route="Strong" params={{ book: Grec ? 40 : 1, strongReference }}>
       <WidgetContainer>
         <Box
           style={{

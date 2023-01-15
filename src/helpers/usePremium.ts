@@ -1,8 +1,9 @@
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 import { QuotaType, updateQuota } from '~redux/modules/user'
+import { tabsCountAtom } from '../state/tabs'
 import { quotaModalAtom } from '../state/app'
 
 export const useIsPremium = () => {
@@ -12,7 +13,10 @@ export const useIsPremium = () => {
 
 export const useQuota = (quotaType: QuotaType) => {
   const dispatch = useDispatch()
-  const quota = useSelector((state: RootState) => state.user.quota[quotaType])
+  const quota = useSelector(
+    (state: RootState) => state.user.quota[quotaType],
+    shallowEqual
+  )
   const isPremium = useIsPremium()
   const hasQuota = quota.remaining > 0
   const [, setShowQuotaModal] = useAtom(quotaModalAtom)
@@ -29,8 +33,31 @@ export const useQuota = (quotaType: QuotaType) => {
         return
       }
       if (failCb) failCb()
-      setShowQuotaModal(true)
+      setShowQuotaModal('daily')
     },
-    [hasQuota, isPremium, setShowQuotaModal, quota, quotaType, dispatch]
+    [hasQuota, isPremium, setShowQuotaModal, quotaType, dispatch]
+  )
+}
+
+const tabsCountQuota = 3
+export const useTabsQuota = () => {
+  const isPremium = useIsPremium()
+  const tabsCount = useAtomValue(tabsCountAtom)
+  const [, setShowQuotaModal] = useAtom(quotaModalAtom)
+
+  return useCallback(
+    (fn: () => void, failCb?: () => void) => {
+      if (isPremium) {
+        fn()
+        return
+      }
+      if (tabsCount < tabsCountQuota) {
+        fn()
+        return
+      }
+      if (failCb) failCb()
+      setShowQuotaModal('always')
+    },
+    [isPremium, setShowQuotaModal, tabsCount]
   )
 }

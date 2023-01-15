@@ -1,10 +1,10 @@
 import React from 'react'
 import FastImage from 'react-native-fast-image'
 import ProgressCircle from 'react-native-progress/Circle'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import Lottie from 'lottie-react-native'
 
-import styled from '~styled'
+import styled from '@emotion/native'
 import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'

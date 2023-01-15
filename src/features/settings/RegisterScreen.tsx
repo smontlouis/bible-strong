@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
 
 import FireAuth from '~helpers/FireAuth'

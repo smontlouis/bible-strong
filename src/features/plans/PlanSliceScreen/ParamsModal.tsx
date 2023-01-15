@@ -7,9 +7,9 @@ import { FlatList } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize } from 'react-native-modalize'
 
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Link, { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -47,13 +47,16 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
     preferredColorScheme,
     preferredDarkTheme,
     preferredLightTheme,
-  } = useSelector(({ user }: RootState) => ({
-    fontFamily: user.fontFamily,
-    fontSizeScale: user.bible.settings.fontSizeScale,
-    preferredColorScheme: user.bible.settings.preferredColorScheme,
-    preferredLightTheme: user.bible.settings.preferredLightTheme,
-    preferredDarkTheme: user.bible.settings.preferredDarkTheme,
-  }))
+  } = useSelector(
+    ({ user }: RootState) => ({
+      fontFamily: user.fontFamily,
+      fontSizeScale: user.bible.settings.fontSizeScale,
+      preferredColorScheme: user.bible.settings.preferredColorScheme,
+      preferredLightTheme: user.bible.settings.preferredLightTheme,
+      preferredDarkTheme: user.bible.settings.preferredDarkTheme,
+    }),
+    shallowEqual
+  )
 
   const {
     preferredColorSchemeToString,

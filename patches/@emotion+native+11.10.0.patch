@@ -1,0 +1,13 @@
+diff --git a/node_modules/@emotion/native/types/index.d.ts b/node_modules/@emotion/native/types/index.d.ts
+index 975f2a7..47f1172 100644
+--- a/node_modules/@emotion/native/types/index.d.ts
++++ b/node_modules/@emotion/native/types/index.d.ts
+@@ -44,7 +44,7 @@ export function css<StyleType extends ReactNativeStyle = ReactNativeStyle>(
+ // those 2 are just copies of the `BaseCreateStyled` with supplied `C` type argument
+ type HostClassComponent<C extends React.ComponentClass<any>> =
+   CreateStyledComponent<
+-    React.ComponentProps<C> & { theme?: Theme; as?: React.ElementType },
++    React.ComponentProps<C> & { theme?: Theme; as?: React.ElementType, children?: React.ReactNode },
+     {},
+     { ref?: React.Ref<InstanceType<C>> },
+     ReactNativeStyleType<React.ComponentProps<C>>

@@ -1,35 +1,37 @@
-import React, { useState } from 'react'
-import { Platform, Alert } from 'react-native'
-import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
-import { useSelector } from 'react-redux'
-import * as Animatable from 'react-native-animatable'
-import { useDispatch } from 'react-redux'
-import { setVersion } from '~redux/modules/bible'
-import { resetCompareVersion } from '~redux/modules/user'
-import { MaterialIcon } from '~common/ui/Icon'
-import LexiqueIcon from '~common/LexiqueIcon'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import NaveIcon from '~common/NaveIcon'
-import Container from '~common/ui/Container'
-import Border from '~common/ui/Border'
-import Header from '~common/Header'
-import ScrollView from '~common/ui/ScrollView'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
-import TagsEditModal from '~common/TagsEditModal'
-import useLogin from '~helpers/useLogin'
-import { useTranslation } from 'react-i18next'
-import { deleteAllDatabases } from '~helpers/database'
-import RNRestart from 'react-native-restart'
+import * as Icon from '@expo/vector-icons'
 import sizeof from 'firestore-size'
+import React, { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Alert, Platform } from 'react-native'
+import * as Animatable from 'react-native-animatable'
+import RNRestart from 'react-native-restart'
+import { useDispatch, useSelector } from 'react-redux'
+import DictionnaireIcon from '~common/DictionnaryIcon'
+import Header from '~common/Header'
+import LexiqueIcon from '~common/LexiqueIcon'
+import Link from '~common/Link'
+import NaveIcon from '~common/NaveIcon'
 import SnackBar from '~common/SnackBar'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import { MaterialIcon } from '~common/ui/Icon'
+import ScrollView from '~common/ui/ScrollView'
+import Text from '~common/ui/Text'
+import { deleteAllDatabases } from '~helpers/database'
+import useLogin from '~helpers/useLogin'
+import { resetCompareVersion } from '~redux/modules/user'
 
-import app from '../../../package.json'
-import { RootState } from '~redux/modules/reducer'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { shallowEqual } from 'recompose'
+import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { firebaseDb } from '~helpers/firebase'
+import { useIsPremium } from '~helpers/usePremium'
 import { r } from '~redux/firestoreMiddleware'
+import { RootState } from '~redux/modules/reducer'
+import app from '../../../package.json'
+import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -63,17 +65,29 @@ const shareMessage = () => {
   return `Bible Strong App ${appUrl}`
 }
 
-const MoreScreen = () => {
+type MoreScreenProps = {
+  closeMenu: () => void
+}
+
+const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   const { isLogged, logout } = useLogin()
+  const isPremium = useIsPremium()
+
   const dispatch = useDispatch()
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [, actions] = useBibleTabActions(defaultBibleAtom)
+
   const [isSyncing, setIsSyncing] = useState(false)
-  const { user, plan } = useSelector((state: RootState) => ({
-    user: state.user,
-    plan: state.plan,
-  }))
+  const { user, plan } = useSelector(
+    (state: RootState) => ({
+      user: state.user,
+      plan: state.plan,
+    }),
+    shallowEqual
+  )
   const userDoc = firebaseDb.collection('users').doc(user.id)
 
   const bibleJSON = useSelector((state: RootState) => state.user.bible)
@@ -125,7 +139,7 @@ const MoreScreen = () => {
           onPress: async () => {
             const isFR = i18n.language === 'fr'
             await deleteAllDatabases()
-            dispatch(setVersion(!isFR ? 'LSG' : 'KJV'))
+            actions.setSelectedVersion(!isFR ? 'LSG' : 'KJV')
             dispatch(resetCompareVersion(!isFR ? 'LSG' : 'KJV'))
 
             i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
@@ -141,9 +155,14 @@ const MoreScreen = () => {
   }
 
   return (
-    <Container>
-      <Header title={t('Plus')} />
-      <ScrollView style={{ flex: 1 }}>
+    <Container borderLeftWidth={1} borderColor="border" pure>
+      <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingBottom: getBottomSpace() + TAB_ICON_SIZE + 20,
+        }}
+      >
         <Box paddingVertical={10}>
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
@@ -217,15 +236,18 @@ const MoreScreen = () => {
             <StyledIcon name="help-circle" size={25} />
             <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
-          {/* <LinkItem href="https://bible-strong.canny.io/fonctionnalites">
-            <StyledIcon name="sun" size={25} />
-            <Text fontSize={15}>{t('Idées de fonctionnalités')}</Text>
-          </LinkItem>
-          <LinkItem href="https://bible-strong.canny.io/bugs">
-            <StyledIcon name="alert-circle" size={25} />
-            <Text fontSize={15}>{t('Bugs')}</Text>
-          </LinkItem> */}
-
+          {isPremium && (
+            <>
+              <LinkItem href="https://bible-strong.canny.io/feature-requests">
+                <StyledIcon name="sun" size={25} />
+                <Text fontSize={15}>{t('app.featureIdeas')}</Text>
+              </LinkItem>
+              <LinkItem href="https://bible-strong.canny.io/bugs">
+                <StyledIcon name="alert-circle" size={25} />
+                <Text fontSize={15}>{t('app.bugs')}</Text>
+              </LinkItem>
+            </>
+          )}
           <LinkItem href="https://www.facebook.com/fr.bible.strong">
             <StyledIcon name="facebook" size={25} />
             <Text fontSize={15}>{t('Nous suivre sur facebook')}</Text>
@@ -244,10 +266,12 @@ const MoreScreen = () => {
             <StyledIcon name="share-2" size={25} />
             <Text fontSize={15}>{t("Partager l'application")}</Text>
           </LinkItem>
-          <LinkItem href="mailto:s.montlouis.calixte+bible-strong@gmail.com">
-            <StyledIcon name="send" size={25} />
-            <Text fontSize={15}>{t('Contacter le développeur')}</Text>
-          </LinkItem>
+          {isPremium && (
+            <LinkItem href="mailto:s.montlouis.calixte+bible-strong@gmail.com">
+              <StyledIcon name="send" size={25} />
+              <Text fontSize={15}>{t('Contacter le développeur')}</Text>
+            </LinkItem>
+          )}
           <LinkItem onPress={confirmChangeLanguage}>
             <MaterialIcon
               name="language"
@@ -318,16 +342,16 @@ const MoreScreen = () => {
             </Text>
           </LinkItem>
         </Box>
+        <Box row justifyContent="flex-end" px={10}>
+          <Text color="grey" fontSize={9} marginRight={10}>
+            {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
+          </Text>
+          <Text color="grey" fontSize={9}>
+            Version: {app.version}
+          </Text>
+        </Box>
       </ScrollView>
-      <Box position="absolute" bottom={30} right={10} row alignItems="flex-end">
-        <Text color="grey" fontSize={9} marginRight={10}>
-          {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
-        </Text>
-        <Text color="grey" fontSize={9}>
-          Version: {app.version}
-        </Text>
-      </Box>
     </Container>
   )
 }
-export default MoreScreen
+export default memo(MoreScreen)

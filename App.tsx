@@ -4,7 +4,8 @@ import analytics from '@react-native-firebase/analytics'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useAtom } from 'jotai'
+import React, { Suspense, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import 'react-native-root-siblings'
@@ -12,8 +13,10 @@ import { Provider as ReduxProvider } from 'react-redux'
 import * as Sentry from 'sentry-expo'
 
 import { persistor, store } from '~redux/store'
+import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -29,7 +32,6 @@ LogBox.ignoreLogs([
   'LottieAnimationView',
   'Setting a timer',
   'expoConstants',
-  "Cannot read property 'name' of null",
   'EventEmitter.removeListener',
   'useNativeDriver',
 ])
@@ -78,6 +80,9 @@ const loadResourcesAsync = async () => {
 
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
+  const [loadableActiveIndex] = useAtom(loadableActiveIndexAtom)
+  const [loadableTabs] = useAtom(loadableTabsAtom)
+
   const [status, setStatus] = useState('')
   useEffect(() => {
     ;(async () => {
@@ -96,7 +101,15 @@ const useAppLoad = () => {
     })()
   }, [])
 
-  return { isLoadingCompleted, status }
+  const isCompleted =
+    loadableActiveIndex.state === 'hasData' &&
+    loadableTabs.state === 'hasData' &&
+    isLoadingCompleted
+
+  return {
+    isLoadingCompleted: isCompleted,
+    status,
+  }
 }
 
 const App = () => {
@@ -104,11 +117,6 @@ const App = () => {
 
   const onLayoutRootView = useCallback(async () => {
     if (isLoadingCompleted) {
-      // This tells the splash screen to hide immediately! If we call this after
-      // `setAppIsReady`, then we may see a blank screen while the app is
-      // loading its initial state and rendering its first pixels. So instead,
-      // we hide the splash screen once we know the root view has already
-      // performed layout.
       await SplashScreen.hideAsync()
     }
   }, [isLoadingCompleted])
@@ -126,7 +134,11 @@ const App = () => {
     <ReduxProvider store={store}>
       <StatusBar translucent />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <InitApp persistor={persistor} />
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Suspense>
+            <InitApp persistor={persistor} />
+          </Suspense>
+        </GestureHandlerRootView>
       </View>
     </ReduxProvider>
   )

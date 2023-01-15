@@ -1,5 +1,5 @@
 import Box from '~common/ui/Box'
-import styled from '~styled'
+import styled from '@emotion/native'
 
 const CircleImage = styled(Box)(({ size = 30, theme }) => ({
   width: size,

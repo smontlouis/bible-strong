@@ -67,10 +67,11 @@ export default store => next => async action => {
     case fetchPlan.fulfilled.type:
     case resetPlan.type:
     case markAsRead.type: {
-      userDoc.update(
-        r({
+      userDoc.set(
+        {
           plan: plan.ongoingPlans,
-        })
+        },
+        { merge: true }
       )
       break
     }

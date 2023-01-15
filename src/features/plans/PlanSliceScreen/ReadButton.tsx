@@ -2,7 +2,7 @@ import React from 'react'
 import { withNavigation, NavigationInjectedProps } from 'react-navigation'
 
 import Link from '~common/Link'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { MaterialIcon } from '~common/ui/Icon'
 import { useDispatch } from 'react-redux'
 import { markAsRead } from '~redux/modules/plan'

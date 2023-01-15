@@ -16,7 +16,7 @@ const Wrapper = styled.View(({ theme }) => ({
 }))
 
 const StyledLink = styled(Link)(({ theme }) => ({
-  backgroundColor: theme.colors.lightPrimary,
+  backgroundColor: theme.colors.primary,
   paddingHorizontal: 15,
   height: 30,
   borderRadius: 30,
@@ -27,7 +27,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.primary,
+  color: theme.colors.reverse,
 }))
 
 const TextButton = styled.Text(({ theme }) => ({

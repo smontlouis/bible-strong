@@ -1,17 +1,12 @@
-import React, { ReactNode, memo, useState } from 'react'
+import React, { memo, ReactNode, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { PanGestureHandler, State } from 'react-native-gesture-handler'
-import Animated, {
-  Easing,
-  clockRunning,
-  debug,
-  or,
-} from 'react-native-reanimated'
+import Animated, { clockRunning, EasingNode, or } from 'react-native-reanimated'
 import {
-  snapPoint,
-  usePanGestureHandler,
-  timing,
   delay,
+  snapPoint,
+  timing,
+  usePanGestureHandler,
   useValues,
 } from 'react-native-redash'
 import { wp } from '~helpers/utils'
@@ -249,7 +244,11 @@ const withScrollX = ({
                 reTiming(
                   clock,
                   { ...state, frameTime: new Value(0) },
-                  { ...config, duration: 500, easing: Easing.out(Easing.ease) }
+                  {
+                    ...config,
+                    duration: 500,
+                    easing: EasingNode.out(EasingNode.ease),
+                  }
                 ),
                 cond(
                   and(
@@ -273,7 +272,11 @@ const withScrollX = ({
                 reTiming(
                   clock,
                   { ...state, frameTime: new Value(0) },
-                  { ...config, duration: 500, easing: Easing.out(Easing.ease) }
+                  {
+                    ...config,
+                    duration: 500,
+                    easing: EasingNode.out(EasingNode.ease),
+                  }
                 ),
                 cond(
                   and(
@@ -342,14 +345,14 @@ const initAnimations = ({
               duration: 1000,
               from: wp(100),
               to: 0,
-              easing: Easing.out(Easing.ease),
+              easing: EasingNode.out(EasingNode.ease),
             }),
             timing({
               clock,
               duration: 1000,
               from: lowerBound - wp(100),
               to: lowerBound,
-              easing: Easing.out(Easing.ease),
+              easing: EasingNode.out(EasingNode.ease),
             })
           )
         ),

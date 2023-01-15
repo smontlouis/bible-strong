@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
-
-import Box from '~common/ui/Box'
+import Color from 'color'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
@@ -16,12 +16,16 @@ import UserWidget from './UserWidget'
 import WordOfTheDay from './WordOfTheDay'
 
 import { useTranslation } from 'react-i18next'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useTheme } from '@emotion/react'
 
-const HomeScreen = () => {
+const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()
+  const theme = useTheme()
 
   return (
-    <Box grey>
+    <Box grey flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
         <Box grey pt={20} px={20}>
@@ -73,7 +77,9 @@ const HomeScreen = () => {
           <Box
             background
             row
-            padding={20}
+            paddingHorizontal={20}
+            paddingTop={20}
+            paddingBottom={getBottomSpace() + 100}
             style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
           >
             <Box flex>
@@ -112,26 +118,44 @@ const HomeScreen = () => {
               </Button>
             </Box>
           </Box>
-          {/* {Platform.OS === 'android' && (
-            <Box background p={20} pt={0}>
-              <Button
-                color="#7ed6df"
-                title="Soutenir"
-                route="Support"
-                leftIcon={
-                  <FeatherIcon
-                    name="thumbs-up"
-                    size={20}
-                    color="white"
-                    style={{ marginRight: 10 }}
-                  />
-                }
-              />
-            </Box>
-          )} */}
         </Box>
       </HomeScrollView>
+      <Box
+        pos="absolute"
+        left={0}
+        right={0}
+        bottom={0}
+        height={100}
+        paddingBottom={getBottomSpace()}
+        center
+      >
+        <Box pos="absolute" top={0} bottom={0} left={0} right={0}>
+          <LinearGradient
+            start={[0.5, 0]}
+            end={[0.5, 0.9]}
+            style={{ height: 100 }}
+            colors={[
+              `${Color(theme.colors.lightGrey)
+                .alpha(0)
+                .string()}`,
+              `${theme.colors.lightGrey}`,
+            ]}
+          />
+        </Box>
+        <TouchableBox
+          center
+          width={50}
+          height={50}
+          borderRadius={30}
+          bg="reverse"
+          lightShadow
+          activeOpacity={0.8}
+          onPress={closeHome}
+        >
+          <FeatherIcon name="x" size={24} color="grey" />
+        </TouchableBox>
+      </Box>
     </Box>
   )
 }
-export default HomeScreen
+export default memo(HomeScreen)

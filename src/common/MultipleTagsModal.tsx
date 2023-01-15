@@ -1,61 +1,59 @@
+import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { useTheme } from 'emotion-theming'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useAtom } from 'jotai'
+import React, { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { Modalize } from 'react-native-modalize'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
+import useFuzzy from '~helpers/useFuzzy'
 import { hp } from '~helpers/utils'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
-import styled from '~styled/index'
+import { multipleTagsModalAtom } from '../state/app'
 import Modal from './Modal'
-import SearchTagInput from './SearchTagInput'
+import SearchInput from './SearchInput'
 import Spacer from './ui/Spacer'
-import Fuse from 'fuse.js'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
   color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
-const MultipleTagsModal = ({ item = {}, onClosed }) => {
+const MultipleTagsModal = () => {
+  const [item, setItem] = useAtom(multipleTagsModalAtom)
+  const onClosed = () => setItem(false)
+
   const { t } = useTranslation()
   const [newTag, setNewTag] = useState('')
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
   const modalRef = React.useRef<Modalize>(null)
-  const tags = useSelector<RootState>(state =>
-    Object.values(state.user.bible.tags)
+  const tags = useSelector(
+    (state: RootState) =>
+      Object.values(state.user.bible.tags).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+    shallowEqual
   )
-  const fuse = useMemo(() => new Fuse(tags, { keys: ['name'] }), [])
-  const [filteredTags, setFilteredTags] = useState(tags)
-  const [searchValue, setSearchValue] = useState('')
-
-  useEffect(() => {
-    if (searchValue) {
-      setFilteredTags(fuse.search(searchValue).map(v => v.item))
-    } else {
-      setFilteredTags(tags)
-    }
-  }, [searchValue, fuse, tags.length])
+  const { keyword, result, search, resetSearch } = useFuzzy(tags, {
+    keys: ['name'],
+  })
 
   useEffect(() => {
     if (item) {
       modalRef?.current?.open()
-    } else {
-      modalRef?.current?.close()
     }
   }, [item])
 
   let currentItems = []
 
-  currentItems = useSelector<RootState>(state => {
+  currentItems = useSelector((state: RootState) => {
     if (item.ids) {
       return Object.keys(item.ids).map(id => ({
         id,
@@ -91,7 +89,7 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
   }, [item])
 
   return (
-    <Modal.Menu
+    <Modal.Body
       isOpen={!!item}
       onClose={onClosed}
       modalHeight={hp(80, 600)}
@@ -105,10 +103,11 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
               : `${t('Étiquettes pour')} ${highlightTitle}`}
           </Text>
           <Spacer />
-          <SearchTagInput
+          <SearchInput
             placeholder={t('Chercher une étiquette')}
-            onChangeText={setSearchValue}
-            value={searchValue}
+            onChangeText={search}
+            onDelete={resetSearch}
+            value={keyword}
             returnKeyType="done"
           />
         </Box>
@@ -139,13 +138,13 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
       }
     >
       <Box flex>
-        {filteredTags.length ? (
+        {result.length ? (
           <ScrollView
             contentContainerStyle={{ padding: 20 }}
             style={{ flex: 1 }}
           >
             <Box row wrap>
-              {filteredTags.map(chip => (
+              {result.map(chip => (
                 <Chip
                   key={chip.id}
                   label={chip.name}
@@ -165,8 +164,8 @@ const MultipleTagsModal = ({ item = {}, onClosed }) => {
           </Box>
         )}
       </Box>
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 
-export default MultipleTagsModal
+export default memo(MultipleTagsModal)

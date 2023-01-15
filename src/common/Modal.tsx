@@ -1,11 +1,13 @@
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import React, { forwardRef, useEffect } from 'react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import {
+  getBottomSpace,
+  getStatusBarHeight,
+} from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
-import { Portal } from 'react-native-paper'
 import Text, { TextProps } from '~common/ui/Text'
-import styled from '~styled/index'
-import { Theme } from '~themes/index'
+import styled from '@emotion/native'
+import { Portal } from '@gorhom/portal'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -37,12 +39,13 @@ interface ItemProps {
 }
 
 const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
-  const theme = useTheme<Theme>()
+  const theme = useTheme()
 
   return (
     <Modalize
       ref={ref}
       handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
+      modalTopOffset={getStatusBarHeight()}
       modalStyle={{
         marginLeft: 'auto',
         marginRight: 'auto',
@@ -59,6 +62,7 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
         shadowRadius: 4,
         elevation: 2,
         paddingBottom: getBottomSpace(),
+        ...props.style,
       }}
       handlePosition="inside"
       {...props}
@@ -66,7 +70,7 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
   )
 })
 
-const Menu = ({
+const Body = ({
   isOpen,
   onClose,
   children,
@@ -76,8 +80,6 @@ const Menu = ({
   useEffect(() => {
     if (isOpen) {
       modalRef?.current?.open()
-    } else {
-      modalRef?.current?.close()
     }
   }, [isOpen])
 
@@ -104,7 +106,7 @@ const Item = ({ children, tag, onPress, ...props }: ItemProps & TextProps) => (
 )
 
 export default {
-  Menu,
+  Body,
   Item,
   Container,
 }

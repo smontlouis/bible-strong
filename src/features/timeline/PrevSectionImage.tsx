@@ -1,6 +1,6 @@
 import React from 'react'
 import { AnimatedBox } from '~common/ui/Box'
-import Animated, { interpolate, Extrapolate } from 'react-native-reanimated'
+import Animated, { interpolateNode, Extrapolate } from 'react-native-reanimated'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 import SectionImage from './SectionImage'
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const PrevSectionImage = ({ x, prevEvent }: Props) => {
-  const opacity = interpolate(x, {
+  const opacity = interpolateNode(x, {
     inputRange: [0, wp(100)],
     outputRange: [0, 1],
     extrapolate: Extrapolate.CLAMP,

@@ -11,12 +11,12 @@ class Back extends Component {
   }
 
   render() {
-    const { padding, style } = this.props
+    const { padding, style, onCustomPress } = this.props
 
     return (
       <TouchableOpacity
         {...this.props}
-        onPress={this.handlePress}
+        onPress={onCustomPress || this.handlePress}
         style={{
           ...style,
           ...(padding && {

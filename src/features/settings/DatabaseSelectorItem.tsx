@@ -2,8 +2,8 @@ import React from 'react'
 import { TouchableOpacity, Alert } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import ProgressCircle from 'react-native-progress/Circle'
-import styled from '~styled'
-import { withTheme } from 'emotion-theming'
+import styled from '@emotion/native'
+import { withTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
@@ -109,7 +109,7 @@ class DBSelectorItem extends React.Component {
       await FileSystem.createDownloadResumable(
         uri,
         path,
-        null,
+        undefined,
         this.calculateProgress
       ).downloadAsync()
 

@@ -1,8 +1,10 @@
-import React from 'react'
 import styled from '@emotion/native'
+import React from 'react'
+import { withNavigation } from 'react-navigation'
 
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { LinkBox } from './Link'
 
 const Tag = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -16,7 +18,7 @@ const Tag = styled(Box)(({ theme }) => ({
   marginTop: 5,
 }))
 
-const TagList = ({ tags, limit }) => {
+const TagList = ({ tags, limit, navigation }) => {
   if (!tags || !Object.values(tags).length) {
     return null
   }
@@ -28,11 +30,22 @@ const TagList = ({ tags, limit }) => {
   return (
     <Box wrap row>
       {array.map(tag => (
-        <Tag key={tag.id}>
-          <Text fontSize={10} color="primary">
-            {tag.name}
-          </Text>
-        </Tag>
+        <TouchableBox
+          key={tag.id}
+          onPress={() =>
+            navigation.navigate({
+              routeName: 'Tag',
+              params: { tagId: tag.id },
+              key: `tag-${tag.id}}`,
+            })
+          }
+        >
+          <Tag>
+            <Text fontSize={10} color="primary">
+              {tag.name}
+            </Text>
+          </Tag>
+        </TouchableBox>
       ))}
       {!!(Object.values(tags).length - limit) && (
         <Text
@@ -55,4 +68,4 @@ const TagList = ({ tags, limit }) => {
   )
 }
 
-export default TagList
+export default withNavigation(TagList)

@@ -1,4 +1,4 @@
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import FastImage from 'react-native-fast-image'

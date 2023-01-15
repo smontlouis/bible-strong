@@ -5,11 +5,12 @@ import FastImage from 'react-native-fast-image'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import { ComputedPlanItem } from '~common/types'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { Theme } from '~themes'
 import { Image } from 'react-native'
 import { wp } from '~helpers/utils'
 import { useTranslation } from 'react-i18next'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
@@ -48,6 +49,7 @@ const DetailsModal = ({
   return (
     <Modalize
       ref={modalRefDetails}
+      modalTopOffset={getStatusBarHeight()}
       modalStyle={{
         backgroundColor: theme.colors.lightGrey,
         maxWidth: 600,

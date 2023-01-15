@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Modalize } from 'react-native-modalize'
 import { Theme } from '~themes'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 
 import { TimelineEvent as TimelineEventProps } from './types'
 import useDebounce from '~helpers/useDebounce'

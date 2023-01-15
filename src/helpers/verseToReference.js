@@ -50,7 +50,7 @@ const verseToReference = (v, options = {}) => {
   }
 
   if (!verses.length) {
-    return
+    return ''
   }
 
   verses = orderVerses(verses)

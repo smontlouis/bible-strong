@@ -1,4 +1,4 @@
-import styled from '~styled/index'
+import styled from '@emotion/native'
 
 const Circle = styled.View<{
   isSelected: boolean

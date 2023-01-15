@@ -22,6 +22,12 @@ export interface Plan {
   lang: 'fr' | 'en'
 }
 
+export interface OngoingPlan {
+  id: string
+  status: PlanStatus
+  readingSlices: { [id: string]: PlanStatus }
+}
+
 type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 export interface OnlinePlan extends WithOptional<Plan, 'sections'> {
@@ -116,12 +122,6 @@ export interface VideoSlice {
   url: string
 }
 
-export interface OngoingPlan {
-  id: string
-  status: PlanStatus
-  readingSlices: { [id: string]: PlanStatus }
-}
-
 export interface OngoingReadingSlice {
   id: string
   status: PlanStatus
@@ -163,3 +163,24 @@ export type PreferredColorScheme = 'light' | 'dark' | 'auto'
 export type PreferredLightTheme = 'default' | 'sepia' | 'nature' | 'sunset'
 export type PreferredDarkTheme = 'dark' | 'black' | 'night' | 'mauve'
 export type CurrentTheme = PreferredLightTheme | PreferredDarkTheme
+
+export type StrongReference = {
+  Hebreu: string
+  Grec: string
+  Mot: string
+  Code: string
+  Phonetique: string
+  Definition: string
+  Type: string
+  LSG: string
+  Origine: string
+  date: string
+  book: string
+  error?: string
+}
+
+export type StudyNavigateBibleType =
+  | 'verse'
+  | 'verse-block'
+  | 'strong'
+  | 'strong-block'

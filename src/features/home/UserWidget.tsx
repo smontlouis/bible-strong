@@ -1,20 +1,18 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import {
   ActivityIndicator,
   Platform,
   ScrollView,
   StyleSheet,
 } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useSelector } from 'react-redux'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
-import RoundedCorner from '~common/ui/RoundedCorner'
 import Text from '~common/ui/Text'
 import extractFirstName from '~helpers/extractFirstName'
 import extractInitials from '~helpers/extractInitials'
@@ -23,30 +21,33 @@ import { useIsPremium } from '~helpers/usePremium'
 import PreloadBible from './PreloadBible'
 
 import { useTranslation } from 'react-i18next'
+import { shallowEqual } from 'recompose'
+import Spacer from '~common/ui/Spacer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
+import FireAuth from '~helpers/FireAuth'
 
 const vodNb = [...Array(6).keys()]
 
 const Container = styled.View(({ theme }) => ({
-  backgroundColor: theme.colors.reverse,
-  paddingTop: getBottomSpace() + Platform.OS === 'ios' ? 20 : 45,
+  backgroundColor: theme.colors.lightGrey,
+  paddingTop: Platform.OS === 'ios' ? 20 : 45,
   paddingBottom: 0,
 }))
 
 const ProfileImage = styled.Image(({ theme }) => ({
-  width: 40,
-  height: 40,
-  borderRadius: 20,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
   backgroundColor: theme.colors.tertiary,
   alignItems: 'center',
   justifyContent: 'center',
 }))
 
 const ProfileContainer = styled.View(({ theme }) => ({
-  width: 50,
-  height: 50,
-  borderRadius: 25,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
   shadowColor: theme.colors.primary,
   shadowOffset: { width: 0, height: 3 },
   shadowOpacity: 0.3,
@@ -83,10 +84,10 @@ const Chip = styled(Link)(({ theme, hightlighted }) => ({
   paddingVertical: 10,
   paddingHorizontal: 13,
   marginRight: 10,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 3 },
-  shadowOpacity: 0.08,
-  shadowRadius: 4,
+  shadowColor: 'rgb(89,131,240)',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 7,
   elevation: 1,
   overflow: 'visible',
 
@@ -101,7 +102,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = React.memo(() => {
+const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
@@ -112,15 +113,22 @@ const UserWidget = React.memo(() => {
       notes: Object.keys(bible.notes).length,
       studies: Object.keys(bible.studies).length,
       tags: Object.keys(bible.tags).length,
-    })
+    }),
+    shallowEqual
   )
   const [currentVOD, setCurrentVOD] = useState(0)
 
   if (!isLogged) {
     return (
       <Container>
-        <Box paddingHorizontal={25}>
-          <Text title fontSize={25} flex>
+        <Box
+          paddingHorizontal={20}
+          borderRadius={30}
+          marginHorizontal={20}
+          bg="reverse"
+          py={20}
+        >
+          <Text marginTop={20} title fontSize={25} flex>
             {t('Bienvenue')}
           </Text>
           <Paragraph marginTop={20} marginBottom={20}>
@@ -142,19 +150,24 @@ const UserWidget = React.memo(() => {
             {t('Je me connecte')}
           </Button>
         </Box>
-        <Box grey>
-          <RoundedCorner />
-        </Box>
       </Container>
     )
   }
 
   return (
     <Container>
-      <Box flex paddingHorizontal={20} overflow="visible">
+      <Box
+        flex
+        paddingHorizontal={20}
+        overflow="visible"
+        borderRadius={30}
+        marginHorizontal={20}
+        bg="reverse"
+        py={20}
+      >
         <OfflineNotice />
 
-        <Box alignItems="flex-end">
+        <Box alignItems="center" row justifyContent="space-between">
           <Box overflow="visible" position="relative">
             <ProfileContainer>
               {user.photoURL ? (
@@ -190,7 +203,7 @@ const UserWidget = React.memo(() => {
             )}
           </Box>
         </Box>
-
+        <Spacer />
         <Box row alignItems="center" overflow="visible">
           <Box flex>
             <Text title fontSize={25}>
@@ -214,9 +227,7 @@ const UserWidget = React.memo(() => {
         {/* {!user.emailVerified && (
           <Box marginTop={10}>
             <Text color="quart" mb={5}>
-              {t(
-                'Un email vous a été envoyé, merci de vérifier votre adresse. Si ce message persiste, reconnectez-vous.'
-              )}
+              {t('app.emailNotVerified')}
             </Text>
             <Link onPress={() => FireAuth.sendEmailVerification()}>
               <Text color="grey" style={{ textDecorationLine: 'underline' }}>
@@ -227,7 +238,6 @@ const UserWidget = React.memo(() => {
         )} */}
       </Box>
       <Box grey>
-        <RoundedCorner />
         <ScrollView
           horizontal
           style={{ maxHeight: 95, overflow: 'visible', marginTop: 10 }}
@@ -287,6 +297,6 @@ const UserWidget = React.memo(() => {
       </Box>
     </Container>
   )
-})
+}
 
-export default UserWidget
+export default memo(UserWidget)

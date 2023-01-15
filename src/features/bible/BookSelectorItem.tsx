@@ -9,7 +9,7 @@ const TouchableOpacity = styled.TouchableOpacity(() => ({
   alignItems: 'center',
   justifyContent: 'center',
   height: 45,
-  width: wp(100) / 5,
+  width: wp(99) / 5,
 }))
 
 const Text = styled.Text(({ isSelected, isNT, themeValue, theme }) => ({

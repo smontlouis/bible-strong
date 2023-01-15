@@ -4,7 +4,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
 
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
@@ -18,7 +18,10 @@ import { RootState } from '~redux/modules/reducer'
 import { ChangelogTag } from '~common/Changelog'
 
 const Changelog = () => {
-  const changelog = useSelector((state: RootState) => state.user.changelog.data)
+  const changelog = useSelector(
+    (state: RootState) => state.user.changelog.data,
+    shallowEqual
+  )
   const { t } = useTranslation()
   const isFR = useLanguage()
 

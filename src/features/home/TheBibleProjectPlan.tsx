@@ -1,4 +1,4 @@
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import React from 'react'
 import ProgressBar from 'react-native-progress/Bar'
 import Link from '~common/Link'

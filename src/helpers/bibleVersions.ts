@@ -96,12 +96,10 @@ export interface Version {
   name: string
   name_en?: string
   c?: string
-  type?: 'en' | 'fr'
+  type?: 'en' | 'fr' | 'other'
 }
 
-export const versions: {
-  [x: string]: Version
-} = {
+export const versions = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910',
@@ -304,30 +302,36 @@ export const versions: {
     name: 'Biblia Hebraica Stuttgartensia (AT)',
     name_en: 'Biblia Hebraica Stuttgartensia (OT)',
     c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
+    type: 'other',
   },
   LXX: {
     id: 'LXX',
     name: 'Septante (AT)',
     name_en: 'Septuagint (OT)',
+    type: 'other',
   },
   SBLGNT: {
     id: 'SBLGNT',
     name: 'SBL NT. Grec (NT)',
     name_en: 'SBL NT. Greek (NT)',
     c: '© 2010 Society of Bible Litterature',
+    type: 'other',
   },
   TR1624: {
     id: 'TR1624',
     name: 'Elzevir Textus Receptus 1624 (NT)',
+    type: 'other',
   },
   TR1894: {
     id: 'TR1894',
     name: 'Scrivener’s Textus Receptus 1894 (NT)',
+    type: 'other',
   },
   DEL: {
     id: 'DEL',
     name: "Tanach and Delitzsch's Hebrew New Testament",
     c: '© Bible Society in Israel, 2018.',
+    type: 'other',
   },
 }
 

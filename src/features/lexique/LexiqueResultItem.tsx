@@ -20,7 +20,7 @@ const LexiqueResultItem = ({ variant, id, title }: Props) => {
   return (
     <Link
       key={id + title}
-      route="BibleStrongDetail"
+      route="Strong"
       params={{ book: isGrec ? 40 : 1, reference: id }}
     >
       <Box

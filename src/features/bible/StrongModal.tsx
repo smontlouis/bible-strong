@@ -12,9 +12,12 @@ import StrongCard from '~features/bible/StrongCard'
 import { Modalize } from 'react-native-modalize'
 import { usePrevious } from '~helpers/usePrevious'
 import { isStrongVersion } from '~helpers/bibleVersions'
+import { useTheme } from '@emotion/react'
+import { Portal } from '@gorhom/portal'
 
 const StrongCardWrapper = waitForStrongModal(
-  ({ theme, navigation, selectedCode, onClosed }) => {
+  ({ navigation, selectedCode, onClosed }) => {
+    const theme = useTheme()
     const [isLoading, setIsLoading] = useState(true)
     const [strongReference, setStrongReference] = useState(null)
     const [error, setError] = useState(false)
@@ -77,20 +80,22 @@ const StrongCardWrapper = waitForStrongModal(
 
 interface StrongModalProps {
   onClosed: () => void
-  theme: Object
-  selectedCode: Object
-  navigation: Object
+  selectedCode: {
+    reference: string
+    book: number
+  } | null
+  navigation?: Object
   version: string
 }
 
 const StrongModal = ({
   onClosed,
-  theme,
   selectedCode,
   navigation,
   version,
 }: StrongModalProps) => {
   const modalRef = React.useRef<Modalize>(null)
+  const theme = useTheme()
   const hasSelectedCode = !!selectedCode
   const hasPrevSelectedCode = usePrevious(hasSelectedCode)
 
@@ -112,25 +117,27 @@ const StrongModal = ({
   }, [version])
 
   return (
-    <Modalize
-      ref={modalRef}
-      onClosed={onClosed}
-      modalHeight={hp(75)}
-      handlePosition="inside"
-      closeSnapPointStraightEnabled={false}
-      modalStyle={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 600,
-        width: '100%',
-        backgroundColor: theme.colors.lightGrey,
-      }}
-      snapPoint={200}
-      withOverlay={false}
-    >
-      <StrongCardWrapper {...{ theme, navigation, selectedCode, onClosed }} />
-    </Modalize>
+    <Portal>
+      <Modalize
+        ref={modalRef}
+        onClosed={onClosed}
+        modalHeight={hp(75)}
+        handlePosition="inside"
+        closeSnapPointStraightEnabled={false}
+        modalStyle={{
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          maxWidth: 600,
+          width: '100%',
+          backgroundColor: theme.colors.lightGrey,
+        }}
+        snapPoint={200}
+        withOverlay={false}
+      >
+        <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
+      </Modalize>
+    </Portal>
   )
 }
 
-export default compose(withNavigation)(StrongModal)
+export default withNavigation(StrongModal)

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import * as Animatable from 'react-native-animatable'
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 import { wp } from '~helpers/utils'
 import Image from '~common/ui/Image'
@@ -46,7 +46,7 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
         transition="height"
         position="relative"
         style={{
-          height: !open ? 0 : width - 40,
+          height: !open ? 0 : width - 100,
           backgroundColor: theme.colors.lightGrey,
           borderRadius: 10,
           shadowColor: theme.colors.reverse,
@@ -70,10 +70,10 @@ const ShowMoreImage = ({ imageUrls, verseOfTheDay, theme, open, setOpen }) => {
               thumbnailSource={{ uri: imageUrls.small }}
               source={{ uri: imageUrls.large, cache: 'force-cache' }}
               style={{
-                width: width - 40,
-                height: width - 40,
+                width: width - 100,
+                height: width - 100,
               }}
-              resizeMode="cover"
+              resizeMode="contain"
             />
             <LinkBox
               position="absolute"

@@ -1,11 +1,14 @@
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
+import { useSetAtom } from 'jotai'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
+import { multipleTagsModalAtom } from '../../state/app'
 import { Theme } from '~themes'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 
@@ -14,21 +17,18 @@ interface Props {
   onClosed: () => void
   theme: Theme
   setTitlePrompt: React.Dispatch<React.SetStateAction<boolean>>
-  setMultipleTagsItem: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const StudySettingsModal = ({
-  isOpen,
-  onClosed,
-  setTitlePrompt,
-  setMultipleTagsItem,
-}: Props) => {
+const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const studyId = isOpen
   const study = useSelector(
-    (state: RootState) => state.user.bible.studies[studyId]
+    (state: RootState) => state.user.bible.studies[studyId],
+    shallowEqual
   )
+  const openInNewTab = useOpenInNewTab()
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
   const deleteStudyConfirmation = (id: string) => {
     Alert.alert(
@@ -49,8 +49,27 @@ const StudySettingsModal = ({
   }
 
   return (
-    <Modal.Menu isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
+    <Modal.Body isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
       {study && <PublishStudyMenuItem study={study} onClosed={onClosed} />}
+      <Modal.Item
+        onPress={() => {
+          onClosed()
+          openInNewTab(
+            {
+              id: `study-${Date.now()}`,
+              title: study.title,
+              isRemovable: true,
+              type: 'study',
+              data: {
+                studyId: study.id,
+              },
+            },
+            { autoRedirect: true }
+          )
+        }}
+      >
+        {t('tab.openInNewTab')}
+      </Modal.Item>
       <Modal.Item
         onPress={() => {
           onClosed()
@@ -73,7 +92,7 @@ const StudySettingsModal = ({
       >
         {t('Supprimer')}
       </Modal.Item>
-    </Modal.Menu>
+    </Modal.Body>
   )
 }
 

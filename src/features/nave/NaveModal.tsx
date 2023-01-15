@@ -1,7 +1,7 @@
+import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { withNavigation } from 'react-navigation'
-import compose from 'recompose/compose'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
@@ -10,13 +10,13 @@ import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import CardWrapper from './NaveModalCard'
 
-const NaveModal = ({ onClosed, theme, selectedVerse, version }) => {
+const NaveModal = ({ onClosed, selectedVerse }) => {
   const { t } = useTranslation()
-
+  const theme = useTheme()
   const { title } = formatVerseContent([selectedVerse])
 
   return (
-    <Modal.Menu
+    <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
       adjustToContentHeight
@@ -36,9 +36,9 @@ const NaveModal = ({ onClosed, theme, selectedVerse, version }) => {
         </Box>
       }
     >
-      <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
-    </Modal.Menu>
+      <CardWrapper {...{ theme, selectedVerse, onClosed }} />
+    </Modal.Body>
   )
 }
 
-export default compose(withNavigation)(NaveModal)
+export default withNavigation(NaveModal)

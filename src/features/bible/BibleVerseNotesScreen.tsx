@@ -10,7 +10,6 @@ import Header from '~common/Header'
 import Empty from '~common/Empty'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 
-import * as BibleActions from '~redux/modules/bible'
 import * as UserActions from '~redux/modules/user'
 
 import TagsHeader from '~common/TagsHeader'
@@ -37,7 +36,6 @@ class BibleVerseNotes extends Component {
     isTagsOpen: false,
     selectedChip: null,
     isNoteSettingsOpen: false,
-    multipleTagsItem: false,
   }
 
   setTagsIsOpen = value => this.setState({ isTagsOpen: value })
@@ -45,8 +43,6 @@ class BibleVerseNotes extends Component {
   setSelectedChip = value => this.setState({ selectedChip: value })
 
   setNoteSettings = value => this.setState({ isNoteSettingsOpen: value })
-
-  setMultipleTagsItem = value => this.setState({ multipleTagsItem: value })
 
   loadPage = async props => {
     const { verse } = props.navigation.state.params || {}
@@ -130,7 +126,6 @@ class BibleVerseNotes extends Component {
       isTagsOpen,
       selectedChip,
       isNoteSettingsOpen,
-      multipleTagsItem,
     } = this.state
 
     const filteredNotes = notes.filter(s =>
@@ -182,13 +177,7 @@ class BibleVerseNotes extends Component {
         <BibleNotesSettingsModal
           isOpen={isNoteSettingsOpen}
           onClosed={() => this.setNoteSettings(false)}
-          setMultipleTagsItem={this.setMultipleTagsItem}
           openNoteEditor={this.openNoteEditor}
-        />
-        <MultipleTagsModal
-          multiple
-          item={multipleTagsItem}
-          onClosed={() => this.setMultipleTagsItem(false)}
         />
       </Container>
     )
@@ -200,7 +189,7 @@ export default compose(
     state => ({
       notes: state.user.bible.notes,
     }),
-    { ...BibleActions, ...UserActions }
+    UserActions
   ),
   withTranslation()
 )(BibleVerseNotes)

@@ -1,38 +1,33 @@
-import React, { Component } from 'react'
-import { Alert, View, Platform } from 'react-native'
-import * as AssetUtils from 'expo-asset-utils'
-import { WebView } from 'react-native-webview'
 import * as Sentry from '@sentry/react-native'
+import React, { Component } from 'react'
+import { Alert, Platform, View } from 'react-native'
+import { WebView } from 'react-native-webview'
 
-import literata from '../../assets/fonts/literata'
 import books from '~assets/bible_versions/books'
 import SnackBar from '~common/SnackBar'
+import literata from '../../assets/fonts/literata'
 import {
-  NAVIGATE_TO_VERSION,
-  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_NOTES,
-  NAVIGATE_TO_PERICOPE,
-  NAVIGATE_TO_BIBLE_VIEW,
-  SEND_INITIAL_DATA,
-  TOGGLE_SELECTED_VERSE,
-  NAVIGATE_TO_BIBLE_NOTE,
-  CONSOLE_LOG,
-  NAVIGATE_TO_STRONG,
-  THROW_ERROR,
-  REMOVE_PARALLEL_VERSION,
   ADD_PARALLEL_VERSION,
-  SWIPE_RIGHT,
-  SWIPE_LEFT,
+  CONSOLE_LOG,
+  NAVIGATE_TO_BIBLE_NOTE,
+  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_BIBLE_VIEW,
+  NAVIGATE_TO_PERICOPE,
+  NAVIGATE_TO_STRONG,
+  NAVIGATE_TO_VERSE_NOTES,
+  NAVIGATE_TO_VERSION,
   OPEN_HIGHLIGHT_TAGS,
+  REMOVE_PARALLEL_VERSION,
+  SEND_INITIAL_DATA,
+  SWIPE_LEFT,
+  SWIPE_RIGHT,
+  THROW_ERROR,
+  TOGGLE_SELECTED_VERSE,
 } from './bibleWebView/src/dispatch'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
   webview = null
-
-  state = {
-    isHTMLFileLoaded: false,
-  }
 
   dispatchToWebView = message => {
     if (this.webview === null) {
@@ -53,29 +48,6 @@ class BibleWebView extends Component {
     }, 0)
   }
 
-  state = {
-    webViewOpacity: 0,
-    isHTMLFileLoaded: false,
-  }
-
-  componentDidMount() {
-    this.enableWebViewOpacity()
-    this.loadHTMLFile()
-  }
-
-  loadHTMLFile = async () => {
-    const { localUri: fileUri } = await AssetUtils.resolveAsync(
-      require('~assets/fonts/FiraCode-Regular.otf')
-    ).catch(e => {
-      SnackBar.show('Erreur lors de la lecture du fichier')
-      Sentry.captureException(e)
-    })
-
-    this.fileUri = fileUri
-
-    this.setState({ isHTMLFileLoaded: true })
-  }
-
   injectFont = () => {
     const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
@@ -85,11 +57,6 @@ class BibleWebView extends Component {
         document.head.appendChild(style);
         true;
     `
-  }
-
-  enableWebViewOpacity = async () => {
-    await sleep(500)
-    this.setState({ webViewOpacity: 1 })
   }
 
   componentDidUpdate() {
@@ -126,12 +93,12 @@ class BibleWebView extends Component {
         break
       }
       case NAVIGATE_TO_VERSION: {
-        const { navigation } = this.props
+        const { navigation, bibleAtom } = this.props
         const { version, index } = action.payload
 
         // index = 0 is Default one
         navigation.navigate('VersionSelector', {
-          version,
+          bibleAtom,
           parallelVersionIndex: index === 0 ? undefined : index - 1,
         })
         break
@@ -302,45 +269,42 @@ class BibleWebView extends Component {
           borderTopRightRadius: 30,
           overflow: 'hidden',
           flex: 1,
-          opacity: this.state.webViewOpacity,
         }}
       >
-        {this.state.isHTMLFileLoaded && (
-          <WebView
-            style={{ backgroundColor: 'transparent' }}
-            onLoad={this.sendDataToWebView}
-            onMessage={this.receiveDataFromWebView}
-            originWhitelist={['*']}
-            ref={ref => {
-              this.webview = ref
-            }}
-            onError={syntheticEvent => {
-              const { nativeEvent } = syntheticEvent
-              console.warn('WebView error: ', nativeEvent)
-            }}
-            source={
-              Platform.OS === 'android'
-                ? { uri: 'file:///android_asset/index.html' }
-                : require('./bibleWebView/dist/index.html')
-            }
-            injectedJavaScript={this.injectFont()}
-            domStorageEnabled
-            allowUniversalAccessFromFileURLs
-            allowFileAccessFromFileURLs
-            allowFileAccess
-            onContentProcessDidTerminate={syntheticEvent => {
-              const { nativeEvent } = syntheticEvent
-              console.warn('Content process terminated, reloading...')
-              this.webview?.reload()
-              Sentry.captureException(nativeEvent)
-            }}
-            onRenderProcessGone={syntheticEvent => {
-              const { nativeEvent } = syntheticEvent
-              this.webview?.reload()
-              Sentry.captureException(nativeEvent)
-            }}
-          />
-        )}
+        <WebView
+          style={{ backgroundColor: 'transparent' }}
+          onLoad={this.sendDataToWebView}
+          onMessage={this.receiveDataFromWebView}
+          originWhitelist={['*']}
+          ref={ref => {
+            this.webview = ref
+          }}
+          onError={syntheticEvent => {
+            const { nativeEvent } = syntheticEvent
+            console.warn('WebView error: ', nativeEvent)
+          }}
+          source={
+            Platform.OS === 'android'
+              ? { uri: 'file:///android_asset/index.html' }
+              : require('./bibleWebView/dist/index.html')
+          }
+          injectedJavaScript={this.injectFont()}
+          domStorageEnabled
+          allowUniversalAccessFromFileURLs
+          allowFileAccessFromFileURLs
+          allowFileAccess
+          onContentProcessDidTerminate={syntheticEvent => {
+            const { nativeEvent } = syntheticEvent
+            console.warn('Content process terminated, reloading...')
+            this.webview?.reload()
+            Sentry.captureException(nativeEvent)
+          }}
+          onRenderProcessGone={syntheticEvent => {
+            const { nativeEvent } = syntheticEvent
+            this.webview?.reload()
+            Sentry.captureException(nativeEvent)
+          }}
+        />
       </View>
     )
   }

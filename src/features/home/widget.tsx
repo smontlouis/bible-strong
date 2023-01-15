@@ -1,6 +1,6 @@
 import React from 'react'
 import ProgressCircle from 'react-native-progress/Circle'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
@@ -19,7 +19,7 @@ export const WidgetContainer = props => (
     height={itemHeight}
     width={itemWidth}
     backgroundColor="reverse"
-    marginRight={20}
+    marginRight={16}
     {...props}
   />
 )

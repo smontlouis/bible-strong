@@ -8,7 +8,7 @@ import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
 import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
-import DictionnaryResultItem from './DictionnaryResultItem'
+import DictionnaryResultItem from './DictionaryResultItem'
 
 const hideIfNoDatabase = WrappedComponent => props => {
   const { isLoading, proposeDownload } = useWaitForDatabase()

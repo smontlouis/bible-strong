@@ -1,10 +1,11 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 
 import { Theme } from '~themes'
 import { TimelineEvent as TimelineEventProps } from './types'
 import EventDetails from './EventDetails'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -24,6 +25,7 @@ const EventDetailsModal = ({
   return (
     <Modalize
       ref={modalRef}
+      modalTopOffset={getStatusBarHeight()}
       handlePosition="inside"
       // snapPoint={400}
       modalStyle={{

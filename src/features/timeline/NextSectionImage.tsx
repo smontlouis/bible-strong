@@ -1,7 +1,7 @@
 import React from 'react'
 import { AnimatedBox } from '~common/ui/Box'
 import Animated, {
-  interpolate,
+  interpolateNode,
   multiply,
   Extrapolate,
 } from 'react-native-reanimated'
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const NextSectionImage = ({ x, width, nextEvent }: Props) => {
-  const opacity = interpolate(multiply(x, -1), {
+  const opacity = interpolateNode(multiply(x, -1), {
     inputRange: [width - wp(100), width],
     outputRange: [0, 1],
     extrapolate: Extrapolate.EXTEND,

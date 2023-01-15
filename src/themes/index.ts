@@ -52,3 +52,10 @@ const getTheme: GetTheme = {
 export default getTheme
 
 export type Theme = typeof baseTheme
+type BaseTheme = typeof baseTheme
+
+import '@emotion/react'
+
+declare module '@emotion/react' {
+  export interface Theme extends BaseTheme {}
+}

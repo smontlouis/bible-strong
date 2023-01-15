@@ -1,6 +1,6 @@
 import React from 'react'
 
-import styled from '~styled'
+import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
@@ -52,7 +52,7 @@ const ReadingSlice = ({
       <Box
         paddingLeft={28}
         paddingTop={15}
-        backgroundColor="lightGrey"
+        backgroundColor="reverse"
         position="relative"
       >
         <FineLine />

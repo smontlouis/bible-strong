@@ -1,20 +1,27 @@
+import { useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import SnackBar from '~common/SnackBar'
 import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
 import i18n from '~i18n'
 import * as UserActions from '~redux/modules/user'
+import { resetUserAtomsAtom } from '../state/app'
 
 const useInitFireAuth = () => {
   const dispatch = useDispatch()
+  const resetAtoms = useSetAtom(resetUserAtomsAtom)
   useEffect(() => {
     const onLogin = ({ profile }: { profile: FireAuthProfile }) => {
       console.log(`Bienvenue ${profile.displayName}.`)
       dispatch(UserActions.onUserLoginSuccess({ profile }))
     }
+
     const emailVerified = () => dispatch(UserActions.verifyEmail())
     const onUserChange = profile => console.log('user changed')
-    const onLogout = () => dispatch(UserActions.onUserLogout())
+    const onLogout = () => {
+      dispatch(UserActions.onUserLogout())
+      resetAtoms()
+    }
     const onError = e => {
       if (e.code === 'auth/internal-error') {
         SnackBar.show(i18n.t("Une erreur s'est produite"))

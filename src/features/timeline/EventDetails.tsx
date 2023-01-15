@@ -1,7 +1,7 @@
 import React from 'react'
 import FastImage from 'react-native-fast-image'
 import Carousel from 'react-native-snap-carousel'
-import { Portal } from 'react-native-paper'
+import { Portal } from '@gorhom/portal'
 import useLanguage from '~helpers/useLanguage'
 
 import bibleMemoize from '~helpers/bibleStupidMemoize'

@@ -1,35 +1,34 @@
+import { PrimitiveAtom } from 'jotai'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { ScrollView, SectionList } from 'react-native'
-import { useSelector, useDispatch } from 'react-redux'
+import { NavigationStackScreenProps } from 'react-navigation-stack'
 import books, { Book, sections } from '~assets/bible_versions/books-desc'
-import { setTempSelectedBook } from '~redux/modules/bible'
-import { RootState } from '~redux/modules/reducer'
-import BookSelectorItem from './BookSelectorItem'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { LinkBox } from '~common/Link'
-import { useTranslation } from 'react-i18next'
 import i18n from '~i18n'
+import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import BookSelectorItem from './BookSelectorItem'
 
-interface Props {
-  navigation: NavigationStackProp<any>
+interface BookSelectorScreenProps {
+  bibleAtom: PrimitiveAtom<BibleTab>
 }
 
-const BookSelector = ({ navigation }: Props) => {
-  const dispatch = useDispatch()
+const BookSelector = ({
+  navigation,
+  screenProps,
+}: NavigationStackScreenProps<{}, BookSelectorScreenProps>) => {
   const { t } = useTranslation()
-  const selectedBook = useSelector(
-    (state: RootState) => state.bible.temp.selectedBook
-  )
+  const [bible, actions] = useBibleTabActions(screenProps.bibleAtom)
 
-  const selectionMode = useSelector(
-    (state: RootState) => state.bible.selectionMode
-  )
+  const {
+    data: { selectionMode, selectedBook },
+  } = bible
 
   const onBookChange = (book: Book) => {
     navigation.navigate('Chapitre')
-    dispatch(setTempSelectedBook(book))
+    actions.setTempSelectedBook(book)
   }
 
   if (selectionMode === 'list') {

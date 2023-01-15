@@ -15,10 +15,10 @@ const Snackbar = {
   show(label: string, type = 'info', params = {}) {
     SnackBar.show(label, {
       backgroundColor: getBackgroundColor(type),
-      buttonColor: 'blue',
+      buttonColor: 'white',
       textColor: 'white',
       tapToClose: true,
-      duration: 2500,
+      duration: 3000,
       ...params,
     })
   },

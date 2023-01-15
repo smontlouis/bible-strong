@@ -1,4 +1,3 @@
-import deepmerge from 'deepmerge'
 import produce, { Draft } from 'immer'
 import { Reducer } from 'redux'
 import {
@@ -10,7 +9,6 @@ import {
   SubscriptionType,
   Tag,
 } from '~common/types'
-import { detailedDiff } from '~helpers/deep-obj'
 import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
@@ -22,8 +20,6 @@ import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
-import { isEmpty } from '../../helpers/deep-obj/utils'
-import { conflictStateProxy } from '../../state/app'
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
 import settingsReducer from './user/settings'
@@ -131,11 +127,16 @@ export interface UserState {
         date: number
       }
     }
-    notes: {}
+    notes: {
+      [x: string]: any
+    }
+
     studies: {
       [x: string]: Study
     }
-    tags: {}
+    tags: {
+      [x: string]: Tag
+    }
     history: any[]
     strongsHebreu: {}
     strongsGrec: {}
@@ -180,7 +181,7 @@ export type QuotaProps = {
   lastDate: number
 }
 
-const initialState: UserState = {
+const getInitialState = (): UserState => ({
   id: '',
   email: '',
   displayName: '',
@@ -250,7 +251,7 @@ const initialState: UserState = {
       lastDate: 0,
     },
   },
-}
+})
 
 // UserReducer
 const userReducer = produce((draft: Draft<UserState>, action) => {
@@ -277,14 +278,22 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
 
     case RECEIVE_LIVE_UPDATES: {
-      const { id, email, displayName, photoURL, provider, bible } = action
-        .payload.remoteUserData as FireStoreUserData
+      const {
+        id,
+        email,
+        displayName,
+        photoURL,
+        provider,
+        bible,
+        subscription,
+      } = action.payload.remoteUserData as FireStoreUserData
 
       draft.id = id
       draft.email = email
-      draft.displayName = displayName
+      draft.displayName = draft.displayName || displayName
       draft.photoURL = photoURL
       draft.provider = provider
+      draft.subscription = subscription
 
       draft.bible = {
         ...draft.bible,
@@ -310,7 +319,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
       draft.id = id
       draft.email = email
-      draft.displayName = displayName
+      draft.displayName = draft.displayName || displayName
       draft.photoURL = photoURL
       draft.provider = provider
       draft.emailVerified = emailVerified
@@ -320,12 +329,14 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
     case USER_LOGOUT: {
       return {
-        ...initialState,
+        ...getInitialState(),
         bible: {
-          ...initialState.bible,
+          ...getInitialState().bible,
           // Keep changelog
           changelog: draft.bible.changelog,
         },
+        // Keep quota
+        quota: draft.quota,
       }
     }
     case SAVE_ALL_LOGS_AS_SEEN: {
@@ -451,7 +462,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
 const reducers = <typeof userReducer>(
   reduceReducers(
-    initialState,
+    getInitialState(),
     userReducer,
     notesReducer,
     highlightsReducer,
@@ -524,9 +535,14 @@ export function receiveLiveUpdates({
 
 // HISTORY
 export function setHistory(item) {
-  return {
-    type: SET_HISTORY,
-    payload: item,
+  return dispatch => {
+    // Wait for animation to finish
+    setTimeout(() => {
+      dispatch({
+        type: SET_HISTORY,
+        payload: item,
+      })
+    }, 600)
   }
 }
 

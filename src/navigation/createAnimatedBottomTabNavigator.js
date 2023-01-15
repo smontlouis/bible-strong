@@ -5,23 +5,8 @@ import { Animated, StyleSheet } from 'react-native'
 import { createTabNavigator } from 'react-navigation-tabs'
 import { ScreenContainer } from 'react-native-screens'
 
-import BottomTabBar from '~common/BottomTabBar'
+import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import withDeviceOrientation from '~helpers/withDeviceOrientation'
-
-const RoundedTopBottomBar = styled.View(({ theme }) => ({
-  height: 20,
-  borderTopLeftRadius: 10,
-  borderTopRightRadius: 10,
-  backgroundColor: theme.colors.reverse,
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 0 },
-  shadowOpacity: 0.2,
-  shadowRadius: 7,
-}))
 
 const Container = styled.View(({ orientation }) => ({
   flex: 1,
@@ -131,7 +116,6 @@ class AnimatedTabNavigationView extends React.Component {
               </Animated.View>
             )
           })}
-          {this.props.navigation.state.index !== 2 && <RoundedTopBottomBar />}
         </ScreenContainer>
         <TabBar
           getButtonComponent={this.getButtonComponent}

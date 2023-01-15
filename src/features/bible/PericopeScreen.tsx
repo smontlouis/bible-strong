@@ -17,6 +17,8 @@ import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
+import { useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { useAtom } from 'jotai'
 
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
@@ -63,10 +65,14 @@ function clearEmpties(o) {
 
 const PericopeScreen = ({ navigation }) => {
   const { t } = useTranslation()
-  const { initialVersion, initialBook } = useSelector(state => ({
-    initialVersion: state.bible.selectedVersion,
-    initialBook: state.bible.selectedBook,
-  }))
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+
+  const {
+    selectedVersion: initialVersion,
+    selectedBook: initialBook,
+  } = bible.data
+
   const [version, setVersion] = useState(initialVersion)
   const [book, setBook] = useState(initialBook)
   const [versionNeedsDownload, setVersionNeedsDownload] = useState(false)

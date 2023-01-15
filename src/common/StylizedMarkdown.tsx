@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { PropsWithChildren } from 'react'
 import Markdown from 'react-native-markdown-display'
 import { textStyle } from './StylizedHTMLView'
@@ -72,7 +72,7 @@ const styles = (theme: Theme) =>
   })
 
 const StylizedMarkdown = ({ children }: PropsWithChildren<{}>) => {
-  const theme = useTheme<Theme>()
+  const theme = useTheme()
   return <Markdown style={styles(theme)}>{children}</Markdown>
 }
 

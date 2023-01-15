@@ -7,7 +7,7 @@ import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import useResetQuotaEveryDay from '~helpers/useResetQuotas'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { quotaModalAtom } from '../state/app'
 import { LinkBox } from './Link'
 import Box from './ui/Box'
@@ -41,8 +41,8 @@ const QuotaModal = ({ navigation }: Props) => {
 
   return (
     <StylizedModal
-      isOpen={showQuotaModal}
-      onClosed={() => setShowQuotaModal(false)}
+      isOpen={Boolean(showQuotaModal)}
+      onClosed={() => setShowQuotaModal(null)}
       animationDuration={200}
       position="center"
       backdropOpacity={0.3}
@@ -65,12 +65,18 @@ const QuotaModal = ({ navigation }: Props) => {
           />
         </Box>
         <Box px={20} pb={20}>
-          <Text textAlign="center">{t('sponsor.quotaReached')}</Text>
+          <Text textAlign="center">
+            {t(
+              showQuotaModal === 'daily'
+                ? 'sponsor.quotaReachedDaily'
+                : 'sponsor.quotaReached'
+            )}
+          </Text>
         </Box>
         <Box p={20}>
           <Button
             onPress={() => {
-              setShowQuotaModal(false)
+              setShowQuotaModal(null)
               navigation.navigate('Premium')
             }}
           >
@@ -78,12 +84,16 @@ const QuotaModal = ({ navigation }: Props) => {
           </Button>
           <LinkBox
             onPress={() => {
-              setShowQuotaModal(false)
+              setShowQuotaModal(null)
             }}
             p={20}
             pb={0}
           >
-            <Text textAlign="center">{t('Non merci')}</Text>
+            <Text textAlign="center">
+              {t(
+                showQuotaModal === 'daily' ? 'app.noIllWait' : 'app.noThankYou'
+              )}
+            </Text>
           </LinkBox>
         </Box>
       </Box>

@@ -9,6 +9,7 @@
       {
         "ignoreRestSiblings": true
       }
-    ]
+    ],
+    "react-hooks/exhaustive-deps": 1
   }
 }

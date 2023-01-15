@@ -1,21 +1,18 @@
 import React, { MutableRefObject } from 'react'
-import { useValues } from 'react-native-redash'
-import { mapRange, scrollViewHeight } from './constants'
-import {
-  useCode,
-  call,
-  concat,
-  abs,
-  round,
-  interpolate,
-  multiply,
-  Extrapolate,
-  lessOrEq,
-  cond,
-  greaterOrEq,
-} from 'react-native-reanimated'
-import { viewportWidth, wp } from '~helpers/utils'
 import { useTranslation } from 'react-i18next'
+import {
+  abs,
+  concat,
+  cond,
+  Extrapolate,
+  greaterOrEq,
+  interpolateNode,
+  multiply,
+  round,
+} from 'react-native-reanimated'
+import { useValues } from 'react-native-redash'
+import { viewportWidth, wp } from '~helpers/utils'
+import { mapRange, scrollViewHeight } from './constants'
 
 export const useTimeline = ({
   startYear,
@@ -37,7 +34,7 @@ export const useTimeline = ({
   const height = scrollViewHeight + 200
 
   const yearNb = round(
-    interpolate(multiply(x, -1), {
+    interpolateNode(multiply(x, -1), {
       inputRange: [0, scrollViewWidth],
       outputRange: [startYear, endYear],
       extrapolate: Extrapolate.EXTEND,
@@ -52,7 +49,7 @@ export const useTimeline = ({
     concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', <string>t(' av.JC')))
   )
 
-  const lineX = interpolate(x, {
+  const lineX = interpolateNode(x, {
     inputRange: [-width, -width + wp(100), 0, wp(100)],
     outputRange: [-wp(100), 0, 0, wp(100)],
   })

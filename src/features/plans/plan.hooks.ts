@@ -1,6 +1,6 @@
 import React from 'react'
 import * as Sentry from '@sentry/react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import to from 'await-to-js'
 import i18n from '~i18n'
 
@@ -23,6 +23,9 @@ import { range } from '~helpers/range'
 import loadBible from '~helpers/loadBible'
 import SnackBar from '~common/SnackBar'
 import verseToReference from '~helpers/verseToReference'
+import { useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { useAtom } from 'jotai'
+import isEqual from 'lodash/isEqual'
 
 interface VerseContent {
   Pericope: {
@@ -126,11 +129,13 @@ const transformSections = (
  * @param id
  */
 export const useComputedPlan = (id: string): ComputedPlan | undefined => {
-  const plan = useSelector((state: RootState) =>
-    state.plan.myPlans.find(p => p.id === id)
+  const plan = useSelector(
+    (state: RootState) => state.plan.myPlans.find(p => p.id === id),
+    shallowEqual
   )
-  const ongoingPlan = useSelector((state: RootState) =>
-    state.plan.ongoingPlans.find(uP => uP.id === id)
+  const ongoingPlan = useSelector(
+    (state: RootState) => state.plan.ongoingPlans.find(uP => uP.id === id),
+    shallowEqual
   )
 
   if (!plan) {
@@ -173,9 +178,10 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
  * Return computed plan items for the plan list
  */
 export const useComputedPlanItems = (): ComputedPlanItem[] => {
-  const myPlans = useSelector((state: RootState) => state.plan.myPlans)
+  const myPlans = useSelector((state: RootState) => state.plan.myPlans, isEqual)
   const ongoingPlans = useSelector(
-    (state: RootState) => state.plan.ongoingPlans
+    (state: RootState) => state.plan.ongoingPlans,
+    isEqual
   )
 
   const computedPlansItems: ComputedPlanItem[] = myPlans.map(
@@ -223,7 +229,8 @@ export const useDownloadPlans = () => {
   const [isLoading, setIsLoading] = React.useState(false)
   const dispatch = useDispatch()
   const ongoingPlans = useSelector(
-    (state: RootState) => state.plan.ongoingPlans
+    (state: RootState) => state.plan.ongoingPlans,
+    shallowEqual
   )
 
   React.useEffect(() => {
@@ -326,7 +333,10 @@ export const getChaptersForPlan = async (
 export const useChapterToContent = (chapters: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<ChapterForPlan>()
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   React.useEffect(() => {
     ;(async () => {
@@ -395,7 +405,10 @@ export const getVersesForPlan = async (
 export const useVersesToContent = (verses: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<VerseForPlan>()
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   React.useEffect(() => {
     ;(async () => {

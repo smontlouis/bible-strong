@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from '@emotion/native'
 import { Switch } from 'react-native-paper'
-import { useSelector, useDispatch } from 'react-redux'
-import { withTheme } from 'emotion-theming'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Container from '~common/ui/Container'
@@ -47,8 +47,9 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
 })
 
 const ToggleCompareVersesScreen = () => {
-  const versionsToCompare = useSelector(state =>
-    Object.keys(state.user.bible.settings.compare)
+  const versionsToCompare = useSelector(
+    state => Object.keys(state.user.bible.settings.compare),
+    shallowEqual
   )
   const dispatch = useDispatch()
   const { t } = useTranslation()

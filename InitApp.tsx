@@ -1,6 +1,6 @@
+import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import { ThemeProvider } from 'emotion-theming'
 import * as Updates from 'expo-updates'
 import React, { useEffect } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
@@ -11,16 +11,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import ErrorBoundary from '~common/ErrorBoundary'
-import OnBoarding from '~features/onboarding/OnBoarding'
 
 import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
-import Changelog from '~common/Changelog'
 import SnackBar from '~common/SnackBar'
 import { CurrentTheme } from '~common/types'
+import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { DBStateProvider } from '~helpers/databaseState'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import useInitFireAuth from '~helpers/useInitFireAuth'
+import useLiveUpdates from '~helpers/useLiveUpdates'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -30,7 +30,6 @@ import {
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { Theme } from '~themes/index'
-import useLiveUpdates from '~helpers/useLiveUpdates'
 
 interface Props {
   persistor: Persistor
@@ -113,13 +112,7 @@ const InitApp = ({ persistor }: Props) => {
   useLiveUpdates()
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const { fontFamily } = useSelector((state: RootState) => ({
-    preferredColorScheme: state.user.bible.settings.preferredColorScheme,
-    preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
-    preferredLightTheme: state.user.bible.settings.preferredLightTheme,
-    fontFamily: state.user.fontFamily,
-  }))
-
+  const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
 
   useEffect(() => {
@@ -163,15 +156,12 @@ const InitApp = ({ persistor }: Props) => {
           <PersistGate loading={null} persistor={persistor}>
             <DBStateProvider>
               <ErrorBoundary>
-                <AppNavigator
-                  screenProps={{
-                    theme: currentTheme,
-                  }}
-                  onNavigationStateChange={onNavigationStateChange}
-                />
+                <AppSwitcherProvider>
+                  <AppNavigator
+                    onNavigationStateChange={onNavigationStateChange}
+                  />
+                </AppSwitcherProvider>
               </ErrorBoundary>
-              <Changelog />
-              <OnBoarding />
             </DBStateProvider>
           </PersistGate>
         </MenuProvider>

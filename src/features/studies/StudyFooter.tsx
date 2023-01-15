@@ -1,28 +1,28 @@
-import React from 'react'
-import * as Icon from '@expo/vector-icons'
-import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
+import Color from 'color'
+import React from 'react'
+import { TouchableOpacity } from 'react-native'
 import {
   Menu,
   MenuOptions,
-  MenuOption,
   MenuTrigger,
   renderers,
   withMenuContext,
 } from 'react-native-popup-menu'
-import Color from 'color'
+import MenuOption from '~common/ui/MenuOption'
 
-import TouchableCircle from '~features/bible/TouchableCircle'
-import Box from '~common/ui/Box'
-import Border from '~common/ui/Border'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import { useTranslation } from 'react-i18next'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
+import Link from '~common/Link'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import TouchableCircle from '~features/bible/TouchableCircle'
 import useMediaQueries from '~helpers/useMediaQueries'
-import { useTranslation } from 'react-i18next'
 
 const { Popover } = renderers
 
@@ -550,9 +550,6 @@ const StudyFooter = ({
           </>
         )}
         <Box marginLeft="auto" />
-        <FormatIcon onPress={openBibleView} style={{ marginRight: 15 }}>
-          <FeatherIcon color="primary" name="book-open" size={20} />
-        </FormatIcon>
         <SelectBlock navigateBibleView={navigateBibleView} />
       </Box>
       <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>

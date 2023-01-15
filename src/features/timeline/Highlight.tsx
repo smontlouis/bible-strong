@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from '~styled'
+import styled from '@emotion/native'
 import compose from 'recompose/compose'
 import { connectHighlight } from 'react-instantsearch-native'
 

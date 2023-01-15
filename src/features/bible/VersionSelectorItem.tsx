@@ -6,18 +6,17 @@ import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabasesRef } from '~helpers/firebase'
 
-import { setVersion } from '~redux/modules/bible'
 import { setVersionUpdated } from '~redux/modules/user'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, Version } from '~helpers/bibleVersions'
 import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { Theme } from '~themes'
 import { RootState } from '~redux/modules/reducer'
 import { isStrongVersion } from '~helpers/bibleVersions'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
@@ -187,7 +186,6 @@ const VersionSelectorItem = ({
     }
     FileSystem.deleteAsync(file.uri)
     setVersionNeedsDownload(true)
-    dispatch(setVersion(isFR ? 'LSG' : 'KJV'))
 
     if (version.id === 'INT') {
       deleteInterlineaireDB()

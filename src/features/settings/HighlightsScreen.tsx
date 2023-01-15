@@ -1,20 +1,21 @@
 import React, { useMemo } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import Container from '~common/ui/Container'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import Empty from '~common/Empty'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
-import Empty from '~common/Empty'
+import Container from '~common/ui/Container'
 
-import VersesList from './VersesList'
-import { RootState } from '~redux/modules/reducer'
-import Modal from '~common/Modal'
-import { Alert } from 'react-native'
-import { removeHighlight, changeHighlightColor } from '~redux/modules/user'
-import MultipleTagsModal from '~common/MultipleTagsModal'
-import TouchableCircle from '~features/bible/TouchableCircle'
-import Box from '~common/ui/Box'
+import { useAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
+import { Alert } from 'react-native'
+import Modal from '~common/Modal'
+import Box from '~common/ui/Box'
+import TouchableCircle from '~features/bible/TouchableCircle'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { RootState } from '~redux/modules/reducer'
+import { changeHighlightColor, removeHighlight } from '~redux/modules/user'
+import { multipleTagsModalAtom } from '../../state/app'
+import VersesList from './VersesList'
 
 interface Chip {
   id: string
@@ -24,17 +25,19 @@ interface Chip {
 const HighlightsScreen = () => {
   const { t } = useTranslation()
   const verseIds = useSelector(
-    (state: RootState) => state.user.bible.highlights
+    (state: RootState) => state.user.bible.highlights,
+    shallowEqual
   )
   const { theme: currentTheme } = useCurrentThemeSelector()
   const colors = useSelector(
-    (state: RootState) => state.user.bible.settings.colors[currentTheme]
+    (state: RootState) => state.user.bible.settings.colors[currentTheme],
+    shallowEqual
   )
 
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = React.useState()
   const [isChangeColorOpen, setIsChangeColorOpen] = React.useState()
-  const [multipleTagsItem, setMultipleTagsItem] = React.useState(false)
+  const [multipleTagsItem, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
   const [selectedChip, setSelectedChip] = React.useState<Chip>()
   const dispatch = useDispatch()
   const chipId = selectedChip?.id
@@ -63,7 +66,9 @@ const HighlightsScreen = () => {
         {
           text: t('Oui'),
           onPress: () => {
-            dispatch(removeHighlight(isSettingsOpen?.stringIds))
+            dispatch(
+              removeHighlight({ selectedVerses: isSettingsOpen?.stringIds })
+            )
             setIsSettingsOpen(undefined)
           },
           style: 'destructive',
@@ -103,7 +108,7 @@ const HighlightsScreen = () => {
           message={t("Vous n'avez pas encore rien surligné...")}
         />
       )}
-      <Modal.Menu
+      <Modal.Body
         isOpen={!!isSettingsOpen}
         onClose={() => setIsSettingsOpen(undefined)}
         adjustToContentHeight
@@ -132,8 +137,8 @@ const HighlightsScreen = () => {
         <Modal.Item bold color="quart" onPress={promptLogout}>
           {t('Supprimer')}
         </Modal.Item>
-      </Modal.Menu>
-      <Modal.Menu
+      </Modal.Body>
+      <Modal.Body
         isOpen={!!isChangeColorOpen}
         onClose={() => setIsChangeColorOpen(undefined)}
         adjustToContentHeight
@@ -160,11 +165,7 @@ const HighlightsScreen = () => {
             onPress={() => changeColor('color5')}
           />
         </Box>
-      </Modal.Menu>
-      <MultipleTagsModal
-        item={multipleTagsItem}
-        onClosed={() => setMultipleTagsItem(false)}
-      />
+      </Modal.Body>
     </Container>
   )
 }

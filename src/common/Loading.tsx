@@ -1,11 +1,11 @@
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
-import { useTheme } from 'emotion-theming'
+import { useTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useTimeout from '~helpers/useTimeout'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { Theme } from '~themes'
 
 const Container = styled.View(({ theme }) => ({

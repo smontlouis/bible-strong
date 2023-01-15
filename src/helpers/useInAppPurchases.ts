@@ -15,7 +15,9 @@ export const subSkus = [
   'com.smontlouis.biblestrong.onemonth.min',
   'com.smontlouis.biblestrong.onemonth',
   'com.smontlouis.biblestrong.onemonth.max',
-]
+] as const
+
+export type SubSku = typeof subSkus[number]
 
 export const useInitIAP = () => {
   const [isIAPInitialized, setIsIAPInitialized] = useAtom(IAPInitializedAtom)

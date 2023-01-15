@@ -3,6 +3,7 @@ import { Keyboard } from 'react-native'
 import { connectSearchBox } from 'react-instantsearch-native'
 
 import SearchInput from '~common/SearchInput'
+import Box from '~common/ui/Box'
 
 const SearchBox = ({
   refine,
@@ -19,17 +20,19 @@ const SearchBox = ({
   }, [debouncedValue])
 
   return (
-    <SearchInput
-      value={value}
-      onChangeText={onChange}
-      placeholder={placeholder}
-      onDelete={() => {
-        Keyboard.dismiss()
-        onChange('')
-      }}
-      // onSubmitEditing={() => refine(searchValue)}
-      returnKeyType="search"
-    />
+    <Box px={20}>
+      <SearchInput
+        value={value}
+        onChangeText={onChange}
+        placeholder={placeholder}
+        onDelete={() => {
+          Keyboard.dismiss()
+          onChange('')
+        }}
+        // onSubmitEditing={() => refine(searchValue)}
+        returnKeyType="search"
+      />
+    </Box>
   )
 }
 

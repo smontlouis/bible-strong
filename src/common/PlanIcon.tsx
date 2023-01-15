@@ -1,7 +1,7 @@
 import * as React from 'react'
 import Svg, { Path } from 'react-native-svg'
 import { Theme } from '~themes'
-import { withTheme } from 'emotion-theming'
+import { withTheme } from '@emotion/react'
 
 function PlanIcon({
   color,

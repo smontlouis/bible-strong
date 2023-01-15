@@ -1,7 +1,7 @@
 import React from 'react'
 import Animated, {
   Extrapolate,
-  interpolate,
+  interpolateNode,
   multiply,
 } from 'react-native-reanimated'
 
@@ -94,7 +94,7 @@ const TimelineEvent = ({
     )
   }
 
-  const posX = interpolate(multiply(x, -1), {
+  const posX = interpolateNode(multiply(x, -1), {
     inputRange: [left + offset, left + width + offset - descSize - imageSize],
     outputRange: [0, width - descSize - imageSize],
     extrapolate: Extrapolate.CLAMP,

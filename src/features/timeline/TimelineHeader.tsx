@@ -1,6 +1,6 @@
 import React from 'react'
 import * as Icon from '@expo/vector-icons'
-import styled from '~styled'
+import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
 import Link from '~common/Link'

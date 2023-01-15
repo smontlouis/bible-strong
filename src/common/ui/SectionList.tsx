@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, SectionListProps } from 'react-native'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 import { Theme } from '~themes'
@@ -40,14 +40,18 @@ export default React.forwardRef(
   ({ contentContainerStyle, ...props }: SectionListProps<any>, ref) => {
     const orientation = useDeviceOrientation()
 
+    const style = useMemo(
+      () => ({
+        paddingBottom: 10 + getBottomSpace(),
+        ...contentContainerStyle,
+      }),
+      []
+    )
     return (
       <View style={{ flex: 1 }}>
         <SectionList
           orientation={orientation}
-          contentContainerStyle={{
-            paddingBottom: 10 + getBottomSpace(),
-            ...contentContainerStyle,
-          }}
+          contentContainerStyle={style}
           ref={ref}
           {...props}
         />

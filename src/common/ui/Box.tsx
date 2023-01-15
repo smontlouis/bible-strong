@@ -1,6 +1,8 @@
 import styled from '@emotion/native'
+import { TouchableOpacity } from 'react-native'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Animated from 'react-native-reanimated'
-import { Theme } from '~themes'
+import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 
 export interface BoxProps {
   position?: 'absolute' | 'relative'
@@ -47,6 +49,10 @@ export interface BoxProps {
   absoluteFill?: boolean
 
   borderWidth?: number
+  borderBottomWidth?: number
+  borderTopWidth?: number
+  borderLeftWidth?: number
+  borderRightWidth?: number
   borderColor?: string
   transform?: object
   borderRadius?: number
@@ -56,16 +62,16 @@ export interface BoxProps {
   borderBottomRightRadius?: number
 
   overflow?: 'visible' | 'hidden'
-  width?: number
-  w?: number
-  maxWidth?: number
-  maxW?: number
-  minWidth?: number
-  minW?: number
-  minHeight?: number
-  minH?: number
-  height?: number
-  h?: number
+  width?: number | string
+  w?: number | string
+  maxWidth?: number | string
+  maxW?: number | string
+  minWidth?: number | string
+  minW?: number | string
+  minHeight?: number | string
+  minH?: number | string
+  height?: number | string
+  h?: number | string
 
   grow?: boolean
   shrink?: number
@@ -89,13 +95,26 @@ export interface BoxProps {
   grey?: boolean
   background?: boolean
   rounded?: boolean
-  shadow?: boolean
   lightShadow?: boolean
-  size?: string
+  size?: number
 
-  theme?: Theme
+  bottomTabBarPadding?: boolean
+
+  zIndex?: number
+
+  shadow?: {
+    shadowColor: string
+    shadowOffset: {
+      width: number
+      height: number
+    }
+    shadowOpacity: number
+    shadowRadius: number
+
+    elevation: number
+  }
 }
-const Box = styled.View((props: BoxProps) => {
+const Box = styled.View<BoxProps>(props => {
   return {
     // container
     position: props.position ?? props.pos,
@@ -108,7 +127,9 @@ const Box = styled.View((props: BoxProps) => {
     paddingTop: props.paddingTop ?? props.pt,
     paddingLeft: props.paddingLeft ?? props.pl,
     paddingRight: props.paddingRight ?? props.pr,
-    paddingBottom: props.paddingBottom ?? props.pb,
+    paddingBottom: props.bottomTabBarPadding
+      ? TAB_ICON_SIZE + getBottomSpace()
+      : props.paddingBottom ?? props.pb,
     paddingVertical: props.paddingVertical ?? props.py,
     paddingHorizontal: props.paddingHorizontal ?? props.px,
 
@@ -121,7 +142,14 @@ const Box = styled.View((props: BoxProps) => {
     marginHorizontal: props.marginHorizontal ?? props.mx,
 
     borderWidth: props.borderWidth,
-    borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
+    borderBottomWidth: props.borderBottomWidth,
+    borderTopWidth: props.borderTopWidth,
+    borderLeftWidth: props.borderLeftWidth,
+    borderRightWidth: props.borderRightWidth,
+    borderColor:
+      props.theme.colors[
+        props.borderColor as keyof typeof props.theme.colors
+      ] ?? props.borderColor,
     transform: props.transform,
     borderRadius: props.borderRadius,
     borderTopLeftRadius: props.borderTopLeftRadius,
@@ -144,6 +172,7 @@ const Box = styled.View((props: BoxProps) => {
     alignItems: props.alignItems ?? (props.center && 'center'),
     alignContent: props.alignContent ?? 'flex-start',
     alignSelf: props.alignSelf,
+    zIndex: props.zIndex,
     // shorthands
     flexWrap:
       (props.wrap && 'wrap') ??
@@ -154,8 +183,12 @@ const Box = styled.View((props: BoxProps) => {
 
     opacity: props.disabled ? 0.3 : props.opacity ?? 1,
 
-    backgroundColor: props.theme.colors[props.backgroundColor ?? props.bg]
-      ? props.theme.colors[props.backgroundColor ?? props.bg]
+    backgroundColor: props.theme.colors[
+      (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
+    ]
+      ? props.theme.colors[
+          (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
+        ]
       : props.backgroundColor ?? props.bg,
 
     ...(props.grey && {
@@ -167,18 +200,7 @@ const Box = styled.View((props: BoxProps) => {
     }),
 
     ...(props.rounded && {
-      borderRadius: 10,
-    }),
-
-    ...(props.shadow && {
-      backgroundColor: props.theme.colors.reverse,
-      shadowColor: props.theme.colors.default,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
-      elevation: 2,
-      borderRadius: 5,
-      overflow: 'visible',
+      borderRadius: 20,
     }),
 
     ...(props.size && {
@@ -202,9 +224,12 @@ const Box = styled.View((props: BoxProps) => {
       elevation: 1,
       overflow: 'visible',
     }),
+
+    ...props.shadow,
   }
 })
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
+export const TouchableBox = Box.withComponent(TouchableOpacity)
 
 export default Box

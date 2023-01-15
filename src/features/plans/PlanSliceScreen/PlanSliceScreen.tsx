@@ -1,8 +1,8 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
-import { MenuOption } from 'react-native-popup-menu'
+import MenuOption from '~common/ui/MenuOption'
 import { NavigationStackProp } from 'react-navigation-stack'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -26,6 +26,8 @@ import * as Sentry from '@sentry/react-native'
 import Snackbar from '~common/SnackBar'
 import { Share } from 'react-native'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
+import { useGetDefaultBibleTabAtom } from '../../../state/tabs'
+import { useAtom } from 'jotai'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -62,7 +64,9 @@ const PlanSliceScreen = ({ navigation }: Props) => {
         id
       ] === 'Completed'
   )
-  const version = useSelector((state: RootState) => state.bible.selectedVersion)
+  const defaultBibleAtom = useGetDefaultBibleTabAtom()
+  const [bible] = useAtom(defaultBibleAtom)
+  const { selectedVersion: version } = bible.data
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id, planId }))
@@ -119,16 +123,6 @@ const PlanSliceScreen = ({ navigation }: Props) => {
         hasBackButton
         rightComponent={
           <PopOverMenu
-            element={
-              <Box
-                alignItems="center"
-                justifyContent="center"
-                height={50}
-                width={50}
-              >
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            }
             popover={
               <>
                 <MenuOption onSelect={onMarkAsReadSelect}>
@@ -150,7 +144,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                   onSelect={() =>
                     navigation.navigate({
                       routeName: 'VersionSelector',
-                      params: { version },
+                      params: { bibleAtom: defaultBibleAtom },
                     })
                   }
                 >

@@ -1,9 +1,9 @@
 const colors = {
   default: 'rgb(103, 87, 124)',
   opacity5: 'rgba(27, 108, 50, 0.05)',
-  reverse: 'rgb(255,250,248)',
-  border: 'rgb(230,230,230)',
-  lightGrey: '#FAE0D5',
+  reverse: '#FFFAF8',
+  border: '#F5E8E2',
+  lightGrey: '#FAE7DF',
   grey: 'rgb(68,60,80)',
   darkGrey: 'rgba(0,0,0,0.5)',
   primary: 'rgb(200,148,186)',

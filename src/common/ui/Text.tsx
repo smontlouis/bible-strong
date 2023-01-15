@@ -1,8 +1,10 @@
 import { bindStyles } from '~helpers/styledProps'
-import styled from '~styled'
+import styled from '@emotion/native'
 import { Theme } from '~themes'
+import { TextProps as BaseTextProps } from 'react-native'
 
-export interface TextProps {
+export interface TextProps extends BaseTextProps {
+  children?: React.ReactNode
   color?: string
   lineHeight?: number
   fontSize?: number
@@ -103,6 +105,7 @@ export interface TextProps {
 
   title?: boolean
   text?: boolean
+  textTransform?: string
 }
 
 const Text = styled.Text((props: TextProps) => {
@@ -119,6 +122,7 @@ const Text = styled.Text((props: TextProps) => {
     fontWeight: props.bold ? 'bold' : undefined,
     textAlign: props.textAlign,
 
+    textTransform: props.textTransform,
     padding: props.padding ?? props.p,
     paddingTop: props.paddingTop ?? props.pt,
     paddingLeft: props.paddingLeft ?? props.pl,
