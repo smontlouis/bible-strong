@@ -47,6 +47,7 @@ const Container = styled.View(({ theme }) => ({
   alignItems: 'stretch',
   justifyContent: 'space-between',
   paddingBottom: getBottomSpace(),
+  paddingTop: 10,
 }))
 
 export const HalfContainer = styled.View<{ border?: boolean }>(
@@ -193,7 +194,6 @@ const BibleParamsModal = ({
           width: '100%',
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
-          paddingTop: 10,
         }}
         adjustToContentHeight
       >

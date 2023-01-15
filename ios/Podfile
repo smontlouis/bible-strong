@@ -36,7 +36,7 @@ target 'biblestrong' do
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
     :production => production,
     :fabric_enabled => flags[:fabric_enabled],
-    :flipper_configuration => FlipperConfiguration.enabled(["Dev", "Staging"], { 'Flipper' => '0.174.0' }),
+    :flipper_configuration => FlipperConfiguration.enabled(["Dev", "Staging"], { 'Flipper' => '0.163.0' }),
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
