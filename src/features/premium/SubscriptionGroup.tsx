@@ -57,7 +57,7 @@ const SubscriptionGroup = () => {
           {products.map(sub => (
             <SubscriptionPlan
               key={sub.id}
-              price={sub.priceAmount + sub.priceCurrency}
+              price={`${sub.price}${sub.currency}`}
               isSelected={selectedSub === sub.sku}
               variant={mappingSku[sub.sku]?.variant}
               period={t('par mois')}
