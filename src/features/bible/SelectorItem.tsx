@@ -1,6 +1,5 @@
-import React from 'react'
 import styled from '@emotion/native'
-import { Dimensions } from 'react-native'
+import React from 'react'
 import { pure } from 'recompose'
 
 import { wp } from '~helpers/utils'
@@ -9,7 +8,7 @@ const TouchableOpacity = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   height: 45,
-  width: wp(100) / 5,
+  width: wp(99) / 5,
 }))
 
 const Text = styled.Text(({ isSelected, theme }) => ({

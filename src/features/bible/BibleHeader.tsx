@@ -44,7 +44,6 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   width: '100%',
   alignSelf: 'center',
   alignItems: 'stretch',
-  borderBottomColor: theme.colors.border,
 }))
 
 const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)

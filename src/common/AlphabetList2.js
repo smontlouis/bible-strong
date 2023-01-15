@@ -1,14 +1,13 @@
+import styled from '@emotion/native'
 import React, { useRef } from 'react'
 import { TouchableOpacity } from 'react-native'
-import styled from '@emotion/native'
 import Carousel from 'react-native-snap-carousel'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { viewportWidth } from '~helpers/utils'
 import { alphabet } from '~helpers/alphabet'
+import { viewportWidth } from '~helpers/utils'
 
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Border from '~common/ui/Border'
 
 const StyledText = styled(Text)(({ theme, isSelected }) => ({
   fontWeight: isSelected ? 'bold' : 'normal',
@@ -27,7 +26,7 @@ const AlphabetList = ({ color, setLetter, letter }) => {
   const index = alphabet.findIndex(l => l === letter.toUpperCase())
 
   return (
-    <Box background paddingBottom={7 + getBottomSpace()}>
+    <Box background paddingBottom={7}>
       <Border />
       <Box paddingTop={5}>
         <Carousel

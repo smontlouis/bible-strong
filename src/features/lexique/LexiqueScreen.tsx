@@ -5,6 +5,8 @@ import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { StrongsTab } from '~state/tabs'
 import LexiqueTabScreen from './LexiqueTabScreen'
 import { useTranslation } from 'react-i18next'
+import Box from '~common/ui/Box'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 interface LexiqueScreenProps {}
 
@@ -26,11 +28,13 @@ const LexiqueScreen = ({
   )
 
   return (
-    <LexiqueTabScreen
-      strongsAtom={onTheFlyAtom}
-      navigation={navigation}
-      hasBackButton
-    />
+    <Box flex={1} bg="reverse" paddingBottom={getBottomSpace()}>
+      <LexiqueTabScreen
+        strongsAtom={onTheFlyAtom}
+        navigation={navigation}
+        hasBackButton
+      />
+    </Box>
   )
 }
 export default LexiqueScreen

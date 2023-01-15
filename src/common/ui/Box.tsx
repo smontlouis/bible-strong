@@ -200,7 +200,7 @@ const Box = styled.View<BoxProps>(props => {
     }),
 
     ...(props.rounded && {
-      borderRadius: 10,
+      borderRadius: 20,
     }),
 
     ...(props.size && {

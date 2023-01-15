@@ -101,13 +101,14 @@ const LexiqueTabScreen = ({
   return (
     <Container>
       <Header hasBackButton={hasBackButton} title={t('Lexique')} />
-      <SearchInput
-        disabled={!sectionResults}
-        placeholder={t('Recherche par code ou par mot')}
-        onChangeText={setSearchValue}
-        value={searchValue}
-        onDelete={() => setSearchValue('')}
-      />
+      <Box px={20}>
+        <SearchInput
+          placeholder={t('Recherche par code ou par mot')}
+          onChangeText={setSearchValue}
+          value={searchValue}
+          onDelete={() => setSearchValue('')}
+        />
+      </Box>
       <Box flex paddingTop={20}>
         {isLoading ? (
           <Loading message={t('Chargement...')} />

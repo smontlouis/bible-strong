@@ -38,7 +38,7 @@ const Container = styled.View(({ theme }) => ({
   width: '100%',
   maxWidth: 400,
   backgroundColor: theme.colors.reverse,
-  borderRadius: 10,
+  borderRadius: 30,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
@@ -174,8 +174,6 @@ const BibleParamsModal = ({
     if (isPrevOpen !== isOpen) {
       if (isOpen) {
         modalRef?.current?.open()
-      } else {
-        modalRef?.current?.close()
       }
     }
   }, [isPrevOpen, isOpen])
@@ -187,11 +185,15 @@ const BibleParamsModal = ({
       <Modalize
         ref={modalRef}
         onClose={onClosed}
+        handlePosition="inside"
         modalStyle={{
           marginLeft: 'auto',
           marginRight: 'auto',
           maxWidth: 400,
           width: '100%',
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          paddingTop: 10,
         }}
         adjustToContentHeight
       >

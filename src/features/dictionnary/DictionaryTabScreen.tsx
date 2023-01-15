@@ -104,14 +104,15 @@ const DictionnaireScreen = ({ hasBackButton }: DictionariesTabScreenProps) => {
         hasBackButton={hasBackButton}
         fontSize={18}
         title={t('Dictionnaire Westphal')}
-        noBorder
       />
-      <SearchInput
-        placeholder={t('Recherche par mot')}
-        onChangeText={setSearchValue}
-        value={searchValue}
-        onDelete={() => setSearchValue('')}
-      />
+      <Box px={20}>
+        <SearchInput
+          placeholder={t('Recherche par mot')}
+          onChangeText={setSearchValue}
+          value={searchValue}
+          onDelete={() => setSearchValue('')}
+        />
+      </Box>
       <Box flex paddingTop={20}>
         {isLoading ? (
           <Loading message={t('Chargement...')} />

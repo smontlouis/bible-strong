@@ -1,8 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import Fuse from 'fuse.js'
 import { useAtom } from 'jotai'
-import React, { memo, useEffect, useMemo, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { Modalize } from 'react-native-modalize'
@@ -18,8 +17,7 @@ import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../state/app'
 import Modal from './Modal'
-import SearchTagInput from './SearchTagInput'
-import { Tag } from './types'
+import SearchInput from './SearchInput'
 import Spacer from './ui/Spacer'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
@@ -50,8 +48,6 @@ const MultipleTagsModal = () => {
   useEffect(() => {
     if (item) {
       modalRef?.current?.open()
-    } else {
-      modalRef?.current?.close()
     }
   }, [item])
 
@@ -107,7 +103,7 @@ const MultipleTagsModal = () => {
               : `${t('Étiquettes pour')} ${highlightTitle}`}
           </Text>
           <Spacer />
-          <SearchTagInput
+          <SearchInput
             placeholder={t('Chercher une étiquette')}
             onChangeText={search}
             onDelete={resetSearch}

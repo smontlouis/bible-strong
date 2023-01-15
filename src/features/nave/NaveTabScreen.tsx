@@ -102,9 +102,8 @@ const NaveTabScreen = ({ hasBackButton }: NaveTabScreenProps) => {
       <Header
         hasBackButton={hasBackButton}
         title={t('Thématique Nave')}
-        noBorder
         rightComponent={
-          isFR && (
+          isFR ? (
             <Link route="NaveWarning" padding>
               <Icon.Feather
                 size={20}
@@ -112,15 +111,19 @@ const NaveTabScreen = ({ hasBackButton }: NaveTabScreenProps) => {
                 color="rgb(255,188,0)"
               />
             </Link>
+          ) : (
+            undefined
           )
         }
       />
-      <SearchInput
-        placeholder={t('Recherche par mot')}
-        onChangeText={setSearchValue}
-        value={searchValue}
-        onDelete={() => setSearchValue('')}
-      />
+      <Box px={20}>
+        <SearchInput
+          placeholder={t('Recherche par mot')}
+          onChangeText={setSearchValue}
+          value={searchValue}
+          onDelete={() => setSearchValue('')}
+        />
+      </Box>
       <Box flex paddingTop={20}>
         {isLoading ? (
           <Loading message={t('Chargement...')} />

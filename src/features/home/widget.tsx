@@ -19,7 +19,7 @@ export const WidgetContainer = props => (
     height={itemHeight}
     width={itemWidth}
     backgroundColor="reverse"
-    marginRight={20}
+    marginRight={16}
     {...props}
   />
 )

@@ -1,5 +1,4 @@
 import React from 'react'
-import { pure } from 'recompose'
 import { smallSize } from '~helpers/utils'
 
 import Back from '~common/Back'
@@ -66,4 +65,4 @@ const Header = ({
   )
 }
 
-export default pure(Header)
+export default Header

@@ -7,6 +7,7 @@ import DropdownMenu from '~common/DropdownMenu'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
+import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import loadBible from '~helpers/loadBible'
 import useDebounce from '~helpers/useDebounce'
@@ -186,7 +187,7 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
   }
 
   return (
-    <>
+    <Box px={20}>
       <SearchInput
         placeholder={t('search.placeholder')}
         onChangeText={setSearchValue}
@@ -233,7 +234,7 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
           message={t('Fais une recherche dans la Bible !')}
         />
       )}
-    </>
+    </Box>
   )
 }
 

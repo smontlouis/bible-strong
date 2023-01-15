@@ -87,12 +87,12 @@ const NewTabItem = ({ type, newAtom }: NewTabItemProps) => {
     <>
       <TouchableBox
         width={150}
-        height={80}
+        height={100}
         mt={20}
         mx={10}
         center
         bg="reverse"
-        borderRadius={10}
+        rounded
         onPress={onPress}
       >
         {getIconByTabType(type, 26)}

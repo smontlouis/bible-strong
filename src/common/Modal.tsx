@@ -80,8 +80,6 @@ const Body = ({
   useEffect(() => {
     if (isOpen) {
       modalRef?.current?.open()
-    } else {
-      modalRef?.current?.close()
     }
   }, [isOpen])
 

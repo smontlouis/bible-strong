@@ -17,11 +17,11 @@ const PremiumWidget = () => {
   const isPremium = useIsPremium()
   const { t } = useTranslation()
   return (
-    <Box grey px={20} pt={20} pb={60}>
+    <Box grey px={20} pt={20} pb={40}>
       <LinkBox
         route="Premium"
         backgroundColor="primary"
-        rounded
+        borderRadius={30}
         lightShadow
         p={20}
         height={130}
@@ -30,14 +30,12 @@ const PremiumWidget = () => {
         center
       >
         <Box
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            height: 130,
-            borderRadius: 10,
-          }}
+          pos="absolute"
+          left={0}
+          right={0}
+          top={0}
+          height={130}
+          borderRadius={30}
         >
           <LinearGradient
             start={[0.1, 0.2]}

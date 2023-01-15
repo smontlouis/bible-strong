@@ -13,7 +13,7 @@ const useTabConstants = () => {
     (WIDTH - SCREEN_MARGIN * 2 - (TABS_PER_ROW - 1) * GAP) / TABS_PER_ROW
   const TAB_PREVIEW_HEIGHT =
     ((TAB_PREVIEW_WIDTH * HEIGHT) / WIDTH) * HEIGHT_REDUCER_COEFFICIENT
-  const TAB_BORDER_RADIUS = (TAB_PREVIEW_WIDTH * 40) / WIDTH
+  const TAB_BORDER_RADIUS = 20
   const STATUS_BAR_HEIGHT = getStatusBarHeight()
 
   return {

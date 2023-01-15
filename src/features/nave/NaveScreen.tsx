@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { NavesTab } from '~state/tabs'
 import NaveTabScreen from './NaveTabScreen'
+import Box from '~common/ui/Box'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 interface NaveScreenProps {}
 
@@ -26,11 +28,13 @@ const NaveScreen = ({
   )
 
   return (
-    <NaveTabScreen
-      navesAtom={onTheFlyAtom}
-      navigation={navigation}
-      hasBackButton
-    />
+    <Box flex={1} bg="reverse" paddingBottom={getBottomSpace()}>
+      <NaveTabScreen
+        navesAtom={onTheFlyAtom}
+        navigation={navigation}
+        hasBackButton
+      />
+    </Box>
   )
 }
 export default NaveScreen

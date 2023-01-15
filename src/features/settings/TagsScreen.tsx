@@ -19,7 +19,7 @@ import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import useFuzzy from '~helpers/useFuzzy'
-import SearchTagInput from '~common/SearchTagInput'
+import SearchInput from '~common/SearchInput'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -147,7 +147,7 @@ const TagsScreen = () => {
     <Container>
       <Header hasBackButton title={t('Étiquettes')}>
         <Box pb={10} px={20}>
-          <SearchTagInput
+          <SearchInput
             placeholder={t('Chercher une étiquette')}
             onChangeText={search}
             onDelete={resetSearch}

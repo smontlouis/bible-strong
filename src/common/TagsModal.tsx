@@ -14,7 +14,7 @@ import { hp } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { addTag } from '~redux/modules/user'
 import Modal from './Modal'
-import SearchTagInput from './SearchTagInput'
+import SearchInput from './SearchInput'
 import Spacer from './ui/Spacer'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
@@ -53,7 +53,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>{t('Étiquettes')}</Text>
           <Spacer />
-          <SearchTagInput
+          <SearchInput
             placeholder={t('Chercher une étiquette')}
             onChangeText={search}
             onDelete={resetSearch}
