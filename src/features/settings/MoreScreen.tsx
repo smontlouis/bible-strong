@@ -32,6 +32,7 @@ import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
+import useLanguage from '~helpers/useLanguage'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -74,6 +75,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   const isPremium = useIsPremium()
 
   const dispatch = useDispatch()
+  const isFR = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
@@ -327,7 +329,11 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
         <Box paddingVertical={10}>
           <LinkItem
             style={{ paddingVertical: 10 }}
-            href="https://bible-strong.app/politique-de-confidentialite"
+            href={
+              isFR
+                ? 'https://bible-strong.app/politique-de-confidentialite'
+                : 'https://bible-strong.app/privacy-policy'
+            }
           >
             <Text fontSize={15} color="grey">
               {t('Politique de confidentialité')}
@@ -335,7 +341,11 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
           </LinkItem>
           <LinkItem
             style={{ paddingVertical: 10 }}
-            href="https://bible-strong.app/eula"
+            href={
+              isFR
+                ? 'https://bible-strong.app/eula'
+                : 'https://bible-strong.app/eula-en'
+            }
           >
             <Text fontSize={15} color="grey">
               {t("Conditions d'utilisation")}
