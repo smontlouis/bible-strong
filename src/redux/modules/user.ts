@@ -27,6 +27,7 @@ import studiesReducer from './user/studies'
 import tagsReducer from './user/tags'
 import versionUpdateReducer from './user/versionUpdate'
 import { reduceReducers } from './utils'
+const deepmerge = require('@fastify/deepmerge')()
 
 export * from './user/highlights'
 export * from './user/notes'
@@ -295,10 +296,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.subscription = subscription
 
-      draft.bible = {
-        ...draft.bible,
-        ...bible,
-      }
+      draft.bible = deepmerge(draft.bible, bible)
 
       break
     }

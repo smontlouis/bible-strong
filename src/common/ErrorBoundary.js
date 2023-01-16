@@ -1,10 +1,14 @@
 import React from 'react'
 import * as Icon from '@expo/vector-icons'
 import * as Sentry from '@sentry/react-native'
+import RNRestart from 'react-native-restart'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import Button from '~common/ui/Button'
+import useLogin from '~helpers/useLogin'
+import { useTranslation } from 'react-i18next'
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false }
@@ -33,6 +37,7 @@ class ErrorBoundary extends React.Component {
                   "Désolé, l'app vient de planter...\nLe développeur en a été informé. Merci de redémarrer l'app."
                 }
               </Text>
+              <LogoutButton />
             </Box>
           </Box>
         </Container>
@@ -43,4 +48,20 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const LogoutButton = () => {
+  const { t } = useTranslation()
+  const { logout } = useLogin()
+  return (
+    <Box mt={20}>
+      <Button
+        onPress={() => {
+          logout()
+          RNRestart.Restart()
+        }}
+      >
+        {t('Se déconnecter')}
+      </Button>
+    </Box>
+  )
+}
 export default ErrorBoundary
