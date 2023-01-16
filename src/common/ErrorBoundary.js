@@ -56,7 +56,9 @@ const LogoutButton = () => {
       <Button
         onPress={() => {
           logout()
-          RNRestart.Restart()
+          setTimeout(() => {
+            RNRestart.Restart()
+          }, 1000)
         }}
       >
         {t('Se déconnecter')}
