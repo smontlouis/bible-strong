@@ -118,6 +118,7 @@ const FireAuth = class {
       }
 
       console.log('No user, do nothing...')
+      this.onLogout?.()
       this.user = null
     })
   }
@@ -315,9 +316,7 @@ const FireAuth = class {
 
     // Sign-out successful.
     this.user = null
-    if (this.onLogout) {
-      this.onLogout()
-    }
+    this.onLogout?.()
     SnackBar.show(i18n.t('Vous êtes déconnecté.'))
   }
 }
