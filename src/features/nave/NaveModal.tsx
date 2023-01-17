@@ -1,9 +1,11 @@
 import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { Modalize } from 'react-native-modalize'
 import { withNavigation } from 'react-navigation'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -14,26 +16,20 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const { title } = formatVerseContent([selectedVerse])
+  const ref = React.useRef<Modalize>(null)
 
   return (
     <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
       adjustToContentHeight
+      modalRef={ref}
       HeaderComponent={
-        <Box row height={60} alignItems="center">
-          <Box flex paddingLeft={20}>
-            <Text title fontSize={16} marginTop={10}>
-              {title}
-            </Text>
-            <Text fontSize={13} color="grey">
-              {t('Par thèmes')}
-            </Text>
-          </Box>
-          <Link onPress={onClosed} padding>
-            <FeatherIcon name="x" size={25} />
-          </Link>
-        </Box>
+        <ModalHeader
+          onClose={() => ref?.current?.close()}
+          title={title}
+          subTitle={t('Par thèmes')}
+        />
       }
     >
       <CardWrapper {...{ theme, selectedVerse, onClosed }} />

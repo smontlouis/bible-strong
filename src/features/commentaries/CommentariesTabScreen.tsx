@@ -33,6 +33,8 @@ import PopOverMenu from '~common/PopOverMenu'
 import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { FeatherIcon } from '~common/ui/Icon'
+import AdventistIcon from '~common/AdventistIcon'
+import { HStack } from '~common/ui/Stack'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -80,15 +82,25 @@ const fetchComments = async (verse: string) => {
   return { ...verseComment, comments } as Comments
 }
 
-const fetchMoreComments = async (id: string, verse: string) => {
-  const snapshot = await firebaseDb
-    .collection('verse-commentaries')
-    .doc(verse)
-    .collection('commentaries')
-    .orderBy('id')
-    .startAfter(id)
-    .limit(8)
-    .get()
+const fetchMoreComments = async (verse: string, id?: string) => {
+  const query = id
+    ? firebaseDb
+        .collection('verse-commentaries')
+        .doc(verse)
+        .collection('commentaries')
+        .orderBy('id')
+        .startAfter(id)
+        .limit(8)
+        .get()
+    : firebaseDb
+        .collection('verse-commentaries')
+        .doc(verse)
+        .collection('commentaries')
+        .orderBy('id')
+        .limit(8)
+        .get()
+
+  const snapshot = await query
 
   const comments = snapshot.docs.map(x => x.data()) as CommentType[]
 
@@ -110,9 +122,9 @@ const useComments = (verse: string) => {
     setStatus('Idle')
   }
 
-  const loadMore = async (id: string) => {
+  const loadMore = async (id?: string) => {
     setMoreStatus('Pending')
-    const comments = await fetchMoreComments(id, verse)
+    const comments = await fetchMoreComments(verse, id)
 
     setData(s => {
       return { ...s, comments: [...s!.comments, ...comments] } as Comments
@@ -155,11 +167,13 @@ const useVerseInCurrentChapter = (book: string, chapter: string) => {
 }
 
 interface CommentariesScreenProps {
+  hasHeader?: boolean
   navigation: NavigationStackProp
   commentaryAtom: PrimitiveAtom<CommentaryTab>
 }
 
 const CommentariesTabScreen = ({
+  hasHeader = true,
   navigation,
   commentaryAtom,
 }: CommentariesScreenProps) => {
@@ -192,9 +206,11 @@ const CommentariesTabScreen = ({
 
   const { status, data, loadMore, canLoad, moreStatus } = useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
+
   const { title: headerTitle } = verseFormatted
     ? formatVerseContent([verse])
     : t('Chargement')
+
   const [verseText] = useBibleVerses(verseFormatted)
   const { versesInCurrentChapter } = useVerseInCurrentChapter(
     verseText?.Livre,
@@ -211,38 +227,43 @@ const CommentariesTabScreen = ({
 
   return (
     <>
-      <Box background paddingTop={getStatusBarHeight()} />
-      <Header
-        background
-        hasBackButton={hasBackButton}
-        title={headerTitle}
-        rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <MenuOption
-                  onSelect={() => {
-                    openInNewTab({
-                      id: `commentary-${Date.now()}`,
-                      title: t('tabs.new'),
-                      isRemovable: true,
-                      type: 'commentary',
-                      data: {
-                        verse,
-                      },
-                    })
-                  }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
+      {hasHeader && (
+        <>
+          <Box background paddingTop={getStatusBarHeight()} />
+          <Header
+            background
+            hasBackButton={hasBackButton}
+            title={headerTitle}
+            rightComponent={
+              <PopOverMenu
+                popover={
+                  <>
+                    <MenuOption
+                      onSelect={() => {
+                        openInNewTab({
+                          id: `commentary-${Date.now()}`,
+                          title: t('tabs.new'),
+                          isRemovable: true,
+                          type: 'commentary',
+                          data: {
+                            verse,
+                          },
+                        })
+                      }}
+                    >
+                      <Box row alignItems="center">
+                        <FeatherIcon name="external-link" size={15} />
+                        <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                      </Box>
+                    </MenuOption>
+                  </>
+                }
+              />
             }
           />
-        }
-      />
+        </>
+      )}
+
       <ScrollView
         style={{ backgroundColor: theme.colors.lightGrey }}
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -301,7 +322,7 @@ const CommentariesTabScreen = ({
               {data?.comments.map((comment, i) => {
                 return <Comment comment={comment} key={i} />
               })}
-              {canLoad && !!data?.comments.length && (
+              {canLoad && (
                 <LinkBox
                   m={20}
                   height={50}
@@ -312,18 +333,19 @@ const CommentariesTabScreen = ({
                   opacity={moreStatus === 'Pending' ? 0.3 : 1}
                   onPress={() => {
                     if (moreStatus !== 'Pending') {
-                      loadMore(data!.comments[data!.comments.length - 1].id)
+                      loadMore(data?.comments[data?.comments.length - 1]?.id)
                     }
                   }}
                 >
                   {moreStatus === 'Pending' ? (
                     <ActivityIndicator />
                   ) : (
-                    <>
+                    <HStack row center>
                       <Text color="primary" fontSize={15}>
                         {t('Plus de résultats')}
                       </Text>
-                    </>
+                      <AdventistIcon color="primary" />
+                    </HStack>
                   )}
                 </LinkBox>
               )}

@@ -1,27 +1,26 @@
 // TODO - SPLIT THIS :(
 
-import React, { useState, useEffect } from 'react'
-import { ActivityIndicator, ScrollView } from 'react-native'
 import styled from '@emotion/native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { withNavigation } from 'react-navigation'
-import compose from 'recompose/compose'
 import * as Icon from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, ScrollView } from 'react-native'
+import { withNavigation } from 'react-navigation'
 
-import { timeout } from '~helpers/timeout'
-import getVersesRef from '~helpers/getVersesRef'
-import formatVerseContent from '~helpers/formatVerseContent'
-import waitForTresorModal from '~common/waitForTresorModal'
+import { useTheme } from '@emotion/react'
+import { useTranslation } from 'react-i18next'
+import { Modalize } from 'react-native-modalize'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import loadTresorReferences from '~helpers/loadTresorReferences'
-import { hp } from '~helpers/utils'
 import Modal from '~common/Modal'
-import { useTranslation } from 'react-i18next'
-import { useTheme } from '@emotion/react'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import waitForTresorModal from '~common/waitForTresorModal'
+import formatVerseContent from '~helpers/formatVerseContent'
+import getVersesRef from '~helpers/getVersesRef'
+import loadTresorReferences from '~helpers/loadTresorReferences'
+import { timeout } from '~helpers/timeout'
+import ModalHeader from '~common/ModalHeader'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -169,25 +168,19 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
   const { title } = formatVerseContent([selectedVerse])
   const { t } = useTranslation()
   const theme = useTheme()
+  const ref = React.useRef<Modalize>(null)
 
   return (
     <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
+      modalRef={ref}
       HeaderComponent={
-        <Box row height={60} alignItems="center">
-          <Box flex paddingLeft={20}>
-            <Text title fontSize={16} marginTop={10}>
-              {title}
-            </Text>
-            <Text fontSize={13} color="grey">
-              {t('Références croisées')}
-            </Text>
-          </Box>
-          <Link onPress={onClosed} padding>
-            <IconFeather name="x" size={25} />
-          </Link>
-        </Box>
+        <ModalHeader
+          onClose={() => ref?.current?.close()}
+          title={title}
+          subTitle={t('Références croisées')}
+        />
       }
     >
       <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />

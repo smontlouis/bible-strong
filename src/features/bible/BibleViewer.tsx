@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useDispatch, useSelector } from 'react-redux'
-
+import BibleHeader from './BibleHeader'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box from '~common/ui/Box'
@@ -24,7 +24,12 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import NaveModal from '~features/nave/NaveModal'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
-import { addHighlight, removeHighlight, setHistory } from '~redux/modules/user'
+import {
+  addHighlight,
+  removeHighlight,
+  setHistory,
+  setSettingsCommentaires,
+} from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import {
   BibleTab,
@@ -38,6 +43,10 @@ import BibleWebView from './BibleWebView'
 import ReferenceModal from './ReferenceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import BibleParamsModal from './BibleParamsModal'
+import BibleVerseDetailModal from './BibleVerseDetailModal'
+import DictionnaireVerseDetailModal from '~features/dictionnary/DictionnaireVerseDetailModal'
+import CommentariesModal from '~features/commentaries/CommentariesModal'
 
 const Container = styled.View({
   flex: 1,
@@ -65,6 +74,16 @@ interface BibleViewerProps {
   settings: RootState['user']['bible']['settings']
   fontFamily: string
 }
+
+const useBottomSheetDisclosure = <T,>() => {
+  const [isOpen, setIsOpen] = useState<T | null>(null)
+  const onOpen = setIsOpen
+  const onClose = () => setIsOpen(null)
+  const onToggle = () => setIsOpen(s => !s)
+
+  return { isOpen, onOpen, onClose, onToggle }
+}
+
 const BibleViewer = ({
   navigation,
   bibleAtom,
@@ -94,12 +113,17 @@ const BibleViewer = ({
   const [audioChapterUrl, setAudioChapterUrl] = useState('')
   const [audioMode, setAudioMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [selectedCode, setSelectedCode] = useState<{
+
+  const strongModalDisclosure = useBottomSheetDisclosure<{
     reference: string
     book: number
-  } | null>(null)
-  const [currentNave, setNave] = useState(null)
-  const [reference, setReference] = useState(null)
+  }>()
+  const naveModalDisclosure = useBottomSheetDisclosure<string>()
+  const referenceModalDisclosure = useBottomSheetDisclosure<string>()
+  const verseDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
+  const dictionaryDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
+  const commentariesModalDisclosure = useBottomSheetDisclosure<string>()
+  const bibleParamsModalDisclosure = useBottomSheetDisclosure<boolean>()
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
@@ -316,6 +340,13 @@ const BibleViewer = ({
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
     <Container>
+      <BibleHeader
+        navigation={navigation}
+        bibleAtom={bibleAtom}
+        onBibleParamsClick={bibleParamsModalDisclosure.onToggle}
+        setSettingsCommentaires={v => dispatch(setSettingsCommentaires(v))}
+        commentsDisplay={settings.commentsDisplay}
+      />
       {error && (
         <Empty
           source={require('~assets/images/empty.json')}
@@ -353,8 +384,9 @@ const BibleViewer = ({
             chapter
           )}
           openNoteModal={openNoteModal}
-          setSelectedCode={setSelectedCode}
-          selectedCode={selectedCode}
+          setSelectedCode={strongModalDisclosure.onOpen}
+          setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
+          selectedCode={strongModalDisclosure.isOpen}
           comments={comments}
           removeParallelVersion={actions.removeParallelVersion}
           addParallelVersion={actions.addParallelVersion}
@@ -389,8 +421,11 @@ const BibleViewer = ({
         settings={settings}
         isSelectionMode={isSelectionMode}
         setSelectedVerse={actions.setSelectedVerse}
-        setReference={setReference}
-        setNave={setNave}
+        setReference={referenceModalDisclosure.onOpen}
+        setNave={naveModalDisclosure.onOpen}
+        setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
+        setDictionaryVerseDetail={dictionaryDetailModalDisclosure.onOpen}
+        setCommentaries={commentariesModalDisclosure.onOpen}
         onCreateNoteClick={toggleCreateNote}
         isVisible={modalIsVisible}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
@@ -422,15 +457,38 @@ const BibleViewer = ({
       )}
       <StrongModal
         version={version}
-        selectedCode={selectedCode}
-        onClosed={() => setSelectedCode(null)}
+        selectedCode={strongModalDisclosure.isOpen}
+        onClosed={strongModalDisclosure.onClose}
       />
       <ReferenceModal
         version={version}
-        selectedVerse={reference}
-        onClosed={() => setReference(null)}
+        selectedVerse={referenceModalDisclosure.isOpen}
+        onClosed={referenceModalDisclosure.onClose}
       />
-      <NaveModal selectedVerse={currentNave} onClosed={() => setNave(null)} />
+      <NaveModal
+        selectedVerse={naveModalDisclosure.isOpen}
+        onClosed={naveModalDisclosure.onClose}
+      />
+      <BibleVerseDetailModal
+        verse={verseDetailModalDisclosure.isOpen}
+        onChangeVerse={verseDetailModalDisclosure.onOpen}
+        onClose={verseDetailModalDisclosure.onClose}
+      />
+      <DictionnaireVerseDetailModal
+        verse={dictionaryDetailModalDisclosure.isOpen}
+        onChangeVerse={dictionaryDetailModalDisclosure.onOpen}
+        onClose={dictionaryDetailModalDisclosure.onClose}
+      />
+      <CommentariesModal
+        verse={commentariesModalDisclosure.isOpen}
+        onChangeVerse={commentariesModalDisclosure.onOpen}
+        onClose={commentariesModalDisclosure.onClose}
+      />
+      <BibleParamsModal
+        navigation={navigation}
+        onClosed={bibleParamsModalDisclosure.onClose}
+        isOpen={bibleParamsModalDisclosure.isOpen}
+      />
     </Container>
   )
 }

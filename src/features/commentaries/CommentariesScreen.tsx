@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
-import { CommentaryTab, SelectedVerses } from '~state/tabs'
+import { CommentaryTab } from '~state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
 
 interface CommentariesScreenProps {

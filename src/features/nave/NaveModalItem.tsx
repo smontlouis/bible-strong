@@ -22,7 +22,7 @@ const StyledNaveItem = styled.View(({ theme }) => ({
 
 const NaveItem = ({ item: { name, name_lower }, onClosed }) => {
   return (
-    <Link route="NaveDetail" onPress={onClosed} params={{ name, name_lower }}>
+    <Link route="NaveDetail" params={{ name, name_lower }}>
       <StyledNaveItem marginBottom={30}>
         <Text color="quint" title fontSize={14}>
           {name}

@@ -2,22 +2,21 @@ import React from 'react'
 import { FlatList } from 'react-native'
 import { Modalize } from 'react-native-modalize'
 
+import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
 import Link, { LinkBox } from '~common/Link'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Circle from '~common/ui/Circle'
+import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import fonts from '~helpers/fonts'
 import { usePrevious } from '~helpers/usePrevious'
 import { RootState } from '~redux/modules/reducer'
-import styled from '@emotion/native'
-import TouchableIcon from './TouchableIcon'
-import TouchableSvgIcon from './TouchableSvgIcon'
-import Paragraph from '~common/ui/Paragraph'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
@@ -30,15 +29,15 @@ import {
   setSettingsPress,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
-import Circle from '~common/ui/Circle'
-import { Portal } from '@gorhom/portal'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import TouchableIcon from './TouchableIcon'
+import TouchableSvgIcon from './TouchableSvgIcon'
 
 const Container = styled.View(({ theme }) => ({
   width: '100%',
   maxWidth: 400,
   backgroundColor: theme.colors.reverse,
-  borderRadius: 30,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
   shadowColor: theme.colors.default,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.3,
@@ -46,7 +45,6 @@ const Container = styled.View(({ theme }) => ({
   elevation: 2,
   alignItems: 'stretch',
   justifyContent: 'space-between',
-  paddingBottom: getBottomSpace(),
   paddingTop: 10,
 }))
 
@@ -182,261 +180,257 @@ const BibleParamsModal = ({
   const fontsViewRef = React.useRef(null)
 
   return (
-    <Portal>
-      <Modalize
-        ref={modalRef}
-        onClose={onClosed}
-        handlePosition="inside"
-        modalStyle={{
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          maxWidth: 400,
-          width: '100%',
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-        }}
-        adjustToContentHeight
-      >
-        <Container>
-          <HalfContainer border>
-            <Text flex={5}>{t('Thème')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>
-              {preferredColorSchemeToString[preferredColorScheme]}
-            </Text>
-            <TouchableIcon
-              isSelected={preferredColorScheme === 'light'}
-              name="sun"
-              onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
+    <Modalize
+      ref={modalRef}
+      onClose={onClosed}
+      handlePosition="inside"
+      modalStyle={{
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: 400,
+        width: '100%',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+      }}
+      adjustToContentHeight
+    >
+      <Container>
+        <HalfContainer border>
+          <Text flex={5}>{t('Thème')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredColorSchemeToString[preferredColorScheme]}
+          </Text>
+          <TouchableIcon
+            isSelected={preferredColorScheme === 'light'}
+            name="sun"
+            onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
+          />
+          <TouchableIcon
+            isSelected={preferredColorScheme === 'dark'}
+            name="moon"
+            onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
+          />
+          <TouchableIcon
+            isSelected={preferredColorScheme === 'auto'}
+            name="sunrise"
+            onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Couleur Jour')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredLightThemeToString[preferredLightTheme]}
+          </Text>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'default'}
+              size={20}
+              color="rgb(255,255,255)"
             />
-            <TouchableIcon
-              isSelected={preferredColorScheme === 'dark'}
-              name="moon"
-              onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'sepia'}
+              size={20}
+              color="rgb(245,242,227)"
             />
-            <TouchableIcon
-              isSelected={preferredColorScheme === 'auto'}
-              name="sunrise"
-              onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'nature'}
+              size={20}
+              color="#EAF9EC"
             />
-          </HalfContainer>
-          <HalfContainer border>
-            <Text flex={5}>{t('Couleur Jour')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>
-              {preferredLightThemeToString[preferredLightTheme]}
-            </Text>
-            <LinkBox
-              onPress={() =>
-                dispatch(setSettingsPreferredLightTheme('default'))
-              }
-            >
-              <Circle
-                isSelected={preferredLightTheme === 'default'}
-                size={20}
-                color="rgb(255,255,255)"
-              />
-            </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
-            >
-              <Circle
-                isSelected={preferredLightTheme === 'sepia'}
-                size={20}
-                color="rgb(245,242,227)"
-              />
-            </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
-            >
-              <Circle
-                isSelected={preferredLightTheme === 'nature'}
-                size={20}
-                color="#EAF9EC"
-              />
-            </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
-            >
-              <Circle
-                isSelected={preferredLightTheme === 'sunset'}
-                size={20}
-                color="#FAE0D5"
-              />
-            </LinkBox>
-          </HalfContainer>
-          <HalfContainer border>
-            <Text flex={5}>{t('Couleur Nuit')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>
-              {preferredDarkThemeToString[preferredDarkTheme]}
-            </Text>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'dark'}
-                size={20}
-                color="rgb(18,45,66)"
-              />
-            </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'black'}
-                size={20}
-                color="black"
-              />
-            </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'mauve'}
-                size={20}
-                color="rgb(51,4,46)"
-              />
-            </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'night'}
-                size={20}
-                color="rgb(0,50,100)"
-              />
-            </LinkBox>
-          </HalfContainer>
-          <HalfContainer border>
-            <Text flex={5}>{t('Alignement du texte')}</Text>
-            <Text marginLeft={5} fontSize={12} bold marginRight={10}>
-              {alignContentToString[alignContent]}
-            </Text>
-            <TouchableIcon
-              isSelected={alignContent === 'justify'}
-              name="align-justify"
-              onPress={() => dispatch(setSettingsAlignContent('justify'))}
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+          >
+            <Circle
+              isSelected={preferredLightTheme === 'sunset'}
+              size={20}
+              color="#FAE0D5"
             />
-            <TouchableIcon
-              isSelected={alignContent === 'left'}
-              name="align-left"
-              onPress={() => dispatch(setSettingsAlignContent('left'))}
+          </LinkBox>
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Couleur Nuit')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {preferredDarkThemeToString[preferredDarkTheme]}
+          </Text>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'dark'}
+              size={20}
+              color="rgb(18,45,66)"
             />
-          </HalfContainer>
-          <HalfContainer border>
-            <Text flex={5}>{t('Taille du texte')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>{`${100 +
-              fontSizeScale * 10}%`}</Text>
-            <TouchableIcon
-              name="type"
-              size={15}
-              onPress={() => dispatch(decreaseSettingsFontSizeScale())}
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'black'}
+              size={20}
+              color="black"
             />
-            <TouchableIcon
-              name="type"
-              onPress={() => dispatch(increaseSettingsFontSizeScale())}
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'mauve'}
+              size={20}
+              color="rgb(51,4,46)"
             />
-          </HalfContainer>
-          <HalfContainer border>
-            <Text flex={5}>{t('Mode des versets')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>
-              {textDisplayToString[textDisplay]}
-            </Text>
-            <TouchableIcon
-              isSelected={textDisplay === 'inline'}
-              name="menu"
-              onPress={() => dispatch(setSettingsTextDisplay('inline'))}
+          </LinkBox>
+          <LinkBox
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+          >
+            <Circle
+              isSelected={preferredDarkTheme === 'night'}
+              size={20}
+              color="rgb(0,50,100)"
             />
-            <TouchableIcon
-              isSelected={textDisplay === 'block'}
-              name="list"
-              onPress={() => dispatch(setSettingsTextDisplay('block'))}
-            />
-          </HalfContainer>
+          </LinkBox>
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Alignement du texte')}</Text>
+          <Text marginLeft={5} fontSize={12} bold marginRight={10}>
+            {alignContentToString[alignContent]}
+          </Text>
+          <TouchableIcon
+            isSelected={alignContent === 'justify'}
+            name="align-justify"
+            onPress={() => dispatch(setSettingsAlignContent('justify'))}
+          />
+          <TouchableIcon
+            isSelected={alignContent === 'left'}
+            name="align-left"
+            onPress={() => dispatch(setSettingsAlignContent('left'))}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Taille du texte')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>{`${100 +
+            fontSizeScale * 10}%`}</Text>
+          <TouchableIcon
+            name="type"
+            size={15}
+            onPress={() => dispatch(decreaseSettingsFontSizeScale())}
+          />
+          <TouchableIcon
+            name="type"
+            onPress={() => dispatch(increaseSettingsFontSizeScale())}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Mode des versets')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {textDisplayToString[textDisplay]}
+          </Text>
+          <TouchableIcon
+            isSelected={textDisplay === 'inline'}
+            name="menu"
+            onPress={() => dispatch(setSettingsTextDisplay('inline'))}
+          />
+          <TouchableIcon
+            isSelected={textDisplay === 'block'}
+            name="list"
+            onPress={() => dispatch(setSettingsTextDisplay('block'))}
+          />
+        </HalfContainer>
 
-          <HalfContainer border>
-            <Text flex={5}>{t('Affichage des notes')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>
-              {notesDisplayToString[notesDisplay]}
-            </Text>
+        <HalfContainer border>
+          <Text flex={5}>{t('Affichage des notes')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {notesDisplayToString[notesDisplay]}
+          </Text>
 
-            <TouchableIcon
-              isSelected={notesDisplay === 'inline'}
-              name="align-left"
-              onPress={() => dispatch(setSettingsNotesDisplay('inline'))}
-            />
-            <TouchableIcon
-              isSelected={notesDisplay === 'block'}
-              name="file-text"
-              onPress={() => dispatch(setSettingsNotesDisplay('block'))}
-            />
-          </HalfContainer>
-          <HalfContainer border>
-            <Text flex={5}>{t('Affichage des strongs')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>
-              {pressToString[press]}
-            </Text>
-            <TouchableSvgIcon
-              icon={IconShortPress}
-              isSelected={press === 'shortPress'}
-              onPress={() => dispatch(setSettingsPress('shortPress'))}
-              size={25}
-            />
-            <TouchableSvgIcon
-              icon={IconLongPress}
-              isSelected={press === 'longPress'}
-              onPress={() => dispatch(setSettingsPress('longPress'))}
-              size={25}
-            />
-          </HalfContainer>
-          <Box height={60}>
-            <FlatList
-              ref={fontsViewRef}
-              ListHeaderComponent={
-                <Text marginLeft={20} marginRight={50}>
-                  {t('Polices')}
-                </Text>
-              }
-              horizontal
-              getItemLayout={(data, index) => ({
-                length: 100,
-                offset: 100 * index,
-                index,
-              })}
-              initialScrollIndex={fonts.findIndex(f => f === fontFamily)}
-              style={{ paddingVertical: 15 }}
-              data={['Literata Book', ...fonts]}
-              keyExtractor={item => item}
-              renderItem={({ item }) => {
-                const isSelected = fontFamily === item
-                return (
-                  <Link onPress={() => dispatch(setFontFamily(item))}>
-                    <FontText
-                      isSelected={isSelected}
-                      style={{ fontFamily: item }}
-                    >
-                      {item}
-                    </FontText>
-                  </Link>
-                )
-              }}
-            />
-            <Border />
-          </Box>
-          <HalfContainer>
-            <Text flex>{t('Couleurs des surbrillances')}</Text>
-            <Button
-              reverse
-              onPress={() => {
-                navigation.navigate('ModifyColors')
-                onClosed()
-              }}
-              small
-            >
-              {t('Ouvrir')}
-            </Button>
-          </HalfContainer>
-        </Container>
-      </Modalize>
-    </Portal>
+          <TouchableIcon
+            isSelected={notesDisplay === 'inline'}
+            name="align-left"
+            onPress={() => dispatch(setSettingsNotesDisplay('inline'))}
+          />
+          <TouchableIcon
+            isSelected={notesDisplay === 'block'}
+            name="file-text"
+            onPress={() => dispatch(setSettingsNotesDisplay('block'))}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Affichage des strongs')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {pressToString[press]}
+          </Text>
+          <TouchableSvgIcon
+            icon={IconShortPress}
+            isSelected={press === 'shortPress'}
+            onPress={() => dispatch(setSettingsPress('shortPress'))}
+            size={25}
+          />
+          <TouchableSvgIcon
+            icon={IconLongPress}
+            isSelected={press === 'longPress'}
+            onPress={() => dispatch(setSettingsPress('longPress'))}
+            size={25}
+          />
+        </HalfContainer>
+        <Box height={60}>
+          <FlatList
+            ref={fontsViewRef}
+            ListHeaderComponent={
+              <Text marginLeft={20} marginRight={50}>
+                {t('Polices')}
+              </Text>
+            }
+            horizontal
+            getItemLayout={(data, index) => ({
+              length: 100,
+              offset: 100 * index,
+              index,
+            })}
+            initialScrollIndex={fonts.findIndex(f => f === fontFamily)}
+            style={{ paddingVertical: 15 }}
+            data={['Literata Book', ...fonts]}
+            keyExtractor={item => item}
+            renderItem={({ item }) => {
+              const isSelected = fontFamily === item
+              return (
+                <Link onPress={() => dispatch(setFontFamily(item))}>
+                  <FontText
+                    isSelected={isSelected}
+                    style={{ fontFamily: item }}
+                  >
+                    {item}
+                  </FontText>
+                </Link>
+              )
+            }}
+          />
+          <Border />
+        </Box>
+        <HalfContainer>
+          <Text flex>{t('Couleurs des surbrillances')}</Text>
+          <Button
+            reverse
+            onPress={() => {
+              navigation.navigate('ModifyColors')
+              onClosed()
+            }}
+            small
+          >
+            {t('Ouvrir')}
+          </Button>
+        </HalfContainer>
+      </Container>
+    </Modalize>
   )
 }
 

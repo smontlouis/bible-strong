@@ -69,7 +69,7 @@ const StrongCardWrapper = waitForStrongModal(
       <StrongCard
         theme={theme}
         navigation={navigation}
-        book={selectedCode.book}
+        book={selectedCode?.book}
         strongReference={strongReference}
         isModal
         onClosed={onClosed}
@@ -117,26 +117,24 @@ const StrongModal = ({
   }, [version])
 
   return (
-    <Portal>
-      <Modalize
-        ref={modalRef}
-        onClosed={onClosed}
-        modalHeight={hp(75)}
-        handlePosition="inside"
-        closeSnapPointStraightEnabled={false}
-        modalStyle={{
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          maxWidth: 600,
-          width: '100%',
-          backgroundColor: theme.colors.lightGrey,
-        }}
-        snapPoint={200}
-        withOverlay={false}
-      >
-        <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
-      </Modalize>
-    </Portal>
+    <Modalize
+      ref={modalRef}
+      onClosed={onClosed}
+      modalHeight={hp(75)}
+      handlePosition="inside"
+      closeSnapPointStraightEnabled={false}
+      modalStyle={{
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: 600,
+        width: '100%',
+        backgroundColor: theme.colors.lightGrey,
+      }}
+      snapPoint={200}
+      withOverlay={false}
+    >
+      <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
+    </Modalize>
   )
 }
 

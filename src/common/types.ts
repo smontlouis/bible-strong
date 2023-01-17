@@ -131,8 +131,8 @@ export type SubscriptionType = 'premium' | 'lifetime' | null
 
 export interface Verse {
   Livre: string
-  Chapitre: string
-  Verset: string
+  Chapitre: string | number
+  Verset: string | number
   Texte: string
 }
 
