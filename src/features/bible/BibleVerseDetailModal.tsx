@@ -1,4 +1,3 @@
-import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modalize } from 'react-native-modalize'
@@ -24,7 +23,7 @@ const BibleVerseDetailModal = ({
     ref.current?.close()
   }
 
-const { title } = formatVerseContent([verse])
+  const { title } = formatVerseContent([verse])
 
   const updateVerse = (value: number) => {
     onChangeVerse(v =>
@@ -40,9 +39,8 @@ const { title } = formatVerseContent([verse])
     <Modal.Body
       HeaderComponent={
         <ModalHeader
-          fontSize={18}
-          background
-          title={`${title} ${title.length < 12 ? t('- Strong LSG') : ''}`}
+          title={title}
+          subTitle={t('Lexique hébreu & grec')}
           onClose={closeModal}
         />
       }

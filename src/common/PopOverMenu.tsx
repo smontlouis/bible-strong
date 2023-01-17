@@ -16,9 +16,17 @@ const { Popover } = renderers
 interface Props {
   element?: React.ReactNode
   popover: React.ReactNode
+  width?: number
+  height?: number
 }
 
-const PopOverMenu = ({ element, popover, ...props }: Props) => {
+const PopOverMenu = ({
+  element,
+  popover,
+  width = 60,
+  height = 60,
+  ...props
+}: Props) => {
   const theme: Theme = useTheme()
   return (
     <Menu
@@ -39,7 +47,7 @@ const PopOverMenu = ({ element, popover, ...props }: Props) => {
         }}
       >
         {element || (
-          <Box row center height={60} width={60}>
+          <Box row center height={height} width={width}>
             <FeatherIcon name="more-vertical" size={18} />
           </Box>
         )}

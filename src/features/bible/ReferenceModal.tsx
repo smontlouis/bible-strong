@@ -20,6 +20,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import getVersesRef from '~helpers/getVersesRef'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { timeout } from '~helpers/timeout'
+import ModalHeader from '~common/ModalHeader'
 
 const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -175,19 +176,11 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
       onClose={onClosed}
       modalRef={ref}
       HeaderComponent={
-        <Box row height={60} alignItems="center">
-          <Box flex paddingLeft={20}>
-            <Text title fontSize={16} marginTop={10}>
-              {title}
-            </Text>
-            <Text fontSize={13} color="grey">
-              {t('Références croisées')}
-            </Text>
-          </Box>
-          <Link onPress={() => ref?.current?.close()} padding>
-            <IconFeather name="x" size={20} />
-          </Link>
-        </Box>
+        <ModalHeader
+          onClose={() => ref?.current?.close()}
+          title={title}
+          subTitle={t('Références croisées')}
+        />
       }
     >
       <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />

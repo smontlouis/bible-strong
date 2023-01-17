@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
+import { Portal } from '@gorhom/portal'
 import React, { forwardRef, useEffect } from 'react'
 import {
   getBottomSpace,
@@ -29,6 +30,7 @@ interface MenuProps {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
+  withPortal?: boolean
 }
 
 interface ItemProps {
@@ -75,6 +77,7 @@ const Body = ({
   onClose,
   children,
   modalRef,
+  withPortal,
   ...props
 }: MenuProps &
   ModalizeProps & {
@@ -87,10 +90,14 @@ const Body = ({
     }
   }, [isOpen, modalRef])
 
+  const Wrapper = withPortal ? Portal : React.Fragment
+
   return (
-    <Container ref={modalRef || ref} onClose={onClose} {...props}>
-      {children}
-    </Container>
+    <Wrapper>
+      <Container ref={modalRef || ref} onClose={onClose} {...props}>
+        {children}
+      </Container>
+    </Wrapper>
   )
 }
 

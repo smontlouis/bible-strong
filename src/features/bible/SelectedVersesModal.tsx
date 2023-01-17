@@ -67,6 +67,7 @@ const VersesModal = ({
   selectAllVerses,
   setStrongVerseDetail,
   setDictionaryVerseDetail,
+  setCommentaries,
 }) => {
   const isPrevVisible = usePrevious(isVisible)
   const theme = useTheme()
@@ -124,13 +125,7 @@ const VersesModal = ({
 
   const openCommentariesScreen = () => {
     const verse = Object.keys(selectedVerses)[0]
-    navigation.navigate({
-      routeName: 'Commentaries',
-      params: {
-        verse,
-      },
-      key: `commentaries-${verse}`,
-    })
+    setCommentaries(verse)
   }
 
   const showDictionnaryDetail = () => {

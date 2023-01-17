@@ -1,57 +1,36 @@
 import React from 'react'
-import { smallSize } from '~helpers/utils'
 
-import Back from '~common/Back'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
 
 interface Props {
-  background?: boolean
-  title?: string
-  fontSize?: number
-  onTitlePress?: () => void
-  leftComponent?: JSX.Element
+  title: string
+  subTitle: string
   onClose?: () => void
   children?: JSX.Element
+  rightComponent?: JSX.Element
 }
 
 const ModalHeader = ({
-  background,
   title,
-  fontSize = 18,
-  onTitlePress,
-  leftComponent,
+  subTitle,
   onClose,
   children,
-  ...props
+  rightComponent,
 }: Props) => {
   return (
-    <Box
-      mt={10}
-      bg={background ? 'reverse' : undefined}
-      borderColor="border"
-      borderBottomWidth={1}
-      {...props}
-    >
+    <Box mt={10} bg="reverse" borderColor="border" borderBottomWidth={1}>
       <Box height={54} row>
-        {leftComponent ? (
-          <Box justifyContent="center" alignItems="flex-end" overflow="visible">
-            {leftComponent}
-          </Box>
-        ) : (
-          <Box width={54} />
-        )}
-        <Box flex center>
-          <Text
-            numberOfLines={1}
-            title
-            fontSize={smallSize ? 16 : fontSize}
-            onPress={onTitlePress}
-          >
+        <Box flex paddingLeft={20}>
+          <Text numberOfLines={1} bold fontSize={16} marginTop={10}>
             {title}
           </Text>
+          <Text fontSize={13} color="grey">
+            {subTitle}
+          </Text>
         </Box>
+        {rightComponent}
         <TouchableBox onPress={onClose} center w={54} h={54}>
           <FeatherIcon name={'x'} size={20} />
         </TouchableBox>

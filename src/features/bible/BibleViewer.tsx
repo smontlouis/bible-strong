@@ -46,6 +46,7 @@ import StrongModal from './StrongModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleVerseDetailModal from './BibleVerseDetailModal'
 import DictionnaireVerseDetailModal from '~features/dictionnary/DictionnaireVerseDetailModal'
+import CommentariesModal from '~features/commentaries/CommentariesModal'
 
 const Container = styled.View({
   flex: 1,
@@ -121,6 +122,7 @@ const BibleViewer = ({
   const referenceModalDisclosure = useBottomSheetDisclosure<string>()
   const verseDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
   const dictionaryDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
+  const commentariesModalDisclosure = useBottomSheetDisclosure<string>()
   const bibleParamsModalDisclosure = useBottomSheetDisclosure<boolean>()
 
   const isFR = useLanguage()
@@ -383,6 +385,7 @@ const BibleViewer = ({
           )}
           openNoteModal={openNoteModal}
           setSelectedCode={strongModalDisclosure.onOpen}
+          setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
           selectedCode={strongModalDisclosure.isOpen}
           comments={comments}
           removeParallelVersion={actions.removeParallelVersion}
@@ -422,6 +425,7 @@ const BibleViewer = ({
         setNave={naveModalDisclosure.onOpen}
         setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
         setDictionaryVerseDetail={dictionaryDetailModalDisclosure.onOpen}
+        setCommentaries={commentariesModalDisclosure.onOpen}
         onCreateNoteClick={toggleCreateNote}
         isVisible={modalIsVisible}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
@@ -474,6 +478,11 @@ const BibleViewer = ({
         verse={dictionaryDetailModalDisclosure.isOpen}
         onChangeVerse={dictionaryDetailModalDisclosure.onOpen}
         onClose={dictionaryDetailModalDisclosure.onClose}
+      />
+      <CommentariesModal
+        verse={commentariesModalDisclosure.isOpen}
+        onChangeVerse={commentariesModalDisclosure.onOpen}
+        onClose={commentariesModalDisclosure.onClose}
       />
       <BibleParamsModal
         navigation={navigation}

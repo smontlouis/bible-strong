@@ -40,9 +40,8 @@ const DictionnaireVerseDetailModal = ({
     <Modal.Body
       HeaderComponent={
         <ModalHeader
-          fontSize={18}
-          background
-          title={`${title} ${title.length < 20 ? t('- Dict. LSG') : ''}`}
+          title={title}
+          subTitle={t('Dictionnaire')}
           onClose={closeModal}
         />
       }
