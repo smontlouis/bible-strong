@@ -296,7 +296,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.subscription = subscription
 
-      draft.bible = deepmerge(draft.bible, bible)
+      draft.bible = deepmerge(draft.bible, bible || {})
 
       break
     }
