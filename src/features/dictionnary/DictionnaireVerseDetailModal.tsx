@@ -1,4 +1,3 @@
-import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modalize } from 'react-native-modalize'
@@ -7,9 +6,9 @@ import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import { Verse } from '~common/types'
 import formatVerseContent from '~helpers/formatVerseContent'
-import BibleVerseDetailCard from './BibleVerseDetailCard'
+import DictionnaireVerseDetailCard from './DictionnaireVerseDetailCard'
 
-const BibleVerseDetailModal = ({
+const DictionnaireVerseDetailModal = ({
   verse,
   onChangeVerse,
   onClose,
@@ -24,7 +23,7 @@ const BibleVerseDetailModal = ({
     ref.current?.close()
   }
 
-const { title } = formatVerseContent([verse])
+  const { title } = formatVerseContent([verse])
 
   const updateVerse = (value: number) => {
     onChangeVerse(v =>
@@ -36,13 +35,14 @@ const { title } = formatVerseContent([verse])
         : null
     )
   }
+
   return (
     <Modal.Body
       HeaderComponent={
         <ModalHeader
           fontSize={18}
           background
-          title={`${title} ${title.length < 12 ? t('- Strong LSG') : ''}`}
+          title={`${title} ${title.length < 20 ? t('- Dict. LSG') : ''}`}
           onClose={closeModal}
         />
       }
@@ -51,10 +51,10 @@ const { title } = formatVerseContent([verse])
       modalRef={ref}
     >
       {!!verse && (
-        <BibleVerseDetailCard verse={verse} updateVerse={updateVerse} />
+        <DictionnaireVerseDetailCard verse={verse} updateVerse={updateVerse} />
       )}
     </Modal.Body>
   )
 }
 
-export default withNavigation(BibleVerseDetailModal)
+export default withNavigation(DictionnaireVerseDetailModal)

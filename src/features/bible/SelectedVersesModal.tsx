@@ -65,7 +65,8 @@ const VersesModal = ({
   setReference,
   setNave,
   selectAllVerses,
-  setVerseDetail,
+  setStrongVerseDetail,
+  setDictionaryVerseDetail,
 }) => {
   const isPrevVisible = usePrevious(isVisible)
   const theme = useTheme()
@@ -114,22 +115,11 @@ const VersesModal = ({
 
   const showStrongDetail = () => {
     const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
-    setVerseDetail({
+    setStrongVerseDetail({
       Livre,
       Chapitre,
       Verset,
     })
-    // navigation.navigate({
-    //   routeName: 'BibleVerseDetail',
-    //   params: {
-    //     verse: {
-    //       Livre,
-    //       Chapitre,
-    //       Verset,
-    //     },
-    //   },
-    //   key: `bible-verse-detail-${Livre}-${Chapitre}-${Verset}`,
-    // })
   }
 
   const openCommentariesScreen = () => {
@@ -145,16 +135,10 @@ const VersesModal = ({
 
   const showDictionnaryDetail = () => {
     const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
-    navigation.navigate({
-      routeName: 'DictionnaireVerseDetail',
-      params: {
-        verse: {
-          Livre,
-          Chapitre,
-          Verset,
-        },
-      },
-      key: `dictionnaire-verse-detail-${Livre}-${Chapitre}-${Verset}`,
+    setDictionaryVerseDetail({
+      Livre,
+      Chapitre,
+      Verset,
     })
   }
 

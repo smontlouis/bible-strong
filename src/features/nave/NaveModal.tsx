@@ -34,7 +34,7 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
             </Text>
           </Box>
           <Link onPress={() => ref?.current?.close()} padding>
-            <FeatherIcon name="x" size={25} />
+            <FeatherIcon name="x" size={20} />
           </Link>
         </Box>
       }

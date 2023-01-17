@@ -36,12 +36,10 @@ const Stats = ({
 
 const ReachGoal = () => {
   const { t } = useTranslation()
-  const [data, loading, error] = useDocumentData<{
+  const [data] = useDocumentData<{
     activeSubscribers: number
     monthlyRecurringRevenue: number
   }>(firebaseDb.doc('stats/iaphub'))
-
-  console.log({ data, loading, error })
 
   const items = [
     {
@@ -73,10 +71,10 @@ const ReachGoal = () => {
               value={`€${data?.monthlyRecurringRevenue || '_'}`}
             />
             <Stats
-              label={t('Contributeurs')}
+              label={t('premium.subscribers')}
               value={data?.activeSubscribers.toString() || '_'}
             />
-            <Stats label={t('Utilisateurs mensuels')} value="57k" />
+            <Stats label={t('premium.monthlyUsers')} value="57k" />
           </HStack>
         </ScrollView>
       </VStack>

@@ -3,16 +3,12 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  useWindowDimensions,
-} from 'react-native'
+import { ActivityIndicator, ScrollView } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
+import { Modalize } from 'react-native-modalize'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
@@ -171,13 +167,13 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
   const { title } = formatVerseContent([selectedVerse])
   const { t } = useTranslation()
   const theme = useTheme()
-  const dimensions = useWindowDimensions()
+  const ref = React.useRef<Modalize>(null)
 
   return (
     <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
-      modalHeight={dimensions.height / 2}
+      modalRef={ref}
       HeaderComponent={
         <Box row height={60} alignItems="center">
           <Box flex paddingLeft={20}>
@@ -188,8 +184,8 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
               {t('Références croisées')}
             </Text>
           </Box>
-          <Link onPress={onClosed} padding>
-            <IconFeather name="x" size={25} />
+          <Link onPress={() => ref?.current?.close()} padding>
+            <IconFeather name="x" size={20} />
           </Link>
         </Box>
       }

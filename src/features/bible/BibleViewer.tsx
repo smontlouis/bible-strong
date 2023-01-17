@@ -45,6 +45,7 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleVerseDetailModal from './BibleVerseDetailModal'
+import DictionnaireVerseDetailModal from '~features/dictionnary/DictionnaireVerseDetailModal'
 
 const Container = styled.View({
   flex: 1,
@@ -75,7 +76,7 @@ interface BibleViewerProps {
 
 const useBottomSheetDisclosure = <T,>() => {
   const [isOpen, setIsOpen] = useState<T | null>(null)
-  const onOpen = (item: T) => setIsOpen(item)
+  const onOpen = setIsOpen
   const onClose = () => setIsOpen(null)
   const onToggle = () => setIsOpen(s => !s)
 
@@ -118,7 +119,8 @@ const BibleViewer = ({
   }>()
   const naveModalDisclosure = useBottomSheetDisclosure<string>()
   const referenceModalDisclosure = useBottomSheetDisclosure<string>()
-  const verseDetailModalDisclosure = useBottomSheetDisclosure<string>()
+  const verseDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
+  const dictionaryDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
   const bibleParamsModalDisclosure = useBottomSheetDisclosure<boolean>()
 
   const isFR = useLanguage()
@@ -418,7 +420,8 @@ const BibleViewer = ({
         setSelectedVerse={actions.setSelectedVerse}
         setReference={referenceModalDisclosure.onOpen}
         setNave={naveModalDisclosure.onOpen}
-        setVerseDetail={verseDetailModalDisclosure.onOpen}
+        setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
+        setDictionaryVerseDetail={dictionaryDetailModalDisclosure.onOpen}
         onCreateNoteClick={toggleCreateNote}
         isVisible={modalIsVisible}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
@@ -463,8 +466,14 @@ const BibleViewer = ({
         onClosed={naveModalDisclosure.onClose}
       />
       <BibleVerseDetailModal
-        selectedVerse={verseDetailModalDisclosure.isOpen}
-        onClosed={verseDetailModalDisclosure.onClose}
+        verse={verseDetailModalDisclosure.isOpen}
+        onChangeVerse={verseDetailModalDisclosure.onOpen}
+        onClose={verseDetailModalDisclosure.onClose}
+      />
+      <DictionnaireVerseDetailModal
+        verse={dictionaryDetailModalDisclosure.isOpen}
+        onChangeVerse={dictionaryDetailModalDisclosure.onOpen}
+        onClose={dictionaryDetailModalDisclosure.onClose}
       />
       <BibleParamsModal
         navigation={navigation}

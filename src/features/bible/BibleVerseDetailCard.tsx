@@ -30,6 +30,7 @@ import { CarouselProvider } from '~helpers/CarouselContext'
 import { withTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { withNavigation } from 'react-navigation'
+import ModalHeader from '~common/ModalHeader'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -87,7 +88,6 @@ class BibleVerseDetailCard extends React.Component {
     isCarouselLoading: true,
     strongReferences: [],
     currentStrongReference: 0,
-    verse: this.props.verse,
     versesInCurrentChapter: null,
   }
 
@@ -95,23 +95,14 @@ class BibleVerseDetailCard extends React.Component {
     this.loadPage()
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.verse.Verset !== this.state.verse.Verset) {
+  componentDidUpdate(prevProps) {
+    if (prevProps.verse.Verset !== this.props.verse.Verset) {
       this.loadPage()
     }
   }
 
-  updateVerse = value => {
-    this.setState(state => ({
-      verse: {
-        ...state.verse,
-        Verset: Number(state.verse.Verset) + value,
-      },
-    }))
-  }
-
   loadPage = async () => {
-    const { verse } = this.state
+    const { verse } = this.props
     const strongVerse = await loadStrongVerse(verse)
 
     if (!strongVerse) {
@@ -174,21 +165,15 @@ class BibleVerseDetailCard extends React.Component {
   }
 
   render() {
+    const { isCarouselLoading, versesInCurrentChapter } = this.state
+
     const {
-      verse,
       verse: { Verset },
-      isCarouselLoading,
-      versesInCurrentChapter,
-    } = this.state
-
-    const { theme, t } = this.props
-
-    const { title: headerTitle } = formatVerseContent([verse])
+    } = this.props
 
     if (this.state.error) {
       return (
         <Container>
-          <Header hasBackButton title={t('Désolé...')} />
           <Empty
             source={require('~assets/images/empty.json')}
             message={`Impossible de charger la strong pour ce verset...${
@@ -212,87 +197,64 @@ class BibleVerseDetailCard extends React.Component {
         contentContainerStyle={{ paddingBottom: 20 }}
         scrollIndicatorInsets={{ right: 1 }}
       >
-        <Box background paddingTop={getStatusBarHeight()} />
-        <Header
-          fontSize={18}
-          background
-          hasBackButton
-          title={`${headerTitle} ${
-            headerTitle.length < 12 ? t('- Strong LSG') : ''
-          }`}
-          rightComponent={
-            <Link
-              route="DictionnaireVerseDetail"
-              params={{ verse }}
-              replace
-              padding
-            >
-              <Box position="relative" overflow="visibility">
-                <DictionnaryIcon color={theme.colors.secondary} />
-              </Box>
-            </Link>
-          }
-        />
-        <Box>
-          <Box background paddingTop={10}>
-            <StyledVerse>
-              <VersetWrapper>
-                <NumberText>{Verset}</NumberText>
-              </VersetWrapper>
-              <CarouselProvider
-                value={{
-                  currentStrongReference: this.state.currentStrongReference,
-                  goToCarouselItem: this.goToCarouselItem,
-                }}
-              >
-                <VerseText>{this.state.formattedTexte}</VerseText>
-              </CarouselProvider>
-            </StyledVerse>
-            <BibleVerseDetailFooter
-              {...{
-                verseNumber: Verset,
-                goToNextVerse: () => {
-                  this.updateVerse(+1)
-                  this.setState({ isCarouselLoading: true })
-                },
-                goToPrevVerse: () => {
-                  this.updateVerse(-1)
-                  this.setState({ isCarouselLoading: true })
-                },
-                versesInCurrentChapter,
+        <Box background paddingTop={10}>
+          <StyledVerse>
+            <VersetWrapper>
+              <NumberText>{Verset}</NumberText>
+            </VersetWrapper>
+            <CarouselProvider
+              value={{
+                currentStrongReference: this.state.currentStrongReference,
+                goToCarouselItem: this.goToCarouselItem,
               }}
+            >
+              <VerseText>{this.state.formattedTexte}</VerseText>
+            </CarouselProvider>
+          </StyledVerse>
+          <BibleVerseDetailFooter
+            {...{
+              verseNumber: Verset,
+              goToNextVerse: () => {
+                this.props.updateVerse(+1)
+                this.setState({ isCarouselLoading: true })
+              },
+              goToPrevVerse: () => {
+                this.props.updateVerse(-1)
+                this.setState({ isCarouselLoading: true })
+              },
+              versesInCurrentChapter,
+            }}
+          />
+        </Box>
+        <Box grey>
+          <RoundedCorner />
+        </Box>
+        <Box grey>
+          {isCarouselLoading && <Loading />}
+          {!isCarouselLoading && (
+            <Carousel
+              ref={c => {
+                this._carousel = c
+              }}
+              data={this.state.strongReferences}
+              renderItem={this.renderItem}
+              activeSlideAlignment="start"
+              sliderWidth={sliderWidth}
+              itemWidth={itemWidth}
+              inactiveSlideScale={1}
+              inactiveSlideOpacity={0.3}
+              containerCustomStyle={{
+                marginTop: 15,
+                paddingLeft: 20,
+                overflow: 'visible',
+                flex: 1,
+              }}
+              contentContainerCustomStyle={{}}
+              onSnapToItem={this.onSnapToItem}
+              useScrollView={false}
+              initialNumToRender={2}
             />
-          </Box>
-          <Box grey>
-            <RoundedCorner />
-          </Box>
-          <Box grey>
-            {isCarouselLoading && <Loading />}
-            {!isCarouselLoading && (
-              <Carousel
-                ref={c => {
-                  this._carousel = c
-                }}
-                data={this.state.strongReferences}
-                renderItem={this.renderItem}
-                activeSlideAlignment="start"
-                sliderWidth={sliderWidth}
-                itemWidth={itemWidth}
-                inactiveSlideScale={1}
-                inactiveSlideOpacity={0.3}
-                containerCustomStyle={{
-                  marginTop: 15,
-                  paddingLeft: 20,
-                  overflow: 'visible',
-                  flex: 1,
-                }}
-                contentContainerCustomStyle={{}}
-                onSnapToItem={this.onSnapToItem}
-                useScrollView={false}
-                initialNumToRender={2}
-              />
-            )}
-          </Box>
+          )}
         </Box>
       </StyledScrollView>
     )
@@ -303,7 +265,7 @@ export default compose(
   withTheme,
   withTranslation(),
   connect((state, ownProps) => {
-    const verse = ownProps.selectedVerse
+    const verse = ownProps.verse
     return {
       verse,
     }
