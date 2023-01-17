@@ -322,7 +322,7 @@ const CommentariesTabScreen = ({
               {data?.comments.map((comment, i) => {
                 return <Comment comment={comment} key={i} />
               })}
-              {canLoad && !!data?.comments.length && (
+              {canLoad && (
                 <LinkBox
                   m={20}
                   height={50}
