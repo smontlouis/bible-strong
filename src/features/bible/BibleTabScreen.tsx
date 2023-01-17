@@ -8,7 +8,6 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import ImmersiveMode from 'react-native-immersive-mode'
 import Container from '~common/ui/Container'
-import BibleHeader from './BibleHeader'
 import BibleParamsModal from './BibleParamsModal'
 import BibleViewer from './BibleViewer'
 
@@ -25,7 +24,6 @@ interface BibleTabScreenProps {
 }
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
-  const [isBibleParamsOpen, setIsBibleParamsOpen] = React.useState(false)
   const [hasPaddingTop, setHasPaddingTop] = React.useState(false)
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -85,8 +83,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
 
     return false
   }
-  const toggleBibleParamsOpen = () => setIsBibleParamsOpen(s => !s)
-  const closeBibleParamsOpen = () => setIsBibleParamsOpen(false)
 
   useEffect(() => {
     let listen: EmitterSubscription
@@ -119,23 +115,11 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
         paddingTop: hasPaddingTop ? 0 : getStatusBarHeight(),
       }}
     >
-      <BibleHeader
-        navigation={navigation}
-        bibleAtom={bibleAtom}
-        onBibleParamsClick={toggleBibleParamsOpen}
-        setSettingsCommentaires={v => dispatch(setSettingsCommentaires(v))}
-        commentsDisplay={settings.commentsDisplay}
-      />
       <BibleViewer
         navigation={navigation}
         settings={settings}
         fontFamily={fontFamily}
         bibleAtom={bibleAtom}
-      />
-      <BibleParamsModal
-        navigation={navigation}
-        onClosed={closeBibleParamsOpen}
-        isOpen={isBibleParamsOpen}
       />
     </Container>
   )

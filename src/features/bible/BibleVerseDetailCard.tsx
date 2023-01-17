@@ -29,6 +29,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { withTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
+import { withNavigation } from 'react-navigation'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -80,7 +81,7 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
 }))
 
-class BibleVerseDetailScreen extends React.Component {
+class BibleVerseDetailCard extends React.Component {
   state = {
     error: false,
     isCarouselLoading: true,
@@ -160,11 +161,10 @@ class BibleVerseDetailScreen extends React.Component {
   }
 
   renderItem = ({ item, index }) => {
-    const { isSelectionMode } = this.props.navigation.state.params || {}
     return (
       <StrongCard
         theme={this.props.theme}
-        isSelectionMode={isSelectionMode}
+        isSelectionMode={false}
         navigation={this.props.navigation}
         book={this.props.verse.Livre}
         strongReference={item}
@@ -188,7 +188,7 @@ class BibleVerseDetailScreen extends React.Component {
     if (this.state.error) {
       return (
         <Container>
-          <Header bg="reverse" hasBackButton title={t('Désolé...')} />
+          <Header hasBackButton title={t('Désolé...')} />
           <Empty
             source={require('~assets/images/empty.json')}
             message={`Impossible de charger la strong pour ce verset...${
@@ -303,10 +303,11 @@ export default compose(
   withTheme,
   withTranslation(),
   connect((state, ownProps) => {
-    const { verse } = ownProps.navigation.state.params || {}
+    const verse = ownProps.selectedVerse
     return {
       verse,
     }
   }),
-  waitForStrongDB
-)(BibleVerseDetailScreen)
+  waitForStrongDB,
+  withNavigation
+)(BibleVerseDetailCard)

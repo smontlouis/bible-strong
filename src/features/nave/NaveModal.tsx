@@ -1,6 +1,7 @@
 import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { Modalize } from 'react-native-modalize'
 import { withNavigation } from 'react-navigation'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
@@ -14,12 +15,14 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const { title } = formatVerseContent([selectedVerse])
+  const ref = React.useRef<Modalize>(null)
 
   return (
     <Modal.Body
       isOpen={!!selectedVerse}
       onClose={onClosed}
       adjustToContentHeight
+      modalRef={ref}
       HeaderComponent={
         <Box row height={60} alignItems="center">
           <Box flex paddingLeft={20}>
@@ -30,7 +33,7 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
               {t('Par thèmes')}
             </Text>
           </Box>
-          <Link onPress={onClosed} padding>
+          <Link onPress={() => ref?.current?.close()} padding>
             <FeatherIcon name="x" size={25} />
           </Link>
         </Box>

@@ -63,6 +63,15 @@ const LogoutButton = () => {
       >
         {t('Se déconnecter')}
       </Button>
+      <Button
+        onPress={() => {
+          setTimeout(() => {
+            RNRestart.Restart()
+          }, 1000)
+        }}
+      >
+        {t('Redémarrer')}
+      </Button>
     </Box>
   )
 }

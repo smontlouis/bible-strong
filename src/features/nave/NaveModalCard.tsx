@@ -1,5 +1,3 @@
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
@@ -9,10 +7,6 @@ import waitForNaveModal from '~features/home/waitForNaveWidget'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
 import { timeout } from '~helpers/timeout'
 import NaveForVerse from './NaveModalForVerse'
-
-const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
 
 const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
   const { t } = useTranslation()
@@ -53,7 +47,7 @@ const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
 
   if (isLoading) {
     return (
-      <Box flex center>
+      <Box flex center height={150}>
         <ActivityIndicator color={theme.colors.grey} />
       </Box>
     )

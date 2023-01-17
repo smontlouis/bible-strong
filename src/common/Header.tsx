@@ -31,7 +31,7 @@ const Header = ({
   ...props
 }: Props) => {
   return (
-    <Box {...props}>
+    <Box bg={background ? 'reverse' : undefined} {...props}>
       <Box height={60} row>
         <Box>
           {hasBackButton ? (

@@ -1,3 +1,4 @@
+import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import React, { forwardRef, useEffect } from 'react'
 import {
@@ -6,8 +7,6 @@ import {
 } from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
 import Text, { TextProps } from '~common/ui/Text'
-import styled from '@emotion/native'
-import { Portal } from '@gorhom/portal'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -45,11 +44,12 @@ const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
     <Modalize
       ref={ref}
       handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
-      modalTopOffset={getStatusBarHeight()}
+      modalTopOffset={getStatusBarHeight() + 40}
       modalStyle={{
         marginLeft: 'auto',
         marginRight: 'auto',
         maxWidth: 600,
+        maxHeight: '50%',
         width: '100%',
         overflow: 'hidden',
         borderTopLeftRadius: 30,
@@ -74,21 +74,23 @@ const Body = ({
   isOpen,
   onClose,
   children,
+  modalRef,
   ...props
-}: MenuProps & ModalizeProps) => {
-  const modalRef = React.useRef<Modalize>(null)
+}: MenuProps &
+  ModalizeProps & {
+    modalRef?: React.RefObject<Modalize>
+  }) => {
+  const ref = React.useRef<Modalize>(null)
   useEffect(() => {
     if (isOpen) {
-      modalRef?.current?.open()
+      modalRef ? modalRef?.current?.open() : ref.current?.open()
     }
-  }, [isOpen])
+  }, [isOpen, modalRef])
 
   return (
-    <Portal>
-      <Container ref={modalRef} onClose={onClose} {...props}>
-        {children}
-      </Container>
-    </Portal>
+    <Container ref={modalRef || ref} onClose={onClose} {...props}>
+      {children}
+    </Container>
   )
 }
 
