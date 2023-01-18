@@ -125,8 +125,8 @@ android {
         applicationId "com.smontlouis.biblestrong"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 257
-        versionName "16.2.1"
+        versionCode 259
+        versionName "16.2.2"
         manifestPlaceholders = [appAuthRedirectScheme: 'com.redirectScheme.comm']
 
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
