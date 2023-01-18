@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import TagsHeader from '~common/TagsHeader'
@@ -16,6 +16,7 @@ import { RootState } from '~redux/modules/reducer'
 import { changeHighlightColor, removeHighlight } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import VersesList from './VersesList'
+import { useModalize } from '~helpers/useModalize'
 
 interface Chip {
   id: string
@@ -43,6 +44,21 @@ const HighlightsScreen = () => {
   const chipId = selectedChip?.id
   const isMultipleTagsItem = !!multipleTagsItem
 
+  const { ref, open, close } = useModalize()
+  const { ref: ref2, open: open2, close: close2 } = useModalize()
+
+  useEffect(() => {
+    if (isSettingsOpen) {
+      open()
+    }
+  }, [isSettingsOpen, open])
+
+  useEffect(() => {
+    if (isChangeColorOpen) {
+      open2()
+    }
+  }, [isChangeColorOpen, open2])
+
   // TODO - Performance issue here
   const filteredHighlights = useMemo(() => {
     return Object.keys(verseIds)
@@ -69,7 +85,7 @@ const HighlightsScreen = () => {
             dispatch(
               removeHighlight({ selectedVerses: isSettingsOpen?.stringIds })
             )
-            setIsSettingsOpen(undefined)
+            close()
           },
           style: 'destructive',
         },
@@ -79,7 +95,7 @@ const HighlightsScreen = () => {
 
   const changeColor = (color: string) => {
     dispatch(changeHighlightColor(isChangeColorOpen, color))
-    setIsChangeColorOpen(undefined)
+    close2()
   }
 
   return (
@@ -109,14 +125,14 @@ const HighlightsScreen = () => {
         />
       )}
       <Modal.Body
-        isOpen={!!isSettingsOpen}
+        ref={ref}
         onClose={() => setIsSettingsOpen(undefined)}
         adjustToContentHeight
       >
         <Modal.Item
           bold
           onPress={() => {
-            setIsSettingsOpen(undefined)
+            close()
             setIsChangeColorOpen(isSettingsOpen?.stringIds)
           }}
         >
@@ -125,7 +141,7 @@ const HighlightsScreen = () => {
         <Modal.Item
           bold
           onPress={() => {
-            setIsSettingsOpen(undefined)
+            close()
             setMultipleTagsItem({
               entity: 'highlights',
               ids: isSettingsOpen?.stringIds,
@@ -139,7 +155,7 @@ const HighlightsScreen = () => {
         </Modal.Item>
       </Modal.Body>
       <Modal.Body
-        isOpen={!!isChangeColorOpen}
+        ref={ref2}
         onClose={() => setIsChangeColorOpen(undefined)}
         adjustToContentHeight
       >

@@ -1,17 +1,13 @@
-import React, { useState } from 'react'
 import * as Icon from '@expo/vector-icons'
+import React from 'react'
 
 import styled from '@emotion/native'
 
+import { Portal } from '@gorhom/portal'
 import Modal from '~common/Modal'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-
-const TouchableBox = styled.TouchableOpacity({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingRight: 15,
-})
+import { useModalize } from '~helpers/useModalize'
 
 const StyledText = styled(Text)({
   fontSize: 14,
@@ -24,38 +20,37 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
-  const [isOpen, setOpen] = useState(false)
   const { label } = choices.find(l => l.value === currentValue)
+  const { ref, open, close } = useModalize()
+
   const onItemPress = value => {
     setValue(value)
-    setOpen(false)
+    close()
   }
   return (
     <>
-      <Box padding={10}>
+      <TouchableBox onPress={open} padding={10}>
         <Text color="grey" fontSize={12}>
           {title}
         </Text>
-        <TouchableBox onPress={() => setOpen(true)}>
+        <Box row pr={15} alignItems="center">
           <StyledText>{label}</StyledText>
           <StyledIcon name="chevron-down" size={15} />
-        </TouchableBox>
-      </Box>
-      <Modal.Body
-        isOpen={isOpen}
-        onClose={() => setOpen(false)}
-        adjustToContentHeight
-      >
-        {choices.map(({ value, label, count }) => (
-          <Modal.Item
-            key={value}
-            tag={count}
-            onPress={() => onItemPress(value)}
-          >
-            {label}
-          </Modal.Item>
-        ))}
-      </Modal.Body>
+        </Box>
+      </TouchableBox>
+      <Portal>
+        <Modal.Body ref={ref} adjustToContentHeight>
+          {choices.map(({ value, label, count }) => (
+            <Modal.Item
+              key={value}
+              tag={count}
+              onPress={() => onItemPress(value)}
+            >
+              {label}
+            </Modal.Item>
+          ))}
+        </Modal.Body>
+      </Portal>
     </>
   )
 }

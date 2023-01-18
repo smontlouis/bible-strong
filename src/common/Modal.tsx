@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { Portal } from '@gorhom/portal'
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef } from 'react'
 import {
   getBottomSpace,
   getStatusBarHeight,
@@ -26,11 +26,12 @@ const Tag = styled.View(({ theme }) => ({
   borderRadius: 3,
 }))
 
-interface MenuProps {
-  isOpen: boolean
+interface ModalBodyProps extends ModalizeProps {
   onClose: () => void
   children: React.ReactNode
   withPortal?: boolean
+  modalRef?: React.RefObject<Modalize>
+  style?: any
 }
 
 interface ItemProps {
@@ -39,67 +40,43 @@ interface ItemProps {
   onPress: () => void
 }
 
-const Container = forwardRef<Modalize, ModalizeProps>((props, ref) => {
-  const theme = useTheme()
+const Body = forwardRef<Modalize, ModalBodyProps>(
+  ({ withPortal, ...props }, ref) => {
+    const Wrapper = withPortal ? Portal : React.Fragment
+    const theme = useTheme()
 
-  return (
-    <Modalize
-      ref={ref}
-      handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
-      modalTopOffset={getStatusBarHeight() + 40}
-      modalStyle={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 600,
-        maxHeight: '50%',
-        width: '100%',
-        overflow: 'hidden',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        backgroundColor: theme.colors.reverse,
+    return (
+      <Wrapper>
+        <Modalize
+          ref={ref}
+          handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
+          modalTopOffset={getStatusBarHeight() + 40}
+          modalStyle={{
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            maxWidth: 600,
+            maxHeight: '50%',
+            width: '100%',
+            overflow: 'hidden',
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+            backgroundColor: theme.colors.reverse,
 
-        shadowColor: theme.colors.default,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 2,
-        paddingBottom: getBottomSpace(),
-        ...props.style,
-      }}
-      handlePosition="inside"
-      {...props}
-    />
-  )
-})
-
-const Body = ({
-  isOpen,
-  onClose,
-  children,
-  modalRef,
-  withPortal,
-  ...props
-}: MenuProps &
-  ModalizeProps & {
-    modalRef?: React.RefObject<Modalize>
-  }) => {
-  const ref = React.useRef<Modalize>(null)
-  useEffect(() => {
-    if (isOpen) {
-      modalRef ? modalRef?.current?.open() : ref.current?.open()
-    }
-  }, [isOpen, modalRef])
-
-  const Wrapper = withPortal ? Portal : React.Fragment
-
-  return (
-    <Wrapper>
-      <Container ref={modalRef || ref} onClose={onClose} {...props}>
-        {children}
-      </Container>
-    </Wrapper>
-  )
-}
+            shadowColor: theme.colors.default,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 2,
+            paddingBottom: getBottomSpace(),
+            ...props.style,
+          }}
+          handlePosition="inside"
+          {...props}
+        />
+      </Wrapper>
+    )
+  }
+)
 
 const Item = ({ children, tag, onPress, ...props }: ItemProps & TextProps) => (
   <Touchy onPress={onPress}>
@@ -117,5 +94,4 @@ const Item = ({ children, tag, onPress, ...props }: ItemProps & TextProps) => (
 export default {
   Body,
   Item,
-  Container,
 }

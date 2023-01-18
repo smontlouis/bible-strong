@@ -1,17 +1,15 @@
 // TODO - SPLIT THIS :(
 
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import { Modalize } from 'react-native-modalize'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
@@ -20,13 +18,9 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import getVersesRef from '~helpers/getVersesRef'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { timeout } from '~helpers/timeout'
-import ModalHeader from '~common/ModalHeader'
+import { useModalize } from '~helpers/useModalize'
 
-const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
-
-const ReferenceItem = ({ reference, version, onClosed }) => {
+const ReferenceItem = ({ reference, version }) => {
   const [Verse, setVerse] = useState(null)
 
   useEffect(() => {
@@ -46,7 +40,6 @@ const ReferenceItem = ({ reference, version, onClosed }) => {
   return (
     <Link
       route="BibleView"
-      onPress={onClosed}
       params={{
         isReadOnly: true,
         book,
@@ -118,18 +111,14 @@ const CardWrapper = waitForTresorModal(
     return (
       <Box flex>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-          <References
-            references={references}
-            version={version}
-            onClosed={onClosed}
-          />
+          <References references={references} version={version} />
         </ScrollView>
       </Box>
     )
   }
 )
 
-const References = ({ references, version, onClosed }) => {
+const References = ({ references, version }) => {
   const refs = references.commentaires
     ? JSON.parse(references.commentaires)
     : []
@@ -145,15 +134,8 @@ const References = ({ references, version, onClosed }) => {
 
   return refs.map((ref, i) => {
     const splittedRef = ref.split('-')
-    if (splittedRef.length === 3) {
-      return (
-        <ReferenceItem
-          key={ref + i}
-          reference={ref}
-          version={version}
-          onClosed={onClosed}
-        />
-      )
+    if (splittedRef.length === 3 && splittedRef[0] > 0) {
+      return <ReferenceItem key={ref + i} reference={ref} version={version} />
     }
 
     return (
@@ -168,11 +150,17 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
   const { title } = formatVerseContent([selectedVerse])
   const { t } = useTranslation()
   const theme = useTheme()
-  const ref = React.useRef<Modalize>(null)
+  const { ref, open, close } = useModalize()
+
+  useEffect(() => {
+    if (selectedVerse) {
+      open()
+    }
+  }, [selectedVerse, open])
 
   return (
     <Modal.Body
-      isOpen={!!selectedVerse}
+      ref={ref}
       onClose={onClosed}
       modalRef={ref}
       HeaderComponent={
@@ -183,7 +171,7 @@ const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
         />
       }
     >
-      <CardWrapper {...{ theme, selectedVerse, onClosed, version }} />
+      <CardWrapper {...{ theme, selectedVerse, onClosed: close, version }} />
     </Modal.Body>
   )
 }

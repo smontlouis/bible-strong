@@ -1,21 +1,19 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { atom, useAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { Modalize } from 'react-native-modalize'
 import { useNavigation } from 'react-navigation-hooks'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
-import formatVerseContent from '~helpers/formatVerseContent'
-import { CommentaryTab } from '~state/tabs'
-import CommentariesTabScreen from './CommentariesTabScreen'
-import produce from 'immer'
 import PopOverMenu from '~common/PopOverMenu'
-import MenuOption from '~common/ui/MenuOption'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { useModalize } from '~helpers/useModalize'
+import { CommentaryTab } from '~state/tabs'
+import CommentariesTabScreen from './CommentariesTabScreen'
 
 const CommentariesModal = ({
   verse,
@@ -27,9 +25,15 @@ const CommentariesModal = ({
   onClose: () => void
 }) => {
   const { t } = useTranslation()
-  const ref = React.useRef<Modalize>(null)
   const navigation = useNavigation()
   const openInNewTab = useOpenInNewTab()
+  const { ref, open, close } = useModalize()
+
+  useEffect(() => {
+    if (verse) {
+      open()
+    }
+  }, [verse, open])
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -52,12 +56,12 @@ const CommentariesModal = ({
 
   return (
     <Modal.Body
-      isOpen={!!verse}
+      ref={ref}
       onClose={onClose}
       modalRef={ref}
       HeaderComponent={
         <ModalHeader
-          onClose={() => ref?.current?.close()}
+          onClose={close}
           title={title}
           subTitle={t('Par thèmes')}
           rightComponent={

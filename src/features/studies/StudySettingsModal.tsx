@@ -1,6 +1,6 @@
 import { withTheme } from '@emotion/react'
 import { useSetAtom } from 'jotai'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -11,6 +11,7 @@ import { deleteStudy } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import { Theme } from '~themes'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
+import { useModalize } from '~helpers/useModalize'
 
 interface Props {
   isOpen: boolean
@@ -48,12 +49,20 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
     )
   }
 
+  const { ref, open, close } = useModalize()
+
+  useEffect(() => {
+    if (isOpen) {
+      open()
+    }
+  }, [isOpen, open])
+
   return (
-    <Modal.Body isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
-      {study && <PublishStudyMenuItem study={study} onClosed={onClosed} />}
+    <Modal.Body ref={ref} onClose={onClosed} adjustToContentHeight>
+      {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <Modal.Item
         onPress={() => {
-          onClosed()
+          close()
           openInNewTab(
             {
               id: `study-${Date.now()}`,
@@ -72,7 +81,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       </Modal.Item>
       <Modal.Item
         onPress={() => {
-          onClosed()
+          close()
           setMultipleTagsItem({ ...study, entity: 'studies' })
         }}
       >
@@ -80,7 +89,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       </Modal.Item>
       <Modal.Item
         onPress={() => {
-          onClosed()
+          close()
           setTitlePrompt({ id: study.id, title: study.title })
         }}
       >

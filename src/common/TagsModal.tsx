@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,6 +10,7 @@ import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import useFuzzy from '~helpers/useFuzzy'
+import { useModalize } from '~helpers/useModalize'
 import { hp } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { addTag } from '~redux/modules/user'
@@ -24,6 +25,15 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   const [newTag, setNewTag] = useState('')
+  const { ref, open } = useModalize()
+
+  // Refactor this
+  useEffect(() => {
+    if (isVisible) {
+      open()
+    }
+  }, [isVisible, open])
+
   const dispatch = useDispatch()
   const tags = useSelector(
     (state: RootState) =>
@@ -47,7 +57,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
 
   return (
     <Modal.Body
-      isOpen={isVisible}
+      ref={ref}
       onClose={onClosed}
       HeaderComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>

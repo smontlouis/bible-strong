@@ -4,13 +4,13 @@ import { useAtom } from 'jotai'
 import React, { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
-import { Modalize } from 'react-native-modalize'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import useFuzzy from '~helpers/useFuzzy'
+import { useModalize } from '~helpers/useModalize'
 import { hp } from '~helpers/utils'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -27,13 +27,14 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const MultipleTagsModal = () => {
   const [item, setItem] = useAtom(multipleTagsModalAtom)
-  const onClosed = () => setItem(false)
+  const { ref, open } = useModalize()
+
+  const onClose = () => setItem(false)
 
   const { t } = useTranslation()
   const [newTag, setNewTag] = useState('')
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
-  const modalRef = React.useRef<Modalize>(null)
   const tags = useSelector(
     (state: RootState) =>
       Object.values(state.user.bible.tags).sort((a, b) =>
@@ -47,7 +48,7 @@ const MultipleTagsModal = () => {
 
   useEffect(() => {
     if (item) {
-      modalRef?.current?.open()
+      open()
     }
   }, [item])
 
@@ -90,8 +91,8 @@ const MultipleTagsModal = () => {
 
   return (
     <Modal.Body
-      isOpen={!!item}
-      onClose={onClosed}
+      ref={ref}
+      onClose={onClose}
       modalHeight={hp(80, 600)}
       HeaderComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>

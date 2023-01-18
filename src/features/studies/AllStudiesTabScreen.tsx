@@ -3,7 +3,6 @@ import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import MultipleTagsModal from '~common/MultipleTagsModal'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import Box from '~common/ui/Box'
@@ -15,10 +14,10 @@ import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
 
 import { useTranslation } from 'react-i18next'
+import { useNavigation } from 'react-navigation-hooks'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
-import { useNavigation } from 'react-navigation-hooks'
 
 const StudiesScreen = ({ hasBackButton }: { hasBackButton?: boolean }) => {
   const { t } = useTranslation()
@@ -75,7 +74,7 @@ const StudiesScreen = ({ hasBackButton }: { hasBackButton?: boolean }) => {
               setIsOpen={setTagsIsOpen}
               isOpen={isTagsOpen}
               selectedChip={selectedChip}
-              hasBackButton
+              hasBackButton={hasBackButton}
             />
             <Empty
               source={require('~assets/images/empty.json')}

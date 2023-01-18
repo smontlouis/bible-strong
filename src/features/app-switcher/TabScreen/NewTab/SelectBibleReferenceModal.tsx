@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import Modal from '~common/Modal'
+import { useModalize } from '~helpers/useModalize'
 import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import {
   BibleTab,
@@ -27,9 +28,16 @@ const SelectBibleReferenceModal = ({
 }: SelectBibleReferenceModalProps) => {
   const [bible, actions] = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
+  const { ref, open, close } = useModalize()
+
+  useEffect(() => {
+    if (isOpen) {
+      open()
+    }
+  }, [isOpen, open])
 
   const getBibleData = () => {
-    onClose()
+    close()
     navigation.navigate('Livres')
     // We can't retrieve latest bible data here for some reason, maybe closure
     setCanGetData(true)
@@ -53,7 +61,7 @@ const SelectBibleReferenceModal = ({
   }
   return (
     <Modal.Body
-      isOpen={isOpen}
+      ref={ref}
       onClose={onClose}
       withPortal
       style={{ paddingTop: 40 }}

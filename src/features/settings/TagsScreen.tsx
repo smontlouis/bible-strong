@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
@@ -20,6 +20,7 @@ import { RootState } from '~redux/modules/reducer'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import useFuzzy from '~helpers/useFuzzy'
 import SearchInput from '~common/SearchInput'
+import { useModalize } from '~helpers/useModalize'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -124,6 +125,13 @@ const TagsScreen = () => {
     keys: ['name'],
   })
   const dispatch = useDispatch()
+  const { ref, open, close } = useModalize()
+
+  useEffect(() => {
+    if (isOpen) {
+      open()
+    }
+  }, [isOpen, open])
 
   const promptLogout = () => {
     Alert.alert(
@@ -135,7 +143,7 @@ const TagsScreen = () => {
           text: t('Oui'),
           onPress: () => {
             dispatch(removeTag(isOpen.id))
-            setOpen(false)
+            close()
           },
           style: 'destructive',
         },
@@ -171,14 +179,14 @@ const TagsScreen = () => {
       )}
 
       <Modal.Body
-        isOpen={!!isOpen}
+        ref={ref}
         onClose={() => setOpen(false)}
         adjustToContentHeight
       >
         <Modal.Item
           bold
           onPress={() => {
-            setOpen(false)
+            close()
             setTitlePrompt({ id: isOpen.id, name: isOpen.name })
           }}
         >

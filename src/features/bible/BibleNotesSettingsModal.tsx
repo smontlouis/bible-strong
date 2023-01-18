@@ -1,10 +1,11 @@
 import { withTheme } from '@emotion/react'
 import { useSetAtom } from 'jotai'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
+import { useModalize } from '~helpers/useModalize'
 import { deleteNote } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 
@@ -17,6 +18,14 @@ const NotesSettingsModal = ({
 }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const { ref, open, close } = useModalize()
+
+  useEffect(() => {
+    if (isOpen) {
+      open()
+    }
+  }, [isOpen, open])
+
   const noteId = isOpen
   const note = useSelector(
     state => state.user.bible.notes[noteId],
@@ -32,7 +41,10 @@ const NotesSettingsModal = ({
         { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
           text: t('Oui'),
-          onPress: () => dispatch(deleteNote(id), onClosed()),
+          onPress: () => {
+            dispatch(deleteNote(id))
+            close()
+          },
           style: 'destructive',
         },
       ]
@@ -40,10 +52,10 @@ const NotesSettingsModal = ({
   }
 
   return (
-    <Modal.Body isOpen={!!isOpen} onClose={onClosed} adjustToContentHeight>
+    <Modal.Body ref={ref} onClose={onClosed} adjustToContentHeight>
       <Modal.Item
         onPress={() => {
-          onClosed()
+          close()
           setTimeout(() => {
             openNoteEditor(noteId)
           }, 500)
@@ -54,7 +66,7 @@ const NotesSettingsModal = ({
       </Modal.Item>
       <Modal.Item
         onPress={() => {
-          onClosed()
+          close()
           setTimeout(() => {
             setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
           }, 500)

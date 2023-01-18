@@ -16,7 +16,7 @@ import SnackBar from '~common/SnackBar'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
-import { MaterialIcon } from '~common/ui/Icon'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { deleteAllDatabases } from '~helpers/database'
@@ -184,18 +184,22 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
               {t('Bible Thématique Nave')}
             </Text>
           </LinkItem>
-          {isLogged && (
-            <LinkItem route="Plans">
-              <MaterialIcon
-                name="playlist-add-check"
-                size={25}
-                style={{ marginRight: 15 }}
-              />
-              <Text bold fontSize={15}>
-                {t('Plans')}
-              </Text>
-            </LinkItem>
-          )}
+          <LinkItem route="Studies">
+            <FeatherIcon name="feather" style={{ marginRight: 15 }} size={25} />
+            <Text bold fontSize={15}>
+              {t('Études')}
+            </Text>
+          </LinkItem>
+          <LinkItem route="Plans">
+            <MaterialIcon
+              name="playlist-add-check"
+              size={25}
+              style={{ marginRight: 15 }}
+            />
+            <Text bold fontSize={15}>
+              {t('Plans')}
+            </Text>
+          </LinkItem>
           <LinkItem route="Highlights">
             <StyledIcon name="edit-3" size={25} />
             <Text bold fontSize={15}>

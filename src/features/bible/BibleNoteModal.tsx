@@ -1,26 +1,26 @@
-import React from 'react'
-import Modal from 'react-native-modal'
 import * as Icon from '@expo/vector-icons'
 import * as Sentry from '@sentry/react-native'
+import React, { useEffect, useState } from 'react'
+import Modal from 'react-native-modal'
 
 import styled from '@emotion/native'
-import { pure, compose } from 'recompose'
-import { connect } from 'react-redux'
-import { ScrollView, Alert, Share } from 'react-native'
+import { Alert, ScrollView, Share } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { useTranslation } from 'react-i18next'
 import Snackbar from '~common/SnackBar'
-import * as UserActions from '~redux/modules/user'
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import TextInput from '~common/ui/TextInput'
-import TextArea from '~common/ui/TextArea'
-import Paragraph from '~common/ui/Paragraph'
 import Button from '~common/ui/Button'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import TextArea from '~common/ui/TextArea'
+import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import verseToReference from '~helpers/verseToReference'
-import { withTranslation } from 'react-i18next'
+import { RootState } from '~redux/modules/reducer'
+import { addNote, deleteNote } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
   flexDirection: 'row',
@@ -65,24 +65,29 @@ const StyledIcon = styled.TouchableOpacity(({ theme, color }) => ({
   marginLeft: 10,
 }))
 
-class BibleNoteModal extends React.Component {
-  state = {
-    id: null,
-    reference: '',
-    title: '',
-    description: '',
-    tags: {},
-    isEditing: false,
-  }
+const BibleNoteModal = ({
+  noteVerses,
+  selectedVerses,
+  onClosed,
+  onSaveNote,
+  isOpen,
+}) => {
+  const [id, setId] = useState(null)
+  const [reference, setReference] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [tags, setTags] = useState({})
+  const [isEditing, setIsEditing] = useState(false)
 
-  backHandler
+  const dispatch = useDispatch()
+  const { t } = useTranslation()
+  const notes = useSelector((state: RootState) => state.user.bible.notes)
 
-  componentDidMount() {
-    const { noteVerses, selectedVerses } = this.props
-    this.loadPage(noteVerses || selectedVerses)
-  }
+  useEffect(() => {
+    loadPage(noteVerses || selectedVerses)
+  }, [])
 
-  checkIfExistingNote(notes, selectedVerses) {
+  const checkIfExistingNote = (notes, selectedVerses) => {
     const orderedVerses = orderVerses(selectedVerses)
     const key = Object.keys(orderedVerses).join('/')
     if (notes[key]) {
@@ -94,65 +99,60 @@ class BibleNoteModal extends React.Component {
     return null
   }
 
-  loadPage = verses => {
-    const { notes } = this.props
-    const existingNote = this.checkIfExistingNote(notes, verses)
+  const loadPage = verses => {
+    const existingNote = checkIfExistingNote(notes, verses)
     const reference = verseToReference(verses)
 
     if (existingNote) {
-      this.setState({
-        id: existingNote.key,
-        reference,
-        title: existingNote.title,
-        description: existingNote.description,
-        tags: existingNote.tags,
-        isEditing: false,
-      })
+      setId(existingNote.key)
+      setReference(reference)
+      setTitle(existingNote.title)
+      setDescription(existingNote.description)
+      setTags(existingNote.tags)
+      setIsEditing(false)
     } else {
-      this.setState({
-        reference,
-        title: '',
-        description: '',
-        isEditing: true,
-      })
+      setReference(reference)
+      setTitle('')
+      setDescription('')
+      setIsEditing(true)
     }
   }
 
-  onTitleChange = text => {
-    this.setState({ title: text })
+  const onTitleChange = (text: string) => {
+    setTitle(text)
   }
 
-  onDescriptionChange = text => {
-    this.setState({ description: text })
+  const onDescriptionChange = (text: string) => {
+    setDescription(text)
   }
 
-  onSaveNote = () => {
-    const { title, description, tags } = this.state
-    const { noteVerses, selectedVerses } = this.props
-    this.props.addNote(
-      { title, description, date: Date.now(), ...(tags && { tags }) },
-      noteVerses || selectedVerses
+  const onSaveNoteFunc = () => {
+    dispatch(
+      addNote(
+        { title, description, date: Date.now(), ...(tags && { tags }) },
+        noteVerses || selectedVerses
+      )
     )
     // TODO - clear selected verses
-    this.props.onClosed()
+    onClosed()
 
     const orderedVerses = orderVerses(noteVerses || selectedVerses)
     const key = Object.keys(orderedVerses).join('/')
 
-    this.props.onSaveNote && this.props.onSaveNote(key)
+    onSaveNote?.(key)
   }
 
-  deleteNote = noteId => {
+  const deleteNoteFunc = (noteId: string) => {
     Alert.alert(
-      this.props.t('Attention'),
-      this.props.t('Voulez-vous vraiment supprimer cette note?'),
+      t('Attention'),
+      t('Voulez-vous vraiment supprimer cette note?'),
       [
-        { text: this.props.t('Non'), onPress: () => null, style: 'cancel' },
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
-          text: this.props.t('Oui'),
+          text: t('Oui'),
           onPress: () => {
-            this.props.deleteNote(noteId)
-            this.props.onClosed()
+            dispatch(deleteNote(noteId))
+            onClosed()
           },
           style: 'destructive',
         },
@@ -160,128 +160,112 @@ class BibleNoteModal extends React.Component {
     )
   }
 
-  cancelEditing = () => {
-    if (!this.state.title) {
-      this.props.onClosed()
+  const cancelEditing = () => {
+    if (!title) {
+      onClosed()
     }
-    this.setState({ isEditing: false })
+    setIsEditing(false)
   }
 
-  shareNote = () => {
+  const shareNote = () => {
     try {
       const message = `
-Note pour ${this.state.reference}
+Note pour ${reference}
 
-${this.state.title}
+${title}
 
-${this.state.description}
+${description}
       `
       Share.share({ message })
     } catch (e) {
-      Snackbar.show(this.props.t('Erreur lors du partage.'))
+      Snackbar.show(t('Erreur lors du partage.'))
       console.log(e)
       Sentry.captureException(e)
     }
   }
 
-  render() {
-    const { isOpen, onClosed, t } = this.props
-    const { title, description, isEditing, id, tags } = this.state
-    const submitIsDisabled = !title || !description
+  const submitIsDisabled = !title || !description
 
-    return (
-      <StylizedModal
-        isVisible={isOpen}
-        animationInTiming={300}
-        avoidKeyboard
-        onBackButtonPress={onClosed}
-        animationIn="fadeInDown"
-        animationOut="fadeOutUp"
-      >
-        <Container>
-          <Text fontSize={16} bold color="darkGrey" marginBottom={10}>
-            {t('Note pour')} {this.state.reference}
-          </Text>
-          {isEditing && (
-            <>
-              <TextInput
-                placeholder={t('Titre')}
-                onChangeText={this.onTitleChange}
-                value={title}
-                style={{ marginTop: 20 }}
-              />
-              <TextArea
-                placeholder={t('Description')}
-                multiline
-                onChangeText={this.onDescriptionChange}
-                value={description}
-              />
-              <Box row marginTop="auto" justifyContent="flex-end">
-                <Button
-                  small
-                  reverse
-                  onPress={this.cancelEditing}
-                  style={{ marginRight: 10 }}
-                >
-                  {t('Annuler')}
-                </Button>
-                <Button
-                  small
-                  disabled={submitIsDisabled}
-                  onPress={this.onSaveNote}
-                >
-                  {t('Sauvegarder')}
-                </Button>
-              </Box>
-            </>
-          )}
-          {!isEditing && (
-            <>
-              <Text title fontSize={20} marginBottom={10}>
-                {title}
-              </Text>
-              <ScrollView style={{ flex: 1 }}>
-                <Paragraph small>{description}</Paragraph>
-                <TagList tags={tags} />
-              </ScrollView>
-              <Box row marginTop={10} justifyContent="flex-end">
-                {id && (
-                  <StyledIcon onPress={() => this.deleteNote(id)} color="quart">
-                    <Icon.Feather name="trash-2" size={15} color="white" />
-                  </StyledIcon>
-                )}
-                {id && (
-                  <StyledIcon onPress={() => this.shareNote()} color="success">
-                    <Icon.MaterialIcons name="share" size={15} color="white" />
-                  </StyledIcon>
-                )}
-                {id && (
-                  <StyledIcon
-                    onPress={() => this.setState({ isEditing: true })}
-                    color="primary"
-                  >
-                    <Icon.MaterialIcons name="edit" size={15} color="white" />
-                  </StyledIcon>
-                )}
-                <StyledIcon onPress={onClosed} color="grey">
-                  <Icon.MaterialIcons name="close" size={15} color="white" />
+  return (
+    <StylizedModal
+      isVisible={isOpen}
+      animationInTiming={300}
+      avoidKeyboard
+      onBackButtonPress={onClosed}
+      animationIn="fadeInDown"
+      animationOut="fadeOutUp"
+    >
+      <Container>
+        <Text fontSize={16} bold color="darkGrey" marginBottom={10}>
+          {t('Note pour')} {reference}
+        </Text>
+        {isEditing && (
+          <>
+            <TextInput
+              placeholder={t('Titre')}
+              onChangeText={onTitleChange}
+              value={title}
+              style={{ marginTop: 20 }}
+            />
+            <TextArea
+              placeholder={t('Description')}
+              multiline
+              onChangeText={onDescriptionChange}
+              value={description}
+            />
+            <Box row marginTop="auto" justifyContent="flex-end">
+              <Button
+                small
+                reverse
+                onPress={cancelEditing}
+                style={{ marginRight: 10 }}
+              >
+                {t('Annuler')}
+              </Button>
+              <Button
+                small
+                disabled={submitIsDisabled}
+                onPress={onSaveNoteFunc}
+              >
+                {t('Sauvegarder')}
+              </Button>
+            </Box>
+          </>
+        )}
+        {!isEditing && (
+          <>
+            <Text title fontSize={20} marginBottom={10}>
+              {title}
+            </Text>
+            <ScrollView style={{ flex: 1 }}>
+              <Paragraph small>{description}</Paragraph>
+              <TagList tags={tags} />
+            </ScrollView>
+            <Box row marginTop={10} justifyContent="flex-end">
+              {id && (
+                <StyledIcon onPress={() => deleteNoteFunc(id)} color="quart">
+                  <Icon.Feather name="trash-2" size={15} color="white" />
                 </StyledIcon>
-              </Box>
-            </>
-          )}
-        </Container>
-      </StylizedModal>
-    )
-  }
+              )}
+              {id && (
+                <StyledIcon onPress={() => shareNote()} color="success">
+                  <Icon.MaterialIcons name="share" size={15} color="white" />
+                </StyledIcon>
+              )}
+              {id && (
+                <StyledIcon onPress={() => setIsEditing(true)} color="primary">
+                  <Icon.MaterialIcons name="edit" size={15} color="white" />
+                </StyledIcon>
+              )}
+              <StyledIcon onPress={onClosed} color="grey">
+                <Icon.MaterialIcons name="close" size={15} color="white" />
+              </StyledIcon>
+            </Box>
+          </>
+        )}
+      </Container>
+    </StylizedModal>
+  )
 }
 
-export default compose(
-  pure,
-  withTranslation(),
-  connect(
-    state => ({
-      notes: state.user.bible.notes,
-    }),
-    { ...UserActions }
-  )
-)(BibleNoteModal)
+export default BibleNoteModal
