@@ -22,6 +22,7 @@ import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
+import { BackHandler } from 'react-native'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -97,21 +98,27 @@ const AppSwitcherScreenWrapper = (props: any) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
   const tabsCount = useAtomValue(tabsCountAtom)
+  const isMenuOpen = React.useRef(false)
+  const isHomeOpen = React.useRef(false)
 
   const openMenu = useCallback(() => {
     moreDrawerRef.current?.openDrawer()
+    isMenuOpen.current = true
   }, [])
 
   const closeMenu = useCallback(() => {
     moreDrawerRef.current?.closeDrawer()
+    isMenuOpen.current = false
   }, [])
 
   const openHome = useCallback(() => {
     homeDrawerRef.current?.openDrawer()
+    isHomeOpen.current = true
   }, [])
 
   const closeHome = useCallback(() => {
     homeDrawerRef.current?.closeDrawer()
+    isHomeOpen.current = false
   }, [])
 
   // Not the best, but when adding a new tab, close home drawer
@@ -128,6 +135,27 @@ const AppSwitcherScreenWrapper = (props: any) => {
     () => <MoreScreen closeMenu={closeMenu} />,
     [closeMenu]
   )
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (isMenuOpen.current) {
+          closeMenu()
+          return true
+        }
+
+        if (isHomeOpen.current) {
+          closeHome()
+          return true
+        }
+
+        return false
+      }
+    )
+
+    return () => backHandler.remove()
+  }, [closeHome, closeMenu])
 
   return (
     <DrawerLayout
