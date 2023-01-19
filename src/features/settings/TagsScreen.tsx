@@ -21,6 +21,7 @@ import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import useFuzzy from '~helpers/useFuzzy'
 import SearchInput from '~common/SearchInput'
 import { useModalize } from '~helpers/useModalize'
+import { sortedTagsSelector } from '~redux/selectors/tags'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -112,13 +113,7 @@ const TagItem = ({ item, setOpen }) => {
 
 const TagsScreen = () => {
   const { t } = useTranslation()
-  const tags = useSelector(
-    (state: RootState) =>
-      Object.values(state.user.bible.tags).sort((a, b) =>
-        a.name.localeCompare(b.name)
-      ),
-    shallowEqual
-  )
+  const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {

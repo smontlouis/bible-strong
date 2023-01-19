@@ -14,6 +14,7 @@ import { useModalize } from '~helpers/useModalize'
 import { hp } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { addTag } from '~redux/modules/user'
+import { sortedTagsSelector } from '~redux/selectors/tags'
 import Modal from './Modal'
 import SearchInput from './SearchInput'
 import Spacer from './ui/Spacer'
@@ -35,13 +36,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   }, [isVisible, open])
 
   const dispatch = useDispatch()
-  const tags = useSelector(
-    (state: RootState) =>
-      Object.values(state.user.bible.tags).sort((a, b) =>
-        a.name.localeCompare(b.name)
-      ),
-    shallowEqual
-  )
+  const tags = useSelector(sortedTagsSelector, shallowEqual)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })

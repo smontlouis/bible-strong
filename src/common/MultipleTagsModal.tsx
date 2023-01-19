@@ -15,6 +15,7 @@ import { hp } from '~helpers/utils'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
+import { sortedTagsSelector } from '~redux/selectors/tags'
 import { multipleTagsModalAtom } from '../state/app'
 import Modal from './Modal'
 import SearchInput from './SearchInput'
@@ -35,13 +36,7 @@ const MultipleTagsModal = () => {
   const [newTag, setNewTag] = useState('')
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
-  const tags = useSelector(
-    (state: RootState) =>
-      Object.values(state.user.bible.tags).sort((a, b) =>
-        a.name.localeCompare(b.name)
-      ),
-    shallowEqual
-  )
+  const tags = useSelector(sortedTagsSelector, shallowEqual)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
