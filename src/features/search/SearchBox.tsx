@@ -23,7 +23,6 @@ const SearchBox = ({
   onSubmit,
   onClear,
 }: Props) => {
-  console.log('render SearchBox')
   return (
     <Box px={20}>
       <SearchInput

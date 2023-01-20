@@ -49,7 +49,6 @@ const SearchInTimelineModal = ({
   const [canQuery, setCanQuery] = React.useState(true)
 
   const onSubmit = useCallback((callback: Function, value: string) => {
-    console.log('onSubmit')
     checkSearchQuota(
       () => {
         setCanQuery(true)
@@ -64,7 +63,6 @@ const SearchInTimelineModal = ({
   }, [])
 
   const onClear = useCallback(() => {
-    console.log('onClear')
     setSubmittedValue('')
     setSearchValue('')
   }, [])
@@ -73,8 +71,6 @@ const SearchInTimelineModal = ({
     eventModalRef.current?.open()
     setEvent(event)
   }
-
-  console.log('hiiiii')
 
   return (
     <Modalize
