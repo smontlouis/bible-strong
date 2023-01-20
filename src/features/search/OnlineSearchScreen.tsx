@@ -29,24 +29,28 @@ const OnlineSearchScreen = ({
   const { t } = useTranslation()
   const isFR = useLanguage()
 
-  const debouncedSearchValue = useDebounce(searchValue, 500)
-  const previousValue = usePrevious(debouncedSearchValue)
-
   const checkSearchQuota = useQuota('bibleSearch')
   const [canQuery, setCanQuery] = React.useState(true)
+  const [submittedValue, setSubmittedValue] = React.useState('')
 
-  useEffect(() => {
-    if (previousValue !== debouncedSearchValue && debouncedSearchValue) {
-      checkSearchQuota(
-        () => {
-          setCanQuery(true)
-        },
-        () => {
-          setCanQuery(false)
-        }
-      )
-    }
-  }, [debouncedSearchValue, previousValue, checkSearchQuota])
+  const onSubmit = (callback: Function, value: string) => {
+    checkSearchQuota(
+      () => {
+        setCanQuery(true)
+        callback()
+        setSubmittedValue(value)
+      },
+      () => {
+        setCanQuery(false)
+        setSubmittedValue('')
+      }
+    )
+  }
+
+  const onClear = () => {
+    setSubmittedValue('')
+    setSearchValue('')
+  }
 
   return (
     <>
@@ -55,15 +59,13 @@ const OnlineSearchScreen = ({
         <>
           <SearchBox
             placeholder={t('search.placeholder')}
-            debouncedValue={debouncedSearchValue}
             value={searchValue}
             onChange={setSearchValue}
+            onSubmit={onSubmit}
+            onClear={onClear}
           />
           <Filters />
-          <SearchResults
-            canQuery={canQuery}
-            searchValue={debouncedSearchValue}
-          />
+          <SearchResults canQuery={canQuery} searchValue={submittedValue} />
         </>
       </InstantSearch>
     </>

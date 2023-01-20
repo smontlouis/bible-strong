@@ -187,7 +187,7 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
   }
 
   return (
-    <Box px={20}>
+    <Box px={20} flex={1}>
       <SearchInput
         placeholder={t('search.placeholder')}
         onChangeText={setSearchValue}

@@ -6,10 +6,19 @@ import { Appearance, EmitterSubscription, Platform } from 'react-native'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
+import blackColors from '~themes/blackColors'
+import defaultColors from '~themes/colors'
+import darkColors from '~themes/darkColors'
+import mauveColors from '~themes/mauveColors'
+import natureColors from '~themes/natureColors'
+import nightColors from '~themes/nightColors'
+import sepiaColors from '~themes/sepiaColors'
+import sunsetColors from '~themes/sunsetColors'
+
 import ImmersiveMode from 'react-native-immersive-mode'
 import Container from '~common/ui/Container'
-import BibleParamsModal from './BibleParamsModal'
 import BibleViewer from './BibleViewer'
+const deepmerge = require('@fastify/deepmerge')()
 
 import { NavigationStackProp } from 'react-navigation-stack'
 
@@ -25,47 +34,65 @@ interface BibleTabScreenProps {
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const [hasPaddingTop, setHasPaddingTop] = React.useState(false)
-  const theme = useTheme()
   const dispatch = useDispatch()
 
   const { settings, fontFamily } = useSelector(
     (state: RootState) => ({
       settings: produce(state.user.bible.settings, draftState => {
-        draftState.colors.default = {
-          ...theme.colors,
-          ...draftState.colors.default,
-        }
-        draftState.colors.dark = {
-          ...theme.colors,
-          ...draftState.colors.dark,
-        }
-        draftState.colors.black = {
-          ...theme.colors,
-          ...draftState.colors.black,
-        }
-        draftState.colors.sepia = {
-          ...theme.colors,
-          ...draftState.colors.sepia,
-        }
+        // TODO: WHY IS THIS HERE?
+        draftState.colors.default = deepmerge(
+          defaultColors,
+          draftState.colors.default || {}
+        )
+        draftState.colors.dark = deepmerge(
+          darkColors,
+          draftState.colors.dark || {}
+        )
+        draftState.colors.black = deepmerge(
+          blackColors,
+          draftState.colors.black || {}
+        )
+        draftState.colors.sepia = deepmerge(
+          sepiaColors,
+          draftState.colors.sepia || {}
+        )
+        draftState.colors.mauve = deepmerge(
+          mauveColors,
+          draftState.colors.mauve || {}
+        )
+        draftState.colors.nature = deepmerge(
+          natureColors,
+          draftState.colors.nature || {}
+        )
+        draftState.colors.night = deepmerge(
+          nightColors,
+          draftState.colors.night || {}
+        )
+        draftState.colors.sunset = deepmerge(
+          sunsetColors,
+          draftState.colors.sunset || {}
+        )
+        // TODO: END - WHY IS THIS HERE?
 
-        const preferredColorScheme = draftState.preferredColorScheme
-        const preferredDarkTheme = draftState.preferredDarkTheme
-        const preferredLightTheme = draftState.preferredLightTheme
+        const preferredColorScheme = draftState.preferredColorScheme || 'auto'
+        const preferredDarkTheme = draftState.preferredDarkTheme || 'dark'
+        const preferredLightTheme = draftState.preferredLightTheme || 'default'
         const systemColorScheme = Appearance.getColorScheme()
 
         // Provide derived theme as a settings now that we removed it from the redux store
         // @ts-ignore
-        draftState.theme = (() => {
-          if (preferredColorScheme === 'auto') {
-            if (systemColorScheme === 'dark') {
-              return preferredDarkTheme
+        draftState.theme =
+          (() => {
+            if (preferredColorScheme === 'auto') {
+              if (systemColorScheme === 'dark') {
+                return preferredDarkTheme
+              }
+              return preferredLightTheme
             }
-            return preferredLightTheme
-          }
 
-          if (preferredColorScheme === 'dark') return preferredDarkTheme
-          return preferredLightTheme
-        })()
+            if (preferredColorScheme === 'dark') return preferredDarkTheme
+            return preferredLightTheme
+          })() || 'default'
       }),
       fontFamily: state.user.fontFamily,
     }),
@@ -103,7 +130,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
 
     return () => {
       if (Platform.OS === 'android') {
-        listen.remove()
+        listen?.remove()
       }
     }
   }, [dispatch, settings.commentsDisplay])
