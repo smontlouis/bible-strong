@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import Modal from 'react-native-modal'
-import { TouchableOpacity } from 'react-native'
 import * as Icon from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
+import { TouchableOpacity } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import Modal from 'react-native-modal'
 
-import { withTheme } from '@emotion/react'
 import styled from '@emotion/native'
+import { withTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
 import TextInput from '~common/ui/TextInput'
-import { useTranslation } from 'react-i18next'
 
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',

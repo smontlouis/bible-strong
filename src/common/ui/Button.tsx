@@ -46,8 +46,8 @@ const WrapperButton = styled.TouchableOpacity(
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: 15,
+    paddingRight: 15,
     flexDirection: 'row',
 
     ...(fullWidth && { flex: 1 }),

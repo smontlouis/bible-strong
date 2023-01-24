@@ -8,6 +8,7 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
+import SearchInput from '~common/SearchInput'
 import TitlePrompt from '~common/TitlePrompt'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
@@ -16,11 +17,9 @@ import FabButton from '~common/ui/FabButton'
 import FlatList from '~common/ui/FlatList'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { RootState } from '~redux/modules/reducer'
-import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import useFuzzy from '~helpers/useFuzzy'
-import SearchInput from '~common/SearchInput'
 import { useModalize } from '~helpers/useModalize'
+import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 
 const Chip = styled(Box)(({ theme }) => ({
@@ -209,7 +208,6 @@ const TagsScreen = () => {
         onPress={() => {
           setTitlePrompt(true)
         }}
-        align="flex-end"
       />
     </Container>
   )

@@ -3,6 +3,7 @@ import analytics from '@react-native-firebase/analytics'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { getLangIsFr } from '~i18n'
+import { VerseIds } from '~common/types'
 
 const SET_TEMP_SELECTED_BOOK = 'bible/SET_TEMP_SELECTED_BOOK'
 const SET_TEMP_SELECTED_CHAPTER = 'bible/SET_TEMP_SELECTED_CHAPTER'
@@ -36,7 +37,7 @@ interface BibleState {
     selectedChapter: number
     selectedVerse: number
   }
-  selectedVerses: { [verse: string]: true }
+  selectedVerses: VerseIds
   selectionMode: 'grid' | 'list'
 }
 

@@ -31,7 +31,6 @@ class BibleVerseNotes extends Component {
   state = {
     title: '',
     notes: [],
-    isEditNoteOpen: false,
     noteVerses: null,
     isTagsOpen: false,
     selectedChip: null,
@@ -83,11 +82,11 @@ class BibleVerseNotes extends Component {
       accuRefs[key] = true
       return accuRefs
     }, {})
-    this.setState({ isEditNoteOpen: true, noteVerses })
+    this.setState({ noteVerses })
   }
 
   closeNoteEditor = () => {
-    this.setState({ isEditNoteOpen: false })
+    this.setState({ noteVerses: undefined })
   }
 
   deleteNote = noteId => {
@@ -161,13 +160,10 @@ class BibleVerseNotes extends Component {
             message={this.props.t("Vous n'avez pas encore de notes...")}
           />
         )}
-        {this.state.isEditNoteOpen && (
-          <BibleNoteModal
-            onClosed={this.closeNoteEditor}
-            isOpen={this.state.isEditNoteOpen}
-            noteVerses={this.state.noteVerses}
-          />
-        )}
+        <BibleNoteModal
+          onClosed={this.closeNoteEditor}
+          noteVerses={this.state.noteVerses}
+        />
         <TagsModal
           isVisible={isTagsOpen}
           onClosed={() => this.setTagsIsOpen(false)}

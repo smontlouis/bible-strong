@@ -1,5 +1,7 @@
 import produce from 'immer'
+import { VerseIds } from '~common/types'
 import orderVerses from '~helpers/orderVerses'
+import { Note } from '../user'
 import { removeEntityInTags } from '../utils'
 
 export const ADD_NOTE = 'user/ADD_NOTE'
@@ -25,7 +27,7 @@ export default produce((draft, action) => {
 })
 
 // NOTES
-export function addNote(note, selectedVerses) {
+export function addNote(note: Note, selectedVerses: VerseIds) {
   selectedVerses = orderVerses(selectedVerses)
   const key = Object.keys(selectedVerses).join('/')
 
@@ -35,7 +37,7 @@ export function addNote(note, selectedVerses) {
   return { type: ADD_NOTE, payload: { [key]: note } }
 }
 
-export function deleteNote(noteId) {
+export function deleteNote(noteId: string) {
   return {
     type: REMOVE_NOTE,
     payload: noteId,

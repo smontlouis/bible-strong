@@ -4,7 +4,7 @@ import { atomWithDefault, loadable, splitAtom } from 'jotai/utils'
 import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
-import { StrongReference } from '~common/types'
+import { StrongReference, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { versions } from '~helpers/bibleVersions'
 import i18n, { getLangIsFr } from '~i18n'
@@ -19,7 +19,7 @@ export type TabBase = {
 
 export type VersionCode = keyof typeof versions
 export type BookName = typeof books[number]['Nom']
-export type SelectedVerses = { [verse: string]: true }
+export type SelectedVerses = VerseIds
 export interface BibleTab extends TabBase {
   type: 'bible'
   data: {
@@ -480,7 +480,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   )
 
   const selectAllVerses = useCallback(
-    (ids: { [verse: string]: true }) => {
+    (ids: VerseIds) => {
       setBibleTab(
         produce(draft => {
           draft.data.selectedVerses = ids
