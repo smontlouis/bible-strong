@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { atom, PrimitiveAtom, useAtom } from 'jotai'
-import { atomWithDefault, splitAtom } from 'jotai/utils'
+import { atomWithDefault, loadable, splitAtom } from 'jotai/utils'
 import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -260,6 +260,10 @@ export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
 export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [
   getDefaultBibleTab(),
 ])
+
+export const loadableActiveIndexAtom = loadable(activeTabIndexAtomOriginal)
+
+export const loadableTabsAtom = loadable(tabsAtom)
 
 export const activeTabIndexAtom = atom(
   get => {
