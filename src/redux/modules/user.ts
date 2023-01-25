@@ -304,7 +304,13 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.subscription = subscription
 
-      draft.bible = deepmerge(getInitialState().bible, bible || {})
+      // Always initialize bible data with initial state
+      const prevDataBible = deepmerge(
+        getInitialState().bible,
+        draft.bible || {}
+      )
+
+      draft.bible = deepmerge(prevDataBible, bible || {})
 
       break
     }
