@@ -1,9 +1,9 @@
 import { atomWithStorage as aws, createJSONStorage } from 'jotai/utils'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import FilesystemStorage from 'redux-persist-filesystem-storage'
 import { PrimitiveAtom } from 'jotai'
 
 const defaultStorage = {
-  ...createJSONStorage(() => AsyncStorage),
+  ...createJSONStorage(() => FilesystemStorage),
   // Adding delay init true to avoid rehydration diff
   delayInit: true,
 }
