@@ -1,12 +1,8 @@
 import { atomWithStorage as aws, createJSONStorage } from 'jotai/utils'
-import FilesystemStorage from 'redux-persist-filesystem-storage'
+import fileSystemStorage from './fileSystemStorage'
 
-const defaultStorage = {
-  ...createJSONStorage(() => FilesystemStorage),
-  delayInit: true,
+const atomWithAsyncStorage = <Value>(key: string, initialValue: Value) => {
+  const defaultStorage = createJSONStorage<Value>(() => fileSystemStorage)
+  return aws<Value>(key, initialValue, defaultStorage)
 }
-
-const atomWithAsyncStorage = <Value>(key: string, initialValue: Value) =>
-  aws<Value>(key, initialValue, defaultStorage)
-
 export default atomWithAsyncStorage
