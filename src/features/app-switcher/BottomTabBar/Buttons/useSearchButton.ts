@@ -1,4 +1,4 @@
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useSlideNewTab } from '~features/app-switcher/utils/useSlideNewTab'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
 import { useTabsQuota } from '~helpers/usePremium'

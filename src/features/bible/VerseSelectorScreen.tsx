@@ -1,7 +1,7 @@
 import React from 'react'
 import { ScrollView } from 'react-native'
 
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import {
   NavigationStackProp,
   NavigationStackScreenProps,

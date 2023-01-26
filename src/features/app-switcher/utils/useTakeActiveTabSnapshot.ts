@@ -1,5 +1,5 @@
 import produce from 'immer'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
 import useDynamicRefs from '~helpers/useDynamicRefs'
 import { tabsAtom, tabsAtomsAtom } from '../../../state/tabs'

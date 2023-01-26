@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai'
+import { useAtomValue } from 'jotai/react'
 import { useState, useEffect } from 'react'
 import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'

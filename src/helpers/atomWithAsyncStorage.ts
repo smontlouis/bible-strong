@@ -1,4 +1,4 @@
-import { atomWithStorage as aws, createJSONStorage } from 'jotai/utils'
+import { atomWithStorage as aws, createJSONStorage } from 'jotai/vanilla/utils'
 import fileSystemStorage from './fileSystemStorage'
 
 const atomWithAsyncStorage = <Value>(key: string, initialValue: Value) => {

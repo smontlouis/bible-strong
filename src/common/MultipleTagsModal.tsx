@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import React, { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'

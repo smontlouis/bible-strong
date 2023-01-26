@@ -1,4 +1,4 @@
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, SectionList } from 'react-native'

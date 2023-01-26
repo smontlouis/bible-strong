@@ -1,5 +1,5 @@
 import { withTheme } from '@emotion/react'
-import { useSetAtom } from 'jotai'
+import { useSetAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'

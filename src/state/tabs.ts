@@ -1,6 +1,7 @@
 import produce from 'immer'
-import { atom, PrimitiveAtom, useAtom } from 'jotai'
-import { atomWithDefault, loadable, splitAtom } from 'jotai/utils'
+import { PrimitiveAtom, atom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
+import { atomWithDefault, loadable, splitAtom } from 'jotai/vanilla/utils'
 import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'

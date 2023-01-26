@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useRef } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 

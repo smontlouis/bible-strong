@@ -18,7 +18,7 @@ import getBiblePericope from '~helpers/getBiblePericope'
 import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 import { useGetDefaultBibleTabAtom } from '../../state/tabs'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,

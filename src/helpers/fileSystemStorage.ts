@@ -30,7 +30,7 @@ const fileSystemStorage = {
       })
     )
 
-    if (err) {
+    if (err || !value) {
       return null
     }
 

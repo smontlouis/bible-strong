@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import React from 'react'
 import { Verse } from '~common/types'
 import loadBible from '~helpers/loadBible'

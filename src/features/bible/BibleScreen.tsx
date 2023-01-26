@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import {
   BibleTab,

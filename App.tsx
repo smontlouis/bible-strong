@@ -4,9 +4,16 @@ import analytics from '@react-native-firebase/analytics'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Alert,
+  LogBox,
+  StatusBar,
+  Text,
+  View,
+} from 'react-native'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'

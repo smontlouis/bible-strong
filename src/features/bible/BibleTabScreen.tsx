@@ -22,7 +22,7 @@ const deepmerge = require('@fastify/deepmerge')()
 
 import { NavigationStackProp } from 'react-navigation-stack'
 
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'

@@ -1,7 +1,7 @@
 import Snackbar from '~common/SnackBar'
 import { useNavigation } from 'react-navigation-hooks'
 import { useTranslation } from 'react-i18next'
-import { useSetAtom } from 'jotai'
+import { useSetAtom } from 'jotai/react'
 import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'
 import { useTabsQuota } from '~helpers/usePremium'

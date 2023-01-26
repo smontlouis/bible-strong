@@ -1,6 +1,7 @@
 import { useTheme } from '@emotion/react'
 import produce from 'immer'
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Switch } from 'react-native-paper'

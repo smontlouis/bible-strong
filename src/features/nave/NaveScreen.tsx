@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { NavesTab } from '~state/tabs'

@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import Lottie from 'lottie-react-native'
 import React from 'react'
 import { useTranslation } from 'react-i18next'

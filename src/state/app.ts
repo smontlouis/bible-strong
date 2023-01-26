@@ -1,4 +1,4 @@
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
 import { VerseIds } from '~common/types'
 import {
   activeTabIndexAtomOriginal,

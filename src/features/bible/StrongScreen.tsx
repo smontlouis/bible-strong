@@ -1,5 +1,5 @@
 import React from 'react'
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
 import { useMemo } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { StrongReference } from '~common/types'

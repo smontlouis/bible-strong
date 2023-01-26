@@ -1,4 +1,4 @@
-import { useSetAtom } from 'jotai'
+import { useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import SnackBar from '~common/SnackBar'

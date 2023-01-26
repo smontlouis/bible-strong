@@ -1,4 +1,5 @@
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableBox } from '~common/ui/Box'

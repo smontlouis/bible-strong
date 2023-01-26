@@ -1,4 +1,5 @@
-import { PrimitiveAtom, useAtomValue } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtomValue } from 'jotai/react'
 import React, { memo } from 'react'
 import { Image, StyleSheet } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'

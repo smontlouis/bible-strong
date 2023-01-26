@@ -9,7 +9,7 @@ import RNSectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getVersionsBySections } from '~helpers/bibleVersions'
 
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
 import VersionSelectorItem from './VersionSelectorItem'
