@@ -5,7 +5,7 @@ import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import Container from '~common/ui/Container'
 
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import Modal from '~common/Modal'

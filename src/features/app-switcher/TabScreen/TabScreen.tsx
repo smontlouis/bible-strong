@@ -1,4 +1,5 @@
-import { PrimitiveAtom, useAtomValue } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtomValue } from 'jotai/react'
 import React, { forwardRef, memo } from 'react'
 import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'

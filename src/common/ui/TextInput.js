@@ -3,33 +3,24 @@ import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
 
-const TextInput = styled.TextInput(({ theme, noBorder, leftIcon }) => ({
+const TextInput = styled.TextInput(({ theme, leftIcon }) => ({
   color: theme.colors.default,
-  paddingBottom: 10,
-  marginTop: 10,
-  ...(!noBorder && {
-    borderBottomColor: theme.colors.border,
-    borderBottomWidth: 2,
-  }),
-  ...(leftIcon && {
-    paddingLeft: 30,
-  }),
+  height: 48,
+  borderColor: theme.colors.border,
+  borderWidth: 2,
+  borderRadius: 10,
+  paddingLeft: leftIcon ? 45 : 15,
 }))
 
 const LeftIcon = styled(Box)(() => ({
   position: 'absolute',
-  left: 0,
+  left: 15,
   bottom: 13,
 }))
 
 export default withTheme(props => (
   <Box position="relative">
     {props.leftIcon && <LeftIcon>{props.leftIcon}</LeftIcon>}
-    <TextInput
-      placeholderTextColor={
-        props.placeholderTextColor || props.theme.colors.default
-      }
-      {...props}
-    />
+    <TextInput placeholderTextColor={props.theme.colors.grey} {...props} />
   </Box>
 ))

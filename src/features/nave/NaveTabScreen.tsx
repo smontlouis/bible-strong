@@ -26,7 +26,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { NavesTab } from '~state/tabs'
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)

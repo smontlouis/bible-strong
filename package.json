@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "16.2.0",
+  "version": "16.3.4",
   "scripts": {
     "start": "react-native start",
     "android": "react-native run-android --variant=devDebug --appIdSuffix=dev",
@@ -105,7 +105,7 @@
     "immer": "^9.0.16",
     "intl": "^1.2.5",
     "intl-locales-supported": "^1.6.0",
-    "jotai": "^1.10.0",
+    "jotai": "^1.13.1",
     "lodash": "^4.17.21",
     "lottie-ios": "3.4.0",
     "lottie-react-native": "5.1.4",

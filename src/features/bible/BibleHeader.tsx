@@ -3,33 +3,27 @@ import React, { useEffect } from 'react'
 import { Platform, StatusBar } from 'react-native'
 import ImmersiveMode from 'react-native-immersive-mode'
 
-import { useTheme } from '@emotion/react'
 import * as Animatable from 'react-native-animatable'
-import {
-  Menu,
-  MenuOptions,
-  MenuTrigger,
-  renderers,
-} from 'react-native-popup-menu'
 
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import Back from '~common/Back'
 import Link from '~common/Link'
 import ParallelIcon from '~common/ParallelIcon'
+import PopOverMenu from '~common/PopOverMenu'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { getIfDatabaseExists } from '~helpers/database'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
-import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { fullscreenAtom } from '../../state/app'
-import MenuOption from '~common/ui/MenuOption'
-import PopOverMenu from '~common/PopOverMenu'
+import { BibleTab, useBibleTabActions } from '../../state/tabs'
 
 const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',

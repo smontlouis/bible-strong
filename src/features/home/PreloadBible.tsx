@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import React, { PropsWithChildren } from 'react'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'

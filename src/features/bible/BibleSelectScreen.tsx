@@ -1,4 +1,4 @@
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackScreenProps } from 'react-navigation-stack'

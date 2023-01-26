@@ -36,11 +36,11 @@ const PremiumScreen = () => {
 
   useInitIAP()
 
-  if (hasPremium) {
-    return (
-      <Container>
-        <Header hasBackButton />
-        <ScrollView>
+  return (
+    <Container>
+      <Header hasBackButton title={t('Devenez un sponsor !')} />
+      <ScrollView>
+        {hasPremium && (
           <Box p={20} mb={40}>
             <Text fontSize={30} title>
               {t('Merci de nous soutenir !')}
@@ -65,15 +65,7 @@ const PremiumScreen = () => {
               </Text>
             </LinkBox>
           </Box>
-        </ScrollView>
-      </Container>
-    )
-  }
-
-  return (
-    <Container>
-      <Header hasBackButton title={t('Devenez un sponsor !')} />
-      <ScrollView>
+        )}
         <ReachGoal />
 
         {!isLogged ? (

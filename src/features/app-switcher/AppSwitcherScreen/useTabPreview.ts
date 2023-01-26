@@ -1,4 +1,5 @@
-import { PrimitiveAtom, useAtomValue, useSetAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { TapGestureHandlerGestureEvent } from 'react-native-gesture-handler'
 import {

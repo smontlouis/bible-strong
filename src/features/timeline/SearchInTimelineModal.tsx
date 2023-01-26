@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Modalize } from 'react-native-modalize'
 import { Theme } from '~themes'
 import { useTheme } from '@emotion/react'
@@ -43,23 +43,29 @@ const SearchInTimelineModal = ({
   const { t } = useTranslation()
   const theme: Theme = useTheme()
   const [searchValue, setSearchValue] = React.useState('')
-  const debouncedSearchValue = useDebounce(searchValue, 500)
-  const previousValue = usePrevious(debouncedSearchValue)
+  const [submittedValue, setSubmittedValue] = React.useState('')
+
   const checkSearchQuota = useQuota('timelineSearch')
   const [canQuery, setCanQuery] = React.useState(true)
 
-  useEffect(() => {
-    if (previousValue !== debouncedSearchValue && debouncedSearchValue) {
-      checkSearchQuota(
-        () => {
-          setCanQuery(true)
-        },
-        () => {
-          setCanQuery(false)
-        }
-      )
-    }
-  }, [debouncedSearchValue, previousValue, checkSearchQuota])
+  const onSubmit = useCallback((callback: Function, value: string) => {
+    checkSearchQuota(
+      () => {
+        setCanQuery(true)
+        callback()
+        setSubmittedValue(value)
+      },
+      () => {
+        setCanQuery(false)
+        setSubmittedValue('')
+      }
+    )
+  }, [])
+
+  const onClear = useCallback(() => {
+    setSubmittedValue('')
+    setSearchValue('')
+  }, [])
 
   const onOpenEvent = event => {
     eventModalRef.current?.open()
@@ -79,9 +85,10 @@ const SearchInTimelineModal = ({
       HeaderComponent={
         <Box pt={20}>
           <SearchBox
-            debouncedValue={debouncedSearchValue}
             value={searchValue}
             onChange={setSearchValue}
+            onSubmit={onSubmit}
+            onClear={onClear}
             placeholder={t('Rechercher un événement dans la Bible')}
           />
           <Filters />
@@ -90,13 +97,13 @@ const SearchInTimelineModal = ({
       flatListProps={{
         ItemSeparatorComponent: () => <Border />,
 
-        data: debouncedSearchValue ? hits : [],
+        data: submittedValue ? hits : [],
         keyExtractor: item => item.objectID,
         onEndReached: () => {
           hasMore && refine()
         },
         ListHeaderComponent:
-          !debouncedSearchValue || !canQuery ? (
+          !submittedValue || !canQuery ? (
             <Empty
               source={require('~assets/images/search-loop.json')}
               message={t('Faites une recherche dans la Bible !')}

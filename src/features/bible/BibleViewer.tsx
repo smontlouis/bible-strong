@@ -15,11 +15,12 @@ import loadMhyComments from '~helpers/loadMhyComments'
 import { audioDefault, audioV2 } from '~helpers/topBibleAudio'
 import { zeroFill } from '~helpers/zeroFill'
 
-import { PrimitiveAtom, useSetAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { shallowEqual } from 'recompose'
-import { Verse } from '~common/types'
+import { Verse, VerseIds } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import NaveModal from '~features/nave/NaveModal'
 import useLanguage from '~helpers/useLanguage'
@@ -56,7 +57,7 @@ const Container = styled.View({
 const ReadMeButton = styled(Button)({
   marginTop: 5,
   marginBottom: 10 + getBottomSpace(),
-  width: 250,
+  width: 270,
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
@@ -102,14 +103,9 @@ const BibleViewer = ({
   const [comments, setComments] = useState(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [quickTagsModal, setQuickTagsModal] = useState<
-    | { ids: { [verse: string]: true }; entity: string }
-    | { id: string; entity: string }
-    | false
+    { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
-  const [isCreateNoteOpen, setIsCreateNoteOpen] = useState(false)
-  const [noteVerses, setNoteVerses] = useState<{
-    [verse: string]: true
-  } | null>(null)
+  const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [audioChapterUrl, setAudioChapterUrl] = useState('')
   const [audioMode, setAudioMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -147,7 +143,7 @@ const BibleViewer = ({
   } = bible
 
   const selectAllVerses = () => {
-    const selectedVersesToAdd: { [verse: string]: true } = Object.fromEntries(
+    const selectedVersesToAdd: VerseIds = Object.fromEntries(
       verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
     )
     actions.selectAllVerses(selectedVersesToAdd)
@@ -310,8 +306,7 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    setIsCreateNoteOpen(s => !s)
-    setNoteVerses(null)
+    setNoteVerses(s => (s ? undefined : selectedVerses))
   }
 
   const openNoteModal = (noteId: string) => {
@@ -319,8 +314,7 @@ const BibleViewer = ({
       const noteVersesToLoad = noteId.split('/').reduce((accuRefs, key) => {
         accuRefs[key] = true
         return accuRefs
-      }, {} as { [verse: string]: true })
-      setIsCreateNoteOpen(s => !s)
+      }, {} as VerseIds)
       setNoteVerses(noteVersesToLoad)
     } catch (e) {
       Sentry.withScope(scope => {
@@ -329,12 +323,6 @@ const BibleViewer = ({
         Sentry.captureMessage('Note corrumpted')
       })
     }
-  }
-
-  const onSaveNote = (id: string) => {
-    setTimeout(() => {
-      setQuickTagsModal({ id, entity: 'notes' })
-    }, 300)
   }
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
@@ -446,15 +434,7 @@ const BibleViewer = ({
         onClosed={() => setQuickTagsModal(false)}
         setMultipleTagsItem={setMultipleTagsItem}
       />
-      {isCreateNoteOpen && (
-        <BibleNoteModal
-          onClosed={toggleCreateNote}
-          isOpen={isCreateNoteOpen}
-          noteVerses={noteVerses}
-          selectedVerses={selectedVerses}
-          onSaveNote={onSaveNote}
-        />
-      )}
+      <BibleNoteModal onClosed={toggleCreateNote} noteVerses={noteVerses} />
       <StrongModal
         version={version}
         selectedCode={strongModalDisclosure.isOpen}

@@ -1,4 +1,5 @@
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
+import { VerseIds } from '~common/types'
 import {
   activeTabIndexAtomOriginal,
   getDefaultBibleTab,
@@ -18,7 +19,7 @@ export const fullscreenAtom = atom(false)
 export const quotaModalAtom = atom<'daily' | 'always' | null>(null)
 
 type MultipleTagsModalProps =
-  | { ids: { [verse: string]: true }; entity: string; title?: string }
+  | { ids: VerseIds; entity: string; title?: string }
   | { id: string; entity: string; title?: string }
   | false
 

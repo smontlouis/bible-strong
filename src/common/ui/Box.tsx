@@ -33,18 +33,18 @@ export interface BoxProps {
 
   margin?: number
   m?: number
-  marginTop?: number
-  mt?: number
-  marginLeft?: number
-  ml?: number
-  marginRight?: number
-  mr?: number
-  marginBottom?: number
-  mb?: number
-  marginVertical?: number
-  my?: number
-  marginHorizontal?: number
-  mx?: number
+  marginTop?: number | 'auto'
+  mt?: number | 'auto'
+  marginLeft?: number | 'auto'
+  ml?: number | 'auto'
+  marginRight?: number | 'auto'
+  mr?: number | 'auto'
+  marginBottom?: number | 'auto'
+  mb?: number | 'auto'
+  marginVertical?: number | 'auto'
+  my?: number | 'auto'
+  marginHorizontal?: number | 'auto'
+  mx?: number | 'auto'
 
   absoluteFill?: boolean
 

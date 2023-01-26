@@ -141,6 +141,10 @@ export interface Tag {
   name: string
 }
 
+export interface TagsObj {
+  [id: string]: Tag
+}
+
 export interface VerseRefContent {
   title: string
   version: string
@@ -184,3 +188,7 @@ export type StudyNavigateBibleType =
   | 'verse-block'
   | 'strong'
   | 'strong-block'
+
+export type VerseIds = {
+  [verse: string]: true
+}

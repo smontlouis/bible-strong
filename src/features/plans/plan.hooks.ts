@@ -7,7 +7,7 @@ import i18n from '~i18n'
 import { getStaticUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import isEqual from 'lodash/isEqual'
 import {
   ComputedPlan,

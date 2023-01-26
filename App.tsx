@@ -4,19 +4,26 @@ import analytics from '@react-native-firebase/analytics'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import { useAtom } from 'jotai'
-import React, { Suspense, useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
+import { useAtom } from 'jotai/react'
+import React, { useCallback, useEffect, useState } from 'react'
+import {
+  ActivityIndicator,
+  Alert,
+  LogBox,
+  StatusBar,
+  Text,
+  View,
+} from 'react-native'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import * as Sentry from 'sentry-expo'
 
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { persistor, store } from '~redux/store'
-import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -135,9 +142,7 @@ const App = () => {
       <StatusBar translucent />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <Suspense>
-            <InitApp persistor={persistor} />
-          </Suspense>
+          <InitApp persistor={persistor} />
         </GestureHandlerRootView>
       </View>
     </ReduxProvider>

@@ -1,5 +1,5 @@
 // @flow
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { NavigationStackScreenProps } from 'react-navigation-stack'

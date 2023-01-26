@@ -18,7 +18,7 @@ import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
 import { useGetDefaultBibleTabAtom } from '../../state/tabs'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 
 const useGetVerseOfTheDay = (version: string, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)

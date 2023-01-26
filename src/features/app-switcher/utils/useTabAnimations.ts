@@ -1,4 +1,4 @@
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useCallback } from 'react'
 import { runOnJS, withDelay, withTiming } from 'react-native-reanimated'
 import {

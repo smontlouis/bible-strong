@@ -1,4 +1,5 @@
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
 import React, { memo } from 'react'
 import { Image, StyleSheet } from 'react-native'
 

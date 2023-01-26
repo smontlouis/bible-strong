@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react'
 
-import { atom, useAtom } from 'jotai'
+import { atom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigation } from 'react-navigation-hooks'
 import Modal from '~common/Modal'

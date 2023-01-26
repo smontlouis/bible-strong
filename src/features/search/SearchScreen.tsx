@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { SearchTab } from '~state/tabs'
 import SearchTabScreen from './SearchTabScreen'

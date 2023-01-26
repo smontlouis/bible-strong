@@ -1,4 +1,4 @@
-import { atom } from 'jotai'
+import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'

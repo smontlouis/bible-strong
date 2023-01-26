@@ -8,6 +8,7 @@ import {
   PreferredLightTheme,
   SubscriptionType,
   Tag,
+  TagsObj,
 } from '~common/types'
 import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
@@ -85,6 +86,22 @@ export interface Study {
   tags?: { [x: string]: Tag }
 }
 
+export interface StudiesObj {
+  [x: string]: Study
+}
+
+export interface Note {
+  id?: string
+  title: string
+  description: string
+  date: number
+  tags?: { [x: string]: Tag }
+}
+
+export interface NotesObj {
+  [x: string]: Note
+}
+
 export interface FireStoreUserData {
   id: string
   email: string
@@ -122,22 +139,13 @@ export interface UserState {
     highlights: {
       [x: string]: {
         color: string
-        tags: {
-          [x: string]: Tag
-        }
+        tags: TagsObj
         date: number
       }
     }
-    notes: {
-      [x: string]: any
-    }
-
-    studies: {
-      [x: string]: Study
-    }
-    tags: {
-      [x: string]: Tag
-    }
+    notes: NotesObj
+    studies: StudiesObj
+    tags: TagsObj
     history: any[]
     strongsHebreu: {}
     strongsGrec: {}
@@ -296,7 +304,13 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.subscription = subscription
 
-      draft.bible = deepmerge(draft.bible, bible || {})
+      // Always initialize bible data with initial state
+      const prevDataBible = deepmerge(
+        getInitialState().bible,
+        draft.bible || {}
+      )
+
+      draft.bible = deepmerge(prevDataBible, bible || {})
 
       break
     }

@@ -2,7 +2,8 @@ import React from 'react'
 
 import withLoginModal from '~common/withLoginModal'
 
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { StudyTab } from '~state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'

@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai'
+import { useAtomValue } from 'jotai/react'
 import React, { forwardRef } from 'react'
 import { ImageStyle, TextStyle, View, ViewStyle } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'

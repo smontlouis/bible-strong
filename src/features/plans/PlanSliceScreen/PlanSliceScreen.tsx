@@ -27,7 +27,7 @@ import Snackbar from '~common/SnackBar'
 import { Share } from 'react-native'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import { useGetDefaultBibleTabAtom } from '../../../state/tabs'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>

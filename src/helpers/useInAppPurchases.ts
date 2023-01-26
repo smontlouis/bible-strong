@@ -1,5 +1,5 @@
 import to from 'await-to-js'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { Alert } from 'react-native'
 import IAPHub from 'react-native-iaphub'

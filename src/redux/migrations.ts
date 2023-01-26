@@ -382,7 +382,7 @@ export default {
       },
     }
   },
-  // @ts-ignore
+  // @ts-ignore - Remove bible from state (where all the bible selectors state were)
   27: ({ bible, ...state }: RootState) => {
     return state
   },

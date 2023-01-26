@@ -1,145 +1,105 @@
-import * as Icon from '@expo/vector-icons'
 import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useState } from 'react'
-import Modal from 'react-native-modal'
 
-import styled from '@emotion/native'
 import { Alert, ScrollView, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useTranslation } from 'react-i18next'
+import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
+import PopOverMenu from '~common/PopOverMenu'
 import Snackbar from '~common/SnackBar'
 import TagList from '~common/TagList'
+import { VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import TextArea from '~common/ui/TextArea'
 import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
-import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { useModalize } from '~helpers/useModalize'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addNote, deleteNote } from '~redux/modules/user'
+import { addNote, deleteNote, Note } from '~redux/modules/user'
+import { HStack } from '~common/ui/Stack'
+import Spacer from '~common/ui/Spacer'
+import { useSetAtom } from 'jotai/react'
+import FabButton from '~common/ui/FabButton'
+import { multipleTagsModalAtom } from '../../state/app'
+import Fab from '~common/ui/Fab'
 
-const StylizedModal = styled(Modal)({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-})
-
-const Container = ({ ...props }) => {
-  const r = useMediaQueriesArray()
-  const modalWidth = r([300, 340, 400, 500])
-  const modalHeight = r([400, 450, 500, 600])
-
-  return (
-    <StyledContainer
-      modalHeight={modalHeight}
-      modalWidth={modalWidth}
-      {...props}
-    />
-  )
+interface BibleNoteModalProps {
+  noteVerses: VerseIds | undefined
+  onClosed: () => void
 }
-const StyledContainer = styled.View(({ theme, modalWidth, modalHeight }) => ({
-  width: modalWidth,
-  height: modalHeight,
-  backgroundColor: theme.colors.reverse,
-  borderRadius: 3,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
-  padding: 20,
-}))
 
-const StyledIcon = styled.TouchableOpacity(({ theme, color }) => ({
-  backgroundColor: theme.colors[color],
-  width: 30,
-  height: 30,
-  color: 'white',
-  borderRadius: 5,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginLeft: 10,
-}))
-
-const BibleNoteModal = ({
+const useCurrentNote = ({
   noteVerses,
-  selectedVerses,
-  onClosed,
-  onSaveNote,
-  isOpen,
+}: {
+  noteVerses: VerseIds | undefined
 }) => {
-  const [id, setId] = useState(null)
-  const [reference, setReference] = useState('')
+  const note = useSelector((state: RootState) => {
+    const notes = state.user.bible.notes
+    const orderedVerses = orderVerses(noteVerses || {})
+    const key = Object.keys(orderedVerses).join('/')
+    if (notes[key]) {
+      return {
+        id: key,
+        ...notes[key],
+      } as Note
+    }
+
+    return null
+  })
+
+  return note
+}
+
+const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
+  const { ref, open, close } = useModalize()
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [tags, setTags] = useState({})
+
   const [isEditing, setIsEditing] = useState(false)
 
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const notes = useSelector((state: RootState) => state.user.bible.notes)
+
+  const currentNote = useCurrentNote({ noteVerses })
+  const reference = verseToReference(noteVerses)
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
   useEffect(() => {
-    loadPage(noteVerses || selectedVerses)
-  }, [])
-
-  const checkIfExistingNote = (notes, selectedVerses) => {
-    const orderedVerses = orderVerses(selectedVerses)
-    const key = Object.keys(orderedVerses).join('/')
-    if (notes[key]) {
-      return {
-        key,
-        ...notes[key],
-      }
+    if (noteVerses) {
+      open()
     }
-    return null
-  }
+  }, [noteVerses, open])
 
-  const loadPage = verses => {
-    const existingNote = checkIfExistingNote(notes, verses)
-    const reference = verseToReference(verses)
-
-    if (existingNote) {
-      setId(existingNote.key)
-      setReference(reference)
-      setTitle(existingNote.title)
-      setDescription(existingNote.description)
-      setTags(existingNote.tags)
-      setIsEditing(false)
+  useEffect(() => {
+    if (noteVerses) {
+      if (currentNote) {
+        setIsEditing(false)
+      } else {
+        setIsEditing(true)
+      }
     } else {
-      setReference(reference)
       setTitle('')
       setDescription('')
-      setIsEditing(true)
     }
-  }
-
-  const onTitleChange = (text: string) => {
-    setTitle(text)
-  }
-
-  const onDescriptionChange = (text: string) => {
-    setDescription(text)
-  }
+  }, [noteVerses])
 
   const onSaveNoteFunc = () => {
     dispatch(
       addNote(
-        { title, description, date: Date.now(), ...(tags && { tags }) },
-        noteVerses || selectedVerses
+        { ...currentNote, title, description, date: Date.now() },
+        noteVerses!
       )
     )
-    // TODO - clear selected verses
-    onClosed()
-
-    const orderedVerses = orderVerses(noteVerses || selectedVerses)
-    const key = Object.keys(orderedVerses).join('/')
-
-    onSaveNote?.(key)
+    setIsEditing(false)
   }
 
   const deleteNoteFunc = (noteId: string) => {
@@ -152,7 +112,7 @@ const BibleNoteModal = ({
           text: t('Oui'),
           onPress: () => {
             dispatch(deleteNote(noteId))
-            onClosed()
+            close()
           },
           style: 'destructive',
         },
@@ -161,9 +121,6 @@ const BibleNoteModal = ({
   }
 
   const cancelEditing = () => {
-    if (!title) {
-      onClosed()
-    }
     setIsEditing(false)
   }
 
@@ -172,9 +129,9 @@ const BibleNoteModal = ({
       const message = `
 Note pour ${reference}
 
-${title}
+${currentNote?.title}
 
-${description}
+${currentNote?.description}
       `
       Share.share({ message })
     } catch (e) {
@@ -184,87 +141,129 @@ ${description}
     }
   }
 
+  const onEditNote = () => {
+    setTitle(currentNote?.title || '')
+    setDescription(currentNote?.description || '')
+    setIsEditing(true)
+  }
+
   const submitIsDisabled = !title || !description
 
   return (
-    <StylizedModal
-      isVisible={isOpen}
-      animationInTiming={300}
-      avoidKeyboard
-      onBackButtonPress={onClosed}
-      animationIn="fadeInDown"
-      animationOut="fadeOutUp"
+    <Modal.Body
+      ref={ref}
+      onClose={onClosed}
+      modalRef={ref}
+      HeaderComponent={
+        <ModalHeader
+          onClose={close}
+          title={reference}
+          subTitle={t('Note')}
+          rightComponent={
+            currentNote ? (
+              <PopOverMenu
+                width={24}
+                height={54}
+                popover={
+                  <>
+                    <MenuOption onSelect={shareNote}>
+                      <Box row alignItems="center">
+                        <FeatherIcon name="share" size={15} />
+                        <Text marginLeft={10}>{t('Partager')}</Text>
+                      </Box>
+                    </MenuOption>
+                    <MenuOption onSelect={onEditNote}>
+                      <Box row alignItems="center">
+                        <FeatherIcon name="edit" size={15} />
+                        <Text marginLeft={10}>{t('Éditer')}</Text>
+                      </Box>
+                    </MenuOption>
+                    <MenuOption
+                      onSelect={() =>
+                        setMultipleTagsItem({
+                          ...currentNote,
+                          id: currentNote.id!,
+                          entity: 'notes',
+                        })
+                      }
+                    >
+                      <Box row alignItems="center">
+                        <FeatherIcon name="tag" size={15} />
+                        <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                      </Box>
+                    </MenuOption>
+                    <MenuOption
+                      onSelect={() => deleteNoteFunc(currentNote?.id!)}
+                    >
+                      <Box row alignItems="center">
+                        <FeatherIcon name="trash-2" size={15} />
+                        <Text marginLeft={10}>{t('Supprimer')}</Text>
+                      </Box>
+                    </MenuOption>
+                  </>
+                }
+              />
+            ) : (
+              undefined
+            )
+          }
+        />
+      }
+      FooterComponent={
+        isEditing ? (
+          <HStack py={10} px={20} justifyContent="flex-end">
+            <Box>
+              <Button reverse onPress={cancelEditing}>
+                {t('Annuler')}
+              </Button>
+            </Box>
+            <Box>
+              <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
+                {t('Sauvegarder')}
+              </Button>
+            </Box>
+          </HStack>
+        ) : (
+          <HStack py={10} px={20} justifyContent="flex-end">
+            <Box>
+              <Fab icon="edit" onPress={onEditNote} />
+            </Box>
+          </HStack>
+        )
+      }
     >
-      <Container>
-        <Text fontSize={16} bold color="darkGrey" marginBottom={10}>
-          {t('Note pour')} {reference}
-        </Text>
+      <Box paddingHorizontal={20}>
         {isEditing && (
           <>
             <TextInput
               placeholder={t('Titre')}
-              onChangeText={onTitleChange}
+              onChangeText={setTitle}
               value={title}
               style={{ marginTop: 20 }}
             />
+            <Spacer />
             <TextArea
               placeholder={t('Description')}
-              multiline
-              onChangeText={onDescriptionChange}
+              onChangeText={setDescription}
               value={description}
             />
-            <Box row marginTop="auto" justifyContent="flex-end">
-              <Button
-                small
-                reverse
-                onPress={cancelEditing}
-                style={{ marginRight: 10 }}
-              >
-                {t('Annuler')}
-              </Button>
-              <Button
-                small
-                disabled={submitIsDisabled}
-                onPress={onSaveNoteFunc}
-              >
-                {t('Sauvegarder')}
-              </Button>
-            </Box>
           </>
         )}
         {!isEditing && (
           <>
-            <Text title fontSize={20} marginBottom={10}>
-              {title}
-            </Text>
-            <ScrollView style={{ flex: 1 }}>
-              <Paragraph small>{description}</Paragraph>
-              <TagList tags={tags} />
-            </ScrollView>
-            <Box row marginTop={10} justifyContent="flex-end">
-              {id && (
-                <StyledIcon onPress={() => deleteNoteFunc(id)} color="quart">
-                  <Icon.Feather name="trash-2" size={15} color="white" />
-                </StyledIcon>
-              )}
-              {id && (
-                <StyledIcon onPress={() => shareNote()} color="success">
-                  <Icon.MaterialIcons name="share" size={15} color="white" />
-                </StyledIcon>
-              )}
-              {id && (
-                <StyledIcon onPress={() => setIsEditing(true)} color="primary">
-                  <Icon.MaterialIcons name="edit" size={15} color="white" />
-                </StyledIcon>
-              )}
-              <StyledIcon onPress={onClosed} color="grey">
-                <Icon.MaterialIcons name="close" size={15} color="white" />
-              </StyledIcon>
+            <Box py={20}>
+              <Text title fontSize={20} marginBottom={10}>
+                {currentNote?.title}
+              </Text>
+              <ScrollView style={{ flex: 1 }}>
+                <Paragraph small>{currentNote?.description}</Paragraph>
+                <TagList tags={currentNote?.tags} />
+              </ScrollView>
             </Box>
           </>
         )}
-      </Container>
-    </StylizedModal>
+      </Box>
+    </Modal.Body>
   )
 }
 

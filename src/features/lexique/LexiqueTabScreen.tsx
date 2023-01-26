@@ -17,7 +17,7 @@ import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
 
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
-import { PrimitiveAtom } from 'jotai'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import waitForDatabase from '~common/waitForStrongDB'

@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import { useRef } from 'react'
 import { tabsAtomsAtom, activeTabIndexAtom } from '../../../state/tabs'
 

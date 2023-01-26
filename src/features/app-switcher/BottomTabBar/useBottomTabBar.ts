@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai/react'
 import { useEffect } from 'react'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import {

@@ -10,9 +10,12 @@ const useCurrentThemeSelector = () => {
     preferredLightTheme,
   } = useSelector(
     (state: RootState) => ({
-      preferredColorScheme: state.user.bible.settings.preferredColorScheme,
-      preferredDarkTheme: state.user.bible.settings.preferredDarkTheme,
-      preferredLightTheme: state.user.bible.settings.preferredLightTheme,
+      preferredColorScheme:
+        state.user.bible.settings.preferredColorScheme || 'auto',
+      preferredDarkTheme:
+        state.user.bible.settings.preferredDarkTheme || 'dark',
+      preferredLightTheme:
+        state.user.bible.settings.preferredLightTheme || 'default',
     }),
     shallowEqual
   )

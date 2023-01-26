@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai'
+import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
