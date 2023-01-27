@@ -1,4 +1,5 @@
 import React from 'react'
+import { useDocumentData } from 'react-firebase-hooks/firestore'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import Link from '~common/Link'
@@ -6,7 +7,6 @@ import Box, { BoxProps } from '~common/ui/Box'
 import { ProgressBar } from '~common/ui/ProgressBar'
 import { HStack, VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import { useDocument, useDocumentData } from 'react-firebase-hooks/firestore'
 import { firebaseDb } from '~helpers/firebase'
 
 const Stats = ({

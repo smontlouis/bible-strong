@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 
-import getVersesRef from '~helpers/getVersesRef'
+import getVersesContent from '~helpers/getVersesContent'
 import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
@@ -26,12 +26,11 @@ class CompareVerseItem extends React.Component {
 
     if (!versionNeedsDownload) {
       try {
-        const { content } = await getVersesRef(
-          selectedVerses,
-          versionId,
-          false,
-          position
-        )
+        const { content } = await getVersesContent({
+          verses: selectedVerses,
+          version: versionId,
+          position,
+        })
         this.setState({ content, versionNeedsDownload })
       } catch (e) {
         this.setState({

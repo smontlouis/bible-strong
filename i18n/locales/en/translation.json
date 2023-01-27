@@ -538,5 +538,11 @@
   "premium.onemonth.max.description": "The manna fell from the sky! It is a blessing to see that you believe in this project and that you are ready to invest yourself financially.Thank you warmly for your support.",
   "premium.onemonth.max.detail1": "Everything in Sponsor",
   "premium.onemonth.max.detail2": "AI Biblical Assistant",
-  "premium.onemonth.max.detail3": "AI Audio Bible"
+  "premium.onemonth.max.detail3": "AI Audio Bible",
+
+  "bible.settings.shareOptions": "Share options",
+  "bible.settings.hasVerseNumbers": "Show verse numbers",
+  "bible.settings.hasInlineVerses": "Inline verses",
+  "bible.settings.hasQuotes": "Show quotes",
+  "bible.settings.hasAppName": "Show app name"
 }

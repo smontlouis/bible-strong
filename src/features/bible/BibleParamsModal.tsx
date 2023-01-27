@@ -9,9 +9,9 @@ import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
 import Link, { LinkBox } from '~common/Link'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import fonts from '~helpers/fonts'
@@ -416,19 +416,33 @@ const BibleParamsModal = ({
           />
           <Border />
         </Box>
-        <HalfContainer>
+        <TouchableBox
+          px={20}
+          py={15}
+          alignItems="center"
+          row
+          onPress={() => {
+            navigation.navigate('ModifyColors')
+            onClosed()
+          }}
+        >
           <Text flex>{t('Couleurs des surbrillances')}</Text>
-          <Button
-            reverse
-            onPress={() => {
-              navigation.navigate('ModifyColors')
-              onClosed()
-            }}
-            small
-          >
-            {t('Ouvrir')}
-          </Button>
-        </HalfContainer>
+          <FeatherIcon name="chevron-right" size={20} color="grey" />
+        </TouchableBox>
+        <Border />
+        <TouchableBox
+          px={20}
+          py={15}
+          alignItems="center"
+          row
+          onPress={() => {
+            navigation.navigate('BibleShareOptions')
+            onClosed()
+          }}
+        >
+          <Text flex>{t('bible.settings.shareOptions')}</Text>
+          <FeatherIcon name="chevron-right" size={20} color="grey" />
+        </TouchableBox>
       </Container>
     </Modalize>
   )

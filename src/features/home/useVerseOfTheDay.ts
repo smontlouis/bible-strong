@@ -13,14 +13,14 @@ import useLogin from '~helpers/useLogin'
 import extractFirstName from '~helpers/extractFirstName'
 import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
-import getVersesRef from '~helpers/getVersesRef'
+import getVersesContent from '~helpers/getVersesContent'
 import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
-import { useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { useGetDefaultBibleTabAtom, VersionCode } from '../../state/tabs'
 import { useAtom } from 'jotai/react'
 
-const useGetVerseOfTheDay = (version: string, addDay: number) => {
+const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
 
   useEffect(() => {
@@ -32,7 +32,10 @@ const useGetVerseOfTheDay = (version: string, addDay: number) => {
       try {
         const [bookName, chapter, verse] = VOD[dayOfTheYear].split('.')
         const book = booksDesc2.find(b => b[1] === bookName)?.[0]
-        const vod = await getVersesRef(`${book}-${chapter}-${verse}`, version)
+        const vod = await getVersesContent({
+          verses: `${book}-${chapter}-${verse}`,
+          version,
+        })
         setVOD({
           v: VOD[dayOfTheYear],
           book: Number(book),

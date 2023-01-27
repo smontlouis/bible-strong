@@ -161,6 +161,12 @@ export interface UserState {
       press: 'shortPress' | 'longPress'
       notesDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      shareVerses: {
+        hasVerseNumbers: boolean
+        hasInlineVerses: boolean
+        hasQuotes: boolean
+        hasAppName: boolean
+      }
       colors: {
         default: typeof defaultColors
         dark: typeof darkColors
@@ -231,6 +237,12 @@ const getInitialState = (): UserState => ({
       press: 'longPress',
       notesDisplay: 'inline',
       commentsDisplay: false,
+      shareVerses: {
+        hasVerseNumbers: true,
+        hasInlineVerses: true,
+        hasQuotes: true,
+        hasAppName: true,
+      },
       colors: {
         default: defaultColors,
         dark: darkColors,

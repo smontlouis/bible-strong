@@ -50,6 +50,7 @@ import HomeScreen from '~features/home/HomeScreen'
 import ChangelogModal from '~common/Changelog'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import MultipleTagsModal from '~common/MultipleTagsModal'
+import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
 
 export const MainStackNavigator = createStackNavigator(
   {
@@ -103,6 +104,7 @@ export const MainStackNavigator = createStackNavigator(
     PremiumMore: { screen: PremiumMoreScreen },
     Concordance: { screen: ConcordanceScreen },
     Commentaries: { screen: CommentariesScreen },
+    BibleShareOptions: { screen: BibleShareOptionsScreen },
   },
   {
     headerMode: 'none',

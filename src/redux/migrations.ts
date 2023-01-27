@@ -386,4 +386,24 @@ export default {
   27: ({ bible, ...state }: RootState) => {
     return state
   },
+  28: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            shareVerses: {
+              hasVerseNumbers: true,
+              hasInlineVerses: true,
+              hasQuotes: true,
+              hasAppName: true,
+            },
+          },
+        },
+      },
+    }
+  },
 }

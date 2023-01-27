@@ -540,5 +540,11 @@
   "premium.onemonth.max.description": "La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
   "premium.onemonth.max.detail1": "Tout ce que contient Sponsor",
   "premium.onemonth.max.detail2": "Assistant biblique IA",
-  "premium.onemonth.max.detail3": "Bible Audio IA"
+  "premium.onemonth.max.detail3": "Bible Audio IA",
+
+  "bible.settings.shareOptions": "Options de partage",
+  "bible.settings.hasVerseNumbers": "Numéros de versets",
+  "bible.settings.hasInlineVerses": "Versets à la suite",
+  "bible.settings.hasQuotes": "Montrer les guillements",
+  "bible.settings.hasAppName": "Montrer le nom de l'application"
 }

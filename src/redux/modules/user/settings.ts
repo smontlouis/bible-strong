@@ -1,20 +1,19 @@
 import produce, { Draft } from 'immer'
 import { Appearance } from 'react-native'
 import {
-  CurrentTheme,
   PreferredColorScheme,
   PreferredDarkTheme,
   PreferredLightTheme,
 } from '~common/types'
 
-import defaultColors from '~themes/colors'
 import blackColors from '~themes/blackColors'
+import defaultColors from '~themes/colors'
+import darkColors from '~themes/darkColors'
 import mauveColors from '~themes/mauveColors'
 import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
-import darkColors from '~themes/darkColors'
 
 import { UserState } from '../user'
 
@@ -35,6 +34,13 @@ export const SET_SETTINGS_PREFERRED_LIGHT_THEME =
   'user/SET_SETTINGS_PREFERRED_LIGHT_THEME'
 export const SET_SETTINGS_PREFERRED_DARK_THEME =
   'user/SET_SETTINGS_PREFERRED_DARK_THEME'
+
+export const TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS =
+  'user/SET_SETTINGS_SHARE_VERSE_NUMBERS'
+export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES =
+  'user/SET_SETTINGS_SHARE_INLINE_VERSES'
+export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
+export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 
 export default produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -134,6 +140,26 @@ export default produce((draft: Draft<UserState>, action) => {
       }
       break
     }
+    case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS: {
+      draft.bible.settings.shareVerses.hasVerseNumbers = !draft.bible.settings
+        .shareVerses.hasVerseNumbers
+      break
+    }
+    case TOGGLE_SETTINGS_SHARE_INLINE_VERSES: {
+      draft.bible.settings.shareVerses.hasInlineVerses = !draft.bible.settings
+        .shareVerses.hasInlineVerses
+      break
+    }
+    case TOGGLE_SETTINGS_SHARE_QUOTES: {
+      draft.bible.settings.shareVerses.hasQuotes = !draft.bible.settings
+        .shareVerses.hasQuotes
+      break
+    }
+    case TOGGLE_SETTINGS_SHARE_APP_NAME: {
+      draft.bible.settings.shareVerses.hasAppName = !draft.bible.settings
+        .shareVerses.hasAppName
+      break
+    }
     default:
       break
   }
@@ -219,5 +245,29 @@ export function changeColor({
     type: CHANGE_COLOR,
     name,
     color,
+  }
+}
+
+export function toggleSettingsShareVerseNumbers() {
+  return {
+    type: TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
+  }
+}
+
+export function toggleSettingsShareLineBreaks() {
+  return {
+    type: TOGGLE_SETTINGS_SHARE_INLINE_VERSES,
+  }
+}
+
+export function toggleSettingsShareQuotes() {
+  return {
+    type: TOGGLE_SETTINGS_SHARE_QUOTES,
+  }
+}
+
+export function toggleSettingsShareAppName() {
+  return {
+    type: TOGGLE_SETTINGS_SHARE_APP_NAME,
   }
 }

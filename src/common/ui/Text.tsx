@@ -118,7 +118,7 @@ const Text = styled.Text((props: TextProps) => {
       props.color ||
       props.theme.colors.default,
     lineHeight: props.lineHeight,
-    fontSize: props.fontSize,
+    fontSize: props.fontSize || 16,
     fontWeight: props.bold ? 'bold' : undefined,
     textAlign: props.textAlign,
 

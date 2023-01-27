@@ -15,7 +15,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import waitForTresorModal from '~common/waitForTresorModal'
 import formatVerseContent from '~helpers/formatVerseContent'
-import getVersesRef from '~helpers/getVersesRef'
+import getVersesContent from '~helpers/getVersesContent'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { timeout } from '~helpers/timeout'
 import { useModalize } from '~helpers/useModalize'
@@ -25,7 +25,7 @@ const ReferenceItem = ({ reference, version }) => {
 
   useEffect(() => {
     const loadVerse = async () => {
-      const verse = await getVersesRef(reference, version)
+      const verse = await getVersesContent({ verses: reference, version })
       setVerse(verse)
     }
     loadVerse()

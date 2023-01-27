@@ -1,33 +1,32 @@
-import React, { useState, useEffect } from 'react'
-import { Share, ScrollView } from 'react-native'
-import { Modalize } from 'react-native-modalize'
 import styled from '@emotion/native'
-import { shallowEqual, useSelector } from 'react-redux'
-import Clipboard from '@react-native-community/clipboard'
 import { useTheme } from '@emotion/react'
+import Clipboard from '@react-native-community/clipboard'
+import React, { useEffect, useState } from 'react'
+import { ScrollView, Share } from 'react-native'
+import { Modalize } from 'react-native-modalize'
+import { shallowEqual, useSelector } from 'react-redux'
 
-import SnackBar from '~common/SnackBar'
+import CommentIcon from '~common/CommentIcon'
+import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import CommentIcon from '~common/CommentIcon'
-import Text from '~common/ui/Text'
+import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
-import getVersesRef from '~helpers/getVersesRef'
-import { cleanParams, wp } from '~helpers/utils'
+import Text from '~common/ui/Text'
+import getVersesContent from '~helpers/getVersesContent'
 import { usePrevious } from '~helpers/usePrevious'
+import { cleanParams, wp } from '~helpers/utils'
 
-import TouchableCircle from './TouchableCircle'
-import TouchableIcon from './TouchableIcon'
-import TouchableChip from './TouchableChip'
-import TouchableSvgIcon from './TouchableSvgIcon'
-import verseToReference from '../../helpers/verseToReference'
 import { useTranslation } from 'react-i18next'
+import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
-import { Portal } from '@gorhom/portal'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import verseToReference from '../../helpers/verseToReference'
+import TouchableChip from './TouchableChip'
+import TouchableCircle from './TouchableCircle'
+import TouchableIcon from './TouchableIcon'
+import TouchableSvgIcon from './TouchableSvgIcon'
 
 const Container = styled.View(({ theme, isSelectionMode }) => ({
   width: '100%',
@@ -92,6 +91,12 @@ const VersesModal = ({
     }),
     shallowEqual
   )
+  const {
+    hasVerseNumbers,
+    hasInlineVerses,
+    hasQuotes,
+    hasAppName,
+  } = useShareOptions()
 
   useEffect(() => {
     const title = verseToReference(selectedVerses)
@@ -99,7 +104,14 @@ const VersesModal = ({
   }, [selectedVerses, version])
 
   const shareVerse = async () => {
-    const { all: message } = await getVersesRef(selectedVerses, version, true)
+    const { all: message } = await getVersesContent({
+      verses: selectedVerses,
+      version,
+      hasVerseNumbers,
+      hasInlineVerses,
+      hasQuotes,
+      hasAppName,
+    })
     const result = await Share.share({ message })
     // Clear selectedverses only if succeed
     if (result.action === Share.sharedAction) {
@@ -108,10 +120,16 @@ const VersesModal = ({
   }
 
   const copyToClipboard = async () => {
-    const { all: message } = await getVersesRef(selectedVerses, version, true)
+    const { all: message } = await getVersesContent({
+      verses: selectedVerses,
+      version,
+      hasVerseNumbers,
+      hasInlineVerses,
+      hasQuotes,
+      hasAppName,
+    })
     Clipboard.setString(message)
     SnackBar.show(t('Copié dans le presse-papiers.'))
-    clearSelectedVerses()
   }
 
   const showStrongDetail = () => {
@@ -144,7 +162,10 @@ const VersesModal = ({
   }
 
   const sendVerseData = async () => {
-    const { title, content } = await getVersesRef(selectedVerses, version)
+    const { title, content } = await getVersesContent({
+      verses: selectedVerses,
+      version,
+    })
     navigation.navigate('EditStudy', {
       ...cleanParams(),
       type: isSelectionMode,
