@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-        <key>EXUpdatesSDKVersion</key>
-        <string>46.0.0</string>
-        <key>EXUpdatesURL</key>
-        <string>https://exp.host/@smontlouis/bible-strong</string>
-        <key>EXUpdatesReleaseChannel</key>
-        <string>prod</string>
-        <key>EXUpdatesCheckOnLaunch</key>
-        <false/>
-</dict>
+        <dict>
+                <key>EXUpdatesEnabled</key>
+                <true/>
+                <key>EXUpdatesCheckOnLaunch</key>
+                <false/>
+                <key>EXUpdatesLaunchWaitMs</key>
+                <integer>0</integer>
+                <key>EXUpdatesURL</key>
+                <string>https://u.expo.dev/fdf72b90-346b-11e9-ad9a-255491359311</string>
+                <key>EXUpdatesRuntimeVersion</key>
+                <string>1.0.0</string>
+                <key>EXUpdatesRequestHeaders</key>
+                <dict>
+                        <key>expo-channel-name</key>
+                        <string>prod</string>
+                </dict>
+        </dict>
 </plist>

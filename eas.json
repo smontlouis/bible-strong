@@ -1,0 +1,30 @@
+{
+  "cli": {
+    "version": ">= 3.4.1"
+  },
+  "build": {
+    "dev": {
+      "distribution": "internal",
+      "android": {
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "ios": {
+        "buildConfiguration": "Debug",
+        "resourceClass": "m1-medium"
+      }
+    },
+    "staging": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m1-medium"
+      },
+      "channel": "staging"
+    },
+    "prod": {
+      "ios": {
+        "resourceClass": "m1-medium"
+      },
+      "channel": "prod"
+    }
+  }
+}
