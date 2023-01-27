@@ -17,6 +17,7 @@ import {
   toggleSettingsShareQuotes,
   toggleSettingsShareVerseNumbers,
 } from '~redux/modules/user'
+import { useIsPremium } from '~helpers/usePremium'
 
 export const useShareOptions = () => {
   const hasVerseNumbers = useSelector(
@@ -45,6 +46,7 @@ const BibleShareOptionsScreen = () => {
   const theme = useTheme()
   const dispatch = useDispatch()
   const [message, setMessage] = useState('')
+  const isPremium = useIsPremium()
 
   const {
     hasVerseNumbers,
@@ -119,15 +121,22 @@ const BibleShareOptionsScreen = () => {
           paddingVertical={10}
           row
           alignItems="center"
+          opacity={isPremium ? 1 : 0.5}
         >
-          <Text flex>{t('bible.settings.hasAppName')}</Text>
+          <Box flex>
+            <Text>{t('bible.settings.hasAppName')}</Text>
+            {!isPremium && (
+              <Text fontSize={12}>{t('premium.sponsorsOnlyOption')}</Text>
+            )}
+          </Box>
           <Switch
             color={theme.colors.primary}
+            disabled={!isPremium}
             value={hasAppName}
             onValueChange={() => dispatch(toggleSettingsShareAppName())}
           />
         </Box>
-        <Box p={20}>
+        <Box p={20} m={20} borderRadius={20} bg="reverse">
           <Text>{message}</Text>
         </Box>
       </ScrollView>

@@ -544,5 +544,8 @@
   "bible.settings.hasVerseNumbers": "Show verse numbers",
   "bible.settings.hasInlineVerses": "Inline verses",
   "bible.settings.hasQuotes": "Show quotes",
-  "bible.settings.hasAppName": "Show app name"
+  "bible.settings.hasAppName": "Show app name",
+
+  "premium.sponsorsOnlyFeature": "This feature is reserved for sponsors.",
+  "premium.sponsorsOnlyOption": "This option is reserved for sponsors."
 }

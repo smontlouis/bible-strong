@@ -51,14 +51,15 @@ export default async ({
   selectedVerses.map(async (key, index) => {
     const [book, chapter, verse] = key.split('-')
     const text = bible[book][chapter][verse]
-    const inlineVerseContent = hasInlineVerses ? '' : '\n'
+    const inlineVerseContent =
+      hasInlineVerses && index !== selectedVerses.length - 1 ? '' : '\n'
     const verseNumberContent = hasVerseNumbers ? `${verse}. ` : ''
     const quoteStartContent = hasQuotes && index === 0 ? '« ' : ''
     const quoteEndContent =
       hasQuotes && index === selectedVerses.length - 1 ? ' »' : ''
 
     try {
-      versesContent += `${inlineVerseContent}${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}`
+      versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent}`
     } catch {
       versesContent = 'Impossible de charger ce verset.'
     }
@@ -68,8 +69,8 @@ export default async ({
     title: reference || '',
     version,
     content: versesContent,
-    all: `${versesContent} \n\n${reference} ${version} ${
-      hasAppName ? '\n\n https://bible-strong.app' : ''
+    all: `${versesContent} \n${reference} ${version} ${
+      hasAppName ? '\n\nhttps://bible-strong.app' : ''
     }`,
   }
 }

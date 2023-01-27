@@ -546,5 +546,8 @@
   "bible.settings.hasVerseNumbers": "Numéros de versets",
   "bible.settings.hasInlineVerses": "Versets à la suite",
   "bible.settings.hasQuotes": "Montrer les guillements",
-  "bible.settings.hasAppName": "Montrer le nom de l'application"
+  "bible.settings.hasAppName": "Montrer le nom de l'application",
+
+  "premium.sponsorsOnlyFeature": "Cette fonctionnalité est réservée aux sponsors.",
+  "premium.sponsorsOnlyOption": "Cette option est réservée aux sponsors."
 }
