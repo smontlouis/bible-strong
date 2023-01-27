@@ -11,7 +11,7 @@ project/*
 config.js
 config.ts
 
-
+dist/
 .expo/
 src/assets/db/
 src/features/plans/bible-project-plan.ts
