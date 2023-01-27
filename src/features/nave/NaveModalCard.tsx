@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
-import waitForNaveModal from '~features/home/waitForNaveWidget'
+import waitForDatabase from '~common/waitForNaveDB'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
 import { timeout } from '~helpers/timeout'
 import NaveForVerse from './NaveModalForVerse'
 
-const CardWrapper = waitForNaveModal(({ theme, selectedVerse, onClosed }) => {
+const CardWrapper = waitForDatabase(({ theme, selectedVerse, onClosed }) => {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [Naves, setNaves] = useState(null)

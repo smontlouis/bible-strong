@@ -24,7 +24,6 @@ const NaveModal = ({ onClosed, selectedVerse }) => {
     <Modal.Body
       ref={ref}
       onClose={onClosed}
-      adjustToContentHeight
       modalRef={ref}
       HeaderComponent={
         <ModalHeader onClose={close} title={title} subTitle={t('Par thèmes')} />

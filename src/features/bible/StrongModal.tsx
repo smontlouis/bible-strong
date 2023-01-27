@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { withNavigation } from 'react-navigation'
-import compose from 'recompose/compose'
 
-import waitForStrongModal from '~common/waitForStrongModal'
+import { useTheme } from '@emotion/react'
+import { Modalize } from 'react-native-modalize'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
-import loadStrongReference from '~helpers/loadStrongReference'
-import { hp } from '~helpers/utils'
+import waitForStrongModal from '~common/waitForStrongModal'
 import StrongCard from '~features/bible/StrongCard'
-import { Modalize } from 'react-native-modalize'
-import { usePrevious } from '~helpers/usePrevious'
 import { isStrongVersion } from '~helpers/bibleVersions'
-import { useTheme } from '@emotion/react'
-import { Portal } from '@gorhom/portal'
+import loadStrongReference from '~helpers/loadStrongReference'
+import { usePrevious } from '~helpers/usePrevious'
+import { hp } from '~helpers/utils'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ navigation, selectedCode, onClosed }) => {

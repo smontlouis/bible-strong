@@ -24,11 +24,11 @@ const waitForWidget = WrappedComponent => props => {
     return (
       <WidgetContainer>
         <DownloadRequired
-          noHeader
+          hasHeader={false}
+          size="small"
           title={t('Strong requis')}
           setStartDownload={setStartDownload}
           fileSize={35}
-          small
         />
       </WidgetContainer>
     )

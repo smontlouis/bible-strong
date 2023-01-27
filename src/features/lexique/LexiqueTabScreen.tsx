@@ -20,7 +20,7 @@ import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
-import waitForDatabase from '~common/waitForStrongDB'
+import waitForStrongDB from '~common/waitForStrongDB'
 import { StrongsTab } from '~state/tabs'
 import LexiqueItem from './LexiqueItem'
 
@@ -154,4 +154,4 @@ const LexiqueTabScreen = ({
   )
 }
 
-export default waitForDatabase(LexiqueTabScreen)
+export default waitForStrongDB(LexiqueTabScreen)

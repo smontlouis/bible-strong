@@ -12,9 +12,9 @@ interface Props {
   fileSize: number
   setStartDownload: (value: boolean) => void
   hasBackButton?: boolean
-  size?: number
-  small?: boolean
-  noHeader?: boolean
+  iconSize?: number
+  size?: 'small' | 'large'
+  hasHeader?: boolean
 }
 
 const DownloadRequired = ({
@@ -22,16 +22,15 @@ const DownloadRequired = ({
   fileSize,
   setStartDownload,
   hasBackButton,
-  size = 100,
-  small,
-  noHeader,
+  iconSize = 100,
+  size,
+  hasHeader = true,
 }: Props) => {
-  const padding = small ? 10 : 30
-  const iconSize = small ? 20 : size
+  const padding = size === 'small' ? 10 : 30
   const { t } = useTranslation()
   return (
-    <Container pure={small} noPadding={small}>
-      {!noHeader && (
+    <Container noPadding={size === 'small'} pure={size === 'small'}>
+      {hasHeader && (
         <Header
           title={t('Téléchargement nécessaire')}
           hasBackButton={hasBackButton}
@@ -41,7 +40,7 @@ const DownloadRequired = ({
         <Box center maxWidth={300}>
           <Icon.Feather
             name="download-cloud"
-            size={iconSize}
+            size={size === 'small' ? 20 : iconSize}
             color="rgb(98,113,122)"
           />
           <Text textAlign="center" marginBottom={padding} marginTop={padding}>

@@ -27,7 +27,6 @@ export const useWaitForDatabase = () => {
       setLoading(false)
     } else {
       const loadDBAsync = async () => {
-        await timeout(1000) // Wait safely
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
@@ -110,7 +109,9 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase = WrappedComponent => props => {
+const waitForDatabase = <T,>(
+  WrappedComponent: React.ComponentType<T>
+): React.ComponentType<T> => props => {
   const { t } = useTranslation()
   const {
     isLoading,
@@ -119,6 +120,8 @@ const waitForDatabase = WrappedComponent => props => {
     startDownload,
     setStartDownload,
   } = useWaitForDatabase()
+
+  console.log({ isLoading, proposeDownload })
 
   if (isLoading && startDownload) {
     return (
@@ -131,8 +134,7 @@ const waitForDatabase = WrappedComponent => props => {
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        noHeader
-        small
+        hasHeader={false}
         title={t(
           'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'
         )}

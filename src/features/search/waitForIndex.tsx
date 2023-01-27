@@ -111,6 +111,7 @@ const waitForIndex = WrappedComponent => props => {
         title={t("L'index de recherche est requis pour accéder à cette page.")}
         setStartDownload={setStartDownload}
         fileSize={16}
+        hasHeader={false}
       />
     )
   }

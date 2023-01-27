@@ -1,11 +1,9 @@
 import React from 'react'
 import { ProgressBar } from 'react-native-paper'
 
-import { wp } from '~helpers/utils'
-import Loading from '~common/Loading'
-import Box from '~common/ui/Box'
-import { useWaitForDatabase } from '~common/waitForStrongDB'
 import DownloadRequired from '~common/DownloadRequired'
+import Loading from '~common/Loading'
+import { useWaitForDatabase } from '~common/waitForStrongDB'
 
 const waitForModal = WrappedComponent => props => {
   const {
@@ -27,8 +25,8 @@ const waitForModal = WrappedComponent => props => {
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        small
-        noHeader
+        hasHeader={false}
+        size="small"
         title="La base de données strong est requise pour accéder à cette page."
         setStartDownload={setStartDownload}
         fileSize={35}
