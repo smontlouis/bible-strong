@@ -20,6 +20,7 @@ import { useTheme } from '@emotion/react'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { HStack } from '~common/ui/Stack'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -221,7 +222,14 @@ const VersionSelectorItem = ({
         <Box flex row>
           <Box disabled flex>
             <TextVersion>{version.id}</TextVersion>
-            <TextName>{version.name}</TextName>
+            <HStack alignItems="center">
+              <TextName>{version.name}</TextName>
+              {version.hasAudio && (
+                <Box>
+                  <FeatherIcon name="volume-2" size={16} color={'default'} />
+                </Box>
+              )}
+            </HStack>
             <TextCopyright>{version.c}</TextCopyright>
           </Box>
           {!isLoading && version.id !== 'LSGS' && version.id !== 'KJVS' && (
@@ -289,9 +297,22 @@ const VersionSelectorItem = ({
       needsUpdate={needsUpdate}
       onPress={() => onChange && onChange(version.id)}
     >
-      <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-      <TextName isSelected={isSelected}>{version.name}</TextName>
-      <TextCopyright>{version.c}</TextCopyright>
+      <Box flex>
+        <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
+        <HStack alignItems="center">
+          <TextName isSelected={isSelected}>{version.name}</TextName>
+          {version.hasAudio && (
+            <Box>
+              <FeatherIcon
+                name="volume-2"
+                size={16}
+                color={isSelected ? 'primary' : 'default'}
+              />
+            </Box>
+          )}
+        </HStack>
+        <TextCopyright>{version.c}</TextCopyright>
+      </Box>
     </TouchableContainer>
   )
 }

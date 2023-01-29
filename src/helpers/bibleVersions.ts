@@ -3,6 +3,7 @@ import to from 'await-to-js'
 
 import { biblesRef } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
+import { VersionCode } from '~state/tabs'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   if (versionId === 'INT') {
@@ -97,20 +98,23 @@ export interface Version {
   name_en?: string
   c?: string
   type?: 'en' | 'fr' | 'other'
+  hasAudio?: boolean
 }
 
-export const versions = {
+export const versions: { [x: string]: Version } = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910',
     c: '1910 - Libre de droit',
     type: 'fr',
+    hasAudio: true,
   },
   LSGS: {
     id: 'LSGS',
     name: 'Bible Segond 1910 + Strongs',
     c: '1910 - Libre de droit',
     type: 'fr',
+    hasAudio: true,
   },
   NBS: {
     id: 'NBS',
