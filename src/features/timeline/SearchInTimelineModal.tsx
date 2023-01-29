@@ -1,28 +1,28 @@
-import React, { useCallback, useEffect } from 'react'
+import { useTheme } from '@emotion/react'
+import React, { useCallback } from 'react'
 import { Modalize } from 'react-native-modalize'
 import { Theme } from '~themes'
-import { useTheme } from '@emotion/react'
 
 import { TimelineEvent as TimelineEventProps } from './types'
-import useDebounce from '~helpers/useDebounce'
 
-import SearchBox from '~features/search/SearchBox'
-import Filters from './Filters'
+import { useTranslation } from 'react-i18next'
 import {
   connectInfiniteHits,
   connectStateResults,
 } from 'react-instantsearch-native'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Highlight from './Highlight'
-import Snippet from './Snippet'
-import Border from '~common/ui/Border'
-import { LinkBox } from '~common/Link'
 import FastImage from 'react-native-fast-image'
 import Empty from '~common/Empty'
-import { useTranslation } from 'react-i18next'
-import { usePrevious } from '~helpers/usePrevious'
-import { useQuota } from '~helpers/usePremium'
+import { LinkBox } from '~common/Link'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import SearchBox from '~features/search/SearchBox'
+import { useIsPremium, useQuota } from '~helpers/usePremium'
+import Filters from './Filters'
+import Highlight from './Highlight'
+import Snippet from './Snippet'
+import { useSelector } from 'react-redux'
+import { RootState } from '~redux/modules/reducer'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -44,7 +44,10 @@ const SearchInTimelineModal = ({
   const theme: Theme = useTheme()
   const [searchValue, setSearchValue] = React.useState('')
   const [submittedValue, setSubmittedValue] = React.useState('')
-
+  const isPremium = useIsPremium()
+  const searchQuotaRemaining = useSelector(
+    (state: RootState) => state.user.quota.timelineSearch.remaining
+  )
   const checkSearchQuota = useQuota('timelineSearch')
   const [canQuery, setCanQuery] = React.useState(true)
 
@@ -91,6 +94,13 @@ const SearchInTimelineModal = ({
             onClear={onClear}
             placeholder={t('Rechercher un événement dans la Bible')}
           />
+          {!isPremium && (
+            <Box px={20} alignItems="flex-end">
+              <Text bold fontSize={10} color="grey">
+                {t('premium.searchQuotaRemaining')}: {searchQuotaRemaining}/10
+              </Text>
+            </Box>
+          )}
           <Filters />
         </Box>
       }

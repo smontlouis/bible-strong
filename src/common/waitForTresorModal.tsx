@@ -121,8 +121,6 @@ const waitForDatabase = <T,>(
     setStartDownload,
   } = useWaitForDatabase()
 
-  console.log({ isLoading, proposeDownload })
-
   if (isLoading && startDownload) {
     return (
       <Loading message={t('Téléchargement de la base commentaires...')}>

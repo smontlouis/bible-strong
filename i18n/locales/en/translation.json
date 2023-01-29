@@ -82,9 +82,10 @@
   "Chercher une étiquette": "Search a tag",
   "Créer un nouveau tag": "Create a new tag",
   "Créez votre premier tag puis sélectionnez-le !": "Create your first tag then select it!",
-  "sponsor.quotaReachedDaily": "You have reached your free usage quota limited to 10 requests per day.\nYou can become a sponsor to have unlimited access and support the app, or wait tomorrow.",
-  "sponsor.quotaReached": "You have reached your free usage quota for this feature.\nPlease become a sponsor to have unlimited access and support the app.",
-  "Devenir sponsor": "Become a sponsor",
+  "sponsor.quotaReachedDaily": "You have reached your free usage quota limited to 10 requests per day.\n\nYou can become a sponsor to have unlimited access and support the app, or wait tomorrow.",
+  "sponsor.tabsQuotaReached": "You have reached your free limit of 4 tabs. \n\nYou can become a sponsor to have unlimited access and support the app, or close tabs.",
+  "sponsor.quotaReached": "You have reached your free usage quota for this feature.\n\nPlease become a sponsor to have unlimited access and support the app.",
+  "Devenir sponsor": "I'm interested!",
   "app.noThankYou": "No, thank you",
   "app.noIllWait": "I'll wait, thanks",
   "app.emailNotVerified": "Your email address is not verified. Please check your inbox and click on the link to verify your email address.",
@@ -513,7 +514,7 @@
   "premium.lotMore": "And much more to come!",
   "premium.coming": "Coming soon",
   "premium.earnings": "Monthly income",
-  "premium.subscribers": "Subscribers",
+  "premium.subscribers": "Monthly subscribers",
   "premium.monthlyUsers": "Monthly users",
   "premium.earnings.500.description": "This amount represents the different operating costs of the app (servers, services, etc.) and increases in proportion to the number of subscribers.",
   "premium.earnings.1500.description": "With your support, I can work part-time on the application and use consultants to make it even more qualitative! The new features and improvements will be delivered faster.",
@@ -547,5 +548,6 @@
   "bible.settings.hasAppName": "Show app name",
 
   "premium.sponsorsOnlyFeature": "This feature is reserved for sponsors.",
-  "premium.sponsorsOnlyOption": "This option is reserved for sponsors."
+  "premium.sponsorsOnlyOption": "This option is reserved for sponsors.",
+  "premium.searchQuotaRemaining": "Remaining research"
 }

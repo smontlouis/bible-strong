@@ -16,7 +16,7 @@ export interface Diff {
 
 export const IAPInitializedAtom = atom(false)
 export const fullscreenAtom = atom(false)
-export const quotaModalAtom = atom<'daily' | 'always' | null>(null)
+export const quotaModalAtom = atom<'daily' | 'always' | 'tabs' | null>(null)
 
 type MultipleTagsModalProps =
   | { ids: VerseIds; entity: string; title?: string }

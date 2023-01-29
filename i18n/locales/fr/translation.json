@@ -82,9 +82,10 @@
   "Chercher une étiquette": "Chercher une étiquette",
   "Créer un nouveau tag": "Créer un nouveau tag",
   "Créez votre premier tag puis sélectionnez-le !": "Créez votre premier tag puis sélectionnez-le !",
-  "sponsor.quotaReachedDaily": "Vous avez atteint votre quota d'utilisation gratuite limitée à 10 requêtes par jour. \nVous pouvez devenir sponsor pour avoir un accès illimité et supporter l'app, ou attendre demain.",
-  "sponsor.quotaReached": "Vous avez atteint votre quota d'utilisation gratuite pour cette fonctionnalité. \nVous pouvez devenir sponsor pour avoir un accès illimité et supporter l'app, ou attendre demain.",
-  "Devenir sponsor": "Devenir sponsor",
+  "sponsor.quotaReachedDaily": "Vous avez atteint votre quota d'utilisation gratuite limitée à 10 requêtes par jour. \n\nVous pouvez devenir sponsor pour avoir un accès illimité et supporter l'app, ou attendre demain.",
+  "sponsor.tabsQuotaReached": "Vous avez atteint votre limite gratuite de 4 onglets.\n\nVous pouvez devenir sponsor pour avoir un accès illimité et supporter l'app, ou fermer des onglets.",
+  "sponsor.quotaReached": "Vous avez atteint votre quota d'utilisation gratuite pour cette fonctionnalité. \n\nVous pouvez devenir sponsor pour avoir un accès illimité et supporter l'app !.",
+  "Devenir sponsor": "Ça m'intéresse !",
   "app.noThankYou": "Non merci",
   "app.noIllWait": "J'attendrais, merci",
   "app.emailNotVerified": "Un email vous a été envoyé, merci de vérifier votre adresse.",
@@ -514,7 +515,7 @@
   "premium.lotMore": "Et bien plus à venir !",
   "premium.coming": "À venir",
   "premium.earnings": "Revenus mensuels",
-  "premium.subscribers": "Contributeurs",
+  "premium.subscribers": "Contributeurs mensuels",
   "premium.monthlyUsers": "Utilisateurs mensuels",
   "premium.earnings.500.description": "Cette somme représente les différents coûts de fonctionnement de l'app (serveurs, services, etc.) et augmente proportionnellement au nombre d'abonnés.",
   "premium.earnings.1500.description": "Avec votre soutien, je peux travailer à temps partiel sur l'application et faire appel à des prestataires pour la rendre encore plus qualitative! Les nouvelles fonctionnalités et améliorations seront alors plus nombreuses et plus rapides.",
@@ -549,5 +550,6 @@
   "bible.settings.hasAppName": "Montrer le nom de l'application",
 
   "premium.sponsorsOnlyFeature": "Cette fonctionnalité est réservée aux sponsors.",
-  "premium.sponsorsOnlyOption": "Cette option est réservée aux sponsors."
+  "premium.sponsorsOnlyOption": "Cette option est réservée aux sponsors.",
+  "premium.searchQuotaRemaining": "Recherches restantes"
 }

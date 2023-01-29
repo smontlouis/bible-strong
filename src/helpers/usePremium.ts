@@ -39,7 +39,7 @@ export const useQuota = (quotaType: QuotaType) => {
   )
 }
 
-const tabsCountQuota = 3
+export const tabsCountQuota = 4
 export const useTabsQuota = () => {
   const isPremium = useIsPremium()
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -56,7 +56,7 @@ export const useTabsQuota = () => {
         return
       }
       if (failCb) failCb()
-      setShowQuotaModal('always')
+      setShowQuotaModal('tabs')
     },
     [isPremium, setShowQuotaModal, tabsCount]
   )

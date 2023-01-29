@@ -5,6 +5,7 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { tabsCountQuota, useIsPremium } from '~helpers/usePremium'
 import { fullscreenAtom } from '../../../state/app'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import AddTabButton from './Buttons/AddTabButton'
@@ -24,6 +25,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, listStyles, viewStyles, tabsCount } = useBottomTabBar()
   const { t } = useTranslation()
   const isFullscreen = useAtomValue(fullscreenAtom)
+  const isPremium = useIsPremium()
   const bottomBarHeight = TAB_ICON_SIZE + getBottomSpace()
   const bottomBarStyles = useAnimatedStyle(() => {
     return {
@@ -34,6 +36,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       ],
     }
   })
+
+  const tabsQuotaExceeded = tabsCount >= tabsCountQuota && !isPremium
 
   return (
     <AnimatedBox
@@ -76,8 +80,10 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       >
         <AddTabButton />
         <Box flex center>
-          <Text>
-            {tabsCount} {t('tabs.tab', { count: tabsCount })}
+          <Text color={tabsQuotaExceeded ? 'quart' : 'default'}>
+            {tabsCount}
+            {!isPremium ? `/${tabsCountQuota}` : ''}{' '}
+            {t('tabs.tab', { count: tabsCount })}
           </Text>
         </Box>
         <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
