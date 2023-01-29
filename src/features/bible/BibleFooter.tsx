@@ -398,7 +398,7 @@ const BibleFooter = ({
 }) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
-  const canPlayAudio = version === 'LSG'
+  const canPlayAudio = version === 'LSG' || version === 'LSGS'
   const [isLoading, setIsLoading] = useState(true)
   const { t } = useTranslation()
   const audioTitle = `${t(book.Nom)} ${chapter} ${version}`
