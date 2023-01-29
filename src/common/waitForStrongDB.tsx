@@ -12,6 +12,7 @@ import { getLangIsFr } from '~i18n'
 import SnackBar from '~common/SnackBar'
 import { getDatabasesRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
+import Box from './ui/Box'
 
 const RNFS = require('react-native-fs')
 const STRONG_FILE_SIZE = 34941952
@@ -201,7 +202,15 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase = <T,>(
+const waitForDatabase = ({
+  hasBackButton,
+  hasHeader,
+  size,
+}: {
+  hasBackButton?: boolean
+  size?: 'small' | 'large'
+  hasHeader?: boolean
+} = {}) => <T,>(
   WrappedComponent: React.ComponentType<T>
 ): React.ComponentType<T> => (props: any) => {
   const { t } = useTranslation()
@@ -215,16 +224,20 @@ const waitForDatabase = <T,>(
 
   if (isLoading && startDownload) {
     return (
-      <Loading message={t('Téléchargement de la base strong...')}>
-        <ProgressBar progress={Number(progress)} color="blue" />
-      </Loading>
+      <Box h={300} alignItems="center">
+        <Loading message={t('Téléchargement de la base strong...')}>
+          <ProgressBar progress={Number(progress)} color="blue" />
+        </Loading>
+      </Box>
     )
   }
 
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        hasBackButton
+        hasBackButton={hasBackButton}
+        size={size}
+        hasHeader={hasHeader}
         title={t(
           'La base de données strong est requise pour accéder à cette page.'
         )}

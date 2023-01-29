@@ -292,4 +292,4 @@ const DictionnaireVerseDetailScreen = ({
   )
 }
 
-export default waitForDictionnaireDB(DictionnaireVerseDetailScreen)
+export default waitForDictionnaireDB()(DictionnaireVerseDetailScreen)

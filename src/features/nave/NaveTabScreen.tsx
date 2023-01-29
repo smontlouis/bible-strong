@@ -15,7 +15,7 @@ import loadNaveBySearch from '~helpers/loadNaveBySearch'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList2'
 import SectionTitle from '~common/SectionTitle'
-import waitForDatabase from '~common/waitForNaveDB'
+import waitForNaveDB from '~common/waitForNaveDB'
 import useLanguage from '~helpers/useLanguage'
 
 import NaveItem from './NaveItem'
@@ -170,4 +170,7 @@ const NaveTabScreen = ({ hasBackButton }: NaveTabScreenProps) => {
   )
 }
 
-export default waitForDatabase(NaveTabScreen)
+export default waitForNaveDB({
+  hasHeader: true,
+  hasBackButton: true,
+})(NaveTabScreen)

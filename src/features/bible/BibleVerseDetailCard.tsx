@@ -264,6 +264,6 @@ export default compose(
       verse,
     }
   }),
-  waitForStrongDB,
+  waitForStrongDB(),
   withNavigation
 )(BibleVerseDetailCard)

@@ -308,5 +308,8 @@ export default compose(
       verse,
     }
   }),
-  waitForStrongDB
+  waitForStrongDB({
+    hasBackButton: true,
+    hasHeader: true,
+  })
 )(BibleVerseDetailScreen)

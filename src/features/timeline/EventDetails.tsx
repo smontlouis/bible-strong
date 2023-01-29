@@ -7,7 +7,7 @@ import useLanguage from '~helpers/useLanguage'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-import waitForDatabase from '~common/waitForTimeline'
+import waitForTimeline from '~common/waitForTimeline'
 import { calculateLabel } from './constants'
 import {
   TimelineEventDetail,
@@ -140,7 +140,7 @@ const Media = ({
   )
 }
 
-const EventDetails = waitForDatabase(
+const EventDetails = waitForTimeline(
   ({
     slug,
     image,

@@ -418,4 +418,4 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   )
 }
 
-export default waitForStrongDB(StrongScreen)
+export default waitForStrongDB()(StrongScreen)

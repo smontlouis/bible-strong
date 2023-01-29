@@ -25,7 +25,7 @@ import PopOverMenu from '~common/PopOverMenu'
 import Snackbar from '~common/SnackBar'
 import TagList from '~common/TagList'
 import MenuOption from '~common/ui/MenuOption'
-import waitForDatabase from '~common/waitForDictionnaireDB'
+import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { DictionaryTab } from '~state/tabs'
@@ -217,4 +217,4 @@ const DictionnaryDetailScreen = ({
   )
 }
 
-export default waitForDatabase(DictionnaryDetailScreen)
+export default waitForDictionnaireDB()(DictionnaryDetailScreen)

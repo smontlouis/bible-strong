@@ -42,7 +42,7 @@ const DLScreen = () => {
 
   return (
     <Container>
-      <Header hasBackButton />
+      <Header hasBackButton title={t('Gestion des téléchargements')} />
       <SectionList
         ListHeaderComponent={
           <>

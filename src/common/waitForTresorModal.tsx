@@ -11,6 +11,7 @@ import Loading from '~common/Loading'
 import { getTresorDB, initTresorDB } from '~helpers/database'
 import { getStaticUrl } from '~helpers/firebase'
 import { timeout } from '~helpers/timeout'
+import Box from './ui/Box'
 
 const STRONG_FILE_SIZE = 5434368
 
@@ -123,9 +124,11 @@ const waitForDatabase = <T,>(
 
   if (isLoading && startDownload) {
     return (
-      <Loading message={t('Téléchargement de la base commentaires...')}>
-        <ProgressBar progress={Number(progress)} color="blue" />
-      </Loading>
+      <Box h={300} alignItems="center">
+        <Loading message={t('Téléchargement de la base commentaires...')}>
+          <ProgressBar progress={Number(progress)} color="blue" />
+        </Loading>
+      </Box>
     )
   }
 

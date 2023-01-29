@@ -154,4 +154,7 @@ const LexiqueTabScreen = ({
   )
 }
 
-export default waitForStrongDB(LexiqueTabScreen)
+export default waitForStrongDB({
+  hasBackButton: true,
+  hasHeader: true,
+})(LexiqueTabScreen)

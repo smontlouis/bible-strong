@@ -29,7 +29,7 @@ const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
         )
       },
       error => {
-        console.log(error)
+        console.log('Error executing sql =>', error)
         reject(error.message)
       }
     )

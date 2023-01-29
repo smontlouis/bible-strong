@@ -18,7 +18,7 @@ import {
   useSearchValue,
   useResultsByLetterOrSearch,
 } from '../lexique/useUtilities'
-import waitForDatabase from '~common/waitForDictionnaireDB'
+import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import DictionnaireItem from './DictionnaireItem'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
@@ -86,7 +86,7 @@ const DictionnaireScreen = ({ hasBackButton }: DictionariesTabScreenProps) => {
         <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
         <Empty
           source={require('~assets/images/empty.json')}
-          message={`{t('Impossible de charger le dictionnaire...')}${
+          message={`${t('Impossible de charger le dictionnaire...')}${
             error === 'CORRUPTED_DATABASE'
               ? t(
                   '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -154,4 +154,7 @@ const DictionnaireScreen = ({ hasBackButton }: DictionariesTabScreenProps) => {
   )
 }
 
-export default waitForDatabase(DictionnaireScreen)
+export default waitForDictionnaireDB({
+  hasBackButton: true,
+  hasHeader: true,
+})(DictionnaireScreen)

@@ -4,6 +4,13 @@ import { getDatabases } from './databases'
 
 const RNFS = require('react-native-fs')
 
+const databaseDictionnaireName = `dictionnaire-${Date.now()}`
+const databaseStrongName = `strong-${Date.now()}`
+const databaseInterlineaireName = `interlineaire-${Date.now()}`
+const databaseTresorName = `tresor-${Date.now()}`
+const databaseMhyName = `mhy-${Date.now()}`
+const databaseNaveName = `naveFr-${Date.now()}`
+
 export const getIfDatabaseExists = async sqliteFile => {
   const sqliteDirPath = `${RNFS.DocumentDirectoryPath}/SQLite`
   const dbPath = `${sqliteDirPath}/${sqliteFile}.sqlite`
@@ -26,7 +33,7 @@ class StrongDB {
   init = async () => {
     this.dbStrong = SQLite.openDatabase(
       {
-        name: 'strong.sqlite',
+        name: databaseStrongName,
         createFromLocation: '/SQLite/strong.sqlite',
       },
       () => {
@@ -44,7 +51,7 @@ class StrongDB {
 
   delete = () => {
     this.dbStrong?._db?.close()
-    SQLite.deleteDatabase({ name: 'strong.sqlite', location: 'default' })
+    SQLite.deleteDatabase({ name: databaseStrongName, location: 'default' })
     this.dbStrong = undefined
   }
 }
@@ -54,7 +61,7 @@ export const strongDB = new StrongDB()
 export const initDictionnaireDB = () => {
   dbDictionnaire = SQLite.openDatabase(
     {
-      name: 'dictionnaire.sqlite',
+      name: databaseDictionnaireName,
       createFromLocation: '/SQLite/dictionnaire.sqlite',
     },
     () => {
@@ -62,13 +69,14 @@ export const initDictionnaireDB = () => {
     },
     e => console.log(e)
   )
+
   return dbDictionnaire
 }
 
 export const initInterlineaireDB = () => {
   dbInterlineaire = SQLite.openDatabase(
     {
-      name: 'interlineaire.sqlite',
+      name: databaseInterlineaireName,
       createFromLocation: '/SQLite/interlineaire.sqlite',
     },
     () => {
@@ -82,7 +90,7 @@ export const initInterlineaireDB = () => {
 export const initTresorDB = () => {
   dbTresorCommentaires = SQLite.openDatabase(
     {
-      name: 'commentaires-tresor.sqlite',
+      name: databaseTresorName,
       createFromLocation: '/SQLite/commentaires-tresor.sqlite',
     },
     () => {
@@ -107,14 +115,14 @@ export const getTresorDB = () => {
 
 export const deleteDictionnaireDB = () => {
   dbDictionnaire?._db?.close()
-  SQLite.deleteDatabase({ name: 'dictionnaire.sqlite', location: 'default' })
+  SQLite.deleteDatabase({ name: databaseDictionnaireName, location: 'default' })
   dbDictionnaire = undefined
 }
 
 export const deleteTresorDB = () => {
   dbTresorCommentaires?._db?.close()
   SQLite.deleteDatabase({
-    name: 'commentaires-tresor.sqlite',
+    name: databaseTresorName,
     location: 'default',
   })
   dbTresorCommentaires = undefined
@@ -122,7 +130,10 @@ export const deleteTresorDB = () => {
 
 export const deleteInterlineaireDB = () => {
   dbInterlineaire?._db?.close()
-  SQLite.deleteDatabase({ name: 'interlineaire.sqlite', location: 'default' })
+  SQLite.deleteDatabase({
+    name: databaseInterlineaireName,
+    location: 'default',
+  })
   dbInterlineaire = undefined
 }
 
@@ -132,7 +143,7 @@ class MhyDB {
   init = () => {
     this.dbMhy = SQLite.openDatabase(
       {
-        name: 'commentaires-mhy.sqlite',
+        name: databaseMhyName,
         createFromLocation: '/SQLite/commentaires-mhy.sqlite',
       },
       () => {
@@ -150,7 +161,7 @@ class MhyDB {
   delete = () => {
     this.dbMhy?._db?.close()
     SQLite.deleteDatabase({
-      name: 'commentaires-mhy.sqlite',
+      name: databaseMhyName,
       location: 'default',
     })
     this.dbMhy = undefined
@@ -165,7 +176,7 @@ class NaveDB {
   init = () => {
     this.dbNave = SQLite.openDatabase(
       {
-        name: 'naveFr.sqlite',
+        name: databaseNaveName,
         createFromLocation: '/SQLite/naveFr.sqlite',
       },
       () => {
@@ -182,7 +193,7 @@ class NaveDB {
 
   delete = () => {
     this.dbNave?._db?.close()
-    SQLite.deleteDatabase({ name: 'naveFr.sqlite', location: 'default' })
+    SQLite.deleteDatabase({ name: databaseNaveName, location: 'default' })
     this.dbNave = undefined
   }
 }

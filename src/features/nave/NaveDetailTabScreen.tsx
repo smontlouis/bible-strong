@@ -19,7 +19,7 @@ import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import waitForDatabase from '~common/waitForNaveDB'
+import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadNaveItem from '~helpers/loadNaveItem'
 import useHTMLView from '~helpers/useHTMLView'
@@ -204,4 +204,4 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   )
 }
 
-export default waitForDatabase(NaveDetailScreen)
+export default waitForNaveDB()(NaveDetailScreen)

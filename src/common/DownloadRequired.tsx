@@ -15,6 +15,7 @@ interface Props {
   iconSize?: number
   size?: 'small' | 'large'
   hasHeader?: boolean
+  hasBackground?: boolean
 }
 
 const DownloadRequired = ({
@@ -24,12 +25,13 @@ const DownloadRequired = ({
   hasBackButton,
   iconSize = 100,
   size,
-  hasHeader = true,
+  hasHeader,
+  hasBackground,
 }: Props) => {
   const padding = size === 'small' ? 10 : 30
   const { t } = useTranslation()
   return (
-    <Container noPadding={size === 'small'} pure={size === 'small'}>
+    <Container noPadding={size === 'small'} pure={!hasBackground}>
       {hasHeader && (
         <Header
           title={t('Téléchargement nécessaire')}

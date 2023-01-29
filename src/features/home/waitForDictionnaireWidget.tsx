@@ -27,7 +27,7 @@ const waitForWidget = WrappedComponent => props => {
           size="small"
           title={t('Dictionnaire requis')}
           setStartDownload={setStartDownload}
-          fileSize={7}
+          fileSize={22}
         />
       </WidgetContainer>
     )

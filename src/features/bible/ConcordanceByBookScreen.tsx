@@ -65,4 +65,7 @@ class ConcordanceByBook extends Component {
   }
 }
 
-export default waitForStrongDB(ConcordanceByBook)
+export default waitForStrongDB({
+  hasBackButton: true,
+  hasHeader: true,
+})(ConcordanceByBook)

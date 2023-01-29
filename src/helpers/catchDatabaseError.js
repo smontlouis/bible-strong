@@ -6,7 +6,7 @@ const catchDBError = async fn => {
   try {
     return await fn()
   } catch (e) {
-    console.log(e)
+    console.log('Error =>', e)
 
     if (!e) {
       SnackBar.show(i18n.t('Une error est survenue.'), 'danger', {

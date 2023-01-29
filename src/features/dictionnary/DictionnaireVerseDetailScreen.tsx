@@ -319,4 +319,4 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
   )
 }
 
-export default waitForDictionnaireDB(DictionnaireVerseDetailScreen)
+export default waitForDictionnaireDB()(DictionnaireVerseDetailScreen)

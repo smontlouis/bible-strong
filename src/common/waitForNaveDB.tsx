@@ -9,6 +9,7 @@ import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { getDatabasesRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
+import Box from './ui/Box'
 
 const FILE_SIZE = 7448576
 
@@ -104,7 +105,15 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase = <T,>(
+const waitForDatabase = ({
+  hasBackButton,
+  hasHeader,
+  size,
+}: {
+  hasBackButton?: boolean
+  size?: 'small' | 'large'
+  hasHeader?: boolean
+} = {}) => <T,>(
   WrappedComponent: React.ComponentType<T>
 ): React.ComponentType<T> => (props: any) => {
   const { t } = useTranslation()
@@ -118,16 +127,20 @@ const waitForDatabase = <T,>(
 
   if (isLoading && startDownload) {
     return (
-      <Loading message={t('Téléchargement des thèmes...')}>
-        <ProgressBar progress={Number(progress)} color="blue" />
-      </Loading>
+      <Box h={300} alignItems="center">
+        <Loading message={t('Téléchargement des thèmes...')}>
+          <ProgressBar progress={Number(progress)} color="blue" />
+        </Loading>
+      </Box>
     )
   }
 
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        hasBackButton
+        hasBackButton={hasBackButton}
+        hasHeader={hasHeader}
+        size={size}
         title={t(
           'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
         )}

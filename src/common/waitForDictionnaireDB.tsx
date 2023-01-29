@@ -9,6 +9,8 @@ import { useDBStateValue } from '~helpers/databaseState'
 import DownloadRequired from '~common/DownloadRequired'
 import { getDatabasesRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
+import Box from './ui/Box'
+import wait from '~helpers/wait'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -141,7 +143,15 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase = <T,>(
+const waitForDatabase = ({
+  hasBackButton,
+  hasHeader,
+  size,
+}: {
+  hasBackButton?: boolean
+  size?: 'small' | 'large'
+  hasHeader?: boolean
+} = {}) => <T,>(
   WrappedComponent: React.ComponentType<T>
 ): React.ComponentType<T> => (props: any) => {
   const { t } = useTranslation()
@@ -155,16 +165,20 @@ const waitForDatabase = <T,>(
 
   if (isLoading && startDownload) {
     return (
-      <Loading message={t('Téléchargement du dictionnaire...')}>
-        <ProgressBar progress={progress} color="blue" />
-      </Loading>
+      <Box h={300} alignItems="center">
+        <Loading message={t('Téléchargement du dictionnaire...')}>
+          <ProgressBar progress={progress} color="blue" />
+        </Loading>
+      </Box>
     )
   }
 
   if (isLoading && proposeDownload) {
     return (
       <DownloadRequired
-        hasBackButton
+        hasBackButton={hasBackButton}
+        hasHeader={hasHeader}
+        size={size}
         title={t(
           'La base de données dictionnaire est requise pour accéder à cette page.'
         )}
