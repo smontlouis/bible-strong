@@ -1,9 +1,14 @@
 import { SQLTresorTransaction } from '~helpers/getSQLTransaction'
-import catchDatabaseError from '~helpers/catchDatabaseError'
+import catchDatabaseError from '~helpers/catchDatabaseError.new'
 
-const loadTresorCommentaires = verse =>
+type TresorCommentaire = {
+  id: string
+  commentaires: string[]
+}
+
+const loadTresorCommentaires = (verse: string) =>
   catchDatabaseError(async () => {
-    const result = await SQLTresorTransaction(
+    const result: TresorCommentaire[] = await SQLTresorTransaction(
       `SELECT commentaires
             FROM COMMENTAIRES
             WHERE id = (?)`,

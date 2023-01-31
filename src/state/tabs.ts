@@ -513,6 +513,19 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     [setBibleTab]
   )
 
+  const selectSelectedVerse = useCallback(
+    (id: string) => {
+      setBibleTab(
+        produce(draft => {
+          draft.data.selectedVerses = {
+            [id]: true,
+          }
+        })
+      )
+    },
+    [setBibleTab]
+  )
+
   const setTitle = useCallback(
     (title: string) => {
       setBibleTab(
@@ -663,6 +676,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       addSelectedVerse,
       removeSelectedVerse,
       clearSelectedVerses,
+      selectSelectedVerse,
 
       goToNextChapter,
       goToPrevChapter,

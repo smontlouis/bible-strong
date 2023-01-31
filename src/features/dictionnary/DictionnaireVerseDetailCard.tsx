@@ -20,9 +20,10 @@ import captureError from '~helpers/captureError'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import useLanguage from '~helpers/useLanguage'
-import { viewportWidth, wp } from '~helpers/utils'
+import { hp, viewportWidth, wp } from '~helpers/utils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
+import { useQuery, QueryStatus } from '@tanstack/react-query'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -95,52 +96,30 @@ const verseToDictionnary = async (
   }
 }
 
-const useLoadWords = (ref: string) => {
-  const [wordsInVerse, setWordsInVerse] = useState([])
-  const [status, setStatus] = useState<Status>('Idle')
-
-  useEffect(() => {
-    ;(async () => {
-      setStatus('Pending')
-      const w = await loadDictionnaireWords(ref)
-      setStatus('Resolved')
-      setWordsInVerse(w)
-    })()
-  }, [ref])
-
-  return {
-    wordsInVerse,
-    status,
-  }
-}
-
-const useFormattedText = (
-  status: Status,
-  wordsInVerse: string[],
-  verse: Verse,
-  Livre: string,
-  Chapitre: string
-) => {
-  const [error, setError] = useState(false)
+const useFormattedText = ({
+  verse,
+  wordsInVerse,
+  status,
+}: {
+  verse: Verse
+  wordsInVerse?: string[]
+  status: QueryStatus
+}) => {
   const [currentWord, setCurrentWord] = useState<string>()
   const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
   const [formattedText, setFormattedText] = useState<
     JSX.Element | JSX.Element[]
   >()
-  const [words, setWords] = useState([])
   const isFR = useLanguage()
+
+  const { Livre, Chapitre, Verset } = verse
 
   useEffect(() => {
     ;(async () => {
-      if (status !== 'Resolved') {
-        return
-      }
-
       if (!wordsInVerse) {
-        setError(true)
         return
       }
-
+      setCurrentWord(wordsInVerse[0])
       const bible = await loadBible(isFR ? 'LSG' : 'KJV')
       const verseToDictionnaryText = await verseToDictionnary(
         verse,
@@ -149,27 +128,23 @@ const useFormattedText = (
       )
       setFormattedText(verseToDictionnaryText)
       setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
-
-      const loadAsyncWords = async () => {
-        const w = await Promise.all(
-          wordsInVerse.map(async w => {
-            const word = await loadDictionnaireItem(w)
-            return word
-          })
-        )
-
-        setWords(w)
-        setCurrentWord(wordsInVerse[0])
-      }
-
-      if (wordsInVerse.length) {
-        loadAsyncWords()
-      }
     })()
-  }, [wordsInVerse, verse, status, isFR, Chapitre, Livre])
+  }, [wordsInVerse, verse, isFR, Chapitre, Livre])
+
+  const { error: wordsError, data: words } = useQuery({
+    enabled: Boolean(wordsInVerse),
+    queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`],
+    queryFn: () =>
+      Promise.all(
+        wordsInVerse!.map(async w => {
+          const word = await loadDictionnaireItem(w)
+          return word
+        })
+      ),
+  })
 
   return {
-    error,
+    wordsError,
     formattedText,
     words,
     currentWord,
@@ -194,19 +169,21 @@ const DictionnaireVerseDetailScreen = ({
   const { Livre, Chapitre, Verset } = verse
   const navigation = useNavigation()
 
-  const { wordsInVerse, status } = useLoadWords(
-    `${Livre}-${Chapitre}-${Verset}`
-  )
+  const { status, error: dictionaryWordsError, data: wordsInVerse } = useQuery({
+    queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`],
+    queryFn: () => loadDictionnaireWords(`${Livre}-${Chapitre}-${Verset}`),
+  })
+
   const {
-    error,
+    wordsError,
     formattedText,
     words,
     currentWord,
     setCurrentWord,
     versesInCurrentChapter,
-  } = useFormattedText(status, wordsInVerse, verse, Livre, Chapitre)
+  } = useFormattedText({ verse, wordsInVerse, status })
 
-  if (error) {
+  if (dictionaryWordsError || wordsError) {
     return (
       <Container>
         <Empty
@@ -217,13 +194,13 @@ const DictionnaireVerseDetailScreen = ({
     )
   }
 
-  if (!formattedText) {
+  if (!formattedText || !wordsInVerse || !words) {
     return <Loading />
   }
 
   return (
     <StyledScrollView
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: 20, minHeight: hp(70) }}
       scrollIndicatorInsets={{ right: 1 }}
     >
       <Box flex>

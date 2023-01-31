@@ -1,5 +1,6 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
+import memoize from './memoize'
 
 const updateReferencesOrder = (result, references) => {
   const updatedResult = []
@@ -20,7 +21,7 @@ const updateReferencesOrder = (result, references) => {
   return updatedResult
 }
 
-const loadStrongReferences = async (references, book) =>
+const loadStrongReferences = memoize(async (references, book) =>
   catchDatabaseError(async () => {
     references = references.filter(n => n.trim())
     const part = book > 39 ? 'Grec' : 'Hebreu'
@@ -35,5 +36,6 @@ const loadStrongReferences = async (references, book) =>
     const result = await SQLStrongTransaction(sqlReq)
     return updateReferencesOrder(result, references)
   })
+)
 
 export default loadStrongReferences

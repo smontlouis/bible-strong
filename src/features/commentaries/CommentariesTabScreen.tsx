@@ -2,8 +2,6 @@ import React, { useEffect, useState, useMemo } from 'react'
 import Header from '~common/Header'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
-import { firebaseDb } from '~helpers/firebase'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { Status } from '~common/types'
 import to from 'await-to-js'
@@ -36,6 +34,8 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { FeatherIcon } from '~common/ui/Icon'
 import AdventistIcon from '~common/AdventistIcon'
 import { HStack } from '~common/ui/Stack'
+import { firebaseDb } from '~helpers/firebase'
+import memoize from '~helpers/memoize'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -58,7 +58,7 @@ const StyledVerse = styled.View({
   flexDirection: 'row',
 })
 
-const fetchComments = async (verse: string) => {
+const fetchComments = memoize(async (verse: string) => {
   const verseCommentRef = await firebaseDb
     .collection('verse-commentaries')
     .doc(verse)
@@ -81,9 +81,9 @@ const fetchComments = async (verse: string) => {
   const comments = snapshot.docs.map(x => x.data())
 
   return { ...verseComment, comments } as Comments
-}
+})
 
-const fetchMoreComments = async (verse: string, id?: string) => {
+const fetchMoreComments = memoize(async (verse: string, id?: string) => {
   const query = id
     ? firebaseDb
         .collection('verse-commentaries')
@@ -106,7 +106,7 @@ const fetchMoreComments = async (verse: string, id?: string) => {
   const comments = snapshot.docs.map(x => x.data()) as CommentType[]
 
   return comments
-}
+})
 
 const useComments = (verse: string) => {
   const [status, setStatus] = useState<Status>('Idle')
@@ -169,13 +169,11 @@ const useVerseInCurrentChapter = (book: string, chapter: string) => {
 
 interface CommentariesScreenProps {
   hasHeader?: boolean
-  navigation: NavigationStackProp
   commentaryAtom: PrimitiveAtom<CommentaryTab>
 }
 
 const CommentariesTabScreen = ({
   hasHeader = true,
-  navigation,
   commentaryAtom,
 }: CommentariesScreenProps) => {
   const { t } = useTranslation()

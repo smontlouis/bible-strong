@@ -9,7 +9,7 @@ import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ErrorBoundary from '~common/ErrorBoundary'
 
 import { NavigationParams, NavigationState } from 'react-navigation'
@@ -107,6 +107,8 @@ const updateApp = async (t: TFunction<'translation'>) => {
   }
 }
 
+const queryClient = new QueryClient()
+
 const InitApp = ({ persistor }: Props) => {
   useInitFireAuth()
   useLiveUpdates()
@@ -153,17 +155,19 @@ const InitApp = ({ persistor }: Props) => {
             },
           }}
         >
-          <PersistGate loading={null} persistor={persistor}>
-            <DBStateProvider>
-              <ErrorBoundary>
-                <AppSwitcherProvider>
-                  <AppNavigator
-                    onNavigationStateChange={onNavigationStateChange}
-                  />
-                </AppSwitcherProvider>
-              </ErrorBoundary>
-            </DBStateProvider>
-          </PersistGate>
+          <QueryClientProvider client={queryClient}>
+            <PersistGate loading={null} persistor={persistor}>
+              <DBStateProvider>
+                <ErrorBoundary>
+                  <AppSwitcherProvider>
+                    <AppNavigator
+                      onNavigationStateChange={onNavigationStateChange}
+                    />
+                  </AppSwitcherProvider>
+                </ErrorBoundary>
+              </DBStateProvider>
+            </PersistGate>
+          </QueryClientProvider>
         </MenuProvider>
       </PaperProvider>
     </ThemeProvider>

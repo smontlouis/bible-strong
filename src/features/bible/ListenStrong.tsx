@@ -15,8 +15,10 @@ interface Props {
   code: number
 }
 
+const cachedSounds: { [x: string]: Audio.Sound } = {}
+
 const ListenToStrong = ({ type, code }: Props) => {
-  const { current: soundObject } = React.useRef(new Audio.Sound())
+  const soundObject = React.useRef(new Audio.Sound())
   const codeId = `${code}`.padStart(4, '0')
   const { t } = useTranslation()
   const url =
@@ -39,13 +41,19 @@ const ListenToStrong = ({ type, code }: Props) => {
 
   useEffect(() => {
     ;(async () => {
+      if (cachedSounds[url]) {
+        soundObject.current = cachedSounds[url]
+        soundObject.current.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+        return
+      }
       try {
         setAudioStatus('Loading')
-        await soundObject.loadAsync({
+        await soundObject.current.loadAsync({
           uri: url,
         })
-        soundObject.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+        soundObject.current.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
         setAudioStatus('Idle')
+        cachedSounds[url] = soundObject.current
       } catch (error) {
         console.log(error)
         setAudioStatus('Error')
@@ -75,13 +83,13 @@ const ListenToStrong = ({ type, code }: Props) => {
 
       if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
         setAudioStatus('Idle')
-        soundObject.stopAsync()
+        soundObject.current.stopAsync()
       }
     }
   }
 
   const playAudio = async () => {
-    const [err] = await to(soundObject.playAsync())
+    const [err] = await to(soundObject.current.playAsync())
   }
 
   return (

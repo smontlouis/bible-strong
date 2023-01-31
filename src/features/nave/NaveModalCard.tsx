@@ -1,3 +1,5 @@
+import { useTheme } from '@emotion/react'
+import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
@@ -8,33 +10,18 @@ import loadNaveByVerset from '~helpers/loadNaveByVerset'
 import { timeout } from '~helpers/timeout'
 import NaveForVerse from './NaveModalForVerse'
 
-const CardWrapper = waitForNaveDB()(({ theme, selectedVerse, onClosed }) => {
+type Props = {
+  selectedVerse: string
+}
+
+const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
   const { t } = useTranslation()
-  const [isLoading, setIsLoading] = useState(true)
-  const [Naves, setNaves] = useState(null)
-  const [error, setError] = useState(false)
+  const theme = useTheme()
 
-  useEffect(() => {
-    const loadRef = async () => {
-      if (selectedVerse) {
-        setError(false)
-        setIsLoading(true)
-        await timeout(500)
-        const Naves = await loadNaveByVerset(selectedVerse)
-        setNaves(Naves)
-
-        if (Naves?.error || !Naves) {
-          setError(true)
-          setIsLoading(false)
-          return
-        }
-
-        setIsLoading(false)
-      }
-    }
-
-    loadRef()
-  }, [selectedVerse])
+  const { isLoading, error, data } = useQuery({
+    queryKey: ['nave', selectedVerse],
+    queryFn: () => loadNaveByVerset(selectedVerse),
+  })
 
   if (error) {
     return (
@@ -57,7 +44,7 @@ const CardWrapper = waitForNaveDB()(({ theme, selectedVerse, onClosed }) => {
     return null
   }
 
-  const [naveItemsForVerse, naveItemsForChapter] = Naves || []
+  const [naveItemsForVerse, naveItemsForChapter] = data || []
 
   return (
     <Box padding={20}>
@@ -66,12 +53,10 @@ const CardWrapper = waitForNaveDB()(({ theme, selectedVerse, onClosed }) => {
           <NaveForVerse
             items={naveItemsForVerse}
             label={t('Concernant le verset')}
-            onClosed={onClosed}
           />
           <NaveForVerse
             items={naveItemsForChapter}
             label={t('Concernant le chapitre entier')}
-            onClosed={onClosed}
           />
         </>
       )}
@@ -79,4 +64,4 @@ const CardWrapper = waitForNaveDB()(({ theme, selectedVerse, onClosed }) => {
   )
 })
 
-export default CardWrapper
+export default NaveModalCard

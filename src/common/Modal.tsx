@@ -27,7 +27,6 @@ const Tag = styled.View(({ theme }) => ({
 }))
 
 interface ModalBodyProps extends ModalizeProps {
-  onClose: () => void
   children: React.ReactNode
   withPortal?: boolean
   modalRef?: React.RefObject<Modalize>

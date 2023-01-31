@@ -1,8 +1,17 @@
 import { SQLNaveTransaction } from '~helpers/getSQLTransaction'
-import catchDatabaseError from '~helpers/catchDatabaseError'
+import catchDatabaseError from '~helpers/catchDatabaseError.new'
 
-const fetchData = async item => {
-  const [itemResult] = await SQLNaveTransaction(
+type NaveRefQuery = {
+  ref: string
+}[]
+
+type NaveTopicsQuery = {
+  name: string
+  name_lower: string
+}[]
+
+const fetchData = async (item: string) => {
+  const [itemResult]: NaveRefQuery = await SQLNaveTransaction(
     `SELECT ref
           FROM VERSES
           WHERE id = '${item}'`
@@ -12,7 +21,7 @@ const fetchData = async item => {
     return
   }
 
-  const refArray = JSON.parse(itemResult.ref)
+  const refArray: string[] = JSON.parse(itemResult.ref)
 
   const verseSqlReq = refArray.reduce((sqlString, name_lower, index) => {
     sqlString += `name_lower LIKE '${name_lower}' `
@@ -22,10 +31,12 @@ const fetchData = async item => {
     return sqlString
   }, 'SELECT name_lower, name FROM TOPICS WHERE ')
 
-  return SQLNaveTransaction(verseSqlReq)
+  const result: Promise<NaveTopicsQuery> = SQLNaveTransaction(verseSqlReq)
+
+  return result
 }
 
-const loadNaveByVerset = verse =>
+const loadNaveByVerset = (verse: string) =>
   catchDatabaseError(async () => {
     // Fetch for verse
     const naveReferenceResultForVerse = await fetchData(verse)
@@ -38,7 +49,10 @@ const loadNaveByVerset = verse =>
 
     const naveReferenceResultForChapter = await fetchData(chapter)
 
-    return [naveReferenceResultForVerse, naveReferenceResultForChapter]
+    return [naveReferenceResultForVerse, naveReferenceResultForChapter] as [
+      NaveTopicsQuery | undefined,
+      NaveTopicsQuery | undefined
+    ]
   })
 
 export default loadNaveByVerset

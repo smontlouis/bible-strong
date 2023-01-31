@@ -20,7 +20,7 @@ const StyledNaveItem = styled.View(({ theme }) => ({
   marginBottom: 5,
 }))
 
-const NaveItem = ({ item: { name, name_lower }, onClosed }) => {
+const NaveItem = ({ item: { name, name_lower } }) => {
   return (
     <Link route="NaveDetail" params={{ name, name_lower }}>
       <StyledNaveItem marginBottom={30}>

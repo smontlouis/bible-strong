@@ -12,6 +12,7 @@ const Container = styled.View(({ theme }) => ({
   flex: 1,
   alignItems: 'center',
   justifyContent: 'center',
+  minHeight: 300,
 }))
 
 interface Props {

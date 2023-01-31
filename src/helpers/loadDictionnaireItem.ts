@@ -1,11 +1,15 @@
 import { SQLDictionnaireTransaction } from '~helpers/getSQLTransaction'
-import catchDatabaseError from '~helpers/catchDatabaseError'
+import catchDatabaseError from '~helpers/catchDatabaseError.new'
 
-const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1)
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
-const loadDictionnaireItem = async word =>
+type DictionaryQuery = {
+  word: string
+  definition: string
+}[]
+const loadDictionnaireItem = async (word: string) =>
   catchDatabaseError(async () => {
-    const result = await SQLDictionnaireTransaction(
+    const result: DictionaryQuery = await SQLDictionnaireTransaction(
       `SELECT word, definition
       FROM dictionnaire
       WHERE word LIKE (?) OR sanitized_word LIKE (?)

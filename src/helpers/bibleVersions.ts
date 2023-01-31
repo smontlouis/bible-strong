@@ -101,7 +101,7 @@ export interface Version {
   hasAudio?: boolean
 }
 
-export const versions: { [x: string]: Version } = {
+export const versions = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910',

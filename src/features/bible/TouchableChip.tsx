@@ -16,7 +16,7 @@ const Touchable = styled.TouchableOpacity(({ disabled, theme }) => ({
   borderRadius: 20,
 }))
 
-const StyledIcon = styled(Icon.Feather)(
+const StyledIcon = styled(Icon.Feather)<{ isSelected?: boolean }>(
   ({ color, isSelected, theme, disabled }) => ({
     marginRight: 8,
     color: disabled
@@ -28,34 +28,41 @@ const StyledIcon = styled(Icon.Feather)(
   })
 )
 
-export default class TabBarIcon extends React.Component {
-  render() {
-    const {
-      onPress,
-      color,
-      isSelected,
-      size = 17,
-      label,
-      disabled,
-      name,
-    } = this.props
-    return (
-      <Touchable onPress={onPress} disabled={disabled}>
-        {name && (
-          <StyledIcon
-            name={name}
-            size={size}
-            color={color}
-            isSelected={isSelected}
-            disabled={disabled}
-          />
-        )}
-        {label && (
-          <Text fontSize={13} color="primary">
-            {label}
-          </Text>
-        )}
-      </Touchable>
-    )
-  }
+type Props = {
+  onPress: () => void
+  color?: string
+  isSelected?: boolean
+  size?: number
+  label?: string
+  disabled?: boolean
+  name?: any
+}
+
+export default ({
+  onPress,
+  color,
+  isSelected,
+  size = 17,
+  label,
+  disabled,
+  name,
+}: Props) => {
+  return (
+    <Touchable onPress={onPress} disabled={disabled}>
+      {name && (
+        <StyledIcon
+          name={name}
+          size={size}
+          color={color}
+          isSelected={isSelected}
+          disabled={disabled}
+        />
+      )}
+      {label && (
+        <Text fontSize={13} color="primary">
+          {label}
+        </Text>
+      )}
+    </Touchable>
+  )
 }

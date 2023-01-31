@@ -1,7 +1,8 @@
 import { SQLDictionnaireTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
+import memoize from './memoize'
 
-const loadDictionnaireByLetter = letter =>
+const loadDictionnaireByLetter = memoize(letter =>
   catchDatabaseError(async () => {
     const result = await SQLDictionnaireTransaction(
       `SELECT rowid, word, sanitized_word
@@ -14,5 +15,6 @@ const loadDictionnaireByLetter = letter =>
 
     return result
   })
+)
 
 export default loadDictionnaireByLetter

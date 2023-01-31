@@ -27,51 +27,69 @@ import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import { BibleResource, VerseIds } from '~common/types'
+import { useNavigation } from 'react-navigation-hooks'
+import { VersionCode } from '~state/tabs'
 
-const Container = styled.View(({ theme, isSelectionMode }) => ({
-  width: '100%',
-  backgroundColor: theme.colors.reverse,
-  paddingTop: 10,
+const Container = styled.View<{ isSelectionMode?: boolean }>(
+  ({ theme, isSelectionMode }) => ({
+    width: '100%',
+    backgroundColor: theme.colors.reverse,
+    paddingTop: 10,
 
-  ...(isSelectionMode && {
+    ...(isSelectionMode && {
+      flexDirection: 'row',
+      paddingLeft: 10,
+      paddingRight: 10,
+      paddingVertical: 30,
+    }),
+  })
+)
+
+const HalfContainer = styled.View<{ border?: boolean }>(
+  ({ border, theme }) => ({
+    borderBottomColor: theme.colors.border,
+    borderBottomWidth: border ? 1 : 0,
     flexDirection: 'row',
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingVertical: 30,
-  }),
-}))
+    alignItems: 'stretch',
+    height: 60,
+  })
+)
 
-const HalfContainer = styled.View(({ border, theme }) => ({
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: border ? 1 : 0,
-  flexDirection: 'row',
-  alignItems: 'stretch',
-  height: 60,
-}))
+type Props = {
+  isVisible: boolean
+  isSelectionMode: boolean
+  isSelectedVerseHighlighted: boolean
+  onChangeResourceType: (type: BibleResource) => void
+  onCreateNoteClick: () => void
+  addHighlight: (color: string) => void
+  addTag: () => void
+  removeHighlight: () => void
+  clearSelectedVerses: () => void
+  selectedVerses: VerseIds
+  selectAllVerses: () => void
+  version: VersionCode
+}
 
 const VersesModal = ({
   isVisible,
+  isSelectionMode,
   isSelectedVerseHighlighted,
+  onChangeResourceType,
+  onCreateNoteClick,
   addHighlight,
   addTag,
   removeHighlight,
   clearSelectedVerses,
-  navigation,
   selectedVerses,
-  version,
-  onCreateNoteClick,
-  isSelectionMode,
-  setReference,
-  setNave,
   selectAllVerses,
-  setStrongVerseDetail,
-  setDictionaryVerseDetail,
-  setCommentaries,
-}) => {
+  version,
+}: Props) => {
+  const navigation = useNavigation()
   const isPrevVisible = usePrevious(isVisible)
   const theme = useTheme()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
-  const modalRef = React.useRef(null)
+  const modalRef = React.useRef<Modalize>(null)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -133,32 +151,29 @@ const VersesModal = ({
   }
 
   const showStrongDetail = () => {
-    const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
-    setStrongVerseDetail({
-      Livre,
-      Chapitre,
-      Verset,
-    })
+    onChangeResourceType('strong')
   }
 
   const openCommentariesScreen = () => {
-    const verse = Object.keys(selectedVerses)[0]
-    setCommentaries(verse)
+    onChangeResourceType('commentary')
   }
 
-  const showDictionnaryDetail = () => {
-    const [Livre, Chapitre, Verset] = Object.keys(selectedVerses)[0].split('-')
-    setDictionaryVerseDetail({
-      Livre,
-      Chapitre,
-      Verset,
-    })
+  const showDictionaryDetail = () => {
+    onChangeResourceType('dictionary')
   }
 
   const compareVerses = () => {
     navigation.navigate('BibleCompareVerses', {
       selectedVerses,
     })
+  }
+
+  const onOpenReferences = () => {
+    onChangeResourceType('reference')
+  }
+
+  const onOpenNave = () => {
+    onChangeResourceType('nave')
   }
 
   const sendVerseData = async () => {
@@ -175,16 +190,6 @@ const VersesModal = ({
       verses: Object.keys(selectedVerses),
     })
     clearSelectedVerses()
-  }
-
-  const onOpenReferences = () => {
-    const reference = Object.keys(selectedVerses)[0]
-    setReference(reference)
-  }
-
-  const onOpenNave = () => {
-    const reference = Object.keys(selectedVerses)[0]
-    setNave(reference)
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
@@ -275,7 +280,7 @@ const VersesModal = ({
                 <TouchableSvgIcon
                   icon={DictionnaireIcon}
                   color="secondary"
-                  onPress={showDictionnaryDetail}
+                  onPress={showDictionaryDetail}
                   label={t('Dictionnaire')}
                   disabled={moreThanOneVerseSelected}
                 />

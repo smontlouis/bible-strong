@@ -1,4 +1,3 @@
-// @flow
 import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useRef, useState } from 'react'
@@ -20,9 +19,8 @@ import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { shallowEqual } from 'recompose'
-import { Verse, VerseIds } from '~common/types'
+import { BibleResource, Verse, VerseIds } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import NaveModal from '~features/nave/NaveModal'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -41,13 +39,10 @@ import {
 import BibleFooter from './BibleFooter'
 import BibleNoteModal from './BibleNoteModal'
 import BibleWebView from './BibleWebView'
-import ReferenceModal from './ReferenceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import BibleParamsModal from './BibleParamsModal'
-import BibleVerseDetailModal from './BibleVerseDetailModal'
-import DictionnaireVerseDetailModal from '~features/dictionnary/DictionnaireVerseDetailModal'
-import CommentariesModal from '~features/commentaries/CommentariesModal'
+import ResourcesModal from './resources/ResourceModal'
 
 const Container = styled.View({
   flex: 1,
@@ -114,18 +109,15 @@ const BibleViewer = ({
     reference: string
     book: number
   }>()
-  const naveModalDisclosure = useBottomSheetDisclosure<string>()
-  const referenceModalDisclosure = useBottomSheetDisclosure<string>()
-  const verseDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
-  const dictionaryDetailModalDisclosure = useBottomSheetDisclosure<Verse>()
-  const commentariesModalDisclosure = useBottomSheetDisclosure<string>()
   const bibleParamsModalDisclosure = useBottomSheetDisclosure<boolean>()
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
   const openInNewTab = useOpenInNewTab()
   const pericope = useRef(getBiblePericope(isFR ? 'LSG' : 'KJV'))
-
+  const [resourceType, onChangeResourceType] = useState<BibleResource | null>(
+    null
+  )
   const [bible, actions] = useBibleTabActions(bibleAtom)
 
   const {
@@ -178,7 +170,9 @@ const BibleViewer = ({
   }, shallowEqual)
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
-    Object.keys(selectedVerses).find(s => state.user.bible.highlights[s])
+    Boolean(
+      Object.keys(selectedVerses).find(s => state.user.bible.highlights[s])
+    )
   )
 
   useEffect(() => {
@@ -373,7 +367,6 @@ const BibleViewer = ({
           )}
           openNoteModal={openNoteModal}
           setSelectedCode={strongModalDisclosure.onOpen}
-          setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
           selectedCode={strongModalDisclosure.isOpen}
           comments={comments}
           removeParallelVersion={actions.removeParallelVersion}
@@ -381,6 +374,7 @@ const BibleViewer = ({
           goToPrevChapter={actions.goToPrevChapter}
           goToNextChapter={actions.goToNextChapter}
           setMultipleTagsItem={setMultipleTagsItem}
+          onChangeResourceType={onChangeResourceType}
         />
       )}
       {!isReadOnly && (
@@ -406,17 +400,11 @@ const BibleViewer = ({
         </Box>
       )}
       <SelectedVersesModal
-        settings={settings}
-        isSelectionMode={isSelectionMode}
-        setSelectedVerse={actions.setSelectedVerse}
-        setReference={referenceModalDisclosure.onOpen}
-        setNave={naveModalDisclosure.onOpen}
-        setStrongVerseDetail={verseDetailModalDisclosure.onOpen}
-        setDictionaryVerseDetail={dictionaryDetailModalDisclosure.onOpen}
-        setCommentaries={commentariesModalDisclosure.onOpen}
-        onCreateNoteClick={toggleCreateNote}
         isVisible={modalIsVisible}
+        isSelectionMode={isSelectionMode}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+        onChangeResourceType={onChangeResourceType}
+        onCreateNoteClick={toggleCreateNote}
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
@@ -424,7 +412,6 @@ const BibleViewer = ({
           actions.clearSelectedVerses()
         }}
         clearSelectedVerses={actions.clearSelectedVerses}
-        navigation={navigation}
         selectedVerses={selectedVerses}
         selectAllVerses={selectAllVerses}
         version={version}
@@ -440,29 +427,11 @@ const BibleViewer = ({
         selectedCode={strongModalDisclosure.isOpen}
         onClosed={strongModalDisclosure.onClose}
       />
-      <ReferenceModal
-        version={version}
-        selectedVerse={referenceModalDisclosure.isOpen}
-        onClosed={referenceModalDisclosure.onClose}
-      />
-      <NaveModal
-        selectedVerse={naveModalDisclosure.isOpen}
-        onClosed={naveModalDisclosure.onClose}
-      />
-      <BibleVerseDetailModal
-        verse={verseDetailModalDisclosure.isOpen}
-        onChangeVerse={verseDetailModalDisclosure.onOpen}
-        onClose={verseDetailModalDisclosure.onClose}
-      />
-      <DictionnaireVerseDetailModal
-        verse={dictionaryDetailModalDisclosure.isOpen}
-        onChangeVerse={dictionaryDetailModalDisclosure.onOpen}
-        onClose={dictionaryDetailModalDisclosure.onClose}
-      />
-      <CommentariesModal
-        verse={commentariesModalDisclosure.isOpen}
-        onChangeVerse={commentariesModalDisclosure.onOpen}
-        onClose={commentariesModalDisclosure.onClose}
+      <ResourcesModal
+        bibleAtom={bibleAtom}
+        resourceType={resourceType}
+        onChangeResourceType={onChangeResourceType}
+        onClose={() => onChangeResourceType(null)}
       />
       <BibleParamsModal
         navigation={navigation}

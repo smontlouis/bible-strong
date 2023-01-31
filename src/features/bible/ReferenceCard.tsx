@@ -2,26 +2,28 @@
 
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
-import { withNavigation } from 'react-navigation'
 
 import { useTheme } from '@emotion/react'
-import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
+import { VerseRefContent } from '~common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import waitForTresorModal from '~common/waitForTresorModal'
-import formatVerseContent from '~helpers/formatVerseContent'
 import getVersesContent from '~helpers/getVersesContent'
 import loadTresorReferences from '~helpers/loadTresorReferences'
-import { timeout } from '~helpers/timeout'
-import { useModalize } from '~helpers/useModalize'
+import { VersionCode } from '~state/tabs'
 
-const ReferenceItem = ({ reference, version }) => {
-  const [Verse, setVerse] = useState(null)
+const ReferenceItem = ({
+  reference,
+  version,
+}: {
+  reference: string
+  version: VersionCode
+}) => {
+  const [Verse, setVerse] = useState<VerseRefContent | null>(null)
 
   useEffect(() => {
     const loadVerse = async () => {
@@ -59,33 +61,20 @@ const ReferenceItem = ({ reference, version }) => {
   )
 }
 
-const CardWrapper = waitForTresorModal(
-  ({ theme, selectedVerse, onClosed, version }) => {
-    const [isLoading, setIsLoading] = useState(true)
-    const [references, setReferences] = useState(null)
-    const [error, setError] = useState(false)
+export const ReferenceCard = waitForTresorModal(
+  ({
+    selectedVerse,
+    version,
+  }: {
+    selectedVerse: string
+    version: VersionCode
+  }) => {
+    const theme = useTheme()
 
-    useEffect(() => {
-      const loadRef = async () => {
-        if (selectedVerse) {
-          setError(false)
-          setIsLoading(true)
-          await timeout(500)
-          const references = await loadTresorReferences(selectedVerse)
-          setReferences(references)
-
-          if (references?.error || !references) {
-            setError(true)
-            setIsLoading(false)
-            return
-          }
-
-          setIsLoading(false)
-        }
-      }
-
-      loadRef()
-    }, [selectedVerse])
+    const { isLoading, error, data } = useQuery({
+      queryKey: ['references', selectedVerse],
+      queryFn: () => loadTresorReferences(selectedVerse),
+    })
 
     if (error) {
       return (
@@ -98,27 +87,33 @@ const CardWrapper = waitForTresorModal(
 
     if (isLoading) {
       return (
-        <Box flex center>
+        <Box flex center minH={200}>
           <ActivityIndicator color={theme.colors.grey} />
         </Box>
       )
     }
 
-    if (!selectedVerse) {
+    if (!selectedVerse || !data) {
       return null
     }
 
     return (
       <Box flex>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-          <References references={references} version={version} />
+          <References references={data} version={version} />
         </ScrollView>
       </Box>
     )
   }
 )
 
-const References = ({ references, version }) => {
+const References = ({
+  references,
+  version,
+}: {
+  references: any
+  version: VersionCode
+}) => {
   const refs = references.commentaires
     ? JSON.parse(references.commentaires)
     : []
@@ -145,35 +140,3 @@ const References = ({ references, version }) => {
     )
   })
 }
-
-const ReferenceModal = ({ onClosed, selectedVerse, version }) => {
-  const { title } = formatVerseContent([selectedVerse])
-  const { t } = useTranslation()
-  const theme = useTheme()
-  const { ref, open, close } = useModalize()
-
-  useEffect(() => {
-    if (selectedVerse) {
-      open()
-    }
-  }, [selectedVerse, open])
-
-  return (
-    <Modal.Body
-      ref={ref}
-      onClose={onClosed}
-      modalRef={ref}
-      HeaderComponent={
-        <ModalHeader
-          onClose={() => ref?.current?.close()}
-          title={title}
-          subTitle={t('Références croisées')}
-        />
-      }
-    >
-      <CardWrapper {...{ theme, selectedVerse, onClosed: close, version }} />
-    </Modal.Body>
-  )
-}
-
-export default withNavigation(ReferenceModal)

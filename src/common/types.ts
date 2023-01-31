@@ -192,3 +192,10 @@ export type StudyNavigateBibleType =
 export type VerseIds = {
   [verse: string]: true
 }
+
+export type BibleResource =
+  | 'strong'
+  | 'commentary'
+  | 'dictionary'
+  | 'nave'
+  | 'reference'

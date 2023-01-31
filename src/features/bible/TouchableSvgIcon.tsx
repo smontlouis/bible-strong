@@ -1,9 +1,8 @@
-import React from 'react'
 import styled from '@emotion/native'
 import { useTheme, withTheme } from '@emotion/react'
+import React from 'react'
 
 import Text from '~common/ui/Text'
-import { SvgProps } from 'react-native-svg'
 
 const Touchable = styled.TouchableOpacity(({ disabled }) => ({
   flex: 1,
@@ -25,7 +24,7 @@ const TouchableSvgIcon = ({
   color?: string
   isSelected?: boolean
   size?: number
-  icon: React.FC<SvgProps>
+  icon: any
   noFlex?: boolean
   label?: string
   disabled?: boolean

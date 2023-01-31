@@ -3,6 +3,7 @@ import * as Icon from '@expo/vector-icons'
 
 import Text from '~common/ui/Text'
 import styled from '@emotion/native'
+import { TouchableOpacityProps } from 'react-native'
 
 const Touchable = styled.TouchableOpacity<{
   noFlex?: boolean
@@ -46,7 +47,7 @@ export default ({
   label?: string
   disabled?: boolean
   name: string
-}) => {
+} & TouchableOpacityProps) => {
   return (
     <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled} {...props}>
       <StyledIcon

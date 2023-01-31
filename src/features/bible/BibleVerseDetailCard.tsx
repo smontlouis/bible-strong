@@ -2,7 +2,6 @@ import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import React from 'react'
 import Carousel from 'react-native-snap-carousel'
-import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -258,12 +257,6 @@ class BibleVerseDetailCard extends React.Component {
 export default compose(
   withTheme,
   withTranslation(),
-  connect((state, ownProps) => {
-    const verse = ownProps.verse
-    return {
-      verse,
-    }
-  }),
   waitForStrongDB(),
   withNavigation
 )(BibleVerseDetailCard)
