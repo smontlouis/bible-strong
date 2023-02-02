@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 function SvgComponent(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -17,4 +19,4 @@ function SvgComponent(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-export default SvgComponent
+export default memo(SvgComponent)

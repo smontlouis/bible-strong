@@ -60,7 +60,7 @@ export const useTabAnimations = () => {
         () => {
           runOnJS(setActiveTabIndex)(index)
           runOnJS(setAtomId)(index)
-          activeTabScreen.opacity.value = withTiming(1, { duration: 300 })
+          activeTabScreen.opacity.value = withTiming(1, { duration: 100 })
           // activeTabScreen.opacity.value = withTiming(1, undefined, () => {
           //   // !TODO - Fix scroll to top
           //   // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import Svg, { G, Path } from 'react-native-svg'
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 
@@ -17,4 +17,4 @@ const SvgComponent = props => (
   </Svg>
 )
 
-export default SvgComponent
+export default memo(SvgComponent)

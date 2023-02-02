@@ -1,6 +1,5 @@
 import React, { createContext, memo, useContext, useMemo } from 'react'
 import { ScrollView, View } from 'react-native'
-import { TapGestureHandler } from 'react-native-gesture-handler'
 import {
   SharedValue,
   useAnimatedRef,
@@ -29,7 +28,6 @@ type AppSwitcherContextValues = {
     padding: SharedValue<number>
   }
   tabPreviews: {
-    gestureRefs: React.RefObject<TapGestureHandler>[]
     refs: React.RefObject<View>[]
   }
   tabPreviewCarousel: {
@@ -53,11 +51,6 @@ export const AppSwitcherProvider = memo(
     const memoizedChildren = useMemo(() => children, [])
     const { HEIGHT } = useTabConstants()
 
-    const tabPreviewGestureRefs = useMemo(
-      () => new Array(100).fill(React.createRef<TapGestureHandler>()),
-      []
-    )
-
     const tabPreviewRefs = useMemo(() => new Array(100), [])
 
     const isBottomTabBarVisible = useSharedValue(1)
@@ -69,7 +62,6 @@ export const AppSwitcherProvider = memo(
     }
 
     const tabPreviews = {
-      gestureRefs: tabPreviewGestureRefs,
       refs: tabPreviewRefs,
     }
 

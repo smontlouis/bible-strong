@@ -19,4 +19,4 @@ function SvgComponent({ color, theme, ...props }) {
   )
 }
 
-export default withTheme(SvgComponent)
+export default React.memo(withTheme(SvgComponent))

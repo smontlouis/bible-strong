@@ -1,4 +1,5 @@
 import styled from '@emotion/native'
+import { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Animated from 'react-native-reanimated'
@@ -229,7 +230,10 @@ const Box = styled.View<BoxProps>(props => {
   }
 })
 
-export const AnimatedBox = Animated.createAnimatedComponent(Box)
 export const TouchableBox = Box.withComponent(TouchableOpacity)
+export const AnimatedBox = Animated.createAnimatedComponent(Box)
+export const AnimatedTouchableBox = Animated.createAnimatedComponent(
+  TouchableBox
+)
 
 export default Box

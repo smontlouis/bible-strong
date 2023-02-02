@@ -2,6 +2,7 @@ import { useAtom, useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useRef } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
+import { BackHandler } from 'react-native'
 import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
 import {
   getBottomSpace,
@@ -22,7 +23,6 @@ import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
-import { BackHandler } from 'react-native'
 
 interface AppSwitcherProps {
   openMenu: () => void
@@ -42,14 +42,13 @@ const AppSwitcherScreen = memo(
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
-    const { scrollView, tabPreviews } = useAppSwitcherContext()
+    const { scrollView } = useAppSwitcherContext()
 
     return (
       <Box flex={1} bg="lightGrey">
         <AnimatedScrollView
           // @ts-ignore
           ref={scrollView.ref}
-          simultaneousHandlers={tabPreviews.gestureRefs}
           showsVerticalScrollIndicator={false}
           // onScroll={scrollHandler}
           // scrollEventThrottle={16}
@@ -80,8 +79,6 @@ const AppSwitcherScreen = memo(
                 index={i}
                 tabAtom={tabAtom}
                 marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
-                tapGestureRef={tabPreviews.gestureRefs[i]}
-                simultaneousHandlers={scrollView.ref}
               />
             ))}
           </AnimatedBox>

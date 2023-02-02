@@ -1,15 +1,11 @@
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue, useSetAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect } from 'react'
-import { TapGestureHandlerGestureEvent } from 'react-native-gesture-handler'
 import {
   Extrapolate,
   interpolate,
-  measure,
-  runOnJS,
   runOnUI,
   scrollTo,
-  useAnimatedGestureHandler,
   useAnimatedRef,
   useAnimatedStyle,
   withTiming,
@@ -18,9 +14,8 @@ import wait from '~helpers/wait'
 import { TabItem, tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
-import useTabConstants from '../utils/useTabConstants'
 import { useTabAnimations } from '../utils/useTabAnimations'
-import { Platform } from 'react-native'
+import useTabConstants from '../utils/useTabConstants'
 
 const useTabPreview = ({
   index,
@@ -67,17 +62,14 @@ const useTabPreview = ({
     }
   }, [])
 
-  const onTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onFinish: () => {
-      if (activeTabPreview.animationProgress.value !== 0) {
-        return
-      }
-      // measure the image
-      // width/height and position to animate from it to the full screen one
-      const measurements = measure(ref)
-      expandTab({ index, left: measurements.pageX, top: measurements.pageY })
-    },
-  })
+  const onOpen = async () => {
+    const { pageX, pageY } = await measureTabPreview(index)
+    expandTab({
+      index,
+      left: pageX,
+      top: pageY,
+    })
+  }
 
   const onDelete = () => {
     scrollView.padding.value = TAB_PREVIEW_HEIGHT + GAP + 20
@@ -88,17 +80,15 @@ const useTabPreview = ({
     scrollView.padding.value = withTiming(0)
   }
 
-  const onClose = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onFinish: () => {
-      activeTabPreview.zIndex.value = 1
-      runOnJS(onDelete)()
+  const onClose = () => {
+    activeTabPreview.zIndex.value = 1
+    onDelete()
 
-      // If deleting last tab, choose the previous one
-      if (tabsCount - 1 === activeTabPreview.index.value) {
-        activeTabPreview.index.value -= 1
-      }
-    },
-  })
+    // If deleting last tab, choose the previous one
+    if (tabsCount - 1 === activeTabPreview.index.value) {
+      activeTabPreview.index.value -= 1
+    }
+  }
 
   const boxStyles = useAnimatedStyle(() => {
     if (activeTabPreview.index.value === index) {
@@ -195,7 +185,7 @@ const useTabPreview = ({
     previewImageStyles,
     textStyles,
     xStyles,
-    onTap,
+    onOpen,
     onClose,
   }
 }

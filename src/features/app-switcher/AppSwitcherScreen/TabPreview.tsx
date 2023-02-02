@@ -1,32 +1,31 @@
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useMemo } from 'react'
 import { Image, StyleSheet } from 'react-native'
-import { TapGestureHandler } from 'react-native-gesture-handler'
 import { FadeIn, Layout, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
-import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
+import { selectAtom } from 'jotai/vanilla/utils'
+import Box, {
+  AnimatedBox,
+  AnimatedTouchableBox,
+  BoxProps,
+} from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
+import getIconByTabType from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
-import getIconByTabType from '../utils/getIconByTabType'
-import { selectAtom } from 'jotai/vanilla/utils'
 
 interface TabPreviewProps {
   index: number
   tabAtom: PrimitiveAtom<TabItem>
-  tapGestureRef: React.RefObject<TapGestureHandler>
-  simultaneousHandlers?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
 }
 
 const TabPreview = ({
   index,
   tabAtom,
-  tapGestureRef,
-  simultaneousHandlers,
   ...props
 }: TabPreviewProps & BoxProps) => {
   const theme = useTheme()
@@ -57,7 +56,7 @@ const TabPreview = ({
     previewImageStyles,
     textStyles,
     xStyles,
-    onTap,
+    onOpen,
     onClose,
   } = useTabPreview({
     index,
@@ -65,114 +64,104 @@ const TabPreview = ({
   })
 
   return (
-    <TapGestureHandler
-      onGestureEvent={onTap}
-      ref={tapGestureRef}
-      simultaneousHandlers={simultaneousHandlers}
-      maxDist={1}
-      maxDurationMs={500}
+    <AnimatedTouchableBox
+      layout={Layout}
+      entering={FadeIn}
+      exiting={ZoomOut}
+      overflow="visible"
+      style={boxStyles}
+      marginBottom={GAP}
+      width={TAB_PREVIEW_WIDTH}
+      height={TAB_PREVIEW_HEIGHT + TEXTBOX_HEIGHT}
+      onPress={onOpen}
+      activeOpacity={0.8}
+      {...props}
     >
       <AnimatedBox
-        layout={Layout}
-        entering={FadeIn}
-        exiting={ZoomOut}
+        ref={ref}
+        bg="reverse"
+        center
         overflow="visible"
-        style={boxStyles}
-        marginBottom={GAP}
-        width={TAB_PREVIEW_WIDTH}
-        height={TAB_PREVIEW_HEIGHT + TEXTBOX_HEIGHT}
-        {...props}
+        style={[
+          previewImageStyles,
+          {
+            shadowColor: theme.colors.default,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 2,
+          },
+        ]}
       >
-        <AnimatedBox
-          ref={ref}
-          bg="reverse"
-          center
-          overflow="visible"
-          style={[
-            previewImageStyles,
-            {
-              shadowColor: theme.colors.default,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 2,
-            },
-          ]}
-        >
-          <>
-            {base64Preview && (
-              <Image
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 20,
-                  opacity: 0.15,
-                  ...StyleSheet.absoluteFillObject,
-                }}
-                source={{ uri: `data:image/png;base64,${base64Preview}` }}
-              />
-            )}
-            <Box
-              center
-              width={80}
-              height={80}
-              borderRadius={40}
-              backgroundColor="lightGrey"
-            >
-              <Box>{getIconByTabType(type, 30)}</Box>
-            </Box>
-          </>
-
-          {isRemovable && (
-            <TapGestureHandler
-              onGestureEvent={onClose}
-              maxDist={1}
-              maxDurationMs={500}
-            >
-              <AnimatedBox
-                position="absolute"
-                top={0}
-                right={0}
-                width={40}
-                height={40}
-                center
-                style={xStyles}
-              >
-                <Box
-                  bg="reverse"
-                  width={24}
-                  height={24}
-                  borderRadius={12}
-                  center
-                  lightShadow
-                >
-                  <FeatherIcon name="x" size={16} />
-                </Box>
-              </AnimatedBox>
-            </TapGestureHandler>
+        <>
+          {base64Preview && (
+            <Image
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: 20,
+                opacity: 0.15,
+                ...StyleSheet.absoluteFillObject,
+              }}
+              source={{ uri: `data:image/png;base64,${base64Preview}` }}
+            />
           )}
-        </AnimatedBox>
-        <AnimatedBox
-          style={textStyles}
-          marginTop={10}
-          row
-          alignItems="center"
-          justifyContent="center"
-          overflow="visible"
-        >
-          {getIconByTabType(type, 16)}
-          <Text
-            ml={8}
-            fontSize={12}
-            title
-            numberOfLines={1}
-            ellipsizeMode="middle"
+          <Box
+            center
+            width={80}
+            height={80}
+            borderRadius={40}
+            backgroundColor="lightGrey"
           >
-            {title}
-          </Text>
-        </AnimatedBox>
+            <Box>{getIconByTabType(type, 30)}</Box>
+          </Box>
+        </>
+
+        {isRemovable && (
+          <AnimatedTouchableBox
+            position="absolute"
+            top={0}
+            right={0}
+            width={40}
+            height={40}
+            center
+            style={xStyles}
+            onPress={onClose}
+            activeOpacity={0.8}
+          >
+            <Box
+              bg="reverse"
+              width={24}
+              height={24}
+              borderRadius={12}
+              center
+              lightShadow
+            >
+              <FeatherIcon name="x" size={16} />
+            </Box>
+          </AnimatedTouchableBox>
+        )}
       </AnimatedBox>
-    </TapGestureHandler>
+      <AnimatedBox
+        style={textStyles}
+        marginTop={10}
+        row
+        alignItems="center"
+        justifyContent="center"
+        overflow="visible"
+      >
+        {getIconByTabType(type, 16)}
+        <Text
+          ml={8}
+          fontSize={12}
+          title
+          numberOfLines={1}
+          ellipsizeMode="middle"
+        >
+          {title}
+        </Text>
+      </AnimatedBox>
+    </AnimatedTouchableBox>
   )
 }
 

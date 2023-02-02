@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import Svg, { Path } from 'react-native-svg'
 import { withTheme } from '@emotion/react'
 
@@ -15,4 +15,4 @@ const SvgComponent = ({ color, theme, ...props }) => (
   </Svg>
 )
 
-export default withTheme(SvgComponent)
+export default memo(withTheme(SvgComponent))

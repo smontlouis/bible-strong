@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import Svg, { Path } from 'react-native-svg'
 
 const SvgComponent = props => (
@@ -8,4 +8,4 @@ const SvgComponent = props => (
   </Svg>
 )
 
-export default SvgComponent
+export default memo(SvgComponent)

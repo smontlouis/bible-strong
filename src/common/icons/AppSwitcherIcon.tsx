@@ -18,4 +18,4 @@ const SvgComponent = (props: SvgProps) => (
   </Svg>
 )
 
-export default SvgComponent
+export default React.memo(SvgComponent)
