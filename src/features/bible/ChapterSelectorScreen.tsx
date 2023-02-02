@@ -1,4 +1,5 @@
 // @flow
+import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { ScrollView } from 'react-native'
@@ -16,8 +17,8 @@ const ChapterSelector = ({
   navigation,
   screenProps,
 }: NavigationStackScreenProps<{}, ChapterSelectorScreenProps>) => {
-  const [bible, actions] = useBibleTabActions(screenProps.bibleAtom)
-
+  const bible = useAtomValue(screenProps.bibleAtom)
+  const actions = useBibleTabActions(screenProps.bibleAtom)
   const {
     data: {
       temp: { selectedChapter, selectedBook },

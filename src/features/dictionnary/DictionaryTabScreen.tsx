@@ -23,7 +23,7 @@ import DictionnaireItem from './DictionnaireItem'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { DictionariesTab } from '~state/tabs'
+import { DictionariesTab } from '../../state/tabs'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)

@@ -10,6 +10,7 @@ import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import i18n from '~i18n'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import SelectorItem from './SelectorItem'
+import { useAtomValue } from 'jotai/react'
 
 interface VerseSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -20,8 +21,8 @@ const VerseSelector = ({
   navigation,
   screenProps,
 }: NavigationStackScreenProps<{}, VerseSelectorScreenProps>) => {
-  const [bible, actions] = useBibleTabActions(screenProps.bibleAtom)
-
+  const bible = useAtomValue(screenProps.bibleAtom)
+  const actions = useBibleTabActions(screenProps.bibleAtom)
   const {
     data: {
       temp: { selectedChapter, selectedBook, selectedVerse },

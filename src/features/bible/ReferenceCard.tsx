@@ -14,7 +14,7 @@ import Text from '~common/ui/Text'
 import waitForTresorModal from '~common/waitForTresorModal'
 import getVersesContent from '~helpers/getVersesContent'
 import loadTresorReferences from '~helpers/loadTresorReferences'
-import { VersionCode } from '~state/tabs'
+import { VersionCode } from '../../state/tabs'
 
 const ReferenceItem = ({
   reference,

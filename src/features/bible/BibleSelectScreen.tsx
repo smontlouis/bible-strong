@@ -1,3 +1,4 @@
+import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -19,8 +20,8 @@ const BibleSelect = ({
   navigation,
 }: NavigationStackScreenProps<BibleSelectProps>) => {
   const bibleAtom = navigation.getParam('bibleAtom')
-  const [bible, actions] = useBibleTabActions(bibleAtom)
-
+  const bible = useAtomValue(bibleAtom)
+  const actions = useBibleTabActions(bibleAtom)
   const {
     data: { selectionMode },
   } = bible

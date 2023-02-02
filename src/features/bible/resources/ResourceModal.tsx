@@ -1,3 +1,4 @@
+import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -5,15 +6,9 @@ import Animated, {
   EntryAnimationsValues,
   EntryExitAnimationFunction,
   ExitAnimationsValues,
-  FadeInDown,
-  FadeOutUp,
-  Layout,
-  LayoutAnimationsValues,
   SharedValue,
-  SlideInDown,
   SlideInLeft,
   SlideInRight,
-  SlideInUp,
   SlideOutLeft,
   SlideOutRight,
   useSharedValue,
@@ -41,18 +36,16 @@ type Props = {
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource | null) => void
   bibleAtom: PrimitiveAtom<BibleTab>
-  onClose: () => void
 }
 const ResourcesModal = ({
   resourceType,
   onChangeResourceType,
   bibleAtom,
-  onClose,
 }: Props) => {
   const { t } = useTranslation()
   const { ref, open, close } = useModalize()
   const openInNewTab = useOpenInNewTab()
-  const [bible] = useBibleTabActions(bibleAtom)
+  const bible = useAtomValue(bibleAtom)
   const direction = useSharedValue<'left' | 'right'>('left')
 
   const {
@@ -140,7 +133,7 @@ const ResourcesModal = ({
           direction={direction}
         />
       }
-      onClosed={onClose}
+      onClosed={() => onChangeResourceType(null)}
       modalRef={ref}
     >
       <Resource
@@ -205,7 +198,8 @@ const Resource = ({
   resourceType: BibleResource | null
   direction: Animated.SharedValue<'left' | 'right'>
 }) => {
-  const [bible, actions] = useBibleTabActions(bibleAtom)
+  const bible = useAtomValue(bibleAtom)
+  const actions = useBibleTabActions(bibleAtom)
   const {
     data: { selectedVersion, selectedVerses },
   } = bible

@@ -19,7 +19,6 @@
       "~helpers/*": ["src/helpers/*"],
       "~navigation/*": ["src/navigation/*"],
       "~redux/*": ["src/redux/*"],
-      "~state/*": ["src/state/*"],
       "~themes/*": ["src/themes/*"],
       "~styled/*": ["src/styled/*"],
       "~themes": ["src/themes"],

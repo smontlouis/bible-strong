@@ -1,28 +1,27 @@
-import React from 'react'
 import styled from '@emotion/native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import distanceInWords from 'date-fns/formatDistance'
-import * as Icon from '@expo/vector-icons'
+import React from 'react'
 
-import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
+import fr from 'date-fns/locale/fr'
 
+import { useAtomValue, useSetAtom } from 'jotai/react'
+import { Trans, useTranslation } from 'react-i18next'
 import books from '~assets/bible_versions/books-desc'
-import Container from '~common/ui/Container'
-import FlatList from '~common/ui/FlatList'
+import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
 import Border from '~common/ui/Border'
-import Empty from '~common/Empty'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import FlatList from '~common/ui/FlatList'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { deleteHistory } from '~redux/modules/user'
-import { useTranslation, Trans } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { deleteHistoryAtom, historyAtom } from '../../state/app'
 
-const Chip = styled.View(({ theme, color }) => ({
+const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
   height: 15,
   alignSelf: 'flex-end',
   borderRadius: 7,
@@ -160,15 +159,8 @@ const HistoryItem = ({ item }) => {
 }
 
 const History = () => {
-  const { theme } = useCurrentThemeSelector()
-  const { history, colors } = useSelector(
-    state => ({
-      history: state.user.bible.history,
-      colors: state.user.bible.settings.colors[theme],
-    }),
-    shallowEqual
-  )
-  const dispatch = useDispatch()
+  const history = useAtomValue(historyAtom)
+  const deleteHistory = useSetAtom(deleteHistoryAtom)
   const { t } = useTranslation()
 
   return (
@@ -177,8 +169,8 @@ const History = () => {
         hasBackButton
         title={t('Historique')}
         rightComponent={
-          <Link onPress={() => dispatch(deleteHistory())} padding>
-            <Icon.Feather size={20} name="trash-2" color={colors.quart} />
+          <Link onPress={deleteHistory} padding>
+            <FeatherIcon size={20} name="trash-2" color="quart" />
           </Link>
         }
       />

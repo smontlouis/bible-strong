@@ -5,7 +5,7 @@ import withLoginModal from '~common/withLoginModal'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
 import { NavigationStackProp } from 'react-navigation-stack'
-import { StudyTab } from '~state/tabs'
+import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
 

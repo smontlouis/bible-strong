@@ -13,6 +13,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
 import VersionSelectorItem from './VersionSelectorItem'
+import { useAtomValue } from 'jotai/react'
 
 const SectionList = styled(RNSectionList)({
   flex: 1,
@@ -35,8 +36,8 @@ const VersionSelector = ({
     throw new Error('bibleAtom is required')
   }
 
-  const [bible, actions] = useBibleTabActions(bibleAtom)
-
+  const bible = useAtomValue(bibleAtom)
+  const actions = useBibleTabActions(bibleAtom)
   const setAndClose = (vers: VersionCode, index: number) => {
     if (parallelVersionIndex === undefined) {
       actions.setSelectedVersion(vers)

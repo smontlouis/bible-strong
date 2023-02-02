@@ -1,23 +1,19 @@
 import { useMemo } from 'react'
 import { useColorScheme } from 'react-native'
-import { shallowEqual, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RootState } from '~redux/modules/reducer'
 
 const useCurrentThemeSelector = () => {
-  const {
-    preferredColorScheme,
-    preferredDarkTheme,
-    preferredLightTheme,
-  } = useSelector(
-    (state: RootState) => ({
-      preferredColorScheme:
-        state.user.bible.settings.preferredColorScheme || 'auto',
-      preferredDarkTheme:
-        state.user.bible.settings.preferredDarkTheme || 'dark',
-      preferredLightTheme:
-        state.user.bible.settings.preferredLightTheme || 'default',
-    }),
-    shallowEqual
+  const preferredColorScheme = useSelector(
+    (state: RootState) =>
+      state.user.bible.settings.preferredColorScheme || 'auto'
+  )
+  const preferredLightTheme = useSelector(
+    (state: RootState) =>
+      state.user.bible.settings.preferredLightTheme || 'default'
+  )
+  const preferredDarkTheme = useSelector(
+    (state: RootState) => state.user.bible.settings.preferredDarkTheme || 'dark'
   )
 
   const systemColorScheme = useColorScheme()

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
-import { StrongsTab } from '~state/tabs'
+import { StrongsTab } from '../../state/tabs'
 import LexiqueTabScreen from './LexiqueTabScreen'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'

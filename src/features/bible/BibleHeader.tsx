@@ -1,14 +1,15 @@
 import styled from '@emotion/native'
-import React, { useEffect } from 'react'
+import React, { memo, useEffect } from 'react'
 import { Platform, StatusBar } from 'react-native'
 import ImmersiveMode from 'react-native-immersive-mode'
 
 import * as Animatable from 'react-native-animatable'
 
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
+import { useDispatch } from 'react-redux'
 import Back from '~common/Back'
 import Link from '~common/Link'
 import ParallelIcon from '~common/ParallelIcon'
@@ -22,6 +23,7 @@ import { getIfDatabaseExists } from '~helpers/database'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
+import { setSettingsCommentaires } from '~redux/modules/user'
 import { fullscreenAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 
@@ -42,63 +44,44 @@ const HeaderBox = styled(Box)(({ theme }) => ({
 
 const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
 
-const formatVerses = verses =>
-  verses.reduce((acc, v, i, array) => {
-    if (v === array[i - 1] + 1 && v === array[i + 1] - 1) {
-      // if suite > 2
-      return acc
-    }
-    if (v === array[i - 1] + 1 && v !== array[i + 1] - 1) {
-      // if endSuite
-      return `${acc}-${v}`
-    }
-    if (array[i - 1] && v - 1 !== array[i - 1]) {
-      // if not preceded by - 1
-      return `${acc},${v}`
-    }
-    return acc + v
-  }, '')
-
 interface BibleHeaderProps {
   navigation: NavigationStackProp
   bibleAtom: PrimitiveAtom<BibleTab>
   hasBackButton?: boolean
   onBibleParamsClick: () => void
-  setSettingsCommentaires: (x: boolean) => void
   commentsDisplay?: boolean
+  version: string
+  bookName: string
+  chapter: number
+  verseFormatted: string
+  isReadOnly?: boolean
+  isSelectionMode?: boolean
+  isParallel?: boolean
 }
 const Header = ({
   navigation,
   hasBackButton,
   bibleAtom,
   onBibleParamsClick,
-  setSettingsCommentaires,
   commentsDisplay,
+  version,
+  bookName,
+  chapter,
+  verseFormatted,
+  isReadOnly,
+  isSelectionMode,
+  isParallel,
 }: BibleHeaderProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
+  const dispatch = useDispatch()
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
-  const [bible, actions] = useBibleTabActions(bibleAtom)
-
-  const {
-    data: {
-      selectedVersion: version,
-      selectedBook: book,
-      selectedChapter: chapter,
-      selectedVerse: verse,
-      isReadOnly,
-      isSelectionMode,
-      focusVerses,
-      parallelVersions,
-    },
-  } = bible
+  const actions = useBibleTabActions(bibleAtom)
 
   useEffect(() => {
-    actions.setTitle(`${t(book.Nom)} ${chapter} - ${version}`)
-  }, [actions, book.Nom, chapter, version, t])
-
-  const isParallel = parallelVersions.length > 0
+    actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
+  }, [actions, bookName, chapter, version, t])
 
   const { addParallelVersion, removeAllParallelVersions } = actions
 
@@ -111,7 +94,7 @@ const Header = ({
       return
     }
 
-    setSettingsCommentaires(true)
+    dispatch(setSettingsCommentaires(true))
   }
 
   const [isFullscreen, setIsFullScreen] = useAtom(fullscreenAtom)
@@ -126,8 +109,7 @@ const Header = ({
         </Box>
         <Box grow center>
           <TextIcon>
-            {t(book.Nom)} {chapter}:
-            {focusVerses ? formatVerses(focusVerses) : verse} - {version}
+            {t(bookName)} {chapter}:{verseFormatted} - {version}
           </TextIcon>
         </Box>
         <Box flex />
@@ -154,8 +136,8 @@ const Header = ({
       >
         <TextIcon>
           {isSmall
-            ? truncate(`${t(book.Nom)} ${chapter}`, 10)
-            : `${t(book.Nom)} ${chapter}`}
+            ? truncate(`${t(bookName)} ${chapter}`, 10)
+            : `${t(bookName)} ${chapter}`}
         </TextIcon>
       </LinkBox>
       <LinkBox
@@ -250,4 +232,4 @@ const Header = ({
   )
 }
 
-export default Header
+export default memo(Header)

@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -26,12 +26,10 @@ import capitalize from '~helpers/capitalize'
 import loadFirstFoundVerses from '~helpers/loadFirstFoundVerses'
 import loadStrongReference from '~helpers/loadStrongReference'
 import loadStrongVersesCount from '~helpers/loadStrongVersesCount'
-import { timeout } from '~helpers/timeout'
-import { setHistory } from '~redux/modules/user'
 
 import produce from 'immer'
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom, useSetAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import DetailedHeader from '~common/DetailedHeader'
@@ -40,8 +38,8 @@ import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { RootState } from '~redux/modules/reducer'
-import { StrongTab } from '~state/tabs'
-import { multipleTagsModalAtom } from '../../state/app'
+import { StrongTab } from '../../state/tabs'
+import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -89,7 +87,8 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  const dispatch = useDispatch()
+  const addHistory = useSetAtom(historyAtom)
+
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
 
@@ -129,16 +128,13 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
       }
     }
 
-    dispatch(
-      setHistory({
-        ...strongReferenceParam,
-        book,
-        type: 'strong',
-      })
-    )
+    addHistory({
+      ...strongReferenceParam,
+      book,
+      date: Date.now(),
+      type: 'strong',
+    })
     setStrongReference(strongReferenceParam)
-
-    await timeout(1500)
     const firstFoundVerses = await loadFirstFoundVerses(
       book,
       strongReferenceParam.Code

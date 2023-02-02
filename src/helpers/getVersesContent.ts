@@ -1,6 +1,6 @@
 import { VerseIds, VerseRefContent } from '~common/types'
 import loadBible from '~helpers/loadBible'
-import { VersionCode } from '~state/tabs'
+import { VersionCode } from '../state/tabs'
 import verseToReference from './verseToReference'
 
 const orderVerses = (verses: VerseIds) => {

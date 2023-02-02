@@ -12,11 +12,10 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import useHTMLView from '~helpers/useHTMLView'
-import { setHistory } from '~redux/modules/user'
 
 import produce from 'immer'
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom, useSetAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { shallowEqual } from 'recompose'
@@ -28,9 +27,9 @@ import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
-import { DictionaryTab } from '~state/tabs'
-import { multipleTagsModalAtom } from '../../state/app'
 import { RootState } from '~redux/modules/reducer'
+import { DictionaryTab } from '../../state/tabs'
+import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -57,6 +56,7 @@ const DictionnaryDetailScreen = ({
   const { t } = useTranslation()
   const [dictionnaireItem, setDictionnaireItem] = useState(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const addHistory = useSetAtom(historyAtom)
 
   const tags = useSelector(
     (state: RootState) => state.user.bible.words[word]?.tags,
@@ -78,14 +78,13 @@ const DictionnaryDetailScreen = ({
     loadDictionnaireItem(word).then(result => {
       setDictionnaireItem(result)
 
-      dispatch(
-        setHistory({
-          word,
-          type: 'word',
-        })
-      )
+      addHistory({
+        word,
+        type: 'word',
+        date: Date.now(),
+      })
     })
-  }, [dispatch, word])
+  }, [word])
 
   const openLink = ({ href, content, type }) => {
     if (type === 'verse') {

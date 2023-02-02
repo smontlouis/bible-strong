@@ -25,7 +25,7 @@ import getBiblePericope from '~helpers/getBiblePericope'
 import loadBible from '~helpers/loadBible'
 import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
-import { useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { defaultBibleAtom } from '../../state/tabs'
 
 interface VerseContent {
   Pericope: {
@@ -334,7 +334,6 @@ export const useChapterToContent = (chapters: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<ChapterForPlan>()
 
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
   const [bible] = useAtom(defaultBibleAtom)
   const { selectedVersion: version } = bible.data
 
@@ -406,7 +405,6 @@ export const useVersesToContent = (verses: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<VerseForPlan>()
 
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
   const [bible] = useAtom(defaultBibleAtom)
   const { selectedVersion: version } = bible.data
 

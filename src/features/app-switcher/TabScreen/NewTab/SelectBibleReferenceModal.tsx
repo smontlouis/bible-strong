@@ -1,9 +1,11 @@
+import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import Modal from '~common/Modal'
 import { useModalize } from '~helpers/useModalize'
+import wait from '~helpers/wait'
 import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import {
   BibleTab,
@@ -26,7 +28,8 @@ const SelectBibleReferenceModal = ({
   onSelect,
   navigation,
 }: SelectBibleReferenceModalProps) => {
-  const [bible, actions] = useBibleTabActions(bibleAtom)
+  const bible = useAtomValue(bibleAtom)
+  const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
   const { ref, open, close } = useModalize()
 
@@ -36,8 +39,9 @@ const SelectBibleReferenceModal = ({
     }
   }, [isOpen, open])
 
-  const getBibleData = () => {
+  const getBibleData = async () => {
     close()
+    await wait(500)
     navigation.navigate('Livres')
     // We can't retrieve latest bible data here for some reason, maybe closure
     setCanGetData(true)

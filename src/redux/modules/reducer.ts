@@ -11,6 +11,7 @@ const planPersistConfig = {
   keyPrefix: '',
   storage: FilesystemStorage,
   blacklist: ['onlinePlans', 'onlineStatus'],
+  timeout: null,
 }
 
 const rootReducer = combineReducers({

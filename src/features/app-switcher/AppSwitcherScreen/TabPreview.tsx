@@ -1,6 +1,6 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
-import React, { memo } from 'react'
+import React, { memo, useMemo } from 'react'
 import { Image, StyleSheet } from 'react-native'
 import { TapGestureHandler } from 'react-native-gesture-handler'
 import { FadeIn, Layout, ZoomOut } from 'react-native-reanimated'
@@ -13,6 +13,7 @@ import { TabItem } from '../../../state/tabs'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
 import getIconByTabType from '../utils/getIconByTabType'
+import { selectAtom } from 'jotai/vanilla/utils'
 
 interface TabPreviewProps {
   index: number
@@ -29,7 +30,19 @@ const TabPreview = ({
   ...props
 }: TabPreviewProps & BoxProps) => {
   const theme = useTheme()
-  const tab = useAtomValue(tabAtom)
+
+  const base64Preview = useAtomValue(
+    useMemo(() => selectAtom(tabAtom, tab => tab.base64Preview), [])
+  )
+  const title = useAtomValue(
+    useMemo(() => selectAtom(tabAtom, tab => tab.title), [])
+  )
+  const type = useAtomValue(
+    useMemo(() => selectAtom(tabAtom, tab => tab.type), [])
+  )
+  const isRemovable = useAtomValue(
+    useMemo(() => selectAtom(tabAtom, tab => tab.isRemovable), [])
+  )
 
   const {
     GAP,
@@ -87,7 +100,7 @@ const TabPreview = ({
           ]}
         >
           <>
-            {tab.base64Preview && (
+            {base64Preview && (
               <Image
                 style={{
                   width: '100%',
@@ -96,7 +109,7 @@ const TabPreview = ({
                   opacity: 0.15,
                   ...StyleSheet.absoluteFillObject,
                 }}
-                source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
+                source={{ uri: `data:image/png;base64,${base64Preview}` }}
               />
             )}
             <Box
@@ -106,11 +119,11 @@ const TabPreview = ({
               borderRadius={40}
               backgroundColor="lightGrey"
             >
-              <Box>{getIconByTabType(tab.type, 30)}</Box>
+              <Box>{getIconByTabType(type, 30)}</Box>
             </Box>
           </>
 
-          {tab.isRemovable && (
+          {isRemovable && (
             <TapGestureHandler
               onGestureEvent={onClose}
               maxDist={1}
@@ -147,7 +160,7 @@ const TabPreview = ({
           justifyContent="center"
           overflow="visible"
         >
-          {getIconByTabType(tab.type, 16)}
+          {getIconByTabType(type, 16)}
           <Text
             ml={8}
             fontSize={12}
@@ -155,7 +168,7 @@ const TabPreview = ({
             numberOfLines={1}
             ellipsizeMode="middle"
           >
-            {tab.title}
+            {title}
           </Text>
         </AnimatedBox>
       </AnimatedBox>

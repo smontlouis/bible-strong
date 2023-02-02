@@ -4,25 +4,18 @@ import analytics from '@react-native-firebase/analytics'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import { useAtom } from 'jotai/react'
-import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  LogBox,
-  StatusBar,
-  Text,
-  View,
-} from 'react-native'
+import { useAtomValue } from 'jotai/react'
+import React, { memo, useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import * as Sentry from 'sentry-expo'
-
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { persistor, store } from '~redux/store'
+
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
+import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 
 // Prevent native splash screen from autohiding before App component declaration
@@ -87,8 +80,9 @@ const loadResourcesAsync = async () => {
 
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
-  const [loadableActiveIndex] = useAtom(loadableActiveIndexAtom)
-  const [loadableTabs] = useAtom(loadableTabsAtom)
+  const loadableActiveIndex = useAtomValue(loadableActiveIndexAtom)
+  const loadableTabs = useAtomValue(loadableTabsAtom)
+  const loadableHistory = useAtomValue(loadableHistoryAtom)
 
   const [status, setStatus] = useState('')
   useEffect(() => {
@@ -111,6 +105,7 @@ const useAppLoad = () => {
   const isCompleted =
     loadableActiveIndex.state === 'hasData' &&
     loadableTabs.state === 'hasData' &&
+    loadableHistory.state === 'hasData' &&
     isLoadingCompleted
 
   return {
@@ -138,15 +133,21 @@ const App = () => {
   }
 
   return (
-    <ReduxProvider store={store}>
+    <>
       <StatusBar translucent />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <InitApp persistor={persistor} />
-        </GestureHandlerRootView>
+        <InitAppWrapper />
       </View>
-    </ReduxProvider>
+    </>
   )
 }
+
+const InitAppWrapper = memo(() => {
+  return (
+    <ReduxProvider store={store}>
+      <InitApp persistor={persistor} />
+    </ReduxProvider>
+  )
+})
 
 export default App

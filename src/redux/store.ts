@@ -26,6 +26,7 @@ function configureStore() {
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations, { debug: true }),
+    timeout: null,
   }
 
   // FileSystem migration

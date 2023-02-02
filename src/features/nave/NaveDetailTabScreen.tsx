@@ -6,8 +6,8 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import produce from 'immer'
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom, useSetAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import DetailedHeader from '~common/DetailedHeader'
@@ -24,9 +24,8 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadNaveItem from '~helpers/loadNaveItem'
 import useHTMLView from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
-import { setHistory } from '~redux/modules/user'
-import { multipleTagsModalAtom } from '../../state/app'
-import { NaveTab } from '~state/tabs'
+import { NaveTab } from '../../state/tabs'
+import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 
 interface NaveDetailScreenProps {
   navigation: NavigationStackProp
@@ -42,6 +41,8 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   } = naveTab
 
   const dispatch = useDispatch()
+  const addHistory = useSetAtom(historyAtom)
+
   const [naveItem, setNaveItem] = useState(null)
   const { t } = useTranslation()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
@@ -65,15 +66,14 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   useEffect(() => {
     loadNaveItem(name_lower).then(result => {
       setNaveItem(result)
-      dispatch(
-        setHistory({
-          name: result.name,
-          name_lower: result.name_lower,
-          type: 'nave',
-        })
-      )
+      addHistory({
+        name: result.name,
+        name_lower: result.name_lower,
+        type: 'nave',
+        date: Date.now(),
+      })
     })
-  }, [dispatch, name, name_lower])
+  }, [name, name_lower])
 
   const openLink = ({ href }) => {
     const [type, item] = href.split('=')

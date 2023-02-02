@@ -7,6 +7,7 @@ export const useOnceAtoms = () => {
   const [tabIndex] = useAtom(activeTabIndexAtom)
   const initialAtomId = useRef(tabsAtoms[tabIndex]?.toString())
   const initialTabIndex = useRef(tabIndex)
+
   return {
     initialAtomId: initialAtomId.current,
     initialTabIndex: initialTabIndex.current,

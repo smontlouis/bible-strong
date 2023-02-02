@@ -43,7 +43,6 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
         }
       }
 
-      console.log(data, getDefaultBibleTab().data)
       return { ...getDefaultBibleTab().data, ...data }
     }
     setTab({

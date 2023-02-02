@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
-import { CompareTab, SelectedVerses } from '~state/tabs'
+import { CompareTab, SelectedVerses } from '../../state/tabs'
 import CompareVersesTabScreen from './CompareVersesTabScreen'
 
 interface CompareVersesScreenProps {

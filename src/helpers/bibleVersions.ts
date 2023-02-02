@@ -1,9 +1,8 @@
-import * as FileSystem from 'expo-file-system'
 import to from 'await-to-js'
+import * as FileSystem from 'expo-file-system'
 
 import { biblesRef } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
-import { VersionCode } from '~state/tabs'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   if (versionId === 'INT') {

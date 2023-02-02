@@ -30,7 +30,6 @@ const useStrongZip = (dispatch: any, startDownload: any) => {
       })
     } else {
       const loadDBAsync = async () => {
-        await timeout(1000) // Wait safely
         const sqliteDirPath = `${RNFS.DocumentDirectoryPath}/SQLite`
         const sqliteDirExists = await RNFS.exists(sqliteDirPath)
 

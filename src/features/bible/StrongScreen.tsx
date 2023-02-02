@@ -3,7 +3,7 @@ import { atom } from 'jotai/vanilla'
 import { useMemo } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { StrongReference } from '~common/types'
-import { StrongTab } from '~state/tabs'
+import { StrongTab } from '../../state/tabs'
 import StrongTabScreen from './StrongTabScreen'
 
 interface StrongScreenProps {

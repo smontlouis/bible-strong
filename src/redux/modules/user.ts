@@ -43,9 +43,6 @@ export const USER_LOGOUT = 'USER_LOGOUT'
 
 export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
 
-export const SET_HISTORY = 'user/SET_HISTORY'
-export const DELETE_HISTORY = 'user/DELETE_HISTORY'
-
 export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
 
 export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
@@ -146,7 +143,6 @@ export interface UserState {
     notes: NotesObj
     studies: StudiesObj
     tags: TagsObj
-    history: any[]
     strongsHebreu: {}
     strongsGrec: {}
     words: {}
@@ -222,7 +218,6 @@ const getInitialState = (): UserState => ({
     notes: {},
     studies: {},
     tags: {},
-    history: [],
     strongsHebreu: {},
     strongsGrec: {},
     words: {},
@@ -367,43 +362,6 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       action.payload.forEach(log => {
         draft.bible.changelog[log.date] = true
       })
-      break
-    }
-    case DELETE_HISTORY: {
-      draft.bible.history = []
-      break
-    }
-    case SET_HISTORY: {
-      const item = action.payload
-      if (draft.bible.history.length) {
-        const prevItem = draft.bible.history[0]
-        if (prevItem.type === item.type) {
-          if (
-            item.type === 'verse' &&
-            item.book == prevItem.book &&
-            item.chapter == prevItem.chapter &&
-            item.version == prevItem.version
-          ) {
-            return draft
-          }
-
-          if (item.type === 'strong' && item.Code == prevItem.Code) {
-            return draft
-          }
-
-          if (item.type === 'word' && item.word == prevItem.word) {
-            return draft
-          }
-        }
-      }
-      if (!Array.isArray(draft.bible.history)) {
-        draft.bible.history = Object.values(draft.bible.history)
-      }
-      draft.bible.history.unshift({
-        ...action.payload,
-        date: Date.now(),
-      })
-      draft.bible.history = draft.bible.history.slice(0, 50)
       break
     }
     case TOGGLE_COMPARE_VERSION: {
@@ -554,25 +512,6 @@ export function receiveLiveUpdates({
   return {
     type: RECEIVE_LIVE_UPDATES,
     payload: { remoteUserData },
-  }
-}
-
-// HISTORY
-export function setHistory(item) {
-  return dispatch => {
-    // Wait for animation to finish
-    setTimeout(() => {
-      dispatch({
-        type: SET_HISTORY,
-        payload: item,
-      })
-    }, 600)
-  }
-}
-
-export function deleteHistory() {
-  return {
-    type: DELETE_HISTORY,
   }
 }
 

@@ -20,6 +20,7 @@ import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import useTabConstants from '../utils/useTabConstants'
 import { useTabAnimations } from '../utils/useTabAnimations'
+import { Platform } from 'react-native'
 
 const useTabPreview = ({
   index,
@@ -67,7 +68,7 @@ const useTabPreview = ({
   }, [])
 
   const onTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onEnd: () => {
+    onFinish: () => {
       if (activeTabPreview.animationProgress.value !== 0) {
         return
       }
@@ -88,7 +89,7 @@ const useTabPreview = ({
   }
 
   const onClose = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onEnd: () => {
+    onFinish: () => {
       activeTabPreview.zIndex.value = 1
       runOnJS(onDelete)()
 

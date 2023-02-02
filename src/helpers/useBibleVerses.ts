@@ -2,7 +2,7 @@ import { useAtom } from 'jotai/react'
 import React from 'react'
 import { Verse } from '~common/types'
 import loadBible from '~helpers/loadBible'
-import { useGetDefaultBibleTabAtom } from '../state/tabs'
+import { defaultBibleAtom } from '../state/tabs'
 
 export const verseStringToObject = (
   arrayString: string[]
@@ -16,7 +16,6 @@ export const verseStringToObject = (
 const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
   const [verses, setVerses] = React.useState<Verse[]>([])
 
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
   const [bible] = useAtom(defaultBibleAtom)
   const { selectedVersion: version } = bible.data
 

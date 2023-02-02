@@ -4,7 +4,6 @@ import Clipboard from '@react-native-community/clipboard'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 import { Modalize } from 'react-native-modalize'
-import { shallowEqual, useSelector } from 'react-redux'
 
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -15,21 +14,19 @@ import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
-import { usePrevious } from '~helpers/usePrevious'
 import { cleanParams, wp } from '~helpers/utils'
 
 import { useTranslation } from 'react-i18next'
+import { useNavigation } from 'react-navigation-hooks'
+import { BibleResource, VerseIds } from '~common/types'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { RootState } from '~redux/modules/reducer'
+import { useModalize } from '~helpers/useModalize'
 import verseToReference from '../../helpers/verseToReference'
+import { VersionCode } from '../../state/tabs'
 import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { BibleResource, VerseIds } from '~common/types'
-import { useNavigation } from 'react-navigation-hooks'
-import { VersionCode } from '~state/tabs'
 
 const Container = styled.View<{ isSelectionMode?: boolean }>(
   ({ theme, isSelectionMode }) => ({
@@ -86,29 +83,20 @@ const VersesModal = ({
   version,
 }: Props) => {
   const navigation = useNavigation()
-  const isPrevVisible = usePrevious(isVisible)
   const theme = useTheme()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
-  const modalRef = React.useRef<Modalize>(null)
+  const { ref, open, close } = useModalize()
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (isPrevVisible !== isVisible) {
-      if (isVisible) {
-        modalRef?.current?.open()
-      } else {
-        modalRef?.current?.close()
-      }
+    if (isVisible) {
+      open()
     }
-  }, [isPrevVisible, isVisible])
+    if (!isVisible) {
+      close()
+    }
+  }, [isVisible])
 
-  const { theme: currentTheme } = useCurrentThemeSelector()
-  const { colors } = useSelector(
-    (state: RootState) => ({
-      colors: state.user.bible.settings.colors[currentTheme],
-    }),
-    shallowEqual
-  )
   const {
     hasVerseNumbers,
     hasInlineVerses,
@@ -133,7 +121,7 @@ const VersesModal = ({
     const result = await Share.share({ message })
     // Clear selectedverses only if succeed
     if (result.action === Share.sharedAction) {
-      clearSelectedVerses()
+      close()
     }
   }
 
@@ -189,15 +177,15 @@ const VersesModal = ({
       version,
       verses: Object.keys(selectedVerses),
     })
-    clearSelectedVerses()
+    close()
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
 
   return (
     <Modalize
-      ref={modalRef}
-      onClose={clearSelectedVerses}
+      ref={ref}
+      onClosed={clearSelectedVerses}
       handlePosition="inside"
       handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
       modalStyle={{
@@ -229,23 +217,23 @@ const VersesModal = ({
         <Container>
           <HalfContainer border>
             <TouchableCircle
-              color={colors.color1}
+              color={theme.colors.color1}
               onPress={() => addHighlight('color1')}
             />
             <TouchableCircle
-              color={colors.color2}
+              color={theme.colors.color2}
               onPress={() => addHighlight('color2')}
             />
             <TouchableCircle
-              color={colors.color3}
+              color={theme.colors.color3}
               onPress={() => addHighlight('color3')}
             />
             <TouchableCircle
-              color={colors.color4}
+              color={theme.colors.color4}
               onPress={() => addHighlight('color4')}
             />
             <TouchableCircle
-              color={colors.color5}
+              color={theme.colors.color5}
               onPress={() => addHighlight('color5')}
             />
             {isSelectedVerseHighlighted && (

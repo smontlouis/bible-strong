@@ -1,12 +1,14 @@
 import { useTheme } from '@emotion/react'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
 import FastImage from 'react-native-fast-image'
 import ProgressCircle from 'react-native-progress/Circle'
 import Link from '~common/Link'
+import PlanIcon from '~common/PlanIcon'
 import Box from '~common/ui/Box'
 import CircleImage from '~common/ui/CircleImage'
-import { MaterialIcon, FeatherIcon } from '~common/ui/Icon'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import {
@@ -15,9 +17,6 @@ import {
   useUpdatePlans,
 } from '~features/plans/plan.hooks'
 import { Theme } from '~themes'
-import { LinearGradient } from 'expo-linear-gradient'
-import PlanIcon from '~common/PlanIcon'
-import { useTranslation } from 'react-i18next'
 
 const LinkBox = Box.withComponent(Link)
 

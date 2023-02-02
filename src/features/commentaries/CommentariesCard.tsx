@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { CommentaryTab } from '~state/tabs'
+import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
 import { useAtom } from 'jotai/react'
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { FlatList } from 'react-native'
 import { Modalize } from 'react-native-modalize'
 
@@ -149,24 +149,31 @@ const BibleParamsModal = ({
   } = useParamsModalLabels()
 
   const dispatch = useDispatch()
-  const {
-    fontFamily,
-    settings: {
-      fontSizeScale,
-      preferredColorScheme,
-      preferredDarkTheme,
-      preferredLightTheme,
-      alignContent,
-      textDisplay,
-      notesDisplay,
-      press,
-    },
-  } = useSelector(
-    ({ user }: RootState) => ({
-      fontFamily: user.fontFamily,
-      settings: user.bible.settings,
-    }),
-    shallowEqual
+
+  const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
+  const fontSizeScale = useSelector(
+    (state: RootState) => state.user.bible.settings.fontSizeScale
+  )
+  const preferredColorScheme = useSelector(
+    (state: RootState) => state.user.bible.settings.preferredColorScheme
+  )
+  const preferredDarkTheme = useSelector(
+    (state: RootState) => state.user.bible.settings.preferredDarkTheme
+  )
+  const preferredLightTheme = useSelector(
+    (state: RootState) => state.user.bible.settings.preferredLightTheme
+  )
+  const alignContent = useSelector(
+    (state: RootState) => state.user.bible.settings.alignContent
+  )
+  const textDisplay = useSelector(
+    (state: RootState) => state.user.bible.settings.textDisplay
+  )
+  const notesDisplay = useSelector(
+    (state: RootState) => state.user.bible.settings.notesDisplay
+  )
+  const press = useSelector(
+    (state: RootState) => state.user.bible.settings.press
   )
 
   React.useEffect(() => {
@@ -448,4 +455,4 @@ const BibleParamsModal = ({
   )
 }
 
-export default BibleParamsModal
+export default memo(BibleParamsModal)

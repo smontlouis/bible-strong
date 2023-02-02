@@ -1,8 +1,9 @@
+import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { useAtom } from 'jotai/react'
 import React, { memo } from 'react'
 import { Image, StyleSheet } from 'react-native'
 
+import { selectAtom } from 'jotai/vanilla/utils'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
@@ -15,8 +16,15 @@ interface TabPreviewProps {
   tabAtom: PrimitiveAtom<TabItem>
 }
 
-const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
-  const [tab] = useAtom(tabAtom)
+const selectorb64 = (tab: TabItem) => tab.base64Preview
+const selectorTitle = (tab: TabItem) => tab.title
+const selectorType = (tab: TabItem) => tab.type
+
+const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
+  const base64Preview = useAtomValue(selectAtom(tabAtom, selectorb64))
+  const title = useAtomValue(selectAtom(tabAtom, selectorTitle))
+  const type = useAtomValue(selectAtom(tabAtom, selectorType))
+
   const { WIDTH, HEIGHT, GAP } = useTabConstants()
 
   return (
@@ -30,7 +38,7 @@ const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
     >
       {
         <>
-          {tab.base64Preview && (
+          {base64Preview && (
             <Image
               style={{
                 width: '100%',
@@ -39,7 +47,7 @@ const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
                 opacity: 0.1,
                 ...StyleSheet.absoluteFillObject,
               }}
-              source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
+              source={{ uri: `data:image/png;base64,${base64Preview}` }}
             />
           )}
           <Box center>
@@ -50,11 +58,11 @@ const TabPreview = ({ index, tabAtom }: TabPreviewProps & BoxProps) => {
               borderRadius={40}
               backgroundColor="lightGrey"
             >
-              <Box opacity={0.6}>{getIconByTabType(tab.type, 30)}</Box>
+              <Box opacity={0.6}>{getIconByTabType(type, 30)}</Box>
             </Box>
             <Spacer />
             <Text opacity={0.5} fontSize={14} color="grey" bold>
-              {tab.title}
+              {title}
             </Text>
           </Box>
         </>

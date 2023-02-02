@@ -7,8 +7,8 @@ import { atom } from 'jotai/vanilla'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import {
   BibleTab,
+  defaultBibleAtom,
   getDefaultBibleTab,
-  useGetDefaultBibleTabAtom,
   VersionCode,
 } from '../../state/tabs'
 import BibleTabScreen from './BibleTabScreen'
@@ -53,7 +53,6 @@ const BibleScreen = ({
   })
 
   const onTheFlyAtom = useMemo(() => atom<BibleTab>(initialValues), [])
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
 
   const bibleAtom = isEmpty(navigation.state.params)
     ? defaultBibleAtom

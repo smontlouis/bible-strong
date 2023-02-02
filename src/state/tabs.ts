@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { PrimitiveAtom, atom } from 'jotai/vanilla'
-import { useAtom } from 'jotai/react'
+import { useAtom, useSetAtom } from 'jotai/react'
 import { atomWithDefault, loadable, splitAtom } from 'jotai/vanilla/utils'
 import { useCallback, useMemo } from 'react'
 
@@ -319,19 +319,21 @@ export const checkTabType = <Type extends TabItem>(
   return tab?.type === type
 }
 
-export const useGetDefaultBibleTabAtom = () => {
-  const [tabsAtoms] = useAtom(tabsAtomsAtom)
-  const [defaultBibleTabAtom] = tabsAtoms
-
-  return defaultBibleTabAtom as PrimitiveAtom<BibleTab>
-}
+export const defaultBibleAtom = atom(
+  get => {
+    const tabsAtoms = get(tabsAtomsAtom)
+    const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
+    return get(defaultBibleTabAtom)
+  },
+  (get, set, value: BibleTab) => {
+    const tabsAtoms = get(tabsAtomsAtom)
+    const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
+    set(defaultBibleTabAtom, value)
+  }
+) as PrimitiveAtom<BibleTab>
 
 export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
-  const [bibleTab, setBibleTab] = useAtom(tabAtom)
-
-  if (!checkTabType<BibleTab>(bibleTab, 'bible')) {
-    throw new Error('Invalid tab type')
-  }
+  const setBibleTab = useSetAtom(tabAtom)
 
   const setSelectedVersion = useCallback(
     (selectedVersion: VersionCode) =>
@@ -687,7 +689,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     []
   )
 
-  return [bibleTab, actions] as [BibleTab, typeof actions]
+  return actions
 }
 
 export type AppSwitcherMode = 'list' | 'view'

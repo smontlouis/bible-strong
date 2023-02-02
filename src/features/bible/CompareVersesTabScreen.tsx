@@ -23,7 +23,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { versions } from '~helpers/bibleVersions'
-import { CompareTab, SelectedVerses } from '~state/tabs'
+import { CompareTab, SelectedVerses } from '../../state/tabs'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 interface CompareVersesTabScreenProps {

@@ -382,7 +382,7 @@ export default {
       },
     }
   },
-  // @ts-ignore - Remove bible from state (where all the bible selectors state were)
+  // @ts-ignore - Remove 'bible' from state (where all the bible selectors state were)
   27: ({ bible, ...state }: RootState) => {
     return state
   },
@@ -402,6 +402,18 @@ export default {
               hasAppName: true,
             },
           },
+        },
+      },
+    }
+  },
+  29: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          history: undefined,
         },
       },
     }

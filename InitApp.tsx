@@ -2,7 +2,7 @@ import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 import * as Updates from 'expo-updates'
-import React, { useEffect } from 'react'
+import React, { memo, useEffect, useMemo } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, StatusBar } from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
@@ -30,6 +30,7 @@ import {
 } from '~redux/modules/user'
 import { paperTheme } from '~themes/default'
 import getTheme, { baseTheme, Theme } from '~themes/index'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 interface Props {
   persistor: Persistor
@@ -133,45 +134,49 @@ const InitApp = ({ persistor }: Props) => {
     changeStatusBarStyle(currentTheme)
   }, [currentTheme])
 
-  const defaultTheme: Theme = getTheme[currentTheme] || baseTheme
+  const theme = useMemo(() => {
+    const defaultTheme: Theme = getTheme[currentTheme] || baseTheme
 
-  const theme = {
-    ...defaultTheme,
-    fontFamily: {
-      ...defaultTheme.fontFamily,
-      paragraph: fontFamily,
-    },
-  }
+    return {
+      ...defaultTheme,
+      fontFamily: {
+        ...defaultTheme.fontFamily,
+        paragraph: fontFamily,
+      },
+    }
+  }, [currentTheme, fontFamily])
 
   return (
-    <ThemeProvider theme={theme}>
-      <PaperProvider theme={paperTheme}>
-        <MenuProvider
-          backHandler
-          customStyles={{
-            backdrop: {
-              backgroundColor: 'black',
-              opacity: 0.2,
-            },
-          }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <PersistGate loading={null} persistor={persistor}>
-              <DBStateProvider>
-                <ErrorBoundary>
-                  <AppSwitcherProvider>
-                    <AppNavigator
-                      onNavigationStateChange={onNavigationStateChange}
-                    />
-                  </AppSwitcherProvider>
-                </ErrorBoundary>
-              </DBStateProvider>
-            </PersistGate>
-          </QueryClientProvider>
-        </MenuProvider>
-      </PaperProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider theme={theme}>
+        <PaperProvider theme={paperTheme}>
+          <MenuProvider
+            backHandler
+            customStyles={{
+              backdrop: {
+                backgroundColor: 'black',
+                opacity: 0.2,
+              },
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <PersistGate loading={null} persistor={persistor}>
+                <DBStateProvider>
+                  <ErrorBoundary>
+                    <AppSwitcherProvider>
+                      <AppNavigator
+                        onNavigationStateChange={onNavigationStateChange}
+                      />
+                    </AppSwitcherProvider>
+                  </ErrorBoundary>
+                </DBStateProvider>
+              </PersistGate>
+            </QueryClientProvider>
+          </MenuProvider>
+        </PaperProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   )
 }
 
-export default InitApp
+export default memo(InitApp)

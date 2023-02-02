@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
@@ -12,6 +12,7 @@ import { isStrongVersion } from '~helpers/bibleVersions'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { usePrevious } from '~helpers/usePrevious'
 import { hp } from '~helpers/utils'
+import { useNavigation } from 'react-navigation-hooks'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ navigation, selectedCode, onClosed }) => {
@@ -82,17 +83,12 @@ interface StrongModalProps {
     reference: string
     book: number
   } | null
-  navigation?: Object
   version: string
 }
 
-const StrongModal = ({
-  onClosed,
-  selectedCode,
-  navigation,
-  version,
-}: StrongModalProps) => {
+const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
   const modalRef = React.useRef<Modalize>(null)
+  const navigation = useNavigation()
   const theme = useTheme()
   const hasSelectedCode = !!selectedCode
   const hasPrevSelectedCode = usePrevious(hasSelectedCode)
@@ -136,4 +132,4 @@ const StrongModal = ({
   )
 }
 
-export default withNavigation(StrongModal)
+export default memo(StrongModal)

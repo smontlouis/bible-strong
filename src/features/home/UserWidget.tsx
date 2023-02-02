@@ -26,6 +26,7 @@ import Spacer from '~common/ui/Spacer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
 import FireAuth from '~helpers/FireAuth'
+import { RootState } from '~redux/modules/reducer'
 
 const vodNb = [...Array(6).keys()]
 
@@ -106,16 +107,20 @@ const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
-  const isLoading = useSelector(state => state.user.isLoading)
-  const { highlights, notes, studies, tags } = useSelector(
-    ({ user: { bible } }) => ({
-      highlights: Object.keys(bible.highlights).length,
-      notes: Object.keys(bible.notes).length,
-      studies: Object.keys(bible.studies).length,
-      tags: Object.keys(bible.tags).length,
-    }),
-    shallowEqual
+  const isLoading = useSelector((state: RootState) => state.user.isLoading)
+  const highlights = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.highlights).length
   )
+  const notes = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.notes).length
+  )
+  const studies = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.studies).length
+  )
+  const tags = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.tags).length
+  )
+
   const [currentVOD, setCurrentVOD] = useState(0)
 
   if (!isLogged) {

@@ -17,8 +17,10 @@ import getVersesContent from '~helpers/getVersesContent'
 import { getDayOfTheYear } from './getDayOfTheYear'
 import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
-import { useGetDefaultBibleTabAtom, VersionCode } from '../../state/tabs'
-import { useAtom } from 'jotai/react'
+import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
+import { useAtom, useAtomValue } from 'jotai/react'
+import { selectAtom } from 'jotai/vanilla/utils'
+import { RootState } from '~redux/modules/reducer'
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -53,16 +55,15 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   return verseOfTheDay
 }
 
+const selectorVersion = (atom: BibleTab) => atom.data.selectedVersion
+
 export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
   const { t } = useTranslation()
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
-  const [bible] = useAtom(defaultBibleAtom)
-  const { selectedVersion: version } = bible.data
+  const version = useAtomValue(selectAtom(defaultBibleAtom, selectorVersion))
 
   const verseOfTheDayTime = useSelector(
-    state => state.user.notifications.verseOfTheDay,
-    shallowEqual
+    (state: RootState) => state.user.notifications.verseOfTheDay
   )
   const displayName = user?.displayName
   const verseOfTheDay = useGetVerseOfTheDay(version, addDay)

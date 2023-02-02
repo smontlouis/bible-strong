@@ -31,7 +31,7 @@ import { useIsPremium } from '~helpers/usePremium'
 import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
-import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 import useLanguage from '~helpers/useLanguage'
 
 const LinkItem = styled(Link)(({}) => ({
@@ -70,63 +70,25 @@ type MoreScreenProps = {
   closeMenu: () => void
 }
 
-const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
-  const { isLogged, logout } = useLogin()
-  const isPremium = useIsPremium()
-
-  const dispatch = useDispatch()
-  const isFR = useLanguage()
-  const hasUpdate = useSelector((state: RootState) =>
-    Object.values(state.user.needsUpdate).some(v => v)
-  )
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
-  const [, actions] = useBibleTabActions(defaultBibleAtom)
-
-  const [isSyncing, setIsSyncing] = useState(false)
-  const { user, plan } = useSelector(
-    (state: RootState) => ({
-      user: state.user,
-      plan: state.plan,
-    }),
-    shallowEqual
-  )
-  const userDoc = firebaseDb.collection('users').doc(user.id)
-
+const Infos = memo(() => {
   const bibleJSON = useSelector((state: RootState) => state.user.bible)
+
+  return (
+    <Box row justifyContent="flex-end" px={10}>
+      <Text color="grey" fontSize={9} marginRight={10}>
+        {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
+      </Text>
+      <Text color="grey" fontSize={9}>
+        Version: {app.version}
+      </Text>
+    </Box>
+  )
+})
+
+const ChangeLanguage = memo(() => {
   const { t, i18n } = useTranslation()
-
-  const promptLogout = () => {
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
-    ])
-  }
-
-  const sync = async () => {
-    SnackBar.show(t('app.syncing'))
-    setIsSyncing(true)
-    const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
-    await userDoc.update(
-      r({
-        bible: sanitizeUserBible(user.bible),
-        plan: plan.ongoingPlans,
-      })
-    )
-    console.log('User synced')
-
-    const studies = user.bible.studies
-    if (studies) {
-      await Promise.all(
-        Object.entries(studies).map(async ([studyId, study]) => {
-          const studyDoc = firebaseDb.collection('studies').doc(studyId)
-          await studyDoc.set(study, { merge: true })
-        })
-      )
-      console.log('Studies synced')
-    }
-    SnackBar.show(t('app.synced'))
-    setIsSyncing(false)
-  }
+  const actions = useBibleTabActions(defaultBibleAtom)
+  const dispatch = useDispatch()
 
   const confirmChangeLanguage = () => {
     Alert.alert(
@@ -154,6 +116,87 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
         },
       ]
     )
+  }
+  return (
+    <LinkItem onPress={confirmChangeLanguage}>
+      <MaterialIcon name="language" size={25} style={{ marginRight: 15 }} />
+      <Text fontSize={15}>
+        {t('Changer la langue')} -{' '}
+        <Text bold fontSize={15} color="primary">
+          {i18n.language.toUpperCase()}
+        </Text>
+      </Text>
+    </LinkItem>
+  )
+})
+
+const ManualSync = memo(() => {
+  const { isLogged } = useLogin()
+  const { t } = useTranslation()
+
+  const [isSyncing, setIsSyncing] = useState(false)
+  const { user, plan } = useSelector(
+    (state: RootState) => ({
+      user: state.user,
+      plan: state.plan,
+    }),
+    shallowEqual
+  )
+  const userDoc = firebaseDb.collection('users').doc(user.id)
+
+  const sync = async () => {
+    SnackBar.show(t('app.syncing'))
+    setIsSyncing(true)
+    const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+    await userDoc.update(
+      r({
+        bible: sanitizeUserBible(user.bible),
+        plan: plan.ongoingPlans,
+      })
+    )
+
+    const studies = user.bible.studies
+    if (studies) {
+      await Promise.all(
+        Object.entries(studies).map(async ([studyId, study]) => {
+          const studyDoc = firebaseDb.collection('studies').doc(studyId)
+          await studyDoc.set(study, { merge: true })
+        })
+      )
+      console.log('Studies synced')
+    }
+    SnackBar.show(t('app.synced'))
+    setIsSyncing(false)
+  }
+
+  if (!isLogged) return null
+
+  return (
+    <LinkItem onPress={isSyncing ? () => {} : sync}>
+      <StyledIcon name="upload-cloud" size={25} />
+      <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
+        {t('app.sync')}
+      </Text>
+    </LinkItem>
+  )
+})
+
+const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
+  const { isLogged, logout } = useLogin()
+  const isPremium = useIsPremium()
+
+  const isFR = useLanguage()
+  const hasUpdate = useSelector((state: RootState) =>
+    Object.values(state.user.needsUpdate).some(v => v)
+  )
+
+  const { t } = useTranslation()
+
+  const promptLogout = () => {
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
+    ])
   }
 
   return (
@@ -278,40 +321,8 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
               <Text fontSize={15}>{t('Contacter le développeur')}</Text>
             </LinkItem>
           )}
-          <LinkItem onPress={confirmChangeLanguage}>
-            <MaterialIcon
-              name="language"
-              size={25}
-              style={{ marginRight: 15 }}
-            />
-            <Text fontSize={15}>
-              {t('Changer la langue')} -{' '}
-              <Text bold fontSize={15} color="primary">
-                {i18n.language.toUpperCase()}
-              </Text>
-            </Text>
-          </LinkItem>
-          {/* <LinkItem
-            {...(Platform.OS === 'android'
-              ? {
-                  route: 'Support',
-                }
-              : {
-                  onPress: () =>
-                    Linking.openURL('https://www.paypal.me/smontlouis'),
-                })}
-          >
-            <StyledIcon name="thumbs-up" size={25} color="secondary" />
-            <Text fontSize={15}>Soutenir le développeur</Text>
-          </LinkItem> */}
-          {isLogged && (
-            <LinkItem onPress={isSyncing ? () => {} : sync}>
-              <StyledIcon name="upload-cloud" size={25} />
-              <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
-                {t('app.sync')}
-              </Text>
-            </LinkItem>
-          )}
+          <ChangeLanguage />
+          <ManualSync />
           {!isLogged && (
             <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />
@@ -356,14 +367,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             </Text>
           </LinkItem>
         </Box>
-        <Box row justifyContent="flex-end" px={10}>
-          <Text color="grey" fontSize={9} marginRight={10}>
-            {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
-          </Text>
-          <Text color="grey" fontSize={9}>
-            Version: {app.version}
-          </Text>
-        </Box>
+        <Infos />
       </ScrollView>
     </Container>
   )

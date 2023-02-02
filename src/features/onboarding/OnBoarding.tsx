@@ -7,7 +7,7 @@ import { deleteAllDatabases } from '~helpers/database'
 import OnBoardingSlides from './OnBoardingSlides'
 import DownloadFiles from './DownloadFiles'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import { useBibleTabActions, useGetDefaultBibleTabAtom } from '../../state/tabs'
+import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
@@ -17,9 +17,7 @@ const useCheckMandatoryVersions = () => {
   const isFR = useLanguage()
   const [isFirstTime, setFirstTime] = useState(false)
 
-  const defaultBibleAtom = useGetDefaultBibleTabAtom()
-  const [, actions] = useBibleTabActions(defaultBibleAtom)
-
+  const actions = useBibleTabActions(defaultBibleAtom)
   useEffect(() => {
     ;(async () => {
       const lsgNeedsDownload = await getIfVersionNeedsDownload(

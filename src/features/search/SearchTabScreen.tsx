@@ -10,7 +10,7 @@ import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import i18n from '~i18n'
-import { SearchTab } from '~state/tabs'
+import { SearchTab } from '../../state/tabs'
 import LocalSearchScreen from './LocalSearchScreen'
 import OnlineSearchScreen from './OnlineSearchScreen'
 
