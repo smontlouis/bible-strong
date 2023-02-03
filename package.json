@@ -92,7 +92,7 @@
     "expo-haptics": "~11.3.0",
     "expo-linear-gradient": "~11.4.0",
     "expo-sharing": "~10.3.0",
-    "expo-splash-screen": "~0.16.2",
+    "expo-splash-screen": "~0.17.5",
     "expo-updates": "~0.14.6",
     "firestore-size": "^2.0.7",
     "fuse.js": "^6.4.6",
