@@ -30,6 +30,12 @@ export const useTabAnimations = () => {
     [tabsAtom, activeTabScreen.atomId]
   )
 
+  const setActiveTabOpacity = useCallback(() => {
+    setTimeout(() => {
+      activeTabScreen.opacity.value = withTiming(1)
+    }, 50)
+  }, [activeTabScreen.opacity])
+
   const minimizeTab = useCallback(() => {
     'worklet'
     activeTabScreen.opacity.value = withTiming(0)
@@ -60,7 +66,7 @@ export const useTabAnimations = () => {
         () => {
           runOnJS(setActiveTabIndex)(index)
           runOnJS(setAtomId)(index)
-          activeTabScreen.opacity.value = withTiming(1, { duration: 100 })
+          runOnJS(setActiveTabOpacity)()
           // activeTabScreen.opacity.value = withTiming(1, undefined, () => {
           //   // !TODO - Fix scroll to top
           //   // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
@@ -87,7 +93,7 @@ export const useTabAnimations = () => {
 
     activeTabPreview.index.value = withTiming(
       index,
-      { duration: 600 },
+      { duration: 400 },
       finished => {
         if (!finished) return
 

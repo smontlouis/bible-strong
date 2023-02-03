@@ -8,15 +8,16 @@ import { getStaticUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 
 import { useAtom } from 'jotai/react'
-import isEqual from 'lodash/isEqual'
 import {
   ComputedPlan,
   ComputedPlanItem,
   ComputedSection,
   OngoingReadingSlice,
+  Plan,
   ReadingSlice,
   Section,
   Status,
+  OngoingPlan,
 } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
@@ -174,14 +175,41 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
   }
 }
 
+const compareMyPlans = (prev: Plan[], next: Plan[]) => {
+  // Loop and compare lastUpdate field
+  for (let i = 0; i < prev.length; i++) {
+    if (prev[i].lastUpdate !== next[i].lastUpdate) {
+      return false
+    }
+  }
+
+  return true
+}
+
+const compareOngoingPlans = (prev: OngoingPlan[], next: OngoingPlan[]) => {
+  // Loop and compare readingSlices.length field and status field
+  for (let i = 0; i < prev.length; i++) {
+    if (
+      prev[i].readingSlices.length !== next[i].readingSlices.length ||
+      prev[i].status !== next[i].status
+    ) {
+      return false
+    }
+  }
+  return true
+}
+
 /**
  * Return computed plan items for the plan list
  */
 export const useComputedPlanItems = (): ComputedPlanItem[] => {
-  const myPlans = useSelector((state: RootState) => state.plan.myPlans, isEqual)
+  const myPlans = useSelector(
+    (state: RootState) => state.plan.myPlans,
+    compareMyPlans
+  )
   const ongoingPlans = useSelector(
     (state: RootState) => state.plan.ongoingPlans,
-    isEqual
+    compareOngoingPlans
   )
 
   const computedPlansItems: ComputedPlanItem[] = myPlans.map(

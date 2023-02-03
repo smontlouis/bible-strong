@@ -7,7 +7,6 @@ Object.fromEntries =
     }, {})
   }
 
-import './wdyr'
 import 'expo-asset'
 import { AppRegistry, Platform } from 'react-native'
 import App from './App'

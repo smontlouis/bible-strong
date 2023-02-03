@@ -1,6 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { useEffect, useLayoutEffect, useRef } from 'react'
+import React, { memo, useEffect, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import Animated, {
   EntryAnimationsValues,
@@ -294,4 +294,4 @@ const Resource = ({
   return null
 }
 
-export default ResourcesModal
+export default memo(ResourcesModal)

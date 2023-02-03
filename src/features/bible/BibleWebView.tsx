@@ -69,8 +69,13 @@ class BibleWebView extends Component {
 
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
-        const { onChangeResourceType } = this.props
-        onChangeResourceType('strong')
+        const { onChangeResourceTypeSelectVerse } = this.props
+        const { Livre, Chapitre, Verset } = action.params.verse
+        console.log(`${Livre}-${Chapitre}-${Verset}`)
+        onChangeResourceTypeSelectVerse(
+          'strong',
+          `${Livre}-${Chapitre}-${Verset}`
+        )
 
         break
       }

@@ -323,6 +323,11 @@ const BibleViewer = ({
     }
   }
 
+  const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
+    actions.selectSelectedVerse(ver)
+    onChangeResourceType(res)
+  }
+
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
     <Container>
@@ -384,7 +389,7 @@ const BibleViewer = ({
           goToPrevChapter={actions.goToPrevChapter}
           goToNextChapter={actions.goToNextChapter}
           setMultipleTagsItem={setMultipleTagsItem}
-          onChangeResourceType={onChangeResourceType}
+          onChangeResourceTypeSelectVerse={onChangeResourceTypeSelectVerse}
         />
       )}
       {!isReadOnly && (

@@ -10,6 +10,7 @@ import Box, {
   AnimatedBox,
   AnimatedTouchableBox,
   BoxProps,
+  TouchableBox,
 } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -118,16 +119,16 @@ const TabPreview = ({
         </>
 
         {isRemovable && (
-          <AnimatedTouchableBox
+          <TouchableBox
             position="absolute"
             top={0}
             right={0}
             width={40}
             height={40}
             center
+            activeOpacity={1}
             style={xStyles}
             onPress={onClose}
-            activeOpacity={0.8}
           >
             <Box
               bg="reverse"
@@ -139,7 +140,7 @@ const TabPreview = ({
             >
               <FeatherIcon name="x" size={16} />
             </Box>
-          </AnimatedTouchableBox>
+          </TouchableBox>
         )}
       </AnimatedBox>
       <AnimatedBox

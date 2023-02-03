@@ -10,7 +10,7 @@ import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import PushNotification, { Importance } from 'react-native-push-notification'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
-import * as Sentry from 'sentry-expo'
+import * as Sentry from '@sentry/react-native'
 import { persistor, store } from '~redux/store'
 
 import { setI18n } from './i18n'

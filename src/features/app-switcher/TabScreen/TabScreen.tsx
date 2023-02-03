@@ -102,6 +102,7 @@ const TabScreen = forwardRef<View, TabScreenProps>(
     const tabAtomId = tabAtom.toString()
 
     const imageStyles = useAnimatedStyle(() => {
+      // console.log('DO SOME')
       return {
         position: 'absolute',
         top: 0,
