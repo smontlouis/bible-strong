@@ -42,6 +42,7 @@ import {
   TOGGLE_SETTINGS_SHARE_INLINE_VERSES,
   TOGGLE_SETTINGS_SHARE_QUOTES,
   TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
+  SAVE_ALL_LOGS_AS_SEEN,
 } from './modules/user'
 
 import { firebaseDb } from '../helpers/firebase'
@@ -108,6 +109,7 @@ export default store => next => async action => {
     case TOGGLE_SETTINGS_SHARE_INLINE_VERSES:
     case TOGGLE_SETTINGS_SHARE_QUOTES:
     case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS:
+    case SAVE_ALL_LOGS_AS_SEEN:
     case UPDATE_TAG: {
       if (!diffState?.user?.bible) break
 

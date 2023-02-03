@@ -4,7 +4,13 @@ import * as Sentry from '@sentry/react-native'
 import * as Updates from 'expo-updates'
 import React, { memo, useEffect, useMemo } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
-import { AppState, AppStateStatus, StatusBar } from 'react-native'
+import {
+  ActivityIndicator,
+  AppState,
+  AppStateStatus,
+  StatusBar,
+  View,
+} from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
@@ -162,7 +168,20 @@ const InitApp = ({ persistor }: Props) => {
               }}
             >
               <QueryClientProvider client={queryClient}>
-                <PersistGate loading={null} persistor={persistor}>
+                <PersistGate
+                  loading={
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <ActivityIndicator />
+                    </View>
+                  }
+                  persistor={persistor}
+                >
                   <DBStateProvider>
                     <ErrorBoundary>
                       <AppSwitcherProvider>
