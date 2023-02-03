@@ -9,8 +9,11 @@
     "privacy": "unlisted",
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
-    "platforms": ["ios", "android"],
-    "version": "16.5.1",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "version": "16.5.2",
     "orientation": "default",
     "assetBundlePatterns": [
       "assets/images/*",
@@ -21,10 +24,10 @@
       "src/features/studies/studiesWebView/dist/index.html"
     ],
     "android": {
-      "versionCode": 285
+      "versionCode": 287
     },
     "ios": {
-      "buildNumber": "117"
+      "buildNumber": "118"
     },
     "extra": {
       "eas": {
