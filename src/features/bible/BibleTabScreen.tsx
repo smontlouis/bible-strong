@@ -1,9 +1,7 @@
-import { useTheme } from '@emotion/react'
 import * as FileSystem from 'expo-file-system'
 import produce from 'immer'
 import React, { useEffect } from 'react'
 import { Appearance, EmitterSubscription, Platform } from 'react-native'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import blackColors from '~themes/blackColors'
@@ -136,12 +134,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   }, [dispatch, settings.commentsDisplay])
 
   return (
-    <Container
-      pure
-      style={{
-        paddingTop: hasPaddingTop ? 0 : getStatusBarHeight(),
-      }}
-    >
+    <Container>
       <BibleViewer
         navigation={navigation}
         settings={settings}

@@ -8,6 +8,7 @@ import * as Animatable from 'react-native-animatable'
 
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 import { useTheme } from '@emotion/react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 {
   /* <ScrollView
@@ -76,14 +77,16 @@ export const HomeScrollView = ({
 }) => {
   const orientation = useDeviceOrientation()
   const theme = useTheme()
+  const insets = useSafeAreaInsets()
   return (
     <ScrollView
       {...props}
       orientation={orientation}
       backgroundColor="lightGrey"
       contentContainerStyle={{
-        paddingTop: getStatusBarHeight() || 20,
         backgroundColor: theme.colors.lightGrey,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
         ...contentContainerStyle,
       }}
     >

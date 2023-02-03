@@ -24,14 +24,14 @@ const DownloadRequired = ({
   setStartDownload,
   hasBackButton,
   iconSize = 100,
-  size,
+  size = 'large',
   hasHeader,
   hasBackground,
 }: Props) => {
   const padding = size === 'small' ? 10 : 30
   const { t } = useTranslation()
   return (
-    <Container noPadding={size === 'small'} pure={!hasBackground}>
+    <Container isSafe={size === 'large'}>
       {hasHeader && (
         <Header
           title={t('Téléchargement nécessaire')}

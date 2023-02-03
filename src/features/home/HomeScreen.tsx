@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
 import Color from 'color'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { SafeAreaBox, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
@@ -25,7 +25,7 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const theme = useTheme()
 
   return (
-    <Box grey flex={1}>
+    <Box bg="lightGrey" flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
         <Box grey pt={20} px={20}>

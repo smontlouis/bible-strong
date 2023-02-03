@@ -31,7 +31,7 @@ const PlanHome = () => {
   useUpdatePlans()
 
   return (
-    <Box grey px={20} bg="red" pt={20}>
+    <Box grey px={20} pt={20}>
       <LinkBox
         route="Plans"
         rounded

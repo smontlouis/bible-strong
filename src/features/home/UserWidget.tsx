@@ -32,7 +32,7 @@ const vodNb = [...Array(6).keys()]
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
-  paddingTop: Platform.OS === 'ios' ? 20 : 45,
+  paddingTop: 20,
   paddingBottom: 0,
 }))
 

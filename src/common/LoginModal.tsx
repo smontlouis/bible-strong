@@ -10,6 +10,8 @@ import Box from '~common/ui/Box'
 
 import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
+import Back from './Back'
+import { FeatherIcon } from './ui/Icon'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   justifyContent: 'flex-end',
@@ -47,9 +49,9 @@ const LoginModal = ({ isVisible }) => {
       <Container>
         <ScrollView>
           <Box row alignItems="center" marginBottom={30}>
-            {/* <Back style={{ marginRight: 15 }}>
-            <Icon.Feather name="arrow-left" size={25} />
-          </Back> */}
+            <Back style={{ marginRight: 15 }}>
+              <FeatherIcon name="arrow-left" size={25} />
+            </Back>
             <Text title fontSize={30}>
               {t('Études bibliques')}
             </Text>

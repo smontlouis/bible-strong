@@ -31,6 +31,7 @@ import {
 import { paperTheme } from '~themes/default'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 interface Props {
   persistor: Persistor
@@ -148,33 +149,35 @@ const InitApp = ({ persistor }: Props) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider theme={theme}>
-        <PaperProvider theme={paperTheme}>
-          <MenuProvider
-            backHandler
-            customStyles={{
-              backdrop: {
-                backgroundColor: 'black',
-                opacity: 0.2,
-              },
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <PersistGate loading={null} persistor={persistor}>
-                <DBStateProvider>
-                  <ErrorBoundary>
-                    <AppSwitcherProvider>
-                      <AppNavigator
-                        onNavigationStateChange={onNavigationStateChange}
-                      />
-                    </AppSwitcherProvider>
-                  </ErrorBoundary>
-                </DBStateProvider>
-              </PersistGate>
-            </QueryClientProvider>
-          </MenuProvider>
-        </PaperProvider>
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider theme={theme}>
+          <PaperProvider theme={paperTheme}>
+            <MenuProvider
+              backHandler
+              customStyles={{
+                backdrop: {
+                  backgroundColor: 'black',
+                  opacity: 0.2,
+                },
+              }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <PersistGate loading={null} persistor={persistor}>
+                  <DBStateProvider>
+                    <ErrorBoundary>
+                      <AppSwitcherProvider>
+                        <AppNavigator
+                          onNavigationStateChange={onNavigationStateChange}
+                        />
+                      </AppSwitcherProvider>
+                    </ErrorBoundary>
+                  </DBStateProvider>
+                </PersistGate>
+              </QueryClientProvider>
+            </MenuProvider>
+          </PaperProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   )
 }

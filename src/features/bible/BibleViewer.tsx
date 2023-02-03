@@ -38,11 +38,6 @@ import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 
-const Container = styled.View({
-  flex: 1,
-  overflow: 'hidden',
-})
-
 const ReadMeButton = styled(Button)({
   marginTop: 5,
   marginBottom: 10 + getBottomSpace(),
@@ -330,7 +325,7 @@ const BibleViewer = ({
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
-    <Container>
+    <>
       <BibleHeader
         navigation={navigation}
         bibleAtom={bibleAtom}
@@ -343,6 +338,7 @@ const BibleViewer = ({
         version={version}
         bookName={book.Nom}
         chapter={chapter}
+        hasBackButton={isReadOnly}
       />
       {error && (
         <Empty
@@ -447,7 +443,7 @@ const BibleViewer = ({
         onClosed={bibleParamsModalDisclosure.onClose}
         isOpen={bibleParamsModalDisclosure.isOpen}
       />
-    </Container>
+    </>
   )
 }
 

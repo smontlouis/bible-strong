@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useAnimatedStyle, withTiming } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { tabsCountQuota, useIsPremium } from '~helpers/usePremium'
@@ -26,7 +27,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { t } = useTranslation()
   const isFullscreen = useAtomValue(fullscreenAtom)
   const isPremium = useIsPremium()
-  const bottomBarHeight = TAB_ICON_SIZE + getBottomSpace()
+  const insets = useSafeAreaInsets()
+  const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
   const bottomBarStyles = useAnimatedStyle(() => {
     return {
       transform: [
@@ -41,7 +43,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
 
   return (
     <AnimatedBox
-      pb={getBottomSpace()}
+      pb={insets.bottom}
       bg="reverse"
       position="absolute"
       bottom={0}

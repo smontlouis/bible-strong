@@ -2,11 +2,9 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { Portal } from '@gorhom/portal'
 import React, { forwardRef } from 'react'
-import {
-  getBottomSpace,
-  getStatusBarHeight,
-} from 'react-native-iphone-x-helper'
+import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
@@ -43,13 +41,14 @@ const Body = forwardRef<Modalize, ModalBodyProps>(
   ({ withPortal, ...props }, ref) => {
     const Wrapper = withPortal ? Portal : React.Fragment
     const theme = useTheme()
+    const insets = useSafeAreaInsets()
 
     return (
       <Wrapper>
         <Modalize
           ref={ref}
           handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
-          modalTopOffset={getStatusBarHeight() + 40}
+          modalTopOffset={insets.top + 40}
           modalStyle={{
             marginLeft: 'auto',
             marginRight: 'auto',

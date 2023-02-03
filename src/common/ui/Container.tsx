@@ -1,15 +1,12 @@
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import styled from '@emotion/native'
-import Box from './Box'
+import React from 'react'
+import Box, { BoxProps, SafeAreaBox } from './Box'
 
-const Container = styled(Box)<{
-  pure?: boolean
-  noPadding?: boolean
-}>(({ theme, pure, noPadding = false }) => ({
-  paddingTop: noPadding ? 0 : getStatusBarHeight(),
-  position: 'relative',
-  flex: 1,
-  backgroundColor: pure ? theme.colors.reverse : theme.colors.lightGrey,
-}))
+const Container = ({
+  isSafe = true,
+  ...props
+}: BoxProps & { isSafe?: boolean }) => {
+  if (!isSafe) return <Box {...props} />
+  return <SafeAreaBox {...props} />
+}
 
 export default Container

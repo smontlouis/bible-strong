@@ -1,11 +1,12 @@
 import styled from '@emotion/native'
-import { memo } from 'react'
-import { TouchableOpacity } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import React, { forwardRef } from 'react'
+import { TouchableOpacity, View, ViewProps } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 
-export interface BoxProps {
+export interface BoxProps extends ViewProps {
+  children?: React.ReactNode
   position?: 'absolute' | 'relative'
   pos?: 'absolute' | 'relative'
   top?: number
@@ -99,8 +100,6 @@ export interface BoxProps {
   lightShadow?: boolean
   size?: number
 
-  bottomTabBarPadding?: boolean
-
   zIndex?: number
 
   shadow?: {
@@ -129,7 +128,7 @@ const Box = styled.View<BoxProps>(props => {
     paddingLeft: props.paddingLeft ?? props.pl,
     paddingRight: props.paddingRight ?? props.pr,
     paddingBottom: props.bottomTabBarPadding
-      ? TAB_ICON_SIZE + getBottomSpace()
+      ? TAB_ICON_SIZE
       : props.paddingBottom ?? props.pb,
     paddingVertical: props.paddingVertical ?? props.py,
     paddingHorizontal: props.paddingHorizontal ?? props.px,
@@ -230,6 +229,39 @@ const Box = styled.View<BoxProps>(props => {
   }
 })
 
+export const SafeAreaBox = forwardRef<
+  View,
+  BoxProps & {
+    enablePaddingTop?: boolean
+    enablePaddingBottom?: boolean
+  }
+>(({ enablePaddingTop = true, enablePaddingBottom = true, ...props }, ref) => {
+  const insets = useSafeAreaInsets()
+  return (
+    <Box
+      ref={ref}
+      marginTop={enablePaddingTop ? insets.top : 0}
+      marginBottom={enablePaddingBottom ? insets.bottom : 0}
+      flex={1}
+      {...props}
+    />
+  )
+})
+
+export const AnimatedSafeAreaBox = forwardRef<
+  View,
+  Animated.AnimateProps<BoxProps> & { hasBottomTabBar?: boolean }
+>((props, ref) => {
+  const insets = useSafeAreaInsets()
+  return (
+    <AnimatedBox
+      ref={ref}
+      paddingTop={insets.top}
+      paddingBottom={insets.bottom}
+      {...props}
+    />
+  )
+})
 export const TouchableBox = Box.withComponent(TouchableOpacity)
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
 export const AnimatedTouchableBox = Animated.createAnimatedComponent(

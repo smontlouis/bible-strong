@@ -14,8 +14,7 @@ import Link from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import SnackBar from '~common/SnackBar'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import Box, { SafeAreaBox } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
@@ -27,12 +26,12 @@ import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { shallowEqual } from 'recompose'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { firebaseDb } from '~helpers/firebase'
+import useLanguage from '~helpers/useLanguage'
 import { useIsPremium } from '~helpers/usePremium'
 import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
-import useLanguage from '~helpers/useLanguage'
 
 const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -200,7 +199,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
   }
 
   return (
-    <Container borderLeftWidth={1} borderColor="border" pure>
+    <SafeAreaBox borderLeftWidth={1} borderColor="border">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
       <ScrollView
         style={{ flex: 1 }}
@@ -369,7 +368,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
         </Box>
         <Infos />
       </ScrollView>
-    </Container>
+    </SafeAreaBox>
   )
 }
 export default memo(MoreScreen)

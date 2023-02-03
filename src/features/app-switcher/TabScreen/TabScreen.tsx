@@ -23,6 +23,7 @@ import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import NewTabScreen from './NewTab/NewTabScreen'
 
 import TabScreenWrapper from './TabScreenWrapper'
+import { useSafeAreaFrame } from 'react-native-safe-area-context'
 
 const getComponentTab = (tab: TabItem) => {
   switch (tab.type) {
@@ -97,18 +98,17 @@ export type TabScreenProps = {
 const TabScreen = forwardRef<View, TabScreenProps>(
   ({ tabAtom, navigation }, ref) => {
     const tab = useAtomValue(tabAtom)
-    const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
+    const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
     const { activeTabScreen } = useAppSwitcherContext()
     const tabAtomId = tabAtom.toString()
 
     const imageStyles = useAnimatedStyle(() => {
-      // console.log('DO SOME')
       return {
         position: 'absolute',
         top: 0,
         left: 0,
         width: WIDTH,
-        height: HEIGHT,
+        bottom: 0,
         opacity: activeTabScreen.opacity.value,
         transform: [
           {

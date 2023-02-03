@@ -4,11 +4,8 @@ import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { BackHandler } from 'react-native'
 import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
-import {
-  getBottomSpace,
-  getStatusBarHeight,
-} from 'react-native-iphone-x-helper'
 import Animated from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
@@ -43,9 +40,10 @@ const AppSwitcherScreen = memo(
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
     const { scrollView } = useAppSwitcherContext()
+    const insets = useSafeAreaInsets()
 
     return (
-      <Box flex={1} bg="lightGrey">
+      <Box flex={1}>
         <AnimatedScrollView
           // @ts-ignore
           ref={scrollView.ref}
@@ -53,10 +51,10 @@ const AppSwitcherScreen = memo(
           // onScroll={scrollHandler}
           // scrollEventThrottle={16}
           contentContainerStyle={{
-            paddingTop: getStatusBarHeight() + SCREEN_MARGIN,
+            paddingTop: SCREEN_MARGIN + insets.top,
             paddingLeft: PADDING_HORIZONTAL,
             paddingRight: PADDING_HORIZONTAL,
-            paddingBottom: getBottomSpace() + TAB_ICON_SIZE,
+            paddingBottom: TAB_ICON_SIZE,
             minHeight: '100%',
           }}
         >
