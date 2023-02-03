@@ -28,13 +28,11 @@ const NaveScreen = ({
   )
 
   return (
-    <Box flex={1} bg="reverse" paddingBottom={getBottomSpace()}>
-      <NaveTabScreen
-        navesAtom={onTheFlyAtom}
-        navigation={navigation}
-        hasBackButton
-      />
-    </Box>
+    <NaveTabScreen
+      navesAtom={onTheFlyAtom}
+      navigation={navigation}
+      hasBackButton
+    />
   )
 }
 export default NaveScreen

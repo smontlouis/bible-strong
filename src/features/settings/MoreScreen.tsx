@@ -204,7 +204,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingBottom: getBottomSpace() + TAB_ICON_SIZE + 20,
+          paddingBottom: 20,
         }}
       >
         <Box paddingVertical={10}>

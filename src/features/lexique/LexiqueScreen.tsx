@@ -28,13 +28,11 @@ const LexiqueScreen = ({
   )
 
   return (
-    <Box flex={1} bg="reverse" paddingBottom={getBottomSpace()}>
-      <LexiqueTabScreen
-        strongsAtom={onTheFlyAtom}
-        navigation={navigation}
-        hasBackButton
-      />
-    </Box>
+    <LexiqueTabScreen
+      strongsAtom={onTheFlyAtom}
+      navigation={navigation}
+      hasBackButton
+    />
   )
 }
 export default LexiqueScreen

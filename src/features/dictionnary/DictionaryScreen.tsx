@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
+import { useTranslation } from 'react-i18next'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { DictionariesTab } from '../../state/tabs'
 import DictionaryTabScreen from './DictionaryTabScreen'
-import { useTranslation } from 'react-i18next'
-import Box from '~common/ui/Box'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 interface DictionaryScreenProps {}
 
@@ -28,13 +26,11 @@ const DictionaryScreen = ({
   )
 
   return (
-    <Box flex={1} bg="reverse" paddingBottom={getBottomSpace()}>
-      <DictionaryTabScreen
-        dictionariesAtom={onTheFlyAtom}
-        navigation={navigation}
-        hasBackButton
-      />
-    </Box>
+    <DictionaryTabScreen
+      dictionariesAtom={onTheFlyAtom}
+      navigation={navigation}
+      hasBackButton
+    />
   )
 }
 export default DictionaryScreen

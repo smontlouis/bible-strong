@@ -41,7 +41,7 @@ import Container from '~common/ui/Container'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
-  marginBottom: 10 + getBottomSpace(),
+  marginBottom: 10,
   width: 270,
 })
 
