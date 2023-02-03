@@ -37,6 +37,7 @@ import BibleWebView from './BibleWebView'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import Container from '~common/ui/Container'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -325,7 +326,7 @@ const BibleViewer = ({
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
-    <>
+    <Container isPadding={isReadOnly}>
       <BibleHeader
         navigation={navigation}
         bibleAtom={bibleAtom}
@@ -443,7 +444,7 @@ const BibleViewer = ({
         onClosed={bibleParamsModalDisclosure.onClose}
         isOpen={bibleParamsModalDisclosure.isOpen}
       />
-    </>
+    </Container>
   )
 }
 

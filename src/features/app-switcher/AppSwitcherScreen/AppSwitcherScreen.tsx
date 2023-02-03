@@ -43,7 +43,7 @@ const AppSwitcherScreen = memo(
     const insets = useSafeAreaInsets()
 
     return (
-      <Box flex={1}>
+      <Box flex={1} bg="lightGrey">
         <AnimatedScrollView
           // @ts-ignore
           ref={scrollView.ref}

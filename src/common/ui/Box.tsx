@@ -232,16 +232,23 @@ const Box = styled.View<BoxProps>(props => {
 export const SafeAreaBox = forwardRef<
   View,
   BoxProps & {
-    enablePaddingTop?: boolean
-    enablePaddingBottom?: boolean
+    isPadding?: boolean
   }
->(({ enablePaddingTop = true, enablePaddingBottom = true, ...props }, ref) => {
+>(({ isPadding = true, ...props }, ref) => {
   const insets = useSafeAreaInsets()
   return (
     <Box
       ref={ref}
-      marginTop={enablePaddingTop ? insets.top : 0}
-      marginBottom={enablePaddingBottom ? insets.bottom : 0}
+      {...(isPadding
+        ? {
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+          }
+        : {
+            marginTop: insets.top,
+            marginBottom: insets.bottom,
+          })}
+      bg="reverse"
       flex={1}
       {...props}
     />

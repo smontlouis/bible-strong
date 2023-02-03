@@ -14,7 +14,6 @@ import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 
 import ImmersiveMode from 'react-native-immersive-mode'
-import Container from '~common/ui/Container'
 import BibleViewer from './BibleViewer'
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -134,14 +133,12 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   }, [dispatch, settings.commentsDisplay])
 
   return (
-    <Container>
-      <BibleViewer
-        navigation={navigation}
-        settings={settings}
-        fontFamily={fontFamily}
-        bibleAtom={bibleAtom}
-      />
-    </Container>
+    <BibleViewer
+      navigation={navigation}
+      settings={settings}
+      fontFamily={fontFamily}
+      bibleAtom={bibleAtom}
+    />
   )
 }
 
