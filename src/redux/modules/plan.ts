@@ -12,8 +12,8 @@ import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
 import { FireStoreUserData, RECEIVE_LIVE_UPDATES, USER_LOGOUT } from './user'
 
-import { bibleProjectPlan } from '~features/plans/bible-project-plan'
-import { bibleProjectPlanEn } from '~features/plans/bible-project-plan-en'
+const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
+const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
 
 type ImageModel = { [key: string]: string }
 

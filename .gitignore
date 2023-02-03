@@ -7,6 +7,7 @@ npm-debug.*
 keystore.txt
 *.mobileprovision
 src/assets/bible_versions/**
+src/assets/plans/**
 project/*
 config.js
 config.ts
@@ -14,8 +15,6 @@ config.ts
 dist/
 .expo/
 src/assets/db/
-src/features/plans/bible-project-plan.ts
-src/features/plans/bible-project-plan-en.ts
 src/features/timeline/events.ts
 src/features/timeline/events-en.ts
 
