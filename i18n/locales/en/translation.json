@@ -15,7 +15,7 @@
   "comment.thanksTranslation": "Thanks for your help !",
   "app.areyousure": "Are you sure ?",
   "app.updateAvailable": "An update is available, downloading...",
-  "app.updateReady": "Update installed. Rebooting...",
+  "app.updateReady": "Update installed. Please restart",
   "home.notificationPermissionNeeded": "You must authorize the notifications in order to be notified for the verse of the day.",
   "conflict.highlightAdded": "{{highlight}} created",
   "conflict.tagAdded": "Tag \"{{tag}}\" created",

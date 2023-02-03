@@ -15,7 +15,7 @@
   "comment.thanksTranslation": "Merci de votre contribution !",
   "app.areyousure": "Êtes-vous sur ?",
   "app.updateAvailable": "Une mise à jour est disponible, téléchargement...",
-  "app.updateReady": "Mise à jour installée. Redémarrage...",
+  "app.updateReady": "Mise à jour installée. Merci de rédémarrer l'app.",
   "home.notificationPermissionNeeded": "Vous devez autorisez les notifications pour être notifié du verset du jour.",
   "conflict.highlightAdded": "{{highlight}} créé",
   "conflict.tagAdded": "Etiquette \"{{tag}}\" créée",

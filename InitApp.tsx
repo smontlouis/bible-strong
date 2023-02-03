@@ -111,7 +111,7 @@ const updateApp = async (t: TFunction<'translation'>) => {
     SnackBar.show(t('app.updateAvailable'))
     await Updates.fetchUpdateAsync()
     SnackBar.show(t('app.updateReady'))
-    await Updates.reloadAsync()
+    // await Updates.reloadAsync()
   }
 }
 
