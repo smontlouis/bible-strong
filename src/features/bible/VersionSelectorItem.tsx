@@ -259,6 +259,7 @@ const VersionSelectorItem = ({
                 thickness={3}
                 color={theme.colors.primary}
                 unfilledColor={theme.colors.lightGrey}
+                fill="none"
               />
             </Box>
           )}

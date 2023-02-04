@@ -63,6 +63,7 @@ const Section = ({
             borderWidth={0}
             color={theme.colors.primary}
             unfilledColor={progress ? 'rgb(230,230,230)' : undefined}
+            fill="none"
           >
             <CircleImage center>
               {cacheImage && (

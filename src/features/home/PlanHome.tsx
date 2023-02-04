@@ -77,6 +77,7 @@ const PlanHome = () => {
               }
               unfilledColor={theme.colors.lightGrey}
               thickness={2}
+              fill="none"
             >
               <Box style={StyleSheet.absoluteFillObject} center>
                 <CircleImage size={35} center>

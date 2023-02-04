@@ -90,6 +90,7 @@ const PlanItem = ({
             }
             unfilledColor={theme.colors.lightGrey}
             thickness={2}
+            fill="none"
           >
             <CircleImage center>
               {cacheImage && (

@@ -44,6 +44,7 @@ export const DownloadingWidget = ({ progress }: { progress?: number }) => {
         thickness={2}
         color={theme.colors.primary}
         unfilledColor={theme.colors.lightGrey}
+        fill="none"
       />
       <Text color="grey" marginTop={20} fontSize={12}>
         {t('Téléchargement en cours')}
