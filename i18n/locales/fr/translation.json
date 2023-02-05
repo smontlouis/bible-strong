@@ -551,5 +551,7 @@
 
   "premium.sponsorsOnlyFeature": "Cette fonctionnalité est réservée aux sponsors.",
   "premium.sponsorsOnlyOption": "Cette option est réservée aux sponsors.",
-  "premium.searchQuotaRemaining": "Recherches restantes"
+  "premium.searchQuotaRemaining": "Recherches restantes",
+
+  "app.downloading": "Téléchargement..."
 }

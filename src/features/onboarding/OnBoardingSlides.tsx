@@ -1,19 +1,20 @@
 import React from 'react'
 
 import Carousel, { Pagination } from 'react-native-snap-carousel'
-import { Button as RNPButton } from 'react-native-paper'
+import { Button as BaseButton } from 'react-native'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { wp } from '~helpers/utils'
 
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 
 import { getSlides, Slide } from './slides'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '@emotion/react'
 
 const slideWidth = wp(100)
 const sliderWidth = wp(100)
@@ -52,6 +53,7 @@ const OnBoardingSlides = ({
   const carousel = React.useRef<Carousel<Slide>>(null)
   const { t } = useTranslation()
   const slides = getSlides(t)
+  const theme = useTheme()
 
   return (
     <Box overflow="visible" flex pb={getBottomSpace() + 20} alignItems="center">
@@ -87,7 +89,7 @@ const OnBoardingSlides = ({
           height: 10,
           borderRadius: 5,
           marginHorizontal: 8,
-          backgroundColor: 'rgba(0, 0, 0, 0.92)',
+          backgroundColor: theme.colors.default,
         }}
         inactiveDotOpacity={0.4}
         inactiveDotScale={0.6}
@@ -102,14 +104,9 @@ const OnBoardingSlides = ({
             {t('Suivant')}
           </Button>
         )}
-        <RNPButton
-          style={{ marginTop: 5 }}
-          mode="text"
-          onPress={() => setStep(1)}
-          labelStyle={{ fontSize: 12 }}
-        >
-          {t('Passer')}
-        </RNPButton>
+        <TouchableBox onPress={() => setStep(1)} marginTop={20} center>
+          <Text fontSize={12}>{t('Passer').toUpperCase()}</Text>
+        </TouchableBox>
       </Box>
     </Box>
   )

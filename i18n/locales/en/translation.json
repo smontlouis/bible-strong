@@ -549,5 +549,7 @@
 
   "premium.sponsorsOnlyFeature": "This feature is reserved for sponsors.",
   "premium.sponsorsOnlyOption": "This option is reserved for sponsors.",
-  "premium.searchQuotaRemaining": "Remaining research"
+  "premium.searchQuotaRemaining": "Remaining research",
+
+  "app.downloading": "Downloading..."
 }

@@ -21,6 +21,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import { HStack } from '~common/ui/Stack'
+import { requireBiblePath } from '~helpers/requireBiblePath'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -116,15 +117,6 @@ const VersionSelectorItem = ({
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const requireBiblePath = (id: string) => {
-    if (id === 'INT') {
-      const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-      return `${sqliteDirPath}/interlineaire.sqlite`
-    }
-
-    return `${FileSystem.documentDirectory}bible-${id}.json`
-  }
 
   const calculateProgress: FileSystem.DownloadProgressCallback = ({
     totalBytesWritten,

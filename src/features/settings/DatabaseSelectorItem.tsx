@@ -77,15 +77,6 @@ class DBSelectorItem extends React.Component {
   }
 
   async componentDidMount() {
-    this.props.shareFn(() => {
-      this.setState({ versionNeedsDownload: true })
-      try {
-        this.delete()
-      } catch (e) {
-        console.log(`Nothing to delete for ${this.props.database}`)
-      }
-      this.startDownload()
-    })
     const versionNeedsDownload = await getIfDatabaseNeedsDownload(
       this.props.database
     )
