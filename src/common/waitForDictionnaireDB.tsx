@@ -10,7 +10,7 @@ import DownloadRequired from '~common/DownloadRequired'
 import { getDatabasesRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
 import Box from './ui/Box'
-import wait from '~helpers/wait'
+import * as Sentry from '@sentry/react-native'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -105,6 +105,7 @@ export const useWaitForDatabase = () => {
               ),
               'danger'
             )
+            Sentry.captureException(e)
             dispatch({
               type: 'dictionnaire.setProposeDownload',
               payload: true,

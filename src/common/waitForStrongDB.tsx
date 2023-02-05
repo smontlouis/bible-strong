@@ -6,7 +6,7 @@ import { strongDB } from '~helpers/database'
 import Loading from '~common/Loading'
 import DownloadRequired from '~common/DownloadRequired'
 import { useDBStateValue } from '~helpers/databaseState'
-import { timeout } from '~helpers/timeout'
+import * as Sentry from '@sentry/react-native'
 import { existsAssets, unzipAssets } from '~helpers/assetUtils'
 import { getLangIsFr } from '~i18n'
 import SnackBar from '~common/SnackBar'
@@ -150,6 +150,7 @@ const useStrongEn = (dispatch: any, startDownload: any) => {
               ),
               'danger'
             )
+            Sentry.captureException(e)
             dispatch({
               type: 'strong.setProposeDownload',
               payload: true,

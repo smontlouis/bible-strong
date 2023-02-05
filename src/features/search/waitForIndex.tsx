@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-
+import * as Sentry from '@sentry/react-native'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
@@ -66,6 +66,7 @@ export const useWaitForIndex = () => {
             "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
             'danger'
           )
+          Sentry.captureException(e)
           setProposeDownload(true)
           setStartDownload(false)
         }

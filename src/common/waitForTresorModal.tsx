@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system'
 import React, { useEffect, useState } from 'react'
 import { ProgressBar } from 'react-native-paper'
 import { useDispatch } from 'react-redux'
+import * as Sentry from '@sentry/react-native'
 
 import SnackBar from '~common/SnackBar'
 
@@ -10,7 +11,6 @@ import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import { getTresorDB, initTresorDB } from '~helpers/database'
 import { getStaticUrl } from '~helpers/firebase'
-import { timeout } from '~helpers/timeout'
 import Box from './ui/Box'
 
 const STRONG_FILE_SIZE = 5434368
@@ -88,6 +88,7 @@ export const useWaitForDatabase = () => {
               ),
               'danger'
             )
+            Sentry.captureException(e)
             setProposeDownload(true)
             setStartDownload(false)
           }

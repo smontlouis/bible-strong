@@ -27,6 +27,7 @@ const DownloadItem = ({
       py={10}
       onPress={isDisabled ? undefined : onPress}
       opacity={isDisabled ? 0.5 : 1}
+      row
     >
       <VStack spacing={1 / 2} flex={1}>
         <HStack>

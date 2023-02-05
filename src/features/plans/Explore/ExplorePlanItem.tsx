@@ -3,7 +3,7 @@ import FastImage from 'react-native-fast-image'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { withNavigation, NavigationParams } from 'react-navigation'
 import SnackBar from '~common/SnackBar'
-
+import * as Sentry from '@sentry/react-native'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import { OnlinePlan } from '~common/types'
@@ -119,6 +119,7 @@ const ExplorePlanItem = ({
                     .catch(e => {
                       console.log(e)
                       setIsLoading(false)
+                      Sentry.captureException(e)
                       SnackBar.show(
                         t(
                           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

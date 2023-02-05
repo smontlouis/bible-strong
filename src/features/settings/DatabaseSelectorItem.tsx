@@ -7,7 +7,7 @@ import { withTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
-
+import * as Sentry from '@sentry/react-native'
 import { getDatabasesRef } from '~helpers/firebase'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 
@@ -134,6 +134,7 @@ class DBSelectorItem extends React.Component {
       }
     } catch (e) {
       console.log(e)
+      Sentry.captureException(e)
       SnackBar.show(
         t(
           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

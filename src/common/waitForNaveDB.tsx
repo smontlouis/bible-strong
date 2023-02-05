@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
-
+import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
 
 import { naveDB } from '~helpers/database'
@@ -82,6 +82,7 @@ export const useWaitForDatabase = () => {
               ),
               'danger'
             )
+            Sentry.captureException(e)
             setProposeDownload(true)
             setStartDownload(false)
           }

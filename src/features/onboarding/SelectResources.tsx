@@ -126,7 +126,7 @@ const DownloadFiles = ({
               isSelected={Boolean(
                 selectedResources.find(r => r.id === version.id)
               )}
-              isDisabled={version.id === 'LSG' || version.id === 'KJV'}
+              isDisabled={version.id === (isFR ? 'LSG' : 'KJV')}
               onPress={() => {
                 const path = requireBiblePath(version.id)
                 const uri =

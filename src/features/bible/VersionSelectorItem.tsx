@@ -5,6 +5,7 @@ import ProgressCircle from 'react-native-progress/Circle'
 import * as Icon from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabasesRef } from '~helpers/firebase'
+import * as Sentry from '@sentry/react-native'
 
 import { setVersionUpdated } from '~redux/modules/user'
 import SnackBar from '~common/SnackBar'
@@ -154,6 +155,7 @@ const VersionSelectorItem = ({
       setIsLoading(false)
     } catch (e) {
       console.log(e)
+      Sentry.captureException(e)
       SnackBar.show(
         t(
           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
