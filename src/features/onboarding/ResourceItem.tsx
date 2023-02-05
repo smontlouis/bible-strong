@@ -1,6 +1,5 @@
 import React from 'react'
-import { TouchableOpacity } from 'react-native-gesture-handler'
-import { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack, VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
@@ -23,12 +22,9 @@ const DownloadItem = ({
   onPress,
 }: Props) => {
   return (
-    <HStack
-      as={isDisabled ? undefined : TouchableOpacity}
+    <TouchableBox
       px={20}
       py={10}
-      spacing={2}
-      // @ts-ignore
       onPress={isDisabled ? undefined : onPress}
       opacity={isDisabled ? 0.5 : 1}
     >
@@ -54,7 +50,8 @@ const DownloadItem = ({
           </Text>
         )}
       </VStack>
-      <TouchableBox
+      <Box
+        marginLeft={30}
         w={25}
         height={25}
         borderRadius={20}
@@ -67,8 +64,8 @@ const DownloadItem = ({
           style={{ opacity: isSelected ? 1 : 0.7, top: 1 }}
           color={isSelected ? 'reverse' : 'grey'}
         />
-      </TouchableBox>
-    </HStack>
+      </Box>
+    </TouchableBox>
   )
 }
 
