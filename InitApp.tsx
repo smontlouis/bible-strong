@@ -11,7 +11,6 @@ import {
   StatusBar,
   View,
 } from 'react-native'
-import { Provider as PaperProvider } from 'react-native-paper'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -34,7 +33,6 @@ import {
   getDatabaseUpdate,
   getVersionUpdate,
 } from '~redux/modules/user'
-import { paperTheme } from '~themes/default'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -157,44 +155,42 @@ const InitApp = ({ persistor }: Props) => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider theme={theme}>
-          <PaperProvider theme={paperTheme}>
-            <MenuProvider
-              backHandler
-              customStyles={{
-                backdrop: {
-                  backgroundColor: 'black',
-                  opacity: 0.2,
-                },
-              }}
-            >
-              <QueryClientProvider client={queryClient}>
-                <PersistGate
-                  loading={
-                    <View
-                      style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <ActivityIndicator />
-                    </View>
-                  }
-                  persistor={persistor}
-                >
-                  <DBStateProvider>
-                    <ErrorBoundary>
-                      <AppSwitcherProvider>
-                        <AppNavigator
-                          onNavigationStateChange={onNavigationStateChange}
-                        />
-                      </AppSwitcherProvider>
-                    </ErrorBoundary>
-                  </DBStateProvider>
-                </PersistGate>
-              </QueryClientProvider>
-            </MenuProvider>
-          </PaperProvider>
+          <MenuProvider
+            backHandler
+            customStyles={{
+              backdrop: {
+                backgroundColor: 'black',
+                opacity: 0.2,
+              },
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <PersistGate
+                loading={
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <ActivityIndicator />
+                  </View>
+                }
+                persistor={persistor}
+              >
+                <DBStateProvider>
+                  <ErrorBoundary>
+                    <AppSwitcherProvider>
+                      <AppNavigator
+                        onNavigationStateChange={onNavigationStateChange}
+                      />
+                    </AppSwitcherProvider>
+                  </ErrorBoundary>
+                </DBStateProvider>
+              </PersistGate>
+            </QueryClientProvider>
+          </MenuProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

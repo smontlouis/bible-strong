@@ -1,21 +1,25 @@
+import Clipboard from '@react-native-community/clipboard'
+import to from 'await-to-js'
 import React, { useEffect, useState } from 'react'
-import slugify from 'slugify'
+import { useTranslation } from 'react-i18next'
+import {
+  ActivityIndicator,
+  PermissionsAndroid,
+  Platform,
+  Share,
+} from 'react-native'
+import { useDispatch } from 'react-redux'
 import RNFetchBlob from 'rn-fetch-blob'
-import Text from '~common/ui/Text'
+import slugify from 'slugify'
+import { LinkBox } from '~common/Link'
+import SnackBar from '~common/SnackBar'
+import { Status } from '~common/types'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import { Study, publishStudy } from '~redux/modules/user'
-import Border from '~common/ui/Border'
-import { LinkBox } from '~common/Link'
-import to from 'await-to-js'
-import { Status } from '~common/types'
-import { ActivityIndicator } from 'react-native-paper'
-import { useDispatch } from 'react-redux'
+import Text from '~common/ui/Text'
 import useConnection from '~helpers/useConnection'
-import Clipboard from '@react-native-community/clipboard'
-import SnackBar from '~common/SnackBar'
-import { Share, Platform, PermissionsAndroid } from 'react-native'
-import { useTranslation } from 'react-i18next'
+import { publishStudy, Study } from '~redux/modules/user'
 
 interface Props {
   study: Study

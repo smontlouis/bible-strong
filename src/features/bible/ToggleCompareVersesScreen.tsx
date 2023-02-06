@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { Switch } from 'react-native-paper'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
@@ -12,6 +11,7 @@ import Header from '~common/Header'
 import { toggleCompareVersion } from '~redux/modules/user'
 import { getVersionsBySections, isStrongVersion } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
+import Switch from '~common/ui/Switch'
 
 const TextVersion = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
@@ -37,11 +37,7 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
         <TextVersion>{version.id}</TextVersion>
         <TextName>{version.name}</TextName>
       </Box>
-      <Switch
-        color={theme.colors.primary}
-        value={isSelected}
-        onValueChange={onChange}
-      />
+      <Switch value={isSelected} onValueChange={onChange} />
     </Box>
   )
 })

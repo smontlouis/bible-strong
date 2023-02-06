@@ -28,7 +28,7 @@ const Loading = ({ message, subMessage, style, children }: Props) => {
 
   return (
     <Container style={style}>
-      <ActivityIndicator color={theme.colors.grey} />
+      {!children && <ActivityIndicator color={theme.colors.grey} />}
       {message && (
         <Box>
           <Text marginTop={20}>{message}</Text>
@@ -42,7 +42,13 @@ const Loading = ({ message, subMessage, style, children }: Props) => {
         </Box>
       )}
       {children && (
-        <Box width={200} marginLeft="auto" marginRight="auto" marginTop={10}>
+        <Box
+          marginTop={20}
+          width={200}
+          marginLeft="auto"
+          marginRight="auto"
+          center
+        >
           {children}
         </Box>
       )}

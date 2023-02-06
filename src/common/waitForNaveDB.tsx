@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import { ProgressBar } from 'react-native-paper'
-import * as FileSystem from 'expo-file-system'
 import * as Sentry from '@sentry/react-native'
+import * as FileSystem from 'expo-file-system'
+import React, { useEffect, useState } from 'react'
 import SnackBar from '~common/SnackBar'
 
-import { naveDB } from '~helpers/database'
-import Loading from '~common/Loading'
-import DownloadRequired from '~common/DownloadRequired'
-import { getDatabasesRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
+import DownloadRequired from '~common/DownloadRequired'
+import Loading from '~common/Loading'
+import { naveDB } from '~helpers/database'
+import { getDatabasesRef } from '~helpers/firebase'
 import Box from './ui/Box'
+import Progress from './ui/Progress'
 
 const FILE_SIZE = 7448576
 
@@ -18,7 +18,7 @@ export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState<number | undefined>(undefined)
+  const [progress, setProgress] = useState<number>(0)
 
   useEffect(() => {
     if (naveDB.get()) {
@@ -62,7 +62,7 @@ export const useWaitForDatabase = () => {
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
                 dbPath,
-                null,
+                undefined,
                 ({ totalBytesWritten }) => {
                   const idxProgress =
                     Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
@@ -82,6 +82,7 @@ export const useWaitForDatabase = () => {
               ),
               'danger'
             )
+            console.log(e)
             Sentry.captureException(e)
             setProposeDownload(true)
             setStartDownload(false)
@@ -130,7 +131,7 @@ const waitForDatabase = ({
     return (
       <Box h={300} alignItems="center">
         <Loading message={t('Téléchargement des thèmes...')}>
-          <ProgressBar progress={Number(progress)} color="blue" />
+          <Progress progress={progress} />
         </Loading>
       </Box>
     )

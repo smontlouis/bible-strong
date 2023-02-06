@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import { Switch } from 'react-native-paper'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
+import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
+import { useIsPremium } from '~helpers/usePremium'
 import { RootState } from '~redux/modules/reducer'
 import {
   toggleSettingsShareAppName,
@@ -17,7 +17,6 @@ import {
   toggleSettingsShareQuotes,
   toggleSettingsShareVerseNumbers,
 } from '~redux/modules/user'
-import { useIsPremium } from '~helpers/usePremium'
 
 export const useShareOptions = () => {
   const hasVerseNumbers = useSelector(
@@ -43,7 +42,6 @@ export const useShareOptions = () => {
 
 const BibleShareOptionsScreen = () => {
   const { t } = useTranslation()
-  const theme = useTheme()
   const dispatch = useDispatch()
   const [message, setMessage] = useState('')
   const isPremium = useIsPremium()
@@ -85,7 +83,6 @@ const BibleShareOptionsScreen = () => {
         >
           <Text flex>{t('bible.settings.hasVerseNumbers')}</Text>
           <Switch
-            color={theme.colors.primary}
             value={hasVerseNumbers}
             onValueChange={() => dispatch(toggleSettingsShareVerseNumbers())}
           />
@@ -98,7 +95,6 @@ const BibleShareOptionsScreen = () => {
         >
           <Text flex>{t('bible.settings.hasInlineVerses')}</Text>
           <Switch
-            color={theme.colors.primary}
             value={hasInlineVerses}
             onValueChange={() => dispatch(toggleSettingsShareLineBreaks())}
           />
@@ -111,7 +107,6 @@ const BibleShareOptionsScreen = () => {
         >
           <Text flex>{t('bible.settings.hasQuotes')}</Text>
           <Switch
-            color={theme.colors.primary}
             value={hasQuotes}
             onValueChange={() => dispatch(toggleSettingsShareQuotes())}
           />
@@ -130,7 +125,6 @@ const BibleShareOptionsScreen = () => {
             )}
           </Box>
           <Switch
-            color={theme.colors.primary}
             disabled={!isPremium}
             value={hasAppName}
             onValueChange={() => dispatch(toggleSettingsShareAppName())}

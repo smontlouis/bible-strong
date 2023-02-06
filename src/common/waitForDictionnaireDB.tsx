@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react'
-import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
+import React, { useEffect } from 'react'
 
-import SnackBar from '~common/SnackBar'
-import { initDictionnaireDB, getDictionnaireDB } from '~helpers/database'
-import Loading from '~common/Loading'
-import { useDBStateValue } from '~helpers/databaseState'
-import DownloadRequired from '~common/DownloadRequired'
-import { getDatabasesRef } from '~helpers/firebase'
-import { useTranslation } from 'react-i18next'
-import Box from './ui/Box'
 import * as Sentry from '@sentry/react-native'
+import { useTranslation } from 'react-i18next'
+import DownloadRequired from '~common/DownloadRequired'
+import Loading from '~common/Loading'
+import SnackBar from '~common/SnackBar'
+import { getDictionnaireDB, initDictionnaireDB } from '~helpers/database'
+import { useDBStateValue } from '~helpers/databaseState'
+import { getDatabasesRef } from '~helpers/firebase'
+import Box from './ui/Box'
+import Progress from './ui/Progress'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -77,7 +77,7 @@ export const useWaitForDatabase = () => {
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
                 dbPath,
-                null,
+                undefined,
                 ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
                   const idxProgress =
                     Math.floor(
@@ -168,7 +168,7 @@ const waitForDatabase = ({
     return (
       <Box h={300} alignItems="center">
         <Loading message={t('Téléchargement du dictionnaire...')}>
-          <ProgressBar progress={progress} color="blue" />
+          <Progress progress={progress} />
         </Loading>
       </Box>
     )

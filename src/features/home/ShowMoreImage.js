@@ -12,7 +12,7 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
-import { ActivityIndicator } from 'react-native-paper'
+import { ActivityIndicator } from 'react-native'
 
 const AnimatableBox = Animatable.createAnimatableComponent(Box)
 

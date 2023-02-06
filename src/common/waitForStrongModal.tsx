@@ -1,9 +1,9 @@
 import React from 'react'
-import { ProgressBar } from 'react-native-paper'
 
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import { useWaitForDatabase } from '~common/waitForStrongDB'
+import Progress from './ui/Progress'
 
 const waitForModal = WrappedComponent => props => {
   const {
@@ -17,7 +17,7 @@ const waitForModal = WrappedComponent => props => {
   if (isLoading && startDownload) {
     return (
       <Loading message="Téléchargement de la base strong...">
-        <ProgressBar progress={progress} color="blue" />
+        <Progress progress={progress} />
       </Loading>
     )
   }

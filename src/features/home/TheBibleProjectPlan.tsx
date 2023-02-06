@@ -1,18 +1,15 @@
 import { useTheme } from '@emotion/react'
 import React from 'react'
-import ProgressBar from 'react-native-progress/Bar'
+import { useTranslation } from 'react-i18next'
+import BibleProjectIcon from '~common/BibleProjectIcon'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import {
-  useComputedPlanItems,
-  useFireStorage,
-} from '~features/plans/plan.hooks'
-import { Theme } from '~themes'
 import { FeatherIcon } from '~common/ui/Icon'
-import BibleProjectIcon from '~common/BibleProjectIcon'
-import { useTranslation } from 'react-i18next'
+import { ProgressBar } from '~common/ui/ProgressBar'
+import Text from '~common/ui/Text'
+import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
+import { Theme } from '~themes'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -45,16 +42,10 @@ const TheBibleProject = () => {
             <BibleProjectIcon />
           </Box>
           <Box flex justifyContent="center">
-            <Text title fontSize={18}>
+            <Text title fontSize={18} mb={10}>
               {t('The Bible Project')}
             </Text>
-            <ProgressBar
-              borderWidth={0}
-              progress={progress}
-              color={theme.colors.primary}
-              unfilledColor={theme.colors.opacity5}
-              style={{ marginTop: 10 }}
-            />
+            <ProgressBar progress={progress || 0} />
           </Box>
           <Box>
             <FeatherIcon name="chevron-right" size={20} />

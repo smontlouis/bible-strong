@@ -9,7 +9,6 @@ import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { offset, rowToPx, calculateLabel } from './constants'
-import { Divider } from 'react-native-paper'
 import FastImage from 'react-native-fast-image'
 import { TimelineEvent as TimelineEventProps } from './types'
 import { Modalize } from 'react-native-modalize'
@@ -127,7 +126,7 @@ const TimelineEvent = ({
         <Text fontSize={12} numberOfLines={2}>
           {isFR ? title : titleEn}
         </Text>
-        <Divider style={{ width: '100%' }} />
+        <Box borderBottomWidth={1} borderColor="border" />
         <Text fontSize={10} textAlign="center">
           {label}
         </Text>

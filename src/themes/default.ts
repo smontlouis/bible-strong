@@ -1,5 +1,4 @@
 import { Platform } from 'react-native'
-import { DefaultTheme } from 'react-native-paper'
 import colors from './colors'
 
 const theme = {
@@ -18,11 +17,3 @@ const theme = {
 }
 
 export default theme
-
-export const paperTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: colors.primary,
-  },
-}

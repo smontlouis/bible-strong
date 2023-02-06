@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { ProgressBar } from 'react-native-paper'
-import * as FileSystem from 'expo-file-system'
 import * as Sentry from '@sentry/react-native'
+import * as FileSystem from 'expo-file-system'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useDispatch } from 'react-redux'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
+import Progress from '~common/ui/Progress'
 import { getDatabasesRef } from '~helpers/firebase'
-import { useTranslation } from 'react-i18next'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
@@ -15,7 +15,7 @@ export const useWaitForIndex = () => {
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState<number | undefined>(undefined)
+  const [progress, setProgress] = useState<number>(0)
   const [idxFile, setIdxFile] = useState<FileSystem.FileInfo | null>(null)
   const dispatch = useDispatch()
 
@@ -48,7 +48,7 @@ export const useWaitForIndex = () => {
           await FileSystem.createDownloadResumable(
             idxUri,
             idxPath,
-            null,
+            undefined,
             ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
               const idxProgress =
                 Math.floor((totalBytesWritten / IDX_LIGHT_FILE_SIZE) * 100) /
@@ -101,7 +101,7 @@ const waitForIndex = WrappedComponent => props => {
   if (isLoading && startDownload) {
     return (
       <Loading message={t("Téléchargement de l'index...")}>
-        <ProgressBar progress={progress} color="blue" />
+        <Progress progress={progress} />
       </Loading>
     )
   }

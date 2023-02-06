@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react'
-import { ProgressBar } from 'react-native-paper'
 import * as FileSystem from 'expo-file-system'
+import React, { useEffect } from 'react'
 
-import { strongDB } from '~helpers/database'
-import Loading from '~common/Loading'
-import DownloadRequired from '~common/DownloadRequired'
-import { useDBStateValue } from '~helpers/databaseState'
 import * as Sentry from '@sentry/react-native'
-import { existsAssets, unzipAssets } from '~helpers/assetUtils'
-import { getLangIsFr } from '~i18n'
-import SnackBar from '~common/SnackBar'
-import { getDatabasesRef } from '~helpers/firebase'
 import { useTranslation } from 'react-i18next'
+import DownloadRequired from '~common/DownloadRequired'
+import Loading from '~common/Loading'
+import SnackBar from '~common/SnackBar'
+import { existsAssets, unzipAssets } from '~helpers/assetUtils'
+import { strongDB } from '~helpers/database'
+import { useDBStateValue } from '~helpers/databaseState'
+import { getDatabasesRef } from '~helpers/firebase'
+import { getLangIsFr } from '~i18n'
 import Box from './ui/Box'
+import Progress from './ui/Progress'
 
 const RNFS = require('react-native-fs')
 const STRONG_FILE_SIZE = 34941952
@@ -226,7 +226,7 @@ const waitForDatabase = ({
     return (
       <Box h={300} alignItems="center">
         <Loading message={t('Téléchargement de la base strong...')}>
-          <ProgressBar progress={Number(progress)} color="blue" />
+          <Progress progress={progress} />
         </Loading>
       </Box>
     )

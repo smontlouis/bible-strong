@@ -5,13 +5,13 @@ const initialState = {
     isLoading: true,
     proposeDownload: false,
     startDownload: false,
-    progress: undefined,
+    progress: 0,
   },
   dictionnaire: {
     isLoading: true,
     proposeDownload: false,
     startDownload: false,
-    progress: undefined,
+    progress: 0,
   },
 }
 

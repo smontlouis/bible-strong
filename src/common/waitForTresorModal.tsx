@@ -1,8 +1,7 @@
+import * as Sentry from '@sentry/react-native'
 import * as FileSystem from 'expo-file-system'
 import React, { useEffect, useState } from 'react'
-import { ProgressBar } from 'react-native-paper'
 import { useDispatch } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
 
 import SnackBar from '~common/SnackBar'
 
@@ -12,6 +11,7 @@ import Loading from '~common/Loading'
 import { getTresorDB, initTresorDB } from '~helpers/database'
 import { getStaticUrl } from '~helpers/firebase'
 import Box from './ui/Box'
+import Progress from './ui/Progress'
 
 const STRONG_FILE_SIZE = 5434368
 
@@ -20,7 +20,7 @@ export const useWaitForDatabase = () => {
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState(undefined)
+  const [progress, setProgress] = useState(0)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export const useWaitForDatabase = () => {
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
                 dbPath,
-                null,
+                undefined,
                 ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
                   const idxProgress =
                     Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
@@ -127,7 +127,7 @@ const waitForDatabase = <T,>(
     return (
       <Box h={300} alignItems="center">
         <Loading message={t('Téléchargement de la base commentaires...')}>
-          <ProgressBar progress={Number(progress)} color="blue" />
+          <Progress progress={progress} />
         </Loading>
       </Box>
     )

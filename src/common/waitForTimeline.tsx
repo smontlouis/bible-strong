@@ -1,24 +1,24 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { ProgressBar } from 'react-native-paper'
-import * as FileSystem from 'expo-file-system'
 import * as Sentry from '@sentry/react-native'
+import * as FileSystem from 'expo-file-system'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useDispatch } from 'react-redux'
+import DownloadRequired from '~common/DownloadRequired'
+import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
-import Loading from '~common/Loading'
-import DownloadRequired from '~common/DownloadRequired'
-import { getDatabasesRef } from '~helpers/firebase'
 import { getDatabases } from '~helpers/databases'
-import Box from './ui/Box'
+import { getDatabasesRef } from '~helpers/firebase'
 import { hp } from '~helpers/utils'
-import { useTranslation } from 'react-i18next'
+import Box from './ui/Box'
+import Progress from './ui/Progress'
 
 export const useWaitForDatabase = () => {
   const { t } = useTranslation()
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
-  const [progress, setProgress] = useState<number>()
+  const [progress, setProgress] = useState<number>(0)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -113,7 +113,7 @@ const waitForDatabase = (WrappedComponent: React.ReactNode) => props => {
     return (
       <Box center height={hp(80)}>
         <Loading message={t('Téléchargement de la chronologie...')}>
-          <ProgressBar progress={Number(progress)} color="blue" />
+          <Progress progress={progress} />
         </Loading>
       </Box>
     )
