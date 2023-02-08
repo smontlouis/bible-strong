@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">staging - Bible Strong</string>
-    <string name="request_headers_key">{&quot;expo-channel-name&quot;:&quot;staging&quot;}</string>
+    <string name="release_channel">staging</string>
 </resources>

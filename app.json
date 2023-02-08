@@ -9,10 +9,7 @@
     "privacy": "unlisted",
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "16.8.1",
     "orientation": "default",
     "assetBundlePatterns": [
@@ -28,15 +25,6 @@
     },
     "ios": {
       "buildNumber": "123"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "fdf72b90-346b-11e9-ad9a-255491359311"
-      }
-    },
-    "runtimeVersion": "1.0.0",
-    "updates": {
-      "url": "https://u.expo.dev/fdf72b90-346b-11e9-ad9a-255491359311"
     }
   }
 }
