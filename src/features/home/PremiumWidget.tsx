@@ -17,7 +17,7 @@ const PremiumWidget = () => {
   const isPremium = useIsPremium()
   const { t } = useTranslation()
   return (
-    <Box grey px={20} pt={20} pb={40}>
+    <Box bg="lightGrey" px={20} pt={20} pb={40}>
       <LinkBox
         route="Premium"
         backgroundColor="primary"

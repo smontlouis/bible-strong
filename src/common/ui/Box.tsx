@@ -92,7 +92,6 @@ export type BoxProps = {
   backgroundColor?: string
   bg?: string
 
-  grey?: boolean
   background?: boolean
   rounded?: boolean
   lightShadow?: boolean
@@ -180,12 +179,6 @@ const Box = styled.View<BoxProps>(props => ({
         (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
       ]
     : props.backgroundColor ?? props.bg,
-
-  ...(props.grey
-    ? {
-        backgroundColor: props.theme.colors.lightGrey,
-      }
-    : {}),
 
   ...(props.background
     ? {

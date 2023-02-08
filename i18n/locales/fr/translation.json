@@ -506,6 +506,7 @@
   "tabs.commentary": "Commentaire",
   "tabs.tab": "onglet",
   "tabs.tab_plural": "onglets",
+  "tabs.created": "Onglet créé",
 
   "common.goTo": "Aller à",
   "common.chooseCompareVersions": "Choisir les versions à comparer",

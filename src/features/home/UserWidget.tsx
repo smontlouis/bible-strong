@@ -1,12 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { memo, useState } from 'react'
-import {
-  ActivityIndicator,
-  Platform,
-  ScrollView,
-  StyleSheet,
-} from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native'
 import { useSelector } from 'react-redux'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -21,12 +16,10 @@ import { useIsPremium } from '~helpers/usePremium'
 import PreloadBible from './PreloadBible'
 
 import { useTranslation } from 'react-i18next'
-import { shallowEqual } from 'recompose'
 import Spacer from '~common/ui/Spacer'
+import { RootState } from '~redux/modules/reducer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
-import FireAuth from '~helpers/FireAuth'
-import { RootState } from '~redux/modules/reducer'
 
 const vodNb = [...Array(6).keys()]
 
@@ -242,7 +235,7 @@ const UserWidget = () => {
           </Box>
         )} */}
       </Box>
-      <Box grey>
+      <Box bg="lightGrey">
         <ScrollView
           horizontal
           style={{ maxHeight: 95, overflow: 'visible', marginTop: 10 }}

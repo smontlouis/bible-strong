@@ -29,7 +29,7 @@ const TheBibleProject = () => {
   }
 
   return (
-    <Box grey pt={20}>
+    <Box bg="lightGrey" pt={20}>
       <Box lightShadow bg="reverse" rounded height={80} px={20}>
         <LinkBox
           flex

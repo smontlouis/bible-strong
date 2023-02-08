@@ -505,6 +505,7 @@
   "tabs.commentary": "Commentary",
   "tabs.tab": "tab",
   "tabs.tab_plural": "tabs",
+  "tabs.created": "Tab created",
 
   "common.goTo": "Go to",
   "common.chooseCompareVersions": "Choose versions to compare",

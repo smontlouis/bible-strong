@@ -215,7 +215,7 @@ class BibleVerseDetailScreen extends React.Component {
         <Box background paddingTop={getStatusBarHeight()} />
         <Header
           fontSize={18}
-          background
+          bg="reverse"
           hasBackButton
           title={`${headerTitle} ${
             headerTitle.length < 12 ? t('- Strong LSG') : ''
@@ -263,10 +263,10 @@ class BibleVerseDetailScreen extends React.Component {
               }}
             />
           </Box>
-          <Box grey>
+          <Box bg="lightGrey">
             <RoundedCorner />
           </Box>
-          <Box grey>
+          <Box bg="lightGrey">
             {isCarouselLoading && <Loading />}
             {!isCarouselLoading && (
               <Carousel

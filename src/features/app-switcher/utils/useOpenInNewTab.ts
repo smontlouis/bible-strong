@@ -32,7 +32,7 @@ export const useOpenInNewTab = () => {
       })
 
       if (!params.autoRedirect) {
-        Snackbar.show('Onglet créé', 'info', {
+        Snackbar.show(t('tabs.created'), 'info', {
           confirmText: t('common.goTo'),
           onConfirm: () => {
             navigation.navigate('AppSwitcher')

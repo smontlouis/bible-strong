@@ -12,7 +12,7 @@ const TimelineWidget = () => {
   const { t } = useTranslation()
 
   return (
-    <Box grey pt={10}>
+    <Box bg="lightGrey" pt={10}>
       <LinkBox
         row
         route="TimelineHome"

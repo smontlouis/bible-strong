@@ -274,10 +274,10 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
               goToPrevVerse={() => updateVerse(-1)}
             />
           </Box>
-          <Box grey>
+          <Box bg="lightGrey">
             <RoundedCorner />
           </Box>
-          <Box flex grey>
+          <Box flex bg="lightGrey">
             {wordsInVerse.length ? (
               <Carousel
                 firstItem={wordsInVerse.findIndex(w => w === currentWord)}

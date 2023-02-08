@@ -164,7 +164,7 @@ const PericopeScreen = ({ navigation }) => {
         </Box>
       </ScrollView>
       <Box
-        background
+        bg="reverse"
         row
         paddingHorizontal={20}
         paddingVertical={10}

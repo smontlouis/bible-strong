@@ -28,19 +28,19 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
     <Box bg="lightGrey" flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <UserWidget />
-        <Box grey pt={20} px={20}>
+        <Box bg="lightGrey" pt={20} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}
           </Text>
           <TheBibleProject />
           <TimelineWidget />
         </Box>
-        <Box grey pt={40} px={20}>
+        <Box bg="lightGrey" pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Étudier')}
           </Text>
         </Box>
-        <Box grey paddingTop={20}>
+        <Box bg="lightGrey" paddingTop={20}>
           <RNScrollView
             horizontal
             style={{ overflow: 'visible' }}
@@ -61,21 +61,21 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
-        <Box grey pt={40} px={20}>
+        <Box bg="lightGrey" pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Méditer')}
           </Text>
         </Box>
         <PlanHome />
-        <Box grey pt={40} px={20}>
+        <Box bg="lightGrey" pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Aller plus loin')}
           </Text>
         </Box>
         <PremiumWidget />
-        <Box grey>
+        <Box bg="lightGrey">
           <Box
-            background
+            bg="reverse"
             row
             paddingHorizontal={20}
             paddingTop={20}

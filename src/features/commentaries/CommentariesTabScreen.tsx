@@ -284,7 +284,7 @@ const CommentariesTabScreen = ({
               versesInCurrentChapter={versesInCurrentChapter}
             />
           </Box>
-          <Box grey>
+          <Box bg="lightGrey">
             <RoundedCorner />
           </Box>
           {status === 'Pending' || status === 'Idle' ? (

@@ -219,10 +219,10 @@ class BibleVerseDetailCard extends React.Component {
             }}
           />
         </Box>
-        <Box grey>
+        <Box bg="lightGrey">
           <RoundedCorner />
         </Box>
-        <Box grey>
+        <Box bg="lightGrey">
           {isCarouselLoading && <Loading />}
           {!isCarouselLoading && (
             <Carousel
