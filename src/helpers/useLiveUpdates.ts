@@ -25,6 +25,9 @@ const useLiveUpdates = () => {
     isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
 
   const isLoading = useSelector((state: RootState) => state.user.isLoading)
+  const hasStudies = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.studies).length > 0
+  )
 
   useEffect(() => {
     let unsuscribeUsers: (() => void) | undefined
@@ -62,7 +65,7 @@ const useLiveUpdates = () => {
             : 'Server'
           if (source === 'Local' || !querySnapshot) return
 
-          if (isNewlyLogged) {
+          if (isNewlyLogged || !hasStudies) {
             const studies = {} as { [key: string]: Study }
             querySnapshot.forEach(doc => {
               const study = doc.data() as Study

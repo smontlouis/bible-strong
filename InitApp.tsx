@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Updates from 'expo-updates'
 import React, { memo, useEffect, useMemo } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
@@ -14,18 +15,19 @@ import {
 import { MenuProvider } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ErrorBoundary from '~common/ErrorBoundary'
 
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
+import LiveUpdates from '~common/LiveUpdates'
 import SnackBar from '~common/SnackBar'
 import { CurrentTheme } from '~common/types'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { DBStateProvider } from '~helpers/databaseState'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import useInitFireAuth from '~helpers/useInitFireAuth'
-import useLiveUpdates from '~helpers/useLiveUpdates'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -34,8 +36,6 @@ import {
   getVersionUpdate,
 } from '~redux/modules/user'
 import getTheme, { baseTheme, Theme } from '~themes/index'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 interface Props {
   persistor: Persistor
@@ -117,7 +117,6 @@ const queryClient = new QueryClient()
 
 const InitApp = ({ persistor }: Props) => {
   useInitFireAuth()
-  useLiveUpdates()
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
@@ -182,6 +181,7 @@ const InitApp = ({ persistor }: Props) => {
                 <DBStateProvider>
                   <ErrorBoundary>
                     <AppSwitcherProvider>
+                      <LiveUpdates />
                       <AppNavigator
                         onNavigationStateChange={onNavigationStateChange}
                       />
