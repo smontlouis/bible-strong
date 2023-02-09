@@ -8,7 +8,7 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "serve-db": "firebase emulators:start --only firestore  --import=../mydirectory/test"
+    "serve-db": "firebase emulators:start --only firestore  --import=../firestore/production_export"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -17,9 +17,11 @@
     "@types/puppeteer": "^3.0.0",
     "cors": "^2.8.5",
     "firebase-admin": "^8.10.0",
-    "firebase-functions": "^3.6.0",
+    "firebase-functions": "^3.20.0",
     "node-fetch": "^2.6.0",
-    "puppeteer": "2.1.1"
+    "puppeteer": "2.1.1",
+    "puppeteer-extra": "^3.3.4",
+    "puppeteer-extra-plugin-stealth": "^2.11.1"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.0",

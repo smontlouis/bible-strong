@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions'
 const admin = require('firebase-admin')
 
+// Subscription type: 'basic' | 'premium' | 'premium_plus' | 'investor'
+
 type EventType =
   | 'purchase'
   | 'refund'
@@ -42,6 +44,23 @@ interface Event {
   }
 }
 
+const getSubscriptionBySku = (sku: string) => {
+  switch (sku) {
+    case 'com.smontlouis.biblestrong.onemonth.min': {
+      return 'basic'
+    }
+    case 'com.smontlouis.biblestrong.onemonth': {
+      return 'premium'
+    }
+    case 'com.smontlouis.biblestrong.onemonth.max': {
+      return 'premium_plus'
+    }
+    default: {
+      return 'basic'
+    }
+  }
+}
+
 export const iaphub = functions.https.onRequest(async (req, res) => {
   try {
     if (req.method === 'POST') {
@@ -61,7 +80,8 @@ export const iaphub = functions.https.onRequest(async (req, res) => {
             res.status(400).send('User does not exist.')
           }
 
-          await user.update({ subscription: 'premium' })
+          const subscription = getSubscriptionBySku(event.data.productSku)
+          await user.update({ subscription })
           break
         }
         case 'subscription_expire': {
