@@ -9,25 +9,11 @@ import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { subSkus, useInitIAP } from '~helpers/useInAppPurchases'
+import { useInitIAP } from '~helpers/useInAppPurchases'
 import useLogin from '~helpers/useLogin'
 import { useIsPremium } from '~helpers/usePremium'
 import ReachGoal from './ReachGoal'
 import SubscriptionGroup from './SubscriptionGroup'
-import { subVariant } from './SubscriptionPlan'
-
-export const [oneMonthSkuMin, oneMonthSku, oneMonthSkuMax] = subSkus
-export const mappingSku = {
-  [oneMonthSkuMin]: {
-    variant: 'normal' as subVariant,
-  },
-  [oneMonthSku]: {
-    variant: 'primary' as subVariant,
-  },
-  [oneMonthSkuMax]: {
-    variant: 'normal' as subVariant,
-  },
-}
 
 const PremiumScreen = () => {
   const hasPremium = useIsPremium()

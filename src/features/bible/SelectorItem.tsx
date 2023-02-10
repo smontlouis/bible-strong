@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
-import React from 'react'
-import { pure } from 'recompose'
+import React, { memo } from 'react'
 
 import { wp } from '~helpers/utils'
 
@@ -23,4 +22,4 @@ const SelectorItem = ({ item, isSelected, onChange }) => (
   </TouchableOpacity>
 )
 
-export default pure(SelectorItem)
+export default memo(SelectorItem)

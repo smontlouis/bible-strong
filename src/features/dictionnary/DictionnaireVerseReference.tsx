@@ -1,11 +1,8 @@
-// @flow
-import React from 'react'
-import { compose } from 'recompose'
-import { withNavigation } from 'react-navigation'
 import styled from '@emotion/native'
+import React from 'react'
 
-import { CarouselConsumer } from '~helpers/CarouselContext'
 import Paragraph from '~common/ui/Paragraph'
+import { CarouselConsumer } from '~helpers/CarouselContext'
 
 const StyledView = styled.TouchableOpacity(({ isSelected, theme }) => ({
   backgroundColor: isSelected
@@ -43,4 +40,4 @@ const DictionnaireRef = ({ word }) => {
   )
 }
 
-export default compose(withNavigation)(DictionnaireRef)
+export default DictionnaireRef

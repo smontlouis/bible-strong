@@ -26,15 +26,7 @@ SplashScreen.preventAutoHideAsync()
   .catch(console.warn) // it's good to explicitly catch and inspect any error
 
 setAutoFreeze(false)
-LogBox.ignoreLogs([
-  'Require cycle',
-  'LottieAnimation',
-  'LottieAnimationView',
-  'Setting a timer',
-  'expoConstants',
-  'EventEmitter.removeListener',
-  'useNativeDriver',
-])
+LogBox.ignoreLogs(['Require cycle', 'Setting a timer'])
 
 if (!__DEV__) {
   Sentry.init({

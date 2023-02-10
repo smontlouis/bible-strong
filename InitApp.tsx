@@ -2,18 +2,10 @@ import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as Updates from 'expo-updates'
 import React, { memo, useEffect, useMemo } from 'react'
-import { TFunction, useTranslation } from 'react-i18next'
-import {
-  ActivityIndicator,
-  AppState,
-  AppStateStatus,
-  StatusBar,
-  View,
-} from 'react-native'
+import { ActivityIndicator, StatusBar, View } from 'react-native'
 import { MenuProvider } from 'react-native-popup-menu'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import ErrorBoundary from '~common/ErrorBoundary'
 
@@ -21,30 +13,17 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
-import LiveUpdates from '~common/LiveUpdates'
-import SnackBar from '~common/SnackBar'
+import InitHooks from '~common/InitHooks'
 import { CurrentTheme } from '~common/types'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { DBStateProvider } from '~helpers/databaseState'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import useInitFireAuth from '~helpers/useInitFireAuth'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
-import {
-  getChangelog,
-  getDatabaseUpdate,
-  getVersionUpdate,
-} from '~redux/modules/user'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 
 interface Props {
   persistor: Persistor
-}
-
-const handleAppStateChange = (nextAppState: AppStateStatus) => {
-  if (nextAppState.match(/inactive|background/)) {
-    console.log('App mode - background!')
-  }
 }
 
 const getActiveRouteName = (
@@ -100,39 +79,11 @@ const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
   else StatusBar.setBarStyle('dark-content')
 }
 
-const updateApp = async (t: TFunction<'translation'>) => {
-  if (__DEV__) return
-
-  const update = await Updates.checkForUpdateAsync()
-
-  if (update.isAvailable) {
-    SnackBar.show(t('app.updateAvailable'))
-    await Updates.fetchUpdateAsync()
-    SnackBar.show(t('app.updateReady'))
-    // await Updates.reloadAsync()
-  }
-}
-
 const queryClient = new QueryClient()
 
 const InitApp = ({ persistor }: Props) => {
-  useInitFireAuth()
-  const { t } = useTranslation()
-  const dispatch = useDispatch()
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
-
-  useEffect(() => {
-    dispatch(getChangelog())
-    dispatch(getVersionUpdate())
-    dispatch(getDatabaseUpdate())
-    updateApp(t)
-    AppState.addEventListener('change', handleAppStateChange)
-
-    return () => {
-      AppState.removeEventListener('change', handleAppStateChange)
-    }
-  }, [dispatch, t])
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
@@ -181,7 +132,7 @@ const InitApp = ({ persistor }: Props) => {
                 <DBStateProvider>
                   <ErrorBoundary>
                     <AppSwitcherProvider>
-                      <LiveUpdates />
+                      <InitHooks />
                       <AppNavigator
                         onNavigationStateChange={onNavigationStateChange}
                       />

@@ -1,17 +1,16 @@
-import React from 'react'
-import * as Icon from '@expo/vector-icons'
-import { pure } from 'recompose'
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
+import React, { memo } from 'react'
 
-import Box from '~common/ui/Box'
-import Link from '~common/Link'
-import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
-import MenuOption from '~common/ui/MenuOption'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
+import Header from '~common/Header'
+import Link from '~common/Link'
+import PopOverMenu from '~common/PopOverMenu'
+import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
+import Text from '~common/ui/Text'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 const HeaderBox = styled(Box)({
   alignItems: 'center',
@@ -90,4 +89,4 @@ const EditHeader = ({
   )
 }
 
-export default pure(EditHeader)
+export default memo(EditHeader)

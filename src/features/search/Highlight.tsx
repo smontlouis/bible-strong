@@ -1,13 +1,12 @@
-import React from 'react'
 import styled from '@emotion/native'
-import { withNavigation } from 'react-navigation'
-import compose from 'recompose/compose'
+import React from 'react'
 import { connectHighlight } from 'react-instantsearch-native'
 
+import { useNavigation } from 'react-navigation-hooks'
+import books from '~assets/bible_versions/books-desc'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
-import books from '~assets/bible_versions/books-desc'
 
 const Container = styled.TouchableOpacity(({ theme }) => ({
   margin: 20,
@@ -21,7 +20,8 @@ const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
   backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent',
 }))
 
-const Highlight = ({ attribute, hit, highlight, navigation }) => {
+const Highlight = ({ attribute, hit, highlight }) => {
+  const navigation = useNavigation()
   const highlights = highlight({
     highlightProperty: '_highlightResult',
     attribute,
@@ -58,4 +58,4 @@ const Highlight = ({ attribute, hit, highlight, navigation }) => {
   )
 }
 
-export default compose(connectHighlight, withNavigation)(Highlight)
+export default connectHighlight(Highlight)

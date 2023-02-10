@@ -143,9 +143,12 @@ export default store => next => async action => {
       const { studies } = diffState.user.bible
 
       if (studies) {
-        Object.entries(studies).forEach(([studyId]) => {
-          const studyDoc = firebaseDb.collection('studies').doc(studyId)
-          studyDoc.delete()
+        Object.entries(studies).forEach(async ([studyId]) => {
+          const studyDocRef = firebaseDb.collection('studies').doc(studyId)
+          const studyDoc = await studyDocRef.get()
+          if (!studyDoc.exists) return
+
+          studyDocRef.delete()
         })
       }
       break

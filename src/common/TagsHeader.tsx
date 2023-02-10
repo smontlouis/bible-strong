@@ -1,12 +1,11 @@
-import React from 'react'
-import { pure } from 'recompose'
 import styled from '@emotion/native'
+import React, { memo } from 'react'
 
-import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
-import Back from '~common/Back'
-import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
+import Back from '~common/Back'
+import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 
 const TouchableBox = styled.TouchableOpacity({
   flex: 1,
@@ -53,4 +52,4 @@ const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
   )
 }
 
-export default pure(Header)
+export default memo(Header)

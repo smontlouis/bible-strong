@@ -35,10 +35,10 @@ const useDeviceOrientation = () => {
       })
     }
 
-    Dimensions.addEventListener('change', onChange)
+    const event = Dimensions.addEventListener('change', onChange)
 
     return () => {
-      Dimensions.removeEventListener('change', onChange)
+      event.remove()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orientation.portrait, orientation.landscape])

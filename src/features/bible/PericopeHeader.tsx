@@ -1,14 +1,12 @@
-import React from 'react'
-import { Platform } from 'react-native'
-import * as Icon from '@expo/vector-icons'
-import { pure } from 'recompose'
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
+import React, { memo } from 'react'
 
+import Back from '~common/Back'
 import Link from '~common/Link'
-import { getVersions } from '~helpers/bibleVersions'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Back from '~common/Back'
+import { getVersions } from '~helpers/bibleVersions'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   height: 60,
@@ -75,4 +73,4 @@ const Header = ({ hasBackButton, isModal, title, version, setVersion }) => {
   )
 }
 
-export default pure(Header)
+export default memo(Header)

@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import React from 'react'
-import { pure } from 'recompose'
 
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { wp } from '~helpers/utils'
@@ -38,4 +37,4 @@ const BookSelectorItem = ({ book, isSelected, isNT, onChange, t }) => {
   )
 }
 
-export default pure(BookSelectorItem)
+export default BookSelectorItem

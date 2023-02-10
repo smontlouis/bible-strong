@@ -1,8 +1,5 @@
-// @flow
-import React from 'react'
-import { pure, compose } from 'recompose'
-import { withNavigation } from 'react-navigation'
 import styled from '@emotion/native'
+import React, { memo } from 'react'
 
 import { CarouselConsumer } from '~helpers/CarouselContext'
 
@@ -66,14 +63,7 @@ const ConcordanceText = styled(Paragraph)(({ isConcordance, theme }) => ({
     : {}),
 }))
 
-const BibleStrongRef = ({
-  small,
-  navigation,
-  reference,
-  word,
-  book,
-  concordanceFor,
-}) => {
+const BibleStrongRef = ({ small, reference, word, book, concordanceFor }) => {
   if (concordanceFor) {
     const isConcordance =
       `0${concordanceFor}` === reference || `${concordanceFor}` === reference
@@ -124,4 +114,4 @@ const BibleStrongRef = ({
   )
 }
 
-export default compose(withNavigation, pure)(BibleStrongRef)
+export default memo(BibleStrongRef)

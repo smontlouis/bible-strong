@@ -15,8 +15,8 @@ import RNRestart from 'react-native-restart'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
-import { selectedResourcesAtom } from './OnBoarding'
 import { VStack } from '~common/ui/Stack'
+import { selectedResourcesAtom } from './atom'
 
 export interface DownloadResourcesProps {
   setFirstTime: React.Dispatch<React.SetStateAction<boolean>>

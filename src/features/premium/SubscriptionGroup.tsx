@@ -10,9 +10,9 @@ import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import { buyProduct, SubSku, useIapUser } from '~helpers/useInAppPurchases'
 import useLogin from '~helpers/useLogin'
-import { mappingSku } from './PremiumScreen'
 import SubscriptionDetails from './SubscriptionDetails'
 import SubscriptionPlan from './SubscriptionPlan'
+import { mappingSku } from './utils'
 
 const SubscriptionGroup = () => {
   const [selectedSub, setSelectedSub] = React.useState<SubSku>(

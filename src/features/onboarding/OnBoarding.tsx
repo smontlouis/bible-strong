@@ -4,22 +4,11 @@ import Modal from 'react-native-modal'
 import { deleteAllDatabases } from '~helpers/database'
 import useLanguage from '~helpers/useLanguage'
 
-import { atom } from 'jotai/vanilla'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 import DownloadResources from './DownloadResources'
 import OnBoardingSlides from './OnBoardingSlides'
 import SelectResources from './SelectResources'
-
-export type ResourceToDownload = {
-  id: string
-  name: string
-  path: string
-  uri: string
-  fileSize: number
-}
-
-export const selectedResourcesAtom = atom<ResourceToDownload[]>([])
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
   backgroundColor: theme.colors.reverse,

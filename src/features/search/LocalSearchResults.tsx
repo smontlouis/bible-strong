@@ -2,28 +2,25 @@ import React from 'react'
 import { withNavigation } from 'react-navigation'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 import compose from 'recompose/compose'
-import { withTheme } from '@emotion/react'
+import { useTheme, withTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
 import LocalSearchItem from './LocalSearchItem'
-import { bibleLSG } from './LocalSearchScreen'
 import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
 import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
 import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import { useTranslation } from 'react-i18next'
 import VerseResultWidget from '~features/bible/VerseResultWidget'
+import bibleLSG from './bibleLSG'
+import { useNavigation } from 'react-navigation-hooks'
 
-const LocalSearchResults = ({
-  results = [],
-  searchValue,
-  navigation,
-  theme,
-}) => {
+const LocalSearchResults = ({ results = [], searchValue }) => {
   const { t } = useTranslation()
-
+  const theme = useTheme()
+  const navigation = useNavigation()
   const nbResults = results.length
 
   return (
@@ -71,7 +68,7 @@ const LocalSearchResults = ({
           .filter(x => x)
         positions.sort((a, b) => a[0] - b[0])
 
-        const text = bibleLSG[book][chapter][verse]
+        const text = bibleLSG.get()[book][chapter][verse]
 
         if (!text) {
           return null
@@ -98,4 +95,4 @@ const LocalSearchResults = ({
   )
 }
 
-export default compose(withNavigation, withTheme)(LocalSearchResults)
+export default LocalSearchResults

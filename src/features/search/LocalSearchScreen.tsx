@@ -8,18 +8,15 @@ import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
 import loadBible from '~helpers/loadBible'
 import useDebounce from '~helpers/useDebounce'
 import useLanguage from '~helpers/useLanguage'
-import i18n from '~i18n'
+import bibleLSG from './bibleLSG'
 import loadIndexCache from './loadIndexCache'
 import LocalSearchResults from './LocalSearchResults'
 import waitForIndex from './waitForIndex'
 
 const timeout = ms => new Promise(r => setTimeout(r, ms))
-
-export let bibleLSG
 
 type Props = {
   idxFile: FileSystem.FileInfo
@@ -79,9 +76,8 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
 
   useEffect(() => {
     const setIndexCache = async () => {
-      await timeout(500)
       index.current = await loadIndexCache(idxFile)
-      bibleLSG = await loadBible(isFR ? 'LSG' : 'KJV')
+      bibleLSG.set(await loadBible(isFR ? 'LSG' : 'KJV'))
       setLoading(false)
     }
     setIndexCache()

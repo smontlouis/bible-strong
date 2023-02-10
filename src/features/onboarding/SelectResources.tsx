@@ -13,7 +13,7 @@ import { getDatabases } from '~helpers/databases'
 import { biblesRef, getDatabasesRef } from '~helpers/firebase'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
-import { ResourceToDownload, selectedResourcesAtom } from './OnBoarding'
+import { ResourceToDownload, selectedResourcesAtom } from './atom'
 import ResourceItem from './ResourceItem'
 
 const DownloadFiles = ({

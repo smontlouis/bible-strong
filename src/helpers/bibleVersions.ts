@@ -5,32 +5,8 @@ import { biblesRef } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
-  if (versionId === 'INT') {
-    // DO SOMETHING HERE
-    return false
-  }
-
-  if (versionId === 'LSGS' || versionId === 'KJVS') {
-    // DO SOMETHING HERE
-    return false
-  }
-
-  const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
-
-  const [errF, file] = await to(FileSystem.getInfoAsync(path))
-
-  if (!file?.exists) {
-    return false
-  }
-
-  const [errRF, remoteFile] = await to(biblesRef[versionId].getMetadata())
-
-  if (errF || errRF) {
-    console.log('Error...', errF, errRF)
-    return false
-  }
-
-  return file.size !== remoteFile?.size
+  // Find a way to update the version
+  return false
 }
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {

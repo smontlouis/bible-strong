@@ -1,10 +1,9 @@
-import React from 'react'
 import styled from '@emotion/native'
-import compose from 'recompose/compose'
+import React from 'react'
 import { connectHighlight } from 'react-instantsearch-native'
 
-import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
 import { calculateLabel } from './constants'
 
 const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
@@ -39,4 +38,4 @@ const Highlight = ({ attribute, hit, highlight }) => {
   )
 }
 
-export default compose(connectHighlight)(Highlight)
+export default connectHighlight(Highlight)

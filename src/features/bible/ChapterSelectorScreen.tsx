@@ -1,4 +1,3 @@
-// @flow
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
