@@ -9,16 +9,16 @@
     "privacy": "unlisted",
     "primaryColor": "#fff",
     "githubUrl": "https://github.com/bulby97/bible-strong",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "16.9.0",
     "orientation": "default",
     "assetBundlePatterns": [
       "assets/images/*",
       "src/assets/fonts/*",
       "src/assets/images/*",
+      "src/assets/plans/*",
+      "src/assets/bible_versions/*",
+      "src/assets/timeline/*",
       "node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf",
       "src/features/bible/bibleWebView/dist/index.html",
       "src/features/studies/studiesWebView/dist/index.html"

@@ -46,7 +46,7 @@ const ReadMeButton = styled(Button)({
 })
 
 const getPericopeChapter = (pericope, book, chapter) => {
-  if (pericope[book] && pericope[book][chapter] && pericope[book][chapter]) {
+  if (pericope && pericope[book] && pericope[book][chapter]) {
     return pericope[book][chapter]
   }
 
@@ -118,7 +118,7 @@ const BibleViewer = ({
   const isFR = useLanguage()
   const dispatch = useDispatch()
   const openInNewTab = useOpenInNewTab()
-  const pericope = useRef(getBiblePericope(isFR ? 'LSG' : 'KJV'))
+  const pericope = useRef()
   const [resourceType, onChangeResourceType] = useState<BibleResource | null>(
     null
   )
@@ -200,7 +200,7 @@ const BibleViewer = ({
   }, [])
 
   const loadVerses = async () => {
-    pericope.current = getBiblePericope(version)
+    pericope.current = await getBiblePericope(version)
     setIsLoading(true)
 
     const versesToLoad = await loadBibleChapter(book.Numero, chapter, version)

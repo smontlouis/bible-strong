@@ -1,27 +1,29 @@
+import { Portal } from '@gorhom/portal'
 import React from 'react'
 import FastImage from 'react-native-fast-image'
 import Carousel from 'react-native-snap-carousel'
-import { Portal } from '@gorhom/portal'
 import useLanguage from '~helpers/useLanguage'
 
-import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import waitForTimeline from '~common/waitForTimeline'
+import bibleMemoize from '~helpers/bibleStupidMemoize'
+import { wp } from '~helpers/utils'
 import { calculateLabel } from './constants'
 import {
-  TimelineEventDetail,
+  TimelineEvent,
   TimelineEvent as TimelineEventProps,
+  TimelineEventDetail,
 } from './types'
-import { wp } from '~helpers/utils'
 // import EventDetailsTab from './EventDetailsTab'
-import EventDetailVerse from './EventDetailVerse'
-import EventDetailsModal from './EventDetailsModal'
+import { useTranslation } from 'react-i18next'
 import { Modalize } from 'react-native-modalize'
 import Link from '~common/Link'
-import { flattenedEvents } from './events'
 import { FeatherIcon } from '~common/ui/Icon'
-import { useTranslation } from 'react-i18next'
+import { useQuery } from '~helpers/react-query-lite'
+import EventDetailsModal from './EventDetailsModal'
+import EventDetailVerse from './EventDetailVerse'
+import { getEvents } from './events'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -57,6 +59,16 @@ const Media = ({
   const { t } = useTranslation()
   const eventModalRef = React.useRef<Modalize>(null)
   const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
+
+  const { data: events } = useQuery({
+    queryKey: 'timeline',
+    queryFn: getEvents,
+  })
+
+  const flattenedEvents = events?.reduce((acc: TimelineEvent[], curr) => {
+    return [...acc, ...curr.events]
+  }, [])
+
   return (
     <Box py={20}>
       {!!scriptures?.length && (
@@ -110,7 +122,7 @@ const Media = ({
             <Link
               key={r.slug}
               onPress={() => {
-                const foundEvent = flattenedEvents.find(
+                const foundEvent = flattenedEvents?.find(
                   ev => ev.slug === r.slug
                 )
                 if (foundEvent) {

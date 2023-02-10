@@ -1,9 +1,10 @@
 import { useTheme } from '@emotion/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
 import FastImage from 'react-native-fast-image'
 import ProgressCircle from 'react-native-progress/Circle'
+import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import PlanIcon from '~common/PlanIcon'
 import Box from '~common/ui/Box'
@@ -16,10 +17,46 @@ import {
   useFireStorage,
   useUpdatePlans,
 } from '~features/plans/plan.hooks'
+import { RootState } from '~redux/modules/reducer'
 import { Theme } from '~themes'
+import { Asset } from 'expo-asset'
+import * as FileSystem from 'expo-file-system'
+import useLanguage from '~helpers/useLanguage'
+import { Plan } from '~common/types'
+import { addPlan } from '~redux/modules/plan'
 
 const LinkBox = Box.withComponent(Link)
 
+const useGetFirstPlans = () => {
+  const hasPlans = useSelector((state: RootState) => state.plan.myPlans.length)
+  const isFR = useLanguage()
+  const dispatch = useDispatch()
+
+  const getBibleProjectPlan = async () => {
+    const [{ localUri }] = await Asset.loadAsync(
+      isFR
+        ? require('~assets/plans/bible-project-plan.txt')
+        : require('~assets/plans/bible-project-plan-en.txt')
+    )
+    if (!localUri) return
+    try {
+      const plan: Plan = JSON.parse(
+        await FileSystem.readAsStringAsync(localUri)
+      )
+      dispatch(addPlan(plan))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    if (!hasPlans) {
+      ;(async () => {
+        await getBibleProjectPlan()
+      })()
+    }
+  }, [])
+}
 const PlanHome = () => {
   const { t } = useTranslation()
   const plans = useComputedPlanItems()
@@ -29,6 +66,7 @@ const PlanHome = () => {
   const theme: Theme = useTheme()
 
   useUpdatePlans()
+  useGetFirstPlans()
 
   return (
     <Box bg="lightGrey" px={20} pt={20}>

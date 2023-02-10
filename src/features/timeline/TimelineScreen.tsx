@@ -1,7 +1,6 @@
 import React, { useRef, useCallback } from 'react'
 import { View } from 'react-native'
 
-import { events } from './events'
 import TimelineSection from './TimelineSection'
 import {
   TimelineSection as TimelineSectionProps,
@@ -9,6 +8,8 @@ import {
 } from './types'
 
 import { NavigationStackProp } from 'react-navigation-stack'
+import { useQuery } from '~helpers/react-query-lite'
+import { getEvents } from './events'
 
 const omitEvents = ({
   events,
@@ -35,10 +36,15 @@ const Timeline = ({ navigation }: Props) => {
     setCurrent(s => s + 1)
   }, [])
 
+  const { data: events } = useQuery({
+    queryKey: 'timeline',
+    queryFn: getEvents,
+  })
+
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
       <View style={{ flex: 1, position: 'relative' }}>
-        {events.map((ev, i) => {
+        {events?.map((ev, i) => {
           const prevEvent = events[i - 1] && omitEvents(events[i - 1])
           const nextEvent = events[i + 1] && omitEvents(events[i + 1])
           return (

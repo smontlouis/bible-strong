@@ -328,7 +328,7 @@ export const getChaptersForPlan = async (
   const bookName = i18n.t(books[book - 1].Nom)
   const chaptersRange = chapterStringToArray(chapters)
   const bible = await loadBible(version)
-  const pericope = getBiblePericope(version)
+  const pericope = await getBiblePericope(version)
 
   const content: ChapterForPlanContent[] = chaptersRange.map(
     (cRange: string[]) => {
@@ -401,7 +401,7 @@ export const getVersesForPlan = async (
   ).map(c => c.split('-').map(Number))
 
   const bible = await loadBible(version)
-  const pericope = getBiblePericope(version)
+  const pericope = await getBiblePericope(version)
 
   const content: VerseContent[] = versesRange.map((vRange: number[]) => {
     const [, , verse] = vRange

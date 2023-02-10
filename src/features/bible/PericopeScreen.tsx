@@ -19,6 +19,7 @@ import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 import { useAtom } from 'jotai/react'
 import { defaultBibleAtom } from '../../state/tabs'
+import { useQuery } from '~helpers/react-query-lite'
 
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
@@ -76,8 +77,11 @@ const PericopeScreen = ({ navigation }) => {
   const [book, setBook] = useState(initialBook)
   const [versionNeedsDownload, setVersionNeedsDownload] = useState(false)
 
-  const pericope = getBiblePericope(version)
-  const pericopeBook = clearEmpties(pericope[book.Numero])
+  const { data: pericope } = useQuery({
+    queryKey: ['bible-pericope', version],
+    queryFn: () => getBiblePericope(version),
+  })
+  const pericopeBook = pericope ? clearEmpties(pericope[book.Numero]) : []
 
   useEffect(() => {
     if (version) {

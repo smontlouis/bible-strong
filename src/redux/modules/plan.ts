@@ -8,12 +8,12 @@ import {
   Status,
 } from '~common/types'
 import { firebaseDb, increment } from '~helpers/firebase'
-import { getLangIsFr } from '~i18n'
+// import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
 import { FireStoreUserData, RECEIVE_LIVE_UPDATES, USER_LOGOUT } from './user'
 
-const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
-const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
+// const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
+// const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
 
 type ImageModel = { [key: string]: string }
 
@@ -27,7 +27,7 @@ interface PlanModel {
 
 const initialState: PlanModel = {
   onlineStatus: 'Idle',
-  myPlans: [getLangIsFr() ? bibleProjectPlan : bibleProjectPlanEn],
+  myPlans: [],
   onlinePlans: [],
   ongoingPlans: [],
   images: {},
@@ -137,6 +137,9 @@ const planSlice = createSlice({
       if (planToDeleteIndex !== -1) {
         state.ongoingPlans.splice(planToDeleteIndex, 1)
       }
+    },
+    addPlan(state, action: PayloadAction<Plan>) {
+      state.myPlans.push(action.payload)
     },
     markAsRead(
       state,
@@ -282,5 +285,6 @@ export const {
   resetPlan,
   markAsRead,
   removePlan,
+  addPlan,
 } = planSlice.actions
 export default planSlice.reducer

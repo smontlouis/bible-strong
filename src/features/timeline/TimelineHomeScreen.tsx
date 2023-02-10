@@ -1,7 +1,6 @@
 import React from 'react'
 
 import TimelineItem from './TimelineItem'
-import { events } from './events'
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import ScrollView from '~common/ui/ScrollView'
@@ -10,10 +9,17 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { Modalize } from 'react-native-modalize'
 import TimelineHomeDetailModal from './TimelineHomeDetailModal'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '~helpers/react-query-lite'
+import { getEvents } from './events'
 
 const TimelineHomeScreen = () => {
   const modalRef = React.useRef<Modalize>(null)
   const { t } = useTranslation()
+
+  const { data: events } = useQuery({
+    queryKey: 'timeline',
+    queryFn: getEvents,
+  })
 
   return (
     <Container>
@@ -27,7 +33,7 @@ const TimelineHomeScreen = () => {
         }
       />
       <ScrollView backgroundColor="lightGrey">
-        {events.map((event, i) => (
+        {events?.map((event, i) => (
           <TimelineItem goTo={i} key={event.id} {...event} />
         ))}
       </ScrollView>

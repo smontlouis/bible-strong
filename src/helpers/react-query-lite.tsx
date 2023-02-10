@@ -85,6 +85,8 @@ export function useQuery<TData = unknown>({
 }: QueryOptions<TData>) {
   const client = React.useContext(Context)
   const prevEnabled = usePrevious(enabled)
+  const queryHash = JSON.stringify(queryKey)
+  const prevQueryHash = usePrevious(queryHash)
 
   if (!client) {
     throw new Error('No query client found')
@@ -96,7 +98,8 @@ export function useQuery<TData = unknown>({
 
   if (
     (!observerRef.current && enabled) ||
-    (prevEnabled !== enabled && enabled)
+    (prevEnabled !== enabled && enabled) ||
+    (prevQueryHash !== queryHash && enabled)
   ) {
     observerRef.current = createQueryObserver(client, {
       queryKey,
@@ -116,7 +119,7 @@ export function useQuery<TData = unknown>({
     return () => {
       unsubscribe()
     }
-  }, [enabled])
+  }, [enabled, queryHash])
 
   return (
     observerRef.current?.getResult() || {
