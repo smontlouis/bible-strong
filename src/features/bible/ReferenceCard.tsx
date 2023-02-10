@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
 
 import { useTheme } from '@emotion/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from '~helpers/react-query-lite'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
 import { VerseRefContent } from '~common/types'

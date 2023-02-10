@@ -1,7 +1,6 @@
 import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { memo, useEffect, useMemo } from 'react'
 import { ActivityIndicator, StatusBar, View } from 'react-native'
 import { MenuProvider } from 'react-native-popup-menu'
@@ -21,6 +20,7 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import getTheme, { baseTheme, Theme } from '~themes/index'
+import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
 
 interface Props {
   persistor: Persistor

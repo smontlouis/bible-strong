@@ -23,7 +23,7 @@ import useLanguage from '~helpers/useLanguage'
 import { hp, viewportWidth, wp } from '~helpers/utils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
-import { useQuery, QueryStatus } from '@tanstack/react-query'
+import { useQuery, QueryStatus } from '~helpers/react-query-lite'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)

@@ -1,13 +1,12 @@
 import { useTheme } from '@emotion/react'
-import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForNaveDB from '~common/waitForNaveDB'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
-import { timeout } from '~helpers/timeout'
+import { useQuery } from '~helpers/react-query-lite'
 import NaveForVerse from './NaveModalForVerse'
 
 type Props = {
