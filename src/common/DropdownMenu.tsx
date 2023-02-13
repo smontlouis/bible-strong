@@ -19,22 +19,34 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const DropdownMenu = ({ currentValue, setValue, choices, title }) => {
-  const { label } = choices.find(l => l.value === currentValue)
+interface DropdownMenuProps {
+  currentValue?: string
+  setValue: (value: string) => void
+  choices: { value: string; label: string; count?: number }[]
+  title: string
+}
+
+const DropdownMenu = ({
+  currentValue,
+  setValue,
+  choices,
+  title,
+}: DropdownMenuProps) => {
+  const choice = choices.find(l => l.value === currentValue)
   const { ref, open, close } = useModalize()
 
-  const onItemPress = value => {
+  const onItemPress = (value: string) => {
     setValue(value)
     close()
   }
   return (
     <>
-      <TouchableBox onPress={open} padding={10}>
+      <TouchableBox onPress={() => open()} padding={10}>
         <Text color="grey" fontSize={12}>
           {title}
         </Text>
         <Box row pr={15} alignItems="center">
-          <StyledText>{label}</StyledText>
+          <StyledText>{choice?.label}</StyledText>
           <StyledIcon name="chevron-down" size={15} />
         </Box>
       </TouchableBox>

@@ -30,7 +30,7 @@ import {
   useBibleTabActions,
   VersionCode,
 } from '../../state/tabs'
-import BibleFooter from './BibleFooter'
+import BibleFooter from './footer/BibleFooter'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleWebView from './BibleWebView'
@@ -105,10 +105,6 @@ const BibleViewer = ({
   const [comments, setComments] = useState(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
-  const [audioChapterUrl, setAudioChapterUrl] = useState('')
-  const [audioMode, setAudioMode] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-
   const strongModalDisclosure = useBottomSheetDisclosure<{
     reference: string
     book: number
@@ -249,9 +245,6 @@ const BibleViewer = ({
     setParallelVerses(parallelVersesToLoad)
     setSecondaryVerses(secondaryVersesToLoad)
     setError(false)
-    setAudioChapterUrl(
-      `${audioBaseUrl}${zeroFill(book.Numero, 2)}_${zeroFill(chapter, 2)}.mp3`
-    )
 
     addHistory({
       book: book.Numero,
@@ -396,12 +389,7 @@ const BibleViewer = ({
           chapter={chapter}
           goToPrevChapter={actions.goToPrevChapter}
           goToNextChapter={actions.goToNextChapter}
-          audioUrl={audioChapterUrl}
           version={version}
-          audioMode={audioMode}
-          isPlaying={isPlaying}
-          setAudioMode={setAudioMode}
-          setIsPlaying={setIsPlaying}
         />
       )}
       {isReadOnly && !error && (

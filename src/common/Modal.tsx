@@ -33,7 +33,7 @@ interface ModalBodyProps extends ModalizeProps {
 
 interface ItemProps {
   children: string
-  tag?: string
+  tag?: string | number
   onPress: () => void
 }
 

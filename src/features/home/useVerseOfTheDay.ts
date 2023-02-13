@@ -1,26 +1,23 @@
 import * as Sentry from '@sentry/react-native'
-import { useState, useEffect } from 'react'
-import { shallowEqual, useSelector } from 'react-redux'
-import PushNotification from 'react-native-push-notification'
-import compose from 'recompose/compose'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
-import Snackbar from '~common/SnackBar'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
+import compose from 'recompose/compose'
+import Snackbar from '~common/SnackBar'
 
-import useLogin from '~helpers/useLogin'
-import extractFirstName from '~helpers/extractFirstName'
+import { useAtomValue } from 'jotai/react'
+import { selectAtom } from 'jotai/vanilla/utils'
 import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import getVersesContent from '~helpers/getVersesContent'
-import { getDayOfTheYear } from './getDayOfTheYear'
+import useLogin from '~helpers/useLogin'
 import { removeBreakLines } from '~helpers/utils'
-import i18n from '~i18n'
-import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
-import { useAtom, useAtomValue } from 'jotai/react'
-import { selectAtom } from 'jotai/vanilla/utils'
 import { RootState } from '~redux/modules/reducer'
+import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
+import { getDayOfTheYear } from './getDayOfTheYear'
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -83,7 +80,7 @@ export const useVerseOfTheDay = (addDay: number) => {
 
     const scheduleNotification = async () => {
       try {
-        await PushNotification.cancelAllLocalNotifications()
+        // await PushNotification.cancelAllLocalNotifications()
 
         const [vodHours, vodMinutes] = verseOfTheDayTime
           .split(':')
@@ -105,16 +102,16 @@ export const useVerseOfTheDay = (addDay: number) => {
           addDays(addDay)
         )(nowDate)
 
-        await PushNotification.localNotificationSchedule({
-          channelId: 'vod-notifications',
-          title: `${i18n.t('Bonjour')} ${extractFirstName(displayName)}`,
-          message: !addDay
-            ? removeBreakLines(verseOfTheDayContent)
-            : removeBreakLines(verseOfTheDayPlus1Content),
-          category: 'NOTIFICATIONS',
-          allowWhileIdle: true,
-          date,
-        })
+        // await PushNotification.localNotificationSchedule({
+        //   channelId: 'vod-notifications',
+        //   title: `${i18n.t('Bonjour')} ${extractFirstName(displayName)}`,
+        //   message: !addDay
+        //     ? removeBreakLines(verseOfTheDayContent)
+        //     : removeBreakLines(verseOfTheDayPlus1Content),
+        //   category: 'NOTIFICATIONS',
+        //   allowWhileIdle: true,
+        //   date,
+        // })
 
         console.log(
           `Notification set at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
@@ -131,8 +128,9 @@ export const useVerseOfTheDay = (addDay: number) => {
       }
     }
     const initNotifications = async () => {
-      const hasPermissions = await new Promise(resolve => {
-        PushNotification.checkPermissions(({ alert }) => resolve(alert))
+      const hasPermissions = await new Promise((resolve, reject) => {
+        // PushNotification.checkPermissions(({ alert }) => resolve(alert))
+        reject()
       })
 
       console.log('has permissions', hasPermissions)

@@ -3,6 +3,8 @@ import * as FileSystem from 'expo-file-system'
 
 import { biblesRef } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
+import { audioDefault, audioV2 } from './topBibleAudio'
+import { zeroFill } from './zeroFill'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
@@ -74,6 +76,23 @@ export interface Version {
   c?: string
   type?: 'en' | 'fr' | 'other'
   hasAudio?: boolean
+  getAudioUrl?: (bookNum: number, chapterNum: number) => string
+}
+
+const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
+  const audioBaseUrl = (() => {
+    if (audioV2.includes(bookNum.toString())) {
+      return 'https://s.topchretien.com/media/topbible/bible_v2/'
+    }
+
+    if (audioDefault.includes(bookNum.toString())) {
+      return 'https://s.topchretien.com/media/topbible/bible/'
+    }
+
+    return 'https://s.topchretien.com/media/topbible/bible_say/'
+  })()
+
+  return `${audioBaseUrl}${zeroFill(bookNum, 2)}_${zeroFill(chapterNum, 2)}.mp3`
 }
 
 export const versions = {
@@ -83,6 +102,7 @@ export const versions = {
     c: '1910 - Libre de droit',
     type: 'fr',
     hasAudio: true,
+    getAudioUrl: getLsgAudioUrl,
   },
   LSGS: {
     id: 'LSGS',
@@ -90,6 +110,7 @@ export const versions = {
     c: '1910 - Libre de droit',
     type: 'fr',
     hasAudio: true,
+    getAudioUrl: getLsgAudioUrl,
   },
   NBS: {
     id: 'NBS',

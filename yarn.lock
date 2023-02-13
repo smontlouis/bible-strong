@@ -3282,13 +3282,6 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-9.3.0.tgz#9792c23341eab5c629566baee016146f4f3f6086"
   integrity sha512-NNdMeIXXqmPCbXrWxVqRzZ1gEZ6L1ykotWnCZLVjQBUgjyGWdL5LiDM/bcIa5DLzqZY7Km08rMgB7BoHUuEmnQ==
 
-"@react-native-community/push-notification-ios@^1.10.1":
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.10.1.tgz#d52a6d69ac1112df0f79e1d17978077629b76784"
-  integrity sha512-k6bZWUKLif4GjenyTD3aQLwA2VT3bNmt22INO/34lexnpmqkPDZF7nreqbckTHG0Zso9wDTe4N/AZJUC/d8iRg==
-  dependencies:
-    invariant "^2.2.4"
-
 "@react-native-firebase/analytics@^12.9.0":
   version "12.9.3"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/analytics/-/analytics-12.9.3.tgz#1bb69f56cdebf8d03f73958867a144542005a281"
@@ -4113,11 +4106,6 @@
   dependencies:
     "@types/react" "*"
     "@types/react-native" "*"
-
-"@types/react-native-push-notification@^7.3.2":
-  version "7.3.3"
-  resolved "https://registry.yarnpkg.com/@types/react-native-push-notification/-/react-native-push-notification-7.3.3.tgz#76d8cd73e37d5348ba714e8632e98615677961d2"
-  integrity sha512-6LmfaZ0cRuk4oEdBZEJVRZ8DoPHz95fqD7wW3jBbcJFy3U23eSE+MeSQall4BCZFBZDGT1KCEGFCwflTxFEZMw==
 
 "@types/react-native-snap-carousel@^3.8.1":
   version "3.8.5"
@@ -8419,6 +8407,11 @@ expo-sharing@~10.3.0:
   version "10.3.0"
   resolved "https://registry.yarnpkg.com/expo-sharing/-/expo-sharing-10.3.0.tgz#4e8e2a50d1c22ea510699664bb6ce827cb06738e"
   integrity sha512-j3kn43WCOykj7mlGTb5Q3Z56DG8raFdTk0A+rauA7lsmJ5Vakb2qGyTFZ7uwqwrML10EQIPAzNEcEYgpIzHKIw==
+
+expo-speech@~10.3.0:
+  version "10.3.0"
+  resolved "https://registry.yarnpkg.com/expo-speech/-/expo-speech-10.3.0.tgz#2e1de60253ef1c261883c9885fa16218d24b4b36"
+  integrity sha512-/DCSga6fmDAzMoTwGiAkexCFjCjnxfQQU2gNY+NEI74n8b8pZiBckgsEhA1WzGuPYWy56u2xoRvbzmLGWSraMw==
 
 expo-splash-screen@~0.17.5:
   version "0.17.5"
@@ -14163,11 +14156,6 @@ react-native-modalize@2.0.12:
   resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-2.0.12.tgz#0e48b2e7d496deca3d241414f233b29df34f4b30"
   integrity sha512-IKPBM4RXLNLaH1WFX8/yPHlbRei15TNcMMftQzi+juG0ibbsAPbEXkbt+KKs7O1dvmOF8sZwRH3SbWjFlcxtAw==
 
-react-native-music-control@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-music-control/-/react-native-music-control-1.4.1.tgz#a1212c082f39783ff10befec1ef53cade585933e"
-  integrity sha512-IBiP2Yhb9iUPutXFFfNWKnf+CG/up9oPlMqY6qq1MDlhJ6giMCGQ+qO/Qd5hoDE0ZfxyqShs3CZaSch+oV/2zg==
-
 react-native-popup-menu@^0.16.0:
   version "0.16.1"
   resolved "https://registry.yarnpkg.com/react-native-popup-menu/-/react-native-popup-menu-0.16.1.tgz#b1bb56be5c0838bbc2f532af7b1f554b7ceef566"
@@ -14179,11 +14167,6 @@ react-native-progress@^5.0.0:
   integrity sha512-KjnGIt3r9i5Kn2biOD9fXLJocf0bwxPRxOyAgXEnZTJQU2O+HyzgGFRCbM5h3izm9kKIkSc1txh8aGmMafCD9A==
   dependencies:
     prop-types "^15.7.2"
-
-react-native-push-notification@^8.1.1:
-  version "8.1.1"
-  resolved "https://registry.yarnpkg.com/react-native-push-notification/-/react-native-push-notification-8.1.1.tgz#a41d20c70ea5a7709417e96261b225461f8dc73a"
-  integrity sha512-XpBtG/w+a6WXTxu6l1dNYyTiHnbgnvjoc3KxPTxYkaIABRmvuJZkFxqruyGvfCw7ELAlZEAJO+dthdTabCe1XA==
 
 react-native-reanimated@^2.13.0:
   version "2.13.0"
@@ -14290,6 +14273,11 @@ react-native-tab-view@^2.14.0, react-native-tab-view@^2.15.2:
   version "2.16.0"
   resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.16.0.tgz#cae72c7084394bd328fac5fefb86cd966df37a86"
   integrity sha512-ac2DmT7+l13wzIFqtbfXn4wwfgtPoKzWjjZyrK1t+T8sdemuUvD4zIt+UImg03fu3s3VD8Wh/fBrIdcqQyZJWg==
+
+react-native-track-player@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-track-player/-/react-native-track-player-3.2.0.tgz#c7b7a53eaf4c248af2ac876ef349feaee2ef774a"
+  integrity sha512-svv6TOgU/quFV1aajG5PskVhgFG0wHQtO+aYs6cIH0D27ckzN8WVoC3jI94m1CVaSgLMw48P911csYuD2fIcqA==
 
 react-native-version@^3.2.0:
   version "3.2.0"

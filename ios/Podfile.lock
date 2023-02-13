@@ -388,6 +388,8 @@ PODS:
     - ReactCommon/turbomodule/core
   - EXSharing (10.3.0):
     - ExpoModulesCore
+  - EXSpeech (10.3.0):
+    - ExpoModulesCore
   - EXSplashScreen (0.17.5):
     - ExpoModulesCore
     - React-Core
@@ -912,6 +914,9 @@ PODS:
     - ReactCommon/turbomodule/core
   - react-native-sqlite-storage (4.1.0):
     - React
+  - react-native-track-player (3.2.0):
+    - React-Core
+    - SwiftAudioEx (= 0.15.3)
   - react-native-view-shot (3.3.0):
     - React-Core
   - react-native-webview (11.23.1):
@@ -1113,6 +1118,7 @@ PODS:
   - Sentry/Core (7.22.0)
   - SocketRocket (0.6.0)
   - SSZipArchive (2.2.2)
+  - SwiftAudioEx (0.15.3)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -1136,6 +1142,7 @@ DEPENDENCIES:
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
+  - EXSpeech (from `../node_modules/expo-speech/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
   - EXUpdates (from `../node_modules/expo-updates/ios`)
@@ -1194,6 +1201,7 @@ DEPENDENCIES:
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
+  - react-native-track-player (from `../node_modules/react-native-track-player`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1281,6 +1289,7 @@ SPEC REPOS:
     - Sentry
     - SocketRocket
     - SSZipArchive
+    - SwiftAudioEx
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -1320,6 +1329,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core/ios"
   EXSharing:
     :path: "../node_modules/expo-sharing/ios"
+  EXSpeech:
+    :path: "../node_modules/expo-speech/ios"
   EXSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   EXStructuredHeaders:
@@ -1386,6 +1397,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
+  react-native-track-player:
+    :path: "../node_modules/react-native-track-player"
   react-native-view-shot:
     :path: "../node_modules/react-native-view-shot"
   react-native-webview:
@@ -1487,6 +1500,7 @@ SPEC CHECKSUMS:
   ExpoLinearGradient: 1a3af07c6dab3c612967a294836df9ae717431df
   ExpoModulesCore: 39ec590ce622289c060183aba57f77b1e73b4e11
   EXSharing: 8530ef08cb899328a7c61de7f4836af6208b567b
+  EXSpeech: 175da82cb7444c8e81e94cc139b9f0d7b22b27e7
   EXSplashScreen: 3e989924f61a8dd07ee4ea584c6ba14be9b51949
   EXStructuredHeaders: 5d86829469399370a9fc7cb1e4391b09de87681d
   EXUpdates: 8afd5cff44d3936e08be0e1688f0ed118134433f
@@ -1556,6 +1570,7 @@ SPEC CHECKSUMS:
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
+  react-native-track-player: 0c26d981b5097910486cbbeb6d8f5352d41be069
   react-native-view-shot: da768466e1cd371de50a3a5c722d1e95456b5b2c
   react-native-webview: d33e2db8925d090871ffeb232dfa50cb3a727581
   React-perflogger: 8e832d4e21fdfa613033c76d58d7e617341e804b
@@ -1598,6 +1613,7 @@ SPEC CHECKSUMS:
   Sentry: 30b51086ca9aac23337880152e95538f7e177f7f
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
+  SwiftAudioEx: 83eabba2940924fc1c0d5cb0896049921365229c
   Yoga: 0b84a956f7393ef1f37f3bb213c516184e4a689d
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
