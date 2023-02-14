@@ -120,7 +120,7 @@
     "react-native-fbsdk-next": "^4.6.0",
     "react-native-flipper": "^0.163.0",
     "react-native-fs": "^2.16.4",
-    "react-native-gesture-handler": "^1.10.3",
+    "react-native-gesture-handler": "1.10.3",
     "react-native-hooks": "^0.0.6",
     "react-native-iaphub": "^8.4.0",
     "react-native-immersive-mode": "^1.1.0",

@@ -11,7 +11,9 @@ import 'expo-asset'
 import 'react-native-gesture-handler'
 import { AppRegistry, Platform } from 'react-native'
 import App from './App'
+import TrackPlayer from 'react-native-track-player'
 
+TrackPlayer.registerPlaybackService(() => require('./service'))
 AppRegistry.registerComponent('main', () => App)
 
 if (Platform.OS === 'web') {
