@@ -24,6 +24,7 @@ import {
   THROW_ERROR,
   TOGGLE_SELECTED_VERSE,
 } from './bibleWebView/src/dispatch'
+import bibleHTML from './bibleWebView/bibleHTML'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 class BibleWebView extends Component {
@@ -283,16 +284,10 @@ class BibleWebView extends Component {
             const { nativeEvent } = syntheticEvent
             console.warn('WebView error: ', nativeEvent)
           }}
-          source={
-            Platform.OS === 'android'
-              ? { uri: 'file:///android_asset/index.html' }
-              : require('./bibleWebView/dist/index.html')
-          }
+          source={{
+            html: bibleHTML,
+          }}
           injectedJavaScript={this.injectFont()}
-          domStorageEnabled
-          allowUniversalAccessFromFileURLs
-          allowFileAccessFromFileURLs
-          allowFileAccess
           onContentProcessDidTerminate={syntheticEvent => {
             const { nativeEvent } = syntheticEvent
             console.warn('Content process terminated, reloading...')

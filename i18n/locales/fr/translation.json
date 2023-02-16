@@ -334,7 +334,7 @@
   "J'ai constaté un bug": "J'ai constaté un bug",
   "faq.bugNoticedAnswer": "Pour éviter de surcharger l'unique développeur de l'équipe, seuls les sponsors peuvent soumettre des bugs en utilisant le lien \"Soumettre un bug\" dans la section \"Plus\".",
   "faq.whiteScreenQuestion": "J'ai un écran blanc quand je veux lire la bible",
-  "faq.whiteScreenAnswer": "Ce bug semble apparaître sur certains modèles de téléphone (Tecno, Infinix...) et est en investigation. Il n'existe pas de solution pour le moment.",
+  "faq.whiteScreenAnswer": "Ce bug semble apparaître sur certains modèles de téléphone (Tecno, Infinix...). Si vous avez une version Android 6 ou inférieure, vous pouvez mettre à jour Android System Webview dans la Play Store.",
   "J'ai une idée de fonctionnalité": "J'ai une idée de fonctionnalité",
   "faq.ideaAnswer": "Pour éviter de surcharger l'unique développeur de l'équipe, seuls les sponsors peuvent soumettre des idées en utilisant le lien \"Soumettre une idée\" dans la section \"Plus\".",
   "Pourquoi l’application contient-elle du contenu adventiste ?": "Pourquoi l’application contient-elle du contenu adventiste ?",

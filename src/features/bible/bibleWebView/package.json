@@ -5,7 +5,7 @@
     "start": "wmr --public src",
     "build": "wmr build --public src",
     "serve": "wmr serve",
-    "postbuild": "cp ./dist/index.html ../../../../android/app/src/main/assets/index.html"
+    "postbuild": "node move-script.js"
   },
   "eslintConfig": {
     "extends": "preact"
