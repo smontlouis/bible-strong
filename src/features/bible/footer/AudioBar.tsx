@@ -1,18 +1,15 @@
 import React from 'react'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { millisToMinutes } from '~helpers/millisToMinutes'
+import { secondsToMinutes } from '~helpers/secondsToMinutes'
 
 type AudioBarProps = {
-  positionMillis?: number
-  durationMillis?: number
+  position?: number
+  duration?: number
 }
 
-const AudioBar = ({ positionMillis, durationMillis }: AudioBarProps) => {
-  const progress =
-    positionMillis && durationMillis
-      ? (positionMillis * 100) / durationMillis
-      : 0
+const AudioBar = ({ position, duration }: AudioBarProps) => {
+  const progress = position && duration ? (position * 100) / duration : 0
   return (
     <Box position="relative">
       <Box height={4} position="relative" backgroundColor="rgba(0,0,0,0.2)">
@@ -27,11 +24,11 @@ const AudioBar = ({ positionMillis, durationMillis }: AudioBarProps) => {
       </Box>
       <Box row marginTop={3}>
         <Text fontSize={10}>
-          {positionMillis ? millisToMinutes(positionMillis) : '--:--'}
+          {position ? secondsToMinutes(position) : '--:--'}
         </Text>
         <Box flex />
         <Text fontSize={10}>
-          {durationMillis ? millisToMinutes(durationMillis) : '--:--'}
+          {duration ? secondsToMinutes(duration) : '--:--'}
         </Text>
       </Box>
     </Box>

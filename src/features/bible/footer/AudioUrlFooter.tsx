@@ -1,7 +1,13 @@
-import React, { memo, useEffect, useMemo, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
-import TrackPlayer from 'react-native-track-player'
+import TrackPlayer, {
+  Capability,
+  Event,
+  State,
+  useProgress,
+  useTrackPlayerEvents,
+} from 'react-native-track-player'
 import { VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import Link from '~common/Link'
@@ -18,59 +24,139 @@ import PlayButton from './PlayButton'
 type UseLoadSoundProps = {
   audioUrl?: string
   canPlayAudio?: boolean
-  goToNextChapter?: () => void
-  goToPrevChapter?: () => void
+  goToNextChapter: () => void
+  goToPrevChapter: () => void
   book: Book
   chapter: number
   version: VersionCode
+  getToNextChapter?: () => void
+  getToPrevChapter?: () => void
 }
 
-const useLoadSound = ({ book, chapter, version }: UseLoadSoundProps) => {
+const events = [Event.PlaybackState, Event.PlaybackError]
+
+const useLoadSound = ({
+  book,
+  chapter,
+  version,
+  goToNextChapter,
+  goToPrevChapter,
+}: UseLoadSoundProps) => {
   const [isExpanded, setExpandedMode] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [playerState, setPlayerState] = useState<State>(State.None)
   const [error, setError] = useState(false)
+  const [isSetup, setIsSetup] = useState(false)
+  const persistPlayingState = useRef(false)
+
   const { t } = useTranslation()
 
-  const tracks = useMemo(() => {
-    const bibleVersion = getVersions()[version] as Version
-    const audioSubtitle = bibleVersion.name
+  useTrackPlayerEvents(events, event => {
+    if (event.type === Event.PlaybackError) {
+      console.warn('An error occured while playing the current track.')
+      setError(true)
+    }
+    if (event.type === Event.PlaybackState) {
+      setPlayerState(event.state)
+    }
+  })
 
-    return [...Array(book.Chapitres).keys()].map(i => ({
-      url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
-      title: `${t(book.Nom)} ${i + 1} ${version}`,
-      album: audioSubtitle,
-    }))
-  }, [book, version, t])
+  const isPlaying = playerState === State.Playing
+  const isLoading =
+    playerState === State.Buffering ||
+    playerState === State.Connecting ||
+    playerState === State.None
 
   const onPlay = async () => {
-    await TrackPlayer.skip(chapter - 1)
-    TrackPlayer.play()
+    setExpandedMode(true)
+    if (!isPlaying) {
+      TrackPlayer.play()
+    }
   }
 
-  const onPause = () => {}
+  const onPause = () => {
+    TrackPlayer.pause()
+  }
 
-  // Audio init
+  const onReduce = () => {
+    setExpandedMode(false)
+  }
+
+  const onNextChapter = () => {
+    persistPlayingState.current = isPlaying
+    goToNextChapter?.()
+  }
+
+  const onPrevChapter = () => {
+    persistPlayingState.current = isPlaying
+    goToPrevChapter?.()
+  }
+
+  // Audio init on book change
   useEffect(() => {
     ;(async () => {
-      await TrackPlayer.setupPlayer()
-    })()
-  }, [])
+      setIsSetup(false)
 
-  useEffect(() => {
-    ;(async () => {
+      // Create tracks for the current book
+      const bibleVersion = getVersions()[version] as Version
+      const audioSubtitle = bibleVersion.name
+      const tracks = [...Array(book.Chapitres).keys()].map(i => ({
+        url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
+        title: `${t(book.Nom)} ${i + 1} ${version}`,
+        album: audioSubtitle,
+      }))
+
+      TrackPlayer.updateOptions({
+        forwardJumpInterval: 10,
+        backwardJumpInterval: 10,
+
+        // Media controls capabilities
+        capabilities: [
+          Capability.Play,
+          Capability.Pause,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.JumpForward,
+          Capability.JumpBackward,
+          Capability.SeekTo,
+        ],
+
+        // Capabilities that will show up when the notification is in the compact form on Android
+        compactCapabilities: [Capability.Play, Capability.Pause],
+      })
+
+      // Reset player and add tracks
+      await TrackPlayer.reset()
       await TrackPlayer.add(tracks)
+
+      setIsSetup(true)
     })()
   }, [book, version, t])
+
+  // Skip to track on chapter change
+  useEffect(() => {
+    if (!isSetup) return
+    ;(async () => {
+      try {
+        await TrackPlayer.skip(chapter - 1)
+        if (persistPlayingState.current) {
+          TrackPlayer.play()
+        }
+      } catch {
+        console.log('out of bound error')
+      }
+    })()
+  }, [chapter, isSetup])
 
   return {
     error,
     isPlaying,
-    setIsPlaying,
     isExpanded,
-    setExpandedMode,
     isLoading,
-    setIsLoading,
+    onPlay,
+    onPause,
+    onReduce,
+    onNextChapter,
+    onPrevChapter,
   }
 }
 
@@ -93,47 +179,45 @@ const AudioUrlFooter = ({
 }: AudioUrlFooterProps) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
-  const { t } = useTranslation()
 
   const {
     error,
     isPlaying,
     isExpanded,
-    setExpandedMode,
+    onReduce,
     isLoading,
     onPlay,
     onPause,
+    onNextChapter,
+    onPrevChapter,
   } = useLoadSound({
     book,
     chapter,
     version,
+    goToNextChapter,
+    goToPrevChapter,
   })
 
-  const isBuffering = isPlaying
+  const progress = useProgress(200)
 
   return (
     <Container isExpanded={isExpanded}>
       {isExpanded && (
         <>
           <Box center>
-            <Link onPress={() => setExpandedMode(false)} style={{ padding: 5 }}>
+            <Link onPress={onReduce} style={{ padding: 5 }}>
               <FeatherIcon name="chevron-down" size={20} color="tertiary" />
             </Link>
           </Box>
-          <AudioBar durationMillis={undefined} positionMillis={undefined} />
+          <AudioBar duration={progress.duration} position={progress.position} />
         </>
       )}
       <Box flex row overflow="visible" center>
         <ChapterButton
-          disabled={
-            disabled || (isLoading && isExpanded) || (isLoading && isPlaying)
-          }
+          disabled={disabled}
           hasNextChapter={hasPreviousChapter}
           direction="left"
-          onPress={() => {
-            setIsLoading(true)
-            goToPrevChapter()
-          }}
+          onPress={onPrevChapter}
           isExpanded={isExpanded}
         />
         <Box flex center overflow="visible" row>
@@ -142,15 +226,12 @@ const AudioUrlFooter = ({
               big={isPlaying}
               disabled={disabled}
               activeOpacity={0.5}
-              onPress={() => {
-                setExpandedMode(true)
-              }}
+              onPress={onPlay}
               color={isPlaying ? 'primary' : ''}
             >
               <AudioButton
                 isPlaying={isPlaying}
                 isLoading={isLoading}
-                isBuffering={isBuffering}
                 error={error}
               />
             </IconButton>
@@ -160,39 +241,34 @@ const AudioUrlFooter = ({
               <IconButton
                 disabled={disabled || isLoading}
                 activeOpacity={0.5}
-                onPress={() => {}}
+                onPress={() => TrackPlayer.seekTo(progress.position - 10)}
                 isFlat
               >
-                <FeatherIcon name="rewind" size={18} color="tertiary" />
+                <FeatherIcon name="rotate-ccw" size={20} />
               </IconButton>
               <PlayButton
                 error={error}
-                isLoading={isLoading || isBuffering}
+                isLoading={isLoading}
                 isPlaying={isPlaying}
                 disabled={disabled}
-                onToggle={isPlaying ? onPlay : onPause}
+                onToggle={isPlaying ? onPause : onPlay}
               />
               <IconButton
                 disabled={disabled || isLoading}
                 activeOpacity={0.5}
-                onPress={() => {}}
+                onPress={() => TrackPlayer.seekTo(progress.position + 10)}
                 isFlat
               >
-                <FeatherIcon name="fast-forward" size={18} color="tertiary" />
+                <FeatherIcon name="rotate-cw" size={20} />
               </IconButton>
             </>
           )}
         </Box>
         <ChapterButton
-          disabled={
-            disabled || (isLoading && isExpanded) || (isLoading && isPlaying)
-          }
+          disabled={disabled}
           hasNextChapter={hasNextChapter}
           direction="right"
-          onPress={() => {
-            setIsLoading(true)
-            goToNextChapter()
-          }}
+          onPress={onNextChapter}
           isExpanded={isExpanded}
         />
       </Box>

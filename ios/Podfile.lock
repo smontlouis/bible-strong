@@ -375,15 +375,15 @@ PODS:
   - EXJSONUtils (0.3.0)
   - EXManifests (0.3.1):
     - EXJSONUtils
-  - Expo (46.0.16):
+  - Expo (46.0.20):
     - ExpoModulesCore
   - ExpoHaptics (11.3.0):
     - ExpoModulesCore
-  - ExpoKeepAwake (10.2.0):
+  - ExpoKeepAwake (10.2.1):
     - ExpoModulesCore
   - ExpoLinearGradient (11.4.0):
     - ExpoModulesCore
-  - ExpoModulesCore (0.11.8):
+  - ExpoModulesCore (0.11.10):
     - React-Core
     - ReactCommon/turbomodule/core
   - EXSharing (10.3.0):
@@ -394,7 +394,7 @@ PODS:
     - ExpoModulesCore
     - React-Core
   - EXStructuredHeaders (2.2.1)
-  - EXUpdates (0.14.6):
+  - EXUpdates (0.14.7):
     - ASN1Decoder (~> 1.8)
     - EASClient
     - EXManifests
@@ -1062,7 +1062,7 @@ PODS:
     - React-Core
   - RNLocalize (1.4.3):
     - React-Core
-  - RNReanimated (2.13.0):
+  - RNReanimated (2.14.4):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -1484,16 +1484,16 @@ SPEC CHECKSUMS:
   EXFont: 06df627203afcb8a3b3152ec06eb2f11f46f0cff
   EXJSONUtils: 2a74b8f40f1523cc3f92af99c91aa78201737a77
   EXManifests: b38dc61303f5eede990b4c8ecbfac32f82160e65
-  Expo: 7ac824960a6059d6c68e73f432c8e6bf6d92a0ef
+  Expo: c2afed3f226befffaed962e9bacb5e0296acd254
   ExpoHaptics: efe9e68e9dfe0d15c183c0c70a25f3874124ab9e
-  ExpoKeepAwake: 0e8f18142e71bbf2c7f6aa66ebed249ba1420320
+  ExpoKeepAwake: 8b47e5358d54ea4922b630a74f2acb026ab7a28b
   ExpoLinearGradient: 1a3af07c6dab3c612967a294836df9ae717431df
-  ExpoModulesCore: 39ec590ce622289c060183aba57f77b1e73b4e11
+  ExpoModulesCore: 1b2f5f91eff132671f6d0642aad2ba7915c6ff41
   EXSharing: 8530ef08cb899328a7c61de7f4836af6208b567b
   EXSpeech: 175da82cb7444c8e81e94cc139b9f0d7b22b27e7
   EXSplashScreen: 3e989924f61a8dd07ee4ea584c6ba14be9b51949
   EXStructuredHeaders: 5d86829469399370a9fc7cb1e4391b09de87681d
-  EXUpdates: 8afd5cff44d3936e08be0e1688f0ed118134433f
+  EXUpdates: 7a705a119c7551d50fbcdd8e3b5b414c4fefadb8
   EXUpdatesInterface: 2bbc11815dfa2ec3fc02e5534c7592c6b42b5327
   FBLazyVector: 6b7f5692909b4300d50e7359cdefbcd09dd30faa
   FBReactNativeSpec: affcf71d996f6b0c01f68883482588297b9d5e6e
@@ -1591,7 +1591,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNGoogleSignin: a51c9c7419262c75748ddcee3f735bb42da5def1
   RNLocalize: 7c7aeda16c01db7a0918981c14875c0a53be9b79
-  RNReanimated: f0d66bda3d074c43c72a18f4fd4f4c26687bc1fd
+  RNReanimated: ba021107f1dd90cb04c35c5d639392d5da27d065
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
   RNSentry: f03937a2cf86c7029ba31fbbf5618c55d223cd62
   RNSVG: c1e76b81c76cdcd34b4e1188852892dc280eb902

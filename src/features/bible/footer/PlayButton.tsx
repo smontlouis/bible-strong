@@ -44,9 +44,8 @@ const PlayButton = ({
       isFlat
     >
       <FeatherIcon
-        name={isPlaying ? 'pause' : 'play'}
-        color="tertiary"
-        size={23}
+        name={isPlaying ? 'pause-circle' : 'play-circle'}
+        size={28}
         style={{ marginLeft: 3 }}
       />
     </IconButton>
