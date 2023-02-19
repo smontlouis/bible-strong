@@ -11,6 +11,7 @@ type BibleFooterProps = {
   chapter: number
   goToNextChapter: () => void
   goToPrevChapter: () => void
+  goToChapter: (x: { book: Book; chapter: number }) => void
   disabled?: boolean
   version: VersionCode
 }
@@ -20,6 +21,7 @@ const BibleFooter = ({
   chapter,
   goToNextChapter,
   goToPrevChapter,
+  goToChapter,
   disabled,
   version,
 }: BibleFooterProps) => {
@@ -33,6 +35,7 @@ const BibleFooter = ({
         chapter={chapter}
         goToNextChapter={goToNextChapter}
         goToPrevChapter={goToPrevChapter}
+        goToChapter={goToChapter}
         disabled={disabled}
         version={version}
       />

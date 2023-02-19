@@ -389,6 +389,7 @@ const BibleViewer = ({
           chapter={chapter}
           goToPrevChapter={actions.goToPrevChapter}
           goToNextChapter={actions.goToNextChapter}
+          goToChapter={actions.goToChapter}
           version={version}
         />
       )}

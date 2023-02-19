@@ -630,6 +630,24 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }, [setBibleTab])
 
+  const goToChapter = useCallback(
+    ({ book, chapter }: { book: Book; chapter: number }) => {
+      setBibleTab(
+        produce(draft => {
+          draft.data.selectedBook = book
+          draft.data.selectedChapter = chapter
+          draft.data.selectedVerse = 1
+          draft.data.temp = {
+            selectedBook: book,
+            selectedChapter: 1,
+            selectedVerse: 1,
+          }
+        })
+      )
+    },
+    [setBibleTab]
+  )
+
   const setAllAndValidateSelected = useCallback(
     (selected: {
       book: Book
@@ -682,6 +700,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
       goToNextChapter,
       goToPrevChapter,
+      goToChapter,
 
       setAllAndValidateSelected,
       setTitle,

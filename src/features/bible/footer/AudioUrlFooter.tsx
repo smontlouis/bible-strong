@@ -1,6 +1,5 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 
-import { useTranslation } from 'react-i18next'
 import TrackPlayer, {
   Capability,
   Event,
@@ -9,7 +8,7 @@ import TrackPlayer, {
   useTrackPlayerEvents,
 } from 'react-native-track-player'
 import { VersionCode } from 'src/state/tabs'
-import { Book } from '~assets/bible_versions/books-desc'
+import books, { Book } from '~assets/bible_versions/books-desc'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -26,6 +25,7 @@ type UseLoadSoundProps = {
   canPlayAudio?: boolean
   goToNextChapter: () => void
   goToPrevChapter: () => void
+  goToChapter: (x: { book: Book; chapter: number }) => void
   book: Book
   chapter: number
   version: VersionCode
@@ -33,7 +33,25 @@ type UseLoadSoundProps = {
   getToPrevChapter?: () => void
 }
 
-const events = [Event.PlaybackState, Event.PlaybackError]
+const events = [
+  Event.PlaybackState,
+  Event.PlaybackError,
+  Event.PlaybackTrackChanged,
+]
+
+const getAllTracks = (version: string) => {
+  const bibleVersion = getVersions()[version] as Version
+  const tracks = books.flatMap(book =>
+    [...Array(book.Chapitres).keys()].map(i => ({
+      book,
+      chapter: i + 1,
+      url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
+      title: `${book.Nom} ${i + 1} ${version}`,
+      album: bibleVersion.name,
+    }))
+  )
+  return tracks
+}
 
 const useLoadSound = ({
   book,
@@ -41,22 +59,37 @@ const useLoadSound = ({
   version,
   goToNextChapter,
   goToPrevChapter,
+  goToChapter,
 }: UseLoadSoundProps) => {
   const [isExpanded, setExpandedMode] = useState(false)
   const [playerState, setPlayerState] = useState<State>(State.None)
   const [error, setError] = useState(false)
   const [isSetup, setIsSetup] = useState(false)
-  const persistPlayingState = useRef(false)
+  const hasAutoTrackChange = useRef(false)
 
-  const { t } = useTranslation()
-
-  useTrackPlayerEvents(events, event => {
+  useTrackPlayerEvents(events, async event => {
     if (event.type === Event.PlaybackError) {
       console.warn('An error occured while playing the current track.')
       setError(true)
     }
     if (event.type === Event.PlaybackState) {
       setPlayerState(event.state)
+    }
+    if (event.type === Event.PlaybackTrackChanged && event.nextTrack) {
+      const nextTrack = await TrackPlayer.getTrack(event.nextTrack)
+
+      // If mismatch, it means the track change was not triggered by the user
+      if (
+        nextTrack &&
+        (nextTrack?.book?.Numero !== book.Numero ||
+          nextTrack?.chapter !== chapter)
+      ) {
+        hasAutoTrackChange.current = true
+        goToChapter({
+          book: nextTrack.book,
+          chapter: nextTrack.chapter,
+        })
+      }
     }
   })
 
@@ -68,6 +101,7 @@ const useLoadSound = ({
 
   const onPlay = async () => {
     setExpandedMode(true)
+
     if (!isPlaying) {
       TrackPlayer.play()
     }
@@ -82,28 +116,24 @@ const useLoadSound = ({
   }
 
   const onNextChapter = () => {
-    persistPlayingState.current = isPlaying
-    goToNextChapter?.()
+    goToNextChapter()
   }
 
   const onPrevChapter = () => {
-    persistPlayingState.current = isPlaying
-    goToPrevChapter?.()
+    goToPrevChapter()
   }
+
+  // Create tracks for the current book
+  const tracks = useMemo(() => getAllTracks(version), [version])
 
   // Audio init on book change
   useEffect(() => {
     ;(async () => {
-      setIsSetup(false)
-
-      // Create tracks for the current book
-      const bibleVersion = getVersions()[version] as Version
-      const audioSubtitle = bibleVersion.name
-      const tracks = [...Array(book.Chapitres).keys()].map(i => ({
-        url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
-        title: `${t(book.Nom)} ${i + 1} ${version}`,
-        album: audioSubtitle,
-      }))
+      try {
+        await TrackPlayer.setupPlayer()
+      } catch {
+        console.log('TrackPlayer already setup')
+      }
 
       TrackPlayer.updateOptions({
         forwardJumpInterval: 10,
@@ -127,25 +157,25 @@ const useLoadSound = ({
       // Reset player and add tracks
       await TrackPlayer.reset()
       await TrackPlayer.add(tracks)
-
       setIsSetup(true)
     })()
-  }, [book, version, t])
+  }, [version, tracks])
 
   // Skip to track on chapter change
   useEffect(() => {
-    if (!isSetup) return
+    // If the track change was not triggered by the user, we don't want to skip
+    if (!isSetup || hasAutoTrackChange.current) {
+      hasAutoTrackChange.current = false
+      return
+    }
+
     ;(async () => {
-      try {
-        await TrackPlayer.skip(chapter - 1)
-        if (persistPlayingState.current) {
-          TrackPlayer.play()
-        }
-      } catch {
-        console.log('out of bound error')
-      }
+      const trackIndex = tracks.findIndex(
+        track => track.book.Numero === book.Numero && track.chapter === chapter
+      )
+      await TrackPlayer.skip(trackIndex)
     })()
-  }, [chapter, isSetup])
+  }, [book.Numero, chapter, isSetup, tracks])
 
   return {
     error,
@@ -165,6 +195,7 @@ type AudioUrlFooterProps = {
   chapter: number
   goToNextChapter: () => void
   goToPrevChapter: () => void
+  goToChapter: (x: { book: Book; chapter: number }) => void
   disabled?: boolean
   version: VersionCode
 }
@@ -174,6 +205,7 @@ const AudioUrlFooter = ({
   chapter,
   goToNextChapter,
   goToPrevChapter,
+  goToChapter,
   disabled,
   version,
 }: AudioUrlFooterProps) => {
@@ -196,6 +228,7 @@ const AudioUrlFooter = ({
     version,
     goToNextChapter,
     goToPrevChapter,
+    goToChapter,
   })
 
   const progress = useProgress(200)
