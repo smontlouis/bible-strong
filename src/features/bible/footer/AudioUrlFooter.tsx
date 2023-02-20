@@ -51,7 +51,8 @@ const getAllTracks = (version: string) => {
       chapter: i + 1,
       url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
       title: `${book.Nom} ${i + 1} ${version}`,
-      album: bibleVersion.name,
+      artist: bibleVersion.name,
+      artwork: require('~assets/images/icon.png'),
     }))
   )
   return tracks
@@ -75,6 +76,9 @@ const useLoadSound = ({
 
   useTrackPlayerEvents(events, async event => {
     if (event.type === Event.PlaybackError) {
+      let trackIndex = await TrackPlayer.getCurrentTrack()
+      let trackObject = await TrackPlayer.getTrack(trackIndex!)
+      console.log(trackObject?.url)
       console.warn('An error occured while playing the current track.')
       setError(true)
     }
@@ -139,6 +143,7 @@ const useLoadSound = ({
 
   // Audio init on book change
   useEffect(() => {
+    setError(false)
     ;(async () => {
       try {
         await TrackPlayer.setupPlayer()
@@ -158,15 +163,6 @@ const useLoadSound = ({
           Capability.SkipToPrevious,
           Capability.JumpForward,
           Capability.JumpBackward,
-          Capability.SeekTo,
-        ],
-
-        // Capabilities that will show up when the notification is in the compact form on Android
-        compactCapabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
           Capability.SeekTo,
         ],
 
@@ -193,6 +189,11 @@ const useLoadSound = ({
         track => track.book.Numero === book.Numero && track.chapter === chapter
       )
       await TrackPlayer.skip(trackIndex)
+
+      const duration = await TrackPlayer.getDuration()
+      await TrackPlayer.updateMetadataForTrack(trackIndex, {
+        duration,
+      })
     })()
   }, [book.Numero, chapter, isSetup, tracks])
 

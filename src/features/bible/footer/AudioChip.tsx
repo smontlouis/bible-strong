@@ -11,6 +11,7 @@ const AudioChip = ({
     <Box
       px={8}
       height={26}
+      maxW={80}
       row
       borderColor={isActive ? 'primary' : 'border'}
       borderWidth={1}

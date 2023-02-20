@@ -67,6 +67,75 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
   return false
 }
 
+const bibleStudyToolsBookMapping = [
+  'ge',
+  'ex',
+  'le',
+  'nu',
+  'de',
+  'jos',
+  'jud',
+  'ru',
+  '1sa',
+  '2sa',
+  '1ki',
+  '2ki',
+  '1ch',
+  '2ch',
+  'ezr',
+  'ne',
+  'es',
+  'job',
+  'ps',
+  'pr',
+  'ec',
+  'so',
+  'isa',
+  'jer',
+  'la',
+  'eze',
+  'da',
+  'ho',
+  'joe',
+  'am',
+  'ob',
+  'jon',
+  'mic',
+  'na',
+  'hab',
+  'zen',
+  'hag',
+  'zec',
+  'mal',
+  'mt',
+  'mr',
+  'lu',
+  'joh',
+  'ac',
+  'ro',
+  '1co',
+  '2co',
+  'ga',
+  'eph',
+  'php',
+  'col',
+  '1th',
+  '2th',
+  '1ti',
+  '2ti',
+  'tit',
+  'phm',
+  'heb',
+  'jas',
+  '1pe',
+  '2pe',
+  '1jo',
+  '2jo',
+  '3jo',
+  'jude',
+  're',
+]
+
 export interface Version {
   id: string
   name: string
@@ -175,6 +244,14 @@ export const versions = {
     name: 'Bible du Semeur',
     c: '© 2000 Société Biblique Internationale',
     type: 'fr',
+    hasAudio: true,
+    getAudioUrl: (bookNum: number, chapterNum: number) => {
+      return `https://www.bible.audio/media/sem/${
+        bookNum > 39 ? 'nt' : 'at'
+      }/${bookNum.toString().padStart(2, '0')}_${chapterNum
+        .toString()
+        .padStart(3, '0')}.mp3`
+    },
   },
   FMAR: {
     id: 'FMAR',
@@ -205,12 +282,20 @@ export const versions = {
     name: 'King James Version',
     c: '1611 Libre de droit',
     type: 'en',
+    hasAudio: true,
+    getAudioUrl: (bookNum: number, chapterNum: number) => {
+      return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
+    },
   },
   KJVS: {
     id: 'KJVS',
     name: 'King James Version Strong',
     c: '1611 Libre de droit',
     type: 'en',
+    hasAudio: true,
+    getAudioUrl: (bookNum: number, chapterNum: number) => {
+      return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
+    },
   },
   NKJV: {
     id: 'NKJV',
@@ -223,12 +308,28 @@ export const versions = {
     name: 'English Standard Version',
     c: '© 2001 Crossway Bibles',
     type: 'en',
+    hasAudio: true,
+    getAudioUrl: (bookNum: number, chapterNum: number) => {
+      return `https://content.swncdn.com/biblestudytools/audio/esv-mp3/${bookNum
+        .toString()
+        .padStart(2, '0')}_${
+        bibleStudyToolsBookMapping[bookNum - 1]
+      }_${chapterNum.toString().padStart(3, '0')}.mp3`
+    },
   },
   NIV: {
     id: 'NIV',
     name: 'New International Version',
     c: '© NIV® 1973, 1978, 1984, 2011 Biblica',
     type: 'en',
+    hasAudio: true,
+    getAudioUrl: (bookNum: number, chapterNum: number) => {
+      return `https://www.bible.audio/media/niv/${
+        bookNum > 39 ? 'nt' : 'at'
+      }/${(bookNum > 39 ? bookNum - 39 : bookNum)
+        .toString()
+        .padStart(2, '0')}_${chapterNum.toString().padStart(3, '0')}.mp3`
+    },
   },
   BCC1923: {
     id: 'BCC1923',
@@ -289,6 +390,14 @@ export const versions = {
     name: 'New Living Translation',
     c: '© 1996, 2004, 2015 Tyndale House Foundation',
     type: 'en',
+    hasAudio: true,
+    getAudioUrl: (bookNum: number, chapterNum: number) => {
+      return `https://content.swncdn.com/biblestudytools/audio/nlt-mp3/${bookNum
+        .toString()
+        .padStart(2, '0')}_${
+        bibleStudyToolsBookMapping[bookNum - 1]
+      }_${chapterNum.toString().padStart(3, '0')}.mp3`
+    },
   },
   AMP: {
     id: 'AMP',

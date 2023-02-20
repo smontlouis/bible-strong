@@ -20,7 +20,7 @@ const PlayButton = ({
 }: PlayButtonProps) => {
   if (error) {
     return (
-      <Box width={50} height={50} bg="reverse" mx={10}>
+      <Box width={50} height={50} bg="reverse" mx={10} center>
         <FeatherIcon name="x" size={23} color="quart" />
       </Box>
     )

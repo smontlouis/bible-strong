@@ -78,6 +78,7 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
             bold
             fontSize={10}
             color={isActive ? 'primary' : 'default'}
+            numberOfLines={1}
           >
             {voice?.name || t('audio.voice')}
           </Text>

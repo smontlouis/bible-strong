@@ -220,7 +220,7 @@ const VersionSelectorItem = ({
               <TextName>{version.name}</TextName>
               {version.hasAudio && (
                 <Box>
-                  <FeatherIcon name="volume-2" size={16} color={'default'} />
+                  <FeatherIcon name="volume-2" size={16} color="primary" />
                 </Box>
               )}
             </HStack>
@@ -298,11 +298,7 @@ const VersionSelectorItem = ({
           <TextName isSelected={isSelected}>{version.name}</TextName>
           {version.hasAudio && (
             <Box>
-              <FeatherIcon
-                name="volume-2"
-                size={16}
-                color={isSelected ? 'primary' : 'default'}
-              />
+              <FeatherIcon name="volume-2" size={16} color="primary" />
             </Box>
           )}
         </HStack>
