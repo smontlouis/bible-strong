@@ -8,7 +8,7 @@ type AudioButtonProps = {
   isPlaying: boolean
   isBuffering?: boolean
   isLoading?: boolean
-  type?: 'audio' | 'tts'
+  type?: 'url' | 'tts'
 }
 
 const AudioButton = ({
@@ -16,7 +16,7 @@ const AudioButton = ({
   isPlaying,
   isBuffering,
   isLoading,
-  type = 'audio',
+  type = 'url',
 }: AudioButtonProps) => {
   if (error) {
     return (

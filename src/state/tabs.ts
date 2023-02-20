@@ -1,6 +1,6 @@
 import produce from 'immer'
-import { PrimitiveAtom, atom } from 'jotai/vanilla'
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
+import { atom, PrimitiveAtom } from 'jotai/vanilla'
 import { atomWithDefault, loadable, splitAtom } from 'jotai/vanilla/utils'
 import { useCallback, useMemo } from 'react'
 

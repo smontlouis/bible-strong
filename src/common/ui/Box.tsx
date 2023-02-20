@@ -12,7 +12,7 @@ export type BoxProps = {
   pos?: 'absolute' | 'relative'
   top?: number
   t?: number
-  left?: number
+  left?: number | string
   l?: number
   right?: number
   r?: number

@@ -1,8 +1,7 @@
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
-import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import IconButton from './IconButton'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 
 type PlayButtonProps = {
   disabled?: boolean
@@ -21,34 +20,39 @@ const PlayButton = ({
 }: PlayButtonProps) => {
   if (error) {
     return (
-      <IconButton big disabled={disabled} activeOpacity={0.5} isFlat>
+      <Box width={50} height={50} bg="reverse" mx={10}>
         <FeatherIcon name="x" size={23} color="quart" />
-      </IconButton>
+      </Box>
     )
   }
   // IsBuffering
   if (isLoading) {
     return (
-      <Box width={50} height={50} center>
+      <Box width={50} height={50} bg="primary" borderRadius={25} center mx={10}>
         <ActivityIndicator />
       </Box>
     )
   }
 
   return (
-    <IconButton
-      big
+    <TouchableBox
       disabled={disabled}
       activeOpacity={0.5}
       onPress={onToggle}
-      isFlat
+      center
+      width={50}
+      height={50}
+      bg="primary"
+      borderRadius={25}
+      mx={10}
     >
-      <FeatherIcon
-        name={isPlaying ? 'pause-circle' : 'play-circle'}
-        size={28}
+      <IonIcon
+        name={isPlaying ? 'pause' : 'play'}
+        size={30}
         style={{ marginLeft: 3 }}
+        color="reverse"
       />
-    </IconButton>
+    </TouchableBox>
   )
 }
 

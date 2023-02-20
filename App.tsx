@@ -36,6 +36,7 @@ const loadResourcesAsync = async () => {
   return Promise.all([
     Font.loadAsync({
       ...Icon.Feather.font,
+      ...Icon.Ionicons.font,
       'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
       'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
     }),

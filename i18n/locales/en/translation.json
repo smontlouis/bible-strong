@@ -4,6 +4,7 @@
   "Il y a {{formattedDate}}": "{{formattedDate}} ago",
   "Fermer": "Close",
   "Valider": "Validate",
+  "app.default": "Default",
   "app.error": "Sorry, the app has just crashed... \nPlease restart the app.",
   "app.featureIdeas": "Feature ideas",
   "app.bugs": "Bugs",
@@ -552,5 +553,19 @@
   "premium.sponsorsOnlyOption": "This option is reserved for sponsors.",
   "premium.searchQuotaRemaining": "Remaining research",
 
-  "app.downloading": "Downloading..."
+  "app.downloading": "Downloading...",
+
+  "audio.speed": "Speed",
+  "audio.pitch": "Pitch",
+  "audio.repeat": "Repeat",
+  "audio.voice": "Voice",
+  "audio.timer": "Timer",
+
+  "fr-FR": "French",
+  "fr-CA": "French Canada",
+  "en-GB": "English UK",
+  "en-AU": "English AU",
+  "en-US": "English US",
+  "he-IL": "Hebrew Israel",
+  "el-GR": "Modern Greek Greece"
 }

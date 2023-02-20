@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useEffect } from 'react'
 
 import { VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
@@ -26,9 +26,14 @@ const BibleFooter = ({
   version,
 }: BibleFooterProps) => {
   const bibleVersion = getVersions()[version] as Version
-  const hasAudio = bibleVersion.hasAudio
+  const canSwitch = bibleVersion.hasAudio
+  const [audioMode, setAudioMode] = React.useState<'url' | 'tts' | undefined>()
 
-  if (hasAudio) {
+  useEffect(() => {
+    setAudioMode(canSwitch ? 'url' : 'tts')
+  }, [version, canSwitch])
+
+  if (audioMode === 'url') {
     return (
       <AudioUrlFooter
         book={book}
@@ -38,20 +43,26 @@ const BibleFooter = ({
         goToChapter={goToChapter}
         disabled={disabled}
         version={version}
+        onChangeMode={canSwitch ? setAudioMode : undefined}
       />
     )
   }
 
-  return (
-    <AudioTTSFooter
-      book={book}
-      chapter={chapter}
-      goToNextChapter={goToNextChapter}
-      goToPrevChapter={goToPrevChapter}
-      disabled={disabled}
-      version={version}
-    />
-  )
+  if (audioMode === 'tts') {
+    return (
+      <AudioTTSFooter
+        book={book}
+        chapter={chapter}
+        goToNextChapter={goToNextChapter}
+        goToPrevChapter={goToPrevChapter}
+        disabled={disabled}
+        version={version}
+        onChangeMode={canSwitch ? setAudioMode : undefined}
+      />
+    )
+  }
+
+  return null
 }
 
 export default memo(BibleFooter)

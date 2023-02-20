@@ -1,22 +1,25 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
 
 import * as Speech from 'expo-speech'
+import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
-import Link from '~common/Link'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getVersions, Version } from '~helpers/bibleVersions'
 import loadBible from '~helpers/loadBible'
-import AudioButton from './AudioButton'
+import { ttsPitchAtom, ttsRepeatAtom, ttsSpeedAtom, ttsVoiceAtom } from './atom'
+import AudioContainer from './AudioContainer'
+import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
-import Container from './Container'
-import IconButton from './IconButton'
 import PlayButton from './PlayButton'
-import { HStack } from '~common/ui/Stack'
-import DropdownMenu from '~common/DropdownMenu'
+import TTSPitchButton from './TTSPitchButton'
+import TTSSpeedButton from './TTSSpeedButton'
+import TTSVoiceButton from './TTSVoiceButton'
+import TTSRepeatButton from './TTSRepeatButton'
 
 type UseLoadSoundProps = {
   book: Book
@@ -40,18 +43,16 @@ const useLoadSound = ({
   const [isExpanded, setExpandedMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(false)
+  const selectedVoice = useAtomValue(ttsVoiceAtom)
+  const rate = useAtomValue(ttsSpeedAtom)
+  const pitch = useAtomValue(ttsPitchAtom)
+  const isRepeat = useAtomValue(ttsRepeatAtom)
   const { t } = useTranslation()
 
   const onNextChapter = () => {
     setCurrentVerse(1)
     setTotalVerses(0)
     goToNextChapter()
-  }
-
-  const onPrevChapter = () => {
-    setCurrentVerse(1)
-    setTotalVerses(0)
-    goToPrevChapter()
   }
 
   const onPlay = () => {
@@ -99,12 +100,6 @@ const useLoadSound = ({
 
   useEffect(() => {
     ;(async () => {
-      // const list = await Speech.getAvailableVoicesAsync()
-      // console.log(
-      //   list.filter(
-      //     l => l.language.startsWith('fr') || l.language.startsWith('en')
-      //   )
-      // )
       if (isPlaying) {
         const bible = await loadBible(version)
         const verses = bible[book.Numero][chapter]
@@ -112,7 +107,9 @@ const useLoadSound = ({
 
         for (let i = currentVerse; i <= totalVerses; i++) {
           Speech.speak(verses[i], {
-            // voice: 'com.apple.speech.synthesis.voice.Junior',
+            voice: selectedVoice !== 'default' ? selectedVoice : undefined,
+            rate,
+            pitch,
             onStart: () => {
               setCurrentVerse(i)
             },
@@ -126,7 +123,11 @@ const useLoadSound = ({
               }
 
               if (i === totalVerses) {
-                onNextChapter()
+                if (isRepeat) {
+                  setCurrentVerse(1)
+                } else {
+                  onNextChapter()
+                }
               }
             },
           })
@@ -135,10 +136,20 @@ const useLoadSound = ({
     })()
 
     return () => {
-      console.log('stop')
       Speech.stop()
     }
-  }, [isPlaying, book.Numero, chapter, version, totalVerses, currentVerse])
+  }, [
+    isPlaying,
+    isRepeat,
+    book.Numero,
+    chapter,
+    version,
+    totalVerses,
+    currentVerse,
+    selectedVoice,
+    rate,
+    pitch,
+  ])
 
   return {
     error,
@@ -151,6 +162,7 @@ const useLoadSound = ({
     goToPrevVerse,
     audioTitle,
     audioSubtitle,
+    selectedVoice,
   }
 }
 
@@ -161,6 +173,7 @@ type AudioTTSFooterProps = {
   goToPrevChapter: () => void
   disabled?: boolean
   version: VersionCode
+  onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
 }
 
 const AudioTTSFooter = ({
@@ -170,10 +183,10 @@ const AudioTTSFooter = ({
   goToPrevChapter,
   disabled,
   version,
+  onChangeMode,
 }: AudioTTSFooterProps) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
-  const { t } = useTranslation()
 
   const {
     error,
@@ -193,109 +206,77 @@ const AudioTTSFooter = ({
     goToPrevChapter,
   })
 
+  if (!isExpanded) {
+    return (
+      <BasicFooter
+        onPlay={onPlay}
+        onPrevChapter={hasPreviousChapter ? goToPrevChapter : undefined}
+        onNextChapter={hasNextChapter ? goToPrevChapter : undefined}
+        isPlaying={isPlaying}
+        isDisabled={disabled}
+        hasError={error}
+        type="tts"
+      />
+    )
+  }
+
   return (
-    <Container isExpanded={isExpanded}>
-      {isExpanded && (
-        <>
-          <Box center>
-            <Link onPress={onReduce} style={{ padding: 5 }}>
-              <FeatherIcon name="chevron-down" size={20} color="tertiary" />
-            </Link>
-          </Box>
-          <HStack center row>
-            <Text color="grey" textAlign="center" fontSize={12} bold>
-              {audioTitle}
-            </Text>
-            <TouchableBox>
-              <FeatherIcon name="settings" size={12} />
-            </TouchableBox>
-          </HStack>
-          <HStack my={10}>
-            <TouchableBox center flex={1}>
-              <Text color="grey" fontSize={12}>
-                Voix
-              </Text>
-            </TouchableBox>
-            <TouchableBox center flex={1}>
-              <Text color="grey" fontSize={12}>
-                Vitesse: 1.0
-              </Text>
-            </TouchableBox>
-            <TouchableBox center flex={1}>
-              <Text color="grey" fontSize={12}>
-                Pitch 1.0
-              </Text>
-            </TouchableBox>
-          </HStack>
-        </>
-      )}
-      <Box flex row overflow="visible" center>
+    <AudioContainer
+      onReduce={onReduce}
+      audioMode="tts"
+      onChangeMode={onChangeMode}
+    >
+      <Text color="grey" textAlign="center" fontSize={12} bold>
+        {audioTitle}
+      </Text>
+      <Box flex row overflow="visible" center mt={10}>
         <ChapterButton
           disabled={disabled}
           hasNextChapter={hasPreviousChapter}
           direction="left"
           onPress={goToPrevChapter}
-          isExpanded={isExpanded}
         />
         <Box flex center overflow="visible" row>
-          {!isExpanded && (
-            <IconButton
-              big={isPlaying}
-              disabled={disabled}
-              activeOpacity={0.5}
-              onPress={onPlay}
-              color={isPlaying ? 'primary' : ''}
-            >
-              <AudioButton isPlaying={isPlaying} error={error} type="tts" />
-            </IconButton>
-          )}
-          {isExpanded && (
-            <>
-              <IconButton
-                disabled={disabled}
-                activeOpacity={0.5}
-                onPress={goToPrevVerse}
-                isFlat
-              >
-                <FeatherIcon name="chevron-left" size={18} color="tertiary" />
-              </IconButton>
-              <PlayButton
-                error={error}
-                isPlaying={isPlaying}
-                disabled={disabled}
-                onToggle={isPlaying ? onStop : onPlay}
-              />
-              <IconButton
-                disabled={disabled}
-                activeOpacity={0.5}
-                onPress={goToNextVerse}
-                isFlat
-              >
-                <FeatherIcon name="chevron-right" size={18} color="tertiary" />
-              </IconButton>
-            </>
-          )}
+          <TouchableBox
+            disabled={disabled}
+            activeOpacity={0.5}
+            onPress={goToPrevVerse}
+            width={40}
+            height={40}
+            center
+          >
+            <FeatherIcon name="chevron-left" size={18} color="tertiary" />
+          </TouchableBox>
+          <PlayButton
+            error={error}
+            isPlaying={isPlaying}
+            disabled={disabled}
+            onToggle={isPlaying ? onStop : onPlay}
+          />
+          <TouchableBox
+            disabled={disabled}
+            activeOpacity={0.5}
+            onPress={goToNextVerse}
+            width={40}
+            height={40}
+            center
+          >
+            <FeatherIcon name="chevron-right" size={18} color="tertiary" />
+          </TouchableBox>
         </Box>
         <ChapterButton
           hasNextChapter={hasNextChapter}
           direction="right"
           onPress={goToNextChapter}
-          isExpanded={isExpanded}
         />
       </Box>
-      {/* <DropdownMenu
-        title={t('Pitch')}
-        currentValue={pitch}
-        setValue={setOrder}
-        choices={orderValues}
-      />
-      <DropdownMenu
-        title={t('Speed')}
-        currentValue={order}
-        setValue={setOrder}
-        choices={orderValues}
-      /> */}
-    </Container>
+      <HStack alignItems="center" justifyContent="center" mt={10}>
+        <TTSVoiceButton currentVersion={version} />
+        <TTSSpeedButton />
+        <TTSPitchButton />
+        <TTSRepeatButton />
+      </HStack>
+    </AudioContainer>
   )
 }
 

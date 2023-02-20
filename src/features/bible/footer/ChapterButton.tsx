@@ -1,11 +1,9 @@
 import React from 'react'
-import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import IconButton from './IconButton'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { IonIcon } from '~common/ui/Icon'
 
 export interface ChapterButtonProps {
   hasNextChapter: boolean
-  isExpanded: boolean
   disabled?: boolean
   onPress: () => void
   direction: 'left' | 'right'
@@ -14,21 +12,28 @@ export interface ChapterButtonProps {
 const ChapterButton = ({
   direction,
   hasNextChapter,
-  isExpanded,
   disabled,
   onPress,
 }: ChapterButtonProps) => {
   return (
     <Box width={40} height={40} overflow="visible">
       {hasNextChapter && (
-        <IconButton
-          isFlat={isExpanded}
-          disabled={disabled}
-          activeOpacity={0.5}
-          onPress={onPress}
-        >
-          <FeatherIcon name={`arrow-${direction}`} size={20} color="tertiary" />
-        </IconButton>
+        <>
+          <TouchableBox
+            disabled={disabled}
+            activeOpacity={0.5}
+            onPress={onPress}
+            width={40}
+            height={40}
+            center
+          >
+            <IonIcon
+              name={`play-skip-${direction === 'left' ? 'back' : 'forward'}`}
+              size={20}
+              color="tertiary"
+            />
+          </TouchableBox>
+        </>
       )}
     </Box>
   )

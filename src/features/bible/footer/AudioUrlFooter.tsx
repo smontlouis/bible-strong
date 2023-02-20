@@ -1,3 +1,4 @@
+import { useAtom, useSetAtom } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 
 import TrackPlayer, {
@@ -9,15 +10,18 @@ import TrackPlayer, {
 } from 'react-native-track-player'
 import { VersionCode } from 'src/state/tabs'
 import books, { Book } from '~assets/bible_versions/books-desc'
-import Link from '~common/Link'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { HStack } from '~common/ui/Stack'
 import { getVersions, Version } from '~helpers/bibleVersions'
+import { audioSleepMinutesAtom, audioSleepTimeAtom } from './atom'
 import AudioBar from './AudioBar'
-import AudioButton from './AudioButton'
+import AudioContainer from './AudioContainer'
+import AudioRepeatButton from './AudioRepeatButton'
+import AudioSleepButton from './AudioSleepButton'
+import AudioSpeedButton from './AudioSpeedButton'
+import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
-import Container from './Container'
-import IconButton from './IconButton'
 import PlayButton from './PlayButton'
 
 type UseLoadSoundProps = {
@@ -66,6 +70,8 @@ const useLoadSound = ({
   const [error, setError] = useState(false)
   const [isSetup, setIsSetup] = useState(false)
   const hasAutoTrackChange = useRef(false)
+  const [audioSleepTime, setAudioSleepTime] = useAtom(audioSleepTimeAtom)
+  const setAudioSleepMinutes = useSetAtom(audioSleepMinutesAtom)
 
   useTrackPlayerEvents(events, async event => {
     if (event.type === Event.PlaybackError) {
@@ -74,6 +80,11 @@ const useLoadSound = ({
     }
     if (event.type === Event.PlaybackState) {
       setPlayerState(event.state)
+
+      if (event.state === State.Paused && audioSleepTime) {
+        setAudioSleepTime(0)
+        setAudioSleepMinutes('off')
+      }
     }
     if (event.type === Event.PlaybackTrackChanged && event.nextTrack) {
       const nextTrack = await TrackPlayer.getTrack(event.nextTrack)
@@ -151,7 +162,15 @@ const useLoadSound = ({
         ],
 
         // Capabilities that will show up when the notification is in the compact form on Android
-        compactCapabilities: [Capability.Play, Capability.Pause],
+        compactCapabilities: [
+          Capability.Play,
+          Capability.Pause,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.SeekTo,
+        ],
+
+        progressUpdateEventInterval: 1,
       })
 
       // Reset player and add tracks
@@ -177,6 +196,14 @@ const useLoadSound = ({
     })()
   }, [book.Numero, chapter, isSetup, tracks])
 
+  useEffect(() => {
+    return () => {
+      TrackPlayer.pause()
+      setAudioSleepTime(0)
+      setAudioSleepMinutes('off')
+    }
+  }, [])
+
   return {
     error,
     isPlaying,
@@ -198,6 +225,7 @@ type AudioUrlFooterProps = {
   goToChapter: (x: { book: Book; chapter: number }) => void
   disabled?: boolean
   version: VersionCode
+  onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
 }
 
 const AudioUrlFooter = ({
@@ -208,6 +236,7 @@ const AudioUrlFooter = ({
   goToChapter,
   disabled,
   version,
+  onChangeMode,
 }: AudioUrlFooterProps) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
@@ -233,79 +262,76 @@ const AudioUrlFooter = ({
 
   const progress = useProgress(200)
 
+  if (!isExpanded) {
+    return (
+      <BasicFooter
+        onPlay={onPlay}
+        onPrevChapter={hasPreviousChapter ? onPrevChapter : undefined}
+        onNextChapter={hasNextChapter ? onNextChapter : undefined}
+        isPlaying={isPlaying}
+        isDisabled={disabled}
+        isLoading={isLoading}
+        hasError={error}
+      />
+    )
+  }
+
   return (
-    <Container isExpanded={isExpanded}>
-      {isExpanded && (
-        <>
-          <Box center>
-            <Link onPress={onReduce} style={{ padding: 5 }}>
-              <FeatherIcon name="chevron-down" size={20} color="tertiary" />
-            </Link>
-          </Box>
-          <AudioBar duration={progress.duration} position={progress.position} />
-        </>
-      )}
-      <Box flex row overflow="visible" center>
+    <AudioContainer
+      onReduce={onReduce}
+      audioMode="url"
+      onChangeMode={onChangeMode}
+    >
+      <AudioBar duration={progress.duration} position={progress.position} />
+      <Box flex row overflow="visible" center mt={10}>
         <ChapterButton
           disabled={disabled}
           hasNextChapter={hasPreviousChapter}
           direction="left"
           onPress={onPrevChapter}
-          isExpanded={isExpanded}
         />
         <Box flex center overflow="visible" row>
-          {!isExpanded && (
-            <IconButton
-              big={isPlaying}
-              disabled={disabled}
-              activeOpacity={0.5}
-              onPress={onPlay}
-              color={isPlaying ? 'primary' : ''}
-            >
-              <AudioButton
-                isPlaying={isPlaying}
-                isLoading={isLoading}
-                error={error}
-              />
-            </IconButton>
-          )}
-          {isExpanded && (
-            <>
-              <IconButton
-                disabled={disabled || isLoading}
-                activeOpacity={0.5}
-                onPress={() => TrackPlayer.seekTo(progress.position - 10)}
-                isFlat
-              >
-                <FeatherIcon name="rotate-ccw" size={20} />
-              </IconButton>
-              <PlayButton
-                error={error}
-                isLoading={isLoading}
-                isPlaying={isPlaying}
-                disabled={disabled}
-                onToggle={isPlaying ? onPause : onPlay}
-              />
-              <IconButton
-                disabled={disabled || isLoading}
-                activeOpacity={0.5}
-                onPress={() => TrackPlayer.seekTo(progress.position + 10)}
-                isFlat
-              >
-                <FeatherIcon name="rotate-cw" size={20} />
-              </IconButton>
-            </>
-          )}
+          <TouchableBox
+            disabled={disabled || isLoading}
+            activeOpacity={0.5}
+            onPress={() => TrackPlayer.seekTo(progress.position - 10)}
+            width={40}
+            height={40}
+            center
+          >
+            <FeatherIcon name="rotate-ccw" size={20} color="tertiary" />
+          </TouchableBox>
+          <PlayButton
+            error={error}
+            isLoading={isLoading}
+            isPlaying={isPlaying}
+            disabled={disabled}
+            onToggle={isPlaying ? onPause : onPlay}
+          />
+          <TouchableBox
+            disabled={disabled || isLoading}
+            activeOpacity={0.5}
+            onPress={() => TrackPlayer.seekTo(progress.position + 10)}
+            width={40}
+            height={40}
+            center
+          >
+            <FeatherIcon name="rotate-cw" size={20} color="tertiary" />
+          </TouchableBox>
         </Box>
         <ChapterButton
           disabled={disabled}
           hasNextChapter={hasNextChapter}
           direction="right"
           onPress={onNextChapter}
-          isExpanded={isExpanded}
         />
       </Box>
-    </Container>
+      <HStack alignItems="center" justifyContent="center" mt={10}>
+        <AudioSpeedButton />
+        <AudioRepeatButton />
+        <AudioSleepButton />
+      </HStack>
+    </AudioContainer>
   )
 }
 

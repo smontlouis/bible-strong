@@ -1,7 +1,7 @@
+import Color from 'color'
 import React, { memo } from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
-import Color from 'color'
-import Box, { SafeAreaBox, TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
@@ -15,10 +15,10 @@ import TimelineWidget from './TimelineWidget'
 import UserWidget from './UserWidget'
 import WordOfTheDay from './WordOfTheDay'
 
+import { useTheme } from '@emotion/react'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { LinearGradient } from 'expo-linear-gradient'
-import { useTheme } from '@emotion/react'
 
 const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()

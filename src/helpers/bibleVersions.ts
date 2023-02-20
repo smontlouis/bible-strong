@@ -1,7 +1,5 @@
-import to from 'await-to-js'
 import * as FileSystem from 'expo-file-system'
 
-import { biblesRef } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
@@ -141,6 +139,7 @@ export const versions = {
     name: 'Bible Interlinéaire',
     name_en: 'Interlinear Bible',
     c: '©',
+    type: null,
   },
   KJF: {
     id: 'KJF',

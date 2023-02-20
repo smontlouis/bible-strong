@@ -4,6 +4,7 @@
   "Il y a {{formattedDate}}": "Il y a {{formattedDate}}",
   "Fermer": "Fermer",
   "Valider": "Valider",
+  "app.default": "Par défaut",
   "app.error": "Désolé, l'app vient de planter...\nLe développeur en a été informé. Merci de redémarrer l'app.",
   "app.featureIdeas": "Idées de fonctionnalités",
   "app.bugs": "Bugs",
@@ -554,5 +555,19 @@
   "premium.sponsorsOnlyOption": "Cette option est réservée aux sponsors.",
   "premium.searchQuotaRemaining": "Recherches restantes",
 
-  "app.downloading": "Téléchargement..."
+  "app.downloading": "Téléchargement...",
+
+  "audio.speed": "Vitesse",
+  "audio.pitch": "Tonalité",
+  "audio.repeat": "Répéter",
+  "audio.voice": "Voix",
+  "audio.timer": "Minuteur",
+
+  "fr-FR": "Français",
+  "fr-CA": "Français CA",
+  "en-GB": "Anglais UK",
+  "en-AU": "Anglais AU",
+  "en-US": "Anglais US",
+  "he-IL": "Hébreu Israël",
+  "el-GR": "Grec moderne"
 }

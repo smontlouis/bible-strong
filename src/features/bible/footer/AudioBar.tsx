@@ -12,7 +12,12 @@ const AudioBar = ({ position, duration }: AudioBarProps) => {
   const progress = position && duration ? (position * 100) / duration : 0
   return (
     <Box position="relative">
-      <Box height={4} position="relative" backgroundColor="rgba(0,0,0,0.2)">
+      <Box
+        height={4}
+        position="relative"
+        backgroundColor="rgba(0,0,0,0.2)"
+        borderRadius={5}
+      >
         <Box
           width={`${progress}%`}
           pos="absolute"
@@ -20,6 +25,7 @@ const AudioBar = ({ position, duration }: AudioBarProps) => {
           height={4}
           left={0}
           bg="primary"
+          borderRadius={5}
         />
       </Box>
       <Box row marginTop={3}>

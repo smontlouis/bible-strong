@@ -9,6 +9,12 @@ export const FeatherIcon = styled(Icon.Feather)(
   })
 )
 
+export const IonIcon = styled(Icon.Ionicons)(
+  ({ theme, color = 'default' }) => ({
+    color: theme.colors[color] || color || theme.colors.default,
+  })
+)
+
 export const MaterialIcon = styled(Icon.MaterialIcons)(({ theme, color }) => ({
   color: theme.colors[color] || color || theme.colors.default,
 }))

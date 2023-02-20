@@ -34,7 +34,7 @@ const RefinementList = ({ items, refine, attribute, ...props }) => {
       return {
         value,
         label: t(lookupTable[attribute][value]),
-        count: item.count,
+        subLabel: item.count,
       }
     }),
   ]
