@@ -93,7 +93,7 @@ const PlayableButtons = ({
       bottom={10}
       row
       bg="lightGrey"
-      padding={5}
+      padding={2}
       borderRadius={50}
     >
       <TouchableBox

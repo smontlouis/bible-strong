@@ -14401,10 +14401,10 @@ react-native-tab-view@^2.14.0, react-native-tab-view@^2.15.2:
   resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.16.0.tgz#cae72c7084394bd328fac5fefb86cd966df37a86"
   integrity sha512-ac2DmT7+l13wzIFqtbfXn4wwfgtPoKzWjjZyrK1t+T8sdemuUvD4zIt+UImg03fu3s3VD8Wh/fBrIdcqQyZJWg==
 
-react-native-track-player@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-track-player/-/react-native-track-player-3.2.0.tgz#c7b7a53eaf4c248af2ac876ef349feaee2ef774a"
-  integrity sha512-svv6TOgU/quFV1aajG5PskVhgFG0wHQtO+aYs6cIH0D27ckzN8WVoC3jI94m1CVaSgLMw48P911csYuD2fIcqA==
+react-native-track-player@^3.2.0-417f3c4cdf26c2db8551eeae6f84eed69f532e77:
+  version "3.2.0-417f3c4cdf26c2db8551eeae6f84eed69f532e77"
+  resolved "https://registry.yarnpkg.com/react-native-track-player/-/react-native-track-player-3.2.0-417f3c4cdf26c2db8551eeae6f84eed69f532e77.tgz#2c334702d2ac84679d2f97f767fb3808209d96ea"
+  integrity sha512-h25kmatlboGA1rWrUipp7AAn1l2VKfqW0fV4a6TjzBDHJKXg+727HtvxEVAO3dPVmcZbh7crvqCtCzYtJnljlQ==
 
 react-native-version@^3.2.0:
   version "3.2.0"
