@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import VIForegroundService from '@voximplant/react-native-foreground-service'
 import * as Speech from 'expo-speech'
 import { Audio } from 'expo-av'
@@ -65,9 +65,10 @@ const useLoadSound = ({
   goToNextChapter,
   goToPrevChapter,
 }: UseLoadSoundProps) => {
-  const goingToNextVerse = useRef(false)
-  const [currentVerse, setCurrentVerse] = useState(1)
-  const [totalVerses, setTotalVerses] = useState(0)
+  const ignoreSpeechDone = useRef(false)
+  const totalVerses = useRef(0)
+  const currentVerse = useRef(1)
+  const [rendered, rerender] = React.useReducer(i => i + 1, 0)
 
   const [isExpanded, setExpandedMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -78,13 +79,23 @@ const useLoadSound = ({
   const isRepeat = useAtomValue(ttsRepeatAtom)
   const { t } = useTranslation()
 
-  const onNextChapter = () => {
-    setCurrentVerse(1)
-    setTotalVerses(0)
-    goToNextChapter()
+  const onNextChapter = useCallback(
+    ({ ignoreDone }: { ignoreDone?: boolean } = {}) => {
+      ignoreSpeechDone.current = ignoreDone ?? isPlaying
+      currentVerse.current = 1
+      goToNextChapter()
+    },
+    [isPlaying, goToNextChapter]
+  )
+
+  const onPrevChapter = () => {
+    ignoreSpeechDone.current = isPlaying
+    currentVerse.current = 1
+    goToPrevChapter()
   }
 
   const onPlay = () => {
+    ignoreSpeechDone.current = false
     setExpandedMode(true)
     if (!isPlaying) {
       setIsPlaying(true)
@@ -92,6 +103,7 @@ const useLoadSound = ({
   }
 
   const onStop = () => {
+    ignoreSpeechDone.current = true
     setIsPlaying(false)
   }
 
@@ -100,18 +112,22 @@ const useLoadSound = ({
   }
 
   const goToNextVerse = () => {
-    goingToNextVerse.current = true
+    ignoreSpeechDone.current = true
 
-    if (currentVerse < totalVerses) {
-      setCurrentVerse(currentVerse + 1)
+    if (currentVerse.current < totalVerses.current) {
+      currentVerse.current += 1
+      rerender()
     } else {
       onNextChapter()
     }
   }
 
   const goToPrevVerse = () => {
-    if (currentVerse > 1) {
-      setCurrentVerse(currentVerse - 1)
+    ignoreSpeechDone.current = true
+
+    if (currentVerse.current > 1) {
+      currentVerse.current -= 1
+      rerender()
     } else {
       goToPrevChapter()
     }
@@ -119,12 +135,14 @@ const useLoadSound = ({
 
   const bibleVersion = getVersions()[version] as Version
 
-  const audioTitle = `${t(book.Nom)} ${chapter}:${currentVerse} ${version}`
+  const audioTitle = `${t(book.Nom)} ${chapter}:${
+    currentVerse.current
+  } ${version}`
   const audioSubtitle = bibleVersion.name
 
   useEffect(() => {
-    setCurrentVerse(1)
-    setTotalVerses(0)
+    currentVerse.current = 1
+    totalVerses.current = 0
   }, [book.Numero, chapter, version])
 
   useEffect(() => {
@@ -159,7 +177,7 @@ const useLoadSound = ({
         setError(false)
         const bible = await loadBible(version)
         const verses = bible[book.Numero][chapter]
-        setTotalVerses(Object.keys(verses).length)
+        totalVerses.current = Object.keys(verses).length
 
         // IOS hack to play tts in silent mode
         if (Platform.OS === 'ios') {
@@ -171,38 +189,46 @@ const useLoadSound = ({
           }
         }
 
-        for (let i = currentVerse; i <= totalVerses; i++) {
-          Speech.speak(verses[i], {
-            voice: selectedVoice !== 'default' ? selectedVoice : undefined,
-            rate,
-            pitch,
-            onStart: () => {
-              setCurrentVerse(i)
-            },
-            onError: () => {
-              setError(true)
-            },
-            onDone: () => {
-              if (goingToNextVerse.current) {
-                goingToNextVerse.current = false
-                return
+        Speech.speak(verses[currentVerse.current], {
+          voice: selectedVoice !== 'default' ? selectedVoice : undefined,
+          rate,
+          pitch,
+          onError: () => {
+            setError(true)
+          },
+          onDone: () => {
+            if (ignoreSpeechDone.current) {
+              ignoreSpeechDone.current = false
+              return
+            }
+
+            if (currentVerse.current === totalVerses.current) {
+              if (isRepeat) {
+                currentVerse.current = 1
+                rerender()
+              } else {
+                onNextChapter({
+                  ignoreDone: false,
+                })
               }
 
-              if (i === totalVerses) {
-                if (isRepeat) {
-                  setCurrentVerse(1)
-                } else {
-                  onNextChapter()
-                }
-              }
-            },
-          })
-        }
+              return
+            }
+
+            currentVerse.current += 1
+            rerender()
+          },
+        })
       }
     })()
 
     return () => {
-      Speech.stop()
+      ;(async () => {
+        Speech.stop()
+        if (await Speech.isSpeakingAsync()) {
+          ignoreSpeechDone.current = true
+        }
+      })()
     }
   }, [
     isPlaying,
@@ -215,6 +241,8 @@ const useLoadSound = ({
     selectedVoice,
     rate,
     pitch,
+    rendered,
+    onNextChapter,
   ])
 
   return {
@@ -229,6 +257,8 @@ const useLoadSound = ({
     audioTitle,
     audioSubtitle,
     selectedVoice,
+    onNextChapter,
+    onPrevChapter,
   }
 }
 
@@ -263,6 +293,8 @@ const AudioTTSFooter = ({
     onReduce,
     goToNextVerse,
     goToPrevVerse,
+    onNextChapter,
+    onPrevChapter,
     audioTitle,
   } = useLoadSound({
     book,
@@ -276,8 +308,8 @@ const AudioTTSFooter = ({
     return (
       <BasicFooter
         onPlay={onPlay}
-        onPrevChapter={hasPreviousChapter ? goToPrevChapter : undefined}
-        onNextChapter={hasNextChapter ? goToPrevChapter : undefined}
+        onPrevChapter={hasPreviousChapter ? onPrevChapter : undefined}
+        onNextChapter={hasNextChapter ? onNextChapter : undefined}
         isPlaying={isPlaying}
         isDisabled={disabled}
         hasError={error}
@@ -300,7 +332,7 @@ const AudioTTSFooter = ({
           disabled={disabled}
           hasNextChapter={hasPreviousChapter}
           direction="left"
-          onPress={goToPrevChapter}
+          onPress={onPrevChapter}
         />
         <Box flex center overflow="visible" row>
           <TouchableBox
@@ -333,7 +365,7 @@ const AudioTTSFooter = ({
         <ChapterButton
           hasNextChapter={hasNextChapter}
           direction="right"
-          onPress={goToNextChapter}
+          onPress={onNextChapter}
         />
       </Box>
       <HStack alignItems="center" justifyContent="center" mt={10}>
