@@ -13,7 +13,7 @@
       "ios",
       "android"
     ],
-    "version": "16.10.0",
+    "version": "16.11.0",
     "orientation": "default",
     "assetBundlePatterns": [
       "assets/images/*",
@@ -27,10 +27,10 @@
       "src/features/studies/studiesWebView/dist/index.html"
     ],
     "android": {
-      "versionCode": 303
+      "versionCode": 305
     },
     "ios": {
-      "buildNumber": "126"
+      "buildNumber": "127"
     }
   }
 }
