@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
-
+import VIForegroundService from '@voximplant/react-native-foreground-service'
 import * as Speech from 'expo-speech'
+import { Audio } from 'expo-av'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { VersionCode } from 'src/state/tabs'
@@ -20,6 +21,7 @@ import TTSPitchButton from './TTSPitchButton'
 import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
 import TTSRepeatButton from './TTSRepeatButton'
+import { Platform } from 'react-native'
 
 type UseLoadSoundProps = {
   book: Book
@@ -27,6 +29,33 @@ type UseLoadSoundProps = {
   version: VersionCode
   goToNextChapter: () => void
   goToPrevChapter: () => void
+}
+
+const soundObject = new Audio.Sound()
+if (Platform.OS === 'ios') {
+  soundObject.loadAsync(require('~assets/sounds/empty.mp3'))
+}
+
+const channelConfig = {
+  id: 'text-to-speech',
+  name: 'Text to speech',
+  description: 'Bible Strong TTS Background Service',
+  enableVibration: false,
+}
+
+const startForegroundService = async () => {
+  const notificationConfig = {
+    channelId: 'text-to-speech',
+    id: 3456,
+    title: 'Bible Strong',
+    text: 'TTS Service',
+    icon: 'ic_launcher_round',
+  }
+  try {
+    await VIForegroundService.getInstance().startService(notificationConfig)
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 const useLoadSound = ({
@@ -99,11 +128,48 @@ const useLoadSound = ({
   }, [book.Numero, chapter, version])
 
   useEffect(() => {
+    if (isPlaying) {
+      ;(async () => {
+        if (Platform.OS === 'android') {
+          try {
+            await VIForegroundService.getInstance().createNotificationChannel(
+              channelConfig
+            )
+
+            await startForegroundService()
+          } catch {}
+        }
+      })()
+    }
+
+    return () => {
+      ;(async () => {
+        if (Platform.OS === 'android') {
+          try {
+            await VIForegroundService.getInstance().stopService()
+          } catch {}
+        }
+      })()
+    }
+  }, [isPlaying])
+
+  useEffect(() => {
     ;(async () => {
       if (isPlaying) {
+        setError(false)
         const bible = await loadBible(version)
         const verses = bible[book.Numero][chapter]
         setTotalVerses(Object.keys(verses).length)
+
+        // IOS hack to play tts in silent mode
+        if (Platform.OS === 'ios') {
+          await Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+          })
+          if (soundObject._loaded) {
+            await soundObject.playAsync()
+          }
+        }
 
         for (let i = currentVerse; i <= totalVerses; i++) {
           Speech.speak(verses[i], {

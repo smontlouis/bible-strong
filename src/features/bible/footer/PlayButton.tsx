@@ -29,7 +29,7 @@ const PlayButton = ({
   if (isLoading) {
     return (
       <Box width={50} height={50} bg="primary" borderRadius={25} center mx={10}>
-        <ActivityIndicator />
+        <ActivityIndicator color="white" />
       </Box>
     )
   }

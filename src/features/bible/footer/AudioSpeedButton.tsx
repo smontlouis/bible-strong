@@ -1,9 +1,11 @@
+import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import TrackPlayer from 'react-native-track-player'
 import DropdownMenu from '~common/DropdownMenu'
 import { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { audioSpeedAtom } from './atom'
 import AudioChip from './AudioChip'
 
 export interface AudioSpeedButtonProps extends BoxProps {}
@@ -18,20 +20,20 @@ const choices = [
 ]
 const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
   const { t } = useTranslation()
-  const [rate, setRate] = React.useState('1')
+  const [rate, setRate] = useAtom(audioSpeedAtom)
 
   useEffect(() => {
     ;(async () => {
-      setRate((await TrackPlayer.getRate()).toString())
+      setRate(await TrackPlayer.getRate())
     })()
   }, [])
 
   const onChange = async (value: string) => {
-    setRate(value)
+    setRate(Number(value))
     await TrackPlayer.setRate(parseFloat(value))
   }
 
-  const isActive = rate !== '1'
+  const isActive = rate !== 1
 
   return (
     <DropdownMenu

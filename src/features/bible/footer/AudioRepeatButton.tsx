@@ -1,22 +1,24 @@
+import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import TrackPlayer, { RepeatMode } from 'react-native-track-player'
 import { BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { audioRepeatAtom } from './atom'
 import AudioChip from './AudioChip'
 
 export interface AudioRepeatButtonProps extends BoxProps {}
 
 const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
   const { t } = useTranslation()
-  const [repeatMode, setRepeatMode] = React.useState<RepeatMode>(RepeatMode.Off)
+  const [repeatMode, setRepeatMode] = useAtom(audioRepeatAtom)
 
   useEffect(() => {
     ;(async () => {
       setRepeatMode(await TrackPlayer.getRepeatMode())
     })()
-  }, [])
+  }, [setRepeatMode])
 
   const onToggle = async () => {
     const newValue =
