@@ -3,12 +3,6 @@ import TrackPlayer, { Event } from 'react-native-track-player'
 import { audioSleepTimeAtom } from '~features/bible/footer/atom'
 
 export const PlaybackService = async function() {
-  try {
-    await TrackPlayer.setupPlayer()
-  } catch {
-    console.log('Player already setup')
-  }
-
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play())
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause())
   TrackPlayer.addEventListener(Event.RemoteNext, () => TrackPlayer.skipToNext())

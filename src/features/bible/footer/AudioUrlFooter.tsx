@@ -145,12 +145,6 @@ const useLoadSound = ({
   useEffect(() => {
     setError(false)
     ;(async () => {
-      try {
-        await TrackPlayer.setupPlayer()
-      } catch {
-        console.log('TrackPlayer already setup')
-      }
-
       TrackPlayer.updateOptions({
         forwardJumpInterval: 10,
         backwardJumpInterval: 10,
@@ -200,6 +194,7 @@ const useLoadSound = ({
   useEffect(() => {
     return () => {
       TrackPlayer.pause()
+      TrackPlayer.reset()
       setAudioSleepTime(0)
       setAudioSleepMinutes('off')
     }
