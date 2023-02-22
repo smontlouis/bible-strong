@@ -197,7 +197,8 @@ const useLoadSound = ({
             setError(true)
           },
           onDone: () => {
-            if (ignoreSpeechDone.current) {
+            // IOS detects any sound interruption as done
+            if (ignoreSpeechDone.current && Platform.OS === 'ios') {
               ignoreSpeechDone.current = false
               return
             }

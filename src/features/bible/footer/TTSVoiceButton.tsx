@@ -8,6 +8,7 @@ import { BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { versions } from '~helpers/bibleVersions'
+import { timeout } from '~helpers/timeout'
 import { ttsVoiceAtom } from './atom'
 import AudioChip from './AudioChip'
 
@@ -54,7 +55,9 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
 
   useEffect(() => {
     ;(async () => {
-      setVoices(await Speech.getAvailableVoicesAsync())
+      await timeout(1000)
+      const v = await Speech.getAvailableVoicesAsync()
+      setVoices(v)
     })()
   }, [])
 

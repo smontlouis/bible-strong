@@ -142,9 +142,8 @@ const useLoadSound = ({
   // Create tracks for the current book
   const tracks = useMemo(() => getAllTracks(version), [version])
 
-  // Audio init on book change
+  // Audio init on version change
   useEffect(() => {
-    setError(false)
     ;(async () => {
       TrackPlayer.updateOptions({
         forwardJumpInterval: 10,
@@ -178,6 +177,8 @@ const useLoadSound = ({
 
   // Skip to track on chapter change
   useEffect(() => {
+    setError(false)
+
     // If the track change was not triggered by the user, we don't want to skip
     if (!isSetup || hasAutoTrackChange.current) {
       hasAutoTrackChange.current = false
