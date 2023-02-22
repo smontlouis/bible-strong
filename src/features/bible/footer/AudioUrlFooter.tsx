@@ -2,6 +2,7 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 
 import TrackPlayer, {
+  AppKilledPlaybackBehavior,
   Capability,
   Event,
   State,
@@ -161,6 +162,11 @@ const useLoadSound = ({
         ],
 
         progressUpdateEventInterval: 1,
+
+        android: {
+          appKilledPlaybackBehavior:
+            AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+        },
       })
 
       // Reset player and add tracks
