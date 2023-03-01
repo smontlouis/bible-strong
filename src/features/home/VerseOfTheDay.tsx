@@ -74,9 +74,11 @@ const VerseOfTheDay = ({
   const [initialHour, initialMinutes] = verseOfTheDayTime
     .split(':')
     .map(n => Number(n))
-  const initialDate = new Date(1, 1, 1, initialHour, initialMinutes)
 
-  const onConfirmTimePicker = (date: string) => {
+  const initialDate = new Date()
+  initialDate.setHours(initialHour || 0, initialMinutes || 0, 0, 0)
+
+  const onConfirmTimePicker = (date: Date) => {
     setTimePicker(false)
     const dateObject = new Date(date)
     const hours = zeroFill(dateObject.getHours())

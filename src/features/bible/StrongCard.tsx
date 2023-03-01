@@ -1,18 +1,20 @@
-import React from 'react'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import React from 'react'
 
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
+import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 import ListenToStrong from './ListenStrong'
-import { withTranslation } from 'react-i18next'
 
-import { wp, cleanParams } from '~helpers/utils'
 import capitalize from '~helpers/capitalize'
 import truncate from '~helpers/truncate'
+import { cleanParams, wp } from '~helpers/utils'
+import { useAtomValue } from 'jotai/react'
+import { openedFromTabAtom } from '~features/studies/atom'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -70,8 +72,11 @@ const smallTextStyle = theme => ({
   fontFamily: theme.fontFamily.paragraph,
 })
 
-class StrongCard extends React.Component {
-  openStrong = () => {
+const StrongCard = props => {
+  const { t } = useTranslation()
+  const openedFromTab = useAtomValue(openedFromTabAtom)
+
+  const openStrong = () => {
     const {
       book,
       strongReference,
@@ -87,10 +92,10 @@ class StrongCard extends React.Component {
         Hebreu,
         Grec,
       },
-    } = this.props
+    } = props
 
     if (isSelectionMode) {
-      navigation.navigate('EditStudy', {
+      navigation.navigate(openedFromTab ? 'AppSwitcher' : 'EditStudy', {
         ...cleanParams(),
         type: isSelectionMode,
         title: Mot,
@@ -111,114 +116,108 @@ class StrongCard extends React.Component {
     }
   }
 
-  render() {
-    const {
-      isSelectionMode,
-      strongReference: {
-        Code,
-        Hebreu,
-        Grec,
-        Type,
-        Mot,
-        Phonetique,
-        Definition,
-        LSG,
-      },
-      theme,
-      isModal,
-      onClosed,
-      t,
-    } = this.props
+  const {
+    isSelectionMode,
+    strongReference: {
+      Code,
+      Hebreu,
+      Grec,
+      Type,
+      Mot,
+      Phonetique,
+      Definition,
+      LSG,
+    },
+    theme,
+    isModal,
+    onClosed,
+  } = props
 
-    return (
-      <Container overflow isModal={isModal}>
-        {/* <Shadow overflow /> */}
-        <Box paddingTop={20}>
-          <Box>
-            <Box row alignItems="flex-end">
-              <Header>
-                <Link onPress={this.openStrong} style={{ flex: 1 }}>
-                  <Text title fontSize={18} flex>
-                    {truncate(capitalize(Mot), 7)}
-                    {!!Phonetique && (
-                      <Text title color="darkGrey" fontSize={16}>
-                        {' '}
-                        {truncate(Phonetique, 7)}
-                      </Text>
-                    )}
-                  </Text>
-                </Link>
-                <Box mr={10} mt={3}>
-                  <ListenToStrong
-                    type={Hebreu ? 'hebreu' : 'grec'}
-                    code={Code}
-                  />
-                </Box>
-                <Link onPress={this.openStrong}>
-                  {isSelectionMode ? (
-                    <IconFeather name="share" size={20} />
-                  ) : (
-                    <IconFeather name="maximize-2" size={17} />
+  return (
+    <Container overflow isModal={isModal}>
+      {/* <Shadow overflow /> */}
+      <Box paddingTop={20}>
+        <Box>
+          <Box row alignItems="flex-end">
+            <Header>
+              <Link onPress={openStrong} style={{ flex: 1 }}>
+                <Text title fontSize={18} flex>
+                  {truncate(capitalize(Mot), 7)}
+                  {!!Phonetique && (
+                    <Text title color="darkGrey" fontSize={16}>
+                      {' '}
+                      {truncate(Phonetique, 7)}
+                    </Text>
                   )}
-                </Link>
-              </Header>
-            </Box>
-            <Text color="darkGrey" bold fontSize={16} textAlign="left">
-              {Hebreu || Grec}
-            </Text>
-            {/* {!!Type && (
+                </Text>
+              </Link>
+              <Box mr={10} mt={3}>
+                <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code} />
+              </Box>
+              <Link onPress={openStrong}>
+                {isSelectionMode ? (
+                  <IconFeather name="share" size={20} />
+                ) : (
+                  <IconFeather name="maximize-2" size={17} />
+                )}
+              </Link>
+            </Header>
+          </Box>
+          <Text color="darkGrey" bold fontSize={16} textAlign="left">
+            {Hebreu || Grec}
+          </Text>
+          {/* {!!Type && (
               <Text titleItalic color="darkGrey" fontSize={12}>
                 {Type}
               </Text>
             )} */}
-            <TitleBorder />
-          </Box>
+          <TitleBorder />
         </Box>
+      </Box>
 
-        <Box style={{ marginBottom: 5 }}>
-          {!!Definition && (
-            <ViewItem>
-              <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
-              <StylizedHTMLView
-                htmlStyle={{
-                  p: { ...smallTextStyle(theme) },
-                  em: { ...smallTextStyle(theme) },
-                  strong: { ...smallTextStyle(theme) },
-                  a: { ...smallTextStyle(theme) },
-                  i: { ...smallTextStyle(theme) },
-                  li: { ...smallTextStyle(theme) },
-                  ol: { ...smallTextStyle(theme) },
-                  ul: { ...smallTextStyle(theme) },
-                }}
-                value={Definition}
-                onLinkPress={() => {}}
-              />
-            </ViewItem>
-          )}
-          {!!LSG && (
-            <ViewItem>
-              <SubTitle color="darkGrey">
-                {t('Généralement traduit par')}
-              </SubTitle>
-              <StylizedHTMLView
-                htmlStyle={{
-                  p: { ...smallTextStyle(theme) },
-                  em: { ...smallTextStyle(theme) },
-                  strong: { ...smallTextStyle(theme) },
-                  a: { ...smallTextStyle(theme) },
-                  i: { ...smallTextStyle(theme) },
-                  li: { ...smallTextStyle(theme) },
-                  ol: { ...smallTextStyle(theme) },
-                  ul: { ...smallTextStyle(theme) },
-                }}
-                value={LSG}
-              />
-            </ViewItem>
-          )}
-        </Box>
-      </Container>
-    )
-  }
+      <Box style={{ marginBottom: 5 }}>
+        {!!Definition && (
+          <ViewItem>
+            <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
+            <StylizedHTMLView
+              htmlStyle={{
+                p: { ...smallTextStyle(theme) },
+                em: { ...smallTextStyle(theme) },
+                strong: { ...smallTextStyle(theme) },
+                a: { ...smallTextStyle(theme) },
+                i: { ...smallTextStyle(theme) },
+                li: { ...smallTextStyle(theme) },
+                ol: { ...smallTextStyle(theme) },
+                ul: { ...smallTextStyle(theme) },
+              }}
+              value={Definition}
+              onLinkPress={() => {}}
+            />
+          </ViewItem>
+        )}
+        {!!LSG && (
+          <ViewItem>
+            <SubTitle color="darkGrey">
+              {t('Généralement traduit par')}
+            </SubTitle>
+            <StylizedHTMLView
+              htmlStyle={{
+                p: { ...smallTextStyle(theme) },
+                em: { ...smallTextStyle(theme) },
+                strong: { ...smallTextStyle(theme) },
+                a: { ...smallTextStyle(theme) },
+                i: { ...smallTextStyle(theme) },
+                li: { ...smallTextStyle(theme) },
+                ol: { ...smallTextStyle(theme) },
+                ul: { ...smallTextStyle(theme) },
+              }}
+              value={LSG}
+            />
+          </ViewItem>
+        )}
+      </Box>
+    </Container>
+  )
 }
 
-export default withTranslation()(StrongCard)
+export default StrongCard

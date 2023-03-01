@@ -4,9 +4,16 @@ import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import compose from 'recompose/compose'
 import Snackbar from '~common/SnackBar'
+import notifee, {
+  AuthorizationStatus,
+  AndroidImportance,
+  AndroidVisibility,
+  TriggerType,
+  TimestampTrigger,
+} from '@notifee/react-native'
 
 import { useAtomValue } from 'jotai/react'
 import { selectAtom } from 'jotai/vanilla/utils'
@@ -18,6 +25,8 @@ import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
 import { getDayOfTheYear } from './getDayOfTheYear'
+import extractFirstName from '~helpers/extractFirstName'
+import { setNotificationVOD } from '~redux/modules/user'
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -56,6 +65,7 @@ const selectorVersion = (atom: BibleTab) => atom.data.selectedVersion
 
 export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
+  const dispatch = useDispatch()
   const { t } = useTranslation()
   const version = useAtomValue(selectAtom(defaultBibleAtom, selectorVersion))
 
@@ -80,7 +90,7 @@ export const useVerseOfTheDay = (addDay: number) => {
 
     const scheduleNotification = async () => {
       try {
-        // await PushNotification.cancelAllLocalNotifications()
+        await notifee.cancelAllNotifications()
 
         const [vodHours, vodMinutes] = verseOfTheDayTime
           .split(':')
@@ -96,22 +106,41 @@ export const useVerseOfTheDay = (addDay: number) => {
             ? 1
             : 0
 
-        const date = compose(
+        const date = (compose(
           setMinutes(vodMinutes),
           setHours(vodHours),
           addDays(addDay)
-        )(nowDate)
+        )(nowDate) as unknown) as Date
 
-        // await PushNotification.localNotificationSchedule({
-        //   channelId: 'vod-notifications',
-        //   title: `${i18n.t('Bonjour')} ${extractFirstName(displayName)}`,
-        //   message: !addDay
-        //     ? removeBreakLines(verseOfTheDayContent)
-        //     : removeBreakLines(verseOfTheDayPlus1Content),
-        //   category: 'NOTIFICATIONS',
-        //   allowWhileIdle: true,
-        //   date,
-        // })
+        const channelId = await notifee.createChannel({
+          id: 'vod-notifications',
+          name: 'Verse of the day notifications',
+          importance: AndroidImportance.HIGH,
+          vibration: true,
+          visibility: AndroidVisibility.PUBLIC,
+          sound: 'default',
+        })
+
+        const trigger: TimestampTrigger = {
+          type: TriggerType.TIMESTAMP,
+          timestamp: date.getTime(),
+        }
+
+        await notifee.createTriggerNotification(
+          {
+            title: `${t('Bonjour')} ${extractFirstName(displayName)}`,
+            body: !addDay
+              ? removeBreakLines(verseOfTheDayContent)
+              : removeBreakLines(verseOfTheDayPlus1Content),
+            android: {
+              channelId,
+              pressAction: {
+                id: 'default',
+              },
+            },
+          },
+          trigger
+        )
 
         console.log(
           `Notification set at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
@@ -120,7 +149,6 @@ export const useVerseOfTheDay = (addDay: number) => {
               : removeBreakLines(verseOfTheDayPlus1Content)
           }`
         )
-        // dispatch(setNotificationId(randomId))
       } catch (e) {
         Snackbar.show('Erreur de notification.')
         console.log(e)
@@ -128,9 +156,17 @@ export const useVerseOfTheDay = (addDay: number) => {
       }
     }
     const initNotifications = async () => {
-      const hasPermissions = await new Promise((resolve, reject) => {
-        // PushNotification.checkPermissions(({ alert }) => resolve(alert))
-        reject()
+      const hasPermissions = await new Promise(resolve => {
+        notifee
+          .requestPermission()
+          .then(settings => {
+            resolve(
+              settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED
+            )
+          })
+          .catch(() => {
+            resolve(false)
+          })
       })
 
       console.log('has permissions', hasPermissions)
@@ -138,7 +174,8 @@ export const useVerseOfTheDay = (addDay: number) => {
       if (hasPermissions) {
         scheduleNotification()
       } else {
-        Snackbar.show(t('home.notificationPermissionNeeded'))
+        dispatch(setNotificationVOD(''))
+        Snackbar.show(t('vod.permissionNeeded'))
       }
     }
     initNotifications()
@@ -148,6 +185,8 @@ export const useVerseOfTheDay = (addDay: number) => {
     verseOfTheDayPlus1Content,
     displayName,
     addDay,
+    dispatch,
+    t,
   ])
   return verseOfTheDay
 }

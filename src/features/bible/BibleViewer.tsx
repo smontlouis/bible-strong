@@ -1,7 +1,6 @@
 import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
@@ -10,8 +9,8 @@ import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { audioDefault, audioV2 } from '~helpers/topBibleAudio'
-import { zeroFill } from '~helpers/zeroFill'
 import BibleHeader from './BibleHeader'
+import QuickTagsModal from '~common/QuickTagsModal'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -19,6 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { shallowEqual } from 'recompose'
 import { BibleResource, Verse, VerseIds } from '~common/types'
+import Container from '~common/ui/Container'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
@@ -30,14 +30,13 @@ import {
   useBibleTabActions,
   VersionCode,
 } from '../../state/tabs'
-import BibleFooter from './footer/BibleFooter'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleWebView from './BibleWebView'
+import BibleFooter from './footer/BibleFooter'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
-import Container from '~common/ui/Container'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -109,6 +108,9 @@ const BibleViewer = ({
     reference: string
     book: number
   }>()
+  const [quickTagsModal, setQuickTagsModal] = useState<
+    { ids: VerseIds; entity: string } | { id: string; entity: string } | false
+  >(false)
   const bibleParamsModalDisclosure = useBottomSheetDisclosure<boolean>()
 
   const isFR = useLanguage()
@@ -277,7 +279,10 @@ const BibleViewer = ({
     })
   }
 
-  const addHiglightOnSelectedVerses = (color: string) => {
+  const addHiglightAndOpenQuickTags = (color: string) => {
+    setTimeout(() => {
+      setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
+    }, 300)
     dispatch(addHighlight({ color, selectedVerses }))
     actions.clearSelectedVerses()
   }
@@ -332,7 +337,7 @@ const BibleViewer = ({
         version={version}
         bookName={book.Nom}
         chapter={chapter}
-        hasBackButton={isReadOnly}
+        hasBackButton={isReadOnly || isSelectionMode}
       />
       {error && (
         <Empty
@@ -406,7 +411,7 @@ const BibleViewer = ({
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
         onChangeResourceType={onChangeResourceType}
         onCreateNoteClick={toggleCreateNote}
-        addHighlight={addHiglightOnSelectedVerses}
+        addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
           dispatch(removeHighlight({ selectedVerses }))
@@ -416,6 +421,11 @@ const BibleViewer = ({
         selectedVerses={selectedVerses}
         selectAllVerses={selectAllVerses}
         version={version}
+      />
+      <QuickTagsModal
+        item={quickTagsModal}
+        onClosed={() => setQuickTagsModal(false)}
+        setMultipleTagsItem={setMultipleTagsItem}
       />
       <BibleNoteModal onClosed={toggleCreateNote} noteVerses={noteVerses} />
       <StrongModal
@@ -427,6 +437,7 @@ const BibleViewer = ({
         bibleAtom={bibleAtom}
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
+        isSelectionMode={isSelectionMode}
       />
       <BibleParamsModal
         navigation={navigation}

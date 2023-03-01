@@ -4,21 +4,25 @@ import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
+import StylizedMarkdown from '~common/StylizedMarkdown'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { useInitIAP } from '~helpers/useInAppPurchases'
+import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
-import { useIsPremium } from '~helpers/usePremium'
-import ReachGoal from './ReachGoal'
+import { useIsPremium, usePremiumType } from '~helpers/usePremium'
+import { descriptionEn, descriptionFr } from './markdown'
 import SubscriptionGroup from './SubscriptionGroup'
 
 const PremiumScreen = () => {
   const hasPremium = useIsPremium()
+  const premiumType = usePremiumType()
   const { isLogged } = useLogin()
   const { t } = useTranslation()
+  const isFR = useLanguage()
 
   useInitIAP()
 
@@ -32,8 +36,9 @@ const PremiumScreen = () => {
               {t('Merci de nous soutenir !')}
             </Text>
             <Box mt={20}>
-              <Paragraph scale={-1} fontFamily="text">
-                {t('premium.description')}
+              <Paragraph fontFamily="paragraph">
+                {t(`premium.${premiumType}.description`)}
+                {t('premium.earlyAccess.description')}
               </Paragraph>
             </Box>
             <LinkBox
@@ -52,7 +57,11 @@ const PremiumScreen = () => {
             </LinkBox>
           </Box>
         )}
-        <ReachGoal />
+        <Box px={20}>
+          <StylizedMarkdown>
+            {isFR ? descriptionFr : descriptionEn}
+          </StylizedMarkdown>
+        </Box>
 
         {!isLogged ? (
           <Box px={40}>

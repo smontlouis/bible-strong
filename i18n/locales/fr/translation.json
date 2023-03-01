@@ -12,6 +12,7 @@
   "app.syncing": "Synchronisation en cours...",
   "app.synced": "Synchronisation finie !",
   "app.sync": "Sauvegarde manuelle",
+  "vod.permissionNeeded": "Vous devez autoriser les notifications pour recevoir le verset du jour.",
   "comment.quotaExceeded": "Le quota de traduction est atteint.",
   "comment.thanksTranslation": "Merci de votre contribution !",
   "app.areyousure": "Êtes-vous sur ?",
@@ -226,7 +227,7 @@
   "The Bible Project": "The Bible Project",
   "La Chronologie\nde la Bible": "La Chronologie\nde la Bible",
   "Bienvenue": "Bienvenue",
-  "Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !": "Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !",
+  "Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !": "Connectez-vous pour sauvegarder vos données dans le cloud!",
   "Je me connecte": "Je me connecte",
   "Bonjour": "Bonjour",
   "Un email vous a été envoyé, merci de vérifier votre adresse. Si ce message persiste, reconnectez-vous.": "Un email vous a été envoyé, merci de vérifier votre adresse. Si ce message persiste, reconnectez-vous.",
@@ -569,5 +570,11 @@
   "en-AU": "Anglais AU",
   "en-US": "Anglais US",
   "he-IL": "Hébreu Israël",
-  "el-GR": "Grec moderne"
+  "el-GR": "Grec moderne",
+
+  "premium.basic.description": "Vous êtes sponsor.\nMerci pour votre aide symbolique à l'évolution de ce projet.",
+  "premium.premium.description": "Vous êtes sponsor premium.\nMerci pour votre engagement envers l'évolution de ce projet et votre volonté de vous y investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
+  "premium.premium_plus.description": "Vous êtes sponsor super premium.\nLa manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
+  "premium.investor.description": "Vous êtes un investisseur\n.La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
+  "premium.earlyAccess.description": "Vous pouvez utiliser les fonctionnalités suivantes en accès anticipé :"
 }

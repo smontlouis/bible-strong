@@ -26,7 +26,6 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, listStyles, viewStyles, tabsCount } = useBottomTabBar()
   const { t } = useTranslation()
   const isFullscreen = useAtomValue(fullscreenAtom)
-  const isPremium = useIsPremium()
   const insets = useSafeAreaInsets()
   const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
   const bottomBarStyles = useAnimatedStyle(() => {
@@ -38,8 +37,6 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       ],
     }
   })
-
-  const tabsQuotaExceeded = tabsCount >= tabsCountQuota && !isPremium
 
   return (
     <AnimatedBox
@@ -82,10 +79,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       >
         <AddTabButton />
         <Box flex center>
-          <Text color={tabsQuotaExceeded ? 'quart' : 'default'}>
-            {tabsCount}
-            {!isPremium ? `/${tabsCountQuota}` : ''}{' '}
-            {t('tabs.tab', { count: tabsCount })}
+          <Text color={'default'}>
+            {tabsCount} {t('tabs.tab', { count: tabsCount })}
           </Text>
         </Box>
         <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>

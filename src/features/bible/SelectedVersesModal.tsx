@@ -27,6 +27,8 @@ import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import { useAtomValue } from 'jotai/react'
+import { openedFromTabAtom } from '~features/studies/atom'
 
 const Container = styled.View<{ isSelectionMode?: boolean }>(
   ({ theme, isSelectionMode }) => ({
@@ -87,6 +89,7 @@ const VersesModal = ({
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const { ref, open, close } = useModalize()
   const { t } = useTranslation()
+  const openedFromTab = useAtomValue(openedFromTabAtom)
 
   useEffect(() => {
     if (isVisible) {
@@ -169,7 +172,7 @@ const VersesModal = ({
       verses: selectedVerses,
       version,
     })
-    navigation.navigate('EditStudy', {
+    navigation.navigate(openedFromTab ? 'AppSwitcher' : 'EditStudy', {
       ...cleanParams(),
       type: isSelectionMode,
       title,

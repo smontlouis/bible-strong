@@ -22,6 +22,7 @@ import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
 import TTSRepeatButton from './TTSRepeatButton'
 import { Platform } from 'react-native'
+import remoteConfig from '@react-native-firebase/remote-config'
 
 type UseLoadSoundProps = {
   book: Book
@@ -95,6 +96,8 @@ const useLoadSound = ({
   }
 
   const onPlay = () => {
+    const enableTTSPublic = remoteConfig().getValue('enable_tts_public')
+    console.log(enableTTSPublic.asBoolean())
     ignoreSpeechDone.current = false
     setExpandedMode(true)
     if (!isPlaying) {

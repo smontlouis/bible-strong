@@ -550,8 +550,7 @@ const StudyFooter = ({
           </>
         )}
         <Box marginLeft="auto" />
-        {/** TEMP DISABLING  */}
-        {/* <SelectBlock navigateBibleView={navigateBibleView} /> */}
+        <SelectBlock navigateBibleView={navigateBibleView} />
       </Box>
       <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
         <MaterialIcon name="keyboard-hide" size={20} color="primary" />

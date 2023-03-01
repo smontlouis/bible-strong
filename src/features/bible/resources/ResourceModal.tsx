@@ -36,11 +36,13 @@ type Props = {
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource | null) => void
   bibleAtom: PrimitiveAtom<BibleTab>
+  isSelectionMode: boolean
 }
 const ResourcesModal = ({
   resourceType,
   onChangeResourceType,
   bibleAtom,
+  isSelectionMode,
 }: Props) => {
   const { t } = useTranslation()
   const { ref, open, close } = useModalize()
@@ -140,6 +142,7 @@ const ResourcesModal = ({
         resourceType={resourceType}
         bibleAtom={bibleAtom}
         direction={direction}
+        isSelectionMode={isSelectionMode}
       />
     </Modal.Body>
   )
@@ -193,10 +196,12 @@ const Resource = ({
   bibleAtom,
   resourceType,
   direction,
+  isSelectionMode,
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
   resourceType: BibleResource | null
   direction: Animated.SharedValue<'left' | 'right'>
+  isSelectionMode?: boolean
 }) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
@@ -234,7 +239,11 @@ const Resource = ({
         isAnimationsEnabled={isAnimationsEnabled}
       >
         {/* @ts-ignore */}
-        <BibleVerseDetailCard verse={verseObj} updateVerse={updateVerse} />
+        <BibleVerseDetailCard
+          verse={verseObj}
+          updateVerse={updateVerse}
+          isSelectionMode={isSelectionMode}
+        />
       </AnimatedResourceBox>
     )
   }

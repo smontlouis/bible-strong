@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
-import React, { memo, useCallback, useMemo, useState } from 'react'
+import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
 import * as Animatable from 'react-native-animatable'
@@ -20,7 +20,6 @@ import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
-import { useQuota } from '~helpers/usePremium'
 import { deepl } from '../../../config'
 import { Comment as CommentProps, EGWComment } from './types'
 
@@ -40,7 +39,6 @@ interface Props {
 const useFrenchTranslation = (id: string) => {
   const [status, setStatus] = useState<Status>('Idle')
   const [contentFR, setContentFR] = useState('')
-  const checkCommentsQuota = useQuota('translateComments')
   const { t } = useTranslation()
 
   const startTranslation = async (text: string) => {
@@ -58,47 +56,40 @@ const useFrenchTranslation = (id: string) => {
         return
       }
 
-      checkCommentsQuota(
-        async () => {
-          const data = `auth_key=${deepl.auth_key}&text=${encodeURIComponent(
-            text
-          )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
+      const data = `auth_key=${deepl.auth_key}&text=${encodeURIComponent(
+        text
+      )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
 
-          const [err, res] = await to(
-            fetch('https://api.deepl.com/v2/translate', {
-              method: 'POST',
-              body: data,
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Content-Length': data.length.toString(),
-              },
-            })
-          )
-
-          if (err) {
-            console.log('Error', err)
-            return
-          }
-
-          const result = await res?.json()
-
-          if (result.message === 'Quota Exceeded') {
-            Snackbar.show(t('comment.quotaExceeded'))
-          }
-
-          await firebaseDb
-            .collection('commentaries-FR')
-            .doc(id.toString())
-            .set({ content: result.translations[0].text })
-
-          setContentFR(result.translations[0].text)
-          setStatus('Resolved')
-          Snackbar.show(t('comment.thanksTranslation'))
-        },
-        () => {
-          setStatus('Rejected')
-        }
+      const [err, res] = await to(
+        fetch('https://api.deepl.com/v2/translate', {
+          method: 'POST',
+          body: data,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': data.length.toString(),
+          },
+        })
       )
+
+      if (err) {
+        console.log('Error', err)
+        return
+      }
+
+      const result = await res?.json()
+
+      if (result.message === 'Quota Exceeded') {
+        Snackbar.show(t('comment.quotaExceeded'))
+      }
+
+      await firebaseDb
+        .collection('commentaries-FR')
+        .doc(id.toString())
+        .set({ content: result.translations[0].text })
+
+      setContentFR(result.translations[0].text)
+      setStatus('Resolved')
+      Snackbar.show(t('comment.thanksTranslation'))
     } catch (e) {
       console.log(e)
       setStatus('Rejected')

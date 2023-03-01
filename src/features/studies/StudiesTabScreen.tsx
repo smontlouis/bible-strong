@@ -31,6 +31,7 @@ const StudiesTabScreen = ({ studyAtom, navigation }: StudiesTabScreenProps) => {
       studyId={studyId}
       hasBackButton={false}
       navigation={navigation}
+      openedFromTab
     />
   )
 }

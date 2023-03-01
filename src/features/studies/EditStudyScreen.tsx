@@ -12,12 +12,15 @@ import { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudyTitlePrompt from './StudyTitlePrompt'
+import { useAtom, useSetAtom } from 'jotai/react'
+import { openedFromTabAtom } from './atom'
 
 type WithStudyProps = {
   navigation: NavigationStackProp
   studyId: string
   canEdit?: boolean
   hasBackButton?: boolean
+  openedFromTab?: boolean
 }
 
 const withStudy = (
@@ -73,12 +76,14 @@ const EditStudyScreen = ({
   studyId,
   canEdit,
   hasBackButton,
+  openedFromTab,
 }: WithStudyProps) => {
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
   const [titlePrompt, setTitlePrompt] = useState<
     { id: string; title: string } | false
   >(false)
   const dispatch = useDispatch()
+  const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector(
@@ -111,6 +116,15 @@ const EditStudyScreen = ({
       hasBackButton: true,
     })
   }
+
+  // Control weither bible webview send back to study tab or not
+  useEffect(() => {
+    setOpenedFromTab(openedFromTab || false)
+
+    return () => {
+      setOpenedFromTab(false)
+    }
+  }, [])
 
   return (
     <Container pure>

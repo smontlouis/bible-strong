@@ -104,24 +104,6 @@ const SubscriptionDetails = ({ sub }: SubscriptionDetailsProps) => {
         {subDetail?.title}
       </Text>
       <Text>{subDetail?.description}</Text>
-      <VStack spacing={1 / 2}>
-        {subDetail?.details.map(detail => (
-          <CheckItem
-            key={detail.label}
-            detail={
-              detail.status ? (
-                <Text fontSize={12} color="quart">
-                  ({detail.status})
-                </Text>
-              ) : (
-                undefined
-              )
-            }
-          >
-            {detail.label}
-          </CheckItem>
-        ))}
-      </VStack>
     </VStack>
   )
 }

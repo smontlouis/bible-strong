@@ -148,7 +148,7 @@ class BibleVerseDetailCard extends React.Component {
     return (
       <StrongCard
         theme={this.props.theme}
-        isSelectionMode={false}
+        isSelectionMode={this.props.isSelectionMode}
         navigation={this.props.navigation}
         book={this.props.verse.Livre}
         strongReference={item}

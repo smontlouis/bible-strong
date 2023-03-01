@@ -10,6 +10,7 @@ import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import { persistor, store } from '~redux/store'
+import remoteConfig from '@react-native-firebase/remote-config'
 
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
@@ -60,12 +61,28 @@ const useAppLoad = () => {
       setIsLoadingCompleted(true)
 
       await TrackPlayer.setupPlayer()
-
       if (!__DEV__) {
         analytics().logScreenView({
           screen_class: 'Bible',
           screen_name: 'Bible',
         })
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await remoteConfig().setDefaults({
+        enable_tts_public: false,
+      })
+      const fetchedRemotely = await remoteConfig().fetchAndActivate()
+
+      if (fetchedRemotely) {
+        console.log('Configs were retrieved from the backend and activated.')
+      } else {
+        console.log(
+          'No configs were fetched from the backend, and the local configs were already activated'
+        )
       }
     })()
   }, [])

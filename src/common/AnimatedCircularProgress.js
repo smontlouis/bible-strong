@@ -30,6 +30,7 @@ export default class AnimatedCircularProgress extends React.PureComponent {
       toValue,
       easing,
       duration,
+      useNativeDriver: false,
     })
     anim.start(this.props.onAnimationComplete)
 

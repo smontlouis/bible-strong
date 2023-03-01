@@ -11,6 +11,15 @@ export const useIsPremium = () => {
   return !!hasPremium
 }
 
+export const usePremiumType = () => {
+  const premiumType = useSelector(
+    (state: RootState) => state.user.subscription
+  ) as 'basic' | 'premium' | 'premium_plus' | 'investor' | undefined
+
+  return premiumType
+}
+
+// Deprecated
 export const useQuota = (quotaType: QuotaType) => {
   const dispatch = useDispatch()
   const quota = useSelector(
@@ -39,7 +48,10 @@ export const useQuota = (quotaType: QuotaType) => {
   )
 }
 
+// Deprecated
 export const tabsCountQuota = 4
+
+// Deprecated
 export const useTabsQuota = () => {
   const isPremium = useIsPremium()
   const tabsCount = useAtomValue(tabsCountAtom)

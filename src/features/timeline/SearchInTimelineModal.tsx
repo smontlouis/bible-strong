@@ -17,12 +17,9 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import SearchBox from '~features/search/SearchBox'
-import { useIsPremium, useQuota } from '~helpers/usePremium'
 import Filters from './Filters'
 import Highlight from './Highlight'
 import Snippet from './Snippet'
-import { useSelector } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -44,25 +41,11 @@ const SearchInTimelineModal = ({
   const theme: Theme = useTheme()
   const [searchValue, setSearchValue] = React.useState('')
   const [submittedValue, setSubmittedValue] = React.useState('')
-  const isPremium = useIsPremium()
-  const searchQuotaRemaining = useSelector(
-    (state: RootState) => state.user.quota.timelineSearch.remaining
-  )
-  const checkSearchQuota = useQuota('timelineSearch')
   const [canQuery, setCanQuery] = React.useState(true)
 
   const onSubmit = useCallback((callback: Function, value: string) => {
-    checkSearchQuota(
-      () => {
-        setCanQuery(true)
-        callback()
-        setSubmittedValue(value)
-      },
-      () => {
-        setCanQuery(false)
-        setSubmittedValue('')
-      }
-    )
+    callback()
+    setSubmittedValue(value)
   }, [])
 
   const onClear = useCallback(() => {
@@ -94,13 +77,6 @@ const SearchInTimelineModal = ({
             onClear={onClear}
             placeholder={t('Rechercher un événement dans la Bible')}
           />
-          {!isPremium && (
-            <Box px={20} alignItems="flex-end">
-              <Text bold fontSize={10} color="grey">
-                {t('premium.searchQuotaRemaining')}: {searchQuotaRemaining}/10
-              </Text>
-            </Box>
-          )}
           <Filters />
         </Box>
       }

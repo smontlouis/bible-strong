@@ -91,7 +91,9 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
           }, 500)
         }}
       >
-        <Text color="reverse">{t('Ajouter un tag')}</Text>
+        <Text color="reverse" fontSize={14}>
+          {t('Ajouter un tag')}
+        </Text>
       </LinkBox>
     </StylizedModal>
   )
