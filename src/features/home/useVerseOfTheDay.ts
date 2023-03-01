@@ -1,3 +1,10 @@
+import notifee, {
+  AndroidImportance,
+  AndroidVisibility,
+  AuthorizationStatus,
+  TimestampTrigger,
+  TriggerType,
+} from '@notifee/react-native'
 import * as Sentry from '@sentry/react-native'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
@@ -7,26 +14,19 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import compose from 'recompose/compose'
 import Snackbar from '~common/SnackBar'
-import notifee, {
-  AuthorizationStatus,
-  AndroidImportance,
-  AndroidVisibility,
-  TriggerType,
-  TimestampTrigger,
-} from '@notifee/react-native'
 
 import { useAtomValue } from 'jotai/react'
 import { selectAtom } from 'jotai/vanilla/utils'
 import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
+import extractFirstName from '~helpers/extractFirstName'
 import getVersesContent from '~helpers/getVersesContent'
 import useLogin from '~helpers/useLogin'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
+import { setNotificationVOD } from '~redux/modules/user'
 import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
 import { getDayOfTheYear } from './getDayOfTheYear'
-import extractFirstName from '~helpers/extractFirstName'
-import { setNotificationVOD } from '~redux/modules/user'
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState(false)
@@ -137,6 +137,8 @@ export const useVerseOfTheDay = (addDay: number) => {
               pressAction: {
                 id: 'default',
               },
+              importance: AndroidImportance.HIGH,
+              visibility: AndroidVisibility.PUBLIC,
             },
           },
           trigger
