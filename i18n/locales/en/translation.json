@@ -219,7 +219,7 @@
   "Vous n'avez aucun plan": "You don't have any plans",
   "Vous êtes Premium !\nMerci !": "You are a Sponsor !\nThank you !",
   "Devenez un sponsor !": "Become a sponsor !",
-  "Voir vos avantages !": "See your benefits!",
+  "Vous êtes en accès anticipé !": "You are in early access !",
   "Supportez-nous et débloquez toutes les fonctionnalités !": "Support us and unlock all the features!",
   "Pas de strong pour ce Code.": "No strong for this Code.",
   "Grec": "Greek",
@@ -512,6 +512,8 @@
   "common.goTo": "Go to",
   "common.chooseCompareVersions": "Choose versions to compare",
 
+  "premium.earlyAccess": "Early access",
+  "premium.earlyAccess.description": "This feature is available in early access for sponsors. It will be available to all users in the coming weeks.",
   "premium.objectives": "Objectives",
   "premium.renew": "All subscriptions are renewed monthly automatically.You can cancel them when you wish.",
   "premium.lotMore": "And much more to come!",

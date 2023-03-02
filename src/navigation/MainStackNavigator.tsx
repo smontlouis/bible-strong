@@ -1,6 +1,6 @@
 import React from 'react'
 import { createStackNavigator } from 'react-navigation-stack'
-import QuotaModal from '~common/QuotaModal'
+import EarlyAccessModal from '~common/EarlyAccessModal'
 import { PortalProvider } from '@gorhom/portal'
 import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
@@ -115,7 +115,7 @@ export const MainStackNavigator = createStackNavigator(
 const MainStack = props => (
   <PortalProvider>
     <MainStackNavigator {...props} />
-    <QuotaModal />
+    <EarlyAccessModal />
     <ChangelogModal />
     <OnBoardingModal />
     <MultipleTagsModal />

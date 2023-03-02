@@ -38,7 +38,6 @@ const PremiumScreen = () => {
             <Box mt={20}>
               <Paragraph fontFamily="paragraph">
                 {t(`premium.${premiumType}.description`)}
-                {t('premium.earlyAccess.description')}
               </Paragraph>
             </Box>
             <LinkBox

@@ -219,7 +219,7 @@
   "Vous n'avez aucun plan": "Vous n'avez aucun plan",
   "Vous êtes Premium !\nMerci !": "Vous êtes Premium !\nMerci !",
   "Devenez un sponsor !": "Devenez un sponsor !",
-  "Voir vos avantages !": "Voir vos avantages !",
+  "Vous êtes en accès anticipé !": "Vous êtes en accès anticipé !",
   "Supportez-nous et débloquez toutes les fonctionnalités !": "Supportez-nous et débloquez toutes les fonctionnalités !",
   "Pas de strong pour ce Code.": "Pas de strong pour ce Code.",
   "Grec": "Grec",
@@ -513,6 +513,8 @@
   "common.goTo": "Aller à",
   "common.chooseCompareVersions": "Choisir les versions à comparer",
 
+  "premium.earlyAccess": "Accès anticipé",
+  "premium.earlyAccess.description": "Cette fonctionnalité est disponible en accès anticipé pour les sponsors. Elle sera disponible pour tous les utilisateurs dans les prochaines semaines.",
   "premium.objectives": "Objectifs",
   "premium.renew": "Tous les abonnements se renouvellent mensuellement de façon automatique. Vous avez la possibilité de les annuler quand vous le souhaitez.",
   "premium.lotMore": "Et bien plus à venir !",
@@ -575,6 +577,5 @@
   "premium.basic.description": "Vous êtes sponsor.\nMerci pour votre aide symbolique à l'évolution de ce projet.",
   "premium.premium.description": "Vous êtes sponsor premium.\nMerci pour votre engagement envers l'évolution de ce projet et votre volonté de vous y investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
   "premium.premium_plus.description": "Vous êtes sponsor super premium.\nLa manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
-  "premium.investor.description": "Vous êtes un investisseur\n.La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
-  "premium.earlyAccess.description": "Vous pouvez utiliser les fonctionnalités suivantes en accès anticipé :"
+  "premium.investor.description": "Vous êtes un investisseur\n.La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien."
 }

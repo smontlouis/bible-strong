@@ -12,7 +12,7 @@ import Text from '~common/ui/Text'
 import extractFirstName from '~helpers/extractFirstName'
 import extractInitials from '~helpers/extractInitials'
 import useLogin from '~helpers/useLogin'
-import { useIsPremium } from '~helpers/usePremium'
+import { useIsPremium, usePremiumType } from '~helpers/usePremium'
 import PreloadBible from './PreloadBible'
 
 import { useTranslation } from 'react-i18next'
@@ -100,6 +100,21 @@ const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
   const isPremium = useIsPremium()
+  const premiumType = usePremiumType()
+  const starsCount = (() => {
+    switch (premiumType) {
+      case 'basic':
+        return 1
+      case 'premium':
+        return 2
+      case 'premium_plus':
+        return 3
+      case 'investor':
+        return 3
+      default:
+        return 0
+    }
+  })()
   const isLoading = useSelector((state: RootState) => state.user.isLoading)
   const highlights = useSelector(
     (state: RootState) => Object.keys(state.user.bible.highlights).length
@@ -189,14 +204,17 @@ const UserWidget = () => {
                 position="absolute"
                 bottom={0}
                 right={0}
-                width={20}
                 height={20}
+                minWidth={20}
                 center
                 bg="lightGrey"
                 borderRadius={20}
                 lightShadow
+                row
               >
-                <MaterialIcon name="star" size={16} color="secondary" />
+                {[...Array(starsCount).keys()].map((_, i) => (
+                  <MaterialIcon name="star" size={14} color="secondary" />
+                ))}
               </Box>
             )}
           </Box>

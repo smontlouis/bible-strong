@@ -57,12 +57,12 @@ const PremiumWidget = () => {
         <Box pl={60}>
           <Text title fontSize={20} color="white">
             {isPremium
-              ? t('Vous êtes Premium !\nMerci !')
+              ? t('Merci de nous soutenir !')
               : t('Devenez un sponsor !')}
           </Text>
           <Text marginTop={5} fontSize={14} color="white">
             {isPremium
-              ? t('Voir vos avantages !')
+              ? t('Vous êtes en accès anticipé !')
               : t('Supportez-nous et débloquez toutes les fonctionnalités !')}
           </Text>
         </Box>

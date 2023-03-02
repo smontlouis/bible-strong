@@ -1,16 +1,15 @@
 import styled from '@emotion/native'
 import { useAtom } from 'jotai/react'
-import Lottie from 'lottie-react-native'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Modal from 'react-native-modalbox'
 import { withNavigation } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
-import useResetQuotaEveryDay from '~helpers/useResetQuotas'
-import { quotaModalAtom } from '../state/app'
+import { useNavigation } from 'react-navigation-hooks'
+import { earlyAccessModalAtom } from '../state/app'
 import { LinkBox } from './Link'
 import Box from './ui/Box'
 import Button from './ui/Button'
+import { IonIcon } from './ui/Icon'
 import Text from './ui/Text'
 
 const StylizedModal = styled(Modal)(({ theme }) => ({
@@ -27,31 +26,18 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
   elevation: 2,
 }))
 
-interface Props {
-  navigation: NavigationStackProp<any>
-}
-
-const QuotaModal = ({ navigation }: Props) => {
+const EarlyAccessModal = () => {
   const { t } = useTranslation()
-  useResetQuotaEveryDay()
+  const navigation = useNavigation()
 
-  const [showQuotaModal, setShowQuotaModal] = useAtom(quotaModalAtom)
-
-  const getQuotaTraduction = () => {
-    switch (showQuotaModal) {
-      case 'daily':
-        return 'sponsor.dailyQuotaReached'
-      case 'tabs':
-        return 'sponsor.tabsQuotaReached'
-      default:
-        return 'sponsor.quotaReached'
-    }
-  }
+  const [showEarlyAccessModal, setShowEarlyAccessModal] = useAtom(
+    earlyAccessModalAtom
+  )
 
   return (
     <StylizedModal
-      isOpen={Boolean(showQuotaModal)}
-      onClosed={() => setShowQuotaModal(null)}
+      isOpen={Boolean(showEarlyAccessModal)}
+      onClosed={() => setShowEarlyAccessModal(false)}
       animationDuration={200}
       position="center"
       backdropOpacity={0.3}
@@ -59,30 +45,20 @@ const QuotaModal = ({ navigation }: Props) => {
       swipeToClose={true}
     >
       <Box flex py={10} px={20} center>
-        <Box w={100} h={80} overflow="visible">
-          <Lottie
-            autoPlay
-            style={{
-              width: 130,
-              height: 130,
-              top: -10,
-              left: -10,
-              position: 'absolute',
-            }}
-            source={require('../assets/images/premium-icon.json')}
-          />
-        </Box>
+        <IonIcon name="time-outline" size={60} color="primary" />
 
         <Text fontSize={18} bold>
-          {t('Devenez un sponsor !')}
+          {t('premium.earlyAccess')}
         </Text>
         <Box my={20}>
-          <Text fontSize={12}>{t(getQuotaTraduction())}</Text>
+          <Text textAlign="center" fontSize={16}>
+            {t('premium.earlyAccess.description')}
+          </Text>
         </Box>
-        <Box>
+        <Box mt={10}>
           <Button
             onPress={() => {
-              setShowQuotaModal(null)
+              setShowEarlyAccessModal(false)
               navigation.navigate('Premium')
             }}
           >
@@ -90,15 +66,13 @@ const QuotaModal = ({ navigation }: Props) => {
           </Button>
           <LinkBox
             onPress={() => {
-              setShowQuotaModal(null)
+              setShowEarlyAccessModal(false)
             }}
             p={10}
             pb={0}
           >
             <Text textAlign="center" fontSize={12}>
-              {t(
-                showQuotaModal === 'daily' ? 'app.noIllWait' : 'app.noThankYou'
-              )}
+              {t('app.noIllWait')}
             </Text>
           </LinkBox>
         </Box>
@@ -107,4 +81,4 @@ const QuotaModal = ({ navigation }: Props) => {
   )
 }
 
-export default withNavigation(QuotaModal)
+export default withNavigation(EarlyAccessModal)

@@ -77,8 +77,7 @@ const useLoadSound = ({
 
   useTrackPlayerEvents(events, async event => {
     if (event.type === Event.PlaybackError) {
-      let trackIndex = await TrackPlayer.getCurrentTrack()
-      let trackObject = await TrackPlayer.getTrack(trackIndex!)
+      let trackObject = await TrackPlayer.getActiveTrack()
       console.log(trackObject?.url)
       console.warn('An error occured while playing the current track.')
       setError(true)
@@ -91,9 +90,8 @@ const useLoadSound = ({
         setAudioSleepMinutes('off')
       }
     }
-    if (event.type === Event.PlaybackTrackChanged && event.nextTrack) {
-      const nextTrack = await TrackPlayer.getTrack(event.nextTrack)
-
+    if (event.type === Event.PlaybackActiveTrackChanged && event.track) {
+      const nextTrack = event.track
       // If mismatch, it means the track change was not triggered by the user
       if (
         nextTrack &&
@@ -142,6 +140,16 @@ const useLoadSound = ({
   // Create tracks for the current book
   const tracks = useMemo(() => getAllTracks(version), [version])
 
+  // Unmounting
+  useEffect(() => {
+    return () => {
+      TrackPlayer.pause()
+      TrackPlayer.reset()
+      setAudioSleepTime(0)
+      setAudioSleepMinutes('off')
+    }
+  }, [setAudioSleepMinutes, setAudioSleepTime])
+
   // Audio init on version change
   useEffect(() => {
     ;(async () => {
@@ -169,8 +177,12 @@ const useLoadSound = ({
       })
 
       // Reset player and add tracks
-      await TrackPlayer.reset()
-      await TrackPlayer.add(tracks)
+      try {
+        await TrackPlayer.reset()
+        await TrackPlayer.add(tracks)
+      } catch {
+        console.log('silent catch')
+      }
       setIsSetup(true)
     })()
   }, [version, tracks])
@@ -189,23 +201,20 @@ const useLoadSound = ({
       const trackIndex = tracks.findIndex(
         track => track.book.Numero === book.Numero && track.chapter === chapter
       )
-      await TrackPlayer.skip(trackIndex)
+      try {
+        await TrackPlayer.skip(trackIndex)
 
-      const duration = await TrackPlayer.getDuration()
-      await TrackPlayer.updateMetadataForTrack(trackIndex, {
-        duration,
-      })
+        const duration = await TrackPlayer.getProgress().then(
+          progress => progress.duration
+        )
+        await TrackPlayer.updateMetadataForTrack(trackIndex, {
+          duration,
+        })
+      } catch {
+        console.log('silent catch')
+      }
     })()
   }, [book.Numero, chapter, isSetup, tracks])
-
-  useEffect(() => {
-    return () => {
-      TrackPlayer.pause()
-      TrackPlayer.reset()
-      setAudioSleepTime(0)
-      setAudioSleepMinutes('off')
-    }
-  }, [])
 
   return {
     error,

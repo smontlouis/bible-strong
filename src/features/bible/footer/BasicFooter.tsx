@@ -1,5 +1,6 @@
 import React from 'react'
 import { TouchableBox } from '~common/ui/Box'
+import EarlyAccessIcon from '~common/ui/EarlyAccessIcon'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import AudioButton from './AudioButton'
@@ -95,6 +96,7 @@ const PlayableButtons = ({
       bg="lightGrey"
       padding={2}
       borderRadius={50}
+      overflow="visible"
     >
       <TouchableBox
         center
@@ -107,6 +109,8 @@ const PlayableButtons = ({
         borderWidth={2}
         borderRadius={25}
         borderColor="lightGrey"
+        position="relative"
+        overflow="visible"
       >
         <AudioButton
           isPlaying={isPlaying}
@@ -115,6 +119,7 @@ const PlayableButtons = ({
           type={type}
         />
       </TouchableBox>
+      {type === 'tts' && <EarlyAccessIcon value="enable_tts_public" />}
     </HStack>
   )
 }

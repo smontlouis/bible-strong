@@ -199,3 +199,5 @@ export type BibleResource =
   | 'dictionary'
   | 'nave'
   | 'reference'
+
+export type RemoteConfigValue = 'enable_tts_public'

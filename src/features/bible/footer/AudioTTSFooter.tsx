@@ -1,9 +1,10 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import VIForegroundService from '@voximplant/react-native-foreground-service'
-import * as Speech from 'expo-speech'
 import { Audio } from 'expo-av'
+import * as Speech from 'expo-speech'
 import { useAtomValue } from 'jotai/react'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Platform } from 'react-native'
 import { VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -12,17 +13,16 @@ import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getVersions, Version } from '~helpers/bibleVersions'
 import loadBible from '~helpers/loadBible'
+import { useEarlyAccess } from '~helpers/usePremium'
 import { ttsPitchAtom, ttsRepeatAtom, ttsSpeedAtom, ttsVoiceAtom } from './atom'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
 import PlayButton from './PlayButton'
 import TTSPitchButton from './TTSPitchButton'
+import TTSRepeatButton from './TTSRepeatButton'
 import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
-import TTSRepeatButton from './TTSRepeatButton'
-import { Platform } from 'react-native'
-import remoteConfig from '@react-native-firebase/remote-config'
 
 type UseLoadSoundProps = {
   book: Book
@@ -70,6 +70,7 @@ const useLoadSound = ({
   const totalVerses = useRef(0)
   const currentVerse = useRef(1)
   const [rendered, rerender] = React.useReducer(i => i + 1, 0)
+  const checkEarlyAccess = useEarlyAccess()
 
   const [isExpanded, setExpandedMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -95,15 +96,13 @@ const useLoadSound = ({
     goToPrevChapter()
   }
 
-  const onPlay = () => {
-    const enableTTSPublic = remoteConfig().getValue('enable_tts_public')
-    console.log(enableTTSPublic.asBoolean())
+  const onPlay = checkEarlyAccess('enable_tts_public', () => {
     ignoreSpeechDone.current = false
     setExpandedMode(true)
     if (!isPlaying) {
       setIsPlaying(true)
     }
-  }
+  })
 
   const onStop = () => {
     ignoreSpeechDone.current = true

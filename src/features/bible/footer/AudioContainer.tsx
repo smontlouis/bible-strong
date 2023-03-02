@@ -2,9 +2,11 @@ import React from 'react'
 import { TouchableOpacityProps } from 'react-native'
 import Link from '~common/Link'
 import Box, { BoxProps, TouchableBox } from '~common/ui/Box'
+import EarlyAccessIcon from '~common/ui/EarlyAccessIcon'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { useEarlyAccess } from '~helpers/usePremium'
 
 export interface AudioContainerProps {
   children: React.ReactNode
@@ -16,11 +18,13 @@ export interface AudioContainerProps {
 type ChipProps = {
   children: string
   isActive?: boolean
+  hasEarlyAccess?: boolean
 }
 
 const Chip = ({
   children,
   isActive,
+  hasEarlyAccess,
   ...props
 }: ChipProps & BoxProps & TouchableOpacityProps) => (
   <TouchableBox
@@ -29,11 +33,15 @@ const Chip = ({
     borderRadius={8}
     borderWidth={1}
     borderColor={isActive ? 'primary' : 'border'}
+    row
     {...props}
   >
     <Text fontSize={10} color={isActive ? 'primary' : 'default'}>
       {children}
     </Text>
+    {hasEarlyAccess && (
+      <EarlyAccessIcon ml={2} value="enable_tts_public" size={10} inline />
+    )}
   </TouchableBox>
 )
 
@@ -43,6 +51,7 @@ const AudioContainer = ({
   audioMode,
   onChangeMode,
 }: AudioContainerProps) => {
+  const checkEarlyAccess = useEarlyAccess()
   return (
     <Box
       height="auto"
@@ -67,7 +76,10 @@ const AudioContainer = ({
           </Chip>
           <Chip
             isActive={audioMode === 'tts'}
-            onPress={() => onChangeMode('tts')}
+            hasEarlyAccess
+            onPress={checkEarlyAccess('enable_tts_public', () =>
+              onChangeMode('tts')
+            )}
           >
             TTS
           </Chip>

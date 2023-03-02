@@ -1,10 +1,9 @@
-import { useAtom, useAtomValue } from 'jotai/react'
-import { useCallback } from 'react'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import remoteConfig from '@react-native-firebase/remote-config'
+import { useSetAtom } from 'jotai/react'
+import { useSelector } from 'react-redux'
+import { earlyAccessModalAtom } from '../state/app'
 import { RootState } from '~redux/modules/reducer'
-import { QuotaType, updateQuota } from '~redux/modules/user'
-import { tabsCountAtom } from '../state/tabs'
-import { quotaModalAtom } from '../state/app'
+import { RemoteConfigValue } from '~common/types'
 
 export const useIsPremium = () => {
   const hasPremium = useSelector((state: RootState) => state.user.subscription)
@@ -19,57 +18,22 @@ export const usePremiumType = () => {
   return premiumType
 }
 
-// Deprecated
-export const useQuota = (quotaType: QuotaType) => {
-  const dispatch = useDispatch()
-  const quota = useSelector(
-    (state: RootState) => state.user.quota[quotaType],
-    shallowEqual
-  )
-  const isPremium = useIsPremium()
-  const hasQuota = quota.remaining > 0
-  const [, setShowQuotaModal] = useAtom(quotaModalAtom)
+export const useEarlyAccess = () => {
+  const setShowEarlyAccessModal = useSetAtom(earlyAccessModalAtom)
+  const hasPremium = useIsPremium()
 
-  return useCallback(
-    (fn: () => void, failCb?: () => void) => {
-      if (isPremium) {
-        fn()
-        return
-      }
-      if (hasQuota) {
-        fn()
-        dispatch(updateQuota(quotaType))
-        return
-      }
-      if (failCb) failCb()
-      setShowQuotaModal('daily')
-    },
-    [hasQuota, isPremium, setShowQuotaModal, quotaType, dispatch]
-  )
-}
+  const showEarlyAccessModal = (
+    remoteConfigValue: RemoteConfigValue,
+    fn: () => void
+  ) => () => {
+    const enable = remoteConfig().getValue(remoteConfigValue)
 
-// Deprecated
-export const tabsCountQuota = 4
+    if (hasPremium || enable.asBoolean()) {
+      return fn()
+    }
 
-// Deprecated
-export const useTabsQuota = () => {
-  const isPremium = useIsPremium()
-  const tabsCount = useAtomValue(tabsCountAtom)
-  const [, setShowQuotaModal] = useAtom(quotaModalAtom)
+    setShowEarlyAccessModal(true)
+  }
 
-  return useCallback(
-    (fn: () => void, failCb?: () => void) => {
-      if (isPremium) {
-        fn()
-        return
-      }
-      if (tabsCount < tabsCountQuota) {
-        fn()
-        return
-      }
-      if (failCb) failCb()
-      setShowQuotaModal('tabs')
-    },
-    [isPremium, setShowQuotaModal, tabsCount]
-  )
+  return showEarlyAccessModal
 }
