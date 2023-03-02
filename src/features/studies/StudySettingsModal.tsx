@@ -31,6 +31,8 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   const openInNewTab = useOpenInNewTab()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
+  const { ref, open, close } = useModalize()
+
   const deleteStudyConfirmation = (id: string) => {
     Alert.alert(
       t('Attention'),
@@ -41,15 +43,13 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
           text: t('Oui'),
           onPress: () => {
             dispatch(deleteStudy(id))
-            onClosed()
+            close()
           },
           style: 'destructive',
         },
       ]
     )
   }
-
-  const { ref, open, close } = useModalize()
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +58,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   }, [isOpen, open])
 
   return (
-    <Modal.Body ref={ref} onClose={onClosed} adjustToContentHeight>
+    <Modal.Body ref={ref} onClose={onClosed} adjustToContentHeight withPortal>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <Modal.Item
         onPress={() => {

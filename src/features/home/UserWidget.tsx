@@ -213,7 +213,12 @@ const UserWidget = () => {
                 row
               >
                 {[...Array(starsCount).keys()].map((_, i) => (
-                  <MaterialIcon name="star" size={14} color="secondary" />
+                  <MaterialIcon
+                    key={i}
+                    name="star"
+                    size={14}
+                    color="secondary"
+                  />
                 ))}
               </Box>
             )}

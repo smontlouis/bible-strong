@@ -7,7 +7,7 @@
                 <key>EXUpdatesURL</key>
                 <string>https://exp.host/@smontlouis/bible-strong</string>
                 <key>EXUpdatesReleaseChannel</key>
-                <string>prod-v16.8</string>
+                <string>prod-v17</string>
                 <key>EXUpdatesCheckOnLaunch</key>
                 <false/>
         </dict>

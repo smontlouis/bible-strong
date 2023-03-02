@@ -120,10 +120,6 @@ const EditStudyScreen = ({
   // Control weither bible webview send back to study tab or not
   useEffect(() => {
     setOpenedFromTab(openedFromTab || false)
-
-    return () => {
-      setOpenedFromTab(false)
-    }
   }, [])
 
   return (
