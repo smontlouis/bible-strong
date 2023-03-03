@@ -152,9 +152,7 @@ export const useVerseOfTheDay = (addDay: number) => {
           }`
         )
       } catch (e) {
-        Snackbar.show('Erreur de notification.')
         console.log(e)
-        Sentry.captureException(e)
       }
     }
     const initNotifications = async () => {
