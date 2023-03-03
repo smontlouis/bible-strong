@@ -79,6 +79,10 @@ project.ext.react = [
     enableHermes: (findProperty('expo.jsEngine') ?: "jsc") == "hermes",
 ]
 
+project.ext.reanimated = [
+    buildFromSource: true
+]
+
 apply from: "../../node_modules/react-native/react.gradle"
 
 project.ext.sentryCli = [
@@ -125,8 +129,8 @@ android {
         applicationId "com.smontlouis.biblestrong"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 321
-        versionName "16.13.2"
+        versionCode 323
+        versionName "16.13.3"
         manifestPlaceholders = [appAuthRedirectScheme: 'com.redirectScheme.comm']
 
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
