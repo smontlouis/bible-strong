@@ -234,15 +234,12 @@ android {
     productFlavors {
         dev {
             applicationIdSuffix ".dev"
-            resValue "string", "content_provider", "com.facebook.app.dev.FacebookContentProvider312719079612015"
         }
         
         staging {
             applicationIdSuffix ".staging"
-            resValue "string", "content_provider", "com.facebook.app.staging.FacebookContentProvider312719079612015"
         }
         prod {
-            resValue "string", "content_provider", "com.facebook.app.FacebookContentProvider312719079612015"
         }
     }
 
