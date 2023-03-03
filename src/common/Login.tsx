@@ -52,11 +52,11 @@ const Login = ({ theme }) => {
     setLoading(isStillLoading)
   }
 
-  const onFacebookLogin = async () => {
-    setLoading(true)
-    const isStillLoading = await FireAuth.facebookLogin()
-    setLoading(isStillLoading)
-  }
+  // const onFacebookLogin = async () => {
+  //   setLoading(true)
+  //   const isStillLoading = await FireAuth.facebookLogin()
+  //   setLoading(isStillLoading)
+  // }
 
   const onLogin = async () => {
     if (!email || !password) {
@@ -140,7 +140,7 @@ const Login = ({ theme }) => {
           <ButtonIcon size={20} name="google" color="white" />
           <ButtonText color="white">Google</ButtonText>
         </SocialButton>
-        <Box width={10} />
+        {/* <Box width={10} />
         <SocialButton
           disabled={isLoading}
           onPress={onFacebookLogin}
@@ -148,7 +148,7 @@ const Login = ({ theme }) => {
         >
           <ButtonIcon size={20} name="facebook" color="white" />
           <ButtonText color="white">Facebook</ButtonText>
-        </SocialButton>
+        </SocialButton> */}
       </Box>
       <Spacer size={2} />
       <Box center pb={20}>

@@ -10,7 +10,6 @@
 #import <React/RCTBridge.h>
 #import <Firebase.h>
 #import <UserNotifications/UserNotifications.h>
-#import <FBSDKCoreKit/FBSDKCoreKit.h>
 #import <RNGoogleSignin/RNGoogleSignin.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
@@ -60,8 +59,6 @@ static void InitializeFlipper(UIApplication *application) {
   #ifdef FB_SONARKIT_ENABLED
     InitializeFlipper(application);
   #endif
-
-  [FBSDKApplicationDelegate initializeSDK:launchOptions];
 
   RCTAppSetupPrepareApp(application);
 
@@ -138,10 +135,6 @@ return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"]
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(nonnull NSURL *)url options:(nonnull NSDictionary<NSString *,id> *)options {
-  if ([[FBSDKApplicationDelegate sharedInstance] application:application openURL:url options:options]) {
-    return YES;
-  }
-
   if ([RNGoogleSignin application:application openURL:url options:options]) {
     return YES;
   }

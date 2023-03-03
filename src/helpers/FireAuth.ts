@@ -7,7 +7,6 @@ import NetInfo from '@react-native-community/netinfo'
 import analytics from '@react-native-firebase/analytics'
 import auth from '@react-native-firebase/auth'
 import * as Sentry from '@sentry/react-native'
-import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
 import i18n from '~i18n'
@@ -164,30 +163,30 @@ const FireAuth = class {
       }
     })
 
-  facebookLogin = () =>
-    new Promise(async resolve => {
-      try {
-        const result = await LoginManager.logInWithPermissions([
-          'public_profile',
-          'email',
-        ])
+  // facebookLogin = () =>
+  //   new Promise(async resolve => {
+  //     try {
+  //       const result = await LoginManager.logInWithPermissions([
+  //         'public_profile',
+  //         'email',
+  //       ])
 
-        if (!result.isCancelled) {
-          const { accessToken } = await AccessToken.getCurrentAccessToken()
-          // Build Firebase credential with the Facebook access token.
-          const credential = auth.FacebookAuthProvider.credential(accessToken)
-          return this.onCredentialSuccess(credential, resolve)
-        }
+  //       if (!result.isCancelled) {
+  //         const { accessToken } = await AccessToken.getCurrentAccessToken()
+  //         // Build Firebase credential with the Facebook access token.
+  //         const credential = auth.FacebookAuthProvider.credential(accessToken)
+  //         return this.onCredentialSuccess(credential, resolve)
+  //       }
 
-        SnackBar.show(i18n.t('Connexion annulée.'))
-        return resolve(false)
-      } catch (e) {
-        SnackBar.show(i18n.t('Une erreur est survenue.'))
-        console.log(e)
-        Sentry.captureException(e)
-        return resolve(false)
-      }
-    })
+  //       SnackBar.show(i18n.t('Connexion annulée.'))
+  //       return resolve(false)
+  //     } catch (e) {
+  //       SnackBar.show(i18n.t('Une erreur est survenue.'))
+  //       console.log(e)
+  //       Sentry.captureException(e)
+  //       return resolve(false)
+  //     }
+  //   })
 
   googleLogin = () =>
     new Promise(async resolve => {
