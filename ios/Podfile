@@ -13,8 +13,6 @@ project 'biblestrong',
         'Staging' => :release, 
         'Prod' => :release
 
-production = ENV["PRODUCTION"] == "1"
-
 target 'biblestrong' do
 
   use_expo_modules!
@@ -56,7 +54,6 @@ target 'biblestrong' do
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
-    :production => production,
     :fabric_enabled => flags[:fabric_enabled],
     :flipper_configuration => FlipperConfiguration.enabled(["Dev", "Staging"], { 'Flipper' => '0.163.0' }),
     # An absolute path to your application root.
