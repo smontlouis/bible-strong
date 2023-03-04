@@ -614,43 +614,42 @@ PODS:
   - DoubleConversion (1.1.6)
   - EASClient (0.3.0):
     - ExpoModulesCore
-  - EXApplication (4.2.2):
+  - EXApplication (5.0.1):
     - ExpoModulesCore
-  - EXAV (12.0.4):
+  - EXAV (13.0.3):
     - ExpoModulesCore
-    - React-runtimeexecutor
-    - ReactCommon
-  - EXConstants (13.2.4):
+    - ReactCommon/turbomodule/core
+  - EXConstants (14.0.2):
     - ExpoModulesCore
-  - EXDevice (4.3.0):
+  - EXDevice (5.0.0):
     - ExpoModulesCore
-  - EXErrorRecovery (3.2.0):
+  - EXErrorRecovery (4.0.1):
     - ExpoModulesCore
-  - EXFileSystem (14.1.0):
+  - EXFileSystem (15.1.1):
     - ExpoModulesCore
-  - EXFont (10.2.1):
+  - EXFont (11.0.1):
     - ExpoModulesCore
   - EXJSONUtils (0.3.0)
   - EXManifests (0.3.1):
     - EXJSONUtils
-  - Expo (46.0.20):
+  - Expo (47.0.13):
     - ExpoModulesCore
   - ExpoAdapterGoogleSignIn (9.0.2):
     - ExpoModulesCore
     - GoogleSignIn (~> 6.2)
     - React-Core
-  - ExpoHaptics (11.3.0):
+  - ExpoHaptics (12.0.1):
     - ExpoModulesCore
-  - ExpoKeepAwake (10.2.1):
+  - ExpoKeepAwake (11.0.1):
     - ExpoModulesCore
-  - ExpoLinearGradient (11.4.0):
+  - ExpoLinearGradient (12.0.1):
     - ExpoModulesCore
-  - ExpoModulesCore (0.11.10):
+  - ExpoModulesCore (1.1.1):
     - React-Core
     - ReactCommon/turbomodule/core
-  - EXSharing (10.3.0):
+  - EXSharing (11.0.1):
     - ExpoModulesCore
-  - EXSpeech (10.3.0):
+  - EXSpeech (11.0.0):
     - ExpoModulesCore
   - EXSplashScreen (0.17.5):
     - ExpoModulesCore
@@ -1175,10 +1174,10 @@ PODS:
     - glog
   - react-native-flipper (0.163.0):
     - React-Core
-  - react-native-iaphub (8.4.0):
+  - react-native-iaphub (8.4.1):
     - Iaphub (= 4.1.0)
     - React-Core
-  - react-native-netinfo (9.3.0):
+  - react-native-netinfo (9.3.5):
     - React-Core
   - react-native-restart (0.0.17):
     - React
@@ -1190,10 +1189,10 @@ PODS:
     - ReactCommon/turbomodule/core
   - react-native-sqlite-storage (4.1.0):
     - React
-  - react-native-track-player (3.2.0-50ddb083808b615ab10d2b76e044a4f989c2796f):
+  - react-native-track-player (3.2.0):
     - React-Core
-    - SwiftAudioEx (= 1.0.0-rc.1)
-  - react-native-view-shot (3.3.0):
+    - SwiftAudioEx (= 0.15.3)
+  - react-native-view-shot (3.4.0):
     - React-Core
   - react-native-webview (11.23.1):
     - React-Core
@@ -1252,25 +1251,6 @@ PODS:
     - ReactCommon/turbomodule/core (= 0.69.7)
   - React-runtimeexecutor (0.69.7):
     - React-jsi (= 0.69.7)
-  - ReactCommon (0.69.7):
-    - React-logger (= 0.69.7)
-    - ReactCommon/react_debug_core (= 0.69.7)
-    - ReactCommon/turbomodule (= 0.69.7)
-  - ReactCommon/react_debug_core (0.69.7):
-    - React-logger (= 0.69.7)
-  - ReactCommon/turbomodule (0.69.7):
-    - DoubleConversion
-    - glog
-    - RCT-Folly (= 2021.06.28.00-v2)
-    - React-bridging (= 0.69.7)
-    - React-callinvoker (= 0.69.7)
-    - React-Core (= 0.69.7)
-    - React-cxxreact (= 0.69.7)
-    - React-jsi (= 0.69.7)
-    - React-logger (= 0.69.7)
-    - React-perflogger (= 0.69.7)
-    - ReactCommon/turbomodule/core (= 0.69.7)
-    - ReactCommon/turbomodule/samples (= 0.69.7)
   - ReactCommon/turbomodule/core (0.69.7):
     - DoubleConversion
     - glog
@@ -1282,18 +1262,6 @@ PODS:
     - React-jsi (= 0.69.7)
     - React-logger (= 0.69.7)
     - React-perflogger (= 0.69.7)
-  - ReactCommon/turbomodule/samples (0.69.7):
-    - DoubleConversion
-    - glog
-    - RCT-Folly (= 2021.06.28.00-v2)
-    - React-bridging (= 0.69.7)
-    - React-callinvoker (= 0.69.7)
-    - React-Core (= 0.69.7)
-    - React-cxxreact (= 0.69.7)
-    - React-jsi (= 0.69.7)
-    - React-logger (= 0.69.7)
-    - React-perflogger (= 0.69.7)
-    - ReactCommon/turbomodule/core (= 0.69.7)
   - rn-fetch-blob (0.12.0):
     - React-Core
   - RNAppleAuthentication (0.2.0):
@@ -1306,7 +1274,7 @@ PODS:
     - React
   - RNDateTimePicker (6.7.5):
     - React-Core
-  - RNFastImage (8.5.11):
+  - RNFastImage (8.6.3):
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
@@ -1335,8 +1303,8 @@ PODS:
     - RNFBApp
   - RNFlashList (1.4.1):
     - React-Core
-  - RNFS (2.18.0):
-    - React
+  - RNFS (2.20.0):
+    - React-Core
   - RNGestureHandler (1.10.3):
     - React-Core
   - RNGoogleSignin (9.0.2):
@@ -1378,9 +1346,9 @@ PODS:
     - Yoga
   - RNScreens (2.18.1):
     - React-Core
-  - RNSentry (4.2.2):
+  - RNSentry (4.9.0):
     - React-Core
-    - Sentry (= 7.22.0)
+    - Sentry/HybridSDK (= 7.31.2)
   - RNSVG (13.8.0):
     - React-Core
   - RNZipArchive (5.0.6):
@@ -1396,12 +1364,10 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
-  - Sentry (7.22.0):
-    - Sentry/Core (= 7.22.0)
-  - Sentry/Core (7.22.0)
+  - Sentry/HybridSDK (7.31.2)
   - SocketRocket (0.6.0)
   - SSZipArchive (2.2.2)
-  - SwiftAudioEx (1.0.0-rc.1)
+  - SwiftAudioEx (0.15.3)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -1424,7 +1390,7 @@ DEPENDENCIES:
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
-  - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
+  - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - EXSharing (from `../node_modules/expo-sharing/ios`)
   - EXSpeech (from `../node_modules/expo-speech/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
@@ -1611,7 +1577,7 @@ EXTERNAL SOURCES:
   ExpoLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
   ExpoModulesCore:
-    :path: "../node_modules/expo-modules-core/ios"
+    :path: "../node_modules/expo-modules-core"
   EXSharing:
     :path: "../node_modules/expo-sharing/ios"
   EXSpeech:
@@ -1767,28 +1733,28 @@ SPEC CHECKSUMS:
   BoringSSL-GRPC: 3175b25143e648463a56daeaaa499c6cb86dad33
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
-  EASClient: a2581835cf9b97d0defd5d630fc6eb1bf77045e7
-  EXApplication: e418d737a036e788510f2c4ad6c10a7d54d18586
-  EXAV: 596506c9bee54ad52f2f3b625cdaeb9d9f2dd6b7
-  EXConstants: 7c44785d41d8e959d527d23d29444277a4d1ee73
-  EXDevice: 7647ca9b1fd8b269dfd896a7643d659343358054
-  EXErrorRecovery: 74d71ee59f6814315457b09d68e86aa95cc7d05d
-  EXFileSystem: 927e0a8885aa9c49e50fc38eaba2c2389f2f1019
-  EXFont: 06df627203afcb8a3b3152ec06eb2f11f46f0cff
+  EASClient: 660c8631487c8035a79d4d909f3766661dc777fd
+  EXApplication: 034b1c40a8e9fe1bff76a1e511ee90dff64ad834
+  EXAV: 8e4e12377926c071843498d19adfa27802695385
+  EXConstants: 3c86653c422dd77e40d10cbbabb3025003977415
+  EXDevice: 734a55d8935ea8e075d12df1919a0497153bf55c
+  EXErrorRecovery: ae43433feb0608a64dc5b1c8363b3e7769a9ea24
+  EXFileSystem: 60602b6eefa6873f97172c684b7537c9760b50d6
+  EXFont: 319606bfe48c33b5b5063fb0994afdc496befe80
   EXJSONUtils: 2a74b8f40f1523cc3f92af99c91aa78201737a77
   EXManifests: b38dc61303f5eede990b4c8ecbfac32f82160e65
-  Expo: c2afed3f226befffaed962e9bacb5e0296acd254
+  Expo: b9fa98bf260992312ee3c424400819fb9beadafe
   ExpoAdapterGoogleSignIn: 98a113d9c0ed1ce7cf6259f0907d3f93209b0d7f
-  ExpoHaptics: efe9e68e9dfe0d15c183c0c70a25f3874124ab9e
-  ExpoKeepAwake: 8b47e5358d54ea4922b630a74f2acb026ab7a28b
-  ExpoLinearGradient: 1a3af07c6dab3c612967a294836df9ae717431df
-  ExpoModulesCore: 1b2f5f91eff132671f6d0642aad2ba7915c6ff41
-  EXSharing: 8530ef08cb899328a7c61de7f4836af6208b567b
-  EXSpeech: 175da82cb7444c8e81e94cc139b9f0d7b22b27e7
+  ExpoHaptics: 5a56d30a87ea213dd00b09566dc4b441a4dff97f
+  ExpoKeepAwake: 69b59d0a8d2b24de9f82759c39b3821fec030318
+  ExpoLinearGradient: b40c2133ad57ae105b1b12a319e314463c817f6b
+  ExpoModulesCore: e4e314bc72c2c2b64e794444a7efae8d24f068f3
+  EXSharing: e4c5ebc5b36828f1e0dff1415b2b28b23dc770b8
+  EXSpeech: b1e02f7d9d4e9731133da25ee4b26cc0740707ed
   EXSplashScreen: 3e989924f61a8dd07ee4ea584c6ba14be9b51949
   EXStructuredHeaders: 5d86829469399370a9fc7cb1e4391b09de87681d
-  EXUpdates: 7a705a119c7551d50fbcdd8e3b5b414c4fefadb8
-  EXUpdatesInterface: 2bbc11815dfa2ec3fc02e5534c7592c6b42b5327
+  EXUpdates: 5a65a2f77aabb0da635bb70e1b7bf780ae0b1a75
+  EXUpdatesInterface: 61d6a5c6e54fc446f3da7d9be8961cd9448ae3ef
   FBLazyVector: 6b7f5692909b4300d50e7359cdefbcd09dd30faa
   FBReactNativeSpec: affcf71d996f6b0c01f68883482588297b9d5e6e
   Firebase: 5f8193dff4b5b7c5d5ef72ae54bb76c08e2b841d
@@ -1847,13 +1813,13 @@ SPEC CHECKSUMS:
   React-jsinspector: 8134ee22182b8dd98dc0973db6266c398103ce6c
   React-logger: 1e7ac909607ee65fd5c4d8bea8c6e644f66b8843
   react-native-flipper: 2d552a8178d839ef378220101fb7f0cd5b2a8003
-  react-native-iaphub: 7ed655d383bc973d2d5714c4facbddf52345d19e
-  react-native-netinfo: 129bd99f607a2dc5bb096168f3e5c150fd1f1c95
+  react-native-iaphub: 523f5f228f4eb367c9abd6717bbbad9ec45d3dc9
+  react-native-netinfo: 85b2a435c4d3705c08b0c42ff2d6ef6b9622ea0a
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
-  react-native-track-player: f89ecfeb9107bbec7304a10da60f23dda22aba47
-  react-native-view-shot: da768466e1cd371de50a3a5c722d1e95456b5b2c
+  react-native-track-player: 0c26d981b5097910486cbbeb6d8f5352d41be069
+  react-native-view-shot: a60a98a18c72bcaaaf2138f9aab960ae9b0d96c7
   react-native-webview: d33e2db8925d090871ffeb232dfa50cb3a727581
   React-perflogger: 8e832d4e21fdfa613033c76d58d7e617341e804b
   React-RCTActionSheet: 9ca778182a9523991bff6381045885b6e808bb73
@@ -1873,7 +1839,7 @@ SPEC CHECKSUMS:
   RNCClipboard: 41d8d918092ae8e676f18adada19104fa3e68495
   RNCMaskedView: 0e1bc4bfa8365eba5fbbb71e07fbdc0555249489
   RNDateTimePicker: 65e1d202799460b286ff5e741d8baf54695e8abd
-  RNFastImage: 1f2cab428712a4baaf78d6169eaec7f622556dd7
+  RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFBAnalytics: ea1421b49a0bf5e5bb7274df4a330713d0e85d2e
   RNFBApp: e4439717c23252458da2b41b81b4b475c86f90c4
   RNFBAuth: 50ac123123b27241927e639c0ac9c8af17f05aa1
@@ -1881,25 +1847,25 @@ SPEC CHECKSUMS:
   RNFBRemoteConfig: 92fbb75ceb69fec44ae727b70d23c5d1798f7648
   RNFBStorage: b5254c0728f704e90b0171769dfffdf4665afab7
   RNFlashList: 8ec7f7454721145fe84566bb9e88bcf58981c9fe
-  RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
+  RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNGoogleSignin: 22e468a9474dbcb8618d8847205ad4f0b2575d13
   RNLocalize: 7c7aeda16c01db7a0918981c14875c0a53be9b79
   RNNotifee: 053c0ace9c73634709a0214fd9c436a5777a562f
   RNReanimated: ba021107f1dd90cb04c35c5d639392d5da27d065
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
-  RNSentry: f03937a2cf86c7029ba31fbbf5618c55d223cd62
+  RNSentry: 6503a8ec616947dbe98be828307c8f49e7686674
   RNSVG: c1e76b81c76cdcd34b4e1188852892dc280eb902
   RNZipArchive: 9dfdaa1d1ad49a423e83df505f292e0ae8126a5d
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
-  Sentry: 30b51086ca9aac23337880152e95538f7e177f7f
+  Sentry: b15765d11769852fe78c9add942f7df60ed5dbf5
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
-  SwiftAudioEx: 3c15f7a8994a08b43a10ef874e236ff31166643d
+  SwiftAudioEx: 83eabba2940924fc1c0d5cb0896049921365229c
   Yoga: 0b84a956f7393ef1f37f3bb213c516184e4a689d
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 9260d659d1a6652d2a9a84ec9fd1a723398c1d5a
+PODFILE CHECKSUM: 33aacbfdc5eeb3ebd9f24c06619e7376fbc85fa2
 
 COCOAPODS: 1.11.3
