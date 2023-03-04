@@ -5,6 +5,9 @@
 #import <RNGoogleSignin/RNGoogleSignin.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import <React/RCTLinkingManager.h>
+#import <React/RCTConvert.h>
+
 #import <React/RCTAppSetupUtils.h>
 
 #if RCT_NEW_ARCH_ENABLED
@@ -14,6 +17,7 @@
 #import <React/RCTSurfacePresenter.h>
 #import <React/RCTSurfacePresenterBridgeAdapter.h>
 #import <ReactCommon/RCTTurboModuleManager.h>
+
 #import <react/config/ReactNativeConfig.h>
 
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
@@ -31,7 +35,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  
+  [FIRApp configure];
   RCTAppSetupPrepareApp(application);
 
   RCTBridge *bridge = [self.reactDelegate createBridgeWithDelegate:self launchOptions:launchOptions];
@@ -45,25 +49,23 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 #endif
 
   NSDictionary *initProps = [self prepareInitialProps];
-  UIView *rootView = [self.reactDelegate createRootViewWithBridge:bridge moduleName:@"main" initialProperties:nil];
+  UIView *rootView = [self.reactDelegate createRootViewWithBridge:bridge moduleName:@"main" initialProperties:initProps];
 
-  if (@available(iOS 13.0, *)) {
-    rootView.backgroundColor = [UIColor systemBackgroundColor];
-  } else {
-    rootView.backgroundColor = [UIColor whiteColor];
-  }
-
+  rootView.backgroundColor = [UIColor whiteColor];
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [self.reactDelegate createRootViewController];
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
   [super application:application didFinishLaunchingWithOptions:launchOptions];
-  
-  if ([FIRApp defaultApp] == nil) {
-    [FIRApp configure];
-  }
+
   return YES;
+}
+
+- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge
+{
+  // If you'd like to export some custom RCTBridgeModules, add them here!
+  return @[];
 }
 
 /// This method controls whether the `concurrentRoot`feature of React18 is turned on or off.
@@ -76,10 +78,11 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   // Switch this bool to turn on and off the concurrent root
   return true;
 }
+
 - (NSDictionary *)prepareInitialProps
 {
   NSMutableDictionary *initProps = [NSMutableDictionary new];
-#ifdef RCT_NEW_ARCH_ENABLED
+#if RCT_NEW_ARCH_ENABLED
   initProps[kRNConcurrentRoot] = @([self concurrentRootEnabled]);
 #endif
   return initProps;
@@ -94,16 +97,39 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 #endif
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(nonnull NSURL *)url options:(nonnull NSDictionary<NSString *,id> *)options {
-  if ([RNGoogleSignin application:application openURL:url options:options]) {
-    return YES;
-  }
+// Linking API
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+  return [RNGoogleSignin application:application openURL:url options:options];
+}
 
-  return NO;
+// Universal Links
+- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+  BOOL result = [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+  return [super application:application continueUserActivity:userActivity restorationHandler:restorationHandler] || result;
+}
+
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+  return [super application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+}
+
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+  return [super application:application didFailToRegisterForRemoteNotificationsWithError:error];
+}
+
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+  return [super application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
 }
 
 #if RCT_NEW_ARCH_ENABLED
+
 #pragma mark - RCTCxxBridgeDelegate
+
 - (std::unique_ptr<facebook::react::JSExecutorFactory>)jsExecutorFactoryForBridge:(RCTBridge *)bridge
 {
   _turboModuleManager = [[RCTTurboModuleManager alloc] initWithBridge:bridge
@@ -111,27 +137,32 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
                                                             jsInvoker:bridge.jsCallInvoker];
   return RCTAppSetupDefaultJsExecutorFactory(bridge, _turboModuleManager);
 }
+
 #pragma mark RCTTurboModuleManagerDelegate
+
 - (Class)getModuleClassFromName:(const char *)name
 {
   return RCTCoreModulesClassProvider(name);
 }
+
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const std::string &)name
                                                       jsInvoker:(std::shared_ptr<facebook::react::CallInvoker>)jsInvoker
 {
   return nullptr;
 }
+
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const std::string &)name
                                                      initParams:
                                                          (const facebook::react::ObjCTurboModule::InitParams &)params
 {
   return nullptr;
 }
+
 - (id<RCTTurboModule>)getModuleInstanceFromClass:(Class)moduleClass
 {
   return RCTAppSetupDefaultModuleFromClass(moduleClass);
 }
-#endif
 
+#endif
 
 @end
