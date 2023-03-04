@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "17.0.1",
+  "version": "17.1.0",
   "scripts": {
     "start": "react-native start",
     "android": "react-native run-android --variant=devDebug --appIdSuffix=dev",
@@ -14,6 +14,7 @@
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "storybook": "start-storybook -p 7007",
     "prestorybook": "rnstl",
+    "nuke": "rm -rf node_modules; rm -rf ios/build; rm -rf ios/Pods; rm -rf ios/Podfile.lock; yarn; yarn podinstall",
     "i18n": "i18next 'src/**/*.{js,ts,tsx}' '!src/features/bible/bibleWebView/**' '!src/features/studies/studiesWebView/**'"
   },
   "config": {
@@ -65,7 +66,7 @@
     "@react-native-firebase/storage": "14.12.0",
     "@react-native-google-signin/google-signin": "^9.0.2",
     "@reduxjs/toolkit": "^1.3.4",
-    "@sentry/react-native": "4.9.0",
+    "@sentry/react-native": "4.2.2",
     "@shopify/flash-list": "^1.4.1",
     "@types/react-instantsearch-native": "^6.3.0",
     "@types/react-native-modalbox": "^1.4.8",
@@ -116,7 +117,7 @@
     "react-firebase-hooks": "3.0.4",
     "react-i18next": "11.18.6",
     "react-instantsearch-native": "^6.13.0",
-    "react-native": "0.69.7",
+    "react-native": "0.70.7",
     "react-native-animatable": "^1.3.3",
     "react-native-fast-image": "^8.1.5",
     "react-native-flipper": "^0.163.0",
