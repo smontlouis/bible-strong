@@ -56,7 +56,7 @@ export const useWaitForDatabase = () => {
             return
           }
 
-          const data = await FileSystem.readAsStringAsync(path)
+          const data = await FileSystem.readAsStringAsync(path || '')
           bibleMemoize['timeline'] = JSON.parse(data)
           setLoading(false)
 
@@ -75,7 +75,7 @@ export const useWaitForDatabase = () => {
         }
       } else {
         const path = getDatabases().TIMELINE.path
-        const data = await FileSystem.readAsStringAsync(path)
+        const data = await FileSystem.readAsStringAsync(path || '')
 
         if (bibleMemoize['timeline']) {
           setLoading(false)

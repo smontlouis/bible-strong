@@ -57,7 +57,7 @@ const getAsyncRequire = version => {
 }
 const getBiblePericope = async version => {
   const [{ localUri }] = await Asset.loadAsync(getAsyncRequire(version))
-  const json = JSON.parse(await FileSystem.readAsStringAsync(localUri))
+  const json = JSON.parse(await FileSystem.readAsStringAsync(localUri || ''))
   return json
 }
 

@@ -230,18 +230,6 @@ const BibleViewer = ({
       throw new Error('I crashed!')
     }
 
-    const audioBaseUrl = (() => {
-      if (audioV2.includes(book.Numero.toString())) {
-        return 'https://s.topchretien.com/media/topbible/bible_v2/'
-      }
-
-      if (audioDefault.includes(book.Numero.toString())) {
-        return 'https://s.topchretien.com/media/topbible/bible/'
-      }
-
-      return 'https://s.topchretien.com/media/topbible/bible_say/'
-    })()
-
     setIsLoading(false)
     setVerses(versesToLoad)
     setParallelVerses(parallelVersesToLoad)

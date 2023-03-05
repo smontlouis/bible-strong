@@ -15,7 +15,7 @@ export default function loadBible(bible, position) {
 
           const path = `${FileSystem.documentDirectory}bible-${b}.json`
           const file = await FileSystem.getInfoAsync(path)
-          const data = await FileSystem.readAsStringAsync(file.uri)
+          const data = await FileSystem.readAsStringAsync(file.uri || '')
 
           bibleMemoize[b] = JSON.parse(data)
           resolve(bibleMemoize[b])
@@ -29,7 +29,7 @@ export default function loadBible(bible, position) {
           }
           const path = `${FileSystem.documentDirectory}bible-LSG.json`
           const file = await FileSystem.getInfoAsync(path)
-          const data = await FileSystem.readAsStringAsync(file.uri)
+          const data = await FileSystem.readAsStringAsync(file.uri || '')
 
           bibleMemoize[bible] = JSON.parse(data)
           resolve(bibleMemoize[bible])
@@ -44,7 +44,7 @@ export default function loadBible(bible, position) {
 
           const path = `${FileSystem.documentDirectory}bible-KJV.json`
           const file = await FileSystem.getInfoAsync(path)
-          const data = await FileSystem.readAsStringAsync(file.uri)
+          const data = await FileSystem.readAsStringAsync(file.uri || '')
 
           bibleMemoize[bible] = JSON.parse(data)
           resolve(bibleMemoize[bible])
@@ -58,7 +58,7 @@ export default function loadBible(bible, position) {
 
           const path = `${FileSystem.documentDirectory}bible-${bible}.json`
           const file = await FileSystem.getInfoAsync(path)
-          const data = await FileSystem.readAsStringAsync(file.uri)
+          const data = await FileSystem.readAsStringAsync(file.uri || '')
 
           if (position) {
             await timeout(500 * position + 1)

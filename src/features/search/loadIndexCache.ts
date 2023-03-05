@@ -9,7 +9,7 @@ const loadIndexCache = (idxFile: FileSystem.FileInfo) =>
       return resolve(loadedIndex)
     }
 
-    const data = await FileSystem.readAsStringAsync(idxFile.uri)
+    const data = await FileSystem.readAsStringAsync(idxFile.uri || '')
 
     const lunr = require('lunr')
 

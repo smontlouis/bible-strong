@@ -40,7 +40,7 @@ class WebViewQuillEditor extends React.Component {
     const { localUri } = await AssetUtils.resolveAsync(
       require('~features/studies/studiesWebView/dist/index.html')
     )
-    this.HTMLFile = await FileSystem.readAsStringAsync(localUri)
+    this.HTMLFile = await FileSystem.readAsStringAsync(localUri || '')
 
     this.setState({ isHTMLFileLoaded: true })
   }

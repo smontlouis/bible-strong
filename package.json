@@ -80,7 +80,7 @@
     "colorsys": "^1.0.22",
     "date-fns": "^2.9.0",
     "debounce": "^1.2.0",
-    "deprecated-react-native-prop-types": "^2.3.0",
+    "deprecated-react-native-prop-types": "^4.0.0",
     "expo": "^47.0.0",
     "expo-application": "~5.0.1",
     "expo-asset": "~8.7.0",
