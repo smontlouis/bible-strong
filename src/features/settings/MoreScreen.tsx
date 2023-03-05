@@ -181,7 +181,7 @@ const ManualSync = memo(() => {
 })
 
 const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
-  const { isLogged, logout } = useLogin()
+  const { isLogged, logout, user } = useLogin()
   const isPremium = useIsPremium()
 
   const isFR = useLanguage()
@@ -365,6 +365,18 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
               {t("Conditions d'utilisation")}
             </Text>
           </LinkItem>
+          {isLogged && (
+            <LinkItem
+              style={{ paddingVertical: 10 }}
+              href={`mailto:contact.sevenapps@gmail.com?subject=${t(
+                'app.deleteAccount'
+              )} ${user.email}&body=${t('app.deleteAccountBody')}`}
+            >
+              <Text fontSize={15} color="grey">
+                {t('app.deleteAccount')}
+              </Text>
+            </LinkItem>
+          )}
         </Box>
         <Infos />
       </ScrollView>

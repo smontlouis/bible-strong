@@ -74,6 +74,7 @@ const useAppLoad = () => {
     ;(async () => {
       await remoteConfig().setDefaults({
         enable_tts_public: false,
+        apple_reviewing: false,
       })
       const fetchedRemotely = await remoteConfig().fetchAndActivate()
 

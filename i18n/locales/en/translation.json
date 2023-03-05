@@ -4,6 +4,8 @@
   "Il y a {{formattedDate}}": "{{formattedDate}} ago",
   "Fermer": "Close",
   "Valider": "Validate",
+  "app.deleteAccount": "Delete account",
+  "app.deleteAccountBody": "I would like to delete my account. \n\nI understand that this action is irreversible and that all my data will be permanently deleted.",
   "app.default": "Default",
   "app.error": "Sorry, the app has just crashed... \nPlease restart the app.",
   "app.featureIdeas": "Feature ideas",

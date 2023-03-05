@@ -1,5 +1,5 @@
 import React from 'react'
-
+import remoteConfig from '@react-native-firebase/remote-config'
 import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
 import Header from '~common/Header'
@@ -14,7 +14,7 @@ import { useInitIAP } from '~helpers/useInAppPurchases'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import { useIsPremium, usePremiumType } from '~helpers/usePremium'
-import { descriptionEn, descriptionFr } from './markdown'
+import * as descriptions from './markdown'
 import SubscriptionGroup from './SubscriptionGroup'
 
 const PremiumScreen = () => {
@@ -23,6 +23,17 @@ const PremiumScreen = () => {
   const { isLogged } = useLogin()
   const { t } = useTranslation()
   const isFR = useLanguage()
+
+  const isAppleReviewing = remoteConfig()
+    .getValue('apple_reviewing')
+    .asBoolean()
+
+  const getDescription = () => {
+    if (isAppleReviewing) {
+      return descriptions[isFR ? 'fr' : 'en'].descriptionForAppleReview
+    }
+    return descriptions[isFR ? 'fr' : 'en'].description
+  }
 
   useInitIAP()
 
@@ -57,9 +68,7 @@ const PremiumScreen = () => {
           </Box>
         )}
         <Box px={20}>
-          <StylizedMarkdown>
-            {isFR ? descriptionFr : descriptionEn}
-          </StylizedMarkdown>
+          <StylizedMarkdown>{getDescription()}</StylizedMarkdown>
         </Box>
 
         {!isLogged ? (
