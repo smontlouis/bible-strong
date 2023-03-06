@@ -218,7 +218,7 @@ const VersionSelectorItem = ({
             <TextVersion>{version.id}</TextVersion>
             <HStack alignItems="center">
               <TextName>{version.name}</TextName>
-              {version.hasAudio && (
+              {version?.hasAudio && (
                 <Box>
                   <FeatherIcon name="volume-2" size={16} color="primary" />
                 </Box>
@@ -296,7 +296,7 @@ const VersionSelectorItem = ({
         <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
         <HStack alignItems="center">
           <TextName isSelected={isSelected}>{version.name}</TextName>
-          {version.hasAudio && (
+          {version?.hasAudio && (
             <Box>
               <FeatherIcon name="volume-2" size={16} color="primary" />
             </Box>

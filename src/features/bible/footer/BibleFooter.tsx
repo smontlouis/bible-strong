@@ -26,7 +26,7 @@ const BibleFooter = ({
   version,
 }: BibleFooterProps) => {
   const bibleVersion = getVersions()[version] as Version
-  const canSwitch = bibleVersion.hasAudio
+  const canSwitch = bibleVersion?.hasAudio
   const [audioMode, setAudioMode] = React.useState<'url' | 'tts' | undefined>()
 
   useEffect(() => {
