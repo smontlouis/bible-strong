@@ -13,11 +13,14 @@ import useLogin from '~helpers/useLogin'
 import SubscriptionDetails from './SubscriptionDetails'
 import SubscriptionPlan from './SubscriptionPlan'
 import { mappingSku } from './utils'
+import { LinkItem } from '~features/settings/MoreScreen'
+import useLanguage from '~helpers/useLanguage'
 
 const SubscriptionGroup = () => {
   const [selectedSub, setSelectedSub] = React.useState<SubSku>(
     'com.smontlouis.biblestrong.onemonth'
   )
+  const isFR = useLanguage()
   const { t } = useTranslation()
   const [processing, setProcessing] = React.useState(false)
   const { status, products } = useIapUser()
@@ -70,6 +73,32 @@ const SubscriptionGroup = () => {
           <Button isLoading={processing} onPress={onSubscription}>
             {t("S'abonner")}
           </Button>
+        </Box>
+        <Box paddingVertical={10}>
+          <LinkItem
+            style={{ paddingVertical: 10 }}
+            href={
+              isFR
+                ? 'https://bible-strong.app/politique-de-confidentialite'
+                : 'https://bible-strong.app/privacy-policy'
+            }
+          >
+            <Text fontSize={15} color="grey">
+              {t('Politique de confidentialité')}
+            </Text>
+          </LinkItem>
+          <LinkItem
+            style={{ paddingVertical: 10 }}
+            href={
+              isFR
+                ? 'https://bible-strong.app/eula'
+                : 'https://bible-strong.app/eula-en'
+            }
+          >
+            <Text fontSize={15} color="grey">
+              {t("Conditions d'utilisation")}
+            </Text>
+          </LinkItem>
         </Box>
       </Box>
     )

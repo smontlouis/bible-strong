@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import auth from '@react-native-firebase/auth'
 import sizeof from 'firestore-size'
 import React, { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -22,9 +23,7 @@ import { deleteAllDatabases } from '~helpers/database'
 import useLogin from '~helpers/useLogin'
 import { resetCompareVersion } from '~redux/modules/user'
 
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { shallowEqual } from 'recompose'
-import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import { useIsPremium } from '~helpers/usePremium'
@@ -33,7 +32,7 @@ import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
-const LinkItem = styled(Link)(({}) => ({
+export const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -195,6 +194,36 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
+    ])
+  }
+
+  const promptDelete = () => {
+    Alert.alert(t('Attention'), t('app.deleteAccountBody'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: async () => {
+          Alert.alert(t('Attention'), t('app.deleteAccountBodyConfirm'), [
+            { text: t('Non'), onPress: () => null, style: 'cancel' },
+            {
+              text: t('Delete'),
+              onPress: async () => {
+                firebaseDb
+                  .collection('users')
+                  .doc(user.id)
+                  .delete()
+
+                const authUser = auth().currentUser
+                await authUser?.delete()
+
+                logout()
+              },
+              style: 'destructive',
+            },
+          ])
+        },
+        style: 'destructive',
+      },
     ])
   }
 
@@ -366,12 +395,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             </Text>
           </LinkItem>
           {isLogged && (
-            <LinkItem
-              style={{ paddingVertical: 10 }}
-              href={`mailto:contact.sevenapps@gmail.com?subject=${t(
-                'app.deleteAccount'
-              )} ${user.email}&body=${t('app.deleteAccountBody')}`}
-            >
+            <LinkItem style={{ paddingVertical: 10 }} onPress={promptDelete}>
               <Text fontSize={15} color="grey">
                 {t('app.deleteAccount')}
               </Text>
