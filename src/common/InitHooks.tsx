@@ -52,10 +52,10 @@ const InitHooks = ({}: InitHooksProps) => {
     dispatch(getVersionUpdate())
     dispatch(getDatabaseUpdate())
     updateApp(t)
-    AppState.addEventListener('change', handleAppStateChange)
+    const event = AppState.addEventListener('change', handleAppStateChange)
 
     return () => {
-      AppState.removeEventListener('change', handleAppStateChange)
+      event.remove()
     }
   }, [dispatch, t])
 

@@ -14,11 +14,14 @@ export default function withDimensions(WrappedComponent) {
     }
 
     componentDidMount() {
-      Dimensions.addEventListener('change', this.handleOrientationChange)
+      this.event = Dimensions.addEventListener(
+        'change',
+        this.handleOrientationChange
+      )
     }
 
     componentWillUnmount() {
-      Dimensions.removeEventListener('change', this.handleOrientationChange)
+      this.event.remove()
     }
 
     handleOrientationChange = ({ window }: { window: ScaledSize }) => {
