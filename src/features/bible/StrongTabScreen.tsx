@@ -198,17 +198,6 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
     LSG,
   } = strongReference || {}
 
-  const flatListRenderItem = useCallback(
-    ({ item }) => (
-      <ConcordanceVerse
-        navigation={navigation}
-        concordanceFor={Code}
-        verse={item}
-      />
-    ),
-    [navigation, Code]
-  )
-
   if (error) {
     return (
       <Container>
@@ -383,13 +372,16 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                     </LinkBox>
                   )}
                 </Box>
-                <FlatList
-                  removeClippedSubviews
-                  data={verses}
-                  keyExtractor={keyExtractor}
-                  contentContainerStyle={flatListStyle}
-                  renderItem={flatListRenderItem}
-                />
+                <Box my={10}>
+                  {verses.map((item, i) => (
+                    <ConcordanceVerse
+                      navigation={navigation}
+                      concordanceFor={Code}
+                      verse={item}
+                      key={i}
+                    />
+                  ))}
+                </Box>
                 {count > 15 && (
                   <Box>
                     <Button
