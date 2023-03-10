@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import React from 'react'
-import Carousel from 'react-native-snap-carousel'
+import Carousel from 'react-native-reanimated-carousel'
 import compose from 'recompose/compose'
 
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -23,11 +23,10 @@ import { withTranslation } from 'react-i18next'
 import { withNavigation } from 'react-navigation'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import { viewportWidth, wp } from '~helpers/utils'
+import { hp, wp } from '~helpers/utils'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
-const sliderWidth = viewportWidth
 const itemWidth = slideWidth + itemHorizontalMargin * 2
 
 const VerseText = styled.View(() => ({
@@ -125,7 +124,7 @@ class BibleVerseDetailCard extends React.Component {
           currentStrongReference: strongReferences[0],
         },
         () => {
-          this._carousel.snapToItem(0, false)
+          this._carousel?.scrollTo({ index: 0, animated: false })
         }
       )
     })
@@ -135,7 +134,11 @@ class BibleVerseDetailCard extends React.Component {
     this.state.strongReferences.findIndex(r => r.Code === Number(ref))
 
   goToCarouselItem = ref => {
-    this._carousel.snapToItem(this.findRefIndex(ref))
+    this.setState({
+      currentStrongReference: this.state.strongReferences.find(
+        r => r.Code === Number(ref)
+      ),
+    })
   }
 
   onSnapToItem = index => {
@@ -187,7 +190,7 @@ class BibleVerseDetailCard extends React.Component {
 
     return (
       <StyledScrollView
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <Box background paddingTop={10}>
@@ -222,30 +225,37 @@ class BibleVerseDetailCard extends React.Component {
         <Box bg="lightGrey">
           <RoundedCorner />
         </Box>
-        <Box bg="lightGrey">
+        <Box flex bg="lightGrey">
           {isCarouselLoading && <Loading />}
           {!isCarouselLoading && (
             <Carousel
               ref={c => {
                 this._carousel = c
               }}
-              data={this.state.strongReferences}
-              renderItem={this.renderItem}
-              activeSlideAlignment="start"
-              sliderWidth={sliderWidth}
-              itemWidth={itemWidth}
-              inactiveSlideScale={1}
-              inactiveSlideOpacity={0.3}
-              containerCustomStyle={{
+              mode="horizontal-stack"
+              scrollAnimationDuration={300}
+              width={itemWidth}
+              panGestureHandlerProps={{
+                activeOffsetX: [-10, 10],
+              }}
+              modeConfig={{
+                opacityInterval: 0.8,
+                scaleInterval: 0,
+                stackInterval: itemWidth,
+                rotateZDeg: 0,
+              }}
+              style={{
                 marginTop: 15,
                 paddingLeft: 20,
                 overflow: 'visible',
                 flex: 1,
               }}
-              contentContainerCustomStyle={{}}
+              data={this.state.strongReferences}
+              renderItem={this.renderItem}
               onSnapToItem={this.onSnapToItem}
-              useScrollView={false}
-              initialNumToRender={2}
+              defaultIndex={this.state.strongReferences.findIndex(
+                r => r.Code === this.state.currentStrongReference.Code
+              )}
             />
           )}
         </Box>

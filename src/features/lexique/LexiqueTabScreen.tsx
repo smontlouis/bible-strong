@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
-import AlphabetList from '~common/AlphabetList2'
+import AlphabetList from '~common/AlphabetList'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'

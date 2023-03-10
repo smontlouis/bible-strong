@@ -1,36 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react'
-import Carousel from 'react-native-snap-carousel'
 import styled from '@emotion/native'
+import React, { useEffect, useRef, useState } from 'react'
 import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
+import Empty from '~common/Empty'
+import Header from '~common/Header'
+import LexiqueIcon from '~common/LexiqueIcon'
+import Link from '~common/Link'
+import Loading from '~common/Loading'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import Paragraph from '~common/ui/Paragraph'
+import RoundedCorner from '~common/ui/RoundedCorner'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import loadBible from '~helpers/loadBible'
 import formatVerseContent from '~helpers/formatVerseContent'
-import LexiqueIcon from '~common/LexiqueIcon'
-import Container from '~common/ui/Container'
-import RoundedCorner from '~common/ui/RoundedCorner'
-import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
-import Header from '~common/Header'
-import Loading from '~common/Loading'
-import Link from '~common/Link'
-import Empty from '~common/Empty'
+import loadBible from '~helpers/loadBible'
 
+import { useTranslation } from 'react-i18next'
+import { Status } from '~common/types'
+import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import captureError from '~helpers/captureError'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
-import DictionnaireVerseReference from './DictionnaireVerseReference'
-import DictionnaireCard from './DictionnaireCard'
-import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
-import { viewportWidth, wp } from '~helpers/utils'
-import { Status } from '~common/types'
 import useLanguage from '~helpers/useLanguage'
-import { useTranslation } from 'react-i18next'
+import { hp, wp } from '~helpers/utils'
+import DictionnaireCard from './DictionnaireCard'
+import DictionnaireVerseReference from './DictionnaireVerseReference'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
-const sliderWidth = viewportWidth
 const itemWidth = slideWidth + itemHorizontalMargin * 2
 
 const VerseText = styled.View(() => ({
@@ -194,7 +193,7 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
 
 const DictionnaireVerseDetailScreen = ({ navigation }) => {
   const { t } = useTranslation()
-  const carousel = useRef()
+  const carousel = useRef<ICarouselInstance>(null)
   const [verse, setVerse] = useState<Verse>(navigation.state.params.verse)
   const { Livre, Chapitre, Verset } = verse
   const { title: headerTitle } = formatVerseContent([verse])
@@ -236,7 +235,7 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
 
   return (
     <StyledScrollView
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
       scrollIndicatorInsets={{ right: 1 }}
     >
       <Box flex paddingTop={getStatusBarHeight()}>
@@ -280,8 +279,26 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
           <Box flex bg="lightGrey">
             {wordsInVerse.length ? (
               <Carousel
-                firstItem={wordsInVerse.findIndex(w => w === currentWord)}
                 ref={carousel}
+                mode="horizontal-stack"
+                scrollAnimationDuration={300}
+                width={itemWidth}
+                panGestureHandlerProps={{
+                  activeOffsetX: [-10, 10],
+                }}
+                modeConfig={{
+                  opacityInterval: 0.8,
+                  scaleInterval: 0,
+                  stackInterval: itemWidth,
+                  rotateZDeg: 0,
+                }}
+                style={{
+                  marginTop: 15,
+                  paddingLeft: 20,
+                  overflow: 'visible',
+                  flex: 1,
+                }}
+                defaultIndex={wordsInVerse.findIndex(w => w === currentWord)}
                 data={words}
                 renderItem={({ item, index }) => (
                   <DictionnaireCard
@@ -290,21 +307,7 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
                     index={index}
                   />
                 )}
-                activeSlideAlignment="start"
-                sliderWidth={sliderWidth}
-                itemWidth={itemWidth}
-                inactiveSlideScale={1}
-                inactiveSlideOpacity={0.3}
-                containerCustomStyle={{
-                  marginTop: 15,
-                  paddingLeft: 20,
-                  overflow: 'visible',
-                  flex: 1,
-                }}
                 onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
-                contentContainerCustomStyle={{}}
-                useScrollView={false}
-                initialNumToRender={2}
               />
             ) : (
               <Empty

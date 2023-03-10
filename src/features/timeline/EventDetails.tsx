@@ -1,7 +1,7 @@
 import { Portal } from '@gorhom/portal'
 import React from 'react'
 import FastImage from 'react-native-fast-image'
-import Carousel from 'react-native-snap-carousel'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import useLanguage from '~helpers/useLanguage'
 
 import Box from '~common/ui/Box'
@@ -108,8 +108,15 @@ const Media = ({
                 </Paragraph>
               </Box>
             )}
-            sliderWidth={sliderWidth}
-            itemWidth={imageWidth}
+            panGestureHandlerProps={{
+              activeOffsetX: [-10, 10],
+            }}
+            style={{
+              width: sliderWidth,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            width={imageWidth + 20}
           />
         </Box>
       )}

@@ -12,7 +12,7 @@ import { getFirstLetterFrom } from '~helpers/alphabet'
 import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
 import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
 import Empty from '~common/Empty'
-import AlphabetList from '~common/AlphabetList2'
+import AlphabetList from '~common/AlphabetList'
 import SectionTitle from '~common/SectionTitle'
 import {
   useSearchValue,

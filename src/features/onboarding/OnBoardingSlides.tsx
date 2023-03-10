@@ -1,20 +1,19 @@
 import React from 'react'
 
-import Carousel, { Pagination } from 'react-native-snap-carousel'
-import { Button as BaseButton } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { Image } from 'react-native'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { wp } from '~helpers/utils'
 
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { SafeAreaBox, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 
-import { getSlides, Slide } from './slides'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '@emotion/react'
+import { VStack } from '~common/ui/Stack'
+import { getSlides, Slide } from './slides'
 
 const slideWidth = wp(100)
 const sliderWidth = wp(100)
@@ -24,8 +23,15 @@ const itemWidth = slideWidth
 const Item = ({ item }: { item: Slide; index: number }) => {
   const r = useMediaQueriesArray()
   return (
-    <Box width={wp(85)} overflow="visible" paddingHorizontal={20}>
-      {/* {item.image && (
+    <VStack
+      overflow="visible"
+      px={20}
+      spacing={2}
+      flex
+      justifyContent="center"
+      bg="reverse"
+    >
+      {item.image && (
         <Image
           source={item.image}
           style={{
@@ -33,14 +39,14 @@ const Item = ({ item }: { item: Slide; index: number }) => {
             height: r([wp(30), wp(68), 380, 460]),
           }}
         />
-      )} */}
-      <Text title fontSize={38} marginTop={30}>
+      )}
+      <Text title fontSize={38}>
         {item.title}
       </Text>
-      <Paragraph fontFamily="text" scale={2} marginTop={40}>
+      <Paragraph fontFamily="text" scale={2}>
         {item.description}
       </Paragraph>
-    </Box>
+    </VStack>
   )
 }
 
@@ -50,57 +56,43 @@ const OnBoardingSlides = ({
   setStep: React.Dispatch<React.SetStateAction<number>>
 }) => {
   const [activeSlide, setActiveSlide] = React.useState(0)
-  const carousel = React.useRef<Carousel<Slide>>(null)
+  const carousel = React.useRef<ICarouselInstance>(null)
   const { t } = useTranslation()
   const slides = getSlides(t)
-  const theme = useTheme()
 
   return (
-    <Box overflow="visible" flex pb={getBottomSpace() + 20} alignItems="center">
-      <Carousel
-        ref={carousel}
-        data={slides}
-        layoutCardOffset={15}
-        renderItem={props => <Item {...props} />}
-        sliderWidth={sliderWidth}
-        itemWidth={itemWidth}
-        inactiveSlideScale={1}
-        inactiveSlideOpacity={0.3}
-        contentContainerCustomStyle={{
-          overflow: 'visible',
-          paddingBottom: 0,
-          alignItems: 'center',
-        }}
-        onSnapToItem={setActiveSlide}
-        useScrollView={false}
-      />
-      <Pagination
-        dotsLength={slides.length}
-        activeDotIndex={activeSlide}
-        containerStyle={{
-          paddingVertical: 10,
-        }}
-        dotContainerStyle={{
-          width: 10,
-          marginHorizontal: 3,
-        }}
-        dotStyle={{
-          width: 10,
-          height: 10,
-          borderRadius: 5,
-          marginHorizontal: 8,
-          backgroundColor: theme.colors.default,
-        }}
-        inactiveDotOpacity={0.4}
-        inactiveDotScale={0.6}
-        carouselRef={carousel.current}
-        tappableDots={!!carousel.current}
-      />
-      <Box width={170} marginTop={20}>
+    <SafeAreaBox>
+      <Box center flex>
+        <Carousel
+          ref={carousel}
+          mode="horizontal-stack"
+          data={slides}
+          loop={false}
+          scrollAnimationDuration={400}
+          panGestureHandlerProps={{
+            activeOffsetX: [-3, 3],
+          }}
+          modeConfig={{
+            opacityInterval: 0.8,
+            scaleInterval: 0,
+            stackInterval: itemWidth,
+            rotateZDeg: 0,
+          }}
+          renderItem={props => <Item {...props} />}
+          style={{
+            width: sliderWidth,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          width={itemWidth}
+          onScrollEnd={setActiveSlide}
+        />
+      </Box>
+      <Box marginTop={20} mx={20}>
         {activeSlide === 3 ? (
           <Button onPress={() => setStep(1)}>{t('Commencer')}</Button>
         ) : (
-          <Button onPress={() => carousel.current?.snapToNext()}>
+          <Button onPress={() => carousel.current?.next()}>
             {t('Suivant')}
           </Button>
         )}
@@ -108,7 +100,7 @@ const OnBoardingSlides = ({
           <Text fontSize={12}>{t('Passer').toUpperCase()}</Text>
         </TouchableBox>
       </Box>
-    </Box>
+    </SafeAreaBox>
   )
 }
 

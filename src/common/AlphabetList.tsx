@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import React, { useRef } from 'react'
 import { TouchableOpacity } from 'react-native'
-import Carousel from 'react-native-snap-carousel'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import { alphabet } from '~helpers/alphabet'
 import { viewportWidth } from '~helpers/utils'
 
@@ -22,7 +22,7 @@ const StyledUnderline = styled(Box)(({ theme, color }) => ({
 }))
 
 const AlphabetList = ({ color, setLetter, letter }) => {
-  const CarouselAlphabet = useRef()
+  const CarouselAlphabet = useRef<ICarouselInstance>(null)
   const index = alphabet.findIndex(l => l === letter.toUpperCase())
 
   return (
@@ -31,7 +31,24 @@ const AlphabetList = ({ color, setLetter, letter }) => {
       <Box paddingTop={5}>
         <Carousel
           ref={CarouselAlphabet}
-          firstItem={index}
+          mode="parallax"
+          loop={false}
+          defaultIndex={index}
+          scrollAnimationDuration={200}
+          modeConfig={{
+            parallaxScrollingOffset: 0,
+            parallaxScrollingScale: 0.75,
+          }}
+          panGestureHandlerProps={{
+            activeOffsetX: [-10, 10],
+          }}
+          style={{
+            width: viewportWidth,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          width={25}
+          height={30}
           data={alphabet}
           renderItem={({ item: section }) => (
             <TouchableOpacity
@@ -43,22 +60,14 @@ const AlphabetList = ({ color, setLetter, letter }) => {
                 <StyledText
                   isSelected={letter === section}
                   textAlign="center"
-                  fontSize={23}
+                  fontSize={26}
                 >
                   {section.toUpperCase()}
                 </StyledText>
               </Box>
             </TouchableOpacity>
           )}
-          sliderWidth={viewportWidth}
-          itemWidth={25}
-          itemHeight={25}
-          inactiveSlideScale={0.7}
-          inactiveSlideOpacity={0.8}
           onSnapToItem={index => setLetter(alphabet[index])}
-          activeSlideOffset={2}
-          enableMomentum
-          decelerationRate={0.9}
         />
         <Box center>
           <StyledUnderline color={color} />

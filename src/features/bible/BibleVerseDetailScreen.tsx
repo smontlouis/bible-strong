@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
-import Carousel from 'react-native-snap-carousel'
+import Carousel from 'react-native-reanimated-carousel'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import { withTheme } from '@emotion/react'
@@ -150,7 +150,11 @@ class BibleVerseDetailScreen extends React.Component {
     this.state.strongReferences.findIndex(r => r.Code === Number(ref))
 
   goToCarouselItem = ref => {
-    this._carousel.snapToItem(this.findRefIndex(ref))
+    this.setState({
+      currentStrongReference: this.state.strongReferences.find(
+        r => r.Code === Number(ref)
+      ),
+    })
   }
 
   onSnapToItem = index => {
@@ -209,7 +213,7 @@ class BibleVerseDetailScreen extends React.Component {
 
     return (
       <StyledScrollView
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <Box background paddingTop={getStatusBarHeight()} />
@@ -273,23 +277,30 @@ class BibleVerseDetailScreen extends React.Component {
                 ref={c => {
                   this._carousel = c
                 }}
-                data={this.state.strongReferences}
-                renderItem={this.renderItem}
-                activeSlideAlignment="start"
-                sliderWidth={sliderWidth}
-                itemWidth={itemWidth}
-                inactiveSlideScale={1}
-                inactiveSlideOpacity={0.3}
-                containerCustomStyle={{
+                mode="horizontal-stack"
+                scrollAnimationDuration={300}
+                width={itemWidth}
+                panGestureHandlerProps={{
+                  activeOffsetX: [-10, 10],
+                }}
+                modeConfig={{
+                  opacityInterval: 0.8,
+                  scaleInterval: 0,
+                  stackInterval: itemWidth,
+                  rotateZDeg: 0,
+                }}
+                style={{
                   marginTop: 15,
                   paddingLeft: 20,
                   overflow: 'visible',
                   flex: 1,
                 }}
-                contentContainerCustomStyle={{}}
+                data={this.state.strongReferences}
+                renderItem={this.renderItem}
                 onSnapToItem={this.onSnapToItem}
-                useScrollView={false}
-                initialNumToRender={2}
+                defaultIndex={this.state.strongReferences.findIndex(
+                  r => r.Code === this.state.currentStrongReference.Code
+                )}
               />
             )}
           </Box>
