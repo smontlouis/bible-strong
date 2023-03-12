@@ -2,7 +2,6 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { ScrollView } from 'react-native'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import i18n from '~i18n'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
@@ -10,14 +9,15 @@ import SelectorItem from './SelectorItem'
 
 interface ChapterSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
+  onNavigate: (index: number) => void
 }
 
 const ChapterSelector = ({
-  navigation,
-  screenProps,
-}: NavigationStackScreenProps<{}, ChapterSelectorScreenProps>) => {
-  const bible = useAtomValue(screenProps.bibleAtom)
-  const actions = useBibleTabActions(screenProps.bibleAtom)
+  bibleAtom,
+  onNavigate,
+}: ChapterSelectorScreenProps) => {
+  const bible = useAtomValue(bibleAtom)
+  const actions = useBibleTabActions(bibleAtom)
   const {
     data: {
       temp: { selectedChapter, selectedBook },
@@ -25,7 +25,7 @@ const ChapterSelector = ({
   } = bible
 
   const onChapterChange = (chapter: number) => {
-    navigation.navigate('Verset')
+    onNavigate(2)
     actions.setTempSelectedChapter(chapter)
   }
 
@@ -52,9 +52,5 @@ const ChapterSelector = ({
     </ScrollView>
   )
 }
-
-ChapterSelector.navigationOptions = () => ({
-  tabBarLabel: i18n.t('Chapitres'),
-})
 
 export default ChapterSelector

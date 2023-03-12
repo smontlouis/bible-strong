@@ -4,9 +4,9 @@ import React, { useEffect } from 'react'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import Modal from '~common/Modal'
+import BibleSelect from '~features/bible/BibleSelect'
 import { useModalize } from '~helpers/useModalize'
 import wait from '~helpers/wait'
-import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import {
   BibleTab,
   getDefaultBibleTab,
@@ -56,13 +56,6 @@ const SelectBibleReferenceModal = ({
     }
   }, [bible, canGetData])
 
-  // This whole component is a very ugly hack using the BibleSelectTabNavigator and an on-the-fly bible atom to get a bible reference from a modal
-  const screenProps = {
-    mainNavigation: {
-      goBack: getBibleData,
-    },
-    bibleAtom,
-  }
   return (
     <Modal.Body
       ref={ref}
@@ -70,10 +63,7 @@ const SelectBibleReferenceModal = ({
       withPortal
       style={{ paddingTop: 40 }}
     >
-      <BibleSelectTabNavigator
-        screenProps={screenProps}
-        navigation={navigation}
-      />
+      <BibleSelect bibleAtom={bibleAtom} onComplete={getBibleData} />
     </Modal.Body>
   )
 }

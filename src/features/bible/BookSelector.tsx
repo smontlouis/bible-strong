@@ -3,32 +3,29 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, SectionList } from 'react-native'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
 import books, { Book, sections } from '~assets/bible_versions/books-desc'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import i18n from '~i18n'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import BookSelectorItem from './BookSelectorItem'
 
 interface BookSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
+  onNavigate: (index: number) => void
 }
 
-const BookSelector = ({
-  navigation,
-  screenProps,
-}: NavigationStackScreenProps<{}, BookSelectorScreenProps>) => {
+const BookSelector = ({ bibleAtom, onNavigate }: BookSelectorScreenProps) => {
   const { t } = useTranslation()
-  const bible = useAtomValue(screenProps.bibleAtom)
-  const actions = useBibleTabActions(screenProps.bibleAtom)
+  const bible = useAtomValue(bibleAtom)
+  const actions = useBibleTabActions(bibleAtom)
+
   const {
     data: { selectionMode, selectedBook },
   } = bible
 
   const onBookChange = (book: Book) => {
-    navigation.navigate('Chapitre')
+    onNavigate(1)
     actions.setTempSelectedBook(book)
   }
 
@@ -92,9 +89,5 @@ const BookSelector = ({
     </ScrollView>
   )
 }
-
-BookSelector.navigationOptions = () => ({
-  tabBarLabel: i18n.t('Livres'),
-})
 
 export default BookSelector

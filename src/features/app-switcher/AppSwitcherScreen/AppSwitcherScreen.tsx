@@ -12,7 +12,6 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import HomeScreen from '~features/home/HomeScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
-import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import CachedTabScreens from '../CachedTabScreens'
@@ -178,6 +177,3 @@ const AppSwitcherScreenWrapper = (props: any) => {
 }
 
 export default AppSwitcherScreenWrapper
-
-// * TODO might be dangerous
-AppSwitcherScreenWrapper.router = BibleSelectTabNavigator.router

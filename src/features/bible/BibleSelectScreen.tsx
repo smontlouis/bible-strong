@@ -9,14 +9,14 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MAX_WIDTH } from '~helpers/useDimensions'
-import BibleSelectTabNavigator from '~navigation/BibleSelectTabNavigator'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import BibleSelect from './BibleSelect'
 
 interface BibleSelectProps {
   bibleAtom: PrimitiveAtom<BibleTab>
 }
 
-const BibleSelect = ({
+const BibleSelectScreen = ({
   navigation,
 }: NavigationStackScreenProps<BibleSelectProps>) => {
   const bibleAtom = navigation.getParam('bibleAtom')
@@ -57,16 +57,11 @@ const BibleSelect = ({
         }
       />
       <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
-        <BibleSelectTabNavigator
-          screenProps={{ mainNavigation: navigation, bibleAtom }}
-          navigation={navigation}
-        />
+        <BibleSelect bibleAtom={bibleAtom} onComplete={navigation.goBack} />
       </Box>
       {/* <SelectorButtons /> */}
     </Container>
   )
 }
 
-BibleSelect.router = BibleSelectTabNavigator.router
-
-export default BibleSelect
+export default BibleSelectScreen

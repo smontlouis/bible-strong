@@ -1,25 +1,15 @@
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { memo, useEffect, useLayoutEffect, useRef } from 'react'
+import React, { memo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import Animated, {
-  EntryAnimationsValues,
-  EntryExitAnimationFunction,
-  ExitAnimationsValues,
-  SharedValue,
-  SlideInLeft,
-  SlideInRight,
-  SlideOutLeft,
-  SlideOutRight,
-  useSharedValue,
-} from 'react-native-reanimated'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { BibleResource, Verse } from '~common/types'
-import Box, { AnimatedBox } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
+import { Slide, Slides } from '~common/ui/Slider'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
@@ -48,7 +38,6 @@ const ResourcesModal = ({
   const { ref, open, close } = useModalize()
   const openInNewTab = useOpenInNewTab()
   const bible = useAtomValue(bibleAtom)
-  const direction = useSharedValue<'left' | 'right'>('left')
 
   const {
     data: { selectedVerses },
@@ -132,75 +121,31 @@ const ResourcesModal = ({
         <ResourcesModalFooter
           resourceType={resourceType}
           onChangeResourceType={onChangeResourceType}
-          direction={direction}
         />
       }
       onClosed={() => onChangeResourceType(null)}
       modalRef={ref}
     >
-      <Resource
-        resourceType={resourceType}
-        bibleAtom={bibleAtom}
-        direction={direction}
-        isSelectionMode={isSelectionMode}
-      />
+      {resourceType && (
+        <Resource
+          resourceType={resourceType}
+          bibleAtom={bibleAtom}
+          isSelectionMode={isSelectionMode}
+        />
+      )}
     </Modal.Body>
   )
 }
 
-const slideOutLeftAnimation = new SlideOutLeft().build() as EntryExitAnimationFunction
-const slideOutRightAnimation = new SlideOutRight().build() as EntryExitAnimationFunction
-
-const slideInLeftAnimation = new SlideInLeft().build() as EntryExitAnimationFunction
-const slideInRightAnimation = new SlideInRight().build() as EntryExitAnimationFunction
-
-const AnimatedResourceBox = ({
-  direction,
-  isAnimationsEnabled,
-  ...props
-}: {
-  direction: SharedValue<'left' | 'right'>
-  isAnimationsEnabled: React.MutableRefObject<boolean>
-}) => {
-  const SlideIn = (values: EntryAnimationsValues) => {
-    'worklet'
-
-    return direction.value === 'left'
-      ? slideInRightAnimation(values)
-      : slideInLeftAnimation(values)
-  }
-
-  const SlideOut = (values: ExitAnimationsValues) => {
-    'worklet'
-
-    return direction.value === 'left'
-      ? slideOutLeftAnimation(values)
-      : slideOutRightAnimation(values)
-  }
-
-  //This is to check if the layouting took place and return the according animation
-  const ifEnabled = (animation: any): any => {
-    return isAnimationsEnabled.current ? animation : undefined
-  }
-
-  return (
-    <AnimatedBox
-      entering={ifEnabled(SlideIn)}
-      exiting={ifEnabled(SlideOut)}
-      {...props}
-    />
-  )
-}
+const resources = ['strong', 'dictionary', 'nave', 'reference', 'commentary']
 
 const Resource = ({
   bibleAtom,
   resourceType,
-  direction,
   isSelectionMode,
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
   resourceType: BibleResource | null
-  direction: Animated.SharedValue<'left' | 'right'>
   isSelectionMode?: boolean
 }) => {
   const bible = useAtomValue(bibleAtom)
@@ -224,83 +169,38 @@ const Resource = ({
     actions.selectSelectedVerse(`${Livre}-${Chapitre}-${Number(Verset) + incr}`)
   }
 
-  const isAnimationsEnabled = useRef(false)
-
-  //This is enabling the animations after layouting
-  useLayoutEffect(() => {
-    if (resourceType) isAnimationsEnabled.current = true
-  }, [resourceType])
-
-  if (resourceType === 'strong') {
-    return (
-      <AnimatedResourceBox
-        key={resourceType}
-        direction={direction}
-        isAnimationsEnabled={isAnimationsEnabled}
-      >
-        {/* @ts-ignore */}
+  return (
+    <Slides index={resources.findIndex(r => r === resourceType)}>
+      <Slide key="strong">
         <BibleVerseDetailCard
           verse={verseObj}
           updateVerse={updateVerse}
           isSelectionMode={isSelectionMode}
         />
-      </AnimatedResourceBox>
-    )
-  }
-  if (resourceType === 'dictionary') {
-    return (
-      <AnimatedResourceBox
-        key={resourceType}
-        direction={direction}
-        isAnimationsEnabled={isAnimationsEnabled}
-      >
+      </Slide>
+      <Slide key="dictionary">
         <DictionnaireVerseDetailCard
           verse={verseObj}
           updateVerse={updateVerse}
         />
-      </AnimatedResourceBox>
-    )
-  }
-  if (resourceType === 'nave') {
-    return (
-      <AnimatedResourceBox
-        key={resourceType}
-        direction={direction}
-        isAnimationsEnabled={isAnimationsEnabled}
-      >
+      </Slide>
+      <Slide key="nave">
         <NaveModalCard selectedVerse={selectedVerse} />
-      </AnimatedResourceBox>
-    )
-  }
-  if (resourceType === 'reference') {
-    return (
-      <AnimatedResourceBox
-        key={resourceType}
-        direction={direction}
-        isAnimationsEnabled={isAnimationsEnabled}
-      >
+      </Slide>
+      <Slide key="reference">
         <ReferenceCard
           selectedVerse={selectedVerse}
           version={selectedVersion}
         />
-      </AnimatedResourceBox>
-    )
-  }
-  if (resourceType === 'commentary') {
-    return (
-      <AnimatedResourceBox
-        key={resourceType}
-        direction={direction}
-        isAnimationsEnabled={isAnimationsEnabled}
-      >
+      </Slide>
+      <Slide key="commentary">
         <CommentariesCard
           verse={selectedVerse}
           onChangeVerse={actions.selectSelectedVerse}
         />
-      </AnimatedResourceBox>
-    )
-  }
-  return null
+      </Slide>
+    </Slides>
+  )
 }
 
 export default memo(ResourcesModal)

@@ -1,21 +1,19 @@
 import React from 'react'
-import TouchableSvgIcon from '~features/bible/TouchableSvgIcon'
-import { wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
+import { BibleResource } from '~common/types'
+import TouchableSvgIcon from '~features/bible/TouchableSvgIcon'
+import { wp } from '~helpers/utils'
 import Box from '../../../common/ui/Box'
 import { HStack } from '../../../common/ui/Stack'
-import { useTranslation } from 'react-i18next'
-import { BibleResource } from '~common/types'
-import { runOnUI, SharedValue } from 'react-native-reanimated'
 
 type Props = {
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
-  direction: SharedValue<'left' | 'right'>
 }
 
 const getPosition = (resourceType: BibleResource) => {
@@ -28,28 +26,10 @@ const getPosition = (resourceType: BibleResource) => {
 const ResourcesModalFooter = ({
   resourceType,
   onChangeResourceType,
-  direction,
 }: Props) => {
   const { t } = useTranslation()
 
-  const setDirection = (
-    prevResourceType: BibleResource,
-    nextResourceType: BibleResource
-  ) => {
-    'worklet'
-
-    const prevPosition = getPosition(prevResourceType)
-    const nextPosition = getPosition(nextResourceType)
-
-    if (prevPosition < nextPosition) {
-      direction.value = 'left'
-      return
-    }
-    direction.value = 'right'
-  }
-
   const onPress = (newResourceType: BibleResource) => {
-    runOnUI(setDirection)(resourceType!, newResourceType)
     onChangeResourceType(newResourceType)
   }
 
