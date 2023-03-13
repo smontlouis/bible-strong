@@ -13,19 +13,74 @@ import Box from '~common/ui/Box'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
-import { changeHighlightColor, removeHighlight } from '~redux/modules/user'
+import {
+  changeHighlightColor,
+  Highlight,
+  HighlightsObj,
+  removeHighlight,
+} from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import VersesList from './VersesList'
 import { useModalize } from '~helpers/useModalize'
+import { TagsObj, Verse, VerseIds } from '~common/types'
 
 interface Chip {
   id: string
   name: string
 }
 
+export type GroupedHighlights = {
+  date: number
+  color: string
+  highlightsObj: Verse[]
+  stringIds: VerseIds
+  tags: TagsObj
+}[]
+
+const filterByChip = (chipId: string, highlightsObj: HighlightsObj) => ([vId]: [
+  string,
+  Highlight
+]) =>
+  chipId
+    ? Boolean(highlightsObj[vId].tags && highlightsObj[vId].tags[chipId])
+    : true
+
+const groupHighlightsByDate = (
+  arr: GroupedHighlights,
+  highlightTuple: [string, Highlight]
+) => {
+  const [highlightId, highlight] = highlightTuple
+  const [Livre, Chapitre, Verset] = highlightId.split('-').map(Number)
+  const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
+
+  if (!arr.find(a => a.date === highlight.date)) {
+    arr.push({
+      date: highlight.date,
+      color: highlight.color,
+      highlightsObj: [],
+      stringIds: {},
+      tags: {},
+    })
+  }
+
+  const dateInArray = arr.find(a => a.date === highlight.date)
+  if (dateInArray) {
+    dateInArray.stringIds[highlightId] = true
+    dateInArray.highlightsObj.push(formattedVerse)
+    dateInArray.highlightsObj.sort(
+      (a, b) => Number(a.Verset) - Number(b.Verset)
+    )
+    dateInArray.tags = { ...dateInArray.tags, ...highlight.tags }
+  }
+
+  arr.sort((a, b) => Number(b.date) - Number(a.date))
+
+  return arr
+}
+
 const HighlightsScreen = () => {
   const { t } = useTranslation()
-  const verseIds = useSelector(
+  const highlightsObj = useSelector(
     (state: RootState) => state.user.bible.highlights,
     shallowEqual
   )
@@ -38,11 +93,10 @@ const HighlightsScreen = () => {
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = React.useState()
   const [isChangeColorOpen, setIsChangeColorOpen] = React.useState()
-  const [multipleTagsItem, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
+  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
   const [selectedChip, setSelectedChip] = React.useState<Chip>()
   const dispatch = useDispatch()
   const chipId = selectedChip?.id
-  const isMultipleTagsItem = !!multipleTagsItem
 
   const { ref, open, close } = useModalize()
   const { ref: ref2, open: open2, close: close2 } = useModalize()
@@ -59,19 +113,16 @@ const HighlightsScreen = () => {
     }
   }, [isChangeColorOpen, open2])
 
-  // TODO - Performance issue here
-  const filteredHighlights = useMemo(() => {
-    return Object.keys(verseIds)
-      .filter(vId =>
-        selectedChip ? verseIds[vId].tags && verseIds[vId].tags[chipId] : true
-      )
-      .reduce((acc, curr) => ({ ...acc, [curr]: verseIds[curr] }), {})
-  }, [
-    chipId,
-    isChangeColorOpen,
-    isMultipleTagsItem,
-    Object.keys(verseIds).length,
-  ])
+  const groupedHighlights = useMemo(() => {
+    const highlights = Object.entries(highlightsObj)
+    highlights.sort((a, b) => Number(b[1].date) - Number(a[1].date))
+    return (chipId
+      ? highlights.filter(filterByChip(chipId, highlightsObj))
+      : highlights
+    )
+      .splice(0, 100)
+      .reduce(groupHighlightsByDate, [])
+  }, [chipId, highlightsObj])
 
   const promptLogout = () => {
     Alert.alert(
@@ -113,10 +164,10 @@ const HighlightsScreen = () => {
         onSelected={(chip: Chip) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
-      {Object.keys(filteredHighlights).length ? (
+      {groupedHighlights?.length ? (
         <VersesList
           setSettings={setIsSettingsOpen}
-          verseIds={filteredHighlights}
+          groupedHighlights={groupedHighlights}
         />
       ) : (
         <Empty

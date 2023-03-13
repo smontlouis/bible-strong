@@ -29,6 +29,9 @@ import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 import { useAtomValue } from 'jotai/react'
 import { openedFromTabAtom } from '~features/studies/atom'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { shallowEqual, useSelector } from 'react-redux'
+import { RootState } from '~redux/modules/reducer'
 
 const Container = styled.View<{ isSelectionMode?: boolean }>(
   ({ theme, isSelectionMode }) => ({
@@ -90,6 +93,14 @@ const VersesModal = ({
   const { ref, open, close } = useModalize()
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
+
+  const { theme: currentTheme } = useCurrentThemeSelector()
+  const { colors } = useSelector(
+    (state: RootState) => ({
+      colors: state.user.bible.settings.colors[currentTheme],
+    }),
+    shallowEqual
+  )
 
   useEffect(() => {
     if (isVisible) {
@@ -220,23 +231,23 @@ const VersesModal = ({
         <Container>
           <HalfContainer border>
             <TouchableCircle
-              color={theme.colors.color1}
+              color={colors.color1}
               onPress={() => addHighlight('color1')}
             />
             <TouchableCircle
-              color={theme.colors.color2}
+              color={colors.color2}
               onPress={() => addHighlight('color2')}
             />
             <TouchableCircle
-              color={theme.colors.color3}
+              color={colors.color3}
               onPress={() => addHighlight('color3')}
             />
             <TouchableCircle
-              color={theme.colors.color4}
+              color={colors.color4}
               onPress={() => addHighlight('color4')}
             />
             <TouchableCircle
-              color={theme.colors.color5}
+              color={colors.color5}
               onPress={() => addHighlight('color5')}
             />
             {isSelectedVerseHighlighted && (

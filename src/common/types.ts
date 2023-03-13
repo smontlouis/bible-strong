@@ -1,4 +1,5 @@
 import { logTypes } from '~helpers/changelog'
+import { RootState } from '~redux/modules/reducer'
 
 export type Status = 'Idle' | 'Pending' | 'Resolved' | 'Rejected'
 
@@ -130,7 +131,7 @@ export interface OngoingReadingSlice {
 export type SubscriptionType = 'premium' | 'lifetime' | null
 
 export interface Verse {
-  Livre: string
+  Livre: string | number
   Chapitre: string | number
   Verset: string | number
   Texte: string

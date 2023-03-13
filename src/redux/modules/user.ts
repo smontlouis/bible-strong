@@ -97,6 +97,16 @@ export interface NotesObj {
   [x: string]: Note
 }
 
+export type Highlight = {
+  color: string
+  tags: TagsObj
+  date: number
+}
+
+export interface HighlightsObj {
+  [x: string]: Highlight
+}
+
 export interface FireStoreUserData {
   id: string
   email: string
@@ -131,13 +141,7 @@ export interface UserState {
   fontFamily: string
   bible: {
     changelog: {}
-    highlights: {
-      [x: string]: {
-        color: string
-        tags: TagsObj
-        date: number
-      }
-    }
+    highlights: HighlightsObj
     notes: NotesObj
     studies: StudiesObj
     tags: TagsObj

@@ -1,52 +1,33 @@
 import React from 'react'
 
 import FlatList from '~common/ui/FlatList'
+import { GroupedHighlights } from './HighlightsScreen'
 import VerseComponent from './Verse'
 
-export const sortVersesByDate = p =>
-  Object.keys(p).reduce((arr, verse, i) => {
-    const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
-    const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
+interface Props {
+  groupedHighlights: GroupedHighlights
+  setSettings: (settings: any) => void
+}
 
-    if (!arr.find(a => a.date === p[verse].date)) {
-      arr.push({
-        date: p[verse].date,
-        color: p[verse].color,
-        verseIds: [],
-        stringIds: {},
-        tags: {},
-      })
-    }
-
-    const dateInArray = arr.find(a => a.date === p[verse].date)
-    if (dateInArray) {
-      dateInArray.stringIds[verse] = true
-      dateInArray.verseIds.push(formattedVerse)
-      dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
-      dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
-    }
-
-    arr.sort((a, b) => Number(b.date) - Number(a.date))
-
-    return arr
-  }, [])
-
-const VersesList = React.memo(({ verseIds, setSettings }) => {
-  const sortedVersesByDate = sortVersesByDate(verseIds)
-
-  sortedVersesByDate.map(verse => {
-    if (!verse.date) {
-      console.log(verse)
-    }
-  })
+const VersesList = React.memo(({ groupedHighlights, setSettings }: Props) => {
+  console.log(JSON.stringify(groupedHighlights, null, 2))
 
   return (
     <FlatList
-      data={sortedVersesByDate}
+      data={groupedHighlights}
       keyExtractor={item => item.date.toString()}
-      renderItem={({ item: { color, date, verseIds, tags, stringIds } }) => (
+      renderItem={({
+        item: { color, date, highlightsObj, tags, stringIds },
+      }) => (
         <VerseComponent
-          {...{ color, date, verseIds, tags, setSettings, stringIds }}
+          {...{
+            color,
+            date,
+            verseIds: highlightsObj,
+            tags,
+            setSettings,
+            stringIds,
+          }}
         />
       )}
     />
