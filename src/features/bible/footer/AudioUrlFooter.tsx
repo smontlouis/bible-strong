@@ -153,33 +153,34 @@ const useLoadSound = ({
   // Audio init on version change
   useEffect(() => {
     ;(async () => {
-      TrackPlayer.updateOptions({
-        forwardJumpInterval: 10,
-        backwardJumpInterval: 10,
-
-        // Media controls capabilities
-        capabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-          Capability.JumpForward,
-          Capability.JumpBackward,
-          Capability.SeekTo,
-        ],
-
-        progressUpdateEventInterval: 1,
-
-        android: {
-          appKilledPlaybackBehavior:
-            AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-        },
-      })
-
       // Reset player and add tracks
       try {
         await TrackPlayer.setupPlayer()
         await TrackPlayer.reset()
+
+        TrackPlayer.updateOptions({
+          forwardJumpInterval: 10,
+          backwardJumpInterval: 10,
+
+          // Media controls capabilities
+          capabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+            Capability.JumpForward,
+            Capability.JumpBackward,
+            Capability.SeekTo,
+          ],
+
+          progressUpdateEventInterval: 1,
+
+          android: {
+            appKilledPlaybackBehavior:
+              AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+          },
+        })
+
         await TrackPlayer.add(tracks)
       } catch {
         console.log('silent catch')
