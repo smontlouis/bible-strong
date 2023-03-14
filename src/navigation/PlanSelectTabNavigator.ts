@@ -1,5 +1,5 @@
 import { createMaterialTopTabNavigator } from 'react-navigation-tabs'
-import BibleSelectTabBar from '~features/bible/BibleSelectTabBar'
+import SelectTabBar from '~common/SelectTabBar'
 import ExploreScreen from '~features/plans/Explore/ExploreScreen'
 import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
 
@@ -9,7 +9,7 @@ const RouteConfigs = {
 }
 
 const TabNavigatorConfig = {
-  tabBarComponent: BibleSelectTabBar,
+  tabBarComponent: SelectTabBar,
 }
 
 export default createMaterialTopTabNavigator(RouteConfigs, TabNavigatorConfig)
