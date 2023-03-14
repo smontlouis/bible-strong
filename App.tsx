@@ -16,7 +16,6 @@ import { setI18n } from './i18n'
 import InitApp from './InitApp'
 import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
-import TrackPlayer from 'react-native-track-player'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -59,8 +58,6 @@ const useAppLoad = () => {
       setStatus('Set i18n')
       await setI18n()
       setIsLoadingCompleted(true)
-
-      await TrackPlayer.setupPlayer()
       if (!__DEV__) {
         analytics().logScreenView({
           screen_class: 'Bible',

@@ -178,6 +178,7 @@ const useLoadSound = ({
 
       // Reset player and add tracks
       try {
+        await TrackPlayer.setupPlayer()
         await TrackPlayer.reset()
         await TrackPlayer.add(tracks)
       } catch {
@@ -221,6 +222,7 @@ const useLoadSound = ({
     isPlaying,
     isExpanded,
     isLoading,
+    isSetup,
     onPlay,
     onPause,
     onReduce,
@@ -259,6 +261,7 @@ const AudioUrlFooter = ({
     isExpanded,
     onReduce,
     isLoading,
+    isSetup,
     onPlay,
     onPause,
     onNextChapter,
@@ -315,9 +318,9 @@ const AudioUrlFooter = ({
           </TouchableBox>
           <PlayButton
             error={error}
-            isLoading={isLoading}
+            isLoading={isLoading || !isSetup}
             isPlaying={isPlaying}
-            disabled={disabled}
+            disabled={disabled || !isSetup}
             onToggle={isPlaying ? onPause : onPlay}
           />
           <TouchableBox
