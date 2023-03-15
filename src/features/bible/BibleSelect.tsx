@@ -16,16 +16,16 @@ export interface BibleSelectProps {
 const BibleSelect = ({ bibleAtom, onComplete }: BibleSelectProps) => {
   const [index, setIndex] = useState(0)
   return (
-    <Box>
+    <Box flex>
       <BibleSelectTabBar index={index} onChange={setIndex} />
       <Slides index={index}>
-        <Slide key="book">
+        <Slide key="book" flex>
           <BookSelector bibleAtom={bibleAtom} onNavigate={setIndex} />
         </Slide>
-        <Slide key="chapter">
+        <Slide key="chapter" flex>
           <ChapterSelector bibleAtom={bibleAtom} onNavigate={setIndex} />
         </Slide>
-        <Slide key="verse">
+        <Slide key="verse" flex>
           <VerseSelector bibleAtom={bibleAtom} onComplete={onComplete} />
         </Slide>
       </Slides>
