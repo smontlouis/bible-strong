@@ -10,8 +10,6 @@ interface Props {
 }
 
 const VersesList = React.memo(({ groupedHighlights, setSettings }: Props) => {
-  console.log(JSON.stringify(groupedHighlights, null, 2))
-
   return (
     <FlatList
       data={groupedHighlights}

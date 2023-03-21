@@ -190,7 +190,7 @@ class BibleVerseDetailCard extends React.Component {
 
     return (
       <StyledScrollView
-        contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
+        contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75)  }}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <Box background paddingTop={10}>

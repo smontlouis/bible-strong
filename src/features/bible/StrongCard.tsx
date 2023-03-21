@@ -15,6 +15,7 @@ import truncate from '~helpers/truncate'
 import { cleanParams, wp } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
 import { openedFromTabAtom } from '~features/studies/atom'
+import { ScrollView } from 'react-native'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -175,7 +176,7 @@ const StrongCard = props => {
         </Box>
       </Box>
 
-      <Box style={{ marginBottom: 5 }}>
+      <ScrollView style={{ marginBottom: 15 }}>
         {!!Definition && (
           <ViewItem>
             <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
@@ -215,7 +216,7 @@ const StrongCard = props => {
             />
           </ViewItem>
         )}
-      </Box>
+      </ScrollView>
     </Container>
   )
 }
