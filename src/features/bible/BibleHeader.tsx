@@ -187,7 +187,9 @@ const Header = ({
                   </MenuOption>
                 )}
                 {commentsDisplay && isFR && (
-                  <MenuOption onSelect={() => setSettingsCommentaires(false)}>
+                  <MenuOption
+                    onSelect={() => dispatch(setSettingsCommentaires(false))}
+                  >
                     <Box row alignItems="center">
                       <MaterialIcon name="chat" size={20} color="primary" />
                       <Text marginLeft={10}>{t('Commentaire activé')}</Text>
