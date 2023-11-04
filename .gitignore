@@ -6,8 +6,6 @@ npm-debug.*
 *.pem
 keystore.txt
 *.mobileprovision
-src/assets/bible_versions/**
-src/assets/plans/**
 project/*
 config.js
 config.ts
