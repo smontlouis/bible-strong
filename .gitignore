@@ -13,8 +13,6 @@ config.ts
 dist/
 .expo/
 src/assets/db/
-src/features/timeline/events.ts
-src/features/timeline/events-en.ts
 
 # Xcode
 !**/*.xcodeproj
