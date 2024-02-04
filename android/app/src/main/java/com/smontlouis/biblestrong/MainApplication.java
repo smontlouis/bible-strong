@@ -70,7 +70,6 @@ public class MainApplication extends Application implements ReactApplication {
     ReactFeatureFlags.useTurboModules = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
 
     SoLoader.init(this, /* native exopackage */ false);
-    initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
     ApplicationLifecycleDispatcher.onApplicationCreate(this);
   }
 
@@ -79,30 +78,5 @@ public class MainApplication extends Application implements ReactApplication {
     super.onConfigurationChanged(newConfig);
     ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig);
   }
-  /**
-   * Loads Flipper in React Native templates.
-   *
-   * @param context
-   */
-  private static void initializeFlipper(Context context, ReactInstanceManager reactInstanceManager) {
-    if (BuildConfig.DEBUG) {
-      try {
-        /*
-         We use reflection here to pick up the class that initializes Flipper,
-        since Flipper library is not available in release mode
-        */
-        Class<?> aClass = Class.forName("com.smontlouis.biblestrong.ReactNativeFlipper");
-        aClass.getMethod("initializeFlipper", Context.class, ReactInstanceManager.class)
-        .invoke(null, context, reactInstanceManager);
-      } catch (ClassNotFoundException e) {
-        e.printStackTrace();
-      } catch (NoSuchMethodException e) {
-        e.printStackTrace();
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
-      } catch (InvocationTargetException e) {
-        e.printStackTrace();
-      }
-    }
-  }
+
 }

@@ -38,11 +38,6 @@ function configureStore() {
 
   const middleware = [logger, crashReporter, firestoreMiddleware, thunk]
 
-  if (__DEV__) {
-    const createDebugger = require('redux-flipper').default
-    middleware.push(createDebugger())
-  }
-
   const persistedReducer = persistReducer(persistConfig, reducer)
   const store = compose(applyMiddleware(...middleware))(createStore)(
     persistedReducer

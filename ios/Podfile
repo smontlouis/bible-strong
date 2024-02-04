@@ -15,6 +15,10 @@ project 'biblestrong',
 
 target 'biblestrong' do
 
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
+
+
   use_expo_modules!
 
   post_install do |installer|
@@ -50,7 +54,6 @@ target 'biblestrong' do
     :path => config[:reactNativePath],
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
     :fabric_enabled => flags[:fabric_enabled],
-    :flipper_configuration => FlipperConfiguration.enabled(["Dev"], { 'Flipper' => '0.163.0' }),
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
