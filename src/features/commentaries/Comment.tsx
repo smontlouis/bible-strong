@@ -144,7 +144,7 @@ const Comment = ({ comment, navigation }: Props) => {
       const message = `${resource.author}
 ${resource.name}
 
-${truncHTML(content, 10000).text}
+${truncHTML(contentFR || content, 10000).text}
 
 https://bible-strong.app
       `
