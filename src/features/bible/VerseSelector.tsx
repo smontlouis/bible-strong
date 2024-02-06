@@ -3,7 +3,6 @@ import { ScrollView } from 'react-native'
 
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { useNavigation } from 'react-navigation-hooks'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import SelectorItem from './SelectorItem'
@@ -11,9 +10,14 @@ import SelectorItem from './SelectorItem'
 interface VerseSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   onComplete: () => void
+  onLongPressComplete?: (verse: number) => void
 }
 
-const VerseSelector = ({ bibleAtom, onComplete }: VerseSelectorScreenProps) => {
+const VerseSelector = ({
+  bibleAtom,
+  onComplete,
+  onLongPressComplete,
+}: VerseSelectorScreenProps) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const {
@@ -29,6 +33,11 @@ const VerseSelector = ({ bibleAtom, onComplete }: VerseSelectorScreenProps) => {
     actions.setTempSelectedVerse(verse)
     actions.validateTempSelected()
     onComplete()
+  }
+
+  const onLongValidate = (verse: number) => {
+    actions.setTempSelectedVerse(verse)
+    onLongPressComplete?.(verse)
   }
 
   if (!versesInCurrentChapter) {
@@ -53,6 +62,7 @@ const VerseSelector = ({ bibleAtom, onComplete }: VerseSelectorScreenProps) => {
           item={v + 1}
           isSelected={selectedVerse === v + 1}
           onChange={onValidate}
+          onLongChange={onLongValidate}
         />
       ))}
     </ScrollView>

@@ -145,7 +145,7 @@
     "react-native-sqlite-storage": "^4.1.0",
     "react-native-svg": "^13.8.0",
     "react-native-tab-view": "^2.14.0",
-    "react-native-track-player": "^3.2.0-bb749e5d286737681ba8907dfd287480eb1cec45",
+    "react-native-track-player": "^4.0.1",
     "react-native-view-shot": "3.4.0",
     "react-native-webview": "11.23.1",
     "react-native-youtube-iframe": "^2.1.2",

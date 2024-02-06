@@ -11,6 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import BibleSelect from './BibleSelect'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 interface BibleSelectProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -23,14 +24,36 @@ const BibleSelectScreen = ({
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const {
-    data: { selectionMode },
+    data: { selectionMode, ...rest },
   } = bible
+  const openInNewTab = useOpenInNewTab()
 
   const { t } = useTranslation()
 
   useEffect(() => {
     actions.resetTempSelected()
   }, [])
+
+  const onLongPressComplete = (verse: number) => {
+    openInNewTab(
+      {
+        id: `bible-${Date.now()}`,
+        title: t('tabs.new'),
+        isRemovable: true,
+        type: 'bible',
+        data: {
+          ...rest,
+          selectionMode,
+          selectedBook: rest.temp.selectedBook,
+          selectedChapter: rest.temp.selectedChapter,
+          selectedVerse: verse,
+        },
+      },
+      {
+        autoRedirect: true,
+      }
+    )
+  }
 
   return (
     <Container>
@@ -57,7 +80,11 @@ const BibleSelectScreen = ({
         }
       />
       <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
-        <BibleSelect bibleAtom={bibleAtom} onComplete={navigation.goBack} />
+        <BibleSelect
+          bibleAtom={bibleAtom}
+          onComplete={navigation.goBack}
+          onLongPressComplete={onLongPressComplete}
+        />
       </Box>
       {/* <SelectorButtons /> */}
     </Container>

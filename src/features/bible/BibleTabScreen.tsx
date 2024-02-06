@@ -13,7 +13,6 @@ import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 
-import ImmersiveMode from 'react-native-immersive-mode'
 import BibleViewer from './BibleViewer'
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -30,7 +29,6 @@ interface BibleTabScreenProps {
 }
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
-  const [hasPaddingTop, setHasPaddingTop] = React.useState(false)
   const dispatch = useDispatch()
 
   const { settings, fontFamily } = useSelector(
@@ -117,11 +115,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
           console.log('Error with commentaires, deactivating...')
           dispatch(setSettingsCommentaires(false))
         }
-      }
-      if (Platform.OS === 'android') {
-        listen = ImmersiveMode.addEventListener(e => {
-          setHasPaddingTop(!e.statusBar)
-        })
       }
     })()
 

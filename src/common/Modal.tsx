@@ -79,7 +79,7 @@ const Body = forwardRef<Modalize, ModalBodyProps>(
 const Item = ({ children, tag, onPress, ...props }: ItemProps & TextProps) => (
   <Touchy onPress={onPress}>
     <Text {...props}>{children}</Text>
-    {tag && (
+    {Boolean(tag) && (
       <Tag>
         <Text fontSize={12} color="grey" reverse>
           {tag}

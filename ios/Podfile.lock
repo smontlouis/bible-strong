@@ -1174,9 +1174,9 @@ PODS:
     - ReactCommon/turbomodule/core
   - react-native-sqlite-storage (4.1.0):
     - React
-  - react-native-track-player (3.2.0-bb749e5d286737681ba8907dfd287480eb1cec45):
+  - react-native-track-player (4.0.1):
     - React-Core
-    - SwiftAudioEx (= 1.0.0-rc.2)
+    - SwiftAudioEx (= 1.0.0)
   - react-native-view-shot (3.4.0):
     - React-Core
   - react-native-webview (11.23.1):
@@ -1355,7 +1355,7 @@ PODS:
     - Sentry/Core (= 7.22.0)
   - Sentry/Core (7.22.0)
   - SSZipArchive (2.2.2)
-  - SwiftAudioEx (1.0.0-rc.2)
+  - SwiftAudioEx (1.0.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1760,7 +1760,7 @@ SPEC CHECKSUMS:
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
-  react-native-track-player: e60e731db6d8662942f72795f766380b1e1d874b
+  react-native-track-player: 97d76dbbd35f27cc709e5f04540615e54264b3f9
   react-native-view-shot: a60a98a18c72bcaaaf2138f9aab960ae9b0d96c7
   react-native-webview: d33e2db8925d090871ffeb232dfa50cb3a727581
   React-perflogger: c0b9c0ab8cbaf732694cd776645b3161d128784d
@@ -1804,7 +1804,7 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   Sentry: 30b51086ca9aac23337880152e95538f7e177f7f
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
-  SwiftAudioEx: 12e816dd695bac59050d28528f19b4f4f521bb1b
+  SwiftAudioEx: 6f511018b7a0fdfd14ed1bb4081f953588245cc0
   Yoga: bb774af243598f7f860127c6e9ac7b62fb6519c4
 
 PODFILE CHECKSUM: 0738dfd676cd6d413df8549d599019ac09411bc0

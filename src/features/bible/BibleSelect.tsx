@@ -11,9 +11,14 @@ import VerseSelector from './VerseSelector'
 export interface BibleSelectProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   onComplete: () => void
+  onLongPressComplete?: (verse: number) => void
 }
 
-const BibleSelect = ({ bibleAtom, onComplete }: BibleSelectProps) => {
+const BibleSelect = ({
+  bibleAtom,
+  onComplete,
+  onLongPressComplete,
+}: BibleSelectProps) => {
   const [index, setIndex] = useState(0)
   return (
     <Box flex>
@@ -26,7 +31,11 @@ const BibleSelect = ({ bibleAtom, onComplete }: BibleSelectProps) => {
           <ChapterSelector bibleAtom={bibleAtom} onNavigate={setIndex} />
         </Slide>
         <Slide key="verse" flex>
-          <VerseSelector bibleAtom={bibleAtom} onComplete={onComplete} />
+          <VerseSelector
+            bibleAtom={bibleAtom}
+            onComplete={onComplete}
+            onLongPressComplete={onLongPressComplete}
+          />
         </Slide>
       </Slides>
     </Box>

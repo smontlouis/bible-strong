@@ -292,6 +292,14 @@ export const activeTabIndexAtom = atom(
   }
 )
 
+export const activeAtomIdAtom = atom(get => {
+  const tabsAtoms = get(tabsAtomsAtom)
+  const activeTabIndex = get(activeTabIndexAtom)
+  const atomId = tabsAtoms[activeTabIndex].toString()
+
+  return atomId
+})
+
 export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 export const tabsCountAtom = atom(get => get(tabsAtom).length)
 

@@ -9,12 +9,14 @@ import {
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 import useTabConstants from './useTabConstants'
+import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
   const tabsAtom = useAtomValue(tabsAtomsAtom)
   const { HEIGHT } = useTabConstants()
+  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
   const {
     activeTabPreview,
@@ -32,7 +34,10 @@ export const useTabAnimations = () => {
 
   const setActiveTabOpacity = useCallback(() => {
     setTimeout(() => {
-      activeTabScreen.opacity.value = withTiming(1)
+      activeTabScreen.opacity.value = withTiming(1, undefined, () => {
+        console.log('Take snapshot')
+        runOnJS(takeActiveTabSnapshot)()
+      })
     }, 50)
   }, [activeTabScreen.opacity])
 
@@ -107,6 +112,8 @@ export const useTabAnimations = () => {
             }
             tabPreviewCarousel.translateY.value = HEIGHT
             activeTabPreview.zIndex.value = 3
+            console.log('Take snapshot')
+            runOnJS(takeActiveTabSnapshot)()
           })
         )
       }

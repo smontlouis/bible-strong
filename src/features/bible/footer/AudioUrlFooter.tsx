@@ -41,10 +41,11 @@ type UseLoadSoundProps = {
 const events = [
   Event.PlaybackState,
   Event.PlaybackError,
-  Event.PlaybackTrackChanged,
+  Event.PlaybackActiveTrackChanged,
 ]
 
 const getAllTracks = (version: string) => {
+  // @ts-expect-error
   const bibleVersion = getVersions()[version] as Version
   const tracks = books.flatMap(book =>
     [...Array(book.Chapitres).keys()].map(i => ({
@@ -90,6 +91,8 @@ const useLoadSound = ({
         setAudioSleepMinutes('off')
       }
     }
+
+    console.log(event)
     if (event.type === Event.PlaybackActiveTrackChanged && event.track) {
       const nextTrack = event.track
       // If mismatch, it means the track change was not triggered by the user
@@ -110,7 +113,7 @@ const useLoadSound = ({
   const isPlaying = playerState === State.Playing
   const isLoading =
     playerState === State.Buffering ||
-    playerState === State.Connecting ||
+    playerState === State.Loading ||
     playerState === State.None
 
   const onPlay = async () => {
@@ -153,9 +156,14 @@ const useLoadSound = ({
   // Audio init on version change
   useEffect(() => {
     ;(async () => {
-      // Reset player and add tracks
       try {
         await TrackPlayer.setupPlayer()
+      } catch (e) {
+        console.log('silent catch', e)
+      }
+
+      // Reset player and add tracks
+      try {
         await TrackPlayer.reset()
 
         TrackPlayer.updateOptions({
@@ -182,8 +190,8 @@ const useLoadSound = ({
         })
 
         await TrackPlayer.add(tracks)
-      } catch {
-        console.log('silent catch')
+      } catch (e) {
+        console.log('silent catch', e)
       }
       setIsSetup(true)
     })()

@@ -11,18 +11,20 @@ export const PlaybackService = async function() {
   )
 
   TrackPlayer.addEventListener(Event.RemoteJumpForward, async () => {
-    const position = await TrackPlayer.getPosition()
+    const progress = await TrackPlayer.getProgress()
+    const position = progress.position
     return TrackPlayer.seekTo(position + 10)
   })
   TrackPlayer.addEventListener(Event.RemoteJumpBackward, async () => {
-    const position = await TrackPlayer.getPosition()
+    const progress = await TrackPlayer.getProgress()
+    const position = progress.position
     TrackPlayer.seekTo(position - 10)
   })
   TrackPlayer.addEventListener(Event.RemoteSeek, async ({ position }) => {
     TrackPlayer.seekTo(position)
   })
 
-  TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async d => {
+  TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async () => {
     const defaultStore = getDefaultStore()
 
     // Stop playback if sleep timer is set and has expired

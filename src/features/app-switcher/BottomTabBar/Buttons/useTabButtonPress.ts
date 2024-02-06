@@ -27,7 +27,7 @@ const useTabButtonPress = () => {
 
   const onPress = async () => {
     if (!tabs[activeTabIndex].base64Preview) {
-      await takeActiveTabSnapshot(activeTabIndex)
+      await takeActiveTabSnapshot()
     }
     minimizeTab()
   }

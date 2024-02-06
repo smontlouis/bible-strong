@@ -16,8 +16,18 @@ const Text = styled.Text(({ isSelected, theme }) => ({
   fontSize: 16,
 }))
 
-const SelectorItem = ({ item, isSelected, onChange }) => (
-  <TouchableOpacity onPress={() => onChange(item)}>
+type Props = {
+  item: number
+  isSelected?: boolean
+  onChange: (item: number) => void
+  onLongChange?: (item: number) => void
+}
+
+const SelectorItem = ({ item, isSelected, onChange, onLongChange }: Props) => (
+  <TouchableOpacity
+    onPress={() => onChange(item)}
+    onLongPress={() => onLongChange?.(item)}
+  >
     <Text isSelected={isSelected}>{item}</Text>
   </TouchableOpacity>
 )
