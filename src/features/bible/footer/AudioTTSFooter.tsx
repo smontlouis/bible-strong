@@ -11,10 +11,8 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import { getVersions, Version } from '~helpers/bibleVersions'
+import { Version, getVersions } from '~helpers/bibleVersions'
 import loadBible from '~helpers/loadBible'
-import { useEarlyAccess } from '~helpers/usePremium'
-import { ttsPitchAtom, ttsRepeatAtom, ttsSpeedAtom, ttsVoiceAtom } from './atom'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
@@ -23,6 +21,7 @@ import TTSPitchButton from './TTSPitchButton'
 import TTSRepeatButton from './TTSRepeatButton'
 import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
+import { ttsPitchAtom, ttsRepeatAtom, ttsSpeedAtom, ttsVoiceAtom } from './atom'
 
 type UseLoadSoundProps = {
   book: Book
@@ -70,7 +69,6 @@ const useLoadSound = ({
   const totalVerses = useRef(0)
   const currentVerse = useRef(1)
   const [rendered, rerender] = React.useReducer(i => i + 1, 0)
-  const checkEarlyAccess = useEarlyAccess()
 
   const [isExpanded, setExpandedMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -96,13 +94,13 @@ const useLoadSound = ({
     goToPrevChapter()
   }
 
-  const onPlay = checkEarlyAccess('enable_tts_public', () => {
+  const onPlay = () => {
     ignoreSpeechDone.current = false
     setExpandedMode(true)
     if (!isPlaying) {
       setIsPlaying(true)
     }
-  })
+  }
 
   const onStop = () => {
     ignoreSpeechDone.current = true

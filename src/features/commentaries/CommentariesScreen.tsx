@@ -29,11 +29,6 @@ const CommentariesScreen = ({
     []
   )
 
-  return (
-    <CommentariesTabScreen
-      commentaryAtom={onTheFlyAtom}
-      navigation={navigation}
-    />
-  )
+  return <CommentariesTabScreen commentaryAtom={onTheFlyAtom} />
 }
 export default CommentariesScreen

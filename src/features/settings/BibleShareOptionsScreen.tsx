@@ -9,7 +9,6 @@ import Container from '~common/ui/Container'
 import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
-import { useIsPremium } from '~helpers/usePremium'
 import { RootState } from '~redux/modules/reducer'
 import {
   toggleSettingsShareAppName,
@@ -44,7 +43,6 @@ const BibleShareOptionsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const [message, setMessage] = useState('')
-  const isPremium = useIsPremium()
 
   const {
     hasVerseNumbers,
@@ -116,16 +114,11 @@ const BibleShareOptionsScreen = () => {
           paddingVertical={10}
           row
           alignItems="center"
-          opacity={isPremium ? 1 : 0.5}
         >
           <Box flex>
             <Text>{t('bible.settings.hasAppName')}</Text>
-            {!isPremium && (
-              <Text fontSize={12}>{t('premium.sponsorsOnlyOption')}</Text>
-            )}
           </Box>
           <Switch
-            disabled={!isPremium}
             value={hasAppName}
             onValueChange={() => dispatch(toggleSettingsShareAppName())}
           />

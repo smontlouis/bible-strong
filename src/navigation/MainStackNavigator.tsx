@@ -1,7 +1,8 @@
+import { PortalProvider } from '@gorhom/portal'
 import React from 'react'
 import { createStackNavigator } from 'react-navigation-stack'
-import EarlyAccessModal from '~common/EarlyAccessModal'
-import { PortalProvider } from '@gorhom/portal'
+import ChangelogModal from '~common/Changelog'
+import MultipleTagsModal from '~common/MultipleTagsModal'
 import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
@@ -18,21 +19,23 @@ import CommentariesScreen from '~features/commentaries/CommentariesScreen'
 import DictionnaryDetailScreen from '~features/dictionnary/DictionaryDetailScreen'
 import DictionaryScreen from '~features/dictionnary/DictionaryScreen'
 import DictionnaireVerseDetailScreen from '~features/dictionnary/DictionnaireVerseDetailScreen'
+import HomeScreen from '~features/home/HomeScreen'
 import LexiqueScreen from '~features/lexique/LexiqueScreen'
 import NaveDetailScreen from '~features/nave/NaveDetailScreen'
 import NaveScreen from '~features/nave/NaveScreen'
 import NaveWarningScreen from '~features/nave/NaveWarningScreen'
+import OnBoardingModal from '~features/onboarding/OnBoarding'
 import MyPlanListScreen from '~features/plans/MyPlanListScreen/MyPlanListScreen'
 import PlanScreen from '~features/plans/PlanScreen/PlanScreen'
 import PlanSelectScreen from '~features/plans/PlanSelectScreen'
 import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
-import PremiumScreen from '~features/premium/PremiumScreen'
-import PremiumMoreScreen from '~features/premium/PremiumMoreScreen'
 import LocalSearchScreen from '~features/search/LocalSearchScreen'
 import SearchScreen from '~features/search/SearchScreen'
+import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
 import FAQScreen from '~features/settings/FAQScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
 import LoginScreen from '~features/settings/LoginScreen'
+import MoreScreen from '~features/settings/MoreScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
 import SupportScreen from '~features/settings/SupportScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
@@ -45,12 +48,6 @@ import DownloadsScreen from '../features/settings/DownloadsScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
-import MoreScreen from '~features/settings/MoreScreen'
-import HomeScreen from '~features/home/HomeScreen'
-import ChangelogModal from '~common/Changelog'
-import OnBoardingModal from '~features/onboarding/OnBoarding'
-import MultipleTagsModal from '~common/MultipleTagsModal'
-import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
 
 export const MainStackNavigator = createStackNavigator(
   {
@@ -100,8 +97,6 @@ export const MainStackNavigator = createStackNavigator(
       },
     },
     TimelineHome: { screen: TimelineHomeScreen },
-    Premium: { screen: PremiumScreen },
-    PremiumMore: { screen: PremiumMoreScreen },
     Concordance: { screen: ConcordanceScreen },
     Commentaries: { screen: CommentariesScreen },
     BibleShareOptions: { screen: BibleShareOptionsScreen },
@@ -115,7 +110,6 @@ export const MainStackNavigator = createStackNavigator(
 const MainStack = props => (
   <PortalProvider>
     <MainStackNavigator {...props} />
-    <EarlyAccessModal />
     <ChangelogModal />
     <OnBoardingModal />
     <MultipleTagsModal />

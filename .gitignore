@@ -71,7 +71,6 @@ android/build/
 android/app/build/
 android/keystores/
 android/app/src/main/assets/www/
-google-services.json
 
 # Node
 node_modules
