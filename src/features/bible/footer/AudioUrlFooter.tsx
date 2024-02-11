@@ -92,7 +92,6 @@ const useLoadSound = ({
       }
     }
 
-    console.log(event)
     if (event.type === Event.PlaybackActiveTrackChanged && event.track) {
       const nextTrack = event.track
       // If mismatch, it means the track change was not triggered by the user

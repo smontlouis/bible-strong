@@ -13157,11 +13157,6 @@ react-native-hooks@^0.0.6:
   dependencies:
     react "^16.7.0-alpha.0"
 
-react-native-iaphub@^8.4.0:
-  version "8.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-iaphub/-/react-native-iaphub-8.4.1.tgz#ad8fbf0c34b9f1367dfbcfb7ae616ad7b7540e32"
-  integrity sha512-EzviK5nKuv412wfUMw+elftSnQh3CA+uwm9vniYhFiZ9psf8qE51jmo7PjyyPPdMYTy29wTSQghMUpOq+SaGkA==
-
 react-native-immersive-mode@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-native-immersive-mode/-/react-native-immersive-mode-1.1.1.tgz#98be3b41a91789278d6d170bf565b9eea8b13215"

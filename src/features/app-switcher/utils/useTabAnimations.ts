@@ -35,7 +35,6 @@ export const useTabAnimations = () => {
   const setActiveTabOpacity = useCallback(() => {
     setTimeout(() => {
       activeTabScreen.opacity.value = withTiming(1, undefined, () => {
-        console.log('Take snapshot')
         runOnJS(takeActiveTabSnapshot)()
       })
     }, 50)
@@ -112,7 +111,6 @@ export const useTabAnimations = () => {
             }
             tabPreviewCarousel.translateY.value = HEIGHT
             activeTabPreview.zIndex.value = 3
-            console.log('Take snapshot')
             runOnJS(takeActiveTabSnapshot)()
           })
         )

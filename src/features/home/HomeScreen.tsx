@@ -8,7 +8,7 @@ import { HomeScrollView } from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import NaveOfTheDay from './NaveOfTheDay'
 import PlanHome from './PlanHome'
-import PremiumWidget from './PremiumWidget'
+import DonationWidget from './DonationWidget'
 import StrongOfTheDay from './StrongOfTheDay'
 import TheBibleProject from './TheBibleProjectPlan'
 import TimelineWidget from './TimelineWidget'
@@ -72,7 +72,7 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
             {t('Aller plus loin')}
           </Text>
         </Box>
-        <PremiumWidget />
+        <DonationWidget />
         <Box bg="lightGrey">
           <Box
             bg="reverse"

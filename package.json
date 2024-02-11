@@ -122,7 +122,6 @@
     "react-native-fs": "^2.16.4",
     "react-native-gesture-handler": "1.10.3",
     "react-native-hooks": "^0.0.6",
-    "react-native-iaphub": "^8.4.0",
     "react-native-immersive-mode": "^1.1.0",
     "react-native-iphone-x-helper": "^1.2.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",

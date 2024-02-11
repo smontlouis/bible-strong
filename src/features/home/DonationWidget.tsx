@@ -1,25 +1,25 @@
-import React from 'react'
 import Lottie from 'lottie-react-native'
+import React from 'react'
 
+import { LinearGradient } from 'expo-linear-gradient'
+import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { LinearGradient } from 'expo-linear-gradient'
-import { useIsPremium } from '~helpers/usePremium'
-import { useTranslation } from 'react-i18next'
+import useLanguage from '~helpers/useLanguage'
 
 const LinkBox = Box.withComponent(Link)
 
-const color1 = '#80d0c7'
-const color2 = '#13547a'
+const color1 = '#E0EAFC'
+const color2 = '#CFDEF3'
 
-const PremiumWidget = () => {
-  const isPremium = useIsPremium()
+const DonationWidget = () => {
+  const isFr = useLanguage()
   const { t } = useTranslation()
   return (
     <Box bg="lightGrey" px={20} pt={20} pb={40}>
       <LinkBox
-        route="Premium"
+        href={`https://bible-strong.app/${isFr ? 'fr/' : ''}give`}
         backgroundColor="primary"
         borderRadius={30}
         lightShadow
@@ -52,18 +52,14 @@ const PremiumWidget = () => {
             width: 300,
             height: 300,
           }}
-          source={require('../../assets/images/premium-icon.json')}
+          source={require('../../assets/images/donation.json')}
         />
-        <Box pl={60}>
-          <Text title fontSize={20} color="white">
-            {isPremium
-              ? t('Merci de nous soutenir !')
-              : t('Devenez un sponsor !')}
+        <Box pl={80}>
+          <Text title fontSize={20} color="black">
+            {t('donation.title')}
           </Text>
-          <Text marginTop={5} fontSize={14} color="white">
-            {isPremium
-              ? t('Vous êtes en accès anticipé !')
-              : t('Supportez-nous et débloquez toutes les fonctionnalités !')}
+          <Text marginTop={5} fontSize={16} color="black">
+            {t('donation.description')}
           </Text>
         </Box>
       </LinkBox>
@@ -71,4 +67,4 @@ const PremiumWidget = () => {
   )
 }
 
-export default PremiumWidget
+export default DonationWidget
