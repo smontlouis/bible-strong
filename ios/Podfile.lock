@@ -908,7 +908,6 @@ PODS:
     - GTMSessionFetcher/Core (< 3.0, >= 1.5)
   - GTMSessionFetcher/Core (2.3.0)
   - hermes-engine (0.70.12)
-  - Iaphub (4.1.0)
   - leveldb-library (1.22.2)
   - libevent (2.1.12)
   - libwebp (1.3.2):
@@ -1159,9 +1158,6 @@ PODS:
   - React-jsinspector (0.70.12)
   - React-logger (0.70.12):
     - glog
-  - react-native-iaphub (8.4.1):
-    - Iaphub (= 4.1.0)
-    - React-Core
   - react-native-netinfo (9.3.5):
     - React-Core
   - react-native-restart (0.0.17):
@@ -1406,7 +1402,6 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
-  - react-native-iaphub (from `../node_modules/react-native-iaphub`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -1481,7 +1476,6 @@ SPEC REPOS:
     - gRPC-Core
     - GTMAppAuth
     - GTMSessionFetcher
-    - Iaphub
     - leveldb-library
     - libevent
     - libwebp
@@ -1585,8 +1579,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
-  react-native-iaphub:
-    :path: "../node_modules/react-native-iaphub"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-restart:
@@ -1732,7 +1724,6 @@ SPEC CHECKSUMS:
   GTMAppAuth: 0ff230db599948a9ad7470ca667337803b3fc4dd
   GTMSessionFetcher: 3a63d75eecd6aa32c2fc79f578064e1214dfdec2
   hermes-engine: 9ae9c0a1ad0ca69b7e3abc1533b6beb01a3ba4ef
-  Iaphub: e85f4e74af063eea00a771d430c87eb841e739d2
   leveldb-library: f03246171cce0484482ec291f88b6d563699ee06
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
@@ -1755,7 +1746,6 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 8ab6379cd3abec21019c9fed3c506750f905bb3c
   React-jsinspector: ffb090a5d57aab834dee2791b1867a17bf37f26f
   React-logger: 00be0dc9dacb7b23f3ab4d78aadccb4b72f24b31
-  react-native-iaphub: 523f5f228f4eb367c9abd6717bbbad9ec45d3dc9
   react-native-netinfo: 85b2a435c4d3705c08b0c42ff2d6ef6b9622ea0a
   react-native-restart: d19a0f8d053d065fe64cd2baebb6487111c77149
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
