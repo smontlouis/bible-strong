@@ -1,24 +1,23 @@
+import { Portal } from '@gorhom/portal'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import FastImage from 'react-native-fast-image'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { withNavigation, NavigationParams } from 'react-navigation'
-import SnackBar from '~common/SnackBar'
-import * as Sentry from '@sentry/react-native'
-import Box from '~common/ui/Box'
-import Link from '~common/Link'
-import { OnlinePlan } from '~common/types'
-import Paragraph from '~common/ui/Paragraph'
 import { Modalize } from 'react-native-modalize'
-import DetailsModal from '../PlanScreen/DetailsModal'
-import { Portal } from '@gorhom/portal'
-import { useFireStorage } from '../plan.hooks'
-import Button from '~common/ui/Button'
-import { fetchPlan } from '~redux/modules/plan'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
+import { NavigationParams, withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
+import { useDispatch, useSelector } from 'react-redux'
+import Link from '~common/Link'
+import SnackBar from '~common/SnackBar'
+import { OnlinePlan } from '~common/types'
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import Paragraph from '~common/ui/Paragraph'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
-import { useTranslation } from 'react-i18next'
+import { fetchPlan } from '~redux/modules/plan'
+import { RootState } from '~redux/modules/reducer'
+import DetailsModal from '../PlanScreen/DetailsModal'
+import { useFireStorage } from '../plan.hooks'
 
 const ExplorePlanItem = ({
   id,
@@ -119,7 +118,6 @@ const ExplorePlanItem = ({
                     .catch(e => {
                       console.log(e)
                       setIsLoading(false)
-                      Sentry.captureException(e)
                       SnackBar.show(
                         t(
                           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import * as FileSystem from 'expo-file-system'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -66,7 +65,6 @@ export const useWaitForIndex = () => {
             "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
             'danger'
           )
-          Sentry.captureException(e)
           setProposeDownload(true)
           setStartDownload(false)
         }

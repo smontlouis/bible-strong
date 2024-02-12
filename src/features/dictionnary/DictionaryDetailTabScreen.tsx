@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -28,8 +27,8 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { RootState } from '~redux/modules/reducer'
-import { DictionaryTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { DictionaryTab } from '../../state/tabs'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -105,9 +104,6 @@ const DictionnaryDetailScreen = ({
         })
       } catch (e) {
         Snackbar.show('Impossible de charger ce mot.')
-        Sentry.captureMessage(
-          `Something went wrong with verse ${href} in ${word} ${e}`
-        )
       }
     } else {
       navigation.navigate({
@@ -135,7 +131,6 @@ const DictionnaryDetailScreen = ({
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
       console.log(e)
-      Sentry.captureException(e)
     }
   }
 

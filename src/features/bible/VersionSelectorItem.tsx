@@ -155,7 +155,6 @@ const VersionSelectorItem = ({
       setIsLoading(false)
     } catch (e) {
       console.log(e)
-      Sentry.captureException(e)
       SnackBar.show(
         t(
           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

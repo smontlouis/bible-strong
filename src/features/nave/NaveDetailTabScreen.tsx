@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
@@ -24,8 +23,8 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadNaveItem from '~helpers/loadNaveItem'
 import useHTMLView from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
-import { NaveTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { NaveTab } from '../../state/tabs'
 
 interface NaveDetailScreenProps {
   navigation: NavigationStackProp
@@ -92,9 +91,6 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
       } catch (e) {
         console.log(e)
         Snackbar.show('Impossible de charger ce verset.')
-        Sentry.captureMessage(
-          `Something went wrong with verse ${href} in ${name}`
-        )
       }
     }
 
@@ -123,7 +119,6 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
       console.log(e)
-      Sentry.captureException(e)
     }
   }
 

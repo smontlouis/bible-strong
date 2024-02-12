@@ -1,5 +1,4 @@
 import produce from 'immer'
-import * as Sentry from '@sentry/react-native'
 
 import generateUUID from '~helpers/generateUUID'
 
@@ -71,9 +70,7 @@ export default produce((draft, action) => {
             try {
               delete draft.bible.tags[tagId][item.entity][id]
               delete draft.bible[item.entity][id].tags[tagId]
-            } catch (e) {
-              Sentry.captureException(e)
-            }
+            } catch (e) {}
 
             // ADD OPERATION
           } else {

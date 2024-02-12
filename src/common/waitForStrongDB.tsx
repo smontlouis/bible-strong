@@ -1,7 +1,6 @@
 import * as FileSystem from 'expo-file-system'
 import React, { useEffect } from 'react'
 
-import * as Sentry from '@sentry/react-native'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
@@ -150,7 +149,6 @@ const useStrongEn = (dispatch: any, startDownload: any) => {
               ),
               'danger'
             )
-            Sentry.captureException(e)
             dispatch({
               type: 'strong.setProposeDownload',
               payload: true,

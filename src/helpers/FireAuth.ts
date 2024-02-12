@@ -198,7 +198,6 @@ const FireAuth = class {
       } catch (e) {
         SnackBar.show(i18n.t('Une erreur est survenue'))
         console.log(e)
-        Sentry.captureException(e)
         return resolve(false)
       }
     })

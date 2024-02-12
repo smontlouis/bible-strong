@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
 import i18n from '~i18n'
 
@@ -27,11 +26,6 @@ const catchDBError = async fn => {
         { duration: 5000 }
       )
 
-      Sentry.withScope(scope => {
-        scope.setExtra('Error', e.toString())
-        Sentry.captureMessage('Database corrupted')
-      })
-
       return { error: 'CORRUPTED_DATABASE' }
     }
 
@@ -52,7 +46,6 @@ const catchDBError = async fn => {
     )
 
     console.log(e)
-    Sentry.captureException(e)
 
     return { error: 'UNKNOWN_ERROR' }
   }

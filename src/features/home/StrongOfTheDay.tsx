@@ -1,20 +1,18 @@
-import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import * as Sentry from '@sentry/react-native'
+import React, { useEffect, useState } from 'react'
 
-import { wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
+import LexiqueIcon from '~common/LexiqueIcon'
 import Link from '~common/Link'
-import Text from '~common/ui/Text'
+import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import loadRandomStrongReference from '~helpers/loadRandomStrongReference'
+import truncate from '~helpers/truncate'
+import RandomButton from './RandomButton'
 import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import LexiqueIcon from '~common/LexiqueIcon'
-import RandomButton from './RandomButton'
-import truncate from '~helpers/truncate'
-import { useTranslation } from 'react-i18next'
 
 const StrongOfTheDay = ({
   type,

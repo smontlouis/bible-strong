@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import * as FileSystem from 'expo-file-system'
 import React, { useEffect, useState } from 'react'
 import SnackBar from '~common/SnackBar'
@@ -83,7 +82,6 @@ export const useWaitForDatabase = () => {
               'danger'
             )
             console.log(e)
-            Sentry.captureException(e)
             setProposeDownload(true)
             setStartDownload(false)
           }

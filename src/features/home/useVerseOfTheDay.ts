@@ -5,7 +5,6 @@ import notifee, {
   TimestampTrigger,
   TriggerType,
 } from '@notifee/react-native'
-import * as Sentry from '@sentry/react-native'
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'

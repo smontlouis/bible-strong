@@ -1,34 +1,33 @@
-import React from 'react'
-import { TouchableOpacity, Alert } from 'react-native'
-import * as FileSystem from 'expo-file-system'
-import ProgressCircle from 'react-native-progress/Circle'
 import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
+import * as FileSystem from 'expo-file-system'
+import React from 'react'
+import { Alert, TouchableOpacity } from 'react-native'
+import ProgressCircle from 'react-native-progress/Circle'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
-import * as Sentry from '@sentry/react-native'
-import { getDatabasesRef } from '~helpers/firebase'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
+import { getDatabasesRef } from '~helpers/firebase'
 
 import {
-  strongDB,
-  mhyDB,
-  naveDB,
   deleteDictionnaireDB,
   deleteTresorDB,
   initDictionnaireDB,
   initTresorDB,
+  mhyDB,
+  naveDB,
+  strongDB,
 } from '~helpers/database'
 
-import { DBStateContext } from '~helpers/databaseState'
+import { withTranslation } from 'react-i18next'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
 import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { DBStateContext } from '~helpers/databaseState'
+import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
-import { withTranslation } from 'react-i18next'
 
 const Container = styled.View(
   ({ needsUpdate, theme }: { needsUpdate: boolean; theme: Theme }) => ({
@@ -134,7 +133,6 @@ class DBSelectorItem extends React.Component {
       }
     } catch (e) {
       console.log(e)
-      Sentry.captureException(e)
       SnackBar.show(
         t(
           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

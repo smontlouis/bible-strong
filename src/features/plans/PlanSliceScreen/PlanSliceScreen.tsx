@@ -1,33 +1,32 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
-import MenuOption from '~common/ui/MenuOption'
 import { NavigationStackProp } from 'react-navigation-stack'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import MenuOption from '~common/ui/MenuOption'
 
+import { useAtom } from 'jotai/react'
+import { useTranslation } from 'react-i18next'
+import { Share } from 'react-native'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
+import Snackbar from '~common/SnackBar'
 import { ComputedReadingSlice, EntitySlice } from '~common/types'
 import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
 import Container from '~common/ui/Container'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import chapterToReference from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 import { markAsRead } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
+import { defaultBibleAtom } from '../../../state/tabs'
 import ParamsModal from './ParamsModal'
 import PauseText from './PauseText'
 import ReadButton from './ReadButton'
 import Slice from './Slice'
-import { useTranslation } from 'react-i18next'
-import * as Sentry from '@sentry/react-native'
-import Snackbar from '~common/SnackBar'
-import { Share } from 'react-native'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
-import { useAtom } from 'jotai/react'
-import { defaultBibleAtom } from '../../../state/tabs'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -111,7 +110,6 @@ const PlanSliceScreen = ({ navigation }: Props) => {
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
       console.log(e)
-      Sentry.captureException(e)
     }
   }
 

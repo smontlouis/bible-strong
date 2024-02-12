@@ -1329,9 +1329,11 @@ PODS:
     - Yoga
   - RNScreens (2.18.1):
     - React-Core
-  - RNSentry (4.2.2):
+  - RNSentry (5.18.0):
+    - hermes-engine
     - React-Core
-    - Sentry (= 7.22.0)
+    - React-hermes
+    - Sentry/HybridSDK (= 8.17.1)
   - RNSVG (13.8.0):
     - React-Core
   - RNZipArchive (5.0.6):
@@ -1347,9 +1349,9 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
-  - Sentry (7.22.0):
-    - Sentry/Core (= 7.22.0)
-  - Sentry/Core (7.22.0)
+  - Sentry/HybridSDK (8.17.1):
+    - SentryPrivate (= 8.17.1)
+  - SentryPrivate (8.17.1)
   - SSZipArchive (2.2.2)
   - SwiftAudioEx (1.0.0)
   - Yoga (1.14.0)
@@ -1485,6 +1487,7 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
+    - SentryPrivate
     - SSZipArchive
     - SwiftAudioEx
 
@@ -1787,12 +1790,13 @@ SPEC CHECKSUMS:
   RNNotifee: 053c0ace9c73634709a0214fd9c436a5777a562f
   RNReanimated: 6668b0587bebd4b15dd849b99e5a9c70fc12ed95
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
-  RNSentry: f03937a2cf86c7029ba31fbbf5618c55d223cd62
+  RNSentry: eefa12fa65b37dd71f54371720f9fcddcd17be2f
   RNSVG: c1e76b81c76cdcd34b4e1188852892dc280eb902
   RNZipArchive: 9dfdaa1d1ad49a423e83df505f292e0ae8126a5d
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
-  Sentry: 30b51086ca9aac23337880152e95538f7e177f7f
+  Sentry: d9f99f9cc13777c5d938650c1e1c85047bb4f0d1
+  SentryPrivate: 839b1e58addf58624087a80b2628e543193fa8ef
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
   SwiftAudioEx: 6f511018b7a0fdfd14ed1bb4081f953588245cc0
   Yoga: bb774af243598f7f860127c6e9ac7b62fb6519c4

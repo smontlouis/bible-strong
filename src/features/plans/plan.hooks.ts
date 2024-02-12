@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
 import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -12,12 +11,12 @@ import {
   ComputedPlan,
   ComputedPlanItem,
   ComputedSection,
+  OngoingPlan,
   OngoingReadingSlice,
   Plan,
   ReadingSlice,
   Section,
   Status,
-  OngoingPlan,
 } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
@@ -472,7 +471,6 @@ export const useFireStorage = (src?: string) => {
         setImageUrl(uri)
         dispatch(cacheImage({ id: src, value: uri }))
       } catch (e) {
-        Sentry.captureException(e)
         console.log(`can't find: images/${src}`)
       }
     })()

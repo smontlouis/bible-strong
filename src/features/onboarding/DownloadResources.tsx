@@ -1,7 +1,6 @@
 import { useTheme } from '@emotion/react'
 import to from 'await-to-js'
 import * as FileSystem from 'expo-file-system'
-import * as Sentry from '@sentry/react-native'
 import {
   DownloadProgressData,
   FileSystemNetworkTaskProgressCallback,
@@ -14,8 +13,8 @@ import ProgressCircle from 'react-native-progress/Circle'
 import RNRestart from 'react-native-restart'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
 import { VStack } from '~common/ui/Stack'
+import Text from '~common/ui/Text'
 import { selectedResourcesAtom } from './atom'
 
 export interface DownloadResourcesProps {
@@ -56,7 +55,6 @@ const DownloadResources = ({ setFirstTime }: DownloadResourcesProps) => {
 
         if (err) {
           setError(err)
-          Sentry.captureException(error)
           return
         }
       }

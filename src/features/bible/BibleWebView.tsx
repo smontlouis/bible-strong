@@ -292,12 +292,10 @@ class BibleWebView extends Component {
             const { nativeEvent } = syntheticEvent
             console.warn('Content process terminated, reloading...')
             this.webview?.reload()
-            Sentry.captureException(nativeEvent)
           }}
           onRenderProcessGone={syntheticEvent => {
             const { nativeEvent } = syntheticEvent
             this.webview?.reload()
-            Sentry.captureException(nativeEvent)
           }}
         />
       </View>
