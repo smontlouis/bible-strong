@@ -9,7 +9,7 @@ import TrackPlayer, {
   useProgress,
   useTrackPlayerEvents,
 } from 'react-native-track-player'
-import { VersionCode } from 'src/state/tabs'
+import { BibleTab, VersionCode, useIsCurrentTab } from '../../../state/tabs'
 import books, { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -24,6 +24,7 @@ import AudioSpeedButton from './AudioSpeedButton'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
 import PlayButton from './PlayButton'
+import { PrimitiveAtom } from 'jotai/vanilla'
 
 type UseLoadSoundProps = {
   audioUrl?: string
@@ -36,6 +37,7 @@ type UseLoadSoundProps = {
   version: VersionCode
   getToNextChapter?: () => void
   getToPrevChapter?: () => void
+  isCurrentTab: boolean
 }
 
 const events = [
@@ -67,6 +69,7 @@ const useLoadSound = ({
   goToNextChapter,
   goToPrevChapter,
   goToChapter,
+  isCurrentTab,
 }: UseLoadSoundProps) => {
   const [isExpanded, setExpandedMode] = useState(false)
   const [playerState, setPlayerState] = useState<State>(State.None)
@@ -77,6 +80,9 @@ const useLoadSound = ({
   const setAudioSleepMinutes = useSetAtom(audioSleepMinutesAtom)
 
   useTrackPlayerEvents(events, async event => {
+    if (!isSetup) {
+      return
+    }
     if (event.type === Event.PlaybackError) {
       let trackObject = await TrackPlayer.getActiveTrack()
       console.log(trackObject?.url)
@@ -92,7 +98,13 @@ const useLoadSound = ({
       }
     }
 
-    if (event.type === Event.PlaybackActiveTrackChanged && event.track) {
+    // Ideally we'd like to track the tab originally playing the audio so that we can only change his tab.
+    // Atm, the current tab playing will be the one changing
+    if (
+      event.type === Event.PlaybackActiveTrackChanged &&
+      event.track &&
+      isCurrentTab
+    ) {
       const nextTrack = event.track
       // If mismatch, it means the track change was not triggered by the user
       if (
@@ -189,6 +201,11 @@ const useLoadSound = ({
         })
 
         await TrackPlayer.add(tracks)
+        const trackIndex = tracks.findIndex(
+          track =>
+            track.book.Numero === book.Numero && track.chapter === chapter
+        )
+        await TrackPlayer.skip(trackIndex)
       } catch (e) {
         console.log('silent catch', e)
       }
@@ -248,6 +265,7 @@ type AudioUrlFooterProps = {
   disabled?: boolean
   version: VersionCode
   onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
+  bibleAtom: PrimitiveAtom<BibleTab>
 }
 
 const AudioUrlFooter = ({
@@ -259,9 +277,12 @@ const AudioUrlFooter = ({
   disabled,
   version,
   onChangeMode,
+  bibleAtom,
 }: AudioUrlFooterProps) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
+  const getIsCurrentTab = useIsCurrentTab()
+  const isCurrentTab = getIsCurrentTab(bibleAtom)
 
   const {
     error,
@@ -281,6 +302,7 @@ const AudioUrlFooter = ({
     goToNextChapter,
     goToPrevChapter,
     goToChapter,
+    isCurrentTab,
   })
 
   const progress = useProgress(200)

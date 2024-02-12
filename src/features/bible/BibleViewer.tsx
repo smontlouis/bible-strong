@@ -376,6 +376,7 @@ const BibleViewer = ({
       )}
       {!isReadOnly && (
         <BibleFooter
+          bibleAtom={bibleAtom}
           disabled={isLoading}
           book={book}
           chapter={chapter}

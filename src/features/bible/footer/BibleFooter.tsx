@@ -1,10 +1,11 @@
 import React, { memo, useEffect } from 'react'
 
-import { VersionCode } from 'src/state/tabs'
+import { BibleTab, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import { getVersions, Version } from '~helpers/bibleVersions'
 import AudioTTSFooter from './AudioTTSFooter'
 import AudioUrlFooter from './AudioUrlFooter'
+import { PrimitiveAtom } from 'jotai/vanilla'
 
 type BibleFooterProps = {
   book: Book
@@ -14,9 +15,11 @@ type BibleFooterProps = {
   goToChapter: (x: { book: Book; chapter: number }) => void
   disabled?: boolean
   version: VersionCode
+  bibleAtom: PrimitiveAtom<BibleTab>
 }
 
 const BibleFooter = ({
+  bibleAtom,
   book,
   chapter,
   goToNextChapter,
@@ -44,6 +47,7 @@ const BibleFooter = ({
         disabled={disabled}
         version={version}
         onChangeMode={canSwitch ? setAudioMode : undefined}
+        bibleAtom={bibleAtom}
       />
     )
   }
