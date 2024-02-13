@@ -98,7 +98,7 @@ export default produce((draft, action) => {
         }
 
         // DELETE OPERATION
-        // eslint-disable-next-line no-lonely-if
+
         if (draft.bible[item.entity][item.id]?.tags?.[tagId]) {
           delete draft.bible.tags[tagId][item.entity][item.id]
           delete draft.bible[item.entity][item.id].tags[tagId]
