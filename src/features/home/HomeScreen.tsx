@@ -19,6 +19,7 @@ import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import { getBottomSpace } from 'react-native-iphone-x-helper'
+import TryAudibibleWidget from './TryAudibibleWidget'
 
 const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()
@@ -73,6 +74,7 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
           </Text>
         </Box>
         <DonationWidget />
+        <TryAudibibleWidget />
         <Box bg="lightGrey">
           <Box
             bg="reverse"

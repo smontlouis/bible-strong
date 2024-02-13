@@ -116,7 +116,12 @@ const ChangeLanguage = memo(() => {
   }
   return (
     <LinkItem onPress={confirmChangeLanguage}>
-      <MaterialIcon name="language" size={25} style={{ marginRight: 15 }} />
+      <MaterialIcon
+        name="language"
+        size={25}
+        color="grey"
+        style={{ marginRight: 15 }}
+      />
       <Text fontSize={15}>
         {t('Changer la langue')} -{' '}
         <Text bold fontSize={15} color="primary">
@@ -339,10 +344,25 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             <StyledIcon name="share-2" size={25} />
             <Text fontSize={15}>{t("Partager l'application")}</Text>
           </LinkItem>
+          <LinkItem
+            href={
+              isFR
+                ? 'https://bible-strong.app/fr/give'
+                : 'https://bible-strong.app/give'
+            }
+          >
+            <StyledIcon name="dollar-sign" size={25} />
+            <Text fontSize={15}>{t('Contribuer')}</Text>
+          </LinkItem>
+          <LinkItem href="https://github.com/smontlouis/bible-strong">
+            <StyledIcon name="github" size={25} />
+            <Text fontSize={15}>Github</Text>
+          </LinkItem>
           <LinkItem href="mailto:stephane@sevnapps.com">
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>{t('Contacter le développeur')}</Text>
           </LinkItem>
+
           <ChangeLanguage />
           <ManualSync />
           {!isLogged && (

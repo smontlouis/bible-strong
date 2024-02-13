@@ -35,7 +35,10 @@ export const useTabAnimations = () => {
   const setActiveTabOpacity = useCallback(() => {
     setTimeout(() => {
       activeTabScreen.opacity.value = withTiming(1, undefined, () => {
-        runOnJS(takeActiveTabSnapshot)()
+        runOnJS(takeActiveTabSnapshot)(
+          activeTabPreview.index.value,
+          activeTabScreen.atomId.value || ''
+        )
       })
     }, 50)
   }, [activeTabScreen.opacity])
@@ -111,7 +114,10 @@ export const useTabAnimations = () => {
             }
             tabPreviewCarousel.translateY.value = HEIGHT
             activeTabPreview.zIndex.value = 3
-            runOnJS(takeActiveTabSnapshot)()
+            runOnJS(takeActiveTabSnapshot)(
+              activeTabPreview.index.value,
+              activeTabScreen.atomId.value || ''
+            )
           })
         )
       }

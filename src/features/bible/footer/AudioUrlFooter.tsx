@@ -1,6 +1,7 @@
 import { useAtom, useSetAtom } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 
+import { PrimitiveAtom } from 'jotai/vanilla'
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
@@ -9,13 +10,12 @@ import TrackPlayer, {
   useProgress,
   useTrackPlayerEvents,
 } from 'react-native-track-player'
-import { BibleTab, VersionCode, useIsCurrentTab } from '../../../state/tabs'
 import books, { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
-import { getVersions, Version } from '~helpers/bibleVersions'
-import { audioSleepMinutesAtom, audioSleepTimeAtom } from './atom'
+import { Version, getVersions } from '~helpers/bibleVersions'
+import { BibleTab, VersionCode } from '../../../state/tabs'
 import AudioBar from './AudioBar'
 import AudioContainer from './AudioContainer'
 import AudioRepeatButton from './AudioRepeatButton'
@@ -24,7 +24,11 @@ import AudioSpeedButton from './AudioSpeedButton'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
 import PlayButton from './PlayButton'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import {
+  audioSleepMinutesAtom,
+  audioSleepTimeAtom,
+  playingBibleTabIdAtom,
+} from './atom'
 
 type UseLoadSoundProps = {
   audioUrl?: string
@@ -37,13 +41,14 @@ type UseLoadSoundProps = {
   version: VersionCode
   getToNextChapter?: () => void
   getToPrevChapter?: () => void
-  isCurrentTab: boolean
+  bibleAtom: PrimitiveAtom<BibleTab>
 }
 
 const events = [
   Event.PlaybackState,
   Event.PlaybackError,
   Event.PlaybackActiveTrackChanged,
+  Event.PlaybackProgressUpdated,
 ]
 
 const getAllTracks = (version: string) => {
@@ -69,7 +74,7 @@ const useLoadSound = ({
   goToNextChapter,
   goToPrevChapter,
   goToChapter,
-  isCurrentTab,
+  bibleAtom,
 }: UseLoadSoundProps) => {
   const [isExpanded, setExpandedMode] = useState(false)
   const [playerState, setPlayerState] = useState<State>(State.None)
@@ -78,6 +83,10 @@ const useLoadSound = ({
   const hasAutoTrackChange = useRef(false)
   const [audioSleepTime, setAudioSleepTime] = useAtom(audioSleepTimeAtom)
   const setAudioSleepMinutes = useSetAtom(audioSleepMinutesAtom)
+  const [playingBibleTabId, setPlayingBibleTabId] = useAtom(
+    playingBibleTabIdAtom
+  )
+  const isCurrentTabPlaying = playingBibleTabId === bibleAtom.toString()
 
   useTrackPlayerEvents(events, async event => {
     if (!isSetup) {
@@ -98,24 +107,17 @@ const useLoadSound = ({
       }
     }
 
-    // Ideally we'd like to track the tab originally playing the audio so that we can only change his tab.
-    // Atm, the current tab playing will be the one changing
-    if (
-      event.type === Event.PlaybackActiveTrackChanged &&
-      event.track &&
-      isCurrentTab
-    ) {
-      const nextTrack = event.track
-      // If mismatch, it means the track change was not triggered by the user
+    if (event.type === Event.PlaybackProgressUpdated && isCurrentTabPlaying) {
+      const track = await TrackPlayer.getTrack(event.track)
+
       if (
-        nextTrack &&
-        (nextTrack?.book?.Numero !== book.Numero ||
-          nextTrack?.chapter !== chapter)
+        track &&
+        (track?.book?.Numero !== book.Numero || track?.chapter !== chapter)
       ) {
         hasAutoTrackChange.current = true
         goToChapter({
-          book: nextTrack.book,
-          chapter: nextTrack.chapter,
+          book: track?.book,
+          chapter: track?.chapter,
         })
       }
     }
@@ -128,6 +130,7 @@ const useLoadSound = ({
     playerState === State.None
 
   const onPlay = async () => {
+    setPlayingBibleTabId(bibleAtom.toString())
     setExpandedMode(true)
 
     if (!isPlaying) {
@@ -136,6 +139,7 @@ const useLoadSound = ({
   }
 
   const onPause = () => {
+    setPlayingBibleTabId('')
     TrackPlayer.pause()
   }
 
@@ -155,14 +159,16 @@ const useLoadSound = ({
   const tracks = useMemo(() => getAllTracks(version), [version])
 
   // Unmounting
-  useEffect(() => {
-    return () => {
-      TrackPlayer.pause()
-      TrackPlayer.reset()
-      setAudioSleepTime(0)
-      setAudioSleepMinutes('off')
-    }
-  }, [setAudioSleepMinutes, setAudioSleepTime])
+  // useEffect(() => {
+  //   return () => {
+  //     TrackPlayer.pause()
+  //     TrackPlayer.reset()
+  //     setAudioSleepTime(0)
+  //     setAudioSleepMinutes('off')
+
+  //     console.log('----- UNMOUNT')
+  //   }
+  // }, [setAudioSleepMinutes, setAudioSleepTime])
 
   // Audio init on version change
   useEffect(() => {
@@ -281,8 +287,6 @@ const AudioUrlFooter = ({
 }: AudioUrlFooterProps) => {
   const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
   const hasNextChapter = !(book.Numero === 66 && chapter === 22)
-  const getIsCurrentTab = useIsCurrentTab()
-  const isCurrentTab = getIsCurrentTab(bibleAtom)
 
   const {
     error,
@@ -302,7 +306,7 @@ const AudioUrlFooter = ({
     goToNextChapter,
     goToPrevChapter,
     goToChapter,
-    isCurrentTab,
+    bibleAtom,
   })
 
   const progress = useProgress(200)

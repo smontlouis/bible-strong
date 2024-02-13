@@ -303,7 +303,15 @@ export const activeAtomIdAtom = atom(get => {
 export const useIsCurrentTab = () => {
   const activeAtomId = useAtomValue(activeAtomIdAtom)
 
-  return (at: PrimitiveAtom<unknown>) => activeAtomId === at.toString()
+  return <T>(at: PrimitiveAtom<T>) => {
+    return activeAtomId === at.toString()
+  }
+}
+
+export const useFindTabIndex = (atomId: string) => {
+  const tabsAtoms = useAtomValue(tabsAtomsAtom)
+
+  return tabsAtoms.findIndex(tab => tab.toString() === atomId)
 }
 
 export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)

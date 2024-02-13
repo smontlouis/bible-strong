@@ -569,6 +569,7 @@
   "audio.repeat": "Répéter",
   "audio.voice": "Voix",
   "audio.timer": "Minuteur",
+  "audio.goBack": "Retour à l'audio",
 
   "fr-FR": "Français",
   "fr-CA": "Français CA",
@@ -580,6 +581,9 @@
 
   "donation.title": "Offrir votre soutien",
   "donation.description": "Aidez à faire la différence",
+
+  "audibible.try": "Essayez audibible",
+  "audibible.description": "Bêta disponible",
 
   "premium.basic.description": "Vous êtes sponsor.\nMerci pour votre aide symbolique à l'évolution de ce projet.",
   "premium.premium.description": "Vous êtes sponsor premium.\nMerci pour votre engagement envers l'évolution de ce projet et votre volonté de vous y investir financièrement. Je vous remercie chaleureusement pour votre soutien.",

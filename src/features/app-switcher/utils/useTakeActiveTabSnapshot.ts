@@ -1,20 +1,14 @@
 import produce from 'immer'
-import { useAtomValue, useSetAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
 import useDynamicRefs from '~helpers/useDynamicRefs'
-import {
-  activeAtomIdAtom,
-  activeTabIndexAtom,
-  tabsAtom,
-} from '../../../state/tabs'
+import { tabsAtom } from '../../../state/tabs'
 
 const useTakeActiveTabSnapshot = () => {
-  const activeAtomId = useAtomValue(activeAtomIdAtom)
-  const activeTabIndex = useAtomValue(activeTabIndexAtom)
   const setTabs = useSetAtom(tabsAtom)
   const [getRef] = useDynamicRefs()
 
-  return async () => {
+  return async (activeTabIndex: number, activeAtomId: string) => {
     try {
       if (typeof activeTabIndex === 'undefined') {
         throw new Error('No active tab')

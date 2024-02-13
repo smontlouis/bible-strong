@@ -567,9 +567,13 @@
   "audio.repeat": "Repeat",
   "audio.voice": "Voice",
   "audio.timer": "Timer",
+  "audio.goBack": "Back to audio",
 
   "donation.title": "Offer your support",
   "donation.description": "Help make a difference",
+
+  "audibible.try": "Try audibible",
+  "audibible.description": "Bêta available now",
 
   "fr-FR": "French",
   "fr-CA": "French Canada",

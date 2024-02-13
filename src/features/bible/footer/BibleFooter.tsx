@@ -1,11 +1,14 @@
 import React, { memo, useEffect } from 'react'
 
-import { BibleTab, VersionCode } from 'src/state/tabs'
+import { BibleTab, VersionCode, useIsCurrentTab } from '../../../state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import { getVersions, Version } from '~helpers/bibleVersions'
 import AudioTTSFooter from './AudioTTSFooter'
 import AudioUrlFooter from './AudioUrlFooter'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtomValue } from 'jotai/react'
+import { playingBibleTabIdAtom } from './atom'
+import BackToAudioFooter from './BackToAudioFooter'
 
 type BibleFooterProps = {
   book: Book
@@ -31,10 +34,30 @@ const BibleFooter = ({
   const bibleVersion = getVersions()[version] as Version
   const canSwitch = bibleVersion?.hasAudio
   const [audioMode, setAudioMode] = React.useState<'url' | 'tts' | undefined>()
+  const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
+  const isTabPlaying = playingBibleTabId === bibleAtom.toString()
+  const getIsCurrentTab = useIsCurrentTab()
+  const isCurrentTab = getIsCurrentTab(bibleAtom)
 
   useEffect(() => {
     setAudioMode(canSwitch ? 'url' : 'tts')
   }, [version, canSwitch])
+
+  if (!isCurrentTab && !isTabPlaying) {
+    return null
+  }
+
+  if (playingBibleTabId && !isTabPlaying) {
+    return (
+      <BackToAudioFooter
+        book={book}
+        chapter={chapter}
+        goToNextChapter={goToNextChapter}
+        goToPrevChapter={goToPrevChapter}
+        disabled={disabled}
+      />
+    )
+  }
 
   if (audioMode === 'url') {
     return (

@@ -14,3 +14,5 @@ export const audioRepeatAtom = atomWithAsyncStorage<RepeatMode>(
   'audioRepeat',
   RepeatMode.Off
 )
+
+export const playingBibleTabIdAtom = atom<string>('')

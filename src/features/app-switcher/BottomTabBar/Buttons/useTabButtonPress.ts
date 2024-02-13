@@ -9,6 +9,7 @@ import {
 import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActiveTabSnapshot'
 import useDidUpdate from '~helpers/useDidUpdate'
 import {
+  activeAtomIdAtom,
   activeTabIndexAtom,
   tabsAtom,
   tabsCountAtom,
@@ -17,6 +18,7 @@ import { useTabAnimations } from '../../utils/useTabAnimations'
 
 const useTabButtonPress = () => {
   const activeTabIndex = useAtomValue(activeTabIndexAtom)
+  const activeAtomId = useAtomValue(activeAtomIdAtom)
   const tabs = useAtomValue(tabsAtom)
   const tabsCount = useAtomValue(tabsCountAtom)
   const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
@@ -27,7 +29,7 @@ const useTabButtonPress = () => {
 
   const onPress = async () => {
     if (!tabs[activeTabIndex].base64Preview) {
-      await takeActiveTabSnapshot()
+      await takeActiveTabSnapshot(activeTabIndex, activeAtomId)
     }
     minimizeTab()
   }

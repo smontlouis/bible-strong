@@ -1,65 +1,63 @@
-import Lottie from 'lottie-react-native'
 import React from 'react'
 
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
+import { Image } from 'react-native'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import useLanguage from '~helpers/useLanguage'
 
 const LinkBox = Box.withComponent(Link)
 
-const color1 = '#E0EAFC'
-const color2 = '#CFDEF3'
+const color1 = '#010F1B'
+const color2 = '#132E4D'
 
-const DonationWidget = () => {
-  const isFr = useLanguage()
+const TryAudibibleWidget = () => {
   const { t } = useTranslation()
   return (
-    <Box bg="lightGrey" px={20} pt={20} pb={20}>
+    <Box bg="lightGrey" px={20} pb={40}>
       <LinkBox
-        href={`https://bible-strong.app/${isFr ? 'fr/' : ''}give`}
+        href={`https://audibible.app`}
         backgroundColor="primary"
         borderRadius={30}
         lightShadow
         p={20}
-        height={130}
+        height={100}
         position="relative"
         overflow="hidden"
-        center
+        alignItems="center"
+        row
       >
         <Box
           pos="absolute"
           left={0}
           right={0}
           top={0}
-          height={130}
+          height={100}
           borderRadius={30}
         >
           <LinearGradient
             start={[0.1, 0.2]}
-            style={{ height: 130 }}
+            style={{ height: 100 }}
             colors={[color1, color2]}
           />
         </Box>
-        <Lottie
-          autoPlay
+        <Image
           style={{
-            position: 'absolute',
-            top: -30,
-            left: -30,
-            width: 300,
-            height: 300,
+            width: 50,
+            height: 50,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: 'white',
           }}
-          source={require('../../assets/images/donation.json')}
+          source={require('../../assets/images/audibible-icon.png')}
         />
-        <Box pl={60}>
-          <Text title fontSize={20} color="black">
-            {t('donation.title')}
+        <Box ml={16}>
+          <Text title fontSize={20} color="white">
+            {t('audibible.try')}
           </Text>
-          <Text marginTop={5} fontSize={16} color="black">
-            {t('donation.description')}
+          <Text fontSize={16} color="white">
+            {t('audibible.description')}
           </Text>
         </Box>
       </LinkBox>
@@ -67,4 +65,4 @@ const DonationWidget = () => {
   )
 }
 
-export default DonationWidget
+export default TryAudibibleWidget
