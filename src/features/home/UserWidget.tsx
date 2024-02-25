@@ -98,7 +98,6 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
 const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
-
   const isLoading = useSelector((state: RootState) => state.user.isLoading)
   const highlights = useSelector(
     (state: RootState) => Object.keys(state.user.bible.highlights).length
