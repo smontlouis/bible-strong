@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>204116128917-djl1r2fnp7n0d8aqvmmqpq5k6oclte0q.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.204116128917-djl1r2fnp7n0d8aqvmmqpq5k6oclte0q</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>204116128917-n6r4rh2bq2tofsjjt5c0sb9und69c0o1.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAuLacmYeJAZKRWQx272U0RZCY4uwshtZg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>204116128917</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.smontlouis.biblestrong</string>
+	<key>PROJECT_ID</key>
+	<string>bible-strong-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>bible-strong-app.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:204116128917:ios:db04ad99d1581a9e02579c</string>
+	<key>DATABASE_URL</key>
+	<string>https://bible-strong-app.firebaseio.com</string>
+</dict>
+</plist>

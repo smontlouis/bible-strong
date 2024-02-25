@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "204116128917",
+    "firebase_url": "https://bible-strong-app.firebaseio.com",
+    "project_id": "bible-strong-app",
+    "storage_bucket": "bible-strong-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204116128917:android:3ae4e716f079e5a002579c",
+        "android_client_info": {
+          "package_name": "com.smontlouis.biblestrong"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "204116128917-n6r4rh2bq2tofsjjt5c0sb9und69c0o1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smontlouis.biblestrong",
+            "certificate_hash": "99678cdf858f41fbc994920a9b21fa90e861fcda"
+          }
+        },
+        {
+          "client_id": "204116128917-6rprdpgim56segkridngt2p70fd23v7e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1NjCx7Vkq6PhAc3iM9sjzURoXazOIhoM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "204116128917-6rprdpgim56segkridngt2p70fd23v7e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "204116128917-djl1r2fnp7n0d8aqvmmqpq5k6oclte0q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.smontlouis.biblestrong",
+                "app_store_id": "1454738221"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

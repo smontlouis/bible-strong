@@ -8,12 +8,22 @@
       "distribution": "internal",
       "android": {
         "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "development"
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "staging"
+      }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      }
+    }
   },
   "submit": {
     "production": {}
