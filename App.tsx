@@ -1,16 +1,16 @@
 import * as Icon from '@expo/vector-icons'
-// import analytics from '@react-native-firebase/analytics'
+import analytics from '@react-native-firebase/analytics'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
-// import { setAutoFreeze } from 'immer'
+import { setAutoFreeze } from 'immer'
 import { useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
-// import 'react-native-root-siblings'
+import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
-// import * as Sentry from '@sentry/react-native'
+import * as Sentry from '@sentry/react-native'
 import { persistor, store } from '~redux/store'
-// import remoteConfig from '@react-native-firebase/remote-config'
+import remoteConfig from '@react-native-firebase/remote-config'
 
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
@@ -24,14 +24,14 @@ SplashScreen.preventAutoHideAsync()
   )
   .catch(console.warn) // it's good to explicitly catch and inspect any error
 
-// setAutoFreeze(false)
-// LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
+setAutoFreeze(false)
+LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
-// if (!__DEV__) {
-//   Sentry.init({
-//     dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
-//   })
-// }
+if (!__DEV__) {
+  Sentry.init({
+    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
+  })
+}
 
 const loadResourcesAsync = async () => {
   return Promise.all([
@@ -58,32 +58,32 @@ const useAppLoad = () => {
       setStatus('Set i18n')
       await setI18n()
       setIsLoadingCompleted(true)
-      // if (!__DEV__) {
-      //   analytics().logScreenView({
-      //     screen_class: 'Bible',
-      //     screen_name: 'Bible',
-      //   })
-      // }
+      if (!__DEV__) {
+        analytics().logScreenView({
+          screen_class: 'Bible',
+          screen_name: 'Bible',
+        })
+      }
     })()
   }, [])
 
-  // useEffect(() => {
-  //   ;(async () => {
-  //     await remoteConfig().setDefaults({
-  //       enable_tts_public: false,
-  //       apple_reviewing: false,
-  //     })
-  //     const fetchedRemotely = await remoteConfig().fetchAndActivate()
+  useEffect(() => {
+    ;(async () => {
+      await remoteConfig().setDefaults({
+        enable_tts_public: false,
+        apple_reviewing: false,
+      })
+      const fetchedRemotely = await remoteConfig().fetchAndActivate()
 
-  //     if (fetchedRemotely) {
-  //       console.log('Configs were retrieved from the backend and activated.')
-  //     } else {
-  //       console.log(
-  //         'No configs were fetched from the backend, and the local configs were already activated'
-  //       )
-  //     }
-  //   })()
-  // }, [])
+      if (fetchedRemotely) {
+        console.log('Configs were retrieved from the backend and activated.')
+      } else {
+        console.log(
+          'No configs were fetched from the backend, and the local configs were already activated'
+        )
+      }
+    })()
+  }, [])
 
   const isCompleted =
     loadableActiveIndex.state === 'hasData' &&
