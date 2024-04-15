@@ -1,6 +1,5 @@
 import * as Updates from 'expo-updates'
 import * as Speech from 'expo-speech'
-import VIForegroundService from '@voximplant/react-native-foreground-service'
 import { useEffect } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, Platform } from 'react-native'
@@ -23,7 +22,8 @@ const handleAppStateChange = async (nextAppState: AppStateStatus) => {
 
     if (!(await Speech.isSpeakingAsync()) && Platform.OS === 'android') {
       try {
-        await VIForegroundService.getInstance().stopService()
+        // TODO Replace this library : @voximplant/react-native-foreground-service
+        // await VIForegroundService.getInstance().stopService()
       } catch {}
     }
   }

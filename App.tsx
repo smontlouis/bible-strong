@@ -34,12 +34,14 @@ if (!__DEV__) {
 }
 
 const loadResourcesAsync = async () => {
+  // TODO Fix import font
+  return true
   return Promise.all([
     Font.loadAsync({
       ...Icon.Feather.font,
       ...Icon.Ionicons.font,
-      'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
-      'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
+      'Literata Book': require('src/assets/fonts/LiterataBook-Regular.otf'),
+      'eina-03-bold': require('src/assets/fonts/eina-03-bold.otf'),
     }),
   ])
 }
