@@ -1,4 +1,3 @@
-import VIForegroundService from '@voximplant/react-native-foreground-service'
 import { Audio } from 'expo-av'
 import * as Speech from 'expo-speech'
 import { useAtomValue } from 'jotai/react'
@@ -52,7 +51,8 @@ const startForegroundService = async () => {
     icon: 'ic_launcher_round',
   }
   try {
-    await VIForegroundService.getInstance().startService(notificationConfig)
+    // TODO Replace this library : @voximplant/react-native-foreground-service
+    // await VIForegroundService.getInstance().startService(notificationConfig)
   } catch (e) {
     console.error(e)
   }

@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import Clipboard from '@react-native-community/clipboard'
+import Clipboard from '@react-native-clipboard/clipboard'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 import { Modalize } from 'react-native-modalize'
