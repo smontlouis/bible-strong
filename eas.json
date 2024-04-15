@@ -9,6 +9,7 @@
       "android": {
         "image": "latest"
       },
+      "ios": { "simulator": true},
       "env": {
         "EXPO_PUBLIC_ENVIRONMENT": "development",
         "APP_NAME": "Dev Bible Strong",
@@ -37,7 +38,7 @@
       }
     }
   },
-  "submit": {
-    "production": {}
+    "submit": {
+      "production": {}
   }
 }
