@@ -2,7 +2,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Bible Strong',
+  name: process.env.APP_NAME ?? 'Dev Bible Strong',
   jsEngine: 'hermes',
   description: 'Bible strong for french people',
   slug: 'bible-strong',
@@ -12,6 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   platforms: ['ios', 'android'],
   version: '17.2.0',
   orientation: 'default',
+  icon: "./assets/images/icon.png",
   assetBundlePatterns: [
     'assets/images/*',
     'src/assets/fonts/*',
@@ -27,12 +28,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     versionCode: 365,
     package: 'com.smontlouis.biblestrong',
-    googleServicesFile: 'firebase/dev/google-services.json',
+    googleServicesFile: process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
   },  
   ios: {
-    bundleIdentifier: 'com.smontlouis.biblestrong.dev',
+    bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
     buildNumber: '157',
-    googleServicesFile: './firebase/dev/GoogleService-Info.plist',
+    googleServicesFile: process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
+  },
+  splash: {
+    image: "./assets/images/splash.png",
+    resizeMode: "contain",
+    backgroundColor: "#6E6E6E"
   },
   plugins: [
     '@react-native-firebase/app',
