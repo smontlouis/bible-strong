@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   platforms: ['ios', 'android'],
   version: '17.2.0',
   orientation: 'default',
-  icon: "./assets/images/icon.png",
+  icon: './assets/images/icon.png',
   assetBundlePatterns: [
     'assets/images/*',
     'src/assets/fonts/*',
@@ -28,17 +28,22 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     versionCode: 365,
     package: 'com.smontlouis.biblestrong',
-    googleServicesFile: process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
-  },  
+    googleServicesFile:
+      process.env.ANDROID_GOOGLE_SERVICES_FILE ??
+      'firebase/dev/google-services.json',
+  },
   ios: {
-    bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
+    bundleIdentifier:
+      process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
     buildNumber: '157',
-    googleServicesFile: process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
+    googleServicesFile:
+      process.env.IOS_GOOGLE_SERVICES_FILE ??
+      './firebase/dev/GoogleService-Info.plist',
   },
   splash: {
-    image: "./assets/images/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#6E6E6E"
+    image: './assets/images/splash.png',
+    resizeMode: 'contain',
+    backgroundColor: '#6E6E6E',
   },
   plugins: [
     '@react-native-firebase/app',
@@ -60,15 +65,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     [
-      "expo-font",
+      'expo-font',
       {
-        "fonts": ["./src/assets/fonts/LiterataBook-Regular.otf", "./src/assets/fonts/eina-03-bold.otf"]
-      }
-    ]
+        fonts: [
+          './src/assets/fonts/LiterataBook-Regular.otf',
+          './src/assets/fonts/eina-03-bold.otf',
+        ],
+      },
+    ],
   ],
   extra: {
     eas: {
-      projectId: '65e00af3-0942-4dd4-8642-71f6ebc3349c',
+      projectId: '1afee084-2344-4ead-a708-ffefec92b35b',
     },
   },
 })
