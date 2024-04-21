@@ -1,4 +1,4 @@
-import SQLite from 'react-native-sqlite-storage'
+import * as SQLite from 'expo-sqlite'
 import * as FileSystem from 'expo-file-system'
 import { getDatabases } from './databases'
 
@@ -31,74 +31,98 @@ class StrongDB {
   dbStrong
 
   init = async () => {
-    this.dbStrong = SQLite.openDatabase(
-      {
-        name: databaseStrongName,
-        createFromLocation: '/SQLite/strong.sqlite',
-      },
-      () => {
-        console.log('Strong loaded')
-      },
-      e => console.log(e)
-    )
-
-    return this.dbStrong
+    try {
+      this.dbStrong = SQLite.openDatabase(
+        databaseStrongName,
+        undefined,
+        undefined,
+        undefined,
+        () => {
+          console.log('Strong loaded')
+        }
+      )
+      return this.dbStrong
+    } catch (error) {
+      console.error('Error opening database:', error)
+      throw error
+    }
   }
 
   get = () => {
     return this.dbStrong
   }
 
-  delete = () => {
-    this.dbStrong?._db?.close()
-    SQLite.deleteDatabase({ name: databaseStrongName, location: 'default' })
-    this.dbStrong = undefined
+  delete = async () => {
+    try {
+      if (this.dbStrong) {
+        await this.dbStrong._db.close() // Fermer la base de données
+        await FileSystem.deleteAsync(
+          `${FileSystem.documentDirectory}SQLite/${databaseStrongName}.db`
+        ) // Supprimer le fichier de la base de données
+        console.log('Strong database deleted')
+      }
+    } catch (error) {
+      console.error('Error deleting database:', error)
+      throw error
+    }
   }
 }
 
 export const strongDB = new StrongDB()
 
 export const initDictionnaireDB = () => {
-  dbDictionnaire = SQLite.openDatabase(
-    {
-      name: databaseDictionnaireName,
-      createFromLocation: '/SQLite/dictionnaire.sqlite',
-    },
-    () => {
-      console.log('Dictionnaire loaded')
-    },
-    e => console.log(e)
-  )
+  try {
+    dbDictionnaire = SQLite.openDatabase(
+      databaseDictionnaireName,
+      undefined,
+      undefined,
+      undefined,
+      () => {
+        console.log('Dictionnaire loaded')
+      }
+    )
 
-  return dbDictionnaire
+    return dbDictionnaire
+  } catch (error) {
+    console.error('Error Dictionnaire loaded:', error)
+    throw error
+  }
 }
 
 export const initInterlineaireDB = () => {
-  dbInterlineaire = SQLite.openDatabase(
-    {
-      name: databaseInterlineaireName,
-      createFromLocation: '/SQLite/interlineaire.sqlite',
-    },
-    () => {
-      console.log('Interlineaire loaded')
-    },
-    e => console.log(e)
-  )
-  return dbDictionnaire
+  try {
+    dbInterlineaire = SQLite.openDatabase(
+      databaseInterlineaireName,
+      undefined,
+      undefined,
+      undefined,
+      () => {
+        console.log('Interlineaire loaded')
+      }
+    )
+    return dbInterlineaire
+  } catch (error) {
+    console.error('Error Interlineaire loaded:', error)
+    throw error
+  }
 }
 
 export const initTresorDB = () => {
-  dbTresorCommentaires = SQLite.openDatabase(
-    {
-      name: databaseTresorName,
-      createFromLocation: '/SQLite/commentaires-tresor.sqlite',
-    },
-    () => {
-      console.log('Tresor loaded')
-    },
-    e => console.log(e)
-  )
-  return dbTresorCommentaires
+  try {
+    dbTresorCommentaires = SQLite.openDatabase(
+      databaseTresorName,
+      undefined,
+      undefined,
+      undefined,
+      () => {
+        console.log('Tresor loaded')
+      }
+    )
+    return dbTresorCommentaires
+  } catch (error) {
+    console.error('Error Tresor loaded:', error)
+    throw error
+  }
 }
 
 export const getDictionnaireDB = () => {
@@ -113,58 +137,80 @@ export const getTresorDB = () => {
   return dbTresorCommentaires
 }
 
-export const deleteDictionnaireDB = () => {
-  dbDictionnaire?._db?.close()
-  SQLite.deleteDatabase({ name: databaseDictionnaireName, location: 'default' })
-  dbDictionnaire = undefined
+export const deleteDictionnaireDB = async () => {
+  try {
+    if (dbDictionnaire) {
+      await dbDictionnaire._db.close()
+      await FileSystem.deleteAsync(
+        `${FileSystem.documentDirectory}SQLite/${databaseDictionnaireName}.db`
+      )
+      console.log('Dictionnaire database deleted')
+      dbDictionnaire = undefined
+    }
+  } catch (error) {
+    console.error('Error deleting Dictionnaire database:', error)
+    throw error
+  }
 }
 
-export const deleteTresorDB = () => {
-  dbTresorCommentaires?._db?.close()
-  SQLite.deleteDatabase({
-    name: databaseTresorName,
-    location: 'default',
-  })
-  dbTresorCommentaires = undefined
+export const deleteTresorDB = async () => {
+  try {
+    if (dbTresorCommentaires) {
+      await dbTresorCommentaires._db.close()
+      await FileSystem.deleteAsync(
+        `${FileSystem.documentDirectory}SQLite/${databaseTresorName}.db`
+      )
+      dbTresorCommentaires = undefined
+    }
+  } catch (error) {
+    console.error('Error deleting Tresor database:', error)
+    throw error
+  }
 }
 
-export const deleteInterlineaireDB = () => {
-  dbInterlineaire?._db?.close()
-  SQLite.deleteDatabase({
-    name: databaseInterlineaireName,
-    location: 'default',
-  })
-  dbInterlineaire = undefined
+export const deleteInterlineaireDB = async () => {
+  if (dbInterlineaire) {
+    await dbInterlineaire._db.close()
+    await FileSystem.deleteAsync(
+      `${FileSystem.documentDirectory}SQLite/${databaseInterlineaireName}.db`
+    )
+    dbInterlineaire = undefined
+  }
 }
 
 class MhyDB {
   dbMhy
 
   init = () => {
-    this.dbMhy = SQLite.openDatabase(
-      {
-        name: databaseMhyName,
-        createFromLocation: '/SQLite/commentaires-mhy.sqlite',
-      },
-      () => {
-        console.log('Commentaires loaded')
-      },
-      e => console.log(e)
-    )
-    return this.dbMhy
+    try {
+      this.dbMhy = SQLite.openDatabase(
+        databaseMhyName,
+        undefined,
+        undefined,
+        undefined,
+        () => {
+          console.log('Commentaires loaded')
+        }
+      )
+      return this.dbMhy
+    } catch (error) {
+      console.error('Error Commentaires loaded:', error)
+      throw error
+    }
   }
 
   get = () => {
     return this.dbMhy
   }
 
-  delete = () => {
-    this.dbMhy?._db?.close()
-    SQLite.deleteDatabase({
-      name: databaseMhyName,
-      location: 'default',
-    })
-    this.dbMhy = undefined
+  delete = async () => {
+    if (this.dbMhy) {
+      await this.dbMhy._db.close()
+      await FileSystem.deleteAsync(
+        `${FileSystem.documentDirectory}SQLite/${databaseMhyName}.db`
+      )
+      this.dbMhy = undefined
+    }
   }
 }
 
@@ -173,28 +219,40 @@ export const mhyDB = new MhyDB()
 class NaveDB {
   dbNave
 
-  init = () => {
-    this.dbNave = SQLite.openDatabase(
-      {
-        name: databaseNaveName,
-        createFromLocation: '/SQLite/naveFr.sqlite',
-      },
-      () => {
-        console.log('Nave loaded')
-      },
-      e => console.log(e)
-    )
-    return this.dbNave
+  init = async () => {
+    try {
+      this.dbNave = SQLite.openDatabase(
+        databaseNaveName,
+        undefined,
+        undefined,
+        undefined,
+        () => {
+          console.log('Nave loaded')
+        }
+      )
+      return this.dbNave
+    } catch (error) {
+      console.error('Error initializing Nave database:', error)
+      throw error
+    }
   }
 
   get = () => {
     return this.dbNave
   }
 
-  delete = () => {
-    this.dbNave?._db?.close()
-    SQLite.deleteDatabase({ name: databaseNaveName, location: 'default' })
-    this.dbNave = undefined
+  delete = async () => {
+    try {
+      if (this.dbNave) {
+        await this.dbNave._db?.close()
+        const databasePath = `${FileSystem.documentDirectory}SQLite/${databaseNaveName}.db`
+        await FileSystem.deleteAsync(databasePath)
+        this.dbNave = undefined
+      }
+    } catch (error) {
+      console.error('Error deleting Nave database:', error)
+      throw error
+    }
   }
 }
 
