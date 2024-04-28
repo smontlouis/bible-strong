@@ -9,16 +9,11 @@ Object.fromEntries =
 
 import 'expo-asset'
 import 'react-native-gesture-handler'
-import { AppRegistry, Platform } from 'react-native'
+import { registerRootComponent } from 'expo'
 import App from './App'
 import TrackPlayer from 'react-native-track-player'
 import { PlaybackService } from './playbackService'
 
 TrackPlayer.registerPlaybackService(() => PlaybackService)
-AppRegistry.registerComponent('main', () => App)
 
-if (Platform.OS === 'web') {
-  const rootTag =
-    document.getElementById('root') || document.getElementById('main')
-  AppRegistry.runApplication('main', { rootTag })
-}
+registerRootComponent(App)
