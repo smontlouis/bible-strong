@@ -3,6 +3,7 @@ import styled from '@emotion/native'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { useTranslation } from 'react-i18next'
 
 const TabItem = styled.TouchableOpacity<{ isRouteActive?: boolean }>(
   ({ theme, isRouteActive }) => ({
@@ -33,6 +34,7 @@ type Props = {
 }
 
 const BibleSelectTabBar = ({ index, onChange }: Props) => {
+  const { t } = useTranslation()
   return (
     <Box row>
       {routes.map((route, routeIndex) => {
@@ -47,7 +49,7 @@ const BibleSelectTabBar = ({ index, onChange }: Props) => {
             }}
           >
             <Text color={isRouteActive ? 'primary' : 'grey'} bold>
-              {route}
+              {t(route)}
             </Text>
           </TabItem>
         )

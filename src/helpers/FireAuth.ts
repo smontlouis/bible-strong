@@ -58,11 +58,6 @@ const FireAuth = class {
     })
 
     auth().onAuthStateChanged(async user => {
-      const { isConnected } = await NetInfo.fetch()
-      if (!isConnected) {
-        return
-      }
-
       // Skip registration call
       if (!this.authFlag) {
         this.authFlag = true

@@ -22,7 +22,7 @@ import Text from '~common/ui/Text'
 import { deleteAllDatabases } from '~helpers/database'
 import useLogin from '~helpers/useLogin'
 import { resetCompareVersion } from '~redux/modules/user'
-
+import * as FileSystem from 'expo-file-system'
 import { shallowEqual } from 'recompose'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
@@ -30,6 +30,8 @@ import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
+
+import * as Sharing from 'expo-sharing'
 
 export const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -365,6 +367,11 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
 
           <ChangeLanguage />
           <ManualSync />
+          <LinkItem route="ImportExport">
+            <StyledIcon name="upload" size={25} />
+            <Text fontSize={15}>{t('app.importexport')}</Text>
+          </LinkItem>
+          {/* <ExportSave /> */}
           {!isLogged && (
             <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />

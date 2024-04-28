@@ -15,7 +15,10 @@
   "app.youAreOffline": "You are offline",
   "app.syncing": "Save in progress...",
   "app.synced": "Save done !",
-  "app.sync": "Manual sync",
+  "app.sync": "Online manual sync",
+  "app.importexport": "Import/Export my data",
+  "app.import": "Import",
+  "app.export": "Export",
   "vod.permissionNeeded": "You must allow notifications to receive today's verse.",
   "comment.quotaExceeded": "Quota exceeded",
   "comment.thanksTranslation": "Thanks for your help !",
@@ -561,6 +564,13 @@
   "premium.searchQuotaRemaining": "Remaining research",
 
   "app.downloading": "Downloading...",
+  "app.imported": "Import completed",
+  "app.exported": "Export completed",
+  "app.lastSave": "Last save",
+  "app.noSave": "No save",
+  "app.syncError": "An error occurred while synchronizing your data. Please save your data manually",
+  "app.exportDesc": "Normally your data is automatically synchronized, but in some cases it may happen that you need to do it manually. \n\nWhen you export your data, a file is created on your phone. You can then share it by email or other means of your choice.",
+  "app.importDesc": "The import file must be in SAVE.BIBLESTRONG format and contain data from your account. \n\nWARNING, imports crushes all existing data. Make sure you have a recent backup before continuing.",
 
   "audio.speed": "Speed",
   "audio.pitch": "Pitch",
@@ -581,5 +591,7 @@
   "en-AU": "English AU",
   "en-US": "English US",
   "he-IL": "Hebrew Israel",
-  "el-GR": "Modern Greek Greece"
+  "el-GR": "Modern Greek Greece",
+
+  "Contribuer": "Contribute"
 }

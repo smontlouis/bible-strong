@@ -64,6 +64,7 @@ export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
 export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
 
 export const RECEIVE_LIVE_UPDATES = 'user/RECEIVE_LIVE_UPDATES'
+export const IMPORT_DATA = 'user/IMPORT_DATA'
 
 export interface Study {
   id: string
@@ -299,6 +300,18 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       break
     }
 
+    case IMPORT_DATA: {
+      const { bible, studies } = action.payload
+
+      // Merge bible
+      draft.bible = deepmerge(getInitialState().bible, bible || {})
+
+      // Restore studies
+      draft.bible.studies = studies
+
+      break
+    }
+
     /**
      * 4. Update user profile
      */
@@ -521,6 +534,13 @@ export function addChangelog(payload) {
 export function setSubscription(payload: SubscriptionType) {
   return {
     type: SET_SUBSCRIPTION,
+    payload,
+  }
+}
+
+export function importData(payload: any) {
+  return {
+    type: IMPORT_DATA,
     payload,
   }
 }

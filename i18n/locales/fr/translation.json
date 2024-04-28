@@ -15,7 +15,10 @@
   "app.youAreOffline": "Vous êtes hors ligne",
   "app.syncing": "Synchronisation en cours...",
   "app.synced": "Synchronisation finie !",
-  "app.sync": "Sauvegarde manuelle",
+  "app.sync": "Sauvegarde en ligne manuelle",
+  "app.importexport": "Importer/Exporter mes données",
+  "app.import": "Importer",
+  "app.export": "Exporter",
   "vod.permissionNeeded": "Vous devez autoriser les notifications pour recevoir le verset du jour.",
   "comment.quotaExceeded": "Le quota de traduction est atteint.",
   "comment.thanksTranslation": "Merci de votre contribution !",
@@ -563,6 +566,13 @@
   "premium.searchQuotaRemaining": "Recherches restantes",
 
   "app.downloading": "Téléchargement...",
+  "app.imported": "Importé",
+  "app.exported": "Exporté",
+  "app.lastSave": "Dernière sauvegarde",
+  "app.noSave": "Pas de sauvegarde",
+  "app.syncError": "Erreur de synchronisation, sauvegardez manuellement vos données",
+  "app.exportDesc": "Normalement vos données sont synchronisées automatiquement, mais dans certains cas, il peut arriver que vous ayez besoin de le faire manuellement. \n\nLorsque vous exportez vos données, un fichier est créé sur votre téléphone. Vous pouvez ensuite le partager par mail ou autre moyen de votre choix.",
+  "app.importDesc": "Le fichier d'import doit être au format .biblestrong et contenir les données de votre compte. \n\nATTENTION, l'import écrase toutes les données existantes. Assurez-vous d'avoir une sauvegarde récente avant de continuer.",
 
   "audio.speed": "Vitesse",
   "audio.pitch": "Tonalité",
@@ -588,5 +598,6 @@
   "premium.basic.description": "Vous êtes sponsor.\nMerci pour votre aide symbolique à l'évolution de ce projet.",
   "premium.premium.description": "Vous êtes sponsor premium.\nMerci pour votre engagement envers l'évolution de ce projet et votre volonté de vous y investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
   "premium.premium_plus.description": "Vous êtes sponsor super premium.\nLa manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
-  "premium.investor.description": "Vous êtes un investisseur\n.La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien."
+  "premium.investor.description": "Vous êtes un investisseur\n.La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
+  "Contribuer": "Contribuer"
 }

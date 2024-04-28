@@ -7,6 +7,7 @@ import { MenuProvider } from 'react-native-popup-menu'
 import { useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import ErrorBoundary from '~common/ErrorBoundary'
+import { useKeepAwake } from 'expo-keep-awake'
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -84,6 +85,7 @@ const queryClient = new QueryClient()
 const InitApp = ({ persistor }: Props) => {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
+  useKeepAwake()
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)

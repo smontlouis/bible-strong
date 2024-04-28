@@ -44,6 +44,7 @@ import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
 import TimelineScreen from '~features/timeline/TimelineScreen'
 import PericopeScreen from '../features/bible/PericopeScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
+import ImportExportScreen from '../features/settings/ImportExportScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import TagScreen from '../features/settings/TagScreen'
@@ -72,6 +73,7 @@ export const MainStackNavigator = createStackNavigator(
     Support: { screen: SupportScreen },
     ModifyColors: { screen: ModifyColorsScreen },
     Changelog: { screen: ChangelogScreen },
+    ImportExport: { screen: ImportExportScreen },
     Pericope: { screen: PericopeScreen },
     History: { screen: HistoryScreen },
     Tags: { screen: TagsScreen },

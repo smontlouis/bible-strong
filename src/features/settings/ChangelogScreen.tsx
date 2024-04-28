@@ -1,21 +1,20 @@
-import React from 'react'
-import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
+import fr from 'date-fns/locale/fr'
+import React from 'react'
 
 import { shallowEqual, useSelector } from 'react-redux'
 
+import { useTranslation } from 'react-i18next'
+import { ChangelogTag } from '~common/Changelog'
+import Header from '~common/Header'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
-import Header from '~common/Header'
-import Box from '~common/ui/Box'
-import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
-import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
-import { ChangelogTag } from '~common/Changelog'
 
 const Changelog = () => {
   const changelog = useSelector(

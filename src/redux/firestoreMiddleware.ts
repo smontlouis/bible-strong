@@ -43,12 +43,16 @@ import {
   TOGGLE_SETTINGS_SHARE_QUOTES,
   TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
   SAVE_ALL_LOGS_AS_SEEN,
+  //
+  IMPORT_DATA,
 } from './modules/user'
 
 import { firebaseDb } from '../helpers/firebase'
 import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { diff } from '~helpers/deep-obj'
+import Snackbar from '~common/SnackBar'
+import i18n from '~i18n'
 
 export const r = obj => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
@@ -69,16 +73,21 @@ export default store => next => async action => {
   const userDoc = firebaseDb.collection('users').doc(user.id)
 
   switch (action.type) {
+    // case IMPORT_DATA:
     case removePlan.type:
     case fetchPlan.fulfilled.type:
     case resetPlan.type:
     case markAsRead.type: {
-      userDoc.set(
-        {
-          plan: plan.ongoingPlans,
-        },
-        { merge: true }
-      )
+      try {
+        await userDoc.set(
+          {
+            plan: plan.ongoingPlans,
+          },
+          { merge: true }
+        )
+      } catch (error) {
+        Snackbar.show(i18n.t('app.syncError'), 'danger')
+      }
       break
     }
     case SET_SETTINGS_ALIGN_CONTENT:
@@ -110,29 +119,36 @@ export default store => next => async action => {
     case TOGGLE_SETTINGS_SHARE_QUOTES:
     case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS:
     case SAVE_ALL_LOGS_AS_SEEN:
+    case IMPORT_DATA:
     case UPDATE_TAG: {
       if (!diffState?.user?.bible) break
 
       const { studies, ...diffStateUserBible } = diffState.user.bible
 
       if (Object.keys(diffStateUserBible).length !== 0) {
-        userDoc.set({ bible: diffStateUserBible }, { merge: true })
+        try {
+          await userDoc.set({ bible: diffStateUserBible }, { merge: true })
+        } catch (error) {
+          Snackbar.show(i18n.t('app.syncError'), 'danger')
+        }
       }
 
       if (studies) {
         Object.entries(studies).forEach(([studyId, obj]) => {
           const studyDoc = firebaseDb.collection('studies').doc(studyId)
           const studyContent = state.user.bible.studies[studyId]?.content?.ops
-          studyDoc.set(
-            {
-              ...obj,
-              content: {
-                // handle array weird form from diff object
-                ops: studyContent || [],
+          try {
+            studyDoc.set(
+              {
+                ...obj,
+                content: {
+                  // handle array weird form from diff object
+                  ops: studyContent || [],
+                },
               },
-            },
-            { merge: true }
-          )
+              { merge: true }
+            )
+          } catch (error) {}
         })
       }
 

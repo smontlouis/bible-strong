@@ -10,7 +10,12 @@ import {
 import { firebaseDb, increment } from '~helpers/firebase'
 // import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
-import { FireStoreUserData, RECEIVE_LIVE_UPDATES, USER_LOGOUT } from './user'
+import {
+  FireStoreUserData,
+  IMPORT_DATA,
+  RECEIVE_LIVE_UPDATES,
+  USER_LOGOUT,
+} from './user'
 
 // const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
 // const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
@@ -267,6 +272,13 @@ const planSlice = createSlice({
     )
     builder.addCase(RECEIVE_LIVE_UPDATES, (state, action: any) => {
       const { plan } = action.payload.remoteUserData as FireStoreUserData
+
+      if (plan) {
+        state.ongoingPlans = plan
+      }
+    })
+    builder.addCase(IMPORT_DATA, (state, action: any) => {
+      const { plan } = action.payload
 
       if (plan) {
         state.ongoingPlans = plan
