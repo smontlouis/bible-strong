@@ -17,34 +17,6 @@
     "nuke": "rm -rf node_modules; rm -rf ios/build; rm -rf ios/Pods; rm -rf ios/Podfile.lock; yarn; yarn podinstall",
     "i18n": "i18next 'src/**/*.{js,ts,tsx}' '!src/features/bible/bibleWebView/**' '!src/features/studies/studiesWebView/**'"
   },
-  "config": {
-    "react-native-storybook-loader": {
-      "searchDir": [
-        "./src"
-      ],
-      "pattern": "**/*.stories.tsx",
-      "outputFile": "./storybook/storyLoader.js"
-    }
-  },
-  "jest": {
-    "modulePathIgnorePatterns": [
-      ".yarn",
-      ".npm"
-    ]
-  },
-  "detox": {
-    "configurations": {
-      "ios.sim.debug": {
-        "binaryPath": "ios/build/Build/Products/Dev-iphonesimulator/Bible Strong - Dev.app",
-        "build": "xcodebuild -workspace ios/biblestrong.xcworkspace -scheme 'biblestrong - dev' -configuration Dev -sdk iphonesimulator -derivedDataPath ios/build",
-        "type": "ios.simulator",
-        "device": {
-          "type": "iPhone 11 Pro"
-        }
-      }
-    },
-    "test-runner": "jest"
-  },
   "dependencies": {
     "@emotion/native": "^11.10.0",
     "@emotion/react": "^11.10.5",
@@ -56,7 +28,7 @@
     "@react-native-async-storage/async-storage": "1.21.0",
     "@react-native-clipboard/clipboard": "^1.14.0",
     "@react-native-community/cli-config": "^13.6.4",
-    "@react-native-community/datetimepicker": "7.6.1",
+    "@react-native-community/datetimepicker": "8.0.0",
     "@react-native-community/masked-view": "^0.1.6",
     "@react-native-community/netinfo": "11.1.0",
     "@react-native-firebase/analytics": "18.1.0",
