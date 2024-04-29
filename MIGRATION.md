@@ -3,4 +3,4 @@
 [] refactor databasesRef into databases
 [] remove mhy in en
 [] refactor sqliteDir
-[] refactor getStaticUrl
+[] refactor cdnUrl

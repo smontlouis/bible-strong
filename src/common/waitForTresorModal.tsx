@@ -7,11 +7,11 @@ import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
+import { getDatabases } from '~helpers/databases'
+import { databasesRef } from '~helpers/firebase'
 import { tresorDB } from '~helpers/sqlite'
-import { getStaticUrl } from '~helpers/firebase'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
-import { getDatabases } from '~helpers/databases'
 
 const STRONG_FILE_SIZE = 5434368
 
@@ -52,9 +52,7 @@ export const useWaitForDatabase = () => {
             if (!window.tresorDownloadHasStarted) {
               window.tresorDownloadHasStarted = true
 
-              const sqliteDbUri = getStaticUrl(
-                'databases/commentaires-tresor.sqlite'
-              )
+              const sqliteDbUri = databasesRef.TRESOR
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 

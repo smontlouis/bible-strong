@@ -160,6 +160,8 @@
     "@types/jest": "^25.2.1",
     "@types/react": "~18.2.45",
     "@types/react-test-renderer": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
     "babel-eslint": "^10.0.3",
     "babel-jest": "~26.6.3",
     "babel-loader": "^8.1.0",
