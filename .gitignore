@@ -119,3 +119,6 @@ RNTester/Pods/*
 # Visual studio
 .vscode
 .vs
+
+android/
+ios/
