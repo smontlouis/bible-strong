@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-native-modal'
-import { deleteAllDatabases } from '~helpers/database'
+import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
 
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'

@@ -11,14 +11,12 @@ import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import { getDatabasesRef } from '~helpers/firebase'
 
 import {
-  deleteDictionnaireDB,
-  deleteTresorDB,
-  initDictionnaireDB,
-  initTresorDB,
+  dictionnaireDB,
   mhyDB,
   naveDB,
   strongDB,
-} from '~helpers/database'
+  tresorDB,
+} from '~helpers/sqlite'
 
 import { withTranslation } from 'react-i18next'
 import SnackBar from '~common/SnackBar'
@@ -112,11 +110,11 @@ class DBSelectorItem extends React.Component {
           break
         }
         case 'DICTIONNAIRE': {
-          await initDictionnaireDB()
+          await dictionnaireDB.init()
           break
         }
         case 'TRESOR': {
-          await initTresorDB()
+          await tresorDB.init()
           break
         }
         case 'MHY': {
@@ -159,11 +157,11 @@ class DBSelectorItem extends React.Component {
         break
       }
       case 'DICTIONNAIRE': {
-        await deleteDictionnaireDB()
+        await dictionnaireDB.delete()
         break
       }
       case 'TRESOR': {
-        await deleteTresorDB()
+        await tresorDB.delete()
         break
       }
       case 'MHY': {

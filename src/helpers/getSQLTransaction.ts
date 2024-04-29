@@ -1,19 +1,23 @@
+import { SQLiteDatabase } from 'expo-sqlite'
 import {
-  strongDB,
-  getDictionnaireDB,
+  dictionnaireDB,
+  interlineaireDB,
   mhyDB,
   naveDB,
-  getTresorDB,
-  getInterlineaireDB,
-  initInterlineaireDB,
-} from '~helpers/database'
+  strongDB,
+  tresorDB,
+} from '~helpers/sqlite'
 
-const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
-  return new Promise((resolve, reject) => {
+const getSQLTransaction = (
+  getDB: () => SQLiteDatabase | undefined,
+  initDB?: () => Promise<unknown>
+) => (sqlReq: string, args = []) => {
+  return new Promise(async (resolve, reject) => {
     if (!getDB() && initDB) {
-      initDB()
+      await initDB()
     }
-    getDB().transaction(
+
+    getDB()?.transaction(
       tx => {
         tx.executeSql(
           sqlReq,
@@ -25,7 +29,10 @@ const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
             }
             resolve(tmpResults)
           },
-          (txObj, error) => reject(error)
+          (txObj, error) => {
+            reject(error)
+            return false
+          }
         )
       },
       error => {
@@ -37,11 +44,11 @@ const getSQLTransaction = (getDB, initDB) => (sqlReq, args = []) => {
 }
 
 export const SQLStrongTransaction = getSQLTransaction(strongDB.get)
-export const SQLDictionnaireTransaction = getSQLTransaction(getDictionnaireDB)
+export const SQLDictionnaireTransaction = getSQLTransaction(dictionnaireDB.get)
 export const SQLNaveTransaction = getSQLTransaction(naveDB.get)
-export const SQLTresorTransaction = getSQLTransaction(getTresorDB)
+export const SQLTresorTransaction = getSQLTransaction(tresorDB.get)
 export const SQLMHYTransaction = getSQLTransaction(mhyDB.get, mhyDB.init)
 export const SQLInterlineaireTransaction = getSQLTransaction(
-  getInterlineaireDB,
-  initInterlineaireDB
+  interlineaireDB.get,
+  interlineaireDB.init
 )

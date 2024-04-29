@@ -1,28 +1,30 @@
-import React from 'react'
-import * as FileSystem from 'expo-file-system'
-import { TouchableOpacity, Alert } from 'react-native'
-import ProgressCircle from 'react-native-progress/Circle'
 import * as Icon from '@expo/vector-icons'
+import * as FileSystem from 'expo-file-system'
+import React from 'react'
+import { Alert, TouchableOpacity } from 'react-native'
+import ProgressCircle from 'react-native-progress/Circle'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabasesRef } from '~helpers/firebase'
-import * as Sentry from '@sentry/react-native'
 
-import { setVersionUpdated } from '~redux/modules/user'
+import styled from '@emotion/native'
+import { useTheme } from '@emotion/react'
+import { useTranslation } from 'react-i18next'
 import SnackBar from '~common/SnackBar'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload, Version } from '~helpers/bibleVersions'
-import { initInterlineaireDB, deleteInterlineaireDB } from '~helpers/database'
-import styled from '@emotion/native'
-import { Theme } from '~themes'
-import { RootState } from '~redux/modules/reducer'
-import { isStrongVersion } from '~helpers/bibleVersions'
-import { useTheme } from '@emotion/react'
 import { FeatherIcon } from '~common/ui/Icon'
-import { useTranslation } from 'react-i18next'
-import useLanguage from '~helpers/useLanguage'
 import { HStack } from '~common/ui/Stack'
+import Text from '~common/ui/Text'
+import {
+  getIfVersionNeedsDownload,
+  isStrongVersion,
+  Version,
+} from '~helpers/bibleVersions'
+import { interlineaireDB } from '~helpers/sqlite'
 import { requireBiblePath } from '~helpers/requireBiblePath'
+import useLanguage from '~helpers/useLanguage'
+import { RootState } from '~redux/modules/reducer'
+import { setVersionUpdated } from '~redux/modules/user'
+import { Theme } from '~themes'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -148,7 +150,7 @@ const VersionSelectorItem = ({
       console.log('Download finished')
 
       if (version.id === 'INT') {
-        await initInterlineaireDB()
+        await interlineaireDB.init()
       }
 
       setVersionNeedsDownload(false)
@@ -182,7 +184,7 @@ const VersionSelectorItem = ({
     setVersionNeedsDownload(true)
 
     if (version.id === 'INT') {
-      deleteInterlineaireDB()
+      interlineaireDB.delete()
     }
   }
 

@@ -22,6 +22,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
+import { getDatabases } from '~helpers/databases'
 
 interface BibleTabScreenProps {
   navigation: NavigationStackProp
@@ -95,8 +96,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   )
 
   const getIfMhyCommentsNeedsDownload = async () => {
-    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-    const path = `${sqliteDirPath}/commentaires-mhy.sqlite`
+    const path = getDatabases().MHY.path
     const file = await FileSystem.getInfoAsync(path)
 
     if (!file.exists) {

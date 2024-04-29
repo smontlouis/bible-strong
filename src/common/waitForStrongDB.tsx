@@ -5,74 +5,16 @@ import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
-import { existsAssets, unzipAssets } from '~helpers/assetUtils'
-import { strongDB } from '~helpers/database'
+import { strongDB } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
 import { getDatabasesRef } from '~helpers/firebase'
-import { getLangIsFr } from '~i18n'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
+import { getDatabases } from '~helpers/databases'
 
-const RNFS = require('react-native-fs')
 const STRONG_FILE_SIZE = 34941952
 
-const useStrongZip = (dispatch: any, startDownload: any) => {
-  useEffect(() => {
-    if (!getLangIsFr()) {
-      return
-    }
-
-    if (strongDB.get()) {
-      dispatch({
-        type: 'strong.setLoading',
-        payload: false,
-      })
-    } else {
-      const loadDBAsync = async () => {
-        const sqliteDirPath = `${RNFS.DocumentDirectoryPath}/SQLite`
-        const sqliteDirExists = await RNFS.exists(sqliteDirPath)
-
-        const dbPath = `${sqliteDirPath}/strong.sqlite`
-        const dbFileExists = await RNFS.exists(dbPath)
-
-        const sqliteZipExists = await existsAssets('www/strong.sqlite.zip')
-
-        if (!dbFileExists) {
-          if (sqliteZipExists && !(window as any).strongDownloadHasStarted) {
-            ;(window as any).strongDownloadHasStarted = true
-
-            if (!sqliteDirExists) {
-              await RNFS.mkdir(sqliteDirPath)
-            }
-
-            await unzipAssets('www/strong.sqlite.zip', sqliteDirPath)
-
-            await strongDB.init()
-
-            dispatch({
-              type: 'strong.setLoading',
-              payload: false,
-            })
-            ;(window as any).strongDownloadHasStarted = false
-          } else {
-            // Grosse erreur impossible de continuer
-          }
-        } else {
-          await strongDB.init()
-
-          dispatch({
-            type: 'strong.setLoading',
-            payload: false,
-          })
-        }
-      }
-
-      loadDBAsync()
-    }
-  }, [dispatch, startDownload])
-}
-
-const useStrongEn = (dispatch: any, startDownload: any) => {
+const useStrong = (dispatch: any, startDownload: any) => {
   const { t } = useTranslation()
   useEffect(() => {
     if (strongDB.get()) {
@@ -85,7 +27,7 @@ const useStrongEn = (dispatch: any, startDownload: any) => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-        const dbPath = `${sqliteDirPath}/strong.sqlite`
+        const dbPath = getDatabases().STRONG.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         if (!dbFile.exists) {
@@ -181,8 +123,7 @@ export const useWaitForDatabase = () => {
     dispatch,
   ] = useDBStateValue()
 
-  // useStrongZip(dispatch, startDownload)
-  useStrongEn(dispatch, startDownload)
+  useStrong(dispatch, startDownload)
 
   const setStartDownload = (value: boolean) => {
     dispatch({

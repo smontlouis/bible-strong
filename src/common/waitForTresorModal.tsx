@@ -7,10 +7,11 @@ import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { getTresorDB, initTresorDB } from '~helpers/database'
+import { tresorDB } from '~helpers/sqlite'
 import { getStaticUrl } from '~helpers/firebase'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
+import { getDatabases } from '~helpers/databases'
 
 const STRONG_FILE_SIZE = 5434368
 
@@ -23,14 +24,14 @@ export const useWaitForDatabase = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (getTresorDB()) {
+    if (tresorDB.get()) {
       setLoading(false)
     } else {
       const loadDBAsync = async () => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-        const dbPath = `${sqliteDirPath}/commentaires-tresor.sqlite`
+        const dbPath = getDatabases().TRESOR.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         // if (__DEV__) {
@@ -75,7 +76,7 @@ export const useWaitForDatabase = () => {
                 }
               ).downloadAsync()
 
-              await initTresorDB()
+              await tresorDB.init()
 
               setLoading(false)
               window.tresorDownloadHasStarted = false
@@ -91,7 +92,7 @@ export const useWaitForDatabase = () => {
             setStartDownload(false)
           }
         } else {
-          await initTresorDB()
+          await tresorDB.init()
           setLoading(false)
         }
       }

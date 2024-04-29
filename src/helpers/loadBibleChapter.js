@@ -1,7 +1,7 @@
 import loadBible from '~helpers/loadBible'
 import loadInterlineaireChapter from '~helpers/loadInterlineaireChapter'
 import loadStrongChapter from '~helpers/loadStrongChapter'
-import { strongDB } from '~helpers/database'
+import { strongDB } from '~helpers/sqlite'
 
 const loadBibleChapter = async (bookNb, chapterNb, version = 'LSG') => {
   if (version === 'INT') {

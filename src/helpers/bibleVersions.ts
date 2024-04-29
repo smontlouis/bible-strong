@@ -3,6 +3,7 @@ import * as FileSystem from 'expo-file-system'
 import { getLangIsFr } from '~i18n'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
+import { databaseInterlineaireName, getDatabases } from './databases'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
@@ -20,7 +21,7 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
       throw new Error('SQLite dir is not a directory')
     }
 
-    const dbPath = `${sqliteDirPath}/interlineaire.sqlite`
+    const dbPath = `${sqliteDirPath}/${databaseInterlineaireName}`
     const file = await FileSystem.getInfoAsync(dbPath)
 
     if (!file.exists) {
@@ -40,7 +41,7 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
       throw new Error('SQLite dir is not a directory')
     }
 
-    const dbPath = `${sqliteDirPath}/strong.sqlite`
+    const dbPath = getDatabases().STRONG.path
     const file = await FileSystem.getInfoAsync(dbPath)
 
     if (!file.exists) {
