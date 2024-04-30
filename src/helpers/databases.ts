@@ -4,10 +4,22 @@ import to from 'await-to-js'
 import { getDatabasesRef } from '~helpers/firebase'
 import i18n, { getLangIsFr } from '~i18n'
 import { getI18n } from 'react-i18next'
+import {
+  databaseDictionnaireName,
+  databaseMhyName,
+  databaseNaveName,
+  databaseStrongName,
+  databaseTresorName,
+  initSQLiteDir,
+} from './sqlite'
 
 const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
 
-export const getIfDatabaseNeedsUpdate = async (dbId: string) => {
+/**
+ *
+ * @TODO - MAKE IT WORK, NOT WORKING ANYMORE
+ */
+export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
   const { path } = databases()[dbId]
 
   const [errF, file] = await to(FileSystem.getInfoAsync(path))
@@ -16,6 +28,7 @@ export const getIfDatabaseNeedsUpdate = async (dbId: string) => {
     return false
   }
 
+  // @ts-expect-error
   const [errRF, remoteFile] = await to(getDatabasesRef()[dbId].getMetadata())
 
   if (errF || errRF) {
@@ -23,18 +36,14 @@ export const getIfDatabaseNeedsUpdate = async (dbId: string) => {
     return false
   }
 
+  // @ts-expect-error
   return file.size !== remoteFile?.size
 }
 
-export const getIfDatabaseNeedsDownload = async (dbId: string) => {
+export const getIfDatabaseNeedsDownload = async (dbId: IdDatabase) => {
   const { path } = databases()[dbId]
-  const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-  if (!sqliteDir.exists) {
-    await FileSystem.makeDirectoryAsync(sqliteDirPath)
-  } else if (!sqliteDir.isDirectory) {
-    throw new Error('SQLite dir is not a directory')
-  }
+  await initSQLiteDir()
 
   const file = await FileSystem.getInfoAsync(path)
 
@@ -44,13 +53,6 @@ export const getIfDatabaseNeedsDownload = async (dbId: string) => {
 
   return false
 }
-
-export const databaseDictionnaireName = 'dictionnaire.sqlite'
-export const databaseStrongName = 'strong.sqlite'
-export const databaseInterlineaireName = 'interlineaire.sqlite'
-export const databaseTresorName = 'tresor.sqlite'
-export const databaseMhyName = 'mhy.sqlite'
-export const databaseNaveName = 'nave.sqlite'
 
 export const databases = () => {
   return {
@@ -115,6 +117,8 @@ export const databases = () => {
     },
   } as const
 }
+
+export type IdDatabase = keyof ReturnType<typeof databases>
 
 export const getDatabases = () => {
   if (getLangIsFr()) {

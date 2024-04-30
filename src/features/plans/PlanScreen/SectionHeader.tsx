@@ -7,15 +7,13 @@ import Lottie from 'lottie-react-native'
 
 import styled from '@emotion/native'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
+import Box, { AnimatableBox } from '~common/ui/Box'
 import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ComputedSection } from '~common/types'
 import { Theme } from '~themes'
 import { useFireStorage } from '../plan.hooks'
-
-const AFeatherIcon = Animatable.createAnimatableComponent(FeatherIcon) as any
 
 const CircleImage = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -90,11 +88,11 @@ const Section = ({
           {subTitle && <Text opacity={0.6}>{subTitle}</Text>}
         </Box>
         <Box width={40} center>
-          <AFeatherIcon
-            color="grey"
-            duration={500}
-            name="chevron-down"
-            size={17}
+          {/* @ts-expect-error */}
+          <AnimatableBox
+            width={17}
+            height={17}
+            center
             animation={{
               from: {
                 rotate: !isCollapsed ? '180deg' : '0deg',
@@ -103,7 +101,10 @@ const Section = ({
                 rotate: isCollapsed ? '180deg' : '0deg',
               },
             }}
-          />
+            duration={500}
+          >
+            <FeatherIcon color="grey" name="chevron-down" size={17} />
+          </AnimatableBox>
         </Box>
       </Box>
       <Border />

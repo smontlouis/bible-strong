@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
-import { strongDB } from '~helpers/sqlite'
+import { initSQLiteDir, strongDB } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
 import { getDatabasesRef } from '~helpers/firebase'
 import Box from './ui/Box'
@@ -31,11 +31,7 @@ const useStrong = (dispatch: any, startDownload: any) => {
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         if (!dbFile.exists) {
-          if (!sqliteDir.exists) {
-            await FileSystem.makeDirectoryAsync(sqliteDirPath)
-          } else if (!sqliteDir.isDirectory) {
-            throw new Error('SQLite dir is not a directory')
-          }
+          await initSQLiteDir()
 
           // Waiting for user to accept to download
           if (!startDownload) {
@@ -54,11 +50,7 @@ const useStrong = (dispatch: any, startDownload: any) => {
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+              await initSQLiteDir()
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
@@ -74,7 +66,6 @@ const useStrong = (dispatch: any, startDownload: any) => {
                   })
                 }
               ).downloadAsync()
-
               await strongDB.init()
 
               dispatch({

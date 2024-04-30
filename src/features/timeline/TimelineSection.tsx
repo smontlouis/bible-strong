@@ -11,7 +11,6 @@ import {
 import CurrentYear from './CurrentYear'
 import PrevSectionImage from './PrevSectionImage'
 import NextSectionImage from './NextSectionImage'
-import { Value, useCode, debug } from 'react-native-reanimated'
 import TimelineHeader from './TimelineHeader'
 import Line from './Line'
 import Datebar from './Datebar'

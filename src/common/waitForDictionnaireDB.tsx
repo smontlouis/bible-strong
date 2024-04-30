@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
-import { dictionnaireDB } from '~helpers/sqlite'
+import { dictionnaireDB, initSQLiteDir } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
 import { getDatabasesRef } from '~helpers/firebase'
 import Box from './ui/Box'
@@ -31,9 +31,6 @@ export const useWaitForDatabase = () => {
       })
     } else {
       const loadDBAsync = async () => {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
-
         const dbPath = getDatabases().DICTIONNAIRE.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
@@ -45,11 +42,7 @@ export const useWaitForDatabase = () => {
         // }
 
         if (!dbFile.exists) {
-          if (!sqliteDir.exists) {
-            await FileSystem.makeDirectoryAsync(sqliteDirPath)
-          } else if (!sqliteDir.isDirectory) {
-            throw new Error('SQLite dir is not a directory')
-          }
+          await initSQLiteDir()
 
           // Waiting for user to accept to download
           if (!startDownload) {
@@ -68,11 +61,7 @@ export const useWaitForDatabase = () => {
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+              await initSQLiteDir()
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,

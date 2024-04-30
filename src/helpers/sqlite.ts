@@ -1,18 +1,17 @@
 import * as FileSystem from 'expo-file-system'
 import * as SQLite from 'expo-sqlite'
-import {
-  databaseDictionnaireName,
-  databaseInterlineaireName,
-  databaseMhyName,
-  databaseNaveName,
-  databaseStrongName,
-  databaseTresorName,
-  getDatabases,
-} from './databases'
+import { getDatabases } from './databases'
+
+export const databaseDictionnaireName = 'dictionnaire.sqlite'
+export const databaseStrongName = 'strong.sqlite'
+export const databaseInterlineaireName = 'interlineaire.sqlite'
+export const databaseTresorName = 'tresor.sqlite'
+export const databaseMhyName = 'mhy.sqlite'
+export const databaseNaveName = 'nave.sqlite'
 
 class DB {
   db?: SQLite.SQLiteDatabase
-  name: string
+  public name: string
 
   constructor(name: string) {
     this.name = name
@@ -87,7 +86,8 @@ export const deleteAllDatabases = async () => {
 }
 
 export const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-export const createSQLiteDir = async () => {
+
+export const initSQLiteDir = async () => {
   const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
   if (!sqliteDir.exists) {

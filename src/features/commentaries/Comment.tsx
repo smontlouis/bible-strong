@@ -13,7 +13,7 @@ import Link, { LinkBox } from '~common/Link'
 import Snackbar from '~common/SnackBar'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import { Status } from '~common/types'
-import Box from '~common/ui/Box'
+import Box, { AnimatableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -28,8 +28,6 @@ const findBookNumber = (bookName: string) => {
   const bookNumber = books.find(b => b[1] === bookName)?.[0]
   return bookNumber || ''
 }
-// @ts-ignore
-const AFeatherIcon = Animatable.createAnimatableComponent(FeatherIcon)
 
 interface Props {
   navigation: NavigationStackProp<any, any>
@@ -177,20 +175,22 @@ https://bible-strong.app
         <Box width={30} center>
           {!isCollapsed && (
             // @ts-ignore
-            <AFeatherIcon
-              color="grey"
-              duration={500}
-              name="chevron-down"
-              size={17}
+            <AnimatableBox
+              width={17}
+              height={17}
+              center
               animation={{
                 from: {
-                  rotate: isCollapsed ? '180deg' : '0deg',
-                },
-                to: {
                   rotate: !isCollapsed ? '180deg' : '0deg',
                 },
+                to: {
+                  rotate: isCollapsed ? '180deg' : '0deg',
+                },
               }}
-            />
+              duration={500}
+            >
+              <FeatherIcon color="grey" name="chevron-down" size={17} />
+            </AnimatableBox>
           )}
         </Box>
         <LinkBox width={30} center onPress={shareDefinition}>
@@ -232,21 +232,23 @@ https://bible-strong.app
             </Box>
           )}
           <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
-            {/* @ts-ignore */}
-            <AFeatherIcon
-              color="grey"
-              duration={500}
-              name="chevron-down"
-              size={20}
+            {/* @ts-expect-error */}
+            <AnimatableBox
+              width={17}
+              height={17}
+              center
               animation={{
                 from: {
-                  rotate: isCollapsed ? '180deg' : '0deg',
-                },
-                to: {
                   rotate: !isCollapsed ? '180deg' : '0deg',
                 },
+                to: {
+                  rotate: isCollapsed ? '180deg' : '0deg',
+                },
               }}
-            />
+              duration={500}
+            >
+              <FeatherIcon color="grey" name="chevron-down" size={17} />
+            </AnimatableBox>
           </LinkBox>
         </Box>
       </Box>

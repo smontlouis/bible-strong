@@ -9,7 +9,7 @@ import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import { getDatabases } from '~helpers/databases'
 import { databasesRef } from '~helpers/firebase'
-import { tresorDB } from '~helpers/sqlite'
+import { initSQLiteDir, tresorDB } from '~helpers/sqlite'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 
@@ -56,11 +56,7 @@ export const useWaitForDatabase = () => {
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+              await initSQLiteDir()
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,

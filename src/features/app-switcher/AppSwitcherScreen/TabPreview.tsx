@@ -119,7 +119,7 @@ const TabPreview = ({
         </>
 
         {isRemovable && (
-          <TouchableBox
+          <AnimatedTouchableBox
             position="absolute"
             top={0}
             right={0}
@@ -140,10 +140,10 @@ const TabPreview = ({
             >
               <FeatherIcon name="x" size={16} />
             </Box>
-          </TouchableBox>
+          </AnimatedTouchableBox>
         )}
       </AnimatedBox>
-      <AnimatedBox
+      <AnimatedTouchableBox
         style={textStyles}
         marginTop={10}
         row
@@ -161,7 +161,7 @@ const TabPreview = ({
         >
           {title}
         </Text>
-      </AnimatedBox>
+      </AnimatedTouchableBox>
     </AnimatedTouchableBox>
   )
 }
