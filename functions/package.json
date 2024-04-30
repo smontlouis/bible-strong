@@ -3,7 +3,7 @@
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
-    "serve": "npm run build && firebase emulators:start --only functions,firestore",
+    "serve": "npm run build && IS_OFFLINE=true firebase emulators:start --only functions,firestore",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
@@ -12,20 +12,22 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@sparticuz/chromium-min": "^123.0.1",
     "@types/node-fetch": "^2.5.7",
     "@types/puppeteer": "^3.0.0",
     "cors": "^2.8.5",
     "firebase-admin": "^8.13.0",
     "firebase-functions": "^3.20.0",
     "node-fetch": "^2.6.0",
-    "puppeteer": "2.1.1",
-    "puppeteer-extra": "^3.3.4",
-    "puppeteer-extra-plugin-stealth": "^2.11.1"
+    "puppeteer": "22.7.1",
+    "puppeteer-core": "^22.7.1"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
     "firebase-functions-test": "^0.2.0",
     "tslint": "^5.20.1",
-    "typescript": "^5.4.5"
+    "typescript": "5.1.6"
   },
   "private": true
 }

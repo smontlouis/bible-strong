@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions'
-import * as puppeteer from 'puppeteer'
+import puppeteer, { Browser } from 'puppeteer-core'
+
+import chromium from '@sparticuz/chromium-min'
 
 const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
@@ -15,11 +17,37 @@ export const exportStudyPDF = functions
   .https.onRequest((req, res) => {
     cors(req, res, async () => {
       try {
-        console.log('---start')
         const { studyId } = req.body
-        const browser = await puppeteer.launch({
-          args: ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage'],
-        })
+
+        console.log('---start')
+        if (!studyId) {
+          res.status(400).send('Missing studyId')
+          return
+        }
+
+        let browser: Browser
+
+        if (process.env.IS_OFFLINE) {
+          browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: '/opt/homebrew/bin/chromium',
+          })
+        } else {
+          browser = await puppeteer.launch({
+            args: [
+              ...chromium.args,
+              '--hide-scrollbars',
+              '--disable-web-security',
+            ],
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(
+              'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar'
+            ),
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+          })
+        }
+
         const page = await browser.newPage()
 
         const result = await page.goto(
@@ -30,7 +58,7 @@ export const exportStudyPDF = functions
         )
 
         if (result?.status() === 404) {
-          res.status(404).send()
+          res.status(404).send('Not found')
         }
 
         const buffer = await page.pdf({ format: 'A4' })
