@@ -18,12 +18,8 @@ import WordOfTheDay from './WordOfTheDay'
 import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
-<<<<<<< HEAD
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import TryAudibibleWidget from './TryAudibibleWidget'
-=======
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
->>>>>>> 251b2426a (chore: remove iphone-x-helper)
 
 const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()

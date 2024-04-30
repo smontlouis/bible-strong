@@ -7112,34 +7112,10 @@ expo-constants@~15.4.0, expo-constants@~15.4.5:
   dependencies:
     "@expo/config" "~8.5.0"
 
-<<<<<<< HEAD
-expo-document-picker@~11.0.1:
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/expo-document-picker/-/expo-document-picker-11.0.1.tgz#1655e1cfacc20fe70ba81e310365048804bcf803"
-  integrity sha512-mLpk5a6yP/wK8DfGMQj9YoPlxiK87Vhxo6S+NnQgKCove8z+cJdkjEcXCpSsH6LXe1HJBDFt5LkwjhSff7bhMg==
-  dependencies:
-    uuid "^3.3.2"
-
-expo-eas-client@~0.4.0:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/expo-eas-client/-/expo-eas-client-0.4.1.tgz#4ccdafb5faeac97394fb3fa4c777ec22b2017f1d"
-  integrity sha512-bIj2rm6lw/iZAOAW5CSAxshSXi2oY+ORpHRp4ZdqSDuwA0RIa9jGyMm1Jhostjjz5y9k2uur5vtVqq6P3Bwx/Q==
-
-expo-error-recovery@~4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/expo-error-recovery/-/expo-error-recovery-4.0.1.tgz#3e3333e134c992c234539d3773fe78915c883755"
-  integrity sha512-wceptnRX+N3qCSVTNbIchUFu3GmY30onRH5L66OF8HMLpAIQfrZMLxJfz7SAMJTcr3jxsJ11vSa2l2RaPKgHsQ==
-
-expo-file-system@~15.1.0, expo-file-system@~15.1.1:
-  version "15.1.1"
-  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-15.1.1.tgz#724090f83ff1e6378cadc0a64b83552f769eb16b"
-  integrity sha512-MYYDKxjLo9VOkvGHqym5EOAUS+ero9O66X5zI+EXJzqNznKvnfScdXeeAaQzShmWtmLkdVDCoYFGOaTvTA1wTQ==
-=======
 expo-dev-client@~3.3.11:
   version "3.3.11"
   resolved "https://registry.yarnpkg.com/expo-dev-client/-/expo-dev-client-3.3.11.tgz#f2541ccbcfc2ba32bcea47293bc9beae4e10db60"
   integrity sha512-9nhhbfbskfmjp/tlRS5KvDpCoW0BREJBxpu2GyjKu7nDB33W8fJLL0wXgNhP+QEb93r37o3uezKmUm2kibOvTw==
->>>>>>> a51329f50 (Migration to Expo)
   dependencies:
     expo-dev-launcher "3.6.9"
     expo-dev-menu "4.5.8"
@@ -7170,6 +7146,11 @@ expo-dev-menu@4.5.8:
   dependencies:
     expo-dev-menu-interface "1.7.2"
     semver "^7.5.3"
+
+expo-document-picker@~11.10.1:
+  version "11.10.1"
+  resolved "https://registry.yarnpkg.com/expo-document-picker/-/expo-document-picker-11.10.1.tgz#03394d77842a2fd7cb0a784a60098ee1ddd1012e"
+  integrity sha512-A1MiLfyXQ+KxanRO5lYxYQy3ryV+25JHe5Ai/BLV+FJU0QXByUF+Y/dn35WVPx5gpdZXC8UJ4ejg5SKSoeconw==
 
 expo-eas-client@~0.11.0:
   version "0.11.2"
