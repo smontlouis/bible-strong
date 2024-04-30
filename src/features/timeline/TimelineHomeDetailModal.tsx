@@ -2,14 +2,14 @@ import React from 'react'
 import { Modalize } from 'react-native-modalize'
 
 import { useTheme } from '@emotion/react'
-import { Theme } from '~themes'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
+import { Trans, useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import InlineLink from '~common/InlineLink'
-import { useTranslation, Trans } from 'react-i18next'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import Accordion from '~common/ui/Accordion'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import { Theme } from '~themes'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -23,7 +23,7 @@ const TimelineHomeDetailModal = ({ modalRef }: Props) => {
 
   return (
     <Modalize
-      modalTopOffset={getStatusBarHeight()}
+      modalTopOffset={useSafeAreaInsets().top}
       ref={modalRef}
       modalStyle={{
         backgroundColor: theme.colors.lightGrey,

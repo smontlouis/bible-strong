@@ -2,7 +2,6 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { Portal } from '@gorhom/portal'
 import React, { forwardRef } from 'react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize, ModalizeProps } from 'react-native-modalize'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
@@ -65,7 +64,7 @@ const Body = forwardRef<Modalize, ModalBodyProps>(
             shadowOpacity: 0.3,
             shadowRadius: 4,
             elevation: 2,
-            paddingBottom: getBottomSpace(),
+            paddingBottom: insets.bottom,
             ...props.style,
           }}
           handlePosition="inside"

@@ -1,14 +1,9 @@
-import React from 'react'
 import styled from '@emotion/native'
-import {
-  getBottomSpace,
-  getStatusBarHeight,
-} from 'react-native-iphone-x-helper'
-import * as Animatable from 'react-native-animatable'
+import React from 'react'
 
-import useDeviceOrientation from '~helpers/useDeviceOrientation'
 import { useTheme } from '@emotion/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
 {
   /* <ScrollView
@@ -103,7 +98,7 @@ export default ({ children, contentContainerStyle = {}, ...props }) => {
       orientation={orientation}
       contentContainerStyle={{
         paddingTop: 20,
-        paddingBottom: 10 + getBottomSpace(),
+        paddingBottom: 10 + useSafeAreaInsets().bottom,
         ...contentContainerStyle,
       }}
     >

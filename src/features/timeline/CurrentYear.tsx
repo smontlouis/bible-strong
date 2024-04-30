@@ -1,21 +1,21 @@
 import React from 'react'
-import { ReText } from 'react-native-redash'
 import Animated, {
-  interpolateNode,
   Extrapolate,
-  multiply,
   concat,
+  interpolateNode,
+  multiply,
   round,
 } from 'react-native-reanimated'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { ReText } from 'react-native-redash'
 
-import Box, { AnimatedBox } from '~common/ui/Box'
-import Link from '~common/Link'
-import { offset } from './constants'
-import { FeatherIcon } from '~common/ui/Icon'
-import { wp } from '~helpers/utils'
 import { Platform } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Link from '~common/Link'
+import Box, { AnimatedBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { wp } from '~helpers/utils'
+import { offset } from './constants'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -56,7 +56,7 @@ const CurrentYear = ({
     <AnimatedBox
       style={{ transform: [{ translateX: lineX }] }}
       pos="absolute"
-      bottom={getBottomSpace()}
+      bottom={useSafeAreaInsets().bottom}
       left={0}
       right={0}
       height={r([30, 40, 60, 60])}

@@ -4,9 +4,9 @@ import React, { memo, useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import * as Animatable from 'react-native-animatable'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import DateTimePicker from 'react-native-modal-datetime-picker'
 import { Modalize } from 'react-native-modalize'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { Fade, Placeholder, PlaceholderLine } from 'rn-placeholder'
 import Empty from '~common/Empty'
@@ -68,6 +68,7 @@ const VerseOfTheDay = ({
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
+  const insets = useSafeAreaInsets()
   const { current: ago } = useRef(dayToAgo(addDay, t))
   const notificationModalRef = React.useRef<Modalize>(null)
 
@@ -205,7 +206,7 @@ const VerseOfTheDay = ({
           }}
           adjustToContentHeight
         >
-          <Box py={30} px={20} pb={30 + getBottomSpace()}>
+          <Box py={30} px={20} pb={30 + insets.bottom}>
             <Box row alignItems="center">
               <Text bold flex>
                 {t('Recevoir une notification quotidienne')}

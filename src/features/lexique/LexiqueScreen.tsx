@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
+import { useTranslation } from 'react-i18next'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 import { StrongsTab } from '../../state/tabs'
 import LexiqueTabScreen from './LexiqueTabScreen'
-import { useTranslation } from 'react-i18next'
-import Box from '~common/ui/Box'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 
 interface LexiqueScreenProps {}
 

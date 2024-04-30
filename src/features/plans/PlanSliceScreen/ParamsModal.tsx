@@ -4,14 +4,15 @@
 
 import React from 'react'
 import { FlatList } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize } from 'react-native-modalize'
 
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Link, { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
+import Circle from '~common/ui/Circle'
 import Text from '~common/ui/Text'
 import {
   FontText,
@@ -30,7 +31,6 @@ import {
   setSettingsPreferredLightTheme,
 } from '~redux/modules/user'
 import { Theme } from '~themes'
-import Circle from '~common/ui/Circle'
 
 interface Props {
   paramsModalRef: React.RefObject<Modalize>
@@ -75,7 +75,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
       ref={paramsModalRef}
       adjustToContentHeight
     >
-      <Box padding={20} paddingBottom={20 + getBottomSpace()}>
+      <Box padding={20} paddingBottom={20 + useSafeAreaInsets().bottom}>
         <HalfContainer border>
           <Text flex={5}>{t('Taille du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold>{`${100 +

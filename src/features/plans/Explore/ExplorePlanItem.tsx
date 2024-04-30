@@ -2,8 +2,8 @@ import { Portal } from '@gorhom/portal'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import FastImage from 'react-native-fast-image'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { Modalize } from 'react-native-modalize'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NavigationParams, withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { useDispatch, useSelector } from 'react-redux'
@@ -38,6 +38,7 @@ const ExplorePlanItem = ({
     (state: RootState) => !!state.plan.myPlans.find(p => id === p.id)
   )
   const [isLoading, setIsLoading] = React.useState(false)
+  const insets = useSafeAreaInsets()
   const r = useMediaQueriesArray()
   const height = r([70, 70, 150, 200])
   const featuredHeight = r([150, 150, 250, 250])
@@ -99,7 +100,7 @@ const ExplorePlanItem = ({
           description={description}
           FooterComponent={
             <Box
-              paddingBottom={10 + getBottomSpace()}
+              paddingBottom={10 + insets.bottom}
               paddingHorizontal={20}
               paddingTop={10}
             >

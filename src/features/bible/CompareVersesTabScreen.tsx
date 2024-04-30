@@ -12,19 +12,19 @@ import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
 import produce from 'immer'
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NavigationStackProp } from 'react-navigation-stack'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import PopOverMenu from '~common/PopOverMenu'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { versions } from '~helpers/bibleVersions'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 interface CompareVersesTabScreenProps {
   navigation: NavigationStackProp
@@ -92,6 +92,8 @@ const CompareVersesTabScreen = ({
     shallowEqual
   )
 
+  const insets = useSafeAreaInsets()
+
   return (
     <Container>
       <Header
@@ -158,7 +160,7 @@ const CompareVersesTabScreen = ({
         )}
       </ScrollView>
       {prevNextItems && (
-        <Box paddingBottom={getBottomSpace()} bg="reverse">
+        <Box paddingBottom={insets.bottom} bg="reverse">
           <BibleVerseDetailFooter
             verseNumber={prevNextItems.verseNumber}
             goToNextVerse={() => goToVerse(+1)}

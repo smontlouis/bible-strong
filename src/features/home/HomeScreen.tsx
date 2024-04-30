@@ -6,9 +6,9 @@ import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
+import DonationWidget from './DonationWidget'
 import NaveOfTheDay from './NaveOfTheDay'
 import PlanHome from './PlanHome'
-import DonationWidget from './DonationWidget'
 import StrongOfTheDay from './StrongOfTheDay'
 import TheBibleProject from './TheBibleProjectPlan'
 import TimelineWidget from './TimelineWidget'
@@ -18,12 +18,17 @@ import WordOfTheDay from './WordOfTheDay'
 import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
+<<<<<<< HEAD
 import { getBottomSpace } from 'react-native-iphone-x-helper'
 import TryAudibibleWidget from './TryAudibibleWidget'
+=======
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+>>>>>>> 251b2426a (chore: remove iphone-x-helper)
 
 const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()
   const theme = useTheme()
+  const insets = useSafeAreaInsets()
 
   return (
     <Box bg="lightGrey" flex={1}>
@@ -81,7 +86,7 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
             row
             paddingHorizontal={20}
             paddingTop={20}
-            paddingBottom={getBottomSpace() + 100}
+            paddingBottom={insets.bottom + 100}
             style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
           >
             <Box flex>
@@ -128,7 +133,7 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
         right={0}
         bottom={0}
         height={100}
-        paddingBottom={getBottomSpace()}
+        paddingBottom={insets.bottom}
         center
       >
         <Box pos="absolute" top={0} bottom={0} left={0} right={0}>

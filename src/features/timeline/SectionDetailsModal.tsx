@@ -1,18 +1,18 @@
 import React from 'react'
 import { Modalize } from 'react-native-modalize'
 
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
 import { useTheme } from '@emotion/react'
+import { useTranslation } from 'react-i18next'
+import FastImage from 'react-native-fast-image'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import InlineLink from '~common/InlineLink'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import useLanguage from '~helpers/useLanguage'
+import { wp } from '~helpers/utils'
 import { Theme } from '~themes'
 import { ShallowTimelineSection } from './types'
-import { wp } from '~helpers/utils'
-import FastImage from 'react-native-fast-image'
-import InlineLink from '~common/InlineLink'
-import useLanguage from '~helpers/useLanguage'
-import { useTranslation } from 'react-i18next'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 
 interface Props extends ShallowTimelineSection {
   modalRef: React.RefObject<Modalize>
@@ -48,7 +48,7 @@ const SectionDetailsModal = ({
   return (
     <Modalize
       ref={modalRef}
-      modalTopOffset={getStatusBarHeight()}
+      modalTopOffset={useSafeAreaInsets().top}
       modalStyle={{
         backgroundColor: theme.colors.lightGrey,
         maxWidth: 600,

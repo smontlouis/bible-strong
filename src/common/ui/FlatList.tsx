@@ -1,7 +1,6 @@
-import React, { useCallback, useMemo } from 'react'
 import styled from '@emotion/native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import * as Animatable from 'react-native-animatable'
+import React, { useMemo } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
 const FlatList = styled.FlatList(({ theme, orientation, bg }) => ({
@@ -35,10 +34,11 @@ const fadeIn = {
 
 const AnimatedFlatList = React.forwardRef(
   ({ contentContainerStyle, ...props }, ref) => {
+    const insets = useSafeAreaInsets()
     const orientation = useDeviceOrientation()
     const style = useMemo(
       () => ({
-        paddingBottom: 10 + getBottomSpace(),
+        paddingBottom: 10 + insets.bottom,
         ...contentContainerStyle,
       }),
       []

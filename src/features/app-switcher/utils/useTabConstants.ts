@@ -1,5 +1,5 @@
 import { useWindowDimensions } from 'react-native'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const useTabConstants = () => {
   const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
@@ -14,7 +14,7 @@ const useTabConstants = () => {
   const TAB_PREVIEW_HEIGHT =
     ((TAB_PREVIEW_WIDTH * HEIGHT) / WIDTH) * HEIGHT_REDUCER_COEFFICIENT
   const TAB_BORDER_RADIUS = 20
-  const STATUS_BAR_HEIGHT = getStatusBarHeight()
+  const STATUS_BAR_HEIGHT = useSafeAreaInsets().top
 
   return {
     TABS_PER_ROW,

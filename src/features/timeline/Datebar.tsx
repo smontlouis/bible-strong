@@ -1,9 +1,9 @@
 import React from 'react'
+import Animated from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { offset } from './constants'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import Animated from 'react-native-reanimated'
 
 const Datebar = ({
   width,
@@ -35,7 +35,7 @@ const Datebar = ({
       row
       pos="absolute"
       l={0}
-      b={getBottomSpace()}
+      b={useSafeAreaInsets().bottom}
       width={width}
       height={25}
       paddingLeft={offset}

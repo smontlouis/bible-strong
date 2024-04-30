@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import Modal from 'react-native-modal'
 import colorsys from 'colorsys'
+import React, { useEffect, useState } from 'react'
+import Modal from 'react-native-modal'
 import { useDispatch } from 'react-redux'
 
 import styled from '@emotion/native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ColorPicker from '~common/ColorPicker'
-import Text from '~common/ui/Text'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
 import { changeColor } from '~redux/modules/user'
 
 const StylizedModal = styled(Modal)({
@@ -17,22 +17,25 @@ const StylizedModal = styled(Modal)({
   margin: 0,
 })
 
-const Container = styled.View(({ theme }) => ({
-  height: 260 + getBottomSpace(),
-  display: 'flex',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '100%',
-  maxWidth: 600,
-  backgroundColor: theme.colors.reverse,
-  borderRadius: 3,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
-  paddingBottom: getBottomSpace(),
-}))
+const Container = styled.View(({ theme }) => {
+  const insets = useSafeAreaInsets()
+  return {
+    height: 260 + insets.bottom,
+    display: 'flex',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '100%',
+    maxWidth: 600,
+    backgroundColor: theme.colors.reverse,
+    borderRadius: 3,
+    shadowColor: theme.colors.default,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+    paddingBottom: insets.bottom,
+  }
+})
 
 const ColorSquare = styled.View(({ color, size }) => ({
   width: size,
