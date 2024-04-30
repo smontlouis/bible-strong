@@ -4,8 +4,10 @@
 
 - [ ] rename strong-random.db to strong.sqlite at start
 - [ ] purge old dbs
-- [ ] refactor databasesRef into databases
 - [ ] remove mhy in en
-- [ ] refactor sqliteDir
+- [x] refactor sqliteDir
 - [x] refactor cdnUrl
-- [ ] downgrade to reanimated 2
+- [ ] fix apple login
+- [ ] fix bible timeline (using reanimated 1)
+- [ ] check ios / android certificate / keys
+- [ ] fix icon / splashscreen
