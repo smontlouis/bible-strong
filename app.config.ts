@@ -2,7 +2,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: process.env.APP_NAME ?? 'Dev Bible Strong',
+  name: process.env.APP_NAME ?? 'dev - Bible Strong',
   jsEngine: 'hermes',
   description: 'Bible strong for french people',
   slug: 'bible-strong',
@@ -10,9 +10,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#fff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
-  version: '17.2.0',
-  orientation: 'default',
-  icon: './assets/images/icon.png',
+  version: '17.4.1',
+  orientation: 'portrait',
+  icon: './assets/images/icon-2.png',
+  userInterfaceStyle: 'automatic',
   assetBundlePatterns: [
     'assets/images/*',
     'src/assets/fonts/*',
@@ -26,24 +27,40 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'src/features/studies/studiesWebView/dist/index.html',
   ],
   android: {
-    versionCode: 365,
+    versionCode: 373,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ??
       'firebase/dev/google-services.json',
+    splash: {
+      image: './assets/images/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#fff',
+      dark: {
+        image: './assets/images/splash-dark.png',
+        resizeMode: 'contain',
+        backgroundColor: '#0F2132',
+      },
+    },
   },
   ios: {
     bundleIdentifier:
       process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '157',
+    buildNumber: '161',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ??
       './firebase/dev/GoogleService-Info.plist',
-  },
-  splash: {
-    image: './assets/images/splash.png',
-    resizeMode: 'contain',
-    backgroundColor: '#6E6E6E',
+    userInterfaceStyle: 'automatic',
+    splash: {
+      image: './assets/images/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#fff',
+      dark: {
+        image: './assets/images/splash-dark.png',
+        resizeMode: 'contain',
+        backgroundColor: '#0F2132',
+      },
+    },
   },
   plugins: [
     '@react-native-firebase/app',
@@ -71,6 +88,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           './src/assets/fonts/LiterataBook-Regular.otf',
           './src/assets/fonts/eina-03-bold.otf',
         ],
+      },
+    ],
+    [
+      'expo-document-picker',
+      {
+        iCloudContainerEnvironment: 'Production',
       },
     ],
   ],

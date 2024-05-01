@@ -2,8 +2,8 @@ import React from 'react'
 import { Modalize } from 'react-native-modalize'
 
 import { useTheme } from '@emotion/react'
+import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import FastImage from 'react-native-fast-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import InlineLink from '~common/InlineLink'
 import Box from '~common/ui/Box'
@@ -77,7 +77,7 @@ const SectionDetailsModal = ({
           <Box height={2} bg="default" />
         </Box>
         <Box row width={width} mt={50} lightShadow borderRadius={10}>
-          <FastImage
+          <Image
             style={{ width, height: width, borderRadius: 10 }}
             source={{
               uri: image,

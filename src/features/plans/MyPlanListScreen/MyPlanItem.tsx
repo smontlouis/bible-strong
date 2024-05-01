@@ -1,15 +1,15 @@
-import React from 'react'
-import FastImage from 'react-native-fast-image'
-import ProgressCircle from 'react-native-progress/Circle'
 import { useTheme } from '@emotion/react'
 import Lottie from 'lottie-react-native'
+import React from 'react'
+import ProgressCircle from 'react-native-progress/Circle'
 
 import styled from '@emotion/native'
-import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
-import Link from '~common/Link'
+import { Image } from 'expo-image'
 import { ComputedPlanItem } from 'src/common/types'
+import Link from '~common/Link'
+import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import { Theme } from '~themes'
 import { useFireStorage } from '../plan.hooks'
 
@@ -94,7 +94,7 @@ const PlanItem = ({
           >
             <CircleImage center>
               {cacheImage && (
-                <FastImage
+                <Image
                   style={{ width: 32, height: 32 }}
                   source={{
                     uri: cacheImage,

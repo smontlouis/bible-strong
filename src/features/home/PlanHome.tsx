@@ -1,12 +1,15 @@
 import { useTheme } from '@emotion/react'
+import { Asset } from 'expo-asset'
+import * as FileSystem from 'expo-file-system'
+import { Image } from 'expo-image'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import FastImage from 'react-native-fast-image'
 import ProgressCircle from 'react-native-progress/Circle'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import PlanIcon from '~common/PlanIcon'
+import { Plan } from '~common/types'
 import Box from '~common/ui/Box'
 import CircleImage from '~common/ui/CircleImage'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -17,13 +20,10 @@ import {
   useFireStorage,
   useUpdatePlans,
 } from '~features/plans/plan.hooks'
+import useLanguage from '~helpers/useLanguage'
+import { addPlan } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { Theme } from '~themes'
-import { Asset } from 'expo-asset'
-import * as FileSystem from 'expo-file-system'
-import useLanguage from '~helpers/useLanguage'
-import { Plan } from '~common/types'
-import { addPlan } from '~redux/modules/plan'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -120,7 +120,7 @@ const PlanHome = () => {
               <Box style={StyleSheet.absoluteFillObject} center>
                 <CircleImage size={35} center>
                   {cacheImage && (
-                    <FastImage
+                    <Image
                       style={{ width: 35, height: 35 }}
                       source={{
                         uri: cacheImage,

@@ -1,17 +1,16 @@
-import React from 'react'
 import { useTheme } from '@emotion/react'
-import * as Animatable from 'react-native-animatable'
-import ProgressCircle from 'react-native-progress/Circle'
-import FastImage from 'react-native-fast-image'
 import Lottie from 'lottie-react-native'
+import React from 'react'
+import ProgressCircle from 'react-native-progress/Circle'
 
 import styled from '@emotion/native'
+import { Image } from 'expo-image'
 import Link from '~common/Link'
-import Box, { AnimatableBox } from '~common/ui/Box'
-import Border from '~common/ui/Border'
-import Text from '~common/ui/Text'
-import { FeatherIcon } from '~common/ui/Icon'
 import { ComputedSection } from '~common/types'
+import Border from '~common/ui/Border'
+import Box, { AnimatableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import { Theme } from '~themes'
 import { useFireStorage } from '../plan.hooks'
 
@@ -65,7 +64,7 @@ const Section = ({
           >
             <CircleImage center>
               {cacheImage && (
-                <FastImage
+                <Image
                   style={{ width: 26, height: 26 }}
                   source={{
                     uri: cacheImage,

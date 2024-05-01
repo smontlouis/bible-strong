@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
+import { Image } from 'expo-image'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import * as Animatable from 'react-native-animatable'
-import FastImage from 'react-native-fast-image'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import truncHTML from 'trunc-html'
@@ -161,7 +160,7 @@ https://bible-strong.app
       <LinkBox row onPress={() => setCollapsed(s => !s)}>
         <Box center width={40} height={40} borderRadius={20}>
           {cacheImage && (
-            <FastImage style={fastImageStyle} source={fastImageSource} />
+            <Image style={fastImageStyle} source={fastImageSource} />
           )}
         </Box>
         <Box ml={10} flex>

@@ -5,12 +5,12 @@ import { Theme } from '~themes'
 
 import { TimelineEvent as TimelineEventProps } from './types'
 
+import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import {
   connectInfiniteHits,
   connectStateResults,
 } from 'react-instantsearch-native'
-import FastImage from 'react-native-fast-image'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
 import Border from '~common/ui/Border'
@@ -114,7 +114,7 @@ const SearchInTimelineModal = ({
           <LinkBox mx={20} my={20} onPress={() => onOpenEvent(item)} row>
             {item.image && (
               <Box mr={20}>
-                <FastImage
+                <Image
                   style={{ width: 70, height: 70, borderRadius: 10 }}
                   source={{
                     uri: item.image,

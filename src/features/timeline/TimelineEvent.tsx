@@ -5,14 +5,14 @@ import Animated, {
   multiply,
 } from 'react-native-reanimated'
 
-import Box from '~common/ui/Box'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
-import { offset, rowToPx, calculateLabel } from './constants'
-import FastImage from 'react-native-fast-image'
-import { TimelineEvent as TimelineEventProps } from './types'
+import { Image } from 'expo-image'
 import { Modalize } from 'react-native-modalize'
+import Link from '~common/Link'
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { calculateLabel, offset, rowToPx } from './constants'
+import { TimelineEvent as TimelineEventProps } from './types'
 
 const AnimatedBox = Animated.createAnimatedComponent(Box)
 const LinkBox = Box.withComponent(Link)
@@ -137,7 +137,7 @@ const TimelineEvent = ({
         borderTopRightRadius={10}
         borderBottomRightRadius={10}
       >
-        <FastImage
+        <Image
           style={{ width: imageSize, height: '100%' }}
           source={{
             uri: image,

@@ -10,4 +10,5 @@
 - [ ] fix apple login
 - [ ] fix bible timeline (using reanimated 1)
 - [ ] check ios / android certificate / keys
-- [ ] fix icon / splashscreen
+- [x] fix icon / splashscreen / dark-light
+- [ ] fix rn version so that it can upgrade app.config.js

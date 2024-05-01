@@ -1,6 +1,5 @@
 import { Portal } from '@gorhom/portal'
 import React from 'react'
-import FastImage from 'react-native-fast-image'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import useLanguage from '~helpers/useLanguage'
 
@@ -24,6 +23,7 @@ import { useQuery } from '~helpers/react-query-lite'
 import EventDetailsModal from './EventDetailsModal'
 import EventDetailVerse from './EventDetailVerse'
 import { getEvents } from './events'
+import { Image } from 'expo-image'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -96,12 +96,12 @@ const Media = ({
               item: TimelineEventDetail['images'][0]
             }) => (
               <Box>
-                <FastImage
+                <Image
                   style={{ width: imageWidth, height: imageWidth }}
                   source={{
                     uri: `http://timeline.biblehistory.com/media/images/original/${item.file}`,
                   }}
-                  resizeMode={FastImage.resizeMode.contain}
+                  contentFit="contain"
                 />
                 <Paragraph mt={15} scale={-3} textAlign="center" color="white">
                   {item.caption}
@@ -187,7 +187,7 @@ const EventDetails = waitForTimeline(
       <Box py={40}>
         {image && (
           <Box center my={30}>
-            <FastImage
+            <Image
               style={{ width: 150, height: 150, borderRadius: 10 }}
               source={{
                 uri: image,

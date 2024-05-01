@@ -1,10 +1,10 @@
 import React from 'react'
-import FastImage from 'react-native-fast-image'
 import { Modalize } from 'react-native-modalize'
 
 import { useTheme } from '@emotion/react'
+import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import { Image } from 'react-native'
+import { Image as RNImage } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ComputedPlanItem } from '~common/types'
 import Box from '~common/ui/Box'
@@ -36,7 +36,7 @@ const DetailsModal = ({
 
   React.useEffect(() => {
     if (!image) return
-    Image.getSize(
+    RNImage.getSize(
       image,
       (imageWidth, imageHeight) => {
         const height = (width * imageHeight) / imageWidth
@@ -62,7 +62,7 @@ const DetailsModal = ({
       <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
         {!!image && (
           <Box marginBottom={20} rounded>
-            <FastImage
+            <Image
               style={{ width: '100%', height: height || 200 }}
               source={{
                 uri: image,
@@ -85,7 +85,7 @@ const DetailsModal = ({
           <Box marginTop={40} row center>
             {author.photoUrl && (
               <Box borderRadius={10}>
-                <FastImage
+                <Image
                   style={{ width: 50, height: 50 }}
                   source={{
                     uri: author.photoUrl,

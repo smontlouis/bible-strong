@@ -4,7 +4,7 @@ import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { TimelineSection } from './types'
-import FastImage from 'react-native-fast-image'
+import { Image } from 'expo-image'
 import useLanguage from '~helpers/useLanguage'
 
 const LinkBox = Box.withComponent(Link)
@@ -21,6 +21,7 @@ const TimelineItem = ({
   goTo,
 }: TimelineSection & { goTo: number }) => {
   const isFR = useLanguage()
+  console.log(image)
   return (
     <LinkBox row px={20} center mb={30} route="Timeline" params={{ goTo }}>
       <Box
@@ -54,8 +55,9 @@ const TimelineItem = ({
         <Box mx={40} height={10} bg={color} borderRadius={10} />
       </Box>
       <Box width="55%" height={250} borderRadius={10}>
-        <FastImage
+        <Image
           source={{ uri: image }}
+          contentFit="cover"
           style={{ width: '100%', height: '100%' }}
         />
       </Box>

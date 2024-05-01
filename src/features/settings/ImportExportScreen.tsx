@@ -68,7 +68,7 @@ const LastSave = () => {
       <Text bold>{t('app.lastSave')}</Text>
       {lastSave ? (
         <Text marginTop={5} color="grey">
-          {format((lastSave.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
+          {format((lastSave?.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
         </Text>
       ) : (
         <Text color="grey">{t('app.noSave')}</Text>
@@ -151,10 +151,12 @@ const ImportSave = () => {
 
   const importSave = async () => {
     try {
-      const file = await DocumentPicker.getDocumentAsync()
+      const file = await DocumentPicker.getDocumentAsync({
+        multiple: false,
+      })
 
-      if (file.type === 'success') {
-        const save = await FileSystem.readAsStringAsync(file.uri)
+      if (file.assets?.length) {
+        const save = await FileSystem.readAsStringAsync(file.assets[0].uri)
 
         const data = JSON.parse(save)
 

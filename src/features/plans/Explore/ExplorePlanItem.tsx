@@ -1,7 +1,7 @@
 import { Portal } from '@gorhom/portal'
+import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import FastImage from 'react-native-fast-image'
 import { Modalize } from 'react-native-modalize'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NavigationParams, withNavigation } from 'react-navigation'
@@ -60,7 +60,7 @@ const ExplorePlanItem = ({
             backgroundColor="lightGrey"
             borderRadius={15}
           >
-            <FastImage
+            <Image
               style={{
                 width: '100%',
                 height: featured ? featuredHeight : height,
