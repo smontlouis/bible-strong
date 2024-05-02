@@ -101,6 +101,7 @@ export const checkDatabasesStorage = async () => {
   const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
   const dir = await FileSystem.readDirectoryAsync(sqliteDirPath)
 
+  console.log('Checking databases...')
   await Promise.all(
     [
       databaseStrongName,
@@ -127,7 +128,7 @@ export const checkForDatabase = async (
     )
     if (fileToRename) {
       // Check if file is not empty
-
+      console.log('Rename file', fileToRename)
       const fileToRenameInfo = await FileSystem.getInfoAsync(
         `${sqliteDirPath}/${fileToRename}`
       )

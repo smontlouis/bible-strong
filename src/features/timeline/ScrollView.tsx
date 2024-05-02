@@ -444,7 +444,7 @@ export default memo(
             clamp: [lowerBoundX, upperBoundX],
             rubberBandEffect: true,
             rubberBandFactor: 1,
-            velocityFactor: 0.4,
+            velocityFactor: 0.6,
           })
         }
         const isInBoundY = y.value >= lowerBoundY && y.value <= upperBoundY
@@ -458,7 +458,7 @@ export default memo(
             clamp: [lowerBoundY, upperBoundY],
             rubberBandEffect: true,
             rubberBandFactor: 1,
-            velocityFactor: 0.4,
+            velocityFactor: 0.6,
           })
         }
       })

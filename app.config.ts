@@ -39,7 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       dark: {
         image: './assets/images/splash-dark.png',
         resizeMode: 'contain',
-        backgroundColor: '#0F2132',
+        backgroundColor: '#102031',
       },
     },
   },
@@ -69,6 +69,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           },
         },
       },
+    },
+    entitlements: {
+      'com.apple.developer.applesignin': ['Default'],
     },
   },
   plugins: [

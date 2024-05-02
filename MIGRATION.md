@@ -12,7 +12,9 @@
 - [x] purge old dbs
 - [x] fix rn version so that it can upgrade app.config.js
 - [x] overlay color drawerLayout
-- [ ] fix apple login
-- [ ] issues with bottom sheet glitching
+- [x] fix apple login
+- [x] Fix StatusBar
+- [ ] migrate to gorhom/bottom-sheet
 - [ ] check ios / android certificate / keys
 - [ ] Tester sur Android
+- [ ] Crashlytics makes app crash

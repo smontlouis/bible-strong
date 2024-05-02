@@ -86,9 +86,9 @@ const Header = ({
   const { addParallelVersion, removeAllParallelVersions } = actions
 
   const onOpenCommentaire = async () => {
-    const exists = await getIfDatabaseNeedsDownload('MHY')
+    const needsDownload = await getIfDatabaseNeedsDownload('MHY')
 
-    if (!exists) {
+    if (needsDownload) {
       SnackBar.show(t('Téléchargez la base de commentaires Matthew Henry'))
       navigation.navigate('Downloads')
       return
