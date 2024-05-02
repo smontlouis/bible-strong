@@ -1,18 +1,27 @@
 import React from 'react'
+import {
+  SharedValue,
+  useAnimatedStyle,
+  useDerivedValue,
+} from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
-import Animated, { not } from 'react-native-reanimated'
-import { ShallowTimelineSection } from './types'
 import SectionImage from './SectionImage'
+import { ShallowTimelineSection } from './types'
 
 interface Props {
-  isReady: Animated.Value<number>
+  isReady: SharedValue<number>
   currentEvent: ShallowTimelineSection
 }
 
 const CurrentSectionImage = ({ isReady, currentEvent }: Props) => {
-  const opacity = not(isReady)
+  const opacity = useDerivedValue(() => (isReady.value === 1 ? 0 : 1))
+
+  const style = useAnimatedStyle(() => {
+    return { opacity: opacity.value }
+  })
+
   return (
-    <AnimatedBox absoluteFill style={{ opacity }}>
+    <AnimatedBox absoluteFill style={style}>
       <SectionImage {...currentEvent} />
     </AnimatedBox>
   )

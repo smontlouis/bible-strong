@@ -84,7 +84,7 @@ const Media = ({
         </Box>
       )}
       {!!images?.length && (
-        <Box py={20} bg="rgb(18,45,66)">
+        <Box py={20} bg="rgb(18,45,66)" height={400}>
           <Paragraph fontFamily="title" mb={20} px={20} color="white">
             {t('Images')}
           </Paragraph>

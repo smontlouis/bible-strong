@@ -25,9 +25,6 @@ export const useWaitForDatabase = () => {
       setLoading(false)
     } else {
       const loadDBAsync = async () => {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
-
         const dbPath = getDatabases().NAVE.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 

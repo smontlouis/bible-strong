@@ -1,5 +1,5 @@
 import React from 'react'
-import Animated from 'react-native-reanimated'
+import { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -13,7 +13,7 @@ const Datebar = ({
   interval,
   color,
 }: {
-  x: Animated.Value<number>
+  x: SharedValue<number>
   width: number
   startYear: number
   endYear: number
@@ -41,7 +41,10 @@ const Datebar = ({
       paddingLeft={offset}
       bg="reverse"
       lightShadow
-      style={{ transform: [{ translateX: x }], elevation: 0 }}
+      style={useAnimatedStyle(() => ({
+        transform: [{ translateX: x.value }],
+        elevation: 0,
+      }))}
     >
       {values.map(value => (
         <Box

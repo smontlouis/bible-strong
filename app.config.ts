@@ -61,6 +61,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         backgroundColor: '#0F2132',
       },
     },
+    infoPlist: {
+      NSAppTransportSecurity: {
+        NSExceptionDomains: {
+          'timeline.biblehistory.com': {
+            NSExceptionAllowsInsecureHTTPLoads: true,
+          },
+        },
+      },
+    },
   },
   plugins: [
     '@react-native-firebase/app',
@@ -78,6 +87,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
         android: {
           compileSdkVersion: 34,
+          usesCleartextTraffic: true,
         },
       },
     ],

@@ -21,7 +21,6 @@ const TimelineItem = ({
   goTo,
 }: TimelineSection & { goTo: number }) => {
   const isFR = useLanguage()
-  console.log(image)
   return (
     <LinkBox row px={20} center mb={30} route="Timeline" params={{ goTo }}>
       <Box

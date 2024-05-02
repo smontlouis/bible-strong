@@ -9,15 +9,12 @@ import { TimelineEvent as TimelineEventProps } from './types'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
-  HeaderComponent?: React.ReactNode
-  FooterComponent?: React.ReactNode
   event: Partial<TimelineEventProps>
 }
 
 const EventDetailsModal = ({
   modalRef,
-  FooterComponent,
-  HeaderComponent,
+
   event,
 }: Props) => {
   const theme: Theme = useTheme()
@@ -26,8 +23,6 @@ const EventDetailsModal = ({
     <Modalize
       ref={modalRef}
       modalTopOffset={useSafeAreaInsets().top}
-      handlePosition="inside"
-      // snapPoint={400}
       modalStyle={{
         backgroundColor: theme.colors.lightGrey,
         maxWidth: 600,
@@ -35,8 +30,6 @@ const EventDetailsModal = ({
         marginLeft: 'auto',
         marginRight: 'auto',
       }}
-      FooterComponent={FooterComponent}
-      HeaderComponent={HeaderComponent}
     >
       <EventDetails {...event} />
     </Modalize>

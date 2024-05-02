@@ -1,8 +1,8 @@
 import algoliasearch from 'algoliasearch/lite'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { InstantSearch } from 'react-instantsearch-native'
 import { Modalize } from 'react-native-modalize'
-import { useValues } from 'react-native-redash'
+import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import useLanguage from '~helpers/useLanguage'
 import { algoliaConfig } from '../../../config'
@@ -66,12 +66,14 @@ const Timeline = ({
   nextEvent,
 }: Props) => {
   const isFR = useLanguage()
-  const [isReady] = useValues([0], [isCurrent])
+  const isReady = useSharedValue(0)
   const modalRef = React.useRef<Modalize>(null)
   const eventModalRef = React.useRef<Modalize>(null)
   const searchModalRef = React.useRef<Modalize>(null)
 
-  const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
+  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(
+    null
+  )
 
   const onTimelineDetailsOpen = () => {
     modalRef.current?.open()
@@ -130,8 +132,8 @@ const Timeline = ({
         }}
       />
       <ScrollView
-        translateX={x}
-        translateY={y}
+        x={x}
+        y={y}
         width={width}
         height={height}
         onPrev={onPrev}

@@ -12,9 +12,14 @@ import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { getVersionsBySections } from '~helpers/bibleVersions'
 import { getDatabases } from '~helpers/databases'
 import DBSelectorItem from './DatabaseSelectorItem'
+import useLanguage from '~helpers/useLanguage'
 
 const DLScreen = () => {
   const { t } = useTranslation()
+  const isFr = useLanguage()
+  const databases = Object.values(getDatabases()).filter(db =>
+    !isFr ? db.id !== 'MHY' : true
+  )
 
   return (
     <Container>
@@ -30,7 +35,7 @@ const DLScreen = () => {
                 "Si votre base de données a été corrompue, pensez à redémarrer l'application une fois les fichiers téléchargés."
               )}
             </Paragraph>
-            {Object.values(getDatabases()).map(db => (
+            {databases.map(db => (
               <DBSelectorItem
                 key={db.id}
                 database={db.id}

@@ -11,11 +11,13 @@ import { Provider as ReduxProvider } from 'react-redux'
 import * as Sentry from '@sentry/react-native'
 import { persistor, store } from '~redux/store'
 import remoteConfig from '@react-native-firebase/remote-config'
+import * as FileSystem from 'expo-file-system'
 
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
 import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
+import { checkDatabasesStorage } from '~helpers/sqlite'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -57,6 +59,7 @@ const useAppLoad = () => {
       await loadResourcesAsync()
       setStatus('Set i18n')
       await setI18n()
+      await checkDatabasesStorage()
       setIsLoadingCompleted(true)
       if (!__DEV__) {
         analytics().logScreenView({

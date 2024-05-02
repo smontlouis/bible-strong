@@ -20,6 +20,7 @@ import SearchBox from '~features/search/SearchBox'
 import Filters from './Filters'
 import Highlight from './Highlight'
 import Snippet from './Snippet'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
   modalRef: React.RefObject<Modalize>
@@ -68,6 +69,7 @@ const SearchInTimelineModal = ({
         marginLeft: 'auto',
         marginRight: 'auto',
       }}
+      modalTopOffset={useSafeAreaInsets().top}
       HeaderComponent={
         <Box pt={20}>
           <SearchBox

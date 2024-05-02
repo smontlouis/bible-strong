@@ -5,7 +5,7 @@ import { getDatabases } from './databases'
 export const databaseDictionnaireName = 'dictionnaire.sqlite'
 export const databaseStrongName = 'strong.sqlite'
 export const databaseInterlineaireName = 'interlineaire.sqlite'
-export const databaseTresorName = 'tresor.sqlite'
+export const databaseTresorName = 'commentaires-tresor.sqlite'
 export const databaseMhyName = 'mhy.sqlite'
 export const databaseNaveName = 'nave.sqlite'
 
@@ -95,4 +95,58 @@ export const initSQLiteDir = async () => {
   } else if (!sqliteDir.isDirectory) {
     throw new Error('SQLite dir is not a directory')
   }
+}
+
+export const checkDatabasesStorage = async () => {
+  const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
+  const dir = await FileSystem.readDirectoryAsync(sqliteDirPath)
+
+  await Promise.all(
+    [
+      databaseStrongName,
+      databaseDictionnaireName,
+      databaseInterlineaireName,
+      databaseTresorName,
+      databaseMhyName,
+      databaseNaveName,
+    ].map(dbName => checkForDatabase(dbName, dir))
+  )
+}
+
+export const checkForDatabase = async (
+  dbName: string,
+  filesInDir: string[]
+) => {
+  const filePath = `${FileSystem.documentDirectory}SQLite/${dbName}`
+  const file = await FileSystem.getInfoAsync(filePath)
+
+  // If file does not exist, find the first file that starts with dbName, and rename it to dbName
+  if (!file.exists) {
+    const fileToRename = filesInDir.find(f =>
+      f.startsWith(dbName.replace('.sqlite', ''))
+    )
+    if (fileToRename) {
+      // Check if file is not empty
+
+      const fileToRenameInfo = await FileSystem.getInfoAsync(
+        `${sqliteDirPath}/${fileToRename}`
+      )
+
+      if (fileToRenameInfo.exists && fileToRenameInfo.size !== 0) {
+        console.log(`Renaming ${fileToRename} to ${dbName}`)
+        await FileSystem.moveAsync({
+          from: `${sqliteDirPath}/${fileToRename}`,
+          to: filePath,
+        })
+        console.log('Done renaming')
+      }
+    }
+  }
+
+  // Remove all OTHER files that start with dbName
+  const filesToRemove = filesInDir.filter(
+    f => f.startsWith(dbName.replace('.sqlite', '')) && f !== dbName
+  )
+  console.log('removing...', filesToRemove)
+  filesToRemove.map(f => FileSystem.deleteAsync(`${sqliteDirPath}/${f}`))
 }

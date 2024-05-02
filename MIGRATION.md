@@ -2,13 +2,17 @@
 
 ----
 
-- [ ] rename strong-random.db to strong.sqlite at start
-- [ ] purge old dbs
-- [ ] remove mhy in en
 - [x] refactor sqliteDir
 - [x] refactor cdnUrl
-- [ ] fix apple login
-- [ ] fix bible timeline (using reanimated 1)
-- [ ] check ios / android certificate / keys
+- [x] fix bible timeline (using reanimated 1)
 - [x] fix icon / splashscreen / dark-light
+- [x] fix images in bible timeline
+- [x] remove mhy in en
+- [x] rename strong-random.db to strong.sqlite at start
+- [x] purge old dbs
+- [ ] fix apple login
 - [ ] fix rn version so that it can upgrade app.config.js
+- [ ] overlay color drawerLayout
+- [ ] issues with bottom sheet glitching
+- [ ] check ios / android certificate / keys
+- [ ] Tester sur Android

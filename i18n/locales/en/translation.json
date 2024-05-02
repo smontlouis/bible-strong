@@ -1,4 +1,6 @@
 {
+  "avJC": "BC",
+  "futur": "Future",
   "Quoi de neuf ?": "What's up ?",
   "Les changements depuis votre dernière visite": "Changes since your last visit",
   "Il y a {{formattedDate}}": "{{formattedDate}} ago",

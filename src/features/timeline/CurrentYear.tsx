@@ -1,10 +1,10 @@
 import React from 'react'
-import Animated, {
-  Extrapolate,
-  concat,
-  interpolateNode,
-  multiply,
-  round,
+import {
+  Extrapolation,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  useDerivedValue,
 } from 'react-native-reanimated'
 import { ReText } from 'react-native-redash'
 
@@ -14,7 +14,7 @@ import Link from '~common/Link'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
-import { wp } from '~helpers/utils'
+import { wp, wpUI } from '~helpers/utils'
 import { offset } from './constants'
 
 const LinkBox = Box.withComponent(Link)
@@ -30,9 +30,9 @@ const CurrentYear = ({
   nextColor,
   prevColor,
 }: {
-  year: Animated.Node<string>
-  x: Animated.Value<number>
-  lineX: Animated.Node<number>
+  year: SharedValue<string>
+  x: SharedValue<number>
+  lineX: SharedValue<number>
   color: string
   width: number
   onPrev: () => void
@@ -41,20 +41,21 @@ const CurrentYear = ({
   nextColor?: string
 }) => {
   const r = useMediaQueriesArray()
-  const progressInSection = concat(
-    round(
-      interpolateNode(multiply(-1, x), {
-        inputRange: [0, width - wp(100)],
-        outputRange: [0, 100],
-        extrapolate: Extrapolate.CLAMP,
-      })
-    ),
-    '%'
-  )
+  const progressInSection = useDerivedValue(() => {
+    const progress = interpolate(
+      x.value * -1,
+      [0, width - wpUI(100)],
+      [0, 100],
+      Extrapolation.CLAMP
+    )
+    return Math.round(progress)
+  })
 
   return (
     <AnimatedBox
-      style={{ transform: [{ translateX: lineX }] }}
+      style={useAnimatedStyle(() => ({
+        transform: [{ translateX: lineX.value }],
+      }))}
       pos="absolute"
       bottom={useSafeAreaInsets().bottom}
       left={0}
@@ -130,9 +131,9 @@ const CurrentYear = ({
         b={0}
         bg={color}
         height={3}
-        style={{
-          width: progressInSection,
-        }}
+        style={useAnimatedStyle(() => ({
+          width: `${progressInSection.value}%`,
+        }))}
       />
     </AnimatedBox>
   )

@@ -1,13 +1,13 @@
 import React from 'react'
+import { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 import { offset } from './constants'
-import Animated from 'react-native-reanimated'
 
 const Line = ({
   lineX,
   color,
 }: {
-  lineX: Animated.Node<number>
+  lineX: SharedValue<number>
   color: string
 }) => {
   return (
@@ -20,7 +20,9 @@ const Line = ({
       h="100%"
       bg={color}
       opacity={0.3}
-      style={{ transform: [{ translateX: lineX }] }}
+      style={useAnimatedStyle(() => ({
+        transform: [{ translateX: lineX.value }],
+      }))}
     />
   )
 }
