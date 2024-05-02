@@ -10,9 +10,9 @@
 - [x] remove mhy in en
 - [x] rename strong-random.db to strong.sqlite at start
 - [x] purge old dbs
-- [ ] fix apple login
-- [ ] fix rn version so that it can upgrade app.config.js
+- [x] fix rn version so that it can upgrade app.config.js
 - [x] overlay color drawerLayout
+- [ ] fix apple login
 - [ ] issues with bottom sheet glitching
 - [ ] check ios / android certificate / keys
 - [ ] Tester sur Android

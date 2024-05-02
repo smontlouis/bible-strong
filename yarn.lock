@@ -3079,10 +3079,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@invertase/react-native-apple-authentication@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@invertase/react-native-apple-authentication/-/react-native-apple-authentication-0.2.0.tgz#b1bda7aa449d24eefaf5fa1e5bf338a7a904dc0d"
-  integrity sha512-SdbLXfL3krsxd5hfsIGQIpgnQWEwJPx1TgVaNN2bs7K40O7oNP7GD1W80hsqvl7+akNIQHy5It+0Mcz3NPaUSQ==
+"@invertase/react-native-apple-authentication@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@invertase/react-native-apple-authentication/-/react-native-apple-authentication-2.3.0.tgz#b131b2033bfce06ca788f0b0886b51eb6effea0e"
+  integrity sha512-D3NNPv98EmkkCJyQEZhRn1zPC5EH+8LKBS+ddFsDyc3rVGWE7Ct0ffpxZ5T60w6wamIPjojIMSfEPUxbQ28+og==
 
 "@isaacs/ttlcache@^1.4.1":
   version "1.4.1"
