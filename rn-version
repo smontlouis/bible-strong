@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Check for correct usage
+if [[ "$1" != "patch" && "$1" != "minor" && "$1" != "major" ]]; then
+  echo "Usage: $0 [patch|minor|major]"
+  exit 1
+fi
+
+# Increment version in package.json using npm and capture the new version
+newVersion=$(npm version $1 --no-git-tag-version --tag-version-prefix='' | sed 's/^.*\([0-9]\+\.[0-9]\+\.[0-9]\+\)$/\1/')
+
+# Update app.config.js and package.json
+node -e "
+const fs = require('fs');
+
+// Update package.json
+let packageJson = require('./package.json');
+packageJson.version = '${newVersion}';
+fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
+
+// Update app.config.js
+let config = fs.readFileSync('app.config.js', 'utf8');
+config = config.replace(/version: '.*?'/, \`version: '${newVersion}'\`);
+config = config.replace(/buildNumber: '(\d+)'/, (match, number) => \`buildNumber: '\${parseInt(number) + 1}'\`);
+config = config.replace(/versionCode: (\d+)/, (match, number) => \`versionCode: \${parseInt(number) + 1}\`);
+fs.writeFileSync('app.config.js', config);
+"
+
+# Commit the changes
+git add package.json app.config.js
+git commit -m "chore: increment version"

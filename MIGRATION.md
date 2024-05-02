@@ -12,7 +12,7 @@
 - [x] purge old dbs
 - [ ] fix apple login
 - [ ] fix rn version so that it can upgrade app.config.js
-- [ ] overlay color drawerLayout
+- [x] overlay color drawerLayout
 - [ ] issues with bottom sheet glitching
 - [ ] check ios / android certificate / keys
 - [ ] Tester sur Android
