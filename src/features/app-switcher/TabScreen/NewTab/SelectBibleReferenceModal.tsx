@@ -5,7 +5,7 @@ import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import Modal from '~common/Modal'
 import BibleSelect from '~features/bible/BibleSelect'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import wait from '~helpers/wait'
 import {
   BibleTab,
@@ -31,7 +31,7 @@ const SelectBibleReferenceModal = ({
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   useEffect(() => {
     if (isOpen) {

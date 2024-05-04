@@ -15,6 +15,7 @@
 - [x] fix apple login
 - [x] Fix StatusBar
 - [ ] migrate to gorhom/bottom-sheet
+- [ ] remove all other modal libs
 - [ ] check ios / android certificate / keys
 - [ ] Tester sur Android
 - [ ] Crashlytics makes app crash

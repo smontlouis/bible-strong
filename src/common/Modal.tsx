@@ -2,9 +2,17 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { Portal } from '@gorhom/portal'
 import React, { forwardRef } from 'react'
-import { Modalize, ModalizeProps } from 'react-native-modalize'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
+import BottomSheet, {
+  BottomSheetView,
+  BottomSheetProps,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -23,10 +31,11 @@ const Tag = styled.View(({ theme }) => ({
   borderRadius: 3,
 }))
 
-interface ModalBodyProps extends ModalizeProps {
+interface ModalBodyProps extends BottomSheetProps {
+  headerComponent?: React.ReactNode
   children: React.ReactNode
   withPortal?: boolean
-  modalRef?: React.RefObject<Modalize>
+  modalRef?: React.RefObject<BottomSheet>
   style?: any
 }
 
@@ -36,40 +45,29 @@ interface ItemProps {
   onPress: () => void
 }
 
-const Body = forwardRef<Modalize, ModalBodyProps>(
-  ({ withPortal, ...props }, ref) => {
+const Body = forwardRef<BottomSheet, ModalBodyProps>(
+  ({ withPortal, children, headerComponent, ...props }, ref) => {
     const Wrapper = withPortal ? Portal : React.Fragment
-    const theme = useTheme()
     const insets = useSafeAreaInsets()
+    const bottomSheetStyles = useBottomSheetStyles()
 
     return (
       <Wrapper>
-        <Modalize
+        <BottomSheet
           ref={ref}
-          handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
-          modalTopOffset={insets.top + 40}
-          modalStyle={{
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            maxWidth: 600,
-            maxHeight: '50%',
-            width: '100%',
-            overflow: 'hidden',
-            borderTopLeftRadius: 30,
-            borderTopRightRadius: 30,
-            backgroundColor: theme.colors.reverse,
-
-            shadowColor: theme.colors.default,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 2,
-            paddingBottom: insets.bottom,
-            ...props.style,
-          }}
-          handlePosition="inside"
+          index={-1}
+          topInset={withPortal ? insets.top : undefined}
+          snapPoints={['100%']}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+          {...bottomSheetStyles}
           {...props}
-        />
+        >
+          {headerComponent && (
+            <BottomSheetView>{headerComponent}</BottomSheetView>
+          )}
+          <BottomSheetScrollView>{children}</BottomSheetScrollView>
+        </BottomSheet>
       </Wrapper>
     )
   }

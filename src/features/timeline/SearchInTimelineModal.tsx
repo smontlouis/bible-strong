@@ -1,30 +1,34 @@
 import { useTheme } from '@emotion/react'
 import React, { useCallback } from 'react'
-import { Modalize } from 'react-native-modalize'
 import { Theme } from '~themes'
 
 import { TimelineEvent as TimelineEventProps } from './types'
 
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import {
   connectInfiniteHits,
   connectStateResults,
 } from 'react-instantsearch-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import SearchBox from '~features/search/SearchBox'
+import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import Filters from './Filters'
 import Highlight from './Highlight'
 import Snippet from './Snippet'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
-  modalRef: React.RefObject<Modalize>
-  eventModalRef: React.RefObject<Modalize>
+  modalRef: React.RefObject<BottomSheet>
+  eventModalRef: React.RefObject<BottomSheet>
   setEvent: (event: Partial<TimelineEventProps>) => void
 }
 const SearchInTimelineModal = ({
@@ -55,22 +59,20 @@ const SearchInTimelineModal = ({
   }, [])
 
   const onOpenEvent = event => {
-    eventModalRef.current?.open()
+    eventModalRef.current?.expand()
     setEvent(event)
   }
 
   return (
-    <Modalize
+    <BottomSheet
       ref={modalRef}
-      modalStyle={{
-        backgroundColor: theme.colors.lightGrey,
-        maxWidth: 600,
-        width: '100%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      }}
-      modalTopOffset={useSafeAreaInsets().top}
-      HeaderComponent={
+      index={-1}
+      snapPoints={['100%']}
+      enablePanDownToClose
+      topInset={useSafeAreaInsets().top + 56}
+      {...useBottomSheetStyles()}
+    >
+      <BottomSheetView>
         <Box pt={20}>
           <SearchBox
             value={searchValue}
@@ -81,16 +83,15 @@ const SearchInTimelineModal = ({
           />
           <Filters />
         </Box>
-      }
-      flatListProps={{
-        ItemSeparatorComponent: () => <Border />,
-
-        data: submittedValue ? hits : [],
-        keyExtractor: item => item.objectID,
-        onEndReached: () => {
+      </BottomSheetView>
+      <BottomSheetFlatList
+        ItemSeparatorComponent={() => <Border />}
+        data={submittedValue ? hits : []}
+        keyExtractor={item => item.objectID}
+        onEndReached={() => {
           hasMore && refine()
-        },
-        ListHeaderComponent:
+        }}
+        ListHeaderComponent={
           !submittedValue || !canQuery ? (
             <Empty
               source={require('~assets/images/search-loop.json')}
@@ -111,8 +112,9 @@ const SearchInTimelineModal = ({
                 })}
               </Text>
             </Box>
-          ),
-        renderItem: ({ item }) => (
+          )
+        }
+        renderItem={({ item }) => (
           <LinkBox mx={20} my={20} onPress={() => onOpenEvent(item)} row>
             {item.image && (
               <Box mr={20}>
@@ -130,9 +132,9 @@ const SearchInTimelineModal = ({
               <Snippet attribute="article" hit={item} />
             </Box>
           </LinkBox>
-        ),
-      }}
-    />
+        )}
+      />
+    </BottomSheet>
   )
 }
 

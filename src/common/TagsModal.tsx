@@ -10,7 +10,7 @@ import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import useFuzzy from '~helpers/useFuzzy'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { hp } from '~helpers/utils'
 import { addTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
@@ -25,7 +25,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   const [newTag, setNewTag] = useState('')
-  const { ref, open } = useModalize()
+  const { ref, open } = useBottomSheet()
 
   // Refactor this
   useEffect(() => {

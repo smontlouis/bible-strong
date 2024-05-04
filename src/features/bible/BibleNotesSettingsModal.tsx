@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { deleteNote } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 
@@ -18,7 +18,7 @@ const NotesSettingsModal = ({
 }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   useEffect(() => {
     if (isOpen) {

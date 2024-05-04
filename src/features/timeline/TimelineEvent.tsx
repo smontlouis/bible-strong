@@ -7,8 +7,8 @@ import Animated, {
   useDerivedValue,
 } from 'react-native-reanimated'
 
+import BottomSheet from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
-import { Modalize } from 'react-native-modalize'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -22,7 +22,7 @@ const LinkBox = Box.withComponent(Link)
 interface Props extends TimelineEventProps {
   x: SharedValue<number>
   yearsToPx: (years: number) => number
-  eventModalRef: React.RefObject<Modalize>
+  eventModalRef: React.RefObject<BottomSheet>
   setEvent: (event: Partial<TimelineEventProps>) => void
   calculateEventWidth: (
     yearStart: number,
@@ -60,7 +60,7 @@ const TimelineEvent = ({
   const label = calculateLabel(start, end)
 
   const onOpenEvent = () => {
-    eventModalRef.current?.open()
+    eventModalRef.current?.expand()
     setEvent({ slug, title, titleEn, image, start, end })
   }
 

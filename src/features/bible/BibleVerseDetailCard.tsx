@@ -24,6 +24,7 @@ import { withNavigation } from 'react-navigation'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { hp, wp } from '~helpers/utils'
+import { View } from 'react-native'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -189,10 +190,7 @@ class BibleVerseDetailCard extends React.Component {
     }
 
     return (
-      <StyledScrollView
-        contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75)  }}
-        scrollIndicatorInsets={{ right: 1 }}
-      >
+      <View style={{ paddingBottom: 20, minHeight: hp(75) }}>
         <Box background paddingTop={10}>
           <StyledVerse>
             <VersetWrapper>
@@ -259,7 +257,7 @@ class BibleVerseDetailCard extends React.Component {
             />
           )}
         </Box>
-      </StyledScrollView>
+      </View>
     )
   }
 }

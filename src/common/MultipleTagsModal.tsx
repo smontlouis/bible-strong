@@ -10,7 +10,7 @@ import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import useFuzzy from '~helpers/useFuzzy'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { hp } from '~helpers/utils'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -28,7 +28,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const MultipleTagsModal = () => {
   const [item, setItem] = useAtom(multipleTagsModalAtom)
-  const { ref, open } = useModalize()
+  const { ref, open } = useBottomSheet()
 
   const onClose = () => setItem(false)
 

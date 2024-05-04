@@ -3,7 +3,6 @@ import { useTheme } from '@emotion/react'
 import Clipboard from '@react-native-clipboard/clipboard'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
-import { Modalize } from 'react-native-modalize'
 
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -16,28 +15,29 @@ import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
 import { cleanParams, wp } from '~helpers/utils'
 
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigation } from 'react-navigation-hooks'
+import { shallowEqual, useSelector } from 'react-redux'
 import { BibleResource, VerseIds } from '~common/types'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
-import { useModalize } from '~helpers/useModalize'
+import { openedFromTabAtom } from '~features/studies/atom'
+import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { useBottomSheet } from '~helpers/useBottomSheet'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { RootState } from '~redux/modules/reducer'
 import verseToReference from '../../helpers/verseToReference'
 import { VersionCode } from '../../state/tabs'
 import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { useAtomValue } from 'jotai/react'
-import { openedFromTabAtom } from '~features/studies/atom'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { shallowEqual, useSelector } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
 
 const Container = styled.View<{ isSelectionMode?: boolean }>(
   ({ theme, isSelectionMode }) => ({
     width: '100%',
     backgroundColor: theme.colors.reverse,
-    paddingTop: 10,
 
     ...(isSelectionMode && {
       flexDirection: 'row',
@@ -90,7 +90,7 @@ const VersesModal = ({
   const navigation = useNavigation()
   const theme = useTheme()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
@@ -195,169 +195,180 @@ const VersesModal = ({
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
+  const bottomSheetStyles = useBottomSheetStyles()
 
   return (
-    <Modalize
+    <BottomSheet
       ref={ref}
-      onClosed={clearSelectedVerses}
-      handlePosition="inside"
-      handleStyle={{ backgroundColor: theme.colors.default, opacity: 0.5 }}
-      modalStyle={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 400,
-        width: '100%',
-
+      onClose={clearSelectedVerses}
+      index={-1}
+      enableDynamicSizing
+      enablePanDownToClose
+      {...bottomSheetStyles}
+      style={{
+        ...(bottomSheetStyles.style as object),
         ...(isSelectionMode && {
           width: 250,
         }),
       }}
-      adjustToContentHeight
-      withOverlay={false}
     >
-      {isSelectionMode ? (
-        <Container isSelectionMode={isSelectionMode}>
-          <Text paddingTop={20} flex bold fontSize={15} textAlign="center">
-            {selectedVersesTitle.toUpperCase()}
-          </Text>
-          <TouchableIcon
-            style={{ paddingTop: 15 }}
-            name="arrow-right"
-            onPress={sendVerseData}
-            noFlex
-          />
-        </Container>
-      ) : (
-        <Container>
-          <HalfContainer border>
-            <TouchableCircle
-              color={colors.color1}
-              onPress={() => addHighlight('color1')}
+      <BottomSheetView
+        style={{
+          flex: 0,
+          minHeight: 100,
+
+          ...(isSelectionMode && {
+            flexDirection: 'row',
+            paddingLeft: 10,
+            paddingRight: 10,
+            paddingVertical: 30,
+          }),
+        }}
+      >
+        {isSelectionMode ? (
+          <>
+            <Text paddingTop={20} flex bold fontSize={15} textAlign="center">
+              {selectedVersesTitle.toUpperCase()}
+            </Text>
+            <TouchableIcon
+              style={{ paddingTop: 15 }}
+              name="arrow-right"
+              onPress={sendVerseData}
+              noFlex
             />
-            <TouchableCircle
-              color={colors.color2}
-              onPress={() => addHighlight('color2')}
-            />
-            <TouchableCircle
-              color={colors.color3}
-              onPress={() => addHighlight('color3')}
-            />
-            <TouchableCircle
-              color={colors.color4}
-              onPress={() => addHighlight('color4')}
-            />
-            <TouchableCircle
-              color={colors.color5}
-              onPress={() => addHighlight('color5')}
-            />
-            {isSelectedVerseHighlighted && (
-              <TouchableIcon
-                name="x-circle"
-                onPress={() => removeHighlight()}
+          </>
+        ) : (
+          <>
+            <HalfContainer border>
+              <TouchableCircle
+                color={colors.color1}
+                onPress={() => addHighlight('color1')}
               />
-            )}
-          </HalfContainer>
-          <HalfContainer>
-            <ScrollView
-              horizontal
-              style={{ overflow: 'visible' }}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                flexDirection: 'row',
-                paddingVertical: 10,
-                overflow: 'visible',
-                justifyContent: 'space-around',
-              }}
-            >
-              <Box width={wp(20, 400)}>
-                <TouchableSvgIcon
-                  icon={LexiqueIcon}
-                  color="primary"
-                  onPress={showStrongDetail}
-                  label={t('Lexique')}
-                  disabled={moreThanOneVerseSelected}
+              <TouchableCircle
+                color={colors.color2}
+                onPress={() => addHighlight('color2')}
+              />
+              <TouchableCircle
+                color={colors.color3}
+                onPress={() => addHighlight('color3')}
+              />
+              <TouchableCircle
+                color={colors.color4}
+                onPress={() => addHighlight('color4')}
+              />
+              <TouchableCircle
+                color={colors.color5}
+                onPress={() => addHighlight('color5')}
+              />
+              {isSelectedVerseHighlighted && (
+                <TouchableIcon
+                  name="x-circle"
+                  onPress={() => removeHighlight()}
                 />
-              </Box>
-              <Box width={wp(20, 400)}>
-                <TouchableSvgIcon
-                  icon={DictionnaireIcon}
-                  color="secondary"
-                  onPress={showDictionaryDetail}
-                  label={t('Dictionnaire')}
-                  disabled={moreThanOneVerseSelected}
+              )}
+            </HalfContainer>
+            <HalfContainer>
+              <ScrollView
+                horizontal
+                style={{ overflow: 'visible' }}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  flexDirection: 'row',
+                  paddingVertical: 10,
+                  overflow: 'visible',
+                  justifyContent: 'space-around',
+                }}
+              >
+                <Box width={wp(20, 400)}>
+                  <TouchableSvgIcon
+                    icon={LexiqueIcon}
+                    color="primary"
+                    onPress={showStrongDetail}
+                    label={t('Lexique')}
+                    disabled={moreThanOneVerseSelected}
+                  />
+                </Box>
+                <Box width={wp(20, 400)}>
+                  <TouchableSvgIcon
+                    icon={DictionnaireIcon}
+                    color="secondary"
+                    onPress={showDictionaryDetail}
+                    label={t('Dictionnaire')}
+                    disabled={moreThanOneVerseSelected}
+                  />
+                </Box>
+                <Box width={wp(20, 400)}>
+                  <TouchableSvgIcon
+                    icon={NaveIcon}
+                    color="quint"
+                    onPress={onOpenNave}
+                    label={t('Thèmes')}
+                    disabled={moreThanOneVerseSelected}
+                  />
+                </Box>
+                <Box width={wp(20, 400)}>
+                  <TouchableSvgIcon
+                    icon={RefIcon}
+                    color="quart"
+                    onPress={onOpenReferences}
+                    label={t('Références')}
+                    disabled={moreThanOneVerseSelected}
+                  />
+                </Box>
+                <Box width={wp(20, 400)}>
+                  <TouchableSvgIcon
+                    icon={CommentIcon}
+                    color="#26A69A"
+                    onPress={openCommentariesScreen}
+                    label={t('Comment.')}
+                    disabled={moreThanOneVerseSelected}
+                  />
+                </Box>
+              </ScrollView>
+            </HalfContainer>
+            <HalfContainer>
+              <ScrollView
+                horizontal
+                style={{ overflow: 'visible' }}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  flexDirection: 'row',
+                  paddingHorizontal: 20,
+                  paddingVertical: 10,
+                  overflow: 'visible',
+                }}
+              >
+                <TouchableChip
+                  name="layers"
+                  onPress={compareVerses}
+                  label={t('Comparer')}
                 />
-              </Box>
-              <Box width={wp(20, 400)}>
-                <TouchableSvgIcon
-                  icon={NaveIcon}
-                  color="quint"
-                  onPress={onOpenNave}
-                  label={t('Thèmes')}
-                  disabled={moreThanOneVerseSelected}
+                <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
+                <TouchableChip
+                  name="file-plus"
+                  onPress={onCreateNoteClick}
+                  label={t('Note')}
                 />
-              </Box>
-              <Box width={wp(20, 400)}>
-                <TouchableSvgIcon
-                  icon={RefIcon}
-                  color="quart"
-                  onPress={onOpenReferences}
-                  label={t('Références')}
-                  disabled={moreThanOneVerseSelected}
+                <TouchableChip
+                  name="copy"
+                  onPress={copyToClipboard}
+                  label={t('Copier')}
                 />
-              </Box>
-              <Box width={wp(20, 400)}>
-                <TouchableSvgIcon
-                  icon={CommentIcon}
-                  color="#26A69A"
-                  onPress={openCommentariesScreen}
-                  label={t('Comment.')}
-                  disabled={moreThanOneVerseSelected}
+                <TouchableChip
+                  name="share-2"
+                  onPress={shareVerse}
+                  label={t('Partager')}
                 />
-              </Box>
-            </ScrollView>
-          </HalfContainer>
-          <HalfContainer>
-            <ScrollView
-              horizontal
-              style={{ overflow: 'visible' }}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                flexDirection: 'row',
-                paddingHorizontal: 20,
-                paddingVertical: 10,
-                overflow: 'visible',
-              }}
-            >
-              <TouchableChip
-                name="layers"
-                onPress={compareVerses}
-                label={t('Comparer')}
-              />
-              <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
-              <TouchableChip
-                name="file-plus"
-                onPress={onCreateNoteClick}
-                label={t('Note')}
-              />
-              <TouchableChip
-                name="copy"
-                onPress={copyToClipboard}
-                label={t('Copier')}
-              />
-              <TouchableChip
-                name="share-2"
-                onPress={shareVerse}
-                label={t('Partager')}
-              />
-              <TouchableChip
-                onPress={selectAllVerses}
-                label={t('Tout sélectionner')}
-              />
-            </ScrollView>
-          </HalfContainer>
-        </Container>
-      )}
-    </Modalize>
+                <TouchableChip
+                  onPress={selectAllVerses}
+                  label={t('Tout sélectionner')}
+                />
+              </ScrollView>
+            </HalfContainer>
+          </>
+        )}
+      </BottomSheetView>
+    </BottomSheet>
   )
 }
 

@@ -98,10 +98,8 @@ export const ReferenceCard = waitForTresorModal(
     }
 
     return (
-      <Box flex>
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-          <References references={data} version={version} />
-        </ScrollView>
+      <Box flex padding={20}>
+        <References references={data} version={version} />
       </Box>
     )
   }

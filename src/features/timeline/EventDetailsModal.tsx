@@ -1,14 +1,16 @@
-import { useTheme } from '@emotion/react'
 import React from 'react'
-import { Modalize } from 'react-native-modalize'
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Theme } from '~themes'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 import EventDetails from './EventDetails'
 import { TimelineEvent as TimelineEventProps } from './types'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
-  modalRef: React.RefObject<Modalize>
+  modalRef: React.RefObject<BottomSheet>
   event: Partial<TimelineEventProps>
 }
 
@@ -17,22 +19,22 @@ const EventDetailsModal = ({
 
   event,
 }: Props) => {
-  const theme: Theme = useTheme()
+  const bottomSheetStyles = useBottomSheetStyles()
 
   return (
-    <Modalize
+    <BottomSheet
       ref={modalRef}
-      modalTopOffset={useSafeAreaInsets().top}
-      modalStyle={{
-        backgroundColor: theme.colors.lightGrey,
-        maxWidth: 600,
-        width: '100%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      }}
+      index={-1}
+      enablePanDownToClose
+      snapPoints={['100%']}
+      backdropComponent={renderBackdrop}
+      topInset={useSafeAreaInsets().top + 56}
+      {...bottomSheetStyles}
     >
-      <EventDetails {...event} />
-    </Modalize>
+      <BottomSheetScrollView>
+        <EventDetails {...event} />
+      </BottomSheetScrollView>
+    </BottomSheet>
   )
 }
 

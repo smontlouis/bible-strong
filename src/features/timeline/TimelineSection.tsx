@@ -1,7 +1,6 @@
 import algoliasearch from 'algoliasearch/lite'
 import React, { useEffect } from 'react'
 import { InstantSearch } from 'react-instantsearch-native'
-import { Modalize } from 'react-native-modalize'
 import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import useLanguage from '~helpers/useLanguage'
@@ -24,6 +23,8 @@ import {
   TimelineEvent as TimelineEventProps,
   TimelineSection as TimelineSectionProps,
 } from './types'
+import { Portal } from '@gorhom/portal'
+import BottomSheet from '@gorhom/bottom-sheet'
 const searchClient = algoliasearch(
   algoliaConfig.applicationId,
   algoliaConfig.apiKey
@@ -67,16 +68,16 @@ const Timeline = ({
 }: Props) => {
   const isFR = useLanguage()
   const isReady = useSharedValue(0)
-  const modalRef = React.useRef<Modalize>(null)
-  const eventModalRef = React.useRef<Modalize>(null)
-  const searchModalRef = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
+  const eventModalRef = React.useRef<BottomSheet>(null)
+  const searchModalRef = React.useRef<BottomSheet>(null)
 
   const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(
     null
   )
 
   const onTimelineDetailsOpen = () => {
-    modalRef.current?.open()
+    modalRef.current?.expand()
   }
 
   const {

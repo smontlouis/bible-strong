@@ -1,18 +1,17 @@
 import React, { memo, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
-import { withNavigation } from 'react-navigation'
 
 import { useTheme } from '@emotion/react'
-import { Modalize } from 'react-native-modalize'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { useNavigation } from 'react-navigation-hooks'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForStrongModal from '~common/waitForStrongModal'
 import StrongCard from '~features/bible/StrongCard'
 import { isStrongVersion } from '~helpers/bibleVersions'
+import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { usePrevious } from '~helpers/usePrevious'
-import { hp } from '~helpers/utils'
-import { useNavigation } from 'react-navigation-hooks'
 
 const StrongCardWrapper = waitForStrongModal(
   ({ navigation, selectedCode, onClosed }) => {
@@ -87,7 +86,7 @@ interface StrongModalProps {
 }
 
 const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
-  const modalRef = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
   const navigation = useNavigation()
   const theme = useTheme()
   const hasSelectedCode = !!selectedCode
@@ -95,7 +94,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
 
   useEffect(() => {
     if (hasSelectedCode && !hasPrevSelectedCode) {
-      modalRef.current?.open()
+      modalRef.current?.snapToIndex(0)
     }
 
     if (!hasSelectedCode && hasPrevSelectedCode) {
@@ -110,25 +109,24 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version])
 
+  const bottomSheetStyles = useBottomSheetStyles()
+
   return (
-    <Modalize
+    <BottomSheet
       ref={modalRef}
-      onClosed={onClosed}
-      modalHeight={hp(75)}
-      handlePosition="inside"
-      closeSnapPointStraightEnabled={false}
-      modalStyle={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 600,
-        width: '100%',
+      onClose={onClosed}
+      index={-1}
+      snapPoints={[200, '75%']}
+      enablePanDownToClose
+      style={bottomSheetStyles.style}
+      backgroundStyle={{
         backgroundColor: theme.colors.lightGrey,
       }}
-      snapPoint={200}
-      withOverlay={false}
     >
-      <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
-    </Modalize>
+      <BottomSheetScrollView>
+        <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
+      </BottomSheetScrollView>
+    </BottomSheet>
   )
 }
 

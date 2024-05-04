@@ -1,6 +1,7 @@
+import BottomSheet from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
-import React from 'react'
-import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import React, { useMemo } from 'react'
+import Carousel from 'react-native-reanimated-carousel'
 import useLanguage from '~helpers/useLanguage'
 
 import Box from '~common/ui/Box'
@@ -11,19 +12,18 @@ import { wp } from '~helpers/utils'
 import { calculateLabel } from './constants'
 import {
   TimelineEvent,
-  TimelineEvent as TimelineEventProps,
   TimelineEventDetail,
+  TimelineEvent as TimelineEventProps,
 } from './types'
 // import EventDetailsTab from './EventDetailsTab'
+import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import { Modalize } from 'react-native-modalize'
 import Link from '~common/Link'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useQuery } from '~helpers/react-query-lite'
-import EventDetailsModal from './EventDetailsModal'
 import EventDetailVerse from './EventDetailVerse'
+import EventDetailsModal from './EventDetailsModal'
 import { getEvents } from './events'
-import { Image } from 'expo-image'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -57,7 +57,7 @@ const Media = ({
   'images' | 'scriptures' | 'videos' | 'related'
 >) => {
   const { t } = useTranslation()
-  const eventModalRef = React.useRef<Modalize>(null)
+  const eventModalRef = React.useRef<BottomSheet>(null)
   const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
 
   const { data: events } = useQuery({
@@ -134,7 +134,7 @@ const Media = ({
                 )
                 if (foundEvent) {
                   setEvent(foundEvent)
-                  eventModalRef.current?.open()
+                  eventModalRef.current?.expand()
                 } else {
                   console.log("Can't open this event.")
                 }
@@ -173,11 +173,11 @@ const EventDetails = waitForTimeline(
   >) => {
     const isFR = useLanguage()
     const date = calculateLabel(start, end)
-    const { current: event } = React.useRef(
-      (bibleMemoize.timeline as TimelineEventDetail[]).find(
+    const event = useMemo(() => {
+      return (bibleMemoize.timeline as TimelineEventDetail[]).find(
         e => e.slug === slug
       )
-    )
+    }, [slug])
 
     if (!event) {
       return null

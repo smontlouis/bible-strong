@@ -1,11 +1,11 @@
 import { useTheme } from '@emotion/react'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import React, { memo, useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import * as Animatable from 'react-native-animatable'
 import DateTimePicker from 'react-native-modal-datetime-picker'
-import { Modalize } from 'react-native-modalize'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { Fade, Placeholder, PlaceholderLine } from 'rn-placeholder'
@@ -16,6 +16,10 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 import { removeBreakLines } from '~helpers/utils'
 import { zeroFill } from '~helpers/zeroFill'
 import { RootState } from '~redux/modules/reducer'
@@ -70,7 +74,7 @@ const VerseOfTheDay = ({
   )
   const insets = useSafeAreaInsets()
   const { current: ago } = useRef(dayToAgo(addDay, t))
-  const notificationModalRef = React.useRef<Modalize>(null)
+  const notificationModalRef = React.useRef<BottomSheet>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime
     .split(':')
@@ -94,6 +98,8 @@ const VerseOfTheDay = ({
   const openTimePicker = () => {
     setTimePicker(true)
   }
+
+  const bottomSheetStyles = useBottomSheetStyles()
 
   if (!currentVOD) {
     return null
@@ -155,7 +161,7 @@ const VerseOfTheDay = ({
           <Box row center mt={5} opacity={0.5}>
             {!addDay && (
               <Link
-                onPress={() => notificationModalRef.current?.open()}
+                onPress={() => notificationModalRef.current?.expand()}
                 size={30}
               >
                 <FeatherIcon size={16} name="bell" />
@@ -195,44 +201,48 @@ const VerseOfTheDay = ({
         onCancel={() => setTimePicker(false)}
       />
       <Portal>
-        <Modalize
+        <BottomSheet
           ref={notificationModalRef}
-          modalStyle={{
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            maxWidth: 400,
-            width: '100%',
-            backgroundColor: theme.colors.reverse,
-          }}
-          adjustToContentHeight
+          index={-1}
+          enablePanDownToClose
+          enableDynamicSizing
+          backdropComponent={renderBackdrop}
+          {...bottomSheetStyles}
         >
-          <Box py={30} px={20} pb={30 + insets.bottom}>
-            <Box row alignItems="center">
-              <Text bold flex>
-                {t('Recevoir une notification quotidienne')}
-              </Text>
-              <Switch
-                value={!!verseOfTheDayTime}
-                onValueChange={() => {
-                  if (verseOfTheDayTime) {
-                    dispatch(setNotificationVOD(''))
-                  } else {
-                    dispatch(setNotificationVOD('07:00'))
-                  }
-                }}
-              />
+          <BottomSheetScrollView scrollEnabled={false}>
+            <Box py={30} px={20} pb={30 + insets.bottom}>
+              <Box row alignItems="center">
+                <Text bold flex>
+                  {t('Recevoir une notification quotidienne')}
+                </Text>
+                <Switch
+                  value={!!verseOfTheDayTime}
+                  onValueChange={() => {
+                    if (verseOfTheDayTime) {
+                      dispatch(setNotificationVOD(''))
+                    } else {
+                      dispatch(setNotificationVOD('07:00'))
+                    }
+                  }}
+                />
+              </Box>
+              {!!verseOfTheDayTime && (
+                <LinkBox
+                  row
+                  alignItems="center"
+                  mt={10}
+                  onPress={openTimePicker}
+                >
+                  <Text>{t("Choisir l'heure")}:</Text>
+                  <Text bold> {verseOfTheDayTime}</Text>
+                  <Box ml={5}>
+                    <FeatherIcon name="chevron-down" />
+                  </Box>
+                </LinkBox>
+              )}
             </Box>
-            {!!verseOfTheDayTime && (
-              <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
-                <Text>{t("Choisir l'heure")}:</Text>
-                <Text bold> {verseOfTheDayTime}</Text>
-                <Box ml={5}>
-                  <FeatherIcon name="chevron-down" />
-                </Box>
-              </LinkBox>
-            )}
-          </Box>
-        </Modalize>
+          </BottomSheetScrollView>
+        </BottomSheet>
       </Portal>
     </Box>
   )

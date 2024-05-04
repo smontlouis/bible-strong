@@ -7,7 +7,7 @@ import { Portal } from '@gorhom/portal'
 import Modal from '~common/Modal'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 
 const StyledText = styled(Text)({
   fontSize: 14,
@@ -35,7 +35,7 @@ const DropdownMenu = ({
   customRender,
 }: DropdownMenuProps) => {
   const choice = choices.find(l => l.value === currentValue)
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   const onItemPress = (value: string) => {
     setValue(value)

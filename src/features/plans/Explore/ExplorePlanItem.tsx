@@ -1,8 +1,8 @@
+import BottomSheet from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modalize } from 'react-native-modalize'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NavigationParams, withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
@@ -31,7 +31,7 @@ const ExplorePlanItem = ({
   featured,
 }: OnlinePlan & { navigation: NavigationStackProp<any, NavigationParams> }) => {
   const { t } = useTranslation()
-  const modalRef = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
   const planImage = useFireStorage(image)
   const dispatch = useDispatch()
   const hasAlreadyStarted = useSelector(
@@ -45,7 +45,7 @@ const ExplorePlanItem = ({
 
   return (
     <Box width={featured ? '100%' : '50%'}>
-      <Link onPress={() => modalRef?.current?.open()}>
+      <Link onPress={() => modalRef?.current?.expand()}>
         <Box
           bg="reverse"
           lightShadow
@@ -98,7 +98,7 @@ const ExplorePlanItem = ({
           author={author}
           downloads={downloads}
           description={description}
-          FooterComponent={
+          footerComponent={() => (
             <Box
               paddingBottom={10 + insets.bottom}
               paddingHorizontal={20}
@@ -135,7 +135,7 @@ const ExplorePlanItem = ({
                   : t('Démarrer ce plan')}
               </Button>
             </Box>
-          }
+          )}
         />
       </Portal>
     </Box>

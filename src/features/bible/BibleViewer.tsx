@@ -288,6 +288,10 @@ const BibleViewer = ({
     setNoteVerses(s => (s ? undefined : selectedVerses))
   }
 
+  const closeNoteModal = () => {
+    setNoteVerses(undefined)
+  }
+
   const openNoteModal = (noteId: string) => {
     try {
       const noteVersesToLoad = noteId.split('/').reduce((accuRefs, key) => {
@@ -415,7 +419,7 @@ const BibleViewer = ({
         onClosed={() => setQuickTagsModal(false)}
         setMultipleTagsItem={setMultipleTagsItem}
       />
-      <BibleNoteModal onClosed={toggleCreateNote} noteVerses={noteVerses} />
+      <BibleNoteModal onClosed={closeNoteModal} noteVerses={noteVerses} />
       <StrongModal
         version={version}
         selectedCode={strongModalDisclosure.isOpen}

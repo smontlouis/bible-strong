@@ -1,18 +1,18 @@
+import BottomSheet from '@gorhom/bottom-sheet'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { Modalize } from 'react-native-modalize'
-import MenuOption from '~common/ui/MenuOption'
+import { NavigationParams } from 'react-navigation'
+import { NavigationStackProp } from 'react-navigation-stack'
 import { useDispatch } from 'react-redux'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import { resetPlan, removePlan } from '~redux/modules/plan'
-import { NavigationStackProp } from 'react-navigation-stack'
-import { NavigationParams } from 'react-navigation'
-import { useTranslation } from 'react-i18next'
+import { removePlan, resetPlan } from '~redux/modules/plan'
 
 interface Props {
-  modalRefDetails: React.RefObject<Modalize>
+  modalRefDetails: React.RefObject<BottomSheet>
   planId: string
   navigation: NavigationStackProp<any, NavigationParams>
 }
@@ -60,7 +60,7 @@ const Menu = ({ modalRefDetails, planId, navigation }: Props) => {
 
   return (
     <>
-      <MenuOption onSelect={() => modalRefDetails.current?.open()}>
+      <MenuOption onSelect={() => modalRefDetails.current?.expand()}>
         <Box row alignItems="center">
           <FeatherIcon name="eye" size={15} />
           <Text marginLeft={10}>{t('Détails')}</Text>

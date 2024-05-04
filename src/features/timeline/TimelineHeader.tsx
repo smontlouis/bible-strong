@@ -1,8 +1,8 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import BottomSheet from '@gorhom/bottom-sheet'
 import React from 'react'
 
-import { Modalize } from 'react-native-modalize'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
 import Link from '~common/Link'
@@ -32,7 +32,7 @@ interface Props {
   fontSize?: number
   hasBackButton?: boolean
   onPress: () => void
-  searchModalRef: React.RefObject<Modalize>
+  searchModalRef: React.RefObject<BottomSheet>
 }
 
 const TimelineHeader = ({
@@ -46,7 +46,7 @@ const TimelineHeader = ({
   const isFR = useLanguage()
 
   const openSearch = () => {
-    searchModalRef.current?.open()
+    searchModalRef.current?.expand()
   }
   return (
     <HeaderBox row>

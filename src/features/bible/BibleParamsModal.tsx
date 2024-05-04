@@ -1,6 +1,5 @@
 import React, { memo } from 'react'
 import { FlatList } from 'react-native'
-import { Modalize } from 'react-native-modalize'
 
 import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
@@ -31,22 +30,12 @@ import {
 } from '~redux/modules/user'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-
-const Container = styled.View(({ theme }) => ({
-  width: '100%',
-  maxWidth: 400,
-  backgroundColor: theme.colors.reverse,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 2,
-  alignItems: 'stretch',
-  justifyContent: 'space-between',
-  paddingTop: 10,
-}))
+import { useTheme } from '@emotion/react'
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 
 export const HalfContainer = styled.View<{ border?: boolean }>(
   ({ border, theme }) => ({
@@ -135,7 +124,7 @@ const BibleParamsModal = ({
   navigation,
 }: BibleParamsModalprops) => {
   const isPrevOpen = usePrevious(isOpen)
-  const modalRef = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
   const { t } = useTranslation()
 
   const {
@@ -179,29 +168,32 @@ const BibleParamsModal = ({
   React.useEffect(() => {
     if (isPrevOpen !== isOpen) {
       if (isOpen) {
-        modalRef?.current?.open()
+        console.log('expand')
+        modalRef?.current?.expand()
       }
     }
   }, [isPrevOpen, isOpen])
 
   const fontsViewRef = React.useRef(null)
+  const bottomSheetStyles = useBottomSheetStyles()
 
   return (
-    <Modalize
+    <BottomSheet
       ref={modalRef}
+      index={-1}
       onClose={onClosed}
-      handlePosition="inside"
-      modalStyle={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 400,
-        width: '100%',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-      }}
-      adjustToContentHeight
+      enablePanDownToClose
+      backdropComponent={renderBackdrop}
+      enableDynamicSizing
+      {...bottomSheetStyles}
     >
-      <Container>
+      <BottomSheetView
+        style={{
+          alignItems: 'stretch',
+          justifyContent: 'space-between',
+          paddingTop: 10,
+        }}
+      >
         <HalfContainer border>
           <Text flex={5}>{t('Thème')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
@@ -450,8 +442,8 @@ const BibleParamsModal = ({
           <Text flex>{t('bible.settings.shareOptions')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
-      </Container>
-    </Modalize>
+      </BottomSheetView>
+    </BottomSheet>
   )
 }
 
