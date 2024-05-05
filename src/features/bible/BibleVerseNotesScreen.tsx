@@ -38,10 +38,12 @@ class BibleVerseNotes extends Component {
   }
 
   setTagsIsOpen = value => this.setState({ isTagsOpen: value })
+  closeTags = () => this.setState({ isTagsOpen: false })
 
   setSelectedChip = value => this.setState({ selectedChip: value })
 
   setNoteSettings = value => this.setState({ isNoteSettingsOpen: value })
+  closeNoteSettings = () => this.setState({ isNoteSettingsOpen: false })
 
   loadPage = async props => {
     const { verse } = props.navigation.state.params || {}
@@ -166,13 +168,13 @@ class BibleVerseNotes extends Component {
         />
         <TagsModal
           isVisible={isTagsOpen}
-          onClosed={() => this.setTagsIsOpen(false)}
+          onClosed={this.closeTags}
           onSelected={chip => this.setSelectedChip(chip)}
           selectedChip={selectedChip}
         />
         <BibleNotesSettingsModal
           isOpen={isNoteSettingsOpen}
-          onClosed={() => this.setNoteSettings(false)}
+          onClosed={this.closeNoteSettings}
           openNoteEditor={this.openNoteEditor}
         />
       </Container>

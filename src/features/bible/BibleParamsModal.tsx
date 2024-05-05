@@ -168,7 +168,6 @@ const BibleParamsModal = ({
   React.useEffect(() => {
     if (isPrevOpen !== isOpen) {
       if (isOpen) {
-        console.log('expand')
         modalRef?.current?.expand()
       }
     }

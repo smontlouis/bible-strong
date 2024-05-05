@@ -88,8 +88,8 @@ const MultipleTagsModal = () => {
     <Modal.Body
       ref={ref}
       onClose={onClose}
-      modalHeight={hp(80, 600)}
-      HeaderComponent={
+      snapPoints={['50%']}
+      headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>
             {item.entity !== 'highlights'
@@ -108,7 +108,7 @@ const MultipleTagsModal = () => {
           />
         </Box>
       }
-      FooterComponent={
+      footerComponent={() => (
         <Box
           row
           center
@@ -131,7 +131,7 @@ const MultipleTagsModal = () => {
             <StyledIcon isDisabled={!newTag} name="check" size={30} />
           </TouchableOpacity>
         </Box>
-      }
+      )}
     >
       <Box flex>
         {result.length ? (

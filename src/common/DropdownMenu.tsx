@@ -57,19 +57,23 @@ const DropdownMenu = ({
         )}
       </TouchableBox>
       <Portal>
-        <Modal.Body ref={ref} adjustToContentHeight>
-          <Box
-            px={20}
-            pt={30}
-            pb={20}
-            center
-            borderColor="border"
-            borderBottomWidth={1}
-          >
-            <Text bold fontSize={20}>
-              {title}
-            </Text>
-          </Box>
+        <Modal.Body
+          ref={ref}
+          snapPoints={['40%']}
+          headerComponent={
+            <Box
+              px={20}
+              py={15}
+              center
+              borderColor="border"
+              borderBottomWidth={1}
+            >
+              <Text bold fontSize={20}>
+                {title}
+              </Text>
+            </Box>
+          }
+        >
           {choices.map(({ value, label, subLabel }) => (
             <Modal.Item
               key={value}

@@ -178,7 +178,7 @@ const HighlightsScreen = () => {
       <Modal.Body
         ref={ref}
         onClose={() => setIsSettingsOpen(undefined)}
-        adjustToContentHeight
+        enableDynamicSizing
       >
         <Modal.Item
           bold
@@ -208,7 +208,7 @@ const HighlightsScreen = () => {
       <Modal.Body
         ref={ref2}
         onClose={() => setIsChangeColorOpen(undefined)}
-        adjustToContentHeight
+        enableDynamicSizing
       >
         <Box row my={20} mx={20}>
           <TouchableCircle

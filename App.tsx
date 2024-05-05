@@ -31,7 +31,7 @@ LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  debug: __DEV__,
+  // debug: __DEV__,
   sampleRate: 0.5,
   ignoreErrors: ignoreSentryErrors,
 })

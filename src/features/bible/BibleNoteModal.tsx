@@ -30,6 +30,7 @@ import { useSetAtom } from 'jotai/react'
 import FabButton from '~common/ui/FabButton'
 import { multipleTagsModalAtom } from '../../state/app'
 import Fab from '~common/ui/Fab'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -153,6 +154,7 @@ ${currentNote?.description}
     <Modal.Body
       ref={ref}
       onClose={onClosed}
+      topInset={useSafeAreaInsets().top}
       headerComponent={
         <ModalHeader
           onClose={close}

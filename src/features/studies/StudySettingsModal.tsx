@@ -58,7 +58,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   }, [isOpen, open])
 
   return (
-    <Modal.Body ref={ref} onClose={onClosed} adjustToContentHeight withPortal>
+    <Modal.Body ref={ref} onClose={onClosed} enableDynamicSizing withPortal>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <Modal.Item
         onPress={() => {

@@ -66,7 +66,11 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           {headerComponent && (
             <BottomSheetView>{headerComponent}</BottomSheetView>
           )}
-          <BottomSheetScrollView>{children}</BottomSheetScrollView>
+          <BottomSheetScrollView
+            contentContainerStyle={{ paddingBottom: insets.bottom }}
+          >
+            {children}
+          </BottomSheetScrollView>
         </BottomSheet>
       </Wrapper>
     )
