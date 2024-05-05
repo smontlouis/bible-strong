@@ -77,7 +77,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
-    '@react-native-firebase/crashlytics',
     '@notifee/react-native',
     [
       'expo-build-properties',
@@ -107,6 +106,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-document-picker',
       {
         iCloudContainerEnvironment: 'Production',
+      },
+    ],
+    [
+      '@sentry/react-native/expo',
+      {
+        organization: 'sevn-apps',
+        project: 'bible-strong',
       },
     ],
   ],

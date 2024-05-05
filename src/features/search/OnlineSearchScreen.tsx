@@ -3,14 +3,13 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Configure, InstantSearch } from 'react-instantsearch-native'
 import useLanguage from '~helpers/useLanguage'
-import { algoliaConfig } from '../../../config'
 import Filters from './Filters'
 import SearchBox from './SearchBox'
 import SearchResults from './SearchResults'
 
 const searchClient = algoliasearch(
-  algoliaConfig.applicationId,
-  algoliaConfig.apiKey
+  process.env.EXPO_PUBLIC_ALGOLIA_APP_ID || '',
+  process.env.EXPO_PUBLIC_ALGOLIA_API_KEY || ''
 )
 
 interface SearchScreenProps {

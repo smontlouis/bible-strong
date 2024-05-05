@@ -14,8 +14,9 @@
 - [x] overlay color drawerLayout
 - [x] fix apple login
 - [x] Fix StatusBar
-- [ ] migrate to gorhom/bottom-sheet
+- [x] migrate to gorhom/bottom-sheet
+- [x] Configure sentry CORRECTLY
+- [x] Crashlytics makes app crash - remove it
 - [ ] remove all other modal libs
 - [ ] check ios / android certificate / keys
 - [ ] Tester sur Android
-- [ ] Crashlytics makes app crash

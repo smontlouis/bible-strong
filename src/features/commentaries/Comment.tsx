@@ -19,7 +19,6 @@ import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
-import { deepl } from '../../../config'
 import { Comment as CommentProps, EGWComment } from './types'
 
 const findBookNumber = (bookName: string) => {
@@ -53,7 +52,9 @@ const useFrenchTranslation = (id: string) => {
         return
       }
 
-      const data = `auth_key=${deepl.auth_key}&text=${encodeURIComponent(
+      const data = `auth_key=${
+        process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY
+      }&text=${encodeURIComponent(
         text
       )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
 

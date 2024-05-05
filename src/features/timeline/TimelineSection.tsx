@@ -1,10 +1,10 @@
+import BottomSheet from '@gorhom/bottom-sheet'
 import algoliasearch from 'algoliasearch/lite'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { InstantSearch } from 'react-instantsearch-native'
 import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import useLanguage from '~helpers/useLanguage'
-import { algoliaConfig } from '../../../config'
 import CurrentSectionImage from './CurrentSectionImage'
 import CurrentYear from './CurrentYear'
 import Datebar from './Datebar'
@@ -23,11 +23,9 @@ import {
   TimelineEvent as TimelineEventProps,
   TimelineSection as TimelineSectionProps,
 } from './types'
-import { Portal } from '@gorhom/portal'
-import BottomSheet from '@gorhom/bottom-sheet'
 const searchClient = algoliasearch(
-  algoliaConfig.applicationId,
-  algoliaConfig.apiKey
+  process.env.EXPO_PUBLIC_ALGOLIA_APP_ID || '',
+  process.env.EXPO_PUBLIC_ALGOLIA_API_KEY || ''
 )
 
 interface Props extends TimelineSectionProps {

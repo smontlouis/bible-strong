@@ -122,3 +122,5 @@ RNTester/Pods/*
 
 android/
 ios/
+
+.env

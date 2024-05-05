@@ -148,6 +148,5 @@ export const checkForDatabase = async (
   const filesToRemove = filesInDir.filter(
     f => f.startsWith(dbName.replace('.sqlite', '')) && f !== dbName
   )
-  console.log('removing...', filesToRemove)
   filesToRemove.map(f => FileSystem.deleteAsync(`${sqliteDirPath}/${f}`))
 }

@@ -8,16 +8,16 @@ import React, { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
 import { persistor, store } from '~redux/store'
 import remoteConfig from '@react-native-firebase/remote-config'
-import * as FileSystem from 'expo-file-system'
+import * as Sentry from '@sentry/react-native'
 
 import { setI18n } from './i18n'
 import InitApp from './InitApp'
 import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 import { checkDatabasesStorage } from '~helpers/sqlite'
+import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -29,11 +29,12 @@ SplashScreen.preventAutoHideAsync()
 setAutoFreeze(false)
 LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
-if (!__DEV__) {
-  Sentry.init({
-    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
-  })
-}
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: __DEV__,
+  sampleRate: 0.5,
+  ignoreErrors: ignoreSentryErrors,
+})
 
 const loadResourcesAsync = async () => {
   return Promise.all([
@@ -136,4 +137,4 @@ const InitAppWrapper = memo(() => {
   )
 })
 
-export default App
+export default Sentry.wrap(App)
