@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app'
+import { initializeApp } from '@react-native-firebase/app'
 import { Platform } from 'react-native'
 
 // Optionally import the services that you want to use

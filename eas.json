@@ -17,7 +17,7 @@
         "BUNDLE_IDENTIFIER": "com.smontlouis.biblestrong.dev"
       }
     },
-    "preview": {
+    "staging": {
       "distribution": "internal",
       "env": {
         "APP_NAME": "staging - Bible Strong",
