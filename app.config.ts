@@ -14,18 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
-  assetBundlePatterns: [
-    'assets/images/*',
-    'src/assets/fonts/*',
-    'src/assets/images/*',
-    'src/assets/plans/*',
-    'src/assets/bible_versions/*',
-    'src/assets/timeline/*',
-    'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf',
-    'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf',
-    'src/features/bible/bibleWebView/dist/index.html',
-    'src/features/studies/studiesWebView/dist/index.html',
-  ],
+
   android: {
     versionCode: 374,
     package: 'com.smontlouis.biblestrong',
@@ -119,6 +108,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     eas: {
       projectId: 'fdf72b90-346b-11e9-ad9a-255491359311',
+    },
+    updates: {
+      assetPatternsToBeBundled: [
+        'assets/images/*',
+        'src/assets/fonts/*',
+        'src/assets/images/*',
+        'src/assets/plans/*',
+        'src/assets/bible_versions/*',
+        'src/assets/timeline/*',
+        'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf',
+        'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf',
+        'src/features/bible/bibleWebView/dist/index.html',
+        'src/features/studies/studiesWebView/dist/index.html',
+      ],
     },
   },
 })

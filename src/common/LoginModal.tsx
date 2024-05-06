@@ -24,24 +24,16 @@ const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
   const { t } = useTranslation()
   const ref = useRef<BottomSheet>(null)
 
-  useEffect(() => {
-    if (isVisible) {
-      ref.current?.expand()
-    } else {
-      ref.current?.close()
-    }
-  }, [isVisible])
-
   return (
     <BottomSheet
       ref={ref}
-      index={-1}
+      index={isVisible ? 0 : -1}
       snapPoints={['100%']}
       topInset={useSafeAreaInsets().top}
       backdropComponent={renderBackdrop}
       {...useBottomSheetStyles()}
     >
-      <BottomSheetScrollView>
+      <BottomSheetScrollView contentContainerStyle={{ padding: 20 }}>
         <Box row alignItems="center" marginBottom={30}>
           <Back style={{ marginRight: 15 }}>
             <FeatherIcon name="arrow-left" size={25} />

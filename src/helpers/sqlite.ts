@@ -98,6 +98,7 @@ export const initSQLiteDir = async () => {
 }
 
 export const checkDatabasesStorage = async () => {
+  await initSQLiteDir()
   const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
   const dir = await FileSystem.readDirectoryAsync(sqliteDirPath)
 

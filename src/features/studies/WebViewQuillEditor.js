@@ -3,19 +3,19 @@ import { withNavigation } from 'react-navigation'
 import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
-import * as AssetUtils from 'expo-asset-utils'
+import { Asset } from 'expo-asset'
 import * as Sentry from '@sentry/react-native'
 
 import books from '~assets/bible_versions/books-desc'
 import literata from '~assets/fonts/literata'
 import StudyFooter from './StudyFooter'
 import i18n from '~i18n'
+import studiesHTML from './studiesWebView/studiesHTML'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef()
 
   state = {
-    isHTMLFileLoaded: false,
     isKeyboardOpened: false,
     activeFormats: {},
   }
@@ -33,17 +33,6 @@ class WebViewQuillEditor extends React.Component {
         this.setState({ isKeyboardOpened: false })
       ),
     ]
-
-    this.loadHTMLFile()
-  }
-
-  loadHTMLFile = async () => {
-    const { localUri } = await AssetUtils.resolveAsync(
-      require('~features/studies/studiesWebView/dist/index.html')
-    )
-    this.HTMLFile = await FileSystem.readAsStringAsync(localUri || '')
-
-    this.setState({ isHTMLFileLoaded: true })
   }
 
   componentDidUpdate(prevProps) {
@@ -248,10 +237,6 @@ class WebViewQuillEditor extends React.Component {
   }
 
   render = () => {
-    if (!this.state.isHTMLFileLoaded) {
-      return null
-    }
-
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -269,7 +254,7 @@ class WebViewQuillEditor extends React.Component {
           onMessage={this.handleMessage}
           originWhitelist={['*']}
           ref={this.webViewRef}
-          source={{ html: this.HTMLFile }}
+          source={{ html: studiesHTML }}
           injectedJavaScript={this.injectFont()}
           domStorageEnabled
           allowUniversalAccessFromFileURLs
