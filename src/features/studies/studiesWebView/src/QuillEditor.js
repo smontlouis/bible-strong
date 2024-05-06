@@ -41,7 +41,7 @@ export default class ReactQuillEditor extends React.Component {
       delta: this.quill.getContents(),
       deltaChange: delta,
       deltaOld: oldDelta,
-      changeSource: source
+      changeSource: source,
     })
   }
 
@@ -76,7 +76,7 @@ export default class ReactQuillEditor extends React.Component {
     })
   }
 
-  loadEditor = ({ fontFamily }) => {
+  loadEditor = ({ fontFamily, language }) => {
     dispatchConsole(fontFamily)
     document.getElementById('editor').style.fontFamily = fontFamily
     this.quill = new Quill('#editor', {
@@ -85,10 +85,11 @@ export default class ReactQuillEditor extends React.Component {
         toolbar: BROWSER_TESTING_ENABLED,
         'inline-verse': true,
         'block-verse': true,
-        format: true
+        format: true,
       },
-      placeholder: 'Créer votre étude...',
-      readOnly: true
+      placeholder:
+        language === 'fr' ? 'Créer votre étude...' : 'Create your study...',
+      readOnly: true,
     })
 
     dispatchConsole('loading editor')
@@ -97,7 +98,7 @@ export default class ReactQuillEditor extends React.Component {
     dispatchConsole('editor initialized')
     dispatch('EDITOR_LOADED', {
       type: 'success',
-      delta: this.quill.getContents()
+      delta: this.quill.getContents(),
     })
     this.addTextChangeEventToEditor()
   }

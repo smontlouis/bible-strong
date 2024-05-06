@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { offset } from './constants'
+import { useTranslation } from 'react-i18next'
 
 const Datebar = ({
   width,
@@ -21,6 +22,7 @@ const Datebar = ({
   color: string
 }) => {
   const [values, setValues] = React.useState<number[]>([])
+  const { t } = useTranslation()
 
   React.useEffect(() => {
     const array = []
@@ -56,7 +58,7 @@ const Datebar = ({
         >
           <Box p={5} borderRadius={3} mb={3}>
             <Text color={color} title fontWeight="bold" fontSize={10}>
-              {value < 2020 ? Math.abs(value) : 'Futur'}
+              {value < 2020 ? Math.abs(value) : t('Futur')}
             </Text>
           </Box>
         </Box>

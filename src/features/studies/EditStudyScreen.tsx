@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import generateUUID from '~helpers/generateUUID'
 
+import { useSetAtom } from 'jotai/react'
+import { useTranslation } from 'react-i18next'
 import { NavigationStackProp } from 'react-navigation-stack'
-import MultipleTagsModal from '~common/MultipleTagsModal'
 import { StudyNavigateBibleType } from '~common/types'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
@@ -12,7 +13,6 @@ import { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudyTitlePrompt from './StudyTitlePrompt'
-import { useAtom, useSetAtom } from 'jotai/react'
 import { openedFromTabAtom } from './atom'
 
 type WithStudyProps = {
@@ -28,6 +28,7 @@ const withStudy = (
 ): React.ComponentType<WithStudyProps> => ({ navigation, ...props }) => {
   const dispatch = useDispatch()
   const [studyId, setStudyId] = useState('')
+  const { t } = useTranslation()
 
   let studyIdParam = navigation.getParam('studyId')
   let canEdit = navigation.getParam('canEdit')
@@ -47,7 +48,7 @@ const withStudy = (
       dispatch(
         updateStudy({
           id: studyUuid,
-          title: 'Document sans Titre',
+          title: t('Document sans titre'),
           content: null,
           created_at: Date.now(),
           modified_at: Date.now(),

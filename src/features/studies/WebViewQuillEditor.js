@@ -9,6 +9,7 @@ import * as Sentry from '@sentry/react-native'
 import books from '~assets/bible_versions/books-desc'
 import literata from '~assets/fonts/literata'
 import StudyFooter from './StudyFooter'
+import i18n from '~i18n'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef()
@@ -218,6 +219,7 @@ class WebViewQuillEditor extends React.Component {
     const { fontFamily } = this.props
     this.dispatchToWebView('LOAD_EDITOR', {
       fontFamily,
+      language: i18n.language,
     })
   }
 
