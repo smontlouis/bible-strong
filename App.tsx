@@ -1,5 +1,6 @@
 import * as Icon from '@expo/vector-icons'
 import analytics from '@react-native-firebase/analytics'
+import * as Sentry from '@sentry/react-native'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
@@ -9,15 +10,13 @@ import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import { persistor, store } from '~redux/store'
-import remoteConfig from '@react-native-firebase/remote-config'
-import * as Sentry from '@sentry/react-native'
 
-import { setI18n } from './i18n'
+import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
+import { checkDatabasesStorage } from '~helpers/sqlite'
 import InitApp from './InitApp'
+import { setI18n } from './i18n'
 import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
-import { checkDatabasesStorage } from '~helpers/sqlite'
-import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
@@ -67,24 +66,6 @@ const useAppLoad = () => {
           screen_class: 'Bible',
           screen_name: 'Bible',
         })
-      }
-    })()
-  }, [])
-
-  useEffect(() => {
-    ;(async () => {
-      await remoteConfig().setDefaults({
-        enable_tts_public: false,
-        apple_reviewing: false,
-      })
-      const fetchedRemotely = await remoteConfig().fetchAndActivate()
-
-      if (fetchedRemotely) {
-        console.log('Configs were retrieved from the backend and activated.')
-      } else {
-        console.log(
-          'No configs were fetched from the backend, and the local configs were already activated'
-        )
       }
     })()
   }, [])
