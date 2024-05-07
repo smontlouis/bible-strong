@@ -1,19 +1,19 @@
 import React from 'react'
 
-import TimelineItem from './TimelineItem'
-import Container from '~common/ui/Container'
-import Header from '~common/Header'
-import ScrollView from '~common/ui/ScrollView'
-import Link from '~common/Link'
-import { FeatherIcon } from '~common/ui/Icon'
-import { Modalize } from 'react-native-modalize'
-import TimelineHomeDetailModal from './TimelineHomeDetailModal'
+import BottomSheet from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
+import Header from '~common/Header'
+import Link from '~common/Link'
+import Container from '~common/ui/Container'
+import { FeatherIcon } from '~common/ui/Icon'
+import ScrollView from '~common/ui/ScrollView'
 import { useQuery } from '~helpers/react-query-lite'
+import TimelineHomeDetailModal from './TimelineHomeDetailModal'
+import TimelineItem from './TimelineItem'
 import { getEvents } from './events'
 
 const TimelineHomeScreen = () => {
-  const modalRef = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
   const { t } = useTranslation()
 
   const { data: events } = useQuery({
@@ -27,7 +27,7 @@ const TimelineHomeScreen = () => {
         hasBackButton
         title={t('La Chronologie biblique')}
         rightComponent={
-          <Link paddingSmall onPress={() => modalRef.current?.open()}>
+          <Link paddingSmall onPress={() => modalRef.current?.expand()}>
             <FeatherIcon name="info" size={20} />
           </Link>
         }

@@ -34,6 +34,7 @@ xcuserdata
 DerivedData
 *.hmap
 *.ipa
+*.aab
 *.xcuserstate
 project.xcworkspace
 ios/build/
@@ -119,3 +120,8 @@ RNTester/Pods/*
 # Visual studio
 .vscode
 .vs
+
+android/
+ios/
+
+.env

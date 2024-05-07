@@ -16,7 +16,7 @@ import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
@@ -35,7 +35,7 @@ const ResourcesModal = ({
   isSelectionMode,
 }: Props) => {
   const { t } = useTranslation()
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
   const openInNewTab = useOpenInNewTab()
   const bible = useAtomValue(bibleAtom)
 
@@ -109,7 +109,7 @@ const ResourcesModal = ({
   return (
     <Modal.Body
       ref={ref}
-      HeaderComponent={
+      headerComponent={
         <ModalHeader
           title={title}
           subTitle={getSubtitleByResourceType()}
@@ -117,14 +117,13 @@ const ResourcesModal = ({
           onClose={close}
         />
       }
-      FooterComponent={
+      footerComponent={() => (
         <ResourcesModalFooter
           resourceType={resourceType}
           onChangeResourceType={onChangeResourceType}
         />
-      }
-      onClosed={() => onChangeResourceType(null)}
-      modalRef={ref}
+      )}
+      onClose={() => onChangeResourceType(null)}
     >
       {resourceType && (
         <Resource

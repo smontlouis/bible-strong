@@ -10,13 +10,14 @@ import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import useFuzzy from '~helpers/useFuzzy'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { hp } from '~helpers/utils'
 import { addTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import Modal from './Modal'
 import SearchInput from './SearchInput'
 import Spacer from './ui/Spacer'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -25,7 +26,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   const [newTag, setNewTag] = useState('')
-  const { ref, open } = useModalize()
+  const { ref, open } = useBottomSheet()
 
   // Refactor this
   useEffect(() => {
@@ -49,11 +50,14 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
     setNewTag('')
   }
 
+  const insets = useSafeAreaInsets()
+
   return (
     <Modal.Body
       ref={ref}
       onClose={onClosed}
-      HeaderComponent={
+      withPortal
+      headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>{t('Étiquettes')}</Text>
           <Spacer />
@@ -66,8 +70,15 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
           />
         </Box>
       }
-      FooterComponent={
-        <Box row center marginBottom={10} marginLeft={20} marginRight={20}>
+      footerComponent={() => (
+        <Box
+          paddingBottom={insets.bottom}
+          row
+          center
+          marginBottom={10}
+          marginLeft={20}
+          marginRight={20}
+        >
           <Box flex>
             <TextInput
               placeholder={t('Créer un nouveau tag')}
@@ -81,27 +92,23 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
             <StyledIcon isDisabled={!newTag} name="check" size={30} />
           </TouchableOpacity>
         </Box>
-      }
-      modalHeight={hp(80, 600)}
+      )}
+      snapPoints={['50%']}
     >
-      <Box flex>
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-          <Box row wrap>
-            <Chip
-              label={t('Tout')}
-              isSelected={!selectedChip}
-              onPress={() => onSelected(null)}
-            />
-            {result.map(chip => (
-              <Chip
-                key={chip.id}
-                label={chip.name}
-                isSelected={selectedChip && chip.name === selectedChip.name}
-                onPress={() => onSelected(chip)}
-              />
-            ))}
-          </Box>
-        </ScrollView>
+      <Box row wrap p={20}>
+        <Chip
+          label={t('Tout')}
+          isSelected={!selectedChip}
+          onPress={() => onSelected(null)}
+        />
+        {result.map(chip => (
+          <Chip
+            key={chip.id}
+            label={chip.name}
+            isSelected={selectedChip && chip.name === selectedChip.name}
+            onPress={() => onSelected(chip)}
+          />
+        ))}
       </Box>
     </Modal.Body>
   )

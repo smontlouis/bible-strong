@@ -1,26 +1,28 @@
 import React from 'react'
 import Animated, {
-  Extrapolate,
-  interpolateNode,
-  multiply,
+  Extrapolation,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  useDerivedValue,
 } from 'react-native-reanimated'
 
-import Box from '~common/ui/Box'
+import BottomSheet from '@gorhom/bottom-sheet'
+import { Image } from 'expo-image'
 import Link from '~common/Link'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { offset, rowToPx, calculateLabel } from './constants'
-import FastImage from 'react-native-fast-image'
-import { TimelineEvent as TimelineEventProps } from './types'
-import { Modalize } from 'react-native-modalize'
 import useLanguage from '~helpers/useLanguage'
+import { calculateLabel, offset, rowToPx } from './constants'
+import { TimelineEvent as TimelineEventProps } from './types'
 
 const AnimatedBox = Animated.createAnimatedComponent(Box)
 const LinkBox = Box.withComponent(Link)
 
 interface Props extends TimelineEventProps {
-  x: Animated.Node<number>
+  x: SharedValue<number>
   yearsToPx: (years: number) => number
-  eventModalRef: React.RefObject<Modalize>
+  eventModalRef: React.RefObject<BottomSheet>
   setEvent: (event: Partial<TimelineEventProps>) => void
   calculateEventWidth: (
     yearStart: number,
@@ -58,9 +60,22 @@ const TimelineEvent = ({
   const label = calculateLabel(start, end)
 
   const onOpenEvent = () => {
-    eventModalRef.current?.open()
+    eventModalRef.current?.expand()
     setEvent({ slug, title, titleEn, image, start, end })
   }
+
+  const posX = useDerivedValue(() => {
+    return interpolate(
+      x.value * -1,
+      [left + offset, left + width + offset - descSize - imageSize],
+      [0, width - descSize - imageSize],
+      Extrapolation.CLAMP
+    )
+  })
+
+  const styles = useAnimatedStyle(() => ({
+    transform: [{ translateX: posX.value }],
+  }))
 
   if (type === 'minor') {
     return (
@@ -93,12 +108,6 @@ const TimelineEvent = ({
     )
   }
 
-  const posX = interpolateNode(multiply(x, -1), {
-    inputRange: [left + offset, left + width + offset - descSize - imageSize],
-    outputRange: [0, width - descSize - imageSize],
-    extrapolate: Extrapolate.CLAMP,
-  })
-
   return (
     <LinkBox
       onPress={onOpenEvent}
@@ -119,9 +128,7 @@ const TimelineEvent = ({
         py={6}
         center
         justifyContent="space-around"
-        style={{
-          transform: [{ translateX: posX }],
-        }}
+        style={styles}
       >
         <Text fontSize={12} numberOfLines={2}>
           {isFR ? title : titleEn}
@@ -137,7 +144,7 @@ const TimelineEvent = ({
         borderTopRightRadius={10}
         borderBottomRightRadius={10}
       >
-        <FastImage
+        <Image
           style={{ width: imageSize, height: '100%' }}
           source={{
             uri: image,

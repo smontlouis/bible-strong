@@ -1,23 +1,32 @@
 import React from 'react'
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+} from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
-import Animated, { interpolateNode, Extrapolate } from 'react-native-reanimated'
-import { wp } from '~helpers/utils'
-import { ShallowTimelineSection } from './types'
+import { wpUI } from '~helpers/utils'
 import SectionImage from './SectionImage'
+import { ShallowTimelineSection } from './types'
 
 interface Props {
-  x: Animated.Value<number>
+  x: Animated.SharedValue<number>
   prevEvent: ShallowTimelineSection
 }
 
 const PrevSectionImage = ({ x, prevEvent }: Props) => {
-  const opacity = interpolateNode(x, {
-    inputRange: [0, wp(100)],
-    outputRange: [0, 1],
-    extrapolate: Extrapolate.CLAMP,
+  const style = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      x.value,
+      [0, wpUI(100)],
+      [0, 1],
+      Extrapolation.CLAMP
+    )
+    return { opacity }
   })
+
   return (
-    <AnimatedBox absoluteFill style={{ opacity }}>
+    <AnimatedBox absoluteFill style={style}>
       <SectionImage direction="previous" {...prevEvent} />
     </AnimatedBox>
   )

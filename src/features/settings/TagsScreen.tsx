@@ -18,7 +18,7 @@ import FlatList from '~common/ui/FlatList'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useFuzzy from '~helpers/useFuzzy'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 
@@ -119,7 +119,7 @@ const TagsScreen = () => {
     keys: ['name'],
   })
   const dispatch = useDispatch()
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   useEffect(() => {
     if (isOpen) {
@@ -172,11 +172,7 @@ const TagsScreen = () => {
         />
       )}
 
-      <Modal.Body
-        ref={ref}
-        onClose={() => setOpen(false)}
-        adjustToContentHeight
-      >
+      <Modal.Body ref={ref} onClose={() => setOpen(false)} enableDynamicSizing>
         <Modal.Item
           bold
           onPress={() => {

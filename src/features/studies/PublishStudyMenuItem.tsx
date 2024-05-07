@@ -1,4 +1,3 @@
-import Clipboard from '@react-native-community/clipboard'
 import to from 'await-to-js'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +19,7 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useConnection from '~helpers/useConnection'
 import { publishStudy, Study } from '~redux/modules/user'
+import Clipboard from '@react-native-clipboard/clipboard'
 
 interface Props {
   study: Study

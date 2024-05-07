@@ -1,45 +1,40 @@
 import React from 'react'
-import { Modalize } from 'react-native-modalize'
-import { useTheme } from '@emotion/react'
 
-import { Theme } from '~themes'
-import { TimelineEvent as TimelineEventProps } from './types'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 import EventDetails from './EventDetails'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import { TimelineEvent as TimelineEventProps } from './types'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
-  modalRef: React.RefObject<Modalize>
-  HeaderComponent?: React.ReactNode
-  FooterComponent?: React.ReactNode
+  modalRef: React.RefObject<BottomSheet>
   event: Partial<TimelineEventProps>
 }
 
 const EventDetailsModal = ({
   modalRef,
-  FooterComponent,
-  HeaderComponent,
+
   event,
 }: Props) => {
-  const theme: Theme = useTheme()
+  const bottomSheetStyles = useBottomSheetStyles()
 
   return (
-    <Modalize
+    <BottomSheet
       ref={modalRef}
-      modalTopOffset={getStatusBarHeight()}
-      handlePosition="inside"
-      // snapPoint={400}
-      modalStyle={{
-        backgroundColor: theme.colors.lightGrey,
-        maxWidth: 600,
-        width: '100%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      }}
-      FooterComponent={FooterComponent}
-      HeaderComponent={HeaderComponent}
+      index={-1}
+      enablePanDownToClose
+      snapPoints={['100%']}
+      backdropComponent={renderBackdrop}
+      topInset={useSafeAreaInsets().top + 56}
+      {...bottomSheetStyles}
     >
-      <EventDetails {...event} />
-    </Modalize>
+      <BottomSheetScrollView>
+        <EventDetails {...event} />
+      </BottomSheetScrollView>
+    </BottomSheet>
   )
 }
 

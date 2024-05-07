@@ -1,5 +1,5 @@
 import React from 'react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { TAB_ICON_SIZE } from '../utils/constants'
@@ -13,7 +13,7 @@ const BackBottomTabBar = ({ onClose, direction }: BackBottomTabBarProps) => {
   return (
     <Box
       row
-      pb={getBottomSpace()}
+      pb={useSafeAreaInsets().bottom}
       bg="reverse"
       px={20}
       alignItems="center"

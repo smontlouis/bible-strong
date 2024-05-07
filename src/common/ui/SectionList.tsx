@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react'
-import { View, SectionListProps } from 'react-native'
 import styled from '@emotion/native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import React, { useMemo } from 'react'
+import { SectionListProps, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 import { Theme } from '~themes'
 
@@ -39,10 +39,10 @@ const SectionList = styled.SectionList(
 export default React.forwardRef(
   ({ contentContainerStyle, ...props }: SectionListProps<any>, ref) => {
     const orientation = useDeviceOrientation()
-
+    const insets = useSafeAreaInsets()
     const style = useMemo(
       () => ({
-        paddingBottom: 10 + getBottomSpace(),
+        paddingBottom: 10 + insets.bottom,
         ...contentContainerStyle,
       }),
       []

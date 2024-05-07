@@ -1,9 +1,9 @@
+import BottomSheet from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
+import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import FastImage from 'react-native-fast-image'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import { Modalize } from 'react-native-modalize'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NavigationParams, withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { useDispatch, useSelector } from 'react-redux'
@@ -31,20 +31,21 @@ const ExplorePlanItem = ({
   featured,
 }: OnlinePlan & { navigation: NavigationStackProp<any, NavigationParams> }) => {
   const { t } = useTranslation()
-  const modalRef = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
   const planImage = useFireStorage(image)
   const dispatch = useDispatch()
   const hasAlreadyStarted = useSelector(
     (state: RootState) => !!state.plan.myPlans.find(p => id === p.id)
   )
   const [isLoading, setIsLoading] = React.useState(false)
+  const insets = useSafeAreaInsets()
   const r = useMediaQueriesArray()
   const height = r([70, 70, 150, 200])
   const featuredHeight = r([150, 150, 250, 250])
 
   return (
     <Box width={featured ? '100%' : '50%'}>
-      <Link onPress={() => modalRef?.current?.open()}>
+      <Link onPress={() => modalRef?.current?.expand()}>
         <Box
           bg="reverse"
           lightShadow
@@ -59,7 +60,7 @@ const ExplorePlanItem = ({
             backgroundColor="lightGrey"
             borderRadius={15}
           >
-            <FastImage
+            <Image
               style={{
                 width: '100%',
                 height: featured ? featuredHeight : height,
@@ -97,9 +98,9 @@ const ExplorePlanItem = ({
           author={author}
           downloads={downloads}
           description={description}
-          FooterComponent={
+          footerComponent={() => (
             <Box
-              paddingBottom={10 + getBottomSpace()}
+              paddingBottom={10 + insets.bottom}
               paddingHorizontal={20}
               paddingTop={10}
             >
@@ -134,7 +135,7 @@ const ExplorePlanItem = ({
                   : t('Démarrer ce plan')}
               </Button>
             </Box>
-          }
+          )}
         />
       </Portal>
     </Box>

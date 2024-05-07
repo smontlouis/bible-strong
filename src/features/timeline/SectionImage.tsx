@@ -1,12 +1,12 @@
 import React from 'react'
 
-import { ShallowTimelineSection } from './types'
+import { Image } from 'expo-image'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import FastImage from 'react-native-fast-image'
-import { wp } from '~helpers/utils'
 import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { wp } from '~helpers/utils'
+import { ShallowTimelineSection } from './types'
 
 const width = wp(50, 500)
 
@@ -48,7 +48,7 @@ const SectionImage = ({
           <Box height={2} bg="default" />
         </Box>
         <Box row width={width} mt={50} lightShadow borderRadius={10}>
-          <FastImage
+          <Image
             style={{ width, height: width, borderRadius: 10 }}
             source={{
               uri: image,

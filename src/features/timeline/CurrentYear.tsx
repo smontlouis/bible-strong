@@ -1,21 +1,21 @@
 import React from 'react'
-import { ReText } from 'react-native-redash'
-import Animated, {
-  interpolateNode,
-  Extrapolate,
-  multiply,
-  concat,
-  round,
+import {
+  Extrapolation,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  useDerivedValue,
 } from 'react-native-reanimated'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { ReText } from 'react-native-redash'
 
-import Box, { AnimatedBox } from '~common/ui/Box'
-import Link from '~common/Link'
-import { offset } from './constants'
-import { FeatherIcon } from '~common/ui/Icon'
-import { wp } from '~helpers/utils'
 import { Platform } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Link from '~common/Link'
+import Box, { AnimatedBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { wp, wpUI } from '~helpers/utils'
+import { offset } from './constants'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -30,9 +30,9 @@ const CurrentYear = ({
   nextColor,
   prevColor,
 }: {
-  year: Animated.Node<string>
-  x: Animated.Value<number>
-  lineX: Animated.Node<number>
+  year: SharedValue<string>
+  x: SharedValue<number>
+  lineX: SharedValue<number>
   color: string
   width: number
   onPrev: () => void
@@ -41,22 +41,23 @@ const CurrentYear = ({
   nextColor?: string
 }) => {
   const r = useMediaQueriesArray()
-  const progressInSection = concat(
-    round(
-      interpolateNode(multiply(-1, x), {
-        inputRange: [0, width - wp(100)],
-        outputRange: [0, 100],
-        extrapolate: Extrapolate.CLAMP,
-      })
-    ),
-    '%'
-  )
+  const progressInSection = useDerivedValue(() => {
+    const progress = interpolate(
+      x.value * -1,
+      [0, width - wpUI(100)],
+      [0, 100],
+      Extrapolation.CLAMP
+    )
+    return Math.round(progress)
+  })
 
   return (
     <AnimatedBox
-      style={{ transform: [{ translateX: lineX }] }}
+      style={useAnimatedStyle(() => ({
+        transform: [{ translateX: lineX.value }],
+      }))}
       pos="absolute"
-      bottom={getBottomSpace()}
+      bottom={useSafeAreaInsets().bottom}
       left={0}
       right={0}
       height={r([30, 40, 60, 60])}
@@ -130,9 +131,9 @@ const CurrentYear = ({
         b={0}
         bg={color}
         height={3}
-        style={{
-          width: progressInSection,
-        }}
+        style={useAnimatedStyle(() => ({
+          width: `${progressInSection.value}%`,
+        }))}
       />
     </AnimatedBox>
   )

@@ -24,6 +24,7 @@ import useLanguage from '~helpers/useLanguage'
 import { hp, wp } from '~helpers/utils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
+import { View } from 'react-native'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -198,10 +199,7 @@ const DictionnaireVerseDetailScreen = ({
   }
 
   return (
-    <StyledScrollView
-      contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
-      scrollIndicatorInsets={{ right: 1 }}
-    >
+    <View style={{ paddingBottom: 20, minHeight: hp(75) }}>
       <Box flex>
         <Box background paddingTop={10}>
           <StyledVerse>
@@ -268,7 +266,7 @@ const DictionnaireVerseDetailScreen = ({
           )}
         </Box>
       </Box>
-    </StyledScrollView>
+    </View>
   )
 }
 

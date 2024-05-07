@@ -3,7 +3,7 @@ import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
-import { getStaticUrl } from '~helpers/firebase'
+import { cdnUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 
 import { useAtom } from 'jotai/react'
@@ -467,7 +467,7 @@ export const useFireStorage = (src?: string) => {
       }
 
       try {
-        const uri = getStaticUrl(`images/${src}.png`)
+        const uri = cdnUrl(`images/${src}.png`)
         setImageUrl(uri)
         dispatch(cacheImage({ id: src, value: uri }))
       } catch (e) {

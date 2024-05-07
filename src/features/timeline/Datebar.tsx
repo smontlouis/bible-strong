@@ -1,9 +1,10 @@
 import React from 'react'
+import { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { offset } from './constants'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-import Animated from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 
 const Datebar = ({
   width,
@@ -13,7 +14,7 @@ const Datebar = ({
   interval,
   color,
 }: {
-  x: Animated.Value<number>
+  x: SharedValue<number>
   width: number
   startYear: number
   endYear: number
@@ -21,6 +22,7 @@ const Datebar = ({
   color: string
 }) => {
   const [values, setValues] = React.useState<number[]>([])
+  const { t } = useTranslation()
 
   React.useEffect(() => {
     const array = []
@@ -35,13 +37,16 @@ const Datebar = ({
       row
       pos="absolute"
       l={0}
-      b={getBottomSpace()}
+      b={useSafeAreaInsets().bottom}
       width={width}
       height={25}
       paddingLeft={offset}
       bg="reverse"
       lightShadow
-      style={{ transform: [{ translateX: x }], elevation: 0 }}
+      style={useAnimatedStyle(() => ({
+        transform: [{ translateX: x.value }],
+        elevation: 0,
+      }))}
     >
       {values.map(value => (
         <Box
@@ -53,7 +58,7 @@ const Datebar = ({
         >
           <Box p={5} borderRadius={3} mb={3}>
             <Text color={color} title fontWeight="bold" fontSize={10}>
-              {value < 2020 ? Math.abs(value) : 'Futur'}
+              {value < 2020 ? Math.abs(value) : t('Futur')}
             </Text>
           </Box>
         </Box>

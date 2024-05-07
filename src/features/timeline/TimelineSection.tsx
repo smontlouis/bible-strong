@@ -1,34 +1,31 @@
+import BottomSheet from '@gorhom/bottom-sheet'
+import algoliasearch from 'algoliasearch/lite'
 import React from 'react'
-import ScrollView from './ScrollView'
+import { InstantSearch } from 'react-instantsearch-native'
+import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
-import { useTimeline } from './timeline.hooks'
+import useLanguage from '~helpers/useLanguage'
+import CurrentSectionImage from './CurrentSectionImage'
+import CurrentYear from './CurrentYear'
+import Datebar from './Datebar'
+import EventDetailsModal from './EventDetailsModal'
+import Line from './Line'
+import NextSectionImage from './NextSectionImage'
+import PrevSectionImage from './PrevSectionImage'
+import ScrollView from './ScrollView'
+import SearchInTimelineModal from './SearchInTimelineModal'
+import SectionDetailsModal from './SectionDetailsModal'
 import TimelineEvent from './TimelineEvent'
+import TimelineHeader from './TimelineHeader'
+import { useTimeline } from './timeline.hooks'
 import {
-  TimelineSection as TimelineSectionProps,
   ShallowTimelineSection,
   TimelineEvent as TimelineEventProps,
+  TimelineSection as TimelineSectionProps,
 } from './types'
-import CurrentYear from './CurrentYear'
-import PrevSectionImage from './PrevSectionImage'
-import NextSectionImage from './NextSectionImage'
-import { Value, useCode, debug } from 'react-native-reanimated'
-import TimelineHeader from './TimelineHeader'
-import Line from './Line'
-import Datebar from './Datebar'
-import CurrentSectionImage from './CurrentSectionImage'
-import { Modalize } from 'react-native-modalize'
-import SectionDetailsModal from './SectionDetailsModal'
-import EventDetailsModal from './EventDetailsModal'
-import { useValues } from 'react-native-redash'
-import SearchInTimelineModal from './SearchInTimelineModal'
-import algoliasearch from 'algoliasearch/lite'
-import { InstantSearch } from 'react-instantsearch-native'
-import { algoliaConfig } from '../../../config'
-import useLanguage from '~helpers/useLanguage'
-import { useTranslation } from 'react-i18next'
 const searchClient = algoliasearch(
-  algoliaConfig.applicationId,
-  algoliaConfig.apiKey
+  process.env.EXPO_PUBLIC_ALGOLIA_APP_ID || '',
+  process.env.EXPO_PUBLIC_ALGOLIA_API_KEY || ''
 )
 
 interface Props extends TimelineSectionProps {
@@ -68,15 +65,17 @@ const Timeline = ({
   nextEvent,
 }: Props) => {
   const isFR = useLanguage()
-  const [isReady] = useValues([0], [isCurrent])
-  const modalRef = React.useRef<Modalize>(null)
-  const eventModalRef = React.useRef<Modalize>(null)
-  const searchModalRef = React.useRef<Modalize>(null)
+  const isReady = useSharedValue(0)
+  const modalRef = React.useRef<BottomSheet>(null)
+  const eventModalRef = React.useRef<BottomSheet>(null)
+  const searchModalRef = React.useRef<BottomSheet>(null)
 
-  const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
+  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(
+    null
+  )
 
   const onTimelineDetailsOpen = () => {
-    modalRef.current?.open()
+    modalRef.current?.expand()
   }
 
   const {
@@ -132,8 +131,8 @@ const Timeline = ({
         }}
       />
       <ScrollView
-        translateX={x}
-        translateY={y}
+        x={x}
+        y={y}
         width={width}
         height={height}
         onPrev={onPrev}

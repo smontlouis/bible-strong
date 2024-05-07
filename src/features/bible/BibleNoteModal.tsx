@@ -20,7 +20,7 @@ import Text from '~common/ui/Text'
 import TextArea from '~common/ui/TextArea'
 import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
@@ -30,6 +30,7 @@ import { useSetAtom } from 'jotai/react'
 import FabButton from '~common/ui/FabButton'
 import { multipleTagsModalAtom } from '../../state/app'
 import Fab from '~common/ui/Fab'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -59,7 +60,7 @@ const useCurrentNote = ({
 }
 
 const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -153,8 +154,8 @@ ${currentNote?.description}
     <Modal.Body
       ref={ref}
       onClose={onClosed}
-      modalRef={ref}
-      HeaderComponent={
+      topInset={useSafeAreaInsets().top}
+      headerComponent={
         <ModalHeader
           onClose={close}
           title={reference}
@@ -209,7 +210,7 @@ ${currentNote?.description}
           }
         />
       }
-      FooterComponent={
+      footerComponent={() =>
         isEditing ? (
           <HStack py={10} px={20} justifyContent="flex-end">
             <Box>

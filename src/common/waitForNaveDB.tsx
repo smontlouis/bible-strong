@@ -5,10 +5,11 @@ import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { naveDB } from '~helpers/database'
+import { initSQLiteDir, naveDB } from '~helpers/sqlite'
 import { getDatabasesRef } from '~helpers/firebase'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
+import { getDatabases } from '~helpers/databases'
 
 const FILE_SIZE = 7448576
 
@@ -24,10 +25,7 @@ export const useWaitForDatabase = () => {
       setLoading(false)
     } else {
       const loadDBAsync = async () => {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
-
-        const dbPath = `${sqliteDirPath}/naveFr.sqlite`
+        const dbPath = getDatabases().NAVE.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         // if (__DEV__) {
@@ -52,11 +50,7 @@ export const useWaitForDatabase = () => {
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+              await initSQLiteDir()
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,

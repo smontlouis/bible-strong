@@ -10,7 +10,7 @@ import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import useFuzzy from '~helpers/useFuzzy'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { hp } from '~helpers/utils'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -28,7 +28,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const MultipleTagsModal = () => {
   const [item, setItem] = useAtom(multipleTagsModalAtom)
-  const { ref, open } = useModalize()
+  const { ref, open } = useBottomSheet()
 
   const onClose = () => setItem(false)
 
@@ -88,8 +88,8 @@ const MultipleTagsModal = () => {
     <Modal.Body
       ref={ref}
       onClose={onClose}
-      modalHeight={hp(80, 600)}
-      HeaderComponent={
+      snapPoints={['50%']}
+      headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>
             {item.entity !== 'highlights'
@@ -108,7 +108,7 @@ const MultipleTagsModal = () => {
           />
         </Box>
       }
-      FooterComponent={
+      footerComponent={() => (
         <Box
           row
           center
@@ -131,7 +131,7 @@ const MultipleTagsModal = () => {
             <StyledIcon isDisabled={!newTag} name="check" size={30} />
           </TouchableOpacity>
         </Box>
-      }
+      )}
     >
       <Box flex>
         {result.length ? (

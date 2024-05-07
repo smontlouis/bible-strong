@@ -1,12 +1,12 @@
 import * as Icon from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import Modal from 'react-native-modal'
 
 import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box from '~common/ui/Box'
 import TextInput from '~common/ui/TextInput'
 
@@ -24,7 +24,7 @@ const Container = styled.View(({ theme }) => ({
   shadowRadius: 4,
   elevation: 2,
   padding: 10,
-  paddingBottom: getBottomSpace() || 10,
+  paddingBottom: useSafeAreaInsets().bottom || 10,
 }))
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({

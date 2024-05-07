@@ -1,4 +1,0 @@
-UPDATE LSGSNT2 SET Texte = replace( Texte, 'Maîre', 'Maître' ) WHERE Texte LIKE '%Maîre%';
-
-- Patch expo-device dans expo 47
-- React-native trackplayer conflicts with expo-av - exoplayer

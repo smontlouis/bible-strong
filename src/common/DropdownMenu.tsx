@@ -7,7 +7,7 @@ import { Portal } from '@gorhom/portal'
 import Modal from '~common/Modal'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 
 const StyledText = styled(Text)({
   fontSize: 14,
@@ -35,7 +35,7 @@ const DropdownMenu = ({
   customRender,
 }: DropdownMenuProps) => {
   const choice = choices.find(l => l.value === currentValue)
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   const onItemPress = (value: string) => {
     setValue(value)
@@ -57,19 +57,23 @@ const DropdownMenu = ({
         )}
       </TouchableBox>
       <Portal>
-        <Modal.Body ref={ref} adjustToContentHeight>
-          <Box
-            px={20}
-            pt={30}
-            pb={20}
-            center
-            borderColor="border"
-            borderBottomWidth={1}
-          >
-            <Text bold fontSize={20}>
-              {title}
-            </Text>
-          </Box>
+        <Modal.Body
+          ref={ref}
+          snapPoints={['40%']}
+          headerComponent={
+            <Box
+              px={20}
+              py={15}
+              center
+              borderColor="border"
+              borderBottomWidth={1}
+            >
+              <Text bold fontSize={20}>
+                {title}
+              </Text>
+            </Box>
+          }
+        >
           {choices.map(({ value, label, subLabel }) => (
             <Modal.Item
               key={value}

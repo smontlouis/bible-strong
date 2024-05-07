@@ -4,20 +4,14 @@ import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
-const TabItem = styled.TouchableOpacity(
-  ({ theme, isRouteActive, isFirst, isLast }) => ({
+const TabItem = styled.TouchableOpacity<{ isRouteActive?: boolean }>(
+  ({ theme, isRouteActive }) => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     height: 35,
     marginVertical: 5,
     marginHorizontal: 10,
-    ...(isFirst && {
-      marginRight: 0,
-    }),
-    ...(isLast && {
-      marginLeft: 0,
-    }),
     ...(isRouteActive && {
       borderRadius: 8,
       backgroundColor: theme.colors.reverse,
@@ -31,38 +25,29 @@ const TabItem = styled.TouchableOpacity(
   })
 )
 
-const SelectTabBar = props => {
-  const {
-    getLabelText,
-    onTabPress,
-    onTabLongPress,
-    getAccessibilityLabel,
-    navigation,
-  } = props
+const routes = ['Plans', 'Explorer']
 
-  const { routes, index: activeRouteIndex } = navigation.state
+type Props = {
+  index: number
+  onChange: (index: number) => void
+}
 
+const BibleSelectTabBar = ({ index, onChange }: Props) => {
   return (
     <Box row>
       {routes.map((route, routeIndex) => {
-        const isRouteActive = routeIndex === activeRouteIndex
+        const isRouteActive = routeIndex === index
 
         return (
           <TabItem
             key={routeIndex}
-            isFirst={routeIndex === 0}
-            isLast={routeIndex === routes.length - 1}
             isRouteActive={isRouteActive}
             onPress={() => {
-              onTabPress({ route })
+              onChange(routeIndex)
             }}
-            onLongPress={() => {
-              onTabLongPress({ route })
-            }}
-            accessibilityLabel={getAccessibilityLabel({ route })}
           >
             <Text color={isRouteActive ? 'primary' : 'grey'} bold>
-              {getLabelText({ route })}
+              {route}
             </Text>
           </TabItem>
         )
@@ -71,4 +56,4 @@ const SelectTabBar = props => {
   )
 }
 
-export default SelectTabBar
+export default BibleSelectTabBar

@@ -1,24 +1,25 @@
+import styled from '@emotion/native'
+import { withTheme } from '@emotion/react'
+import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import Modal from 'react-native-modal'
-import styled from '@emotion/native'
-import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
 import Link from '~common/Link'
-import * as Icon from '@expo/vector-icons'
-import { withTheme } from '@emotion/react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 
 const LinkBox = Box.withComponent(Link)
 
-import AnimatedCircularProgress from '~common/AnimatedCircularProgress'
 import { useTranslation } from 'react-i18next'
+import AnimatedCircularProgress from '~common/AnimatedCircularProgress'
 
-const StylizedModal = styled(Modal)({
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+const StylizedModal = styled(Modal)(({ theme }) => ({
   justifyContent: 'flex-end',
   alignItems: 'center',
   margin: 0,
-  paddingBottom: 100 + getBottomSpace(),
-})
+  paddingBottom: 100 + useSafeAreaInsets().bottom,
+}))
 
 const WrapperIcon = styled.TouchableOpacity(({ theme }) => ({
   width: 50,

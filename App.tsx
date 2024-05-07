@@ -1,5 +1,6 @@
 import * as Icon from '@expo/vector-icons'
 import analytics from '@react-native-firebase/analytics'
+import * as Sentry from '@sentry/react-native'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
@@ -8,12 +9,12 @@ import React, { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
 import { persistor, store } from '~redux/store'
-import remoteConfig from '@react-native-firebase/remote-config'
 
-import { setI18n } from './i18n'
+import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
+import { checkDatabasesStorage } from '~helpers/sqlite'
 import InitApp from './InitApp'
+import { setI18n } from './i18n'
 import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 
@@ -27,11 +28,12 @@ SplashScreen.preventAutoHideAsync()
 setAutoFreeze(false)
 LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
-if (!__DEV__) {
-  Sentry.init({
-    dsn: 'https://0713ab46e07f4eaa973a160d5cd5b77d@sentry.io/1406911',
-  })
-}
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  // debug: __DEV__,
+  sampleRate: 0.5,
+  ignoreErrors: ignoreSentryErrors,
+})
 
 const loadResourcesAsync = async () => {
   return Promise.all([
@@ -57,30 +59,13 @@ const useAppLoad = () => {
       await loadResourcesAsync()
       setStatus('Set i18n')
       await setI18n()
+      await checkDatabasesStorage()
       setIsLoadingCompleted(true)
       if (!__DEV__) {
         analytics().logScreenView({
           screen_class: 'Bible',
           screen_name: 'Bible',
         })
-      }
-    })()
-  }, [])
-
-  useEffect(() => {
-    ;(async () => {
-      await remoteConfig().setDefaults({
-        enable_tts_public: false,
-        apple_reviewing: false,
-      })
-      const fetchedRemotely = await remoteConfig().fetchAndActivate()
-
-      if (fetchedRemotely) {
-        console.log('Configs were retrieved from the backend and activated.')
-      } else {
-        console.log(
-          'No configs were fetched from the backend, and the local configs were already activated'
-        )
       }
     })()
   }, [])
@@ -133,4 +118,4 @@ const InitAppWrapper = memo(() => {
   )
 })
 
-export default App
+export default Sentry.wrap(App)

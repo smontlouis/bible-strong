@@ -1,18 +1,12 @@
 import React, { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  abs,
-  concat,
-  cond,
-  Extrapolate,
-  greaterOrEq,
-  interpolateNode,
-  multiply,
-  round,
-} from 'react-native-reanimated'
-import { useValues } from 'react-native-redash'
-import { viewportWidth, wp } from '~helpers/utils'
+import { viewportWidth, wp, wpUI } from '~helpers/utils'
 import { mapRange, scrollViewHeight } from './constants'
+import {
+  interpolate,
+  useDerivedValue,
+  useSharedValue,
+} from 'react-native-reanimated'
 
 export const useTimeline = ({
   startYear,
@@ -24,7 +18,8 @@ export const useTimeline = ({
   interval: number
 }) => {
   const { t } = useTranslation()
-  const [x, y] = useValues([viewportWidth, 0], [])
+  const x = useSharedValue(viewportWidth)
+  const y = useSharedValue(0)
   const { current: ratio } = React.useRef(100 / interval) // 1 year = 1px with ratio = 1
   const { current: scrollViewWidth } = React.useRef(
     Math.abs(startYear - endYear) * ratio
@@ -33,25 +28,33 @@ export const useTimeline = ({
   const width = scrollViewWidth + wp(100)
   const height = scrollViewHeight + 200
 
-  const yearNb = round(
-    interpolateNode(multiply(x, -1), {
-      inputRange: [0, scrollViewWidth],
-      outputRange: [startYear, endYear],
-      extrapolate: Extrapolate.EXTEND,
-    })
-  )
-
   const yearNow = new Date().getFullYear()
+  const avJCString = t('avJC')
+  const futurString = t('futur')
 
-  const year = cond(
-    greaterOrEq(yearNb, yearNow),
-    concat(<string>t('Futur')),
-    concat(abs(yearNb), cond(greaterOrEq(yearNb, 0), '', <string>t(' av.JC')))
-  )
+  const year = useDerivedValue(() => {
+    const currentYearNb = Math.round(
+      interpolate(
+        x.value * -1,
+        [0, scrollViewWidth],
+        [startYear, endYear],
+        'extend'
+      )
+    )
+    if (currentYearNb >= yearNow) {
+      return futurString
+    } else {
+      const yearSuffix = currentYearNb >= 0 ? '' : avJCString
+      return `${Math.abs(currentYearNb)} ${yearSuffix}`
+    }
+  })
 
-  const lineX = interpolateNode(x, {
-    inputRange: [-width, -width + wp(100), 0, wp(100)],
-    outputRange: [-wp(100), 0, 0, wp(100)],
+  const lineX = useDerivedValue(() => {
+    return interpolate(
+      x.value,
+      [-width, -width + wpUI(100), 0, wpUI(100)],
+      [-wpUI(100), 0, 0, wpUI(100)]
+    )
   })
 
   const {

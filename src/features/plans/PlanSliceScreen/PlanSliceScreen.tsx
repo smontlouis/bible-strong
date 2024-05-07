@@ -1,5 +1,4 @@
 import React from 'react'
-import { Modalize } from 'react-native-modalize'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { useDispatch, useSelector } from 'react-redux'
 import MenuOption from '~common/ui/MenuOption'
@@ -27,6 +26,7 @@ import PauseText from './PauseText'
 import ReadButton from './ReadButton'
 import Slice from './Slice'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
+import BottomSheet from '@gorhom/bottom-sheet'
 
 interface Props {
   navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
@@ -55,7 +55,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
   )
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const paramsModalRef = React.useRef<Modalize>(null)
+  const paramsModalRef = React.useRef<BottomSheet>(null)
 
   const isRead = useSelector(
     (state: RootState) =>
@@ -150,7 +150,7 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                     <Text marginLeft={10}>{t('Changer de version')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={() => paramsModalRef.current?.open()}>
+                <MenuOption onSelect={() => paramsModalRef.current?.expand()}>
                   <Box row alignItems="center">
                     <TextIcon>Aa</TextIcon>
                     <Text marginLeft={10}>{t('Mise en forme')}</Text>

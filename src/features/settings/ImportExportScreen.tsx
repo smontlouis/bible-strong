@@ -15,6 +15,7 @@ import Snackbar from '~common/SnackBar'
 import * as Sharing from 'expo-sharing'
 import * as DocumentPicker from 'expo-document-picker'
 import { importData } from '~redux/modules/user'
+import { Platform } from 'react-native'
 
 const ImportExport = () => {
   const { t } = useTranslation()
@@ -68,7 +69,7 @@ const LastSave = () => {
       <Text bold>{t('app.lastSave')}</Text>
       {lastSave ? (
         <Text marginTop={5} color="grey">
-          {format((lastSave.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
+          {format((lastSave?.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
         </Text>
       ) : (
         <Text color="grey">{t('app.noSave')}</Text>
@@ -96,30 +97,52 @@ const ExportButton = ({
     shallowEqual
   )
 
+  const exportAsync = async (json: string) => {
+    const fileUri = FileSystem.documentDirectory + 'save.biblestrong'
+
+    const UTI = 'save.biblestrong'
+
+    await Sharing.shareAsync(fileUri, { UTI }).catch(error => {
+      console.log(error)
+    })
+  }
+
   const sync = async () => {
     setIsSyncing(true)
 
     try {
       const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+      const json = JSON.stringify({
+        bible: sanitizeUserBible(user.bible),
+        plan: plan.ongoingPlans,
+        studies: user.bible.studies,
+      })
+
       const fileUri = FileSystem.documentDirectory + 'save.biblestrong'
 
-      await FileSystem.writeAsStringAsync(
-        fileUri,
-        JSON.stringify({
-          bible: sanitizeUserBible(user.bible),
-          plan: plan.ongoingPlans,
-          studies: user.bible.studies,
-        }),
-        {
-          encoding: FileSystem.EncodingType.UTF8,
-        }
-      )
-
-      const UTI = 'save.biblestrong'
-
-      await Sharing.shareAsync(fileUri, { UTI }).catch(error => {
-        console.log(error)
+      await FileSystem.writeAsStringAsync(fileUri, json, {
+        encoding: FileSystem.EncodingType.UTF8,
       })
+
+      if (Platform.OS === 'android') {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+
+        if (permissions.granted) {
+          await FileSystem.StorageAccessFramework.createFileAsync(
+            permissions.directoryUri,
+            'save.biblestrong',
+            'application/json'
+          )
+            .then(async uri => {
+              await FileSystem.writeAsStringAsync(uri, json)
+            })
+            .catch(e => console.log(e))
+        } else {
+          await exportAsync(json)
+        }
+      } else {
+        await exportAsync(json)
+      }
 
       const saveFile = await FileSystem.getInfoAsync(fileUri)
       setLastSave(saveFile)
@@ -151,10 +174,12 @@ const ImportSave = () => {
 
   const importSave = async () => {
     try {
-      const file = await DocumentPicker.getDocumentAsync()
+      const file = await DocumentPicker.getDocumentAsync({
+        multiple: false,
+      })
 
-      if (file.type === 'success') {
-        const save = await FileSystem.readAsStringAsync(file.uri)
+      if (file.assets?.length) {
+        const save = await FileSystem.readAsStringAsync(file.assets[0].uri)
 
         const data = JSON.parse(save)
 

@@ -20,7 +20,7 @@ const ModalHeader = ({
   rightComponent,
 }: Props) => {
   return (
-    <Box mt={10} bg="reverse" borderColor="border" borderBottomWidth={1}>
+    <Box bg="reverse" borderColor="border" borderBottomWidth={1}>
       <Box height={54} row>
         <Box flex paddingLeft={20}>
           <Text numberOfLines={1} bold fontSize={16} marginTop={10}>

@@ -47,8 +47,8 @@ const DonationWidget = () => {
           autoPlay
           style={{
             position: 'absolute',
-            top: -30,
-            left: -30,
+            top: -100,
+            left: -100,
             width: 300,
             height: 300,
           }}

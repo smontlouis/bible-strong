@@ -11,7 +11,7 @@ import { deleteStudy } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import { Theme } from '~themes'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 
 interface Props {
   isOpen: boolean
@@ -31,7 +31,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   const openInNewTab = useOpenInNewTab()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  const { ref, open, close } = useModalize()
+  const { ref, open, close } = useBottomSheet()
 
   const deleteStudyConfirmation = (id: string) => {
     Alert.alert(
@@ -58,7 +58,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   }, [isOpen, open])
 
   return (
-    <Modal.Body ref={ref} onClose={onClosed} adjustToContentHeight withPortal>
+    <Modal.Body ref={ref} onClose={onClosed} enableDynamicSizing withPortal>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <Modal.Item
         onPress={() => {

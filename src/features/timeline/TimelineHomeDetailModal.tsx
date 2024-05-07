@@ -1,65 +1,65 @@
 import React from 'react'
-import { Modalize } from 'react-native-modalize'
 
-import { useTheme } from '@emotion/react'
-import { Theme } from '~themes'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { Trans, useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import InlineLink from '~common/InlineLink'
-import { useTranslation, Trans } from 'react-i18next'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import Accordion from '~common/ui/Accordion'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 
 interface Props {
-  modalRef: React.RefObject<Modalize>
+  modalRef: React.RefObject<BottomSheet>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }
 
 const TimelineHomeDetailModal = ({ modalRef }: Props) => {
-  const theme: Theme = useTheme()
   const { t } = useTranslation()
 
   return (
-    <Modalize
-      modalTopOffset={getStatusBarHeight()}
+    <BottomSheet
       ref={modalRef}
-      modalStyle={{
-        backgroundColor: theme.colors.lightGrey,
-        maxWidth: 600,
-        width: '100%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      }}
+      index={-1}
+      topInset={useSafeAreaInsets().top}
+      snapPoints={['100%']}
+      enablePanDownToClose
+      backdropComponent={renderBackdrop}
+      {...useBottomSheetStyles()}
     >
-      <Box mt={20} p={20}>
-        <Paragraph>
-          <Trans>
-            Traduction de la Chronologie biblique{' '}
-            <InlineLink href="http://timeline.biblehistory.com/home">
-              "The Bible Timeline"
-            </InlineLink>
-            , avec l'autorisation d'
-            <InlineLink href="https://www.bibleuniverse.com/study-tools/storacles/c/3/l/french">
-              Amazing Facts
-            </InlineLink>
-          </Trans>
-        </Paragraph>
-        <Text mt={20} fontSize={24} title>
-          {t('Questions fréquentes')}
-        </Text>
-      </Box>
-      <Box px={20}>
-        <Accordion
-          title={
-            <Text title fontSize={18}>
-              {t("Qu'est-ce que la chronologie biblique ?")}
-            </Text>
-          }
-        >
-          <Paragraph m={20} scale={-1}>
-            {`Avec plus de 850 entrées interconnectées, la chronologie des prophéties de la Bible est un outil d'étude complet qui vous permet d'explorer chaque personnage et événement majeur de la Bible, de la création du monde aux prophéties des derniers jours. Chaque entrée de la Chronologie contient un article bref mais perspicace avec des faits intéressants sur la personne ou l'événement, ainsi que des illustrations et des références bibliques complètes et des passages pour vous aider à le trouver dans la Bible.
+      <BottomSheetScrollView>
+        <Box mt={20} p={20}>
+          <Paragraph>
+            <Trans>
+              Traduction de la Chronologie biblique{' '}
+              <InlineLink href="http://timeline.biblehistory.com/home">
+                "The Bible Timeline"
+              </InlineLink>
+              , avec l'autorisation d'
+              <InlineLink href="https://www.bibleuniverse.com/study-tools/storacles/c/3/l/french">
+                Amazing Facts
+              </InlineLink>
+            </Trans>
+          </Paragraph>
+          <Text mt={20} fontSize={24} title>
+            {t('Questions fréquentes')}
+          </Text>
+        </Box>
+        <Box px={20}>
+          <Accordion
+            title={
+              <Text title fontSize={18}>
+                {t("Qu'est-ce que la chronologie biblique ?")}
+              </Text>
+            }
+          >
+            <Paragraph m={20} scale={-1}>
+              {`Avec plus de 850 entrées interconnectées, la chronologie des prophéties de la Bible est un outil d'étude complet qui vous permet d'explorer chaque personnage et événement majeur de la Bible, de la création du monde aux prophéties des derniers jours. Chaque entrée de la Chronologie contient un article bref mais perspicace avec des faits intéressants sur la personne ou l'événement, ainsi que des illustrations et des références bibliques complètes et des passages pour vous aider à le trouver dans la Bible.
 
 Dans la mesure du possible, les entrées comprennent également des liens vers des personnages et des événements connexes et une présentation vidéo pour vous aider à approfondir votre compréhension de leur place dans l'histoire de la Bible.
 
@@ -77,19 +77,19 @@ Couvre l'histoire de la nation juive, de Moïse et de l'Exode au roi David et au
 Couvre la vie, la mort et la résurrection de Jésus, les apôtres, la Réforme et les derniers événements de l'histoire de la terre.
 
 Chacune de ces sections est divisée en périodes plus spécifiques pour faciliter l'étude.`}
-          </Paragraph>
-        </Accordion>
-        <Accordion
-          title={
-            <Text title fontSize={18}>
-              {t(
-                'Comment avez-vous déterminé les dates, en particulier la date de création ?'
-              )}
-            </Text>
-          }
-        >
-          <Paragraph m={20} scale={-1}>
-            {`Nous croyons que la Bible est la Parole inspirée de Dieu, et que notre principale source pour la datation des événements et des personnes dans la chronologie de la prophétie biblique sont les généalogies de la Bible et les comparaisons d'événement à événement que l'on trouve dans d'autres sources non bibliques traditionnellement acceptées, telles que les archives historiques anciennes de Josèphe et les études modernes des théologiens et des éducateurs professionnels. Pour cette chronologie, nous nous sommes appuyés sur le texte masorétique, sur lequel sont basées les Bibles anglaises.
+            </Paragraph>
+          </Accordion>
+          <Accordion
+            title={
+              <Text title fontSize={18}>
+                {t(
+                  'Comment avez-vous déterminé les dates, en particulier la date de création ?'
+                )}
+              </Text>
+            }
+          >
+            <Paragraph m={20} scale={-1}>
+              {`Nous croyons que la Bible est la Parole inspirée de Dieu, et que notre principale source pour la datation des événements et des personnes dans la chronologie de la prophétie biblique sont les généalogies de la Bible et les comparaisons d'événement à événement que l'on trouve dans d'autres sources non bibliques traditionnellement acceptées, telles que les archives historiques anciennes de Josèphe et les études modernes des théologiens et des éducateurs professionnels. Pour cette chronologie, nous nous sommes appuyés sur le texte masorétique, sur lequel sont basées les Bibles anglaises.
 
 Nous pensons que la chronologie de la prophétie biblique fournit la datation la plus précise disponible, mais de nombreuses dates sont encore sujettes à interprétation et à quelques suppositions éclairées en raison de quelques zones vagues dans l'histoire de la Bible. Comme pour tout arbre généalogique, plus on remonte dans le temps, plus les choses peuvent devenir floues.
 
@@ -117,19 +117,21 @@ Le problème, c'est que les années ne s'additionnent pas comme ça. L'âge moye
 La solution habituelle adoptée par la plupart des commentateurs est de conclure que les 430 ans ne se réfèrent pas à l'oppression mais au temps qu'Abraham et ses descendants auraient dû attendre jusqu'à ce que la terre de Canaan leur appartienne. Les 430 ans sont le temps qui s'écoule entre la visite d'Abraham en Égypte et l'Exode. Cela correspond à environ 215 ans d'errance en Canaan et 215 ans d'oppression en Égypte.
 
 Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèphe, l'historien juif du 1er siècle après J.-C., a écrit : "Ils ont quitté l'Égypte au mois de Xanthique, le quinzième jour du mois lunaire ; quatre cent trente ans après que notre ancêtre Abraham soit venu en Canaan, mais deux cent quinze ans seulement après que Jacob se soit retiré en Égypte" (Antiquités des Juifs II:xv:2). Un fragment de rouleau de la mer Morte (4Q559) confirme Traduit avec www.DeepL.com/Translator (version gratuite)`}
-          </Paragraph>
-        </Accordion>
-        <Accordion
-          title={
-            <Text title fontSize={18}>
-              {t('Quelles sont vos principales sources pour la chronologie ?')}
-            </Text>
-          }
-        >
-          <Paragraph m={20} scale={-1}>
-            {`${t(
-              'Voici une liste des sources utilisées, entre autres, pour créer la chronologie'
-            )} :
+            </Paragraph>
+          </Accordion>
+          <Accordion
+            title={
+              <Text title fontSize={18}>
+                {t(
+                  'Quelles sont vos principales sources pour la chronologie ?'
+                )}
+              </Text>
+            }
+          >
+            <Paragraph m={20} scale={-1}>
+              {`${t(
+                'Voici une liste des sources utilisées, entre autres, pour créer la chronologie'
+              )} :
 
 * Adam Clarke’s Commentary on the Whole Bible, 1826.
 * Bainton, Roland H. _Here I Stand: A Life of Martin Luther._ New York: Abingdon Press, 1950.
@@ -155,23 +157,24 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
 * Walton, John H. _Chronological and Background Charts of the Old Testament,_ Zondervan, 1994.
          
           `}
-          </Paragraph>
-        </Accordion>
-        <Accordion
-          title={
-            <Text title fontSize={18}>
-              {t('Prévoyez-vous la date du retour du Christ ?')}
-            </Text>
-          }
-        >
-          <Paragraph m={20} scale={-1}>
-            {t(
-              "Non. La Bible dit que quant au jour et à l'heure du retour du Christ, personne ne le sait. Voir Matthieu 24;50. De plus, le retour du Christ ne viendra qu'après que d'autres accomplissements prophétiques se soient produits - et nous ne savons pas non plus quand ils se produiront. L'objectif de la ligne du temps n'est pas de prédire quand exactement les événements futurs se produiront, mais plutôt de montrer la fiabilité de la Bible en tant que document historique, sa fiabilité en matière de prophétie et en tant qu'outil d'étude approfondie de la Bible."
-            )}
-          </Paragraph>
-        </Accordion>
-      </Box>
-    </Modalize>
+            </Paragraph>
+          </Accordion>
+          <Accordion
+            title={
+              <Text title fontSize={18}>
+                {t('Prévoyez-vous la date du retour du Christ ?')}
+              </Text>
+            }
+          >
+            <Paragraph m={20} scale={-1}>
+              {t(
+                "Non. La Bible dit que quant au jour et à l'heure du retour du Christ, personne ne le sait. Voir Matthieu 24;50. De plus, le retour du Christ ne viendra qu'après que d'autres accomplissements prophétiques se soient produits - et nous ne savons pas non plus quand ils se produiront. L'objectif de la ligne du temps n'est pas de prédire quand exactement les événements futurs se produiront, mais plutôt de montrer la fiabilité de la Bible en tant que document historique, sa fiabilité en matière de prophétie et en tant qu'outil d'étude approfondie de la Bible."
+              )}
+            </Paragraph>
+          </Accordion>
+        </Box>
+      </BottomSheetScrollView>
+    </BottomSheet>
   )
 }
 

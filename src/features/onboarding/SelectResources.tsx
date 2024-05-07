@@ -23,8 +23,9 @@ const DownloadFiles = ({
 }) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
-  const databases = useRef(getDatabases())
-
+  const databases = Object.values(getDatabases()).filter(db =>
+    !isFR ? db.id !== 'MHY' : true
+  )
   const [selectedResources, setSelectedResources] = useAtom(
     selectedResourcesAtom
   )
@@ -82,7 +83,7 @@ const DownloadFiles = ({
             <Text padding={20} title fontSize={25}>
               {t('Bases de données')}
             </Text>
-            {Object.values(databases.current).map(db => (
+            {Object.values(databases).map(db => (
               <ResourceItem
                 key={db.id}
                 name={db.name}

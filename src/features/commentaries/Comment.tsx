@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
+import { Image } from 'expo-image'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import * as Animatable from 'react-native-animatable'
-import FastImage from 'react-native-fast-image'
 import { withNavigation } from 'react-navigation'
 import { NavigationStackProp } from 'react-navigation-stack'
 import truncHTML from 'trunc-html'
@@ -13,14 +12,13 @@ import Link, { LinkBox } from '~common/Link'
 import Snackbar from '~common/SnackBar'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import { Status } from '~common/types'
-import Box from '~common/ui/Box'
+import Box, { AnimatableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
-import { deepl } from '../../../config'
 import { Comment as CommentProps, EGWComment } from './types'
 
 const findBookNumber = (bookName: string) => {
@@ -28,8 +26,6 @@ const findBookNumber = (bookName: string) => {
   const bookNumber = books.find(b => b[1] === bookName)?.[0]
   return bookNumber || ''
 }
-// @ts-ignore
-const AFeatherIcon = Animatable.createAnimatableComponent(FeatherIcon)
 
 interface Props {
   navigation: NavigationStackProp<any, any>
@@ -56,7 +52,9 @@ const useFrenchTranslation = (id: string) => {
         return
       }
 
-      const data = `auth_key=${deepl.auth_key}&text=${encodeURIComponent(
+      const data = `auth_key=${
+        process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY
+      }&text=${encodeURIComponent(
         text
       )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
 
@@ -163,7 +161,7 @@ https://bible-strong.app
       <LinkBox row onPress={() => setCollapsed(s => !s)}>
         <Box center width={40} height={40} borderRadius={20}>
           {cacheImage && (
-            <FastImage style={fastImageStyle} source={fastImageSource} />
+            <Image style={fastImageStyle} source={fastImageSource} />
           )}
         </Box>
         <Box ml={10} flex>
@@ -177,20 +175,22 @@ https://bible-strong.app
         <Box width={30} center>
           {!isCollapsed && (
             // @ts-ignore
-            <AFeatherIcon
-              color="grey"
-              duration={500}
-              name="chevron-down"
-              size={17}
+            <AnimatableBox
+              width={17}
+              height={17}
+              center
               animation={{
                 from: {
-                  rotate: isCollapsed ? '180deg' : '0deg',
-                },
-                to: {
                   rotate: !isCollapsed ? '180deg' : '0deg',
                 },
+                to: {
+                  rotate: isCollapsed ? '180deg' : '0deg',
+                },
               }}
-            />
+              duration={500}
+            >
+              <FeatherIcon color="grey" name="chevron-down" size={17} />
+            </AnimatableBox>
           )}
         </Box>
         <LinkBox width={30} center onPress={shareDefinition}>
@@ -232,21 +232,23 @@ https://bible-strong.app
             </Box>
           )}
           <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
-            {/* @ts-ignore */}
-            <AFeatherIcon
-              color="grey"
-              duration={500}
-              name="chevron-down"
-              size={20}
+            {/* @ts-expect-error */}
+            <AnimatableBox
+              width={17}
+              height={17}
+              center
               animation={{
                 from: {
-                  rotate: isCollapsed ? '180deg' : '0deg',
-                },
-                to: {
                   rotate: !isCollapsed ? '180deg' : '0deg',
                 },
+                to: {
+                  rotate: isCollapsed ? '180deg' : '0deg',
+                },
               }}
-            />
+              duration={500}
+            >
+              <FeatherIcon color="grey" name="chevron-down" size={17} />
+            </AnimatableBox>
           </LinkBox>
         </Box>
       </Box>

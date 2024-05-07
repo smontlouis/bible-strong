@@ -1,13 +1,13 @@
-import React from 'react'
-import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
+import BottomSheet from '@gorhom/bottom-sheet'
+import React from 'react'
 
-import Box from '~common/ui/Box'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import { Modalize } from 'react-native-modalize'
+import Link from '~common/Link'
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
@@ -16,7 +16,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   height: 60,
-  marginTop: getStatusBarHeight(),
+  marginTop: useSafeAreaInsets().top,
   borderBottomColor: theme.colors.border,
   alignItems: 'stretch',
   zIndex: 1,
@@ -32,7 +32,7 @@ interface Props {
   fontSize?: number
   hasBackButton?: boolean
   onPress: () => void
-  searchModalRef: React.RefObject<Modalize>
+  searchModalRef: React.RefObject<BottomSheet>
 }
 
 const TimelineHeader = ({
@@ -46,7 +46,7 @@ const TimelineHeader = ({
   const isFR = useLanguage()
 
   const openSearch = () => {
-    searchModalRef.current?.open()
+    searchModalRef.current?.expand()
   }
   return (
     <HeaderBox row>

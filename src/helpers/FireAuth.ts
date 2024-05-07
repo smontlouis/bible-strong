@@ -1,11 +1,7 @@
-import appleAuth, {
-  AppleAuthRequestOperation,
-  AppleAuthRequestScope,
-} from '@invertase/react-native-apple-authentication'
-import { GoogleSignin } from '@react-native-google-signin/google-signin'
-import NetInfo from '@react-native-community/netinfo'
+import appleAuth from '@invertase/react-native-apple-authentication'
 import analytics from '@react-native-firebase/analytics'
 import auth from '@react-native-firebase/auth'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
@@ -121,11 +117,8 @@ const FireAuth = class {
     new Promise(async resolve => {
       try {
         const appleAuthRequestResponse = await appleAuth.performRequest({
-          requestedOperation: AppleAuthRequestOperation.LOGIN,
-          requestedScopes: [
-            AppleAuthRequestScope.EMAIL,
-            AppleAuthRequestScope.FULL_NAME,
-          ],
+          requestedOperation: appleAuth.Operation.LOGIN,
+          requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
         })
 
         const { identityToken, nonce } = appleAuthRequestResponse

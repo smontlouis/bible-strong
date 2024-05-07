@@ -19,7 +19,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import { getIfDatabaseExists } from '~helpers/database'
+import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
@@ -86,9 +86,9 @@ const Header = ({
   const { addParallelVersion, removeAllParallelVersions } = actions
 
   const onOpenCommentaire = async () => {
-    const exists = await getIfDatabaseExists('commentaires-mhy')
+    const needsDownload = await getIfDatabaseNeedsDownload('MHY')
 
-    if (!exists) {
+    if (needsDownload) {
       SnackBar.show(t('Téléchargez la base de commentaires Matthew Henry'))
       navigation.navigate('Downloads')
       return

@@ -1,21 +1,18 @@
-import React from 'react'
 import { useTheme } from '@emotion/react'
-import * as Animatable from 'react-native-animatable'
-import ProgressCircle from 'react-native-progress/Circle'
-import FastImage from 'react-native-fast-image'
 import Lottie from 'lottie-react-native'
+import React from 'react'
+import ProgressCircle from 'react-native-progress/Circle'
 
 import styled from '@emotion/native'
+import { Image } from 'expo-image'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
-import Border from '~common/ui/Border'
-import Text from '~common/ui/Text'
-import { FeatherIcon } from '~common/ui/Icon'
 import { ComputedSection } from '~common/types'
+import Border from '~common/ui/Border'
+import Box, { AnimatableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import { Theme } from '~themes'
 import { useFireStorage } from '../plan.hooks'
-
-const AFeatherIcon = Animatable.createAnimatableComponent(FeatherIcon) as any
 
 const CircleImage = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -67,7 +64,7 @@ const Section = ({
           >
             <CircleImage center>
               {cacheImage && (
-                <FastImage
+                <Image
                   style={{ width: 26, height: 26 }}
                   source={{
                     uri: cacheImage,
@@ -90,11 +87,11 @@ const Section = ({
           {subTitle && <Text opacity={0.6}>{subTitle}</Text>}
         </Box>
         <Box width={40} center>
-          <AFeatherIcon
-            color="grey"
-            duration={500}
-            name="chevron-down"
-            size={17}
+          {/* @ts-expect-error */}
+          <AnimatableBox
+            width={17}
+            height={17}
+            center
             animation={{
               from: {
                 rotate: !isCollapsed ? '180deg' : '0deg',
@@ -103,7 +100,10 @@ const Section = ({
                 rotate: isCollapsed ? '180deg' : '0deg',
               },
             }}
-          />
+            duration={500}
+          >
+            <FeatherIcon color="grey" name="chevron-down" size={17} />
+          </AnimatableBox>
         </Box>
       </Box>
       <Border />

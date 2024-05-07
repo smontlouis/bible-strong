@@ -1,7 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
@@ -56,7 +55,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         justifyContent="space-around"
         px={20}
         absoluteFill
-        paddingBottom={getBottomSpace()}
+        paddingBottom={insets.bottom}
         style={viewStyles}
         key="view"
       >
@@ -72,7 +71,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         justifyContent="space-around"
         px={20}
         absoluteFill
-        paddingBottom={getBottomSpace()}
+        paddingBottom={insets.bottom}
         style={listStyles}
         key="list"
       >

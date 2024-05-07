@@ -1,19 +1,16 @@
+import BottomSheet from '@gorhom/bottom-sheet'
 import React from 'react'
-import { Modalize } from 'react-native-modalize'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { ComputedPlanItem } from 'src/common/types'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
-import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
-import { FeatherIcon } from '~common/ui/Icon'
 import { usePrevious } from '~helpers/usePrevious'
-import { useComputedPlan } from '../plan.hooks'
+import { useComputedPlan, useFireStorage } from '../plan.hooks'
 import DetailsModal from './DetailsModal'
+import Menu from './Menu'
 import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
-import Menu from './Menu'
-import { useFireStorage } from '../plan.hooks'
 
 interface Props {
   navigation: NavigationStackProp<{ plan: ComputedPlanItem }>
@@ -27,8 +24,8 @@ const PlanScreen = ({ navigation }: Props) => {
     description,
     author,
   }: ComputedPlanItem = navigation.getParam('plan', {})
-  const modalRef = React.useRef<Modalize>(null)
-  const modalRefDetails = React.useRef<Modalize>(null)
+  const modalRef = React.useRef<BottomSheet>(null)
+  const modalRefDetails = React.useRef<BottomSheet>(null)
   const cacheImage = useFireStorage(image)
 
   const plan = useComputedPlan(id)
@@ -40,7 +37,7 @@ const PlanScreen = ({ navigation }: Props) => {
   React.useEffect(() => {
     if (progress != null && prevProgress != null && prevProgress !== progress) {
       if (progress > prevProgress) {
-        modalRef.current?.open()
+        modalRef.current?.expand()
       }
     }
   }, [progress, prevProgress])

@@ -7,8 +7,9 @@ import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { getTresorDB, initTresorDB } from '~helpers/database'
-import { getStaticUrl } from '~helpers/firebase'
+import { getDatabases } from '~helpers/databases'
+import { databasesRef } from '~helpers/firebase'
+import { initSQLiteDir, tresorDB } from '~helpers/sqlite'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 
@@ -23,14 +24,14 @@ export const useWaitForDatabase = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (getTresorDB()) {
+    if (tresorDB.get()) {
       setLoading(false)
     } else {
       const loadDBAsync = async () => {
         const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
         const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-        const dbPath = `${sqliteDirPath}/commentaires-tresor.sqlite`
+        const dbPath = getDatabases().TRESOR.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         // if (__DEV__) {
@@ -51,17 +52,11 @@ export const useWaitForDatabase = () => {
             if (!window.tresorDownloadHasStarted) {
               window.tresorDownloadHasStarted = true
 
-              const sqliteDbUri = getStaticUrl(
-                'databases/commentaires-tresor.sqlite'
-              )
+              const sqliteDbUri = databasesRef.TRESOR
 
               console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
 
-              if (!sqliteDir.exists) {
-                await FileSystem.makeDirectoryAsync(sqliteDirPath)
-              } else if (!sqliteDir.isDirectory) {
-                throw new Error('SQLite dir is not a directory')
-              }
+              await initSQLiteDir()
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
@@ -75,7 +70,7 @@ export const useWaitForDatabase = () => {
                 }
               ).downloadAsync()
 
-              await initTresorDB()
+              await tresorDB.init()
 
               setLoading(false)
               window.tresorDownloadHasStarted = false
@@ -91,7 +86,7 @@ export const useWaitForDatabase = () => {
             setStartDownload(false)
           }
         } else {
-          await initTresorDB()
+          await tresorDB.init()
           setLoading(false)
         }
       }

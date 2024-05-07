@@ -3,6 +3,8 @@ import * as FileSystem from 'expo-file-system'
 import { getLangIsFr } from '~i18n'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
+import { getDatabases } from './databases'
+import { databaseInterlineaireName, initSQLiteDir } from './sqlite'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
@@ -12,15 +14,10 @@ export const getIfVersionNeedsUpdate = async (versionId: string) => {
 export const getIfVersionNeedsDownload = async (versionId: string) => {
   if (versionId === 'INT') {
     const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-    const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-    if (!sqliteDir.exists) {
-      await FileSystem.makeDirectoryAsync(sqliteDirPath)
-    } else if (!sqliteDir.isDirectory) {
-      throw new Error('SQLite dir is not a directory')
-    }
+    await initSQLiteDir()
 
-    const dbPath = `${sqliteDirPath}/interlineaire.sqlite`
+    const dbPath = `${sqliteDirPath}/${databaseInterlineaireName}`
     const file = await FileSystem.getInfoAsync(dbPath)
 
     if (!file.exists) {
@@ -32,15 +29,10 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
 
   if (versionId === 'LSGS' || versionId === 'KJVS') {
     const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-    const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
-    if (!sqliteDir.exists) {
-      await FileSystem.makeDirectoryAsync(sqliteDirPath)
-    } else if (!sqliteDir.isDirectory) {
-      throw new Error('SQLite dir is not a directory')
-    }
+    await initSQLiteDir()
 
-    const dbPath = `${sqliteDirPath}/strong.sqlite`
+    const dbPath = getDatabases().STRONG.path
     const file = await FileSystem.getInfoAsync(dbPath)
 
     if (!file.exists) {

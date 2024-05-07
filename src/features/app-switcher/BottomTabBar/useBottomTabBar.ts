@@ -1,13 +1,13 @@
 import { useAtom, useAtomValue } from 'jotai/react'
 import { useEffect } from 'react'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
 import {
   SharedValue,
+  WithTimingConfig,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  WithTimingConfig,
 } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePrevious } from '~helpers/usePrevious'
 import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -50,7 +50,7 @@ const useBottomTabBar = () => {
   const { activeTabPreview } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
 
-  const HIDDEN_HEIGHT = TAB_ICON_SIZE + getBottomSpace()
+  const HIDDEN_HEIGHT = TAB_ICON_SIZE + useSafeAreaInsets().bottom
   const bottomBarViewY = useSharedValue(0)
   const bottomBarViewOpacity = useSharedValue(1)
 

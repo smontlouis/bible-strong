@@ -50,13 +50,13 @@ export const useWaitForDatabase = () => {
             }
           ).downloadAsync()
 
-          if (bibleMemoize['timeline']) {
+          if (bibleMemoize.timeline) {
             setLoading(false)
             return
           }
 
           const data = await FileSystem.readAsStringAsync(path || '')
-          bibleMemoize['timeline'] = JSON.parse(data)
+          bibleMemoize.timeline = JSON.parse(data)
           setLoading(false)
 
           setLoading(false)
@@ -75,12 +75,12 @@ export const useWaitForDatabase = () => {
         const path = getDatabases().TIMELINE.path
         const data = await FileSystem.readAsStringAsync(path || '')
 
-        if (bibleMemoize['timeline']) {
+        if (bibleMemoize.timeline) {
           setLoading(false)
           return
         }
 
-        bibleMemoize['timeline'] = JSON.parse(data)
+        bibleMemoize.timeline = JSON.parse(data)
         setLoading(false)
       }
     }

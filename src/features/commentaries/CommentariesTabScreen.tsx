@@ -1,40 +1,40 @@
-import React, { useEffect, useState, useMemo } from 'react'
-import Header from '~common/Header'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import { useTranslation } from 'react-i18next'
-import formatVerseContent from '~helpers/formatVerseContent'
-import { Status } from '~common/types'
-import to from 'await-to-js'
-import Loading from '~common/Loading'
-import Empty from '~common/Empty'
-import { ActivityIndicator, ScrollView } from 'react-native'
-import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import styled from '@emotion/native'
-import { Comments, Comment as CommentType } from './types'
-import Comment from './Comment'
+import to from 'await-to-js'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ActivityIndicator, ScrollView } from 'react-native'
+import Empty from '~common/Empty'
+import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
+import Loading from '~common/Loading'
+import { Status } from '~common/types'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
+import Text from '~common/ui/Text'
+import formatVerseContent from '~helpers/formatVerseContent'
 import useBibleVerses, { verseStringToObject } from '~helpers/useBibleVerses'
 import BibleVerseDetailFooter from '../bible/BibleVerseDetailFooter'
+import Comment from './Comment'
+import { Comment as CommentType, Comments } from './types'
 
 import { useTheme } from '@emotion/react'
-import { Theme } from '~themes'
-import useLanguage from '~helpers/useLanguage'
-import countLsgChapters from '~assets/bible_versions/countLsgChapters'
-import { PrimitiveAtom } from 'jotai/vanilla'
-import { useAtom } from 'jotai/react'
-import { CommentaryTab } from '../../state/tabs'
 import produce from 'immer'
-import PopOverMenu from '~common/PopOverMenu'
-import MenuOption from '~common/ui/MenuOption'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { FeatherIcon } from '~common/ui/Icon'
+import { useAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import AdventistIcon from '~common/AdventistIcon'
+import PopOverMenu from '~common/PopOverMenu'
+import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { firebaseDb } from '~helpers/firebase'
 import memoize from '~helpers/memoize'
+import useLanguage from '~helpers/useLanguage'
+import { Theme } from '~themes'
+import { CommentaryTab } from '../../state/tabs'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -219,6 +219,8 @@ const CommentariesTabScreen = ({
     setVerse(`${b}-${c}-${v + value}`)
   }
 
+  const insets = useSafeAreaInsets()
+
   useEffect(() => {
     setTitle(headerTitle)
   }, [headerTitle])
@@ -227,7 +229,7 @@ const CommentariesTabScreen = ({
     <>
       {hasHeader && (
         <>
-          <Box background paddingTop={getStatusBarHeight()} />
+          <Box background paddingTop={insets.top} />
           <Header
             background
             hasBackButton={hasBackButton}

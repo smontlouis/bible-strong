@@ -1,34 +1,34 @@
-import React from 'react'
 import styled from '@emotion/native'
+import { withTheme } from '@emotion/react'
+import React from 'react'
 import Carousel from 'react-native-reanimated-carousel'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
-import { withTheme } from '@emotion/react'
 
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
-import verseToStrong from '~helpers/verseToStrong'
-import loadStrongReferences from '~helpers/loadStrongReferences'
-import loadStrongVerse from '~helpers/loadStrongVerse'
-import waitForStrongDB from '~common/waitForStrongDB'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
+import waitForStrongDB from '~common/waitForStrongDB'
+import loadStrongReferences from '~helpers/loadStrongReferences'
+import loadStrongVerse from '~helpers/loadStrongVerse'
+import verseToStrong from '~helpers/verseToStrong'
 
-import Container from '~common/ui/Container'
-import RoundedCorner from '~common/ui/RoundedCorner'
-import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
+import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import Paragraph from '~common/ui/Paragraph'
+import RoundedCorner from '~common/ui/RoundedCorner'
 import StrongCard from './StrongCard'
-import Empty from '~common/Empty'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { viewportWidth, wp } from '~helpers/utils'
-import formatVerseContent from '~helpers/formatVerseContent'
-import { CarouselProvider } from '~helpers/CarouselContext'
 import { withTranslation } from 'react-i18next'
+import { withSafeAreaInsets } from 'react-native-safe-area-context'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
+import { CarouselProvider } from '~helpers/CarouselContext'
+import formatVerseContent from '~helpers/formatVerseContent'
+import { viewportWidth, wp } from '~helpers/utils'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -216,7 +216,7 @@ class BibleVerseDetailScreen extends React.Component {
         contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
         scrollIndicatorInsets={{ right: 1 }}
       >
-        <Box background paddingTop={getStatusBarHeight()} />
+        <Box background paddingTop={this.props.insets.top} />
         <Header
           fontSize={18}
           bg="reverse"
@@ -312,6 +312,7 @@ class BibleVerseDetailScreen extends React.Component {
 
 export default compose(
   withTheme,
+  withSafeAreaInsets,
   withTranslation(),
   connect((state, ownProps) => {
     const { verse } = ownProps.navigation.state.params || {}

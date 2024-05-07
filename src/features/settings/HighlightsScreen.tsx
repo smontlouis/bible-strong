@@ -21,7 +21,7 @@ import {
 } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import VersesList from './VersesList'
-import { useModalize } from '~helpers/useModalize'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import { TagsObj, Verse, VerseIds } from '~common/types'
 
 interface Chip {
@@ -98,8 +98,8 @@ const HighlightsScreen = () => {
   const dispatch = useDispatch()
   const chipId = selectedChip?.id
 
-  const { ref, open, close } = useModalize()
-  const { ref: ref2, open: open2, close: close2 } = useModalize()
+  const { ref, open, close } = useBottomSheet()
+  const { ref: ref2, open: open2, close: close2 } = useBottomSheet()
 
   useEffect(() => {
     if (isSettingsOpen) {
@@ -178,7 +178,7 @@ const HighlightsScreen = () => {
       <Modal.Body
         ref={ref}
         onClose={() => setIsSettingsOpen(undefined)}
-        adjustToContentHeight
+        enableDynamicSizing
       >
         <Modal.Item
           bold
@@ -208,7 +208,7 @@ const HighlightsScreen = () => {
       <Modal.Body
         ref={ref2}
         onClose={() => setIsChangeColorOpen(undefined)}
-        adjustToContentHeight
+        enableDynamicSizing
       >
         <Box row my={20} mx={20}>
           <TouchableCircle

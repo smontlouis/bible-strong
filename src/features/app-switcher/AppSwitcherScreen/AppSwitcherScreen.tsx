@@ -3,7 +3,9 @@ import React, { memo, useCallback, useEffect, useRef } from 'react'
 import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { BackHandler } from 'react-native'
-import { DrawerLayout, ScrollView } from 'react-native-gesture-handler'
+import { ScrollView } from 'react-native-gesture-handler'
+import DrawerLayout from 'react-native-gesture-handler/DrawerLayout'
+
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
@@ -157,6 +159,7 @@ const AppSwitcherScreenWrapper = (props: any) => {
       drawerWidth={wp(95, 450)}
       drawerPosition="left"
       drawerType="slide"
+      useNativeAnimations={false}
       overlayColor="rgba(0,0,0,0.1)"
       renderNavigationView={renderHomeScreen}
       drawerLockMode="locked-closed"

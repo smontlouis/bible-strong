@@ -24,6 +24,24 @@ export const wp = (percentage: number, maxWidth?: boolean | number) => {
   return Math.round(value)
 }
 
+export const wpUI = (percentage: number, maxWidth?: boolean | number) => {
+  'worklet'
+
+  let value
+  if (maxWidth === true) {
+    value =
+      (percentage * (viewportWidth > MAX_WIDTH ? MAX_WIDTH : viewportWidth)) /
+      100
+  } else if (typeof maxWidth === 'number') {
+    value =
+      (percentage * (viewportWidth > maxWidth ? maxWidth : viewportWidth)) / 100
+  } else {
+    value = (percentage * viewportWidth) / 100
+  }
+
+  return Math.round(value)
+}
+
 export const hp = (percentage: number, maxHeight?: number) => {
   let value = (percentage * viewportHeight) / 100
   if (maxHeight) {

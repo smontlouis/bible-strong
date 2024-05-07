@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import React, { useEffect, useRef, useState } from 'react'
-import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import Empty from '~common/Empty'
@@ -18,6 +17,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import loadBible from '~helpers/loadBible'
 
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Status } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import captureError from '~helpers/captureError'
@@ -210,6 +210,8 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
     versesInCurrentChapter,
   } = useFormattedText(status, wordsInVerse, verse, Livre, Chapitre)
 
+  const insets = useSafeAreaInsets()
+
   const updateVerse = (value: number) => {
     setVerse(verse => ({
       ...verse,
@@ -238,7 +240,7 @@ const DictionnaireVerseDetailScreen = ({ navigation }) => {
       contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
       scrollIndicatorInsets={{ right: 1 }}
     >
-      <Box flex paddingTop={getStatusBarHeight()}>
+      <Box flex paddingTop={insets.top}>
         <Header
           background
           hasBackButton

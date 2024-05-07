@@ -50,7 +50,7 @@ const Timeline = ({ navigation }: Props) => {
           return (
             <TimelineSection
               {...ev}
-              key={i}
+              key={`${i}-${current === i}`}
               entrance={entrance}
               isCurrent={current === i}
               isFirst={i === 0}

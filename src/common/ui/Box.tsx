@@ -3,6 +3,7 @@ import React, { forwardRef } from 'react'
 import { TouchableOpacity, View, ViewStyle } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as Animatable from 'react-native-animatable'
 
 export type BoxProps = {
   as?: React.ElementType<any> | undefined
@@ -268,5 +269,6 @@ export const AnimatedBox = Animated.createAnimatedComponent(Box)
 export const AnimatedTouchableBox = Animated.createAnimatedComponent(
   TouchableBox
 )
+export const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
 export default Box
