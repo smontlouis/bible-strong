@@ -3,10 +3,12 @@
   "version": "17.4.2",
   "scripts": {
     "start": "react-native start",
-    "android": "react-native run-android --variant=devDebug --appIdSuffix=dev",
-    "android-staging": "react-native run-android --variant=stagingRelease --appIdSuffix=staging",
-    "android-prod": "react-native run-android --variant=prodRelease",
-    "ios": "react-native run-ios --simulator=\"iPhone 14\"",
+    "build:android:dev": "dotenv -c development -- eas build -p android --local --profile development",
+    "build:android:staging": "dotenv -c staging -- eas build -p android --local --profile staging",
+    "build:android:prod": "dotenv -c production -- eas build -p android --local --profile production",
+    "build:ios:dev": "dotenv -c development -- eas build -p ios --local --profile development",
+    "build:ios:staging": "dotenv -c staging -- eas build -p ios --local --profile staging",
+    "build:ios:prod": "dotenv -c production -- eas build -p ios --local --profile production",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll",
     "clean": "rm -rf yarn-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && yarn install && say I love react native",
     "postinstall": "patch-package",
@@ -14,7 +16,9 @@
     "storybook": "start-storybook -p 7007",
     "prestorybook": "rnstl",
     "nuke": "rm -rf node_modules; rm -rf ios/build; rm -rf ios/Pods; rm -rf ios/Podfile.lock; yarn; yarn podinstall",
-    "i18n": "i18next 'src/**/*.{js,ts,tsx}' '!src/features/bible/bibleWebView/**' '!src/features/studies/studiesWebView/**'"
+    "i18n": "i18next 'src/**/*.{js,ts,tsx}' '!src/features/bible/bibleWebView/**' '!src/features/studies/studiesWebView/**'",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "resolutions": {
     "react-native-gesture-handler": "^2.16.1"
@@ -27,7 +31,7 @@
     "@gorhom/bottom-sheet": "^4",
     "@gorhom/portal": "^1.0.14",
     "@invertase/react-native-apple-authentication": "^2.3.0",
-    "@notifee/react-native": "^7.5.0",
+    "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "1.21.0",
     "@react-native-clipboard/clipboard": "^1.14.0",
     "@react-native-community/cli-config": "^13.6.4",

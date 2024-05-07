@@ -9,31 +9,12 @@
       "android": {
         "image": "latest"
       },
-      "ios": { "simulator": true },
-      "env": {
-        "APP_NAME": "dev - Bible Strong",
-        "IOS_GOOGLE_SERVICES_FILE": "./firebase/dev/GoogleService-Info.plist",
-        "ANDROID_GOOGLE_SERVICES_FILE": "./firebase/dev/google-services.json",
-        "BUNDLE_IDENTIFIER": "com.smontlouis.biblestrong.dev"
-      }
+      "ios": { "simulator": true }
     },
     "staging": {
-      "distribution": "internal",
-      "env": {
-        "APP_NAME": "staging - Bible Strong",
-        "IOS_GOOGLE_SERVICES_FILE": "./firebase/staging/GoogleService-Info.plist",
-        "ANDROID_GOOGLE_SERVICES_FILE": "./firebase/staging/google-services.json",
-        "BUNDLE_IDENTIFIER": "com.smontlouis.biblestrong.staging"
-      }
+      "distribution": "internal"
     },
-    "production": {
-      "env": {
-        "APP_NAME": "Bible Strong",
-        "IOS_GOOGLE_SERVICES_FILE": "./firebase/prod/GoogleService-Info.plist",
-        "ANDROID_GOOGLE_SERVICES_FILE": "./firebase/prod/google-services.json",
-        "BUNDLE_IDENTIFIER": "com.smontlouis.biblestrong"
-      }
-    }
+    "production": {}
   },
   "submit": {
     "production": {}

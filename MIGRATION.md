@@ -17,6 +17,7 @@
 - [x] migrate to gorhom/bottom-sheet
 - [x] Configure sentry CORRECTLY
 - [x] Crashlytics makes app crash - remove it
+- [x] Fix modal not centered
+- [x] test android
 - [ ] remove react-native-modal
 - [ ] check ios / android certificate / keys
-- [ ] Tester sur Android

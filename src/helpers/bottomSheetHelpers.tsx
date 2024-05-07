@@ -5,6 +5,7 @@ import {
   BottomSheetProps,
 } from '@gorhom/bottom-sheet'
 import React from 'react'
+import { useWindowDimensions } from 'react-native'
 
 export const renderBackdrop = (props: BottomSheetBackdropProps) => (
   <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
@@ -12,12 +13,12 @@ export const renderBackdrop = (props: BottomSheetBackdropProps) => (
 
 export const useBottomSheetStyles = () => {
   const theme = useTheme()
-
+  const { width } = useWindowDimensions()
+  const containerWidth = 400
   return {
     style: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      maxWidth: 400,
+      marginLeft: width / 2 - containerWidth / 2,
+      maxWidth: containerWidth,
       width: '100%',
       borderTopLeftRadius: 30,
       borderTopRightRadius: 30,

@@ -66,7 +66,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
-    '@notifee/react-native',
     [
       'expo-build-properties',
       {
@@ -79,6 +78,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           compileSdkVersion: 34,
           usesCleartextTraffic: true,
+          extraMavenRepos: [
+            '../../node_modules/@notifee/react-native/android/libs',
+          ],
         },
       },
     ],

@@ -83,7 +83,7 @@ const FAQScreen = () => {
               {t('faq.ideaAnswer')}
             </Paragraph>
           </Accordion>
-          <Accordion
+          {/* <Accordion
             title={
               <Text title fontSize={18}>
                 {t(
@@ -97,7 +97,7 @@ const FAQScreen = () => {
                 "L'app contient du contenu adventiste, mais également du contenu d’autres confessions. Je ne me suis pas concentré sur la religion, mais plutôt sur la qualité du contenu. Par exemple, la timeline d’Amazing Facts est la seule que je connaisse qui soit aussi complète. Si vous ne partagez pas la foi adventiste, il est normal que vous puissiez être en désaccord avec certains contenus."
               )}
             </Paragraph>
-          </Accordion>
+          </Accordion> */}
           <Accordion
             title={
               <Text title fontSize={18}>
