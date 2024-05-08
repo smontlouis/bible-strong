@@ -6,6 +6,7 @@ import React, { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
+import remoteConfig from '@react-native-firebase/remote-config'
 import RNRestart from 'react-native-restart'
 import { useDispatch, useSelector } from 'react-redux'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -232,6 +233,10 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     ])
   }
 
+  const appleIsReviewing = remoteConfig()
+    .getValue('apple_reviewing')
+    .asBoolean()
+
   return (
     <SafeAreaBox borderLeftWidth={1} borderColor="border">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
@@ -346,16 +351,18 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             <StyledIcon name="share-2" size={25} />
             <Text fontSize={15}>{t("Partager l'application")}</Text>
           </LinkItem>
-          <LinkItem
-            href={
-              isFR
-                ? 'https://bible-strong.app/fr/give'
-                : 'https://bible-strong.app/give'
-            }
-          >
-            <StyledIcon name="dollar-sign" size={25} />
-            <Text fontSize={15}>{t('Contribuer')}</Text>
-          </LinkItem>
+          {!appleIsReviewing && (
+            <LinkItem
+              href={
+                isFR
+                  ? 'https://bible-strong.app/fr/give'
+                  : 'https://bible-strong.app/give'
+              }
+            >
+              <StyledIcon name="dollar-sign" size={25} />
+              <Text fontSize={15}>{t('Contribuer')}</Text>
+            </LinkItem>
+          )}
           <LinkItem href="https://github.com/smontlouis/bible-strong">
             <StyledIcon name="github" size={25} />
             <Text fontSize={15}>Github</Text>

@@ -26,7 +26,9 @@ const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const appleIsReviewing = remoteConfig().getValue('apple_reviewing')
+  const appleIsReviewing = remoteConfig()
+    .getValue('apple_reviewing')
+    .asBoolean()
 
   return (
     <Box bg="lightGrey" flex={1}>
