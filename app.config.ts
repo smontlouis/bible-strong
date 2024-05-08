@@ -11,12 +11,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
   version: '18.0.0',
-  orientation: 'portrait',
+  orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 375,
+    versionCode: 376,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ??
@@ -35,7 +35,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier:
       process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '163',
+    buildNumber: '164',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ??
       './firebase/dev/GoogleService-Info.plist',
@@ -50,6 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         backgroundColor: '#0F2132',
       },
     },
+    supportsTablet: true,
     infoPlist: {
       NSAppTransportSecurity: {
         NSExceptionDomains: {
@@ -104,6 +105,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         organization: 'sevn-apps',
         project: 'bible-strong',
+      },
+    ],
+    [
+      './plugins/withAndroidUsesFeature.js',
+      {
+        name: 'android.hardware.microphone',
+        attributes: {
+          required: 'false',
+        },
       },
     ],
   ],
