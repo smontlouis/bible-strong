@@ -2,6 +2,7 @@ import { VerseIds, VerseRefContent } from '~common/types'
 import loadBible from '~helpers/loadBible'
 import { VersionCode } from '../state/tabs'
 import verseToReference from './verseToReference'
+import * as Sentry from '@sentry/react-native'
 
 const orderVerses = (verses: VerseIds) => {
   const orderedVersesList = Object.keys(verses).sort((key1, key2) => {
@@ -49,18 +50,22 @@ export default async ({
   const bible = await loadBible(version, position)
 
   selectedVerses.map(async (key, index) => {
-    const [book, chapter, verse] = key.split('-')
-    const text = bible[book][chapter][verse]
-    const inlineVerseContent =
-      hasInlineVerses && index !== selectedVerses.length - 1 ? '' : '\n'
-    const verseNumberContent = hasVerseNumbers ? `${verse}. ` : ''
-    const quoteStartContent = hasQuotes && index === 0 ? '« ' : ''
-    const quoteEndContent =
-      hasQuotes && index === selectedVerses.length - 1 ? ' »' : ''
-
     try {
+      const [book, chapter, verse] = key.split('-')
+      const text = bible[book][chapter][verse]
+      const inlineVerseContent =
+        hasInlineVerses && index !== selectedVerses.length - 1 ? '' : '\n'
+      const verseNumberContent = hasVerseNumbers ? `${verse}. ` : ''
+      const quoteStartContent = hasQuotes && index === 0 ? '« ' : ''
+      const quoteEndContent =
+        hasQuotes && index === selectedVerses.length - 1 ? ' »' : ''
+
       versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent}`
-    } catch {
+    } catch (e) {
+      Sentry.withScope(scope => {
+        scope.setExtra('reference', `${reference} ${version}`)
+        Sentry.captureException('getVersesContent error')
+      })
       versesContent = 'Impossible de charger ce verset.'
     }
   })

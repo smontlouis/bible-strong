@@ -191,7 +191,15 @@ const BibleViewer = ({
     ;(async () => {
       if (settings.commentsDisplay && !comments) {
         const mhyComments = await loadMhyComments(book.Numero, chapter)
-        setComments(JSON.parse(mhyComments.commentaires))
+        try {
+          setComments(JSON.parse(mhyComments.commentaires))
+        } catch (e) {
+          Sentry.withScope(scope => {
+            scope.setExtra('Reference', `${book.Numero}-${chapter}`)
+            scope.setExtra('Comments', mhyComments.commentaires)
+            Sentry.captureException('Comments corrupted')
+          })
+        }
       }
     })()
   }, [])

@@ -252,7 +252,7 @@ class BibleVerseDetailCard extends React.Component {
               renderItem={this.renderItem}
               onSnapToItem={this.onSnapToItem}
               defaultIndex={this.state.strongReferences.findIndex(
-                r => r.Code === this.state.currentStrongReference.Code
+                r => r?.Code === this.state.currentStrongReference?.Code
               )}
             />
           )}

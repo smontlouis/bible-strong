@@ -1,5 +1,6 @@
 import { useAtom, useSetAtom } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
+import * as Sentry from '@sentry/react-native'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
 import TrackPlayer, {
@@ -52,19 +53,28 @@ const events = [
 ]
 
 const getAllTracks = (version: string) => {
-  // @ts-expect-error
-  const bibleVersion = getVersions()[version] as Version
-  const tracks = books.flatMap(book =>
-    [...Array(book.Chapitres).keys()].map(i => ({
-      book,
-      chapter: i + 1,
-      url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
-      title: `${book.Nom} ${i + 1} ${version}`,
-      artist: bibleVersion.name,
-      artwork: require('~assets/images/icon.png'),
-    }))
-  )
-  return tracks
+  try {
+    // @ts-expect-error
+    const bibleVersion = getVersions()[version] as Version
+    const tracks = books.flatMap(book =>
+      [...Array(book.Chapitres).keys()].map(i => ({
+        book,
+        chapter: i + 1,
+        url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
+        title: `${book.Nom} ${i + 1} ${version}`,
+        artist: bibleVersion.name,
+        artwork: require('~assets/images/icon.png'),
+      }))
+    )
+    return tracks
+  } catch (e) {
+    Sentry.withScope(scope => {
+      scope.setExtra('Version', `${version}`)
+      scope.setExtra('Versions', getVersions())
+      Sentry.captureException('getAllTracks error')
+    })
+    return []
+  }
 }
 
 const useLoadSound = ({
