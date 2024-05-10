@@ -12,8 +12,8 @@ import { useBottomSheet } from '~helpers/useBottomSheet'
 import useFuzzy from '~helpers/useFuzzy'
 import { addTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
+import BottomSheetSearchInput from './BottomSheetSearchInput'
 import Modal from './Modal'
-import SearchInput from './SearchInput'
 import { FeatherIcon } from './ui/Icon'
 import Spacer from './ui/Spacer'
 
@@ -56,7 +56,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>{t('Étiquettes')}</Text>
           <Spacer />
-          <SearchInput
+          <BottomSheetSearchInput
             placeholder={t('Chercher ou créer une étiquette')}
             onChangeText={search}
             onDelete={resetSearch}

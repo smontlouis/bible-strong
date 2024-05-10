@@ -8,19 +8,17 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
-import TextInput from '~common/ui/TextInput'
-import useFuzzy from '~helpers/useFuzzy'
 import { useBottomSheet } from '~helpers/useBottomSheet'
-import { hp } from '~helpers/utils'
+import useFuzzy from '~helpers/useFuzzy'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import { multipleTagsModalAtom } from '../state/app'
+import BottomSheetSearchInput from './BottomSheetSearchInput'
 import Modal from './Modal'
-import SearchInput from './SearchInput'
-import Spacer from './ui/Spacer'
 import { FeatherIcon } from './ui/Icon'
+import Spacer from './ui/Spacer'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -99,7 +97,7 @@ const MultipleTagsModal = () => {
               : `${t('Étiquettes pour')} ${highlightTitle}`}
           </Text>
           <Spacer />
-          <SearchInput
+          <BottomSheetSearchInput
             placeholder={t('Chercher ou créer une étiquette')}
             onChangeText={search}
             onDelete={resetSearch}
