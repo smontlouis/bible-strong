@@ -5,4 +5,7 @@ export const ignoreSentryErrors = [
   'SQLite',
   'keep awake',
   'auth/no-current-user',
+  'deleteAsync',
+  'Player does not exist',
+  'The player is not initialized',
 ]

@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { Audio, AVPlaybackStatus } from 'expo-av'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import Box from '~common/ui/Box'
-import { LinkBox } from '~common/Link'
-import { ActivityIndicator } from 'react-native'
-import SnackBar from '~common/SnackBar'
 import to from 'await-to-js'
+import { AVPlaybackStatus, Audio } from 'expo-av'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ActivityIndicator } from 'react-native'
+import { LinkBox } from '~common/Link'
+import Box from '~common/ui/Box'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 
 type AudioStatus = 'Idle' | 'Loading' | 'Playing' | 'Error'
 
@@ -68,7 +67,6 @@ const ListenToStrong = ({ type, code }: Props) => {
           `Encountered a fatal error during playback: ${playbackStatus.error}`
         )
         setAudioStatus('Error')
-        SnackBar.show(t("Impossible de lire l'audio"), 'error')
       }
     } else {
       if (playbackStatus.isPlaying) {

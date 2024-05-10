@@ -20,6 +20,7 @@ import { multipleTagsModalAtom } from '../state/app'
 import Modal from './Modal'
 import SearchInput from './SearchInput'
 import Spacer from './ui/Spacer'
+import { FeatherIcon } from './ui/Icon'
 
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
@@ -33,7 +34,6 @@ const MultipleTagsModal = () => {
   const onClose = () => setItem(false)
 
   const { t } = useTranslation()
-  const [newTag, setNewTag] = useState('')
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
@@ -70,11 +70,11 @@ const MultipleTagsModal = () => {
   )
 
   const saveTag = () => {
-    if (!newTag.trim()) {
+    if (!keyword.trim()) {
       return
     }
-    dispatch(addTag(newTag.trim()))
-    setNewTag('')
+    dispatch(addTag(keyword.trim()))
+    resetSearch()
   }
 
   useEffect(() => {
@@ -100,38 +100,15 @@ const MultipleTagsModal = () => {
           </Text>
           <Spacer />
           <SearchInput
-            placeholder={t('Chercher une étiquette')}
+            placeholder={t('Chercher ou créer une étiquette')}
             onChangeText={search}
             onDelete={resetSearch}
             value={keyword}
             returnKeyType="done"
+            onSubmitEditing={() => (!result.length ? saveTag() : undefined)}
           />
         </Box>
       }
-      footerComponent={() => (
-        <Box
-          row
-          center
-          marginBottom={10}
-          marginLeft={20}
-          marginRight={20}
-          paddingTop={10}
-          paddingBottom={10}
-        >
-          <Box flex>
-            <TextInput
-              placeholder={t('Créer un nouveau tag')}
-              onChangeText={setNewTag}
-              onSubmitEditing={saveTag}
-              returnKeyType="send"
-              value={newTag}
-            />
-          </Box>
-          <TouchableOpacity onPress={saveTag}>
-            <StyledIcon isDisabled={!newTag} name="check" size={30} />
-          </TouchableOpacity>
-        </Box>
-      )}
     >
       <Box flex>
         {result.length ? (
@@ -152,6 +129,15 @@ const MultipleTagsModal = () => {
               ))}
             </Box>
           </ScrollView>
+        ) : keyword ? (
+          <TouchableOpacity onPress={saveTag}>
+            <Box row flex alignItems="center" py={10} px={30}>
+              <FeatherIcon size={20} color="primary" name="tag" />
+              <Text ml={5} width={200} bold color="primary">
+                {t('Créer')} "{keyword}"
+              </Text>
+            </Box>
+          </TouchableOpacity>
         ) : (
           <Box flex center paddingVertical={10}>
             <Text textAlign="center" width={200} bold color="lightPrimary">

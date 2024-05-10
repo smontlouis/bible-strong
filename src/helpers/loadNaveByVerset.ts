@@ -1,5 +1,6 @@
 import { SQLNaveTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError.new'
+import * as Sentry from '@sentry/react-native'
 
 type NaveRefQuery = {
   ref: string
@@ -37,22 +38,30 @@ const fetchData = async (item: string) => {
 }
 
 const loadNaveByVerset = (verse: string) =>
-  catchDatabaseError(async () => {
-    // Fetch for verse
-    const naveReferenceResultForVerse = await fetchData(verse)
+  catchDatabaseError(
+    async () => {
+      // Fetch for verse
+      const naveReferenceResultForVerse = await fetchData(verse)
 
-    // Fetch for chapter
-    const chapter = verse
-      .split('-')
-      .slice(0, -1)
-      .join('-') // 1-1-1 => 1-1
+      // Fetch for chapter
+      const chapter = verse
+        .split('-')
+        .slice(0, -1)
+        .join('-') // 1-1-1 => 1-1
 
-    const naveReferenceResultForChapter = await fetchData(chapter)
+      const naveReferenceResultForChapter = await fetchData(chapter)
 
-    return [naveReferenceResultForVerse, naveReferenceResultForChapter] as [
-      NaveTopicsQuery | undefined,
-      NaveTopicsQuery | undefined
-    ]
-  })
+      return [naveReferenceResultForVerse, naveReferenceResultForChapter] as [
+        NaveTopicsQuery | undefined,
+        NaveTopicsQuery | undefined
+      ]
+    },
+    () => {
+      Sentry.withScope(scope => {
+        scope.setExtra('verse', verse)
+        Sentry.captureMessage('Nave issue')
+      })
+    }
+  )
 
 export default loadNaveByVerset

@@ -2,11 +2,13 @@ import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
 import i18n from '~i18n'
 
-const catchDBError = async <T>(fn: () => Promise<T>) => {
+const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
   try {
     return await fn()
   } catch (e) {
     console.log('Error =>', e)
+
+    cb?.()
 
     if (!e) {
       SnackBar.show(i18n.t('Une error est survenue.'), 'danger', {

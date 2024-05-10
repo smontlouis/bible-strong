@@ -10,6 +10,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import * as Sentry from '@sentry/react-native'
 import { Version, getVersions } from '~helpers/bibleVersions'
 import loadBible from '~helpers/loadBible'
 import AudioContainer from './AudioContainer'
@@ -33,29 +34,6 @@ type UseLoadSoundProps = {
 const soundObject = new Audio.Sound()
 if (Platform.OS === 'ios') {
   soundObject.loadAsync(require('~assets/sounds/empty.mp3'))
-}
-
-const channelConfig = {
-  id: 'text-to-speech',
-  name: 'Text to speech',
-  description: 'Bible Strong TTS Background Service',
-  enableVibration: false,
-}
-
-const startForegroundService = async () => {
-  const notificationConfig = {
-    channelId: 'text-to-speech',
-    id: 3456,
-    title: 'Bible Strong',
-    text: 'TTS Service',
-    icon: 'ic_launcher_round',
-  }
-  try {
-    // TODO Replace this library : @voximplant/react-native-foreground-service
-    // await VIForegroundService.getInstance().startService(notificationConfig)
-  } catch (e) {
-    console.error(e)
-  }
 }
 
 const useLoadSound = ({
@@ -146,79 +124,60 @@ const useLoadSound = ({
   }, [book.Numero, chapter, version])
 
   useEffect(() => {
-    if (isPlaying) {
-      ;(async () => {
-        if (Platform.OS === 'android') {
-          try {
-            await VIForegroundService.getInstance().createNotificationChannel(
-              channelConfig
-            )
-
-            await startForegroundService()
-          } catch {}
-        }
-      })()
-    }
-
-    return () => {
-      ;(async () => {
-        if (Platform.OS === 'android') {
-          try {
-            await VIForegroundService.getInstance().stopService()
-          } catch {}
-        }
-      })()
-    }
-  }, [isPlaying])
-
-  useEffect(() => {
     ;(async () => {
-      if (isPlaying) {
-        setError(false)
-        const bible = await loadBible(version)
-        const verses = bible[book.Numero][chapter]
-        totalVerses.current = Object.keys(verses).length
+      try {
+        if (isPlaying) {
+          setError(false)
+          const bible = await loadBible(version)
+          const verses = bible[book.Numero][chapter]
+          totalVerses.current = Object.keys(verses).length
 
-        // IOS hack to play tts in silent mode
-        if (Platform.OS === 'ios') {
-          await Audio.setAudioModeAsync({
-            playsInSilentModeIOS: true,
-          })
-          if (soundObject._loaded) {
-            await soundObject.playAsync()
-          }
-        }
-
-        Speech.speak(verses[currentVerse.current], {
-          voice: selectedVoice !== 'default' ? selectedVoice : undefined,
-          rate,
-          pitch,
-          onError: () => {
-            setError(true)
-          },
-          onDone: () => {
-            // IOS detects any sound interruption as done
-            if (ignoreSpeechDone.current && Platform.OS === 'ios') {
-              ignoreSpeechDone.current = false
-              return
+          // IOS hack to play tts in silent mode
+          if (Platform.OS === 'ios') {
+            await Audio.setAudioModeAsync({
+              playsInSilentModeIOS: true,
+            })
+            if (soundObject._loaded) {
+              await soundObject.playAsync()
             }
+          }
 
-            if (currentVerse.current === totalVerses.current) {
-              if (isRepeat) {
-                currentVerse.current = 1
-                rerender()
-              } else {
-                onNextChapter({
-                  ignoreDone: false,
-                })
+          Speech.speak(verses[currentVerse.current], {
+            voice: selectedVoice !== 'default' ? selectedVoice : undefined,
+            rate,
+            pitch,
+            onError: () => {
+              setError(true)
+            },
+            onDone: () => {
+              // IOS detects any sound interruption as done
+              if (ignoreSpeechDone.current && Platform.OS === 'ios') {
+                ignoreSpeechDone.current = false
+                return
               }
 
-              return
-            }
+              if (currentVerse.current === totalVerses.current) {
+                if (isRepeat) {
+                  currentVerse.current = 1
+                  rerender()
+                } else {
+                  onNextChapter({
+                    ignoreDone: false,
+                  })
+                }
 
-            currentVerse.current += 1
-            rerender()
-          },
+                return
+              }
+
+              currentVerse.current += 1
+              rerender()
+            },
+          })
+        }
+      } catch {
+        Sentry.withScope(scope => {
+          scope.setExtra('Reference', `${book.Numero}-${chapter} ${version}`)
+          Sentry.captureException('AudioTTSFooter error')
         })
       }
     })()

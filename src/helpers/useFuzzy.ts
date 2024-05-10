@@ -38,7 +38,7 @@ function useFuzzy<T>(
 
   const searcher = useMemo(() => {
     const defaultOptions: Fuse.IFuseOptions<T> = {
-      threshold: 0.3,
+      threshold: 0,
       ignoreFieldNorm: true,
     }
     return new Fuse(data, { ...defaultOptions, ...options, getFn })

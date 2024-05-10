@@ -329,7 +329,7 @@ const AudioUrlFooter = ({
         onNextChapter={hasNextChapter ? onNextChapter : undefined}
         isPlaying={isPlaying}
         isDisabled={disabled}
-        isLoading={isLoading}
+        isLoading={isLoading || !isSetup}
         hasError={error}
       />
     )
@@ -351,7 +351,7 @@ const AudioUrlFooter = ({
         />
         <Box flex center overflow="visible" row>
           <TouchableBox
-            disabled={disabled || isLoading}
+            disabled={disabled || isLoading || !isSetup}
             activeOpacity={0.5}
             onPress={() => TrackPlayer.seekTo(progress.position - 10)}
             width={40}

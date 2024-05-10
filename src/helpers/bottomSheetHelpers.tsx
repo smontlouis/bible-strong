@@ -17,7 +17,7 @@ export const useBottomSheetStyles = () => {
   const containerWidth = 400
   return {
     style: {
-      marginLeft: width / 2 - containerWidth / 2,
+      marginLeft: width > containerWidth ? width / 2 - containerWidth / 2 : 0,
       maxWidth: containerWidth,
       width: '100%',
       borderTopLeftRadius: 30,

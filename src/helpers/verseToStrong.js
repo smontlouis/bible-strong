@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 import BibleStrongReference from '~features/bible/BibleStrongReference'
 import Paragraph from '~common/ui/Paragraph'
 import memoize from './memoize'
+import * as Sentry from '@sentry/react-native'
 
 const verseToStrong = memoize(
   ({ Texte, Livre }, concordanceFor, isSmall) =>
