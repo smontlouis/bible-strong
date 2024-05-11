@@ -121,7 +121,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
 
       const res = await RNFetchBlob.config(options!).fetch(
         'POST',
-        'https://us-central1-bible-strong-app.cloudfunctions.net/exportStudyPDF',
+        `${process.env.EXPO_PUBLIC_API_URL}exportStudyPDF`,
         {
           'Content-Type': 'application/json',
         },

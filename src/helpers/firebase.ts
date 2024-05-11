@@ -10,8 +10,8 @@ storage().setMaxOperationRetryTime(2000)
 storage().setMaxUploadRetryTime(2000)
 storage().setMaxDownloadRetryTime(2000)
 
-export const CDN_URL = 'https://assets.bible-strong.app/'
-export const cdnUrl = (path: string) => `${CDN_URL}${path}`
+export const cdnUrl = (path: string) =>
+  `${process.env.EXPO_PUBLIC_CDN_URL}${path}`
 
 export const databasesRef = {
   MHY: cdnUrl('databases/commentaires-mhy.sqlite'),

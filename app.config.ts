@@ -136,4 +136,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       ],
     },
   },
+  runtimeVersion: '1.0.0',
+  updates: {
+    url: `${process.env.EXPO_PUBLIC_API_URL}/api/expo-up/manifest`,
+    enabled: true,
+    fallbackToCacheTimeout: 30000,
+    requestHeaders: {
+      'x-expo-updates-key': process.env.EXPO_UPDATES_KEY,
+    },
+  },
 })
