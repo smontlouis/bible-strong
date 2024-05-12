@@ -33,9 +33,9 @@ export const Slides = ({ children, index }: SliderProviderProps) => {
   const direction = useSharedValue<'left' | 'right'>('left')
   const prevIndex = usePrevious(index)
 
-  useEffect(() => {
-    isAnimationsEnabled.current = true
-  }, [])
+  // useEffect(() => {
+  //   isAnimationsEnabled.current = true
+  // }, [])
 
   useEffect(() => {
     if (prevIndex !== undefined && prevIndex !== index) {
