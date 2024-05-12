@@ -1,0 +1,36 @@
+{
+  "name": "expo-up",
+  "version": "0.1.1",
+  "description": "CLI Tool for Custom Expo Update",
+  "type": "module",
+  "author": "glncy",
+  "license": "MIT",
+  "bin": "dist/index.js",
+  "scripts": {
+    "build": "rimraf dist && tsc && uglifyjs-folder dist -e -x .js -o dist && chmod +x dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glncy/expo-up.git"
+  },
+  "homepage": "https://github.com/glncy/expo-up",
+  "devDependencies": {
+    "@types/archiver": "^6.0.2",
+    "@types/figlet": "^1.5.8",
+    "@types/node": "^20.11.28",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.2",
+    "uglifyjs-folder": "^3.3.0"
+  },
+  "dependencies": {
+    "@expo/config": "^8.5.4",
+    "archiver": "^7.0.1",
+    "axios": "^1.6.8",
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
+    "figlet": "^1.7.0",
+    "form-data": "^4.0.0",
+    "ora": "^8.0.1"
+  }
+}
