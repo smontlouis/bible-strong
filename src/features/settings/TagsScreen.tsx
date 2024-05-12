@@ -172,7 +172,11 @@ const TagsScreen = () => {
         />
       )}
 
-      <Modal.Body ref={ref} onClose={() => setOpen(false)} enableDynamicSizing>
+      <Modal.Body
+        ref={ref}
+        onModalClose={() => setOpen(false)}
+        enableDynamicSizing
+      >
         <Modal.Item
           bold
           onPress={() => {

@@ -85,7 +85,7 @@ const MultipleTagsModal = () => {
   return (
     <Modal.Body
       ref={ref}
-      onClose={onClose}
+      onModalClose={onClose}
       snapPoints={['50%']}
       headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>

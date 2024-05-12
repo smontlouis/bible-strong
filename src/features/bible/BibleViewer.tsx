@@ -36,6 +36,7 @@ import BibleFooter from './footer/BibleFooter'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -110,15 +111,14 @@ const BibleViewer = ({
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
-  const bibleParamsModalDisclosure = useBottomSheetDisclosure<boolean>()
+  const bibleParamsModal = useBottomSheet()
+  const resourceModal = useBottomSheet()
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
   const openInNewTab = useOpenInNewTab()
   const pericope = useRef()
-  const [resourceType, onChangeResourceType] = useState<BibleResource | null>(
-    null
-  )
+  const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
@@ -319,6 +319,7 @@ const BibleViewer = ({
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
     actions.selectSelectedVerse(ver)
     onChangeResourceType(res)
+    resourceModal.open()
   }
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
@@ -327,7 +328,7 @@ const BibleViewer = ({
       <BibleHeader
         navigation={navigation}
         bibleAtom={bibleAtom}
-        onBibleParamsClick={bibleParamsModalDisclosure.onToggle}
+        onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
         verseFormatted={
           focusVerses ? formatVerses(focusVerses) : verse.toString()
@@ -409,7 +410,10 @@ const BibleViewer = ({
         isVisible={modalIsVisible}
         isSelectionMode={isSelectionMode}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
-        onChangeResourceType={onChangeResourceType}
+        onChangeResourceType={val => {
+          onChangeResourceType(val)
+          resourceModal.open()
+        }}
         onCreateNoteClick={toggleCreateNote}
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
@@ -434,6 +438,7 @@ const BibleViewer = ({
         onClosed={strongModalDisclosure.onClose}
       />
       <ResourcesModal
+        resourceModalRef={resourceModal.ref}
         bibleAtom={bibleAtom}
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
@@ -441,8 +446,7 @@ const BibleViewer = ({
       />
       <BibleParamsModal
         navigation={navigation}
-        onClosed={bibleParamsModalDisclosure.onClose}
-        isOpen={bibleParamsModalDisclosure.isOpen}
+        modalRef={bibleParamsModal.ref}
       />
     </Container>
   )

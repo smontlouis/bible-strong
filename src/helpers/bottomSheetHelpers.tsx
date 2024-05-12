@@ -11,6 +11,13 @@ export const renderBackdrop = (props: BottomSheetBackdropProps) => (
   <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
 )
 
+export const onAnimateModalClose = (onClose?: () => void) => (
+  fromIndex: number,
+  toIndex: number
+) => {
+  if (toIndex === -1) onClose?.()
+}
+
 export const useBottomSheetStyles = () => {
   const theme = useTheme()
   const { width } = useWindowDimensions()

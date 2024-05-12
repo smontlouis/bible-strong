@@ -177,7 +177,7 @@ const HighlightsScreen = () => {
       )}
       <Modal.Body
         ref={ref}
-        onClose={() => setIsSettingsOpen(undefined)}
+        onModalClose={() => setIsSettingsOpen(undefined)}
         enableDynamicSizing
       >
         <Modal.Item
@@ -207,7 +207,7 @@ const HighlightsScreen = () => {
       </Modal.Body>
       <Modal.Body
         ref={ref2}
-        onClose={() => setIsChangeColorOpen(undefined)}
+        onModalClose={() => setIsChangeColorOpen(undefined)}
         enableDynamicSizing
       >
         <Box row my={20} mx={20}>

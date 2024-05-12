@@ -153,7 +153,7 @@ ${currentNote?.description}
   return (
     <Modal.Body
       ref={ref}
-      onClose={onClosed}
+      onModalClose={onClosed}
       topInset={useSafeAreaInsets().top}
       headerComponent={
         <ModalHeader

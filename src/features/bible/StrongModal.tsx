@@ -9,7 +9,10 @@ import Box from '~common/ui/Box'
 import waitForStrongModal from '~common/waitForStrongModal'
 import StrongCard from '~features/bible/StrongCard'
 import { isStrongVersion } from '~helpers/bibleVersions'
-import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import {
+  onAnimateModalClose,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { usePrevious } from '~helpers/usePrevious'
 
@@ -114,7 +117,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
   return (
     <BottomSheet
       ref={modalRef}
-      onClose={onClosed}
+      onAnimate={onAnimateModalClose(onClosed)}
       index={-1}
       snapPoints={[200, '75%']}
       enablePanDownToClose

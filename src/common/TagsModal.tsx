@@ -50,7 +50,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
   return (
     <Modal.Body
       ref={ref}
-      onClose={onClosed}
+      onModalClose={onClosed}
       withPortal
       headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>

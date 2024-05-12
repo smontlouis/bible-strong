@@ -59,7 +59,7 @@ const SelectBibleReferenceModal = ({
   return (
     <Modal.Body
       ref={ref}
-      onClose={onClose}
+      onModalClose={onClose}
       withPortal
       style={{ paddingTop: 40 }}
     >

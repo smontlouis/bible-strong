@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 
 import CommentIcon from '~common/CommentIcon'
@@ -23,7 +23,11 @@ import { shallowEqual, useSelector } from 'react-redux'
 import { BibleResource, VerseIds } from '~common/types'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import { openedFromTabAtom } from '~features/studies/atom'
-import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import {
+  onAnimateModalClose,
+  onChangeModalClose,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
@@ -197,10 +201,14 @@ const VersesModal = ({
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
   const bottomSheetStyles = useBottomSheetStyles()
 
+  const onClose = useCallback(() => {
+    clearSelectedVerses()
+  }, [])
+
   return (
     <BottomSheet
       ref={ref}
-      onClose={clearSelectedVerses}
+      onAnimate={onAnimateModalClose(onClose)}
       index={-1}
       enableDynamicSizing
       enablePanDownToClose

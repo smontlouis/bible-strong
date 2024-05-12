@@ -2,8 +2,9 @@ import React, { memo } from 'react'
 import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
 import Link, { LinkBox } from '~common/Link'
@@ -13,8 +14,11 @@ import Circle from '~common/ui/Circle'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
 import fonts from '~helpers/fonts'
-import { usePrevious } from '~helpers/usePrevious'
 import { RootState } from '~redux/modules/reducer'
 import {
   decreaseSettingsFontSizeScale,
@@ -30,12 +34,6 @@ import {
 } from '~redux/modules/user'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
 
 export const HalfContainer = styled.View<{ border?: boolean }>(
   ({ border, theme }) => ({
@@ -113,18 +111,11 @@ export const useParamsModalLabels = () => {
 }
 
 interface BibleParamsModalprops {
-  isOpen: boolean
-  onClosed: () => void
+  modalRef: React.RefObject<BottomSheet>
   navigation: any
 }
 
-const BibleParamsModal = ({
-  isOpen,
-  onClosed,
-  navigation,
-}: BibleParamsModalprops) => {
-  const isPrevOpen = usePrevious(isOpen)
-  const modalRef = React.useRef<BottomSheet>(null)
+const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const { t } = useTranslation()
 
   const {
@@ -165,14 +156,6 @@ const BibleParamsModal = ({
     (state: RootState) => state.user.bible.settings.press
   )
 
-  React.useEffect(() => {
-    if (isPrevOpen !== isOpen) {
-      if (isOpen) {
-        modalRef?.current?.expand()
-      }
-    }
-  }, [isPrevOpen, isOpen])
-
   const fontsViewRef = React.useRef(null)
   const bottomSheetStyles = useBottomSheetStyles()
 
@@ -180,7 +163,6 @@ const BibleParamsModal = ({
     <BottomSheet
       ref={modalRef}
       index={-1}
-      onClose={onClosed}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
       enableDynamicSizing
@@ -435,7 +417,7 @@ const BibleParamsModal = ({
           row
           onPress={() => {
             navigation.navigate('BibleShareOptions')
-            onClosed()
+            modalRef.current?.close()
           }}
         >
           <Text flex>{t('bible.settings.shareOptions')}</Text>

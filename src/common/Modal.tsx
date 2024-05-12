@@ -10,6 +10,7 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet'
 import {
+  onAnimateModalClose,
   renderBackdrop,
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
@@ -37,6 +38,7 @@ interface ModalBodyProps extends BottomSheetProps {
   withPortal?: boolean
   modalRef?: React.RefObject<BottomSheet>
   style?: any
+  onModalClose?: () => void
 }
 
 interface ItemProps {
@@ -60,6 +62,7 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           snapPoints={['100%']}
           enablePanDownToClose
           backdropComponent={renderBackdrop}
+          onAnimate={onAnimateModalClose(props.onModalClose)}
           {...bottomSheetStyles}
           {...props}
         >

@@ -21,21 +21,23 @@ import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
+import BottomSheet from '@gorhom/bottom-sheet/'
 
 type Props = {
+  resourceModalRef: React.RefObject<BottomSheet>
   resourceType: BibleResource | null
-  onChangeResourceType: (resourceType: BibleResource | null) => void
+  onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>
   isSelectionMode: boolean
 }
 const ResourcesModal = ({
+  resourceModalRef,
   resourceType,
   onChangeResourceType,
   bibleAtom,
   isSelectionMode,
 }: Props) => {
   const { t } = useTranslation()
-  const { ref, open, close } = useBottomSheet()
   const openInNewTab = useOpenInNewTab()
   const bible = useAtomValue(bibleAtom)
 
@@ -43,12 +45,6 @@ const ResourcesModal = ({
     data: { selectedVerses },
   } = bible
   const selectedVerse = Object.keys(selectedVerses)[0]
-
-  useEffect(() => {
-    if (resourceType) {
-      open()
-    }
-  }, [resourceType, open])
 
   const { title } = formatVerseContent([selectedVerse])
 
@@ -108,13 +104,13 @@ const ResourcesModal = ({
 
   return (
     <Modal.Body
-      ref={ref}
+      ref={resourceModalRef}
       headerComponent={
         <ModalHeader
           title={title}
           subTitle={getSubtitleByResourceType()}
           rightComponent={getOptionsByResourceType()}
-          onClose={close}
+          onClose={() => resourceModalRef.current?.close()}
         />
       }
       footerComponent={() => (
@@ -123,7 +119,6 @@ const ResourcesModal = ({
           onChangeResourceType={onChangeResourceType}
         />
       )}
-      onClose={() => onChangeResourceType(null)}
     >
       {resourceType && (
         <Resource
@@ -167,6 +162,8 @@ const Resource = ({
   const updateVerse = (incr: number) => {
     actions.selectSelectedVerse(`${Livre}-${Chapitre}-${Number(Verset) + incr}`)
   }
+
+  if (!selectedVerse) return null
 
   return (
     <Slides index={resources.findIndex(r => r === resourceType)}>

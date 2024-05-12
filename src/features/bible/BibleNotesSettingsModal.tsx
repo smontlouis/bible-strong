@@ -52,7 +52,7 @@ const NotesSettingsModal = ({
   }
 
   return (
-    <Modal.Body ref={ref} onClose={onClosed} enableDynamicSizing>
+    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
       <Modal.Item
         onPress={() => {
           close()

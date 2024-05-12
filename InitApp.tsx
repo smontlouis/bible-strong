@@ -22,6 +22,7 @@ import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
+import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
 interface Props {
   persistor: Persistor
@@ -103,8 +104,14 @@ const InitApp = ({ persistor }: Props) => {
     }
   }, [currentTheme, fontFamily])
 
+  const orientation = useDeviceOrientation()
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView
+      // Reset key to force re-render on orientation change
+      key={`modal${orientation.portrait}`}
+      style={{ flex: 1 }}
+    >
       <SafeAreaProvider>
         <ThemeProvider theme={theme}>
           <MenuProvider
