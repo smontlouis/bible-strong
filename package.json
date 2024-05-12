@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "18.0.2",
+  "version": "18.0.3",
   "scripts": {
     "start": "react-native start",
     "build:android:dev": "dotenv -c development -- eas build -p android --local --profile development --non-interactive",
