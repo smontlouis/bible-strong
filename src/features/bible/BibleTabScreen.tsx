@@ -23,6 +23,7 @@ import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
 import { getDatabases } from '~helpers/databases'
+import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
 interface BibleTabScreenProps {
   navigation: NavigationStackProp
@@ -125,8 +126,12 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
     }
   }, [dispatch, settings.commentsDisplay])
 
+  const orientation = useDeviceOrientation()
+
   return (
     <BibleViewer
+      // Reset key to force re-render on orientation change
+      key={`BibletabScreen${orientation.portrait}`}
       navigation={navigation}
       settings={settings}
       fontFamily={fontFamily}

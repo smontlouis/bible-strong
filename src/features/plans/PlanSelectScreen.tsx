@@ -17,7 +17,7 @@ const PlanSelect = () => {
   const { t } = useTranslation()
   return (
     <Container>
-      <Header hasBackButton title={t('Références')} />
+      <Header hasBackButton title={t('Plans & Méditations')} />
       <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
         <Box flex>
           <SelectTabBar index={index} onChange={setIndex} />

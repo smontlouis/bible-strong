@@ -12,14 +12,12 @@ const TabItem = styled.TouchableOpacity<{ isRouteActive?: boolean }>(
     height: 35,
     marginVertical: 5,
     marginHorizontal: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
     ...(isRouteActive && {
       borderRadius: 8,
       backgroundColor: theme.colors.reverse,
-      shadowColor: 'rgb(89,131,240)',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 7,
-      elevation: 1,
+      borderColor: theme.colors.lightPrimary,
       overflow: 'visible',
     }),
   })

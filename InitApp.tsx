@@ -1,13 +1,13 @@
 import { ThemeProvider } from '@emotion/react'
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
+import { useKeepAwake } from 'expo-keep-awake'
 import React, { memo, useEffect, useMemo } from 'react'
 import { ActivityIndicator, StatusBar, View } from 'react-native'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import ErrorBoundary from '~common/ErrorBoundary'
-import { useKeepAwake } from 'expo-keep-awake'
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -17,12 +17,11 @@ import InitHooks from '~common/InitHooks'
 import { CurrentTheme } from '~common/types'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { DBStateProvider } from '~helpers/databaseState'
+import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
-import getTheme, { baseTheme, Theme } from '~themes/index'
-import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
-import useDeviceOrientation from '~helpers/useDeviceOrientation'
+import getTheme, { Theme, baseTheme } from '~themes/index'
 
 interface Props {
   persistor: Persistor
@@ -104,14 +103,8 @@ const InitApp = ({ persistor }: Props) => {
     }
   }, [currentTheme, fontFamily])
 
-  const orientation = useDeviceOrientation()
-
   return (
-    <GestureHandlerRootView
-      // Reset key to force re-render on orientation change
-      key={`modal${orientation.portrait}`}
-      style={{ flex: 1 }}
-    >
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider theme={theme}>
           <MenuProvider
