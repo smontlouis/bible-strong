@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { useAtom } from 'jotai/react'
+import { useAtomValue } from 'jotai/react'
 import React, { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
@@ -26,10 +26,8 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 }))
 
 const MultipleTagsModal = () => {
-  const [item, setItem] = useAtom(multipleTagsModalAtom)
+  const item = useAtomValue(multipleTagsModalAtom)
   const { ref, open } = useBottomSheet()
-
-  const onClose = () => setItem(false)
 
   const { t } = useTranslation()
   const [highlightTitle, setHighlightTitle] = useState('')
@@ -85,7 +83,6 @@ const MultipleTagsModal = () => {
   return (
     <Modal.Body
       ref={ref}
-      onModalClose={onClose}
       snapPoints={['50%']}
       headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
