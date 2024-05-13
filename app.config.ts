@@ -52,6 +52,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     supportsTablet: true,
     infoPlist: {
+      UIBackgroundModes: ['audio'],
       NSAppTransportSecurity: {
         NSExceptionDomains: {
           'timeline.biblehistory.com': {
@@ -60,6 +61,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     },
+
     entitlements: {
       'com.apple.developer.applesignin': ['Default'],
     },
@@ -72,9 +74,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         ios: {
           useFrameworks: 'static',
-          infoPlist: {
-            UIBackgroundModes: ['audio'],
-          },
         },
         android: {
           compileSdkVersion: 34,
