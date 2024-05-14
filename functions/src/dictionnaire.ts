@@ -1,9 +1,9 @@
-import * as functions from 'firebase-functions'
-const admin = require('firebase-admin')
+import * as admin from 'firebase-admin'
+import { onRequest } from 'firebase-functions/v2/https'
 
-export const dictionnaire = functions.https.onRequest(async (req, res) => {
+export const dictionnaire = onRequest(async (req, res) => {
   try {
-    const word = req.query.word
+    const word = req.query.word as string
 
     if (!word) {
       res.status(400).send({ error: 'id_required' })

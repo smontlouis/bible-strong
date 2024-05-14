@@ -7,7 +7,9 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noEmitOnError": false,
+    "resolveJsonModule": true
   },
   "compileOnSave": true,
   "include": ["src"]

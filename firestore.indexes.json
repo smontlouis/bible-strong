@@ -1,0 +1,46 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "commentaries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isSDA",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "studies",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "user.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "modified_at",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "users",
+      "fieldPath": "bible",
+      "ttl": false,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "users",
+      "fieldPath": "plan",
+      "ttl": false,
+      "indexes": []
+    }
+  ]
+}

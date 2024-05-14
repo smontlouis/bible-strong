@@ -1,7 +1,7 @@
-import * as functions from 'firebase-functions'
-const admin = require('firebase-admin')
+import * as admin from 'firebase-admin'
+import { onRequest } from 'firebase-functions/v2/https'
 
-export const count_verses = functions.https.onRequest(async (req, res) => {
+export const count_verses = onRequest(async (req, res) => {
   try {
     const { book, chapter } = req.query
 
