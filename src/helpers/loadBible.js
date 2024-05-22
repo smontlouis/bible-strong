@@ -71,7 +71,7 @@ export default function loadBible(bible, position) {
       }
     } catch (e) {
       console.log(e)
-      reject('Erreur', e)
+      reject('Erreur loadBible', e)
     }
   })
 }

@@ -3,8 +3,8 @@ import * as FileSystem from 'expo-file-system'
 import { getLangIsFr } from '~i18n'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
-import { getDatabases } from './databases'
-import { databaseInterlineaireName, initSQLiteDir } from './sqlite'
+import { databaseInterlineaireName, getDatabases } from './databases'
+import { initSQLiteDir } from './sqlite'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version

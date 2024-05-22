@@ -62,10 +62,12 @@ export default async ({
 
       versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent}`
     } catch (e) {
-      Sentry.withScope(scope => {
-        scope.setExtra('reference', `${reference} ${version}`)
-        Sentry.captureException('getVersesContent error')
-      })
+      if (version !== 'POV') {
+        Sentry.withScope(scope => {
+          scope.setExtra('reference', `${reference} ${version}`)
+          Sentry.captureException('getVersesContent error')
+        })
+      }
       versesContent = 'Impossible de charger ce verset.'
     }
   })

@@ -31,6 +31,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         backgroundColor: '#102031',
       },
     },
+    adaptiveIcon: {
+      foregroundImage: './assets/images/foreground-image.png',
+      backgroundImage: './assets/images/background-image.png',
+      monochromeImage: './assets/images/icon_notification.png',
+    },
   },
   ios: {
     bundleIdentifier:

@@ -60,9 +60,9 @@ const getAllTracks = (version: string) => {
       [...Array(book.Chapitres).keys()].map(i => ({
         book,
         chapter: i + 1,
-        url: bibleVersion.getAudioUrl?.(book.Numero, i + 1) || '',
+        url: bibleVersion?.getAudioUrl?.(book.Numero, i + 1) || '',
         title: `${book.Nom} ${i + 1} ${version}`,
-        artist: bibleVersion.name,
+        artist: bibleVersion?.name,
         artwork: require('~assets/images/icon.png'),
       }))
     )

@@ -105,7 +105,7 @@ const App = () => {
 
   return (
     <>
-      <StatusBar translucent />
+      <StatusBar translucent backgroundColor="transparent" />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <InitAppWrapper />
       </View>

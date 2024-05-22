@@ -66,6 +66,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
   } = useParamsModalLabels()
 
   const bottomSheetStyles = useBottomSheetStyles()
+  const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
 
   return (
     <BottomSheet
@@ -208,7 +209,9 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
                 offset: 100 * index,
                 index,
               })}
-              initialScrollIndex={fonts.findIndex(f => f === fontFamily)}
+              initialScrollIndex={
+                initialScrollIndex === -1 ? 0 : initialScrollIndex
+              }
               style={{ paddingVertical: 15 }}
               data={['Literata Book', ...fonts]}
               keyExtractor={item => item}

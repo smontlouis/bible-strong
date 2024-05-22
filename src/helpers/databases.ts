@@ -4,14 +4,23 @@ import to from 'await-to-js'
 import { getDatabasesRef } from '~helpers/firebase'
 import i18n, { getLangIsFr } from '~i18n'
 import { getI18n } from 'react-i18next'
-import {
-  databaseDictionnaireName,
-  databaseMhyName,
-  databaseNaveName,
-  databaseStrongName,
-  databaseTresorName,
-  initSQLiteDir,
-} from './sqlite'
+
+export const databaseDictionnaireName = 'dictionnaire.sqlite'
+export const databaseStrongName = 'strong.sqlite'
+export const databaseInterlineaireName = 'interlineaire.sqlite'
+export const databaseTresorName = 'commentaires-tresor.sqlite'
+export const databaseMhyName = 'mhy.sqlite'
+export const databaseNaveName = 'nave.sqlite'
+
+const initSQLiteDir = async () => {
+  const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
+
+  if (!sqliteDir.exists) {
+    await FileSystem.makeDirectoryAsync(sqliteDirPath)
+  } else if (!sqliteDir.isDirectory) {
+    throw new Error('SQLite dir is not a directory')
+  }
+}
 
 const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
 

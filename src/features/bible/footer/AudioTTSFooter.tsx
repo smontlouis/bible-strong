@@ -116,7 +116,7 @@ const useLoadSound = ({
   const audioTitle = `${t(book.Nom)} ${chapter}:${
     currentVerse.current
   } ${version}`
-  const audioSubtitle = bibleVersion.name
+  const audioSubtitle = bibleVersion?.name
 
   useEffect(() => {
     currentVerse.current = 1

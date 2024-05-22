@@ -14,7 +14,12 @@
     "staging": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {},
+    "production-apk": {
+      "android": {
+        "buildType": "apk"
+      }
+    }
   },
   "submit": {
     "production": {}

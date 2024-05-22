@@ -159,6 +159,8 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const fontsViewRef = React.useRef(null)
   const bottomSheetStyles = useBottomSheetStyles()
 
+  const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
+
   return (
     <BottomSheet
       ref={modalRef}
@@ -376,7 +378,9 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
               offset: 100 * index,
               index,
             })}
-            initialScrollIndex={fonts.findIndex(f => f === fontFamily)}
+            initialScrollIndex={
+              initialScrollIndex === -1 ? 0 : initialScrollIndex
+            }
             style={{ paddingVertical: 15 }}
             data={['Literata Book', ...fonts]}
             keyExtractor={item => item}
@@ -403,7 +407,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           row
           onPress={() => {
             navigation.navigate('ModifyColors')
-            onClosed()
+            modalRef.current?.close()
           }}
         >
           <Text flex>{t('Couleurs des surbrillances')}</Text>

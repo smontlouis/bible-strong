@@ -1,13 +1,14 @@
 import * as FileSystem from 'expo-file-system'
 import * as SQLite from 'expo-sqlite'
-import { getDatabases } from './databases'
-
-export const databaseDictionnaireName = 'dictionnaire.sqlite'
-export const databaseStrongName = 'strong.sqlite'
-export const databaseInterlineaireName = 'interlineaire.sqlite'
-export const databaseTresorName = 'commentaires-tresor.sqlite'
-export const databaseMhyName = 'mhy.sqlite'
-export const databaseNaveName = 'nave.sqlite'
+import {
+  databaseDictionnaireName,
+  databaseInterlineaireName,
+  databaseMhyName,
+  databaseNaveName,
+  databaseStrongName,
+  databaseTresorName,
+  getDatabases,
+} from './databases'
 
 class DB {
   db?: SQLite.SQLiteDatabase

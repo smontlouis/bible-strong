@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system'
-import { databaseInterlineaireName } from './sqlite'
+import { databaseInterlineaireName } from './databases'
 
 export const requireBiblePath = (id: string) => {
   if (id === 'INT') {
