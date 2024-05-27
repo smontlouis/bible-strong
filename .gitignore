@@ -79,6 +79,8 @@ node_modules
 .nvm
 /bots/node_modules/
 package-lock.json
+.yarnrc.yml
+.yarn
 
 # OS X
 .DS_Store
