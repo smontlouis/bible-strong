@@ -1,6 +1,6 @@
 import { PortalProvider } from '@gorhom/portal'
 import React from 'react'
-import { createStackNavigator } from 'react-navigation-stack'
+import { createStackNavigator } from '@react-navigation/stack'
 import ChangelogModal from '~common/Changelog'
 import MultipleTagsModal from '~common/MultipleTagsModal'
 import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
@@ -50,71 +50,115 @@ import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 
-export const MainStackNavigator = createStackNavigator(
-  {
-    AppSwitcher: { screen: AppSwitcherScreen },
-    More: { screen: MoreScreen },
-    Home: { screen: HomeScreen },
-    BibleSelect: { screen: BibleSelectScreen },
-    VersionSelector: { screen: VersionSelectorScreen },
-    BibleVerseDetail: { screen: BibleVerseDetailScreen },
-    BibleVerseNotes: { screen: BibleVerseNotesScreen },
-    Highlights: { screen: HighlightScreen },
-    Strong: { screen: StrongScreen },
-    DictionnaireVerseDetail: { screen: DictionnaireVerseDetailScreen },
-    ConcordanceByBook: { screen: ConcordanceByBookScreen },
-    BibleView: { screen: BibleViewScreen },
-    BibleCompareVerses: { screen: BibleCompareVersesScreen },
-    Studies: { screen: StudiesScreen },
-    Lexique: { screen: LexiqueScreen },
-    EditStudy: { screen: EditStudyScreen },
-    DictionnaryDetail: { screen: DictionnaryDetailScreen },
-    Login: { screen: LoginScreen },
-    Support: { screen: SupportScreen },
-    ModifyColors: { screen: ModifyColorsScreen },
-    Changelog: { screen: ChangelogScreen },
-    ImportExport: { screen: ImportExportScreen },
-    Pericope: { screen: PericopeScreen },
-    History: { screen: HistoryScreen },
-    Tags: { screen: TagsScreen },
-    Tag: { screen: TagScreen },
-    Downloads: { screen: DownloadsScreen },
-    Search: { screen: SearchScreen },
-    LocalSearch: { screen: LocalSearchScreen },
-    Register: { screen: RegisterScreen },
-    Dictionnaire: { screen: DictionaryScreen },
-    FAQ: { screen: FAQScreen },
-    Nave: { screen: NaveScreen },
-    NaveDetail: { screen: NaveDetailScreen },
-    NaveWarning: { screen: NaveWarningScreen },
-    ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
-    Plan: { screen: PlanScreen },
-    Plans: { screen: PlanSelectScreen },
-    MyPlanList: { screen: MyPlanListScreen },
-    PlanSlice: { screen: PlanSliceScreen },
-    Timeline: {
-      screen: TimelineScreen,
-      navigationOptions: {
-        gesturesEnabled: false,
-      },
-    },
-    TimelineHome: { screen: TimelineHomeScreen },
-    Concordance: { screen: ConcordanceScreen },
-    Commentaries: { screen: CommentariesScreen },
-    BibleShareOptions: { screen: BibleShareOptionsScreen },
-  },
-  {
-    headerMode: 'none',
-    initialRouteName: 'AppSwitcher',
-  }
-)
+// export const MainStackNavigator = createStackNavigator(
+//   {
+//     AppSwitcher: { screen: AppSwitcherScreen },
+//     More: { screen: MoreScreen },
+//     Home: { screen: HomeScreen },
+//     BibleSelect: { screen: BibleSelectScreen },
+//     VersionSelector: { screen: VersionSelectorScreen },
+//     BibleVerseDetail: { screen: BibleVerseDetailScreen },
+//     BibleVerseNotes: { screen: BibleVerseNotesScreen },
+//     Highlights: { screen: HighlightScreen },
+//     Strong: { screen: StrongScreen },
+//     DictionnaireVerseDetail: { screen: DictionnaireVerseDetailScreen },
+//     ConcordanceByBook: { screen: ConcordanceByBookScreen },
+//     BibleView: { screen: BibleViewScreen },
+//     BibleCompareVerses: { screen: BibleCompareVersesScreen },
+//     Studies: { screen: StudiesScreen },
+//     Lexique: { screen: LexiqueScreen },
+//     EditStudy: { screen: EditStudyScreen },
+//     DictionnaryDetail: { screen: DictionnaryDetailScreen },
+//     Login: { screen: LoginScreen },
+//     Support: { screen: SupportScreen },
+//     ModifyColors: { screen: ModifyColorsScreen },
+//     Changelog: { screen: ChangelogScreen },
+//     ImportExport: { screen: ImportExportScreen },
+//     Pericope: { screen: PericopeScreen },
+//     History: { screen: HistoryScreen },
+//     Tags: { screen: TagsScreen },
+//     Tag: { screen: TagScreen },
+//     Downloads: { screen: DownloadsScreen },
+//     Search: { screen: SearchScreen },
+//     LocalSearch: { screen: LocalSearchScreen },
+//     Register: { screen: RegisterScreen },
+//     Dictionnaire: { screen: DictionaryScreen },
+//     FAQ: { screen: FAQScreen },
+//     Nave: { screen: NaveScreen },
+//     NaveDetail: { screen: NaveDetailScreen },
+//     NaveWarning: { screen: NaveWarningScreen },
+//     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
+//     Plan: { screen: PlanScreen },
+//     Plans: { screen: PlanSelectScreen },
+//     MyPlanList: { screen: MyPlanListScreen },
+//     PlanSlice: { screen: PlanSliceScreen },
+//     Timeline: {
+//       screen: TimelineScreen,
+//       navigationOptions: {
+//         gesturesEnabled: false,
+//       },
+//     },
+//     TimelineHome: { screen: TimelineHomeScreen },
+//     Concordance: { screen: ConcordanceScreen },
+//     Commentaries: { screen: CommentariesScreen },
+//     BibleShareOptions: { screen: BibleShareOptionsScreen },
+//   },
+//   {
+//     headerMode: 'none',
+//     initialRouteName: 'AppSwitcher',
+//   }
+// )
+
+export const MainStackNavigator = createStackNavigator()
 
 const MainStack = props => (
   <PortalProvider>
-    <MainStackNavigator {...props} />
-    <ChangelogModal />
-    <OnBoardingModal />
-    <MultipleTagsModal />
+    <MainStackNavigator.Navigator>
+      <MainStackNavigator.Screen name='AppSwitcher' component={AppSwitcherScreen} />
+      <MainStackNavigator.Screen name='More' component={MoreScreen} />
+      <MainStackNavigator.Screen name='Home' component={HomeScreen} />
+      <MainStackNavigator.Screen name='BibleSelect' component={BibleSelectScreen} />
+      <MainStackNavigator.Screen name='VersionSelector' component={VersionSelectorScreen} />
+      <MainStackNavigator.Screen name='BibleVerseDetail' component={BibleVerseDetailScreen} />
+      <MainStackNavigator.Screen name='BibleVerseNotes' component={BibleVerseNotesScreen} />
+      <MainStackNavigator.Screen name='Highlights' component={HighlightScreen} />
+      <MainStackNavigator.Screen name='Strong' component={StrongScreen} />
+      <MainStackNavigator.Screen name='DictionnaireVerseDetail' component={DictionaryScreen} />
+      <MainStackNavigator.Screen name='ConcordanceByBook' component={ConcordanceByBookScreen} />
+      <MainStackNavigator.Screen name='BibleView' component={BibleViewScreen} />
+      <MainStackNavigator.Screen name='BibleCompareVerses' component={BibleCompareVersesScreen} />
+      <MainStackNavigator.Screen name='Studies' component={StudiesScreen} />
+      <MainStackNavigator.Screen name='Lexique' component={LexiqueScreen} />
+      <MainStackNavigator.Screen name='EditStudy' component={EditStudyScreen} />
+      <MainStackNavigator.Screen name='DictionnaryDetail' component={DictionnaryDetailScreen} />
+      <MainStackNavigator.Screen name='Login' component={LoginScreen} />
+      <MainStackNavigator.Screen name='Support' component={SupportScreen} />
+      <MainStackNavigator.Screen name='ModifyColors' component={ModifyColorsScreen} />
+      <MainStackNavigator.Screen name='Changelog' component={ChangelogScreen} />
+      <MainStackNavigator.Screen name='ImportExport' component={ImportExportScreen} />
+      <MainStackNavigator.Screen name='Pericope' component={PericopeScreen} />
+      <MainStackNavigator.Screen name='History' component={HistoryScreen} />
+      <MainStackNavigator.Screen name='Tags' component={TagsScreen} />
+      <MainStackNavigator.Screen name='Tag' component={TagScreen} />
+      <MainStackNavigator.Screen name='Downloads' component={DownloadsScreen} />
+      <MainStackNavigator.Screen name='Search' component={SearchScreen} />
+      <MainStackNavigator.Screen name='LocalSearch' component={LocalSearchScreen} />
+      <MainStackNavigator.Screen name='Register' component={RegisterScreen} />
+      <MainStackNavigator.Screen name='FAQ' component={FAQScreen} />
+      <MainStackNavigator.Screen name='Nave' component={NaveScreen} />
+      <MainStackNavigator.Screen name='NaveDetail' component={NaveDetailScreen} />
+      <MainStackNavigator.Screen name='NaveWarning' component={NaveWarningScreen} />
+      <MainStackNavigator.Screen name='Plan' component={PlanScreen} />
+      <MainStackNavigator.Screen name='Plans' component={PlanSelectScreen} />
+      <MainStackNavigator.Screen name='MyPlanList' component={MyPlanListScreen} />
+      <MainStackNavigator.Screen name='PlanSlice' component={PlanSliceScreen} />
+      <MainStackNavigator.Screen name='Timeline' component={PlanSliceScreen} />
+
+      {/* <MainStackNavigator {...props} /> */}
+      <ChangelogModal />
+      <OnBoardingModal />
+      <MultipleTagsModal />
+    </MainStackNavigator.Navigator>
   </PortalProvider>
 )
 
