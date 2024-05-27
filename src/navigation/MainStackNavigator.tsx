@@ -113,7 +113,7 @@ export const MainStackNavigator = createStackNavigator()
 
 const MainStack = props => (
   <PortalProvider>
-    <MainStackNavigator.Navigator>
+    <MainStackNavigator.Navigator screenOptions={{ headerMode: undefined }}>
       <MainStackNavigator.Screen name='AppSwitcher' component={AppSwitcherScreen} />
       <MainStackNavigator.Screen name='More' component={MoreScreen} />
       <MainStackNavigator.Screen name='Home' component={HomeScreen} />
@@ -152,7 +152,11 @@ const MainStack = props => (
       <MainStackNavigator.Screen name='Plans' component={PlanSelectScreen} />
       <MainStackNavigator.Screen name='MyPlanList' component={MyPlanListScreen} />
       <MainStackNavigator.Screen name='PlanSlice' component={PlanSliceScreen} />
-      <MainStackNavigator.Screen name='Timeline' component={PlanSliceScreen} />
+      <MainStackNavigator.Screen name='Timeline' component={TimelineScreen} />
+      <MainStackNavigator.Screen name='TimelineHome' component={TimelineHomeScreen} />
+      <MainStackNavigator.Screen name='Concordance' component={ConcordanceScreen} />
+      <MainStackNavigator.Screen name='Commentaries' component={CommentariesScreen} />
+      <MainStackNavigator.Screen name='BibleShareOptions' component={BibleShareOptionsScreen} />
 
       {/* <MainStackNavigator {...props} /> */}
       <ChangelogModal />
