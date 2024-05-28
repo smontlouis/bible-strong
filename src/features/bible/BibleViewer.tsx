@@ -14,7 +14,8 @@ import BibleHeader from './BibleHeader'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+// import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { shallowEqual } from 'recompose'
 import { BibleResource, Verse, VerseIds } from '~common/types'
 import Container from '~common/ui/Container'
@@ -53,7 +54,7 @@ const getPericopeChapter = (pericope, book, chapter) => {
 }
 
 interface BibleViewerProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<any, any>
   bibleAtom: PrimitiveAtom<BibleTab>
   commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
