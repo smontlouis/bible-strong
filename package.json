@@ -131,7 +131,6 @@
     "react-native-view-shot": "3.8.0",
     "react-native-webview": "13.6.4",
     "react-native-youtube-iframe": "^2.1.2",
-    "react-navigation": "^4.0.10",
     "react-navigation-hooks": "^1.1.0",
     "react-redux": "7.1.0",
     "recompose": "^0.30.0",

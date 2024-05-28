@@ -11,7 +11,7 @@ import ErrorBoundary from '~common/ErrorBoundary'
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { NavigationParams, NavigationState } from 'react-navigation'
+// import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
 import InitHooks from '~common/InitHooks'
 import { CurrentTheme } from '~common/types'
@@ -27,52 +27,52 @@ interface Props {
   persistor: Persistor
 }
 
-const getActiveRouteName = (
-  navigationState: NavigationState
-): {
-  route: string
-  params: NavigationParams | undefined
-} => {
-  const route = navigationState.routes[navigationState.index]
-  // dive into nested navigators
-  if (route.routes) {
-    return getActiveRouteName(route)
-  }
-  return {
-    route: route.routeName,
-    params: route.params,
-  }
-}
+// const getActiveRouteName = (
+//   navigationState: NavigationState
+// ): {
+//   route: string
+//   params: NavigationParams | undefined
+// } => {
+//   const route = navigationState.routes[navigationState.index]
+//   // dive into nested navigators
+//   if (route.routes) {
+//     return getActiveRouteName(route)
+//   }
+//   return {
+//     route: route.routeName,
+//     params: route.params,
+//   }
+// }
 
-const onNavigationStateChange = (
-  prevState: NavigationState,
-  currentState: NavigationState
-) => {
-  const { route: currentScreen, params: currentParams } = getActiveRouteName(
-    currentState
-  )
-  const { route: prevScreen, params: prevParams } = getActiveRouteName(
-    prevState
-  )
+// const onNavigationStateChange = (
+//   prevState: NavigationState,
+//   currentState: NavigationState
+// ) => {
+//   const { route: currentScreen, params: currentParams } = getActiveRouteName(
+//     currentState
+//   )
+//   const { route: prevScreen, params: prevParams } = getActiveRouteName(
+//     prevState
+//   )
 
-  if (prevScreen !== currentScreen) {
-    if (!__DEV__) {
-      analytics().logScreenView({
-        screen_class: currentScreen,
-        screen_name: currentScreen,
-      })
-    }
+//   if (prevScreen !== currentScreen) {
+//     if (!__DEV__) {
+//       analytics().logScreenView({
+//         screen_class: currentScreen,
+//         screen_name: currentScreen,
+//       })
+//     }
 
-    Sentry.addBreadcrumb({
-      category: 'screen',
-      message: `From: ${prevScreen} To: ${currentScreen}`,
-      data: {
-        prevRoute: { prevScreen, prevParams },
-        currentRoute: { currentScreen, currentParams },
-      },
-    })
-  }
-}
+//     Sentry.addBreadcrumb({
+//       category: 'screen',
+//       message: `From: ${prevScreen} To: ${currentScreen}`,
+//       data: {
+//         prevRoute: { prevScreen, prevParams },
+//         currentRoute: { currentScreen, currentParams },
+//       },
+//     })
+//   }
+// }
 
 const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
   if (['mauve', 'dark', 'night', 'black'].includes(currentTheme))
@@ -136,7 +136,7 @@ const InitApp = ({ persistor }: Props) => {
                     <AppSwitcherProvider>
                       <InitHooks />
                       <AppNavigator
-                        onNavigationStateChange={onNavigationStateChange}
+                        // onNavigationStateChange={onNavigationStateChange}
                       />
                     </AppSwitcherProvider>
                   </ErrorBoundary>
