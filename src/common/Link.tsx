@@ -1,12 +1,14 @@
 import React, { Component, PropsWithChildren } from 'react'
 import { TouchableOpacity, Linking, Share } from 'react-native'
-import { withNavigation } from 'react-navigation'
+// import { withNavigation } from 'react-navigation'
+import { withNavigation } from '@react-navigation/compat'
 
 import Box, { BoxProps } from '~common/ui/Box'
-import { NavigationStackProp } from 'react-navigation-stack'
+//import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 
 interface LinkProps {
-  navigation?: NavigationStackProp<any, any>
+  navigation?: StackNavigationProp<any, any>
   route?: string
   href?: string
   share?: string
