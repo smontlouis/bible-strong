@@ -1,5 +1,6 @@
 import React, { createRef } from 'react'
-import { withNavigation } from 'react-navigation'
+// import { withNavigation } from 'react-navigation'
+import { useNavigation } from '@react-navigation/native'
 import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
@@ -14,6 +15,7 @@ import studiesHTML from './studiesWebView/studiesHTML'
 
 class WebViewQuillEditor extends React.Component {
   webViewRef = createRef()
+  navigation = useNavigation()
 
   state = {
     isKeyboardOpened: false,
@@ -108,7 +110,7 @@ class WebViewQuillEditor extends React.Component {
   }
 
   handleMessage = event => {
-    const { navigation } = this.props
+    // const { navigation } = this.props
     let msgData
     try {
       msgData = JSON.parse(event.nativeEvent.data)
@@ -296,4 +298,5 @@ WebViewQuillEditor.defaultProps = {
   theme: 'snow',
 }
 
-export default withNavigation(WebViewQuillEditor)
+export default WebViewQuillEditor
+// export default withNavigation(WebViewQuillEditor)
