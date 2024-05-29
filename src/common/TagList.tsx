@@ -1,6 +1,7 @@
 import styled from '@emotion/native'
 import React from 'react'
-import { withNavigation } from 'react-navigation'
+// import { withNavigation } from 'react-navigation'
+import { useNavigation } from '@react-navigation/native'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -18,7 +19,9 @@ const Tag = styled(Box)(({ theme }) => ({
   marginTop: 5,
 }))
 
-const TagList = ({ tags, limit, navigation }) => {
+const TagList = ({ tags, limit }) => {
+  const navigation = useNavigation()
+
   if (!tags || !Object.values(tags).length) {
     return null
   }
@@ -68,4 +71,5 @@ const TagList = ({ tags, limit, navigation }) => {
   )
 }
 
-export default withNavigation(TagList)
+export default TagList
+// export default withNavigation(TagList)
