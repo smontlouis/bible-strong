@@ -4,8 +4,10 @@ import { Image } from 'expo-image'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import { withNavigation } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
+// import { withNavigation } from 'react-navigation'
+// import { NavigationStackProp } from 'react-navigation-stack'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import truncHTML from 'trunc-html'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
 import Link, { LinkBox } from '~common/Link'
@@ -28,7 +30,7 @@ const findBookNumber = (bookName: string) => {
 }
 
 interface Props {
-  navigation: NavigationStackProp<any, any>
+  navigation: StackNavigationProp<any, any>
   comment: CommentProps | EGWComment
 }
 
@@ -99,7 +101,8 @@ const useFrenchTranslation = (id: string) => {
 
 const fastImageStyle = { width: 40, height: 40 }
 
-const Comment = ({ comment, navigation }: Props) => {
+const Comment = ({ comment }: Props) => {
+  const navigation = useNavigation()
   const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
@@ -256,4 +259,5 @@ https://bible-strong.app
   )
 }
 
-export default withNavigation(memo(Comment))
+export default memo(Comment)
+// export default withNavigation(memo(Comment))
