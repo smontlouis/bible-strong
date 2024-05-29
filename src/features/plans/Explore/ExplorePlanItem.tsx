@@ -4,8 +4,10 @@ import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { NavigationParams, withNavigation } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
+// import { NavigationParams, withNavigation } from 'react-navigation'
+// import { NavigationStackProp } from 'react-navigation-stack'
+import { useNavigation, RouteProp } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import SnackBar from '~common/SnackBar'
@@ -27,9 +29,10 @@ const ExplorePlanItem = ({
   image,
   author,
   type,
-  navigation,
+  // navigation,
   featured,
-}: OnlinePlan & { navigation: NavigationStackProp<any, NavigationParams> }) => {
+}/*: OnlinePlan & { navigation: StackNavigationProp<any, >> }*/) => {
+  const navigation = useNavigation()
   const { t } = useTranslation()
   const modalRef = React.useRef<BottomSheet>(null)
   const planImage = useFireStorage(image)
@@ -142,4 +145,5 @@ const ExplorePlanItem = ({
   )
 }
 
-export default withNavigation(ExplorePlanItem)
+// export default withNavigation(ExplorePlanItem)
+export default ExplorePlanItem

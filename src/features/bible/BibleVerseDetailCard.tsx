@@ -20,7 +20,8 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { withTranslation } from 'react-i18next'
-import { withNavigation } from 'react-navigation'
+// import { withNavigation } from 'react-navigation'
+import { useNavigation } from '@react-navigation/native'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { hp, wp } from '~helpers/utils'
@@ -76,6 +77,8 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
 }))
 
 class BibleVerseDetailCard extends React.Component {
+  navigation = useNavigation()
+
   state = {
     error: false,
     isCarouselLoading: true,
@@ -153,7 +156,7 @@ class BibleVerseDetailCard extends React.Component {
       <StrongCard
         theme={this.props.theme}
         isSelectionMode={this.props.isSelectionMode}
-        navigation={this.props.navigation}
+        navigation={this.navigation}
         book={this.props.verse.Livre}
         strongReference={item}
         index={index}
@@ -266,5 +269,5 @@ export default compose(
   withTheme,
   withTranslation(),
   waitForStrongDB(),
-  withNavigation
+  // withNavigation
 )(BibleVerseDetailCard)
