@@ -1,23 +1,18 @@
 import React from 'react'
 import { atom } from 'jotai/vanilla'
 import { useMemo } from 'react'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
-import { StrongReference } from '~common/types'
+import { StackScreenProps } from '@react-navigation/stack'
 import { StrongTab } from '../../state/tabs'
 import StrongTabScreen from './StrongTabScreen'
-
-interface StrongScreenProps {
-  book: number
-  reference: string
-  strongReference: StrongReference
-}
+import { MainStackProps } from '~navigation/type'
 
 const StrongScreen = ({
   navigation,
-}: NavigationStackScreenProps<StrongScreenProps>) => {
-  const book = navigation.getParam('book')
-  const reference = navigation.getParam('reference')
-  let strongReference = navigation.getParam('strongReference')
+  route
+}: StackScreenProps<MainStackProps, 'Strong'>) => {
+  const book = route.params.book // navigation.getParam('book')
+  const reference = route.params.reference // navigation.getParam('reference')
+  let strongReference = route.params.strongReference // navigation.getParam('strongReference')
 
   const onTheFlyAtom = useMemo(
     () =>

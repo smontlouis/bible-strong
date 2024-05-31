@@ -2,7 +2,6 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
@@ -19,7 +18,7 @@ interface BibleSelectProps {
 
 const BibleSelectScreen = ({
   navigation,
-}: NavigationStackScreenProps<BibleSelectProps>) => {
+}: /*NavigationStackScreenProps<BibleSelectProps>*/any) => {
   const bibleAtom = navigation.getParam('bibleAtom')
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)

@@ -7,21 +7,18 @@ import {
   ShallowTimelineSection,
 } from './types'
 
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { useQuery } from '~helpers/react-query-lite'
 import { getEvents } from './events'
+import { MainStackProps } from '~navigation/type'
 
 const omitEvents = ({
   events,
   ...rest
 }: TimelineSectionProps): ShallowTimelineSection => rest
 
-interface Props {
-  navigation: NavigationStackProp<{ goTo: number }>
-}
-
-const Timeline = ({ navigation }: Props) => {
-  const goTo = navigation.getParam('goTo', 0)
+const Timeline = ({ route }: StackScreenProps<MainStackProps, 'Timeline'>) => {
+  const goTo = route.params.goTo // navigation.getParam('goTo', 0)
 
   const [current, setCurrent] = React.useState(goTo)
   const [entrance, setEntrance] = React.useState<0 | 1>(1)

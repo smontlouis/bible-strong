@@ -4,8 +4,6 @@ import { Image } from 'expo-image'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-// import { withNavigation } from 'react-navigation'
-// import { NavigationStackProp } from 'react-navigation-stack'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import truncHTML from 'trunc-html'
@@ -22,6 +20,7 @@ import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
+import { MainStackProps } from '~navigation/type'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -30,7 +29,7 @@ const findBookNumber = (bookName: string) => {
 }
 
 interface Props {
-  navigation: StackNavigationProp<any, any>
+  navigation: StackNavigationProp<MainStackProps, 'BibleView'>
   comment: CommentProps | EGWComment
 }
 
@@ -101,8 +100,7 @@ const useFrenchTranslation = (id: string) => {
 
 const fastImageStyle = { width: 40, height: 40 }
 
-const Comment = ({ comment }: Props) => {
-  const navigation = useNavigation()
+const Comment = ({ comment, navigation }: Props) => {
   const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
@@ -127,16 +125,24 @@ const Comment = ({ comment }: Props) => {
       book = findBookNumber(book.substr(0, 3).toUpperCase())
       const [chapter, verse] = numbers.split('.')
 
-      navigation.navigate({
-        routeName: 'BibleView',
-        params: {
-          isReadOnly: true,
-          book: Number(book),
-          chapter: Number(chapter),
-          verse: Number(verse),
-        },
-        key: `bible-view-${book}-${chapter}-${verse}`,
-      })
+      navigation.navigate('BibleView', {
+        isReadOnly: true,
+        book: Number(book),
+        chapter: Number(chapter),
+        verse: Number(verse),
+        version: 'LSG', // TODO : parse version or get default version
+      });
+
+      // navigation.navigate({
+      //   routeName: 'BibleView',
+      //   params: {
+      //     isReadOnly: true,
+      //     book: Number(book),
+      //     chapter: Number(chapter),
+      //     verse: Number(verse),
+      //   },
+      //   key: `bible-view-${book}-${chapter}-${verse}`,
+      // })
     }
   }
 
@@ -260,4 +266,3 @@ https://bible-strong.app
 }
 
 export default memo(Comment)
-// export default withNavigation(memo(Comment))

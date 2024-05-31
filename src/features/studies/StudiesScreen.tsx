@@ -1,18 +1,16 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { StudyTab } from '../../state/tabs'
 import StudiesTabScreen from './StudiesTabScreen'
-
-interface StudiesScreenProps {
-  studyId?: string
-}
+import { MainStackProps } from '~navigation/type'
 
 const StudiesScreen = ({
   navigation,
-}: NavigationStackScreenProps<StudiesScreenProps>) => {
-  const studyId = navigation.getParam('studyId')
+  route
+}: StackScreenProps<MainStackProps, 'Studies'>) => {
+  const studyId = route.params.studyId
 
   const onTheFlyAtom = useMemo(
     () =>

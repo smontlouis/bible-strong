@@ -19,10 +19,11 @@ import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import waitForStrongDB from '~common/waitForStrongDB'
 import { StrongsTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
+import { MainStackProps } from '~navigation/type'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -51,14 +52,14 @@ const useSectionResults = results => {
 }
 
 interface StrongsTabScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'Strong'>
   strongsAtom: PrimitiveAtom<StrongsTab>
   hasBackButton?: boolean
 }
 
 const LexiqueTabScreen = ({
   strongsAtom,
-  navigation,
+  navigation, // not use
   hasBackButton,
 }: StrongsTabScreenProps) => {
   const { t } = useTranslation()

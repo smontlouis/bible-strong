@@ -3,7 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import books from '~assets/bible_versions/books-desc'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -33,11 +33,11 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 interface Props {
-  navigation: NavigationStackProp<any>
+  navigation: StackNavigationProp<any>
 }
 
 const ConcordanceScreen = ({ navigation }: Props) => {
-  const strongReference = navigation.getParam('strongReference', {})
+  const strongReference =  navigation.getParam('strongReference', {})
   const book = navigation.getParam('book', 0)
 
   const { data: versesCountByBook, status } = useAsync(

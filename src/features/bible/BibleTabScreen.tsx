@@ -16,7 +16,6 @@ import sunsetColors from '~themes/sunsetColors'
 import BibleViewer from './BibleViewer'
 const deepmerge = require('@fastify/deepmerge')()
 
-// import { NavigationStackProp } from 'react-navigation-stack'
 import { StackNavigationProp } from '@react-navigation/stack'
 
 import { PrimitiveAtom } from 'jotai/vanilla'

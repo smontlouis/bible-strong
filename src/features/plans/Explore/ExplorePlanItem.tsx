@@ -1,11 +1,10 @@
+// TODO : type nested screen
 import BottomSheet from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-// import { NavigationParams, withNavigation } from 'react-navigation'
-// import { NavigationStackProp } from 'react-navigation-stack'
 import { useNavigation, RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useDispatch, useSelector } from 'react-redux'

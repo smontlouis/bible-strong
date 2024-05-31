@@ -1,5 +1,4 @@
 import React from 'react'
-import { NavigationStackProp } from 'react-navigation-stack'
 import { useDispatch, useSelector } from 'react-redux'
 import MenuOption from '~common/ui/MenuOption'
 
@@ -27,10 +26,8 @@ import ReadButton from './ReadButton'
 import Slice from './Slice'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import BottomSheet from '@gorhom/bottom-sheet'
-
-interface Props {
-  navigation: NavigationStackProp<{ readingSlice: ComputedReadingSlice }>
-}
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -43,16 +40,14 @@ const extractTitle = (slice: EntitySlice) => {
   }
 }
 
-const PlanSliceScreen = ({ navigation }: Props) => {
+const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
   const {
     id,
     title,
-    planId,
     slices,
-  }: ComputedReadingSlice & { planId: string } = navigation.getParam(
-    'readingSlice',
-    {}
-  )
+  }: ComputedReadingSlice = route.params.readingSlice || {}
+  const planId = route.params.planId
+
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const paramsModalRef = React.useRef<BottomSheet>(null)
@@ -139,10 +134,13 @@ const PlanSliceScreen = ({ navigation }: Props) => {
                 </MenuOption>
                 <MenuOption
                   onSelect={() =>
-                    navigation.navigate({
-                      routeName: 'VersionSelector',
-                      params: { bibleAtom: defaultBibleAtom },
+                    navigation.navigate('VersionSelector', {
+                      bibleAtom: defaultBibleAtom,
                     })
+                    // navigation.navigate({
+                    //   routeName: 'VersionSelector',
+                    //   params: { bibleAtom: defaultBibleAtom },
+                    // })
                   }
                 >
                   <Box row alignItems="center">

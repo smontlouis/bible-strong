@@ -1,3 +1,4 @@
+// TODO : is this file still in use ? If not, remove it
 import React, { useState, useEffect } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
@@ -21,7 +22,7 @@ import {
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import DictionnaireItem from './DictionnaireItem'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { DictionariesTab } from '../../state/tabs'
 
@@ -56,7 +57,7 @@ const useSectionResults = results => {
 }
 
 interface DictionariesTabScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<any>
   dictionariesAtom: PrimitiveAtom<DictionariesTab>
   hasBackButton?: boolean
 }

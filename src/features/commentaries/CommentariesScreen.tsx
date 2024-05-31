@@ -1,18 +1,16 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
-
-interface CommentariesScreenProps {
-  verse: string
-}
+import { MainStackProps } from '~navigation/type'
 
 const CommentariesScreen = ({
   navigation,
-}: NavigationStackScreenProps<CommentariesScreenProps>) => {
-  const verse = navigation.getParam('verse')
+  route
+}: StackScreenProps<MainStackProps, 'Commentaries'>) => {
+  const verse = route.params.verse // navigation.getParam('verse')
 
   const onTheFlyAtom = useMemo(
     () =>

@@ -1,8 +1,12 @@
 import { PortalProvider } from '@gorhom/portal'
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
+
+import { MainStackProps } from '~navigation/type'
+
 import ChangelogModal from '~common/Changelog'
 import MultipleTagsModal from '~common/MultipleTagsModal'
+
 import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleSelectScreen from '~features/bible/BibleSelectScreen'
@@ -50,7 +54,7 @@ import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 
-export const MainStackNavigator = createStackNavigator()
+export const MainStackNavigator = createStackNavigator<MainStackProps>()
 
 const MainStack = props => (
   <PortalProvider>

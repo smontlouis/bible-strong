@@ -13,7 +13,6 @@ import { CarouselProvider } from '~helpers/CarouselContext'
 import loadBible from '~helpers/loadBible'
 
 import { useTranslation } from 'react-i18next'
-// import { useNavigation } from 'react-navigation-hooks'
 import { useNavigation } from '@react-navigation/native'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'

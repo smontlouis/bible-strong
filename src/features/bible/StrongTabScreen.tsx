@@ -31,7 +31,7 @@ import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
@@ -40,6 +40,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { RootState } from '~redux/modules/reducer'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { MainStackProps } from '~navigation/type'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -63,7 +64,7 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 interface StrongScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'Strong'>
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
@@ -179,11 +180,18 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   }
 
   const linkToStrong = (url: string, ref: number) => {
-    navigation.navigate({
-      routeName: 'Strong',
-      params: { book, reference: ref },
-      key: `bible-strong-detail-${ref}`,
-    })
+    // TODO : check if there is a missing parameter
+    navigation.navigate("Strong", { 
+      book,
+      reference: ref.toString(),
+      strongReference: strongReferenceParam
+    });
+
+    // navigation.navigate({
+    //   routeName: 'Strong',
+    //   params: { book, reference: ref },
+    //   key: `bible-strong-detail-${ref}`,
+    // })
   }
 
   const {

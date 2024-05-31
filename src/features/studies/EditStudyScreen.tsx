@@ -4,7 +4,8 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/native'
 import { StudyNavigateBibleType } from '~common/types'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
@@ -14,24 +15,27 @@ import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
+import { MainStackProps } from '~navigation/type'
 
 type WithStudyProps = {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
+  route: RouteProp<MainStackProps, 'EditStudy'>
   studyId: string
   canEdit?: boolean
   hasBackButton?: boolean
   openedFromTab?: boolean
 }
 
+// TODO : way to complex, need to be refactored
 const withStudy = (
   Component: React.ComponentType<WithStudyProps>
-): React.ComponentType<WithStudyProps> => ({ navigation, ...props }) => {
+): React.ComponentType<WithStudyProps> => ({ navigation, route, ...props }) => {
   const dispatch = useDispatch()
   const [studyId, setStudyId] = useState('')
   const { t } = useTranslation()
 
-  let studyIdParam = navigation.getParam('studyId')
-  let canEdit = navigation.getParam('canEdit')
+  let studyIdParam = route.params.studyId // navigation.getParam('studyId')
+  let canEdit = route.params.canEdit // navigation.getParam('canEdit')
 
   if (!studyIdParam) {
     studyIdParam = props.studyId
@@ -78,7 +82,7 @@ const EditStudyScreen = ({
   canEdit,
   hasBackButton,
   openedFromTab,
-}: WithStudyProps) => {
+}: WithStudyProps ) => {
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
   const [titlePrompt, setTitlePrompt] = useState<
     { id: string; title: string } | false

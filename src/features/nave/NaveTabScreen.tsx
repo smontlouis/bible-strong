@@ -24,9 +24,10 @@ import {
   useResultsByLetterOrSearch,
 } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { NavesTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { MainStackProps } from '~navigation/type'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -55,7 +56,7 @@ const useSectionResults = results => {
 }
 
 interface NaveTabScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'Nave'>
   navesAtom: PrimitiveAtom<NavesTab>
   hasBackButton?: boolean
 }

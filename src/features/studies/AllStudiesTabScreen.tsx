@@ -14,7 +14,6 @@ import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
 
 import { useTranslation } from 'react-i18next'
-// import { useNavigation } from 'react-navigation-hooks'
 import { useNavigation } from '@react-navigation/native'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'

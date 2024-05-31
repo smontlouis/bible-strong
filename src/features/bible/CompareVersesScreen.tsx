@@ -1,18 +1,19 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
 import CompareVersesTabScreen from './CompareVersesTabScreen'
 
-interface CompareVersesScreenProps {
+type CompareVersesScreenProps = {
   selectedVerses: SelectedVerses
 }
 
 const CompareVersesScreen = ({
   navigation,
-}: NavigationStackScreenProps<CompareVersesScreenProps>) => {
-  const { selectedVerses } = navigation.state.params || {}
+  route
+}: StackScreenProps<CompareVersesScreenProps>) => {
+  const { selectedVerses } = route.params || {} // navigation.state.params || {}
 
   const onTheFlyAtom = useMemo(
     () =>
