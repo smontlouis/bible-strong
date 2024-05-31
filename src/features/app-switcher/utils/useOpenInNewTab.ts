@@ -1,6 +1,6 @@
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { useNavigation } from 'react-navigation-hooks'
+import { useNavigation } from '@react-navigation/native'
 import Snackbar from '~common/SnackBar'
 import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'

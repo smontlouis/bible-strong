@@ -2,13 +2,10 @@
 import React from 'react';
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import { NavigationContainer, useNavigationContainerRef, Route } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef, Route, NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import MainStackNavigator from './MainStackNavigator'
 
-const navigationRef = useNavigationContainerRef();
-const routeNameRef = React.useRef<Route<string>>();
-
-const setCurrentRoute = () => {
+const setCurrentRoute = (navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>, routeNameRef: React.MutableRefObject<Route<string> | undefined>) => {
     const current_route = navigationRef.getCurrentRoute()
     if (current_route == undefined)
         return;
@@ -16,7 +13,7 @@ const setCurrentRoute = () => {
     routeNameRef.current = current_route;
 }
 
-const onNavigationStateChange = () => {
+const onNavigationStateChange = (navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>, routeNameRef: React.MutableRefObject<Route<string> | undefined>) => {
     const current_route = navigationRef.getCurrentRoute()
 
     if (routeNameRef.current == undefined) return;
@@ -45,8 +42,14 @@ const onNavigationStateChange = () => {
 }
 
 function AppNavigator() {
+    const navigationRef = useNavigationContainerRef();
+    const routeNameRef = React.useRef<Route<string>>();
+
     return (
-        <NavigationContainer ref={navigationRef} onReady={setCurrentRoute} onStateChange={onNavigationStateChange}>
+        <NavigationContainer
+            ref={navigationRef} 
+            onReady={() => setCurrentRoute(navigationRef, routeNameRef)}
+            onStateChange={() => onNavigationStateChange(navigationRef, routeNameRef)}>
             <MainStackNavigator />
         </NavigationContainer>
     );

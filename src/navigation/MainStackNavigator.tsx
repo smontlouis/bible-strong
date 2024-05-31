@@ -159,10 +159,10 @@ const MainStack = props => (
       <MainStackNavigator.Screen name='BibleShareOptions' component={BibleShareOptionsScreen} {...props} />
 
       {/* <MainStackNavigator {...props} /> */}
-      <ChangelogModal />
-      <OnBoardingModal />
-      <MultipleTagsModal />
     </MainStackNavigator.Navigator>
+    <ChangelogModal />
+    <OnBoardingModal />
+    <MultipleTagsModal />
   </PortalProvider>
 )
 

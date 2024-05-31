@@ -1,7 +1,7 @@
 import React, { Component, PropsWithChildren } from 'react'
 import { TouchableOpacity, Linking, Share } from 'react-native'
 // import { withNavigation } from 'react-navigation'
-import { withNavigation } from '@react-navigation/compat'
+// import { useNavigation } from '@react-navigation/native'
 
 import Box, { BoxProps } from '~common/ui/Box'
 //import { NavigationStackProp } from 'react-navigation-stack'
@@ -21,9 +21,12 @@ interface LinkProps {
   size?: number
 }
 class Link extends Component<LinkProps> {
+  // navigation = useNavigation()
+  navigation = this.props.navigation
+
   handlePress = () => {
     const {
-      navigation,
+      // navigation,
       route,
       href,
       share,
@@ -36,15 +39,15 @@ class Link extends Component<LinkProps> {
         onPress()
         setTimeout(() => {
           replace
-            ? navigation?.replace(route, params)
-            : navigation?.navigate(route, params)
+            ? this.navigation?.replace(route, params)
+            : this.navigation?.navigate(route, params)
         }, 300)
 
         return
       }
       replace
-        ? navigation?.replace(route, params)
-        : navigation?.navigate(route, params)
+        ? this.navigation?.replace(route, params)
+        : this.navigation?.navigate(route, params)
     }
     if (href) {
       Linking.openURL(href)
@@ -97,6 +100,7 @@ type LinkBoxProps = React.FC<BoxProps & LinkProps>
 export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
 // @ts-ignore
-export default withNavigation(Link) as (
-  x: PropsWithChildren<LinkProps>
-) => JSX.Element
+// export default withNavigation(Link) as (
+//   x: PropsWithChildren<LinkProps>
+// ) => JSX.Element
+export default Link as (x: PropsWithChildren<LinkProps>) => JSX.Element
