@@ -1,7 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai/react'
 import React, { memo, useMemo } from 'react'
 import { View } from 'react-native'
-// import { NavigationStackProp } from 'react-navigation-stack'
 import { StackNavigationProp } from '@react-navigation/stack'
 import useDynamicRefs from '~helpers/useDynamicRefs'
 import { cachedTabIdsAtom, tabsAtomsAtom } from '../../state/tabs'

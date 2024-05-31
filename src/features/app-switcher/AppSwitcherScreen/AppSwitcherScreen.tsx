@@ -1,6 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useRef } from 'react'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { BackHandler } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -36,7 +35,7 @@ const AppSwitcherScreen = memo(
     navigation,
     openMenu,
     openHome,
-  }: NavigationStackScreenProps<{}> & AppSwitcherProps) => {
+  }: /*NavigationStackScreenProps<{}>*/any & AppSwitcherProps) => {
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()

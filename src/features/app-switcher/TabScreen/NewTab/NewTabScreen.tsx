@@ -2,7 +2,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -11,7 +11,7 @@ import NewTabItem from './NewTabItem'
 
 export interface NewTabScreenProps {
   newAtom: PrimitiveAtom<NewTab>
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<any>
 }
 
 const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {

@@ -11,7 +11,6 @@ import ErrorBoundary from '~common/ErrorBoundary'
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-// import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
 import InitHooks from '~common/InitHooks'
 import { CurrentTheme } from '~common/types'
@@ -135,9 +134,7 @@ const InitApp = ({ persistor }: Props) => {
                   <ErrorBoundary>
                     <AppSwitcherProvider>
                       <InitHooks />
-                      <AppNavigator
-                        // onNavigationStateChange={onNavigationStateChange}
-                      />
+                      <AppNavigator />
                     </AppSwitcherProvider>
                   </ErrorBoundary>
                 </DBStateProvider>

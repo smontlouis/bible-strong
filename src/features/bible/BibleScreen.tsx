@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 import books, { Book } from '~assets/bible_versions/books-desc'
 
 import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import {
   BibleTab,
   defaultBibleAtom,
@@ -26,7 +26,7 @@ interface BibleScreenProps {
 
 const BibleScreen = ({
   navigation,
-}: NavigationStackScreenProps<BibleScreenProps>) => {
+}: /*NavigationStackScreenProps<BibleScreenProps>*/any) => {
   const {
     focusVerses,
     isSelectionMode,

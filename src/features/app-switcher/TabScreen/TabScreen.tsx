@@ -4,7 +4,7 @@ import React, { forwardRef, memo } from 'react'
 import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'
 
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleTabScreen from '~features/bible/BibleTabScreen'
@@ -92,7 +92,7 @@ const getComponentTab = (tab: TabItem) => {
 
 export type TabScreenProps = {
   tabAtom: PrimitiveAtom<TabItem>
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<any>
 }
 
 const TabScreen = forwardRef<View, TabScreenProps>(

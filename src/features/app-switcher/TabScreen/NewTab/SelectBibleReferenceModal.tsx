@@ -1,8 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
-// import { withNavigation } from 'react-navigation'
-// import { NavigationStackProp } from 'react-navigation-stack'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import Modal from '~common/Modal'
@@ -71,5 +69,4 @@ const SelectBibleReferenceModal = ({
   )
 }
 
-// export default withNavigation(SelectBibleReferenceModal)
 export default SelectBibleReferenceModal

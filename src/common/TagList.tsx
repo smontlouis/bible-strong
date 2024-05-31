@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import React from 'react'
-// import { withNavigation } from 'react-navigation'
 import { useNavigation } from '@react-navigation/native'
 
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -72,4 +71,3 @@ const TagList = ({ tags, limit }) => {
 }
 
 export default TagList
-// export default withNavigation(TagList)

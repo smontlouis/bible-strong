@@ -50,65 +50,6 @@ import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 
-// export const MainStackNavigator = createStackNavigator(
-//   {
-//     AppSwitcher: { screen: AppSwitcherScreen },
-//     More: { screen: MoreScreen },
-//     Home: { screen: HomeScreen },
-//     BibleSelect: { screen: BibleSelectScreen },
-//     VersionSelector: { screen: VersionSelectorScreen },
-//     BibleVerseDetail: { screen: BibleVerseDetailScreen },
-//     BibleVerseNotes: { screen: BibleVerseNotesScreen },
-//     Highlights: { screen: HighlightScreen },
-//     Strong: { screen: StrongScreen },
-//     DictionnaireVerseDetail: { screen: DictionnaireVerseDetailScreen },
-//     ConcordanceByBook: { screen: ConcordanceByBookScreen },
-//     BibleView: { screen: BibleViewScreen },
-//     BibleCompareVerses: { screen: BibleCompareVersesScreen },
-//     Studies: { screen: StudiesScreen },
-//     Lexique: { screen: LexiqueScreen },
-//     EditStudy: { screen: EditStudyScreen },
-//     DictionnaryDetail: { screen: DictionnaryDetailScreen },
-//     Login: { screen: LoginScreen },
-//     Support: { screen: SupportScreen },
-//     ModifyColors: { screen: ModifyColorsScreen },
-//     Changelog: { screen: ChangelogScreen },
-//     ImportExport: { screen: ImportExportScreen },
-//     Pericope: { screen: PericopeScreen },
-//     History: { screen: HistoryScreen },
-//     Tags: { screen: TagsScreen },
-//     Tag: { screen: TagScreen },
-//     Downloads: { screen: DownloadsScreen },
-//     Search: { screen: SearchScreen },
-//     LocalSearch: { screen: LocalSearchScreen },
-//     Register: { screen: RegisterScreen },
-//     Dictionnaire: { screen: DictionaryScreen },
-//     FAQ: { screen: FAQScreen },
-//     Nave: { screen: NaveScreen },
-//     NaveDetail: { screen: NaveDetailScreen },
-//     NaveWarning: { screen: NaveWarningScreen },
-//     ToggleCompareVerses: { screen: ToggleCompareVersesScreen },
-//     Plan: { screen: PlanScreen },
-//     Plans: { screen: PlanSelectScreen },
-//     MyPlanList: { screen: MyPlanListScreen },
-//     PlanSlice: { screen: PlanSliceScreen },
-//     Timeline: {
-//       screen: TimelineScreen,
-//       navigationOptions: {
-//         gesturesEnabled: false,
-//       },
-//     },
-//     TimelineHome: { screen: TimelineHomeScreen },
-//     Concordance: { screen: ConcordanceScreen },
-//     Commentaries: { screen: CommentariesScreen },
-//     BibleShareOptions: { screen: BibleShareOptionsScreen },
-//   },
-//   {
-//     headerMode: 'none',
-//     initialRouteName: 'AppSwitcher',
-//   }
-// )
-
 export const MainStackNavigator = createStackNavigator()
 
 const MainStack = props => (
@@ -123,7 +64,7 @@ const MainStack = props => (
       <MainStackNavigator.Screen name='BibleVerseNotes' component={BibleVerseNotesScreen} {...props} />
       <MainStackNavigator.Screen name='Highlights' component={HighlightScreen} {...props} />
       <MainStackNavigator.Screen name='Strong' component={StrongScreen} {...props} />
-      <MainStackNavigator.Screen name='DictionnaireVerseDetail' component={DictionaryScreen} {...props} />
+      <MainStackNavigator.Screen name='DictionnaireVerseDetail' component={DictionnaireVerseDetailScreen} {...props} />
       <MainStackNavigator.Screen name='ConcordanceByBook' component={ConcordanceByBookScreen} {...props} />
       <MainStackNavigator.Screen name='BibleView' component={BibleViewScreen} {...props} />
       <MainStackNavigator.Screen name='BibleCompareVerses' component={BibleCompareVersesScreen} {...props} />
@@ -144,10 +85,12 @@ const MainStack = props => (
       <MainStackNavigator.Screen name='Search' component={SearchScreen} {...props} />
       <MainStackNavigator.Screen name='LocalSearch' component={LocalSearchScreen} {...props} />
       <MainStackNavigator.Screen name='Register' component={RegisterScreen} {...props} />
+      <MainStackNavigator.Screen name='Dictionnaire' component={DictionaryScreen} {...props} />
       <MainStackNavigator.Screen name='FAQ' component={FAQScreen} {...props} />
       <MainStackNavigator.Screen name='Nave' component={NaveScreen} {...props} />
       <MainStackNavigator.Screen name='NaveDetail' component={NaveDetailScreen} {...props} />
       <MainStackNavigator.Screen name='NaveWarning' component={NaveWarningScreen} {...props} />
+      <MainStackNavigator.Screen name='ToggleCompareVerses' component={ToggleCompareVersesScreen} {...props} />
       <MainStackNavigator.Screen name='Plan' component={PlanScreen} {...props} />
       <MainStackNavigator.Screen name='Plans' component={PlanSelectScreen} {...props} />
       <MainStackNavigator.Screen name='MyPlanList' component={MyPlanListScreen} {...props} />
@@ -157,15 +100,13 @@ const MainStack = props => (
       <MainStackNavigator.Screen name='Concordance' component={ConcordanceScreen} {...props} />
       <MainStackNavigator.Screen name='Commentaries' component={CommentariesScreen} {...props} />
       <MainStackNavigator.Screen name='BibleShareOptions' component={BibleShareOptionsScreen} {...props} />
-
-      {/* <MainStackNavigator {...props} /> */}
     </MainStackNavigator.Navigator>
+    
     <ChangelogModal />
     <OnBoardingModal />
     <MultipleTagsModal />
+
   </PortalProvider>
 )
-
-// MainStack.router = MainStackNavigator.router
 
 export default MainStack;

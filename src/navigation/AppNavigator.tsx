@@ -1,26 +1,32 @@
-// import { createAppContainer } from 'react-navigation'
 import React from 'react';
 import analytics from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 import { NavigationContainer, useNavigationContainerRef, Route, NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import MainStackNavigator from './MainStackNavigator'
 
-const setCurrentRoute = (navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>, routeNameRef: React.MutableRefObject<Route<string> | undefined>) => {
+// Helper types for navigation ref and route ref
+type NavigationRef = NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>
+type RouteRef = React.MutableRefObject<Route<string> | undefined>
+
+const setCurrentRoute = (navigationRef: NavigationRef, routeRef: RouteRef) => {
     const current_route = navigationRef.getCurrentRoute()
     if (current_route == undefined)
         return;
 
-    routeNameRef.current = current_route;
+    routeRef.current = current_route;
 }
 
-const onNavigationStateChange = (navigationRef: NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>, routeNameRef: React.MutableRefObject<Route<string> | undefined>) => {
-    const current_route = navigationRef.getCurrentRoute()
+const onNavigationStateChange = (navigationRef: NavigationRef, routeRef: RouteRef) => {
+    const currentRoute = navigationRef.getCurrentRoute()
 
-    if (routeNameRef.current == undefined) return;
-    if (current_route == undefined) return;
+    if (routeRef.current == undefined)
+        return;
+    
+    if (currentRoute == undefined)
+        return;
 
-    const { name: prevScreen, params: prevParams } = routeNameRef.current;
-    const { name: currentScreen, params: currentParams } = current_route;
+    const { name: prevScreen, params: prevParams } = routeRef.current;
+    const { name: currentScreen, params: currentParams } = currentRoute;
 
     if (prevScreen != currentScreen) {
         if (!__DEV__) {
@@ -56,5 +62,3 @@ function AppNavigator() {
 }
 
 export default AppNavigator;
-
-// export default createAppContainer(MainStackNavigator)

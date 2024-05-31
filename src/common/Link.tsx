@@ -1,10 +1,7 @@
 import React, { Component, PropsWithChildren } from 'react'
 import { TouchableOpacity, Linking, Share } from 'react-native'
-// import { withNavigation } from 'react-navigation'
-// import { useNavigation } from '@react-navigation/native'
 
 import Box, { BoxProps } from '~common/ui/Box'
-//import { NavigationStackProp } from 'react-navigation-stack'
 import { StackNavigationProp } from '@react-navigation/stack'
 
 interface LinkProps {
@@ -21,7 +18,6 @@ interface LinkProps {
   size?: number
 }
 class Link extends Component<LinkProps> {
-  // navigation = useNavigation()
   navigation = this.props.navigation
 
   handlePress = () => {
@@ -100,7 +96,4 @@ type LinkBoxProps = React.FC<BoxProps & LinkProps>
 export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
 // @ts-ignore
-// export default withNavigation(Link) as (
-//   x: PropsWithChildren<LinkProps>
-// ) => JSX.Element
 export default Link as (x: PropsWithChildren<LinkProps>) => JSX.Element
