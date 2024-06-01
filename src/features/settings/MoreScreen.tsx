@@ -33,6 +33,8 @@ import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
 import * as Sharing from 'expo-sharing'
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 export const LinkItem = styled(Link)(({}) => ({
   flexDirection: 'row',
@@ -64,10 +66,6 @@ const shareMessage = () => {
       ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
       : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
   return `Bible Strong App ${appUrl}`
-}
-
-type MoreScreenProps = {
-  closeMenu: () => void
 }
 
 const Infos = memo(() => {
@@ -186,7 +184,8 @@ const ManualSync = memo(() => {
   )
 })
 
-const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
+const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
+  const closeMenu = route.params.closeMenu
   const { isLogged, logout, user } = useLogin()
 
   const isFR = useLanguage()
@@ -435,4 +434,5 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     </SafeAreaBox>
   )
 }
+
 export default memo(MoreScreen)

@@ -1,17 +1,57 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { BibleTab, VersionCode } from 'src/state/tabs'
+import { BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import { ComputedPlanItem, ComputedReadingSlice, StrongReference } from '~common/types'
+
+type AppSwitcherScreenProps = {
+    openMenu: () => void
+    openHome: () => void
+}
+
+type MoreScreenProps = {
+    closeMenu: () => void
+}
+
+type HomeScreenProps = {
+    closeHome: () => void
+}
 
 type VersionSelectorProps = {
     parallelVersionIndex?: number
     bibleAtom: PrimitiveAtom<BibleTab>
 }
 
+type BibleVerseDetailScreenProps = {
+    book: number
+    chapter: number
+    verse: number
+}
+
+type BibleVerseNotesScreenProps = {
+    book: number
+    chapter: number
+    verse: number
+}
+
 type StrongScreenProps = {
     book: number
     reference: string
     strongReference: StrongReference
+}
+
+interface Verse {
+    Livre: string
+    Chapitre: string
+    Verset: number
+}
+
+type DictionnaireVerseDetailScreenProps = {
+    verse: Verse
+}
+
+type ConcordanceByBookScreenProps = {
+    strongReference: StrongReference
+    book: number
 }
 
 type BibleScreenProps = {
@@ -22,6 +62,10 @@ type BibleScreenProps = {
     chapter: number
     verse: number
     version: VersionCode
+}
+
+type CompareVersesScreenProps = {
+    selectedVerses: SelectedVerses
 }
 
 type StudiesScreenProps = {
@@ -68,24 +112,29 @@ type TimelineScreenProps = {
     goTo: number
 }
 
+type ConcordanceScreenProps = {
+    strongReference: StrongReference
+    book: number
+}
+
 type CommentariesScreenProps = {
     verse: string
 }
 
 export type MainStackProps = {
-    AppSwitcher: undefined
-    More: undefined
-    Home: undefined
+    AppSwitcher: AppSwitcherScreenProps
+    More: MoreScreenProps
+    Home: HomeScreenProps
     BibleSelect: undefined
     VersionSelector: VersionSelectorProps
-    BibleVerseDetail: { book: number; chapter: number; verse: number }
-    BibleVerseNotes: { book: number; chapter: number; verse: number }
+    BibleVerseDetail: BibleVerseDetailScreenProps
+    BibleVerseNotes: BibleVerseNotesScreenProps
     Highlights: undefined
     Strong: StrongScreenProps
-    DictionnaireVerseDetail: { book: number; chapter: number; verse: number }
-    ConcordanceByBook: { book: number; chapter: number }
+    DictionnaireVerseDetail: DictionnaireVerseDetailScreenProps
+    ConcordanceByBook: ConcordanceByBookScreenProps
     BibleView: BibleScreenProps
-    BibleCompareVerses: undefined
+    BibleCompareVerses: CompareVersesScreenProps
     Studies: StudiesScreenProps
     Lexique: LexiqueScreenProps
     EditStudy: EditStudyScreenProps
@@ -115,7 +164,7 @@ export type MainStackProps = {
     PlanSlice: PlanSliceScreenProps
     Timeline: TimelineScreenProps
     TimelineHome: undefined
-    Concordance: undefined
+    Concordance: ConcordanceScreenProps
     Commentaries: CommentariesScreenProps
     BibleShareOptions: undefined
 }

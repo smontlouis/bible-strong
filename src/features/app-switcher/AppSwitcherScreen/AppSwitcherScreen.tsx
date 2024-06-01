@@ -20,11 +20,8 @@ import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
-
-interface AppSwitcherProps {
-  openMenu: () => void
-  openHome: () => void
-}
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 export const TAB_PREVIEW_SCALE = 0.6
 
@@ -33,9 +30,10 @@ const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 const AppSwitcherScreen = memo(
   ({
     navigation,
-    openMenu,
-    openHome,
-  }: /*NavigationStackScreenProps<{}>*/any & AppSwitcherProps) => {
+    route
+  }: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
+    const openMenu = route.params.openMenu
+    const openHome = route.params.openHome
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
@@ -89,7 +87,7 @@ const AppSwitcherScreen = memo(
   }
 )
 
-const AppSwitcherScreenWrapper = (props: any) => {
+const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -122,12 +120,12 @@ const AppSwitcherScreenWrapper = (props: any) => {
   }, [tabsCount, closeHome])
 
   const renderHomeScreen = useCallback(
-    () => <HomeScreen closeHome={closeHome} />,
+    () => <HomeScreen closeHome={closeHome} />, // TODO : pass params to HomeScreen
     [closeHome]
   )
 
   const renderMoreScreen = useCallback(
-    () => <MoreScreen closeMenu={closeMenu} />,
+    () => <MoreScreen closeMenu={closeMenu} />, // TODO : pass params to MoreScreen
     [closeMenu]
   )
 

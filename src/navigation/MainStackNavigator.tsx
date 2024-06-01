@@ -1,6 +1,6 @@
 import { PortalProvider } from '@gorhom/portal'
 import React from 'react'
-import { createStackNavigator } from '@react-navigation/stack'
+import { createStackNavigator, StackScreenProps } from '@react-navigation/stack'
 
 import { MainStackProps } from '~navigation/type'
 
@@ -56,7 +56,7 @@ import TagsScreen from '../features/settings/TagsScreen'
 
 export const MainStackNavigator = createStackNavigator<MainStackProps>()
 
-const MainStack = props => (
+const MainStack = (props: StackScreenProps<MainStackProps>) => (
   <PortalProvider>
     <MainStackNavigator.Navigator initialRouteName='AppSwitcher' screenOptions={{ headerShown: false }}>
       <MainStackNavigator.Screen name='AppSwitcher' component={AppSwitcherScreen} {...props} />

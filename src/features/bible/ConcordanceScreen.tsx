@@ -3,7 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 
-import { StackNavigationProp } from '@react-navigation/stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import books from '~assets/bible_versions/books-desc'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -12,6 +12,7 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
+import { MainStackProps } from '~navigation/type'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -32,13 +33,9 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-interface Props {
-  navigation: StackNavigationProp<any>
-}
-
-const ConcordanceScreen = ({ navigation }: Props) => {
-  const strongReference =  navigation.getParam('strongReference', {})
-  const book = navigation.getParam('book', 0)
+const ConcordanceScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Concordance'>) => {
+  const strongReference =  route.params.strongReference || {}
+  const book = route.params.book || 0
 
   const { data: versesCountByBook, status } = useAsync(
     async () => await loadStrongVersesCountByBook(book, strongReference.Code)
@@ -57,14 +54,19 @@ const ConcordanceScreen = ({ navigation }: Props) => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate({
-                  routeName: 'ConcordanceByBook',
-                  params: {
-                    book: item.Livre,
-                    strongReference,
-                  },
-                  key: `concordance-${strongReference.Code}-${item.Livre}`,
+                navigation.navigate('ConcordanceByBook', {
+                  book: item.Livre,
+                  strongReference,
                 })
+
+                // navigation.navigate({
+                //   routeName: 'ConcordanceByBook',
+                //   params: {
+                //     book: item.Livre,
+                //     strongReference,
+                //   },
+                //   key: `concordance-${strongReference.Code}-${item.Livre}`,
+                // })
               }}
             >
               <ListItem row alignItems="center" height={50}>

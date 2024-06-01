@@ -9,7 +9,7 @@ import { MainStackProps } from '~navigation/type'
 
 const NaveScreen = ({
   navigation,
-}: StackScreenProps<MainStackProps, 'NaveDetail'>) => {
+}: StackScreenProps<MainStackProps, 'Nave'>) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>

@@ -27,6 +27,8 @@ import useLanguage from '~helpers/useLanguage'
 import { hp, wp } from '~helpers/utils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -191,10 +193,10 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
 }))
 
-const DictionnaireVerseDetailScreen = ({ navigation }) => {
+const DictionnaireVerseDetailScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'DictionnaireVerseDetail'>) => {
   const { t } = useTranslation()
   const carousel = useRef<ICarouselInstance>(null)
-  const [verse, setVerse] = useState<Verse>(navigation.state.params.verse)
+  const [verse, setVerse] = useState<Verse>(route.params.verse)
   const { Livre, Chapitre, Verset } = verse
   const { title: headerTitle } = formatVerseContent([verse])
 

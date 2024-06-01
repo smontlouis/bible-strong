@@ -9,8 +9,10 @@ import Header from '~common/Header'
 import Login from '~common/Login'
 import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Login'>) => {
   const { isLogged } = useLogin()
   const { t } = useTranslation()
 

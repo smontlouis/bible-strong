@@ -21,8 +21,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import TryAudibibleWidget from './TryAudibibleWidget'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
-const HomeScreen = ({ closeHome }: { closeHome: () => void }) => {
+const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Home'>) => {
+  const closeHome = route.params.closeHome
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()

@@ -80,7 +80,7 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
 }))
 
-class BibleVerseDetailScreen extends React.Component {
+class BibleVerseDetailScreen extends React.Component<BibleVerseDetailScreen> {
   state = {
     error: false,
     isCarouselLoading: true,

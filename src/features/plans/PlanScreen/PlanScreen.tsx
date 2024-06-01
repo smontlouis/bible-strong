@@ -20,7 +20,7 @@ const PlanScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Pla
     image,
     description,
     author,
-  }: ComputedPlanItem = route.params.plan // navigation.getParam('plan', {})
+  }: ComputedPlanItem = route.params.plan
   const modalRef = React.useRef<BottomSheet>(null)
   const modalRefDetails = React.useRef<BottomSheet>(null)
   const cacheImage = useFireStorage(image)
