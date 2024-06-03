@@ -36,7 +36,7 @@ import * as Sharing from 'expo-sharing'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-export const LinkItem = styled(Link)(({}) => ({
+export const LinkItem = styled(Link)(({ }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -175,7 +175,7 @@ const ManualSync = memo(() => {
   if (!isLogged) return null
 
   return (
-    <LinkItem onPress={isSyncing ? () => {} : sync}>
+    <LinkItem onPress={isSyncing ? () => { } : sync}>
       <StyledIcon name="upload-cloud" size={25} />
       <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
         {t('app.sync')}
@@ -184,8 +184,12 @@ const ManualSync = memo(() => {
   )
 })
 
-const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
-  const closeMenu = route.params.closeMenu
+// local react props
+type MoreProps = {
+  closeMenu: () => void
+}
+
+export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, logout, user } = useLogin()
 
   const isFR = useLanguage()
@@ -432,6 +436,14 @@ const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
         <Infos />
       </ScrollView>
     </SafeAreaBox>
+  )
+}
+
+const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
+  const closeMenu = route.params.closeMenu
+
+  return (
+    <More closeMenu={closeMenu} />
   )
 }
 

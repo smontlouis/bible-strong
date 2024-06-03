@@ -10,8 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
-import HomeScreen from '~features/home/HomeScreen'
-import MoreScreen from '~features/settings/MoreScreen'
+import { Home } from '~features/home/HomeScreen'
+import { More } from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
 import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -23,6 +23,11 @@ import useAppSwitcher from './useAppSwitcher'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
+type AppSwitcherScreenFuncs = {
+  openMenu: () => void
+  openHome: () => void
+}
+
 export const TAB_PREVIEW_SCALE = 0.6
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
@@ -30,10 +35,10 @@ const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 const AppSwitcherScreen = memo(
   ({
     navigation,
-    route
-  }: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
-    const openMenu = route.params.openMenu
-    const openHome = route.params.openHome
+    route,
+    openHome,
+    openMenu
+  }: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
@@ -120,12 +125,12 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
   }, [tabsCount, closeHome])
 
   const renderHomeScreen = useCallback(
-    () => <HomeScreen closeHome={closeHome} />, // TODO : pass params to HomeScreen
+    () => <Home closeHome={closeHome} />,
     [closeHome]
   )
 
   const renderMoreScreen = useCallback(
-    () => <MoreScreen closeMenu={closeMenu} />, // TODO : pass params to MoreScreen
+    () => <More closeMenu={closeMenu} />,
     [closeMenu]
   )
 
@@ -151,7 +156,7 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
   }, [closeHome, closeMenu])
 
   return (
-    <DrawerLayout
+    <DrawerLayout // should use drawer navigator
       ref={homeDrawerRef}
       drawerWidth={wp(95, 450)}
       drawerPosition="left"

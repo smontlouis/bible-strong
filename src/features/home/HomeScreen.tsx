@@ -24,8 +24,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Home'>) => {
-  const closeHome = route.params.closeHome
+// local react props
+type HomeProps = {
+  closeHome: () => void
+}
+
+export const Home = ({ closeHome }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -166,6 +170,14 @@ const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Hom
         </TouchableBox>
       </Box>
     </Box>
+  )
+}
+
+const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Home'>) => {
+  const closeHome = route.params.closeHome
+  
+  return (
+    <Home closeHome={closeHome} />
   )
 }
 export default memo(HomeScreen)
