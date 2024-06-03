@@ -27,7 +27,7 @@ const LexiqueScreen = ({
   return (
     <LexiqueTabScreen
       strongsAtom={onTheFlyAtom}
-      navigation={navigation} // TODO : something odds here
+      navigation={navigation}
       hasBackButton
     />
   )

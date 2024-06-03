@@ -1,7 +1,17 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { TranslationProps } from 'react-i18next'
+import { Insets } from 'react-native'
+import { EdgeInsets } from 'react-native-safe-area-context'
 import { BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
-import { ComputedPlanItem, ComputedReadingSlice, StrongReference } from '~common/types'
+import { ComputedPlanItem, ComputedReadingSlice, StrongReference, StudyNavigateBibleType } from '~common/types'
+import { Theme } from '~themes/index'
+
+interface Verse {
+    Livre: string
+    Chapitre: string
+    Verset: number
+}
 
 type AppSwitcherScreenProps = {
     openMenu: () => void
@@ -24,7 +34,10 @@ type VersionSelectorProps = {
 type BibleVerseDetailScreenProps = {
     book: number
     chapter: number
-    verse: number
+    verse: Verse
+    isSelectionMode: boolean,
+    theme: Theme,
+    insets: EdgeInsets,
 }
 
 type BibleVerseNotesScreenProps = {
@@ -37,12 +50,6 @@ type StrongScreenProps = {
     book: number
     reference: string
     strongReference: StrongReference
-}
-
-interface Verse {
-    Livre: string
-    Chapitre: string
-    Verset: number
 }
 
 type DictionnaireVerseDetailScreenProps = {

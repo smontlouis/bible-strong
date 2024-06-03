@@ -4,7 +4,7 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/native'
 import { StudyNavigateBibleType } from '~common/types'
 import Container from '~common/ui/Container'
@@ -71,18 +71,21 @@ const withStudy = (
       studyId={studyId}
       canEdit={canEdit}
       navigation={navigation}
-      {...props}
+      route={route}
+      // {...props}
     />
   )
 }
 
 const EditStudyScreen = ({
   navigation,
-  studyId,
-  canEdit,
-  hasBackButton,
-  openedFromTab,
-}: WithStudyProps ) => {
+  route
+}: StackScreenProps<MainStackProps, 'EditStudy'>) => {
+  const studyId = route.params.studyId
+  const canEdit = route.params.canEdit
+  const hasBackButton = route.params.hasBackButton
+  const openedFromTab = route.params.openedFromTab
+  
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
   const [titlePrompt, setTitlePrompt] = useState<
     { id: string; title: string } | false
@@ -112,7 +115,7 @@ const EditStudyScreen = ({
 
   const navigateBibleView = (type: StudyNavigateBibleType) => {
     navigation.navigate('BibleView', {
-      isSelectionMode: type,
+      isSelectionMode: type, // type inconsistency
     })
   }
 
@@ -149,7 +152,7 @@ const EditStudyScreen = ({
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
-        params={navigation.state.params}
+        params={route.params}
         navigateBibleView={navigateBibleView}
         openBibleView={openBibleView}
       />
@@ -167,4 +170,4 @@ const EditStudyScreen = ({
   )
 }
 
-export default withStudy(EditStudyScreen)
+export default EditStudyScreen

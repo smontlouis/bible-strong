@@ -52,7 +52,7 @@ const useSectionResults = results => {
 }
 
 interface StrongsTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'Strong'>
+  navigation: StackNavigationProp<MainStackProps, 'Lexique'>
   strongsAtom: PrimitiveAtom<StrongsTab>
   hasBackButton?: boolean
 }
