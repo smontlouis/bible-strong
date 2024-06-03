@@ -26,6 +26,7 @@ import useLanguage from '~helpers/useLanguage'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { fullscreenAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import { MainStackProps } from '~navigation/type'
 
 const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',
@@ -45,7 +46,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
 const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
 
 interface BibleHeaderProps {
-  navigation: StackNavigationProp<any>
+  navigation: StackNavigationProp<MainStackProps>
   bibleAtom: PrimitiveAtom<BibleTab>
   hasBackButton?: boolean
   onBibleParamsClick: () => void

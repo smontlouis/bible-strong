@@ -11,13 +11,20 @@ import ConcordanceVerse from './ConcordanceVerse'
 import books from '~assets/bible_versions/books-desc'
 import loadFoundVersesByBook from '~helpers/loadFoundVersesByBook'
 import truncate from '~helpers/truncate'
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { useTranslation } from 'react-i18next'
 
 class ConcordanceByBook extends Component {
+  navigation = useNavigation<StackNavigationProp<MainStackProps>>()
+  route = useRoute<RouteProp<MainStackProps, 'ConcordanceByBook'>>()
+
   async componentDidMount() {
     const {
       book,
       strongReference: { Code },
-    } = this.props.navigation.state.params
+    } = this.route.params // this.props.navigation.state.params
 
     const verses = await loadFoundVersesByBook(book, Code)
     this.setState({ verses })
@@ -29,7 +36,7 @@ class ConcordanceByBook extends Component {
     const {
       book,
       strongReference: { Code, Mot },
-    } = this.props.navigation.state.params
+    } = this.route.params // this.props.navigation.state.params
     return (
       <Container>
         <Header
@@ -52,7 +59,7 @@ class ConcordanceByBook extends Component {
               }
               renderItem={({ item }) => (
                 <ConcordanceVerse
-                  navigation={this.props.navigation}
+                  navigation={this.navigation}
                   concordanceFor={Code}
                   verse={item}
                 />

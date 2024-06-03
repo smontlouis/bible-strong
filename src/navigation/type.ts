@@ -43,7 +43,8 @@ type BibleVerseDetailScreenProps = {
 type BibleVerseNotesScreenProps = {
     book: number
     chapter: number
-    verse: number
+    verse: string
+    withBack: boolean
 }
 
 type StrongScreenProps = {
@@ -90,6 +91,10 @@ type EditStudyScreenProps = {
 
 type DictionaryDetailScreenProps = {
     word: string
+}
+
+type TagScreenProps = {
+    tagId: string
 }
 
 type SearchScreenProps = {
@@ -154,7 +159,7 @@ export type MainStackProps = {
     Pericope: undefined
     History: undefined
     Tags: undefined
-    Tag: { tag: string }
+    Tag: TagScreenProps
     Downloads: undefined
     Search: undefined
     LocalSearch: undefined

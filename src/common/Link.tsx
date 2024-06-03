@@ -3,9 +3,10 @@ import { TouchableOpacity, Linking, Share } from 'react-native'
 
 import Box, { BoxProps } from '~common/ui/Box'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 interface LinkProps {
-  navigation?: StackNavigationProp<any, any>
+  navigation?: StackNavigationProp<MainStackProps>
   route?: string
   href?: string
   share?: string
@@ -18,11 +19,9 @@ interface LinkProps {
   size?: number
 }
 class Link extends Component<LinkProps> {
-  navigation = this.props.navigation
-
   handlePress = () => {
     const {
-      // navigation,
+      navigation,
       route,
       href,
       share,
@@ -30,21 +29,23 @@ class Link extends Component<LinkProps> {
       replace,
       onPress,
     } = this.props
+
     if (route) {
       if (onPress) {
         onPress()
         setTimeout(() => {
-          replace
-            ? this.navigation?.replace(route, params)
-            : this.navigation?.navigate(route, params)
+          replace // How to type this ? Maybe we should not use a class component
+            ? navigation?.replace(route, params)
+            : navigation?.navigate(route, params)
         }, 300)
 
         return
       }
       replace
-        ? this.navigation?.replace(route, params)
-        : this.navigation?.navigate(route, params)
+        ? navigation?.replace(route, params)
+        : navigation?.navigate(route, params)
     }
+
     if (href) {
       Linking.openURL(href)
     }

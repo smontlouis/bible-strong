@@ -29,6 +29,8 @@ import StudyItem from '~features/studies/StudyItem'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 export const sortVersesByDate = p =>
   Object.keys(p).reduce((arr, verse, i) => {
@@ -98,8 +100,8 @@ const NoteItem = ({ item, t, isFR }) => {
   )
 }
 
-const TagScreen = ({ navigation }) => {
-  const tagId = navigation.getParam('tagId')
+const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'>) => {
+  const tagId = route.params.tagId
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const isFR = useLanguage()

@@ -6,9 +6,10 @@ import useDynamicRefs from '~helpers/useDynamicRefs'
 import { cachedTabIdsAtom, tabsAtomsAtom } from '../../state/tabs'
 import TabScreen, { TabScreenProps } from './TabScreen/TabScreen'
 import useOnce from './utils/useOnce'
+import { MainStackProps } from '~navigation/type'
 
 export interface ChachedTabScreensProps {
-  navigation: StackNavigationProp<any, any>
+  navigation: StackNavigationProp<MainStackProps>
 }
 
 const CachedTabScreens = ({ navigation }: ChachedTabScreensProps) => {

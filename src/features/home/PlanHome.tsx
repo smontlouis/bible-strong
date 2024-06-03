@@ -1,11 +1,13 @@
 import { useTheme } from '@emotion/react'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system'
 import { Image } from 'expo-image'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import ProgressCircle from 'react-native-progress/Circle'
+import { Circle as ProgressCircle } from 'react-native-progress'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import PlanIcon from '~common/PlanIcon'
@@ -21,6 +23,7 @@ import {
   useUpdatePlans,
 } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
+import { MainStackProps } from '~navigation/type'
 import { addPlan } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { Theme } from '~themes'
@@ -58,6 +61,7 @@ const useGetFirstPlans = () => {
   }, [])
 }
 const PlanHome = () => {
+  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { t } = useTranslation()
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress, status } =
@@ -72,6 +76,7 @@ const PlanHome = () => {
     <Box bg="lightGrey" px={20} pt={20}>
       <LinkBox
         route="Plans"
+        navigation={navigation}
         rounded
         lightShadow
         bg="reverse"
@@ -100,6 +105,7 @@ const PlanHome = () => {
             row
             center
             route="Plan"
+            navigation={navigation}
             params={{ plan: { id, title, image, description, author } }}
             px={20}
           >

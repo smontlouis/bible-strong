@@ -24,6 +24,7 @@ import NewTabScreen from './NewTab/NewTabScreen'
 
 import TabScreenWrapper from './TabScreenWrapper'
 import { useSafeAreaFrame } from 'react-native-safe-area-context'
+import { MainStackProps } from '~navigation/type'
 
 const getComponentTab = (tab: TabItem) => {
   switch (tab.type) {
@@ -92,7 +93,7 @@ const getComponentTab = (tab: TabItem) => {
 
 export type TabScreenProps = {
   tabAtom: PrimitiveAtom<TabItem>
-  navigation: StackNavigationProp<any>
+  navigation: StackNavigationProp<MainStackProps>
 }
 
 const TabScreen = forwardRef<View, TabScreenProps>(

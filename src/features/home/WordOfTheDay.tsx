@@ -14,8 +14,11 @@ import DictionnaireIcon from '~common/DictionnaryIcon'
 import RandomButton from './RandomButton'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
-function randomIntFromInterval(min, max) {
+function randomIntFromInterval(min: number, max: number) {
   // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
@@ -24,6 +27,7 @@ const DictionnaireOfTheDay = ({
   color1 = 'rgba(86,204,242,1)',
   color2 = 'rgba(47,128,237,1)',
 }) => {
+  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { t } = useTranslation()
   const isFR = useLanguage()
   const [error, setError] = useState(false)
@@ -66,7 +70,10 @@ const DictionnaireOfTheDay = ({
   const { word } = strongReference
 
   return (
-    <Link route="DictionnaryDetail" params={{ word }}>
+    <Link
+      navigation={navigation}
+      route="DictionnaryDetail"
+      params={{ word }}>
       <WidgetContainer>
         <Box
           style={{
@@ -90,7 +97,10 @@ const DictionnaireOfTheDay = ({
             {word}
           </Paragraph>
         </Box>
-        <Link route="Dictionnaire" style={{ width: '100%' }}>
+        <Link
+          navigation={navigation}
+          route="Dictionnaire"
+          style={{ width: '100%' }}>
           <Box
             row
             center

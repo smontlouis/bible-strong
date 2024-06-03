@@ -8,10 +8,11 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { NewTab, tabTypes } from '../../../../state/tabs'
 import NewTabItem from './NewTabItem'
+import { MainStackProps } from '~navigation/type'
 
 export interface NewTabScreenProps {
   newAtom: PrimitiveAtom<NewTab>
-  navigation: StackNavigationProp<any>
+  navigation: StackNavigationProp<MainStackProps>
 }
 
 const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
