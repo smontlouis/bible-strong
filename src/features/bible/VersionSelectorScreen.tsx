@@ -25,8 +25,8 @@ const VersionSelector = ({
   navigation,
   route
 }: StackScreenProps<MainStackProps, 'VersionSelector'>) => {
-  const bibleAtom = route.params.bibleAtom// navigation.getParam('bibleAtom')
-  const parallelVersionIndex = route.params.parallelVersionIndex// navigation.getParam('parallelVersionIndex')
+  const bibleAtom = route.params.bibleAtom
+  const parallelVersionIndex = route.params.parallelVersionIndex
 
   if (!bibleAtom) {
     throw new Error('bibleAtom is required')
@@ -34,14 +34,15 @@ const VersionSelector = ({
 
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const setAndClose = (vers: VersionCode, index: number) => {
-    if (parallelVersionIndex === undefined) {
+  const setAndClose = (vers: VersionCode, index: number | undefined) => {
+    if (index == undefined) {
       actions.setSelectedVersion(vers)
     } else {
       actions.setParallelVersion(vers, index)
     }
     navigation.goBack()
   }
+
   return (
     <Container>
       <Header hasBackButton title="Version" />
@@ -60,7 +61,7 @@ const VersionSelector = ({
         )}
         renderItem={({ item }) => (
           <VersionSelectorItem
-            onChange={vers => setAndClose(vers, parallelVersionIndex)} // TODO : should type check this
+            onChange={vers => setAndClose(vers, parallelVersionIndex)}
             version={item}
             isSelected={
               item.id ===
