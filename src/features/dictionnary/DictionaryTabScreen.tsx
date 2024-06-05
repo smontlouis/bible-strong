@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { DictionariesTab } from '../../state/tabs'
+import { MainStackProps } from '~navigation/type'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -57,12 +58,12 @@ const useSectionResults = results => {
 }
 
 interface DictionariesTabScreenProps {
-  navigation: StackNavigationProp<any>
+  navigation: StackNavigationProp<MainStackProps>
   dictionariesAtom: PrimitiveAtom<DictionariesTab>
   hasBackButton?: boolean
 }
 
-const DictionnaireScreen = ({ hasBackButton }: DictionariesTabScreenProps) => {
+const DictionnaireScreen = ({ hasBackButton, navigation }: DictionariesTabScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
@@ -120,7 +121,7 @@ const DictionnaireScreen = ({ hasBackButton }: DictionariesTabScreenProps) => {
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem key={id} {...{ word }} />
+              <DictionnaireItem key={id} navigation={navigation} {...{ word }} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
