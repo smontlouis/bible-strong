@@ -33,8 +33,9 @@ import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
 import * as Sharing from 'expo-sharing'
-import { StackScreenProps } from '@react-navigation/stack'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { useNavigation } from '@react-navigation/native'
 
 export const LinkItem = styled(Link)(({ }) => ({
   flexDirection: 'row',
@@ -190,6 +191,7 @@ type MoreProps = {
 }
 
 export const More = ({ closeMenu }: MoreProps) => {
+  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { isLogged, logout, user } = useLogin()
 
   const isFR = useLanguage()
@@ -250,31 +252,31 @@ export const More = ({ closeMenu }: MoreProps) => {
         }}
       >
         <Box paddingVertical={10}>
-          <LinkItem route="Lexique">
+          <LinkItem route="Lexique" navigation={navigation}>
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
             <Text color="primary" bold fontSize={15}>
               {t('Lexique')}
             </Text>
           </LinkItem>
-          <LinkItem route="Dictionnaire">
+          <LinkItem route="Dictionnaire" navigation={navigation}>
             <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
             <Text color="secondary" bold fontSize={15}>
               {t('Dictionnaire')}
             </Text>
           </LinkItem>
-          <LinkItem route="Nave">
+          <LinkItem route="Nave" navigation={navigation}>
             <NaveIcon style={{ marginRight: 15 }} size={25} />
             <Text color="quint" bold fontSize={15}>
               {t('Bible Thématique Nave')}
             </Text>
           </LinkItem>
-          <LinkItem route="Studies">
+          <LinkItem route="Studies" navigation={navigation}>
             <FeatherIcon name="feather" style={{ marginRight: 15 }} size={25} />
             <Text bold fontSize={15}>
               {t('Études')}
             </Text>
           </LinkItem>
-          <LinkItem route="Plans">
+          <LinkItem route="Plans" navigation={navigation}>
             <MaterialIcon
               name="playlist-add-check"
               size={25}
@@ -284,19 +286,19 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Plans')}
             </Text>
           </LinkItem>
-          <LinkItem route="Highlights">
+          <LinkItem route="Highlights" navigation={navigation}>
             <StyledIcon name="edit-3" size={25} />
             <Text bold fontSize={15}>
               {t('Surbrillances')}
             </Text>
           </LinkItem>
-          <LinkItem route="BibleVerseNotes">
+          <LinkItem route="BibleVerseNotes" navigation={navigation}>
             <StyledIcon name="file-text" size={25} />
             <Text bold fontSize={15}>
               {t('Notes')}
             </Text>
           </LinkItem>
-          <LinkItem route="Tags">
+          <LinkItem route="Tags" navigation={navigation}>
             <StyledIcon name="tag" size={25} />
             <Text bold fontSize={15}>
               {t('Étiquettes')}
@@ -305,7 +307,7 @@ export const More = ({ closeMenu }: MoreProps) => {
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
-          <LinkItem route="Downloads">
+          <LinkItem route="Downloads" navigation={navigation}>
             <Box>
               {hasUpdate && (
                 <AnimatedCircle
@@ -318,11 +320,11 @@ export const More = ({ closeMenu }: MoreProps) => {
             </Box>
             <Text fontSize={15}>{t('Gestion des téléchargements')}</Text>
           </LinkItem>
-          <LinkItem route="Changelog">
+          <LinkItem route="Changelog" navigation={navigation}>
             <StyledIcon name="terminal" size={25} />
             <Text fontSize={15}>{t('Changelog')}</Text>
           </LinkItem>
-          <LinkItem route="FAQ">
+          <LinkItem route="FAQ" navigation={navigation}>
             <StyledIcon name="help-circle" size={25} />
             <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
@@ -377,13 +379,13 @@ export const More = ({ closeMenu }: MoreProps) => {
 
           <ChangeLanguage />
           <ManualSync />
-          <LinkItem route="ImportExport">
+          <LinkItem route="ImportExport" navigation={navigation}>
             <StyledIcon name="upload" size={25} />
             <Text fontSize={15}>{t('app.importexport')}</Text>
           </LinkItem>
           {/* <ExportSave /> */}
           {!isLogged && (
-            <LinkItem route="Login">
+            <LinkItem route="Login" navigation={navigation}>
               <StyledIcon color="primary" name="log-in" size={25} />
               <Text color="primary" fontSize={15} bold>
                 {t('Se connecter')}
