@@ -59,7 +59,7 @@ interface StrongsTabScreenProps {
 
 const LexiqueTabScreen = ({
   strongsAtom,
-  navigation, // not use
+  navigation,
   hasBackButton,
 }: StrongsTabScreenProps) => {
   const { t } = useTranslation()
@@ -121,7 +121,7 @@ const LexiqueTabScreen = ({
             }) => (
               <LexiqueItem
                 key={index}
-                {...{ Mot, Grec, Hebreu, Code, lexiqueType }}
+                {...{ Mot, Grec, Hebreu, Code, lexiqueType, navigation }}
               />
             )}
             removeClippedSubviews

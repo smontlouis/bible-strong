@@ -384,6 +384,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                   {verses.map((item, i) => (
                     <ConcordanceVerse
                       navigation={navigation}
+                      t={t}
                       concordanceFor={Code}
                       verse={item}
                       key={i}
@@ -393,13 +394,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                 {count > 15 && (
                   <Box>
                     <Button
-                      onPress={() =>
-                        navigation.navigate({
-                          routeName: 'Concordance',
-                          params: { strongReference, book },
-                          key: `concordance-${strongReference}-${book}`,
-                        })
-                      }
+                      onPress={() => navigation.navigate("Concordance", { strongReference, book })}
                     >
                       {t('Tout voir')}
                     </Button>

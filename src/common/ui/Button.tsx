@@ -27,6 +27,7 @@ interface Props {
   rightIcon?: JSX.Element
   subTitle?: string
   theme?: Theme
+  navigation?: StackNavigationProp<MainStackProps>
 }
 
 const WrapperButton = styled.TouchableOpacity(
@@ -113,8 +114,8 @@ const Button = ({
   color,
   subTitle,
   fullWidth,
+  navigation
 }: Props) => {
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const Component = onPress ? WrapperButton : WrapperLink
 
   return (

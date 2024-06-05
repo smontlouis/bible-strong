@@ -6,7 +6,7 @@ import books from '~assets/bible_versions/books-desc'
 
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
-import { useTranslation, withTranslation } from 'react-i18next'
+import { TFunction, useTranslation, withTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
@@ -26,13 +26,14 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
 
 type Props = {
   navigation: StackNavigationProp<MainStackProps>
+  t: TFunction<"translation", undefined>
   verse: any
   concordanceFor: any
 }
 
 class ConcordanceVerse extends React.Component<Props> {
   state = { formattedTexte: '' }
-  t = useTranslation().t
+  t = this.props.t
 
   componentDidMount() {
     const { verse, concordanceFor } = this.props
@@ -78,4 +79,4 @@ class ConcordanceVerse extends React.Component<Props> {
   }
 }
 
-export default withTranslation()(ConcordanceVerse)
+export default ConcordanceVerse

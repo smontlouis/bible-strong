@@ -5,6 +5,9 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { useNavigation } from '@react-navigation/native'
 
 const SectionItem = styled(Box)(({ theme }) => ({
   height: 80,
@@ -27,12 +30,13 @@ const Chip = styled(Box)(({ theme, isHebreu }) => ({
   marginBottom: 3,
 }))
 
-const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType }) => {
+const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType, navigation }: any & StackNavigationProp<MainStackProps>) => {
   const { t } = useTranslation()
   return (
     // That's why : `const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'` - Ok this is not the best implementation
     <Link
       route="Strong"
+      navigation={navigation}
       params={{ book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code }}
     >
       <SectionItem>
