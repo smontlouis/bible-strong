@@ -10,7 +10,7 @@ const StudiesScreen = ({
   navigation,
   route
 }: StackScreenProps<MainStackProps, 'Studies'>) => {
-  const studyId = route.params.studyId
+  const studyId = route.params?.studyId // need to fix routing through LinkItem : params shouldn't be undefined
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -27,6 +27,6 @@ const StudiesScreen = ({
     []
   )
 
-  return <StudiesTabScreen studyAtom={onTheFlyAtom} navigation={navigation} />
+  return <StudiesTabScreen studyAtom={onTheFlyAtom} navigation={navigation} route={route} />
 }
 export default StudiesScreen

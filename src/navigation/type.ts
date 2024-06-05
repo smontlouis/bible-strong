@@ -78,7 +78,7 @@ type CompareVersesScreenProps = {
 
 type StudiesScreenProps = {
     studyId?: string
-  }
+}
 
 type LexiqueScreenProps = {}
 

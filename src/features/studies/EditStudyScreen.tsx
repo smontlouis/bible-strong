@@ -68,11 +68,11 @@ const withStudy = (
 
   return (
     <Component
-      studyId={studyId}
+      // studyId={studyId}
       canEdit={canEdit}
       navigation={navigation}
       route={route}
-      // {...props}
+      {...props}
     />
   )
 }

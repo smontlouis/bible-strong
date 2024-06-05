@@ -270,7 +270,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Bible Thématique Nave')}
             </Text>
           </LinkItem>
-          <LinkItem route="Studies" navigation={navigation}>
+          <LinkItem route="Studies" navigation={navigation} params={{}}>
             <FeatherIcon name="feather" style={{ marginRight: 15 }} size={25} />
             <Text bold fontSize={15}>
               {t('Études')}

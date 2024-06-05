@@ -9,13 +9,15 @@ import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
 import { MainStackProps } from '~navigation/type'
+import { RouteProp } from '@react-navigation/native'
 
 interface StudiesTabScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'Studies'>
+  route: RouteProp<MainStackProps, 'EditStudy'>
   studyAtom: PrimitiveAtom<StudyTab>
 }
 
-const StudiesTabScreen = ({ studyAtom, navigation }: StudiesTabScreenProps) => {
+const StudiesTabScreen = ({ studyAtom, navigation, route }: StudiesTabScreenProps) => {
   const [studyTab] = useAtom(studyAtom)
 
   const {
@@ -32,6 +34,7 @@ const StudiesTabScreen = ({ studyAtom, navigation }: StudiesTabScreenProps) => {
       studyId={studyId}
       hasBackButton={false}
       navigation={navigation}
+      route={route}
       openedFromTab
     />
   )
