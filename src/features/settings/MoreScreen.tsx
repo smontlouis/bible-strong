@@ -294,7 +294,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Surbrillances')}
             </Text>
           </LinkItem>
-          <LinkItem route="BibleVerseNotes" navigation={navigation}>
+          <LinkItem route="BibleVerseNotes" navigation={navigation} params={{}}>
             <StyledIcon name="file-text" size={25} />
             <Text bold fontSize={15}>
               {t('Notes')}
