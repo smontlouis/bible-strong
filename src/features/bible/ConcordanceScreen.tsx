@@ -54,7 +54,7 @@ const ConcordanceScreen = ({ navigation, route }: StackScreenProps<MainStackProp
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('ConcordanceByBook', {
+                navigation.navigate('ConcordanceByBook',{
                   book: item.Livre,
                   strongReference,
                 })

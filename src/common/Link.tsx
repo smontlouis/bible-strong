@@ -5,12 +5,13 @@ import Box, { BoxProps } from '~common/ui/Box'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-interface LinkProps {
-  navigation?: StackNavigationProp<MainStackProps>
-  route?: string
+// first try in typing this component
+export interface LinkProps<R extends keyof MainStackProps> {
+  navigation?: StackNavigationProp<MainStackProps, R>
+  route?: R
   href?: string
   share?: string
-  params?: object
+  params?: MainStackProps[R]
   replace?: boolean
   onPress?: () => void
   padding?: boolean
@@ -18,7 +19,7 @@ interface LinkProps {
   style?: any
   size?: number
 }
-class Link extends Component<LinkProps> {
+class Link extends Component<LinkProps<keyof MainStackProps>> {
   handlePress = () => {
     const {
       navigation,
@@ -34,9 +35,9 @@ class Link extends Component<LinkProps> {
       if (onPress) {
         onPress()
         setTimeout(() => {
-          replace // How to type this ? Maybe we should not use a class component
+          replace 
             ? navigation?.replace(route, params)
-            : navigation?.navigate(route, params)
+            : navigation?.navigate(route, params) // How to type this ? Maybe we should not use a class component
         }, 300)
 
         return
@@ -93,8 +94,8 @@ class Link extends Component<LinkProps> {
   }
 }
 
-type LinkBoxProps = React.FC<BoxProps & LinkProps>
+type LinkBoxProps = React.FC<BoxProps & LinkProps<keyof MainStackProps>>
 export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
 // @ts-ignore
-export default Link as (x: PropsWithChildren<LinkProps>) => JSX.Element
+export default Link as (x: PropsWithChildren<LinkProps<keyof MainStackProps>>) => JSX.Element

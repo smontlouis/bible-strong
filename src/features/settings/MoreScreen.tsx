@@ -1,4 +1,4 @@
-import styled from '@emotion/native'
+import styled, { StyledComponent } from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import auth from '@react-native-firebase/auth'
 import sizeof from 'firestore-size'
@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link from '~common/Link'
+import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import SnackBar from '~common/SnackBar'
 import Border from '~common/ui/Border'
@@ -37,7 +37,7 @@ import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { useNavigation } from '@react-navigation/native'
 
-export const LinkItem = styled(Link)(({ }) => ({
+export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({ }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -242,6 +242,8 @@ export const More = ({ closeMenu }: MoreProps) => {
     .getValue('apple_reviewing')
     .asBoolean()
 
+  // All the LinkItem should define params if they use route
+  // There should be a way to type params using the route name
   return (
     <SafeAreaBox borderLeftWidth={1} borderColor="border">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />

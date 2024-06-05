@@ -12,7 +12,7 @@ import { MainStackProps } from '~navigation/type'
 import { RouteProp } from '@react-navigation/native'
 
 interface StudiesTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'Studies'>
+  navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
   route: RouteProp<MainStackProps, 'EditStudy'>
   studyAtom: PrimitiveAtom<StudyTab>
 }
@@ -31,11 +31,11 @@ const StudiesTabScreen = ({ studyAtom, navigation, route }: StudiesTabScreenProp
 
   return (
     <EditStudyScreen
-      studyId={studyId}
-      hasBackButton={false}
+      // studyId={studyId}
+      // hasBackButton={false}
       navigation={navigation}
       route={route}
-      openedFromTab
+      // openedFromTab
     />
   )
 }
