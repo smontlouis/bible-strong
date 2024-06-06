@@ -13,7 +13,10 @@ import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
 import { MainStackProps } from '~navigation/type'
 
-const PlanScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Plan'>) => {
+const PlanScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'Plan'>) => {
   const {
     id,
     title,

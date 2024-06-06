@@ -40,12 +40,12 @@ const extractTitle = (slice: EntitySlice) => {
   }
 }
 
-const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
-  const {
-    id,
-    title,
-    slices,
-  }: ComputedReadingSlice = route.params.readingSlice || {}
+const PlanSliceScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
+  const { id, title, slices }: ComputedReadingSlice =
+    route.params.readingSlice || {}
   const planId = route.params.planId
 
   const { t } = useTranslation()
@@ -133,10 +133,11 @@ const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps,
                   </Box>
                 </MenuOption>
                 <MenuOption
-                  onSelect={() =>
-                    navigation.navigate('VersionSelector', {
-                      bibleAtom: defaultBibleAtom,
-                    })
+                  onSelect={
+                    () =>
+                      navigation.navigate('VersionSelector', {
+                        bibleAtom: defaultBibleAtom,
+                      })
                     // navigation.navigate({
                     //   routeName: 'VersionSelector',
                     //   params: { bibleAtom: defaultBibleAtom },

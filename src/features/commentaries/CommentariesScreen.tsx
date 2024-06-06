@@ -8,7 +8,7 @@ import { MainStackProps } from '~navigation/type'
 
 const CommentariesScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'Commentaries'>) => {
   const verse = route.params.verse // navigation.getParam('verse')
 

@@ -40,241 +40,257 @@ const sliderWidth = viewportWidth
 const itemWidth = slideWidth + itemHorizontalMargin * 2
 
 const VerseText = styled.View(() => ({
-    flex: 1,
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    flexDirection: 'row',
+  flex: 1,
+  flexWrap: 'wrap',
+  alignItems: 'flex-start',
+  flexDirection: 'row',
 }))
 
 const VersetWrapper = styled.View(() => ({
-    width: 25,
-    marginRight: 5,
-    borderRightWidth: 3,
-    borderRightColor: 'transparent',
-    alignItems: 'flex-end',
+  width: 25,
+  marginRight: 5,
+  borderRightWidth: 3,
+  borderRightColor: 'transparent',
+  alignItems: 'flex-end',
 }))
 
 const NumberText = styled(Paragraph)({
-    marginTop: 0,
-    fontSize: 9,
-    justifyContent: 'flex-end',
-    marginRight: 3,
+  marginTop: 0,
+  fontSize: 9,
+  justifyContent: 'flex-end',
+  marginRight: 3,
 })
 
 const StyledVerse = styled.View(({ theme }) => ({
-    paddingLeft: 0,
-    paddingRight: 10,
-    marginBottom: 5,
-    flexDirection: 'row',
+  paddingLeft: 0,
+  paddingRight: 10,
+  marginBottom: 5,
+  flexDirection: 'row',
 }))
 
 const CountChip = styled.View(({ theme }) => ({
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: theme.colors.border,
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    bottom: -5,
-    right: -5,
+  width: 14,
+  height: 14,
+  borderRadius: 7,
+  backgroundColor: theme.colors.border,
+  position: 'absolute',
+  justifyContent: 'center',
+  alignItems: 'center',
+  bottom: -5,
+  right: -5,
 }))
 
 const StyledScrollView = styled.ScrollView(({ theme }) => ({
-    backgroundColor: theme.colors.lightGrey,
+  backgroundColor: theme.colors.lightGrey,
 }))
 
-const BibleVerseDetailScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'BibleVerseDetail'>) => {
-    const [error, setError] = useState(false);
-    const [isCarouselLoading, setIsCarouselLoading] = useState(true);
-    const [strongReferences, setStrongReferences] = useState<StrongReference[]>([]);
-    const [currentStrongReference, setCurrentStrongReference] = useState<StrongReference>();
-    const [verse, setVerse] = useState(route.params.verse);
-    const [versesInCurrentChapter, setVersesInCurrentChapter] = useState<number | null>(null);
-    const [formattedTexte, setFormattedTexte] = useState('');
-    const { theme, insets } = route.params
-    const { t } = useTranslation()
+const BibleVerseDetailScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'BibleVerseDetail'>) => {
+  const [error, setError] = useState(false)
+  const [isCarouselLoading, setIsCarouselLoading] = useState(true)
+  const [strongReferences, setStrongReferences] = useState<StrongReference[]>(
+    []
+  )
+  const [currentStrongReference, setCurrentStrongReference] = useState<
+    StrongReference
+  >()
+  const [verse, setVerse] = useState(route.params.verse)
+  const [versesInCurrentChapter, setVersesInCurrentChapter] = useState<
+    number | null
+  >(null)
+  const [formattedTexte, setFormattedTexte] = useState('')
+  const { theme, insets } = route.params
+  const { t } = useTranslation()
 
-    let _carousel = React.useRef<ICarouselInstance>(null)
+  let _carousel = React.useRef<ICarouselInstance>(null)
 
-    const formatVerse = async (strongVerse: any) => {
-        const { verse: { Livre } } = route.params
-        const { formattedTexte, references } = await verseToStrong(strongVerse)
+  const formatVerse = async (strongVerse: any) => {
+    const {
+      verse: { Livre },
+    } = route.params
+    const { formattedTexte, references } = await verseToStrong(strongVerse)
 
-        setFormattedTexte(formattedTexte)
+    setFormattedTexte(formattedTexte)
 
-        async () => {
-            const strongReferences = await loadStrongReferences(references, Livre)
+    ;async () => {
+      const strongReferences = await loadStrongReferences(references, Livre)
 
-            setIsCarouselLoading(false)
-            setStrongReferences(strongReferences)
-            setCurrentStrongReference(strongReferences[0])
+      setIsCarouselLoading(false)
+      setStrongReferences(strongReferences)
+      setCurrentStrongReference(strongReferences[0])
 
-            _carousel.current?.scrollTo({ index: 0, animated: false })
-            // _carousel.current?.snapToItem(0, false)
-        }
+      _carousel.current?.scrollTo({ index: 0, animated: false })
+      // _carousel.current?.snapToItem(0, false)
+    }
+  }
+
+  const loadPage = async () => {
+    const strongVerse = await loadStrongVerse(verse)
+
+    if (!strongVerse) {
+      setError(true)
+      return
     }
 
-    const loadPage = async () => {
-        const strongVerse = await loadStrongVerse(verse)
+    const versesInCurrentChapter =
+      countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
 
-        if (!strongVerse) {
-            setError(true)
-            return
-        }
+    setVersesInCurrentChapter(versesInCurrentChapter)
 
-        const versesInCurrentChapter =
-            countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
+    formatVerse(strongVerse)
+  }
 
-        setVersesInCurrentChapter(versesInCurrentChapter)
+  useEffect(() => {
+    loadPage()
+  }, [])
 
-        formatVerse(strongVerse)
-    }
+  useEffect(() => {
+    loadPage()
+  }, [verse])
 
-    useEffect(() => {
-        loadPage()
-    }, [])
+  const goToCarouselItem = (ref: string) => {
+    const strongRef = strongReferences.find(r => r.Code === ref)
+    setCurrentStrongReference(strongRef)
+  }
 
-    useEffect(() => {
-        loadPage()
-    }, [verse])
+  const onSnapToItem = (index: number) => {
+    setCurrentStrongReference(strongReferences[index])
+  }
 
-    const goToCarouselItem = (ref: string) => {
-        const strongRef = strongReferences.find(r => r.Code === ref)
-        setCurrentStrongReference(strongRef)
-    }
+  const updateVerse = (value: number) => {
+    setVerse(verse => ({
+      ...verse,
+      Verset: verse.Verset + value,
+    }))
+  }
 
-    const onSnapToItem = (index: number) => {
-        setCurrentStrongReference(strongReferences[index])
-    }
-
-    const updateVerse = (value: number) => {
-        setVerse(verse => ({
-            ...verse,
-            Verset: verse.Verset + value,
-        }))
-    }
-
-    const renderItem = ({ item, index }) => {
-        const { isSelectionMode } = route.params || {}
-        return (
-            <StrongCard
-                theme={theme}
-                isSelectionMode={isSelectionMode}
-                navigation={navigation}
-                book={verse.Livre}
-                strongReference={item}
-                index={index}
-            />
-        )
-    }
-
-    const { title: headerTitle } = formatVerseContent([verse])
-
+  const renderItem = ({ item, index }) => {
+    const { isSelectionMode } = route.params || {}
     return (
-        <StyledScrollView
-            contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
-            scrollIndicatorInsets={{ right: 1 }}
-        >
-            <Box background paddingTop={insets.top} />
-            <Header
-                fontSize={18}
-                bg="reverse" // attr doesn't exist
-                hasBackButton
-                title={`${headerTitle} ${headerTitle.length < 12 ? t('- Strong LSG') : '' // t must be imported as props
-                    }`}
-                rightComponent={
-                    <Link
-                        route="DictionnaireVerseDetail"
-                        params={{ verse }}
-                        replace
-                        padding
-                    >
-                        <Box position="relative" overflow="visible">
-                            <DictionnaryIcon color={theme.colors.secondary} />
-                        </Box>
-                    </Link>
-                }
-            />
-            <Box>
-                <Box background paddingTop={10}>
-                    <StyledVerse>
-                        <VersetWrapper>
-                            <NumberText>{verse.Verset}</NumberText>
-                        </VersetWrapper>
-                        <CarouselProvider
-                            value={{
-                                currentStrongReference: currentStrongReference,
-                                goToCarouselItem: goToCarouselItem
-                            }}
-                        >
-                            <VerseText>{formattedTexte}</VerseText>
-                        </CarouselProvider>
-                    </StyledVerse>
-                    <BibleVerseDetailFooter
-                        {...{
-                            verseNumber: verse.Verset,
-                            goToNextVerse: () => {
-                                updateVerse(+1)
-                                setIsCarouselLoading(true)
-                            },
-                            goToPrevVerse: () => {
-                                updateVerse(-1)
-                                setIsCarouselLoading(true)
-                            },
-                            versesInCurrentChapter,
-                        }}
-                    />
-                </Box>
-                <Box bg="lightGrey">
-                    <RoundedCorner />
-                </Box>
-                <Box bg="lightGrey">
-                    {isCarouselLoading && <Loading />}
-                    {!isCarouselLoading && (
-                        <Carousel
-                            ref={_carousel}
-                            mode="horizontal-stack"
-                            scrollAnimationDuration={300}
-                            width={itemWidth}
-                            panGestureHandlerProps={{
-                                activeOffsetX: [-10, 10],
-                            }}
-                            modeConfig={{
-                                opacityInterval: 0.8,
-                                scaleInterval: 0,
-                                stackInterval: itemWidth,
-                                rotateZDeg: 0,
-                            }}
-                            style={{
-                                marginTop: 15,
-                                paddingLeft: 20,
-                                overflow: 'visible',
-                                flex: 1,
-                            }}
-                            data={strongReferences}
-                            renderItem={renderItem}
-                            onSnapToItem={onSnapToItem}
-                            defaultIndex={strongReferences.findIndex(
-                                r => r.Code === currentStrongReference?.Code
-                            )}
-                        />
-                    )}
-                </Box>
-            </Box>
-        </StyledScrollView>
+      <StrongCard
+        theme={theme}
+        isSelectionMode={isSelectionMode}
+        navigation={navigation}
+        book={verse.Livre}
+        strongReference={item}
+        index={index}
+      />
     )
+  }
+
+  const { title: headerTitle } = formatVerseContent([verse])
+
+  return (
+    <StyledScrollView
+      contentContainerStyle={{ paddingBottom: 20, minHeight: hp(75) }}
+      scrollIndicatorInsets={{ right: 1 }}
+    >
+      <Box background paddingTop={insets.top} />
+      <Header
+        fontSize={18}
+        bg="reverse" // attr doesn't exist
+        hasBackButton
+        title={`${headerTitle} ${
+          headerTitle.length < 12 ? t('- Strong LSG') : '' // t must be imported as props
+        }`}
+        rightComponent={
+          <Link
+            route="DictionnaireVerseDetail"
+            params={{ verse }}
+            replace
+            padding
+          >
+            <Box position="relative" overflow="visible">
+              <DictionnaryIcon color={theme.colors.secondary} />
+            </Box>
+          </Link>
+        }
+      />
+      <Box>
+        <Box background paddingTop={10}>
+          <StyledVerse>
+            <VersetWrapper>
+              <NumberText>{verse.Verset}</NumberText>
+            </VersetWrapper>
+            <CarouselProvider
+              value={{
+                currentStrongReference: currentStrongReference,
+                goToCarouselItem: goToCarouselItem,
+              }}
+            >
+              <VerseText>{formattedTexte}</VerseText>
+            </CarouselProvider>
+          </StyledVerse>
+          <BibleVerseDetailFooter
+            {...{
+              verseNumber: verse.Verset,
+              goToNextVerse: () => {
+                updateVerse(+1)
+                setIsCarouselLoading(true)
+              },
+              goToPrevVerse: () => {
+                updateVerse(-1)
+                setIsCarouselLoading(true)
+              },
+              versesInCurrentChapter,
+            }}
+          />
+        </Box>
+        <Box bg="lightGrey">
+          <RoundedCorner />
+        </Box>
+        <Box bg="lightGrey">
+          {isCarouselLoading && <Loading />}
+          {!isCarouselLoading && (
+            <Carousel
+              ref={_carousel}
+              mode="horizontal-stack"
+              scrollAnimationDuration={300}
+              width={itemWidth}
+              panGestureHandlerProps={{
+                activeOffsetX: [-10, 10],
+              }}
+              modeConfig={{
+                opacityInterval: 0.8,
+                scaleInterval: 0,
+                stackInterval: itemWidth,
+                rotateZDeg: 0,
+              }}
+              style={{
+                marginTop: 15,
+                paddingLeft: 20,
+                overflow: 'visible',
+                flex: 1,
+              }}
+              data={strongReferences}
+              renderItem={renderItem}
+              onSnapToItem={onSnapToItem}
+              defaultIndex={strongReferences.findIndex(
+                r => r.Code === currentStrongReference?.Code
+              )}
+            />
+          )}
+        </Box>
+      </Box>
+    </StyledScrollView>
+  )
 }
 
-export default compose<any, StackScreenProps<MainStackProps, 'BibleVerseDetail'>>(
-    withTheme, // try with useTheme
-    withSafeAreaInsets, // try with useSafeAreaInsets
-    connect((state, props) => { // typing redux : https://react-redux.js.org/using-react-redux/usage-with-typescript#manually-typing-connect
-        const { verse } = props.route.params || {}
-        return { verse }
-    }),
-    waitForStrongDB({
-        hasBackButton: true,
-        hasHeader: true,
-    })
+export default compose<
+  any,
+  StackScreenProps<MainStackProps, 'BibleVerseDetail'>
+>(
+  withTheme, // try with useTheme
+  withSafeAreaInsets, // try with useSafeAreaInsets
+  connect((state, props) => {
+    // typing redux : https://react-redux.js.org/using-react-redux/usage-with-typescript#manually-typing-connect
+    const { verse } = props.route.params || {}
+    return { verse }
+  }),
+  waitForStrongDB({
+    hasBackButton: true,
+    hasHeader: true,
+  })
 )(BibleVerseDetailScreen)

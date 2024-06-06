@@ -35,7 +35,7 @@ class Link extends Component<LinkProps<keyof MainStackProps>> {
       if (onPress) {
         onPress()
         setTimeout(() => {
-          replace 
+          replace
             ? navigation?.replace(route, params)
             : navigation?.navigate(route, params) // How to type this ? Maybe we should not use a class component
         }, 300)
@@ -98,4 +98,6 @@ type LinkBoxProps = React.FC<BoxProps & LinkProps<keyof MainStackProps>>
 export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
 // @ts-ignore
-export default Link as (x: PropsWithChildren<LinkProps<keyof MainStackProps>>) => JSX.Element
+export default Link as (
+  x: PropsWithChildren<LinkProps<keyof MainStackProps>>
+) => JSX.Element

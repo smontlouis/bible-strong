@@ -98,9 +98,9 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
     if (type === 'w') {
       navigation.navigate('NaveDetail', {
-          name_lower: item,
-          name: item
-        })
+        name_lower: item,
+        name: item,
+      })
       // navigation.navigate({
       //   routeName: 'NaveDetail',
       //   params: {

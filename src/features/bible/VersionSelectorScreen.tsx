@@ -23,7 +23,7 @@ const SectionList = styled(RNSectionList)({
 
 const VersionSelector = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'VersionSelector'>) => {
   const bibleAtom = route.params.bibleAtom
   const parallelVersionIndex = route.params.parallelVersionIndex

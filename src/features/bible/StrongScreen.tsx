@@ -8,7 +8,7 @@ import { MainStackProps } from '~navigation/type'
 
 const StrongScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'Strong'>) => {
   const book = route.params.book // navigation.getParam('book')
   const reference = route.params.reference // navigation.getParam('reference')

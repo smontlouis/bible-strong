@@ -70,10 +70,7 @@ const DictionnaireOfTheDay = ({
   const { word } = strongReference
 
   return (
-    <Link
-      navigation={navigation}
-      route="DictionnaryDetail"
-      params={{ word }}>
+    <Link navigation={navigation} route="DictionnaryDetail" params={{ word }}>
       <WidgetContainer>
         <Box
           style={{
@@ -100,7 +97,8 @@ const DictionnaireOfTheDay = ({
         <Link
           navigation={navigation}
           route="Dictionnaire"
-          style={{ width: '100%' }}>
+          style={{ width: '100%' }}
+        >
           <Box
             row
             center

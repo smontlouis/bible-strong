@@ -18,7 +18,8 @@ import { Theme } from '~themes'
 
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
-interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
+interface Props
+  extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
   modalRefDetails: React.RefObject<BottomSheet>
   headerComponent?: React.ReactNode
   footerComponent?: () => React.ReactNode

@@ -268,6 +268,6 @@ class BibleVerseDetailCard extends React.Component {
 export default compose(
   withTheme,
   withTranslation(),
-  waitForStrongDB(),
+  waitForStrongDB()
   // withNavigation
 )(BibleVerseDetailCard)

@@ -8,7 +8,7 @@ import { MainStackProps } from '~navigation/type'
 
 const StudiesScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'Studies'>) => {
   const studyId = route.params.studyId
 
@@ -27,6 +27,12 @@ const StudiesScreen = ({
     []
   )
 
-  return <StudiesTabScreen studyAtom={onTheFlyAtom} navigation={navigation} route={route} />
+  return (
+    <StudiesTabScreen
+      studyAtom={onTheFlyAtom}
+      navigation={navigation}
+      route={route}
+    />
+  )
 }
 export default StudiesScreen

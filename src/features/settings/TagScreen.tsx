@@ -100,7 +100,10 @@ const NoteItem = ({ item, t, isFR }) => {
   )
 }
 
-const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'>) => {
+const TagScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'Tag'>) => {
   const tagId = route.params.tagId
   const dispatch = useDispatch()
   const { t } = useTranslation()

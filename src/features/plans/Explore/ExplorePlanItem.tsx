@@ -20,17 +20,19 @@ import { RootState } from '~redux/modules/reducer'
 import DetailsModal from '../PlanScreen/DetailsModal'
 import { useFireStorage } from '../plan.hooks'
 
-const ExplorePlanItem = ({
-  id,
-  title,
-  downloads,
-  description,
-  image,
-  author,
-  type,
-  // navigation,
-  featured,
-}/*: OnlinePlan & { navigation: StackNavigationProp<any, >> }*/) => {
+const ExplorePlanItem = (
+  {
+    id,
+    title,
+    downloads,
+    description,
+    image,
+    author,
+    type,
+    // navigation,
+    featured,
+  } /*: OnlinePlan & { navigation: StackNavigationProp<any, >> }*/
+) => {
   const navigation = useNavigation()
   const { t } = useTranslation()
   const modalRef = React.useRef<BottomSheet>(null)

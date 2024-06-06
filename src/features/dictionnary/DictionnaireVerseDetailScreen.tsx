@@ -193,7 +193,10 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
 }))
 
-const DictionnaireVerseDetailScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'DictionnaireVerseDetail'>) => {
+const DictionnaireVerseDetailScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'DictionnaireVerseDetail'>) => {
   const { t } = useTranslation()
   const carousel = useRef<ICarouselInstance>(null)
   const [verse, setVerse] = useState<Verse>(route.params.verse)

@@ -173,11 +173,12 @@ export const Home = ({ closeHome }: HomeProps) => {
   )
 }
 
-const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Home'>) => {
+const HomeScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'Home'>) => {
   const closeHome = route.params.closeHome
-  
-  return (
-    <Home closeHome={closeHome} />
-  )
+
+  return <Home closeHome={closeHome} />
 }
 export default memo(HomeScreen)

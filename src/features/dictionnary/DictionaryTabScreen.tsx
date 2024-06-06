@@ -63,7 +63,10 @@ interface DictionariesTabScreenProps {
   hasBackButton?: boolean
 }
 
-const DictionnaireScreen = ({ hasBackButton, navigation }: DictionariesTabScreenProps) => {
+const DictionnaireScreen = ({
+  hasBackButton,
+  navigation,
+}: DictionariesTabScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
@@ -121,7 +124,11 @@ const DictionnaireScreen = ({ hasBackButton, navigation }: DictionariesTabScreen
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem key={id} navigation={navigation} {...{ word }} />
+              <DictionnaireItem
+                key={id}
+                navigation={navigation}
+                {...{ word }}
+              />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}

@@ -131,7 +131,12 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { name_lower, name } }) => (
-              <NaveItem key={name_lower} navigation={navigation} name_lower={name_lower} name={name} />
+              <NaveItem
+                key={name_lower}
+                navigation={navigation}
+                name_lower={name_lower}
+                name={name}
+              />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}

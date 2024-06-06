@@ -18,7 +18,7 @@ interface BibleSelectProps {
 
 const BibleSelectScreen = ({
   navigation,
-}: /*NavigationStackScreenProps<BibleSelectProps>*/any) => {
+}: /*NavigationStackScreenProps<BibleSelectProps>*/ any) => {
   const bibleAtom = navigation.getParam('bibleAtom')
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)

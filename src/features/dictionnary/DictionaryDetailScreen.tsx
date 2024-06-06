@@ -8,7 +8,7 @@ import { MainStackProps } from '~navigation/type'
 
 const DictionaryDetailScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'DictionnaryDetail'>) => {
   const word = route.params.word // navigation.getParam('word')
 

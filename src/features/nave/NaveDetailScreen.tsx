@@ -8,9 +8,9 @@ import { MainStackProps } from '~navigation/type'
 
 const NaveDetailScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'NaveDetail'>) => {
-  const name_lower = route.params.name_lower// navigation.getParam('name_lower')
+  const name_lower = route.params.name_lower // navigation.getParam('name_lower')
   const name = route.params.name // navigation.getParam('name')
 
   const onTheFlyAtom = useMemo(

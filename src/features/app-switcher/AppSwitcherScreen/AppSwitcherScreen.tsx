@@ -37,8 +37,9 @@ const AppSwitcherScreen = memo(
     navigation,
     route,
     openHome,
-    openMenu
-  }: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
+    openMenu,
+  }: StackScreenProps<MainStackProps, 'AppSwitcher'> &
+    AppSwitcherScreenFuncs) => {
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
@@ -92,7 +93,9 @@ const AppSwitcherScreen = memo(
   }
 )
 
-const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
+const AppSwitcherScreenWrapper = (
+  props: StackScreenProps<MainStackProps, 'AppSwitcher'>
+) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -124,15 +127,13 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
     closeHome()
   }, [tabsCount, closeHome])
 
-  const renderHomeScreen = useCallback(
-    () => <Home closeHome={closeHome} />,
-    [closeHome]
-  )
+  const renderHomeScreen = useCallback(() => <Home closeHome={closeHome} />, [
+    closeHome,
+  ])
 
-  const renderMoreScreen = useCallback(
-    () => <More closeMenu={closeMenu} />,
-    [closeMenu]
-  )
+  const renderMoreScreen = useCallback(() => <More closeMenu={closeMenu} />, [
+    closeMenu,
+  ])
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(

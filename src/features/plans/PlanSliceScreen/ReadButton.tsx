@@ -29,12 +29,14 @@ interface Props {
   isRead: boolean
 }
 
-const ReadButton = ({
-  readingSliceId,
-  planId,
-  isRead,
-  // navigation,
-}/*: NavigationInjectedProps & Props*/) => {
+const ReadButton = (
+  {
+    readingSliceId,
+    planId,
+    isRead,
+    // navigation,
+  } /*: NavigationInjectedProps & Props*/
+) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 

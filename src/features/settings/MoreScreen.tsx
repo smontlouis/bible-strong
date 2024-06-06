@@ -37,7 +37,7 @@ import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { useNavigation } from '@react-navigation/native'
 
-export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({ }) => ({
+export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -176,7 +176,7 @@ const ManualSync = memo(() => {
   if (!isLogged) return null
 
   return (
-    <LinkItem onPress={isSyncing ? () => { } : sync}>
+    <LinkItem onPress={isSyncing ? () => {} : sync}>
       <StyledIcon name="upload-cloud" size={25} />
       <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
         {t('app.sync')}
@@ -446,9 +446,7 @@ export const More = ({ closeMenu }: MoreProps) => {
 const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
   const closeMenu = route.params.closeMenu
 
-  return (
-    <More closeMenu={closeMenu} />
-  )
+  return <More closeMenu={closeMenu} />
 }
 
 export default memo(MoreScreen)

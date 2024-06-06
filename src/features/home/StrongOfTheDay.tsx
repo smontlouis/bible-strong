@@ -79,10 +79,11 @@ const StrongOfTheDay = ({
   const { Grec, Hebreu, Mot } = strongReference
 
   return (
-    <Link 
+    <Link
       route="Strong"
       navigation={navigation}
-      params={{ book: Grec ? 40 : 1, strongReference }}>
+      params={{ book: Grec ? 40 : 1, strongReference }}
+    >
       <WidgetContainer>
         <Box
           style={{
@@ -124,10 +125,7 @@ const StrongOfTheDay = ({
             {truncate(Grec, 10) || truncate(Hebreu, 10)}
           </Paragraph>
         </Box>
-        <Link 
-          route="Lexique"
-          navigation={navigation}
-          style={{ width: '100%' }}>
+        <Link route="Lexique" navigation={navigation} style={{ width: '100%' }}>
           <Box
             row
             center

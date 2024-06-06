@@ -8,7 +8,7 @@ import { MainStackProps } from '~navigation/type'
 
 const CompareVersesScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'BibleCompareVerses'>) => {
   const { selectedVerses } = route.params || {}
 

@@ -26,8 +26,8 @@ const SelectBibleReferenceModal = ({
   isOpen,
   onClose,
   onSelect,
-  // navigation,
-}: SelectBibleReferenceModalProps) => {
+}: // navigation,
+SelectBibleReferenceModalProps) => {
   const navigation = useNavigation()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)

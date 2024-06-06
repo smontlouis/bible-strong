@@ -131,7 +131,7 @@ const Comment = ({ comment, navigation }: Props) => {
         chapter: Number(chapter),
         verse: Number(verse),
         version: 'LSG', // TODO : parse version or get default version
-      });
+      })
 
       // navigation.navigate({
       //   routeName: 'BibleView',

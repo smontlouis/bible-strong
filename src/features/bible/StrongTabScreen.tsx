@@ -181,11 +181,11 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   const linkToStrong = (url: string, ref: number) => {
     // TODO : check if there is a missing parameter
-    navigation.navigate("Strong", { 
+    navigation.navigate('Strong', {
       book,
       reference: ref.toString(),
-      strongReference: strongReferenceParam
-    });
+      strongReference: strongReferenceParam,
+    })
 
     // navigation.navigate({
     //   routeName: 'Strong',
@@ -394,7 +394,12 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                 {count > 15 && (
                   <Box>
                     <Button
-                      onPress={() => navigation.navigate("Concordance", { strongReference, book })}
+                      onPress={() =>
+                        navigation.navigate('Concordance', {
+                          strongReference,
+                          book,
+                        })
+                      }
                     >
                       {t('Tout voir')}
                     </Button>

@@ -17,7 +17,7 @@ import { MainStackProps } from '~navigation/type'
 
 const BibleScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'BibleView'>) => {
   const {
     focusVerses,
@@ -28,7 +28,7 @@ const BibleScreen = ({
     verse,
     version,
   } = route.params // navigation.state.params || {}
-  
+
   const initialValues = produce(getDefaultBibleTab(), draft => {
     draft.id = `bible-${Date.now()}`
     if (book)

@@ -79,13 +79,13 @@ const withStudy = (
 
 const EditStudyScreen = ({
   navigation,
-  route
+  route,
 }: StackScreenProps<MainStackProps, 'EditStudy'>) => {
   const studyId = route.params.studyId
   const canEdit = route.params.canEdit
   const hasBackButton = route.params.hasBackButton
   const openedFromTab = route.params.openedFromTab
-  
+
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
   const [titlePrompt, setTitlePrompt] = useState<
     { id: string; title: string } | false

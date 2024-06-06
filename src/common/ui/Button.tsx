@@ -114,7 +114,7 @@ const Button = ({
   color,
   subTitle,
   fullWidth,
-  navigation
+  navigation,
 }: Props) => {
   const Component = onPress ? WrapperButton : WrapperLink
 

@@ -58,10 +58,11 @@ const NaveOfTheDay = ({
   const { name, name_lower } = naveReference
 
   return (
-    <Link 
+    <Link
       route="NaveDetail"
       navigation={navigation}
-      params={{ name, name_lower }}>
+      params={{ name, name_lower }}
+    >
       <WidgetContainer>
         <Box
           style={{
@@ -85,10 +86,7 @@ const NaveOfTheDay = ({
             {name}
           </Paragraph>
         </Box>
-        <Link
-          route="Nave"
-          navigation={navigation}
-          style={{ width: '100%' }}>
+        <Link route="Nave" navigation={navigation} style={{ width: '100%' }}>
           <Box
             row
             center

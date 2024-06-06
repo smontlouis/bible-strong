@@ -33,8 +33,11 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const ConcordanceScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Concordance'>) => {
-  const strongReference =  route.params.strongReference || {}
+const ConcordanceScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'Concordance'>) => {
+  const strongReference = route.params.strongReference || {}
   const book = route.params.book || 0
 
   const { data: versesCountByBook, status } = useAsync(
@@ -54,7 +57,7 @@ const ConcordanceScreen = ({ navigation, route }: StackScreenProps<MainStackProp
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('ConcordanceByBook',{
+                navigation.navigate('ConcordanceByBook', {
                   book: item.Livre,
                   strongReference,
                 })

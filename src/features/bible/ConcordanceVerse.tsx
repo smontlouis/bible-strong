@@ -26,7 +26,7 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
 
 type Props = {
   navigation: StackNavigationProp<MainStackProps>
-  t: TFunction<"translation", undefined>
+  t: TFunction<'translation', undefined>
   verse: any
   concordanceFor: any
 }
@@ -60,13 +60,13 @@ class ConcordanceVerse extends React.Component<Props> {
       <Container
         onPress={() =>
           navigation.navigate('BibleView', {
-              isReadOnly: true,
-              book: books[verse.Livre - 1],
-              chapter: verse.Chapitre,
-              verse: verse.Verset,
-              focusVerses: [verse.Verset],
-              isSelectionMode: false,
-              // version: 'LSG', where do we find the version ?
+            isReadOnly: true,
+            book: books[verse.Livre - 1],
+            chapter: verse.Chapitre,
+            verse: verse.Verset,
+            focusVerses: [verse.Verset],
+            isSelectionMode: false,
+            // version: 'LSG', where do we find the version ?
           })
         }
       >

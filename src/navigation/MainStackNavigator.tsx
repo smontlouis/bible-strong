@@ -58,59 +58,234 @@ export const MainStackNavigator = createStackNavigator<MainStackProps>()
 
 const MainStack = (props: StackScreenProps<MainStackProps>) => (
   <PortalProvider>
-    <MainStackNavigator.Navigator initialRouteName='AppSwitcher' screenOptions={{ headerShown: false }}>
-      <MainStackNavigator.Screen name='AppSwitcher' component={AppSwitcherScreen} {...props} />
-      <MainStackNavigator.Screen name='More' component={MoreScreen} {...props} />
-      <MainStackNavigator.Screen name='Home' component={HomeScreen} {...props} />
-      <MainStackNavigator.Screen name='BibleSelect' component={BibleSelectScreen} {...props} />
-      <MainStackNavigator.Screen name='VersionSelector' component={VersionSelectorScreen} {...props} />
-      <MainStackNavigator.Screen name='BibleVerseDetail' component={BibleVerseDetailScreen} {...props} />
-      <MainStackNavigator.Screen name='BibleVerseNotes' component={BibleVerseNotesScreen} {...props} />
-      <MainStackNavigator.Screen name='Highlights' component={HighlightScreen} {...props} />
-      <MainStackNavigator.Screen name='Strong' component={StrongScreen} {...props} />
-      <MainStackNavigator.Screen name='DictionnaireVerseDetail' component={DictionnaireVerseDetailScreen} {...props} />
-      <MainStackNavigator.Screen name='ConcordanceByBook' component={ConcordanceByBookScreen} {...props} />
-      <MainStackNavigator.Screen name='BibleView' component={BibleViewScreen} {...props} />
-      <MainStackNavigator.Screen name='BibleCompareVerses' component={BibleCompareVersesScreen} {...props} />
-      <MainStackNavigator.Screen name='Studies' component={StudiesScreen} {...props} />
-      <MainStackNavigator.Screen name='Lexique' component={LexiqueScreen} {...props} />
-      <MainStackNavigator.Screen name='EditStudy' component={EditStudyScreen} {...props} />
-      <MainStackNavigator.Screen name='DictionnaryDetail' component={DictionnaryDetailScreen} {...props} />
-      <MainStackNavigator.Screen name='Login' component={LoginScreen} {...props} />
-      <MainStackNavigator.Screen name='Support' component={SupportScreen} {...props} />
-      <MainStackNavigator.Screen name='ModifyColors' component={ModifyColorsScreen} {...props} />
-      <MainStackNavigator.Screen name='Changelog' component={ChangelogScreen} {...props} />
-      <MainStackNavigator.Screen name='ImportExport' component={ImportExportScreen} {...props} />
-      <MainStackNavigator.Screen name='Pericope' component={PericopeScreen} {...props} />
-      <MainStackNavigator.Screen name='History' component={HistoryScreen} {...props} />
-      <MainStackNavigator.Screen name='Tags' component={TagsScreen} {...props} />
-      <MainStackNavigator.Screen name='Tag' component={TagScreen} {...props} />
-      <MainStackNavigator.Screen name='Downloads' component={DownloadsScreen} {...props} />
-      <MainStackNavigator.Screen name='Search' component={SearchScreen} {...props} />
-      <MainStackNavigator.Screen name='LocalSearch' component={LocalSearchScreen} {...props} />
-      <MainStackNavigator.Screen name='Register' component={RegisterScreen} {...props} />
-      <MainStackNavigator.Screen name='Dictionnaire' component={DictionaryScreen} {...props} />
-      <MainStackNavigator.Screen name='FAQ' component={FAQScreen} {...props} />
-      <MainStackNavigator.Screen name='Nave' component={NaveScreen} {...props} />
-      <MainStackNavigator.Screen name='NaveDetail' component={NaveDetailScreen} {...props} />
-      <MainStackNavigator.Screen name='NaveWarning' component={NaveWarningScreen} {...props} />
-      <MainStackNavigator.Screen name='ToggleCompareVerses' component={ToggleCompareVersesScreen} {...props} />
-      <MainStackNavigator.Screen name='Plan' component={PlanScreen} {...props} />
-      <MainStackNavigator.Screen name='Plans' component={PlanSelectScreen} {...props} />
-      <MainStackNavigator.Screen name='MyPlanList' component={MyPlanListScreen} {...props} />
-      <MainStackNavigator.Screen name='PlanSlice' component={PlanSliceScreen} {...props} />
-      <MainStackNavigator.Screen name='Timeline' component={TimelineScreen} options={{ gestureEnabled: true }} {...props} />
-      <MainStackNavigator.Screen name='TimelineHome' component={TimelineHomeScreen} {...props} />
-      <MainStackNavigator.Screen name='Concordance' component={ConcordanceScreen} {...props} />
-      <MainStackNavigator.Screen name='Commentaries' component={CommentariesScreen} {...props} />
-      <MainStackNavigator.Screen name='BibleShareOptions' component={BibleShareOptionsScreen} {...props} />
+    <MainStackNavigator.Navigator
+      initialRouteName="AppSwitcher"
+      screenOptions={{ headerShown: false }}
+    >
+      <MainStackNavigator.Screen
+        name="AppSwitcher"
+        component={AppSwitcherScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="More"
+        component={MoreScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Home"
+        component={HomeScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="BibleSelect"
+        component={BibleSelectScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="VersionSelector"
+        component={VersionSelectorScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="BibleVerseDetail"
+        component={BibleVerseDetailScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="BibleVerseNotes"
+        component={BibleVerseNotesScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Highlights"
+        component={HighlightScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Strong"
+        component={StrongScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="DictionnaireVerseDetail"
+        component={DictionnaireVerseDetailScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="ConcordanceByBook"
+        component={ConcordanceByBookScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="BibleView"
+        component={BibleViewScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="BibleCompareVerses"
+        component={BibleCompareVersesScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Studies"
+        component={StudiesScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Lexique"
+        component={LexiqueScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="EditStudy"
+        component={EditStudyScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="DictionnaryDetail"
+        component={DictionnaryDetailScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Login"
+        component={LoginScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Support"
+        component={SupportScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="ModifyColors"
+        component={ModifyColorsScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Changelog"
+        component={ChangelogScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="ImportExport"
+        component={ImportExportScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Pericope"
+        component={PericopeScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="History"
+        component={HistoryScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Tags"
+        component={TagsScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen name="Tag" component={TagScreen} {...props} />
+      <MainStackNavigator.Screen
+        name="Downloads"
+        component={DownloadsScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Search"
+        component={SearchScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="LocalSearch"
+        component={LocalSearchScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Register"
+        component={RegisterScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Dictionnaire"
+        component={DictionaryScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen name="FAQ" component={FAQScreen} {...props} />
+      <MainStackNavigator.Screen
+        name="Nave"
+        component={NaveScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="NaveDetail"
+        component={NaveDetailScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="NaveWarning"
+        component={NaveWarningScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="ToggleCompareVerses"
+        component={ToggleCompareVersesScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Plan"
+        component={PlanScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Plans"
+        component={PlanSelectScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="MyPlanList"
+        component={MyPlanListScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="PlanSlice"
+        component={PlanSliceScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Timeline"
+        component={TimelineScreen}
+        options={{ gestureEnabled: true }}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="TimelineHome"
+        component={TimelineHomeScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Concordance"
+        component={ConcordanceScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="Commentaries"
+        component={CommentariesScreen}
+        {...props}
+      />
+      <MainStackNavigator.Screen
+        name="BibleShareOptions"
+        component={BibleShareOptionsScreen}
+        {...props}
+      />
     </MainStackNavigator.Navigator>
-    
+
     <ChangelogModal />
     <OnBoardingModal />
     <MultipleTagsModal />
-
   </PortalProvider>
 )
 
-export default MainStack;
+export default MainStack

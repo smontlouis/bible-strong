@@ -17,7 +17,11 @@ interface StudiesTabScreenProps {
   studyAtom: PrimitiveAtom<StudyTab>
 }
 
-const StudiesTabScreen = ({ studyAtom, navigation, route }: StudiesTabScreenProps) => {
+const StudiesTabScreen = ({
+  studyAtom,
+  navigation,
+  route,
+}: StudiesTabScreenProps) => {
   const [studyTab] = useAtom(studyAtom)
 
   const {

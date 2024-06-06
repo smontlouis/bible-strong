@@ -22,7 +22,10 @@ import verseToReference from '~helpers/verseToReference'
 import { MainStackProps } from '~navigation/type'
 import { VerseIds } from '~common/types'
 
-const BibleVerseNotes = ({ navigation, route }: StackScreenProps<MainStackProps, 'BibleVerseNotes'>) => {
+const BibleVerseNotes = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'BibleVerseNotes'>) => {
   const { withBack, verse } = route.params || {}
   const { t } = useTranslation()
 
@@ -124,10 +127,7 @@ const BibleVerseNotes = ({ navigation, route }: StackScreenProps<MainStackProps,
   return (
     <Container>
       {verse ? (
-        <Header
-          hasBackButton={withBack}
-          title={title || t('Chargement...')}
-        />
+        <Header hasBackButton={withBack} title={title || t('Chargement...')} />
       ) : (
         <TagsHeader
           title="Notes"
@@ -150,10 +150,7 @@ const BibleVerseNotes = ({ navigation, route }: StackScreenProps<MainStackProps,
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
-      <BibleNoteModal
-        onClosed={closeNoteEditor}
-        noteVerses={noteVerses}
-      />
+      <BibleNoteModal onClosed={closeNoteEditor} noteVerses={noteVerses} />
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={closeTags}
