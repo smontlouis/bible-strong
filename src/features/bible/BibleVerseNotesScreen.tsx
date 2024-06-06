@@ -110,9 +110,9 @@ const BibleVerseNotes = ({ navigation, route }: StackScreenProps<MainStackProps,
       <BibleNoteItem
         key={index}
         item={item}
-        openNoteEditor={openNoteEditor}
-        setNoteSettings={setNoteSettings}
-        deleteNote={deleteNote}
+        // openNoteEditor={openNoteEditor}
+        setNoteSettings={isNoteSettingsOpen}
+        // deleteNote={deleteNote}
       />
     )
   }

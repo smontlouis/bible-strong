@@ -26,7 +26,12 @@ const NoteLink = styled(Link)(({ theme }) => ({
   flexDirection: 'row',
 }))
 
-const BibleNoteItem = ({ item, setNoteSettings }) => {
+type Props = {
+  item: any
+  setNoteSettings: boolean
+}
+
+const BibleNoteItem = ({ item, setNoteSettings }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const isFR = useLanguage()
