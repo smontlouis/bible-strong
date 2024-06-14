@@ -18,8 +18,10 @@ class DB {
     this.name = name
   }
 
-  init = async () =>
-    new Promise((resolve, reject) => {
+  init = async () => {
+    if (this.db) return
+
+    return new Promise((resolve, reject) => {
       try {
         this.db = SQLite.openDatabase(
           this.name,
@@ -36,6 +38,7 @@ class DB {
         reject(error)
       }
     })
+  }
 
   get = () => {
     return this.db

@@ -8,4 +8,5 @@ export const ignoreSentryErrors = [
   'deleteAsync',
   'Player does not exist',
   'The player is not initialized',
+  'remoteConfig/failure',
 ]

@@ -24,9 +24,6 @@ const useStrong = (dispatch: any, startDownload: any) => {
       })
     } else {
       const loadDBAsync = async () => {
-        const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-        const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
-
         const dbPath = getDatabases().STRONG.path
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
