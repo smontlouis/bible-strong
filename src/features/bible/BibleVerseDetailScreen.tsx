@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { withTheme } from '@emotion/react'
+import { useTheme, withTheme } from '@emotion/react'
 import React, { useEffect, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import { connect } from 'react-redux'
@@ -103,6 +103,7 @@ const BibleVerseDetailScreen = ({
   const [formattedTexte, setFormattedTexte] = useState('')
   const { theme, insets } = route.params
   const { t } = useTranslation()
+  // const theme = useTheme()
 
   let _carousel = React.useRef<ICarouselInstance>(null)
 
@@ -166,7 +167,7 @@ const BibleVerseDetailScreen = ({
     }))
   }
 
-  const renderItem = ({ item, index }) => {
+  const renderItem = ({ item, index }: { item: StrongReference, index: number }) => {
     const { isSelectionMode } = route.params || {}
     return (
       <StrongCard
@@ -190,7 +191,7 @@ const BibleVerseDetailScreen = ({
       <Box background paddingTop={insets.top} />
       <Header
         fontSize={18}
-        bg="reverse" // attr doesn't exist
+        // bg="reverse" // attr doesn't exist
         hasBackButton
         title={`${headerTitle} ${
           headerTitle.length < 12 ? t('- Strong LSG') : '' // t must be imported as props
@@ -278,19 +279,24 @@ const BibleVerseDetailScreen = ({
   )
 }
 
-export default compose<
-  any,
-  StackScreenProps<MainStackProps, 'BibleVerseDetail'>
->(
-  withTheme, // try with useTheme
-  withSafeAreaInsets, // try with useSafeAreaInsets
-  connect((state, props) => {
-    // typing redux : https://react-redux.js.org/using-react-redux/usage-with-typescript#manually-typing-connect
-    const { verse } = props.route.params || {}
-    return { verse }
-  }),
-  waitForStrongDB({
-    hasBackButton: true,
-    hasHeader: true,
-  })
-)(BibleVerseDetailScreen)
+// export default compose<
+//   any,
+//   StackScreenProps<MainStackProps, 'BibleVerseDetail'>
+// >(
+//   // withTheme, // try with useTheme
+//   // withSafeAreaInsets, // try with useSafeAreaInsets
+//   connect((state, props: StackScreenProps<MainStackProps, 'BibleVerseDetail'>) => {
+//     // typing redux : https://react-redux.js.org/using-react-redux/usage-with-typescript#manually-typing-connect
+//     const { verse } = props.route.params || {}
+//     return { verse }
+//   }),
+//   waitForStrongDB({
+//     hasBackButton: true,
+//     hasHeader: true,
+//   })
+// )(BibleVerseDetailScreen)
+
+export default waitForStrongDB({
+  hasBackButton: true,
+  hasHeader: true,
+})(BibleVerseDetailScreen)

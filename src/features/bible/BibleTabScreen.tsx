@@ -24,9 +24,10 @@ import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
 import { getDatabases } from '~helpers/databases'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
+import { MainStackProps } from '~navigation/type'
 
 interface BibleTabScreenProps {
-  navigation: StackNavigationProp<any, any>
+  navigation: StackNavigationProp<MainStackProps, 'BibleView'>
   bibleAtom: PrimitiveAtom<BibleTab>
 }
 

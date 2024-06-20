@@ -19,8 +19,8 @@ interface Verse {
 }
 
 type AppSwitcherScreenProps = {
-  openMenu: () => void
-  openHome: () => void
+  openMenu?: () => void
+  openHome?: () => void
 }
 
 type MoreScreenProps = {
