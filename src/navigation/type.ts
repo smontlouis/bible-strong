@@ -31,6 +31,10 @@ type HomeScreenProps = {
   closeHome: () => void
 }
 
+type BibleSelectScreenProps = {
+  bibleAtom: PrimitiveAtom<BibleTab>
+}
+
 type VersionSelectorProps = {
   parallelVersionIndex?: number
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -142,7 +146,7 @@ export type MainStackProps = {
   AppSwitcher: AppSwitcherScreenProps
   More: MoreScreenProps
   Home: HomeScreenProps
-  BibleSelect: undefined
+  BibleSelect: BibleSelectScreenProps
   VersionSelector: VersionSelectorProps
   BibleVerseDetail: BibleVerseDetailScreenProps
   BibleVerseNotes: BibleVerseNotesScreenProps

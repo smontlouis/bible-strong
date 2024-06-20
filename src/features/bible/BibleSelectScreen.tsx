@@ -11,15 +11,14 @@ import { MAX_WIDTH } from '~helpers/useDimensions'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import BibleSelect from './BibleSelect'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-
-interface BibleSelectProps {
-  bibleAtom: PrimitiveAtom<BibleTab>
-}
+import { MainStackProps } from '~navigation/type'
+import { StackScreenProps } from '@react-navigation/stack'
 
 const BibleSelectScreen = ({
   navigation,
-}: /*NavigationStackScreenProps<BibleSelectProps>*/ any) => {
-  const bibleAtom = navigation.getParam('bibleAtom')
+  route
+}: StackScreenProps<MainStackProps, 'BibleSelect'>) => {
+  const bibleAtom = route.params.bibleAtom
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const {
