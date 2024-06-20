@@ -120,7 +120,7 @@ const Header = ({
   return (
     <AnimatableHeaderBox
       row
-      transition="height"
+      transition="height" // TODO: fix this
       style={{ height: isFullscreen ? 35 : 60 }}
     >
       {(isSelectionMode || hasBackButton) && (
@@ -146,6 +146,7 @@ const Header = ({
         route="VersionSelector"
         params={{ bibleAtom }}
         style={{ marginRight: 'auto' }}
+        navigation={navigation}
       >
         <TextIcon>{version}</TextIcon>
       </LinkBox>

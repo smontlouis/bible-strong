@@ -37,6 +37,7 @@ import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import { useBottomSheet } from '~helpers/useBottomSheet'
+import { MainStackProps } from '~navigation/type'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -53,7 +54,7 @@ const getPericopeChapter = (pericope, book, chapter) => {
 }
 
 interface BibleViewerProps {
-  navigation: StackNavigationProp<any, any>
+  navigation: StackNavigationProp<MainStackProps>
   bibleAtom: PrimitiveAtom<BibleTab>
   commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
@@ -307,7 +308,7 @@ const BibleViewer = ({
         return accuRefs
       }, {} as VerseIds)
       setNoteVerses(noteVersesToLoad)
-    } catch (e) {
+    } catch (e: any) {
       Sentry.withScope(scope => {
         scope.setExtra('Error', e.toString())
         scope.setExtra('Note', noteId)

@@ -56,7 +56,8 @@ import TagsScreen from '../features/settings/TagsScreen'
 
 export const MainStackNavigator = createStackNavigator<MainStackProps>()
 
-const MainStack = () => (
+const MainStack = () => {
+  return (
   <PortalProvider>
     <MainStackNavigator.Navigator
       initialRouteName="AppSwitcher"
@@ -114,5 +115,6 @@ const MainStack = () => (
     <MultipleTagsModal />
   </PortalProvider>
 )
+}
 
 export default MainStack

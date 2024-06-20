@@ -28,7 +28,7 @@ import { MainStackProps } from '~navigation/type'
 
 interface BibleTabScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'BibleView'>
-  bibleAtom: PrimitiveAtom<BibleTab>
+  bibleAtom: PrimitiveAtom<BibleTab> // extract to MainStackNaviagtor as props
 }
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {

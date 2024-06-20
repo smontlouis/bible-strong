@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 
-import { atom } from 'jotai/vanilla'
+import { atom, PrimitiveAtom } from 'jotai/vanilla'
 import { StackScreenProps } from '@react-navigation/stack'
 import {
   BibleTab,
@@ -27,7 +27,7 @@ const BibleScreen = ({
     chapter,
     verse,
     version,
-  } = route.params // navigation.state.params || {}
+  } = route.params
 
   const initialValues = produce(getDefaultBibleTab(), draft => {
     draft.id = `bible-${Date.now()}`
@@ -46,7 +46,7 @@ const BibleScreen = ({
 
   const onTheFlyAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  const bibleAtom = isEmpty(route.params) // navigation.state.params
+  const bibleAtom = isEmpty(route.params)
     ? defaultBibleAtom
     : onTheFlyAtom
 
