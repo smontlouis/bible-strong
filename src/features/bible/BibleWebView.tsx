@@ -29,6 +29,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab } from 'src/state/tabs'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { is } from 'immer/dist/internal'
 
 type WebViewProps = { // TODO: Add types
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -192,16 +193,13 @@ class BibleWebView extends Component<WebViewProps> {
           return
         }
 
-        navigation.navigate({
-          routeName: 'BibleView',
-          params: {
-            isReadOnly: true,
-            book: parseInt(book, 10),
-            chapter: parseInt(action.chapter, 10),
-            verse: parseInt(action.verse, 10),
-          },
-          key: `bible-view-${book}-${action.chapter}-${action.verse}`,
+        navigation.navigate('BibleView', {
+          isReadOnly: true,
+          book: parseInt(book, 10),
+          chapter: parseInt(action.chapter, 10),
+          verse: parseInt(action.verse, 10),
         })
+
         break
       }
       case CONSOLE_LOG: {
@@ -253,7 +251,7 @@ class BibleWebView extends Component<WebViewProps> {
     }
   }
 
-  isVerseSelected = verseId => {
+  isVerseSelected = (verseId: any) => {
     const { selectedVerses } = this.props
     return !!selectedVerses[verseId]
   }

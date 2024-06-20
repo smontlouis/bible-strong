@@ -50,8 +50,8 @@ type BibleVerseDetailScreenProps = {
 }
 
 type BibleVerseNotesScreenProps = {
-  book: number
-  chapter: number
+  book?: number
+  chapter?: number
   verse: string
   withBack: boolean
 }
@@ -78,7 +78,7 @@ type BibleScreenProps = {
   book: Book | number
   chapter: number
   verse: number
-  version: VersionCode
+  version?: VersionCode
 }
 
 type CompareVersesScreenProps = {
