@@ -127,7 +127,7 @@ const AppSwitcherScreenWrapper = (
     closeHome()
   }, [tabsCount, closeHome])
 
-  const renderHomeScreen = useCallback(() => <Home closeHome={closeHome} />, [
+  const renderHomeScreen = useCallback(() => <Home closeHome={closeHome} navigation={props.navigation} />, [
     closeHome,
   ])
 

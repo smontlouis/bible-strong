@@ -21,15 +21,16 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import TryAudibibleWidget from './TryAudibibleWidget'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { StackScreenProps } from '@react-navigation/stack'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
 // local react props
 type HomeProps = {
   closeHome: () => void
+  navigation: StackNavigationProp<MainStackProps>
 }
 
-export const Home = ({ closeHome }: HomeProps) => {
+export const Home = ({ closeHome, navigation }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -40,7 +41,7 @@ export const Home = ({ closeHome }: HomeProps) => {
   return (
     <Box bg="lightGrey" flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
-        <UserWidget />
+        <UserWidget navigation={navigation} />
         <Box bg="lightGrey" pt={20} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}
@@ -179,6 +180,6 @@ const HomeScreen = ({
 }: StackScreenProps<MainStackProps, 'Home'>) => {
   const closeHome = route.params.closeHome
 
-  return <Home closeHome={closeHome} />
+  return <Home closeHome={closeHome} navigation={navigation} />
 }
 export default memo(HomeScreen)

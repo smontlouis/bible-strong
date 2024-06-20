@@ -19,6 +19,8 @@ import Spacer from '~common/ui/Spacer'
 import { RootState } from '~redux/modules/reducer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 const vodNb = [...Array(6).keys()]
 
@@ -95,7 +97,11 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = () => {
+type UserWidgetProps = {
+  navigation: StackNavigationProp<MainStackProps>
+}
+
+const UserWidget = ({ navigation }: UserWidgetProps) => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
 
@@ -135,6 +141,7 @@ const UserWidget = () => {
           </Paragraph>
           <Button
             route="Login"
+            navigation={navigation}
             rightIcon={
               <Icon.Feather
                 name="arrow-right"
