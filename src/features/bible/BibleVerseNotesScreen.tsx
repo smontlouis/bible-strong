@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Alert } from 'react-native'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { StackScreenProps } from '@react-navigation/stack'
@@ -21,29 +21,42 @@ import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import verseToReference from '~helpers/verseToReference'
 import { MainStackProps } from '~navigation/type'
 import { VerseIds } from '~common/types'
+import { RootState } from '~redux/modules/reducer'
+
+type Note = {
+  noteId: string
+  reference: string
+  notes: any
+}
 
 const BibleVerseNotes = ({
   navigation,
   route,
 }: StackScreenProps<MainStackProps, 'BibleVerseNotes'>) => {
+  console.log(route)
   const { withBack, verse } = route.params || {}
   const { t } = useTranslation()
 
   const [title, setTitle] = useState('')
-  const [notes, setNotes] = useState([])
+  const [notes, setNotes] = useState<any>([])
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [isTagsOpen, setIsTagsOpen] = useState(false)
   const [selectedChip, setSelectedChip] = useState(null)
   const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState(false)
 
+  const _notes = useSelector((state: RootState) => state.user.bible.notes)
+  // navigation.setParams({ 
+  //   notes : useSelector((state: RootState) => state.user.bible.notes)
+  // })
+
   useEffect(() => {
     loadPage()
-  }, [route.params.verse, route.params.notes])
+  }, [verse, _notes])
 
   const loadPage = async () => {
     const { verse } = route.params || {} // props.navigation.state.params || {}
     let title
-    const notes = []
+    const filtered_notes: Note[] = []
 
     if (verse) {
       title = verseToReference(verse)
@@ -53,7 +66,7 @@ const BibleVerseNotes = ({
     }
 
     await Promise.all(
-      Object.entries(route.params.notes) // props.notes
+      Object.entries(_notes) // props.notes
         .filter(note => {
           if (verse) {
             const firstVerseRef = note[0].split('/')[0]
@@ -68,12 +81,12 @@ const BibleVerseNotes = ({
           })
 
           const reference = verseToReference(verseNumbers)
-          notes.push({ noteId: note[0], reference, notes: note[1] })
+          filtered_notes.push({ noteId: note[0], reference, notes: note[1] })
         })
     )
 
     setTitle(title)
-    setNotes(notes)
+    setNotes(filtered_notes)
     // this.setState({ title, notes })
   }
 
@@ -166,8 +179,9 @@ const BibleVerseNotes = ({
   )
 }
 
-const mapStateToProps = state => ({
-  notes: state.user.bible.notes,
-})
+// const mapStateToProps = state => ({
+//   notes: state.user.bible.notes,
+// })
 
-export default connect(mapStateToProps, UserActions)(BibleVerseNotes)
+// export default connect(mapStateToProps, UserActions)(BibleVerseNotes)
+export default BibleVerseNotes
