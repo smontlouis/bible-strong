@@ -21,6 +21,7 @@ import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { Theme } from '@emotion/react'
 
 const vodNb = [...Array(6).keys()]
 
@@ -73,7 +74,7 @@ const GenerateImage = ({ name }) => (
 
 const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
 
-const Chip = styled(Link)(({ theme, hightlighted }) => ({
+const Chip = styled(Link)(({ theme, hightlighted }: { theme: Theme, hightlighted: boolean }) => ({
   borderRadius: 10,
   backgroundColor: theme.colors.reverse,
   paddingVertical: 10,
