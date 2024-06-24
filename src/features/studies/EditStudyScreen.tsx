@@ -159,7 +159,7 @@ const EditStudyScreen = ({
       <StudyTitlePrompt
         titlePrompt={titlePrompt}
         onClosed={() => setTitlePrompt(false)}
-        onSave={(id, title) => {
+        onSave={(id: string, title: string) => {
           dispatch(updateStudy({ id, title, modified_at: Date.now() }))
         }}
       />
