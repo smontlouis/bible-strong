@@ -18,18 +18,26 @@ import { useNavigation } from '@react-navigation/native'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
+import { Tag } from '~common/types'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
-const StudiesScreen = ({ hasBackButton }: { hasBackButton?: boolean }) => {
+type StudiesScreenProps = {
+  hasBackButton?: boolean
+  navigation: StackNavigationProp<MainStackProps>
+}
+
+const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
   const { t } = useTranslation()
   const { isLogged } = useLogin()
+  const dispatch = useDispatch()
+  const r = useMediaQueriesArray()
+
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isStudySettingsOpen, setStudySettings] = React.useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
-  const dispatch = useDispatch()
-  const r = useMediaQueriesArray()
-  const navigation = useNavigation()
 
-  const [selectedChip, setSelectedChip] = React.useState(null)
+  const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
   const studies = useSelector(
     state => Object.values(state.user.bible.studies),
     shallowEqual
@@ -64,6 +72,7 @@ const StudiesScreen = ({ hasBackButton }: { hasBackButton?: boolean }) => {
                 key={item.id}
                 study={item}
                 setStudySettings={setStudySettings}
+                navigation={navigation}
               />
             )}
           />
@@ -95,7 +104,7 @@ const StudiesScreen = ({ hasBackButton }: { hasBackButton?: boolean }) => {
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={() => setTagsIsOpen(false)}
-        onSelected={chip => setSelectedChip(chip)}
+        onSelected={(chip: Tag) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <StudySettingsModal

@@ -30,7 +30,7 @@ const StudiesTabScreen = ({
   } = studyTab
 
   if (!studyId) {
-    return <AllStudiesTabScreen hasBackButton={hasBackButton} />
+    return <AllStudiesTabScreen hasBackButton={hasBackButton} navigation={navigation} />
   }
 
   return (

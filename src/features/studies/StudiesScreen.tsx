@@ -10,7 +10,7 @@ const StudiesScreen = ({
   navigation,
   route,
 }: StackScreenProps<MainStackProps, 'Studies'>) => {
-  const studyId = route.params.studyId
+  const studyId = route.params?.studyId
 
   const onTheFlyAtom = useMemo(
     () =>
