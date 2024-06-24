@@ -20,29 +20,29 @@ import TagsModal from '~common/TagsModal'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import verseToReference from '~helpers/verseToReference'
 import { MainStackProps } from '~navigation/type'
-import { VerseIds } from '~common/types'
+import { Tag, VerseIds } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
+import { Note } from '~redux/modules/user'
 
-type Note = {
+type TNote = {
   noteId: string
   reference: string
-  notes: any
+  notes: Note
 }
 
 const BibleVerseNotes = ({
   navigation,
   route,
 }: StackScreenProps<MainStackProps, 'BibleVerseNotes'>) => {
-  console.log(route)
   const { withBack, verse } = route.params || {}
   const { t } = useTranslation()
 
   const [title, setTitle] = useState('')
-  const [notes, setNotes] = useState<any>([])
+  const [notes, setNotes] = useState<TNote[]>([])
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [isTagsOpen, setIsTagsOpen] = useState(false)
-  const [selectedChip, setSelectedChip] = useState(null)
-  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState(false)
+  const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
+  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(null)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   // navigation.setParams({ 
@@ -56,7 +56,7 @@ const BibleVerseNotes = ({
   const loadPage = async () => {
     const { verse } = route.params || {} // props.navigation.state.params || {}
     let title
-    const filtered_notes: Note[] = []
+    const filtered_notes: TNote[] = []
 
     if (verse) {
       title = verseToReference(verse)
@@ -104,7 +104,7 @@ const BibleVerseNotes = ({
   }
 
   const closeTags = () => setIsTagsOpen(false)
-  const closeNoteSettings = () => setIsNoteSettingsOpen(false)
+  const closeNoteSettings = () => setIsNoteSettingsOpen(null)
 
   const deleteNote = (noteId: string) => {
     Alert.alert(
@@ -114,21 +114,22 @@ const BibleVerseNotes = ({
         { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
           text: t('Oui'),
-          onPress: () => this.props.deleteNote(noteId), // how to handle this?
+          onPress: () => this.props.deleteNote(noteId), // where is deleteNote from ?
           style: 'destructive',
         },
       ]
     )
   }
 
-  const renderNote = ({ item, index }) => {
+  const renderNote = ({ item, index }: { item: TNote, index: number }) => {
     return (
       <BibleNoteItem
         key={index}
         item={item}
         // openNoteEditor={openNoteEditor}
-        setNoteSettings={isNoteSettingsOpen}
+        setNoteSettings={setIsNoteSettingsOpen}
         // deleteNote={deleteNote}
+        navigation={navigation}
       />
     )
   }
@@ -154,7 +155,7 @@ const BibleVerseNotes = ({
         <FlatList
           data={filteredNotes}
           renderItem={renderNote}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item: TNote, index: number) => index.toString()}
           style={{ paddingBottom: 30 }}
         />
       ) : (
@@ -167,7 +168,7 @@ const BibleVerseNotes = ({
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={closeTags}
-        onSelected={chip => setSelectedChip(chip)}
+        onSelected={(chip : Tag) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <BibleNotesSettingsModal
