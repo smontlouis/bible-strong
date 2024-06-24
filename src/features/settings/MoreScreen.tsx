@@ -1,4 +1,4 @@
-import styled from '@emotion/native'
+import styled, { StyledComponent } from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import auth from '@react-native-firebase/auth'
 import sizeof from 'firestore-size'
@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link from '~common/Link'
+import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import SnackBar from '~common/SnackBar'
 import Border from '~common/ui/Border'
@@ -33,8 +33,11 @@ import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
 import * as Sharing from 'expo-sharing'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { useNavigation } from '@react-navigation/native'
 
-export const LinkItem = styled(Link)(({}) => ({
+export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -64,10 +67,6 @@ const shareMessage = () => {
       ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
       : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
   return `Bible Strong App ${appUrl}`
-}
-
-type MoreScreenProps = {
-  closeMenu: () => void
 }
 
 const Infos = memo(() => {
@@ -186,7 +185,13 @@ const ManualSync = memo(() => {
   )
 })
 
-const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
+// local react props
+type MoreProps = {
+  closeMenu: () => void
+}
+
+export const More = ({ closeMenu }: MoreProps) => {
+  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { isLogged, logout, user } = useLogin()
 
   const isFR = useLanguage()
@@ -237,6 +242,8 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     .getValue('apple_reviewing')
     .asBoolean()
 
+  // All the LinkItem should define params if they use route
+  // There should be a way to type params using the route name
   return (
     <SafeAreaBox borderLeftWidth={1} borderColor="border">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
@@ -247,31 +254,31 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
         }}
       >
         <Box paddingVertical={10}>
-          <LinkItem route="Lexique">
+          <LinkItem route="Lexique" navigation={navigation}>
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
             <Text color="primary" bold fontSize={15}>
               {t('Lexique')}
             </Text>
           </LinkItem>
-          <LinkItem route="Dictionnaire">
+          <LinkItem route="Dictionnaire" navigation={navigation}>
             <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
             <Text color="secondary" bold fontSize={15}>
               {t('Dictionnaire')}
             </Text>
           </LinkItem>
-          <LinkItem route="Nave">
+          <LinkItem route="Nave" navigation={navigation}>
             <NaveIcon style={{ marginRight: 15 }} size={25} />
             <Text color="quint" bold fontSize={15}>
               {t('Bible Thématique Nave')}
             </Text>
           </LinkItem>
-          <LinkItem route="Studies">
+          <LinkItem route="Studies" navigation={navigation} params={{}}>
             <FeatherIcon name="feather" style={{ marginRight: 15 }} size={25} />
             <Text bold fontSize={15}>
               {t('Études')}
             </Text>
           </LinkItem>
-          <LinkItem route="Plans">
+          <LinkItem route="Plans" navigation={navigation}>
             <MaterialIcon
               name="playlist-add-check"
               size={25}
@@ -281,19 +288,19 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
               {t('Plans')}
             </Text>
           </LinkItem>
-          <LinkItem route="Highlights">
+          <LinkItem route="Highlights" navigation={navigation}>
             <StyledIcon name="edit-3" size={25} />
             <Text bold fontSize={15}>
               {t('Surbrillances')}
             </Text>
           </LinkItem>
-          <LinkItem route="BibleVerseNotes">
+          <LinkItem route="BibleVerseNotes" navigation={navigation} params={{}}>
             <StyledIcon name="file-text" size={25} />
             <Text bold fontSize={15}>
               {t('Notes')}
             </Text>
           </LinkItem>
-          <LinkItem route="Tags">
+          <LinkItem route="Tags" navigation={navigation}>
             <StyledIcon name="tag" size={25} />
             <Text bold fontSize={15}>
               {t('Étiquettes')}
@@ -302,7 +309,7 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
-          <LinkItem route="Downloads">
+          <LinkItem route="Downloads" navigation={navigation}>
             <Box>
               {hasUpdate && (
                 <AnimatedCircle
@@ -315,11 +322,11 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
             </Box>
             <Text fontSize={15}>{t('Gestion des téléchargements')}</Text>
           </LinkItem>
-          <LinkItem route="Changelog">
+          <LinkItem route="Changelog" navigation={navigation}>
             <StyledIcon name="terminal" size={25} />
             <Text fontSize={15}>{t('Changelog')}</Text>
           </LinkItem>
-          <LinkItem route="FAQ">
+          <LinkItem route="FAQ" navigation={navigation}>
             <StyledIcon name="help-circle" size={25} />
             <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
@@ -374,13 +381,13 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
 
           <ChangeLanguage />
           <ManualSync />
-          <LinkItem route="ImportExport">
+          <LinkItem route="ImportExport" navigation={navigation}>
             <StyledIcon name="upload" size={25} />
             <Text fontSize={15}>{t('app.importexport')}</Text>
           </LinkItem>
           {/* <ExportSave /> */}
           {!isLogged && (
-            <LinkItem route="Login">
+            <LinkItem route="Login" navigation={navigation}>
               <StyledIcon color="primary" name="log-in" size={25} />
               <Text color="primary" fontSize={15} bold>
                 {t('Se connecter')}
@@ -435,4 +442,11 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     </SafeAreaBox>
   )
 }
+
+const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
+  const closeMenu = route.params.closeMenu
+
+  return <More closeMenu={closeMenu} />
+}
+
 export default memo(MoreScreen)

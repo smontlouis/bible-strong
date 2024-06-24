@@ -3,7 +3,7 @@ import { ActivityIndicator } from 'react-native'
 
 import { useTheme } from '@emotion/react'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { useNavigation } from 'react-navigation-hooks'
+import { useNavigation } from '@react-navigation/native'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForStrongModal from '~common/waitForStrongModal'

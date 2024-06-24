@@ -3,8 +3,8 @@ import React, { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 
-import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { atom, PrimitiveAtom } from 'jotai/vanilla'
+import { StackScreenProps } from '@react-navigation/stack'
 import {
   BibleTab,
   defaultBibleAtom,
@@ -13,20 +13,12 @@ import {
 } from '../../state/tabs'
 import BibleTabScreen from './BibleTabScreen'
 import { isEmpty } from '~helpers/deep-obj/utils'
-
-interface BibleScreenProps {
-  focusVerses?: string[]
-  isSelectionMode?: boolean
-  isReadOnly?: boolean
-  book: Book | number
-  chapter: number
-  verse: number
-  version: VersionCode
-}
+import { MainStackProps } from '~navigation/type'
 
 const BibleScreen = ({
   navigation,
-}: NavigationStackScreenProps<BibleScreenProps>) => {
+  route,
+}: StackScreenProps<MainStackProps, 'BibleView'>) => {
   const {
     focusVerses,
     isSelectionMode,
@@ -35,7 +27,7 @@ const BibleScreen = ({
     chapter,
     verse,
     version,
-  } = navigation.state.params || {}
+  } = route.params
 
   const initialValues = produce(getDefaultBibleTab(), draft => {
     draft.id = `bible-${Date.now()}`
@@ -54,7 +46,7 @@ const BibleScreen = ({
 
   const onTheFlyAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  const bibleAtom = isEmpty(navigation.state.params)
+  const bibleAtom = isEmpty(route.params)
     ? defaultBibleAtom
     : onTheFlyAtom
 

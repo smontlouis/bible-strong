@@ -19,6 +19,9 @@ import Spacer from '~common/ui/Spacer'
 import { RootState } from '~redux/modules/reducer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { Theme } from '@emotion/react'
 
 const vodNb = [...Array(6).keys()]
 
@@ -71,7 +74,7 @@ const GenerateImage = ({ name }) => (
 
 const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
 
-const Chip = styled(Link)(({ theme, hightlighted }) => ({
+const Chip = styled(Link)(({ theme, hightlighted }: { theme: Theme, hightlighted: boolean }) => ({
   borderRadius: 10,
   backgroundColor: theme.colors.reverse,
   paddingVertical: 10,
@@ -95,7 +98,11 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   marginRight: 5,
 }))
 
-const UserWidget = () => {
+type UserWidgetProps = {
+  navigation: StackNavigationProp<MainStackProps>
+}
+
+const UserWidget = ({ navigation }: UserWidgetProps) => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
 
@@ -135,6 +142,7 @@ const UserWidget = () => {
           </Paragraph>
           <Button
             route="Login"
+            navigation={navigation}
             rightIcon={
               <Icon.Feather
                 name="arrow-right"
@@ -231,13 +239,13 @@ const UserWidget = () => {
             overflow: 'visible',
           }}
         >
-          <Chip route="History" hightlighted>
+          <Chip route="History" navigation={navigation} hightlighted>
             <MaterialIcon name="history" size={20} />
             <Text mt={5} fontSize={12}>
               {t('Historique')}
             </Text>
           </Chip>
-          <Chip route="Highlights">
+          <Chip route="Highlights" navigation={navigation}>
             <Box row>
               <ChipIcon name="edit-3" size={20} />
               <Text bold fontSize={20}>
@@ -248,7 +256,7 @@ const UserWidget = () => {
               {t('surbrillance', { count: highlights })}
             </Text>
           </Chip>
-          <Chip route="BibleVerseNotes">
+          <Chip route="BibleVerseNotes" navigation={navigation}>
             <Box row>
               <ChipIcon name="file-text" size={20} />
               <Text bold fontSize={20}>
@@ -257,7 +265,7 @@ const UserWidget = () => {
             </Box>
             <Text fontSize={12}>{t('note', { count: notes })}</Text>
           </Chip>
-          <Chip route="Studies">
+          <Chip route="Studies" navigation={navigation}>
             <Box row>
               <ChipIcon name="feather" size={20} />
               <Text bold fontSize={20}>
@@ -266,7 +274,7 @@ const UserWidget = () => {
             </Box>
             <Text fontSize={12}>{t('étude', { count: studies })}</Text>
           </Chip>
-          <Chip route="Tags">
+          <Chip route="Tags" navigation={navigation}>
             <Box row>
               <ChipIcon name="tag" size={20} />
               <Text bold fontSize={20}>

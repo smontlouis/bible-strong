@@ -1,18 +1,16 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
-
-interface DictionaryDetailScreenProps {
-  word: string
-}
+import { MainStackProps } from '~navigation/type'
 
 const DictionaryDetailScreen = ({
   navigation,
-}: NavigationStackScreenProps<DictionaryDetailScreenProps>) => {
-  const word = navigation.getParam('word')
+  route,
+}: StackScreenProps<MainStackProps, 'DictionnaryDetail'>) => {
+  const word = route.params.word // navigation.getParam('word')
 
   const onTheFlyAtom = useMemo(
     () =>

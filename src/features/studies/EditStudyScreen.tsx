@@ -4,7 +4,8 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/native'
 import { StudyNavigateBibleType } from '~common/types'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
@@ -14,24 +15,27 @@ import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
+import { MainStackProps } from '~navigation/type'
 
 type WithStudyProps = {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
+  route: RouteProp<MainStackProps, 'EditStudy'>
   studyId: string
   canEdit?: boolean
   hasBackButton?: boolean
   openedFromTab?: boolean
 }
 
+// TODO : way to complex, need to be refactored
 const withStudy = (
   Component: React.ComponentType<WithStudyProps>
-): React.ComponentType<WithStudyProps> => ({ navigation, ...props }) => {
+): React.ComponentType<WithStudyProps> => ({ navigation, route, ...props }) => {
   const dispatch = useDispatch()
   const [studyId, setStudyId] = useState('')
   const { t } = useTranslation()
 
-  let studyIdParam = navigation.getParam('studyId')
-  let canEdit = navigation.getParam('canEdit')
+  let studyIdParam = route.params.studyId // navigation.getParam('studyId')
+  let canEdit = route.params.canEdit // navigation.getParam('canEdit')
 
   if (!studyIdParam) {
     studyIdParam = props.studyId
@@ -64,9 +68,10 @@ const withStudy = (
 
   return (
     <Component
-      studyId={studyId}
+      // studyId={studyId}
       canEdit={canEdit}
       navigation={navigation}
+      route={route}
       {...props}
     />
   )
@@ -74,11 +79,13 @@ const withStudy = (
 
 const EditStudyScreen = ({
   navigation,
-  studyId,
-  canEdit,
-  hasBackButton,
-  openedFromTab,
-}: WithStudyProps) => {
+  route,
+}: StackScreenProps<MainStackProps, 'EditStudy'>) => {
+  const studyId = route.params.studyId
+  const canEdit = route.params.canEdit
+  const hasBackButton = route.params.hasBackButton
+  const openedFromTab = route.params.openedFromTab
+
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
   const [titlePrompt, setTitlePrompt] = useState<
     { id: string; title: string } | false
@@ -108,7 +115,7 @@ const EditStudyScreen = ({
 
   const navigateBibleView = (type: StudyNavigateBibleType) => {
     navigation.navigate('BibleView', {
-      isSelectionMode: type,
+      isSelectionMode: type, // type inconsistency
     })
   }
 
@@ -145,14 +152,14 @@ const EditStudyScreen = ({
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
-        params={navigation.state.params}
+        params={route.params}
         navigateBibleView={navigateBibleView}
         openBibleView={openBibleView}
       />
       <StudyTitlePrompt
         titlePrompt={titlePrompt}
         onClosed={() => setTitlePrompt(false)}
-        onSave={(id, title) => {
+        onSave={(id: string, title: string) => {
           dispatch(updateStudy({ id, title, modified_at: Date.now() }))
         }}
       />
@@ -163,4 +170,4 @@ const EditStudyScreen = ({
   )
 }
 
-export default withStudy(EditStudyScreen)
+export default EditStudyScreen

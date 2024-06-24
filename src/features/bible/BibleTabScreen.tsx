@@ -16,7 +16,7 @@ import sunsetColors from '~themes/sunsetColors'
 import BibleViewer from './BibleViewer'
 const deepmerge = require('@fastify/deepmerge')()
 
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
@@ -24,10 +24,11 @@ import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
 import { getDatabases } from '~helpers/databases'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
+import { MainStackProps } from '~navigation/type'
 
 interface BibleTabScreenProps {
-  navigation: NavigationStackProp
-  bibleAtom: PrimitiveAtom<BibleTab>
+  navigation: StackNavigationProp<MainStackProps, 'BibleView'>
+  bibleAtom: PrimitiveAtom<BibleTab> // extract to MainStackNaviagtor as props
 }
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {

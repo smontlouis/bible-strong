@@ -1,6 +1,6 @@
 import BottomSheet from '@gorhom/bottom-sheet'
 import React from 'react'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { ComputedPlanItem } from 'src/common/types'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -11,19 +11,19 @@ import DetailsModal from './DetailsModal'
 import Menu from './Menu'
 import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
+import { MainStackProps } from '~navigation/type'
 
-interface Props {
-  navigation: NavigationStackProp<{ plan: ComputedPlanItem }>
-}
-
-const PlanScreen = ({ navigation }: Props) => {
+const PlanScreen = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'Plan'>) => {
   const {
     id,
     title,
     image,
     description,
     author,
-  }: ComputedPlanItem = navigation.getParam('plan', {})
+  }: ComputedPlanItem = route.params.plan
   const modalRef = React.useRef<BottomSheet>(null)
   const modalRefDetails = React.useRef<BottomSheet>(null)
   const cacheImage = useFireStorage(image)

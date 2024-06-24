@@ -1,8 +1,8 @@
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
-import { withNavigation } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import Modal from '~common/Modal'
 import BibleSelect from '~features/bible/BibleSelect'
 import { useBottomSheet } from '~helpers/useBottomSheet'
@@ -17,7 +17,7 @@ export interface SelectBibleReferenceModalProps {
   isOpen: boolean
   onClose: () => void
   onSelect: (data: BibleTab['data']['temp']) => void
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<any, any>
 }
 
 const bibleAtom = atom(getDefaultBibleTab())
@@ -26,8 +26,9 @@ const SelectBibleReferenceModal = ({
   isOpen,
   onClose,
   onSelect,
-  navigation,
-}: SelectBibleReferenceModalProps) => {
+}: // navigation,
+SelectBibleReferenceModalProps) => {
+  const navigation = useNavigation()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
@@ -68,4 +69,4 @@ const SelectBibleReferenceModal = ({
   )
 }
 
-export default withNavigation(SelectBibleReferenceModal)
+export default SelectBibleReferenceModal

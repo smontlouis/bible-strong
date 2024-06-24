@@ -16,7 +16,7 @@ import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { shallowEqual } from 'recompose'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
@@ -29,13 +29,14 @@ import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { RootState } from '~redux/modules/reducer'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
+import { MainStackProps } from '~navigation/type'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
 interface DictionaryDetailScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'DictionnaryDetail'>
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
 }
 
@@ -106,11 +107,12 @@ const DictionnaryDetailScreen = ({
         Snackbar.show('Impossible de charger ce mot.')
       }
     } else {
-      navigation.navigate({
-        routeName: 'DictionnaryDetail',
-        params: { word: href },
-        key: href,
-      })
+      navigation.navigate('DictionnaryDetail', { word: href }) // TODO : check if this is correct
+      // navigation.navigate({
+      //   routeName: 'DictionnaryDetail',
+      //   params: { word: href },
+      //   key: href,
+      // })
     }
   }
 

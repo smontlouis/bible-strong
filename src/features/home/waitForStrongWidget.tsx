@@ -5,7 +5,7 @@ import DownloadRequired from '~common/DownloadRequired'
 import { DownloadingWidget, WidgetContainer, WidgetLoading } from './widget'
 import { useTranslation } from 'react-i18next'
 
-const waitForWidget = WrappedComponent => props => {
+const waitForWidget = (WrappedComponent: any) => (props: any) => {
   const { t } = useTranslation()
 
   const {

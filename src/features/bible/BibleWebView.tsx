@@ -25,9 +25,49 @@ import {
   TOGGLE_SELECTED_VERSE,
 } from './bibleWebView/src/dispatch'
 import bibleHTML from './bibleWebView/bibleHTML'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { BibleTab } from 'src/state/tabs'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { is } from 'immer/dist/internal'
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-class BibleWebView extends Component {
+type WebViewProps = { // TODO: Add types
+  bibleAtom: PrimitiveAtom<BibleTab>
+  book: any
+  chapter: any
+  isLoading: any
+  navigation: StackNavigationProp<MainStackProps>
+  addSelectedVerse: any
+  removeSelectedVerse: any
+  setSelectedVerse: any
+  version: any
+  isReadOnly: any
+  isSelectionMode: any
+  verses: any
+  parallelVerses: any
+  focusVerses: any
+  secondaryVerses: any
+  selectedVerses: any
+  highlightedVerses: any
+  notedVerses: any
+  settings: any
+  fontFamily: any
+  verseToScroll: any
+  pericopeChapter: any
+  openNoteModal: any
+  setSelectedCode: any
+  selectedCode: any
+  comments: any
+  removeParallelVersion: any
+  addParallelVersion: any
+  goToPrevChapter: any
+  goToNextChapter: any
+  setMultipleTagsItem: any
+  onChangeResourceTypeSelectVerse: any
+}
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+class BibleWebView extends Component<WebViewProps> {
   webview = null
 
   dispatchToWebView = message => {
@@ -153,16 +193,13 @@ class BibleWebView extends Component {
           return
         }
 
-        navigation.navigate({
-          routeName: 'BibleView',
-          params: {
-            isReadOnly: true,
-            book: parseInt(book, 10),
-            chapter: parseInt(action.chapter, 10),
-            verse: parseInt(action.verse, 10),
-          },
-          key: `bible-view-${book}-${action.chapter}-${action.verse}`,
+        navigation.navigate('BibleView', {
+          isReadOnly: true,
+          book: parseInt(book, 10),
+          chapter: parseInt(action.chapter, 10),
+          verse: parseInt(action.verse, 10),
         })
+
         break
       }
       case CONSOLE_LOG: {
@@ -214,7 +251,7 @@ class BibleWebView extends Component {
     }
   }
 
-  isVerseSelected = verseId => {
+  isVerseSelected = (verseId: any) => {
     const { selectedVerses } = this.props
     return !!selectedVerses[verseId]
   }

@@ -4,7 +4,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
 
-import { withTheme } from '@emotion/react'
+import { Theme, withTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -17,16 +17,24 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { StudiesObj, Study } from '~redux/modules/user'
 
 export const LinkBox = Box.withComponent(Link)
 
-const StudyLink = styled(Link)(({ theme }) => ({
+const StudyLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   position: 'relative',
   flexDirection: 'row',
   margin: 10,
 }))
 
-const StudyItem = ({ study, theme, setStudySettings }) => {
+type StudyItemProps = {
+  study: Study,
+  theme: Theme,
+  setStudySettings?: any,
+  navigation: any,
+}
+
+const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
 
@@ -41,6 +49,7 @@ const StudyItem = ({ study, theme, setStudySettings }) => {
         key={study.id}
         route="EditStudy"
         params={{ studyId: study.id }}
+        navigation={navigation}
       >
         <Box
           flex

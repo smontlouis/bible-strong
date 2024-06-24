@@ -25,6 +25,7 @@ import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
+import { VersionCode } from 'src/state/tabs'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -81,7 +82,7 @@ const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
 interface Props {
   version: Version
   isSelected?: boolean
-  onChange?: (id: string) => void
+  onChange?: (id: VersionCode) => void
   isParameters?: boolean
   shareFn?: (fn: () => void) => void
 }

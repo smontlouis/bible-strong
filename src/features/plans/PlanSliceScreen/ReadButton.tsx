@@ -1,5 +1,6 @@
 import React from 'react'
-import { withNavigation, NavigationInjectedProps } from 'react-navigation'
+// import { withNavigation, NavigationInjectedProps } from 'react-navigation'
+import { useNavigation } from '@react-navigation/native'
 
 import Link from '~common/Link'
 import styled from '@emotion/native'
@@ -28,12 +29,15 @@ interface Props {
   isRead: boolean
 }
 
-const ReadButton = ({
-  readingSliceId,
-  planId,
-  isRead,
-  navigation,
-}: NavigationInjectedProps & Props) => {
+const ReadButton = (
+  {
+    readingSliceId,
+    planId,
+    isRead,
+    // navigation,
+  } /*: NavigationInjectedProps & Props*/
+) => {
+  const navigation = useNavigation()
   const dispatch = useDispatch()
 
   const onPress = () => {
@@ -47,4 +51,5 @@ const ReadButton = ({
   )
 }
 
-export default withNavigation(ReadButton)
+// export default withNavigation(ReadButton)
+export default ReadButton

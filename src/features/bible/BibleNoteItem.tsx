@@ -13,20 +13,29 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
-import { useTheme } from '@emotion/react'
+import { Theme, useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import Paragraph from '~common/ui/Paragraph'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { VerseIds } from '~common/types'
 
-const NoteLink = styled(Link)(({ theme }) => ({
+const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   paddingVertical: 20,
   padding: 20,
   paddingRight: 0,
   flexDirection: 'row',
 }))
 
-const BibleNoteItem = ({ item, setNoteSettings }) => {
+type Props = {
+  item: any
+  setNoteSettings: React.Dispatch<React.SetStateAction<null | VerseIds>>
+  navigation: StackNavigationProp<MainStackProps>
+}
+
+const BibleNoteItem = ({ item, setNoteSettings, navigation }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const isFR = useLanguage()
@@ -47,6 +56,7 @@ const BibleNoteItem = ({ item, setNoteSettings }) => {
           verse: Number(Verset),
           focusVerses: [Number(Verset)],
         }}
+        navigation={navigation}
       >
         <Box flex>
           <Box row justifyContent="space-between">
@@ -67,7 +77,7 @@ const BibleNoteItem = ({ item, setNoteSettings }) => {
           )}
           <TagList tags={item.notes.tags} />
         </Box>
-        <Link padding onPress={() => setNoteSettings(item.noteId)}>
+        <Link padding onPress={() => setNoteSettings(item.noteId) }>
           <Icon.Feather
             name="more-vertical"
             size={20}

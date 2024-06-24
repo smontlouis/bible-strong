@@ -2,19 +2,19 @@ import BottomSheet from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { NavigationParams } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useDispatch } from 'react-redux'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { removePlan, resetPlan } from '~redux/modules/plan'
+import { MainStackProps } from '~navigation/type'
 
 interface Props {
   modalRefDetails: React.RefObject<BottomSheet>
   planId: string
-  navigation: NavigationStackProp<any, NavigationParams>
+  navigation: StackNavigationProp<MainStackProps, 'Plan'>
 }
 
 const Menu = ({ modalRefDetails, planId, navigation }: Props) => {

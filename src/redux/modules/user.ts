@@ -70,6 +70,7 @@ export interface Study {
   id: string
   title: string
   created_at: number
+  modified_at: number
   content: {
     ops: string[]
   }

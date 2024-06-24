@@ -5,11 +5,15 @@ import Text from '~common/ui/Text'
 import TimelineIcon from '~common/TimelineIcon'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
 const LinkBox = Box.withComponent(Link)
 
 const TimelineWidget = () => {
   const { t } = useTranslation()
+  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
 
   return (
     <Box bg="lightGrey" pt={10}>
@@ -23,6 +27,7 @@ const TimelineWidget = () => {
         px={20}
         pl={10}
         height={80}
+        navigation={navigation}
       >
         <Box center size={50} bg="lightPrimary" borderRadius={25} ml={10}>
           <TimelineIcon color="primary" size={70} style={{ marginTop: 8 }} />

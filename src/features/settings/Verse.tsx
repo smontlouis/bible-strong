@@ -5,7 +5,8 @@ import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
 
 import styled from '@emotion/native'
-import { withNavigation } from 'react-navigation'
+// import { withNavigation } from 'react-navigation'
+import { useNavigation } from '@react-navigation/native'
 import { shallowEqual, useSelector } from 'react-redux'
 
 import TagList from '~common/TagList'
@@ -50,9 +51,10 @@ const VerseComponent = ({
   verseIds,
   stringIds,
   tags,
-  navigation,
+  // navigation,
   setSettings,
 }) => {
+  const navigation = useNavigation()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
   const isFR = useLanguage()
@@ -123,4 +125,5 @@ const VerseComponent = ({
   )
 }
 
-export default withNavigation(VerseComponent)
+export default VerseComponent
+// export default withNavigation(VerseComponent)
