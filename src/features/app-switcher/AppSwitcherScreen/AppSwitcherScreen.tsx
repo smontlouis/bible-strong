@@ -85,7 +85,7 @@ const AppSwitcherScreen = memo(
             ))}
           </AnimatedBox>
         </AnimatedScrollView>
-        <CachedTabScreens navigation={navigation} />
+        <CachedTabScreens navigation={navigation} route={route} />
         <TabPreviewCarousel tabsAtoms={tabsAtoms} />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>

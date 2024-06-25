@@ -81,6 +81,11 @@ const EditStudyScreen = ({
   navigation,
   route,
 }: StackScreenProps<MainStackProps, 'EditStudy'>) => {
+  if (!route.params?.studyId) { // check to prevent error loop
+    console.error('No studyId provided')
+    return navigation.goBack()
+  }
+
   const studyId = route.params.studyId
   const canEdit = route.params.canEdit
   const hasBackButton = route.params.hasBackButton
@@ -99,10 +104,10 @@ const EditStudyScreen = ({
   )
 
   const onDeltaChangeCallback = (
-    delta,
-    deltaChange,
-    deltaOld,
-    changeSource
+    delta: string | null,
+    deltaChange: string | null,
+    deltaOld: string | null,
+    changeSource: string | null
   ) => {
     dispatch(
       updateStudy({

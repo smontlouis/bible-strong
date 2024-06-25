@@ -33,12 +33,14 @@ const StudiesTabScreen = ({
     return <AllStudiesTabScreen hasBackButton={hasBackButton} navigation={navigation} />
   }
 
+  navigation.setParams({ studyId: studyId })
+
   return (
     <EditStudyScreen
-      // studyId={studyId}
-      // hasBackButton={false}
       navigation={navigation}
       route={route}
+      // studyId={studyId}
+      // hasBackButton={false}
       // openedFromTab
     />
   )

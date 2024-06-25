@@ -1,6 +1,7 @@
 import React, { createRef, useEffect } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
+import { WebViewErrorEvent } from 'react-native-webview/lib/WebViewTypes';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import * as Sentry from '@sentry/react-native'
@@ -15,7 +16,7 @@ type Props = {
     isReadOnly: boolean
     onDeltaChangeCallback: any
     fontFamily: string
-    contentToDisplay: any
+    contentToDisplay: { ops: string[] }
     navigateBibleView: any
     openBibleView: any
     params: RouteProp<MainStackProps>['params']
@@ -28,25 +29,26 @@ const WebViewQuillEditor = (props: Props) => {
     const [isKeyboardOpened, setIsKeyboardOpened] = React.useState(false)
     const [activeFormats, setActiveFormat] = React.useState({})
 
-    // listeners
-    const updateListener =
-        Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
-    const resetListener =
-        Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
-    const _listeners = [
-        Keyboard.addListener(updateListener, () =>
-            setIsKeyboardOpened(true)
-        ),
-        Keyboard.addListener(resetListener, () =>
-            setIsKeyboardOpened(false)
-        ),
-    ]
+    useEffect(() => {
+        const updateListener =
+            Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
+        const resetListener =
+            Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
+        const _listeners = [
+            Keyboard.addListener(updateListener, () =>
+                setIsKeyboardOpened(true)
+            ),
+            Keyboard.addListener(resetListener, () =>
+                setIsKeyboardOpened(false)
+            ),
+        ]
+    }, [])
 
     useEffect(() => {
         const newParams = props.params || {}
 
-        if (newParams.verse) {
-            const isBlock = newParams.block
+        if (newParams.type?.includes('verse')) {
+            const isBlock = newParams.type?.includes('block')
             dispatchToWebView('FOCUS_EDITOR')
             dispatchToWebView(
                 isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES',
@@ -54,7 +56,7 @@ const WebViewQuillEditor = (props: Props) => {
             )
         }
         else {
-            const isBlock = newParams.block
+            const isBlock = newParams.type?.includes('block')
             dispatchToWebView('FOCUS_EDITOR')
             dispatchToWebView(
                 isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG',
@@ -71,9 +73,9 @@ const WebViewQuillEditor = (props: Props) => {
             dispatchToWebView('READ_ONLY')
             dispatchToWebView('BLUR_EDITOR')
         }
-    }, [props.params])
+    }, [props.params?.type, props.contentToDisplay, props.isReadOnly])
 
-    const dispatchToWebView = (type: string, payload: any) => {
+    const dispatchToWebView = (type: string, payload: any = undefined) => {
         const webView = webViewRef.current
 
         if (webView) {
@@ -115,7 +117,7 @@ const WebViewQuillEditor = (props: Props) => {
 
             switch (msgData.type) {
                 case 'EDITOR_LOADED':
-                    editorLoaded()
+                    editorLoaded() // done in onLoadEnd (more consistent)
                     break
                 case 'TEXT_CHANGED':
                     if (props.onDeltaChangeCallback) {
@@ -214,6 +216,8 @@ const WebViewQuillEditor = (props: Props) => {
     }
 
     const editorLoaded = () => {
+        injectFont()
+
         if (props.contentToDisplay) {
             dispatchToWebView('SET_CONTENTS', {
                 delta: props.contentToDisplay,
@@ -225,13 +229,10 @@ const WebViewQuillEditor = (props: Props) => {
         }
     }
 
-    // expected error type is event: WebViewErrorEvent
-    const onError = (error: string) => {
-        Alert.alert('WebView onError', error, [
+    const onError = (event: WebViewErrorEvent) => { // doesn't make sense
+        Alert.alert('WebView onError', JSON.stringify(event), [
             { text: 'OK', onPress: () => console.log('OK Pressed') },
         ])
-
-        return undefined // expected type return value
     }
 
     const renderError = (error: string | undefined, errorCode: number, errorDesc: string) => {
@@ -239,7 +240,7 @@ const WebViewQuillEditor = (props: Props) => {
             { text: 'OK', onPress: () => console.log('OK Pressed') },
         ])
 
-        return undefined // expected type return value
+        return <></>
     }
 
     return (
@@ -253,14 +254,14 @@ const WebViewQuillEditor = (props: Props) => {
             }}
         >
             <WebView
-                useWebKit
+                // useWebKit // This doesn't exist anymore
                 onLoad={onWebViewLoaded}
-                onLoadEnd={injectFont}
+                onLoadEnd={() => editorLoaded()}
                 onMessage={handleMessage}
                 originWhitelist={['*']}
                 ref={webViewRef}
                 source={{ html: studiesHTML }}
-                injectedJavaScript={injectFont}
+                injectedJavaScript={injectFont()}
                 domStorageEnabled
                 allowUniversalAccessFromFileURLs
                 allowFileAccessFromFileURLs
