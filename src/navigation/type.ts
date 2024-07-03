@@ -73,11 +73,12 @@ type ConcordanceByBookScreenProps = {
 
 type BibleScreenProps = {
   focusVerses?: string[]
-  isSelectionMode?: boolean
+  isSelectionMode?: StudyNavigateBibleType
   isReadOnly?: boolean
-  book: Book | number
-  chapter: number
-  verse: number
+  hasBackButton?: boolean
+  book?: Book | number
+  chapter?: number
+  verse?: number
   version?: VersionCode
 }
 
