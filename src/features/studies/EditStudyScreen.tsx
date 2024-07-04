@@ -17,36 +17,96 @@ import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
 import { MainStackProps } from '~navigation/type'
 
-type WithStudyProps = {
-  navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
-  route: RouteProp<MainStackProps, 'EditStudy'>
-  studyId: string
+// type WithStudyProps = {
+//   navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
+//   route: RouteProp<MainStackProps, 'EditStudy'>
+//   studyId: string
+//   canEdit?: boolean
+//   hasBackButton?: boolean
+//   openedFromTab?: boolean
+// }
+
+// const withStudy = (
+//   Component: React.ComponentType<WithStudyProps>
+// ): React.ComponentType<WithStudyProps> => ({ navigation, route, ...props }) => {
+//   const dispatch = useDispatch()
+//   const [studyId, setStudyId] = useState('')
+//   const { t } = useTranslation()
+
+//   let studyIdParam = route.params.studyId // navigation.getParam('studyId')
+//   let canEdit = route.params.canEdit // navigation.getParam('canEdit')
+
+//   if (!studyIdParam) {
+//     studyIdParam = props.studyId
+//     canEdit = props.canEdit
+//   }
+
+//   useEffect(() => {
+//     if (studyIdParam) {
+//       // Update modification_date
+//       setStudyId(studyIdParam)
+//     } else {
+//       // Create Study
+//       const studyUuid = generateUUID()
+//       dispatch(
+//         updateStudy({
+//           id: studyUuid,
+//           title: t('Document sans titre'),
+//           content: null,
+//           created_at: Date.now(),
+//           modified_at: Date.now(),
+//         })
+//       )
+//       setStudyId(studyUuid)
+//     }
+//   }, [dispatch, studyIdParam])
+
+//   if (!studyId) {
+//     return null
+//   }
+
+//   return (
+//     <Component
+//       // studyId={studyId}
+//       canEdit={canEdit}
+//       navigation={navigation}
+//       route={route}
+//       {...props}
+//     />
+//   )
+// }
+
+type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
+  studyId?: string
   canEdit?: boolean
-  hasBackButton?: boolean
-  openedFromTab?: boolean
 }
 
-// TODO : way to complex, need to be refactored
-const withStudy = (
-  Component: React.ComponentType<WithStudyProps>
-): React.ComponentType<WithStudyProps> => ({ navigation, route, ...props }) => {
-  const dispatch = useDispatch()
-  const [studyId, setStudyId] = useState('')
+const EditStudyScreen = ({
+  navigation,
+  route,
+  ...props
+}: EditStudyScreenProps) => {
   const { t } = useTranslation()
 
-  let studyIdParam = route.params.studyId // navigation.getParam('studyId')
-  let canEdit = route.params.canEdit // navigation.getParam('canEdit')
+  const studyIdParam = route.params.studyId ? route.params.studyId : props.studyId
+  const canEdit = route.params.canEdit ? route.params.canEdit : props.canEdit
+  const hasBackButton = route.params.hasBackButton
+  const openedFromTab = route.params.openedFromTab
 
-  if (!studyIdParam) {
-    studyIdParam = props.studyId
-    canEdit = props.canEdit
-  }
+  const dispatch = useDispatch()
+  const [studyId, setStudyId] = useState<string>('')
+  const [isReadOnly, setIsReadOnly] = useState(!canEdit)
+  const [titlePrompt, setTitlePrompt] = useState<
+    { id: string; title: string } | false
+  >(false)
+  const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
+  // hook to initialize the studyId state and create a new study if studyIdParam is not provided.
   useEffect(() => {
     if (studyIdParam) {
-      // Update modification_date
       setStudyId(studyIdParam)
-    } else {
+    }
+    else {
       // Create Study
       const studyUuid = generateUUID()
       dispatch(
@@ -61,42 +121,6 @@ const withStudy = (
       setStudyId(studyUuid)
     }
   }, [dispatch, studyIdParam])
-
-  if (!studyId) {
-    return null
-  }
-
-  return (
-    <Component
-      // studyId={studyId}
-      canEdit={canEdit}
-      navigation={navigation}
-      route={route}
-      {...props}
-    />
-  )
-}
-
-const EditStudyScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'EditStudy'>) => {
-  if (!route.params?.studyId) { // check to prevent error loop
-    console.error('No studyId provided')
-    return navigation.goBack()
-  }
-
-  const studyId = route.params.studyId
-  const canEdit = route.params.canEdit
-  const hasBackButton = route.params.hasBackButton
-  const openedFromTab = route.params.openedFromTab
-
-  const [isReadOnly, setIsReadOnly] = useState(!canEdit)
-  const [titlePrompt, setTitlePrompt] = useState<
-    { id: string; title: string } | false
-  >(false)
-  const dispatch = useDispatch()
-  const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector(
@@ -120,7 +144,7 @@ const EditStudyScreen = ({
 
   const navigateBibleView = (type: StudyNavigateBibleType) => {
     navigation.navigate('BibleView', {
-      isSelectionMode: type, // type inconsistency
+      isSelectionMode: type,
     })
   }
 
@@ -135,7 +159,12 @@ const EditStudyScreen = ({
     setOpenedFromTab(openedFromTab || false)
   }, [])
 
-  return (
+  // prevent rendering if studyId is not set
+  if (studyId === '') {
+    return null
+  }
+
+  return ( // where does pure come from?
     <Container pure>
       <EditStudyHeader
         isReadOnly={isReadOnly}
