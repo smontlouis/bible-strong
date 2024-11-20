@@ -35,6 +35,7 @@ DerivedData
 *.hmap
 *.ipa
 *.aab
+*.apk
 *.xcuserstate
 project.xcworkspace
 ios/build/
