@@ -1,27 +1,22 @@
-import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
+import React, { useEffect, useState } from 'react'
 
-import { wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
+import NaveIcon from '~common/NaveIcon'
 import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 import loadNaveByRandom from '~helpers/loadNaveByRandom'
+import RandomButton from './RandomButton'
 import waitForNaveWidget from './waitForNaveWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import NaveIcon from '~common/NaveIcon'
-import RandomButton from './RandomButton'
-import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
-import { useNavigation } from '@react-navigation/native'
 
 const NaveOfTheDay = ({
   color1 = 'rgb(80, 83, 140)',
   color2 = 'rgb(48, 51, 107)',
 }) => {
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
@@ -58,11 +53,7 @@ const NaveOfTheDay = ({
   const { name, name_lower } = naveReference
 
   return (
-    <Link
-      route="NaveDetail"
-      navigation={navigation}
-      params={{ name, name_lower }}
-    >
+    <Link route="NaveDetail" params={{ name, name_lower }}>
       <WidgetContainer>
         <Box
           style={{
@@ -86,7 +77,7 @@ const NaveOfTheDay = ({
             {name}
           </Paragraph>
         </Box>
-        <Link route="Nave" navigation={navigation} style={{ width: '100%' }}>
+        <Link route="Nave" style={{ width: '100%' }}>
           <Box
             row
             center

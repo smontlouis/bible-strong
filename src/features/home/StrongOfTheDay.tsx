@@ -16,6 +16,7 @@ import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { MainStackProps } from '~navigation/type'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useNavigation } from '@react-navigation/native'
+import { StrongReference } from '~common/types'
 
 const StrongOfTheDay = ({
   type,
@@ -23,11 +24,12 @@ const StrongOfTheDay = ({
   color2 = 'rgb(89,131,240)',
 }) => {
   const { t } = useTranslation()
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
 
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
-  const [strongReference, setStrongRef] = useState(false)
+  const [strongReference, setStrongRef] = useState<StrongReference | undefined>(
+    undefined
+  )
 
   useEffect(() => {
     const loadStrong = async () => {
@@ -79,11 +81,7 @@ const StrongOfTheDay = ({
   const { Grec, Hebreu, Mot } = strongReference
 
   return (
-    <Link
-      route="Strong"
-      navigation={navigation}
-      params={{ book: Grec ? 40 : 1, strongReference }}
-    >
+    <Link route="Strong" params={{ book: Grec ? 40 : 1, strongReference }}>
       <WidgetContainer>
         <Box
           style={{
@@ -125,7 +123,7 @@ const StrongOfTheDay = ({
             {truncate(Grec, 10) || truncate(Hebreu, 10)}
           </Paragraph>
         </Box>
-        <Link route="Lexique" navigation={navigation} style={{ width: '100%' }}>
+        <Link route="Lexique" style={{ width: '100%' }}>
           <Box
             row
             center

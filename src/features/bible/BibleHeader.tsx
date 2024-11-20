@@ -134,7 +134,6 @@ const Header = ({
         route="BibleSelect"
         params={{ bibleAtom }}
         style={{ paddingLeft: 15, paddingRight: 0 }}
-        navigation={navigation}
       >
         <TextIcon>
           {isSmall
@@ -146,7 +145,6 @@ const Header = ({
         route="VersionSelector"
         params={{ bibleAtom }}
         style={{ marginRight: 'auto' }}
-        navigation={navigation}
       >
         <TextIcon>{version}</TextIcon>
       </LinkBox>

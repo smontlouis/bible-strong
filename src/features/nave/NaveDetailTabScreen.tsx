@@ -89,7 +89,6 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
           chapter: Number(chapter),
           verse: Number(verse),
           focusVerses: verses?.split(',').map(Number),
-          // TODO : add version
         })
       } catch (e) {
         console.log(e)

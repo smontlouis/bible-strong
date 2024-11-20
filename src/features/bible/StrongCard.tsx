@@ -110,9 +110,8 @@ const StrongCard = (props: Props) => {
 
     if (isSelectionMode) {
       if (openedFromTab) {
-        navigation.navigate('AppSwitcher', {})
+        navigation.navigate('AppSwitcher')
       } else {
-        // wrong typing, something is fishy here, unused params perhaps
         navigation.navigate('EditStudy', {
           ...cleanParams(),
           type: isSelectionMode,
@@ -128,7 +127,7 @@ const StrongCard = (props: Props) => {
       }
     } else {
       navigation.navigate('Strong', {
-        book,
+        book: Number(book),
         strongReference,
       })
     }

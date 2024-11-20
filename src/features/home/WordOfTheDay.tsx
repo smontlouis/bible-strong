@@ -1,22 +1,18 @@
-import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
+import React, { useEffect, useState } from 'react'
 
-import { wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
+import DictionnaireIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
+import useLanguage from '~helpers/useLanguage'
+import RandomButton from './RandomButton'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import RandomButton from './RandomButton'
-import { useTranslation } from 'react-i18next'
-import useLanguage from '~helpers/useLanguage'
-import { useNavigation } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 
 function randomIntFromInterval(min: number, max: number) {
   // min and max included
@@ -27,7 +23,6 @@ const DictionnaireOfTheDay = ({
   color1 = 'rgba(86,204,242,1)',
   color2 = 'rgba(47,128,237,1)',
 }) => {
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { t } = useTranslation()
   const isFR = useLanguage()
   const [error, setError] = useState(false)
@@ -70,7 +65,7 @@ const DictionnaireOfTheDay = ({
   const { word } = strongReference
 
   return (
-    <Link navigation={navigation} route="DictionnaryDetail" params={{ word }}>
+    <Link route="DictionnaryDetail" params={{ word }}>
       <WidgetContainer>
         <Box
           style={{
@@ -94,11 +89,7 @@ const DictionnaireOfTheDay = ({
             {word}
           </Paragraph>
         </Box>
-        <Link
-          navigation={navigation}
-          route="Dictionnaire"
-          style={{ width: '100%' }}
-        >
+        <Link route="Dictionnaire" style={{ width: '100%' }}>
           <Box
             row
             center

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Alert } from 'react-native'
-import { connect, useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { StackScreenProps } from '@react-navigation/stack'
@@ -42,19 +42,18 @@ const BibleVerseNotes = ({
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [isTagsOpen, setIsTagsOpen] = useState(false)
   const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
-  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(null)
-
+  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(
+    null
+  )
+  const dispatch = useDispatch()
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
-  // navigation.setParams({ 
-  //   notes : useSelector((state: RootState) => state.user.bible.notes)
-  // })
 
   useEffect(() => {
     loadPage()
   }, [verse, _notes])
 
   const loadPage = async () => {
-    const { verse } = route.params || {} // props.navigation.state.params || {}
+    const { verse } = route.params || {}
     let title
     const filtered_notes: TNote[] = []
 
@@ -66,7 +65,7 @@ const BibleVerseNotes = ({
     }
 
     await Promise.all(
-      Object.entries(_notes) // props.notes
+      Object.entries(_notes)
         .filter(note => {
           if (verse) {
             const firstVerseRef = note[0].split('/')[0]
@@ -87,7 +86,6 @@ const BibleVerseNotes = ({
 
     setTitle(title)
     setNotes(filtered_notes)
-    // this.setState({ title, notes })
   }
 
   const openNoteEditor = (noteId: string) => {
@@ -96,11 +94,11 @@ const BibleVerseNotes = ({
       return accuRefs
     }, {})
 
-    setNoteVerses(noteVerses) // this.setState({ noteVerses })
+    setNoteVerses(noteVerses)
   }
 
   const closeNoteEditor = () => {
-    setNoteVerses(undefined) // this.setState({ noteVerses: undefined })
+    setNoteVerses(undefined)
   }
 
   const closeTags = () => setIsTagsOpen(false)
@@ -114,21 +112,19 @@ const BibleVerseNotes = ({
         { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
           text: t('Oui'),
-          onPress: () => this.props.deleteNote(noteId), // where is deleteNote from ?
+          onPress: () => dispatch(deleteNote(noteId)),
           style: 'destructive',
         },
       ]
     )
   }
 
-  const renderNote = ({ item, index }: { item: TNote, index: number }) => {
+  const renderNote = ({ item, index }: { item: TNote; index: number }) => {
     return (
       <BibleNoteItem
         key={index}
         item={item}
-        // openNoteEditor={openNoteEditor}
         setNoteSettings={setIsNoteSettingsOpen}
-        // deleteNote={deleteNote}
         navigation={navigation}
       />
     )
@@ -168,7 +164,7 @@ const BibleVerseNotes = ({
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={closeTags}
-        onSelected={(chip : Tag) => setSelectedChip(chip)}
+        onSelected={(chip: Tag) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <BibleNotesSettingsModal
@@ -180,9 +176,4 @@ const BibleVerseNotes = ({
   )
 }
 
-// const mapStateToProps = state => ({
-//   notes: state.user.bible.notes,
-// })
-
-// export default connect(mapStateToProps, UserActions)(BibleVerseNotes)
 export default BibleVerseNotes

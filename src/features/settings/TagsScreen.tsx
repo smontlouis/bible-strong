@@ -59,7 +59,7 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
 
   return (
     <Box>
-      <Link route="Tag" navigation={navigation} params={{ tagId: item.id }}>
+      <Link route="Tag" params={{ tagId: item.id }}>
         <Box padding={20} row paddingRight={0}>
           <Box flex justifyContent="center">
             <Text bold>{item.name}</Text>
@@ -119,11 +119,16 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   )
 }
 
-const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) => {
+const TagsScreen = ({
+  navigation,
+}: StackScreenProps<MainStackProps, 'Tags'>) => {
   const { t } = useTranslation()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
-  const [titlePrompt, setTitlePrompt] = React.useState<{ id: string, name: string }>()
+  const [titlePrompt, setTitlePrompt] = React.useState<{
+    id: string
+    name: string
+  }>()
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
@@ -170,7 +175,9 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
       {result.length ? (
         <FlatList
           data={result}
-          renderItem={({ item }: { item: Tag }) => <TagItem setOpen={setOpen} item={item} navigation={navigation} />}
+          renderItem={({ item }: { item: Tag }) => (
+            <TagItem setOpen={setOpen} item={item} navigation={navigation} />
+          )}
           keyExtractor={(item: Tag) => item.id}
           contentContainerStyle={{ paddingBottom: 70 }}
         />

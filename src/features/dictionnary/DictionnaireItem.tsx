@@ -24,7 +24,7 @@ const SectionItem = styled(Box)(({ theme }) => ({
 }))
 
 const DictionnaireItem = memo(({ word, navigation }: Props) => (
-  <Link route="DictionnaryDetail" navigation={navigation} params={{ word }}>
+  <Link route="DictionnaryDetail" params={{ word }}>
     <SectionItem>
       <Box row>
         <Text title fontSize={18} color="default" flex paddingRight={20}>

@@ -9,6 +9,7 @@ import verseToStrong from '~helpers/verseToStrong'
 import { TFunction, useTranslation, withTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 const VerseText = styled.View(() => ({
   flex: 1,
@@ -59,15 +60,15 @@ class ConcordanceVerse extends React.Component<Props> {
     return (
       <Container
         onPress={() =>
-          navigation.navigate('BibleView', {
-            isReadOnly: true,
-            book: books[verse.Livre - 1],
-            chapter: verse.Chapitre,
-            verse: verse.Verset,
-            focusVerses: [verse.Verset],
-            isSelectionMode: false,
-            // version: 'LSG', where do we find the version ?
-          })
+          navigation.dispatch(
+            StackActions.push('BibleView', {
+              isReadOnly: true,
+              book: books[verse.Livre - 1],
+              chapter: verse.Chapitre,
+              verse: verse.Verset,
+              focusVerses: [verse.Verset],
+            })
+          )
         }
       >
         <Text title fontSize={16} marginBottom={5}>

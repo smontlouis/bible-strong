@@ -191,7 +191,6 @@ type MoreProps = {
 }
 
 export const More = ({ closeMenu }: MoreProps) => {
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { isLogged, logout, user } = useLogin()
 
   const isFR = useLanguage()
@@ -254,31 +253,31 @@ export const More = ({ closeMenu }: MoreProps) => {
         }}
       >
         <Box paddingVertical={10}>
-          <LinkItem route="Lexique" navigation={navigation}>
+          <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
             <Text color="primary" bold fontSize={15}>
               {t('Lexique')}
             </Text>
           </LinkItem>
-          <LinkItem route="Dictionnaire" navigation={navigation}>
+          <LinkItem route="Dictionnaire">
             <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
             <Text color="secondary" bold fontSize={15}>
               {t('Dictionnaire')}
             </Text>
           </LinkItem>
-          <LinkItem route="Nave" navigation={navigation}>
+          <LinkItem route="Nave">
             <NaveIcon style={{ marginRight: 15 }} size={25} />
             <Text color="quint" bold fontSize={15}>
               {t('Bible Thématique Nave')}
             </Text>
           </LinkItem>
-          <LinkItem route="Studies" navigation={navigation} params={{}}>
+          <LinkItem route="Studies">
             <FeatherIcon name="feather" style={{ marginRight: 15 }} size={25} />
             <Text bold fontSize={15}>
               {t('Études')}
             </Text>
           </LinkItem>
-          <LinkItem route="Plans" navigation={navigation}>
+          <LinkItem route="Plans">
             <MaterialIcon
               name="playlist-add-check"
               size={25}
@@ -288,19 +287,19 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Plans')}
             </Text>
           </LinkItem>
-          <LinkItem route="Highlights" navigation={navigation}>
+          <LinkItem route="Highlights">
             <StyledIcon name="edit-3" size={25} />
             <Text bold fontSize={15}>
               {t('Surbrillances')}
             </Text>
           </LinkItem>
-          <LinkItem route="BibleVerseNotes" navigation={navigation} params={{}}>
+          <LinkItem route="BibleVerseNotes">
             <StyledIcon name="file-text" size={25} />
             <Text bold fontSize={15}>
               {t('Notes')}
             </Text>
           </LinkItem>
-          <LinkItem route="Tags" navigation={navigation}>
+          <LinkItem route="Tags">
             <StyledIcon name="tag" size={25} />
             <Text bold fontSize={15}>
               {t('Étiquettes')}
@@ -309,7 +308,7 @@ export const More = ({ closeMenu }: MoreProps) => {
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
-          <LinkItem route="Downloads" navigation={navigation}>
+          <LinkItem route="Downloads">
             <Box>
               {hasUpdate && (
                 <AnimatedCircle
@@ -322,11 +321,11 @@ export const More = ({ closeMenu }: MoreProps) => {
             </Box>
             <Text fontSize={15}>{t('Gestion des téléchargements')}</Text>
           </LinkItem>
-          <LinkItem route="Changelog" navigation={navigation}>
+          <LinkItem route="Changelog">
             <StyledIcon name="terminal" size={25} />
             <Text fontSize={15}>{t('Changelog')}</Text>
           </LinkItem>
-          <LinkItem route="FAQ" navigation={navigation}>
+          <LinkItem route="FAQ">
             <StyledIcon name="help-circle" size={25} />
             <Text fontSize={15}>{t('Foire aux questions')}</Text>
           </LinkItem>
@@ -381,13 +380,13 @@ export const More = ({ closeMenu }: MoreProps) => {
 
           <ChangeLanguage />
           <ManualSync />
-          <LinkItem route="ImportExport" navigation={navigation}>
+          <LinkItem route="ImportExport">
             <StyledIcon name="upload" size={25} />
             <Text fontSize={15}>{t('app.importexport')}</Text>
           </LinkItem>
           {/* <ExportSave /> */}
           {!isLogged && (
-            <LinkItem route="Login" navigation={navigation}>
+            <LinkItem route="Login">
               <StyledIcon color="primary" name="log-in" size={25} />
               <Text color="primary" fontSize={15} bold>
                 {t('Se connecter')}

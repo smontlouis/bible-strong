@@ -1,12 +1,9 @@
 import styled from '@emotion/native'
+import { StackActions, useNavigation } from '@react-navigation/native'
 import React from 'react'
-import { useNavigation } from '@react-navigation/native'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { LinkBox } from './Link'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 
 const Tag = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -21,7 +18,7 @@ const Tag = styled(Box)(({ theme }) => ({
 }))
 
 const TagList = ({ tags, limit }) => {
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
+  const navigation = useNavigation()
 
   if (!tags || !Object.values(tags).length) {
     return null
@@ -37,10 +34,11 @@ const TagList = ({ tags, limit }) => {
         <TouchableBox
           key={tag.id}
           onPress={() =>
-            navigation.navigate('Tag', {
-              tagId: tag.id,
-              // key: `tag-${tag.id}}`,
-            })
+            navigation.dispatch(
+              StackActions.push('Tag', {
+                tagId: tag.id,
+              })
+            )
           }
         >
           <Tag>

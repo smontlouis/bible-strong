@@ -20,6 +20,9 @@ import { useTranslation } from 'react-i18next'
 import { useAtom } from 'jotai/react'
 import { defaultBibleAtom } from '../../state/tabs'
 import { useQuery } from '~helpers/react-query-lite'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
@@ -64,7 +67,11 @@ function clearEmpties(o) {
   return o
 }
 
-const PericopeScreen = ({ navigation }) => {
+const PericopeScreen = ({
+  navigation,
+}: {
+  navigation: StackNavigationProp<MainStackProps>
+}) => {
   const { t } = useTranslation()
   const [bible] = useAtom(defaultBibleAtom)
 
@@ -140,17 +147,15 @@ const PericopeScreen = ({ navigation }) => {
                                     'Vous devez télécharger cette version de la Bible.'
                                   )
                                 )
-                              : navigation.navigate({
-                                  routeName: 'BibleView',
-                                  params: {
+                              : navigation.dispatch(
+                                  StackActions.push('BibleView', {
                                     isReadOnly: true,
                                     book,
                                     chapter: Number(chapterKey),
                                     version,
                                     verse: 1,
-                                  },
-                                  key: `bible-view-${book}-${chapterKey}-1-${version}`,
-                                })
+                                  })
+                                )
                           }
                         >
                           {h1 && <H1>{h1}</H1>}

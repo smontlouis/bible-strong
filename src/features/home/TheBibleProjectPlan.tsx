@@ -1,6 +1,4 @@
 import { useTheme } from '@emotion/react'
-import { useNavigation } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import BibleProjectIcon from '~common/BibleProjectIcon'
@@ -11,7 +9,6 @@ import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
-import { MainStackProps } from '~navigation/type'
 import { Theme } from '~themes'
 
 const LinkBox = Box.withComponent(Link)
@@ -19,7 +16,6 @@ const LinkBox = Box.withComponent(Link)
 const TheBibleProject = () => {
   const { t } = useTranslation()
   const isFR = useLanguage()
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
 
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress } =
@@ -41,7 +37,6 @@ const TheBibleProject = () => {
           center
           route="Plan"
           params={{ plan: { id, title, image, description, author } }}
-          navigation={navigation}
         >
           <Box mr={20} center size={50} bg="lightPrimary" borderRadius={25}>
             <BibleProjectIcon />

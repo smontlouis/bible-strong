@@ -79,30 +79,31 @@ const PlanItem = ({
             source={require('../../../assets/images/crown.json')}
           />
         ) : (
-          <ProgressCircle
-            size={40}
-            progress={progress}
-            borderWidth={0}
-            color={
-              status === 'Completed'
-                ? theme.colors.success
-                : theme.colors.primary
-            }
-            unfilledColor={theme.colors.lightGrey}
-            thickness={2}
-            fill="none"
-          >
-            <CircleImage center>
-              {cacheImage && (
-                <Image
-                  style={{ width: 32, height: 32 }}
-                  source={{
-                    uri: cacheImage,
-                  }}
-                />
-              )}
-            </CircleImage>
-          </ProgressCircle>
+          <></>
+          // <ProgressCircle
+          //   size={40}
+          //   progress={progress}
+          //   borderWidth={0}
+          //   color={
+          //     status === 'Completed'
+          //       ? theme.colors.success
+          //       : theme.colors.primary
+          //   }
+          //   unfilledColor={theme.colors.lightGrey}
+          //   thickness={2}
+          //   fill="none"
+          // >
+          //   <CircleImage center>
+          //     {cacheImage && (
+          //       <Image
+          //         style={{ width: 32, height: 32 }}
+          //         source={{
+          //           uri: cacheImage,
+          //         }}
+          //       />
+          //     )}
+          //   </CircleImage>
+          // </ProgressCircle>
         )}
         <Box flex paddingLeft={10}>
           <Text title>{title}</Text>

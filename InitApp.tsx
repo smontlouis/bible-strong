@@ -26,53 +26,6 @@ interface Props {
   persistor: Persistor
 }
 
-// const getActiveRouteName = (
-//   navigationState: NavigationState
-// ): {
-//   route: string
-//   params: NavigationParams | undefined
-// } => {
-//   const route = navigationState.routes[navigationState.index]
-//   // dive into nested navigators
-//   if (route.routes) {
-//     return getActiveRouteName(route)
-//   }
-//   return {
-//     route: route.routeName,
-//     params: route.params,
-//   }
-// }
-
-// const onNavigationStateChange = (
-//   prevState: NavigationState,
-//   currentState: NavigationState
-// ) => {
-//   const { route: currentScreen, params: currentParams } = getActiveRouteName(
-//     currentState
-//   )
-//   const { route: prevScreen, params: prevParams } = getActiveRouteName(
-//     prevState
-//   )
-
-//   if (prevScreen !== currentScreen) {
-//     if (!__DEV__) {
-//       analytics().logScreenView({
-//         screen_class: currentScreen,
-//         screen_name: currentScreen,
-//       })
-//     }
-
-//     Sentry.addBreadcrumb({
-//       category: 'screen',
-//       message: `From: ${prevScreen} To: ${currentScreen}`,
-//       data: {
-//         prevRoute: { prevScreen, prevParams },
-//         currentRoute: { currentScreen, currentParams },
-//       },
-//     })
-//   }
-// }
-
 const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
   if (['mauve', 'dark', 'night', 'black'].includes(currentTheme))
     StatusBar.setBarStyle('light-content')

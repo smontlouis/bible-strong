@@ -56,11 +56,15 @@ type BibleVerseNotesScreenProps = {
   withBack: boolean
 }
 
-type StrongScreenProps = {
-  book: number
-  reference: string
-  strongReference: StrongReference
-}
+type StrongScreenProps =
+  | {
+      book: number
+      reference: string
+    }
+  | {
+      book: number
+      strongReference: StrongReference
+    }
 
 type DictionnaireVerseDetailScreenProps = {
   verse: Verse
@@ -72,7 +76,7 @@ type ConcordanceByBookScreenProps = {
 }
 
 type BibleScreenProps = {
-  focusVerses?: string[]
+  focusVerses?: number[]
   isSelectionMode?: StudyNavigateBibleType
   isReadOnly?: boolean
   hasBackButton?: boolean
@@ -126,8 +130,7 @@ type PlanScreenProps = {
 }
 
 type PlanSliceScreenProps = {
-  planId: string
-  readingSlice: ComputedReadingSlice
+  readingSlice: ComputedReadingSlice & { planId: string }
 }
 
 type TimelineScreenProps = {
@@ -144,7 +147,7 @@ type CommentariesScreenProps = {
 }
 
 export type MainStackProps = {
-  AppSwitcher: AppSwitcherScreenProps
+  AppSwitcher?: AppSwitcherScreenProps
   More: MoreScreenProps
   Home: HomeScreenProps
   BibleSelect: BibleSelectScreenProps

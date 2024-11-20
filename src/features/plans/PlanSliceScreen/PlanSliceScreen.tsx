@@ -44,9 +44,7 @@ const PlanSliceScreen = ({
   navigation,
   route,
 }: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
-  const { id, title, slices }: ComputedReadingSlice =
-    route.params.readingSlice || {}
-  const planId = route.params.planId
+  const { id, title, slices, planId } = route.params.readingSlice || {}
 
   const { t } = useTranslation()
   const dispatch = useDispatch()

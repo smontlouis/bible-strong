@@ -86,6 +86,7 @@ export default store => next => async action => {
           { merge: true }
         )
       } catch (error) {
+        console.log('error', error)
         Snackbar.show(i18n.t('app.syncError'), 'danger')
       }
       break

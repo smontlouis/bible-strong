@@ -61,7 +61,6 @@ const useGetFirstPlans = () => {
   }, [])
 }
 const PlanHome = () => {
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const { t } = useTranslation()
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress, status } =
@@ -76,7 +75,6 @@ const PlanHome = () => {
     <Box bg="lightGrey" px={20} pt={20}>
       <LinkBox
         route="Plans"
-        navigation={navigation}
         rounded
         lightShadow
         bg="reverse"
@@ -105,7 +103,6 @@ const PlanHome = () => {
             row
             center
             route="Plan"
-            navigation={navigation}
             params={{ plan: { id, title, image, description, author } }}
             px={20}
           >

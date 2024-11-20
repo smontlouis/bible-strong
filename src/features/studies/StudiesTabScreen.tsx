@@ -38,8 +38,6 @@ const StudiesTabScreen = ({
     )
   }
 
-  console.log('route', route)
-
   return (
     <EditStudyScreen
       navigation={navigation}
