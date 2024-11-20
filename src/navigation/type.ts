@@ -190,3 +190,9 @@ export type MainStackProps = {
   Commentaries: CommentariesScreenProps
   BibleShareOptions: undefined
 }
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends MainStackProps {}
+  }
+}

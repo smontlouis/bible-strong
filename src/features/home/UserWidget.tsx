@@ -60,7 +60,7 @@ const ProfileContainer = styled.View(({ theme }) => ({
 
 const GenerateImageContainer = ProfileImage.withComponent(Box)
 
-const GenerateImage = ({ name }) => (
+const GenerateImage = ({ name }: { name: string }) => (
   <GenerateImageContainer>
     {name ? (
       <Text color="reverse" bold fontSize={24}>
@@ -72,26 +72,26 @@ const GenerateImage = ({ name }) => (
   </GenerateImageContainer>
 )
 
-const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
+const Chip = styled(Link)(
+  ({ theme, hightlighted }: { theme: Theme; hightlighted?: boolean }) => ({
+    borderRadius: 10,
+    backgroundColor: theme.colors.reverse,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
+    marginRight: 10,
+    shadowColor: 'rgb(89,131,240)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 7,
+    elevation: 1,
+    overflow: 'visible',
 
-const Chip = styled(Link)(({ theme, hightlighted }: { theme: Theme, hightlighted: boolean }) => ({
-  borderRadius: 10,
-  backgroundColor: theme.colors.reverse,
-  paddingVertical: 10,
-  paddingHorizontal: 13,
-  marginRight: 10,
-  shadowColor: 'rgb(89,131,240)',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 7,
-  elevation: 1,
-  overflow: 'visible',
-
-  ...(hightlighted && {
-    elevation: 0,
-    shadowOpacity: 0,
-  }),
-}))
+    ...(hightlighted && {
+      elevation: 0,
+      shadowOpacity: 0,
+    }),
+  })
+)
 
 const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: theme.colors[color] || theme.colors.grey,
@@ -239,13 +239,13 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
             overflow: 'visible',
           }}
         >
-          <Chip route="History" navigation={navigation} hightlighted>
+          <Chip route="History" hightlighted>
             <MaterialIcon name="history" size={20} />
             <Text mt={5} fontSize={12}>
               {t('Historique')}
             </Text>
           </Chip>
-          <Chip route="Highlights" navigation={navigation}>
+          <Chip route="Highlights">
             <Box row>
               <ChipIcon name="edit-3" size={20} />
               <Text bold fontSize={20}>
@@ -256,7 +256,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
               {t('surbrillance', { count: highlights })}
             </Text>
           </Chip>
-          <Chip route="BibleVerseNotes" navigation={navigation}>
+          <Chip route="BibleVerseNotes">
             <Box row>
               <ChipIcon name="file-text" size={20} />
               <Text bold fontSize={20}>
@@ -265,7 +265,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
             </Box>
             <Text fontSize={12}>{t('note', { count: notes })}</Text>
           </Chip>
-          <Chip route="Studies" navigation={navigation}>
+          <Chip route="Studies">
             <Box row>
               <ChipIcon name="feather" size={20} />
               <Text bold fontSize={20}>
@@ -274,7 +274,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
             </Box>
             <Text fontSize={12}>{t('étude', { count: studies })}</Text>
           </Chip>
-          <Chip route="Tags" navigation={navigation}>
+          <Chip route="Tags">
             <Box row>
               <ChipIcon name="tag" size={20} />
               <Text bold fontSize={20}>

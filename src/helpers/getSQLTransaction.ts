@@ -1,4 +1,4 @@
-import { SQLiteDatabase } from 'expo-sqlite'
+import { SQLiteDatabase } from 'expo-sqlite/legacy'
 import {
   dictionnaireDB,
   interlineaireDB,
