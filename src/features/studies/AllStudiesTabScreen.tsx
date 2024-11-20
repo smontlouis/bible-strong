@@ -13,14 +13,14 @@ import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
 
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
-import { useNavigation } from '@react-navigation/native'
+import { Tag } from '~common/types'
+import { MainStackProps } from '~navigation/type'
+import { RootState } from '~redux/modules/reducer'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
-import { Tag } from '~common/types'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
@@ -39,7 +39,7 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
 
   const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
   const studies = useSelector(
-    state => Object.values(state.user.bible.studies),
+    (state: RootState) => Object.values(state.user.bible.studies),
     shallowEqual
   )
 

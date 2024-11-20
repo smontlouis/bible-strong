@@ -13,6 +13,7 @@ import Text from '~common/ui/Text'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
 import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -57,19 +58,12 @@ const ConcordanceScreen = ({
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('ConcordanceByBook', {
-                  book: item.Livre,
-                  strongReference,
-                })
-
-                // navigation.navigate({
-                //   routeName: 'ConcordanceByBook',
-                //   params: {
-                //     book: item.Livre,
-                //     strongReference,
-                //   },
-                //   key: `concordance-${strongReference.Code}-${item.Livre}`,
-                // })
+                navigation.dispatch(
+                  StackActions.push('ConcordanceByBook', {
+                    book: item.Livre,
+                    strongReference,
+                  })
+                )
               }}
             >
               <ListItem row alignItems="center" height={50}>

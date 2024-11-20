@@ -1,299 +1,306 @@
-import React, { createRef, useEffect } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
-import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import { WebViewErrorEvent } from 'react-native-webview/lib/WebViewTypes';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useRef, useState, useEffect } from 'react'
+import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
+import * as FileSystem from 'expo-file-system'
+import { WebView } from 'react-native-webview'
+import { Asset } from 'expo-asset'
 import * as Sentry from '@sentry/react-native'
+import { useNavigation } from '@react-navigation/native'
 
-import StudyFooter from './StudyFooter';
-import { MainStackProps } from '~navigation/type';
-import literata from '~assets/fonts/literata';
-import i18n from '~i18n';
-import studiesHTML from './studiesWebView/studiesHTML';
+import books from '~assets/bible_versions/books-desc'
+import literata from '~assets/fonts/literata'
+import StudyFooter from './StudyFooter'
+import i18n from '~i18n'
+import studiesHTML from './studiesWebView/studiesHTML'
+import { EditStudyScreenProps } from '~navigation/type'
+import { StudyNavigateBibleType } from '~common/types'
 
 type Props = {
-    isReadOnly: boolean
-    onDeltaChangeCallback: any
-    fontFamily: string
-    contentToDisplay: { ops: string[] }
-    navigateBibleView: any
-    openBibleView: any
-    params: RouteProp<MainStackProps>['params']
+  params: Readonly<EditStudyScreenProps>
+  isReadOnly: boolean
+  onDeltaChangeCallback: (
+    delta: string | null,
+    deltaChange: string | null,
+    deltaOld: string | null,
+    changeSource: string | null
+  ) => void
+  contentToDisplay: {
+    ops: string[]
+  }
+  fontFamily: string
+  navigateBibleView: (type: StudyNavigateBibleType) => void
+  openBibleView: () => void
 }
+const WebViewQuillEditor = ({
+  params,
+  isReadOnly,
+  onDeltaChangeCallback,
+  contentToDisplay,
+  fontFamily,
+  navigateBibleView,
+  openBibleView,
+}: Props) => {
+  const webViewRef = useRef<WebView>(null)
+  const navigation = useNavigation()
+  const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
+  const [activeFormats, setActiveFormats] = useState({})
 
-const WebViewQuillEditor = (props: Props) => {
-    const webViewRef = createRef<WebView>()
-    const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
+  useEffect(() => {
+    const updateListener =
+      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
+    const resetListener =
+      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
 
-    const [isKeyboardOpened, setIsKeyboardOpened] = React.useState(false)
-    const [activeFormats, setActiveFormat] = React.useState({})
+    const showKeyboard = () => setIsKeyboardOpened(true)
+    const hideKeyboard = () => setIsKeyboardOpened(false)
 
-    useEffect(() => {
-        const updateListener =
-            Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
-        const resetListener =
-            Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
-        const _listeners = [
-            Keyboard.addListener(updateListener, () =>
-                setIsKeyboardOpened(true)
-            ),
-            Keyboard.addListener(resetListener, () =>
-                setIsKeyboardOpened(false)
-            ),
-        ]
-    }, [])
-
-    useEffect(() => {
-        const newParams = props.params || {}
-
-        if (newParams.type?.includes('verse')) {
-            const isBlock = newParams.type?.includes('block')
-            dispatchToWebView('FOCUS_EDITOR')
-            dispatchToWebView(
-                isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES',
-                newParams
-            )
-        }
-        else {
-            const isBlock = newParams.type?.includes('block')
-            dispatchToWebView('FOCUS_EDITOR')
-            dispatchToWebView(
-                isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG',
-                newParams
-            )
-        }
-
-        if (!props.isReadOnly) {
-            dispatchToWebView('CAN_EDIT')
-            dispatchToWebView('FOCUS_EDITOR')
-        }
-
-        if (props.isReadOnly) {
-            dispatchToWebView('READ_ONLY')
-            dispatchToWebView('BLUR_EDITOR')
-        }
-    }, [props.params?.type, props.contentToDisplay, props.isReadOnly])
-
-    const dispatchToWebView = (type: string, payload: any = undefined) => {
-        const webView = webViewRef.current
-
-        if (webView) {
-            console.log('RN DISPATCH: ', type)
-
-            webView.injectJavaScript(`
-            (function() {
-              setTimeout(() => {
-                document.dispatchEvent(new CustomEvent("messages", {
-                  detail: ${JSON.stringify({ type, payload })}
-                }));
-              }, 0)
-            })()
-          `)
-        }
-    }
-
-    const injectFont = () => {
-        const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
-
-        return `
-            var style = document.createElement("style");
-            style.innerHTML = "${fontRule}";
-            document.head.appendChild(style);
-            true;
-        `
-    }
-
-    const setActiveFormats = (formats = '') => {
-        setActiveFormat(JSON.parse(formats))
-    }
-
-    const handleMessage = (event: WebViewMessageEvent) => {
-        // const { navigation } = this.props
-        let msgData
-        try {
-            msgData = JSON.parse(event.nativeEvent.data)
-            // console.log('RN RECEIVE: ', msgData.type)
-
-            switch (msgData.type) {
-                case 'EDITOR_LOADED':
-                    editorLoaded() // done in onLoadEnd (more consistent)
-                    break
-                case 'TEXT_CHANGED':
-                    if (props.onDeltaChangeCallback) {
-                        delete msgData.payload.type
-                        const {
-                            delta,
-                            deltaChange,
-                            deltaOld,
-                            changeSource,
-                        } = msgData.payload
-                        props.onDeltaChangeCallback(
-                            delta,
-                            deltaChange,
-                            deltaOld,
-                            changeSource
-                        )
-                    }
-                    break
-                case 'VIEW_BIBLE_VERSE': {
-                    navigation.navigate('BibleView', {
-                        ...msgData.payload,
-                        arrayVerses: null, // Remove arrayVerses
-                        book: books[msgData.payload.book - 1],
-                    })
-                    return
-                }
-                case 'VIEW_BIBLE_STRONG': {
-                    navigation.navigate('Strong', msgData.payload)
-                    return
-                }
-                case 'SELECT_BIBLE_VERSE': {
-                    navigation.navigate('BibleView', {
-                        isSelectionMode: 'verse',
-                    })
-                    return
-                }
-                case 'SELECT_BIBLE_STRONG': {
-                    navigation.navigate('BibleView', {
-                        isSelectionMode: 'strong',
-                    })
-                    return
-                }
-                case 'SELECT_BIBLE_VERSE_BLOCK': {
-                    navigation.navigate('BibleView', {
-                        isSelectionMode: 'verse-block',
-                    })
-                    return
-                }
-                case 'SELECT_BIBLE_STRONG_BLOCK': {
-                    navigation.navigate('BibleView', {
-                        isSelectionMode: 'strong-block',
-                    })
-                    return
-                }
-                case 'ACTIVE_FORMATS': {
-                    setActiveFormats(msgData.payload)
-                    return
-                }
-                case 'CONSOLE_LOG': {
-                    console.log(
-                        `%c${msgData.payload}`,
-                        'color:black;background-color:#81ecec'
-                    )
-                    return
-                }
-                case 'THROW_ERROR': {
-                    console.log(
-                        `%c${msgData.payload}`,
-                        'color:black;background-color:#81ecec'
-                    )
-                    Alert.alert(
-                        `Une erreur est survenue, impossible de charger la page: ${msgData.payload} \n Le développeur en a été informé.`
-                    )
-                    Sentry.captureMessage(msgData.payload)
-                    return
-                }
-
-                default:
-                    console.warn(
-                        `WebViewQuillEditor Error: Unhandled message type received "${msgData.type}"`
-                    )
-            }
-        } catch (err) {
-            console.warn(err)
-        }
-
-        return undefined // expected type return value
-    }
-
-    const onWebViewLoaded = () => {
-        const { fontFamily } = props
-        dispatchToWebView('LOAD_EDITOR', {
-            fontFamily,
-            language: i18n.language,
-        })
-    }
-
-    const editorLoaded = () => {
-        injectFont()
-
-        if (props.contentToDisplay) {
-            dispatchToWebView('SET_CONTENTS', {
-                delta: props.contentToDisplay,
-            })
-        }
-
-        if (!props.isReadOnly) {
-            dispatchToWebView('CAN_EDIT')
-        }
-    }
-
-    const onError = (event: WebViewErrorEvent) => { // doesn't make sense
-        Alert.alert('WebView onError', JSON.stringify(event), [
-            { text: 'OK', onPress: () => console.log('OK Pressed') },
-        ])
-    }
-
-    const renderError = (error: string | undefined, errorCode: number, errorDesc: string) => {
-        Alert.alert('WebView renderError', error, [
-            { text: 'OK', onPress: () => console.log('OK Pressed') },
-        ])
-
-        return <></>
-    }
-
-    return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{
-                overflow: 'hidden',
-                flex: 1,
-                borderTopLeftRadius: 30,
-                borderTopRightRadius: 30,
-            }}
-        >
-            <WebView
-                // useWebKit // This doesn't exist anymore
-                onLoad={onWebViewLoaded}
-                onLoadEnd={() => editorLoaded()}
-                onMessage={handleMessage}
-                originWhitelist={['*']}
-                ref={webViewRef}
-                source={{ html: studiesHTML }}
-                injectedJavaScript={injectFont()}
-                domStorageEnabled
-                allowUniversalAccessFromFileURLs
-                allowFileAccessFromFileURLs
-                allowFileAccess
-                keyboardDisplayRequiresUserAction={false}
-                renderError={renderError}
-                onError={onError}
-                bounces={false}
-                scrollEnabled={false}
-                hideKeyboardAccessoryView
-                onContentProcessDidTerminate={syntheticEvent => {
-                    console.warn('Content process terminated, reloading...')
-                    const { nativeEvent } = syntheticEvent
-                    webViewRef.current?.reload()
-                    Sentry.captureException(nativeEvent)
-                }}
-                onRenderProcessGone={syntheticEvent => {
-                    webViewRef.current?.reload()
-                    const { nativeEvent } = syntheticEvent
-                    Sentry.captureException(nativeEvent)
-                }}
-            />
-            {isKeyboardOpened && (
-                <StudyFooter
-                    navigateBibleView={props.navigateBibleView}
-                    openBibleView={props.openBibleView}
-                    dispatchToWebView={dispatchToWebView}
-                    activeFormats={activeFormats}
-                />
-            )}
-        </KeyboardAvoidingView>
+    const keyboardShowListener = Keyboard.addListener(
+      updateListener,
+      showKeyboard
     )
+    const keyboardHideListener = Keyboard.addListener(
+      resetListener,
+      hideKeyboard
+    )
+
+    return () => {
+      keyboardShowListener.remove()
+      keyboardHideListener.remove()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!params?.type) return
+
+    if (params.type.includes('verse')) {
+      const isBlock = params.type.includes('block')
+      dispatchToWebView('FOCUS_EDITOR')
+      dispatchToWebView(
+        isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES',
+        params
+      )
+    } else {
+      const isBlock = params.type.includes('block')
+      dispatchToWebView('FOCUS_EDITOR')
+      dispatchToWebView(
+        isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG',
+        params
+      )
+    }
+  }, [params])
+
+  useEffect(() => {
+    if (!isReadOnly) {
+      dispatchToWebView('CAN_EDIT')
+      dispatchToWebView('FOCUS_EDITOR')
+    } else {
+      dispatchToWebView('READ_ONLY')
+      dispatchToWebView('BLUR_EDITOR')
+    }
+  }, [isReadOnly])
+
+  const dispatchToWebView = (type: string, payload?: any) => {
+    if (webViewRef.current) {
+      console.log('RN DISPATCH: ', type)
+
+      webViewRef.current.injectJavaScript(`
+        (function() {
+          setTimeout(() => {
+            document.dispatchEvent(new CustomEvent("messages", {
+              detail: ${JSON.stringify({ type, payload })}
+            }));
+          }, 0)
+        })()
+      `)
+    }
+  }
+
+  const injectFont = () => {
+    const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
+
+    return `
+        var style = document.createElement("style");
+        style.innerHTML = "${fontRule}";
+        document.head.appendChild(style);
+        true;
+    `
+  }
+
+  const handleMessage = event => {
+    let msgData
+    try {
+      msgData = JSON.parse(event.nativeEvent.data)
+
+      switch (msgData.type) {
+        case 'EDITOR_LOADED':
+          editorLoaded()
+          break
+        case 'TEXT_CHANGED':
+          if (onDeltaChangeCallback) {
+            delete msgData.payload.type
+            const {
+              delta,
+              deltaChange,
+              deltaOld,
+              changeSource,
+            } = msgData.payload
+            onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
+          }
+          break
+        case 'VIEW_BIBLE_VERSE': {
+          navigation.navigate('BibleView', {
+            ...msgData.payload,
+            arrayVerses: null,
+            book: books[msgData.payload.book - 1],
+          })
+          return
+        }
+        case 'VIEW_BIBLE_STRONG': {
+          navigation.navigate('Strong', msgData.payload)
+          return
+        }
+        case 'SELECT_BIBLE_VERSE': {
+          navigation.navigate('BibleView', {
+            isSelectionMode: 'verse',
+          })
+          return
+        }
+        case 'SELECT_BIBLE_STRONG': {
+          navigation.navigate('BibleView', {
+            isSelectionMode: 'strong',
+          })
+          return
+        }
+        case 'SELECT_BIBLE_VERSE_BLOCK': {
+          navigation.navigate('BibleView', {
+            isSelectionMode: 'verse-block',
+          })
+          return
+        }
+        case 'SELECT_BIBLE_STRONG_BLOCK': {
+          navigation.navigate('BibleView', {
+            isSelectionMode: 'strong-block',
+          })
+          return
+        }
+        case 'ACTIVE_FORMATS': {
+          setActiveFormats(JSON.parse(msgData.payload))
+          return
+        }
+        case 'CONSOLE_LOG': {
+          console.log(
+            `%c${msgData.payload}`,
+            'color:black;background-color:#81ecec'
+          )
+          return
+        }
+        case 'THROW_ERROR': {
+          console.log(
+            `%c${msgData.payload}`,
+            'color:black;background-color:#81ecec'
+          )
+          Alert.alert(
+            `Une erreur est survenue, impossible de charger la page: ${msgData.payload} \n Le développeur en a été informé.`
+          )
+          Sentry.captureMessage(msgData.payload)
+          return
+        }
+
+        default:
+          console.warn(
+            `WebViewQuillEditor Error: Unhandled message type received "${msgData.type}"`
+          )
+      }
+    } catch (err) {
+      console.warn(err)
+    }
+  }
+
+  const onWebViewLoaded = () => {
+    dispatchToWebView('LOAD_EDITOR', {
+      fontFamily,
+      language: i18n.language,
+    })
+  }
+
+  const editorLoaded = () => {
+    if (contentToDisplay) {
+      dispatchToWebView('SET_CONTENTS', {
+        delta: contentToDisplay,
+      })
+    }
+
+    if (!isReadOnly) {
+      dispatchToWebView('CAN_EDIT')
+    }
+  }
+
+  const onError = error => {
+    Alert.alert('WebView onError', error, [
+      { text: 'OK', onPress: () => console.log('OK Pressed') },
+    ])
+  }
+
+  const renderError = error => {
+    Alert.alert('WebView renderError', error, [
+      { text: 'OK', onPress: () => console.log('OK Pressed') },
+    ])
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{
+        overflow: 'hidden',
+        flex: 1,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+      }}
+    >
+      <WebView
+        useWebKit
+        onLoad={onWebViewLoaded}
+        onLoadEnd={injectFont}
+        onMessage={handleMessage}
+        originWhitelist={['*']}
+        ref={webViewRef}
+        source={{ html: studiesHTML }}
+        injectedJavaScript={injectFont()}
+        domStorageEnabled
+        allowUniversalAccessFromFileURLs
+        allowFileAccessFromFileURLs
+        allowFileAccess
+        keyboardDisplayRequiresUserAction={false}
+        renderError={renderError}
+        onError={onError}
+        bounces={false}
+        scrollEnabled={false}
+        hideKeyboardAccessoryView
+        onContentProcessDidTerminate={syntheticEvent => {
+          console.warn('Content process terminated, reloading...')
+          const { nativeEvent } = syntheticEvent
+          webViewRef.current?.reload()
+          Sentry.captureException(nativeEvent)
+        }}
+        onRenderProcessGone={syntheticEvent => {
+          webViewRef.current?.reload()
+          const { nativeEvent } = syntheticEvent
+          Sentry.captureException(nativeEvent)
+        }}
+      />
+      {isKeyboardOpened && (
+        <StudyFooter
+          navigateBibleView={navigateBibleView}
+          openBibleView={openBibleView}
+          dispatchToWebView={dispatchToWebView}
+          activeFormats={activeFormats}
+        />
+      )}
+    </KeyboardAvoidingView>
+  )
 }
 
-export default WebViewQuillEditor;
+WebViewQuillEditor.defaultProps = {
+  theme: 'snow',
+}
+
+export default WebViewQuillEditor

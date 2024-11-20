@@ -133,15 +133,10 @@ const PlanSliceScreen = ({
                   </Box>
                 </MenuOption>
                 <MenuOption
-                  onSelect={
-                    () =>
-                      navigation.navigate('VersionSelector', {
-                        bibleAtom: defaultBibleAtom,
-                      })
-                    // navigation.navigate({
-                    //   routeName: 'VersionSelector',
-                    //   params: { bibleAtom: defaultBibleAtom },
-                    // })
+                  onSelect={() =>
+                    navigation.navigate('VersionSelector', {
+                      bibleAtom: defaultBibleAtom,
+                    })
                   }
                 >
                   <Box row alignItems="center">

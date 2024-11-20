@@ -30,6 +30,7 @@ import { RootState } from '~redux/modules/reducer'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -107,12 +108,9 @@ const DictionnaryDetailScreen = ({
         Snackbar.show('Impossible de charger ce mot.')
       }
     } else {
-      navigation.navigate('DictionnaryDetail', { word: href }) // TODO : check if this is correct
-      // navigation.navigate({
-      //   routeName: 'DictionnaryDetail',
-      //   params: { word: href },
-      //   key: href,
-      // })
+      navigation.dispatch(
+        StackActions.push('DictionnaryDetail', { word: href })
+      )
     }
   }
 

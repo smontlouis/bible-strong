@@ -26,6 +26,7 @@ import { RootState } from '~redux/modules/reducer'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 interface NaveDetailScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'NaveDetail'>
@@ -97,17 +98,12 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     }
 
     if (type === 'w') {
-      navigation.navigate('NaveDetail', {
-        name_lower: item,
-        name: item,
-      })
-      // navigation.navigate({
-      //   routeName: 'NaveDetail',
-      //   params: {
-      //     name_lower: item,
-      //   },
-      //   key: name_lower,
-      // })
+      navigation.dispatch(
+        StackActions.push('NaveDetail', {
+          name_lower: item,
+          name: item,
+        })
+      )
     }
   }
 

@@ -67,7 +67,7 @@ const fadeIn = {
 
 type HomeScrollViewProps = {
   children: any
-  showsVerticalScrollIndicator: boolean,
+  showsVerticalScrollIndicator: boolean
   contentContainerStyle?: any
 }
 
@@ -85,6 +85,7 @@ export const HomeScrollView = ({
       {...props}
       orientation={orientation}
       backgroundColor="lightGrey"
+      showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       contentContainerStyle={{
         backgroundColor: theme.colors.lightGrey,
         paddingTop: insets.top,

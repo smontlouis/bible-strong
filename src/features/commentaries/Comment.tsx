@@ -4,7 +4,7 @@ import { Image } from 'expo-image'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { StackActions, useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import truncHTML from 'trunc-html'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
@@ -125,24 +125,14 @@ const Comment = ({ comment, navigation }: Props) => {
       book = findBookNumber(book.substr(0, 3).toUpperCase())
       const [chapter, verse] = numbers.split('.')
 
-      navigation.navigate('BibleView', {
-        isReadOnly: true,
-        book: Number(book),
-        chapter: Number(chapter),
-        verse: Number(verse),
-        version: 'LSG', // TODO : parse version or get default version
-      })
-
-      // navigation.navigate({
-      //   routeName: 'BibleView',
-      //   params: {
-      //     isReadOnly: true,
-      //     book: Number(book),
-      //     chapter: Number(chapter),
-      //     verse: Number(verse),
-      //   },
-      //   key: `bible-view-${book}-${chapter}-${verse}`,
-      // })
+      navigation.dispatch(
+        StackActions.push('BibleView', {
+          isReadOnly: true,
+          book: Number(book),
+          chapter: Number(chapter),
+          verse: Number(verse),
+        })
+      )
     }
   }
 

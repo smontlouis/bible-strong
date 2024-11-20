@@ -1,10 +1,10 @@
 import styled from '@emotion/native'
-import { useTheme, withTheme } from '@emotion/react'
-import React, { useEffect, useState } from 'react'
+import { useTheme } from '@emotion/react'
+import React, { useEffect, useRef, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
-import { connect } from 'react-redux'
-import compose from 'recompose/compose'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
@@ -24,15 +24,14 @@ import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { useTranslation, withTranslation } from 'react-i18next'
+import { withTranslation } from 'react-i18next'
 import { withSafeAreaInsets } from 'react-native-safe-area-context'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { viewportWidth, hp, wp } from '~helpers/utils'
+import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
-import { StrongReference } from '~common/types'
-import { CarouselRenderItem } from 'react-native-reanimated-carousel/lib/typescript/types'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -84,104 +83,147 @@ const StyledScrollView = styled.ScrollView(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
 }))
 
-const BibleVerseDetailScreen = ({
+interface BibleVerseDetailScreenProps
+  extends StackScreenProps<MainStackProps, 'BibleVerseDetail'> {
+  verse: {
+    Livre: string
+    Chapitre: number
+    Verset: number
+  }
+}
+
+interface StrongReference {
+  Code: number
+  // add other properties as needed
+}
+
+const BibleVerseDetailScreen: React.FC<BibleVerseDetailScreenProps> = ({
   navigation,
   route,
-}: StackScreenProps<MainStackProps, 'BibleVerseDetail'>) => {
-  const [error, setError] = useState(false)
-  const [isCarouselLoading, setIsCarouselLoading] = useState(true)
-  const [strongReferences, setStrongReferences] = useState<StrongReference[]>(
-    []
-  )
-  const [currentStrongReference, setCurrentStrongReference] = useState<
-    StrongReference
-  >()
-  const [verse, setVerse] = useState(route.params.verse)
-  const [versesInCurrentChapter, setVersesInCurrentChapter] = useState<
-    number | null
-  >(null)
-  const [formattedTexte, setFormattedTexte] = useState('')
-  const { theme, insets } = route.params
+  verse: initialVerse,
+}) => {
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
   const { t } = useTranslation()
-  // const theme = useTheme()
+  const carouselRef = useRef<ICarouselInstance | null>(null)
 
-  let _carousel = React.useRef<ICarouselInstance>(null)
+  const [state, setState] = useState({
+    error: false,
+    isCarouselLoading: true,
+    strongReferences: [] as StrongReference[],
+    currentStrongReference: null as StrongReference | null | undefined,
+    verse: initialVerse,
+    versesInCurrentChapter: null as number | null,
+    formattedTexte: '',
+  })
 
-  const formatVerse = async (strongVerse: any) => {
-    const {
-      verse: { Livre },
-    } = route.params
-    const { formattedTexte, references } = await verseToStrong(strongVerse)
+  useEffect(() => {
+    loadPage()
+  }, [state.verse.Verset])
 
-    setFormattedTexte(formattedTexte)
-
-    ;async () => {
-      const strongReferences = await loadStrongReferences(references, Livre)
-
-      setIsCarouselLoading(false)
-      setStrongReferences(strongReferences)
-      setCurrentStrongReference(strongReferences[0])
-
-      _carousel.current?.scrollTo({ index: 0, animated: false })
-      // _carousel.current?.snapToItem(0, false)
-    }
+  const updateVerse = (value: number) => {
+    setState(prev => ({
+      ...prev,
+      verse: {
+        ...prev.verse,
+        Verset: Number(prev.verse.Verset) + value,
+      },
+    }))
   }
 
   const loadPage = async () => {
+    const { verse } = state
     const strongVerse = await loadStrongVerse(verse)
 
     if (!strongVerse) {
-      setError(true)
+      setState(prev => ({ ...prev, error: true }))
       return
     }
 
     const versesInCurrentChapter =
       countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
 
-    setVersesInCurrentChapter(versesInCurrentChapter)
-
+    setState(prev => ({ ...prev, versesInCurrentChapter }))
     formatVerse(strongVerse)
   }
 
-  useEffect(() => {
-    loadPage()
-  }, [])
+  const formatVerse = async (strongVerse: any) => {
+    const { formattedTexte, references } = await verseToStrong(strongVerse)
 
-  useEffect(() => {
-    loadPage()
-  }, [verse])
+    setState(prev => ({ ...prev, formattedTexte }))
+
+    const strongReferences = await loadStrongReferences(
+      references,
+      initialVerse.Livre
+    )
+    setState(prev => ({
+      ...prev,
+      isCarouselLoading: false,
+      strongReferences,
+      currentStrongReference: strongReferences[0],
+    }))
+
+    if (carouselRef.current) {
+      carouselRef.current.scrollTo({ index: 0, animated: false })
+    }
+  }
+
+  const findRefIndex = (ref: string) =>
+    state.strongReferences.findIndex(r => r.Code === Number(ref))
 
   const goToCarouselItem = (ref: string) => {
-    const strongRef = strongReferences.find(r => r.Code === ref)
-    setCurrentStrongReference(strongRef)
-  }
-
-  const onSnapToItem = (index: number) => {
-    setCurrentStrongReference(strongReferences[index])
-  }
-
-  const updateVerse = (value: number) => {
-    setVerse(verse => ({
-      ...verse,
-      Verset: verse.Verset + value,
+    setState(prev => ({
+      ...prev,
+      currentStrongReference: state.strongReferences.find(
+        r => r.Code === Number(ref)
+      ),
     }))
   }
 
-  const renderItem = ({ item, index }: { item: StrongReference, index: number }) => {
+  const onSnapToItem = (index: number) => {
+    setState(prev => ({
+      ...prev,
+      currentStrongReference: state.strongReferences[index],
+    }))
+  }
+
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: StrongReference
+    index: number
+  }) => {
     const { isSelectionMode } = route.params || {}
     return (
       <StrongCard
         theme={theme}
         isSelectionMode={isSelectionMode}
         navigation={navigation}
-        book={verse.Livre}
+        book={state.verse.Livre}
         strongReference={item}
         index={index}
       />
     )
   }
 
-  const { title: headerTitle } = formatVerseContent([verse])
+  if (state.error) {
+    return (
+      <Container>
+        <Header hasBackButton title={t('Désolé...')} />
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message={t('Impossible de charger la strong pour ce verset...')}
+        />
+      </Container>
+    )
+  }
+
+  if (!state.formattedTexte) {
+    return <Loading />
+  }
+
+  const { title: headerTitle } = formatVerseContent([state.verse])
 
   return (
     <StyledScrollView
@@ -191,15 +233,14 @@ const BibleVerseDetailScreen = ({
       <Box background paddingTop={insets.top} />
       <Header
         fontSize={18}
-        // bg="reverse" // attr doesn't exist
         hasBackButton
         title={`${headerTitle} ${
-          headerTitle.length < 12 ? t('- Strong LSG') : '' // t must be imported as props
+          headerTitle.length < 12 ? t('- Strong LSG') : ''
         }`}
         rightComponent={
           <Link
             route="DictionnaireVerseDetail"
-            params={{ verse }}
+            params={{ verse: state.verse }}
             replace
             padding
           >
@@ -213,29 +254,29 @@ const BibleVerseDetailScreen = ({
         <Box background paddingTop={10}>
           <StyledVerse>
             <VersetWrapper>
-              <NumberText>{verse.Verset}</NumberText>
+              <NumberText>{state.verse.Verset}</NumberText>
             </VersetWrapper>
             <CarouselProvider
               value={{
-                currentStrongReference: currentStrongReference,
+                currentStrongReference: state.currentStrongReference,
                 goToCarouselItem: goToCarouselItem,
               }}
             >
-              <VerseText>{formattedTexte}</VerseText>
+              <VerseText>{state.formattedTexte}</VerseText>
             </CarouselProvider>
           </StyledVerse>
           <BibleVerseDetailFooter
             {...{
-              verseNumber: verse.Verset,
+              verseNumber: state.verse.Verset,
               goToNextVerse: () => {
                 updateVerse(+1)
-                setIsCarouselLoading(true)
+                setState(prev => ({ ...prev, isCarouselLoading: true }))
               },
               goToPrevVerse: () => {
                 updateVerse(-1)
-                setIsCarouselLoading(true)
+                setState(prev => ({ ...prev, isCarouselLoading: true }))
               },
-              versesInCurrentChapter,
+              versesInCurrentChapter: state.versesInCurrentChapter,
             }}
           />
         </Box>
@@ -243,10 +284,12 @@ const BibleVerseDetailScreen = ({
           <RoundedCorner />
         </Box>
         <Box bg="lightGrey">
-          {isCarouselLoading && <Loading />}
-          {!isCarouselLoading && (
+          {state.isCarouselLoading && <Loading />}
+          {!state.isCarouselLoading && (
             <Carousel
-              ref={_carousel}
+              ref={c => {
+                carouselRef.current = c
+              }}
               mode="horizontal-stack"
               scrollAnimationDuration={300}
               width={itemWidth}
@@ -265,11 +308,11 @@ const BibleVerseDetailScreen = ({
                 overflow: 'visible',
                 flex: 1,
               }}
-              data={strongReferences}
+              data={state.strongReferences}
               renderItem={renderItem}
               onSnapToItem={onSnapToItem}
-              defaultIndex={strongReferences.findIndex(
-                r => r.Code === currentStrongReference?.Code
+              defaultIndex={state.strongReferences.findIndex(
+                r => r.Code === state.currentStrongReference.Code
               )}
             />
           )}
@@ -278,23 +321,6 @@ const BibleVerseDetailScreen = ({
     </StyledScrollView>
   )
 }
-
-// export default compose<
-//   any,
-//   StackScreenProps<MainStackProps, 'BibleVerseDetail'>
-// >(
-//   // withTheme, // try with useTheme
-//   // withSafeAreaInsets, // try with useSafeAreaInsets
-//   connect((state, props: StackScreenProps<MainStackProps, 'BibleVerseDetail'>) => {
-//     // typing redux : https://react-redux.js.org/using-react-redux/usage-with-typescript#manually-typing-connect
-//     const { verse } = props.route.params || {}
-//     return { verse }
-//   }),
-//   waitForStrongDB({
-//     hasBackButton: true,
-//     hasHeader: true,
-//   })
-// )(BibleVerseDetailScreen)
 
 export default waitForStrongDB({
   hasBackButton: true,

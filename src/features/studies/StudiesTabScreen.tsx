@@ -9,7 +9,7 @@ import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
 import { MainStackProps } from '~navigation/type'
-import { RouteProp } from '@react-navigation/native'
+import { CommonActions, RouteProp } from '@react-navigation/native'
 
 interface StudiesTabScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
@@ -30,18 +30,29 @@ const StudiesTabScreen = ({
   } = studyTab
 
   if (!studyId) {
-    return <AllStudiesTabScreen hasBackButton={hasBackButton} navigation={navigation} />
+    return (
+      <AllStudiesTabScreen
+        hasBackButton={hasBackButton}
+        navigation={navigation}
+      />
+    )
   }
 
-  navigation.setParams({ studyId: studyId })
+  console.log('route', route)
 
   return (
     <EditStudyScreen
       navigation={navigation}
-      route={route}
-      // studyId={studyId}
-      // hasBackButton={false}
-      // openedFromTab
+      route={{
+        ...route,
+        params: {
+          ...route.params,
+          studyId,
+          hasBackButton: false,
+          openedFromTab: true,
+        },
+      }}
+      studyId={studyId}
     />
   )
 }

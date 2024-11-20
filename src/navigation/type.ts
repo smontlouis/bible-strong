@@ -92,7 +92,7 @@ type StudiesScreenProps = {
 
 type LexiqueScreenProps = {}
 
-type EditStudyScreenProps = {
+export type EditStudyScreenProps = {
   studyId?: string
   canEdit?: boolean
   hasBackButton?: boolean

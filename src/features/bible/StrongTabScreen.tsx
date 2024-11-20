@@ -41,6 +41,7 @@ import { RootState } from '~redux/modules/reducer'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -180,18 +181,12 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   }
 
   const linkToStrong = (url: string, ref: number) => {
-    // TODO : check if there is a missing parameter
-    navigation.navigate('Strong', {
-      book,
-      reference: ref.toString(),
-      strongReference: strongReferenceParam,
-    })
-
-    // navigation.navigate({
-    //   routeName: 'Strong',
-    //   params: { book, reference: ref },
-    //   key: `bible-strong-detail-${ref}`,
-    // })
+    navigation.dispatch(
+      StackActions.push('Strong', {
+        book,
+        reference: ref,
+      })
+    )
   }
 
   const {
