@@ -4,17 +4,24 @@ import withLoginModal from '~common/withLoginModal'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
+import { MainStackProps } from '~navigation/type'
+import { CommonActions, RouteProp } from '@react-navigation/native'
 
 interface StudiesTabScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
+  route: RouteProp<MainStackProps, 'EditStudy'>
   studyAtom: PrimitiveAtom<StudyTab>
 }
 
-const StudiesTabScreen = ({ studyAtom, navigation }: StudiesTabScreenProps) => {
+const StudiesTabScreen = ({
+  studyAtom,
+  navigation,
+  route,
+}: StudiesTabScreenProps) => {
   const [studyTab] = useAtom(studyAtom)
 
   const {
@@ -23,15 +30,27 @@ const StudiesTabScreen = ({ studyAtom, navigation }: StudiesTabScreenProps) => {
   } = studyTab
 
   if (!studyId) {
-    return <AllStudiesTabScreen hasBackButton={hasBackButton} />
+    return (
+      <AllStudiesTabScreen
+        hasBackButton={hasBackButton}
+        navigation={navigation}
+      />
+    )
   }
 
   return (
     <EditStudyScreen
-      studyId={studyId}
-      hasBackButton={false}
       navigation={navigation}
-      openedFromTab
+      route={{
+        ...route,
+        params: {
+          ...route.params,
+          studyId,
+          hasBackButton: false,
+          openedFromTab: true,
+        },
+      }}
+      studyId={studyId}
     />
   )
 }

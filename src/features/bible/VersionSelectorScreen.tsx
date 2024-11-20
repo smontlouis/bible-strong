@@ -9,11 +9,11 @@ import RNSectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getVersionsBySections } from '~helpers/bibleVersions'
 
-import { PrimitiveAtom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
-import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
+import { StackScreenProps } from '@react-navigation/stack'
+import { useBibleTabActions, VersionCode } from '../../state/tabs'
 import VersionSelectorItem from './VersionSelectorItem'
 import { useAtomValue } from 'jotai/react'
+import { MainStackProps } from '~navigation/type'
 
 const SectionList = styled(RNSectionList)({
   flex: 1,
@@ -21,16 +21,12 @@ const SectionList = styled(RNSectionList)({
   paddingBottom: 20,
 })
 
-interface VersionSelectorProps {
-  parallelVersionIndex?: number
-  bibleAtom: PrimitiveAtom<BibleTab>
-}
-
 const VersionSelector = ({
   navigation,
-}: NavigationStackScreenProps<VersionSelectorProps>) => {
-  const bibleAtom = navigation.getParam('bibleAtom')
-  const parallelVersionIndex = navigation.getParam('parallelVersionIndex')
+  route,
+}: StackScreenProps<MainStackProps, 'VersionSelector'>) => {
+  const bibleAtom = route.params.bibleAtom
+  const parallelVersionIndex = route.params.parallelVersionIndex
 
   if (!bibleAtom) {
     throw new Error('bibleAtom is required')
@@ -38,14 +34,15 @@ const VersionSelector = ({
 
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const setAndClose = (vers: VersionCode, index: number) => {
-    if (parallelVersionIndex === undefined) {
+  const setAndClose = (vers: VersionCode, index: number | undefined) => {
+    if (index == undefined) {
       actions.setSelectedVersion(vers)
     } else {
       actions.setParallelVersion(vers, index)
     }
     navigation.goBack()
   }
+
   return (
     <Container>
       <Header hasBackButton title="Version" />

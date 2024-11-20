@@ -8,7 +8,7 @@ import * as Animatable from 'react-native-animatable'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useDispatch } from 'react-redux'
 import Back from '~common/Back'
 import Link from '~common/Link'
@@ -26,6 +26,7 @@ import useLanguage from '~helpers/useLanguage'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { fullscreenAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import { MainStackProps } from '~navigation/type'
 
 const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',
@@ -45,7 +46,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
 const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
 
 interface BibleHeaderProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps>
   bibleAtom: PrimitiveAtom<BibleTab>
   hasBackButton?: boolean
   onBibleParamsClick: () => void
@@ -119,7 +120,7 @@ const Header = ({
   return (
     <AnimatableHeaderBox
       row
-      transition="height"
+      transition="height" // TODO: fix this
       style={{ height: isFullscreen ? 35 : 60 }}
     >
       {(isSelectionMode || hasBackButton) && (

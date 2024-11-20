@@ -1,6 +1,6 @@
-import React, { memo } from 'react'
+import { useNavigation } from '@react-navigation/native'
+import React, { FC, memo, PropsWithChildren } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { useNavigation } from 'react-navigation-hooks'
 
 type BackProps = {
   padding?: boolean
@@ -8,7 +8,12 @@ type BackProps = {
   onCustomPress?: () => void
 }
 
-const Back = ({ padding, style, onCustomPress, ...props }: BackProps) => {
+const Back: FC<PropsWithChildren<BackProps>> = ({
+  padding,
+  style,
+  onCustomPress,
+  ...props
+}: BackProps) => {
   const navigation = useNavigation()
 
   const handlePress = () => {

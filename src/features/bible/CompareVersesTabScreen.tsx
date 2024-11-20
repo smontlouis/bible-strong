@@ -16,7 +16,7 @@ import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import PopOverMenu from '~common/PopOverMenu'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -27,7 +27,7 @@ import { versions } from '~helpers/bibleVersions'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
 
 interface CompareVersesTabScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<any>
   compareAtom: PrimitiveAtom<CompareTab>
 }
 

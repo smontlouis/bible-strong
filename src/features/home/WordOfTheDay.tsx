@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
+import React, { useEffect, useState } from 'react'
 
-import { wp } from '~helpers/utils'
+import { useTranslation } from 'react-i18next'
+import DictionnaireIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
+import useLanguage from '~helpers/useLanguage'
+import RandomButton from './RandomButton'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import RandomButton from './RandomButton'
-import { useTranslation } from 'react-i18next'
-import useLanguage from '~helpers/useLanguage'
 
-function randomIntFromInterval(min, max) {
+function randomIntFromInterval(min: number, max: number) {
   // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
 }

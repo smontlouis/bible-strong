@@ -1,16 +1,15 @@
-import React, { Component, PropsWithChildren } from 'react'
-import { TouchableOpacity, Linking, Share } from 'react-native'
-import { withNavigation } from 'react-navigation'
+import React, { PropsWithChildren } from 'react'
+import { Linking, Share, TouchableOpacity } from 'react-native'
 
+import { StackActions, useNavigation } from '@react-navigation/native'
 import Box, { BoxProps } from '~common/ui/Box'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { MainStackProps } from '~navigation/type'
 
-interface LinkProps {
-  navigation?: NavigationStackProp<any, any>
-  route?: string
+export interface LinkProps<R extends keyof MainStackProps> {
+  route?: R
   href?: string
   share?: string
-  params?: object
+  params?: MainStackProps[R]
   replace?: boolean
   onPress?: () => void
   padding?: boolean
@@ -18,32 +17,39 @@ interface LinkProps {
   style?: any
   size?: number
 }
-class Link extends Component<LinkProps> {
-  handlePress = () => {
-    const {
-      navigation,
-      route,
-      href,
-      share,
-      params,
-      replace,
-      onPress,
-    } = this.props
+
+const Link = <R extends keyof MainStackProps>({
+  route,
+  href,
+  share,
+  params,
+  replace,
+  onPress,
+  padding,
+  paddingSmall,
+  style,
+  size,
+  ...props
+}: PropsWithChildren<LinkProps<R>>) => {
+  const navigation = useNavigation()
+
+  const handlePress = () => {
     if (route) {
       if (onPress) {
         onPress()
         setTimeout(() => {
           replace
-            ? navigation?.replace(route, params)
-            : navigation?.navigate(route, params)
+            ? navigation.dispatch(StackActions.replace(route, params))
+            : navigation.dispatch(StackActions.push(route, params))
         }, 300)
-
         return
       }
+
       replace
-        ? navigation?.replace(route, params)
-        : navigation?.navigate(route, params)
+        ? navigation.dispatch(StackActions.replace(route, params))
+        : navigation.dispatch(StackActions.push(route, params))
     }
+
     if (href) {
       Linking.openURL(href)
     }
@@ -57,44 +63,37 @@ class Link extends Component<LinkProps> {
     }
   }
 
-  render() {
-    const { padding, paddingSmall, style, size } = this.props
-
-    return (
-      <TouchableOpacity
-        activeOpacity={0.5}
-        {...this.props}
-        onPress={this.handlePress}
-        style={{
-          ...(padding && {
-            width: 60,
-            height: 60,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }),
-          ...(paddingSmall && {
-            width: 50,
-            height: 40,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }),
-          ...(size && {
-            width: size,
-            height: size,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }),
-          ...(Array.isArray(style) ? Object.assign({}, ...style) : style),
-        }}
-      />
-    )
-  }
+  return (
+    <TouchableOpacity
+      activeOpacity={0.5}
+      {...props}
+      onPress={handlePress}
+      style={{
+        ...(padding && {
+          width: 60,
+          height: 60,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }),
+        ...(paddingSmall && {
+          width: 50,
+          height: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }),
+        ...(size && {
+          width: size,
+          height: size,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }),
+        ...(Array.isArray(style) ? Object.assign({}, ...style) : style),
+      }}
+    />
+  )
 }
 
-type LinkBoxProps = React.FC<BoxProps & LinkProps>
+type LinkBoxProps = React.FC<BoxProps & LinkProps<keyof MainStackProps>>
 export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
 
-// @ts-ignore
-export default withNavigation(Link) as (
-  x: PropsWithChildren<LinkProps>
-) => JSX.Element
+export default Link

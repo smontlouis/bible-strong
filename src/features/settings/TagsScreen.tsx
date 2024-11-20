@@ -21,6 +21,9 @@ import useFuzzy from '~helpers/useFuzzy'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { Tag } from '~common/types'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -34,7 +37,13 @@ const Chip = styled(Box)(({ theme }) => ({
   marginTop: 5,
 }))
 
-const TagItem = ({ item, setOpen }) => {
+type TagItemProps = {
+  item: Tag
+  setOpen: any
+  navigation: StackNavigationProp<MainStackProps>
+}
+
+const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   const { t } = useTranslation()
   const highlightsNumber =
     item.highlights && Object.keys(item.highlights).length
@@ -110,11 +119,16 @@ const TagItem = ({ item, setOpen }) => {
   )
 }
 
-const TagsScreen = () => {
+const TagsScreen = ({
+  navigation,
+}: StackScreenProps<MainStackProps, 'Tags'>) => {
   const { t } = useTranslation()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
-  const [isOpen, setOpen] = useState(false)
-  const [titlePrompt, setTitlePrompt] = React.useState(false)
+  const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
+  const [titlePrompt, setTitlePrompt] = React.useState<{
+    id: string
+    name: string
+  }>()
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
@@ -136,7 +150,7 @@ const TagsScreen = () => {
         {
           text: t('Oui'),
           onPress: () => {
-            dispatch(removeTag(isOpen.id))
+            dispatch(removeTag(isOpen?.id))
             close()
           },
           style: 'destructive',
@@ -161,8 +175,10 @@ const TagsScreen = () => {
       {result.length ? (
         <FlatList
           data={result}
-          renderItem={({ item }) => <TagItem setOpen={setOpen} item={item} />}
-          keyExtractor={item => item.id}
+          renderItem={({ item }: { item: Tag }) => (
+            <TagItem setOpen={setOpen} item={item} navigation={navigation} />
+          )}
+          keyExtractor={(item: Tag) => item.id}
           contentContainerStyle={{ paddingBottom: 70 }}
         />
       ) : (
@@ -174,12 +190,14 @@ const TagsScreen = () => {
 
       <Modal.Body
         ref={ref}
-        onModalClose={() => setOpen(false)}
+        onModalClose={() => setOpen(undefined)}
         enableDynamicSizing
       >
         <Modal.Item
           bold
           onPress={() => {
+            if (!isOpen) return // show error ?
+
             close()
             setTitlePrompt({ id: isOpen.id, name: isOpen.name })
           }}
@@ -193,10 +211,10 @@ const TagsScreen = () => {
       <TitlePrompt
         placeholder={t("Nom de l'étiquette")}
         isOpen={!!titlePrompt}
-        title={titlePrompt.name}
-        onClosed={() => setTitlePrompt(false)}
-        onSave={value => {
-          if (titlePrompt.id) {
+        title={titlePrompt?.name}
+        onClosed={() => setTitlePrompt(undefined)}
+        onSave={(value: string) => {
+          if (titlePrompt?.id) {
             dispatch(updateTag(titlePrompt.id, value))
           } else {
             dispatch(addTag(value))
@@ -206,7 +224,7 @@ const TagsScreen = () => {
       <FabButton
         icon="add"
         onPress={() => {
-          setTitlePrompt(true)
+          setTitlePrompt({ id: '', name: '' })
         }}
       />
     </Container>

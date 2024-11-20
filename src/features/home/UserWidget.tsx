@@ -19,6 +19,9 @@ import Spacer from '~common/ui/Spacer'
 import { RootState } from '~redux/modules/reducer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { Theme } from '@emotion/react'
 
 const vodNb = [...Array(6).keys()]
 
@@ -57,7 +60,7 @@ const ProfileContainer = styled.View(({ theme }) => ({
 
 const GenerateImageContainer = ProfileImage.withComponent(Box)
 
-const GenerateImage = ({ name }) => (
+const GenerateImage = ({ name }: { name: string }) => (
   <GenerateImageContainer>
     {name ? (
       <Text color="reverse" bold fontSize={24}>
@@ -69,33 +72,37 @@ const GenerateImage = ({ name }) => (
   </GenerateImageContainer>
 )
 
-const getPluriel = (word, count) => `${word}${count > 1 ? 's' : ''}`
+const Chip = styled(Link)(
+  ({ theme, hightlighted }: { theme: Theme; hightlighted?: boolean }) => ({
+    borderRadius: 10,
+    backgroundColor: theme.colors.reverse,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
+    marginRight: 10,
+    shadowColor: 'rgb(89,131,240)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 7,
+    elevation: 1,
+    overflow: 'visible',
 
-const Chip = styled(Link)(({ theme, hightlighted }) => ({
-  borderRadius: 10,
-  backgroundColor: theme.colors.reverse,
-  paddingVertical: 10,
-  paddingHorizontal: 13,
-  marginRight: 10,
-  shadowColor: 'rgb(89,131,240)',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 7,
-  elevation: 1,
-  overflow: 'visible',
-
-  ...(hightlighted && {
-    elevation: 0,
-    shadowOpacity: 0,
-  }),
-}))
+    ...(hightlighted && {
+      elevation: 0,
+      shadowOpacity: 0,
+    }),
+  })
+)
 
 const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
   color: theme.colors[color] || theme.colors.grey,
   marginRight: 5,
 }))
 
-const UserWidget = () => {
+type UserWidgetProps = {
+  navigation: StackNavigationProp<MainStackProps>
+}
+
+const UserWidget = ({ navigation }: UserWidgetProps) => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
 
@@ -135,6 +142,7 @@ const UserWidget = () => {
           </Paragraph>
           <Button
             route="Login"
+            navigation={navigation}
             rightIcon={
               <Icon.Feather
                 name="arrow-right"

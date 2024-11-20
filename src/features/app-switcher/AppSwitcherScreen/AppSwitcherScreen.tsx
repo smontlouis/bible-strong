@@ -1,6 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useRef } from 'react'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
 
 import { BackHandler } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -11,8 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
-import HomeScreen from '~features/home/HomeScreen'
-import MoreScreen from '~features/settings/MoreScreen'
+import { Home } from '~features/home/HomeScreen'
+import { More } from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
 import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -21,8 +20,10 @@ import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
+import { StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
 
-interface AppSwitcherProps {
+type AppSwitcherScreenFuncs = {
   openMenu: () => void
   openHome: () => void
 }
@@ -34,9 +35,11 @@ const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 const AppSwitcherScreen = memo(
   ({
     navigation,
-    openMenu,
+    route,
     openHome,
-  }: NavigationStackScreenProps<{}> & AppSwitcherProps) => {
+    openMenu,
+  }: StackScreenProps<MainStackProps, 'AppSwitcher'> &
+    AppSwitcherScreenFuncs) => {
     const [tabsAtoms] = useAtom(tabsAtomsAtom)
     const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
     const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
@@ -82,7 +85,7 @@ const AppSwitcherScreen = memo(
             ))}
           </AnimatedBox>
         </AnimatedScrollView>
-        <CachedTabScreens navigation={navigation} />
+        <CachedTabScreens navigation={navigation} route={route} />
         <TabPreviewCarousel tabsAtoms={tabsAtoms} />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>
@@ -90,7 +93,9 @@ const AppSwitcherScreen = memo(
   }
 )
 
-const AppSwitcherScreenWrapper = (props: any) => {
+const AppSwitcherScreenWrapper = (
+  props: StackScreenProps<MainStackProps, 'AppSwitcher'>
+) => {
   const moreDrawerRef = useRef<DrawerLayout>(null)
   const homeDrawerRef = useRef<DrawerLayout>(null)
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -122,15 +127,13 @@ const AppSwitcherScreenWrapper = (props: any) => {
     closeHome()
   }, [tabsCount, closeHome])
 
-  const renderHomeScreen = useCallback(
-    () => <HomeScreen closeHome={closeHome} />,
-    [closeHome]
-  )
+  const renderHomeScreen = useCallback(() => <Home closeHome={closeHome} navigation={props.navigation} />, [
+    closeHome,
+  ])
 
-  const renderMoreScreen = useCallback(
-    () => <MoreScreen closeMenu={closeMenu} />,
-    [closeMenu]
-  )
+  const renderMoreScreen = useCallback(() => <More closeMenu={closeMenu} />, [
+    closeMenu,
+  ])
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -154,7 +157,7 @@ const AppSwitcherScreenWrapper = (props: any) => {
   }, [closeHome, closeMenu])
 
   return (
-    <DrawerLayout
+    <DrawerLayout // should use drawer navigator
       ref={homeDrawerRef}
       drawerWidth={wp(95, 450)}
       drawerPosition="left"

@@ -4,6 +4,13 @@ import styled from '@emotion/native'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+
+type Props = {
+  word: string
+  navigation: StackNavigationProp<MainStackProps>
+}
 
 const SectionItem = styled(Box)(({ theme }) => ({
   height: 60,
@@ -16,7 +23,7 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const DictionnaireItem = memo(({ word }) => (
+const DictionnaireItem = memo(({ word, navigation }: Props) => (
   <Link route="DictionnaryDetail" params={{ word }}>
     <SectionItem>
       <Box row>

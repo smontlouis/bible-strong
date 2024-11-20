@@ -1,6 +1,9 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Alert } from 'react-native'
-import { connect } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { StackScreenProps } from '@react-navigation/stack'
 
 import BibleNoteModal from './BibleNoteModal'
 import BibleNoteItem from './BibleNoteItem'
@@ -16,49 +19,53 @@ import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import verseToReference from '~helpers/verseToReference'
-import { withTranslation } from 'react-i18next'
-import compose from 'recompose/compose'
+import { MainStackProps } from '~navigation/type'
+import { Tag, VerseIds } from '~common/types'
+import { RootState } from '~redux/modules/reducer'
+import { Note } from '~redux/modules/user'
 
-class BibleVerseNotes extends Component {
-  componentDidMount() {
-    this.loadPage(this.props)
-  }
+type TNote = {
+  noteId: string
+  reference: string
+  notes: Note
+}
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.loadPage(nextProps)
-  }
+const BibleVerseNotes = ({
+  navigation,
+  route,
+}: StackScreenProps<MainStackProps, 'BibleVerseNotes'>) => {
+  const { withBack, verse } = route.params || {}
+  const { t } = useTranslation()
 
-  state = {
-    title: '',
-    notes: [],
-    noteVerses: null,
-    isTagsOpen: false,
-    selectedChip: null,
-    isNoteSettingsOpen: false,
-  }
+  const [title, setTitle] = useState('')
+  const [notes, setNotes] = useState<TNote[]>([])
+  const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
+  const [isTagsOpen, setIsTagsOpen] = useState(false)
+  const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
+  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(
+    null
+  )
+  const dispatch = useDispatch()
+  const _notes = useSelector((state: RootState) => state.user.bible.notes)
 
-  setTagsIsOpen = value => this.setState({ isTagsOpen: value })
-  closeTags = () => this.setState({ isTagsOpen: false })
+  useEffect(() => {
+    loadPage()
+  }, [verse, _notes])
 
-  setSelectedChip = value => this.setState({ selectedChip: value })
-
-  setNoteSettings = value => this.setState({ isNoteSettingsOpen: value })
-  closeNoteSettings = () => this.setState({ isNoteSettingsOpen: false })
-
-  loadPage = async props => {
-    const { verse } = props.navigation.state.params || {}
+  const loadPage = async () => {
+    const { verse } = route.params || {}
     let title
-    const notes = []
+    const filtered_notes: TNote[] = []
 
     if (verse) {
       title = verseToReference(verse)
-      title = `${props.t('Notes sur')} ${title}...`
+      title = `${t('Notes sur')} ${title}...`
     } else {
       title = 'Notes'
     }
 
     await Promise.all(
-      Object.entries(props.notes)
+      Object.entries(_notes)
         .filter(note => {
           if (verse) {
             const firstVerseRef = note[0].split('/')[0]
@@ -73,26 +80,31 @@ class BibleVerseNotes extends Component {
           })
 
           const reference = verseToReference(verseNumbers)
-          notes.push({ noteId: note[0], reference, notes: note[1] })
+          filtered_notes.push({ noteId: note[0], reference, notes: note[1] })
         })
     )
-    this.setState({ title, notes })
+
+    setTitle(title)
+    setNotes(filtered_notes)
   }
 
-  openNoteEditor = noteId => {
+  const openNoteEditor = (noteId: string) => {
     const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
       return accuRefs
     }, {})
-    this.setState({ noteVerses })
+
+    setNoteVerses(noteVerses)
   }
 
-  closeNoteEditor = () => {
-    this.setState({ noteVerses: undefined })
+  const closeNoteEditor = () => {
+    setNoteVerses(undefined)
   }
 
-  deleteNote = noteId => {
-    const { t } = this.props
+  const closeTags = () => setIsTagsOpen(false)
+  const closeNoteSettings = () => setIsNoteSettingsOpen(null)
+
+  const deleteNote = (noteId: string) => {
     Alert.alert(
       t('Attention'),
       t('Voulez-vous vraiment supprimer cette note?'),
@@ -100,94 +112,68 @@ class BibleVerseNotes extends Component {
         { text: t('Non'), onPress: () => null, style: 'cancel' },
         {
           text: t('Oui'),
-          onPress: () => this.props.deleteNote(noteId),
+          onPress: () => dispatch(deleteNote(noteId)),
           style: 'destructive',
         },
       ]
     )
   }
 
-  renderNote = ({ item, index }) => {
+  const renderNote = ({ item, index }: { item: TNote; index: number }) => {
     return (
       <BibleNoteItem
         key={index}
         item={item}
-        openNoteEditor={this.openNoteEditor}
-        setNoteSettings={this.setNoteSettings}
-        deleteNote={this.deleteNote}
+        setNoteSettings={setIsNoteSettingsOpen}
+        navigation={navigation}
       />
     )
   }
 
-  render() {
-    const { withBack, verse } = this.props.navigation.state.params || {}
-    const {
-      title,
-      notes,
-      isTagsOpen,
-      selectedChip,
-      isNoteSettingsOpen,
-    } = this.state
+  const filteredNotes = notes.filter(s =>
+    selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true
+  )
 
-    const filteredNotes = notes.filter(s =>
-      selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true
-    )
-
-    return (
-      <Container>
-        {verse ? (
-          <Header
-            hasBackButton={withBack}
-            title={title || this.props.t('Chargement...')}
-          />
-        ) : (
-          <TagsHeader
-            title="Notes"
-            setIsOpen={this.setTagsIsOpen}
-            isOpen={isTagsOpen}
-            selectedChip={selectedChip}
-            hasBackButton
-          />
-        )}
-        {filteredNotes.length ? (
-          <FlatList
-            data={filteredNotes}
-            renderItem={this.renderNote}
-            keyExtractor={(item, index) => index.toString()}
-            style={{ paddingBottom: 30 }}
-          />
-        ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={this.props.t("Vous n'avez pas encore de notes...")}
-          />
-        )}
-        <BibleNoteModal
-          onClosed={this.closeNoteEditor}
-          noteVerses={this.state.noteVerses}
-        />
-        <TagsModal
-          isVisible={isTagsOpen}
-          onClosed={this.closeTags}
-          onSelected={chip => this.setSelectedChip(chip)}
+  return (
+    <Container>
+      {verse ? (
+        <Header hasBackButton={withBack} title={title || t('Chargement...')} />
+      ) : (
+        <TagsHeader
+          title="Notes"
+          setIsOpen={setIsTagsOpen}
+          isOpen={isTagsOpen}
           selectedChip={selectedChip}
+          hasBackButton
         />
-        <BibleNotesSettingsModal
-          isOpen={isNoteSettingsOpen}
-          onClosed={this.closeNoteSettings}
-          openNoteEditor={this.openNoteEditor}
+      )}
+      {filteredNotes.length ? (
+        <FlatList
+          data={filteredNotes}
+          renderItem={renderNote}
+          keyExtractor={(item: TNote, index: number) => index.toString()}
+          style={{ paddingBottom: 30 }}
         />
-      </Container>
-    )
-  }
+      ) : (
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message={t("Vous n'avez pas encore de notes...")}
+        />
+      )}
+      <BibleNoteModal onClosed={closeNoteEditor} noteVerses={noteVerses} />
+      <TagsModal
+        isVisible={isTagsOpen}
+        onClosed={closeTags}
+        onSelected={(chip: Tag) => setSelectedChip(chip)}
+        selectedChip={selectedChip}
+      />
+      <BibleNotesSettingsModal
+        isOpen={isNoteSettingsOpen}
+        onClosed={closeNoteSettings}
+        openNoteEditor={openNoteEditor}
+      />
+    </Container>
+  )
 }
 
-export default compose(
-  connect(
-    state => ({
-      notes: state.user.bible.notes,
-    }),
-    UserActions
-  ),
-  withTranslation()
-)(BibleVerseNotes)
+export default BibleVerseNotes

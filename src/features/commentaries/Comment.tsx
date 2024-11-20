@@ -4,8 +4,8 @@ import { Image } from 'expo-image'
 import React, { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import { withNavigation } from 'react-navigation'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackActions, useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import truncHTML from 'trunc-html'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
 import Link, { LinkBox } from '~common/Link'
@@ -20,6 +20,7 @@ import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
+import { MainStackProps } from '~navigation/type'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -28,7 +29,7 @@ const findBookNumber = (bookName: string) => {
 }
 
 interface Props {
-  navigation: NavigationStackProp<any, any>
+  navigation: StackNavigationProp<MainStackProps, 'BibleView'>
   comment: CommentProps | EGWComment
 }
 
@@ -124,16 +125,14 @@ const Comment = ({ comment, navigation }: Props) => {
       book = findBookNumber(book.substr(0, 3).toUpperCase())
       const [chapter, verse] = numbers.split('.')
 
-      navigation.navigate({
-        routeName: 'BibleView',
-        params: {
+      navigation.dispatch(
+        StackActions.push('BibleView', {
           isReadOnly: true,
           book: Number(book),
           chapter: Number(chapter),
           verse: Number(verse),
-        },
-        key: `bible-view-${book}-${chapter}-${verse}`,
-      })
+        })
+      )
     }
   }
 
@@ -256,4 +255,4 @@ https://bible-strong.app
   )
 }
 
-export default withNavigation(memo(Comment))
+export default memo(Comment)

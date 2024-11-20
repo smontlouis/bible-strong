@@ -1,4 +1,4 @@
-import styled from '@emotion/native'
+import styled, { StyledComponent } from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import auth from '@react-native-firebase/auth'
 import sizeof from 'firestore-size'
@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link from '~common/Link'
+import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import SnackBar from '~common/SnackBar'
 import Border from '~common/ui/Border'
@@ -33,8 +33,11 @@ import app from '../../../package.json'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
 import * as Sharing from 'expo-sharing'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { useNavigation } from '@react-navigation/native'
 
-export const LinkItem = styled(Link)(({}) => ({
+export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -64,10 +67,6 @@ const shareMessage = () => {
       ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
       : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
   return `Bible Strong App ${appUrl}`
-}
-
-type MoreScreenProps = {
-  closeMenu: () => void
 }
 
 const Infos = memo(() => {
@@ -186,7 +185,12 @@ const ManualSync = memo(() => {
   )
 })
 
-const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
+// local react props
+type MoreProps = {
+  closeMenu: () => void
+}
+
+export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, logout, user } = useLogin()
 
   const isFR = useLanguage()
@@ -237,6 +241,8 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     .getValue('apple_reviewing')
     .asBoolean()
 
+  // All the LinkItem should define params if they use route
+  // There should be a way to type params using the route name
   return (
     <SafeAreaBox borderLeftWidth={1} borderColor="border">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
@@ -435,4 +441,11 @@ const MoreScreen = ({ closeMenu }: MoreScreenProps) => {
     </SafeAreaBox>
   )
 }
+
+const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
+  const closeMenu = route.params.closeMenu
+
+  return <More closeMenu={closeMenu} />
+}
+
 export default memo(MoreScreen)

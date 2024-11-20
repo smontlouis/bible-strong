@@ -403,7 +403,6 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           row
           onPress={() => {
             navigation.navigate('ModifyColors')
-            onClosed()
           }}
         >
           <Text flex>{t('Couleurs des surbrillances')}</Text>

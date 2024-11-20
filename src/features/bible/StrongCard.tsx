@@ -16,6 +16,10 @@ import { cleanParams, wp } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
 import { openedFromTabAtom } from '~features/studies/atom'
 import { ScrollView } from 'react-native'
+import { StrongReference } from '~common/types'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { Theme } from '@emotion/react'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -66,14 +70,23 @@ const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const smallTextStyle = theme => ({
+const smallTextStyle = (theme: Theme) => ({
   lineHeight: 20,
   fontSize: 14,
   color: theme.colors.default,
   fontFamily: theme.fontFamily.paragraph,
 })
 
-const StrongCard = props => {
+type Props = {
+  index: number
+  theme: Theme
+  book: string
+  strongReference: StrongReference
+  navigation: StackNavigationProp<MainStackProps>
+  isSelectionMode: boolean
+}
+
+const StrongCard = (props: Props) => {
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
@@ -96,23 +109,26 @@ const StrongCard = props => {
     } = props
 
     if (isSelectionMode) {
-      navigation.navigate(openedFromTab ? 'AppSwitcher' : 'EditStudy', {
-        ...cleanParams(),
-        type: isSelectionMode,
-        title: Mot,
-        codeStrong: Code,
-        strongType: Type,
-        phonetique: Phonetique,
-        definition: Definition,
-        translatedBy: LSG,
-        original: Hebreu || Grec,
-        book,
-      })
+      if (openedFromTab) {
+        navigation.navigate('AppSwitcher')
+      } else {
+        navigation.navigate('EditStudy', {
+          ...cleanParams(),
+          type: isSelectionMode,
+          title: Mot,
+          codeStrong: Code,
+          strongType: Type,
+          phonetique: Phonetique,
+          definition: Definition,
+          translatedBy: LSG,
+          original: Hebreu || Grec,
+          book,
+        })
+      }
     } else {
-      navigation.navigate({
-        routeName: 'Strong',
-        params: { book, strongReference },
-        key: `bible-strong-detail-${strongReference.Code}`,
+      navigation.navigate('Strong', {
+        book: Number(book),
+        strongReference,
       })
     }
   }
