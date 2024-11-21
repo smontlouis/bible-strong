@@ -11,7 +11,6 @@
     "build:ios:staging": "dotenv -c staging -- eas build -p ios --local --profile staging --non-interactive",
     "build:ios:prod": "dotenv -c production -- eas build -p ios --local --profile production --non-interactive",
     "postinstall": "patch-package",
-    "preinstall": "npx only-allow pnpm",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll",
     "clean": "rm -rf pnpm-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && pnpm && say I love react native",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -184,5 +183,6 @@
     "patchedDependencies": {
       "react-native-modal": "patches/react-native-modal.patch"
     }
-  }
+  },
+  "packageManager": "yarn@4.5.1"
 }
