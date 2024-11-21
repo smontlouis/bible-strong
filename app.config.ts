@@ -99,7 +99,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
-    ['./plugins/withBoringSSLFix.js'],
     [
       'expo-splash-screen',
       {

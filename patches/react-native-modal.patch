@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-modal/dist/modal.js b/node_modules/react-native-modal/dist/modal.js
-index 165cd55..2e68297 100644
---- a/node_modules/react-native-modal/dist/modal.js
-+++ b/node_modules/react-native-modal/dist/modal.js
+diff --git a/dist/modal.js b/dist/modal.js
+index 165cd55a960dfaccbb238807b17b0cc43e4f7bcb..2e682974fc684ee103943a815bda407c993c6f18 100644
+--- a/dist/modal.js
++++ b/dist/modal.js
 @@ -403,7 +403,7 @@ export class ReactNativeModal extends React.Component {
          if (this.props.onSwipe) {
              console.warn('`<Modal onSwipe="..." />` is deprecated and will be removed starting from 13.0.0. Use `<Modal onSwipeComplete="..." />` instead.');
