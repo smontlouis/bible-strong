@@ -2,11 +2,11 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
+  newArchEnabled: false,
   name: process.env.APP_NAME ?? 'dev - Bible Strong',
   jsEngine: 'hermes',
   description: 'Bible strong for french people',
   slug: 'bible-strong',
-  privacy: 'unlisted',
   primaryColor: '#fff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
@@ -21,16 +21,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ??
       'firebase/dev/google-services.json',
-    splash: {
-      image: './assets/images/splash.png',
-      resizeMode: 'contain',
-      backgroundColor: '#fff',
-      dark: {
-        image: './assets/images/splash-dark.png',
-        resizeMode: 'contain',
-        backgroundColor: '#102031',
-      },
-    },
     adaptiveIcon: {
       foregroundImage: './assets/images/foreground-image.png',
       backgroundImage: './assets/images/background-image.png',
@@ -45,16 +35,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       process.env.IOS_GOOGLE_SERVICES_FILE ??
       './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',
-    splash: {
-      image: './assets/images/splash.png',
-      resizeMode: 'contain',
-      backgroundColor: '#fff',
-      dark: {
-        image: './assets/images/splash-dark.png',
-        resizeMode: 'contain',
-        backgroundColor: '#0F2132',
-      },
-    },
     supportsTablet: true,
     infoPlist: {
       UIBackgroundModes: ['audio'],
@@ -79,10 +59,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         ios: {
           useFrameworks: 'static',
-          deploymentTarget: '15.0',
         },
         android: {
-          compileSdkVersion: 34,
           usesCleartextTraffic: true,
           extraMavenRepos: [
             '../../node_modules/@notifee/react-native/android/libs',
@@ -122,6 +100,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ['./plugins/withBoringSSLFix.js'],
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/images/splash.png',
+        resizeMode: 'contain',
+        backgroundColor: '#fff',
+        dark: {
+          image: './assets/images/splash-dark.png',
+          resizeMode: 'contain',
+          backgroundColor: '#0F2132',
+        },
+      },
+    ],
   ],
   extra: {
     eas: {

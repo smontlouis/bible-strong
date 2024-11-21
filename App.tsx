@@ -26,6 +26,11 @@ SplashScreen.preventAutoHideAsync()
   )
   .catch(console.warn) // it's good to explicitly catch and inspect any error
 
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+})
+
 setAutoFreeze(false)
 LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
@@ -88,9 +93,9 @@ const useAppLoad = () => {
 const App = () => {
   const { isLoadingCompleted, status } = useAppLoad()
 
-  const onLayoutRootView = useCallback(async () => {
+  const onLayoutRootView = useCallback(() => {
     if (isLoadingCompleted) {
-      await SplashScreen.hideAsync()
+      SplashScreen.hide()
     }
   }, [isLoadingCompleted])
 
