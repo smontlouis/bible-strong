@@ -180,7 +180,13 @@ const FireAuth = class {
     new Promise(async resolve => {
       try {
         await GoogleSignin.hasPlayServices()
-        const { idToken } = await GoogleSignin.signIn()
+        const signInResult = await GoogleSignin.signIn()
+        const idToken = signInResult.data?.idToken
+
+        if (!idToken) {
+          throw new Error('No ID token found')
+        }
+
         const googleCredential = auth.GoogleAuthProvider.credential(idToken)
         return this.onCredentialSuccess(googleCredential, resolve)
       } catch (e) {

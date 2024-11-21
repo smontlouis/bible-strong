@@ -58,6 +58,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-build-properties',
       {
         ios: {
+          deploymentTarget: '15.1',
           useFrameworks: 'static',
         },
         android: {
@@ -112,6 +113,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    ['@react-native-google-signin/google-signin'],
   ],
   extra: {
     eas: {
