@@ -65,11 +65,18 @@ const fadeIn = {
   },
 }
 
+type HomeScrollViewProps = {
+  children: any
+  showsVerticalScrollIndicator: boolean
+  contentContainerStyle?: any
+}
+
 export const HomeScrollView = ({
   children,
+  showsVerticalScrollIndicator,
   contentContainerStyle,
   ...props
-}) => {
+}: HomeScrollViewProps) => {
   const orientation = useDeviceOrientation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -78,6 +85,7 @@ export const HomeScrollView = ({
       {...props}
       orientation={orientation}
       backgroundColor="lightGrey"
+      showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       contentContainerStyle={{
         backgroundColor: theme.colors.lightGrey,
         paddingTop: insets.top,

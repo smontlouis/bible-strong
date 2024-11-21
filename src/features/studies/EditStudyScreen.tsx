@@ -4,7 +4,8 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/native'
 import { StudyNavigateBibleType } from '~common/types'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
@@ -14,33 +15,35 @@ import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
+import { MainStackProps } from '~navigation/type'
 
-type WithStudyProps = {
-  navigation: NavigationStackProp
-  studyId: string
-  canEdit?: boolean
-  hasBackButton?: boolean
-  openedFromTab?: boolean
+type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
+  studyId?: string
 }
 
-const withStudy = (
-  Component: React.ComponentType<WithStudyProps>
-): React.ComponentType<WithStudyProps> => ({ navigation, ...props }) => {
-  const dispatch = useDispatch()
-  const [studyId, setStudyId] = useState('')
+const EditStudyScreen = ({
+  navigation,
+  route,
+  ...props
+}: EditStudyScreenProps) => {
   const { t } = useTranslation()
 
-  let studyIdParam = navigation.getParam('studyId')
-  let canEdit = navigation.getParam('canEdit')
+  const studyIdParam = route.params.studyId
+  const canEdit = route.params.canEdit
+  const hasBackButton = route.params.hasBackButton
+  const openedFromTab = route.params.openedFromTab
 
-  if (!studyIdParam) {
-    studyIdParam = props.studyId
-    canEdit = props.canEdit
-  }
+  const dispatch = useDispatch()
+  const [studyId, setStudyId] = useState<string>('')
+  const [isReadOnly, setIsReadOnly] = useState(!canEdit)
+  const [titlePrompt, setTitlePrompt] = useState<
+    { id: string; title: string } | false
+  >(false)
+  const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
+  // hook to initialize the studyId state and create a new study if studyIdParam is not provided.
   useEffect(() => {
     if (studyIdParam) {
-      // Update modification_date
       setStudyId(studyIdParam)
     } else {
       // Create Study
@@ -58,44 +61,16 @@ const withStudy = (
     }
   }, [dispatch, studyIdParam])
 
-  if (!studyId) {
-    return null
-  }
-
-  return (
-    <Component
-      studyId={studyId}
-      canEdit={canEdit}
-      navigation={navigation}
-      {...props}
-    />
-  )
-}
-
-const EditStudyScreen = ({
-  navigation,
-  studyId,
-  canEdit,
-  hasBackButton,
-  openedFromTab,
-}: WithStudyProps) => {
-  const [isReadOnly, setIsReadOnly] = useState(!canEdit)
-  const [titlePrompt, setTitlePrompt] = useState<
-    { id: string; title: string } | false
-  >(false)
-  const dispatch = useDispatch()
-  const setOpenedFromTab = useSetAtom(openedFromTabAtom)
-
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector(
     (state: RootState) => state.user.bible.studies[studyId]
   )
 
   const onDeltaChangeCallback = (
-    delta,
-    deltaChange,
-    deltaOld,
-    changeSource
+    delta: string | null,
+    deltaChange: string | null,
+    deltaOld: string | null,
+    changeSource: string | null
   ) => {
     dispatch(
       updateStudy({
@@ -123,8 +98,13 @@ const EditStudyScreen = ({
     setOpenedFromTab(openedFromTab || false)
   }, [])
 
+  // prevent rendering if studyId is not set
+  if (studyId === '') {
+    return null
+  }
+
   return (
-    <Container pure>
+    <Container>
       <EditStudyHeader
         isReadOnly={isReadOnly}
         hasBackButton={hasBackButton}
@@ -145,14 +125,14 @@ const EditStudyScreen = ({
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
-        params={navigation.state.params}
+        params={route.params}
         navigateBibleView={navigateBibleView}
         openBibleView={openBibleView}
       />
       <StudyTitlePrompt
         titlePrompt={titlePrompt}
         onClosed={() => setTitlePrompt(false)}
-        onSave={(id, title) => {
+        onSave={(id: string, title: string) => {
           dispatch(updateStudy({ id, title, modified_at: Date.now() }))
         }}
       />
@@ -163,4 +143,4 @@ const EditStudyScreen = ({
   )
 }
 
-export default withStudy(EditStudyScreen)
+export default EditStudyScreen

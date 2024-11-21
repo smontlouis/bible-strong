@@ -1,20 +1,17 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { NaveTab } from '../../state/tabs'
 import NaveDetailTabScreen from './NaveDetailTabScreen'
-
-interface NaveDetailScreenProps {
-  name_lower: string
-  name: string
-}
+import { MainStackProps } from '~navigation/type'
 
 const NaveDetailScreen = ({
   navigation,
-}: NavigationStackScreenProps<NaveDetailScreenProps>) => {
-  const name_lower = navigation.getParam('name_lower')
-  const name = navigation.getParam('name')
+  route,
+}: StackScreenProps<MainStackProps, 'NaveDetail'>) => {
+  const name_lower = route.params.name_lower // navigation.getParam('name_lower')
+  const name = route.params.name // navigation.getParam('name')
 
   const onTheFlyAtom = useMemo(
     () =>

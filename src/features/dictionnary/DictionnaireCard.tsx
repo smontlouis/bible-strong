@@ -13,6 +13,7 @@ import StylizedHTMLView from '~common/StylizedHTMLView'
 
 import { wp } from '~helpers/utils'
 import truncate from '~helpers/truncate'
+import { StackActions } from '@react-navigation/native'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -65,11 +66,7 @@ class StrongCard extends React.Component {
     if (isSelectionMode) {
       /** TODO */
     } else {
-      navigation.navigate({
-        routeName: 'DictionnaryDetail',
-        params: { word },
-        key: `dictionnary-detail-${word}`,
-      })
+      navigation.dispatch(StackActions.push('DictionnaryDetail', { word }))
     }
   }
 

@@ -8,14 +8,15 @@ import Modal from '~common/Modal'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import { deleteNote } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
+import { VerseIds } from '~common/types'
 
-const NotesSettingsModal = ({
-  isOpen,
-  onClosed,
-  theme,
-  setTitlePrompt,
-  openNoteEditor,
-}) => {
+type Props = {
+  isOpen: VerseIds | null
+  onClosed: () => void
+  openNoteEditor: (noteId: string) => void
+}
+
+const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const { ref, open, close } = useBottomSheet()

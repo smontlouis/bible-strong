@@ -2,15 +2,14 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackScreenProps } from 'react-navigation-stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { NavesTab } from '../../state/tabs'
 import NaveTabScreen from './NaveTabScreen'
-
-interface NaveScreenProps {}
+import { MainStackProps } from '~navigation/type'
 
 const NaveScreen = ({
   navigation,
-}: NavigationStackScreenProps<NaveScreenProps>) => {
+}: StackScreenProps<MainStackProps, 'Nave'>) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>

@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import React from 'react'
 import { connectHighlight } from 'react-instantsearch-native'
 
-import { useNavigation } from 'react-navigation-hooks'
+import { useNavigation } from '@react-navigation/native'
 import books from '~assets/bible_versions/books-desc'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'

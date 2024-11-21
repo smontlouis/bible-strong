@@ -3,7 +3,7 @@ import React from 'react'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 
 import { useTranslation } from 'react-i18next'
-import { useNavigation } from 'react-navigation-hooks'
+import { useNavigation } from '@react-navigation/native'
 import books from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'

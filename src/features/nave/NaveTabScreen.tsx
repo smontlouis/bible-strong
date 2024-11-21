@@ -24,9 +24,10 @@ import {
   useResultsByLetterOrSearch,
 } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { NavesTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { MainStackProps } from '~navigation/type'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -55,12 +56,12 @@ const useSectionResults = results => {
 }
 
 interface NaveTabScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'Nave'>
   navesAtom: PrimitiveAtom<NavesTab>
   hasBackButton?: boolean
 }
 
-const NaveTabScreen = ({ hasBackButton }: NaveTabScreenProps) => {
+const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const [error, setError] = useState(false)
@@ -130,7 +131,12 @@ const NaveTabScreen = ({ hasBackButton }: NaveTabScreenProps) => {
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { name_lower, name } }) => (
-              <NaveItem key={name_lower} name_lower={name_lower} name={name} />
+              <NaveItem
+                key={name_lower}
+                navigation={navigation}
+                name_lower={name_lower}
+                name={name}
+              />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}

@@ -140,6 +140,14 @@ export interface Verse {
 export interface Tag {
   id: string
   name: string
+  highlights?: Object // what kind of object?
+  date: string
+  notes?: Object // what kind of object?
+  studies?: Object // what kind of object?
+  strongsHebreu?: Object // what kind of object?
+  strongsGrec: Object // what kind of object?
+  words?: Object // what kind of object?
+  naves?: Object // what kind of object?
 }
 
 export interface TagsObj {

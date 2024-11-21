@@ -13,6 +13,10 @@ import truncate from '~helpers/truncate'
 import RandomButton from './RandomButton'
 import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
+import { MainStackProps } from '~navigation/type'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { useNavigation } from '@react-navigation/native'
+import { StrongReference } from '~common/types'
 
 const StrongOfTheDay = ({
   type,
@@ -20,9 +24,13 @@ const StrongOfTheDay = ({
   color2 = 'rgb(89,131,240)',
 }) => {
   const { t } = useTranslation()
+
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
-  const [strongReference, setStrongRef] = useState(false)
+  const [strongReference, setStrongRef] = useState<StrongReference | undefined>(
+    undefined
+  )
+
   useEffect(() => {
     const loadStrong = async () => {
       if (!startRandom) return

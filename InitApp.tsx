@@ -11,7 +11,6 @@ import ErrorBoundary from '~common/ErrorBoundary'
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { NavigationParams, NavigationState } from 'react-navigation'
 import { Persistor } from 'redux-persist'
 import InitHooks from '~common/InitHooks'
 import { CurrentTheme } from '~common/types'
@@ -25,53 +24,6 @@ import getTheme, { Theme, baseTheme } from '~themes/index'
 
 interface Props {
   persistor: Persistor
-}
-
-const getActiveRouteName = (
-  navigationState: NavigationState
-): {
-  route: string
-  params: NavigationParams | undefined
-} => {
-  const route = navigationState.routes[navigationState.index]
-  // dive into nested navigators
-  if (route.routes) {
-    return getActiveRouteName(route)
-  }
-  return {
-    route: route.routeName,
-    params: route.params,
-  }
-}
-
-const onNavigationStateChange = (
-  prevState: NavigationState,
-  currentState: NavigationState
-) => {
-  const { route: currentScreen, params: currentParams } = getActiveRouteName(
-    currentState
-  )
-  const { route: prevScreen, params: prevParams } = getActiveRouteName(
-    prevState
-  )
-
-  if (prevScreen !== currentScreen) {
-    if (!__DEV__) {
-      analytics().logScreenView({
-        screen_class: currentScreen,
-        screen_name: currentScreen,
-      })
-    }
-
-    Sentry.addBreadcrumb({
-      category: 'screen',
-      message: `From: ${prevScreen} To: ${currentScreen}`,
-      data: {
-        prevRoute: { prevScreen, prevParams },
-        currentRoute: { currentScreen, currentParams },
-      },
-    })
-  }
 }
 
 const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
@@ -135,9 +87,7 @@ const InitApp = ({ persistor }: Props) => {
                   <ErrorBoundary>
                     <AppSwitcherProvider>
                       <InitHooks />
-                      <AppNavigator
-                        onNavigationStateChange={onNavigationStateChange}
-                      />
+                      <AppNavigator />
                     </AppSwitcherProvider>
                   </ErrorBoundary>
                 </DBStateProvider>

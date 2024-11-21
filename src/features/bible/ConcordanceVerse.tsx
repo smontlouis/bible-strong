@@ -6,7 +6,10 @@ import books from '~assets/bible_versions/books-desc'
 
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
-import { withTranslation } from 'react-i18next'
+import { TFunction, useTranslation, withTranslation } from 'react-i18next'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 const VerseText = styled.View(() => ({
   flex: 1,
@@ -22,8 +25,16 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-class ConcordanceVerse extends React.Component {
+type Props = {
+  navigation: StackNavigationProp<MainStackProps>
+  t: TFunction<'translation', undefined>
+  verse: any
+  concordanceFor: any
+}
+
+class ConcordanceVerse extends React.Component<Props> {
   state = { formattedTexte: '' }
+  t = this.props.t
 
   componentDidMount() {
     const { verse, concordanceFor } = this.props
@@ -40,7 +51,7 @@ class ConcordanceVerse extends React.Component {
   }
 
   render() {
-    const { verse, navigation, t } = this.props
+    const { verse, navigation } = this.props
 
     if (!this.state.formattedTexte) {
       return <Loading />
@@ -49,21 +60,19 @@ class ConcordanceVerse extends React.Component {
     return (
       <Container
         onPress={() =>
-          navigation.navigate({
-            routeName: 'BibleView',
-            params: {
+          navigation.dispatch(
+            StackActions.push('BibleView', {
               isReadOnly: true,
               book: books[verse.Livre - 1],
               chapter: verse.Chapitre,
               verse: verse.Verset,
               focusVerses: [verse.Verset],
-            },
-            key: `bible-view-${verse.Livre}-${verse.Chapitre}-${verse.Verset}`,
-          })
+            })
+          )
         }
       >
         <Text title fontSize={16} marginBottom={5}>
-          {t(books[verse.Livre - 1].Nom)} {verse.Chapitre}:{verse.Verset}
+          {this.t(books[verse.Livre - 1].Nom)} {verse.Chapitre}:{verse.Verset}
         </Text>
         <VerseText>{this.state.formattedTexte}</VerseText>
       </Container>
@@ -71,4 +80,4 @@ class ConcordanceVerse extends React.Component {
   }
 }
 
-export default withTranslation()(ConcordanceVerse)
+export default ConcordanceVerse

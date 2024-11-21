@@ -11,6 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { Study } from '~redux/modules/user'
 
 const HeaderBox = styled(Box)({
   alignItems: 'center',
@@ -22,6 +23,15 @@ const ValidateIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.success,
 }))
 
+type EditHeaderProps = {
+  isReadOnly: boolean
+  setReadOnly: () => void
+  title: string
+  setTitlePrompt: () => void
+  hasBackButton?: boolean
+  study: Study
+}
+
 const EditHeader = ({
   isReadOnly,
   setReadOnly,
@@ -29,7 +39,7 @@ const EditHeader = ({
   setTitlePrompt,
   hasBackButton = true,
   study,
-}) => {
+}: EditHeaderProps) => {
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
 

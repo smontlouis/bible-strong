@@ -1,10 +1,10 @@
 import React from 'react'
-import Link from '~common/Link'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import TimelineIcon from '~common/TimelineIcon'
-import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
+import Link from '~common/Link'
+import TimelineIcon from '~common/TimelineIcon'
+import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 
 const LinkBox = Box.withComponent(Link)
 

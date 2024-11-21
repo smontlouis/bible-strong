@@ -4,7 +4,7 @@ import {
   BottomSheetBackdropProps,
   BottomSheetProps,
 } from '@gorhom/bottom-sheet'
-import React from 'react'
+import React, { useId } from 'react'
 import { useWindowDimensions } from 'react-native'
 import useDeviceOrientation from './useDeviceOrientation'
 
@@ -21,13 +21,14 @@ export const onAnimateModalClose = (onClose?: () => void) => (
 
 export const useBottomSheetStyles = () => {
   const theme = useTheme()
+  const id = useId()
   const { width } = useWindowDimensions()
   const orientation = useDeviceOrientation()
 
   const containerWidth = 400
   return {
     // Reset key to force re-render on orientation change
-    key: `modal${orientation.portrait}`,
+    key: `modal${orientation.portrait}-${id}`,
     style: {
       marginLeft: width > containerWidth ? width / 2 - containerWidth / 2 : 0,
       maxWidth: containerWidth,

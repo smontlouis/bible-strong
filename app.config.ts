@@ -79,6 +79,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         ios: {
           useFrameworks: 'static',
+          deploymentTarget: '15.0',
         },
         android: {
           compileSdkVersion: 34,
@@ -120,6 +121,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    ['./plugins/withBoringSSLFix.js'],
   ],
   extra: {
     eas: {

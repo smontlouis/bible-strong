@@ -8,7 +8,7 @@ import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import Snackbar from '~common/SnackBar'
@@ -25,9 +25,11 @@ import useHTMLView from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
+import { MainStackProps } from '~navigation/type'
+import { StackActions } from '@react-navigation/native'
 
 interface NaveDetailScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'NaveDetail'>
   naveAtom: PrimitiveAtom<NaveTab>
 }
 
@@ -95,13 +97,12 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     }
 
     if (type === 'w') {
-      navigation.navigate({
-        routeName: 'NaveDetail',
-        params: {
+      navigation.dispatch(
+        StackActions.push('NaveDetail', {
           name_lower: item,
-        },
-        key: name_lower,
-      })
+          name: item,
+        })
+      )
     }
   }
 

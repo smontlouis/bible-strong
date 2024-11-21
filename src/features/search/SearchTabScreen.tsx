@@ -3,7 +3,7 @@ import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NavigationStackProp } from 'react-navigation-stack'
+import { StackNavigationProp } from '@react-navigation/stack'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -12,9 +12,10 @@ import i18n from '~i18n'
 import { SearchTab } from '../../state/tabs'
 import LocalSearchScreen from './LocalSearchScreen'
 import OnlineSearchScreen from './OnlineSearchScreen'
+import { MainStackProps } from '~navigation/type'
 
 interface SearchScreenProps {
-  navigation: NavigationStackProp
+  navigation: StackNavigationProp<MainStackProps, 'Search'>
   searchAtom: PrimitiveAtom<SearchTab>
 }
 
