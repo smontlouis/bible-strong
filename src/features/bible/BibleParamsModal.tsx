@@ -157,7 +157,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   )
 
   const fontsViewRef = React.useRef(null)
-  const bottomSheetStyles = useBottomSheetStyles()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
 
@@ -168,6 +168,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
       enablePanDownToClose
       backdropComponent={renderBackdrop}
       enableDynamicSizing
+      key={key}
       {...bottomSheetStyles}
     >
       <BottomSheetView

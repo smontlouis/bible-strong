@@ -63,6 +63,8 @@ const SearchInTimelineModal = ({
     setEvent(event)
   }
 
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+
   return (
     <BottomSheet
       ref={modalRef}
@@ -70,7 +72,8 @@ const SearchInTimelineModal = ({
       snapPoints={['100%']}
       enablePanDownToClose
       topInset={useSafeAreaInsets().top + 56}
-      {...useBottomSheetStyles()}
+      key={key}
+      {...bottomSheetStyles}
     >
       <BottomSheetView>
         <Box pt={20}>

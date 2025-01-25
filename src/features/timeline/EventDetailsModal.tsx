@@ -19,7 +19,7 @@ const EventDetailsModal = ({
 
   event,
 }: Props) => {
-  const bottomSheetStyles = useBottomSheetStyles()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
     <BottomSheet
@@ -29,6 +29,7 @@ const EventDetailsModal = ({
       snapPoints={['100%']}
       backdropComponent={renderBackdrop}
       topInset={useSafeAreaInsets().top + 56}
+      key={key}
       {...bottomSheetStyles}
     >
       <BottomSheetScrollView>

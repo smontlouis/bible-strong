@@ -51,6 +51,8 @@ const DetailsModal = ({
     )
   }, [image])
 
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+
   return (
     <BottomSheet
       ref={modalRefDetails}
@@ -58,7 +60,8 @@ const DetailsModal = ({
       enablePanDownToClose
       snapPoints={['100%']}
       topInset={useSafeAreaInsets().top}
-      {...useBottomSheetStyles()}
+      key={key}
+      {...bottomSheetStyles}
       footerComponent={footerComponent}
     >
       {headerComponent && <BottomSheetView>{headerComponent}</BottomSheetView>}

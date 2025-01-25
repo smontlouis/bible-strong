@@ -111,7 +111,7 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-localize": "^1.4.0",
     "react-native-markdown-display": "^7.0.0-alpha.2",
-    "react-native-modal": "^11.1.0",
+    "react-native-modal": "patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-modalbox": "^2.0.0",
     "react-native-popup-menu": "^0.16.0",

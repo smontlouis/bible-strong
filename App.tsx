@@ -18,6 +18,11 @@ import { setI18n } from './i18n'
 import { loadableHistoryAtom } from './src/state/app'
 import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
+import { configureReanimatedLogger } from 'react-native-reanimated'
+
+configureReanimatedLogger({
+  strict: false,
+})
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()

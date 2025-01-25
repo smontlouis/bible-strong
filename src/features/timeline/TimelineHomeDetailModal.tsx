@@ -21,6 +21,7 @@ interface Props {
 
 const TimelineHomeDetailModal = ({ modalRef }: Props) => {
   const { t } = useTranslation()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
     <BottomSheet
@@ -30,7 +31,8 @@ const TimelineHomeDetailModal = ({ modalRef }: Props) => {
       snapPoints={['100%']}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
-      {...useBottomSheetStyles()}
+      key={key}
+      {...bottomSheetStyles}
     >
       <BottomSheetScrollView>
         <Box mt={20} p={20}>

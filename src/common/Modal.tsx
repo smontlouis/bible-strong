@@ -51,7 +51,7 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
   ({ withPortal, children, headerComponent, ...props }, ref) => {
     const Wrapper = withPortal ? Portal : React.Fragment
     const insets = useSafeAreaInsets()
-    const bottomSheetStyles = useBottomSheetStyles()
+    const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
     return (
       <Wrapper>
@@ -63,6 +63,7 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           enablePanDownToClose
           backdropComponent={renderBackdrop}
           onAnimate={onAnimateModalClose(props.onModalClose)}
+          key={key}
           {...bottomSheetStyles}
           {...props}
         >

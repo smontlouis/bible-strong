@@ -1,4 +1,4 @@
-import { SQLiteDatabase } from 'expo-sqlite/legacy'
+import { SQLiteDatabase } from 'expo-sqlite'
 import {
   dictionnaireDB,
   interlineaireDB,
@@ -17,29 +17,13 @@ const getSQLTransaction = (
       await initDB()
     }
 
-    getDB()?.transaction(
-      tx => {
-        tx.executeSql(
-          sqlReq,
-          args,
-          (_, resultSet) => {
-            const tmpResults = []
-            for (let x = 0; x < resultSet.rows.length; x++) {
-              tmpResults.push(resultSet.rows.item(x))
-            }
-            resolve(tmpResults)
-          },
-          (txObj, error) => {
-            reject(error)
-            return false
-          }
-        )
-      },
-      error => {
-        console.log('Error executing sql =>', error)
-        reject(error.message)
-      }
-    )
+    try {
+      const allRows = await getDB()?.getAllAsync(sqlReq, args)
+      resolve(allRows)
+    } catch (error) {
+      console.log('Error executing sql =>', error)
+      reject(error)
+    }
   })
 }
 

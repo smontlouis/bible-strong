@@ -43,6 +43,7 @@ const SectionDetailsModal = ({
 }: Props) => {
   const isFR = useLanguage()
   const { t } = useTranslation()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
     <BottomSheet
@@ -52,7 +53,8 @@ const SectionDetailsModal = ({
       snapPoints={['100%']}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
-      {...useBottomSheetStyles()}
+      key={key}
+      {...bottomSheetStyles}
     >
       <BottomSheetScrollView>
         <Box flex center px={50} py={60}>

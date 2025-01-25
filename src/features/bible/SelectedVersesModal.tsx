@@ -16,16 +16,15 @@ import getVersesContent from '~helpers/getVersesContent'
 import { cleanParams, wp } from '~helpers/utils'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import { useNavigation } from '@react-navigation/native'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { useNavigation } from '@react-navigation/native'
 import { shallowEqual, useSelector } from 'react-redux'
 import { BibleResource, VerseIds } from '~common/types'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import { openedFromTabAtom } from '~features/studies/atom'
 import {
   onAnimateModalClose,
-  onChangeModalClose,
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
 import { useBottomSheet } from '~helpers/useBottomSheet'
@@ -199,7 +198,7 @@ const VersesModal = ({
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
-  const bottomSheetStyles = useBottomSheetStyles()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const onClose = useCallback(() => {
     clearSelectedVerses()
@@ -212,6 +211,7 @@ const VersesModal = ({
       index={-1}
       enableDynamicSizing
       enablePanDownToClose
+      key={key}
       {...bottomSheetStyles}
       style={{
         ...(bottomSheetStyles.style as object),

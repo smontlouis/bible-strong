@@ -65,7 +65,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
     preferredDarkThemeToString,
   } = useParamsModalLabels()
 
-  const bottomSheetStyles = useBottomSheetStyles()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
 
   return (
@@ -75,6 +75,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
       enableDynamicSizing
       enablePanDownToClose
       backdropComponent={renderBackdrop}
+      key={key}
       {...bottomSheetStyles}
     >
       <BottomSheetScrollView scrollEnabled={false}>

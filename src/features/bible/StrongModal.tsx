@@ -112,7 +112,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version])
 
-  const bottomSheetStyles = useBottomSheetStyles()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
     <BottomSheet
@@ -121,6 +121,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
       index={-1}
       snapPoints={[200, '75%']}
       enablePanDownToClose
+      key={key}
       style={bottomSheetStyles.style}
       backgroundStyle={{
         backgroundColor: theme.colors.lightGrey,

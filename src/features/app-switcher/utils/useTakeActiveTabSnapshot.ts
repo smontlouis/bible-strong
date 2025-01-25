@@ -23,7 +23,8 @@ const useTakeActiveTabSnapshot = () => {
       const data = await captureRef(cachedTabScreenRef, {
         result: 'base64',
         format: 'png',
-      })
+      }).catch(error => console.error('Oops, snapshot failed', error))
+
       const resolution = /^(\d+):(\d+)\|/g.exec(data)
       const base64 = data.substr((resolution || [''])[0].length || 0)
 

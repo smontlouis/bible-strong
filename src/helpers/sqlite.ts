@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system'
-import * as SQLite from 'expo-sqlite/legacy'
+import * as SQLite from 'expo-sqlite'
 import {
   databaseDictionnaireName,
   databaseInterlineaireName,
@@ -21,18 +21,11 @@ class DB {
   init = async () => {
     if (this.db) return
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        this.db = SQLite.openDatabase(
-          this.name,
-          undefined,
-          undefined,
-          undefined,
-          () => {
-            console.log(`${this.name} loaded`)
-            resolve(true)
-          }
-        )
+        this.db = await SQLite.openDatabaseAsync(this.name)
+        console.log(`${this.name} loaded`)
+        resolve(true)
       } catch (error) {
         console.error('Error opening database:', error)
         reject(error)

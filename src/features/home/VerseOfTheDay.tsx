@@ -99,7 +99,7 @@ const VerseOfTheDay = ({
     setTimePicker(true)
   }
 
-  const bottomSheetStyles = useBottomSheetStyles()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   if (!currentVOD) {
     return null
@@ -207,6 +207,7 @@ const VerseOfTheDay = ({
           enablePanDownToClose
           enableDynamicSizing
           backdropComponent={renderBackdrop}
+          key={key}
           {...bottomSheetStyles}
         >
           <BottomSheetScrollView scrollEnabled={false}>

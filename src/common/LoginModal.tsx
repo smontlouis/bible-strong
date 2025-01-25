@@ -23,6 +23,7 @@ import {
 const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
   const { t } = useTranslation()
   const ref = useRef<BottomSheet>(null)
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
     <BottomSheet
@@ -31,7 +32,8 @@ const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
       snapPoints={['100%']}
       topInset={useSafeAreaInsets().top}
       backdropComponent={renderBackdrop}
-      {...useBottomSheetStyles()}
+      key={key}
+      {...bottomSheetStyles}
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 20 }}>
         <Box row alignItems="center" marginBottom={30}>
