@@ -16,7 +16,13 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { shallowEqual } from 'recompose'
-import { BibleResource, Verse, VerseIds } from '~common/types'
+import {
+  BibleResource,
+  Pericope,
+  SelectedCode,
+  Verse,
+  VerseIds,
+} from '~common/types'
 import Container from '~common/ui/Container'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import useLanguage from '~helpers/useLanguage'
@@ -38,6 +44,8 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import { MainStackProps } from '~navigation/type'
+import BibleDOMComponent from './BibleDOM/BibleDOMComponent'
+import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -45,7 +53,11 @@ const ReadMeButton = styled(Button)({
   width: 270,
 })
 
-const getPericopeChapter = (pericope, book, chapter) => {
+const getPericopeChapter = (
+  pericope: Pericope | null,
+  book: number,
+  chapter: number
+) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
     return pericope[book][chapter]
   }
@@ -98,17 +110,12 @@ const BibleViewer = ({
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [verses, setVerses] = useState<Verse[]>([])
-  const [parallelVerses, setParallelVerses] = useState<
-    { id: VersionCode; verses: any }[] | null
-  >(null)
-  const [secondaryVerses, setSecondaryVerses] = useState(null)
+  const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
+  const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
   const [comments, setComments] = useState(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
-  const strongModalDisclosure = useBottomSheetDisclosure<{
-    reference: string
-    book: number
-  }>()
+  const strongModalDisclosure = useBottomSheetDisclosure<SelectedCode>()
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
@@ -118,7 +125,7 @@ const BibleViewer = ({
   const isFR = useLanguage()
   const dispatch = useDispatch()
   const openInNewTab = useOpenInNewTab()
-  const pericope = useRef()
+  const pericope = useRef<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
@@ -210,21 +217,25 @@ const BibleViewer = ({
     setIsLoading(true)
 
     const versesToLoad = await loadBibleChapter(book.Numero, chapter, version)
-    const parallelVersesToLoad = []
+    const parallelVersesToLoad: ParallelVerse[] = []
     if (parallelVersions.length) {
       for (const p of parallelVersions) {
-        const pVerses = await loadBibleChapter(book.Numero, chapter, p)
+        const pVerses = (await loadBibleChapter(
+          book.Numero,
+          chapter,
+          p
+        )) as Verse[]
         parallelVersesToLoad.push({ id: p, verses: pVerses })
       }
     }
 
-    let secondaryVersesToLoad = null
+    let secondaryVersesToLoad: Verse[] | null = null
     if (version === 'INT') {
-      secondaryVersesToLoad = await loadBibleChapter(
+      secondaryVersesToLoad = (await loadBibleChapter(
         book.Numero,
         chapter,
         isFR ? 'LSG' : 'KJV'
-      )
+      )) as Verse[]
     }
 
     if (settings.commentsDisplay) {
@@ -308,7 +319,7 @@ const BibleViewer = ({
         return accuRefs
       }, {} as VerseIds)
       setNoteVerses(noteVersesToLoad)
-    } catch (e: any) {
+    } catch (e) {
       Sentry.withScope(scope => {
         scope.setExtra('Error', e.toString())
         scope.setExtra('Note', noteId)
@@ -322,6 +333,8 @@ const BibleViewer = ({
     onChangeResourceType(res)
     resourceModal.open()
   }
+
+  console.log(settings)
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (

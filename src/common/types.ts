@@ -137,6 +137,16 @@ export interface Verse {
   Texte: string
 }
 
+export interface Pericope {
+  [book: string]: {
+    [chapter: string]: {
+      [verse: string]: {
+        [key: string]: string
+      }
+    }
+  }
+}
+
 export interface Tag {
   id: string
   name: string
@@ -210,3 +220,8 @@ export type BibleResource =
   | 'reference'
 
 export type RemoteConfigValue = 'enable_tts_public'
+
+export type SelectedCode = {
+  reference: string
+  book: number
+}

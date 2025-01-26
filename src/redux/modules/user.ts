@@ -167,6 +167,10 @@ export interface UserState {
         hasQuotes: boolean
         hasAppName: boolean
       }
+      // Dynamically provided for bible webview in BibleTabScreen
+      theme: PreferredLightTheme | PreferredDarkTheme
+      // Dynamically provided for bible webview in BibleTabScreen
+      fontFamily: string
       colors: {
         default: typeof defaultColors
         dark: typeof darkColors
@@ -230,6 +234,8 @@ const getInitialState = (): UserState => ({
         hasQuotes: true,
         hasAppName: true,
       },
+      fontFamily: 'Avenir',
+      theme: 'default',
       colors: {
         default: defaultColors,
         dark: darkColors,

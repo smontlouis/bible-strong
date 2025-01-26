@@ -26,34 +26,43 @@ import {
 } from './bibleWebView/src/dispatch'
 import bibleHTML from './bibleWebView/bibleHTML'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { BibleTab } from 'src/state/tabs'
+import { BibleTab, VersionCode } from 'src/state/tabs'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { is } from 'immer/dist/internal'
+import { Book } from '~assets/bible_versions/books-desc'
+import { Verse, VerseIds } from '~common/types'
+import { HighlightsObj, NotesObj } from '~redux/modules/user'
 
-type WebViewProps = { // TODO: Add types
+type WebViewProps = {
+  // TODO: Add types
   bibleAtom: PrimitiveAtom<BibleTab>
-  book: any
-  chapter: any
-  isLoading: any
+  book: Book
+  chapter: number
+  isLoading: boolean
   navigation: StackNavigationProp<MainStackProps>
-  addSelectedVerse: any
-  removeSelectedVerse: any
-  setSelectedVerse: any
-  version: any
-  isReadOnly: any
-  isSelectionMode: any
-  verses: any
-  parallelVerses: any
-  focusVerses: any
+  addSelectedVerse: (id: string) => void
+  removeSelectedVerse: (id: string) => void
+  setSelectedVerse: (selectedVerse: number) => void
+  version: VersionCode
+  isReadOnly: boolean
+  isSelectionMode: boolean
+  verses: Verse[]
+  parallelVerses:
+    | {
+        id: VersionCode
+        verses: any
+      }[]
+    | null
+  focusVerses: string[] | undefined
   secondaryVerses: any
-  selectedVerses: any
-  highlightedVerses: any
-  notedVerses: any
+  selectedVerses: VerseIds
+  highlightedVerses: HighlightsObj
+  notedVerses: NotesObj
   settings: any
-  fontFamily: any
-  verseToScroll: any
-  pericopeChapter: any
+  fontFamily: string
+  verseToScroll: number | undefined
+  pericopeChapter: number | undefined
   openNoteModal: any
   setSelectedCode: any
   selectedCode: any

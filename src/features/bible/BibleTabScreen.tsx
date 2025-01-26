@@ -78,7 +78,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
         const systemColorScheme = Appearance.getColorScheme()
 
         // Provide derived theme as a settings now that we removed it from the redux store
-        // @ts-ignore
         draftState.theme =
           (() => {
             if (preferredColorScheme === 'auto') {

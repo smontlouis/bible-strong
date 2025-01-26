@@ -1,6 +1,8 @@
 import { getLangIsFr } from '~i18n'
 import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system'
+import { VersionCode } from 'src/state/tabs'
+import { Pericope } from '~common/types'
 
 const PericopeBDS = require('../assets/bible_versions/bible-bds-pericope.txt')
 const PericopeFMAR = require('../assets/bible_versions/bible-fmar-pericope.txt')
@@ -14,7 +16,7 @@ const PericopeS21 = require('../assets/bible_versions/bible-s21-pericope.txt')
 const PericopeESV = require('../assets/bible_versions/bible-esv-pericope.txt')
 const PericopeNJKV = require('../assets/bible_versions/bible-nkjv-pericope.txt')
 
-const getAsyncRequire = version => {
+const getAsyncRequire = (version: VersionCode) => {
   switch (version) {
     case 'BDS': {
       return PericopeBDS
@@ -55,10 +57,10 @@ const getAsyncRequire = version => {
     }
   }
 }
-const getBiblePericope = async version => {
+const getBiblePericope = async (version: VersionCode) => {
   const [{ localUri }] = await Asset.loadAsync(getAsyncRequire(version))
   const json = JSON.parse(await FileSystem.readAsStringAsync(localUri || ''))
-  return json
+  return json as Pericope
 }
 
 export default getBiblePericope

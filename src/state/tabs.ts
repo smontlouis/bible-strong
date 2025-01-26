@@ -5,7 +5,11 @@ import { atomWithDefault, loadable, splitAtom } from 'jotai/vanilla/utils'
 import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
-import { StrongReference, VerseIds } from '~common/types'
+import {
+  StrongReference,
+  StudyNavigateBibleType,
+  VerseIds,
+} from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { versions } from '~helpers/bibleVersions'
 import i18n, { getLangIsFr } from '~i18n'
@@ -36,8 +40,8 @@ export interface BibleTab extends TabBase {
     }
     selectedVerses: SelectedVerses
     selectionMode: 'grid' | 'list'
-    focusVerses?: string[]
-    isSelectionMode: boolean
+    focusVerses?: (string | number)[]
+    isSelectionMode: StudyNavigateBibleType | undefined
     isReadOnly: boolean
   }
 }
@@ -163,7 +167,7 @@ export const getDefaultBibleTab = (): BibleTab => ({
     selectedVerses: {}, // highlighted verses,
     selectionMode: 'grid',
     focusVerses: undefined,
-    isSelectionMode: false,
+    isSelectionMode: undefined,
     isReadOnly: false,
   },
 })
