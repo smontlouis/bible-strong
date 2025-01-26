@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
@@ -11,10 +11,10 @@ import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
 import BibleHeader from './BibleHeader'
 
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { shallowEqual } from 'recompose'
 import {
   BibleResource,
@@ -25,7 +25,9 @@ import {
 } from '~common/types'
 import Container from '~common/ui/Container'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
+import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
@@ -33,19 +35,14 @@ import {
   BibleTab,
   getDefaultBibleTab,
   useBibleTabActions,
-  VersionCode,
 } from '../../state/tabs'
+import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
-import BibleWebView from './BibleWebView'
 import BibleFooter from './footer/BibleFooter'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
-import { useBottomSheet } from '~helpers/useBottomSheet'
-import { MainStackProps } from '~navigation/type'
-import BibleDOMComponent from './BibleDOM/BibleDOMComponent'
-import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -112,7 +109,9 @@ const BibleViewer = ({
   const [verses, setVerses] = useState<Verse[]>([])
   const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
-  const [comments, setComments] = useState(null)
+  const [comments, setComments] = useState<{ [key: string]: string } | null>(
+    null
+  )
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const strongModalDisclosure = useBottomSheetDisclosure<SelectedCode>()
@@ -334,8 +333,6 @@ const BibleViewer = ({
     resourceModal.open()
   }
 
-  console.log(settings)
-
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
     <Container isPadding={isReadOnly}>
@@ -362,7 +359,7 @@ const BibleViewer = ({
         />
       )}
       {!error && (
-        <BibleWebView
+        <BibleDOMWrapper
           bibleAtom={bibleAtom}
           book={book}
           chapter={chapter}
@@ -382,7 +379,6 @@ const BibleViewer = ({
           highlightedVerses={highlightedVersesByChapter}
           notedVerses={notesByChapter}
           settings={settings}
-          fontFamily={fontFamily}
           verseToScroll={verse}
           pericopeChapter={getPericopeChapter(
             pericope.current,

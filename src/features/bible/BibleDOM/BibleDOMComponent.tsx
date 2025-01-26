@@ -1,7 +1,7 @@
 'use dom'
 
-import { styled } from 'goober'
-import { useState } from 'react'
+import { setup, styled } from 'goober'
+import React, { useEffect, useState } from 'react'
 import { TagsObj, Verse as TVerse } from '~common/types'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
 import {
@@ -20,8 +20,10 @@ import {
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   REMOVE_PARALLEL_VERSION,
+  SWIPE_LEFT,
+  SWIPE_RIGHT,
 } from './dispatch'
-import { DispatchProvider } from './DispatchProvider'
+import { DispatchProvider, useDispatch } from './DispatchProvider'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
@@ -29,6 +31,31 @@ import './polyfills'
 import { scaleFontSize } from './scaleFontSize'
 import './swiped-events'
 import Verse from './Verse'
+import { useFonts } from 'expo-font'
+
+const forwardProps = [
+  'isHebreu',
+  'isFocused',
+  'isParallel',
+  'isParallelVerse',
+  'isTouched',
+  'isSelected',
+  'isVerseToScroll',
+  'highlightedColor',
+  'rtl',
+]
+setup(
+  React.createElement,
+  undefined,
+  undefined,
+  (props: { [key: string]: any }) => {
+    for (let prop in props) {
+      if (forwardProps.includes(prop)) {
+        delete props[prop]
+      }
+    }
+  }
+)
 
 type Props = Pick<
   WebViewProps,
@@ -48,17 +75,8 @@ type Props = Pick<
   | 'isSelectionMode'
   | 'selectedCode'
   | 'comments'
-  | 'fontFamily'
 > & {
   dispatch: Dispatch
-}
-
-const exists = (obj: any) => {
-  if (!obj || obj.error) {
-    return false
-  }
-
-  return true
 }
 
 const extractParallelVerse = (
@@ -85,7 +103,7 @@ const Container = styled('div')<
 >(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
   maxWidth: isParallelVerse ? 'none' : '800px',
   margin: '0 auto',
-  padding: isParallelVerse ? '10px 0' : '10px 15px',
+  padding: isParallelVerse ? '10px 5px' : '10px 15px',
   paddingBottom: '210px',
   textAlign: alignContent,
   background: colors[theme].reverse,
@@ -197,7 +215,7 @@ const VersesRenderer = ({
   parallelVerses,
   focusVerses,
   secondaryVerses,
-  comments,
+  comments: originalComments,
   selectedVerses,
   highlightedVerses,
   notedVerses,
@@ -211,6 +229,48 @@ const VersesRenderer = ({
   dispatch,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
+  const [loaded, error] = useFonts({
+    'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
+  })
+
+  useEffect(() => {
+    document.addEventListener('swiped-left', function(e) {
+      console.log('sw-left')
+      dispatch({
+        type: SWIPE_LEFT,
+      })
+    })
+
+    document.addEventListener('swiped-right', function(e) {
+      console.log('sw-right')
+      dispatch({
+        type: SWIPE_RIGHT,
+      })
+    })
+  }, [])
+
+  useEffect(() => {
+    if (verseToScroll === 1) {
+      window.scrollTo(0, 0)
+    }
+  }, [chapter, verseToScroll])
+
+  useEffect(() => {
+    if (settings?.theme) {
+      document.body.style.backgroundColor =
+        settings.colors[settings.theme].reverse
+    }
+  }, [settings?.theme])
+
+  useEffect(() => {
+    if (!verseToScroll) return
+
+    if (verseToScroll === 1) return
+
+    setTimeout(() => {
+      document.querySelector(`#verset-${verseToScroll}`)?.scrollIntoView()
+    }, 200)
+  }, [verseToScroll])
 
   const sortVersesToTags = (
     highlightedVerses: HighlightsObj
@@ -319,7 +379,10 @@ const VersesRenderer = ({
     return newNotedVerses
   }
 
-  const transformComments = (comments: any, versesLength: number) => {
+  const transformComments = (
+    comments: { [key: string]: string } | null,
+    versesLength: number
+  ) => {
     if (!comments) return null
 
     return Object.entries(comments).reduce((acc, [key, value], i) => {
@@ -332,7 +395,7 @@ const VersesRenderer = ({
         return { ...acc, [newKey]: value }
       }
       return { ...acc, [versesLength]: value }
-    }, {})
+    }, {} as { [key: string]: string })
   }
 
   const navigateToPericope = () => {
@@ -381,16 +444,16 @@ const VersesRenderer = ({
   if (!verses.length) {
     return null
   }
+  const comments = transformComments(originalComments, verses.length)
 
   const isHebreu =
     version === 'BHS' || (version === 'INT' && Number(verses[0].Livre) < 40)
-  const introComment = comments && comments[0]
+  const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
 
-  const transformedComments = transformComments(comments, verses.length)
   const taggedVerses = sortVersesToTags(highlightedVerses)
   const notedVersesCount = getNotedVersesCount(verses, notedVerses)
   const notedVersesText = getNotedVersesText(verses, notedVerses)
@@ -480,7 +543,7 @@ const VersesRenderer = ({
 
           const notesCount = notedVersesCount[Verset]
           const notesText = notedVersesText[Verset]
-          const comment = comments && comments[Verset]
+          const comment = comments?.[Verset]
           const isFocused = focusVerses
             ? focusVerses.includes(Number(Verset))
             : undefined

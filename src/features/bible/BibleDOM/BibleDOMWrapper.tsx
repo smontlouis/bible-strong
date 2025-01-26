@@ -3,7 +3,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
-import { Book } from '~assets/bible_versions/books-desc'
+import books from '~assets/bible_versions/books'
 import {
   Pericope,
   SelectedCode,
@@ -15,7 +15,24 @@ import {
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
 import { View } from 'react-native'
 import { RootState } from '~redux/modules/reducer'
-
+import {
+  ADD_PARALLEL_VERSION,
+  NAVIGATE_TO_BIBLE_NOTE,
+  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_BIBLE_VIEW,
+  NAVIGATE_TO_PERICOPE,
+  NAVIGATE_TO_STRONG,
+  NAVIGATE_TO_VERSE_NOTES,
+  NAVIGATE_TO_VERSION,
+  OPEN_HIGHLIGHT_TAGS,
+  REMOVE_PARALLEL_VERSION,
+  SWIPE_LEFT,
+  SWIPE_RIGHT,
+  TOGGLE_SELECTED_VERSE,
+} from './dispatch'
+import Snackbar from '~common/SnackBar'
+import * as Sentry from '@sentry/react-native'
+import { Book } from '~assets/bible_versions/books-desc'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -61,13 +78,12 @@ export type WebViewProps = {
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
   settings: RootState['user']['bible']['settings']
-  fontFamily: string
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   openNoteModal: any
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
-  comments: any
+  comments: { [key: string]: string } | null
   removeParallelVersion: any
   addParallelVersion: any
   goToPrevChapter: any
@@ -106,11 +122,141 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isSelectionMode,
     selectedCode,
     comments,
-    fontFamily,
   } = props
 
-  const dispatch: Dispatch = async ({ type, payload }) => {
-    console.log('dispatch', type, payload)
+  const dispatch: Dispatch = async action => {
+    switch (action.type) {
+      case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
+        const { onChangeResourceTypeSelectVerse } = props
+        const { Livre, Chapitre, Verset } = action.params.verse
+        console.log(`${Livre}-${Chapitre}-${Verset}`)
+        onChangeResourceTypeSelectVerse(
+          'strong',
+          `${Livre}-${Chapitre}-${Verset}`
+        )
+
+        break
+      }
+      case NAVIGATE_TO_VERSE_NOTES: {
+        const { navigation } = props
+        navigation.navigate('BibleVerseNotes', {
+          verse: action.payload,
+          withBack: true,
+        })
+        break
+      }
+      case NAVIGATE_TO_PERICOPE: {
+        const { navigation } = props
+        navigation.navigate('Pericope')
+        break
+      }
+      case NAVIGATE_TO_VERSION: {
+        const { navigation, bibleAtom } = props
+        const { version, index } = action.payload
+
+        // index = 0 is Default one
+        navigation.navigate('VersionSelector', {
+          bibleAtom,
+          parallelVersionIndex: index === 0 ? undefined : index - 1,
+        })
+        break
+      }
+      case REMOVE_PARALLEL_VERSION: {
+        const { removeParallelVersion } = props
+        removeParallelVersion(action.payload - 1)
+        break
+      }
+      case ADD_PARALLEL_VERSION: {
+        const { addParallelVersion } = props
+        addParallelVersion()
+        break
+      }
+      case NAVIGATE_TO_STRONG: {
+        const { setSelectedCode } = props
+        setSelectedCode(action.payload) // { reference, book }
+        break
+      }
+      case TOGGLE_SELECTED_VERSE: {
+        // try {
+        //   Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
+        // } catch (e) {
+        //   console.log('No vibration')
+        // }
+        const verseId = action.payload
+        const { addSelectedVerse, removeSelectedVerse } = props
+
+        const isVerseSelected = (verseId: any) => {
+          const { selectedVerses } = props
+          return !!selectedVerses[verseId]
+        }
+
+        if (isVerseSelected(verseId)) {
+          removeSelectedVerse(verseId)
+        } else {
+          addSelectedVerse(verseId)
+        }
+
+        break
+      }
+
+      case NAVIGATE_TO_BIBLE_NOTE: {
+        props.openNoteModal(action.payload)
+        break
+      }
+      case NAVIGATE_TO_BIBLE_VIEW: {
+        const { navigation } = props
+        const book = Object.keys(books).find(
+          key => books[key][0].toUpperCase() === action.bookCode
+        )
+
+        if (!book) {
+          Snackbar.show("Erreur lors de l'ouverture du verset")
+          Sentry.captureMessage(JSON.stringify(action))
+          return
+        }
+
+        navigation.navigate('BibleView', {
+          isReadOnly: true,
+          book: parseInt(book, 10),
+          chapter: parseInt(action.chapter, 10),
+          verse: parseInt(action.verse, 10),
+        })
+
+        break
+      }
+      case SWIPE_LEFT: {
+        const { goToNextChapter, book, chapter } = props
+        const hasNextChapter = !(book.Numero === 66 && chapter === 22)
+
+        if (hasNextChapter) {
+          goToNextChapter()
+        }
+        break
+      }
+      case SWIPE_RIGHT: {
+        const { goToPrevChapter, book, chapter } = props
+        const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
+
+        if (hasPreviousChapter) {
+          goToPrevChapter()
+        }
+        break
+      }
+      case OPEN_HIGHLIGHT_TAGS: {
+        const { setMultipleTagsItem } = props
+        const { verseIds } = action.payload
+        const obj = {
+          entity: 'highlights',
+          ids: Object.fromEntries(verseIds.map(v => [v, true])),
+        }
+        setMultipleTagsItem(obj)
+        break
+      }
+
+      default: {
+        break
+      }
+    }
   }
 
   return (
@@ -139,7 +285,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         isSelectionMode={isSelectionMode}
         selectedCode={selectedCode}
         comments={comments}
-        fontFamily={fontFamily}
         dispatch={dispatch}
       />
     </View>

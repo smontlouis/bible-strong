@@ -20,7 +20,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useSelector } from 'react-redux'
-import { BibleResource, VerseIds } from '~common/types'
+import { BibleResource, StudyNavigateBibleType, VerseIds } from '~common/types'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import { openedFromTabAtom } from '~features/studies/atom'
 import {
@@ -63,7 +63,7 @@ const HalfContainer = styled.View<{ border?: boolean }>(
 
 type Props = {
   isVisible: boolean
-  isSelectionMode: boolean
+  isSelectionMode: StudyNavigateBibleType | undefined
   isSelectedVerseHighlighted: boolean
   onChangeResourceType: (type: BibleResource) => void
   onCreateNoteClick: () => void

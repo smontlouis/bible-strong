@@ -373,7 +373,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             <StyledIcon name="github" size={25} />
             <Text fontSize={15}>Github</Text>
           </LinkItem>
-          <LinkItem href="mailto:stephane@sevnapps.com">
+          <LinkItem href="mailto:stephane@lestudio316.com">
             <StyledIcon name="send" size={25} />
             <Text fontSize={15}>{t('Contacter le développeur')}</Text>
           </LinkItem>

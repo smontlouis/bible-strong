@@ -22,7 +22,7 @@ import { NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import VerseTextFormatting from './VerseTextFormatting'
 import { ContainerText } from './ContainerText'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
-import InterlinearVerse from './InterlinearVerseComplete'
+import InterlinearVerse from './InterlinearVerse'
 import VerseTags from './VerseTags'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
@@ -361,7 +361,7 @@ const Verse = ({
         </VerseText>
         {tag && <VerseTags settings={settings} tag={tag} />}
       </ContainerText>
-      {notesText && settings.notesDisplay !== 'inline' && !isSelectionMode && (
+      {notesText && settings.notesDisplay === 'inline' && !isSelectionMode && (
         <NotesText
           isParallel={isParallel}
           settings={settings}

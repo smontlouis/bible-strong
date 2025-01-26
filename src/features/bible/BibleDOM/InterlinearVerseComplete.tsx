@@ -59,10 +59,11 @@ const Hebreu = styled('div')<RootStyles & { isSelected: boolean }>(
 )
 
 const Code = styled('div')<RootStyles & { isSelected?: boolean }>(
-  ({ settings: { fontSizeScale } }) => ({
+  ({ settings: { fontSizeScale, theme, colors } }) => ({
     fontSize: scaleFontSize(11, fontSizeScale),
     fontFamily: 'arial',
-    color: 'rgba(0,0,0,0.3)',
+    color: colors[theme].default,
+    opacity: 0.5,
   })
 )
 

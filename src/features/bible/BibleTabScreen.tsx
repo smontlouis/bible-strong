@@ -90,8 +90,9 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
             if (preferredColorScheme === 'dark') return preferredDarkTheme
             return preferredLightTheme
           })() || 'default'
+
+        draftState.fontFamily = state.user.fontFamily
       }),
-      fontFamily: state.user.fontFamily,
     }),
     shallowEqual
   )

@@ -25,7 +25,7 @@ export const useBottomSheetStyles = () => {
   const { width } = useWindowDimensions()
   const orientation = useDeviceOrientation()
 
-  const containerWidth = 400
+  const containerWidth = 500
   return {
     // Reset key to force re-render on orientation change
     key: `modal${orientation.portrait}-${id}`,
