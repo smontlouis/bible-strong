@@ -20,19 +20,19 @@ const useTakeActiveTabSnapshot = () => {
         throw new Error('No active tab')
       }
 
-      // const data = await captureRef(cachedTabScreenRef, {
-      //   result: 'base64',
-      //   format: 'png',
-      // }).catch(error => console.error('Oops, snapshot failed', error))
+      const data = await captureRef(cachedTabScreenRef, {
+        result: 'base64',
+        format: 'png',
+      }).catch(error => console.error('Oops, snapshot failed', error))
 
-      // const resolution = /^(\d+):(\d+)\|/g.exec(data)
-      // const base64 = data.substr((resolution || [''])[0].length || 0)
+      const resolution = /^(\d+):(\d+)\|/g.exec(data)
+      const base64 = data.substr((resolution || [''])[0].length || 0)
 
-      // setTabs(
-      //   produce(draft => {
-      //     draft[activeTabIndex].base64Preview = base64
-      //   })
-      // )
+      setTabs(
+        produce(draft => {
+          draft[activeTabIndex].base64Preview = base64
+        })
+      )
     } catch {
       console.log('Error taking snapshot')
     }

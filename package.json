@@ -130,7 +130,7 @@
     "react-native-tab-view": "^2.14.0",
     "react-native-track-player": "^4.0.1",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-view-shot": "~4.0.2",
+    "react-native-view-shot": "~4.0.3",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.4",
     "react-native-youtube-iframe": "^2.1.2",
