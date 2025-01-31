@@ -73,7 +73,7 @@ const BackToAudioFooter = ({
           overflow="visible"
           row
         >
-          <Text color="white">{t('audio.goBack')}</Text>
+          <Text color="reverse">{t('audio.goBack')}</Text>
           <FeatherIcon
             name="volume-2"
             style={{ marginLeft: 10 }}

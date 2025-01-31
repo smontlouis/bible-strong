@@ -44,7 +44,9 @@ export const ContainerText = styled('span')<
       transition: 'background 0.3s ease',
       background,
       padding: '4px',
-      borderBottom: isSelected ? '2px dashed rgb(52,73,94)' : 'none',
+      borderBottom: isSelected
+        ? `2px dashed ${colors[theme]['default']}`
+        : 'none',
       WebkitTouchCallout: 'none',
       MozUserSelect: 'none',
       msUserSelect: 'none',

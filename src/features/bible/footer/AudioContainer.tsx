@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacityProps } from 'react-native'
+import { Linking, TouchableOpacityProps } from 'react-native'
 import Link from '~common/Link'
 import Box, { BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -58,23 +58,31 @@ const AudioContainer = ({
       position="absolute"
       borderRadius={30}
     >
-      {!!onChangeMode && (
-        <HStack row pos="absolute" top={8} right={20} zIndex={10}>
-          <Chip
-            isActive={audioMode === 'url'}
-            onPress={() => onChangeMode('url')}
-          >
-            Audio
-          </Chip>
-          <Chip
-            isActive={audioMode === 'tts'}
-            onPress={() => onChangeMode('tts')}
-          >
-            TTS
-          </Chip>
-        </HStack>
-      )}
-
+      <HStack row pos="absolute" top={8} right={20} zIndex={10}>
+        {!!onChangeMode && (
+          <>
+            <Chip
+              isActive={audioMode === 'url'}
+              onPress={() => onChangeMode('url')}
+            >
+              Audio
+            </Chip>
+            <Chip
+              isActive={audioMode === 'tts'}
+              onPress={() => onChangeMode('tts')}
+            >
+              TTS
+            </Chip>
+          </>
+        )}
+        <Chip
+          onPress={() =>
+            Linking.openURL('https://click.audibible.app/5nmN/stephane30')
+          }
+        >
+          Audibible
+        </Chip>
+      </HStack>
       <Box center mb={10}>
         <Link onPress={onReduce} style={{ padding: 5 }}>
           <FeatherIcon name="chevron-down" size={20} color="tertiary" />

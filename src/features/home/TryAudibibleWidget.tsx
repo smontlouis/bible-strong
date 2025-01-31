@@ -17,9 +17,9 @@ const TryAudibibleWidget = () => {
   return (
     <Box bg="lightGrey" px={20} pb={40}>
       <LinkBox
-        href={`https://audibible.app`}
+        href={`https://click.audibible.app/5nmN/stephane30`}
         backgroundColor="primary"
-        borderRadius={30}
+        rounded
         lightShadow
         p={20}
         height={100}
@@ -28,14 +28,7 @@ const TryAudibibleWidget = () => {
         alignItems="center"
         row
       >
-        <Box
-          pos="absolute"
-          left={0}
-          right={0}
-          top={0}
-          height={100}
-          borderRadius={30}
-        >
+        <Box pos="absolute" left={0} right={0} top={0} height={100} rounded>
           <LinearGradient
             start={[0.1, 0.2]}
             style={{ height: 100 }}
@@ -44,8 +37,8 @@ const TryAudibibleWidget = () => {
         </Box>
         <Image
           style={{
-            width: 50,
-            height: 50,
+            width: 60,
+            height: 60,
             borderRadius: 10,
             borderWidth: 2,
             borderColor: 'white',

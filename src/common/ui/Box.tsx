@@ -13,7 +13,7 @@ export type BoxProps = {
   pos?: 'absolute' | 'relative'
   top?: number
   t?: number
-  left?: number | string
+  left?: number
   l?: number
   right?: number
   r?: number
@@ -49,7 +49,7 @@ export type BoxProps = {
   my?: number | 'auto'
   marginHorizontal?: number | 'auto'
   mx?: number | 'auto'
-
+  gap?: number
   absoluteFill?: boolean
 
   borderWidth?: number
@@ -69,13 +69,13 @@ export type BoxProps = {
   width?: ViewStyle['width']
   w?: ViewStyle['width']
   maxWidth?: ViewStyle['maxWidth']
-  maxW?: number | string
-  minWidth?: number | string
-  minW?: number | string
-  minHeight?: number | string
-  minH?: number | string
-  height?: number | string
-  h?: number | string
+  maxW?: number
+  minWidth?: number
+  minW?: number
+  minHeight?: number
+  minH?: number
+  height?: number
+  h?: number
 
   flex?: true | number
   justifyContent?: ViewStyle['justifyContent']
@@ -135,6 +135,8 @@ const Box = styled.View<BoxProps>(props => ({
   marginRight: props.marginRight ?? props.mr,
   marginVertical: props.marginVertical ?? props.my,
   marginHorizontal: props.marginHorizontal ?? props.mx,
+
+  gap: props.gap,
 
   borderWidth: props.borderWidth,
   borderBottomWidth: props.borderBottomWidth,
@@ -223,6 +225,14 @@ const Box = styled.View<BoxProps>(props => ({
 
   ...props.shadow,
 }))
+
+export const HStack = styled(Box)({
+  flexDirection: 'row',
+})
+
+export const VStack = styled(Box)({
+  flexDirection: 'column',
+})
 
 export const SafeAreaBox = forwardRef<
   View,

@@ -587,7 +587,7 @@
   "donation.description": "Help make a difference",
 
   "audibible.try": "Try audibible",
-  "audibible.description": "Bêta available now",
+  "audibible.description": "Listen, read, meditate",
 
   "fr-FR": "French",
   "fr-CA": "French Canada",
@@ -598,5 +598,6 @@
   "el-GR": "Modern Greek Greece",
 
   "Contribuer": "Contribute",
-  "Document sans titre": "Untitled document"
+  "Document sans titre": "Untitled document",
+  "event": "Event"
 }

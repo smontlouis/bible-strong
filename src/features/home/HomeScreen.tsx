@@ -2,7 +2,7 @@ import Color from 'color'
 import remoteConfig from '@react-native-firebase/remote-config'
 import React, { memo } from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
@@ -23,6 +23,7 @@ import TryAudibibleWidget from './TryAudibibleWidget'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { Events } from './Events'
 
 // local react props
 type HomeProps = {
@@ -41,6 +42,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
   return (
     <Box bg="lightGrey" flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
+        <Events />
         <UserWidget navigation={navigation} />
         <Box bg="lightGrey" pt={20} px={20}>
           <Text title fontSize={23} flex>
@@ -80,14 +82,17 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
             {t('Méditer')}
           </Text>
         </Box>
-        <PlanHome />
+        <VStack gap={10}>
+          <PlanHome />
+          <TryAudibibleWidget />
+        </VStack>
+
         <Box bg="lightGrey" pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Aller plus loin')}
           </Text>
         </Box>
         {!appleIsReviewing && <DonationWidget />}
-        <TryAudibibleWidget />
         <Box bg="lightGrey">
           <Box
             bg="reverse"

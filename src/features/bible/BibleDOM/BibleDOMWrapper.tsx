@@ -4,6 +4,7 @@ import { BibleTab, VersionCode } from 'src/state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
 import books from '~assets/bible_versions/books'
+import * as Haptics from 'expo-haptics'
 import {
   Pericope,
   SelectedCode,
@@ -13,7 +14,7 @@ import {
   VerseIds,
 } from '~common/types'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { RootState } from '~redux/modules/reducer'
 import {
   ADD_PARALLEL_VERSION,
@@ -177,11 +178,9 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case TOGGLE_SELECTED_VERSE: {
-        // try {
-        //   Platform.OS === 'ios' ? Haptics.selectionAsync() : Vibration.vibrate(5)
-        // } catch (e) {
-        //   console.log('No vibration')
-        // }
+        if (Platform.OS === 'ios') {
+          Haptics.selectionAsync()
+        }
         const verseId = action.payload
         const { addSelectedVerse, removeSelectedVerse } = props
 
