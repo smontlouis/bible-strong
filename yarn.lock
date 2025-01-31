@@ -6444,7 +6444,6 @@ __metadata:
     react-native-fs: "npm:^2.16.4"
     react-native-gesture-handler: "npm:~2.20.2"
     react-native-hooks: "npm:^0.0.6"
-    react-native-iaphub: "npm:^8.4.0"
     react-native-immersive-mode: "npm:^2.0.1"
     react-native-keyboard-aware-scroll-view: "npm:^0.9.4"
     react-native-localize: "npm:^1.4.0"
@@ -14045,16 +14044,6 @@ __metadata:
   dependencies:
     react: "npm:^16.7.0-alpha.0"
   checksum: 10c0/1d75e66b741a92948d5b6c4d2836cf71a91324a0101773513706c2495f6a785e72a6c6c60f13bc9e12c6042f085f15336029d10883dd75b430aea1daefb9b81b
-  languageName: node
-  linkType: hard
-
-"react-native-iaphub@npm:^8.4.0":
-  version: 8.9.0
-  resolution: "react-native-iaphub@npm:8.9.0"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/56c973376fbe4b4555b4f2a71af30f841dbbc64026b9a587d8ca5c18771e325844066d44275286bf307f8d2404844b0dc3c069e2d2ba5f6a2366e26da6e3b0d2
   languageName: node
   linkType: hard
 

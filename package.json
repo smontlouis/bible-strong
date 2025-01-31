@@ -108,7 +108,6 @@
     "react-native-fs": "^2.16.4",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-hooks": "^0.0.6",
-    "react-native-iaphub": "^8.4.0",
     "react-native-immersive-mode": "^2.0.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-localize": "^1.4.0",
