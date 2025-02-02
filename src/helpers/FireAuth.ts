@@ -72,7 +72,7 @@ const FireAuth = class {
         const emailVerified =
           !user.providerData ||
           !user.providerData.length ||
-          user.providerData[0].providerId !== 'password' ||
+          user.providerData[0]?.providerId !== 'password' ||
           user.emailVerified
 
         /**
@@ -81,9 +81,9 @@ const FireAuth = class {
         const profile: FireAuthProfile = {
           id: user.uid,
           email: user.email!,
-          displayName: user.providerData[0].displayName || '',
-          photoURL: user.providerData[0].photoURL || '',
-          provider: user.providerData[0].providerId,
+          displayName: user.providerData[0]?.displayName || '',
+          photoURL: user.providerData[0]?.photoURL || '',
+          provider: user.providerData[0]?.providerId || '',
           emailVerified,
         }
 
@@ -100,9 +100,7 @@ const FireAuth = class {
           if (!__DEV__) {
             analytics().setUserId(profile.id)
           }
-          Sentry.configureScope(scope => {
-            scope.setUser(profile)
-          })
+          Sentry.getCurrentScope().setUser(profile)
           return
         }
       }
