@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "18.1.1",
+  "version": "18.1.2",
   "scripts": {
     "start": "expo start --dev-client",
     "build:android:dev": "dotenv -c development -- eas build -p android --local --profile development --non-interactive",
