@@ -731,7 +731,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       setAllAndValidateSelected,
       setTitle,
     }),
-    []
+    [setBibleTab]
   )
 
   return actions

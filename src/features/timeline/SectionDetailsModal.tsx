@@ -51,6 +51,7 @@ const SectionDetailsModal = ({
       index={-1}
       topInset={useSafeAreaInsets().top + 56}
       snapPoints={['100%']}
+      enableDynamicSizing={false}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
       key={key}

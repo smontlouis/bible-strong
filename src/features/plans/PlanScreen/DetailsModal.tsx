@@ -58,6 +58,7 @@ const DetailsModal = ({
       ref={modalRefDetails}
       index={-1}
       enablePanDownToClose
+      enableDynamicSizing={false}
       snapPoints={['100%']}
       topInset={useSafeAreaInsets().top}
       key={key}

@@ -599,5 +599,7 @@
 
   "Contribuer": "Contribute",
   "Document sans titre": "Untitled document",
-  "event": "Event"
+  "event": "Event",
+
+  "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number."
 }

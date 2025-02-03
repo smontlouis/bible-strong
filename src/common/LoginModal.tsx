@@ -30,6 +30,7 @@ const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
       ref={ref}
       index={isVisible ? 0 : -1}
       snapPoints={['100%']}
+      enableDynamicSizing={false}
       topInset={useSafeAreaInsets().top}
       backdropComponent={renderBackdrop}
       key={key}

@@ -27,6 +27,7 @@ const EventDetailsModal = ({
       index={-1}
       enablePanDownToClose
       snapPoints={['100%']}
+      enableDynamicSizing={false}
       backdropComponent={renderBackdrop}
       topInset={useSafeAreaInsets().top + 56}
       key={key}

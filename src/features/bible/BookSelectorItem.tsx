@@ -1,39 +1,46 @@
 import styled from '@emotion/native'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { TouchableOpacity } from 'react-native'
+import { Book } from '~assets/bible_versions/books-desc'
+import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Text from '~common/ui/Text'
 
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { wp } from '~helpers/utils'
+interface BookSelectorItemProps {
+  book: Book
+  isSelected: boolean
+  onBookSelect: (book: Book) => void
+}
 
-const TouchableOpacity = styled.TouchableOpacity(() => ({
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: 45,
-  width: wp(99) / 5,
-}))
+const itemHeight = 46
 
-const Text = styled.Text(({ isSelected, isNT, themeValue, theme }) => ({
-  color: isSelected
-    ? theme.colors.primary
-    : isNT
-    ? themeValue === 'default'
-      ? theme.colors.quart
-      : theme.colors.tertiary
-    : theme.colors.default,
-  fontWeight: isSelected ? 'bold' : 'normal',
-  fontSize: 16,
-}))
+const BookSelectorItem = ({
+  book,
+  isSelected,
+  onBookSelect,
+}: BookSelectorItemProps) => {
+  const { t } = useTranslation()
 
-const BookSelectorItem = ({ book, isSelected, isNT, onChange, t }) => {
-  const { theme } = useCurrentThemeSelector()
-  const bookName = t(book.Nom)
-    .replace(/\s/g, '')
-    .substr(0, 3)
   return (
-    <TouchableOpacity onPress={() => onChange(book)}>
-      <Text isSelected={isSelected} isNT={isNT} themeValue={theme}>
-        {bookName}
-      </Text>
-    </TouchableOpacity>
+    <Box>
+      <TouchableOpacity activeOpacity={0.8} onPress={() => onBookSelect(book)}>
+        <HStack
+          px={20}
+          backgroundColor={isSelected ? 'lightGrey' : 'transparent'}
+          height={itemHeight}
+          alignItems="center"
+        >
+          <Text
+            fontSize={16}
+            color={isSelected ? 'primary' : 'default'}
+            bold={isSelected}
+            flex
+          >
+            {t(book.Nom)}
+          </Text>
+        </HStack>
+      </TouchableOpacity>
+    </Box>
   )
 }
 

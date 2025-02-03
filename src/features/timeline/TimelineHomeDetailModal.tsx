@@ -29,6 +29,7 @@ const TimelineHomeDetailModal = ({ modalRef }: Props) => {
       index={-1}
       topInset={useSafeAreaInsets().top}
       snapPoints={['100%']}
+      enableDynamicSizing={false}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
       key={key}

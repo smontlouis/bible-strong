@@ -22,6 +22,7 @@ import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 
 type AppSwitcherScreenFuncs = {
   openMenu: () => void
@@ -58,7 +59,7 @@ const AppSwitcherScreen = memo(
             paddingTop: SCREEN_MARGIN + insets.top,
             paddingLeft: PADDING_HORIZONTAL,
             paddingRight: PADDING_HORIZONTAL,
-            paddingBottom: TAB_ICON_SIZE,
+            paddingBottom: TAB_ICON_SIZE + 60,
             minHeight: '100%',
           }}
         >
@@ -127,9 +128,10 @@ const AppSwitcherScreenWrapper = (
     closeHome()
   }, [tabsCount, closeHome])
 
-  const renderHomeScreen = useCallback(() => <Home closeHome={closeHome} navigation={props.navigation} />, [
-    closeHome,
-  ])
+  const renderHomeScreen = useCallback(
+    () => <Home closeHome={closeHome} navigation={props.navigation} />,
+    [closeHome]
+  )
 
   const renderMoreScreen = useCallback(() => <More closeMenu={closeMenu} />, [
     closeMenu,

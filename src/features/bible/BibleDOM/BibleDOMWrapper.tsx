@@ -34,6 +34,7 @@ import {
 import Snackbar from '~common/SnackBar'
 import * as Sentry from '@sentry/react-native'
 import { Book } from '~assets/bible_versions/books-desc'
+import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -124,6 +125,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     selectedCode,
     comments,
   } = props
+  const { openVersionSelector } = useBookAndVersionSelector()
 
   const dispatch: Dispatch = async action => {
     switch (action.type) {
@@ -156,10 +158,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         const { version, index } = action.payload
 
         // index = 0 is Default one
-        navigation.navigate('VersionSelector', {
-          bibleAtom,
-          parallelVersionIndex: index === 0 ? undefined : index - 1,
-        })
+        openVersionSelector(bibleAtom, index === 0 ? undefined : index - 1)
         break
       }
       case REMOVE_PARALLEL_VERSION: {

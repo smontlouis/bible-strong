@@ -70,6 +70,7 @@ const SearchInTimelineModal = ({
       ref={modalRef}
       index={-1}
       snapPoints={['100%']}
+      enableDynamicSizing={false}
       enablePanDownToClose
       topInset={useSafeAreaInsets().top + 56}
       key={key}

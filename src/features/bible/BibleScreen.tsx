@@ -1,19 +1,18 @@
 import produce from 'immer'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 
-import { atom, PrimitiveAtom } from 'jotai/vanilla'
 import { StackScreenProps } from '@react-navigation/stack'
+import { atom } from 'jotai/vanilla'
+import { isEmpty } from '~helpers/deep-obj/utils'
+import { MainStackProps } from '~navigation/type'
 import {
   BibleTab,
   defaultBibleAtom,
   getDefaultBibleTab,
-  VersionCode,
 } from '../../state/tabs'
 import BibleTabScreen from './BibleTabScreen'
-import { isEmpty } from '~helpers/deep-obj/utils'
-import { MainStackProps } from '~navigation/type'
 
 const BibleScreen = ({
   navigation,
@@ -46,9 +45,7 @@ const BibleScreen = ({
 
   const onTheFlyAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  const bibleAtom = isEmpty(route.params)
-    ? defaultBibleAtom
-    : onTheFlyAtom
+  const bibleAtom = isEmpty(route.params) ? defaultBibleAtom : onTheFlyAtom
 
   return <BibleTabScreen bibleAtom={bibleAtom} navigation={navigation} />
 }

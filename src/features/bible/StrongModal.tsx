@@ -120,6 +120,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
       onAnimate={onAnimateModalClose(onClosed)}
       index={-1}
       snapPoints={[200, '75%']}
+      enableDynamicSizing={false}
       enablePanDownToClose
       key={key}
       style={bottomSheetStyles.style}

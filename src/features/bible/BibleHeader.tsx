@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import { Platform, StatusBar } from 'react-native'
 import ImmersiveMode from 'react-native-immersive-mode'
 
@@ -25,8 +25,9 @@ import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { fullscreenAtom } from '../../state/app'
-import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import { BibleTab, useBibleTabActions, useIsCurrentTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
+import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 
 const LinkBox = styled(Link)(() => ({
   flexDirection: 'row',
@@ -59,6 +60,7 @@ interface BibleHeaderProps {
   isSelectionMode?: boolean
   isParallel?: boolean
 }
+
 const Header = ({
   navigation,
   hasBackButton,
@@ -79,6 +81,8 @@ const Header = ({
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
   const actions = useBibleTabActions(bibleAtom)
+
+  const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
 
   useEffect(() => {
     actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
@@ -108,7 +112,7 @@ const Header = ({
             <FeatherIcon name="arrow-left" size={20} />
           </Back>
         </Box>
-        <Box grow center>
+        <Box flex alignItems="center" justifyContent="center">
           <TextIcon>
             {t(bookName)} {chapter}:{verseFormatted} - {version}
           </TextIcon>
@@ -117,121 +121,128 @@ const Header = ({
       </HeaderBox>
     )
   }
+
   return (
-    <AnimatableHeaderBox
-      row
-      transition="height" // TODO: fix this
-      style={{ height: isFullscreen ? 35 : 60 }}
-    >
-      {(isSelectionMode || hasBackButton) && (
-        <Box justifyContent="center">
-          <Back padding>
-            <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        </Box>
-      )}
-      <LinkBox
-        route="BibleSelect"
-        params={{ bibleAtom }}
-        style={{ paddingLeft: 15, paddingRight: 0 }}
+    <>
+      <AnimatableHeaderBox
+        row
+        animation="slideInDown"
+        style={{ height: isFullscreen ? 35 : 60 }}
       >
-        <TextIcon>
-          {isSmall
-            ? truncate(`${t(bookName)} ${chapter}`, 10)
-            : `${t(bookName)} ${chapter}`}
-        </TextIcon>
-      </LinkBox>
-      <LinkBox
-        route="VersionSelector"
-        params={{ bibleAtom }}
-        style={{ marginRight: 'auto' }}
-      >
-        <TextIcon>{version}</TextIcon>
-      </LinkBox>
-      {isFullscreen && (
+        {(isSelectionMode || hasBackButton) && (
+          <Box justifyContent="center">
+            <Back padding>
+              <FeatherIcon name="arrow-left" size={20} />
+            </Back>
+          </Box>
+        )}
         <LinkBox
-          onPress={() => {
-            setIsFullScreen(false)
-            Platform.OS === 'android' && ImmersiveMode.setBarMode('Normal')
-            StatusBar.setHidden(false)
-          }}
-          style={{ width: 50 }}
+          onPress={() => openBookSelector(bibleAtom)}
+          style={{ paddingLeft: 15, paddingRight: 0 }}
         >
-          <MaterialIcon name="fullscreen-exit" size={20} />
+          <TextIcon>
+            {isSmall
+              ? truncate(`${t(bookName)} ${chapter}`, 10)
+              : `${t(bookName)} ${chapter}`}
+          </TextIcon>
         </LinkBox>
-      )}
-      {!isSelectionMode && !isFullscreen && (
-        <>
-          <LinkBox onPress={onBibleParamsClick} style={{ width: 50 }}>
-            <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
+        <LinkBox
+          onPress={() => openVersionSelector(bibleAtom)}
+          style={{ marginRight: 'auto' }}
+        >
+          <TextIcon>{version}</TextIcon>
+        </LinkBox>
+        {isFullscreen && (
+          <LinkBox
+            onPress={() => {
+              setIsFullScreen(false)
+              Platform.OS === 'android' && ImmersiveMode.setBarMode('Normal')
+              StatusBar.setHidden(false)
+            }}
+            style={{ width: 50 }}
+          >
+            <MaterialIcon name="fullscreen-exit" size={20} />
           </LinkBox>
-          <PopOverMenu
-            element={
-              <Box
-                row
-                center
-                height={60}
-                width={50}
-                opacity={isFullscreen ? 0 : 1}
-              >
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            }
-            popover={
-              <>
-                {!commentsDisplay && isFR && (
-                  <MenuOption onSelect={onOpenCommentaire}>
-                    <Box row alignItems="center">
-                      <MaterialIcon name="chat" size={20} />
-                      <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
-                    </Box>
-                  </MenuOption>
-                )}
-                {commentsDisplay && isFR && (
+        )}
+        {!isSelectionMode && !isFullscreen && (
+          <>
+            <LinkBox onPress={onBibleParamsClick} style={{ width: 50 }}>
+              <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
+            </LinkBox>
+            <PopOverMenu
+              element={
+                <Box
+                  row
+                  alignItems="center"
+                  height={60}
+                  width={50}
+                  opacity={isFullscreen ? 0 : 1}
+                >
+                  <FeatherIcon name="more-vertical" size={18} />
+                </Box>
+              }
+              popover={
+                <>
+                  {!commentsDisplay && isFR && (
+                    <MenuOption onSelect={onOpenCommentaire}>
+                      <Box row alignItems="center">
+                        <MaterialIcon name="chat" size={20} />
+                        <Text marginLeft={10}>
+                          {t('Commentaire désactivé')}
+                        </Text>
+                      </Box>
+                    </MenuOption>
+                  )}
+                  {commentsDisplay && isFR && (
+                    <MenuOption
+                      onSelect={() => dispatch(setSettingsCommentaires(false))}
+                    >
+                      <Box row alignItems="center">
+                        <MaterialIcon name="chat" size={20} color="primary" />
+                        <Text marginLeft={10}>{t('Commentaire activé')}</Text>
+                      </Box>
+                    </MenuOption>
+                  )}
                   <MenuOption
-                    onSelect={() => dispatch(setSettingsCommentaires(false))}
+                    onSelect={
+                      isParallel
+                        ? removeAllParallelVersions
+                        : addParallelVersion
+                    }
                   >
                     <Box row alignItems="center">
-                      <MaterialIcon name="chat" size={20} color="primary" />
-                      <Text marginLeft={10}>{t('Commentaire activé')}</Text>
+                      <ParallelIcon
+                        color={isParallel ? 'primary' : 'default'}
+                      />
+                      <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
                     </Box>
                   </MenuOption>
-                )}
-                <MenuOption
-                  onSelect={
-                    isParallel ? removeAllParallelVersions : addParallelVersion
-                  }
-                >
-                  <Box row alignItems="center">
-                    <ParallelIcon color={isParallel ? 'primary' : 'default'} />
-                    <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => navigation.navigate('History')}>
-                  <Box row alignItems="center">
-                    <MaterialIcon name="history" size={20} />
-                    <Text marginLeft={10}>{t('Historique')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
-                  onSelect={() => {
-                    setIsFullScreen(true)
-                    Platform.OS === 'android' &&
-                      ImmersiveMode.setBarMode('FullSticky')
-                    StatusBar.setHidden(true)
-                  }}
-                >
-                  <Box row alignItems="center">
-                    <MaterialIcon name="fullscreen" size={20} />
-                    <Text marginLeft={10}>{t('Plein écran')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
-            }
-          />
-        </>
-      )}
-    </AnimatableHeaderBox>
+                  <MenuOption onSelect={() => navigation.navigate('History')}>
+                    <Box row alignItems="center">
+                      <MaterialIcon name="history" size={20} />
+                      <Text marginLeft={10}>{t('Historique')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption
+                    onSelect={() => {
+                      setIsFullScreen(true)
+                      Platform.OS === 'android' &&
+                        ImmersiveMode.setBarMode('FullSticky')
+                      StatusBar.setHidden(true)
+                    }}
+                  >
+                    <Box row alignItems="center">
+                      <MaterialIcon name="fullscreen" size={20} />
+                      <Text marginLeft={10}>{t('Plein écran')}</Text>
+                    </Box>
+                  </MenuOption>
+                </>
+              }
+            />
+          </>
+        )}
+      </AnimatableHeaderBox>
+    </>
   )
 }
 

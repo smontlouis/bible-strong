@@ -219,7 +219,7 @@ const getInitialState = (): UserState => ({
     words: {},
     naves: {},
     settings: {
-      alignContent: 'justify',
+      alignContent: 'left',
       fontSizeScale: 0,
       textDisplay: 'inline',
       preferredColorScheme: 'auto',

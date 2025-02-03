@@ -1,14 +1,13 @@
 import { ThemeProvider } from '@emotion/react'
-import analytics from '@react-native-firebase/analytics'
-import * as Sentry from '@sentry/react-native'
 import { useKeepAwake } from 'expo-keep-awake'
-import React, { memo, useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { ActivityIndicator, StatusBar, View } from 'react-native'
 import { MenuProvider } from 'react-native-popup-menu'
 import { useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import ErrorBoundary from '~common/ErrorBoundary'
 
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Persistor } from 'redux-persist'
@@ -21,6 +20,7 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import getTheme, { Theme, baseTheme } from '~themes/index'
+import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 
 interface Props {
   persistor: Persistor
@@ -57,45 +57,47 @@ const InitApp = ({ persistor }: Props) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ThemeProvider theme={theme}>
-          <MenuProvider
-            backHandler
-            customStyles={{
-              backdrop: {
-                backgroundColor: 'black',
-                opacity: 0.2,
-              },
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <PersistGate
-                loading={
-                  <View
-                    style={{
-                      flex: 1,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <ActivityIndicator />
-                  </View>
-                }
-                persistor={persistor}
-              >
-                <DBStateProvider>
-                  <ErrorBoundary>
-                    <AppSwitcherProvider>
-                      <InitHooks />
-                      <AppNavigator />
-                    </AppSwitcherProvider>
-                  </ErrorBoundary>
-                </DBStateProvider>
-              </PersistGate>
-            </QueryClientProvider>
-          </MenuProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
+      <BottomSheetModalProvider>
+        <SafeAreaProvider>
+          <ThemeProvider theme={theme}>
+            <MenuProvider
+              backHandler
+              customStyles={{
+                backdrop: {
+                  backgroundColor: 'black',
+                  opacity: 0.2,
+                },
+              }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <PersistGate
+                  loading={
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <ActivityIndicator />
+                    </View>
+                  }
+                  persistor={persistor}
+                >
+                  <DBStateProvider>
+                    <ErrorBoundary>
+                      <AppSwitcherProvider>
+                        <InitHooks />
+                        <AppNavigator />
+                      </AppSwitcherProvider>
+                    </ErrorBoundary>
+                  </DBStateProvider>
+                </PersistGate>
+              </QueryClientProvider>
+            </MenuProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   )
 }

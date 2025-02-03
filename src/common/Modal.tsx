@@ -60,6 +60,7 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           index={-1}
           topInset={withPortal ? insets.top : undefined}
           snapPoints={['100%']}
+          enableDynamicSizing={false}
           enablePanDownToClose
           backdropComponent={renderBackdrop}
           onAnimate={onAnimateModalClose(props.onModalClose)}

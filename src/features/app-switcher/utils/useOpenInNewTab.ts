@@ -1,14 +1,12 @@
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import Snackbar from '~common/SnackBar'
-import { MainStackProps } from '~navigation/type'
 import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'
 
 export const useOpenInNewTab = () => {
   const navigation = useNavigation()
-  const route = useRoute<RouteProp<MainStackProps, 'AppSwitcher'>>()
   const { t } = useTranslation()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const { triggerSlideNewTab } = useSlideNewTab()
@@ -34,13 +32,13 @@ export const useOpenInNewTab = () => {
       Snackbar.show(t('tabs.created'), 'info', {
         confirmText: t('common.goTo'),
         onConfirm: () => {
-          navigation.navigate('AppSwitcher', route.params)
+          navigation.navigate('AppSwitcher')
           triggerSlideNewTab(newTabId)
         },
       })
     } else {
       triggerSlideNewTab(newTabId)
-      navigation.navigate('AppSwitcher', route.params)
+      navigation.navigate('AppSwitcher')
     }
   }
 

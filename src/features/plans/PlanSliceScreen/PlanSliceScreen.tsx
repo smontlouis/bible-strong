@@ -28,6 +28,7 @@ import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import BottomSheet from '@gorhom/bottom-sheet'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
+import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -57,6 +58,7 @@ const PlanSliceScreen = ({
       ] === 'Completed'
   )
   const [bible] = useAtom(defaultBibleAtom)
+  const { openVersionSelector } = useBookAndVersionSelector()
   const { selectedVersion: version } = bible.data
 
   const onMarkAsReadSelect = () => {
@@ -131,11 +133,7 @@ const PlanSliceScreen = ({
                   </Box>
                 </MenuOption>
                 <MenuOption
-                  onSelect={() =>
-                    navigation.navigate('VersionSelector', {
-                      bibleAtom: defaultBibleAtom,
-                    })
-                  }
+                  onSelect={() => openVersionSelector(defaultBibleAtom)}
                 >
                   <Box row alignItems="center">
                     <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>
