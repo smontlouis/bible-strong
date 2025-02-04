@@ -1,14 +1,15 @@
 import { useAtomValue } from 'jotai/react'
-import React, { memo } from 'react'
+import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Book } from '~assets/bible_versions/books-desc'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
-import { playingBibleTabIdAtom } from './atom'
 import { useFindTabIndex } from '../../../state/tabs'
-import { useTranslation } from 'react-i18next'
+import { playingBibleTabIdAtom } from './atom'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 type BackToAudioFooterProps = {
   book: Book
@@ -31,7 +32,7 @@ const BackToAudioFooter = ({
   const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
   const playingBibleTabIndex = useFindTabIndex(playingBibleTabId)
   const { t } = useTranslation()
-
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <>
       <TouchableBox
@@ -46,7 +47,7 @@ const BackToAudioFooter = ({
         bg="reverse"
         center
         position="absolute"
-        bottom={10}
+        bottom={10 + bottomBarHeight}
         left={10}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />

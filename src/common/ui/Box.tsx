@@ -4,6 +4,7 @@ import { TouchableOpacity, View, ViewStyle } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Animatable from 'react-native-animatable'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 export type BoxProps = {
   as?: React.ElementType<any> | undefined
@@ -76,8 +77,11 @@ export type BoxProps = {
   minH?: number
   height?: number
   h?: number
+  maxHeight?: number
+  maxH?: number
 
   flex?: true | number
+  flexShrink?: number
   justifyContent?: ViewStyle['justifyContent']
   center?: boolean
   alignItems?: ViewStyle['alignItems']
@@ -158,6 +162,7 @@ const Box = styled.View<BoxProps>(props => ({
   maxWidth: props.maxWidth ?? props.maxW,
   minWidth: props.minWidth ?? props.minW,
   minHeight: props.minHeight ?? props.minH,
+  maxHeight: props.maxHeight ?? props.maxH,
   height: props.height ?? props.h,
   // flex props
   flex: props.flex === true ? 1 : props.flex,
@@ -172,6 +177,7 @@ const Box = styled.View<BoxProps>(props => ({
     (props.wrapReverse ? 'wrap-reverse' : undefined) ??
     'nowrap',
   flexDirection: props.row ? 'row' : 'column',
+  flexShrink: props.flexShrink,
 
   opacity: props.disabled ? 0.3 : props.opacity ?? 1,
 
@@ -241,13 +247,14 @@ export const SafeAreaBox = forwardRef<
   }
 >(({ isPadding = true, ...props }, ref) => {
   const insets = useSafeAreaInsets()
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <Box
       ref={ref}
       {...(isPadding
         ? {
             paddingTop: insets.top,
-            paddingBottom: insets.bottom,
+            paddingBottom: bottomBarHeight,
           }
         : {
             marginTop: insets.top,

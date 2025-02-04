@@ -3,6 +3,8 @@ import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import AudioButton from './AudioButton'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 export interface BasicFooterProps {
   onPlay: () => void
@@ -25,6 +27,7 @@ const BasicFooter = ({
   onNextChapter,
   type,
 }: BasicFooterProps) => {
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <>
       <TouchableBox
@@ -39,7 +42,7 @@ const BasicFooter = ({
         bg="reverse"
         center
         position="absolute"
-        bottom={10}
+        bottom={10 + bottomBarHeight}
         left={10}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />
@@ -64,7 +67,7 @@ const BasicFooter = ({
         borderColor="lightGrey"
         bg="reverse"
         position="absolute"
-        bottom={10}
+        bottom={10 + bottomBarHeight}
         right={10}
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
@@ -86,11 +89,12 @@ const PlayableButtons = ({
   hasError,
   type,
 }: PlayableButtonsProps) => {
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <HStack
       position="absolute"
       alignSelf="center"
-      bottom={10}
+      bottom={10 + bottomBarHeight}
       row
       bg="lightGrey"
       padding={2}

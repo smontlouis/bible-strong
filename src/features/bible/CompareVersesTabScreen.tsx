@@ -15,7 +15,6 @@ import produce from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StackNavigationProp } from '@react-navigation/stack'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import PopOverMenu from '~common/PopOverMenu'
@@ -92,8 +91,6 @@ const CompareVersesTabScreen = ({
     shallowEqual
   )
 
-  const insets = useSafeAreaInsets()
-
   return (
     <Container>
       <Header
@@ -160,7 +157,7 @@ const CompareVersesTabScreen = ({
         )}
       </ScrollView>
       {prevNextItems && (
-        <Box paddingBottom={insets.bottom} bg="reverse">
+        <Box bg="reverse" borderTopWidth={1} borderColor="border">
           <BibleVerseDetailFooter
             verseNumber={prevNextItems.verseNumber}
             goToNextVerse={() => goToVerse(+1)}

@@ -1,10 +1,12 @@
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Link from '~common/Link'
 import Box, { BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 export interface AudioContainerProps {
   children: React.ReactNode
@@ -44,6 +46,7 @@ const AudioContainer = ({
   audioMode,
   onChangeMode,
 }: AudioContainerProps) => {
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <Box
       height="auto"
@@ -52,7 +55,7 @@ const AudioContainer = ({
       borderWidth={1}
       paddingHorizontal={20}
       pb={20}
-      bottom={20}
+      bottom={20 + bottomBarHeight}
       left={20}
       right={20}
       position="absolute"

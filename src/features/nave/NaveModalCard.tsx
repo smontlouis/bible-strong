@@ -1,13 +1,14 @@
 import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, ScrollView } from 'react-native'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForNaveDB from '~common/waitForNaveDB'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
 import { useQuery } from '~helpers/react-query-lite'
 import NaveForVerse from './NaveModalForVerse'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 type Props = {
   selectedVerse: string
@@ -46,20 +47,22 @@ const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
   const [naveItemsForVerse, naveItemsForChapter] = data || []
 
   return (
-    <Box padding={20}>
-      {(!!naveItemsForChapter || !!naveItemsForVerse) && (
-        <>
-          <NaveForVerse
-            items={naveItemsForVerse}
-            label={t('Concernant le verset')}
-          />
-          <NaveForVerse
-            items={naveItemsForChapter}
-            label={t('Concernant le chapitre entier')}
-          />
-        </>
-      )}
-    </Box>
+    <BottomSheetScrollView>
+      <Box padding={20}>
+        {(!!naveItemsForChapter || !!naveItemsForVerse) && (
+          <>
+            <NaveForVerse
+              items={naveItemsForVerse}
+              label={t('Concernant le verset')}
+            />
+            <NaveForVerse
+              items={naveItemsForChapter}
+              label={t('Concernant le chapitre entier')}
+            />
+          </>
+        )}
+      </Box>
+    </BottomSheetScrollView>
   )
 })
 

@@ -25,7 +25,8 @@ import { useNavigation } from '@react-navigation/native'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { hp, wp } from '~helpers/utils'
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -112,7 +113,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const theme = useTheme()
   const { t } = useTranslation()
   const carouselRef = useRef<any>(null)
-
+  const [boxHeight, setBoxHeight] = useState(0)
   const [state, setState] = useState<State>({
     error: false,
     isCarouselLoading: true,
@@ -222,22 +223,28 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     return <Loading />
   }
 
+  const currentStrongReferenceIndex = state.strongReferences.findIndex(
+    r => r?.Code === state.currentStrongReference?.Code
+  )
+
   return (
-    <View style={{ paddingBottom: 20, minHeight: hp(75) }}>
-      <Box background paddingTop={10}>
-        <StyledVerse>
-          <VersetWrapper>
-            <NumberText>{verse.Verset}</NumberText>
-          </VersetWrapper>
-          <CarouselProvider
-            value={{
-              currentStrongReference: state.currentStrongReference,
-              goToCarouselItem,
-            }}
-          >
-            <VerseText>{formattedTexte}</VerseText>
-          </CarouselProvider>
-        </StyledVerse>
+    <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
+      <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
+        <BottomSheetScrollView contentContainerStyle={{ paddingTop: 10 }}>
+          <StyledVerse>
+            <VersetWrapper>
+              <NumberText>{verse.Verset}</NumberText>
+            </VersetWrapper>
+            <CarouselProvider
+              value={{
+                currentStrongReference: state.currentStrongReference,
+                goToCarouselItem,
+              }}
+            >
+              <VerseText>{formattedTexte}</VerseText>
+            </CarouselProvider>
+          </StyledVerse>
+        </BottomSheetScrollView>
         <BibleVerseDetailFooter
           verseNumber={verse.Verset}
           goToNextVerse={() => {
@@ -251,10 +258,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           versesInCurrentChapter={versesInCurrentChapter}
         />
       </Box>
-      <Box bg="lightGrey">
+      <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box flex bg="lightGrey">
+      <Box bg="lightGrey" flex={1}>
         {isCarouselLoading && <Loading />}
         {!isCarouselLoading && (
           <Carousel
@@ -272,7 +279,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
               rotateZDeg: 0,
             }}
             style={{
-              marginTop: 15,
               paddingLeft: 20,
               overflow: 'visible',
               flex: 1,
@@ -280,13 +286,15 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             data={state.strongReferences}
             renderItem={renderItem}
             onSnapToItem={onSnapToItem}
-            defaultIndex={state.strongReferences.findIndex(
-              r => r?.Code === state.currentStrongReference?.Code
-            )}
+            defaultIndex={
+              currentStrongReferenceIndex === -1
+                ? 0
+                : currentStrongReferenceIndex
+            }
           />
         )}
       </Box>
-    </View>
+    </Box>
   )
 }
 

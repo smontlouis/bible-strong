@@ -14,6 +14,7 @@ import {
   renderBackdrop,
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -39,6 +40,7 @@ interface ModalBodyProps extends BottomSheetProps {
   modalRef?: React.RefObject<BottomSheet>
   style?: any
   onModalClose?: () => void
+  enableScrollView?: boolean
 }
 
 interface ItemProps {
@@ -48,17 +50,20 @@ interface ItemProps {
 }
 
 const Body = forwardRef<BottomSheet, ModalBodyProps>(
-  ({ withPortal, children, headerComponent, ...props }, ref) => {
+  (
+    { withPortal, children, headerComponent, enableScrollView, ...props },
+    ref
+  ) => {
     const Wrapper = withPortal ? Portal : React.Fragment
     const insets = useSafeAreaInsets()
     const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-
+    const { bottomBarHeight } = useBottomBarHeightInTab()
     return (
       <Wrapper>
         <BottomSheet
           ref={ref}
           index={-1}
-          topInset={withPortal ? insets.top : undefined}
+          topInset={insets.top}
           snapPoints={['100%']}
           enableDynamicSizing={false}
           enablePanDownToClose
@@ -71,11 +76,26 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           {headerComponent && (
             <BottomSheetView>{headerComponent}</BottomSheetView>
           )}
-          <BottomSheetScrollView
-            contentContainerStyle={{ paddingBottom: insets.bottom }}
-          >
-            {children}
-          </BottomSheetScrollView>
+          {enableScrollView ? (
+            <BottomSheetScrollView
+              contentContainerStyle={{
+                paddingBottom:
+                  bottomBarHeight + (props.footerComponent ? 54 : 0),
+              }}
+            >
+              {children}
+            </BottomSheetScrollView>
+          ) : (
+            <BottomSheetView
+              style={{
+                flex: 1,
+                paddingBottom:
+                  bottomBarHeight + (props.footerComponent ? 54 : 0),
+              }}
+            >
+              {children}
+            </BottomSheetView>
+          )}
         </BottomSheet>
       </Wrapper>
     )

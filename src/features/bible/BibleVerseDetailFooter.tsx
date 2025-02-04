@@ -24,7 +24,7 @@ const BibleVerseDetailFooter = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Box row paddingLeft={20} paddingRight={20} marginTop={20}>
+    <Box row paddingLeft={20} paddingRight={20} my={20}>
       {!(verseNumber == 1) && (
         <IconButton
           activeOpacity={0.5}

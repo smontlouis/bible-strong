@@ -28,7 +28,7 @@ const AlphabetList = ({ color, setLetter, letter }) => {
   return (
     <Box background paddingBottom={7}>
       <Border />
-      <Box paddingTop={5}>
+      <Box paddingTop={5} height={50}>
         <Carousel
           ref={CarouselAlphabet}
           mode="parallax"

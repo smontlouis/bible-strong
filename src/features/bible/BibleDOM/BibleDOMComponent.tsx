@@ -77,6 +77,7 @@ type Props = Pick<
   | 'comments'
 > & {
   dispatch: Dispatch
+  dom: import('expo/dom').DOMProps
 }
 
 const extractParallelVerse = (

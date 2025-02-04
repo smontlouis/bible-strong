@@ -35,6 +35,7 @@ import memoize from '~helpers/memoize'
 import useLanguage from '~helpers/useLanguage'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -220,7 +221,7 @@ const CommentariesTabScreen = ({
   }
 
   const insets = useSafeAreaInsets()
-
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   useEffect(() => {
     setTitle(headerTitle)
   }, [headerTitle])
@@ -266,7 +267,7 @@ const CommentariesTabScreen = ({
 
       <ScrollView
         style={{ backgroundColor: theme.colors.lightGrey }}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 20 + bottomBarHeight }}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <>

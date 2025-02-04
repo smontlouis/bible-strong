@@ -180,10 +180,10 @@ https://bible-strong.app
               center
               animation={{
                 from: {
-                  rotate: !isCollapsed ? '180deg' : '0deg',
+                  rotate: !isCollapsed ? '0deg' : '180deg',
                 },
                 to: {
-                  rotate: isCollapsed ? '180deg' : '0deg',
+                  rotate: isCollapsed ? '0deg' : '180deg',
                 },
               }}
               duration={500}
@@ -238,10 +238,10 @@ https://bible-strong.app
               center
               animation={{
                 from: {
-                  rotate: !isCollapsed ? '180deg' : '0deg',
+                  rotate: !isCollapsed ? '0deg' : '180deg',
                 },
                 to: {
-                  rotate: isCollapsed ? '180deg' : '0deg',
+                  rotate: isCollapsed ? '0deg' : '180deg',
                 },
               }}
               duration={500}

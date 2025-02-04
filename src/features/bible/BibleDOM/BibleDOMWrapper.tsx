@@ -258,33 +258,25 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   }
 
   return (
-    <View
-      style={{
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        overflow: 'hidden',
-        flex: 1,
-      }}
-    >
-      <BibleDOMComponent
-        verses={verses}
-        parallelVerses={parallelVerses}
-        focusVerses={focusVerses}
-        secondaryVerses={secondaryVerses}
-        selectedVerses={selectedVerses}
-        highlightedVerses={highlightedVerses}
-        notedVerses={notedVerses}
-        settings={settings}
-        verseToScroll={verseToScroll}
-        isReadOnly={isReadOnly}
-        version={version}
-        pericopeChapter={pericopeChapter}
-        chapter={chapter}
-        isSelectionMode={isSelectionMode}
-        selectedCode={selectedCode}
-        comments={comments}
-        dispatch={dispatch}
-      />
-    </View>
+    <BibleDOMComponent
+      dom={{ containerStyle: { flex: 1 } }}
+      verses={verses}
+      parallelVerses={parallelVerses}
+      focusVerses={focusVerses}
+      secondaryVerses={secondaryVerses}
+      selectedVerses={selectedVerses}
+      highlightedVerses={highlightedVerses}
+      notedVerses={notedVerses}
+      settings={settings}
+      verseToScroll={verseToScroll}
+      isReadOnly={isReadOnly}
+      version={version}
+      pericopeChapter={pericopeChapter}
+      chapter={chapter}
+      isSelectionMode={isSelectionMode}
+      selectedCode={selectedCode}
+      comments={comments}
+      dispatch={dispatch}
+    />
   )
 }

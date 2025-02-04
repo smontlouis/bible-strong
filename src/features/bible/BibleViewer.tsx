@@ -43,10 +43,11 @@ import BibleFooter from './footer/BibleFooter'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
-  marginBottom: 10,
+  marginBottom: 5,
   width: 270,
 })
 
@@ -129,6 +130,8 @@ const BibleViewer = ({
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
+  const insets = useSafeAreaInsets()
+
   const {
     data: {
       selectedVersion: version,
@@ -335,7 +338,7 @@ const BibleViewer = ({
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
-    <Container isPadding={isReadOnly}>
+    <Box flex={1}>
       <BibleHeader
         navigation={navigation}
         bibleAtom={bibleAtom}
@@ -348,7 +351,7 @@ const BibleViewer = ({
         version={version}
         bookName={book.Nom}
         chapter={chapter}
-        hasBackButton={isReadOnly || isSelectionMode}
+        hasBackButton={isReadOnly || Boolean(isSelectionMode)}
       />
       {error && (
         <Empty
@@ -410,7 +413,7 @@ const BibleViewer = ({
         />
       )}
       {isReadOnly && !error && (
-        <Box center background>
+        <Box center background paddingBottom={insets.bottom}>
           <ReadMeButton onPress={openInBibleTab}>
             {t('tab.openInNewTab')}
           </ReadMeButton>
@@ -452,13 +455,13 @@ const BibleViewer = ({
         bibleAtom={bibleAtom}
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
-        isSelectionMode={isSelectionMode}
+        isSelectionMode={Boolean(isSelectionMode)}
       />
       <BibleParamsModal
         navigation={navigation}
         modalRef={bibleParamsModal.ref}
       />
-    </Container>
+    </Box>
   )
 }
 

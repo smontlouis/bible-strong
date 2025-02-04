@@ -125,16 +125,28 @@ const References = ({
     )
   }
 
-  return refs.map((ref, i) => {
-    const splittedRef = ref.split('-')
-    if (splittedRef.length === 3 && splittedRef[0] > 0) {
-      return <ReferenceItem key={ref + i} reference={ref} version={version} />
-    }
+  return (
+    <ScrollView>
+      {refs.map((ref, i) => {
+        const splittedRef = ref.split('-')
+        if (splittedRef.length === 3 && splittedRef[0] > 0) {
+          return (
+            <ReferenceItem key={ref + i} reference={ref} version={version} />
+          )
+        }
 
-    return (
-      <Text title key={ref} fontSize={20} marginBottom={5} color="lightPrimary">
-        {splittedRef}
-      </Text>
-    )
-  })
+        return (
+          <Text
+            title
+            key={ref}
+            fontSize={20}
+            marginBottom={5}
+            color="lightPrimary"
+          >
+            {splittedRef}
+          </Text>
+        )
+      })}
+    </ScrollView>
+  )
 }

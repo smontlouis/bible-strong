@@ -10,6 +10,7 @@ import TouchableSvgIcon from '~features/bible/TouchableSvgIcon'
 import { wp } from '~helpers/utils'
 import Box from '../../../common/ui/Box'
 import { HStack } from '../../../common/ui/Stack'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 type Props = {
   resourceType: BibleResource | null
@@ -28,13 +29,21 @@ const ResourcesModalFooter = ({
   onChangeResourceType,
 }: Props) => {
   const { t } = useTranslation()
+  const { bottomBarHeight } = useBottomBarHeightInTab()
 
   const onPress = (newResourceType: BibleResource) => {
     onChangeResourceType(newResourceType)
   }
 
   return (
-    <HStack spacing={0} borderTopWidth={1} borderColor="border" h={54}>
+    <HStack
+      spacing={0}
+      borderTopWidth={1}
+      borderColor="border"
+      bg="reverse"
+      h={54 + bottomBarHeight}
+      paddingBottom={bottomBarHeight}
+    >
       <Box width={wp(20, 400)} opacity={resourceType === 'strong' ? 1 : 0.3}>
         <TouchableSvgIcon
           icon={LexiqueIcon}

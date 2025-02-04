@@ -1,13 +1,13 @@
 import React, { memo, useEffect } from 'react'
 
-import { BibleTab, VersionCode, useIsCurrentTab } from '../../../state/tabs'
+import { useAtomValue } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { Book } from '~assets/bible_versions/books-desc'
 import { getVersions, Version } from '~helpers/bibleVersions'
+import { BibleTab, useIsCurrentTab, VersionCode } from '../../../state/tabs'
+import { playingBibleTabIdAtom } from './atom'
 import AudioTTSFooter from './AudioTTSFooter'
 import AudioUrlFooter from './AudioUrlFooter'
-import { PrimitiveAtom } from 'jotai/vanilla'
-import { useAtomValue } from 'jotai/react'
-import { playingBibleTabIdAtom } from './atom'
 import BackToAudioFooter from './BackToAudioFooter'
 
 type BibleFooterProps = {

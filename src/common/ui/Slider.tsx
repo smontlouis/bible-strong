@@ -115,6 +115,7 @@ export const Slide = ({ slideIndex, ...props }: BoxProps & SlideProps) => {
     <AnimatedBox
       entering={ifEnabled(SlideIn)}
       exiting={ifEnabled(SlideOut)}
+      flex={1}
       {...props}
     />
   )

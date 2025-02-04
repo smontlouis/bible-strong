@@ -21,7 +21,7 @@ import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
-import BottomSheet from '@gorhom/bottom-sheet/'
+import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet/'
 
 type Props = {
   resourceModalRef: React.RefObject<BottomSheet>
@@ -113,12 +113,15 @@ const ResourcesModal = ({
           onClose={() => resourceModalRef.current?.close()}
         />
       }
-      footerComponent={() => (
-        <ResourcesModalFooter
-          resourceType={resourceType}
-          onChangeResourceType={onChangeResourceType}
-        />
+      footerComponent={props => (
+        <BottomSheetFooter {...props}>
+          <ResourcesModalFooter
+            resourceType={resourceType}
+            onChangeResourceType={onChangeResourceType}
+          />
+        </BottomSheetFooter>
       )}
+      enableScrollView={false}
     >
       {resourceType && (
         <Resource

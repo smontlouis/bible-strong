@@ -15,8 +15,8 @@ import books from '~assets/bible_versions/books-desc'
 
 const Container = styled.View(({ theme }) => ({
   padding: 20,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
+  borderTopColor: theme.colors.border,
+  borderTopWidth: 1,
 }))
 
 class CompareVerseItem extends React.Component {

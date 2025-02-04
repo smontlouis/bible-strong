@@ -23,6 +23,7 @@ import useAppSwitcher from './useAppSwitcher'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { TabContextProvider } from '../context/TabContext'
 
 type AppSwitcherScreenFuncs = {
   openMenu: () => void
@@ -48,48 +49,50 @@ const AppSwitcherScreen = memo(
     const insets = useSafeAreaInsets()
 
     return (
-      <Box flex={1} bg="lightGrey">
-        <AnimatedScrollView
-          // @ts-ignore
-          ref={scrollView.ref}
-          showsVerticalScrollIndicator={false}
-          // onScroll={scrollHandler}
-          // scrollEventThrottle={16}
-          contentContainerStyle={{
-            paddingTop: SCREEN_MARGIN + insets.top,
-            paddingLeft: PADDING_HORIZONTAL,
-            paddingRight: PADDING_HORIZONTAL,
-            paddingBottom: TAB_ICON_SIZE + 60,
-            minHeight: '100%',
-          }}
-        >
-          <AnimatedBox
-            overflow="visible"
-            row
-            style={[
-              scrollViewBoxStyle,
-              {
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                justifyContent: 'flex-start',
-              },
-            ]}
+      <TabContextProvider>
+        <Box flex={1} bg="lightGrey">
+          <AnimatedScrollView
+            // @ts-ignore
+            ref={scrollView.ref}
+            showsVerticalScrollIndicator={false}
+            // onScroll={scrollHandler}
+            // scrollEventThrottle={16}
+            contentContainerStyle={{
+              paddingTop: SCREEN_MARGIN + insets.top,
+              paddingLeft: PADDING_HORIZONTAL,
+              paddingRight: PADDING_HORIZONTAL,
+              paddingBottom: TAB_ICON_SIZE + 60,
+              minHeight: '100%',
+            }}
           >
-            {tabsAtoms.map((tabAtom, i) => (
-              <TabPreview
-                key={`${tabAtom}`}
-                index={i}
-                tabAtom={tabAtom}
-                marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
-              />
-            ))}
-          </AnimatedBox>
-        </AnimatedScrollView>
-        <CachedTabScreens navigation={navigation} route={route} />
-        <TabPreviewCarousel tabsAtoms={tabsAtoms} />
-        <BottomTabBar openMenu={openMenu} openHome={openHome} />
-      </Box>
+            <AnimatedBox
+              overflow="visible"
+              row
+              style={[
+                scrollViewBoxStyle,
+                {
+                  flexWrap: 'wrap',
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'flex-start',
+                },
+              ]}
+            >
+              {tabsAtoms.map((tabAtom, i) => (
+                <TabPreview
+                  key={`${tabAtom}`}
+                  index={i}
+                  tabAtom={tabAtom}
+                  marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
+                />
+              ))}
+            </AnimatedBox>
+          </AnimatedScrollView>
+          <CachedTabScreens navigation={navigation} route={route} />
+          <TabPreviewCarousel tabsAtoms={tabsAtoms} />
+          <BottomTabBar openMenu={openMenu} openHome={openHome} />
+        </Box>
+      </TabContextProvider>
     )
   }
 )

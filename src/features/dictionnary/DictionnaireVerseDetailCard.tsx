@@ -12,8 +12,9 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import loadBible from '~helpers/loadBible'
 
-import { useTranslation } from 'react-i18next'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
+import { useTranslation } from 'react-i18next'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import captureError from '~helpers/captureError'
@@ -21,10 +22,9 @@ import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
 import useLanguage from '~helpers/useLanguage'
-import { hp, wp } from '~helpers/utils'
+import { wp } from '~helpers/utils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
-import { View } from 'react-native'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -110,6 +110,8 @@ const useFormattedText = ({
   const [formattedText, setFormattedText] = useState<
     JSX.Element | JSX.Element[]
   >()
+  const [boxHeight, setBoxHeight] = useState(0)
+
   const isFR = useLanguage()
 
   const { Livre, Chapitre, Verset } = verse
@@ -168,6 +170,7 @@ const DictionnaireVerseDetailScreen = ({
   const carousel = useRef<ICarouselInstance>(null)
   const { Livre, Chapitre, Verset } = verse
   const navigation = useNavigation()
+  const [boxHeight, setBoxHeight] = useState(0)
 
   const { status, error: dictionaryWordsError, data: wordsInVerse } = useQuery({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`],
@@ -198,10 +201,12 @@ const DictionnaireVerseDetailScreen = ({
     return <Loading />
   }
 
+  const currentWordIndex = wordsInVerse.findIndex(w => w === currentWord)
+
   return (
-    <View style={{ paddingBottom: 20, minHeight: hp(75) }}>
-      <Box flex>
-        <Box background paddingTop={10}>
+    <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
+      <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
+        <BottomSheetScrollView contentContainerStyle={{ paddingTop: 10 }}>
           <StyledVerse>
             <VersetWrapper>
               <NumberText>{verse.Verset}</NumberText>
@@ -215,58 +220,57 @@ const DictionnaireVerseDetailScreen = ({
               <VerseText>{formattedText}</VerseText>
             </CarouselProvider>
           </StyledVerse>
-          <BibleVerseDetailFooter
-            verseNumber={Verset}
-            versesInCurrentChapter={versesInCurrentChapter}
-            goToNextVerse={() => updateVerse(+1)}
-            goToPrevVerse={() => updateVerse(-1)}
-          />
-        </Box>
-        <Box bg="lightGrey">
-          <RoundedCorner />
-        </Box>
-        <Box flex bg="lightGrey">
-          {wordsInVerse.length ? (
-            <Carousel
-              ref={carousel}
-              mode="horizontal-stack"
-              scrollAnimationDuration={300}
-              width={itemWidth}
-              panGestureHandlerProps={{
-                activeOffsetX: [-10, 10],
-              }}
-              modeConfig={{
-                opacityInterval: 0.8,
-                scaleInterval: 0,
-                stackInterval: itemWidth,
-                rotateZDeg: 0,
-              }}
-              style={{
-                marginTop: 15,
-                paddingLeft: 20,
-                overflow: 'visible',
-                flex: 1,
-              }}
-              defaultIndex={wordsInVerse.findIndex(w => w === currentWord)}
-              data={words}
-              renderItem={({ item, index }) => (
-                <DictionnaireCard
-                  navigation={navigation}
-                  dictionnaireRef={item}
-                  index={index}
-                />
-              )}
-              onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
-            />
-          ) : (
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message="Pas de mot pour ce verset..."
-            />
-          )}
-        </Box>
+        </BottomSheetScrollView>
+        <BibleVerseDetailFooter
+          verseNumber={Verset}
+          versesInCurrentChapter={versesInCurrentChapter}
+          goToNextVerse={() => updateVerse(+1)}
+          goToPrevVerse={() => updateVerse(-1)}
+        />
       </Box>
-    </View>
+      <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
+        <RoundedCorner />
+      </Box>
+      <Box flex bg="lightGrey">
+        {wordsInVerse.length ? (
+          <Carousel
+            ref={carousel}
+            mode="horizontal-stack"
+            scrollAnimationDuration={300}
+            width={itemWidth}
+            panGestureHandlerProps={{
+              activeOffsetX: [-10, 10],
+            }}
+            modeConfig={{
+              opacityInterval: 0.8,
+              scaleInterval: 0,
+              stackInterval: itemWidth,
+              rotateZDeg: 0,
+            }}
+            style={{
+              paddingLeft: 20,
+              overflow: 'visible',
+              flex: 1,
+            }}
+            defaultIndex={currentWordIndex === -1 ? 0 : currentWordIndex}
+            data={words}
+            renderItem={({ item, index }) => (
+              <DictionnaireCard
+                navigation={navigation}
+                dictionnaireRef={item}
+                index={index}
+              />
+            )}
+            onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
+          />
+        ) : (
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message="Pas de mot pour ce verset..."
+          />
+        )}
+      </Box>
+    </Box>
   )
 }
 

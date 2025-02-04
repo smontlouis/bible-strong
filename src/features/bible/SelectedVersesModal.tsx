@@ -36,6 +36,7 @@ import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 const Container = styled.View<{ isSelectionMode?: boolean }>(
   ({ theme, isSelectionMode }) => ({
@@ -204,6 +205,8 @@ const VersesModal = ({
     clearSelectedVerses()
   }, [])
 
+  const { bottomBarHeight } = useBottomBarHeightInTab()
+
   return (
     <BottomSheet
       ref={ref}
@@ -224,7 +227,7 @@ const VersesModal = ({
         style={{
           flex: 0,
           minHeight: 100,
-
+          paddingBottom: bottomBarHeight,
           ...(isSelectionMode && {
             flexDirection: 'row',
             paddingLeft: 10,
