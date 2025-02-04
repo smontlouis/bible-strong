@@ -57,6 +57,7 @@ const SelectBibleReferenceModal = ({
     <Modal.Body
       ref={ref}
       onModalClose={onClose}
+      enableDynamicSizing
       withPortal
       style={{ paddingTop: 40 }}
     >

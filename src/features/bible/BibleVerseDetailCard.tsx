@@ -27,6 +27,7 @@ import { CarouselProvider } from '~helpers/CarouselContext'
 import { hp, wp } from '~helpers/utils'
 import { ScrollView, View } from 'react-native'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { StudyNavigateBibleType } from '~common/types'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -91,7 +92,7 @@ interface Verse {
 
 interface Props {
   verse: Verse
-  isSelectionMode?: boolean
+  isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
 }
 

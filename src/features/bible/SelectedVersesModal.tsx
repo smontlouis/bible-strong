@@ -10,7 +10,7 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
 import SnackBar from '~common/SnackBar'
-import Box from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
 import { cleanParams, wp } from '~helpers/utils'
@@ -218,36 +218,33 @@ const VersesModal = ({
       {...bottomSheetStyles}
       style={{
         ...(bottomSheetStyles.style as object),
-        ...(isSelectionMode && {
-          width: 250,
-        }),
       }}
     >
       <BottomSheetView
         style={{
           flex: 0,
-          minHeight: 100,
+          // minHeight: 100,
           paddingBottom: bottomBarHeight,
-          ...(isSelectionMode && {
-            flexDirection: 'row',
-            paddingLeft: 10,
-            paddingRight: 10,
-            paddingVertical: 30,
-          }),
         }}
       >
         {isSelectionMode ? (
-          <>
-            <Text paddingTop={20} flex bold fontSize={15} textAlign="center">
+          <HStack
+            gap={10}
+            width="100%"
+            alignItems="center"
+            justifyContent="center"
+            py={10}
+          >
+            <Text bold fontSize={18} textAlign="center">
               {selectedVersesTitle.toUpperCase()}
             </Text>
             <TouchableIcon
-              style={{ paddingTop: 15 }}
               name="arrow-right"
+              size={20}
               onPress={sendVerseData}
               noFlex
             />
-          </>
+          </HStack>
         ) : (
           <>
             <HalfContainer border>

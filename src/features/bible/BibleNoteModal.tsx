@@ -155,6 +155,7 @@ ${currentNote?.description}
       ref={ref}
       onModalClose={onClosed}
       topInset={useSafeAreaInsets().top}
+      snapPoints={['100%']}
       headerComponent={
         <ModalHeader
           onClose={close}

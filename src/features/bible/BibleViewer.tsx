@@ -352,6 +352,7 @@ const BibleViewer = ({
         bookName={book.Nom}
         chapter={chapter}
         hasBackButton={isReadOnly || Boolean(isSelectionMode)}
+        isReadOnly={isReadOnly}
       />
       {error && (
         <Empty
@@ -455,7 +456,7 @@ const BibleViewer = ({
         bibleAtom={bibleAtom}
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
-        isSelectionMode={Boolean(isSelectionMode)}
+        isSelectionMode={isSelectionMode}
       />
       <BibleParamsModal
         navigation={navigation}

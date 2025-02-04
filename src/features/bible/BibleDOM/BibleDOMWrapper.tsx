@@ -3,6 +3,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
+// @ts-expect-error
 import books from '~assets/bible_versions/books'
 import * as Haptics from 'expo-haptics'
 import {
@@ -35,6 +36,7 @@ import Snackbar from '~common/SnackBar'
 import * as Sentry from '@sentry/react-native'
 import { Book } from '~assets/bible_versions/books-desc'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { useTheme } from '@emotion/react'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -126,6 +128,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     comments,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
+  const theme = useTheme()
 
   const dispatch: Dispatch = async action => {
     switch (action.type) {
@@ -245,7 +248,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         const { verseIds } = action.payload
         const obj = {
           entity: 'highlights',
-          ids: Object.fromEntries(verseIds.map(v => [v, true])),
+          ids: Object.fromEntries(verseIds.map((v: any) => [v, true])),
         }
         setMultipleTagsItem(obj)
         break
@@ -259,7 +262,9 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
 
   return (
     <BibleDOMComponent
-      dom={{ containerStyle: { flex: 1 } }}
+      dom={{
+        containerStyle: { flex: 1, backgroundColor: theme.colors.reverse },
+      }}
       verses={verses}
       parallelVerses={parallelVerses}
       focusVerses={focusVerses}

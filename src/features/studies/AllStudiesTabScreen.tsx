@@ -50,34 +50,10 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
 
   return (
     <Container>
-      <Box flex>
-        {filteredStudies.length ? (
-          <FlatList
-            key={r(['xs', 'sm', 'md', 'lg'])}
-            ListHeaderComponent={
-              <TagsHeader
-                title={t('Études')}
-                setIsOpen={setTagsIsOpen}
-                isOpen={isTagsOpen}
-                selectedChip={selectedChip}
-                hasBackButton={hasBackButton}
-              />
-            }
-            numColumns={r([2, 2, 3, 3])}
-            data={filteredStudies}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <StudyItem
-                key={item.id}
-                study={item}
-                setStudySettings={setStudySettings}
-                navigation={navigation}
-              />
-            )}
-          />
-        ) : (
-          <>
+      {filteredStudies.length ? (
+        <FlatList
+          key={r(['xs', 'sm', 'md', 'lg'])}
+          ListHeaderComponent={
             <TagsHeader
               title={t('Études')}
               setIsOpen={setTagsIsOpen}
@@ -85,22 +61,43 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
               selectedChip={selectedChip}
               hasBackButton={hasBackButton}
             />
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message={t('Aucune étude...')}
+          }
+          numColumns={r([2, 2, 3, 3])}
+          data={filteredStudies}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <StudyItem
+              key={item.id}
+              study={item}
+              setStudySettings={setStudySettings}
+              navigation={navigation}
             />
-          </>
-        )}
-        {isLogged && (
-          <FabButton
-            icon="add"
-            onPress={() => {
-              navigation.navigate('EditStudy', { canEdit: true })
-            }}
-            align="flex-end"
+          )}
+        />
+      ) : (
+        <>
+          <TagsHeader
+            title={t('Études')}
+            setIsOpen={setTagsIsOpen}
+            isOpen={isTagsOpen}
+            selectedChip={selectedChip}
+            hasBackButton={hasBackButton}
           />
-        )}
-      </Box>
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={t('Aucune étude...')}
+          />
+        </>
+      )}
+      {isLogged && (
+        <FabButton
+          icon="add"
+          onPress={() => {
+            navigation.navigate('EditStudy', { canEdit: true })
+          }}
+        />
+      )}
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={() => setTagsIsOpen(false)}

@@ -16,7 +16,7 @@ import { cleanParams, wp } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
 import { openedFromTabAtom } from '~features/studies/atom'
 import { ScrollView } from 'react-native'
-import { StrongReference } from '~common/types'
+import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { Theme } from '@emotion/react'
@@ -83,7 +83,7 @@ type Props = {
   book: string
   strongReference: StrongReference
   navigation: StackNavigationProp<MainStackProps>
-  isSelectionMode: boolean
+  isSelectionMode: StudyNavigateBibleType
 }
 
 const StrongCard = (props: Props) => {

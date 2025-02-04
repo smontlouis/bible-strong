@@ -51,7 +51,13 @@ interface ItemProps {
 
 const Body = forwardRef<BottomSheet, ModalBodyProps>(
   (
-    { withPortal, children, headerComponent, enableScrollView, ...props },
+    {
+      withPortal,
+      children,
+      headerComponent,
+      enableScrollView = true,
+      ...props
+    },
     ref
   ) => {
     const Wrapper = withPortal ? Portal : React.Fragment
@@ -64,9 +70,8 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           ref={ref}
           index={-1}
           topInset={insets.top}
-          snapPoints={['100%']}
-          enableDynamicSizing={false}
           enablePanDownToClose
+          enableDynamicSizing={false}
           backdropComponent={renderBackdrop}
           onAnimate={onAnimateModalClose(props.onModalClose)}
           key={key}

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { BibleResource, Verse } from '~common/types'
+import { BibleResource, StudyNavigateBibleType, Verse } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -28,7 +28,7 @@ type Props = {
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>
-  isSelectionMode: boolean
+  isSelectionMode?: StudyNavigateBibleType
 }
 const ResourcesModal = ({
   resourceModalRef,
@@ -105,6 +105,7 @@ const ResourcesModal = ({
   return (
     <Modal.Body
       ref={resourceModalRef}
+      snapPoints={['100%']}
       headerComponent={
         <ModalHeader
           title={title}
@@ -143,7 +144,7 @@ const Resource = ({
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
   resourceType: BibleResource | null
-  isSelectionMode?: boolean
+  isSelectionMode?: StudyNavigateBibleType
 }) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)

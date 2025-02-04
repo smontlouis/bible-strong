@@ -52,6 +52,7 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       ref={ref}
       onModalClose={onClosed}
       withPortal
+      snapPoints={['50%']}
       headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>{t('Étiquettes')}</Text>
@@ -66,7 +67,6 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
           />
         </Box>
       }
-      snapPoints={['50%']}
     >
       <Box row wrap p={20}>
         {result.length || !keyword ? (
