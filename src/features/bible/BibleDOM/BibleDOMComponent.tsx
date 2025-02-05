@@ -22,6 +22,8 @@ import {
   REMOVE_PARALLEL_VERSION,
   SWIPE_LEFT,
   SWIPE_RIGHT,
+  SWIPE_DOWN,
+  SWIPE_UP,
 } from './dispatch'
 import { DispatchProvider, useDispatch } from './DispatchProvider'
 import ExternalIcon from './ExternalIcon'
@@ -32,6 +34,10 @@ import { scaleFontSize } from './scaleFontSize'
 import './swiped-events'
 import Verse from './Verse'
 import { useFonts } from 'expo-font'
+import {
+  HEADER_HEIGHT,
+  HEADER_HEIGHT_MIN,
+} from '~features/app-switcher/utils/constants'
 
 const forwardProps = [
   'isHebreu',
@@ -110,6 +116,7 @@ const Container = styled('div')<
   background: colors[theme].reverse,
   color: colors[theme].default,
   direction: rtl ? 'rtl' : 'ltr',
+  paddingTop: `${HEADER_HEIGHT + 10}px`,
   ...(rtl ? { textAlign: 'right' } : {}),
 }))
 
@@ -179,10 +186,11 @@ const VersionsContainer = styled('div')<RootStyles>(
   ({ settings: { theme, colors } }) => ({
     display: 'flex',
     position: 'sticky',
-    top: 0,
+    top: 'var(--header-height)',
     background: colors[theme].reverse,
     paddingTop: '5px',
     paddingBottom: '10px',
+    transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
   })
 )
 
@@ -235,15 +243,92 @@ const VersesRenderer = ({
   })
 
   useEffect(() => {
+    // Set initial header height CSS variable
+    document.documentElement.style.setProperty(
+      '--header-height',
+      `${HEADER_HEIGHT}px`
+    )
+  }, [])
+
+  useEffect(() => {
+    let lastScrollTop = 0
+    let lastScrollTime = Date.now()
+    const VELOCITY_THRESHOLD = 400
+    let canSwipeDown = true
+    let canSwipeUp = true
+    let reachedBoundaries = false
+
+    const handleScroll = () => {
+      const currentScrollTop = window.scrollY
+      const currentTime = Date.now()
+      const timeDiff = currentTime - lastScrollTime
+      const scrollDiff = currentScrollTop - lastScrollTop
+
+      // Calculate velocity (pixels per millisecond)
+      const velocity = Math.abs(scrollDiff / timeDiff)
+
+      // Get total scrollable height
+      const totalHeight =
+        document.documentElement.scrollHeight - window.innerHeight
+
+      // Don't dispatch if scroll is beyond boundaries (iOS momentum scrolling)
+      if (currentScrollTop < 0 || currentScrollTop > totalHeight) {
+        if (!reachedBoundaries) {
+          dispatch({
+            type: SWIPE_UP,
+          })
+          document.documentElement.style.setProperty(
+            '--header-height',
+            `${HEADER_HEIGHT}px`
+          )
+        }
+        reachedBoundaries = true
+        return
+      }
+
+      reachedBoundaries = false
+
+      // Only trigger if velocity is above threshold
+      if (velocity * 1000 > VELOCITY_THRESHOLD) {
+        if (scrollDiff > 0 && canSwipeDown) {
+          dispatch({
+            type: SWIPE_DOWN,
+          })
+          document.documentElement.style.setProperty(
+            '--header-height',
+            `${HEADER_HEIGHT_MIN}px`
+          )
+          canSwipeDown = false
+          canSwipeUp = true
+        } else if (scrollDiff < 0 && canSwipeUp) {
+          dispatch({
+            type: SWIPE_UP,
+          })
+          document.documentElement.style.setProperty(
+            '--header-height',
+            `${HEADER_HEIGHT}px`
+          )
+          canSwipeUp = false
+          canSwipeDown = true
+        }
+      }
+
+      lastScrollTop = currentScrollTop
+      lastScrollTime = currentTime
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
     document.addEventListener('swiped-left', function(e) {
-      console.log('sw-left')
       dispatch({
         type: SWIPE_LEFT,
       })
     })
 
     document.addEventListener('swiped-right', function(e) {
-      console.log('sw-right')
       dispatch({
         type: SWIPE_RIGHT,
       })
@@ -269,7 +354,13 @@ const VersesRenderer = ({
     if (verseToScroll === 1) return
 
     setTimeout(() => {
-      document.querySelector(`#verset-${verseToScroll}`)?.scrollIntoView()
+      const element = document.querySelector(`#verset-${verseToScroll}`)
+      if (element) {
+        const elementPosition = element.getBoundingClientRect().top
+        window.scrollTo({
+          top: window.scrollY + elementPosition - 100,
+        })
+      }
     }, 200)
   }, [verseToScroll])
 
@@ -632,6 +723,29 @@ const VersesRenderer = ({
           )
         })}
       </Container>
+      <svg
+        style={{
+          visibility: 'hidden',
+          position: 'absolute',
+        }}
+        width="0"
+        height="0"
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.1"
+      >
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 35 -4"
+              result="goo"
+            />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
     </DispatchProvider>
   )
 }

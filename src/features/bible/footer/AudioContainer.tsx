@@ -1,12 +1,21 @@
+import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
+import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 import Link from '~common/Link'
-import Box, { BoxProps, TouchableBox } from '~common/ui/Box'
+import Box, {
+  BoxProps,
+  HStack,
+  MotiBox,
+  motiTransition,
+  TouchableBox,
+} from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 
 export interface AudioContainerProps {
   children: React.ReactNode
@@ -48,7 +57,7 @@ const AudioContainer = ({
 }: AudioContainerProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
-    <Box
+    <MotiBox
       height="auto"
       backgroundColor="reverse"
       borderColor="border"
@@ -60,8 +69,14 @@ const AudioContainer = ({
       right={20}
       position="absolute"
       borderRadius={30}
+      animate={useDerivedValue(() => {
+        return {
+          translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
+        }
+      })}
+      {...motiTransition}
     >
-      <HStack row pos="absolute" top={8} right={20} zIndex={10}>
+      <HStack row pos="absolute" top={8} right={20} zIndex={10} gap={3}>
         {!!onChangeMode && (
           <>
             <Chip
@@ -92,7 +107,7 @@ const AudioContainer = ({
         </Link>
       </Box>
       {children}
-    </Box>
+    </MotiBox>
   )
 }
 

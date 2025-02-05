@@ -485,6 +485,7 @@
   "Rechercher": "Search",
   "Index de recherche": "Search index",
   "Index permettant une recherche hors-ligne dans la Bible": "Index allowing off-line search in the Bible",
+  "Police et paramêtres": "Font and settings",
 
   "L'index de recherche est requis pour accéder à cette page.": "The search index is required to access this page.",
   "Téléchargement de l'index...": "Downloading the index ...",
@@ -601,5 +602,6 @@
   "Document sans titre": "Untitled document",
   "event": "Event",
 
-  "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number."
+  "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number.",
+  "goToVerse": "Go to verse"
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
-import Box from '~common/ui/Box'
+import Box, { MotiBox, motiTransition } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
@@ -30,7 +30,11 @@ import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import {
+  historyAtom,
+  isFullScreenBibleValue,
+  multipleTagsModalAtom,
+} from '../../state/app'
 import {
   BibleTab,
   getDefaultBibleTab,
@@ -44,6 +48,8 @@ import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useDerivedValue } from 'react-native-reanimated'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 
 const ReadMeButton = styled(Button)({
   marginTop: 5,
@@ -352,7 +358,6 @@ const BibleViewer = ({
         bookName={book.Nom}
         chapter={chapter}
         hasBackButton={isReadOnly || Boolean(isSelectionMode)}
-        isReadOnly={isReadOnly}
       />
       {error && (
         <Empty
@@ -414,11 +419,26 @@ const BibleViewer = ({
         />
       )}
       {isReadOnly && !error && (
-        <Box center background paddingBottom={insets.bottom}>
+        <MotiBox
+          center
+          paddingBottom={insets.bottom}
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          animate={useDerivedValue(() => {
+            return {
+              translateY: isFullScreenBibleValue.value
+                ? HEADER_HEIGHT + insets.bottom + 20
+                : 0,
+            }
+          })}
+          {...motiTransition}
+        >
           <ReadMeButton onPress={openInBibleTab}>
             {t('tab.openInNewTab')}
           </ReadMeButton>
-        </Box>
+        </MotiBox>
       )}
       <SelectedVersesModal
         isVisible={modalIsVisible}

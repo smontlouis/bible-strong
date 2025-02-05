@@ -10,7 +10,7 @@ export interface TextProps extends BaseTextProps {
   fontSize?: number
   bold?: boolean
   textAlign?: string
-
+  fontWeight?: string
   position?: 'absolute' | 'relative'
   pos?: 'absolute' | 'relative'
   top?: number
@@ -119,7 +119,7 @@ const Text = styled.Text((props: TextProps) => {
       props.theme.colors.default,
     lineHeight: props.lineHeight,
     fontSize: props.fontSize || 16,
-    fontWeight: props.bold ? 'bold' : undefined,
+    fontWeight: props.fontWeight ?? (props.bold ? 'bold' : undefined),
     textAlign: props.textAlign,
 
     textTransform: props.textTransform,

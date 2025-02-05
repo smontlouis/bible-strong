@@ -12,9 +12,6 @@ export const TabContextProvider = ({
 }: {
   children: React.ReactNode
 }) => {
-  const insets = useSafeAreaInsets()
-  const isInTab = true
-  const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
   return (
     <TabContext.Provider value={{ isInTab: true }}>
       {children}

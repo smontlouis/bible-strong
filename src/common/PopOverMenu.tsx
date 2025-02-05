@@ -1,19 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTheme } from '@emotion/react'
-import {
-  Menu,
-  MenuOptions,
-  MenuTrigger,
-  renderers,
-} from 'react-native-popup-menu'
+import Popover from 'react-native-popover-view'
 
 import Box from '~common/ui/Box'
 import { Theme } from '~themes'
 import { FeatherIcon } from './ui/Icon'
+import { TouchableOpacity } from 'react-native'
+import { PopOverContext } from './PopOverContext'
+import { PopoverProps } from 'react-native-popover-view/dist/Types'
 
-const { Popover } = renderers
-
-interface Props {
+interface Props extends PopoverProps {
   element?: React.ReactNode
   popover: React.ReactNode
   width?: number
@@ -28,46 +24,31 @@ const PopOverMenu = ({
   ...props
 }: Props) => {
   const theme: Theme = useTheme()
+  const [showPopover, setShowPopover] = useState(false)
+
   return (
-    <Menu
-      renderer={Popover}
-      rendererProps={{
-        placement: 'bottom',
-        anchorStyle: { backgroundColor: theme.colors.reverse },
+    <Popover
+      isVisible={showPopover}
+      onRequestClose={() => setShowPopover(false)}
+      popoverStyle={{
+        backgroundColor: theme.colors.reverse,
+        borderRadius: 10,
       }}
+      from={
+        <TouchableOpacity onPress={() => setShowPopover(true)}>
+          {element || (
+            <Box row center height={height} width={width}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          )}
+        </TouchableOpacity>
+      }
       {...props}
     >
-      <MenuTrigger
-        customStyles={{
-          triggerTouchable: {
-            borderRadius: 25,
-            activeOpacity: 0.5,
-            underlayColor: 'transparent',
-          },
-        }}
-      >
-        {element || (
-          <Box row center height={height} width={width}>
-            <FeatherIcon name="more-vertical" size={18} />
-          </Box>
-        )}
-      </MenuTrigger>
-      <MenuOptions
-        customStyles={{
-          optionsContainer: {
-            backgroundColor: theme.colors.reverse,
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            borderRadius: 8,
-          },
-        }}
-      >
+      <PopOverContext.Provider value={{ onClose: () => setShowPopover(false) }}>
         <Box paddingVertical={10}>{popover}</Box>
-      </MenuOptions>
-    </Menu>
+      </PopOverContext.Provider>
+    </Popover>
   )
 }
 

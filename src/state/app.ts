@@ -8,6 +8,7 @@ import {
   getDefaultBibleTab,
   tabsAtom,
 } from './tabs'
+import { makeMutable } from 'react-native-reanimated'
 
 export interface Diff {
   added?: {
@@ -16,6 +17,9 @@ export interface Diff {
   updated?: any
   deleted?: any
 }
+
+export const isFullScreenBibleAtom = atom(false)
+export const isFullScreenBibleValue = makeMutable(false)
 
 export const IAPInitializedAtom = atom(false)
 

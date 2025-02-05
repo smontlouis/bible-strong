@@ -1,10 +1,24 @@
 import styled from '@emotion/native'
 import React, { forwardRef } from 'react'
-import { TouchableOpacity, View, ViewStyle } from 'react-native'
-import Animated from 'react-native-reanimated'
+import {
+  DimensionValue,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native'
+import Animated, { Easing } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Animatable from 'react-native-animatable'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { TouchableOpacityProps } from 'react-native-gesture-handler'
+import {
+  motify,
+  MotiTransitionProp,
+  StyleValueWithReplacedTransforms,
+} from 'moti'
+import Text from './Text'
+import { ImageStyle } from 'expo-image'
 
 export type BoxProps = {
   as?: React.ElementType<any> | undefined
@@ -70,15 +84,15 @@ export type BoxProps = {
   width?: ViewStyle['width']
   w?: ViewStyle['width']
   maxWidth?: ViewStyle['maxWidth']
-  maxW?: number
-  minWidth?: number
-  minW?: number
-  minHeight?: number
-  minH?: number
-  height?: number
-  h?: number
-  maxHeight?: number
-  maxH?: number
+  maxW?: ViewStyle['maxWidth']
+  minWidth?: ViewStyle['minWidth']
+  minW?: ViewStyle['minWidth']
+  minHeight?: ViewStyle['minHeight']
+  minH?: ViewStyle['minHeight']
+  height?: ViewStyle['height']
+  h?: ViewStyle['height']
+  maxHeight?: ViewStyle['maxHeight']
+  maxH?: ViewStyle['maxHeight']
 
   flex?: true | number
   flexShrink?: number
@@ -281,11 +295,31 @@ export const AnimatedSafeAreaBox = forwardRef<
     />
   )
 })
-export const TouchableBox = Box.withComponent(TouchableOpacity)
+const BasicTouchableBox = Box.withComponent(TouchableOpacity)
+export const TouchableBox = (props: BoxProps & TouchableOpacityProps) => (
+  <BasicTouchableBox {...props} activeOpacity={0.6} />
+)
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
 export const AnimatedTouchableBox = Animated.createAnimatedComponent(
-  TouchableBox
+  BasicTouchableBox
 )
 export const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
+export const MotiTouchableBox = motify(BasicTouchableBox)()
+export const MotiBox = motify(Box)()
+export const MotiHStack = motify(HStack)()
+export const MotiVStack = motify(VStack)()
+export const MotiText = motify(Text)()
+
+export const motiTransition: {
+  transition: MotiTransitionProp<
+    StyleValueWithReplacedTransforms<ViewStyle | TextStyle | ImageStyle>
+  >
+} = {
+  transition: {
+    type: 'timing',
+    duration: 300,
+    easing: Easing.bezier(0.13, 0.69, 0.5, 0.98),
+  },
+}
 export default Box

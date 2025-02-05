@@ -1,10 +1,19 @@
 import React from 'react'
-import { TouchableBox } from '~common/ui/Box'
+import {
+  MotiHStack,
+  MotiTouchableBox,
+  motiTransition,
+  TouchableBox,
+} from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import AudioButton from './AudioButton'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { useAtomValue } from 'jotai/react'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import { useDerivedValue } from 'react-native-reanimated'
 
 export interface BasicFooterProps {
   onPlay: () => void
@@ -28,9 +37,12 @@ const BasicFooter = ({
   type,
 }: BasicFooterProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const insets = useSafeAreaInsets()
+
   return (
     <>
-      <TouchableBox
+      <MotiTouchableBox
         disabled={isDisabled}
         width={40}
         height={40}
@@ -44,9 +56,17 @@ const BasicFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         left={10}
+        animate={useDerivedValue(() => {
+          return {
+            translateY: isFullScreenBibleValue.value
+              ? HEADER_HEIGHT + insets.bottom + 40
+              : 0,
+          }
+        })}
+        {...motiTransition}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />
-      </TouchableBox>
+      </MotiTouchableBox>
       <PlayableButtons
         onPlay={onPlay}
         isPlaying={isPlaying}
@@ -55,7 +75,7 @@ const BasicFooter = ({
         hasError={hasError}
         type={type}
       />
-      <TouchableBox
+      <MotiTouchableBox
         disabled={isDisabled}
         width={40}
         height={40}
@@ -69,9 +89,17 @@ const BasicFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         right={10}
+        animate={useDerivedValue(() => {
+          return {
+            translateY: isFullScreenBibleValue.value
+              ? HEADER_HEIGHT + insets.bottom + 40
+              : 0,
+          }
+        })}
+        {...motiTransition}
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
-      </TouchableBox>
+      </MotiTouchableBox>
     </>
   )
 }
@@ -90,8 +118,9 @@ const PlayableButtons = ({
   type,
 }: PlayableButtonsProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   return (
-    <HStack
+    <MotiHStack
       position="absolute"
       alignSelf="center"
       bottom={10 + bottomBarHeight}
@@ -100,6 +129,12 @@ const PlayableButtons = ({
       padding={2}
       borderRadius={50}
       overflow="visible"
+      animate={useDerivedValue(() => {
+        return {
+          translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
+        }
+      })}
+      {...motiTransition}
     >
       <TouchableBox
         center
@@ -122,7 +157,7 @@ const PlayableButtons = ({
           type={type}
         />
       </TouchableBox>
-    </HStack>
+    </MotiHStack>
   )
 }
 

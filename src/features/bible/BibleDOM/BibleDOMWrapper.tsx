@@ -28,8 +28,10 @@ import {
   NAVIGATE_TO_VERSION,
   OPEN_HIGHLIGHT_TAGS,
   REMOVE_PARALLEL_VERSION,
+  SWIPE_DOWN,
   SWIPE_LEFT,
   SWIPE_RIGHT,
+  SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 import Snackbar from '~common/SnackBar'
@@ -37,6 +39,10 @@ import * as Sentry from '@sentry/react-native'
 import { Book } from '~assets/bible_versions/books-desc'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { useTheme } from '@emotion/react'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { useSetAtom } from 'jotai/react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -128,6 +134,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     comments,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
+  const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const theme = useTheme()
 
   const dispatch: Dispatch = async action => {
@@ -243,6 +250,16 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         }
         break
       }
+      case SWIPE_DOWN: {
+        setIsFullScreenBible(true)
+        isFullScreenBibleValue.value = true
+        break
+      }
+      case SWIPE_UP: {
+        setIsFullScreenBible(false)
+        isFullScreenBibleValue.value = false
+        break
+      }
       case OPEN_HIGHLIGHT_TAGS: {
         const { setMultipleTagsItem } = props
         const { verseIds } = action.payload
@@ -263,7 +280,11 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   return (
     <BibleDOMComponent
       dom={{
-        containerStyle: { flex: 1, backgroundColor: theme.colors.reverse },
+        containerStyle: {
+          flex: 1,
+          backgroundColor: theme.colors.reverse,
+          zIndex: -1,
+        },
       }}
       verses={verses}
       parallelVerses={parallelVerses}

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useAnimatedStyle, withTiming } from 'react-native-reanimated'
+import { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -11,6 +11,8 @@ import MenuButton from './Buttons/MenuButton'
 import SearchButton from './Buttons/SearchButton'
 import TabButton from './Buttons/TabButton'
 import useBottomTabBar from './useBottomTabBar'
+import { isFullScreenBibleAtom } from 'src/state/app'
+import { useAtomValue } from 'jotai/react'
 
 type BottomTabBarProps = {
   openMenu: () => void
@@ -22,12 +24,16 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+
   const bottomBarStyles = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          // @TODO: remove this once we have a proper fullscreen mode
-          translateY: withTiming(false ? bottomBarHeight : 0),
+          translateY: withTiming(isFullScreenBible ? bottomBarHeight : 0, {
+            duration: 300,
+            easing: Easing.bezier(0.13, 0.69, 0.5, 0.98),
+          }),
         },
       ],
     }

@@ -116,6 +116,7 @@
     "react-native-modal": "patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-modalbox": "^2.0.0",
+    "react-native-popover-view": "^6.1.0",
     "react-native-popup-menu": "^0.16.0",
     "react-native-progress": "^5.0.0",
     "react-native-reanimated": "~3.16.1",

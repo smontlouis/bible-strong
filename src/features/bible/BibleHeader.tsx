@@ -9,11 +9,18 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
 import Back from '~common/Back'
-import Link from '~common/Link'
+import Link, { LinkBox } from '~common/Link'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
 import SnackBar from '~common/SnackBar'
-import Box from '~common/ui/Box'
+import Box, {
+  HStack,
+  MotiBox,
+  MotiHStack,
+  MotiText,
+  motiTransition,
+  TouchableBox,
+} from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
@@ -26,23 +33,11 @@ import { MainStackProps } from '~navigation/type'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-
-const LinkBox = styled(Link)(() => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingLeft: 10,
-  paddingRight: 10,
-}))
-
-const HeaderBox = styled(Box)(({ theme }) => ({
-  maxWidth: 830,
-  width: '100%',
-  alignSelf: 'center',
-  alignItems: 'stretch',
-}))
-
-const AnimatableHeaderBox = Animatable.createAnimatableComponent(HeaderBox)
+import { VerseSelectorPopup } from './VerseSelectorPopup'
+import { useAtomValue } from 'jotai/react'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import { useDerivedValue } from 'react-native-reanimated'
 
 interface BibleHeaderProps {
   navigation: StackNavigationProp<MainStackProps>
@@ -54,7 +49,6 @@ interface BibleHeaderProps {
   bookName: string
   chapter: number
   verseFormatted: string
-  isReadOnly?: boolean
   isSelectionMode?: boolean
   isParallel?: boolean
 }
@@ -69,7 +63,6 @@ const Header = ({
   bookName,
   chapter,
   verseFormatted,
-  isReadOnly,
   isSelectionMode,
   isParallel,
 }: BibleHeaderProps) => {
@@ -81,8 +74,7 @@ const Header = ({
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
-
-  const { isInTab } = useTabContext()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
 
   useEffect(() => {
     actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
@@ -102,72 +94,171 @@ const Header = ({
     dispatch(setSettingsCommentaires(true))
   }
 
-  if (isReadOnly) {
-    return (
-      <HeaderBox
-        row
-        bg="reverse"
-        paddingTop={insets.top}
-        height={60 + insets.top}
-      >
-        <Box flex justifyContent="center">
-          <Back padding>
-            <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        </Box>
-        <Box flex alignItems="center" justifyContent="center">
-          <TextIcon>
-            {t(bookName)} {chapter}:{verseFormatted} - {version}
-          </TextIcon>
-        </Box>
-        <Box flex />
-      </HeaderBox>
-    )
-  }
-
   return (
-    <HeaderBox
-      row
+    <MotiHStack
+      width="100%"
+      maxWidth={830}
       bg="reverse"
+      px={15}
       paddingTop={insets.top}
-      height={60 + insets.top}
+      height={HEADER_HEIGHT + insets.top}
+      alignItems="center"
+      borderBottomWidth={1}
+      borderColor="border"
+      position="absolute"
+      top={0}
+      left={0}
+      // zIndex={1}
+      animate={useDerivedValue(() => {
+        return {
+          height: isFullScreenBibleValue.value
+            ? 20 + insets.top
+            : HEADER_HEIGHT + insets.top,
+        }
+      })}
+      {...motiTransition}
     >
       {(isSelectionMode || hasBackButton) && (
-        <Box justifyContent="center">
-          <Back padding>
+        <Back>
+          <MotiBox
+            alignItems="center"
+            justifyContent="center"
+            width={50}
+            height={32}
+            animate={useDerivedValue(() => {
+              return {
+                translateY: isFullScreenBibleValue.value ? -5 : 0,
+              }
+            })}
+            {...motiTransition}
+          >
             <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        </Box>
+          </MotiBox>
+        </Back>
       )}
-      <LinkBox
-        onPress={() => openBookSelector(bibleAtom)}
-        style={{ paddingLeft: 15, paddingRight: 0 }}
-      >
-        <TextIcon>
-          {isSmall
-            ? truncate(`${t(bookName)} ${chapter}`, 10)
-            : `${t(bookName)} ${chapter}`}
-        </TextIcon>
-      </LinkBox>
-      <LinkBox
-        onPress={() => openVersionSelector(bibleAtom)}
-        style={{ marginRight: 'auto' }}
-      >
-        <TextIcon>{version}</TextIcon>
-      </LinkBox>
+      <HStack alignItems="center" gap={3} marginRight="auto">
+        <HStack>
+          <TouchableBox
+            onPress={() => openBookSelector(bibleAtom)}
+            center
+            pl={12}
+            pr={7}
+            height={32}
+          >
+            <MotiBox
+              bg="lightGrey"
+              borderTopLeftRadius={20}
+              borderBottomLeftRadius={20}
+              position="absolute"
+              left={0}
+              bottom={0}
+              right={0}
+              top={0}
+              animate={useDerivedValue(() => {
+                return {
+                  opacity: isFullScreenBibleValue.value ? 0 : 1,
+                }
+              })}
+            />
+            <MotiText
+              fontWeight="bold"
+              fontSize={14}
+              animate={useDerivedValue(() => {
+                return {
+                  translateY: isFullScreenBibleValue.value ? -5 : 0,
+                }
+              })}
+              {...motiTransition}
+            >
+              {isSmall
+                ? truncate(`${t(bookName)} ${chapter}`, 10)
+                : `${t(bookName)} ${chapter}`}
+            </MotiText>
+          </TouchableBox>
+        </HStack>
+        <TouchableBox
+          onPress={() => openVersionSelector(bibleAtom)}
+          center
+          pl={7}
+          pr={12}
+          height={32}
+        >
+          <MotiBox
+            bg="lightGrey"
+            borderTopRightRadius={20}
+            borderBottomRightRadius={20}
+            position="absolute"
+            left={0}
+            bottom={0}
+            right={0}
+            top={0}
+            animate={useDerivedValue(() => {
+              return {
+                opacity: isFullScreenBibleValue.value ? 0 : 1,
+              }
+            })}
+          />
+          <MotiText
+            fontWeight="bold"
+            fontSize={14}
+            animate={useDerivedValue(() => {
+              return {
+                translateY: isFullScreenBibleValue.value ? -5 : 0,
+              }
+            })}
+            {...motiTransition}
+          >
+            {version}
+          </MotiText>
+        </TouchableBox>
+      </HStack>
+
+      <PopOverMenu
+        element={
+          <MotiBox
+            center
+            width={40}
+            height="100%"
+            animate={useDerivedValue(() => {
+              return {
+                opacity: isFullScreenBibleValue.value ? 0 : 1,
+              }
+            })}
+          >
+            <FeatherIcon
+              name="chevrons-down"
+              size={20}
+              style={{ opacity: 0.3 }}
+            />
+          </MotiBox>
+        }
+        popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
+      />
       {!isSelectionMode && (
         <>
-          <LinkBox onPress={onBibleParamsClick} style={{ width: 50 }}>
-            <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
-          </LinkBox>
           <PopOverMenu
             element={
-              <Box row alignItems="center" height={60} width={50}>
+              <MotiBox
+                center
+                width={40}
+                height="100%"
+                animate={useDerivedValue(() => {
+                  return {
+                    opacity: isFullScreenBibleValue.value ? 0 : 1,
+                  }
+                })}
+              >
                 <FeatherIcon name="more-vertical" size={18} />
-              </Box>
+              </MotiBox>
             }
             popover={
               <>
+                <MenuOption onSelect={onBibleParamsClick}>
+                  <Box row alignItems="center">
+                    <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
+                    <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
+                  </Box>
+                </MenuOption>
                 {!commentsDisplay && isFR && (
                   <MenuOption onSelect={onOpenCommentaire}>
                     <Box row alignItems="center">
@@ -207,7 +298,7 @@ const Header = ({
           />
         </>
       )}
-    </HeaderBox>
+    </MotiHStack>
   )
 }
 
