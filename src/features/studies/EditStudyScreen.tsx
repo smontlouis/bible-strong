@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import generateUUID from '~helpers/generateUUID'
 
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
-import { RouteProp } from '@react-navigation/native'
+import { RouteProp, useFocusEffect } from '@react-navigation/native'
 import { StudyNavigateBibleType } from '~common/types'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
@@ -16,6 +16,7 @@ import EditStudyHeader from './EditStudyHeader'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
 import { MainStackProps } from '~navigation/type'
+import { isFullScreenBibleValue } from 'src/state/app'
 
 type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'>
 
@@ -26,10 +27,10 @@ const EditStudyScreen = ({
 }: EditStudyScreenProps) => {
   const { t } = useTranslation()
 
-  const studyId = route.params.studyId
-  const canEdit = route.params.canEdit
-  const hasBackButton = route.params.hasBackButton
-  const openedFromTab = route.params.openedFromTab
+  const studyId = useMemo(() => route.params.studyId, [])
+  const canEdit = useMemo(() => route.params.canEdit, [])
+  const hasBackButton = useMemo(() => route.params.hasBackButton, [])
+  const openedFromTab = useMemo(() => route.params.openedFromTab, [])
 
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
@@ -74,6 +75,12 @@ const EditStudyScreen = ({
   useEffect(() => {
     setOpenedFromTab(openedFromTab || false)
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      isFullScreenBibleValue.value = false
+    }, [])
+  )
 
   // prevent rendering if studyId is not set
   if (studyId === '') {

@@ -6,18 +6,21 @@ type BackProps = {
   padding?: boolean
   style?: any
   onCustomPress?: () => void
+  onGoBack?: () => void
 }
 
 const Back: FC<PropsWithChildren<BackProps>> = ({
   padding,
   style,
   onCustomPress,
+  onGoBack,
   ...props
 }: BackProps) => {
   const navigation = useNavigation()
 
   const handlePress = () => {
     navigation.goBack()
+    onGoBack?.()
   }
 
   return (
