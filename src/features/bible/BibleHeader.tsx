@@ -1,15 +1,13 @@
-import styled from '@emotion/native'
 import { memo, useEffect } from 'react'
-
-import * as Animatable from 'react-native-animatable'
 
 import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
+import { isFullScreenBibleValue } from 'src/state/app'
 import Back from '~common/Back'
-import Link, { LinkBox } from '~common/Link'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
 import SnackBar from '~common/SnackBar'
@@ -24,7 +22,7 @@ import Box, {
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import { useTabContext } from '~features/app-switcher/context/TabContext'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
@@ -34,10 +32,6 @@ import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
-import { useAtomValue } from 'jotai/react'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
-import { useDerivedValue } from 'react-native-reanimated'
 
 interface BibleHeaderProps {
   navigation: StackNavigationProp<MainStackProps>
@@ -74,7 +68,6 @@ const Header = ({
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
 
   useEffect(() => {
     actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
@@ -119,7 +112,12 @@ const Header = ({
       {...motiTransition}
     >
       {(isSelectionMode || hasBackButton) && (
-        <Back>
+        <Back
+          onGoBack={() => {
+            isFullScreenBibleValue.value = false
+            console.log('onGoBack')
+          }}
+        >
           <MotiBox
             alignItems="center"
             justifyContent="center"

@@ -1,24 +1,23 @@
 import { useAtomValue } from 'jotai/react'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDerivedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { isFullScreenBibleValue } from 'src/state/app'
 import { Book } from '~assets/bible_versions/books-desc'
 import {
-  MotiTouchableBox,
   MotiHStack,
+  MotiTouchableBox,
   motiTransition,
   TouchableBox,
 } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
 import { useFindTabIndex } from '../../../state/tabs'
 import { playingBibleTabIdAtom } from './atom'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useDerivedValue } from 'react-native-reanimated'
 
 type BackToAudioFooterProps = {
   book: Book
@@ -42,7 +41,6 @@ const BackToAudioFooter = ({
   const playingBibleTabIndex = useFindTabIndex(playingBibleTabId)
   const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const insets = useSafeAreaInsets()
 
   return (

@@ -18,6 +18,7 @@ import sunsetColors from '~themes/sunsetColors'
 import { UserState } from '../user'
 
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
+export const SET_SETTINGS_LINE_HEIGHT = 'user/SET_SETTINGS_LINE_HEIGHT'
 export const INCREASE_SETTINGS_FONTSIZE_SCALE =
   'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
 export const DECREASE_SETTINGS_FONTSIZE_SCALE =
@@ -100,6 +101,10 @@ export default produce((draft: Draft<UserState>, action) => {
       draft.bible.settings.alignContent = action.payload
       break
     }
+    case SET_SETTINGS_LINE_HEIGHT: {
+      draft.bible.settings.lineHeight = action.payload
+      break
+    }
     case SET_SETTINGS_TEXT_DISPLAY: {
       draft.bible.settings.textDisplay = action.payload
       break
@@ -173,6 +178,12 @@ export function setSettingsAlignContent(payload: string) {
   }
 }
 
+export function setSettingsLineHeight(payload: 'normal' | 'small' | 'large') {
+  return {
+    type: SET_SETTINGS_LINE_HEIGHT,
+    payload,
+  }
+}
 export function setSettingsTextDisplay(payload: string) {
   return {
     type: SET_SETTINGS_TEXT_DISPLAY,

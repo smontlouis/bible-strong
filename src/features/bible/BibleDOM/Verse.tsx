@@ -9,6 +9,7 @@ import {
 } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
+import { scaleLineHeight } from './scaleLineHeight'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import { RootState } from '~redux/modules/reducer'
@@ -26,9 +27,13 @@ import InterlinearVerse from './InterlinearVerse'
 import VerseTags from './VerseTags'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale } }) => ({
+  ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
+    lineHeight: scaleLineHeight(
+      isParallel ? 26 : 32,
+      lineHeight,
+      fontSizeScale
+    ),
   })
 )
 

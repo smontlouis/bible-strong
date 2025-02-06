@@ -1,4 +1,6 @@
-import React from 'react'
+import { useDerivedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { isFullScreenBibleValue } from 'src/state/app'
 import {
   MotiHStack,
   MotiTouchableBox,
@@ -6,14 +8,9 @@ import {
   TouchableBox,
 } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { HStack } from '~common/ui/Stack'
-import AudioButton from './AudioButton'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { useAtomValue } from 'jotai/react'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
-import { useDerivedValue } from 'react-native-reanimated'
+import AudioButton from './AudioButton'
 
 export interface BasicFooterProps {
   onPlay: () => void
@@ -37,7 +34,6 @@ const BasicFooter = ({
   type,
 }: BasicFooterProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const insets = useSafeAreaInsets()
 
   return (
@@ -118,7 +114,6 @@ const PlayableButtons = ({
   type,
 }: PlayableButtonsProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   return (
     <MotiHStack
       position="absolute"

@@ -1,14 +1,11 @@
 import { useTheme } from '@emotion/react'
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetProps,
-} from '@gorhom/bottom-sheet'
-import React, { useId } from 'react'
+import { BottomSheetBackdrop, BottomSheetProps } from '@gorhom/bottom-sheet'
+import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
+import { useId } from 'react'
 import { useWindowDimensions } from 'react-native'
 import useDeviceOrientation from './useDeviceOrientation'
 
-export const renderBackdrop = (props: BottomSheetBackdropProps) => (
+export const renderBackdrop = (props: BottomSheetDefaultBackdropProps) => (
   <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
 )
 

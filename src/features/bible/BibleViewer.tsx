@@ -342,6 +342,15 @@ const BibleViewer = ({
     resourceModal.open()
   }
 
+  // Déplacer le hook en dehors de la condition de rendu
+  const translationY = useDerivedValue(() => {
+    return {
+      translateY: isFullScreenBibleValue.value
+        ? HEADER_HEIGHT + insets.bottom + 20
+        : 0,
+    }
+  })
+
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
     <Box flex={1}>
@@ -426,13 +435,7 @@ const BibleViewer = ({
           bottom={0}
           left={0}
           right={0}
-          animate={useDerivedValue(() => {
-            return {
-              translateY: isFullScreenBibleValue.value
-                ? HEADER_HEIGHT + insets.bottom + 20
-                : 0,
-            }
-          })}
+          animate={translationY}
           {...motiTransition}
         >
           <ReadMeButton onPress={openInBibleTab}>

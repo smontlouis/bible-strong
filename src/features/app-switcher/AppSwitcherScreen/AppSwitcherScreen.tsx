@@ -129,7 +129,8 @@ const AppSwitcherScreenWrapper = (
   // Not the best, but when adding a new tab, close home drawer
   useEffect(() => {
     closeHome()
-  }, [tabsCount, closeHome])
+    closeMenu()
+  }, [tabsCount, closeHome, closeMenu])
 
   const renderHomeScreen = useCallback(
     () => <Home closeHome={closeHome} navigation={props.navigation} />,

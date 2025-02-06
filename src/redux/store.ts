@@ -22,7 +22,7 @@ function configureStore() {
     keyPrefix: '',
     storage: FilesystemStorage,
     stateReconciler: autoMergeLevel2,
-    version: 28,
+    version: 29,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations, { debug: true }),
@@ -44,6 +44,7 @@ function configureStore() {
   )
   const persistor = persistStore(store)
   // persistor.purge() // Purge async storage
+  // AsyncStorage.clear()
 
   if (__DEV__) {
     if (module.hot) {

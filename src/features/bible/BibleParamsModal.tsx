@@ -2,8 +2,10 @@ import React, { memo } from 'react'
 import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { Portal } from '@gorhom/portal'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
@@ -25,6 +27,7 @@ import {
   increaseSettingsFontSizeScale,
   setFontFamily,
   setSettingsAlignContent,
+  setSettingsLineHeight,
   setSettingsNotesDisplay,
   setSettingsPreferredColorScheme,
   setSettingsPreferredDarkTheme,
@@ -34,8 +37,7 @@ import {
 } from '~redux/modules/user'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { Portal } from '@gorhom/portal'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LineHeightIcon } from '~common/LineHeightIcon'
 
 export const HalfContainer = styled.View<{ border?: boolean }>(
   ({ border, theme }) => ({
@@ -64,6 +66,12 @@ export const useParamsModalLabels = () => {
   const alignContentToString = {
     left: t('À gauche'),
     justify: t('Justifié'),
+  }
+
+  const lineHeightToString = {
+    normal: t('Normal'),
+    small: t('Petit'),
+    large: t('Grand'),
   }
 
   const textDisplayToString = {
@@ -103,6 +111,7 @@ export const useParamsModalLabels = () => {
 
   return {
     alignContentToString,
+    lineHeightToString,
     textDisplayToString,
     preferredColorSchemeToString,
     preferredLightThemeToString,
@@ -122,6 +131,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
 
   const {
     alignContentToString,
+    lineHeightToString,
     textDisplayToString,
     preferredColorSchemeToString,
     preferredLightThemeToString,
@@ -148,6 +158,9 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const alignContent = useSelector(
     (state: RootState) => state.user.bible.settings.alignContent
   )
+  const lineHeight = useSelector(
+    (state: RootState) => state.user.bible.settings.lineHeight
+  )
   const textDisplay = useSelector(
     (state: RootState) => state.user.bible.settings.textDisplay
   )
@@ -169,13 +182,14 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
         ref={modalRef}
         index={-1}
         enablePanDownToClose
-        backdropComponent={renderBackdrop}
-        enableDynamicSizing
+        backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
+        enableDynamicSizing={false}
+        snapPoints={['40%']}
         key={key}
         {...bottomSheetStyles}
       >
-        <BottomSheetView
-          style={{
+        <BottomSheetScrollView
+          contentContainerStyle={{
             alignItems: 'stretch',
             justifyContent: 'space-between',
             paddingTop: 10,
@@ -290,22 +304,6 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             </LinkBox>
           </HalfContainer>
           <HalfContainer border>
-            <Text flex={5}>{t('Alignement du texte')}</Text>
-            <Text marginLeft={5} fontSize={12} bold marginRight={10}>
-              {alignContentToString[alignContent]}
-            </Text>
-            <TouchableIcon
-              isSelected={alignContent === 'left'}
-              name="align-left"
-              onPress={() => dispatch(setSettingsAlignContent('left'))}
-            />
-            <TouchableIcon
-              isSelected={alignContent === 'justify'}
-              name="align-justify"
-              onPress={() => dispatch(setSettingsAlignContent('justify'))}
-            />
-          </HalfContainer>
-          <HalfContainer border>
             <Text flex={5}>{t('Taille du texte')}</Text>
             <Text marginLeft={5} fontSize={12} bold>{`${100 +
               fontSizeScale * 10}%`}</Text>
@@ -320,19 +318,56 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             />
           </HalfContainer>
           <HalfContainer border>
+            <Text flex={5}>{t('Alignement du texte')}</Text>
+            <Text marginLeft={5} fontSize={12} bold marginRight={10}>
+              {alignContentToString[alignContent]}
+            </Text>
+            <TouchableIcon
+              isSelected
+              name={alignContent === 'left' ? 'align-left' : 'align-justify'}
+              onPress={() => {
+                const nextAlign = alignContent === 'left' ? 'justify' : 'left'
+                dispatch(setSettingsAlignContent(nextAlign))
+              }}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text flex={5}>{t('Hauteur de ligne')}</Text>
+            <Text marginLeft={5} fontSize={12} bold marginRight={10}>
+              {lineHeightToString[lineHeight]}
+            </Text>
+            <TouchableBox
+              onPress={() => {
+                const nextLineHeight = {
+                  small: 'normal',
+                  normal: 'large',
+                  large: 'small',
+                } as const
+                dispatch(setSettingsLineHeight(nextLineHeight[lineHeight]))
+              }}
+            >
+              <LineHeightIcon
+                isSelected
+                gap={
+                  lineHeight === 'small' ? 1 : lineHeight === 'normal' ? 2 : 4
+                }
+              />
+            </TouchableBox>
+          </HalfContainer>
+
+          <HalfContainer border>
             <Text flex={5}>{t('Mode des versets')}</Text>
             <Text marginLeft={5} fontSize={12} bold>
               {textDisplayToString[textDisplay]}
             </Text>
             <TouchableIcon
-              isSelected={textDisplay === 'inline'}
-              name="menu"
-              onPress={() => dispatch(setSettingsTextDisplay('inline'))}
-            />
-            <TouchableIcon
-              isSelected={textDisplay === 'block'}
-              name="list"
-              onPress={() => dispatch(setSettingsTextDisplay('block'))}
+              isSelected
+              name={textDisplay === 'inline' ? 'menu' : 'list'}
+              onPress={() => {
+                const nextDisplay =
+                  textDisplay === 'inline' ? 'block' : 'inline'
+                dispatch(setSettingsTextDisplay(nextDisplay))
+              }}
             />
           </HalfContainer>
 
@@ -341,16 +376,14 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             <Text marginLeft={5} fontSize={12} bold>
               {notesDisplayToString[notesDisplay]}
             </Text>
-
             <TouchableIcon
-              isSelected={notesDisplay === 'inline'}
-              name="align-left"
-              onPress={() => dispatch(setSettingsNotesDisplay('inline'))}
-            />
-            <TouchableIcon
-              isSelected={notesDisplay === 'block'}
-              name="file-text"
-              onPress={() => dispatch(setSettingsNotesDisplay('block'))}
+              isSelected
+              name={notesDisplay === 'inline' ? 'align-left' : 'file-text'}
+              onPress={() => {
+                const nextDisplay =
+                  notesDisplay === 'inline' ? 'block' : 'inline'
+                dispatch(setSettingsNotesDisplay(nextDisplay))
+              }}
             />
           </HalfContainer>
           <HalfContainer border>
@@ -359,15 +392,13 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
               {pressToString[press]}
             </Text>
             <TouchableSvgIcon
-              icon={IconShortPress}
-              isSelected={press === 'shortPress'}
-              onPress={() => dispatch(setSettingsPress('shortPress'))}
-              size={25}
-            />
-            <TouchableSvgIcon
-              icon={IconLongPress}
-              isSelected={press === 'longPress'}
-              onPress={() => dispatch(setSettingsPress('longPress'))}
+              icon={press === 'shortPress' ? IconShortPress : IconLongPress}
+              isSelected
+              onPress={() => {
+                const nextPress =
+                  press === 'shortPress' ? 'longPress' : 'shortPress'
+                dispatch(setSettingsPress(nextPress))
+              }}
               size={25}
             />
           </HalfContainer>
@@ -434,7 +465,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             <Text flex>{t('bible.settings.shareOptions')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </TouchableBox>
-        </BottomSheetView>
+        </BottomSheetScrollView>
       </BottomSheet>
     </Portal>
   )

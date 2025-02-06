@@ -18,7 +18,15 @@ export const HelpTip = ({
   if (isDismissed) return null
 
   return (
-    <HStack gap={10} bg="lightGrey" py={20} px={14} alignItems="center">
+    <HStack
+      gap={10}
+      bg="opacity5"
+      py={20}
+      px={14}
+      alignItems="center"
+      borderBottomWidth={1}
+      borderColor="border"
+    >
       <FeatherIcon name="info" size={20} color="tertiary" />
       <Text flex color="tertiary" fontSize={14}>
         {description}

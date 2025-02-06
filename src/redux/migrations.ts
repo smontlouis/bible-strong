@@ -413,7 +413,10 @@ export default {
         ...state.user,
         bible: {
           ...state.user.bible,
-          history: undefined,
+          settings: {
+            ...state.user.bible.settings,
+            lineHeight: 'normal',
+          },
         },
       },
     }

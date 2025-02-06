@@ -153,6 +153,7 @@ export interface UserState {
     naves: {}
     settings: {
       alignContent: 'left' | 'justify'
+      lineHeight: 'normal' | 'small' | 'large'
       fontSizeScale: number
       textDisplay: 'inline' | 'block'
       preferredColorScheme: PreferredColorScheme
@@ -220,6 +221,7 @@ const getInitialState = (): UserState => ({
     naves: {},
     settings: {
       alignContent: 'left',
+      lineHeight: 'normal',
       fontSizeScale: 0,
       textDisplay: 'inline',
       preferredColorScheme: 'auto',

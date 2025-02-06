@@ -603,5 +603,9 @@
   "event": "Event",
 
   "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number.",
-  "goToVerse": "Go to verse"
+  "goToVerse": "Go to verse",
+
+  "Normal": "Normal",
+  "Petit": "Small",
+  "Grand": "Large"
 }
