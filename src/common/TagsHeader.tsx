@@ -29,7 +29,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
 const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
   const { t } = useTranslation()
   return (
-    <HeaderBox row>
+    <HeaderBox row bg="reverse">
       {hasBackButton ? (
         <Back padding>
           <FeatherIcon name="arrow-left" size={20} />

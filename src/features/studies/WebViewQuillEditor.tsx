@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import { WebView } from 'react-native-webview'
@@ -28,7 +28,6 @@ type Props = {
   }
   fontFamily: string
   navigateBibleView: (type: StudyNavigateBibleType) => void
-  openBibleView: () => void
 }
 const WebViewQuillEditor = ({
   params,
@@ -37,7 +36,6 @@ const WebViewQuillEditor = ({
   contentToDisplay,
   fontFamily,
   navigateBibleView,
-  openBibleView,
 }: Props) => {
   const webViewRef = useRef<WebView>(null)
   const navigation = useNavigation()
@@ -98,7 +96,7 @@ const WebViewQuillEditor = ({
     }
   }, [isReadOnly])
 
-  const dispatchToWebView = (type: string, payload?: any) => {
+  const dispatchToWebView = useCallback((type: string, payload?: any) => {
     if (webViewRef.current) {
       console.log('RN DISPATCH: ', type)
 
@@ -112,7 +110,7 @@ const WebViewQuillEditor = ({
         })()
       `)
     }
-  }
+  }, [])
 
   const injectFont = () => {
     const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
@@ -290,7 +288,6 @@ const WebViewQuillEditor = ({
       {isKeyboardOpened && (
         <StudyFooter
           navigateBibleView={navigateBibleView}
-          openBibleView={openBibleView}
           dispatchToWebView={dispatchToWebView}
           activeFormats={activeFormats}
         />

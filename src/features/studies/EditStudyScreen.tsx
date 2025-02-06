@@ -17,9 +17,7 @@ import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
 import { MainStackProps } from '~navigation/type'
 
-type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
-  studyId?: string
-}
+type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'>
 
 const EditStudyScreen = ({
   navigation,
@@ -28,38 +26,17 @@ const EditStudyScreen = ({
 }: EditStudyScreenProps) => {
   const { t } = useTranslation()
 
-  const studyIdParam = route.params.studyId
+  const studyId = route.params.studyId
   const canEdit = route.params.canEdit
   const hasBackButton = route.params.hasBackButton
   const openedFromTab = route.params.openedFromTab
 
   const dispatch = useDispatch()
-  const [studyId, setStudyId] = useState<string>('')
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
   const [titlePrompt, setTitlePrompt] = useState<
     { id: string; title: string } | false
   >(false)
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
-
-  // hook to initialize the studyId state and create a new study if studyIdParam is not provided.
-  useEffect(() => {
-    if (studyIdParam) {
-      setStudyId(studyIdParam)
-    } else {
-      // Create Study
-      const studyUuid = generateUUID()
-      dispatch(
-        updateStudy({
-          id: studyUuid,
-          title: t('Document sans titre'),
-          content: null,
-          created_at: Date.now(),
-          modified_at: Date.now(),
-        })
-      )
-      setStudyId(studyUuid)
-    }
-  }, [dispatch, studyIdParam])
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector(

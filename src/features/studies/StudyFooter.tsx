@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import Color from 'color'
-import React from 'react'
+import React, { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import {
   Menu,
@@ -10,7 +10,6 @@ import {
   renderers,
   withMenuContext,
 } from 'react-native-popup-menu'
-import MenuOption from '~common/ui/MenuOption'
 
 import { useTranslation } from 'react-i18next'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
@@ -23,6 +22,10 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import useMediaQueries from '~helpers/useMediaQueries'
+import {
+  MenuOption as BaseMenuOption,
+  MenuOptionProps,
+} from 'react-native-popup-menu'
 
 const { Popover } = renderers
 
@@ -49,6 +52,20 @@ const PopOverMenu = ({ element, popover, ...props }) => (
     </MenuOptions>
   </Menu>
 )
+
+// For whatever reason, we cannot use react-native-popover-view here, so we use react-native-popup-menu instead
+const MenuOption = (props: MenuOptionProps) => {
+  return (
+    <BaseMenuOption
+      {...props}
+      customStyles={{
+        optionWrapper: {
+          paddingHorizontal: 10,
+        },
+      }}
+    />
+  )
+}
 
 const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
   const { t } = useTranslation()
@@ -392,171 +409,177 @@ const ColorPopover = ({ type, setColor, ctx }) => (
   </Box>
 )
 
-const StudyFooter = ({
-  dispatchToWebView,
-  navigateBibleView,
-  openBibleView,
-  activeFormats,
-  ctx,
-}) => {
-  const deviceSize = useMediaQueries()
+const StudyFooter = memo(
+  ({ dispatchToWebView, navigateBibleView, activeFormats, ctx }) => {
+    const deviceSize = useMediaQueries()
 
-  const setColor = (colorModal, color) => {
-    dispatchToWebView('TOGGLE_FORMAT', {
-      type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
-      value: color,
-    })
-  }
+    const setColor = (colorModal, color) => {
+      dispatchToWebView('TOGGLE_FORMAT', {
+        type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
+        value: color,
+      })
+    }
 
-  return (
-    <Box row height={50} backgroundColor="#F9F9F9" alignItems="center">
-      <Box row flex center paddingLeft={10}>
-        <SelectHeading
-          dispatchToWebView={dispatchToWebView}
-          activeFormats={activeFormats}
-        />
-        <FormatIcon
-          isSelected={activeFormats.bold}
-          onPress={() =>
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'BOLD',
-              value: !activeFormats.bold,
-            })
-          }
-          style={{ marginLeft: 10, marginRight: 10 }}
-        >
-          <FeatherIcon color="primary" name="bold" size={16} />
-        </FormatIcon>
-        <FormatIcon
-          isSelected={activeFormats.italic}
-          onPress={() =>
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'ITALIC',
-              value: !activeFormats.italic,
-            })
-          }
-          style={{ marginRight: 10 }}
-        >
-          <FeatherIcon color="primary" name="italic" size={16} />
-        </FormatIcon>
-        <FormatIcon
-          isSelected={activeFormats.underline}
-          onPress={() =>
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'UNDERLINE',
-              value: !activeFormats.underline,
-            })
-          }
-          style={{ marginRight: 10 }}
-        >
-          <FeatherIcon color="primary" name="underline" size={16} />
-        </FormatIcon>
-        {deviceSize === 'xs' || deviceSize === 'sm' ? (
-          <SelectMore
+    return (
+      <Box row height={50} backgroundColor="#F9F9F9" alignItems="center">
+        <Box row flex center paddingLeft={10}>
+          <SelectHeading
             dispatchToWebView={dispatchToWebView}
             activeFormats={activeFormats}
-            ctx={ctx}
           />
-        ) : (
-          <>
-            <PopOverMenu
-              element={
-                <FormatIconForPopover
-                  isSelected={activeFormats.background}
-                  style={{ marginHorizontal: 10 }}
-                >
-                  <BackgroundIcon color={activeFormats.background} />
-                </FormatIconForPopover>
-              }
-              popover={
-                <ColorPopover type="background" ctx={ctx} setColor={setColor} />
-              }
+          <FormatIcon
+            isSelected={activeFormats.bold}
+            onPress={() =>
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'BOLD',
+                value: !activeFormats.bold,
+              })
+            }
+            style={{ marginLeft: 10, marginRight: 10 }}
+          >
+            <FeatherIcon color="primary" name="bold" size={16} />
+          </FormatIcon>
+          <FormatIcon
+            isSelected={activeFormats.italic}
+            onPress={() =>
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'ITALIC',
+                value: !activeFormats.italic,
+              })
+            }
+            style={{ marginRight: 10 }}
+          >
+            <FeatherIcon color="primary" name="italic" size={16} />
+          </FormatIcon>
+          <FormatIcon
+            isSelected={activeFormats.underline}
+            onPress={() =>
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'UNDERLINE',
+                value: !activeFormats.underline,
+              })
+            }
+            style={{ marginRight: 10 }}
+          >
+            <FeatherIcon color="primary" name="underline" size={16} />
+          </FormatIcon>
+          {deviceSize === 'xs' || deviceSize === 'sm' ? (
+            <SelectMore
+              dispatchToWebView={dispatchToWebView}
+              activeFormats={activeFormats}
+              ctx={ctx}
             />
-            <PopOverMenu
-              element={
-                <FormatIconForPopover
-                  isSelected={activeFormats.color}
-                  style={{ marginHorizontal: 10 }}
-                >
-                  <ColorIcon color={activeFormats.color} />
-                </FormatIconForPopover>
-              }
-              popover={
-                <ColorPopover type="color" ctx={ctx} setColor={setColor} />
-              }
-            />
-            <FormatIcon
-              isSelected={activeFormats.blockquote}
-              style={{ marginHorizontal: 10 }}
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'BLOCKQUOTE',
-                  value: !activeFormats.blockquote,
-                })
-              }
-            >
-              <QuoteIcon color="primary" />
-            </FormatIcon>
-            <FormatIcon
-              isSelected={activeFormats.list === 'bullet'}
-              style={{ marginHorizontal: 10 }}
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'LIST',
-                  value: activeFormats.list === 'bullet' ? false : 'bullet',
-                })
-              }
-            >
-              <FeatherIcon color="primary" name="list" size={20} />
-            </FormatIcon>
-            <FormatIcon
-              isSelected={activeFormats.list === 'ordered'}
-              style={{ marginHorizontal: 10 }}
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'LIST',
-                  value: activeFormats.list === 'ordered' ? false : 'ordered',
-                })
-              }
-            >
-              <MaterialIcon
-                color="primary"
-                name="format-list-numbered"
-                size={20}
+          ) : (
+            <>
+              <PopOverMenu
+                element={
+                  <FormatIconForPopover
+                    isSelected={activeFormats.background}
+                    style={{ marginHorizontal: 10 }}
+                  >
+                    <BackgroundIcon color={activeFormats.background} />
+                  </FormatIconForPopover>
+                }
+                popover={
+                  <ColorPopover
+                    type="background"
+                    ctx={ctx}
+                    setColor={setColor}
+                  />
+                }
               />
-            </FormatIcon>
-            <FormatIcon
-              style={{ marginHorizontal: 10 }}
-              onPress={() => {
-                dispatchToWebView('BLOCK_DIVIDER')
-              }}
-            >
-              <FeatherIcon size={20} name="minus" color="primary" />
-            </FormatIcon>
-            <TouchableIcon
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
-              }
-            >
-              <MaterialIcon name="undo" size={20} color="primary" />
-            </TouchableIcon>
-            <TouchableIcon
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
-              }
-            >
-              <MaterialIcon name="redo" size={20} color="primary" />
-            </TouchableIcon>
-          </>
-        )}
-        <Box marginLeft="auto" />
-        <SelectBlock navigateBibleView={navigateBibleView} />
+              <PopOverMenu
+                element={
+                  <FormatIconForPopover
+                    isSelected={activeFormats.color}
+                    style={{ marginHorizontal: 10 }}
+                  >
+                    <ColorIcon color={activeFormats.color} />
+                  </FormatIconForPopover>
+                }
+                popover={
+                  <ColorPopover type="color" ctx={ctx} setColor={setColor} />
+                }
+              />
+              <FormatIcon
+                isSelected={activeFormats.blockquote}
+                style={{ marginHorizontal: 10 }}
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', {
+                    type: 'BLOCKQUOTE',
+                    value: !activeFormats.blockquote,
+                  })
+                }
+              >
+                <QuoteIcon color="primary" />
+              </FormatIcon>
+              <FormatIcon
+                isSelected={activeFormats.list === 'bullet'}
+                style={{ marginHorizontal: 10 }}
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', {
+                    type: 'LIST',
+                    value: activeFormats.list === 'bullet' ? false : 'bullet',
+                  })
+                }
+              >
+                <FeatherIcon color="primary" name="list" size={20} />
+              </FormatIcon>
+              <FormatIcon
+                isSelected={activeFormats.list === 'ordered'}
+                style={{ marginHorizontal: 10 }}
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', {
+                    type: 'LIST',
+                    value: activeFormats.list === 'ordered' ? false : 'ordered',
+                  })
+                }
+              >
+                <MaterialIcon
+                  color="primary"
+                  name="format-list-numbered"
+                  size={20}
+                />
+              </FormatIcon>
+              <FormatIcon
+                style={{ marginHorizontal: 10 }}
+                onPress={() => {
+                  dispatchToWebView('BLOCK_DIVIDER')
+                }}
+              >
+                <FeatherIcon size={20} name="minus" color="primary" />
+              </FormatIcon>
+              <TouchableIcon
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
+                }
+              >
+                <MaterialIcon name="undo" size={20} color="primary" />
+              </TouchableIcon>
+              <TouchableIcon
+                onPress={() =>
+                  dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
+                }
+              >
+                <MaterialIcon name="redo" size={20} color="primary" />
+              </TouchableIcon>
+            </>
+          )}
+          <Box marginLeft="auto" />
+          <SelectBlock navigateBibleView={navigateBibleView} />
+        </Box>
+        <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
+          <MaterialIcon name="keyboard-hide" size={20} color="primary" />
+        </Link>
       </Box>
-      <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
-        <MaterialIcon name="keyboard-hide" size={20} color="primary" />
-      </Link>
-    </Box>
-  )
-}
+    )
+  },
+  (prevProps, nextProps) => {
+    return (
+      JSON.stringify(prevProps.activeFormats) ===
+      JSON.stringify(nextProps.activeFormats)
+    )
+  }
+)
 
 export default withMenuContext(StudyFooter)
