@@ -17,6 +17,7 @@ import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
 import { MainStackProps } from '~navigation/type'
 import { isFullScreenBibleValue } from 'src/state/app'
+import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 
 type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'>
 
@@ -104,14 +105,13 @@ const EditStudyScreen = ({
         title={currentStudy.title}
         study={currentStudy}
       />
-      <WebViewQuillEditor
+      <StudiesDomWrapper
         isReadOnly={isReadOnly}
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
         params={route.params}
         navigateBibleView={navigateBibleView}
-        openBibleView={openBibleView}
       />
       <StudyTitlePrompt
         titlePrompt={titlePrompt}

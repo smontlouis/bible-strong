@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Strong from './Strong'
-import { dispatch, dispatchConsole } from './dispatch'
+import { dispatch } from './dispatch'
 
 import Quill from './quill.js'
 
@@ -24,11 +24,19 @@ class StrongBlock extends Embed {
       definition,
       translatedBy,
       book,
-      original
+      original,
     } = data
     node.innerHTML = ReactDOMServer.renderToString(
       <Strong
-        {...{ title, codeStrong, strongType, phonetique, definition, translatedBy, original }}
+        {...{
+          title,
+          codeStrong,
+          strongType,
+          phonetique,
+          definition,
+          translatedBy,
+          original,
+        }}
       />
     )
     node.setAttribute('data', JSON.stringify(data))
@@ -38,12 +46,14 @@ class StrongBlock extends Embed {
     node.setAttribute('autocapitalize', 'off')
 
     node.addEventListener('click', () => {
-      const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
+      const isReadOnly = document
+        .querySelector('#editor')
+        .classList.contains('ql-disabled')
       if (isReadOnly) {
-        dispatchConsole(`${codeStrong} ${book}`)
+        console.log(`${codeStrong} ${book}`)
         dispatch('VIEW_BIBLE_STRONG', {
           reference: codeStrong,
-          book
+          book,
         })
       }
     })
@@ -96,7 +106,7 @@ class StrongBlock extends Embed {
     // see `remove` implementation on:
     // https://github.com/quilljs/parchment/blob/master/src/blot/abstract/shadow.ts
     this.remove()
-    
+
     // schedule cursor positioning after quill is done with whatever has scheduled
     setTimeout(() => quill.setSelection(cursorPosition, Quill.sources.API), 0)
   }

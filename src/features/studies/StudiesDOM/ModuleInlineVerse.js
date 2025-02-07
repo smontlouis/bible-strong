@@ -1,6 +1,5 @@
 import Quill from './quill.js'
 import InlineTooltip from './InlineTooltip'
-import { dispatch, dispatchConsole } from './dispatch'
 
 const InlineVerseBlot = Quill.import('formats/inline-verse')
 const InlineStrongBlot = Quill.import('formats/inline-strong')
@@ -26,20 +25,23 @@ class ModuleInlineVerse extends Module {
     this.quill.focus()
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
-    // dispatchConsole(`Range: ${JSON.stringify(this.range)}`)
+    // console.log(`Range: ${JSON.stringify(this.range)}`)
 
     if (this.range) {
       if (this.range.length) {
         this.quill.format('inline-strong', false) // Disable inline-strong in case
         this.quill.format('inline-verse', {
           title,
-          verses
+          verses,
         })
-        this.quill.setSelection(this.range.index + this.range.length + 1, Quill.sources.SILENT)
+        this.quill.setSelection(
+          this.range.index + this.range.length + 1,
+          Quill.sources.SILENT
+        )
       } else {
         this.quill.insertText(this.range.index, title, 'inline-verse', {
           title,
-          verses
+          verses,
         })
         this.quill.insertText(this.range.index, ' ', 'inline-verse', false)
       }
@@ -50,7 +52,7 @@ class ModuleInlineVerse extends Module {
     this.quill.focus()
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
-    // dispatchConsole(`Receive strong ${title}`)
+    // console.log(`Receive strong ${title}`)
 
     if (this.range) {
       if (this.range.length) {
@@ -58,14 +60,17 @@ class ModuleInlineVerse extends Module {
         this.quill.format('inline-strong', {
           title,
           codeStrong,
-          book
+          book,
         })
-        this.quill.setSelection(this.range.index + this.range.length + 1, Quill.sources.SILENT)
+        this.quill.setSelection(
+          this.range.index + this.range.length + 1,
+          Quill.sources.SILENT
+        )
       } else {
         this.quill.insertText(this.range.index, title, 'inline-strong', {
           title,
           codeStrong,
-          book
+          book,
         })
         this.quill.insertText(this.range.index, ' ', 'inline-strong', false)
       }
@@ -75,7 +80,7 @@ class ModuleInlineVerse extends Module {
 
 Quill.register(
   {
-    'modules/inline-verse': ModuleInlineVerse
+    'modules/inline-verse': ModuleInlineVerse,
   },
   true
 )

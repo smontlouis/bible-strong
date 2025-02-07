@@ -1,18 +1,15 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react'
-import { Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native'
-import * as FileSystem from 'expo-file-system'
-import { WebView } from 'react-native-webview'
-import { Asset } from 'expo-asset'
-import * as Sentry from '@sentry/react-native'
 import { useNavigation } from '@react-navigation/native'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
+import { WebViewMessageEvent } from 'react-native-webview'
 
 import books from '~assets/bible_versions/books-desc'
-import literata from '~assets/fonts/literata'
-import StudyFooter from './StudyFooter'
-import i18n from '~i18n'
-import studiesHTML from './studiesWebView/studiesHTML'
-import { EditStudyScreenProps } from '~navigation/type'
 import { StudyNavigateBibleType } from '~common/types'
+import useDidUpdate from '~helpers/useDidUpdate'
+import i18n from '~i18n'
+import { EditStudyScreenProps } from '~navigation/type'
+import StudyFooter from '../StudyFooter'
+import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -29,7 +26,7 @@ type Props = {
   fontFamily: string
   navigateBibleView: (type: StudyNavigateBibleType) => void
 }
-const WebViewQuillEditor = ({
+const StudiesDomWrapper = ({
   params,
   isReadOnly,
   onDeltaChangeCallback,
@@ -37,7 +34,7 @@ const WebViewQuillEditor = ({
   fontFamily,
   navigateBibleView,
 }: Props) => {
-  const webViewRef = useRef<WebView>(null)
+  const ref = useRef<StudyDOMRef>(null)
   const navigation = useNavigation()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
   const [activeFormats, setActiveFormats] = useState({})
@@ -86,52 +83,20 @@ const WebViewQuillEditor = ({
     }
   }, [params])
 
-  useEffect(() => {
-    if (!isReadOnly) {
-      dispatchToWebView('CAN_EDIT')
-      dispatchToWebView('FOCUS_EDITOR')
-    } else {
-      dispatchToWebView('READ_ONLY')
-      dispatchToWebView('BLUR_EDITOR')
-    }
-  }, [isReadOnly])
-
   const dispatchToWebView = useCallback((type: string, payload?: any) => {
-    if (webViewRef.current) {
+    if (ref.current) {
       console.log('RN DISPATCH: ', type)
-
-      webViewRef.current.injectJavaScript(`
-        (function() {
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent("messages", {
-              detail: ${JSON.stringify({ type, payload })}
-            }));
-          }, 0)
-        })()
-      `)
+      console.log(ref.current)
+      ref.current?.dispatch({ type, payload })
     }
   }, [])
 
-  const injectFont = () => {
-    const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
-
-    return `
-        var style = document.createElement("style");
-        style.innerHTML = "${fontRule}";
-        document.head.appendChild(style);
-        true;
-    `
-  }
-
-  const handleMessage = event => {
+  const dispatch = (event: WebViewMessageEvent) => {
     let msgData
     try {
       msgData = JSON.parse(event.nativeEvent.data)
 
       switch (msgData.type) {
-        case 'EDITOR_LOADED':
-          editorLoaded()
-          break
         case 'TEXT_CHANGED':
           if (onDeltaChangeCallback) {
             delete msgData.payload.type
@@ -184,24 +149,6 @@ const WebViewQuillEditor = ({
           setActiveFormats(JSON.parse(msgData.payload))
           return
         }
-        case 'CONSOLE_LOG': {
-          console.log(
-            `%c${msgData.payload}`,
-            'color:black;background-color:#81ecec'
-          )
-          return
-        }
-        case 'THROW_ERROR': {
-          console.log(
-            `%c${msgData.payload}`,
-            'color:black;background-color:#81ecec'
-          )
-          Alert.alert(
-            `Une erreur est survenue, impossible de charger la page: ${msgData.payload} \n Le développeur en a été informé.`
-          )
-          Sentry.captureMessage(msgData.payload)
-          return
-        }
 
         default:
           console.warn(
@@ -211,37 +158,6 @@ const WebViewQuillEditor = ({
     } catch (err) {
       console.warn(err)
     }
-  }
-
-  const onWebViewLoaded = () => {
-    dispatchToWebView('LOAD_EDITOR', {
-      fontFamily,
-      language: i18n.language,
-    })
-  }
-
-  const editorLoaded = () => {
-    if (contentToDisplay) {
-      dispatchToWebView('SET_CONTENTS', {
-        delta: contentToDisplay,
-      })
-    }
-
-    if (!isReadOnly) {
-      dispatchToWebView('CAN_EDIT')
-    }
-  }
-
-  const onError = error => {
-    Alert.alert('WebView onError', error, [
-      { text: 'OK', onPress: () => console.log('OK Pressed') },
-    ])
-  }
-
-  const renderError = error => {
-    Alert.alert('WebView renderError', error, [
-      { text: 'OK', onPress: () => console.log('OK Pressed') },
-    ])
   }
 
   return (
@@ -254,35 +170,18 @@ const WebViewQuillEditor = ({
         borderTopRightRadius: 30,
       }}
     >
-      <WebView
-        useWebKit
-        onLoad={onWebViewLoaded}
-        onLoadEnd={injectFont}
-        onMessage={handleMessage}
-        originWhitelist={['*']}
-        ref={webViewRef}
-        source={{ html: studiesHTML }}
-        injectedJavaScript={injectFont()}
-        domStorageEnabled
-        allowUniversalAccessFromFileURLs
-        allowFileAccessFromFileURLs
-        allowFileAccess
-        keyboardDisplayRequiresUserAction={false}
-        renderError={renderError}
-        onError={onError}
-        bounces={false}
-        scrollEnabled={false}
-        hideKeyboardAccessoryView
-        onContentProcessDidTerminate={syntheticEvent => {
-          console.warn('Content process terminated, reloading...')
-          const { nativeEvent } = syntheticEvent
-          webViewRef.current?.reload()
-          Sentry.captureException(nativeEvent)
-        }}
-        onRenderProcessGone={syntheticEvent => {
-          webViewRef.current?.reload()
-          const { nativeEvent } = syntheticEvent
-          Sentry.captureException(nativeEvent)
+      <StudiesDOMComponent
+        ref={ref}
+        fontFamily={fontFamily}
+        language={i18n.language}
+        contentToDisplay={contentToDisplay}
+        isReadOnly={isReadOnly}
+        dom={{
+          onMessage: dispatch,
+          keyboardDisplayRequiresUserAction: false,
+          bounces: false,
+          scrollEnabled: false,
+          hideKeyboardAccessoryView: true,
         }}
       />
       {isKeyboardOpened && (
@@ -296,8 +195,8 @@ const WebViewQuillEditor = ({
   )
 }
 
-WebViewQuillEditor.defaultProps = {
+StudiesDomWrapper.defaultProps = {
   theme: 'snow',
 }
 
-export default WebViewQuillEditor
+export default StudiesDomWrapper
