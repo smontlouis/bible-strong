@@ -26,6 +26,7 @@ interface Props {
     ops: string[]
   }
   isReadOnly: boolean
+  colorScheme: 'light' | 'dark'
 }
 
 export interface StudyDOMRef extends DOMImperativeFactory {
@@ -33,7 +34,7 @@ export interface StudyDOMRef extends DOMImperativeFactory {
 }
 
 export default forwardRef<StudyDOMRef, Props>(function MyComponent(
-  { fontFamily, language, contentToDisplay, isReadOnly },
+  { fontFamily, language, contentToDisplay, isReadOnly, colorScheme },
   ref
 ) {
   const [loaded] = useFonts({
@@ -253,5 +254,10 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
     addTextChangeEventToEditor()
   }
 
-  return <div id="editor" />
+  return (
+    <div
+      id="editor"
+      style={{ filter: colorScheme === 'dark' ? 'invert(1)' : 'none' }}
+    />
+  )
 })

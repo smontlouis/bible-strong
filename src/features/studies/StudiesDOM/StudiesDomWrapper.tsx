@@ -11,6 +11,7 @@ import { EditStudyScreenProps } from '~navigation/type'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { timeout } from '~helpers/timeout'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -37,6 +38,7 @@ const StudiesDomWrapper = ({
   const navigation = useNavigation()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
   const [activeFormats, setActiveFormats] = useState({})
+  const { colorScheme } = useCurrentThemeSelector()
 
   const navigateBibleView = async (type: StudyNavigateBibleType) => {
     dispatchToWebView('BLUR_EDITOR')
@@ -193,6 +195,7 @@ const StudiesDomWrapper = ({
         language={i18n.language}
         contentToDisplay={contentToDisplay}
         isReadOnly={isReadOnly}
+        colorScheme={colorScheme}
         dom={{
           onMessage: dispatch,
           keyboardDisplayRequiresUserAction: false,

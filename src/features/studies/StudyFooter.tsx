@@ -26,6 +26,7 @@ import {
   MenuOption as BaseMenuOption,
   MenuOptionProps,
 } from 'react-native-popup-menu'
+import { useTheme } from '@emotion/react'
 
 const { Popover } = renderers
 
@@ -34,24 +35,27 @@ const TouchableIcon = styled(TouchableOpacity)(() => ({
   marginHorizontal: 10,
 }))
 
-const PopOverMenu = ({ element, popover, ...props }) => (
-  <Menu renderer={Popover} rendererProps={{ placement: 'top' }} {...props}>
-    <MenuTrigger>{element}</MenuTrigger>
-    <MenuOptions
-      optionsContainerStyle={{
-        backgroundColor: 'white',
-        shadowColor: 'rgb(89,131,240)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 7,
-        elevation: 1,
-        borderRadius: 8,
-      }}
-    >
-      <Box padding={10}>{popover}</Box>
-    </MenuOptions>
-  </Menu>
-)
+const PopOverMenu = ({ element, popover, ...props }) => {
+  const theme = useTheme()
+  return (
+    <Menu renderer={Popover} rendererProps={{ placement: 'top' }} {...props}>
+      <MenuTrigger>{element}</MenuTrigger>
+      <MenuOptions
+        optionsContainerStyle={{
+          backgroundColor: theme.colors.reverse,
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          borderRadius: 8,
+        }}
+      >
+        <Box padding={10}>{popover}</Box>
+      </MenuOptions>
+    </Menu>
+  )
+}
 
 // For whatever reason, we cannot use react-native-popover-view here, so we use react-native-popup-menu instead
 const MenuOption = (props: MenuOptionProps) => {
@@ -421,7 +425,7 @@ const StudyFooter = memo(
     }
 
     return (
-      <Box row height={50} backgroundColor="#F9F9F9" alignItems="center">
+      <Box row height={50} backgroundColor="reverse" alignItems="center">
         <Box row flex center paddingLeft={10}>
           <SelectHeading
             dispatchToWebView={dispatchToWebView}
