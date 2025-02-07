@@ -362,7 +362,7 @@ const VersesRenderer = ({
         })
       }
     }, 200)
-  }, [verseToScroll])
+  }, [verseToScroll, verses])
 
   const sortVersesToTags = (
     highlightedVerses: HighlightsObj

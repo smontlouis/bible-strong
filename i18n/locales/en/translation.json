@@ -603,6 +603,7 @@
   "event": "Event",
 
   "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number.",
+  "tips.manual-backup": "To prevent any data loss, you can manually export your data in the Import/Export tab",
   "goToVerse": "Go to verse",
 
   "Normal": "Normal",

@@ -10,6 +10,7 @@ import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
+import { timeout } from '~helpers/timeout'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -24,7 +25,6 @@ type Props = {
     ops: string[]
   }
   fontFamily: string
-  navigateBibleView: (type: StudyNavigateBibleType) => void
 }
 const StudiesDomWrapper = ({
   params,
@@ -32,12 +32,19 @@ const StudiesDomWrapper = ({
   onDeltaChangeCallback,
   contentToDisplay,
   fontFamily,
-  navigateBibleView,
 }: Props) => {
   const ref = useRef<StudyDOMRef>(null)
   const navigation = useNavigation()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
   const [activeFormats, setActiveFormats] = useState({})
+
+  const navigateBibleView = async (type: StudyNavigateBibleType) => {
+    dispatchToWebView('BLUR_EDITOR')
+    await timeout(300)
+    navigation.navigate('BibleView', {
+      isSelectionMode: type,
+    })
+  }
 
   useEffect(() => {
     const updateListener =
@@ -91,10 +98,12 @@ const StudiesDomWrapper = ({
     }
   }, [])
 
-  const dispatch = (event: WebViewMessageEvent) => {
+  const dispatch = async (event: WebViewMessageEvent) => {
     let msgData
     try {
       msgData = JSON.parse(event.nativeEvent.data)
+
+      console.log('DISPATCH: ', msgData.type)
 
       switch (msgData.type) {
         case 'TEXT_CHANGED':
@@ -122,24 +131,32 @@ const StudiesDomWrapper = ({
           return
         }
         case 'SELECT_BIBLE_VERSE': {
+          dispatchToWebView('BLUR_EDITOR')
+          await timeout(300)
           navigation.navigate('BibleView', {
             isSelectionMode: 'verse',
           })
           return
         }
         case 'SELECT_BIBLE_STRONG': {
+          dispatchToWebView('BLUR_EDITOR')
+          await timeout(300)
           navigation.navigate('BibleView', {
             isSelectionMode: 'strong',
           })
           return
         }
         case 'SELECT_BIBLE_VERSE_BLOCK': {
+          dispatchToWebView('BLUR_EDITOR')
+          await timeout(300)
           navigation.navigate('BibleView', {
             isSelectionMode: 'verse-block',
           })
           return
         }
         case 'SELECT_BIBLE_STRONG_BLOCK': {
+          dispatchToWebView('BLUR_EDITOR')
+          await timeout(300)
           navigation.navigate('BibleView', {
             isSelectionMode: 'strong-block',
           })

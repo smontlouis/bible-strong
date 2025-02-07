@@ -45,6 +45,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           },
         },
       },
+      CFBundleAllowMixedLocalizations: true,
+      CFBundleLocalizations: ['en', 'fr'],
+      CFBundleDevelopmentRegion: 'en',
     },
 
     entitlements: {

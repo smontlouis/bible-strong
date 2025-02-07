@@ -36,6 +36,7 @@ import * as Sharing from 'expo-sharing'
 import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { useNavigation } from '@react-navigation/native'
+import { HelpTip } from '~features/tips/HelpTip'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
   flexDirection: 'row',
@@ -253,6 +254,7 @@ export const More = ({ closeMenu }: MoreProps) => {
         }}
       >
         <Box paddingVertical={10}>
+          <HelpTip id="manual-backup" description={t('tips.manual-backup')} />
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
             <Text color="primary" bold fontSize={15}>
@@ -379,7 +381,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
 
           <ChangeLanguage />
-          <ManualSync />
+          {/* <ManualSync /> */}
           <LinkItem route="ImportExport">
             <StyledIcon name="upload" size={25} />
             <Text fontSize={15}>{t('app.importexport')}</Text>

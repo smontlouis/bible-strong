@@ -8,11 +8,9 @@ import { RootStyles } from './BibleDOMWrapper'
 import { SelectedCode, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 
-const Wrapper = styled('div')<RootStyles & { textDisplay?: string }>(
-  ({ textDisplay }) => ({
-    display: textDisplay,
-  })
-)
+const Wrapper = styled('div')<RootStyles>(({ settings: { textDisplay } }) => ({
+  display: textDisplay,
+}))
 
 const Section = styled('div')<RootStyles & { isSelected?: boolean }>(
   ({ settings: { theme, colors } }) => ({

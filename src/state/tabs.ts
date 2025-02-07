@@ -606,6 +606,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
         draft.data.selectedChapter = currentChapter - 1
         draft.data.selectedVerse = 1
+        draft.data.focusVerses = undefined
         draft.data.temp.selectedChapter = currentChapter - 1
         draft.data.temp.selectedVerse = 1
 
@@ -648,6 +649,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
         draft.data.selectedChapter = currentChapter + 1
         draft.data.selectedVerse = 1
+        draft.data.focusVerses = undefined
         draft.data.temp.selectedChapter = currentChapter + 1
         draft.data.temp.selectedVerse = 1
 

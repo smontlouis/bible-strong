@@ -13,8 +13,6 @@ export const onAnimateModalClose = (onClose?: () => void) => (
   fromIndex: number,
   toIndex: number
 ) => {
-  console.log('fromIndex', fromIndex)
-  console.log('toIndex', toIndex)
   if (toIndex === -1) onClose?.()
 }
 

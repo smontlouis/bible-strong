@@ -362,7 +362,9 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             </Text>
             <TouchableIcon
               isSelected
-              name={textDisplay === 'inline' ? 'menu' : 'list'}
+              name={
+                textDisplay === 'inline' ? 'arrow-right' : 'corner-down-right'
+              }
               onPress={() => {
                 const nextDisplay =
                   textDisplay === 'inline' ? 'block' : 'inline'

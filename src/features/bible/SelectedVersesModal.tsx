@@ -285,6 +285,7 @@ const VersesModal = ({
                   paddingVertical: 10,
                   overflow: 'visible',
                   justifyContent: 'space-around',
+                  minWidth: '100%',
                 }}
               >
                 <Box width={wp(20, 400)}>

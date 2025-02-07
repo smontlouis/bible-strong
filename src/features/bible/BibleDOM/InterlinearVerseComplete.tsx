@@ -9,9 +9,7 @@ import { Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 
-const Wrapper = styled('div')<
-  RootStyles & { textDisplay?: 'block' | 'inline' }
->(({ settings: { textDisplay } }) => ({
+const Wrapper = styled('div')<RootStyles>(({ settings: { textDisplay } }) => ({
   display: textDisplay,
 }))
 

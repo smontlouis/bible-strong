@@ -55,7 +55,7 @@ const BasicFooter = ({
         animate={useDerivedValue(() => {
           return {
             translateY: isFullScreenBibleValue.value
-              ? HEADER_HEIGHT + insets.bottom + 40
+              ? HEADER_HEIGHT + insets.bottom + 60
               : 0,
           }
         })}
@@ -88,7 +88,7 @@ const BasicFooter = ({
         animate={useDerivedValue(() => {
           return {
             translateY: isFullScreenBibleValue.value
-              ? HEADER_HEIGHT + insets.bottom + 40
+              ? HEADER_HEIGHT + insets.bottom + 60
               : 0,
           }
         })}

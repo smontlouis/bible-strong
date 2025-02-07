@@ -1,23 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import generateUUID from '~helpers/generateUUID'
 
+import { useFocusEffect } from '@react-navigation/native'
+import { StackScreenProps } from '@react-navigation/stack'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
-import { RouteProp, useFocusEffect } from '@react-navigation/native'
-import { StudyNavigateBibleType } from '~common/types'
+import { isFullScreenBibleValue } from 'src/state/app'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
-import WebViewQuillEditor from '~features/studies/WebViewQuillEditor'
+import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
+import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
-import { MainStackProps } from '~navigation/type'
-import { isFullScreenBibleValue } from 'src/state/app'
-import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 
 type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'>
 
@@ -60,18 +57,6 @@ const EditStudyScreen = ({
     )
   }
 
-  const navigateBibleView = (type: StudyNavigateBibleType) => {
-    navigation.navigate('BibleView', {
-      isSelectionMode: type,
-    })
-  }
-
-  const openBibleView = () => {
-    navigation.navigate('BibleView', {
-      hasBackButton: true,
-    })
-  }
-
   // Control weither bible webview send back to study tab or not
   useEffect(() => {
     setOpenedFromTab(openedFromTab || false)
@@ -111,7 +96,6 @@ const EditStudyScreen = ({
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
         params={route.params}
-        navigateBibleView={navigateBibleView}
       />
       <StudyTitlePrompt
         titlePrompt={titlePrompt}

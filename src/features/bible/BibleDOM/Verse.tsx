@@ -43,9 +43,7 @@ const NumberText = styled<RootStyles & { isFocused?: boolean }>('span')(
   })
 )
 
-const Wrapper = styled('span')<
-  RootStyles & { textDisplay?: 'block' | 'inline'; id?: string }
->(({ textDisplay }) => ({
+const Wrapper = styled('span')<RootStyles>(({ settings: { textDisplay } }) => ({
   display: textDisplay,
   ...(textDisplay === 'block'
     ? {

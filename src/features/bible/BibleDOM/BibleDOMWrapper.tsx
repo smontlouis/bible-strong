@@ -136,7 +136,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const theme = useTheme()
-
+  const insets = useSafeAreaInsets()
   const dispatch: Dispatch = async action => {
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
@@ -284,6 +284,10 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
           flex: 1,
           backgroundColor: theme.colors.reverse,
           zIndex: -1,
+          ...(Platform.OS === 'android' && {
+            marginTop: insets.top,
+            marginBottom: insets.bottom,
+          }),
         },
       }}
       verses={verses}

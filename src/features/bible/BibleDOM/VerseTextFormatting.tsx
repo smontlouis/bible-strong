@@ -12,16 +12,16 @@ import { SelectedCode, StudyNavigateBibleType, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import VerseTags from './VerseTags'
 
-export const Wrapper = styled('span')<
-  RootStyles & { textDisplay?: 'block' | 'inline' }
->(({ textDisplay, settings: { theme, colors } }) => ({
-  display: textDisplay,
-  ...(textDisplay === 'block'
-    ? {
-        marginBottom: '5px',
-      }
-    : {}),
-}))
+export const Wrapper = styled('span')<RootStyles>(
+  ({ settings: { textDisplay } }) => ({
+    display: textDisplay,
+    ...(textDisplay === 'block'
+      ? {
+          marginBottom: '5px',
+        }
+      : {}),
+  })
+)
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, fontFamily } }) => ({
