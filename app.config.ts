@@ -132,9 +132,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         'src/assets/timeline/*',
         'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf',
         'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf',
-        'src/features/bible/bibleWebView/dist/index.html',
-        'src/features/studies/studiesWebView/dist/index.html',
       ],
     },
+    ethern: {
+      projectId: 'ccb42b86-1286-4ca0-99bd-929b7ce418c1',
+    },
   },
+  updates: {
+    url: 'https://api.ethern.dev/updates/ccb42b86-1286-4ca0-99bd-929b7ce418c1',
+  },
+  runtimeVersion: '1.0.0',
 })

@@ -83,6 +83,7 @@
     "expo-splash-screen": "~0.29.21",
     "expo-sqlite": "~15.1.0",
     "expo-system-ui": "~4.0.7",
+    "expo-updates": "~0.26.17",
     "firestore-size": "^2.0.7",
     "fuse.js": "^6.4.6",
     "global": "^4.4.0",
