@@ -31,6 +31,8 @@ import FabButton from '~common/ui/FabButton'
 import { multipleTagsModalAtom } from '../../state/app'
 import Fab from '~common/ui/Fab'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BottomSheetFooter } from '@gorhom/bottom-sheet/'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -73,6 +75,7 @@ const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
   const currentNote = useCurrentNote({ noteVerses })
   const reference = verseToReference(noteVerses)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const { bottomBarHeight } = useBottomBarHeightInTab()
 
   useEffect(() => {
     if (noteVerses) {
@@ -211,26 +214,42 @@ ${currentNote?.description}
           }
         />
       }
-      footerComponent={() =>
+      footerComponent={props =>
         isEditing ? (
-          <HStack py={10} px={20} justifyContent="flex-end">
-            <Box>
-              <Button reverse onPress={cancelEditing}>
-                {t('Annuler')}
-              </Button>
-            </Box>
-            <Box>
-              <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
-                {t('Sauvegarder')}
-              </Button>
-            </Box>
-          </HStack>
+          <BottomSheetFooter {...props}>
+            <HStack
+              py={10}
+              px={20}
+              justifyContent="flex-end"
+              h={80 + bottomBarHeight}
+              paddingBottom={bottomBarHeight}
+            >
+              <Box>
+                <Button reverse onPress={cancelEditing}>
+                  {t('Annuler')}
+                </Button>
+              </Box>
+              <Box>
+                <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
+                  {t('Sauvegarder')}
+                </Button>
+              </Box>
+            </HStack>
+          </BottomSheetFooter>
         ) : (
-          <HStack py={10} px={20} justifyContent="flex-end">
-            <Box>
-              <Fab icon="edit" onPress={onEditNote} />
-            </Box>
-          </HStack>
+          <BottomSheetFooter {...props}>
+            <HStack
+              py={10}
+              px={20}
+              justifyContent="flex-end"
+              h={80 + bottomBarHeight}
+              paddingBottom={bottomBarHeight}
+            >
+              <Box>
+                <Fab icon="edit" onPress={onEditNote} />
+              </Box>
+            </HStack>
+          </BottomSheetFooter>
         )
       }
     >

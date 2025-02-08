@@ -257,7 +257,10 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
   return (
     <div
       id="editor"
-      style={{ filter: colorScheme === 'dark' ? 'invert(1)' : 'none' }}
+      style={{
+        filter:
+          colorScheme === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none',
+      }}
     />
   )
 })
