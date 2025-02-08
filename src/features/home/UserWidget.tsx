@@ -197,7 +197,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
         <Box row alignItems="center" overflow="visible">
           <Box flex>
             <Text title fontSize={25}>
-              {`${t('Bonjour')} ${extractFirstName(user.displayName)},`}
+              {`${t('Bonjour')} ${extractFirstName(user.displayName)},,,`}
             </Text>
           </Box>
         </Box>
