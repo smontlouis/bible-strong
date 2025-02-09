@@ -111,7 +111,7 @@ const Container = styled('div')<
   maxWidth: isParallelVerse ? 'none' : '800px',
   margin: '0 auto',
   padding: isParallelVerse ? '10px 5px' : '10px 15px',
-  paddingBottom: '210px',
+  paddingBottom: '300px',
   textAlign: alignContent,
   background: colors[theme].reverse,
   color: colors[theme].default,
@@ -362,7 +362,7 @@ const VersesRenderer = ({
         })
       }
     }, 200)
-  }, [verseToScroll, verses])
+  }, [verseToScroll])
 
   const sortVersesToTags = (
     highlightedVerses: HighlightsObj

@@ -14,6 +14,7 @@ import StylizedHTMLView from '~common/StylizedHTMLView'
 import { wp } from '~helpers/utils'
 import truncate from '~helpers/truncate'
 import { StackActions } from '@react-navigation/native'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -115,7 +116,7 @@ class StrongCard extends React.Component {
           </Box>
         </Box>
 
-        <ScrollView style={{ marginBottom: 15 }}>
+        <BottomSheetScrollView style={{ marginBottom: 15 }}>
           {!!definition && (
             <ViewItem>
               <StylizedHTMLView
@@ -137,7 +138,7 @@ class StrongCard extends React.Component {
               />
             </ViewItem>
           )}
-        </ScrollView>
+        </BottomSheetScrollView>
       </Container>
     )
   }

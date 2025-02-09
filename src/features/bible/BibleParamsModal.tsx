@@ -185,6 +185,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
         backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
         enableDynamicSizing={false}
         snapPoints={['40%']}
+        activeOffsetY={[-20, 20]}
         key={key}
         {...bottomSheetStyles}
       >

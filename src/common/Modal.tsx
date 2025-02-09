@@ -73,6 +73,7 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           enablePanDownToClose
           enableDynamicSizing={false}
           backdropComponent={renderBackdrop}
+          activeOffsetY={[-20, 20]}
           onAnimate={onAnimateModalClose(props.onModalClose)}
           key={key}
           {...bottomSheetStyles}

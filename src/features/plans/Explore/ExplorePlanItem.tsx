@@ -1,5 +1,5 @@
 // TODO : type nested screen
-import BottomSheet from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import { Image } from 'expo-image'
 import React from 'react'
@@ -102,43 +102,45 @@ const ExplorePlanItem = (
           author={author}
           downloads={downloads}
           description={description}
-          footerComponent={() => (
-            <Box
-              paddingBottom={10 + insets.bottom}
-              paddingHorizontal={20}
-              paddingTop={10}
-            >
-              <Button
-                success
-                disabled={hasAlreadyStarted || isLoading}
-                onPress={() => {
-                  setIsLoading(true)
-                  dispatch(fetchPlan({ id, update: true }))
-                    .then(() => {
-                      setIsLoading(false)
-                      navigation.goBack()
-                      modalRef?.current?.close()
-                      SnackBar.show(t('Plan ajouté avec succès'))
-                    })
-                    .catch(e => {
-                      console.log(e)
-                      setIsLoading(false)
-                      SnackBar.show(
-                        t(
-                          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-                        ),
-                        'danger'
-                      )
-                    })
-                }}
+          footerComponent={props => (
+            <BottomSheetFooter {...props}>
+              <Box
+                paddingBottom={10 + insets.bottom}
+                paddingHorizontal={20}
+                paddingTop={10}
               >
-                {hasAlreadyStarted
-                  ? t('Plan démarré')
-                  : isLoading
-                  ? t('Chargement...')
-                  : t('Démarrer ce plan')}
-              </Button>
-            </Box>
+                <Button
+                  success
+                  disabled={hasAlreadyStarted || isLoading}
+                  onPress={() => {
+                    setIsLoading(true)
+                    dispatch(fetchPlan({ id, update: true }))
+                      .then(() => {
+                        setIsLoading(false)
+                        navigation.goBack()
+                        modalRef?.current?.close()
+                        SnackBar.show(t('Plan ajouté avec succès'))
+                      })
+                      .catch(e => {
+                        console.log(e)
+                        setIsLoading(false)
+                        SnackBar.show(
+                          t(
+                            "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+                          ),
+                          'danger'
+                        )
+                      })
+                  }}
+                >
+                  {hasAlreadyStarted
+                    ? t('Plan démarré')
+                    : isLoading
+                    ? t('Chargement...')
+                    : t('Démarrer ce plan')}
+                </Button>
+              </Box>
+            </BottomSheetFooter>
           )}
         />
       </Portal>

@@ -18,7 +18,7 @@ const TabButton = ({}: TabButtonProps) => {
         center
         style={iconStyle}
       >
-        <Text fontSize={12} color="tertiary">
+        <Text fontSize={12} color="tertiary" lineHeight={15}>
           {tabsCount}
         </Text>
       </AnimatedBox>

@@ -376,7 +376,7 @@ const BibleViewer = ({
           }
         />
       )}
-      {!error && (
+      {!error && verses.length > 0 && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
           book={book}
