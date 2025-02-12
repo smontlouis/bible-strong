@@ -109,7 +109,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   }
 
   useEffect(() => {
-    let listen: EmitterSubscription
     ;(async () => {
       if (settings.commentsDisplay) {
         const mhyCommentsNeedsDownload = await getIfMhyCommentsNeedsDownload()
@@ -119,12 +118,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
         }
       }
     })()
-
-    return () => {
-      if (Platform.OS === 'android') {
-        listen?.remove()
-      }
-    }
   }, [dispatch, settings.commentsDisplay])
 
   const orientation = useDeviceOrientation()

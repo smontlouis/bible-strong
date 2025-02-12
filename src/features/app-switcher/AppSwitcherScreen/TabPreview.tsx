@@ -101,7 +101,7 @@ const TabPreview = ({
                 width: '100%',
                 height: '100%',
                 borderRadius: 20,
-                opacity: 0.15,
+                opacity: 0.8,
                 ...StyleSheet.absoluteFillObject,
               }}
               source={{ uri: `data:image/png;base64,${base64Preview}` }}
@@ -111,8 +111,9 @@ const TabPreview = ({
             center
             width={80}
             height={80}
-            borderRadius={40}
+            borderRadius={20}
             backgroundColor="lightGrey"
+            opacity={0.7}
           >
             <Box>{getIconByTabType(type, 30)}</Box>
           </Box>

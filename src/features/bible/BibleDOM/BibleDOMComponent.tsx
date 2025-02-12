@@ -1,6 +1,6 @@
 'use dom'
 
-import { setup, styled } from 'goober'
+import { keyframes, setup, styled } from 'goober'
 import React, { useEffect, useState } from 'react'
 import { TagsObj, Verse as TVerse } from '~common/types'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
@@ -105,6 +105,16 @@ const extractParallelVersionTitles = (
   return [currentVersion, ...parallelVerses.map(p => p.id)]
 }
 
+const fadeIn = keyframes({
+  '0%': {
+    opacity: 0,
+  },
+
+  '100%': {
+    opacity: 1,
+  },
+})
+
 const Container = styled('div')<
   RootStyles & { rtl: boolean; isParallelVerse: boolean }
 >(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
@@ -117,6 +127,7 @@ const Container = styled('div')<
   color: colors[theme].default,
   direction: rtl ? 'rtl' : 'ltr',
   paddingTop: `${HEADER_HEIGHT + 10}px`,
+  animation: `${fadeIn} 0.5s`,
   ...(rtl ? { textAlign: 'right' } : {}),
 }))
 
@@ -351,9 +362,11 @@ const VersesRenderer = ({
   useEffect(() => {
     if (!verseToScroll) return
 
-    if (verseToScroll === 1) return
+    if (verseToScroll === 1) {
+      return
+    }
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       const element = document.querySelector(`#verset-${verseToScroll}`)
       if (element) {
         const elementPosition = element.getBoundingClientRect().top
@@ -361,7 +374,7 @@ const VersesRenderer = ({
           top: window.scrollY + elementPosition - 100,
         })
       }
-    }, 200)
+    })
   }, [verseToScroll])
 
   const sortVersesToTags = (
@@ -516,26 +529,6 @@ const VersesRenderer = ({
     })
   }
 
-  if (!verses) {
-    return (
-      <div
-        style={{
-          height: '100vh',
-          fontFamily: 'arial',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textTransform: 'uppercase',
-        }}
-      >
-        Une erreur est survenue.
-      </div>
-    )
-  }
-
-  if (!verses.length) {
-    return null
-  }
   const comments = transformComments(originalComments, verses.length)
 
   const isHebreu =
@@ -549,6 +542,8 @@ const VersesRenderer = ({
   const taggedVerses = sortVersesToTags(highlightedVerses)
   const notedVersesCount = getNotedVersesCount(verses, notedVerses)
   const notedVersesText = getNotedVersesText(verses, notedVerses)
+
+  // console.log('BibleDOMComponent: verses', verses.length)
 
   return (
     <DispatchProvider dispatch={dispatch}>

@@ -15,7 +15,7 @@ import {
   VerseIds,
 } from '~common/types'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
-import { Platform, View } from 'react-native'
+import { ActivityIndicator, Platform, View } from 'react-native'
 import { RootState } from '~redux/modules/reducer'
 import {
   ADD_PARALLEL_VERSION,
@@ -132,6 +132,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isSelectionMode,
     selectedCode,
     comments,
+    isLoading,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -275,6 +276,21 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
     }
+  }
+
+  if (isLoading && !verses.length) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: -1,
+        }}
+      >
+        <ActivityIndicator />
+      </View>
+    )
   }
 
   return (

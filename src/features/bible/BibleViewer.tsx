@@ -351,6 +351,8 @@ const BibleViewer = ({
     }
   })
 
+  // console.log('BibleViewer: verses', verses.length)
+
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
     <Box flex={1}>
@@ -376,7 +378,7 @@ const BibleViewer = ({
           }
         />
       )}
-      {!error && verses.length > 0 && (
+      {!error && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
           book={book}
