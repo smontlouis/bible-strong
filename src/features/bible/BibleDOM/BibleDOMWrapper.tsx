@@ -300,13 +300,13 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
 
   // console.log('BibleDOMWrapper', version, props.book.Numero, chapter)
 
-  if (isLoading && !verses.length) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    )
-  }
+  // if (isLoading && !verses.length) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  //       <ActivityIndicator />
+  //     </View>
+  //   )
+  // }
 
   return (
     <BibleDOMComponent
