@@ -91,7 +91,7 @@ const Header = ({
     <MotiHStack
       width="100%"
       maxWidth={830}
-      bg="green"
+      bg="reverse"
       px={15}
       paddingTop={insets.top}
       height={HEADER_HEIGHT + insets.top}

@@ -2,7 +2,7 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab, VersionCode } from '../../../state/tabs'
 import { MainStackProps } from '~navigation/type'
-import BibleDOMComponent from './BibleDOMComponentTest'
+import BibleDOMComponent from './BibleDOMComponent'
 // @ts-expect-error
 import books from '~assets/bible_versions/books'
 import * as Haptics from 'expo-haptics'
@@ -137,7 +137,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isSelectionMode,
     selectedCode,
     comments,
-    isLoading: isLoadingFromProps,
+    isLoading,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -283,43 +283,49 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     }
   }
 
-  const isLoading = useDebounce(isLoadingFromProps && !verses.length, 1000)
-
-  console.log('BibleDOMWrapper: verses', verses.length)
+  // if (isLoading && !verses.length) {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         alignItems: 'center',
+  //         justifyContent: 'center',
+  //         zIndex: -1,
+  //       }}
+  //     >
+  //       <ActivityIndicator />
+  //     </View>
+  //   )
+  // }
 
   return (
-    <>
-      <Text paddingTop={insets.top + 54}>Verses: {verses.length}</Text>
-      <BibleDOMComponent
-        dom={{
-          containerStyle: {
-            flex: 1,
-            backgroundColor: 'red',
-            ...(Platform.OS === 'android' && {
-              marginTop: insets.top,
-              marginBottom: insets.bottom,
-            }),
-          },
-        }}
-        isLoading={isLoading}
-        // verses={verses}
-        // parallelVerses={parallelVerses}
-        // focusVerses={focusVerses}
-        // secondaryVerses={secondaryVerses}
-        // selectedVerses={selectedVerses}
-        // highlightedVerses={highlightedVerses}
-        // notedVerses={notedVerses}
-        // settings={settings}
-        // verseToScroll={verseToScroll}
-        // isReadOnly={isReadOnly}
-        // version={version}
-        // pericopeChapter={pericopeChapter}
-        // chapter={chapter}
-        // isSelectionMode={isSelectionMode}
-        // selectedCode={selectedCode}
-        // comments={comments}
-        // dispatch={dispatch}
-      />
-    </>
+    <BibleDOMComponent
+      dom={{
+        containerStyle: {
+          flex: 1,
+          ...(Platform.OS === 'android' && {
+            marginTop: insets.top,
+            marginBottom: insets.bottom,
+          }),
+        },
+      }}
+      verses={verses}
+      parallelVerses={parallelVerses}
+      focusVerses={focusVerses}
+      secondaryVerses={secondaryVerses}
+      selectedVerses={selectedVerses}
+      highlightedVerses={highlightedVerses}
+      notedVerses={notedVerses}
+      settings={settings}
+      verseToScroll={verseToScroll}
+      isReadOnly={isReadOnly}
+      version={version}
+      pericopeChapter={pericopeChapter}
+      chapter={chapter}
+      isSelectionMode={isSelectionMode}
+      selectedCode={selectedCode}
+      comments={comments}
+      dispatch={dispatch}
+    />
   )
 }

@@ -127,7 +127,8 @@ const Container = styled('div')<
   color: colors[theme].default,
   direction: rtl ? 'rtl' : 'ltr',
   paddingTop: `${HEADER_HEIGHT + 10}px`,
-  backgroundColor: 'yellow',
+  animation: `${fadeIn} 0.5s`,
+
   ...(rtl ? { textAlign: 'right' } : {}),
 }))
 

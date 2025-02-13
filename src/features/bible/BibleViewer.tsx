@@ -355,7 +355,7 @@ const BibleViewer = ({
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
-    <Box flex={1}>
+    <Box flex={1} bg="reverse">
       {error && (
         <Empty
           source={require('~assets/images/empty.json')}
@@ -364,7 +364,7 @@ const BibleViewer = ({
           }
         />
       )}
-      {!error && (
+      {!error && verses.length > 0 && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
           book={book}
