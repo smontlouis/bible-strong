@@ -3,6 +3,7 @@ import React from 'react'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
+import { BottomSheetView } from '@gorhom/bottom-sheet'
 
 interface Props {
   title: string
@@ -20,23 +21,25 @@ const ModalHeader = ({
   rightComponent,
 }: Props) => {
   return (
-    <Box bg="reverse" borderColor="border" borderBottomWidth={1}>
-      <Box height={54} row>
-        <Box flex paddingLeft={20}>
-          <Text numberOfLines={1} bold fontSize={16} marginTop={10}>
-            {title}
-          </Text>
-          <Text fontSize={13} color="grey">
-            {subTitle}
-          </Text>
+    <BottomSheetView>
+      <Box bg="reverse" borderColor="border" borderBottomWidth={1}>
+        <Box height={54} row>
+          <Box flex paddingLeft={20}>
+            <Text numberOfLines={1} bold fontSize={16} marginTop={10}>
+              {title}
+            </Text>
+            <Text fontSize={13} color="grey">
+              {subTitle}
+            </Text>
+          </Box>
+          {rightComponent}
+          <TouchableBox onPress={onClose} center w={54} h={54}>
+            <FeatherIcon name={'x'} size={20} />
+          </TouchableBox>
         </Box>
-        {rightComponent}
-        <TouchableBox onPress={onClose} center w={54} h={54}>
-          <FeatherIcon name={'x'} size={20} />
-        </TouchableBox>
+        {children}
       </Box>
-      {children}
-    </Box>
+    </BottomSheetView>
   )
 }
 

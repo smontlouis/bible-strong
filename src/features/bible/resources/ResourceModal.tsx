@@ -21,7 +21,18 @@ import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
-import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet/'
+import BottomSheet, {
+  BottomSheetFooter,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet/'
+import {
+  renderBackdrop,
+  useBottomSheetStyles,
+} from '~helpers/bottomSheetHelpers'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { View } from 'react-native-animatable'
 
 type Props = {
   resourceModalRef: React.RefObject<BottomSheet>
@@ -40,7 +51,8 @@ const ResourcesModal = ({
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
   const bible = useAtomValue(bibleAtom)
-
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+  const insets = useSafeAreaInsets()
   const {
     data: { selectedVerses },
   } = bible
@@ -103,17 +115,15 @@ const ResourcesModal = ({
   }
 
   return (
-    <Modal.Body
+    <BottomSheet
+      key={key}
       ref={resourceModalRef}
+      index={-1}
+      topInset={insets.top}
+      enablePanDownToClose
+      enableDynamicSizing={false}
+      backdropComponent={renderBackdrop}
       snapPoints={['100%']}
-      headerComponent={
-        <ModalHeader
-          title={title}
-          subTitle={getSubtitleByResourceType()}
-          rightComponent={getOptionsByResourceType()}
-          onClose={() => resourceModalRef.current?.close()}
-        />
-      }
       footerComponent={props => (
         <BottomSheetFooter {...props}>
           <ResourcesModalFooter
@@ -122,8 +132,14 @@ const ResourcesModal = ({
           />
         </BottomSheetFooter>
       )}
-      enableScrollView={false}
+      {...bottomSheetStyles}
     >
+      <ModalHeader
+        title={title}
+        subTitle={getSubtitleByResourceType()}
+        rightComponent={getOptionsByResourceType()}
+        onClose={() => resourceModalRef.current?.close()}
+      />
       {resourceType && (
         <Resource
           resourceType={resourceType}
@@ -131,7 +147,7 @@ const ResourcesModal = ({
           isSelectionMode={isSelectionMode}
         />
       )}
-    </Modal.Body>
+    </BottomSheet>
   )
 }
 
@@ -148,6 +164,7 @@ const Resource = ({
 }) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   const {
     data: { selectedVersion, selectedVerses },
   } = bible
@@ -172,32 +189,64 @@ const Resource = ({
   return (
     <Slides index={resources.findIndex(r => r === resourceType)}>
       <Slide key="strong">
-        <BibleVerseDetailCard
-          verse={verseObj}
-          updateVerse={updateVerse}
-          isSelectionMode={isSelectionMode}
-        />
+        <View
+          style={{
+            flex: 1,
+            paddingBottom: bottomBarHeight + 54,
+          }}
+        >
+          <BibleVerseDetailCard
+            verse={verseObj}
+            updateVerse={updateVerse}
+            isSelectionMode={isSelectionMode}
+          />
+        </View>
       </Slide>
       <Slide key="dictionary">
-        <DictionnaireVerseDetailCard
-          verse={verseObj}
-          updateVerse={updateVerse}
-        />
+        <View
+          style={{
+            flex: 1,
+            paddingBottom: bottomBarHeight + 54,
+          }}
+        >
+          <DictionnaireVerseDetailCard
+            verse={verseObj}
+            updateVerse={updateVerse}
+          />
+        </View>
       </Slide>
       <Slide key="nave">
-        <NaveModalCard selectedVerse={selectedVerse} />
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            paddingBottom: bottomBarHeight + 54,
+          }}
+        >
+          <NaveModalCard selectedVerse={selectedVerse} />
+        </BottomSheetScrollView>
       </Slide>
       <Slide key="reference">
-        <ReferenceCard
-          selectedVerse={selectedVerse}
-          version={selectedVersion}
-        />
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            paddingBottom: bottomBarHeight + 54,
+          }}
+        >
+          <ReferenceCard
+            selectedVerse={selectedVerse}
+            version={selectedVersion}
+          />
+        </BottomSheetScrollView>
       </Slide>
       <Slide key="commentary">
-        <CommentariesCard
-          verse={selectedVerse}
-          onChangeVerse={actions.selectSelectedVerse}
-        />
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            paddingBottom: bottomBarHeight + 54,
+          }}
+        >
+          <CommentariesCard
+            verse={selectedVerse}
+            onChangeVerse={actions.selectSelectedVerse}
+          />
+        </BottomSheetScrollView>
       </Slide>
     </Slides>
   )

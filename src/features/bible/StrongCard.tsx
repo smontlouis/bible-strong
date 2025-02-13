@@ -20,6 +20,7 @@ import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { Theme } from '@emotion/react'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -192,7 +193,7 @@ const StrongCard = (props: Props) => {
         </Box>
       </Box>
 
-      <ScrollView style={{ marginBottom: 15 }}>
+      <BottomSheetScrollView style={{ marginBottom: 15 }}>
         {!!Definition && (
           <ViewItem>
             <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
@@ -232,7 +233,7 @@ const StrongCard = (props: Props) => {
             />
           </ViewItem>
         )}
-      </ScrollView>
+      </BottomSheetScrollView>
     </Container>
   )
 }

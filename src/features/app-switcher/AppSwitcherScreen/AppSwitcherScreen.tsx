@@ -169,7 +169,7 @@ const AppSwitcherScreenWrapper = (
       drawerPosition="left"
       drawerType="slide"
       useNativeAnimations={false}
-      overlayColor="rgba(0,0,0,0.1)"
+      overlayColor="rgba(0,0,0,0)"
       renderNavigationView={renderHomeScreen}
       drawerLockMode="locked-closed"
     >
@@ -178,7 +178,7 @@ const AppSwitcherScreenWrapper = (
         drawerWidth={wp(95, 450)}
         drawerPosition="right"
         drawerType="slide"
-        overlayColor="rgba(0,0,0,0.1)"
+        overlayColor="rgba(0,0,0,0)"
         renderNavigationView={renderMoreScreen}
         drawerLockMode="locked-closed"
       >

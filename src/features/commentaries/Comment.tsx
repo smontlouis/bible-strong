@@ -29,7 +29,6 @@ const findBookNumber = (bookName: string) => {
 }
 
 interface Props {
-  navigation: StackNavigationProp<MainStackProps, 'BibleView'>
   comment: CommentProps | EGWComment
 }
 
@@ -100,10 +99,11 @@ const useFrenchTranslation = (id: string) => {
 
 const fastImageStyle = { width: 40, height: 40 }
 
-const Comment = ({ comment, navigation }: Props) => {
+const Comment = ({ comment }: Props) => {
   const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
+  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
   const fastImageSource = useMemo(
     () => ({
       uri: cacheImage,

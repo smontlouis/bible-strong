@@ -66,7 +66,7 @@ const DetailsModal = ({
       footerComponent={footerComponent}
     >
       {headerComponent && <BottomSheetView>{headerComponent}</BottomSheetView>}
-      <BottomSheetScrollView>
+      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: 50 }}>
         <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
           {!!image && (
             <Box marginBottom={20} rounded>

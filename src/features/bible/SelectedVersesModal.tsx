@@ -214,6 +214,7 @@ const VersesModal = ({
       index={-1}
       enableDynamicSizing
       enablePanDownToClose
+      activeOffsetY={[-20, 20]}
       key={key}
       {...bottomSheetStyles}
       style={{

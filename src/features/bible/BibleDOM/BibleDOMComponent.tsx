@@ -111,7 +111,7 @@ const Container = styled('div')<
   maxWidth: isParallelVerse ? 'none' : '800px',
   margin: '0 auto',
   padding: isParallelVerse ? '10px 5px' : '10px 15px',
-  paddingBottom: '210px',
+  paddingBottom: '300px',
   textAlign: alignContent,
   background: colors[theme].reverse,
   color: colors[theme].default,
@@ -335,11 +335,13 @@ const VersesRenderer = ({
     })
   }, [])
 
+  const hasVerses = verses.length > 0
   useEffect(() => {
+    if (!hasVerses) return
     if (verseToScroll === 1) {
       window.scrollTo(0, 0)
     }
-  }, [chapter, verseToScroll])
+  }, [chapter, verseToScroll, hasVerses])
 
   useEffect(() => {
     if (settings?.theme) {
@@ -349,7 +351,7 @@ const VersesRenderer = ({
   }, [settings?.theme])
 
   useEffect(() => {
-    if (!verseToScroll) return
+    if (!verseToScroll || !hasVerses) return
 
     if (verseToScroll === 1) return
 
@@ -362,7 +364,7 @@ const VersesRenderer = ({
         })
       }
     }, 200)
-  }, [verseToScroll, verses])
+  }, [verseToScroll, hasVerses])
 
   const sortVersesToTags = (
     highlightedVerses: HighlightsObj
