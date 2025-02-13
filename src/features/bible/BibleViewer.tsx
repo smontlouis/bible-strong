@@ -351,25 +351,11 @@ const BibleViewer = ({
     }
   })
 
-  // console.log('BibleViewer: verses', verses.length)
+  console.log('BibleViewer: verses', verses.length)
 
   // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
   return (
     <Box flex={1}>
-      <BibleHeader
-        navigation={navigation}
-        bibleAtom={bibleAtom}
-        onBibleParamsClick={bibleParamsModal.open}
-        commentsDisplay={settings.commentsDisplay}
-        verseFormatted={
-          focusVerses ? formatVerses(focusVerses) : verse.toString()
-        }
-        isParallel={parallelVersions.length > 0}
-        version={version}
-        bookName={book.Nom}
-        chapter={chapter}
-        hasBackButton={isReadOnly || Boolean(isSelectionMode)}
-      />
       {error && (
         <Empty
           source={require('~assets/images/empty.json')}
@@ -417,6 +403,20 @@ const BibleViewer = ({
           onChangeResourceTypeSelectVerse={onChangeResourceTypeSelectVerse}
         />
       )}
+      <BibleHeader
+        navigation={navigation}
+        bibleAtom={bibleAtom}
+        onBibleParamsClick={bibleParamsModal.open}
+        commentsDisplay={settings.commentsDisplay}
+        verseFormatted={
+          focusVerses ? formatVerses(focusVerses) : verse.toString()
+        }
+        isParallel={parallelVersions.length > 0}
+        version={version}
+        bookName={book.Nom}
+        chapter={chapter}
+        hasBackButton={isReadOnly || Boolean(isSelectionMode)}
+      />
       {!isReadOnly && (
         <BibleFooter
           bibleAtom={bibleAtom}

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleValue } from '../../state/app'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
@@ -91,7 +91,7 @@ const Header = ({
     <MotiHStack
       width="100%"
       maxWidth={830}
-      bg="reverse"
+      bg="green"
       px={15}
       paddingTop={insets.top}
       height={HEADER_HEIGHT + insets.top}

@@ -1,6 +1,6 @@
 import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { BibleTab, VersionCode } from 'src/state/tabs'
+import { BibleTab, VersionCode } from '../../../state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
 // @ts-expect-error
@@ -39,7 +39,10 @@ import * as Sentry from '@sentry/react-native'
 import { Book } from '~assets/bible_versions/books-desc'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { useTheme } from '@emotion/react'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import {
+  isFullScreenBibleAtom,
+  isFullScreenBibleValue,
+} from '../../../state/app'
 import { useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
@@ -285,7 +288,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: -1,
+          backgroundColor: 'purple',
         }}
       >
         <ActivityIndicator />
@@ -293,13 +296,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     )
   }
 
+  console.log('BibleDOMWrapper: verses', verses.length)
+
   return (
     <BibleDOMComponent
       dom={{
         containerStyle: {
           flex: 1,
-          backgroundColor: theme.colors.reverse,
-          zIndex: -1,
+          // backgroundColor: 'red',
           ...(Platform.OS === 'android' && {
             marginTop: insets.top,
             marginBottom: insets.bottom,

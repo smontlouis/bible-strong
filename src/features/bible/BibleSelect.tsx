@@ -1,6 +1,6 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useState } from 'react'
-import { BibleTab } from 'src/state/tabs'
+import { BibleTab } from '../../state/tabs'
 import Box from '~common/ui/Box'
 import { Slide, Slides } from '~common/ui/Slider'
 import BibleSelectTabBar from './BibleSelectTabBar'

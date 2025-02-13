@@ -3,7 +3,10 @@ import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import {
+  isFullScreenBibleAtom,
+  isFullScreenBibleValue,
+} from '../../../state/app'
 import Link from '~common/Link'
 import Box, {
   BoxProps,

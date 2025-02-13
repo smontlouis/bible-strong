@@ -25,7 +25,7 @@ import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
-import { VersionCode } from 'src/state/tabs'
+import { VersionCode } from '../../state/tabs'
 
 const BIBLE_FILESIZE = 2500000
 

@@ -3,7 +3,7 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleValue } from '../../../state/app'
 import { Book } from '~assets/bible_versions/books-desc'
 import {
   MotiHStack,

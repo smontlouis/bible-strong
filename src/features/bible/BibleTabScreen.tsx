@@ -33,6 +33,7 @@ interface BibleTabScreenProps {
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
+  console.log('BibleTabScreen', bibleAtom.toString())
 
   const { settings, fontFamily } = useSelector(
     (state: RootState) => ({

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleValue } from '../../../state/app'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '../utils/constants'

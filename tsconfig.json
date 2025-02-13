@@ -23,6 +23,7 @@
       "~styled/*": ["src/styled/*"],
       "~themes": ["src/themes"],
       "~styled": ["src/styled"],
+      "~state/*": ["src/state/*"],
       "~i18n": ["i18n"]
     }
   },

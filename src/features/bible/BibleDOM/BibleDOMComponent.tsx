@@ -127,7 +127,7 @@ const Container = styled('div')<
   color: colors[theme].default,
   direction: rtl ? 'rtl' : 'ltr',
   paddingTop: `${HEADER_HEIGHT + 10}px`,
-  animation: `${fadeIn} 0.5s`,
+  // backgroundColor: 'yellow',
   ...(rtl ? { textAlign: 'right' } : {}),
 }))
 
@@ -543,7 +543,7 @@ const VersesRenderer = ({
   const notedVersesCount = getNotedVersesCount(verses, notedVerses)
   const notedVersesText = getNotedVersesText(verses, notedVerses)
 
-  // console.log('BibleDOMComponent: verses', verses.length)
+  console.log('BibleDOMComponent: verses', verses.length)
 
   return (
     <DispatchProvider dispatch={dispatch}>

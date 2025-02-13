@@ -124,8 +124,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: 'fdf72b90-346b-11e9-ad9a-255491359311',
     },
   },
-  updates: {
-    url: 'https://u.expo.dev/fdf72b90-346b-11e9-ad9a-255491359311',
-  },
   runtimeVersion: '1.0.0',
 })

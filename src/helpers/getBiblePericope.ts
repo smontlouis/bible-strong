@@ -1,7 +1,7 @@
 import { getLangIsFr } from '~i18n'
 import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system'
-import { VersionCode } from 'src/state/tabs'
+import { VersionCode } from '../state/tabs'
 import { Pericope } from '~common/types'
 
 const PericopeBDS = require('../assets/bible_versions/bible-bds-pericope.txt')
