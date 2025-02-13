@@ -5,10 +5,15 @@ import { SectionList } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai/react'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { atom, PrimitiveAtom } from 'jotai/vanilla'
 
 import { getVersionsBySections } from '~helpers/bibleVersions'
-import { BibleTab, useBibleTabActions, VersionCode } from '../../../state/tabs'
+import {
+  BibleTab,
+  BibleTabActions,
+  useBibleTabActions,
+  VersionCode,
+} from '../../../state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
 import {
   renderBackdrop,
@@ -20,33 +25,35 @@ import Border from '~common/ui/Border'
 
 interface VersionSelectorBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet>
-  bibleAtom: PrimitiveAtom<BibleTab>
-  parallelVersionIndex?: number
 }
+
+export const versionSelectorDataAtom = atom<{
+  actions?: Pick<BibleTabActions, 'setSelectedVersion' | 'setParallelVersion'>
+  data?: BibleTab['data']
+  parallelVersionIndex?: number
+}>({})
 
 const VersionSelectorBottomSheet = ({
   bottomSheetRef,
-  bibleAtom,
-  parallelVersionIndex,
 }: VersionSelectorBottomSheetProps) => {
   const insets = useSafeAreaInsets()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { t } = useTranslation()
 
-  const bible = useAtomValue(bibleAtom)
-  const actions = useBibleTabActions(bibleAtom)
-
-  const handleVersionSelect = useCallback(
-    (vers: VersionCode) => {
-      if (parallelVersionIndex === undefined) {
-        actions.setSelectedVersion(vers)
-      } else {
-        actions.setParallelVersion(vers, parallelVersionIndex)
-      }
-      bottomSheetRef.current?.close()
-    },
-    [actions, parallelVersionIndex]
+  const { actions, data, parallelVersionIndex } = useAtomValue(
+    versionSelectorDataAtom
   )
+
+  const handleVersionSelect = (vers: VersionCode) => {
+    if (!actions) return
+
+    if (parallelVersionIndex === undefined) {
+      actions.setSelectedVersion(vers)
+    } else {
+      actions.setParallelVersion(vers, parallelVersionIndex)
+    }
+    bottomSheetRef.current?.close()
+  }
 
   return (
     <Portal>
@@ -96,8 +103,8 @@ const VersionSelectorBottomSheet = ({
               isSelected={
                 item.id ===
                 (parallelVersionIndex === undefined
-                  ? bible.data.selectedVersion
-                  : bible.data.parallelVersions[parallelVersionIndex])
+                  ? data?.selectedVersion
+                  : data?.parallelVersions[parallelVersionIndex])
               }
             />
           )}

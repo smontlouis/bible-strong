@@ -131,7 +131,7 @@ const TabScreen = forwardRef<View, TabScreenProps>(
             {...{
               [atomName]: tabAtom,
               navigation,
-              route
+              route,
             }}
           />
         </TabScreenWrapper>

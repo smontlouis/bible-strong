@@ -1,11 +1,9 @@
-import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box, { MotiBox, motiTransition } from '~common/ui/Box'
-import Button from '~common/ui/Button'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
@@ -23,8 +21,6 @@ import {
   Verse,
   VerseIds,
 } from '~common/types'
-import Container from '~common/ui/Container'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
@@ -35,27 +31,19 @@ import {
   isFullScreenBibleValue,
   multipleTagsModalAtom,
 } from '../../state/app'
-import {
-  BibleTab,
-  getDefaultBibleTab,
-  useBibleTabActions,
-} from '../../state/tabs'
+import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
+// import BibleWebView from './BibleDOMWebview'
+import { useDerivedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleFooter from './footer/BibleFooter'
+import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useDerivedValue } from 'react-native-reanimated'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
-
-const ReadMeButton = styled(Button)({
-  marginTop: 5,
-  marginBottom: 5,
-  width: 270,
-})
 
 const getPericopeChapter = (
   pericope: Pericope | null,
@@ -130,7 +118,6 @@ const BibleViewer = ({
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
-  const openInNewTab = useOpenInNewTab()
   const pericope = useRef<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const addHistory = useSetAtom(historyAtom)
@@ -278,22 +265,6 @@ const BibleViewer = ({
     })
   }
 
-  const openInBibleTab = () => {
-    openInNewTab({
-      id: `bible-${Date.now()}`,
-      title: t('tabs.new'),
-      isRemovable: true,
-      type: 'bible',
-      data: {
-        ...getDefaultBibleTab().data,
-        selectedBook: book,
-        selectedChapter: chapter,
-        selectedVerse: verse,
-        selectedVersion: version,
-      },
-    })
-  }
-
   const addHiglightAndOpenQuickTags = (color: string) => {
     setTimeout(() => {
       setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
@@ -351,9 +322,9 @@ const BibleViewer = ({
     }
   })
 
-  // TODO: At some point, send to WebView ONLY chapter based elements (notes, highlighted...)
+  console.log('BibleViewer', version, book.Numero, chapter, verse)
   return (
-    <Box flex={1}>
+    <Box flex={1} bg="reverse">
       <BibleHeader
         navigation={navigation}
         bibleAtom={bibleAtom}
@@ -438,9 +409,12 @@ const BibleViewer = ({
           animate={translationY}
           {...motiTransition}
         >
-          <ReadMeButton onPress={openInBibleTab}>
-            {t('tab.openInNewTab')}
-          </ReadMeButton>
+          <OpenInNewTabButton
+            book={book}
+            chapter={chapter}
+            verse={verse}
+            version={version}
+          />
         </MotiBox>
       )}
       <SelectedVersesModal

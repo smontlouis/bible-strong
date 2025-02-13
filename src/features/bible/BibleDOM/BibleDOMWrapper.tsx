@@ -1,5 +1,5 @@
 import { StackNavigationProp } from '@react-navigation/stack'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
@@ -15,7 +15,7 @@ import {
   VerseIds,
 } from '~common/types'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
-import { Platform, View } from 'react-native'
+import { ActivityIndicator, Platform, View } from 'react-native'
 import { RootState } from '~redux/modules/reducer'
 import {
   ADD_PARALLEL_VERSION,
@@ -43,6 +43,7 @@ import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 import { useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import produce from 'immer'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -132,6 +133,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isSelectionMode,
     selectedCode,
     comments,
+    isLoading,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -164,11 +166,30 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case NAVIGATE_TO_VERSION: {
-        const { navigation, bibleAtom } = props
+        const { bibleAtom } = props
         const { version, index } = action.payload
 
         // index = 0 is Default one
-        openVersionSelector(bibleAtom, index === 0 ? undefined : index - 1)
+        openVersionSelector({
+          actions: {
+            setSelectedVersion: (version: VersionCode) =>
+              getDefaultStore().set(
+                bibleAtom,
+                produce(draft => {
+                  draft.data.selectedVersion = version
+                })
+              ),
+            setParallelVersion: (version: VersionCode, index: number) =>
+              getDefaultStore().set(
+                bibleAtom,
+                produce(draft => {
+                  draft.data.parallelVersions[index] = version
+                })
+              ),
+          },
+          data: getDefaultStore().get(bibleAtom).data,
+          parallelVersionIndex: index === 0 ? undefined : index - 1,
+        })
         break
       }
       case REMOVE_PARALLEL_VERSION: {
@@ -275,6 +296,16 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
     }
+  }
+
+  // console.log('BibleDOMWrapper', version, props.book.Numero, chapter)
+
+  if (isLoading && !verses.length) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    )
   }
 
   return (

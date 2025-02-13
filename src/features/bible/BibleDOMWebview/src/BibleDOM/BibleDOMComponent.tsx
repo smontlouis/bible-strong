@@ -1,9 +1,6 @@
-'use dom'
-
-import { setup, styled } from 'goober'
 import React, { useEffect, useState } from 'react'
-import { TagsObj, Verse as TVerse } from '~common/types'
-import { HighlightsObj, NotesObj } from '~redux/modules/user'
+import { TagsObj, Verse as TVerse } from '../../../../../common/types'
+import { HighlightsObj, NotesObj } from '../../../../../redux/modules/user'
 import {
   Dispatch,
   NotedVerse,
@@ -20,12 +17,12 @@ import {
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   REMOVE_PARALLEL_VERSION,
+  SWIPE_DOWN,
   SWIPE_LEFT,
   SWIPE_RIGHT,
-  SWIPE_DOWN,
   SWIPE_UP,
 } from './dispatch'
-import { DispatchProvider, useDispatch } from './DispatchProvider'
+import { DispatchProvider } from './DispatchProvider'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
@@ -33,35 +30,10 @@ import './polyfills'
 import { scaleFontSize } from './scaleFontSize'
 import './swiped-events'
 import Verse from './Verse'
-import { useFonts } from 'expo-font'
-import {
-  HEADER_HEIGHT,
-  HEADER_HEIGHT_MIN,
-} from '~features/app-switcher/utils/constants'
+import { setup, styled } from 'goober'
 
-const forwardProps = [
-  'isHebreu',
-  'isFocused',
-  'isParallel',
-  'isParallelVerse',
-  'isTouched',
-  'isSelected',
-  'isVerseToScroll',
-  'highlightedColor',
-  'rtl',
-]
-setup(
-  React.createElement,
-  undefined,
-  undefined,
-  (props: { [key: string]: any }) => {
-    for (let prop in props) {
-      if (forwardProps.includes(prop)) {
-        delete props[prop]
-      }
-    }
-  }
-)
+const HEADER_HEIGHT = 48
+const HEADER_HEIGHT_MIN = 20
 
 type Props = Pick<
   WebViewProps,
@@ -83,7 +55,6 @@ type Props = Pick<
   | 'comments'
 > & {
   dispatch: Dispatch
-  dom: import('expo/dom').DOMProps
 }
 
 const extractParallelVerse = (
@@ -238,9 +209,6 @@ const VersesRenderer = ({
   dispatch,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
-  const [loaded, error] = useFonts({
-    'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
-  })
 
   useEffect(() => {
     // Set initial header height CSS variable
@@ -518,6 +486,26 @@ const VersesRenderer = ({
     })
   }
 
+  if (!verses) {
+    return (
+      <div
+        style={{
+          height: '100vh',
+          fontFamily: 'arial',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textTransform: 'uppercase',
+        }}
+      >
+        Une erreur est survenue.
+      </div>
+    )
+  }
+
+  if (!verses.length) {
+    return null
+  }
   const comments = transformComments(originalComments, verses.length)
 
   const isHebreu =

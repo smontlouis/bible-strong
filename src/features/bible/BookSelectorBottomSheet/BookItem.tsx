@@ -13,7 +13,7 @@ import {
 import { MotiView } from 'moti'
 import { FeatherIcon } from '~common/ui/Icon'
 import { DeviceEventEmitter } from 'react-native'
-import { BOOK_SELECTION_EVENT } from './BookSelectorBottomSheetProvider'
+import { BOOK_SELECTION_EVENT } from './BookSelectorBottomSheet'
 
 interface BookItemProps {
   book: Book

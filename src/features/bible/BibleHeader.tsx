@@ -1,7 +1,7 @@
 import { memo, useEffect } from 'react'
 
 import { StackNavigationProp } from '@react-navigation/stack'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -137,7 +137,12 @@ const Header = ({
       <HStack alignItems="center" gap={3} marginRight="auto">
         <HStack>
           <TouchableBox
-            onPress={() => openBookSelector(bibleAtom)}
+            onPress={() => {
+              openBookSelector({
+                actions,
+                data: getDefaultStore().get(bibleAtom).data,
+              })
+            }}
             center
             pl={12}
             pr={7}
@@ -175,7 +180,12 @@ const Header = ({
           </TouchableBox>
         </HStack>
         <TouchableBox
-          onPress={() => openVersionSelector(bibleAtom)}
+          onPress={() =>
+            openVersionSelector({
+              actions,
+              data: getDefaultStore().get(bibleAtom).data,
+            })
+          }
           center
           pl={7}
           pr={12}

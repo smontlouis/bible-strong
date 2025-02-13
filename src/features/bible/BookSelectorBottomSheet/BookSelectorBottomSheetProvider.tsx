@@ -1,5 +1,5 @@
 import BottomSheet from '@gorhom/bottom-sheet'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { atom, PrimitiveAtom } from 'jotai/vanilla'
 import React, {
   createContext,
   useContext,
@@ -10,23 +10,39 @@ import React, {
 } from 'react'
 import {
   BibleTab,
+  BibleTabActions,
   defaultBibleAtom,
   useBibleTabActions,
 } from '../../../state/tabs'
-import BookSelectorBottomSheet from './BookSelectorBottomSheet'
-import VersionSelectorBottomSheet from '../VersionSelectorBottomSheet/VersionSelectorBottomSheet'
-import { useAtomValue } from 'jotai/react'
+import BookSelectorBottomSheet, {
+  bookSelectorDataAtom,
+} from './BookSelectorBottomSheet'
+import VersionSelectorBottomSheet, {
+  versionSelectorDataAtom,
+} from '../VersionSelectorBottomSheet/VersionSelectorBottomSheet'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { Book } from '~assets/bible_versions/books-desc'
 import { DeviceEventEmitter } from 'react-native'
 
 interface BookSelectorContextType {
-  openBookSelector: (bibleAtom: PrimitiveAtom<BibleTab>) => void
-  openVersionSelector: (
-    bibleAtom: PrimitiveAtom<BibleTab>,
+  openBookSelector: ({
+    actions,
+    data,
+  }: {
+    actions: BibleTabActions
+    data: BibleTab['data']
+  }) => void
+  openVersionSelector: ({
+    actions,
+    data,
+    parallelVersionIndex,
+  }: {
+    actions: Pick<BibleTabActions, 'setSelectedVersion' | 'setParallelVersion'>
+    data: BibleTab['data']
     parallelVersionIndex?: number
-  ) => void
+  }) => void
 }
 
 const BookSelectorContext = createContext<BookSelectorContextType | null>(null)
@@ -41,15 +57,6 @@ export const useBookAndVersionSelector = () => {
   return context
 }
 
-export type SelectionEvent = {
-  type: 'select' | 'longPress'
-  book: Book
-  chapter: number
-}
-
-// Définir une constante pour l'event name pour éviter les typos
-export const BOOK_SELECTION_EVENT = 'book-selection'
-
 export const BookSelectorBottomSheetProvider = ({
   children,
 }: {
@@ -57,101 +64,42 @@ export const BookSelectorBottomSheetProvider = ({
 }) => {
   const bookBottomSheetRef = useRef<BottomSheet>(null)
   const versionBottomSheetRef = useRef<BottomSheet>(null)
-  const [currentBibleAtom, setCurrentBibleAtom] = useState<
-    PrimitiveAtom<BibleTab>
-  >(defaultBibleAtom)
-  const [
-    currentParallelVersionIndex,
-    setCurrentParallelVersionIndex,
-  ] = useState<number | undefined>(undefined)
-  const bible = useAtomValue(currentBibleAtom)
-  const actions = useBibleTabActions(currentBibleAtom)
-  const openInNewTab = useOpenInNewTab()
-  const {
-    data: { selectionMode, ...rest },
-  } = bible
+  const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
+  const setVersionSelectorData = useSetAtom(versionSelectorDataAtom)
+
   const { t } = useTranslation()
 
-  const {
-    data: { selectedBook },
-  } = bible
-
-  const openBookSelector = (bibleAtom: PrimitiveAtom<BibleTab>) => {
-    setCurrentBibleAtom(bibleAtom)
-    setTimeout(() => {
-      bookBottomSheetRef.current?.expand()
-    }, 150)
+  const openBookSelector = ({
+    actions,
+    data,
+  }: {
+    actions: BibleTabActions
+    data: BibleTab['data']
+  }) => {
+    setBookSelectorData({ actions, data })
+    bookBottomSheetRef.current?.expand()
   }
 
-  const openVersionSelector = (
-    bibleAtom: PrimitiveAtom<BibleTab>,
+  const openVersionSelector = ({
+    actions,
+    data,
+    parallelVersionIndex,
+  }: {
+    actions: Pick<BibleTabActions, 'setSelectedVersion' | 'setParallelVersion'>
+    data: BibleTab['data']
     parallelVersionIndex?: number
-  ) => {
-    setCurrentBibleAtom(bibleAtom)
-    setCurrentParallelVersionIndex(parallelVersionIndex)
-    setTimeout(() => {
-      console.log(versionBottomSheetRef.current)
-      versionBottomSheetRef.current?.expand()
-    }, 150)
+  }) => {
+    setVersionSelectorData({ actions, data, parallelVersionIndex })
+    versionBottomSheetRef.current?.expand()
   }
-
-  // On écoute les événements de sélection
-  useEffect(() => {
-    const handleSelection = (event: SelectionEvent) => {
-      const { type, book, chapter } = event
-
-      if (type === 'select') {
-        actions.setTempSelectedBook(book)
-        actions.setTempSelectedChapter(chapter)
-        actions.validateTempSelected()
-        bookBottomSheetRef.current?.close()
-      } else if (type === 'longPress') {
-        bookBottomSheetRef.current?.close()
-        setTimeout(() => {
-          openInNewTab(
-            {
-              id: `bible-${Date.now()}`,
-              title: t('tabs.new'),
-              isRemovable: true,
-              type: 'bible',
-              data: {
-                ...rest,
-                selectionMode,
-                selectedBook: book,
-                selectedChapter: chapter,
-                selectedVerse: 1,
-              },
-            },
-            { autoRedirect: true }
-          )
-        }, 200)
-      }
-    }
-
-    const subscription = DeviceEventEmitter.addListener(
-      BOOK_SELECTION_EVENT,
-      handleSelection
-    )
-
-    return () => {
-      subscription.remove()
-    }
-  }, [actions, openInNewTab, t, rest, selectionMode])
 
   return (
     <BookSelectorContext.Provider
       value={{ openBookSelector, openVersionSelector }}
     >
       {children}
-      <BookSelectorBottomSheet
-        bottomSheetRef={bookBottomSheetRef}
-        selectedBookNum={selectedBook.Numero}
-      />
-      <VersionSelectorBottomSheet
-        bottomSheetRef={versionBottomSheetRef}
-        bibleAtom={currentBibleAtom}
-        parallelVersionIndex={currentParallelVersionIndex}
-      />
+      <BookSelectorBottomSheet bottomSheetRef={bookBottomSheetRef} />
+      <VersionSelectorBottomSheet bottomSheetRef={versionBottomSheetRef} />
     </BookSelectorContext.Provider>
   )
 }

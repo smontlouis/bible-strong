@@ -22,7 +22,7 @@ const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
   useOnce(() => {
     setCachedTabIds(cachedTabIds)
   })
-  
+
   return (
     <>
       {tabsAtoms
@@ -39,11 +39,11 @@ const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
   )
 }
 
-const TabScreenRefMemoize = (props: TabScreenProps) => {
+const TabScreenRefMemoize = memo((props: TabScreenProps) => {
   const [, setRef] = useDynamicRefs<View>()
   const ref = useMemo(() => setRef(props.tabAtom.toString()), [])
 
   return <TabScreen {...props} ref={ref} />
-}
+})
 
 export default memo(CachedTabScreens)

@@ -358,6 +358,8 @@ export const defaultBibleAtom = atom(
   }
 ) as PrimitiveAtom<BibleTab>
 
+export type BibleTabActions = ReturnType<typeof useBibleTabActions>
+
 export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setBibleTab = useSetAtom(tabAtom)
 
