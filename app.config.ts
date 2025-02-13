@@ -10,13 +10,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#fff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
-  version: '19.0.6',
+  version: '19.0.7',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 396,
+    versionCode: 397,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ??
@@ -30,7 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier:
       process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '186',
+    buildNumber: '187',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ??
       './firebase/dev/GoogleService-Info.plist',
@@ -94,6 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         project: 'bible-strong',
       },
     ],
+    ['./plugins/gradleProperties.js'],
     [
       './plugins/withAndroidUsesFeature.js',
       {
@@ -122,12 +123,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     eas: {
       projectId: 'fdf72b90-346b-11e9-ad9a-255491359311',
     },
-    ethern: {
-      projectId: 'ccb42b86-1286-4ca0-99bd-929b7ce418c1',
-    },
   },
   updates: {
-    url: 'https://api.ethern.dev/updates/ccb42b86-1286-4ca0-99bd-929b7ce418c1',
+    url: 'https://u.expo.dev/fdf72b90-346b-11e9-ad9a-255491359311',
   },
   runtimeVersion: '1.0.0',
 })
