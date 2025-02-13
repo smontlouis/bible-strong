@@ -2,7 +2,7 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab, VersionCode } from '../../../state/tabs'
 import { MainStackProps } from '~navigation/type'
-import BibleDOMComponent from './BibleDOMComponent'
+import BibleDOMComponent from './BibleDOMComponentTest'
 // @ts-expect-error
 import books from '~assets/bible_versions/books'
 import * as Haptics from 'expo-haptics'
@@ -46,6 +46,8 @@ import {
 import { useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import useDebounce from '~helpers/useDebounce'
+import Text from '~common/ui/Text'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -135,7 +137,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isSelectionMode,
     selectedCode,
     comments,
-    isLoading,
+    isLoading: isLoadingFromProps,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -281,52 +283,43 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     }
   }
 
-  if (isLoading && !verses.length) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'purple',
-        }}
-      >
-        <ActivityIndicator />
-      </View>
-    )
-  }
+  const isLoading = useDebounce(isLoadingFromProps && !verses.length, 1000)
 
   console.log('BibleDOMWrapper: verses', verses.length)
 
   return (
-    <BibleDOMComponent
-      dom={{
-        containerStyle: {
-          flex: 1,
-          // backgroundColor: 'red',
-          ...(Platform.OS === 'android' && {
-            marginTop: insets.top,
-            marginBottom: insets.bottom,
-          }),
-        },
-      }}
-      verses={verses}
-      parallelVerses={parallelVerses}
-      focusVerses={focusVerses}
-      secondaryVerses={secondaryVerses}
-      selectedVerses={selectedVerses}
-      highlightedVerses={highlightedVerses}
-      notedVerses={notedVerses}
-      settings={settings}
-      verseToScroll={verseToScroll}
-      isReadOnly={isReadOnly}
-      version={version}
-      pericopeChapter={pericopeChapter}
-      chapter={chapter}
-      isSelectionMode={isSelectionMode}
-      selectedCode={selectedCode}
-      comments={comments}
-      dispatch={dispatch}
-    />
+    <>
+      <Text paddingTop={insets.top + 54}>Verses: {verses.length}</Text>
+      <BibleDOMComponent
+        dom={{
+          containerStyle: {
+            flex: 1,
+            backgroundColor: 'red',
+            ...(Platform.OS === 'android' && {
+              marginTop: insets.top,
+              marginBottom: insets.bottom,
+            }),
+          },
+        }}
+        isLoading={isLoading}
+        // verses={verses}
+        // parallelVerses={parallelVerses}
+        // focusVerses={focusVerses}
+        // secondaryVerses={secondaryVerses}
+        // selectedVerses={selectedVerses}
+        // highlightedVerses={highlightedVerses}
+        // notedVerses={notedVerses}
+        // settings={settings}
+        // verseToScroll={verseToScroll}
+        // isReadOnly={isReadOnly}
+        // version={version}
+        // pericopeChapter={pericopeChapter}
+        // chapter={chapter}
+        // isSelectionMode={isSelectionMode}
+        // selectedCode={selectedCode}
+        // comments={comments}
+        // dispatch={dispatch}
+      />
+    </>
   )
 }
