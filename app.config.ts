@@ -55,6 +55,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   plugins: [
+    'expo-asset',
+    'expo-sqlite',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     [
@@ -134,5 +136,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-channel-name': process.env.EAS_BUILD_CHANNEL,
     },
   },
-  runtimeVersion: '1.0.1',
+  runtimeVersion: '1.0.2',
 })
