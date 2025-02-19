@@ -12,10 +12,14 @@
       "ios": { "simulator": true }
     },
     "staging": {
+      "channel": "staging",
       "distribution": "internal"
     },
-    "production": {},
+    "production": {
+      "channel": "production"
+    },
     "production-apk": {
+      "channel": "production",
       "android": {
         "buildType": "apk"
       }

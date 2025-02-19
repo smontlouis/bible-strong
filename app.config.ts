@@ -128,7 +128,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   updates: {
-    url: 'https://api.ethern.dev/updates/ccb42b86-1286-4ca0-99bd-929b7ce418c1',
+    url: 'https://u.expo.dev/fdf72b90-346b-11e9-ad9a-255491359311',
+    checkAutomatically: 'NEVER',
+    requestHeaders: {
+      'expo-channel-name': process.env.EAS_BUILD_CHANNEL,
+    },
   },
-  runtimeVersion: '1.0.0',
+  runtimeVersion: '1.0.1',
 })
