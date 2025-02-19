@@ -92,6 +92,7 @@ const Header = ({
       width="100%"
       maxWidth={830}
       bg="reverse"
+      bg="blue"
       px={15}
       paddingTop={insets.top}
       height={HEADER_HEIGHT + insets.top}
