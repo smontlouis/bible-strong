@@ -135,6 +135,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     requestHeaders: {
       'expo-channel-name': process.env.EAS_BUILD_CHANNEL,
     },
+    assetPatternsToBeBundled: [],
   },
   runtimeVersion: '1.0.2',
 })
