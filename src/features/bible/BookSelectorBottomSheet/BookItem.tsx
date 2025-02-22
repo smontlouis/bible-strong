@@ -1,19 +1,17 @@
-import React, { memo, useMemo, useContext } from 'react'
+import { useAtomValue } from 'jotai/react'
+import { MotiView } from 'moti'
+import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DeviceEventEmitter } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import { SharedValue, useDerivedValue } from 'react-native-reanimated'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import AccordionItem from './AccordionItem'
-import {
-  SharedValue,
-  useAnimatedStyle,
-  useDerivedValue,
-} from 'react-native-reanimated'
-import { MotiView } from 'moti'
-import { FeatherIcon } from '~common/ui/Icon'
-import { DeviceEventEmitter } from 'react-native'
 import { BOOK_SELECTION_EVENT } from './BookSelectorBottomSheet'
+import { bookSelectorVersesAtom } from './atom'
 
 interface BookItemProps {
   book: Book
@@ -35,7 +33,6 @@ const BookItem = memo(
     )
 
     const handleChapterSelect = (chapter: number) => {
-      expandedBook.value = null
       DeviceEventEmitter.emit(BOOK_SELECTION_EVENT, {
         type: 'select',
         book,
@@ -44,7 +41,6 @@ const BookItem = memo(
     }
 
     const handleLongPressChapterSelect = (chapter: number) => {
-      expandedBook.value = null
       DeviceEventEmitter.emit(BOOK_SELECTION_EVENT, {
         type: 'longPress',
         book,

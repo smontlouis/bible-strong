@@ -612,5 +612,12 @@
 
   "Normal": "Normal",
   "Petit": "Petit",
-  "Grand": "Grand"
+  "Grand": "Grand",
+
+  "bookSelector.sort.classical": "Ordre classique",
+  "bookSelector.sort.alphabetical": "Ordre alphabétique",
+  "bookSelector.selectionMode.grid": "Grille",
+  "bookSelector.selectionMode.list": "Liste",
+  "bookSelector.withVerses": "Avec versets",
+  "bookSelector.withoutVerses": "Sans versets"
 }
