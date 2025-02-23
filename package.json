@@ -8,6 +8,7 @@
     "build:android:prod": "dotenv -c production -- eas build -p android --local --profile production --non-interactive",
     "build:android:prod:apk": "dotenv -c production -- eas build -p android --local --profile production-apk --non-interactive",
     "build:ios:dev": "dotenv -c development -- eas build -p ios --local --profile development --non-interactive",
+    "build:ios:dev-sim": "dotenv -c development -- eas build -p ios --local --profile development-simulator --non-interactive",
     "build:ios:staging": "dotenv -c staging -- eas build -p ios --local --profile staging --non-interactive",
     "build:ios:prod": "dotenv -c production -- eas build -p ios --local --profile production --non-interactive",
     "postinstall": "patch-package",

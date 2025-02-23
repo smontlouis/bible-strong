@@ -163,4 +163,10 @@ const TabPreview = ({
   )
 }
 
-export default memo(TabPreview)
+// Ajout d'une fonction de comparaison pour memo
+const areEqual = (prevProps: TabPreviewProps, nextProps: TabPreviewProps) => {
+  return prevProps.index === nextProps.index
+}
+
+// Modifier l'export pour utiliser la fonction de comparaison
+export default memo(TabPreview, areEqual)

@@ -59,7 +59,7 @@ const SelectBibleReferenceModal = ({
       onModalClose={onClose}
       enableDynamicSizing
       withPortal
-      style={{ paddingTop: 40 }}
+      enableScrollView={false}
     >
       <BibleSelect bibleAtom={bibleAtom} onComplete={getBibleData} />
     </Modal.Body>

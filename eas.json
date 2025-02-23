@@ -8,6 +8,13 @@
       "distribution": "internal",
       "android": {
         "image": "latest"
+      }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "image": "latest"
       },
       "ios": { "simulator": true }
     },

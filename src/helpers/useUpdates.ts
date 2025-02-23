@@ -8,12 +8,14 @@ export const useUpdates = () => {
   useEffect(() => {
     const onFetchUpdateAsync = async () => {
       try {
+        if (__DEV__) return
+
         const update = await Updates.checkForUpdateAsync()
 
         if (update.isAvailable) {
           SnackBar.show(t('app.updateAvailable'))
           await Updates.fetchUpdateAsync()
-          await Updates.reloadAsync()
+          SnackBar.show(t('app.updateReady'))
         }
       } catch (error) {
         // You can also add an alert() to see the error message in case of an error when fetching updates.
