@@ -124,7 +124,7 @@ const ResourcesModal = ({
       enableDynamicSizing={false}
       backdropComponent={renderBackdrop}
       snapPoints={['100%']}
-      footerComponent={props => (
+      footerComponent={(props) => (
         <BottomSheetFooter {...props}>
           <ResourcesModalFooter
             resourceType={resourceType}
@@ -187,7 +187,7 @@ const Resource = ({
   if (!selectedVerse) return null
 
   return (
-    <Slides index={resources.findIndex(r => r === resourceType)}>
+    <Slides index={resources.findIndex((r) => r === resourceType)}>
       <Slide key="strong">
         <View
           style={{

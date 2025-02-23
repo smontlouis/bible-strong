@@ -5,6 +5,7 @@ import { BackHandler } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout'
 
+import { StackScreenProps } from '@react-navigation/stack'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
@@ -13,17 +14,16 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
 import { wp } from '~helpers/utils'
+import { MainStackProps } from '~navigation/type'
 import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import CachedTabScreens from '../CachedTabScreens'
+import { TabContextProvider } from '../context/TabContext'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 import useTabConstants from '../utils/useTabConstants'
+import { DebugView } from './DebugView'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
-import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
-import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import { TabContextProvider } from '../context/TabContext'
 
 type AppSwitcherScreenFuncs = {
   openMenu: () => void
@@ -86,6 +86,7 @@ const AppSwitcherScreen = memo(
                   marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
                 />
               ))}
+              {__DEV__ && <DebugView />}
             </AnimatedBox>
           </AnimatedScrollView>
           <CachedTabScreens navigation={navigation} route={route} />
@@ -137,9 +138,10 @@ const AppSwitcherScreenWrapper = (
     [closeHome]
   )
 
-  const renderMoreScreen = useCallback(() => <More closeMenu={closeMenu} />, [
-    closeMenu,
-  ])
+  const renderMoreScreen = useCallback(
+    () => <More closeMenu={closeMenu} />,
+    [closeMenu]
+  )
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(

@@ -21,15 +21,13 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
   return (
     <Container>
       <Header title={t('tabs.new')} />
-      <ScrollView style={{ flex: 1 }}>
-        <Box flex center row>
-          <Box row wrap center>
-            {tabTypes.map(type => (
-              <NewTabItem key={type} type={type} newAtom={newAtom} />
-            ))}
-          </Box>
+      <Box flex center row>
+        <Box row wrap center>
+          {tabTypes.map((type) => (
+            <NewTabItem key={type} type={type} newAtom={newAtom} />
+          ))}
         </Box>
-      </ScrollView>
+      </Box>
     </Container>
   )
 }

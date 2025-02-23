@@ -2,7 +2,7 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useMemo } from 'react'
 import { Image, StyleSheet } from 'react-native'
-import { FadeIn, Layout, ZoomOut } from 'react-native-reanimated'
+import { FadeIn, LinearTransition, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
 import { selectAtom } from 'jotai/vanilla/utils'
@@ -10,7 +10,6 @@ import Box, {
   AnimatedBox,
   AnimatedTouchableBox,
   BoxProps,
-  TouchableBox,
 } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -32,24 +31,20 @@ const TabPreview = ({
   const theme = useTheme()
 
   const base64Preview = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, tab => tab.base64Preview), [])
+    useMemo(() => selectAtom(tabAtom, (tab) => tab.base64Preview), [])
   )
   const title = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, tab => tab.title), [])
+    useMemo(() => selectAtom(tabAtom, (tab) => tab.title), [])
   )
   const type = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, tab => tab.type), [])
+    useMemo(() => selectAtom(tabAtom, (tab) => tab.type), [])
   )
   const isRemovable = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, tab => tab.isRemovable), [])
+    useMemo(() => selectAtom(tabAtom, (tab) => tab.isRemovable), [])
   )
 
-  const {
-    GAP,
-    TAB_PREVIEW_WIDTH,
-    TAB_PREVIEW_HEIGHT,
-    TEXTBOX_HEIGHT,
-  } = useTabConstants()
+  const { GAP, TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT, TEXTBOX_HEIGHT } =
+    useTabConstants()
 
   const {
     ref,
@@ -64,9 +59,11 @@ const TabPreview = ({
     tabAtom,
   })
 
+  console.log('tabAtom', tabAtom.toString())
+
   return (
     <AnimatedTouchableBox
-      layout={Layout}
+      layout={LinearTransition}
       entering={FadeIn}
       exiting={ZoomOut}
       overflow="visible"

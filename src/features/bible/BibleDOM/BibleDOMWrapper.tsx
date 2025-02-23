@@ -139,7 +139,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const dispatch: Dispatch = async action => {
+  const dispatch: Dispatch = async (action) => {
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         const { onChangeResourceTypeSelectVerse } = props
@@ -175,14 +175,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
             setSelectedVersion: (version: VersionCode) =>
               getDefaultStore().set(
                 bibleAtom,
-                produce(draft => {
+                produce((draft) => {
                   draft.data.selectedVersion = version
                 })
               ),
             setParallelVersion: (version: VersionCode, index: number) =>
               getDefaultStore().set(
                 bibleAtom,
-                produce(draft => {
+                produce((draft) => {
                   draft.data.parallelVersions[index] = version
                 })
               ),
@@ -235,7 +235,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case NAVIGATE_TO_BIBLE_VIEW: {
         const { navigation } = props
         const book = Object.keys(books).find(
-          key => books[key][0].toUpperCase() === action.bookCode
+          (key) => books[key][0].toUpperCase() === action.bookCode
         )
 
         if (!book) {
@@ -272,6 +272,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_DOWN: {
+        console.log('SWIPE_DOWN')
         setIsFullScreenBible(true)
         isFullScreenBibleValue.value = true
         break
@@ -297,8 +298,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
     }
   }
-
-  // console.log('BibleDOMWrapper', version, props.book.Numero, chapter)
 
   // if (isLoading && !verses.length) {
   //   return (

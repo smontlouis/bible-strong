@@ -92,7 +92,6 @@ const Header = ({
       width="100%"
       maxWidth={830}
       bg="reverse"
-      bg="red"
       px={15}
       paddingTop={insets.top}
       height={HEADER_HEIGHT + insets.top}
@@ -135,7 +134,7 @@ const Header = ({
           </MotiBox>
         </Back>
       )}
-      <HStack alignItems="center" gap={3} marginRight="auto">
+      <HStack alignItems="center" gap={3}>
         <HStack>
           <TouchableBox
             onPress={() => {
@@ -244,7 +243,7 @@ const Header = ({
         popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
       />
       {!isSelectionMode && (
-        <>
+        <HStack marginLeft="auto">
           <PopOverMenu
             element={
               <MotiBox
@@ -305,7 +304,7 @@ const Header = ({
               </>
             }
           />
-        </>
+        </HStack>
       )}
     </MotiHStack>
   )

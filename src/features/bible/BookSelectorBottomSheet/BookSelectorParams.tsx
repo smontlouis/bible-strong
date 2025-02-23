@@ -23,7 +23,7 @@ export const BookSelectorParams = () => {
   const hasVerses = verses === 'with-verses'
 
   const handleSortToggle = () => {
-    setSort(prev => (prev === 'alphabetical' ? 'classical' : 'alphabetical'))
+    setSort((prev) => (prev === 'alphabetical' ? 'classical' : 'alphabetical'))
   }
 
   return (
@@ -47,7 +47,7 @@ export const BookSelectorParams = () => {
 
           <MenuOption
             onSelect={() => {
-              setVerses(v =>
+              setVerses((v) =>
                 v === 'with-verses' ? 'without-verses' : 'with-verses'
               )
             }}
@@ -68,7 +68,7 @@ export const BookSelectorParams = () => {
           </MenuOption>
           <MenuOption
             onSelect={() => {
-              setSelectionMode(s => (s === 'grid' ? 'list' : 'grid'))
+              setSelectionMode((s) => (s === 'grid' ? 'list' : 'grid'))
             }}
             closeOnSelect={false}
           >

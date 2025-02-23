@@ -4,18 +4,43 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "~assets/*": ["src/assets/*"],
-      "~common/*": ["src/common/*"],
-      "~features/*": ["src/features/*"],
-      "~helpers/*": ["src/helpers/*"],
-      "~navigation/*": ["src/navigation/*"],
-      "~redux/*": ["src/redux/*"],
-      "~themes/*": ["src/themes/*"],
-      "~styled/*": ["src/styled/*"],
-      "~themes": ["src/themes"],
-      "~styled": ["src/styled"],
-      "~i18n": ["i18n"]
+      "~assets/*": [
+        "src/assets/*"
+      ],
+      "~common/*": [
+        "src/common/*"
+      ],
+      "~features/*": [
+        "src/features/*"
+      ],
+      "~helpers/*": [
+        "src/helpers/*"
+      ],
+      "~navigation/*": [
+        "src/navigation/*"
+      ],
+      "~redux/*": [
+        "src/redux/*"
+      ],
+      "~themes/*": [
+        "src/themes/*"
+      ],
+      "~styled/*": [
+        "src/styled/*"
+      ],
+      "~themes": [
+        "src/themes"
+      ],
+      "~styled": [
+        "src/styled"
+      ],
+      "~i18n": [
+        "i18n"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }

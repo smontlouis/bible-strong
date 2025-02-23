@@ -2,7 +2,7 @@ import BottomSheet from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useAtomValue } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, FlatList } from 'react-native'
@@ -21,7 +21,11 @@ import {
 import { bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import BookItem, { itemHeight } from './BookItem'
 import { BookSelectorParams } from './BookSelectorParams'
-import VerseBottomSheet from './VerseBottomSheet'
+import VerseBottomSheet, {
+  tempSelectedBookAtom,
+  tempSelectedChapterAtom,
+} from './VerseBottomSheet'
+import { BookSelectorList } from './BookSelectorList'
 
 export type SelectionEvent = {
   type: 'select' | 'longPress'
@@ -53,16 +57,12 @@ const BookSelectorBottomSheet = ({
   const isAlphabetical = sort === 'alphabetical'
   const verses = useAtomValue(bookSelectorVersesAtom)
   const bookSelectorHasVerses = verses === 'with-verses'
-
-  const { actions: bookSelectorActions, data: bookSelectorData } = useAtomValue(
-    bookSelectorDataAtom
-  )
+  const setTempSelectedBook = useSetAtom(tempSelectedBookAtom)
+  const setTempSelectedChapter = useSetAtom(tempSelectedChapterAtom)
+  const { actions: bookSelectorActions, data: bookSelectorData } =
+    useAtomValue(bookSelectorDataAtom)
   const openInNewTab = useOpenInNewTab()
   const verseBottomSheetRef = useRef<BottomSheet>(null)
-
-  const handleBookSelect = (book: Book) => {
-    expandedBook.value = expandedBook.value === book.Numero ? null : book.Numero
-  }
 
   // On écoute les événements de sélection
   useEffect(() => {
@@ -74,6 +74,8 @@ const BookSelectorBottomSheet = ({
 
       if (type === 'select') {
         if (bookSelectorHasVerses) {
+          setTempSelectedBook(book)
+          setTempSelectedChapter(chapter)
           bookSelectorActions.setTempSelectedBook(book)
           bookSelectorActions.setTempSelectedChapter(chapter)
           verseBottomSheetRef.current?.expand()
@@ -126,18 +128,6 @@ const BookSelectorBottomSheet = ({
     bookSelectorHasVerses,
   ])
 
-  const renderItem = useCallback(
-    ({ item: book }: { item: Book }) => (
-      <BookItem
-        book={book}
-        isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
-        onBookSelect={handleBookSelect}
-        expandedBook={expandedBook}
-      />
-    ),
-    [bookSelectorData?.selectedBook.Numero]
-  )
-
   const data = useMemo(() => {
     const booksArray = Object.values(books)
     if (isAlphabetical) {
@@ -147,21 +137,8 @@ const BookSelectorBottomSheet = ({
   }, [isAlphabetical])
 
   const initialScrollIndex = data.findIndex(
-    book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
+    (book) => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
   )
-
-  useEffect(() => {
-    console.log('initialScrollIndex: ', initialScrollIndex)
-    setTimeout(() => {
-      flatListRef.current?.scrollToIndex({
-        index: initialScrollIndex,
-        viewOffset: itemHeight * 2,
-        animated: false,
-      })
-    }, 100)
-  }, [initialScrollIndex])
-
-  console.log('bookSelectorBottomSheet')
 
   return (
     <>
@@ -177,6 +154,7 @@ const BookSelectorBottomSheet = ({
           enableContentPanningGesture={false}
           backdropComponent={renderBackdrop}
           onAnimate={(fromIndex, toIndex) => {
+            // Opening the bottom sheet
             if (fromIndex === -1 && toIndex === 0) {
               flatListRef.current?.scrollToIndex({
                 index: initialScrollIndex,
@@ -184,6 +162,7 @@ const BookSelectorBottomSheet = ({
                 animated: false,
               })
             }
+            // Closing the bottom sheet
             if (fromIndex === 0 && toIndex === -1) {
               expandedBook.value = null
             }
@@ -197,7 +176,7 @@ const BookSelectorBottomSheet = ({
             borderBottomWidth={1}
             borderColor="lightGrey"
           >
-            <Box px={20} width={100}></Box>
+            <Box px={20} width={60}></Box>
             <Text flex textAlign="center" fontSize={16} bold>
               {t('Livres')}
             </Text>
@@ -207,28 +186,19 @@ const BookSelectorBottomSheet = ({
             id="chapter-selector"
             description={t('tips.chapterSelector')}
           />
-          <FlatList
-            ref={flatListRef}
+          <BookSelectorList
             data={data}
-            renderItem={renderItem}
-            getItemLayout={(_, index) => ({
-              length: itemHeight,
-              offset: itemHeight * index,
-              index,
-            })}
-            onScrollToIndexFailed={error => console.log('scroll failed', error)}
-            keyExtractor={item => item.Numero.toString()}
-            maintainVisibleContentPosition={{
-              minIndexForVisible: 0,
-            }}
-            contentContainerStyle={{
-              paddingBottom: insets.bottom,
-            }}
+            initialScrollIndex={initialScrollIndex}
+            expandedBook={expandedBook}
+            bookSelectorData={bookSelectorData}
+            flatListRef={flatListRef}
           />
         </BottomSheet>
         <VerseBottomSheet
           bottomSheetRef={verseBottomSheetRef}
           bookSelectorRef={bottomSheetRef}
+          actions={bookSelectorActions}
+          data={bookSelectorData}
         />
       </Portal>
     </>

@@ -39,6 +39,12 @@ import {
   HEADER_HEIGHT_MIN,
 } from '~features/app-switcher/utils/constants'
 
+declare global {
+  interface Window {
+    disableSwipeDownEvent: boolean
+  }
+}
+
 const forwardProps = [
   'isHebreu',
   'isFocused',
@@ -93,7 +99,7 @@ const extractParallelVerse = (
   version: string
 ) => [
   { version, verse },
-  ...parallelVerses.map(p => ({ version: p.id, verse: p.verses[i] })),
+  ...parallelVerses.map((p) => ({ version: p.id, verse: p.verses[i] })),
 ]
 
 const extractParallelVersionTitles = (
@@ -102,7 +108,7 @@ const extractParallelVersionTitles = (
 ) => {
   if (!parallelVerses?.length) return []
 
-  return [currentVersion, ...parallelVerses.map(p => p.id)]
+  return [currentVersion, ...parallelVerses.map((p) => p.id)]
 }
 
 const Container = styled('div')<
@@ -291,6 +297,7 @@ const VersesRenderer = ({
       // Only trigger if velocity is above threshold
       if (velocity * 1000 > VELOCITY_THRESHOLD) {
         if (scrollDiff > 0 && canSwipeDown) {
+          if (window.disableSwipeDownEvent) return
           dispatch({
             type: SWIPE_DOWN,
           })
@@ -322,13 +329,13 @@ const VersesRenderer = ({
   }, [])
 
   useEffect(() => {
-    document.addEventListener('swiped-left', function(e) {
+    document.addEventListener('swiped-left', function (e) {
       dispatch({
         type: SWIPE_LEFT,
       })
     })
 
-    document.addEventListener('swiped-right', function(e) {
+    document.addEventListener('swiped-right', function (e) {
       dispatch({
         type: SWIPE_RIGHT,
       })
@@ -358,10 +365,14 @@ const VersesRenderer = ({
     setTimeout(() => {
       const element = document.querySelector(`#verset-${verseToScroll}`)
       if (element) {
+        window.disableSwipeDownEvent = true
         const elementPosition = element.getBoundingClientRect().top
         window.scrollTo({
           top: window.scrollY + elementPosition - 100,
         })
+        setTimeout(() => {
+          window.disableSwipeDownEvent = false
+        }, 400)
       }
     }, 200)
   }, [verseToScroll, hasVerses])
@@ -385,7 +396,7 @@ const VersesRenderer = ({
         const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
         const formattedVerse = { Livre, Chapitre, Verset, Texte: '' }
 
-        if (!arr.find(a => a.date === p[verse].date)) {
+        if (!arr.find((a) => a.date === p[verse].date)) {
           arr.push({
             date: p[verse].date,
             color: p[verse].color,
@@ -394,7 +405,7 @@ const VersesRenderer = ({
           })
         }
 
-        const dateInArray = arr.find(a => a.date === p[verse].date)
+        const dateInArray = arr.find((a) => a.date === p[verse].date)
         if (dateInArray) {
           dateInArray.verseIds.push(verse)
           dateInArray.verseIds.sort(
@@ -410,7 +421,7 @@ const VersesRenderer = ({
       []
     )
 
-    return taggedVerses.map(verse => ({
+    return taggedVerses.map((verse) => ({
       ...verse,
       lastVerse: verse.verseIds[verse.verseIds.length - 1],
       tags: Object.values(verse.tags),
@@ -421,7 +432,7 @@ const VersesRenderer = ({
     const newNotedVerses: { [key: string]: number } = {}
     if (verses?.length) {
       const { Livre, Chapitre } = verses[0]
-      Object.keys(notedVerses).map(key => {
+      Object.keys(notedVerses).map((key) => {
         const firstVerseRef = key.split('/')[0]
         const bookNumber = parseInt(firstVerseRef.split('-')[0])
         const chapterNumber = parseInt(firstVerseRef.split('-')[1])
@@ -608,7 +619,7 @@ const VersesRenderer = ({
             highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
           )
           const tag: TaggedVerse | undefined = taggedVerses?.find(
-            v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
+            (v) => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
           )
           const highlightedColor = isHighlighted
             ? (highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]

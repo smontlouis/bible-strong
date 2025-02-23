@@ -5347,7 +5347,7 @@ __metadata:
     react-native-keyboard-aware-scroll-view: "npm:^0.9.4"
     react-native-localize: "npm:^1.4.0"
     react-native-markdown-display: "npm:^7.0.0-alpha.2"
-    react-native-modal: "patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch"
+    react-native-modal: "npm:13.0.1"
     react-native-modal-datetime-picker: "npm:^17.1.0"
     react-native-modalbox: "npm:^2.0.0"
     react-native-popover-view: "npm:^6.1.0"
@@ -11599,29 +11599,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-modal@npm:11.10.0":
-  version: 11.10.0
-  resolution: "react-native-modal@npm:11.10.0"
+"react-native-modal@npm:13.0.1":
+  version: 13.0.1
+  resolution: "react-native-modal@npm:13.0.1"
   dependencies:
     prop-types: "npm:^15.6.2"
     react-native-animatable: "npm:1.3.3"
   peerDependencies:
     react: "*"
-    react-native: "*"
-  checksum: 10c0/9f61c4b9299fa068f046cc0763208c8448cb3283f1570ebe2ccda3ad6baebffc08e0c2f56df59b3a5e17ef2bebf98918908804f6565c0330340c7764c22f2361
-  languageName: node
-  linkType: hard
-
-"react-native-modal@patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch":
-  version: 11.10.0
-  resolution: "react-native-modal@patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch::version=11.10.0&hash=84fc66"
-  dependencies:
-    prop-types: "npm:^15.6.2"
-    react-native-animatable: "npm:1.3.3"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/b4eea810196beca186ab52bf86f831fd87609491d5f172fed135d41364155aa4395abba0a21430b6ea15fe8cb5d8eb98dac8ee086a6d0edd0de11b8d5c7621ca
+    react-native: ">=0.65.0"
+  checksum: 10c0/8ec5728c2a27eb31c97451968b4ecefdf005afda51fab2fc864fc442122573c70f7bf3fa0c6e3bd1d6aab3565c684104d1d30df916c3f9a6c7c3223e4d3b9249
   languageName: node
   linkType: hard
 

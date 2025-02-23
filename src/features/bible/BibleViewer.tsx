@@ -69,7 +69,7 @@ const useBottomSheetDisclosure = <T,>() => {
   const [isOpen, setIsOpen] = useState<T | null>(null)
   const onOpen = setIsOpen
   const onClose = useRef(() => setIsOpen(null)).current
-  const onToggle = useRef(() => setIsOpen(s => !s)).current
+  const onToggle = useRef(() => setIsOpen((s) => !s)).current
 
   return { isOpen, onOpen, onClose, onToggle }
 }
@@ -141,7 +141,7 @@ const BibleViewer = ({
 
   const selectAllVerses = () => {
     const selectedVersesToAdd: VerseIds = Object.fromEntries(
-      verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
+      verses.map((v) => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
     )
     actions.selectAllVerses(selectedVersesToAdd)
   }
@@ -176,13 +176,13 @@ const BibleViewer = ({
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
     Boolean(
-      Object.keys(selectedVerses).find(s => state.user.bible.highlights[s])
+      Object.keys(selectedVerses).find((s) => state.user.bible.highlights[s])
     )
   )
 
   useEffect(() => {
     // Settimeout ?
-    loadVerses().catch(e => {
+    loadVerses().catch((e) => {
       console.log(e)
       setError(true)
       setIsLoading(false)
@@ -197,7 +197,7 @@ const BibleViewer = ({
         try {
           setComments(JSON.parse(mhyComments.commentaires))
         } catch (e) {
-          Sentry.withScope(scope => {
+          Sentry.withScope((scope) => {
             scope.setExtra('Reference', `${book.Numero}-${chapter}`)
             scope.setExtra('Comments', mhyComments.commentaires)
             Sentry.captureException('Comments corrupted')
@@ -284,7 +284,7 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    setNoteVerses(s => (s ? undefined : selectedVerses))
+    setNoteVerses((s) => (s ? undefined : selectedVerses))
   }
 
   const closeNoteModal = () => {
@@ -299,7 +299,7 @@ const BibleViewer = ({
       }, {} as VerseIds)
       setNoteVerses(noteVersesToLoad)
     } catch (e) {
-      Sentry.withScope(scope => {
+      Sentry.withScope((scope) => {
         scope.setExtra('Error', e.toString())
         scope.setExtra('Note', noteId)
         Sentry.captureMessage('Note corrumpted')
@@ -347,7 +347,7 @@ const BibleViewer = ({
           }
         />
       )}
-      {!error && (
+      {!error && verses.length > 0 && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
           book={book}
@@ -421,7 +421,7 @@ const BibleViewer = ({
         isVisible={modalIsVisible}
         isSelectionMode={isSelectionMode}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
-        onChangeResourceType={val => {
+        onChangeResourceType={(val) => {
           onChangeResourceType(val)
           resourceModal.open()
         }}

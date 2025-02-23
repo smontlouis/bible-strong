@@ -16,6 +16,7 @@ import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { DBStateProvider } from '~helpers/databaseState'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { useUpdates } from '~helpers/useUpdates'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import getTheme, { Theme, baseTheme } from '~themes/index'
@@ -36,7 +37,7 @@ const InitApp = ({ persistor }: Props) => {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
   useKeepAwake()
-  // useUpdates()
+  useUpdates()
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
