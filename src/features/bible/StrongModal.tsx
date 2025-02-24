@@ -2,7 +2,7 @@ import React, { memo, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 
 import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
@@ -89,7 +89,7 @@ interface StrongModalProps {
 }
 
 const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
-  const modalRef = React.useRef<BottomSheet>(null)
+  const modalRef = React.useRef<BottomSheetModal>(null)
   const navigation = useNavigation()
   const theme = useTheme()
   const hasSelectedCode = !!selectedCode
@@ -97,11 +97,11 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
 
   useEffect(() => {
     if (hasSelectedCode && !hasPrevSelectedCode) {
-      modalRef.current?.snapToIndex(0)
+      modalRef.current?.present()
     }
 
     if (!hasSelectedCode && hasPrevSelectedCode) {
-      modalRef.current?.close()
+      modalRef.current?.dismiss()
     }
   }, [hasSelectedCode, hasPrevSelectedCode])
 
@@ -115,10 +115,9 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={modalRef}
       onAnimate={onAnimateModalClose(onClosed)}
-      index={-1}
       snapPoints={[200, '75%']}
       enableDynamicSizing={false}
       enablePanDownToClose
@@ -131,7 +130,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
       <BottomSheetScrollView>
         <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
       </BottomSheetScrollView>
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

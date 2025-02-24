@@ -92,6 +92,7 @@ const StrongCard = (props: Props) => {
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const openStrong = () => {
+    onClosed?.()
     const {
       book,
       strongReference,

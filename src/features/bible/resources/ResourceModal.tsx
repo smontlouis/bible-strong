@@ -23,6 +23,7 @@ import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 import BottomSheet, {
   BottomSheetFooter,
+  BottomSheetModal,
   BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet/'
@@ -35,7 +36,7 @@ import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabConte
 import { View } from 'react-native-animatable'
 
 type Props = {
-  resourceModalRef: React.RefObject<BottomSheet>
+  resourceModalRef: React.RefObject<BottomSheetModal>
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -115,10 +116,9 @@ const ResourcesModal = ({
   }
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       key={key}
       ref={resourceModalRef}
-      index={-1}
       topInset={insets.top}
       enablePanDownToClose
       enableDynamicSizing={false}
@@ -147,7 +147,7 @@ const ResourcesModal = ({
           isSelectionMode={isSelectionMode}
         />
       )}
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

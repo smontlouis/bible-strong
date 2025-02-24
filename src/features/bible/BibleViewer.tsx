@@ -21,7 +21,7 @@ import {
   Verse,
   VerseIds,
 } from '~common/types'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
@@ -113,8 +113,8 @@ const BibleViewer = ({
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
-  const bibleParamsModal = useBottomSheet()
-  const resourceModal = useBottomSheet()
+  const bibleParamsModal = useBottomSheetModal()
+  const resourceModal = useBottomSheetModal()
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
