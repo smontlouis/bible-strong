@@ -57,7 +57,8 @@ const SelectBibleReferenceModal = ({
     <Modal.Body
       ref={ref}
       onModalClose={onClose}
-      enableDynamicSizing
+      enableDynamicSizing={false}
+      snapPoints={['90%']}
       withPortal
       enableScrollView={false}
     >

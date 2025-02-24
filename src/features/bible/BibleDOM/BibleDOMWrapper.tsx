@@ -3,9 +3,18 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
+import { useTheme } from '@emotion/react'
+import * as Sentry from '@sentry/react-native'
+import * as Haptics from 'expo-haptics'
+import produce from 'immer'
+import { useSetAtom } from 'jotai/react'
+import { Alert, Platform, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 // @ts-expect-error
 import books from '~assets/bible_versions/books'
-import * as Haptics from 'expo-haptics'
+import { Book } from '~assets/bible_versions/books-desc'
+import Snackbar from '~common/SnackBar'
 import {
   Pericope,
   SelectedCode,
@@ -14,9 +23,10 @@ import {
   Verse,
   VerseIds,
 } from '~common/types'
-import { HighlightsObj, NotesObj } from '~redux/modules/user'
-import { ActivityIndicator, Platform, View } from 'react-native'
+import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
+import { HighlightsObj, NotesObj } from '~redux/modules/user'
+import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import {
   ADD_PARALLEL_VERSION,
   NAVIGATE_TO_BIBLE_NOTE,
@@ -34,16 +44,6 @@ import {
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
-import Snackbar from '~common/SnackBar'
-import * as Sentry from '@sentry/react-native'
-import { Book } from '~assets/bible_versions/books-desc'
-import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import { useTheme } from '@emotion/react'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
-import { useSetAtom } from 'jotai/react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
-import produce from 'immer'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -318,6 +318,28 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
             marginTop: insets.top,
             marginBottom: insets.bottom,
           }),
+        },
+        onError: (error) => {
+          Alert.alert('Error', error.nativeEvent.description)
+        },
+        onRenderProcessGone(event) {
+          Alert.alert('Render process gone', event.nativeEvent.didCrash)
+        },
+        renderError: (errorDomain, errorCode, errorDesc) => {
+          return (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text>Error</Text>
+              <Text>{errorDomain}</Text>
+              <Text>{errorCode}</Text>
+              <Text>{errorDesc}</Text>
+            </View>
+          )
         },
       }}
       verses={verses}

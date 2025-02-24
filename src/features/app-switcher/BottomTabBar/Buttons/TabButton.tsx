@@ -19,7 +19,7 @@ const TabButton = ({}: TabButtonProps) => {
         style={iconStyle}
       >
         <Text fontSize={12} color="tertiary" lineHeight={15}>
-          {tabsCount}
+          {tabsCount > 100 ? ':)' : tabsCount}
         </Text>
       </AnimatedBox>
     </TouchableBox>

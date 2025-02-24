@@ -107,7 +107,7 @@
     "react-native-gesture-handler": "~2.20.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-localize": "^1.4.0",
-    "react-native-markdown-display": "^7.0.0-alpha.2",
+    "react-native-mmkv": "^2",
     "react-native-modal": "13.0.1",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-modalbox": "^2.0.0",
