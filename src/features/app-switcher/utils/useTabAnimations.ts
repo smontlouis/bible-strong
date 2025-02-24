@@ -10,27 +10,21 @@ import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 import useTabConstants from './useTabConstants'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
+import { getDefaultStore } from 'jotai/vanilla'
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
-  const tabsAtom = useAtomValue(tabsAtomsAtom)
   const { HEIGHT } = useTabConstants()
   const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
-  const {
-    activeTabPreview,
-    activeTabScreen,
-    tabPreviewCarousel,
-  } = useAppSwitcherContext()
+  const { activeTabPreview, activeTabScreen, tabPreviewCarousel } =
+    useAppSwitcherContext()
 
-  const setAtomId = useCallback(
-    (index: number) => {
-      const atomId = tabsAtom[index].toString()
-      activeTabScreen.atomId.value = atomId
-    },
-    [tabsAtom, activeTabScreen.atomId]
-  )
+  const setAtomId = (index: number) => {
+    const atomId = getDefaultStore().get(tabsAtomsAtom)[index].toString()
+    activeTabScreen.atomId.value = atomId
+  }
 
   const setActiveTabOpacity = useCallback(() => {
     setTimeout(() => {
@@ -101,13 +95,13 @@ export const useTabAnimations = () => {
     activeTabPreview.index.value = withTiming(
       index,
       { duration: 400 },
-      finished => {
+      (finished) => {
         if (!finished) return
 
         runOnJS(setAtomId)(index)
         tabPreviewCarousel.opacity.value = withDelay(
           200,
-          withTiming(0, undefined, finish => {
+          withTiming(0, undefined, (finish) => {
             if (!finish) {
               tabPreviewCarousel.opacity.value = 1
               return

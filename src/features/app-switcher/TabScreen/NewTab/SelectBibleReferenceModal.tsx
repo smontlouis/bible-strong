@@ -11,12 +11,11 @@ import {
   getDefaultBibleTab,
   useBibleTabActions,
 } from '../../../../state/tabs'
+import { selectBibleReferenceDataAtom } from './SelectBibleReferenceModalProvider'
 
 export interface SelectBibleReferenceModalProps {
   isOpen: boolean
   onClose: () => void
-  onSelect: (data: BibleTab['data']['temp']) => void
-  navigation: StackNavigationProp<any, any>
 }
 
 const bibleAtom = atom(getDefaultBibleTab())
@@ -24,12 +23,12 @@ const bibleAtom = atom(getDefaultBibleTab())
 const SelectBibleReferenceModal = ({
   isOpen,
   onClose,
-  onSelect,
 }: SelectBibleReferenceModalProps) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
   const { ref, open, close } = useBottomSheet()
+  const { onSelect } = useAtomValue(selectBibleReferenceDataAtom)
 
   useEffect(() => {
     if (isOpen) {
@@ -46,12 +45,12 @@ const SelectBibleReferenceModal = ({
 
   // Trigger onSelect when we have the latest bible data
   useEffect(() => {
-    if (canGetData) {
+    if (canGetData && onSelect) {
       onSelect(bible.data.temp)
       setCanGetData(false)
       actions.resetTempSelected()
     }
-  }, [bible, canGetData])
+  }, [bible, canGetData, onSelect])
 
   return (
     <Modal.Body

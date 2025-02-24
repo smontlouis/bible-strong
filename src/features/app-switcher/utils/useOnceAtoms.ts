@@ -9,7 +9,7 @@ export const useOnceAtoms = () => {
       getDefaultStore().get(tabsAtomsAtom)[
         initialTabIndex.current
       ] as unknown as TabItem
-    )?.id
+    )?.toString()
   )
 
   return {

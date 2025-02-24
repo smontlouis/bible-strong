@@ -13,7 +13,7 @@ import {
   getDefaultBibleTab,
   TabItem,
 } from '../../../../state/tabs'
-import SelectBibleReferenceModal from './SelectBibleReferenceModal'
+import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
 
 interface NewTabItemProps {
   type: TabItem['type']
@@ -22,11 +22,7 @@ interface NewTabItemProps {
 
 const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
   const [tab, setTab] = useAtom(newAtom)
-  const {
-    isOpen: isBibleSelectOpen,
-    onOpen: onBibleSelectOpen,
-    onClose: onBibleSelectClose,
-  } = useDisclosure()
+  const { openBibleReferenceModal } = useSelectBibleReference()
 
   const onBibleSelectDone = (data: BibleTab['data']['temp']) => {
     const getData = () => {
@@ -55,7 +51,9 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
 
   const onPress = () => {
     if (['compare', 'commentary', 'bible'].includes(type)) {
-      onBibleSelectOpen()
+      openBibleReferenceModal({
+        onSelect: onBibleSelectDone,
+      })
       return
     }
     // @ts-ignore
@@ -64,48 +62,29 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
 
   return {
     onPress,
-    onBibleSelectDone,
-    isBibleSelectOpen,
-    onBibleSelectClose,
-    onBibleSelectOpen,
   }
 }
 
 const NewTabItem = ({ type, newAtom }: NewTabItemProps) => {
   const { t } = useTranslation()
-  const {
-    onPress,
-    onBibleSelectDone,
-    onBibleSelectClose,
-    isBibleSelectOpen,
-  } = useOpenTabByType({
-    type,
-    newAtom,
-  })
+  const { onPress } = useOpenTabByType({ type, newAtom })
 
   return (
-    <>
-      <TouchableBox
-        width={150}
-        height={100}
-        mt={20}
-        mx={10}
-        center
-        bg="reverse"
-        rounded
-        onPress={onPress}
-      >
-        {getIconByTabType(type, 26)}
-        <Text opacity={0.4} title mt={8} fontSize={14} lightShadow>
-          {t(`tabs.${type}`)}
-        </Text>
-      </TouchableBox>
-      <SelectBibleReferenceModal
-        onSelect={onBibleSelectDone}
-        isOpen={isBibleSelectOpen}
-        onClose={onBibleSelectClose}
-      />
-    </>
+    <TouchableBox
+      width={150}
+      height={100}
+      mt={20}
+      mx={10}
+      center
+      bg="reverse"
+      rounded
+      onPress={onPress}
+    >
+      {getIconByTabType(type, 26)}
+      <Text opacity={0.4} title mt={8} fontSize={14} lightShadow>
+        {t(`tabs.${type}`)}
+      </Text>
+    </TouchableBox>
   )
 }
 
