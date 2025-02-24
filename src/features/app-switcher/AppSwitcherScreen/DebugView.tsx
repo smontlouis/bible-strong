@@ -11,6 +11,7 @@ export const DebugView = () => {
       ...Array.from({ length: 100 }, (_, i) => ({
         ...getDefaultBibleTab(),
         id: `tab-${i}-${Date.now()}`,
+        isRemovable: true,
       })),
     ])
   }

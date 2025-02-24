@@ -1,15 +1,15 @@
 import { combineReducers } from 'redux'
-import FilesystemStorage from 'redux-persist-filesystem-storage'
 
 import { persistReducer } from 'redux-persist'
 
-import user from './user'
+import { mmkvStorage } from '~helpers/storage'
 import plan from './plan'
+import user from './user'
 
 const planPersistConfig = {
   key: 'plan',
   keyPrefix: '',
-  storage: FilesystemStorage,
+  storage: mmkvStorage,
   blacklist: ['onlinePlans', 'onlineStatus'],
   timeout: null,
 }

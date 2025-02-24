@@ -1,7 +1,7 @@
 import produce from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom, PrimitiveAtom } from 'jotai/vanilla'
-import { atomWithDefault, loadable, splitAtom } from 'jotai/vanilla/utils'
+import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
 import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -23,7 +23,7 @@ export type TabBase = {
 }
 
 export type VersionCode = keyof typeof versions
-export type BookName = typeof books[number]['Nom']
+export type BookName = (typeof books)[number]['Nom']
 export type SelectedVerses = VerseIds
 export interface BibleTab extends TabBase {
   type: 'bible'
@@ -266,12 +266,8 @@ export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [
   getDefaultBibleTab(),
 ])
 
-export const loadableActiveIndexAtom = loadable(activeTabIndexAtomOriginal)
-
-export const loadableTabsAtom = loadable(tabsAtom)
-
 export const activeTabIndexAtom = atom(
-  get => {
+  (get) => {
     const tabsAtoms = get(tabsAtomsAtom)
     if (
       (get(activeTabIndexAtomOriginal) !== 0 && tabsAtoms.length === 1) ||
@@ -296,7 +292,7 @@ export const activeTabIndexAtom = atom(
   }
 )
 
-export const activeAtomIdAtom = atom(get => {
+export const activeAtomIdAtom = atom((get) => {
   const tabsAtoms = get(tabsAtomsAtom)
   const activeTabIndex = get(activeTabIndexAtom)
   const atomId = tabsAtoms[activeTabIndex].toString()
@@ -315,13 +311,13 @@ export const useIsCurrentTab = () => {
 export const useFindTabIndex = (atomId: string) => {
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
-  return tabsAtoms.findIndex(tab => tab.toString() === atomId)
+  return tabsAtoms.findIndex((tab) => tab.toString() === atomId)
 }
 
-export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
-export const tabsCountAtom = atom(get => get(tabsAtom).length)
+export const tabsAtomsAtom = splitAtom(tabsAtom, (tab) => tab.id)
+export const tabsCountAtom = atom((get) => get(tabsAtom).length)
 
-export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
+export const cachedTabIdsAtom = atomWithDefault<string[]>((get) => {
   let activeTabIndex = get(activeTabIndexAtom)
 
   if (activeTabIndex === -1) {
@@ -346,7 +342,7 @@ export const checkTabType = <Type extends TabItem>(
 }
 
 export const defaultBibleAtom = atom(
-  get => {
+  (get) => {
     const tabsAtoms = get(tabsAtomsAtom)
     const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
     return get(defaultBibleTabAtom)
@@ -366,7 +362,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setSelectedVersion = useCallback(
     (selectedVersion: VersionCode) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedVersion = selectedVersion
         })
       ),
@@ -376,7 +372,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setSelectedBook = useCallback(
     (selectedBook: Book) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedBook = selectedBook
         })
       ),
@@ -386,7 +382,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setSelectedChapter = useCallback(
     (selectedChapter: number) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedChapter = selectedChapter
         })
       ),
@@ -396,7 +392,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setSelectedVerse = useCallback(
     (selectedVerse: number) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedVerse = selectedVerse
         })
       ),
@@ -406,7 +402,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const addParallelVersion = useCallback(
     () =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.parallelVersions.push(getLangIsFr() ? 'LSG' : 'KJV')
         })
       ),
@@ -416,7 +412,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setParallelVersion = useCallback(
     (version: VersionCode, index: number) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.parallelVersions[index] = version
         })
       ),
@@ -426,7 +422,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const removeParallelVersion = useCallback(
     (index: number) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.parallelVersions = draft.data.parallelVersions.filter(
             (p, i) => i !== index
           )
@@ -438,7 +434,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const removeAllParallelVersions = useCallback(
     () =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.parallelVersions = []
         })
       ),
@@ -448,7 +444,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setTempSelectedBook = useCallback(
     (selectedBook: Book) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.temp.selectedBook = selectedBook
         })
       ),
@@ -458,7 +454,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setTempSelectedChapter = useCallback(
     (selectedChapter: number) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.temp.selectedChapter = selectedChapter
         })
       ),
@@ -468,7 +464,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setTempSelectedVerse = useCallback(
     (selectedVerse: number) =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.temp.selectedVerse = selectedVerse
         })
       ),
@@ -478,7 +474,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const resetTempSelected = useCallback(
     () =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.temp.selectedBook = draft.data.selectedBook
           draft.data.temp.selectedChapter = draft.data.selectedChapter
           draft.data.temp.selectedVerse = draft.data.selectedVerse
@@ -490,7 +486,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const validateTempSelected = useCallback(
     () =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedBook = draft.data.temp.selectedBook
           draft.data.selectedChapter = draft.data.temp.selectedChapter
           draft.data.selectedVerse = draft.data.temp.selectedVerse
@@ -502,7 +498,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const toggleSelectionMode = useCallback(
     () =>
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectionMode =
             draft.data.selectionMode === 'grid' ? 'list' : 'grid'
         })
@@ -513,7 +509,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const selectAllVerses = useCallback(
     (ids: VerseIds) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedVerses = ids
         })
       )
@@ -524,7 +520,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const addSelectedVerse = useCallback(
     (id: string) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedVerses[id] = true
         })
       )
@@ -535,7 +531,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const removeSelectedVerse = useCallback(
     (id: string) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           delete draft.data.selectedVerses[id]
         })
       )
@@ -546,7 +542,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const selectSelectedVerse = useCallback(
     (id: string) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedVerses = {
             [id]: true,
           }
@@ -559,7 +555,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setTitle = useCallback(
     (title: string) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.title = title
         })
       )
@@ -569,7 +565,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   const clearSelectedVerses = useCallback(() => {
     setBibleTab(
-      produce(draft => {
+      produce((draft) => {
         draft.data.selectedVerses = {}
       })
     )
@@ -577,7 +573,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   const goToPrevChapter = useCallback(() => {
     setBibleTab(
-      produce(draft => {
+      produce((draft) => {
         if (
           draft.data.selectedBook.Numero === 1 &&
           draft.data.selectedChapter === 1
@@ -590,7 +586,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         if (currentChapter === 1) {
           const currentBook = draft.data.selectedBook
           const currentBookIndex = books.findIndex(
-            b => b.Numero === currentBook.Numero
+            (b) => b.Numero === currentBook.Numero
           )
 
           const prevBook = books[currentBookIndex - 1]
@@ -619,7 +615,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   const goToNextChapter = useCallback(() => {
     setBibleTab(
-      produce(draft => {
+      produce((draft) => {
         if (
           draft.data.selectedBook.Numero === 66 &&
           draft.data.selectedChapter === draft.data.selectedBook.Chapitres
@@ -632,7 +628,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
         if (currentChapter === currentBook.Chapitres) {
           const currentBookIndex = books.findIndex(
-            b => b.Numero === currentBook.Numero
+            (b) => b.Numero === currentBook.Numero
           )
 
           const nextBook = books[currentBookIndex + 1]
@@ -663,7 +659,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const goToChapter = useCallback(
     ({ book, chapter }: { book: Book; chapter: number }) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.selectedBook = book
           draft.data.selectedChapter = chapter
           draft.data.selectedVerse = 1
@@ -686,7 +682,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       version: VersionCode
     }) => {
       setBibleTab(
-        produce(draft => {
+        produce((draft) => {
           draft.data.temp = {
             selectedBook: selected.book,
             selectedChapter: selected.chapter,

@@ -1,12 +1,16 @@
-import { useAtom } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { useRef } from 'react'
-import { tabsAtomsAtom, activeTabIndexAtom } from '../../../state/tabs'
+import { activeTabIndexAtom, TabItem, tabsAtomsAtom } from '../../../state/tabs'
 
 export const useOnceAtoms = () => {
-  const [tabsAtoms] = useAtom(tabsAtomsAtom)
-  const [tabIndex] = useAtom(activeTabIndexAtom)
-  const initialAtomId = useRef(tabsAtoms[tabIndex]?.toString())
-  const initialTabIndex = useRef(tabIndex)
+  const initialTabIndex = useRef(getDefaultStore().get(activeTabIndexAtom))
+  const initialAtomId = useRef(
+    (
+      getDefaultStore().get(tabsAtomsAtom)[
+        initialTabIndex.current
+      ] as unknown as TabItem
+    )?.id
+  )
 
   return {
     initialAtomId: initialAtomId.current,

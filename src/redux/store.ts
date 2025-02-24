@@ -7,7 +7,6 @@ import {
   getStoredState,
 } from 'redux-persist'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
 
 import firestoreMiddleware from './firestoreMiddleware'
@@ -15,12 +14,14 @@ import { logger, crashReporter } from './logMiddleware'
 import migrations from './migrations'
 
 import reducer from '~redux/modules/reducer'
+import { mmkvStorage } from '~helpers/storage'
+import { PersistConfig } from 'redux-persist/es/types'
 
 function configureStore() {
   const persistConfig = {
     key: 'root',
     keyPrefix: '',
-    storage: FilesystemStorage,
+    storage: mmkvStorage,
     stateReconciler: autoMergeLevel2,
     version: 29,
     // debug: true,
@@ -29,10 +30,10 @@ function configureStore() {
     timeout: null,
   }
 
-  // FileSystem migration
-  persistConfig.getStoredState = async config => {
-    return getStoredState(config).catch(err => {
-      return getStoredState({ ...config, storage: AsyncStorage })
+  // MMKV migration
+  persistConfig.getStoredState = async (config) => {
+    return getStoredState(config).catch((err) => {
+      return getStoredState({ ...config, storage: FilesystemStorage })
     })
   }
 
@@ -44,7 +45,7 @@ function configureStore() {
   )
   const persistor = persistStore(store)
   // persistor.purge() // Purge async storage
-  // AsyncStorage.clear()
+  // storage.clearAll()
 
   if (__DEV__) {
     if (module.hot) {

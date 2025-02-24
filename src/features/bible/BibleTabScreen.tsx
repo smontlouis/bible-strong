@@ -36,7 +36,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
 
   const { settings, fontFamily } = useSelector(
     (state: RootState) => ({
-      settings: produce(state.user.bible.settings, draftState => {
+      settings: produce(state.user.bible.settings, (draftState) => {
         // TODO: WHY IS THIS HERE?
         draftState.colors.default = deepmerge(
           defaultColors,
