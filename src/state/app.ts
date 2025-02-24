@@ -1,6 +1,5 @@
 import produce from 'immer'
 import { atom } from 'jotai/vanilla'
-import { loadable } from 'jotai/vanilla/utils'
 import { VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import {
@@ -82,10 +81,9 @@ export const historyBaseAtom = atomWithAsyncStorage<HistoryItem[]>(
   'history',
   []
 )
-export const loadableHistoryAtom = loadable(historyBaseAtom)
 
 export const historyAtom = atom(
-  get => get(historyBaseAtom),
+  (get) => get(historyBaseAtom),
   (get, set, newItem: HistoryItem) => {
     const history = get(historyBaseAtom)
 
@@ -137,7 +135,7 @@ export const historyAtom = atom(
 
     set(
       historyBaseAtom,
-      produce(history, draft => {
+      produce(history, (draft) => {
         draft.unshift(newItem)
         draft.slice(0, 50)
       })

@@ -323,6 +323,7 @@ const BibleViewer = ({
   })
 
   console.log('BibleViewer', version, book.Numero, chapter, verse)
+
   return (
     <Box flex={1} bg="reverse">
       <BibleHeader

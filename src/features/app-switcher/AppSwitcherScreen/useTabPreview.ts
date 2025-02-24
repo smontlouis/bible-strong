@@ -1,5 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect } from 'react'
 import {
   Extrapolate,
@@ -27,7 +27,6 @@ const useTabPreview = ({
   const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
-  const tabsCount = useAtomValue(tabsCountAtom)
 
   // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
   tabPreviews.refs[index] = useAnimatedRef<AnimatedBox>()
@@ -83,7 +82,7 @@ const useTabPreview = ({
   const onClose = () => {
     activeTabPreview.zIndex.value = 1
     onDelete()
-
+    const tabsCount = getDefaultStore().get(tabsCountAtom)
     // If deleting last tab, choose the previous one
     if (tabsCount - 1 === activeTabPreview.index.value) {
       activeTabPreview.index.value -= 1

@@ -1,11 +1,36 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { atomWithStorage as aws, createJSONStorage } from 'jotai/vanilla/utils'
+import { atomWithStorage, createJSONStorage } from 'jotai/utils'
+import { storage } from './storage'
 
-const atomWithAsyncStorage = <Value>(key: string, initialValue: Value) => {
-  const defaultStorage = {
-    ...createJSONStorage<Value>(() => AsyncStorage),
-    delayInit: false,
-  }
-  return aws<Value>(key, initialValue, defaultStorage)
+function getItem(key: string): string | null {
+  const value = storage.getString(key)
+  return value ? value : null
 }
+
+function setItem(key: string, value: string): void {
+  storage.set(key, value)
+}
+
+function removeItem(key: string): void {
+  storage.delete(key)
+}
+
+function clearAll(): void {
+  storage.clearAll()
+}
+
+const atomWithAsyncStorage = <T>(key: string, initialValue: T) =>
+  atomWithStorage<T>(
+    key,
+    initialValue,
+    createJSONStorage<T>(() => ({
+      getItem,
+      setItem,
+      removeItem,
+      clearAll,
+    })),
+    {
+      getOnInit: true,
+    }
+  )
+
 export default atomWithAsyncStorage

@@ -4,21 +4,19 @@ import * as Sentry from '@sentry/react-native'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import { useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import { persistor, store } from '~redux/store'
 
+import { configureReanimatedLogger } from 'react-native-reanimated'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { checkDatabasesStorage } from '~helpers/sqlite'
+import { useMigrateFromAsyncStorage } from '~helpers/storage'
+import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import InitApp from './InitApp'
 import { setI18n } from './i18n'
-import { loadableHistoryAtom } from './src/state/app'
-import { loadableActiveIndexAtom, loadableTabsAtom } from './src/state/tabs'
-import { useRemoteConfig } from '~helpers/useRemoteConfig'
-import { configureReanimatedLogger } from 'react-native-reanimated'
 
 configureReanimatedLogger({
   strict: false,
@@ -26,7 +24,7 @@ configureReanimatedLogger({
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
-  .then(result =>
+  .then((result) =>
     console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
   )
   .catch(console.warn) // it's good to explicitly catch and inspect any error
@@ -59,9 +57,7 @@ const loadResourcesAsync = async () => {
 
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
-  const loadableActiveIndex = useAtomValue(loadableActiveIndexAtom)
-  const loadableTabs = useAtomValue(loadableTabsAtom)
-  const loadableHistory = useAtomValue(loadableHistoryAtom)
+  const hasMigrated = useMigrateFromAsyncStorage()
 
   const [status, setStatus] = useState('')
   useEffect(() => {
@@ -83,11 +79,7 @@ const useAppLoad = () => {
 
   useRemoteConfig()
 
-  const isCompleted =
-    loadableActiveIndex.state === 'hasData' &&
-    loadableTabs.state === 'hasData' &&
-    loadableHistory.state === 'hasData' &&
-    isLoadingCompleted
+  const isCompleted = isLoadingCompleted && hasMigrated
 
   return {
     isLoadingCompleted: isCompleted,
