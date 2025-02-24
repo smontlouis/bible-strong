@@ -2,7 +2,7 @@ import { useAtomValue } from 'jotai/react'
 import { MotiView } from 'moti'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DeviceEventEmitter } from 'react-native'
+import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { SharedValue, useDerivedValue } from 'react-native-reanimated'
 import { Book } from '~assets/bible_versions/books-desc'
@@ -25,12 +25,24 @@ export const itemHeight = 46
 const BookItem = memo(
   ({ book, isSelected, onBookSelect, expandedBook }: BookItemProps) => {
     const { t } = useTranslation()
+    const { width: windowWidth } = useWindowDimensions()
     const isExpanded = useDerivedValue(() => expandedBook.value === book.Numero)
 
     const chapters = useMemo(
       () => Array.from({ length: book.Chapitres }, (_, i) => i + 1),
       [book]
     )
+
+    const ITEM_WIDTH = 60
+    const ITEM_GAP = 10
+    const MAX_WIDTH = Math.min(500, windowWidth)
+    const PADDING = 0
+
+    const availableWidth = MAX_WIDTH - PADDING * 2
+    const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
+    const totalItemsWidth =
+      itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
+    const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
     const handleChapterSelect = (chapter: number) => {
       DeviceEventEmitter.emit(BOOK_SELECTION_EVENT, {
@@ -88,8 +100,17 @@ const BookItem = memo(
           </HStack>
         </TouchableOpacity>
         <AccordionItem isExpanded={isExpanded} viewKey={book.Nom}>
-          <HStack gap={10} style={{ flexWrap: 'wrap' }} padding={10}>
-            {chapters.map(chapter => (
+          <HStack
+            gap={ITEM_GAP}
+            style={{
+              flexWrap: 'wrap',
+              paddingVertical: 10,
+              paddingHorizontal: horizontalMargin,
+              maxWidth: MAX_WIDTH,
+              alignSelf: 'center',
+            }}
+          >
+            {chapters.map((chapter) => (
               <TouchableOpacity
                 key={chapter}
                 onPress={() => handleChapterSelect(chapter)}
@@ -98,8 +119,8 @@ const BookItem = memo(
                 <Box
                   backgroundColor="opacity5"
                   borderRadius={6}
-                  minWidth={60}
-                  minHeight={60}
+                  width={ITEM_WIDTH}
+                  height={60}
                   alignItems="center"
                   justifyContent="center"
                 >

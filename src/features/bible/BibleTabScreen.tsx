@@ -19,12 +19,11 @@ const deepmerge = require('@fastify/deepmerge')()
 import { StackNavigationProp } from '@react-navigation/stack'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { getDatabases } from '~helpers/databases'
+import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
-import { getDatabases } from '~helpers/databases'
-import useDeviceOrientation from '~helpers/useDeviceOrientation'
-import { MainStackProps } from '~navigation/type'
 
 interface BibleTabScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'BibleView'>
@@ -127,12 +126,8 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
     }
   }, [dispatch, settings.commentsDisplay])
 
-  const orientation = useDeviceOrientation()
-
   return (
     <BibleViewer
-      // Reset key to force re-render on orientation change
-      key={`BibletabScreen${orientation.portrait}`}
       navigation={navigation}
       settings={settings}
       fontFamily={fontFamily}

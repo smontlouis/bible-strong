@@ -90,12 +90,10 @@ const Header = ({
   return (
     <MotiHStack
       width="100%"
-      maxWidth={830}
       bg="reverse"
       px={15}
       paddingTop={insets.top}
       height={HEADER_HEIGHT + insets.top}
-      alignItems="center"
       borderBottomWidth={1}
       borderColor="border"
       position="absolute"
@@ -111,47 +109,91 @@ const Header = ({
       })}
       {...motiTransition}
     >
-      {(isSelectionMode || hasBackButton) && (
-        <Back
-          onGoBack={() => {
-            isFullScreenBibleValue.value = false
-            console.log('onGoBack')
-          }}
-        >
-          <MotiBox
-            alignItems="center"
-            justifyContent="center"
-            width={50}
-            height={32}
-            animate={useDerivedValue(() => {
-              return {
-                translateY: isFullScreenBibleValue.value ? -5 : 0,
-              }
-            })}
-            {...motiTransition}
+      <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+        {(isSelectionMode || hasBackButton) && (
+          <Back
+            onGoBack={() => {
+              isFullScreenBibleValue.value = false
+              console.log('onGoBack')
+            }}
           >
-            <FeatherIcon name="arrow-left" size={20} />
-          </MotiBox>
-        </Back>
-      )}
-      <HStack alignItems="center" gap={3}>
-        <HStack>
+            <MotiBox
+              alignItems="center"
+              justifyContent="center"
+              width={50}
+              height={32}
+              animate={useDerivedValue(() => {
+                return {
+                  translateY: isFullScreenBibleValue.value ? -5 : 0,
+                }
+              })}
+              {...motiTransition}
+            >
+              <FeatherIcon name="arrow-left" size={20} />
+            </MotiBox>
+          </Back>
+        )}
+        <HStack alignItems="center" gap={3}>
+          <HStack>
+            <TouchableBox
+              onPress={() => {
+                openBookSelector({
+                  actions,
+                  data: getDefaultStore().get(bibleAtom).data,
+                })
+              }}
+              center
+              pl={12}
+              pr={7}
+              height={32}
+            >
+              <MotiBox
+                bg="lightGrey"
+                borderTopLeftRadius={20}
+                borderBottomLeftRadius={20}
+                position="absolute"
+                left={0}
+                bottom={0}
+                right={0}
+                top={0}
+                animate={useDerivedValue(() => {
+                  return {
+                    opacity: isFullScreenBibleValue.value ? 0 : 1,
+                  }
+                })}
+              />
+              <MotiText
+                fontWeight="bold"
+                fontSize={14}
+                animate={useDerivedValue(() => {
+                  return {
+                    translateY: isFullScreenBibleValue.value ? -5 : 0,
+                  }
+                })}
+                {...motiTransition}
+              >
+                {isSmall
+                  ? truncate(`${t(bookName)} ${chapter}`, 10)
+                  : `${t(bookName)} ${chapter}`}
+              </MotiText>
+            </TouchableBox>
+          </HStack>
           <TouchableBox
-            onPress={() => {
-              openBookSelector({
+            onPress={() =>
+              openVersionSelector({
                 actions,
                 data: getDefaultStore().get(bibleAtom).data,
               })
-            }}
+            }
             center
-            pl={12}
-            pr={7}
+            pl={7}
+            pr={12}
             height={32}
           >
             <MotiBox
               bg="lightGrey"
-              borderTopLeftRadius={20}
-              borderBottomLeftRadius={20}
+              borderTopRightRadius={20}
+              borderBottomRightRadius={20}
               position="absolute"
               left={0}
               bottom={0}
@@ -173,139 +215,103 @@ const Header = ({
               })}
               {...motiTransition}
             >
-              {isSmall
-                ? truncate(`${t(bookName)} ${chapter}`, 10)
-                : `${t(bookName)} ${chapter}`}
+              {version}
             </MotiText>
           </TouchableBox>
         </HStack>
-        <TouchableBox
-          onPress={() =>
-            openVersionSelector({
-              actions,
-              data: getDefaultStore().get(bibleAtom).data,
-            })
-          }
-          center
-          pl={7}
-          pr={12}
-          height={32}
-        >
-          <MotiBox
-            bg="lightGrey"
-            borderTopRightRadius={20}
-            borderBottomRightRadius={20}
-            position="absolute"
-            left={0}
-            bottom={0}
-            right={0}
-            top={0}
-            animate={useDerivedValue(() => {
-              return {
-                opacity: isFullScreenBibleValue.value ? 0 : 1,
-              }
-            })}
-          />
-          <MotiText
-            fontWeight="bold"
-            fontSize={14}
-            animate={useDerivedValue(() => {
-              return {
-                translateY: isFullScreenBibleValue.value ? -5 : 0,
-              }
-            })}
-            {...motiTransition}
-          >
-            {version}
-          </MotiText>
-        </TouchableBox>
-      </HStack>
 
-      <PopOverMenu
-        element={
-          <MotiBox
-            center
-            width={40}
-            height="100%"
-            animate={useDerivedValue(() => {
-              return {
-                opacity: isFullScreenBibleValue.value ? 0 : 1,
+        <PopOverMenu
+          element={
+            <MotiBox
+              center
+              width={40}
+              height="100%"
+              animate={useDerivedValue(() => {
+                return {
+                  opacity: isFullScreenBibleValue.value ? 0 : 1,
+                }
+              })}
+            >
+              <FeatherIcon
+                name="chevrons-down"
+                size={20}
+                style={{ opacity: 0.3 }}
+              />
+            </MotiBox>
+          }
+          popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
+        />
+        {!isSelectionMode && (
+          <HStack marginLeft="auto">
+            <PopOverMenu
+              element={
+                <MotiBox
+                  center
+                  width={40}
+                  height="100%"
+                  animate={useDerivedValue(() => {
+                    return {
+                      opacity: isFullScreenBibleValue.value ? 0 : 1,
+                    }
+                  })}
+                >
+                  <FeatherIcon name="more-vertical" size={18} />
+                </MotiBox>
               }
-            })}
-          >
-            <FeatherIcon
-              name="chevrons-down"
-              size={20}
-              style={{ opacity: 0.3 }}
-            />
-          </MotiBox>
-        }
-        popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
-      />
-      {!isSelectionMode && (
-        <HStack marginLeft="auto">
-          <PopOverMenu
-            element={
-              <MotiBox
-                center
-                width={40}
-                height="100%"
-                animate={useDerivedValue(() => {
-                  return {
-                    opacity: isFullScreenBibleValue.value ? 0 : 1,
-                  }
-                })}
-              >
-                <FeatherIcon name="more-vertical" size={18} />
-              </MotiBox>
-            }
-            popover={
-              <>
-                <MenuOption onSelect={onBibleParamsClick}>
-                  <Box row alignItems="center">
-                    <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
-                    <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
-                  </Box>
-                </MenuOption>
-                {!commentsDisplay && isFR && (
-                  <MenuOption onSelect={onOpenCommentaire}>
+              popover={
+                <>
+                  <MenuOption onSelect={onBibleParamsClick}>
                     <Box row alignItems="center">
-                      <MaterialIcon name="chat" size={20} />
-                      <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
+                      <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
+                      <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
                     </Box>
                   </MenuOption>
-                )}
-                {commentsDisplay && isFR && (
+                  {!commentsDisplay && isFR && (
+                    <MenuOption onSelect={onOpenCommentaire}>
+                      <Box row alignItems="center">
+                        <MaterialIcon name="chat" size={20} />
+                        <Text marginLeft={10}>
+                          {t('Commentaire désactivé')}
+                        </Text>
+                      </Box>
+                    </MenuOption>
+                  )}
+                  {commentsDisplay && isFR && (
+                    <MenuOption
+                      onSelect={() => dispatch(setSettingsCommentaires(false))}
+                    >
+                      <Box row alignItems="center">
+                        <MaterialIcon name="chat" size={20} color="primary" />
+                        <Text marginLeft={10}>{t('Commentaire activé')}</Text>
+                      </Box>
+                    </MenuOption>
+                  )}
                   <MenuOption
-                    onSelect={() => dispatch(setSettingsCommentaires(false))}
+                    onSelect={
+                      isParallel
+                        ? removeAllParallelVersions
+                        : addParallelVersion
+                    }
                   >
                     <Box row alignItems="center">
-                      <MaterialIcon name="chat" size={20} color="primary" />
-                      <Text marginLeft={10}>{t('Commentaire activé')}</Text>
+                      <ParallelIcon
+                        color={isParallel ? 'primary' : 'default'}
+                      />
+                      <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
                     </Box>
                   </MenuOption>
-                )}
-                <MenuOption
-                  onSelect={
-                    isParallel ? removeAllParallelVersions : addParallelVersion
-                  }
-                >
-                  <Box row alignItems="center">
-                    <ParallelIcon color={isParallel ? 'primary' : 'default'} />
-                    <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => navigation.navigate('History')}>
-                  <Box row alignItems="center">
-                    <MaterialIcon name="history" size={20} />
-                    <Text marginLeft={10}>{t('Historique')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
-            }
-          />
-        </HStack>
-      )}
+                  <MenuOption onSelect={() => navigation.navigate('History')}>
+                    <Box row alignItems="center">
+                      <MaterialIcon name="history" size={20} />
+                      <Text marginLeft={10}>{t('Historique')}</Text>
+                    </Box>
+                  </MenuOption>
+                </>
+              }
+            />
+          </HStack>
+        )}
+      </HStack>
     </MotiHStack>
   )
 }

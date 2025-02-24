@@ -111,12 +111,8 @@ const StudiesDomWrapper = ({
         case 'TEXT_CHANGED':
           if (onDeltaChangeCallback) {
             delete msgData.payload.type
-            const {
-              delta,
-              deltaChange,
-              deltaOld,
-              changeSource,
-            } = msgData.payload
+            const { delta, deltaChange, deltaOld, changeSource } =
+              msgData.payload
             onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
           }
           break
@@ -213,10 +209,6 @@ const StudiesDomWrapper = ({
       )}
     </KeyboardAvoidingView>
   )
-}
-
-StudiesDomWrapper.defaultProps = {
-  theme: 'snow',
 }
 
 export default StudiesDomWrapper

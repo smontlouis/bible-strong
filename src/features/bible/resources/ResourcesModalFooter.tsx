@@ -44,7 +44,7 @@ const ResourcesModalFooter = ({
       h={54 + bottomBarHeight}
       paddingBottom={bottomBarHeight}
     >
-      <Box width={wp(20, 400)} opacity={resourceType === 'strong' ? 1 : 0.3}>
+      <Box flex={1} opacity={resourceType === 'strong' ? 1 : 0.3}>
         <TouchableSvgIcon
           icon={LexiqueIcon}
           color={resourceType === 'strong' ? 'primary' : 'grey'}
@@ -52,10 +52,7 @@ const ResourcesModalFooter = ({
           label={t('Lexique')}
         />
       </Box>
-      <Box
-        width={wp(20, 400)}
-        opacity={resourceType === 'dictionary' ? 1 : 0.3}
-      >
+      <Box flex={1} opacity={resourceType === 'dictionary' ? 1 : 0.3}>
         <TouchableSvgIcon
           icon={DictionnaireIcon}
           color={resourceType === 'dictionary' ? 'secondary' : 'grey'}
@@ -63,7 +60,7 @@ const ResourcesModalFooter = ({
           label={t('Dictionnaire')}
         />
       </Box>
-      <Box width={wp(20, 400)} opacity={resourceType === 'nave' ? 1 : 0.3}>
+      <Box flex={1} opacity={resourceType === 'nave' ? 1 : 0.3}>
         <TouchableSvgIcon
           icon={NaveIcon}
           color={resourceType === 'nave' ? 'quint' : 'grey'}
@@ -71,7 +68,7 @@ const ResourcesModalFooter = ({
           label={t('Thèmes')}
         />
       </Box>
-      <Box width={wp(20, 400)} opacity={resourceType === 'reference' ? 1 : 0.3}>
+      <Box flex={1} opacity={resourceType === 'reference' ? 1 : 0.3}>
         <TouchableSvgIcon
           icon={RefIcon}
           color={resourceType === 'reference' ? 'quart' : 'grey'}
@@ -79,10 +76,7 @@ const ResourcesModalFooter = ({
           label={t('Références')}
         />
       </Box>
-      <Box
-        width={wp(20, 400)}
-        opacity={resourceType === 'commentary' ? 1 : 0.3}
-      >
+      <Box flex={1} opacity={resourceType === 'commentary' ? 1 : 0.3}>
         <TouchableSvgIcon
           icon={CommentIcon}
           color={resourceType === 'commentary' ? '#26A69A' : 'grey'}
