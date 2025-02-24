@@ -11,6 +11,7 @@ import { NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import { SelectedCode, StudyNavigateBibleType, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import VerseTags from './VerseTags'
+import { scaleLineHeight } from './scaleLineHeight'
 
 export const Wrapper = styled('span')<RootStyles>(
   ({ settings: { textDisplay } }) => ({
@@ -24,11 +25,15 @@ export const Wrapper = styled('span')<RootStyles>(
 )
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale, fontFamily } }) => ({
+  ({ isParallel, settings: { fontSizeScale, fontFamily, lineHeight } }) => ({
     fontFamily,
 
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
+    lineHeight: scaleLineHeight(
+      isParallel ? 26 : 32,
+      lineHeight,
+      fontSizeScale
+    ),
   })
 )
 
@@ -91,7 +96,7 @@ const VerseTextFormatting = ({
 
   useEffect(() => {
     verseToStrong({ Texte: verse.Texte, Livre: verse.Livre }).then(
-      formattedText => {
+      (formattedText) => {
         setText(formattedText)
       }
     )

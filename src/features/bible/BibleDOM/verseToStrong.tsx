@@ -32,7 +32,7 @@ const BibleStrongRef = ({
 }) => {
   const dispatch = useDispatch()
   const { selectedCode, settings, onTouchMove } = useContext(VerseContext)
-  const isSelected = selectedCode?.reference == reference
+  const isSelected = Number(selectedCode?.reference) === Number(reference)
 
   const navigateToStrong = () => {
     dispatch({
@@ -58,7 +58,7 @@ const verseToStrong = ({
   Texte,
   Livre,
 }: Pick<Verse, 'Texte' | 'Livre'>): Promise<(string | JSX.Element)[]> =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     // STRONG
     const splittedTexte = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map(
       (item, i) => {
