@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system'
 import produce from 'immer'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Appearance, EmitterSubscription, Platform } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
@@ -32,6 +32,7 @@ interface BibleTabScreenProps {
 
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
+  const [reloadKey, setReloadKey] = useState(0)
 
   const { settings, fontFamily } = useSelector(
     (state: RootState) => ({
@@ -119,12 +120,19 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
     })()
   }, [dispatch, settings.commentsDisplay])
 
+  const handleBibleViewerReload = () => {
+    console.log('Bible component failed to mount, forcing reload')
+    setReloadKey((prev) => prev + 1)
+  }
+
   return (
     <BibleViewer
+      key={`bible-viewer-${reloadKey}`}
       navigation={navigation}
       settings={settings}
       fontFamily={fontFamily}
       bibleAtom={bibleAtom}
+      onMountTimeout={handleBibleViewerReload}
     />
   )
 }

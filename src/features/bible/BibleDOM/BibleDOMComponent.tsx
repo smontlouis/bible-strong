@@ -249,6 +249,11 @@ const VersesRenderer = ({
   })
 
   useEffect(() => {
+    // Notify parent component that we've mounted
+    dispatch({
+      type: 'DOM_COMPONENT_MOUNTED',
+    }).catch(console.error)
+
     // Set initial header height CSS variable
     document.documentElement.style.setProperty(
       '--header-height',

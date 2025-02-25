@@ -63,13 +63,16 @@ interface BibleViewerProps {
   commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
   fontFamily: string
+  onMountTimeout?: () => void
 }
 
 const useBottomSheetDisclosure = <T,>() => {
   const [isOpen, setIsOpen] = useState<T | null>(null)
   const onOpen = setIsOpen
   const onClose = useRef(() => setIsOpen(null)).current
-  const onToggle = useRef(() => setIsOpen((s) => !s)).current
+  const onToggle = useRef(() =>
+    setIsOpen((s) => (s === null ? null : s))
+  ).current
 
   return { isOpen, onOpen, onClose, onToggle }
 }
@@ -96,6 +99,7 @@ const BibleViewer = ({
   bibleAtom,
   settings,
   fontFamily,
+  onMountTimeout,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
 
@@ -300,7 +304,7 @@ const BibleViewer = ({
       setNoteVerses(noteVersesToLoad)
     } catch (e) {
       Sentry.withScope((scope) => {
-        scope.setExtra('Error', e.toString())
+        scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
         scope.setExtra('Note', noteId)
         Sentry.captureMessage('Note corrumpted')
       })
@@ -385,6 +389,7 @@ const BibleViewer = ({
           goToNextChapter={actions.goToNextChapter}
           setMultipleTagsItem={setMultipleTagsItem}
           onChangeResourceTypeSelectVerse={onChangeResourceTypeSelectVerse}
+          onMountTimeout={onMountTimeout}
         />
       )}
       {!isReadOnly && (

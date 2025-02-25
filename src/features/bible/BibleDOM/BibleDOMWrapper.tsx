@@ -44,6 +44,8 @@ import {
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
+import { useEffect, useRef } from 'react'
+
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -101,6 +103,7 @@ export type WebViewProps = {
   goToNextChapter: any
   setMultipleTagsItem: any
   onChangeResourceTypeSelectVerse: any
+  onMountTimeout?: () => void
 }
 
 export type NotedVerse = {
@@ -134,13 +137,41 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     selectedCode,
     comments,
     isLoading,
+    onMountTimeout,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+
+  // Add this to track component mounting
+  const mountedRef = useRef(false)
+
+  useEffect(() => {
+    // Reset mount status when component is mounted
+    mountedRef.current = false
+
+    // Set up timeout to check if DOM component has mounted
+    const timeoutId = setTimeout(() => {
+      if (!mountedRef.current) {
+        // If component hasn't mounted after 1 second, notify parent
+        console.log('DOM component NOT mounted')
+        onMountTimeout?.()
+      } else {
+        console.log('DOM component mounted')
+      }
+    }, 1500)
+
+    return () => clearTimeout(timeoutId)
+  }, [onMountTimeout])
+
   const dispatch: Dispatch = async (action) => {
     switch (action.type) {
+      case 'DOM_COMPONENT_MOUNTED': {
+        // Mark component as mounted
+        mountedRef.current = true
+        break
+      }
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         const { onChangeResourceTypeSelectVerse } = props
         const { Livre, Chapitre, Verset } = action.params.verse
@@ -317,28 +348,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
           ...(Platform.OS === 'android' && {
             marginTop: insets.top,
           }),
-        },
-        onError: (error) => {
-          Alert.alert('Error', error.nativeEvent.description)
-        },
-        onRenderProcessGone(event) {
-          Alert.alert('Render process gone', event.nativeEvent.didCrash)
-        },
-        renderError: (errorDomain, errorCode, errorDesc) => {
-          return (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Text>Error</Text>
-              <Text>{errorDomain}</Text>
-              <Text>{errorCode}</Text>
-              <Text>{errorDesc}</Text>
-            </View>
-          )
         },
       }}
       verses={verses}
