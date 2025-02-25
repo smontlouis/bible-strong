@@ -15,25 +15,12 @@ export default class SnackBarManager {
       props.onAutoDismiss = this.dismiss
     }
 
-    const sibling = new RootSiblings(
-      (
-        <View
-          style={{
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            backgroundColor: 'red',
-          }}
-        />
-      )
-    )
-    const current = new RootSiblings((<SnackBar {...props} />))
+    const current = new RootSiblings(<SnackBar {...props} />)
     this.current = current
     callback && callback()
   }
 
-  _removeCurrent = callback => {
+  _removeCurrent = (callback) => {
     if (!this.current) {
       callback && callback()
       return
@@ -79,7 +66,7 @@ export default class SnackBarManager {
     this._setCurrent(props, callback)
   }
 
-  dismiss = callback => {
+  dismiss = (callback) => {
     this._removeCurrent(() => {
       if (!this.queue.length) {
         callback && callback()
@@ -91,7 +78,7 @@ export default class SnackBarManager {
     })
   }
 
-  _isItemAlreadyExistById = props => {
-    return props.id && this.queue.find(item => item.id === props.id)
+  _isItemAlreadyExistById = (props) => {
+    return props.id && this.queue.find((item) => item.id === props.id)
   }
 }

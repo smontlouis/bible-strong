@@ -1,16 +1,16 @@
 import React, { Component } from 'react'
 
 import {
-  View,
   Animated,
-  Dimensions,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Easing,
   InteractionManager,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native'
+import { withSafeAreaInsets } from 'react-native-safe-area-context'
 
 const DEFAULT_DURATION: number = 5000
 const DEFAULT_FADEOUT_DURATION: number = 250
@@ -22,21 +22,17 @@ const TO_POSITION_TOP: number = -360
 const STYLE_BANNER_COLOR: string = '#000000'
 const TEXT_COLOR_ACCENT: string = '#fff'
 
-const { width } = Dimensions.get('window')
-
 const styles = StyleSheet.create({
   containerBottom: {
     flex: 1,
     position: 'absolute',
     bottom: INITIAL_POSITION_BOTTOM,
-    width,
   },
 
   containerTop: {
     flex: 1,
     position: 'absolute',
     top: INITIAL_POSITION_TOP,
-    width,
   },
 
   text: {
@@ -112,7 +108,7 @@ interface State {
   transformOpacity: any
 }
 
-export default class SnackBar extends Component<Props, State> {
+class SnackBar extends Component<Props, State> {
   static defaultProps = {
     // Behaviour
     fadeOutDuration: DEFAULT_FADEOUT_DURATION,
@@ -154,11 +150,8 @@ export default class SnackBar extends Component<Props, State> {
   }
 
   show = () => {
-    const {
-      transformOpacity,
-      transformOffsetYTop,
-      transformOffsetYBottom,
-    } = this.state
+    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } =
+      this.state
 
     const { fadeOutDuration, isStatic, duration, position } = this.props
 
@@ -194,11 +187,8 @@ export default class SnackBar extends Component<Props, State> {
   }
 
   hide = () => {
-    const {
-      transformOpacity,
-      transformOffsetYTop,
-      transformOffsetYBottom,
-    } = this.state
+    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } =
+      this.state
 
     const { fadeOutDuration, onAutoDismiss, position } = this.props
 
@@ -284,13 +274,8 @@ export default class SnackBar extends Component<Props, State> {
   }
 
   render() {
-    const {
-      style,
-      renderContent,
-      backgroundColor,
-      position,
-      tapToClose,
-    } = this.props
+    const { style, renderContent, backgroundColor, position, tapToClose } =
+      this.props
 
     const isTop = position === 'top'
     const transformOffsetY = isTop
@@ -306,6 +291,10 @@ export default class SnackBar extends Component<Props, State> {
               opacity: this.state.transformOpacity,
               transform: [{ translateY: transformOffsetY }],
               backgroundColor,
+              marginBottom: this.props.insets.bottom,
+              left: 10,
+              right: 10,
+              borderRadius: 10,
             },
             style,
           ]}
@@ -316,3 +305,5 @@ export default class SnackBar extends Component<Props, State> {
     )
   }
 }
+
+export default withSafeAreaInsets(SnackBar)

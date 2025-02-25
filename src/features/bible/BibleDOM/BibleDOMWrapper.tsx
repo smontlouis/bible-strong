@@ -316,7 +316,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
           zIndex: -1,
           ...(Platform.OS === 'android' && {
             marginTop: insets.top,
-            marginBottom: insets.bottom,
           }),
         },
         onError: (error) => {

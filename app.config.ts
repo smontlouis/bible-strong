@@ -120,15 +120,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ['@react-native-google-signin/google-signin'],
-    [
-      'react-native-edge-to-edge',
-      {
-        android: {
-          parentTheme: 'Material3.Dynamic',
-          enforceNavigationBarContrast: false,
-        },
-      },
-    ],
+    ['react-native-edge-to-edge'],
   ],
   extra: {
     eas: {

@@ -20,6 +20,8 @@ import { useUpdates } from '~helpers/useUpdates'
 import AppNavigator from '~navigation/AppNavigator'
 import { RootState } from '~redux/modules/reducer'
 import getTheme, { Theme, baseTheme } from '~themes/index'
+import { SystemBars } from 'react-native-edge-to-edge'
+import { RootSiblingParent } from 'react-native-root-siblings'
 
 interface Props {
   persistor: Persistor
@@ -27,8 +29,13 @@ interface Props {
 
 const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
   if (['mauve', 'dark', 'night', 'black'].includes(currentTheme))
-    StatusBar.setBarStyle('light-content')
-  else StatusBar.setBarStyle('dark-content')
+    SystemBars.pushStackEntry({
+      style: 'light',
+    })
+  else
+    SystemBars.pushStackEntry({
+      style: 'dark',
+    })
 }
 
 const queryClient = new QueryClient()
@@ -87,8 +94,10 @@ const InitApp = ({ persistor }: Props) => {
                   <DBStateProvider>
                     <ErrorBoundary>
                       <AppSwitcherProvider>
-                        <InitHooks />
-                        <AppNavigator />
+                        <RootSiblingParent>
+                          <InitHooks />
+                          <AppNavigator />
+                        </RootSiblingParent>
                       </AppSwitcherProvider>
                     </ErrorBoundary>
                   </DBStateProvider>

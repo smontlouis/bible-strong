@@ -1,7 +1,12 @@
 import { Theme, useTheme } from '@emotion/react'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DeviceEventEmitter, ScrollView, TouchableOpacity } from 'react-native'
+import {
+  DeviceEventEmitter,
+  ScrollView,
+  TouchableOpacity,
+  useWindowDimensions,
+} from 'react-native'
 import Popover from 'react-native-popover-view'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
@@ -26,11 +31,24 @@ export const BookShortItem = ({
   const theme: Theme = useTheme()
   const bookName = t(book.Nom).replace(/\s/g, '').substr(0, 3)
   const [showPopover, setShowPopover] = useState(false)
+  const { width: windowWidth } = useWindowDimensions()
 
   const chapters = useMemo(
     () => Array.from({ length: book.Chapitres }, (_, i) => i + 1),
     [book]
   )
+
+  // Configuration pour le centrage des éléments
+  const ITEM_WIDTH = 40
+  const ITEM_GAP = 10
+  const MAX_WIDTH = Math.min(500, windowWidth - 20) // 20px pour le padding du popover
+  const PADDING = 0
+
+  const availableWidth = MAX_WIDTH - PADDING * 2
+  const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
+  const totalItemsWidth =
+    itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
+  const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
   const handleChapterSelect = (chapter: number) => {
     setShowPopover(false)
@@ -84,7 +102,16 @@ export const BookShortItem = ({
           maxHeight: 200,
         }}
       >
-        <HStack padding={10} gap={10} style={{ flexWrap: 'wrap' }}>
+        <HStack
+          padding={10}
+          gap={ITEM_GAP}
+          style={{
+            flexWrap: 'wrap',
+            paddingHorizontal: horizontalMargin,
+            maxWidth: MAX_WIDTH,
+            alignSelf: 'center',
+          }}
+        >
           {chapters.map((chapter) => (
             <TouchableOpacity
               key={chapter}
@@ -94,7 +121,7 @@ export const BookShortItem = ({
               <Box
                 backgroundColor="opacity5"
                 borderRadius={6}
-                minWidth={40}
+                minWidth={ITEM_WIDTH}
                 minHeight={40}
                 alignItems="center"
                 justifyContent="center"

@@ -17,6 +17,7 @@ import { useMigrateFromAsyncStorage } from '~helpers/storage'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import InitApp from './InitApp'
 import { setI18n } from './i18n'
+import { SystemBars } from 'react-native-edge-to-edge'
 
 configureReanimatedLogger({
   strict: false,
@@ -107,7 +108,7 @@ const App = () => {
 
   return (
     <>
-      <StatusBar translucent backgroundColor="transparent" />
+      <SystemBars style="light" />
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <InitAppWrapper />
       </View>
