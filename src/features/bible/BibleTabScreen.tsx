@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system'
 import produce from 'immer'
-import React, { useEffect, useState } from 'react'
-import { Appearance, EmitterSubscription, Platform } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Appearance } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import blackColors from '~themes/blackColors'
@@ -18,7 +18,7 @@ const deepmerge = require('@fastify/deepmerge')()
 
 import { StackNavigationProp } from '@react-navigation/stack'
 
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { getDatabases } from '~helpers/databases'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
@@ -33,8 +33,9 @@ interface BibleTabScreenProps {
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [reloadKey, setReloadKey] = useState(0)
+  const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
 
-  const { settings, fontFamily } = useSelector(
+  const { settings } = useSelector(
     (state: RootState) => ({
       settings: produce(state.user.bible.settings, (draftState) => {
         // TODO: WHY IS THIS HERE?
@@ -123,6 +124,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const handleBibleViewerReload = () => {
     console.log('Bible component failed to mount, forcing reload')
     setReloadKey((prev) => prev + 1)
+    getDefaultStore().set(isBibleViewReloadingAtom, true)
   }
 
   return (
@@ -130,9 +132,9 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
       key={`bible-viewer-${reloadKey}`}
       navigation={navigation}
       settings={settings}
-      fontFamily={fontFamily}
       bibleAtom={bibleAtom}
       onMountTimeout={handleBibleViewerReload}
+      isBibleViewReloadingAtom={isBibleViewReloadingAtom}
     />
   )
 }

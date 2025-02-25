@@ -72,6 +72,7 @@ export type Dispatch = (props: {
 
 export type WebViewProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
+  isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   book: Book
   chapter: number
   isLoading: boolean
@@ -138,16 +139,23 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     comments,
     isLoading,
     onMountTimeout,
+    isBibleViewReloadingAtom,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
+  const setIsBibleViewReloading = useSetAtom(isBibleViewReloadingAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
 
   // Add this to track component mounting
   const mountedRef = useRef(false)
 
+  // This is a workaround to reload the component when it doesn't mount
+  // It's an issue on Android only
   useEffect(() => {
+    if (Platform.OS === 'ios') {
+      return
+    }
     // Reset mount status when component is mounted
     mountedRef.current = false
 
@@ -159,11 +167,12 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         onMountTimeout?.()
       } else {
         console.log('DOM component mounted')
+        setIsBibleViewReloading(false)
       }
-    }, 1500)
+    }, 1300)
 
     return () => clearTimeout(timeoutId)
-  }, [onMountTimeout])
+  }, [])
 
   const dispatch: Dispatch = async (action) => {
     switch (action.type) {

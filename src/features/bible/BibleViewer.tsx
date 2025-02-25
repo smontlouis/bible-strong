@@ -44,6 +44,7 @@ import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import { LoadingView } from './LoadingView'
 
 const getPericopeChapter = (
   pericope: Pericope | null,
@@ -62,8 +63,8 @@ interface BibleViewerProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
-  fontFamily: string
   onMountTimeout?: () => void
+  isBibleViewReloadingAtom: PrimitiveAtom<boolean>
 }
 
 const useBottomSheetDisclosure = <T,>() => {
@@ -98,8 +99,8 @@ const BibleViewer = ({
   navigation,
   bibleAtom,
   settings,
-  fontFamily,
   onMountTimeout,
+  isBibleViewReloadingAtom,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
 
@@ -355,6 +356,7 @@ const BibleViewer = ({
       {!error && verses.length > 0 && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
+          isBibleViewReloadingAtom={isBibleViewReloadingAtom}
           book={book}
           chapter={chapter}
           isLoading={isLoading}
@@ -465,6 +467,7 @@ const BibleViewer = ({
         navigation={navigation}
         modalRef={bibleParamsModal.ref}
       />
+      <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
     </Box>
   )
 }
