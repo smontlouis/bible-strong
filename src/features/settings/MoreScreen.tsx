@@ -79,7 +79,7 @@ const Infos = memo(() => {
         {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
       </Text>
       <Text color="grey" fontSize={9}>
-        Version: {app.version}
+        Version: {app.version} {Platform.Version}
       </Text>
     </Box>
   )
@@ -196,7 +196,7 @@ export const More = ({ closeMenu }: MoreProps) => {
 
   const isFR = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
-    Object.values(state.user.needsUpdate).some(v => v)
+    Object.values(state.user.needsUpdate).some((v) => v)
   )
 
   const { t } = useTranslation()
@@ -219,10 +219,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             {
               text: t('Delete'),
               onPress: async () => {
-                firebaseDb
-                  .collection('users')
-                  .doc(user.id)
-                  .delete()
+                firebaseDb.collection('users').doc(user.id).delete()
 
                 const authUser = auth().currentUser
                 await authUser?.delete()

@@ -61,6 +61,7 @@ export const BookSelectorList = ({
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
           paddingTop: 10,
+          paddingBottom: insets.bottom,
         }}
       >
         {Object.values(books).map((book) => (

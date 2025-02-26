@@ -1,4 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
@@ -169,19 +169,21 @@ const BookSelectorBottomSheet = ({
           }}
           {...bottomSheetStyles}
         >
-          <HStack
-            height={54}
-            justifyContent="center"
-            alignItems="center"
-            borderBottomWidth={1}
-            borderColor="lightGrey"
-          >
-            <Box px={20} width={60}></Box>
-            <Text flex textAlign="center" fontSize={16} bold>
-              {t('Livres')}
-            </Text>
-            <BookSelectorParams />
-          </HStack>
+          <BottomSheetView>
+            <HStack
+              height={54}
+              justifyContent="center"
+              alignItems="center"
+              borderBottomWidth={1}
+              borderColor="lightGrey"
+            >
+              <Box px={20} width={60}></Box>
+              <Text flex textAlign="center" fontSize={16} bold>
+                {t('Livres')}
+              </Text>
+              <BookSelectorParams />
+            </HStack>
+          </BottomSheetView>
           <HelpTip
             id="chapter-selector"
             description={t('tips.chapterSelector')}

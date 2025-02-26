@@ -119,7 +119,7 @@ const BibleViewer = ({
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
   const bibleParamsModal = useBottomSheetModal()
-  const resourceModal = useBottomSheetModal()
+  const resourceModal = useBottomSheet()
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
@@ -456,6 +456,7 @@ const BibleViewer = ({
         selectedCode={strongModalDisclosure.isOpen}
         onClosed={strongModalDisclosure.onClose}
       />
+
       <ResourcesModal
         resourceModalRef={resourceModal.ref}
         bibleAtom={bibleAtom}

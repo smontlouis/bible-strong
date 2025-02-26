@@ -33,9 +33,7 @@ const TabPreview = ({
   const base64Preview = useAtomValue(
     useMemo(() => selectAtom(tabAtom, (tab) => tab.base64Preview), [])
   )
-  const title = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, (tab) => tab.title), [])
-  )
+
   const type = useAtomValue(
     useMemo(() => selectAtom(tabAtom, (tab) => tab.type), [])
   )
@@ -149,17 +147,20 @@ const TabPreview = ({
         overflow="visible"
       >
         {getIconByTabType(type, 16)}
-        <Text
-          ml={8}
-          fontSize={12}
-          title
-          numberOfLines={1}
-          ellipsizeMode="middle"
-        >
-          {title}
-        </Text>
+        <Title tabAtom={tabAtom} />
       </AnimatedTouchableBox>
     </AnimatedTouchableBox>
+  )
+}
+
+const Title = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) => {
+  const title = useAtomValue(
+    useMemo(() => selectAtom(tabAtom, (tab) => tab.title), [])
+  )
+  return (
+    <Text ml={8} fontSize={12} title numberOfLines={1} ellipsizeMode="middle">
+      {title}
+    </Text>
   )
 }
 

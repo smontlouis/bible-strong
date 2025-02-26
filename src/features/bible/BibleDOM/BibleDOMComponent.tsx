@@ -368,7 +368,7 @@ const VersesRenderer = ({
 
     if (verseToScroll === 1) return
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       const element = document.querySelector(`#verset-${verseToScroll}`)
       if (element) {
         window.disableSwipeDownEvent = true
@@ -380,7 +380,7 @@ const VersesRenderer = ({
           window.disableSwipeDownEvent = false
         }, 400)
       }
-    }, 200)
+    })
   }, [verseToScroll, hasVerses])
 
   const sortVersesToTags = (

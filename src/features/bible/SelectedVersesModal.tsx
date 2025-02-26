@@ -115,12 +115,8 @@ const VersesModal = ({
     }
   }, [isVisible])
 
-  const {
-    hasVerseNumbers,
-    hasInlineVerses,
-    hasQuotes,
-    hasAppName,
-  } = useShareOptions()
+  const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } =
+    useShareOptions()
 
   useEffect(() => {
     const title = verseToReference(selectedVerses)
@@ -156,31 +152,31 @@ const VersesModal = ({
     SnackBar.show(t('Copié dans le presse-papiers.'))
   }
 
-  const showStrongDetail = () => {
+  const showStrongDetail = useCallback(() => {
     onChangeResourceType('strong')
-  }
+  }, [])
 
-  const openCommentariesScreen = () => {
+  const openCommentariesScreen = useCallback(() => {
     onChangeResourceType('commentary')
-  }
+  }, [])
 
-  const showDictionaryDetail = () => {
+  const showDictionaryDetail = useCallback(() => {
     onChangeResourceType('dictionary')
-  }
+  }, [])
 
-  const compareVerses = () => {
+  const compareVerses = useCallback(() => {
     navigation.navigate('BibleCompareVerses', {
       selectedVerses,
     })
-  }
+  }, [])
 
-  const onOpenReferences = () => {
+  const onOpenReferences = useCallback(() => {
     onChangeResourceType('reference')
-  }
+  }, [])
 
-  const onOpenNave = () => {
+  const onOpenNave = useCallback(() => {
     onChangeResourceType('nave')
-  }
+  }, [])
 
   const sendVerseData = async () => {
     const { title, content } = await getVersesContent({

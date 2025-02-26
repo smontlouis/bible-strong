@@ -1,8 +1,11 @@
 import { useTheme } from '@emotion/react'
-import { BottomSheetBackdrop, BottomSheetProps } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetBackdrop,
+  BottomSheetProps,
+  SCREEN_WIDTH,
+} from '@gorhom/bottom-sheet'
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
 import { useId } from 'react'
-import { useWindowDimensions } from 'react-native'
 
 export const renderBackdrop = (props: BottomSheetDefaultBackdropProps) => (
   <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
@@ -16,7 +19,7 @@ export const onAnimateModalClose =
 export const useBottomSheetStyles = () => {
   const theme = useTheme()
   const id = useId()
-  const { width } = useWindowDimensions()
+  const width = SCREEN_WIDTH
 
   const containerWidth = 500
   return {
