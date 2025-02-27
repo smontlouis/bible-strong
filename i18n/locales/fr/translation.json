@@ -608,6 +608,7 @@
   "event": "Evénement",
   "tips.chapterSelector": "Vous pouvez ouvrir un nouvel onglet en maintenant enfoncé le numéro de chapitre.",
   "tips.manual-backup": "En cas de problème de synchronisation, vous pouvez sauvegarder vos données localement dans l'onglet Import/Export.",
+  "tips.bible-dom-wrapper-android": "Vous êtes sur une version Android 10 ou inférieure. Si vous avez un écran blanc, merci de mettre à jour votre Android Webview dans le Play Store.",
   "goToVerse": "Aller au verset",
 
   "Normal": "Normal",

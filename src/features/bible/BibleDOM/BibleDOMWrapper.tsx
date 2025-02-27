@@ -1,17 +1,19 @@
-import { StackNavigationProp } from '@react-navigation/stack'
-import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
-import { BibleTab, VersionCode } from 'src/state/tabs'
-import { MainStackProps } from '~navigation/type'
-import BibleDOMComponent from './BibleDOMComponent'
 import { useTheme } from '@emotion/react'
+import { StackNavigationProp } from '@react-navigation/stack'
 import * as Sentry from '@sentry/react-native'
 import * as Haptics from 'expo-haptics'
 import produce from 'immer'
 import { useSetAtom } from 'jotai/react'
-import { Alert, Platform, View } from 'react-native'
+import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
+import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { BibleTab, VersionCode } from 'src/state/tabs'
+import { MainStackProps } from '~navigation/type'
+import BibleDOMComponent from './BibleDOMComponent'
 // @ts-expect-error
+import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import books from '~assets/bible_versions/books'
 import { Book } from '~assets/bible_versions/books-desc'
 import Snackbar from '~common/SnackBar'
@@ -23,7 +25,9 @@ import {
   Verse,
   VerseIds,
 } from '~common/types'
-import Text from '~common/ui/Text'
+import Box from '~common/ui/Box'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import { HelpTip } from '~features/tips/HelpTip'
 import { RootState } from '~redux/modules/reducer'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
@@ -44,7 +48,6 @@ import {
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
-import { useEffect, useRef } from 'react'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -146,7 +149,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   const setIsBibleViewReloading = useSetAtom(isBibleViewReloadingAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-
+  const { t } = useTranslation()
   // Add this to track component mounting
   const mountedRef = useRef(false)
 
@@ -169,7 +172,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         console.log('DOM component mounted')
         setIsBibleViewReloading(false)
       }
-    }, 1300)
+    }, 2000)
 
     return () => clearTimeout(timeoutId)
   }, [])
@@ -348,34 +351,52 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   // }
 
   return (
-    <BibleDOMComponent
-      dom={{
-        containerStyle: {
-          flex: 1,
-          backgroundColor: theme.colors.reverse,
-          zIndex: -1,
-          ...(Platform.OS === 'android' && {
-            marginTop: insets.top,
-          }),
-        },
+    <Box
+      style={{
+        backgroundColor: theme.colors.reverse,
+        zIndex: -1,
+        flex: 1,
       }}
-      verses={verses}
-      parallelVerses={parallelVerses}
-      focusVerses={focusVerses}
-      secondaryVerses={secondaryVerses}
-      selectedVerses={selectedVerses}
-      highlightedVerses={highlightedVerses}
-      notedVerses={notedVerses}
-      settings={settings}
-      verseToScroll={verseToScroll}
-      isReadOnly={isReadOnly}
-      version={version}
-      pericopeChapter={pericopeChapter}
-      chapter={chapter}
-      isSelectionMode={isSelectionMode}
-      selectedCode={selectedCode}
-      comments={comments}
-      dispatch={dispatch}
-    />
+    >
+      <BibleDOMComponent
+        dom={{
+          containerStyle: {
+            flex: 1,
+            backgroundColor: theme.colors.reverse,
+            ...(Platform.OS === 'android' && {
+              marginTop: insets.top,
+            }),
+          },
+        }}
+        verses={verses}
+        parallelVerses={parallelVerses}
+        focusVerses={focusVerses}
+        secondaryVerses={secondaryVerses}
+        selectedVerses={selectedVerses}
+        highlightedVerses={highlightedVerses}
+        notedVerses={notedVerses}
+        settings={settings}
+        verseToScroll={verseToScroll}
+        isReadOnly={isReadOnly}
+        version={version}
+        pericopeChapter={pericopeChapter}
+        chapter={chapter}
+        isSelectionMode={isSelectionMode}
+        selectedCode={selectedCode}
+        comments={comments}
+        dispatch={dispatch}
+      />
+      {Platform.OS === 'android' && Platform.Version < 30 && (
+        <HelpTip
+          id="bible-dom-wrapper-android"
+          description={t('tips.bible-dom-wrapper-android')}
+          type="warning"
+          position="absolute"
+          left={0}
+          right={0}
+          top={HEADER_HEIGHT + insets.top}
+        />
+      )}
+    </Box>
   )
 }
