@@ -1,0 +1,17 @@
+diff --git a/src/lib/getPreludeCode.js b/src/lib/getPreludeCode.js
+index 2a3612f..6f1e8ea 100644
+--- a/src/lib/getPreludeCode.js
++++ b/src/lib/getPreludeCode.js
+@@ -7,10 +7,10 @@ function getPreludeCode({
+   requireCycleIgnorePatterns,
+ }) {
+   const vars = [
+-    "__BUNDLE_START_TIME__=globalThis.nativePerformanceNow?nativePerformanceNow():Date.now()",
++    "__BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now()",
+     `__DEV__=${String(isDev)}`,
+     ...formatExtraVars(extraVars),
+-    "process=globalThis.process||{}",
++    "process=this.process||{}",
+     `__METRO_GLOBAL_PREFIX__='${globalPrefix}'`,
+   ];
+   if (isDev) {

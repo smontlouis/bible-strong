@@ -156,7 +156,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   // This is a workaround to reload the component when it doesn't mount
   // It's an issue on Android only
   useEffect(() => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'ios' || 1) {
       return
     }
     // Reset mount status when component is mounted
@@ -360,6 +360,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     >
       <BibleDOMComponent
         dom={{
+          webviewDebuggingEnabled: true,
           containerStyle: {
             flex: 1,
             backgroundColor: theme.colors.reverse,

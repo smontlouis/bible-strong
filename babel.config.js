@@ -1,6 +1,13 @@
 module.exports = function (api) {
-  api.cache(true)
-  return {
+  let platform
+  api.caller((caller) => {
+    platform = caller.platform
+  })
+
+  // Cache must be disabled
+  api.cache(false)
+
+  const config = {
     presets: ['babel-preset-expo'],
     plugins: [
       [
@@ -27,4 +34,30 @@ module.exports = function (api) {
       },
     },
   }
+
+  if (platform === 'web') {
+    config.presets = [
+      'babel-preset-expo',
+      [
+        '@babel/preset-env',
+        {
+          targets: {
+            chrome: '66',
+          },
+        },
+      ],
+    ]
+
+    config.plugins = [
+      ...config.plugins,
+      ...[
+        ['@babel/plugin-transform-class-properties', { loose: true }],
+        ['@babel/plugin-transform-private-methods', { loose: true }],
+        ['@babel/plugin-transform-private-property-in-object', { loose: true }],
+        'babel-plugin-transform-globalthis',
+      ],
+    ]
+  }
+
+  return config
 }

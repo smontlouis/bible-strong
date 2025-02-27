@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "19.1.4",
+  "version": "19.1.5",
   "scripts": {
     "start": "expo start --dev-client",
     "build:android:dev": "dotenv -c development -- eas build -p android --local --profile development --non-interactive",
@@ -11,7 +11,6 @@
     "build:ios:dev-sim": "dotenv -c development -- eas build -p ios --local --profile development-simulator --non-interactive",
     "build:ios:staging": "dotenv -c staging -- eas build -p ios --local --profile staging --non-interactive",
     "build:ios:prod": "dotenv -c production -- eas build -p ios --local --profile production --non-interactive",
-    "postinstall": "patch-package",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll",
     "clean": "rm -rf pnpm-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && pnpm && say I love react native",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -20,6 +19,10 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@babel/plugin-transform-class-properties": "^7.25.9",
+    "@babel/plugin-transform-private-methods": "^7.25.9",
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
+    "@babel/preset-env": "^7.26.9",
     "@emotion/native": "^11.10.0",
     "@emotion/react": "^11.10.5",
     "@expo/config-plugins": "~9.0.14",
@@ -55,12 +58,13 @@
     "@types/recompose": "^0.30.7",
     "algoliasearch": "^4.11.0",
     "await-to-js": "^2.1.1",
+    "babel-plugin-transform-globalthis": "^1.0.0",
     "color": "^4.2.3",
     "colorsys": "^1.0.22",
     "date-fns": "^2.9.0",
     "debounce": "^1.2.0",
     "deprecated-react-native-prop-types": "^4.0.0",
-    "expo": "~52.0.36",
+    "expo": "~52.0.37",
     "expo-application": "~6.0.2",
     "expo-asset": "~11.0.4",
     "expo-asset-utils": "^3.0.0",
@@ -80,7 +84,7 @@
     "expo-splash-screen": "~0.29.22",
     "expo-sqlite": "~15.1.2",
     "expo-system-ui": "~4.0.8",
-    "expo-updates": "~0.26.19",
+    "expo-updates": "~0.27.1",
     "firestore-size": "^2.0.7",
     "fuse.js": "^6.4.6",
     "global": "^4.4.0",
@@ -93,9 +97,8 @@
     "lottie-react-native": "7.1.0",
     "lunr": "^2.3.9",
     "lunr-languages": "^1.9.0",
-    "metro": "^0.81.0",
+    "metro": "^0.81.2",
     "moti": "^0.30.0",
-    "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "promise": "^8.3.0",
     "react": "18.3.1",
@@ -144,6 +147,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@types/babel__preset-env": "^7",
     "@types/jest": "^29.5.12",
     "@types/react": "~18.3.12",
     "@types/react-test-renderer": "^18.3.0",
@@ -155,5 +159,10 @@
     "typescript": "^5.3.3"
   },
   "private": true,
-  "packageManager": "yarn@4.5.1"
+  "packageManager": "yarn@4.5.1",
+  "resolutions": {
+    "react-native-modal@13.0.1": "patch:react-native-modal@npm:11.10.0#./.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch",
+    "expo@~52.0.37": "patch:expo@npm:52.0.37#./.yarn/patches/expo+52.0.37.patch",
+    "metro@^0.81.2": "patch:metro@npm:0.81.2#./.yarn/patches/metro+0.81.2.patch"
+  }
 }
