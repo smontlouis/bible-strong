@@ -360,7 +360,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     >
       <BibleDOMComponent
         dom={{
-          webviewDebuggingEnabled: true,
+          // webviewDebuggingEnabled: true,
           containerStyle: {
             flex: 1,
             backgroundColor: theme.colors.reverse,
