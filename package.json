@@ -1,7 +1,8 @@
 {
   "name": "bible-strong",
-  "version": "19.1.9",
+  "version": "19.1.10",
   "scripts": {
+    "eas-build-pre-install": "corepack enable",
     "start": "expo start --dev-client",
     "build:android:dev": "dotenv -c development -- eas build -p android --local --profile development --non-interactive",
     "build:android:staging": "dotenv -c staging -- eas build -p android --local --profile staging --non-interactive",

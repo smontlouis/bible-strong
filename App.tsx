@@ -13,7 +13,10 @@ import { persistor, store } from '~redux/store'
 import { configureReanimatedLogger } from 'react-native-reanimated'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { checkDatabasesStorage } from '~helpers/sqlite'
-import { useMigrateFromAsyncStorage } from '~helpers/storage'
+import {
+  useMigrateFromAsyncStorage,
+  useMigrateFromFileSystemStorage,
+} from '~helpers/storage'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import InitApp from './InitApp'
 import { setI18n } from './i18n'
@@ -58,7 +61,8 @@ const loadResourcesAsync = async () => {
 
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
-  const hasMigrated = useMigrateFromAsyncStorage()
+  const hasMigratedFromAsyncStorage = useMigrateFromAsyncStorage()
+  const hasMigratedFromFileSystem = useMigrateFromFileSystemStorage()
 
   const [status, setStatus] = useState('')
   useEffect(() => {
@@ -80,7 +84,10 @@ const useAppLoad = () => {
 
   useRemoteConfig()
 
-  const isCompleted = isLoadingCompleted && hasMigrated
+  const isCompleted =
+    isLoadingCompleted &&
+    hasMigratedFromAsyncStorage &&
+    hasMigratedFromFileSystem
 
   return {
     isLoadingCompleted: isCompleted,

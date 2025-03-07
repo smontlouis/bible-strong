@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from 'react'
+import { format } from 'date-fns'
+import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system'
+import * as Sharing from 'expo-sharing'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Platform } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual } from 'recompose'
 import Header from '~common/Header'
+import Snackbar from '~common/SnackBar'
 import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { format } from 'date-fns'
-import Button from '~common/ui/Button'
-import { shallowEqual } from 'recompose'
 import { RootState } from '~redux/modules/reducer'
-import { useDispatch, useSelector } from 'react-redux'
-import Snackbar from '~common/SnackBar'
-import * as Sharing from 'expo-sharing'
-import * as DocumentPicker from 'expo-document-picker'
 import { importData } from '~redux/modules/user'
-import { Platform } from 'react-native'
-import fileSystemStorage from '~helpers/fileSystemStorage'
 
 const ImportExport = () => {
   const { t } = useTranslation()
@@ -43,12 +42,12 @@ const ImportExport = () => {
           </Text>
           <ImportSave />
         </Box>
-        <Box mt={40} paddingHorizontal={20}>
+        {/* <Box mt={40} paddingHorizontal={20}>
           <Text fontSize={20} bold>
             Debug FileSystemStorage
           </Text>
           <FileSystemStorageDebug />
-        </Box>
+        </Box> */}
       </ScrollView>
     </Container>
   )
@@ -217,63 +216,44 @@ const ImportSave = () => {
 }
 
 const FileSystemStorageDebug = () => {
-  const [rootContent, setRootContent] = useState<any>(null)
+  const [storageContent, setStorageContent] = useState<Record<string, string>>(
+    {}
+  )
   const [isLoading, setIsLoading] = useState(false)
 
   const loadStorageContent = async () => {
     setIsLoading(true)
     try {
-      // Try to get the "root" key directly
-      const rootValue = await fileSystemStorage.getItem('root')
+      // Get the file from persistStore/root
+      const filePath = `${FileSystem.documentDirectory}persistStore/root`
+      const fileInfo = await FileSystem.getInfoAsync(filePath)
 
-      if (rootValue) {
+      if (fileInfo.exists) {
         try {
-          // Parse the JSON content
-          const parsedContent = JSON.parse(rootValue)
-          setRootContent(parsedContent)
-          console.log('Root content:', parsedContent)
-        } catch (parseError) {
-          console.error('Error parsing root content:', parseError)
-          // If parsing fails, show the raw content
-          setRootContent({ raw: rootValue })
+          const content = await FileSystem.readAsStringAsync(filePath)
+          // Try to parse the JSON content
+          try {
+            const parsedContent = JSON.parse(content)
+            setStorageContent({
+              'persistStore/root': JSON.stringify(parsedContent, null, 2),
+            })
+            console.log('PersistStore content:', parsedContent)
+          } catch (parseError) {
+            // If parsing fails, just show the raw content
+            setStorageContent({ 'persistStore/root': content })
+            console.log('PersistStore raw content:', content)
+          }
+        } catch (readError) {
+          console.error('Error reading persistStore file:', readError)
+          setStorageContent({})
         }
       } else {
-        console.log('Root key not found, checking directory')
-
-        // If direct access fails, try to find it in the directory
-        const storagePath = `${FileSystem.documentDirectory}/persistAtoms`
-        const dirInfo = await FileSystem.getInfoAsync(storagePath)
-
-        if (dirInfo.exists && dirInfo.isDirectory) {
-          const files = await FileSystem.readDirectoryAsync(storagePath)
-          const rootFileName = files.find(
-            (file) => file === 'root' || file === 'root.json'
-          )
-
-          if (rootFileName) {
-            const filePath = `${storagePath}/${rootFileName}`
-            const content = await FileSystem.readAsStringAsync(filePath)
-
-            try {
-              const parsedContent = JSON.parse(content)
-              setRootContent(parsedContent)
-              console.log('Root content from file:', parsedContent)
-            } catch (parseError) {
-              console.error('Error parsing root content from file:', parseError)
-              setRootContent({ raw: content })
-            }
-          } else {
-            console.log('Root file not found in directory')
-            setRootContent(null)
-          }
-        } else {
-          console.log('Storage directory does not exist')
-          setRootContent(null)
-        }
+        console.log('PersistStore file does not exist at path:', filePath)
+        setStorageContent({})
       }
     } catch (error) {
-      console.error('Error loading root content:', error)
-      setRootContent(null)
+      console.error('Error loading persistStore content:', error)
+      setStorageContent({})
     } finally {
       setIsLoading(false)
     }
@@ -283,67 +263,27 @@ const FileSystemStorageDebug = () => {
     loadStorageContent()
   }, [])
 
-  const renderJsonContent = (content: any, level = 0) => {
-    if (content === null || content === undefined) {
-      return <Text>null</Text>
-    }
-
-    if (typeof content !== 'object') {
-      return <Text>{String(content)}</Text>
-    }
-
-    if (Array.isArray(content)) {
-      return (
-        <Box paddingLeft={level > 0 ? 10 : 0}>
-          {content.length === 0 ? (
-            <Text>[]</Text>
-          ) : (
-            content.map((item, index) => (
-              <Box key={index}>
-                <Text bold>{index}: </Text>
-                {renderJsonContent(item, level + 1)}
-              </Box>
-            ))
-          )}
-        </Box>
-      )
-    }
-
-    const entries = Object.entries(content)
-    if (entries.length === 0) {
-      return <Text>{'{}'}</Text>
-    }
-
-    return (
-      <Box paddingLeft={level > 0 ? 10 : 0}>
-        {entries.map(([key, value], index) => (
-          <Box key={key} marginTop={index > 0 ? 5 : 0}>
-            <Text bold>{key}: </Text>
-            {renderJsonContent(value, level + 1)}
-          </Box>
-        ))}
-      </Box>
-    )
-  }
-
   return (
     <Box marginTop={20}>
       {isLoading ? (
-        <Text>Loading root content...</Text>
-      ) : rootContent ? (
-        <Box
-          marginTop={10}
-          padding={10}
-          backgroundColor="rgba(0,0,0,0.05)"
-          borderRadius={5}
-        >
-          <Text bold fontSize={16} marginBottom={10}>
-            Root Content:
-          </Text>
-          {renderJsonContent(rootContent)}
-        </Box>
+        <Text>Loading storage content...</Text>
+      ) : Object.keys(storageContent).length > 0 ? (
+        Object.entries(storageContent).map(([key, value]) => (
+          <Box
+            key={key}
+            marginTop={10}
+            padding={10}
+            backgroundColor="rgba(0,0,0,0.05)"
+            borderRadius={5}
+          >
+            <Text bold>{key}</Text>
+            <Text fontSize={12} numberOfLines={3} ellipsizeMode="tail">
+              {value.length > 100 ? `${value.substring(0, 100)}...` : value}
+            </Text>
+          </Box>
+        ))
       ) : (
-        <Text>Root content not found</Text>
+        <Text>No storage content found</Text>
       )}
     </Box>
   )
