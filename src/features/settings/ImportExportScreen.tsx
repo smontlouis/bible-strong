@@ -43,8 +43,8 @@ const ImportExport = () => {
           </Text>
           <ImportSave />
         </Box>
-        <Box mt={40} paddingHorizontal={20} opacity={0.3}>
-          <Text fontSize={14} bold>
+        <Box mt={40} paddingHorizontal={20}>
+          <Text fontSize={20} bold>
             Debug FileSystemStorage
           </Text>
           <FileSystemStorageDebug />
@@ -230,15 +230,46 @@ const FileSystemStorageDebug = () => {
         try {
           // Parse the JSON content
           const parsedContent = JSON.parse(rootValue)
-          const user = JSON.parse(parsedContent.user)
-          setRootContent(user.bible.studies)
+          setRootContent(parsedContent)
+          console.log('Root content:', parsedContent)
         } catch (parseError) {
           console.error('Error parsing root content:', parseError)
           // If parsing fails, show the raw content
           setRootContent({ raw: rootValue })
         }
       } else {
-        throw new Error('Root key not found')
+        console.log('Root key not found, checking directory')
+
+        // If direct access fails, try to find it in the directory
+        const storagePath = `${FileSystem.documentDirectory}/persistAtoms`
+        const dirInfo = await FileSystem.getInfoAsync(storagePath)
+
+        if (dirInfo.exists && dirInfo.isDirectory) {
+          const files = await FileSystem.readDirectoryAsync(storagePath)
+          const rootFileName = files.find(
+            (file) => file === 'root' || file === 'root.json'
+          )
+
+          if (rootFileName) {
+            const filePath = `${storagePath}/${rootFileName}`
+            const content = await FileSystem.readAsStringAsync(filePath)
+
+            try {
+              const parsedContent = JSON.parse(content)
+              setRootContent(parsedContent)
+              console.log('Root content from file:', parsedContent)
+            } catch (parseError) {
+              console.error('Error parsing root content from file:', parseError)
+              setRootContent({ raw: content })
+            }
+          } else {
+            console.log('Root file not found in directory')
+            setRootContent(null)
+          }
+        } else {
+          console.log('Storage directory does not exist')
+          setRootContent(null)
+        }
       }
     } catch (error) {
       console.error('Error loading root content:', error)
