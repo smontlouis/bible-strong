@@ -346,12 +346,14 @@ const BibleViewer = ({
         hasBackButton={isReadOnly || Boolean(isSelectionMode)}
       />
       {error && (
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={
-            "Désolé ! Une erreur est survenue:\n Ce chapitre n'existe pas dans cette version.\n Si vous êtes en mode parallèle, désactivez la version concernée."
-          }
-        />
+        <Box flex={1} zIndex={-1}>
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={
+              "Désolé ! Une erreur est survenue:\n Ce chapitre n'existe pas dans cette version.\n Si vous êtes en mode parallèle, désactivez la version concernée."
+            }
+          />
+        </Box>
       )}
       {!error && verses.length > 0 && (
         <BibleDOMWrapper
