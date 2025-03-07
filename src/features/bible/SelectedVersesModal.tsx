@@ -168,7 +168,7 @@ const VersesModal = ({
     navigation.navigate('BibleCompareVerses', {
       selectedVerses,
     })
-  }, [])
+  }, [selectedVerses])
 
   const onOpenReferences = useCallback(() => {
     onChangeResourceType('reference')
