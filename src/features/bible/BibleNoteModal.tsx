@@ -33,6 +33,7 @@ import Fab from '~common/ui/Fab'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BottomSheetFooter } from '@gorhom/bottom-sheet/'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { timeout } from '~helpers/timeout'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -128,7 +129,7 @@ const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
     setIsEditing(false)
   }
 
-  const shareNote = () => {
+  const shareNote = async () => {
     try {
       const message = `
 Note pour ${reference}
@@ -137,6 +138,7 @@ ${currentNote?.title}
 
 ${currentNote?.description}
       `
+      await timeout(400)
       Share.share({ message })
     } catch (e) {
       Snackbar.show(t('Erreur lors du partage.'))
@@ -208,13 +210,11 @@ ${currentNote?.description}
                   </>
                 }
               />
-            ) : (
-              undefined
-            )
+            ) : undefined
           }
         />
       }
-      footerComponent={props =>
+      footerComponent={(props) =>
         isEditing ? (
           <BottomSheetFooter {...props}>
             <HStack

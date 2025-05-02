@@ -27,6 +27,7 @@ import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
 import { StackActions } from '@react-navigation/native'
+import { timeout } from '~helpers/timeout'
 
 interface NaveDetailScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'NaveDetail'>
@@ -55,7 +56,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
   const setTitle = (title: string) =>
     setNaveTab(
-      produce(draft => {
+      produce((draft) => {
         draft.title = title
       })
     )
@@ -65,7 +66,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   }, [naveItem?.name, name])
 
   useEffect(() => {
-    loadNaveItem(name_lower).then(result => {
+    loadNaveItem(name_lower).then((result) => {
       setNaveItem(result)
       addHistory({
         name: result.name,
@@ -108,14 +109,14 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
   const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
 
-  const shareDefinition = () => {
+  const shareDefinition = async () => {
     try {
       const message = `${name} \n\n${truncHTML(naveItem.description, 4000)
         .text.replace(/&#/g, '\\')
-        .replace(/\\x([0-9A-F]+);/gi, function() {
+        .replace(/\\x([0-9A-F]+);/gi, function () {
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
-
+      await timeout(400)
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')

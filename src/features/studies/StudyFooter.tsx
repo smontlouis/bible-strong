@@ -17,7 +17,7 @@ import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox, VStack } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import TouchableCircle from '~features/bible/TouchableCircle'
@@ -118,7 +118,7 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
           </Box>
         </Box>
       }
-      popover={headings.map(h => (
+      popover={headings.map((h) => (
         <MenuOption
           key={h.label}
           onSelect={() => {
@@ -162,8 +162,9 @@ const lighten = ['0.3', '0.5', '0.7', '0.9']
 
 const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
   const [colorModal, setOpenColorModal] = React.useState()
+  const { t } = useTranslation()
 
-  const setColor = color => {
+  const setColor = (color) => {
     dispatchToWebView('TOGGLE_FORMAT', {
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
       value: color,
@@ -176,29 +177,37 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
       element={<FeatherIcon name="more-horizontal" size={18} color="primary" />}
       popover={
         colorModal ? (
-          <Box width={200}>
-            {lighten.map(l => (
+          <VStack width={200} gap={12}>
+            <TouchableBox
+              onPress={() => {
+                setColor(null)
+                ctx.menuActions.closeMenu()
+              }}
+              bg="lightGrey"
+              px={10}
+              py={5}
+              rounded
+            >
+              <Text textAlign="center" fontSize={12}>
+                {t('reset')}
+              </Text>
+            </TouchableBox>
+            {lighten.map((l) => (
               <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
-                {colors.map(c => (
+                {colors.map((c) => (
                   <TouchableCircle
                     key={c}
                     size={20}
-                    color={Color(c)
-                      .lighten(l)
-                      .string()}
+                    color={Color(c).lighten(l).string()}
                     onPress={() => {
-                      setColor(
-                        Color(c)
-                          .lighten(l)
-                          .string()
-                      )
+                      setColor(Color(c).lighten(l).string())
                       ctx.menuActions.closeMenu()
                     }}
                   />
                 ))}
               </Box>
             ))}
-          </Box>
+          </VStack>
         ) : (
           <Box>
             <Box row>
@@ -388,22 +397,15 @@ const ColorPopover = ({ type, setColor, ctx }) => (
         Aucune
       </Text>
     </Box>
-    {lighten.map(l => (
+    {lighten.map((l) => (
       <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
-        {colors.map(c => (
+        {colors.map((c) => (
           <TouchableCircle
             key={c}
             size={20}
-            color={Color(c)
-              .lighten(l)
-              .string()}
+            color={Color(c).lighten(l).string()}
             onPress={() => {
-              setColor(
-                type,
-                Color(c)
-                  .lighten(l)
-                  .string()
-              )
+              setColor(type, Color(c).lighten(l).string())
               ctx.menuActions.closeMenu()
             }}
           />

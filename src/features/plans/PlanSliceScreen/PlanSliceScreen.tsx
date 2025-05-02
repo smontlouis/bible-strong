@@ -29,6 +29,7 @@ import BottomSheet from '@gorhom/bottom-sheet'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { timeout } from '~helpers/timeout'
 
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -53,7 +54,7 @@ const PlanSliceScreen = ({
 
   const isRead = useSelector(
     (state: RootState) =>
-      state.plan.ongoingPlans.find(oP => oP.id === planId)?.readingSlices[
+      state.plan.ongoingPlans.find((oP) => oP.id === planId)?.readingSlices[
         id
       ] === 'Completed'
   )
@@ -67,13 +68,13 @@ const PlanSliceScreen = ({
   }
 
   const mainSlice: EntitySlice | undefined = slices.find(
-    s => s.type === 'Chapter' || s.type === 'Verse'
+    (s) => s.type === 'Chapter' || s.type === 'Verse'
   )
   const sliceTitle = mainSlice ? extractTitle(mainSlice) : ''
 
   const share = async () => {
     const textSlices = await Promise.all(
-      slices.map(async slice => {
+      slices.map(async (slice) => {
         switch (slice.type) {
           case 'Chapter': {
             return await chapterSliceToText(slice, version)
@@ -100,7 +101,7 @@ const PlanSliceScreen = ({
 
     try {
       const message = `${sliceTitle || title}\n\n${textSlices.join('\n\n')}`
-
+      await timeout(400)
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
@@ -195,7 +196,7 @@ const PlanSliceScreen = ({
             <Paragraph scale={3}>{title}</Paragraph>
           </Box>
         )}
-        {slices.map(slice => (
+        {slices.map((slice) => (
           <Slice key={slice.id} {...slice} />
         ))}
         <Box height={80} center marginTop={30}>

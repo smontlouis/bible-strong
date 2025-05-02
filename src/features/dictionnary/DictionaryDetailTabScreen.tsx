@@ -31,6 +31,7 @@ import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
 import { StackActions } from '@react-navigation/native'
+import { timeout } from '~helpers/timeout'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -66,7 +67,7 @@ const DictionnaryDetailScreen = ({
 
   const setTitle = (title: string) =>
     setDictionaryTab(
-      produce(draft => {
+      produce((draft) => {
         draft.title = title
       })
     )
@@ -76,7 +77,7 @@ const DictionnaryDetailScreen = ({
   }, [word])
 
   useEffect(() => {
-    loadDictionnaireItem(word).then(result => {
+    loadDictionnaireItem(word).then((result) => {
       setDictionnaireItem(result)
 
       addHistory({
@@ -91,13 +92,12 @@ const DictionnaryDetailScreen = ({
     if (type === 'verse') {
       try {
         const sanitizedHref = href.replace(String.fromCharCode(160), ' ')
-        const book = books.find(b => sanitizedHref.includes(b.Nom))
+        const book = books.find((b) => sanitizedHref.includes(b.Nom))
         const splittedHref = sanitizedHref
           .replace(String.fromCharCode(160), ' ')
           .split(/\b\s+(?!$)/)
-        const [chapter, verse] = splittedHref[splittedHref.length - 1].split(
-          '.'
-        )
+        const [chapter, verse] =
+          splittedHref[splittedHref.length - 1].split('.')
         navigation.navigate('BibleView', {
           isReadOnly: true,
           book,
@@ -116,17 +116,17 @@ const DictionnaryDetailScreen = ({
 
   const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
 
-  const shareDefinition = () => {
+  const shareDefinition = async () => {
     try {
       const message = `${word} \n\n${truncHTML(
         dictionnaireItem.definition,
         4000
       )
         .text.replace(/&#/g, '\\')
-        .replace(/\\x([0-9A-F]+);/gi, function() {
+        .replace(/\\x([0-9A-F]+);/gi, function () {
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
-
+      await timeout(400)
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')

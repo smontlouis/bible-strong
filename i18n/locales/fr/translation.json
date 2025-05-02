@@ -620,5 +620,7 @@
   "bookSelector.selectionMode.grid": "Grille",
   "bookSelector.selectionMode.list": "Liste",
   "bookSelector.withVerses": "Avec versets",
-  "bookSelector.withoutVerses": "Sans versets"
+  "bookSelector.withoutVerses": "Sans versets",
+
+  "reset": "Réinitialiser"
 }

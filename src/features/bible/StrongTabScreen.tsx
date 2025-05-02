@@ -42,6 +42,7 @@ import { StrongTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { MainStackProps } from '~navigation/type'
 import { StackActions } from '@react-navigation/native'
+import { timeout } from '~helpers/timeout'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -69,7 +70,7 @@ interface StrongScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
-const keyExtractor = item => `${item.Livre}-${item.Chapitre}-${item.Verset}`
+const keyExtractor = (item) => `${item.Livre}-${item.Chapitre}-${item.Verset}`
 const flatListStyle = { paddingTop: 10 }
 
 const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
@@ -104,7 +105,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   const setTitle = (title: string) =>
     setStrongTab(
-      produce(draft => {
+      produce((draft) => {
         draft.title = title
       })
     )
@@ -151,17 +152,9 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
     setConcordanceLoading(false)
   }
 
-  const shareContent = () => {
-    const {
-      Code,
-      Hebreu,
-      Grec,
-      Mot,
-      Phonetique,
-      Definition,
-      Type,
-      LSG,
-    } = strongReference!
+  const shareContent = async () => {
+    const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG } =
+      strongReference!
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
     toCopy += Type ? `${Type}\n---\n\n` : '---\n\n'
@@ -176,7 +169,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
     }
     toCopy += LSG ? `${t('Généralement traduit par')}:\n${LSG}` : ''
     toCopy += '\n\n https://bible-strong.app'
-
+    await timeout(400)
     Share.share({ message: toCopy })
   }
 

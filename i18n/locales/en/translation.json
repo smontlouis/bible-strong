@@ -616,5 +616,7 @@
   "bookSelector.selectionMode.grid": "Grid",
   "bookSelector.selectionMode.list": "List",
   "bookSelector.withVerses": "With verses",
-  "bookSelector.withoutVerses": "Without verses"
+  "bookSelector.withoutVerses": "Without verses",
+
+  "reset": "Reset"
 }

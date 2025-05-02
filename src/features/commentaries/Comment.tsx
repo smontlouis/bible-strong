@@ -21,10 +21,11 @@ import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
 import { MainStackProps } from '~navigation/type'
+import { timeout } from '~helpers/timeout'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
-  const bookNumber = books.find(b => b[1] === bookName)?.[0]
+  const bookNumber = books.find((b) => b[1] === bookName)?.[0]
   return bookNumber || ''
 }
 
@@ -136,7 +137,7 @@ const Comment = ({ comment }: Props) => {
     }
   }
 
-  const shareDefinition = () => {
+  const shareDefinition = async () => {
     try {
       const message = `${resource.author}
 ${resource.name}
@@ -157,7 +158,7 @@ https://bible-strong.app
 
   return (
     <Box m={20} marginBottom={0} p={20} rounded lightShadow bg="reverse">
-      <LinkBox row onPress={() => setCollapsed(s => !s)}>
+      <LinkBox row onPress={() => setCollapsed((s) => !s)}>
         <Box center width={40} height={40} borderRadius={20}>
           {cacheImage && (
             <Image style={fastImageStyle} source={fastImageSource} />
@@ -230,7 +231,7 @@ https://bible-strong.app
               </Button>
             </Box>
           )}
-          <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
+          <LinkBox center height={40} onPress={() => setCollapsed((s) => !s)}>
             {/* @ts-expect-error */}
             <AnimatableBox
               width={17}
