@@ -40,6 +40,7 @@ const StudiesTabScreen = ({
 
   return (
     <EditStudyScreen
+      studyAtom={studyAtom}
       navigation={navigation}
       route={{
         ...route,

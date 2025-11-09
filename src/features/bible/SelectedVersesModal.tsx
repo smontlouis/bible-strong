@@ -1,42 +1,48 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
-
-import CommentIcon from '~common/CommentIcon'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import LexiqueIcon from '~common/LexiqueIcon'
-import NaveIcon from '~common/NaveIcon'
-import RefIcon from '~common/RefIcon'
-import SnackBar from '~common/SnackBar'
-import Box, { HStack } from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import getVersesContent from '~helpers/getVersesContent'
-import { cleanParams, wp } from '~helpers/utils'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useSelector } from 'react-redux'
-import { BibleResource, StudyNavigateBibleType, VerseIds } from '~common/types'
+import CommentIcon from '~common/CommentIcon'
+import DictionnaireIcon from '~common/DictionnaryIcon'
+import LexiqueIcon from '~common/LexiqueIcon'
+import NaveIcon from '~common/NaveIcon'
+import RefIcon from '~common/RefIcon'
+import SnackBar from '~common/SnackBar'
+import type {
+  BibleResource,
+  StudyNavigateBibleType,
+  VerseIds,
+} from '~common/types'
+import Box, { HStack } from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
+import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { openedFromTabAtom } from '~features/studies/atom'
+import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
+import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
 import {
   onAnimateModalClose,
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
 import { useBottomSheet } from '~helpers/useBottomSheet'
+import getVersesContent from '~helpers/getVersesContent'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { RootState } from '~redux/modules/reducer'
+import { cleanParams, wp } from '~helpers/utils'
+import type { RootState } from '~redux/modules/reducer'
 import verseToReference from '../../helpers/verseToReference'
-import { VersionCode } from '../../state/tabs'
+import type { VersionCode } from '../../state/tabs'
 import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 const Container = styled.View<{ isSelectionMode?: boolean }>(
   ({ theme, isSelectionMode }) => ({
@@ -97,6 +103,12 @@ const VersesModal = ({
   const { ref, open, close } = useBottomSheet()
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
+  const addVerseToStudy = useAddVerseToStudy()
+
+  // Add to study modal states
+  const [isAddToStudyModalOpen, setAddToStudyModalOpen] = useState(false)
+  const [selectedStudyId, setSelectedStudyId] = useState<string | null>(null)
+  const verseFormatBottomSheetRef = useRef<BottomSheet>(null)
 
   const { theme: currentTheme } = useCurrentThemeSelector()
   const { colors } = useSelector(
@@ -192,6 +204,45 @@ const VersesModal = ({
       verses: Object.keys(selectedVerses),
     })
     close()
+  }
+
+  // Handle add to study flow
+  const handleAddToStudyClick = () => {
+    setAddToStudyModalOpen(true)
+  }
+
+  const handleSelectStudy = (studyId: string) => {
+    setSelectedStudyId(studyId)
+    // Open format selection bottom sheet
+    verseFormatBottomSheetRef.current?.snapToIndex(0)
+  }
+
+  const handleSelectFormat = async (format: 'inline' | 'block') => {
+    if (!selectedStudyId) return
+
+    const { title, content } = await getVersesContent({
+      verses: selectedVerses,
+      version,
+    })
+
+    const verseData = {
+      title,
+      content,
+      version,
+      verses: Object.keys(selectedVerses),
+    }
+
+    addVerseToStudy(selectedStudyId, verseData, format)
+
+    // Reset state and close all modals
+    setSelectedStudyId(null)
+    close()
+    clearSelectedVerses()
+  }
+
+  const handleCloseFormatBottomSheet = () => {
+    setSelectedStudyId(null)
+    setAddToStudyModalOpen(false)
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
@@ -356,6 +407,11 @@ const VersesModal = ({
                   label={t('Note')}
                 />
                 <TouchableChip
+                  name="book-open"
+                  onPress={handleAddToStudyClick}
+                  label={t('study.addToStudy')}
+                />
+                <TouchableChip
                   name="copy"
                   onPress={copyToClipboard}
                   label={t('Copier')}
@@ -374,6 +430,16 @@ const VersesModal = ({
           </>
         )}
       </BottomSheetView>
+      <AddToStudyModal
+        isVisible={isAddToStudyModalOpen}
+        onClosed={() => setAddToStudyModalOpen(false)}
+        onSelectStudy={handleSelectStudy}
+      />
+      <VerseFormatBottomSheet
+        bottomSheetRef={verseFormatBottomSheetRef}
+        onSelectFormat={handleSelectFormat}
+        onClose={handleCloseFormatBottomSheet}
+      />
     </BottomSheet>
   )
 }

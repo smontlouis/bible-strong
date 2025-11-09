@@ -521,6 +521,18 @@
   "tabs.tab_plural": "onglets",
   "tabs.created": "Onglet créé",
 
+  "study.addToStudy": "Ajouter à une étude",
+  "study.selectStudy": "Sélectionner une étude",
+  "study.searchStudy": "Rechercher une étude...",
+  "study.formatChoice": "Comment ajouter ce verset ?",
+  "study.asLink": "Lien",
+  "study.asLinkDescription": "Ajouter comme lien cliquable (ex: Jean 3:16)",
+  "study.asBlock": "Bloc de texte",
+  "study.asBlockDescription": "Ajouter le texte complet du verset",
+  "study.verseAdded": "Verset ajouté à l'étude",
+  "study.openStudy": "Ouvrir",
+  "study.noStudies": "Aucune étude trouvée",
+
   "common.goTo": "Aller à",
   "common.chooseCompareVersions": "Choisir les versions à comparer",
 

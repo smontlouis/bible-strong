@@ -1,10 +1,10 @@
 'use dom'
 
+import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
 import { forwardRef, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
 import Quill from './quill'
-import debounce from 'debounce'
 import './quill.snow.css'
 
 import './InlineStrong'
@@ -12,11 +12,11 @@ import './InlineVerse'
 import './StrongBlock'
 import './VerseBlock'
 
+import { useFonts } from 'expo-font'
 import './DividerBlock'
 import './ModuleBlockVerse'
 import './ModuleFormat'
 import './ModuleInlineVerse'
-import { useFonts } from 'expo-font'
 
 interface Props {
   dom: import('expo/dom').DOMProps
@@ -73,7 +73,7 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
   useDOMImperativeHandle(
     ref,
     () => ({
-      dispatch: event => {
+      dispatch: (event) => {
         try {
           const msgData = event
 
@@ -88,27 +88,23 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
               quillRef.current.blur()
               break
             case 'GET_BIBLE_VERSES':
-              inlineVerseModuleRef.current = quillRef.current.getModule(
-                'inline-verse'
-              )
+              inlineVerseModuleRef.current =
+                quillRef.current.getModule('inline-verse')
               inlineVerseModuleRef.current.receiveVerseLink(msgData.payload)
               break
             case 'GET_BIBLE_STRONG':
-              inlineVerseModuleRef.current = quillRef.current.getModule(
-                'inline-verse'
-              )
+              inlineVerseModuleRef.current =
+                quillRef.current.getModule('inline-verse')
               inlineVerseModuleRef.current.receiveStrongLink(msgData.payload)
               break
             case 'GET_BIBLE_VERSES_BLOCK':
-              blockVerseModuleRef.current = quillRef.current.getModule(
-                'block-verse'
-              )
+              blockVerseModuleRef.current =
+                quillRef.current.getModule('block-verse')
               blockVerseModuleRef.current.receiveVerseBlock(msgData.payload)
               break
             case 'GET_BIBLE_STRONG_BLOCK':
-              blockVerseModuleRef.current = quillRef.current.getModule(
-                'block-verse'
-              )
+              blockVerseModuleRef.current =
+                quillRef.current.getModule('block-verse')
               blockVerseModuleRef.current.receiveStrongBlock(msgData.payload)
               break
             case 'BLOCK_DIVIDER': {
@@ -176,6 +172,11 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
           console.log(`reactQuillEditor error: ${err}`)
         }
       },
+      reloadEditor: (content: any) => {
+        if (quillRef.current) {
+          quillRef.current.setContents(content, Quill.sources.SILENT)
+        }
+      },
     }),
     []
   )
@@ -194,9 +195,8 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
     quillRef.current.on('text-change', debounce(onChangeText, 500))
 
     quillRef.current.on(Quill.events.EDITOR_CHANGE, (type, range) => {
-      const isReadOnly = quillRef.current.container.classList.contains(
-        'ql-disabled'
-      )
+      const isReadOnly =
+        quillRef.current.container.classList.contains('ql-disabled')
 
       if (isReadOnly) return
       if (type !== Quill.events.SELECTION_CHANGE) return

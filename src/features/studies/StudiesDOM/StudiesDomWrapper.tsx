@@ -3,15 +3,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { StudyTab, useIsCurrentTab } from 'src/state/tabs'
 import books from '~assets/bible_versions/books-desc'
 import { StudyNavigateBibleType } from '~common/types'
-import useDidUpdate from '~helpers/useDidUpdate'
+import { timeout } from '~helpers/timeout'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
-import { timeout } from '~helpers/timeout'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -26,6 +27,7 @@ type Props = {
     ops: string[]
   }
   fontFamily: string
+  studyAtom?: PrimitiveAtom<StudyTab>
 }
 const StudiesDomWrapper = ({
   params,
@@ -33,6 +35,7 @@ const StudiesDomWrapper = ({
   onDeltaChangeCallback,
   contentToDisplay,
   fontFamily,
+  studyAtom,
 }: Props) => {
   const ref = useRef<StudyDOMRef>(null)
   const navigation = useNavigation()
@@ -71,6 +74,17 @@ const StudiesDomWrapper = ({
       keyboardHideListener.remove()
     }
   }, [])
+
+  const getIsCurrentTab = useIsCurrentTab()
+  const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom) : false
+  useEffect(() => {
+    console.log('isCurrentTab', isCurrentTab)
+
+    if (ref.current?.reloadEditor && isCurrentTab) {
+      console.log('hehehe')
+      ref.current.reloadEditor(contentToDisplay)
+    }
+  }, [isCurrentTab])
 
   useEffect(() => {
     if (!params?.type) return
