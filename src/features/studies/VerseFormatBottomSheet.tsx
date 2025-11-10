@@ -8,34 +8,21 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 
 interface VerseFormatBottomSheetProps {
-  verseFormatModalRef: React.RefObject<BottomSheet>
-  addToStudyModalRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheet>
   onSelectFormat: (format: 'inline' | 'block') => void
   onClose?: () => void
 }
 
 const VerseFormatBottomSheet = ({
-  verseFormatModalRef,
-  addToStudyModalRef,
+  bottomSheetRef,
   onSelectFormat,
   onClose,
 }: VerseFormatBottomSheetProps) => {
   const { t } = useTranslation()
 
-  const handleSelectFormat = useCallback(
-    (format: 'inline' | 'block') => {
-      onSelectFormat(format)
-      setTimeout(() => {
-        verseFormatModalRef.current?.close()
-        addToStudyModalRef.current?.close()
-      }, 250)
-    },
-    [onSelectFormat, verseFormatModalRef]
-  )
-
   return (
     <Modal.Body
-      ref={verseFormatModalRef}
+      ref={bottomSheetRef}
       onModalClose={onClose}
       withPortal
       snapPoints={[280]}
@@ -49,7 +36,7 @@ const VerseFormatBottomSheet = ({
     >
       <Box paddingHorizontal={20} paddingBottom={20}>
         {/* Inline format option */}
-        <TouchableOpacity onPress={() => handleSelectFormat('inline')}>
+        <TouchableOpacity onPress={() => onSelectFormat('inline')}>
           <HStack
             paddingVertical={16}
             paddingHorizontal={16}
@@ -72,7 +59,7 @@ const VerseFormatBottomSheet = ({
         </TouchableOpacity>
 
         {/* Block format option */}
-        <TouchableOpacity onPress={() => handleSelectFormat('block')}>
+        <TouchableOpacity onPress={() => onSelectFormat('block')}>
           <HStack
             paddingVertical={16}
             paddingHorizontal={16}

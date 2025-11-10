@@ -128,7 +128,15 @@ const BibleViewer = ({
   // Add to study modal states
   const addToStudyModal = useBottomSheet()
   const verseFormatModal = useBottomSheet()
-  const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
+  const [pendingVerseData, setPendingVerseData] = useState<{
+    studyId: string
+    verseData: {
+      title: string
+      content: string
+      version: string
+      verses: string[]
+    }
+  } | null>(null)
   const addVerseToStudy = useAddVerseToStudy()
 
   const isFR = useLanguage()
@@ -333,14 +341,8 @@ const BibleViewer = ({
     addToStudyModal.open()
   }
 
-  const handleSelectStudy = (studyId: string) => {
-    setPendingStudyId(studyId)
-    verseFormatModal.open()
-  }
-
-  const handleSelectFormat = async (format: 'inline' | 'block') => {
-    if (!pendingStudyId) return
-
+  const handleSelectStudy = async (studyId: string) => {
+    // Capture verse data immediately when study is selected
     const { title, content } = await getVersesContent({
       verses: selectedVerses,
       version,
@@ -353,15 +355,32 @@ const BibleViewer = ({
       verses: Object.keys(selectedVerses),
     }
 
-    addVerseToStudy(pendingStudyId, verseData, format)
+    setPendingVerseData({ studyId, verseData })
+    verseFormatModal.open()
+  }
 
-    // Reset state and clear selection
-    setPendingStudyId(null)
+  const handleSelectFormat = (format: 'inline' | 'block') => {
+    if (!pendingVerseData) return
+
+    addVerseToStudy(
+      pendingVerseData.studyId,
+      pendingVerseData.verseData,
+      format
+    )
+
+    // Close both modals and reset state
+    verseFormatModal.close()
+    addToStudyModal.close()
+    setPendingVerseData(null)
     actions.clearSelectedVerses()
   }
 
   const handleCloseFormatBottomSheet = () => {
-    setPendingStudyId(null)
+    setPendingVerseData(null)
+  }
+
+  const handleCloseAddToStudyModal = () => {
+    setPendingVerseData(null)
   }
 
   // Déplacer le hook en dehors de la condition de rendu
@@ -518,12 +537,12 @@ const BibleViewer = ({
         modalRef={bibleParamsModal.ref}
       />
       <AddToStudyModal
-        addToStudyModalRef={addToStudyModal.ref}
+        bottomSheetRef={addToStudyModal.ref}
         onSelectStudy={handleSelectStudy}
+        onClose={handleCloseAddToStudyModal}
       />
       <VerseFormatBottomSheet
-        verseFormatModalRef={verseFormatModal.ref}
-        addToStudyModalRef={addToStudyModal.ref}
+        bottomSheetRef={verseFormatModal.ref}
         onSelectFormat={handleSelectFormat}
         onClose={handleCloseFormatBottomSheet}
       />

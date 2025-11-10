@@ -20,13 +20,15 @@ import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
 
 interface AddToStudyModalProps {
-  addToStudyModalRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheet>
   onSelectStudy: (studyId: string) => void
+  onClose?: () => void
 }
 
 const AddToStudyModal = ({
-  addToStudyModalRef,
+  bottomSheetRef,
   onSelectStudy,
+  onClose,
 }: AddToStudyModalProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
@@ -112,7 +114,8 @@ const AddToStudyModal = ({
 
   return (
     <Modal.Body
-      ref={addToStudyModalRef}
+      ref={bottomSheetRef}
+      onModalClose={onClose}
       withPortal
       snapPoints={['90%']}
       headerComponent={
