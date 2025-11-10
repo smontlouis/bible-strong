@@ -10,13 +10,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
-  version: '19.2.0',
+  version: '19.2.1',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 411,
+    versionCode: 412,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ??
@@ -30,7 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier:
       process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '200',
+    buildNumber: '201',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ??
       './firebase/dev/GoogleService-Info.plist',
@@ -68,6 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           useFrameworks: 'static',
         },
         android: {
+          targetSdkVersion: 35,
           usesCleartextTraffic: true,
           extraMavenRepos: [
             '../../node_modules/@notifee/react-native/android/libs',
