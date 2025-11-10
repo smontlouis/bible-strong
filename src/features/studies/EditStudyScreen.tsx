@@ -15,10 +15,15 @@ import EditStudyHeader from './EditStudyHeader'
 import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
+import { StudyTab } from 'src/state/tabs'
+import { PrimitiveAtom } from 'jotai/vanilla'
 
-type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'>
+type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
+  studyAtom?: PrimitiveAtom<StudyTab>
+}
 
 const EditStudyScreen = ({
+  studyAtom,
   navigation,
   route,
   ...props
@@ -48,6 +53,7 @@ const EditStudyScreen = ({
     deltaOld: string | null,
     changeSource: string | null
   ) => {
+    console.log('delta', delta)
     dispatch(
       updateStudy({
         id: currentStudy.id,
@@ -96,6 +102,7 @@ const EditStudyScreen = ({
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
         params={route.params}
+        studyAtom={studyAtom}
       />
       <StudyTitlePrompt
         titlePrompt={titlePrompt}
