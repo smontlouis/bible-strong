@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
@@ -341,47 +341,59 @@ const BibleViewer = ({
     addToStudyModal.open()
   }
 
-  const handleSelectStudy = async (studyId: string) => {
-    // Capture verse data immediately when study is selected
-    const { title, content } = await getVersesContent({
-      verses: selectedVerses,
-      version,
-    })
+  const handleSelectStudy = useCallback(
+    async (studyId: string) => {
+      // Capture verse data immediately when study is selected
+      const { title, content } = await getVersesContent({
+        verses: selectedVerses,
+        version,
+      })
 
-    const verseData = {
-      title,
-      content,
-      version,
-      verses: Object.keys(selectedVerses),
-    }
+      const verseData = {
+        title,
+        content,
+        version,
+        verses: Object.keys(selectedVerses),
+      }
 
-    setPendingVerseData({ studyId, verseData })
-    verseFormatModal.open()
-  }
+      setPendingVerseData({ studyId, verseData })
+      verseFormatModal.open()
+    },
+    [selectedVerses, version, verseFormatModal]
+  )
 
-  const handleSelectFormat = (format: 'inline' | 'block') => {
-    if (!pendingVerseData) return
+  const handleSelectFormat = useCallback(
+    (format: 'inline' | 'block') => {
+      if (!pendingVerseData) return
 
-    addVerseToStudy(
-      pendingVerseData.studyId,
-      pendingVerseData.verseData,
-      format
-    )
+      addVerseToStudy(
+        pendingVerseData.studyId,
+        pendingVerseData.verseData,
+        format
+      )
 
-    // Close both modals and reset state
-    verseFormatModal.close()
-    addToStudyModal.close()
+      // Close both modals and reset state
+      verseFormatModal.close()
+      addToStudyModal.close()
+      setPendingVerseData(null)
+      actions.clearSelectedVerses()
+    },
+    [
+      pendingVerseData,
+      addVerseToStudy,
+      verseFormatModal,
+      addToStudyModal,
+      actions,
+    ]
+  )
+
+  const handleCloseFormatBottomSheet = useCallback(() => {
     setPendingVerseData(null)
-    actions.clearSelectedVerses()
-  }
+  }, [])
 
-  const handleCloseFormatBottomSheet = () => {
+  const handleCloseAddToStudyModal = useCallback(() => {
     setPendingVerseData(null)
-  }
-
-  const handleCloseAddToStudyModal = () => {
-    setPendingVerseData(null)
-  }
+  }, [])
 
   // Déplacer le hook en dehors de la condition de rendu
   const translationY = useDerivedValue(() => {
