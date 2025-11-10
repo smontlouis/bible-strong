@@ -1,11 +1,10 @@
-import BottomSheet from '@gorhom/bottom-sheet'
-import React, { useMemo } from 'react'
-import { TouchableOpacity } from 'react-native'
-import { FlashList } from '@shopify/flash-list'
+import BottomSheet, { BottomSheetFlashList } from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import enGB from 'date-fns/locale/en-GB'
 import fr from 'date-fns/locale/fr'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TouchableOpacity } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
 import Empty from '~common/Empty'
@@ -133,11 +132,11 @@ const AddToStudyModal = ({
         </Box>
       }
     >
-      <FlashList
+      <BottomSheetFlashList
         ListHeaderComponent={renderNewStudyButton}
         data={result}
         renderItem={renderStudyItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || Math.random().toString()}
         estimatedItemSize={72}
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={

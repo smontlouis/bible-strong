@@ -7,7 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   jsEngine: 'hermes',
   description: 'Bible strong for french people',
   slug: 'bible-strong',
-  primaryColor: '#fff',
+  primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
   version: '19.2.0',
@@ -112,7 +112,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         image: './assets/images/splash.png',
         imageWidth: 200,
-        backgroundColor: '#fff',
+        backgroundColor: '#ffffff',
         dark: {
           image: './assets/images/splash-dark.png',
           imageWidth: 200,
