@@ -1,44 +1,35 @@
-import React, { useEffect, useMemo } from 'react'
+import BottomSheet from '@gorhom/bottom-sheet'
+import React, { useMemo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
+import distanceInWords from 'date-fns/formatDistance'
+import enGB from 'date-fns/locale/en-GB'
+import fr from 'date-fns/locale/fr'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useSelector } from 'react-redux'
-import distanceInWords from 'date-fns/formatDistance'
-import fr from 'date-fns/locale/fr'
-import enGB from 'date-fns/locale/en-GB'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
 import Empty from '~common/Empty'
 import Modal from '~common/Modal'
 import Box, { HStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import generateUUID from '~helpers/generateUUID'
 import useFuzzy from '~helpers/useFuzzy'
 import useLanguage from '~helpers/useLanguage'
 import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
 
 interface AddToStudyModalProps {
-  isVisible: boolean
-  onClosed: () => void
+  addToStudyModalRef: React.RefObject<BottomSheet>
   onSelectStudy: (studyId: string) => void
 }
 
 const AddToStudyModal = ({
-  isVisible,
-  onClosed,
+  addToStudyModalRef,
   onSelectStudy,
 }: AddToStudyModalProps) => {
-  const { ref, open, close } = useBottomSheet()
   const { t } = useTranslation()
   const isFR = useLanguage()
-
-  useEffect(() => {
-    if (isVisible) {
-      open()
-    } else {
-      close()
-    }
-  }, [isVisible, open, close])
 
   const studies = useSelector(
     (state: RootState) => Object.values(state.user.bible.studies),
@@ -60,6 +51,33 @@ const AddToStudyModal = ({
     onSelectStudy(studyId)
     resetSearch()
   }
+
+  const handleCreateNewStudy = () => {
+    const newStudyId = generateUUID()
+    onSelectStudy(newStudyId)
+    resetSearch()
+  }
+
+  const renderNewStudyButton = () => (
+    <TouchableOpacity onPress={handleCreateNewStudy}>
+      <HStack
+        paddingVertical={16}
+        paddingHorizontal={20}
+        borderBottomWidth={2}
+        borderColor="lightGrey"
+        alignItems="center"
+        bg="lightPrimary"
+      >
+        <FeatherIcon name="plus-square" size={24} color="primary" />
+        <Box flex marginLeft={16}>
+          <Text fontSize={16} bold color="primary">
+            {t('study.newStudy')}
+          </Text>
+        </Box>
+        <FeatherIcon name="arrow-right" size={20} color="primary" />
+      </HStack>
+    </TouchableOpacity>
+  )
 
   const renderStudyItem = ({ item }: { item: Study }) => {
     const formattedDate = distanceInWords(
@@ -94,8 +112,7 @@ const AddToStudyModal = ({
 
   return (
     <Modal.Body
-      ref={ref}
-      onModalClose={onClosed}
+      ref={addToStudyModalRef}
       withPortal
       snapPoints={['90%']}
       headerComponent={
@@ -113,22 +130,22 @@ const AddToStudyModal = ({
         </Box>
       }
     >
-      {result.length > 0 ? (
-        <FlashList
-          data={result}
-          renderItem={renderStudyItem}
-          keyExtractor={(item) => item.id}
-          estimatedItemSize={72}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      ) : (
-        <Box flex justifyContent="center" alignItems="center" padding={40}>
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('study.noStudies')}
-          />
-        </Box>
-      )}
+      <FlashList
+        ListHeaderComponent={renderNewStudyButton}
+        data={result}
+        renderItem={renderStudyItem}
+        keyExtractor={(item) => item.id}
+        estimatedItemSize={72}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        ListEmptyComponent={
+          <Box flex justifyContent="center" alignItems="center" padding={40}>
+            <Empty
+              source={require('~assets/images/empty.json')}
+              message={t('study.noStudies')}
+            />
+          </Box>
+        }
+      />
     </Modal.Body>
   )
 }

@@ -12,6 +12,8 @@ import BibleHeader from './BibleHeader'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { useDerivedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual } from 'recompose'
 import {
@@ -21,6 +23,11 @@ import {
   Verse,
   VerseIds,
 } from '~common/types'
+import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import AddToStudyModal from '~features/studies/AddToStudyModal'
+import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
+import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
+import getVersesContent from '~helpers/getVersesContent'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
@@ -34,9 +41,6 @@ import {
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 // import BibleWebView from './BibleDOMWebview'
-import { useDerivedValue } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -120,6 +124,12 @@ const BibleViewer = ({
   >(false)
   const bibleParamsModal = useBottomSheetModal()
   const resourceModal = useBottomSheet()
+
+  // Add to study modal states
+  const addToStudyModal = useBottomSheet()
+  const verseFormatModal = useBottomSheet()
+  const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
+  const addVerseToStudy = useAddVerseToStudy()
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
@@ -318,6 +328,42 @@ const BibleViewer = ({
     resourceModal.open()
   }
 
+  // Add to study handlers
+  const handleOpenAddToStudy = () => {
+    addToStudyModal.open()
+  }
+
+  const handleSelectStudy = (studyId: string) => {
+    setPendingStudyId(studyId)
+    verseFormatModal.open()
+  }
+
+  const handleSelectFormat = async (format: 'inline' | 'block') => {
+    if (!pendingStudyId) return
+
+    const { title, content } = await getVersesContent({
+      verses: selectedVerses,
+      version,
+    })
+
+    const verseData = {
+      title,
+      content,
+      version,
+      verses: Object.keys(selectedVerses),
+    }
+
+    addVerseToStudy(pendingStudyId, verseData, format)
+
+    // Reset state and clear selection
+    setPendingStudyId(null)
+    actions.clearSelectedVerses()
+  }
+
+  const handleCloseFormatBottomSheet = () => {
+    setPendingStudyId(null)
+  }
+
   // Déplacer le hook en dehors de la condition de rendu
   const translationY = useDerivedValue(() => {
     return {
@@ -446,6 +492,7 @@ const BibleViewer = ({
         selectedVerses={selectedVerses}
         selectAllVerses={selectAllVerses}
         version={version}
+        onAddToStudy={handleOpenAddToStudy}
       />
       <QuickTagsModal
         item={quickTagsModal}
@@ -469,6 +516,16 @@ const BibleViewer = ({
       <BibleParamsModal
         navigation={navigation}
         modalRef={bibleParamsModal.ref}
+      />
+      <AddToStudyModal
+        addToStudyModalRef={addToStudyModal.ref}
+        onSelectStudy={handleSelectStudy}
+      />
+      <VerseFormatBottomSheet
+        verseFormatModalRef={verseFormatModal.ref}
+        addToStudyModalRef={addToStudyModal.ref}
+        onSelectFormat={handleSelectFormat}
+        onClose={handleCloseFormatBottomSheet}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
     </Box>

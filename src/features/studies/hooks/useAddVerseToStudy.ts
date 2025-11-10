@@ -39,14 +39,23 @@ export const useAddVerseToStudy = () => {
     format: VerseFormat
   ) => {
     const study = studies[studyId]
-    console.log('study', study)
-    if (!study) {
-      console.error(`Study ${studyId} not found`)
-      return
-    }
+    const isNewStudy = !study
 
     // Parse existing content or create empty delta
-    let delta: QuillDelta = study.content || { ops: [] }
+    let delta: QuillDelta
+    if (study?.content) {
+      try {
+        delta =
+          typeof study.content === 'string'
+            ? JSON.parse(study.content)
+            : study.content
+      } catch (e) {
+        console.error('Error parsing study content:', e)
+        delta = { ops: [] }
+      }
+    } else {
+      delta = { ops: [] }
+    }
     // Create the verse operation based on format
     if (format === 'inline') {
       // Add inline verse link
@@ -79,18 +88,26 @@ export const useAddVerseToStudy = () => {
       delta.ops.push({ insert: '\n' })
     }
 
-    console.log('delta', delta)
     // Update study in Redux
+    // If new study, also set title and created_at
     dispatch(
       updateStudy({
         id: studyId,
         content: delta,
         modified_at: Date.now(),
+        ...(isNewStudy
+          ? {
+              title: t('Document sans titre'),
+              created_at: Date.now(),
+            }
+          : {}),
       })
     )
 
     // Show success toast with option to open study in new tab
     const newTabId = `new-${Date.now()}`
+    const studyTitle = study?.title || t('Document sans titre')
+
     Snackbar.show(t('study.verseAdded'), 'info', {
       confirmText: t('study.openStudy'),
       onConfirm: () => {
@@ -106,7 +123,7 @@ export const useAddVerseToStudy = () => {
           type: 'insert',
           value: {
             id: newTabId,
-            title: study.title,
+            title: studyTitle,
             isRemovable: true,
             type: 'study',
             data: {

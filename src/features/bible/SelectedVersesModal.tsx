@@ -1,7 +1,6 @@
 import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
@@ -24,10 +23,7 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
-import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { openedFromTabAtom } from '~features/studies/atom'
-import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
-import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
 import {
   onAnimateModalClose,
   useBottomSheetStyles,
@@ -43,20 +39,6 @@ import TouchableChip from './TouchableChip'
 import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-
-const Container = styled.View<{ isSelectionMode?: boolean }>(
-  ({ theme, isSelectionMode }) => ({
-    width: '100%',
-    backgroundColor: theme.colors.reverse,
-
-    ...(isSelectionMode && {
-      flexDirection: 'row',
-      paddingLeft: 10,
-      paddingRight: 10,
-      paddingVertical: 30,
-    }),
-  })
-)
 
 const HalfContainer = styled.View<{ border?: boolean }>(
   ({ border, theme }) => ({
@@ -81,6 +63,7 @@ type Props = {
   selectedVerses: VerseIds
   selectAllVerses: () => void
   version: VersionCode
+  onAddToStudy: () => void
 }
 
 const VersesModal = ({
@@ -96,19 +79,13 @@ const VersesModal = ({
   selectedVerses,
   selectAllVerses,
   version,
+  onAddToStudy,
 }: Props) => {
   const navigation = useNavigation()
-  const theme = useTheme()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const { ref, open, close } = useBottomSheet()
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
-  const addVerseToStudy = useAddVerseToStudy()
-
-  // Add to study modal states
-  const [isAddToStudyModalOpen, setAddToStudyModalOpen] = useState(false)
-  const [selectedStudyId, setSelectedStudyId] = useState<string | null>(null)
-  const verseFormatBottomSheetRef = useRef<BottomSheet>(null)
 
   const { theme: currentTheme } = useCurrentThemeSelector()
   const { colors } = useSelector(
@@ -204,45 +181,6 @@ const VersesModal = ({
       verses: Object.keys(selectedVerses),
     })
     close()
-  }
-
-  // Handle add to study flow
-  const handleAddToStudyClick = () => {
-    setAddToStudyModalOpen(true)
-  }
-
-  const handleSelectStudy = (studyId: string) => {
-    setSelectedStudyId(studyId)
-    // Open format selection bottom sheet
-    verseFormatBottomSheetRef.current?.snapToIndex(0)
-  }
-
-  const handleSelectFormat = async (format: 'inline' | 'block') => {
-    if (!selectedStudyId) return
-
-    const { title, content } = await getVersesContent({
-      verses: selectedVerses,
-      version,
-    })
-
-    const verseData = {
-      title,
-      content,
-      version,
-      verses: Object.keys(selectedVerses),
-    }
-
-    addVerseToStudy(selectedStudyId, verseData, format)
-
-    // Reset state and close all modals
-    setSelectedStudyId(null)
-    close()
-    clearSelectedVerses()
-  }
-
-  const handleCloseFormatBottomSheet = () => {
-    setSelectedStudyId(null)
-    setAddToStudyModalOpen(false)
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
@@ -407,8 +345,8 @@ const VersesModal = ({
                   label={t('Note')}
                 />
                 <TouchableChip
-                  name="book-open"
-                  onPress={handleAddToStudyClick}
+                  name="feather"
+                  onPress={onAddToStudy}
                   label={t('study.addToStudy')}
                 />
                 <TouchableChip
@@ -430,16 +368,6 @@ const VersesModal = ({
           </>
         )}
       </BottomSheetView>
-      <AddToStudyModal
-        isVisible={isAddToStudyModalOpen}
-        onClosed={() => setAddToStudyModalOpen(false)}
-        onSelectStudy={handleSelectStudy}
-      />
-      <VerseFormatBottomSheet
-        bottomSheetRef={verseFormatBottomSheetRef}
-        onSelectFormat={handleSelectFormat}
-        onClose={handleCloseFormatBottomSheet}
-      />
     </BottomSheet>
   )
 }
