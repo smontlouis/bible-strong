@@ -25,9 +25,18 @@ const ImportExport = () => {
     <Container>
       <Header hasBackButton title={t('app.importexport')} />
       <ScrollView style={{ flex: 1 }}>
-        <Box paddingHorizontal={20}>
+        <Box mt={20} paddingHorizontal={20}>
           <Text fontSize={20} bold>
-            {t('app.export')}
+            💾 {t('backups.title')}
+          </Text>
+          <Text mt={10} color="quart" fontSize={12}>
+            {t('backups.description')}
+          </Text>
+          <AutoBackupsList />
+        </Box>
+        <Box mt={40} paddingHorizontal={20}>
+          <Text fontSize={20} bold>
+            📤 {t('app.export')}
           </Text>
           <Text mt={10} fontSize={12}>
             {t('app.exportDesc')}
@@ -36,21 +45,12 @@ const ImportExport = () => {
         </Box>
         <Box mt={40} paddingHorizontal={20}>
           <Text fontSize={20} bold>
-            {t('app.import')}
+            📥 {t('app.import')}
           </Text>
           <Text mt={10} color="quart" fontSize={12}>
             {t('app.importDesc')}
           </Text>
           <ImportSave />
-        </Box>
-        <Box mt={40} paddingHorizontal={20}>
-          <Text fontSize={20} bold>
-            {t('Backups Automatiques')}
-          </Text>
-          <Text mt={10} color="quart" fontSize={12}>
-            Maximum 10 backups conservés au total. Backups auto limités à 1 par jour (si données changées). Backups logout/erreur/manuels créés sans limite. Permet de récupérer vos données en cas de problème.
-          </Text>
-          <AutoBackupsList />
         </Box>
       </ScrollView>
     </Container>
@@ -170,11 +170,10 @@ const ExportButton = ({
       style={{ width: 130, marginTop: 20 }}
       reverse
       small
-      onPress={isSyncing ? () => {} : sync}
+      onPress={sync}
+      disabled={isSyncing}
     >
-      <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
-        {t('app.export')}
-      </Text>
+      <Text fontSize={15}>{isSyncing ? 'Export...' : t('app.export')}</Text>
     </Button>
   )
 }
@@ -247,20 +246,24 @@ const AutoBackupsList = () => {
 
     // Confirmation
     Alert.alert(
-      'Restaurer le backup',
-      `Restaurer ce backup du ${format(backup.timestamp, 'dd/MM/yyyy HH:mm')}? Vos données actuelles seront remplacées.`,
+      t('backups.restoreTitle'),
+      t('backups.restoreMessage', {
+        date: format(backup.timestamp, 'dd/MM/yyyy HH:mm'),
+      }),
       [
         {
-          text: 'Annuler',
-          style: 'cancel'
+          text: t('backups.cancel'),
+          style: 'cancel',
         },
         {
-          text: 'Restaurer',
+          text: t('backups.restore'),
           style: 'destructive',
           onPress: async () => {
             setIsRestoring(true)
             try {
-              const backupData = await autoBackupManager.restoreBackup(backup.filename)
+              const backupData = await autoBackupManager.restoreBackup(
+                backup.filename
+              )
 
               if (!backupData) {
                 throw new Error('Failed to read backup')
@@ -269,48 +272,50 @@ const AutoBackupsList = () => {
               // Importer les données
               dispatch(importData(backupData.data))
 
-              Snackbar.show('Backup restauré avec succès', 'success')
+              Snackbar.show(t('backups.restoreSuccess'), 'success')
             } catch (error) {
               console.error('Failed to restore backup:', error)
-              Snackbar.show('Erreur lors de la restauration', 'danger')
+              Snackbar.show(t('backups.restoreError'), 'danger')
             } finally {
               setIsRestoring(false)
             }
-          }
-        }
+          },
+        },
       ]
     )
   }
 
-  const getTriggerLabel = (trigger: string) => {
-    switch (trigger) {
-      case 'auto':
-        return 'Automatique'
-      case 'logout':
-        return 'Avant déconnexion'
-      case 'sync_error':
-        return 'Erreur sync'
-      case 'manual':
-        return 'Manuel'
-      default:
-        return trigger
-    }
-  }
-
   if (isLoading) {
-    return <Text mt={10}>Chargement...</Text>
+    return <Text mt={10}>{t('backups.loading')}</Text>
   }
 
   if (backups.length === 0) {
-    return <Text mt={10} color="grey">Aucun backup disponible</Text>
+    return (
+      <Text mt={10} color="grey" textAlign="center">
+        {t('backups.none')}
+      </Text>
+    )
   }
 
   return (
     <Box mt={10}>
-      <Text fontSize={12} color="grey" mb={10}>
-        {backups.length} backup(s) disponible(s) - {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB total
-      </Text>
-      {backups.map(backup => (
+      <Box row justifyContent="space-between" alignItems="center" mb={10}>
+        <Text fontSize={12} color="grey">
+          {t('backups.count', { count: backups.length })} -{' '}
+          {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB
+        </Text>
+        <Button
+          small
+          onPress={loadBackups}
+          disabled={isLoading}
+          style={{ paddingHorizontal: 10 }}
+        >
+          <Text fontSize={11}>
+            {isLoading ? '...' : '🔄 ' + t('backups.refresh')}
+          </Text>
+        </Button>
+      </Box>
+      {backups.map((backup) => (
         <Box
           key={backup.filename}
           mb={10}
@@ -322,11 +327,13 @@ const AutoBackupsList = () => {
             {format(backup.timestamp, 'dd/MM/yyyy à HH:mm:ss')}
           </Text>
           <Text fontSize={12} color="grey" mt={5}>
-            Type: {getTriggerLabel(backup.filename.includes('backup_') ? 'auto' : 'manual')} • Taille: {(backup.size / 1024).toFixed(1)} KB
+            {t('backups.size')}: {(backup.size / 1024).toFixed(1)} KB
           </Text>
           {backup.stats && (
             <Text fontSize={11} color="grey" mt={3}>
-              {backup.stats.studiesCount} études • {backup.stats.notesCount} notes • {backup.stats.highlightsCount} highlights
+              {t('backups.studies', { count: backup.stats.studiesCount })} •{' '}
+              {t('backups.notes', { count: backup.stats.notesCount })} •{' '}
+              {t('backups.highlights', { count: backup.stats.highlightsCount })}
             </Text>
           )}
           <Button
@@ -336,85 +343,11 @@ const AutoBackupsList = () => {
             disabled={isRestoring}
           >
             <Text fontSize={12} opacity={isRestoring ? 0.4 : 1}>
-              Restaurer
+              {t('backups.restore')}
             </Text>
           </Button>
         </Box>
       ))}
-    </Box>
-  )
-}
-
-const FileSystemStorageDebug = () => {
-  const [storageContent, setStorageContent] = useState<Record<string, string>>(
-    {}
-  )
-  const [isLoading, setIsLoading] = useState(false)
-
-  const loadStorageContent = async () => {
-    setIsLoading(true)
-    try {
-      // Get the file from persistStore/root
-      const filePath = `${FileSystem.documentDirectory}persistStore/root`
-      const fileInfo = await FileSystem.getInfoAsync(filePath)
-
-      if (fileInfo.exists) {
-        try {
-          const content = await FileSystem.readAsStringAsync(filePath)
-          // Try to parse the JSON content
-          try {
-            const parsedContent = JSON.parse(content)
-            setStorageContent({
-              'persistStore/root': JSON.stringify(parsedContent, null, 2),
-            })
-            console.log('PersistStore content:', parsedContent)
-          } catch (parseError) {
-            // If parsing fails, just show the raw content
-            setStorageContent({ 'persistStore/root': content })
-            console.log('PersistStore raw content:', content)
-          }
-        } catch (readError) {
-          console.error('Error reading persistStore file:', readError)
-          setStorageContent({})
-        }
-      } else {
-        console.log('PersistStore file does not exist at path:', filePath)
-        setStorageContent({})
-      }
-    } catch (error) {
-      console.error('Error loading persistStore content:', error)
-      setStorageContent({})
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadStorageContent()
-  }, [])
-
-  return (
-    <Box marginTop={20}>
-      {isLoading ? (
-        <Text>Loading storage content...</Text>
-      ) : Object.keys(storageContent).length > 0 ? (
-        Object.entries(storageContent).map(([key, value]) => (
-          <Box
-            key={key}
-            marginTop={10}
-            padding={10}
-            backgroundColor="rgba(0,0,0,0.05)"
-            borderRadius={5}
-          >
-            <Text bold>{key}</Text>
-            <Text fontSize={12} numberOfLines={3} ellipsizeMode="tail">
-              {value.length > 100 ? `${value.substring(0, 100)}...` : value}
-            </Text>
-          </Box>
-        ))
-      ) : (
-        <Text>No storage content found</Text>
-      )}
     </Box>
   )
 }
