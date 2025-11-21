@@ -75,7 +75,7 @@ const EditStudyScreen = ({
   )
 
   // prevent rendering if studyId is not set
-  if (studyId === '') {
+  if (studyId === '' || !currentStudy) {
     return null
   }
 

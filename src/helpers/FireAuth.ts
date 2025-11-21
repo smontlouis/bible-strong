@@ -5,6 +5,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
 import { firebaseDb } from '~helpers/firebase'
+import { tokenManager } from '~helpers/TokenManager'
 import i18n from '~i18n'
 
 export type FireAuthProfile = {
@@ -53,13 +54,7 @@ const FireAuth = class {
         '204116128917-56eubi7hu2f0k3rnb6dn8q3sfv23588l.apps.googleusercontent.com',
     })
 
-    auth().onAuthStateChanged(async user => {
-      // Skip registration call
-      if (!this.authFlag) {
-        this.authFlag = true
-        return
-      }
-
+    auth().onAuthStateChanged(async (user) => {
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
@@ -112,7 +107,7 @@ const FireAuth = class {
   }
 
   appleLogin = () =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       try {
         const appleAuthRequestResponse = await appleAuth.performRequest({
           requestedOperation: appleAuth.Operation.LOGIN,
@@ -175,7 +170,7 @@ const FireAuth = class {
   //   })
 
   googleLogin = () =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       try {
         await GoogleSignin.hasPlayServices()
         const signInResult = await GoogleSignin.signIn()
@@ -214,14 +209,14 @@ const FireAuth = class {
   }
 
   login = (email, password) =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       try {
         auth()
           .signInWithEmailAndPassword(email.trim(), password.trim())
           .then(() => {
             resolve(true)
           })
-          .catch(err => {
+          .catch((err) => {
             if (this.onError) {
               this.onError(err)
             }
@@ -249,8 +244,8 @@ const FireAuth = class {
     }
   }
 
-  resetPassword = email =>
-    new Promise(async resolve => {
+  resetPassword = (email) =>
+    new Promise(async (resolve) => {
       try {
         auth()
           .sendPasswordResetEmail(email)
@@ -258,7 +253,7 @@ const FireAuth = class {
             SnackBar.show(i18n.t('Email envoyé.'))
             resolve(false)
           })
-          .catch(err => {
+          .catch((err) => {
             if (this.onError) {
               this.onError(err)
             }
@@ -273,7 +268,7 @@ const FireAuth = class {
     })
 
   register = (username, email, password) =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       try {
         auth()
           .createUserWithEmailAndPassword(email, password)
@@ -286,7 +281,7 @@ const FireAuth = class {
             user.sendEmailVerification()
             return resolve(true)
           })
-          .catch(err => {
+          .catch((err) => {
             if (this.onError) {
               this.onError(err)
             }
@@ -306,6 +301,10 @@ const FireAuth = class {
     // Sign-out successful.
     this.user = null
     this.onLogout?.()
+
+    // Reset token manager state
+    tokenManager.reset()
+
     SnackBar.show(i18n.t('Vous êtes déconnecté.'))
   }
 }
