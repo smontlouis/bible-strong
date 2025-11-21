@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
+import { autoBackupManager } from '~helpers/AutoBackupManager'
 import {
   getChangelog,
   getDatabaseUpdate,
@@ -33,6 +34,11 @@ const InitHooks = ({}: InitHooksProps) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
+    // Initialiser le système de backup automatique
+    autoBackupManager.initialize().catch(err => {
+      console.error('Failed to initialize AutoBackupManager:', err)
+    })
+
     dispatch(getChangelog())
     dispatch(getVersionUpdate())
     dispatch(getDatabaseUpdate())

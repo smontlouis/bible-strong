@@ -1,15 +1,19 @@
 import { useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import SnackBar from '~common/SnackBar'
 import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
+import { autoBackupManager } from '~helpers/AutoBackupManager'
 import i18n from '~i18n'
 import * as UserActions from '~redux/modules/user'
 import { resetUserAtomsAtom } from '../state/app'
+import { RootState } from '~redux/modules/reducer'
 
 const useInitFireAuth = () => {
   const dispatch = useDispatch()
   const resetAtoms = useSetAtom(resetUserAtomsAtom)
+  const state = useSelector((state: RootState) => state)
+
   useEffect(() => {
     const onLogin = ({ profile }: { profile: FireAuthProfile }) => {
       console.log(`Bienvenue ${profile.displayName}.`)
@@ -17,12 +21,23 @@ const useInitFireAuth = () => {
     }
 
     const emailVerified = () => dispatch(UserActions.verifyEmail())
-    const onUserChange = profile => console.log('user changed')
-    const onLogout = () => {
+    const onUserChange = (profile) => console.log('user changed')
+    const onLogout = async () => {
+      // PROTECTION: Créer un backup avant de déconnecter
+      // Garantit qu'aucune donnée non-sync ne peut être perdue
+      try {
+        console.log('[Logout] Creating backup before logout...')
+        await autoBackupManager.createBackupNow(state, 'logout')
+        console.log('[Logout] Backup created successfully')
+      } catch (error) {
+        console.error('[Logout] Failed to create backup:', error)
+        // Continue quand même avec le logout
+      }
+
       dispatch(UserActions.onUserLogout())
       resetAtoms()
     }
-    const onError = e => {
+    const onError = (e) => {
       if (e.code === 'auth/internal-error') {
         SnackBar.show(i18n.t("Une erreur s'est produite"))
       }

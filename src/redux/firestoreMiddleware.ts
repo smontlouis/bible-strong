@@ -1,8 +1,8 @@
 import firestore from '@react-native-firebase/firestore'
 import auth from '@react-native-firebase/auth'
-import NetInfo from '@react-native-community/netinfo'
 import * as Sentry from '@sentry/react-native'
 import { tokenManager } from '~helpers/TokenManager'
+import { autoBackupManager } from '~helpers/AutoBackupManager'
 import {
   USER_UPDATE_PROFILE,
   //
@@ -81,6 +81,10 @@ export default (store) => (next) => async (action) => {
 
   const { user, plan }: RootState = state
   const userDoc = firebaseDb.collection('users').doc(currentUser.uid)
+
+  // Schedule un backup automatique après chaque changement (debounced 30s)
+  // Garantit que les données ne peuvent jamais être perdues
+  autoBackupManager.scheduleBackup(state)
 
   switch (action.type) {
     // case IMPORT_DATA:
@@ -179,6 +183,13 @@ export default (store) => (next) => async (action) => {
             tags: { feature: 'sync', action: 'user_bible_sync' },
             extra: { userId: currentUser.uid, errorCode: error.code },
           })
+
+          // SAFETY: Créer un backup immédiat en cas d'erreur de sync
+          // Garantit que les données ne sont jamais perdues
+          autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
+            console.error('[AutoBackup] Failed to create error backup:', backupError)
+          })
+
           Snackbar.show(i18n.t('app.syncError'), 'danger')
         }
       }

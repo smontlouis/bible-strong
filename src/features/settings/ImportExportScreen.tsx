@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { shallowEqual } from 'recompose'
 import Header from '~common/Header'
@@ -16,6 +16,7 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { importData } from '~redux/modules/user'
+import { autoBackupManager, BackupInfo } from '~helpers/AutoBackupManager'
 
 const ImportExport = () => {
   const { t } = useTranslation()
@@ -42,12 +43,15 @@ const ImportExport = () => {
           </Text>
           <ImportSave />
         </Box>
-        {/* <Box mt={40} paddingHorizontal={20}>
+        <Box mt={40} paddingHorizontal={20}>
           <Text fontSize={20} bold>
-            Debug FileSystemStorage
+            {t('Backups Automatiques')}
           </Text>
-          <FileSystemStorageDebug />
-        </Box> */}
+          <Text mt={10} color="quart" fontSize={12}>
+            Maximum 10 backups conservés au total. Backups auto limités à 1 par jour (si données changées). Backups logout/erreur/manuels créés sans limite. Permet de récupérer vos données en cas de problème.
+          </Text>
+          <AutoBackupsList />
+        </Box>
       </ScrollView>
     </Container>
   )
@@ -212,6 +216,132 @@ const ImportSave = () => {
     >
       <Text fontSize={15}>{t('app.import')}</Text>
     </Button>
+  )
+}
+
+const AutoBackupsList = () => {
+  const { t } = useTranslation()
+  const dispatch = useDispatch()
+  const [backups, setBackups] = useState<BackupInfo[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(false)
+
+  useEffect(() => {
+    loadBackups()
+  }, [])
+
+  const loadBackups = async () => {
+    setIsLoading(true)
+    try {
+      const backupList = await autoBackupManager.listBackups()
+      setBackups(backupList)
+    } catch (error) {
+      console.error('Failed to load backups:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRestore = async (backup: BackupInfo) => {
+    if (isRestoring) return
+
+    // Confirmation
+    Alert.alert(
+      'Restaurer le backup',
+      `Restaurer ce backup du ${format(backup.timestamp, 'dd/MM/yyyy HH:mm')}? Vos données actuelles seront remplacées.`,
+      [
+        {
+          text: 'Annuler',
+          style: 'cancel'
+        },
+        {
+          text: 'Restaurer',
+          style: 'destructive',
+          onPress: async () => {
+            setIsRestoring(true)
+            try {
+              const backupData = await autoBackupManager.restoreBackup(backup.filename)
+
+              if (!backupData) {
+                throw new Error('Failed to read backup')
+              }
+
+              // Importer les données
+              dispatch(importData(backupData.data))
+
+              Snackbar.show('Backup restauré avec succès', 'success')
+            } catch (error) {
+              console.error('Failed to restore backup:', error)
+              Snackbar.show('Erreur lors de la restauration', 'danger')
+            } finally {
+              setIsRestoring(false)
+            }
+          }
+        }
+      ]
+    )
+  }
+
+  const getTriggerLabel = (trigger: string) => {
+    switch (trigger) {
+      case 'auto':
+        return 'Automatique'
+      case 'logout':
+        return 'Avant déconnexion'
+      case 'sync_error':
+        return 'Erreur sync'
+      case 'manual':
+        return 'Manuel'
+      default:
+        return trigger
+    }
+  }
+
+  if (isLoading) {
+    return <Text mt={10}>Chargement...</Text>
+  }
+
+  if (backups.length === 0) {
+    return <Text mt={10} color="grey">Aucun backup disponible</Text>
+  }
+
+  return (
+    <Box mt={10}>
+      <Text fontSize={12} color="grey" mb={10}>
+        {backups.length} backup(s) disponible(s) - {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB total
+      </Text>
+      {backups.map(backup => (
+        <Box
+          key={backup.filename}
+          mb={10}
+          padding={10}
+          backgroundColor="rgba(0,0,0,0.05)"
+          borderRadius={5}
+        >
+          <Text fontSize={14} bold>
+            {format(backup.timestamp, 'dd/MM/yyyy à HH:mm:ss')}
+          </Text>
+          <Text fontSize={12} color="grey" mt={5}>
+            Type: {getTriggerLabel(backup.filename.includes('backup_') ? 'auto' : 'manual')} • Taille: {(backup.size / 1024).toFixed(1)} KB
+          </Text>
+          {backup.stats && (
+            <Text fontSize={11} color="grey" mt={3}>
+              {backup.stats.studiesCount} études • {backup.stats.notesCount} notes • {backup.stats.highlightsCount} highlights
+            </Text>
+          )}
+          <Button
+            style={{ width: 100, marginTop: 10 }}
+            small
+            onPress={() => handleRestore(backup)}
+            disabled={isRestoring}
+          >
+            <Text fontSize={12} opacity={isRestoring ? 0.4 : 1}>
+              Restaurer
+            </Text>
+          </Button>
+        </Box>
+      ))}
+    </Box>
   )
 }
 
