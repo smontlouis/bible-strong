@@ -96,53 +96,53 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase = <T,>(
-  WrappedComponent: React.ComponentType<T>
-): React.ComponentType<T> => props => {
-  const { t } = useTranslation()
-  const {
-    isLoading,
-    progress,
-    proposeDownload,
-    startDownload,
-    setStartDownload,
-  } = useWaitForDatabase()
+const waitForDatabase =
+  <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
+  (props) => {
+    const { t } = useTranslation()
+    const {
+      isLoading,
+      progress,
+      proposeDownload,
+      startDownload,
+      setStartDownload,
+    } = useWaitForDatabase()
 
-  if (isLoading && startDownload) {
-    return (
-      <Box h={300} alignItems="center">
-        <Loading message={t('Téléchargement de la base commentaires...')}>
-          <Progress progress={progress} />
-        </Loading>
-      </Box>
-    )
+    if (isLoading && startDownload) {
+      return (
+        <Box h={300} alignItems="center">
+          <Loading message={t('Téléchargement de la base commentaires...')}>
+            <Progress progress={progress} />
+          </Loading>
+        </Box>
+      )
+    }
+
+    if (isLoading && proposeDownload) {
+      return (
+        <DownloadRequired
+          hasHeader={false}
+          title={t(
+            'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'
+          )}
+          setStartDownload={setStartDownload}
+          fileSize={5.4}
+        />
+      )
+    }
+
+    if (isLoading) {
+      return (
+        <Loading
+          message={t('Chargement de la base de données...')}
+          subMessage={t(
+            "Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+          )}
+        />
+      )
+    }
+
+    return <WrappedComponent key={resourceLang} {...props} />
   }
-
-  if (isLoading && proposeDownload) {
-    return (
-      <DownloadRequired
-        hasHeader={false}
-        title={t(
-          'La base de données "Trésor de l\'écriture" est requise pour accéder à ce module.'
-        )}
-        setStartDownload={setStartDownload}
-        fileSize={5.4}
-      />
-    )
-  }
-
-  if (isLoading) {
-    return (
-      <Loading
-        message={t('Chargement de la base de données...')}
-        subMessage={t(
-          "Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
-        )}
-      />
-    )
-  }
-
-  return <WrappedComponent {...props} />
-}
 
 export default waitForDatabase

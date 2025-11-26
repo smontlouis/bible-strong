@@ -85,6 +85,20 @@ class LanguageAwareDB {
       // Ensure the directory exists
       await initLanguageDirs(this.lang)
 
+      // Check if database file exists and has content BEFORE opening
+      // This prevents SQLite from creating empty 0-byte files
+      const fileInfo = await FileSystem.getInfoAsync(this.path)
+
+      if (!fileInfo.exists) {
+        return
+      }
+
+      if (fileInfo.size === 0) {
+        // Delete the empty file to clean up
+        await FileSystem.deleteAsync(this.path)
+        return
+      }
+
       // Get the file name from the path
       const fileName = this.path.split('/').pop()!
       this.db = await SQLite.openDatabaseAsync(

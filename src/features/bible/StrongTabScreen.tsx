@@ -226,7 +226,6 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
           <PopOverMenu
             popover={
               <>
-                <LanguageMenuOption resourceId="STRONG" />
                 <MenuOption
                   onSelect={() =>
                     setMultipleTagsItem({

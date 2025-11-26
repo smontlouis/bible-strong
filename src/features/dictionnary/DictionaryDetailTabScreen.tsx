@@ -12,14 +12,14 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import useHTMLView from '~helpers/useHTMLView'
 
+import { StackActions } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { shallowEqual } from 'recompose'
 import DetailedHeader from '~common/DetailedHeader'
-import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
 import Snackbar from '~common/SnackBar'
 import TagList from '~common/TagList'
@@ -27,12 +27,11 @@ import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
+import { timeout } from '~helpers/timeout'
+import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
-import { MainStackProps } from '~navigation/type'
-import { StackActions } from '@react-navigation/native'
-import { timeout } from '~helpers/timeout'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -145,7 +144,6 @@ const DictionnaryDetailScreen = ({
           <PopOverMenu
             popover={
               <>
-                <LanguageMenuOption resourceId="DICTIONNAIRE" />
                 <MenuOption
                   onSelect={() =>
                     setMultipleTagsItem({
