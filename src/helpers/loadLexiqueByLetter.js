@@ -1,8 +1,8 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
-import memoize from './memoize'
+import { memoizeWithLang } from './memoize'
 
-const loadLexiqueByLetter = memoize(letter =>
+const loadLexiqueByLetter = memoizeWithLang('STRONG', letter =>
   catchDatabaseError(async () => {
     const resultGrec = await SQLStrongTransaction(
       `SELECT Code, Grec, Mot, 'Grec' as lexiqueType

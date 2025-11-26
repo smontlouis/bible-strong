@@ -1,6 +1,7 @@
 import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage'
 import { getLangIsFr } from '~i18n'
+import { ResourceLanguage, DatabaseId, isSharedDB } from '~helpers/databaseTypes'
 
 export const firebaseDb = firestore()
 export const storageRef = storage().ref()
@@ -13,6 +14,7 @@ storage().setMaxDownloadRetryTime(2000)
 export const CDN_URL = 'https://assets.bible-strong.app/'
 export const cdnUrl = (path: string) => `${CDN_URL}${path}`
 
+// French database URLs
 export const databasesRef = {
   MHY: cdnUrl('databases/commentaires-mhy.sqlite'),
   TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'),
@@ -24,9 +26,10 @@ export const databasesRef = {
   SEARCH: cdnUrl('databases/idx-light.json'),
 }
 
+// English database URLs
 export const databasesEnRef = {
   MHY: cdnUrl('databases/en/commentaires-mhy.sqlite'),
-  TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'),
+  TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'), // Shared across languages
   DICTIONNAIRE: cdnUrl('databases/en/dictionnaire.sqlite'),
   INTERLINEAIRE: cdnUrl('databases/en/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/en/nave.sqlite'),
@@ -47,8 +50,32 @@ interface DatabasesRef {
   SEARCH: string
 }
 
+// Get database URL for a specific database and language
+export const getDatabaseUrl = (dbId: DatabaseId, lang: ResourceLanguage): string => {
+  // Shared databases always use the same URL
+  if (isSharedDB(dbId)) {
+    return databasesRef[dbId]
+  }
+
+  if (lang === 'fr') {
+    return databasesRef[dbId]
+  }
+
+  return databasesEnRef[dbId]
+}
+
+// Legacy function for backward compatibility
 export const getDatabasesRef = (): DatabasesRef => {
   if (getLangIsFr()) {
+    return databasesRef
+  }
+
+  return databasesEnRef
+}
+
+// Get all database URLs for a specific language
+export const getDatabasesRefForLang = (lang: ResourceLanguage): DatabasesRef => {
+  if (lang === 'fr') {
     return databasesRef
   }
 

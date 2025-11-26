@@ -648,5 +648,29 @@
   "bookSelector.withVerses": "With verses",
   "bookSelector.withoutVerses": "Without verses",
 
-  "reset": "Reset"
+  "reset": "Reset",
+
+  "language.appLanguage": "App Language",
+  "language.appLanguageDesc": "Changes the interface language and resets all resources to this language.",
+
+  "resourceLanguage.title": "Change Language",
+  "resourceLanguage.description": "You can customize each resource's language individually.",
+  "resourceLanguage.setAllTo": "Set all to",
+  "resourceLanguage.allFrench": "All in French",
+  "resourceLanguage.allEnglish": "All in English",
+  "resourceLanguage.perResource": "Per resource",
+  "resourceLanguage.strongDesc": "Hebrew and Greek word definitions",
+  "resourceLanguage.dictDesc": "Westphal Bible Dictionary",
+  "resourceLanguage.naveDesc": "Topical Bible index",
+  "resourceLanguage.interlineaireDesc": "Hebrew/Greek interlinear text",
+  "resourceLanguage.timelineDesc": "Biblical timeline",
+  "resourceLanguage.searchDesc": "Full-text search index",
+  "resourceLanguage.note": "Note: Changing a resource's language may require a new download if the database for that language is not yet available.",
+
+  "downloads.databasesFr": "Databases - French",
+  "downloads.databasesEn": "Databases - English",
+  "downloads.crossReferences": "Cross-references",
+
+  "menu.language": "Language",
+  "menu.languageChanged": "Resource language changed to {{language}}"
 }

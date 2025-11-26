@@ -14,7 +14,8 @@ import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import Empty from '~common/Empty'
 import Highlight from './Highlight'
 import { useTranslation } from 'react-i18next'
-import useLanguage from '~helpers/useLanguage'
+import { useAtomValue } from 'jotai'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import VerseResultWidget from '~features/bible/VerseResultWidget'
 
 interface Props {
@@ -36,7 +37,8 @@ const InfiniteHits = ({
   error,
 }: Props) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const isFR = resourcesLanguage.SEARCH === 'fr'
   return (
     <Box flex>
       <FlatList
@@ -67,7 +69,7 @@ const InfiniteHits = ({
           </Box>
         }
         data={hits}
-        keyExtractor={item => item.objectID}
+        keyExtractor={(item) => item.objectID}
         onEndReached={() => hasMore && refineNext()}
         renderItem={({ item }) => (
           <Highlight attribute={isFR ? 'LSG' : 'KJV'} hit={item} />

@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { shallowEqual } from 'recompose'
 import DetailedHeader from '~common/DetailedHeader'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
 import Snackbar from '~common/SnackBar'
 import TagList from '~common/TagList'
@@ -144,6 +145,7 @@ const DictionnaryDetailScreen = ({
           <PopOverMenu
             popover={
               <>
+                <LanguageMenuOption resourceId="DICTIONNAIRE" />
                 <MenuOption
                   onSelect={() =>
                     setMultipleTagsItem({

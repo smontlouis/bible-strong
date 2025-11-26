@@ -1,11 +1,11 @@
+import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
-import blackColors from '~themes/blackColors'
-import sepiaColors from '~themes/sepiaColors'
-import natureColors from '~themes/natureColors'
-import sunsetColors from '~themes/sunsetColors'
 import mauveColors from '~themes/mauveColors'
+import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
+import sepiaColors from '~themes/sepiaColors'
+import sunsetColors from '~themes/sunsetColors'
 import { RootState } from './modules/reducer'
 
 export default {

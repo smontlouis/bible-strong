@@ -5,7 +5,12 @@ import { strongDB } from '~helpers/sqlite'
 
 const loadBibleChapter = async (bookNb, chapterNb, version = 'LSG') => {
   if (version === 'INT') {
-    const res = await loadInterlineaireChapter(bookNb, chapterNb)
+    const res = await loadInterlineaireChapter(bookNb, chapterNb, 'fr')
+    return res
+  }
+
+  if (version === 'INT_EN') {
+    const res = await loadInterlineaireChapter(bookNb, chapterNb, 'en')
     return res
   }
 

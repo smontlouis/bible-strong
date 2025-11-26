@@ -26,6 +26,8 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { DictionariesTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
+import PopOverMenu from '~common/PopOverMenu'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -109,6 +111,15 @@ const DictionnaireScreen = ({
         hasBackButton={hasBackButton}
         fontSize={18}
         title={t('Dictionnaire Westphal')}
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <LanguageMenuOption resourceId="DICTIONNAIRE" />
+              </>
+            }
+          />
+        }
       />
       <Box px={20}>
         <SearchInput

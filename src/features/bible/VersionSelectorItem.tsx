@@ -4,7 +4,8 @@ import React from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import ProgressCircle from 'react-native-progress/Circle'
 import { useDispatch, useSelector } from 'react-redux'
-import { biblesRef, getDatabasesRef } from '~helpers/firebase'
+import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
+import { dbManager } from '~helpers/sqlite'
 
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
@@ -19,7 +20,6 @@ import {
   isStrongVersion,
   Version,
 } from '~helpers/bibleVersions'
-import { interlineaireDB } from '~helpers/sqlite'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
@@ -136,7 +136,9 @@ const VersionSelectorItem = ({
     const path = requireBiblePath(version.id)
     const uri =
       version.id === 'INT'
-        ? getDatabasesRef().INTERLINEAIRE
+        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
+        : version.id === 'INT_EN'
+        ? getDatabaseUrl('INTERLINEAIRE', 'en')
         : biblesRef[version.id]
 
     console.log(`Downloading ${uri} to ${path}`)
@@ -150,8 +152,9 @@ const VersionSelectorItem = ({
 
       console.log('Download finished')
 
-      if (version.id === 'INT') {
-        await interlineaireDB.init()
+      if (version.id === 'INT' || version.id === 'INT_EN') {
+        const lang = version.id === 'INT' ? 'fr' : 'en'
+        await dbManager.getDB('INTERLINEAIRE', lang).init()
       }
 
       setVersionNeedsDownload(false)
@@ -184,8 +187,9 @@ const VersionSelectorItem = ({
     FileSystem.deleteAsync(file.uri)
     setVersionNeedsDownload(true)
 
-    if (version.id === 'INT') {
-      interlineaireDB.delete()
+    if (version.id === 'INT' || version.id === 'INT_EN') {
+      const lang = version.id === 'INT' ? 'fr' : 'en'
+      dbManager.getDB('INTERLINEAIRE', lang).delete()
     }
   }
 
@@ -234,7 +238,7 @@ const VersionSelectorItem = ({
               style={{ padding: 10, alignItems: 'flex-end' }}
             >
               <FeatherIcon name="download" size={20} />
-              {version.id === 'INT' && (
+              {(version.id === 'INT' || version.id === 'INT_EN') && (
                 <Box center marginTop={5}>
                   <Text fontSize={10}>⚠️ {t('Taille de')} 20Mo</Text>
                 </Box>

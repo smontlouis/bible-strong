@@ -10,6 +10,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import DetailedHeader from '~common/DetailedHeader'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
 import Snackbar from '~common/SnackBar'
 import TagList from '~common/TagList'
@@ -135,6 +136,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
           <PopOverMenu
             popover={
               <>
+                <LanguageMenuOption resourceId="NAVE" />
                 <MenuOption
                   onSelect={() =>
                     setMultipleTagsItem({

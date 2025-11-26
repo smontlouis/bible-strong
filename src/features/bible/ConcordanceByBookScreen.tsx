@@ -8,6 +8,8 @@ import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
+import PopOverMenu from '~common/PopOverMenu'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 import waitForStrongDB from '~common/waitForStrongDB'
 import ConcordanceVerse from './ConcordanceVerse'
 
@@ -51,6 +53,15 @@ const ConcordanceByBook = () => {
       <Header
         hasBackButton
         title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <LanguageMenuOption resourceId="STRONG" />
+              </>
+            }
+          />
+        }
       />
       {!verses.length && (
         <Box flex>

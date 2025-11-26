@@ -4,6 +4,9 @@ import BottomSheet from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Link from '~common/Link'
+import PopOverMenu from '~common/PopOverMenu'
+import LanguageMenuOption from '~common/LanguageMenuOption'
+import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
@@ -27,9 +30,18 @@ const TimelineHomeScreen = () => {
         hasBackButton
         title={t('La Chronologie biblique')}
         rightComponent={
-          <Link paddingSmall onPress={() => modalRef.current?.expand()}>
-            <FeatherIcon name="info" size={20} />
-          </Link>
+          <Box row alignItems="center">
+            <Link paddingSmall onPress={() => modalRef.current?.expand()}>
+              <FeatherIcon name="info" size={20} />
+            </Link>
+            <PopOverMenu
+              popover={
+                <>
+                  <LanguageMenuOption resourceId="TIMELINE" />
+                </>
+              }
+            />
+          </Box>
         }
       />
       <ScrollView backgroundColor="lightGrey">

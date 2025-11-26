@@ -1,26 +1,40 @@
 import * as FileSystem from 'expo-file-system'
-import { getLangIsFr } from '~i18n'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
-let loadedIndex: Object | null = null
+// Initialize lunr plugins once at module load
+// This ensures French stemmer is always available regardless of which language is loaded first
+const lunr = require('lunr')
+require('~helpers/lunr.stemmer.support.min.js')(lunr)
+require('~helpers/lunr.fr.min.js')(lunr)
+require('~helpers/lunr.unicodeNormalizer')(lunr)
 
-const loadIndexCache = (idxFile: FileSystem.FileInfo) =>
+// Cache per language
+const loadedIndexes: { [lang: string]: Object } = {}
+
+const loadIndexCache = (idxFile: FileSystem.FileInfo, lang: ResourceLanguage = 'fr') =>
   new Promise(async resolve => {
-    if (loadedIndex) {
-      return resolve(loadedIndex)
+    // Return cached index for this language if available
+    if (loadedIndexes[lang]) {
+      return resolve(loadedIndexes[lang])
     }
 
+    // Read from the file passed (which should be language-specific)
     const data = await FileSystem.readAsStringAsync(idxFile.uri || '')
 
-    const lunr = require('lunr')
-
-    if (getLangIsFr()) {
-      require('~helpers/lunr.stemmer.support.min.js')(lunr)
-      require('~helpers/lunr.fr.min.js')(lunr)
-      require('~helpers/lunr.unicodeNormalizer')(lunr)
-    }
-
-    loadedIndex = lunr.Index.load(JSON.parse(data))
-    resolve(loadedIndex)
+    loadedIndexes[lang] = lunr.Index.load(JSON.parse(data))
+    resolve(loadedIndexes[lang])
   })
+
+// Clear cache for a specific language
+export const clearIndexCache = (lang: ResourceLanguage) => {
+  delete loadedIndexes[lang]
+}
+
+// Clear all cached indexes
+export const clearAllIndexCaches = () => {
+  for (const key of Object.keys(loadedIndexes)) {
+    delete loadedIndexes[key]
+  }
+}
 
 export default loadIndexCache

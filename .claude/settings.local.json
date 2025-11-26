@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

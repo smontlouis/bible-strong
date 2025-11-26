@@ -538,7 +538,7 @@ const VersesRenderer = ({
   const comments = transformComments(originalComments, verses.length)
 
   const isHebreu =
-    version === 'BHS' || (version === 'INT' && Number(verses[0].Livre) < 40)
+    version === 'BHS' || ((version === 'INT' || version === 'INT_EN') && Number(verses[0].Livre) < 40)
   const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
@@ -591,7 +591,7 @@ const VersesRenderer = ({
             )}
           </VersionsContainer>
         )}
-        {version === 'INT' && (
+        {(version === 'INT' || version === 'INT_EN') && (
           <IntMode
             settings={settings}
             onClick={() => setIsINTComplete(!isINTComplete)}

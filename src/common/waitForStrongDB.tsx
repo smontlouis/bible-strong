@@ -1,34 +1,54 @@
 import * as FileSystem from 'expo-file-system'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
+import { useAtomValue } from 'jotai'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
-import { initSQLiteDir, strongDB } from '~helpers/sqlite'
+import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
-import { getDatabasesRef } from '~helpers/firebase'
+import { getDatabaseUrl } from '~helpers/firebase'
+import { getDbPath, databases } from '~helpers/databases'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
-import { getDatabases } from '~helpers/databases'
 
 const STRONG_FILE_SIZE = 34941952
 
-const useStrong = (dispatch: any, startDownload: any) => {
+const useStrong = (
+  dispatch: any,
+  startDownload: any,
+  lang: ResourceLanguage
+) => {
   const { t } = useTranslation()
+  const prevLangRef = useRef<ResourceLanguage>(lang)
+
   useEffect(() => {
-    if (strongDB.get()) {
+    // Reset state when language changes
+    if (prevLangRef.current !== lang) {
+      prevLangRef.current = lang
+      dispatch({ type: 'strong.setLoading', payload: true })
+      dispatch({ type: 'strong.setProposeDownload', payload: false })
+      dispatch({ type: 'strong.setStartDownload', payload: false })
+      dispatch({ type: 'strong.setProgress', payload: 0 })
+    }
+
+    const db = dbManager.getDB('STRONG', lang)
+
+    if (db.get()) {
       dispatch({
         type: 'strong.setLoading',
         payload: false,
       })
     } else {
       const loadDBAsync = async () => {
-        const dbPath = getDatabases().STRONG.path
+        const dbPath = getDbPath('STRONG', lang)
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
         if (!dbFile.exists) {
-          await initSQLiteDir()
+          await initSQLiteDirForLang(lang)
 
           // Waiting for user to accept to download
           if (!startDownload) {
@@ -40,14 +60,15 @@ const useStrong = (dispatch: any, startDownload: any) => {
           }
 
           try {
-            if (!(window as any).strongDownloadHasStarted) {
-              ;(window as any).strongDownloadHasStarted = true
+            const downloadKey = `strongDownloadHasStarted_${lang}`
+            if (!(window as any)[downloadKey]) {
+              ;(window as any)[downloadKey] = true
 
-              const sqliteDbUri = getDatabasesRef().STRONG
+              const sqliteDbUri = getDatabaseUrl('STRONG', lang)
 
-              console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
+              console.log(`[Strong] Downloading ${sqliteDbUri} to ${dbPath}`)
 
-              await initSQLiteDir()
+              await initSQLiteDirForLang(lang)
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
@@ -63,13 +84,14 @@ const useStrong = (dispatch: any, startDownload: any) => {
                   })
                 }
               ).downloadAsync()
-              await strongDB.init()
+
+              await db.init()
 
               dispatch({
                 type: 'strong.setLoading',
                 payload: false,
               })
-              ;(window as any).strongDownloadHasStarted = false
+              ;(window as any)[downloadKey] = false
             }
           } catch (e) {
             console.log(e)
@@ -89,7 +111,7 @@ const useStrong = (dispatch: any, startDownload: any) => {
             })
           }
         } else {
-          await strongDB.init()
+          await db.init()
 
           dispatch({
             type: 'strong.setLoading',
@@ -100,7 +122,7 @@ const useStrong = (dispatch: any, startDownload: any) => {
 
       loadDBAsync()
     }
-  }, [dispatch, startDownload])
+  }, [dispatch, startDownload, lang, t])
 }
 
 export const useWaitForDatabase = () => {
@@ -111,7 +133,11 @@ export const useWaitForDatabase = () => {
     dispatch,
   ] = useDBStateValue()
 
-  useStrong(dispatch, startDownload)
+  // Get current resource language from Jotai
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const resourceLang = resourcesLanguage.STRONG
+
+  useStrong(dispatch, startDownload, resourceLang)
 
   const setStartDownload = (value: boolean) => {
     dispatch({
@@ -126,64 +152,67 @@ export const useWaitForDatabase = () => {
     proposeDownload,
     startDownload,
     setStartDownload,
+    resourceLang,
   }
 }
 
-const waitForDatabase = ({
-  hasBackButton,
-  hasHeader,
-  size,
-}: {
-  hasBackButton?: boolean
-  size?: 'small' | 'large'
-  hasHeader?: boolean
-} = {}) => <T,>(
-  WrappedComponent: React.ComponentType<T>
-): React.ComponentType<T> => (props: any) => {
-  const { t } = useTranslation()
-  const {
-    isLoading,
-    progress,
-    proposeDownload,
-    startDownload,
-    setStartDownload,
-  } = useWaitForDatabase()
+const waitForDatabase =
+  ({
+    hasBackButton,
+    hasHeader,
+    size,
+  }: {
+    hasBackButton?: boolean
+    size?: 'small' | 'large'
+    hasHeader?: boolean
+  } = {}) =>
+  <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
+  (props: any) => {
+    const { t } = useTranslation()
+    const {
+      isLoading,
+      progress,
+      proposeDownload,
+      startDownload,
+      setStartDownload,
+      resourceLang,
+    } = useWaitForDatabase()
 
-  if (isLoading && startDownload) {
-    return (
-      <Box h={300} alignItems="center">
-        <Loading message={t('Téléchargement de la base strong...')}>
-          <Progress progress={progress} />
-        </Loading>
-      </Box>
-    )
+    if (isLoading && startDownload) {
+      return (
+        <Box h={300} alignItems="center">
+          <Loading message={t('Téléchargement de la base strong...')}>
+            <Progress progress={progress} />
+          </Loading>
+        </Box>
+      )
+    }
+
+    if (isLoading && proposeDownload) {
+      return (
+        <DownloadRequired
+          hasBackButton={hasBackButton}
+          size={size}
+          hasHeader={hasHeader}
+          title={t(
+            'La base de données strong est requise pour accéder à cette page.'
+          )}
+          setStartDownload={setStartDownload}
+          fileSize={35}
+        />
+      )
+    }
+
+    if (isLoading) {
+      return (
+        <Loading
+          message={t('Chargement de la base strong...')}
+          subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+        />
+      )
+    }
+
+    return <WrappedComponent key={resourceLang} {...props} />
   }
-
-  if (isLoading && proposeDownload) {
-    return (
-      <DownloadRequired
-        hasBackButton={hasBackButton}
-        size={size}
-        hasHeader={hasHeader}
-        title={t(
-          'La base de données strong est requise pour accéder à cette page.'
-        )}
-        setStartDownload={setStartDownload}
-        fileSize={35}
-      />
-    )
-  }
-
-  if (isLoading) {
-    return (
-      <Loading
-        message={t('Chargement de la base strong...')}
-        subMessage="Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
-      />
-    )
-  }
-
-  return <WrappedComponent {...props} />
-}
 
 export default waitForDatabase

@@ -33,6 +33,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import DetailedHeader from '~common/DetailedHeader'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
@@ -225,6 +226,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
           <PopOverMenu
             popover={
               <>
+                <LanguageMenuOption resourceId="STRONG" />
                 <MenuOption
                   onSelect={() =>
                     setMultipleTagsItem({

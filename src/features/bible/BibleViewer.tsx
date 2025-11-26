@@ -248,7 +248,7 @@ const BibleViewer = ({
     }
 
     let secondaryVersesToLoad: Verse[] | null = null
-    if (version === 'INT') {
+    if (version === 'INT' || version === 'INT_EN') {
       secondaryVersesToLoad = (await loadBibleChapter(
         book.Numero,
         chapter,

@@ -47,6 +47,7 @@ import ChangelogScreen from '../features/settings/ChangelogScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
 import ImportExportScreen from '../features/settings/ImportExportScreen'
 import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
+import ResourceLanguageScreen from '../features/settings/ResourceLanguageScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 
@@ -183,6 +184,10 @@ const MainStack = () => {
           <MainStackNavigator.Screen
             name="BibleShareOptions"
             component={BibleShareOptionsScreen}
+          />
+          <MainStackNavigator.Screen
+            name="ResourceLanguage"
+            component={ResourceLanguageScreen}
           />
         </MainStackNavigator.Navigator>
 
