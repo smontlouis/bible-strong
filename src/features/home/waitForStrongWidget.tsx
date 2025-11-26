@@ -14,6 +14,7 @@ const waitForWidget = (WrappedComponent: any) => (props: any) => {
     proposeDownload,
     setStartDownload,
     progress,
+    resourceLang,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {
@@ -38,7 +39,7 @@ const waitForWidget = (WrappedComponent: any) => (props: any) => {
     return <WidgetLoading />
   }
 
-  return <WrappedComponent {...props} />
+  return <WrappedComponent key={resourceLang} {...props} />
 }
 
 export default waitForWidget

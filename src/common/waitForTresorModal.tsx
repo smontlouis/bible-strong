@@ -142,7 +142,7 @@ const waitForDatabase =
       )
     }
 
-    return <WrappedComponent key={resourceLang} {...props} />
+    return <WrappedComponent {...props} />
   }
 
 export default waitForDatabase
