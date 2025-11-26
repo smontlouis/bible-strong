@@ -26,8 +26,11 @@ const useStrong = (
   const prevLangRef = useRef<ResourceLanguage>(lang)
 
   useEffect(() => {
+    // Detect if this is a language change
+    const isLangChange = prevLangRef.current !== lang
+
     // Reset state when language changes
-    if (prevLangRef.current !== lang) {
+    if (isLangChange) {
       prevLangRef.current = lang
       dispatch({ type: 'strong.setLoading', payload: true })
       dispatch({ type: 'strong.setProposeDownload', payload: false })
@@ -51,7 +54,8 @@ const useStrong = (
           await initSQLiteDirForLang(lang)
 
           // Waiting for user to accept to download
-          if (!startDownload) {
+          // Also prevent auto-download when language changes
+          if (!startDownload || isLangChange) {
             dispatch({
               type: 'strong.setProposeDownload',
               payload: true,

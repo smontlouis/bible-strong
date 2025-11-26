@@ -30,8 +30,11 @@ export const useWaitForDatabase = () => {
   const prevLangRef = useRef<ResourceLanguage>(resourceLang)
 
   useEffect(() => {
+    // Detect if this is a language change
+    const isLangChange = prevLangRef.current !== resourceLang
+
     // Reset state when language changes
-    if (prevLangRef.current !== resourceLang) {
+    if (isLangChange) {
       prevLangRef.current = resourceLang
       setLoading(true)
       setProposeDownload(false)
@@ -50,7 +53,8 @@ export const useWaitForDatabase = () => {
 
         if (!dbFile.exists) {
           // Waiting for user to accept to download
-          if (!startDownload) {
+          // Also prevent auto-download when language changes
+          if (!startDownload || isLangChange) {
             setProposeDownload(true)
             return
           }

@@ -1,6 +1,7 @@
 import styled from '@emotion/native'
 import React, { useEffect, useRef, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import { useAtomValue } from 'jotai'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
@@ -21,8 +22,8 @@ import captureError from '~helpers/captureError'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
-import useLanguage from '~helpers/useLanguage'
 import { wp } from '~helpers/utils'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 
@@ -100,10 +101,12 @@ const useFormattedText = ({
   verse,
   wordsInVerse,
   status,
+  resourceLang,
 }: {
   verse: Verse
   wordsInVerse?: string[]
   status: QueryStatus
+  resourceLang: string
 }) => {
   const [currentWord, setCurrentWord] = useState<string>()
   const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
@@ -112,7 +115,7 @@ const useFormattedText = ({
   >()
   const [boxHeight, setBoxHeight] = useState(0)
 
-  const isFR = useLanguage()
+  const isFR = resourceLang === 'fr'
 
   const { Livre, Chapitre, Verset } = verse
 
@@ -135,7 +138,7 @@ const useFormattedText = ({
 
   const { error: wordsError, data: words } = useQuery({
     enabled: Boolean(wordsInVerse),
-    queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`],
+    queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () =>
       Promise.all(
         wordsInVerse!.map(async w => {
@@ -172,8 +175,12 @@ const DictionnaireVerseDetailScreen = ({
   const navigation = useNavigation()
   const [boxHeight, setBoxHeight] = useState(0)
 
+  // Get resource language from Jotai for cache key invalidation
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const resourceLang = resourcesLanguage.DICTIONNAIRE
+
   const { status, error: dictionaryWordsError, data: wordsInVerse } = useQuery({
-    queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`],
+    queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () => loadDictionnaireWords(`${Livre}-${Chapitre}-${Verset}`),
   })
 
@@ -184,7 +191,7 @@ const DictionnaireVerseDetailScreen = ({
     currentWord,
     setCurrentWord,
     versesInCurrentChapter,
-  } = useFormattedText({ verse, wordsInVerse, status })
+  } = useFormattedText({ verse, wordsInVerse, status, resourceLang })
 
   if (dictionaryWordsError || wordsError) {
     return (

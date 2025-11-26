@@ -33,8 +33,11 @@ export const useWaitForDatabase = () => {
   const prevLangRef = useRef<ResourceLanguage>(resourceLang)
 
   useEffect(() => {
+    // Detect if this is a language change
+    const isLangChange = prevLangRef.current !== resourceLang
+
     // Reset state when language changes
-    if (prevLangRef.current !== resourceLang) {
+    if (isLangChange) {
       prevLangRef.current = resourceLang
       dispatch({ type: 'dictionnaire.setLoading', payload: true })
       dispatch({ type: 'dictionnaire.setProposeDownload', payload: false })
@@ -58,7 +61,8 @@ export const useWaitForDatabase = () => {
           await initSQLiteDirForLang(resourceLang)
 
           // Waiting for user to accept to download
-          if (!startDownload) {
+          // Also prevent auto-download when language changes
+          if (!startDownload || isLangChange) {
             dispatch({
               type: 'dictionnaire.setProposeDownload',
               payload: true,
