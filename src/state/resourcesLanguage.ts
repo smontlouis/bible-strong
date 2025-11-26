@@ -13,6 +13,7 @@ export type ResourcesLanguageState = {
   INTERLINEAIRE: ResourceLanguage
   TIMELINE: ResourceLanguage
   SEARCH: ResourceLanguage
+  COMMENTARIES: ResourceLanguage
 }
 
 // Helper to get default resources language based on current UI language
@@ -26,6 +27,7 @@ const getDefaultResourcesLanguage = (): ResourcesLanguageState => {
     INTERLINEAIRE: defaultLang,
     TIMELINE: defaultLang,
     SEARCH: defaultLang,
+    COMMENTARIES: defaultLang,
   }
 }
 
@@ -67,5 +69,6 @@ export const resetAllResourcesLanguage = (lang: ResourceLanguage) => {
     INTERLINEAIRE: lang,
     TIMELINE: lang,
     SEARCH: lang,
+    COMMENTARIES: lang,
   })
 }

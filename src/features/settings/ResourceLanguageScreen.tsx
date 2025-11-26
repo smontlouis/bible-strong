@@ -58,6 +58,11 @@ const RESOURCES_CONFIG: {
     labelKey: 'Index de recherche',
     descriptionKey: 'resourceLanguage.searchDesc',
   },
+  {
+    id: 'COMMENTARIES',
+    labelKey: 'Commentaires',
+    descriptionKey: 'resourceLanguage.commentariesDesc',
+  },
 ]
 
 interface LanguageButtonProps {
