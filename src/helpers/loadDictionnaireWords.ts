@@ -16,6 +16,12 @@ const loadDictionnaireWords = async (v: string) =>
       `,
         [v]
       )
+
+      // Defensive check: return empty array if no result found
+      if (!result || !result[0]) {
+        return []
+      }
+
       return (JSON.parse(result[0].ref) as string[]).map(word =>
         word.toLowerCase()
       )
