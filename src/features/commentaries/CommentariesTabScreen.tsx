@@ -78,7 +78,7 @@ const fetchComments = memoize(async (verse: string) => {
     .where('isSDA', '==', false)
     .get()
 
-  const comments = snapshot.docs.map(x => x.data())
+  const comments = snapshot.docs.map((x) => x.data())
 
   return { ...verseComment, comments } as Comments
 })
@@ -103,7 +103,7 @@ const fetchMoreComments = memoize(async (verse: string, id?: string) => {
 
   const snapshot = await query
 
-  const comments = snapshot.docs.map(x => x.data()) as CommentType[]
+  const comments = snapshot.docs.map((x) => x.data()) as CommentType[]
 
   return comments
 })
@@ -127,10 +127,10 @@ const useComments = (verse: string) => {
     setMoreStatus('Pending')
     const comments = await fetchMoreComments(verse, id)
 
-    setData(s => {
+    setData((s) => {
       return { ...s, comments: [...s!.comments, ...comments] } as Comments
     })
-    setPage(s => s + comments.length)
+    setPage((s) => s + comments.length)
     setMoreStatus('Resolved')
   }
 
@@ -155,9 +155,8 @@ const useComments = (verse: string) => {
 }
 
 const useVerseInCurrentChapter = (book: string, chapter: string) => {
-  const [versesInCurrentChapter, setVersesInCurrentChapter] = React.useState<
-    number
-  >()
+  const [versesInCurrentChapter, setVersesInCurrentChapter] =
+    React.useState<number>()
   useEffect(() => {
     ;(async () => {
       const v = countLsgChapters[`${book}-${chapter}`]
@@ -191,14 +190,14 @@ const CommentariesTabScreen = ({
 
   const setVerse = (v: string) =>
     setCommentaryTab(
-      produce(draft => {
+      produce((draft) => {
         draft.data.verse = v
       })
     )
 
   const setTitle = (title: string) =>
     setCommentaryTab(
-      produce(draft => {
+      produce((draft) => {
         draft.title = title
       })
     )
@@ -303,23 +302,6 @@ const CommentariesTabScreen = ({
             />
           ) : (
             <>
-              {isFR && (
-                <Box
-                  opacity={0.6}
-                  mx={20}
-                  mt={20}
-                  p={20}
-                  rounded
-                  lightShadow
-                  bg="reverse"
-                >
-                  <Text>
-                    Les commentaires sont traduits à partir de l'anglais. Une
-                    traduction manuelle peut être effectuée en appuyant sur
-                    "traduire".
-                  </Text>
-                </Box>
-              )}
               {data?.comments.map((comment, i) => {
                 return <Comment comment={comment} key={i} />
               })}

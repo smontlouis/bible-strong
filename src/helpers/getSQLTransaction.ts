@@ -53,7 +53,6 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
     }
 
     // Get the database instance
-    console.log('lang', lang)
     const db = dbManager.getDB(dbId, lang)
 
     // Initialize if needed
