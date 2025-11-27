@@ -2,7 +2,7 @@ import BottomSheet, { BottomSheetFlashList } from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import enGB from 'date-fns/locale/en-GB'
 import fr from 'date-fns/locale/fr'
-import React, { useMemo } from 'react'
+import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
@@ -33,20 +33,22 @@ const AddToStudyModal = ({
   const isFR = useLanguage()
 
   const studies = useSelector(
-    (state: RootState) => Object.values(state.user.bible.studies),
+    (state: RootState) => state.user.bible.studies,
     shallowEqual
   )
 
   // Sort studies by modified_at (most recent first)
   const sortedStudies = useMemo(() => {
-    return [...studies].sort(
+    return Object.values(studies).sort(
       (a, b) => Number(b.modified_at) - Number(a.modified_at)
     )
   }, [studies])
 
-  const { keyword, result, search, resetSearch } = useFuzzy(sortedStudies, {
-    keys: ['title'],
-  })
+  const fuzzyOptions = useMemo(() => ({ keys: ['title'] }), [])
+  const { keyword, result, search, resetSearch } = useFuzzy(
+    sortedStudies,
+    fuzzyOptions
+  )
 
   const handleSelectStudy = (studyId: string) => {
     onSelectStudy(studyId)
@@ -134,9 +136,9 @@ const AddToStudyModal = ({
     >
       <BottomSheetFlashList
         ListHeaderComponent={renderNewStudyButton}
-        data={result}
+        data={result.filter((item) => item.id)}
         renderItem={renderStudyItem}
-        keyExtractor={(item) => item.id || Math.random().toString()}
+        keyExtractor={(item) => item.id}
         estimatedItemSize={72}
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={
@@ -152,4 +154,4 @@ const AddToStudyModal = ({
   )
 }
 
-export default AddToStudyModal
+export default memo(AddToStudyModal)

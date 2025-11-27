@@ -1,16 +1,19 @@
 import * as FileSystem from 'expo-file-system'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
+import { useAtomValue } from 'jotai'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
-import { dictionnaireDB, initSQLiteDir } from '~helpers/sqlite'
+import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
-import { getDatabasesRef } from '~helpers/firebase'
+import { getDatabaseUrl } from '~helpers/firebase'
+import { getDbPath } from '~helpers/databases'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
-import { getDatabases } from '~helpers/databases'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
@@ -23,29 +26,43 @@ export const useWaitForDatabase = () => {
     dispatch,
   ] = useDBStateValue()
 
+  // Get current resource language from Jotai
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const resourceLang = resourcesLanguage.DICTIONNAIRE
+
+  const prevLangRef = useRef<ResourceLanguage>(resourceLang)
+
   useEffect(() => {
-    if (dictionnaireDB.get()) {
+    // Detect if this is a language change
+    const isLangChange = prevLangRef.current !== resourceLang
+
+    // Reset state when language changes
+    if (isLangChange) {
+      prevLangRef.current = resourceLang
+      dispatch({ type: 'dictionnaire.setLoading', payload: true })
+      dispatch({ type: 'dictionnaire.setProposeDownload', payload: false })
+      dispatch({ type: 'dictionnaire.setStartDownload', payload: false })
+      dispatch({ type: 'dictionnaire.setProgress', payload: 0 })
+    }
+
+    const db = dbManager.getDB('DICTIONNAIRE', resourceLang)
+
+    if (db.get()) {
       dispatch({
         type: 'dictionnaire.setLoading',
         payload: false,
       })
     } else {
       const loadDBAsync = async () => {
-        const dbPath = getDatabases().DICTIONNAIRE.path
+        const dbPath = getDbPath('DICTIONNAIRE', resourceLang)
         const dbFile = await FileSystem.getInfoAsync(dbPath)
 
-        // if (__DEV__) {
-        //   if (dbFile.exists) {
-        //     FileSystem.deleteAsync(dbFile.uri)
-        //     dbFile = await FileSystem.getInfoAsync(dbPath)
-        //   }
-        // }
-
         if (!dbFile.exists) {
-          await initSQLiteDir()
+          await initSQLiteDirForLang(resourceLang)
 
           // Waiting for user to accept to download
-          if (!startDownload) {
+          // Also prevent auto-download when language changes
+          if (!startDownload || isLangChange) {
             dispatch({
               type: 'dictionnaire.setProposeDownload',
               payload: true,
@@ -54,20 +71,23 @@ export const useWaitForDatabase = () => {
           }
 
           try {
-            if (!window.dictionnaireDownloadHasStarted) {
-              window.dictionnaireDownloadHasStarted = true
+            const downloadKey = `dictionnaireDownloadHasStarted_${resourceLang}`
+            if (!(window as any)[downloadKey]) {
+              ;(window as any)[downloadKey] = true
 
-              const sqliteDbUri = getDatabasesRef().DICTIONNAIRE
+              const sqliteDbUri = getDatabaseUrl('DICTIONNAIRE', resourceLang)
 
-              console.log(`Downloading ${sqliteDbUri} to ${dbPath}`)
+              console.log(
+                `[Dictionnaire] Downloading ${sqliteDbUri} to ${dbPath}`
+              )
 
-              await initSQLiteDir()
+              await initSQLiteDirForLang(resourceLang)
 
               await FileSystem.createDownloadResumable(
                 sqliteDbUri,
                 dbPath,
                 undefined,
-                ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+                ({ totalBytesWritten }) => {
                   const idxProgress =
                     Math.floor(
                       (totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100
@@ -79,13 +99,13 @@ export const useWaitForDatabase = () => {
                 }
               ).downloadAsync()
 
-              await dictionnaireDB.init()
+              await db.init()
 
               dispatch({
                 type: 'dictionnaire.setLoading',
                 payload: false,
               })
-              window.dictionnaireDownloadHasStarted = false
+              ;(window as any)[downloadKey] = false
             }
           } catch (e) {
             SnackBar.show(
@@ -104,7 +124,7 @@ export const useWaitForDatabase = () => {
             })
           }
         } else {
-          await dictionnaireDB.init()
+          await db.init()
 
           dispatch({
             type: 'dictionnaire.setLoading',
@@ -115,9 +135,9 @@ export const useWaitForDatabase = () => {
 
       loadDBAsync()
     }
-  }, [dispatch, startDownload])
+  }, [dispatch, startDownload, resourceLang, t])
 
-  const setStartDownload = value =>
+  const setStartDownload = (value: boolean) =>
     dispatch({
       type: 'dictionnaire.setStartDownload',
       payload: value,
@@ -129,65 +149,68 @@ export const useWaitForDatabase = () => {
     proposeDownload,
     startDownload,
     setStartDownload,
+    resourceLang,
   }
 }
 
-const waitForDatabase = ({
-  hasBackButton,
-  hasHeader,
-  size,
-}: {
-  hasBackButton?: boolean
-  size?: 'small' | 'large'
-  hasHeader?: boolean
-} = {}) => <T,>(
-  WrappedComponent: React.ComponentType<T>
-): React.ComponentType<T> => (props: any) => {
-  const { t } = useTranslation()
-  const {
-    isLoading,
-    progress,
-    proposeDownload,
-    startDownload,
-    setStartDownload,
-  } = useWaitForDatabase()
+const waitForDatabase =
+  ({
+    hasBackButton,
+    hasHeader,
+    size,
+  }: {
+    hasBackButton?: boolean
+    size?: 'small' | 'large'
+    hasHeader?: boolean
+  } = {}) =>
+  <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
+  (props: any) => {
+    const { t } = useTranslation()
+    const {
+      isLoading,
+      progress,
+      proposeDownload,
+      startDownload,
+      setStartDownload,
+      resourceLang,
+    } = useWaitForDatabase()
 
-  if (isLoading && startDownload) {
-    return (
-      <Box h={300} alignItems="center">
-        <Loading message={t('Téléchargement du dictionnaire...')}>
-          <Progress progress={progress} />
-        </Loading>
-      </Box>
-    )
-  }
+    if (isLoading && startDownload) {
+      return (
+        <Box h={300} alignItems="center">
+          <Loading message={t('Téléchargement du dictionnaire...')}>
+            <Progress progress={progress} />
+          </Loading>
+        </Box>
+      )
+    }
 
-  if (isLoading && proposeDownload) {
-    return (
-      <DownloadRequired
-        hasBackButton={hasBackButton}
-        hasHeader={hasHeader}
-        size={size}
-        title={t(
-          'La base de données dictionnaire est requise pour accéder à cette page.'
-        )}
-        setStartDownload={setStartDownload}
-        fileSize={22}
-      />
-    )
-  }
+    if (isLoading && proposeDownload) {
+      return (
+        <DownloadRequired
+          hasBackButton={hasBackButton}
+          hasHeader={hasHeader}
+          size={size}
+          title={t(
+            'La base de données dictionnaire est requise pour accéder à cette page.'
+          )}
+          setStartDownload={setStartDownload}
+          fileSize={22}
+        />
+      )
+    }
 
-  if (isLoading) {
-    return (
-      <Loading
-        message={t('Chargement du dictionnaire...')}
-        subMessage={t(
-          'Merci de patienter, la première fois peut prendre plusieurs secondes...'
-        )}
-      />
-    )
+    if (isLoading) {
+      return (
+        <Loading
+          message={t('Chargement du dictionnaire...')}
+          subMessage={t(
+            'Merci de patienter, la première fois peut prendre plusieurs secondes...'
+          )}
+        />
+      )
+    }
+    return <WrappedComponent key={resourceLang} {...props} />
   }
-  return <WrappedComponent {...props} />
-}
 
 export default waitForDatabase

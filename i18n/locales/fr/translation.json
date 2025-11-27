@@ -591,6 +591,23 @@
   "app.exportDesc": "Normalement vos données sont synchronisées automatiquement, mais dans certains cas, il peut arriver que vous ayez besoin de le faire manuellement. \n\nLorsque vous exportez vos données, un fichier est créé sur votre téléphone. Vous pouvez ensuite le partager par mail ou autre moyen de votre choix.",
   "app.importDesc": "Le fichier d'import doit être au format .biblestrong et contenir les données de votre compte. \n\nATTENTION, l'import écrase toutes les données existantes. Assurez-vous d'avoir une sauvegarde récente avant de continuer.",
 
+  "backups.title": "Sauvegardes Automatiques",
+  "backups.description": "Vos données sont automatiquement sauvegardées de manière régulière. Les 10 sauvegardes les plus récentes sont conservées.",
+  "backups.none": "Aucune sauvegarde disponible pour le moment.\nLes sauvegardes seront créées automatiquement.",
+  "backups.count": "{{count}} sauvegarde(s)",
+  "backups.loading": "Chargement...",
+  "backups.restore": "Restaurer",
+  "backups.restoreTitle": "Restaurer cette sauvegarde ?",
+  "backups.restoreMessage": "Restaurer cette sauvegarde du {{date}} ?\n\n⚠️ Vos données actuelles seront définitivement remplacées par cette sauvegarde.",
+  "backups.restoreSuccess": "Sauvegarde restaurée avec succès",
+  "backups.restoreError": "Erreur lors de la restauration",
+  "backups.cancel": "Annuler",
+  "backups.refresh": "Actualiser",
+  "backups.size": "Taille",
+  "backups.studies": "{{count}} études",
+  "backups.notes": "{{count}} notes",
+  "backups.highlights": "{{count}} highlights",
+
   "audio.speed": "Vitesse",
   "audio.pitch": "Tonalité",
   "audio.repeat": "Répéter",
@@ -635,5 +652,29 @@
   "bookSelector.withVerses": "Avec versets",
   "bookSelector.withoutVerses": "Sans versets",
 
-  "reset": "Réinitialiser"
+  "reset": "Réinitialiser",
+
+  "language.appLanguage": "Langue de l'application",
+  "language.appLanguageDesc": "Change la langue de l'interface et réinitialise toutes les ressources dans cette langue.",
+
+  "resourceLanguage.title": "Changer la langue",
+  "resourceLanguage.description": "Vous pouvez personnaliser la langue de chaque ressource individuellement.",
+  "resourceLanguage.setAllTo": "Tout mettre en",
+  "resourceLanguage.allFrench": "Tout en français",
+  "resourceLanguage.allEnglish": "Tout en anglais",
+  "resourceLanguage.perResource": "Par ressource",
+  "resourceLanguage.strongDesc": "Définitions des mots hébreux et grecs",
+  "resourceLanguage.dictDesc": "Dictionnaire biblique Westphal",
+  "resourceLanguage.naveDesc": "Index thématique de la Bible",
+  "resourceLanguage.interlineaireDesc": "Texte interlinéaire hébreu/grec",
+  "resourceLanguage.timelineDesc": "Chronologie biblique",
+  "resourceLanguage.searchDesc": "Index de recherche plein texte",
+  "resourceLanguage.note": "Note: Changer la langue d'une ressource peut nécessiter un nouveau téléchargement si la base de données pour cette langue n'est pas encore disponible.",
+
+  "downloads.databasesFr": "Bases de données - Français",
+  "downloads.databasesEn": "Bases de données - English",
+  "downloads.crossReferences": "Références croisées",
+
+  "menu.language": "Langue",
+  "menu.languageChanged": "Langue de la ressource changée en {{language}}"
 }

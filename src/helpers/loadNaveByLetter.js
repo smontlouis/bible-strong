@@ -1,8 +1,8 @@
 import { SQLNaveTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
-import memoize from './memoize'
+import { memoizeWithLang } from './memoize'
 
-const loadNaveByLetter = memoize(letter =>
+const loadNaveByLetter = memoizeWithLang('NAVE', letter =>
   catchDatabaseError(async () => {
     const result = await SQLNaveTransaction(
       `SELECT name_lower, name, letter

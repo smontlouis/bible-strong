@@ -1,4 +1,4 @@
-import styled, { StyledComponent } from '@emotion/native'
+import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import auth from '@react-native-firebase/auth'
 import sizeof from 'firestore-size'
@@ -7,8 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
 import remoteConfig from '@react-native-firebase/remote-config'
-import RNRestart from 'react-native-restart'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -20,22 +19,16 @@ import Box, { SafeAreaBox } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { deleteAllDatabases } from '~helpers/sqlite'
 import useLogin from '~helpers/useLogin'
-import { resetCompareVersion } from '~redux/modules/user'
-import * as FileSystem from 'expo-file-system'
 import { shallowEqual } from 'recompose'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
-import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
-import * as Sharing from 'expo-sharing'
-import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
-import { useNavigation } from '@react-navigation/native'
 import { HelpTip } from '~features/tips/HelpTip'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
@@ -82,56 +75,6 @@ const Infos = memo(() => {
         Version: {app.version} {Platform.Version}
       </Text>
     </Box>
-  )
-})
-
-const ChangeLanguage = memo(() => {
-  const { t, i18n } = useTranslation()
-  const actions = useBibleTabActions(defaultBibleAtom)
-  const dispatch = useDispatch()
-
-  const confirmChangeLanguage = () => {
-    Alert.alert(
-      t('Attention'),
-      t(
-        'Vous êtes sur le point de changer de langue, les bases de données françaises seront supprimées.'
-      ),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: async () => {
-            const isFR = i18n.language === 'fr'
-            await deleteAllDatabases()
-            actions.setSelectedVersion(!isFR ? 'LSG' : 'KJV')
-            dispatch(resetCompareVersion(!isFR ? 'LSG' : 'KJV'))
-
-            i18n.changeLanguage(i18n.language === 'fr' ? 'en' : 'fr')
-
-            setTimeout(() => {
-              RNRestart.Restart()
-            }, 1000)
-          },
-          style: 'destructive',
-        },
-      ]
-    )
-  }
-  return (
-    <LinkItem onPress={confirmChangeLanguage}>
-      <MaterialIcon
-        name="language"
-        size={25}
-        color="grey"
-        style={{ marginRight: 15 }}
-      />
-      <Text fontSize={15}>
-        {t('Changer la langue')} -{' '}
-        <Text bold fontSize={15} color="primary">
-          {i18n.language.toUpperCase()}
-        </Text>
-      </Text>
-    </LinkItem>
   )
 })
 
@@ -307,6 +250,15 @@ export const More = ({ closeMenu }: MoreProps) => {
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
+          <LinkItem route="ResourceLanguage">
+            <MaterialIcon
+              name="language"
+              size={25}
+              color="grey"
+              style={{ marginRight: 15 }}
+            />
+            <Text fontSize={15}>{t('Changer la langue')}</Text>
+          </LinkItem>
           <LinkItem route="Downloads">
             <Box>
               {hasUpdate && (
@@ -377,7 +329,6 @@ export const More = ({ closeMenu }: MoreProps) => {
             <Text fontSize={15}>{t('Contacter le développeur')}</Text>
           </LinkItem>
 
-          <ChangeLanguage />
           {/* <ManualSync /> */}
           <LinkItem route="ImportExport">
             <StyledIcon name="upload" size={25} />

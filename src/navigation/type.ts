@@ -192,6 +192,7 @@ export type MainStackProps = {
   Concordance: ConcordanceScreenProps
   Commentaries: CommentariesScreenProps
   BibleShareOptions: undefined
+  ResourceLanguage: undefined
 }
 
 declare global {

@@ -1,10 +1,11 @@
-import { SQLInterlineaireTransaction } from '~helpers/getSQLTransaction'
+import { getSQLTransactionForLang } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 
-const loadInterlineaireChapter = (Livre, Chapitre) =>
+const loadInterlineaireChapter = (Livre, Chapitre, lang = 'fr') =>
   catchDatabaseError(async () => {
-    const result = await SQLInterlineaireTransaction(
-      `SELECT * 
+    const transaction = getSQLTransactionForLang('INTERLINEAIRE', lang)
+    const result = await transaction(
+      `SELECT *
             FROM INTERLINEAIRE
             WHERE LIVRE = (?)
             AND CHAPITRE  = (?)`,

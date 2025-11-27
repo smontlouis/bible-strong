@@ -19,6 +19,11 @@ export const hasMigratedFromFileSystem = storage.getBoolean(
   'hasMigratedFromFileSystem'
 )
 
+// Flag to track if databases have been migrated to language folders
+export const hasMigratedToLanguageFolders = storage.getBoolean(
+  'hasMigratedToLanguageFolders'
+)
+
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export async function migrateFromAsyncStorage(): Promise<void> {
   console.log('Migrating from AsyncStorage -> MMKV...')
@@ -156,4 +161,42 @@ export const mmkvStorage: Storage = {
     storage.delete(key)
     return Promise.resolve()
   },
+}
+
+/**
+ * Hook to handle migration of databases to language folders
+ * This moves existing databases from SQLite/ to SQLite/fr/ or SQLite/en/
+ * and TRESOR to SQLite/shared/
+ */
+export const useMigrateToLanguageFolders = () => {
+  const [hasMigrated, setHasMigrated] = useState(hasMigratedToLanguageFolders)
+
+  useEffect(() => {
+    if (!hasMigratedToLanguageFolders) {
+      InteractionManager.runAfterInteractions(async () => {
+        try {
+          // Import dynamically to avoid circular dependencies
+          const { migrateToLanguageFolders } = await import(
+            '~helpers/databaseMigration'
+          )
+          const { getLangIsFr } = await import('~i18n')
+
+          // Use current UI language as the target for migration
+          const currentLang = getLangIsFr() ? 'fr' : 'en'
+          await migrateToLanguageFolders(currentLang)
+
+          storage.set('hasMigratedToLanguageFolders', true)
+          setHasMigrated(true)
+        } catch (e) {
+          console.error('Failed to migrate databases to language folders:', e)
+          // Mark as migrated anyway to avoid blocking the app
+          // The migration will effectively be skipped and files will be at old locations
+          storage.set('hasMigratedToLanguageFolders', true)
+          setHasMigrated(true)
+        }
+      })
+    }
+  }, [])
+
+  return hasMigrated
 }

@@ -24,6 +24,8 @@ import waitForStrongDB from '~common/waitForStrongDB'
 import { StrongsTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
 import { MainStackProps } from '~navigation/type'
+import PopOverMenu from '~common/PopOverMenu'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -101,7 +103,19 @@ const LexiqueTabScreen = ({
 
   return (
     <Container>
-      <Header hasBackButton={hasBackButton} title={t('Lexique')} />
+      <Header
+        hasBackButton={hasBackButton}
+        title={t('Lexique')}
+        rightComponent={
+          <PopOverMenu
+            popover={
+              <>
+                <LanguageMenuOption resourceId="STRONG" />
+              </>
+            }
+          />
+        }
+      />
       <Box px={20}>
         <SearchInput
           placeholder={t('Recherche par code ou par mot')}

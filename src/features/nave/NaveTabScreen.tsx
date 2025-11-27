@@ -28,6 +28,8 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { NavesTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { MainStackProps } from '~navigation/type'
+import PopOverMenu from '~common/PopOverMenu'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 
 const useSectionResults = results => {
   const [sectionResults, setSectionResults] = useState(null)
@@ -104,17 +106,24 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
         hasBackButton={hasBackButton}
         title={t('Thématique Nave')}
         rightComponent={
-          isFR ? (
-            <Link route="NaveWarning" padding>
-              <Icon.Feather
-                size={20}
-                name="alert-triangle"
-                color="rgb(255,188,0)"
-              />
-            </Link>
-          ) : (
-            undefined
-          )
+          <Box row alignItems="center">
+            {isFR && (
+              <Link route="NaveWarning" padding>
+                <Icon.Feather
+                  size={20}
+                  name="alert-triangle"
+                  color="rgb(255,188,0)"
+                />
+              </Link>
+            )}
+            <PopOverMenu
+              popover={
+                <>
+                  <LanguageMenuOption resourceId="NAVE" />
+                </>
+              }
+            />
+          </Box>
         }
       />
       <Box px={20}>

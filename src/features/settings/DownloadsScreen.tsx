@@ -10,16 +10,35 @@ import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { getVersionsBySections } from '~helpers/bibleVersions'
-import { getDatabases } from '~helpers/databases'
+import { databases } from '~helpers/databases'
+import { LANGUAGE_SPECIFIC_DBS, SHARED_DBS, FRENCH_ONLY_DBS } from '~helpers/databaseTypes'
+import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 import DBSelectorItem from './DatabaseSelectorItem'
-import useLanguage from '~helpers/useLanguage'
+
+// Get databases for a specific language, excluding shared ones
+const getLanguageSpecificDatabases = (lang: ResourceLanguage) => {
+  const allDbs = databases(lang)
+  return LANGUAGE_SPECIFIC_DBS
+    .filter((dbId) => dbId !== 'INTERLINEAIRE') // Interlineaire shown separately with Bibles (INT/INT_EN)
+    .filter((dbId) => lang === 'en' ? !FRENCH_ONLY_DBS.includes(dbId) : true) // Exclude French-only DBs from English
+    .map((dbId) => ({
+      ...allDbs[dbId as keyof typeof allDbs],
+      lang,
+    }))
+}
+
+// Get shared databases (like TRESOR)
+const getSharedDatabases = () => {
+  const allDbs = databases('fr') // Language doesn't matter for shared
+  return SHARED_DBS.map((dbId) => allDbs[dbId as keyof typeof allDbs])
+}
 
 const DLScreen = () => {
   const { t } = useTranslation()
-  const isFr = useLanguage()
-  const databases = Object.values(getDatabases()).filter(db =>
-    !isFr ? db.id !== 'MHY' : true
-  )
+
+  const frDatabases = getLanguageSpecificDatabases('fr')
+  const enDatabases = getLanguageSpecificDatabases('en')
+  const sharedDatabases = getSharedDatabases()
 
   return (
     <Container>
@@ -27,15 +46,59 @@ const DLScreen = () => {
       <SectionList
         ListHeaderComponent={
           <>
-            <Text padding={20} title fontSize={25}>
-              {t('Bases de données')}
-            </Text>
-            <Paragraph padding={20} paddingTop={0} scale={-3}>
+            <Paragraph padding={20} paddingTop={20} scale={-3}>
               {t(
                 "Si votre base de données a été corrompue, pensez à redémarrer l'application une fois les fichiers téléchargés."
               )}
             </Paragraph>
-            {databases.map(db => (
+
+            {/* French Databases */}
+            <Text padding={20} paddingBottom={10} title fontSize={20}>
+              🇫🇷 {t('downloads.databasesFr')}
+            </Text>
+            {frDatabases.map((db) => (
+              <DBSelectorItem
+                key={`${db.id}-fr`}
+                database={db.id}
+                name={db.name}
+                subTitle={db.desc}
+                fileSize={db.fileSize}
+                lang="fr"
+              />
+            ))}
+
+            {/* English Databases */}
+            <Text
+              padding={20}
+              paddingBottom={10}
+              paddingTop={30}
+              title
+              fontSize={20}
+            >
+              🇺🇸 {t('downloads.databasesEn')}
+            </Text>
+            {enDatabases.map((db) => (
+              <DBSelectorItem
+                key={`${db.id}-en`}
+                database={db.id}
+                name={db.name}
+                subTitle={db.desc}
+                fileSize={db.fileSize}
+                lang="en"
+              />
+            ))}
+
+            {/* Shared Databases */}
+            <Text
+              padding={20}
+              paddingBottom={10}
+              paddingTop={30}
+              title
+              fontSize={20}
+            >
+              {t('downloads.crossReferences')}
+            </Text>
+            {sharedDatabases.map((db) => (
               <DBSelectorItem
                 key={db.id}
                 database={db.id}
@@ -46,14 +109,20 @@ const DLScreen = () => {
               />
             ))}
 
-            <Text padding={20} paddingBottom={0} title fontSize={25}>
+            <Text
+              padding={20}
+              paddingBottom={0}
+              paddingTop={30}
+              title
+              fontSize={25}
+            >
               {t('Bibles')}
             </Text>
           </>
         }
         stickySectionHeadersEnabled={false}
         sections={getVersionsBySections()}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderSectionHeader={({ section: { title } }) => (
           <Box paddingHorizontal={20} marginTop={20}>
             <Text fontSize={16} color="tertiary">

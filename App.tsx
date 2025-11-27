@@ -16,6 +16,7 @@ import { checkDatabasesStorage } from '~helpers/sqlite'
 import {
   useMigrateFromAsyncStorage,
   useMigrateFromFileSystemStorage,
+  useMigrateToLanguageFolders,
 } from '~helpers/storage'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import InitApp from './InitApp'
@@ -63,6 +64,7 @@ const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
   const hasMigratedFromAsyncStorage = useMigrateFromAsyncStorage()
   const hasMigratedFromFileSystem = useMigrateFromFileSystemStorage()
+  const hasMigratedToLanguageFolders = useMigrateToLanguageFolders()
 
   const [status, setStatus] = useState('')
   useEffect(() => {
@@ -87,7 +89,8 @@ const useAppLoad = () => {
   const isCompleted =
     isLoadingCompleted &&
     hasMigratedFromAsyncStorage &&
-    hasMigratedFromFileSystem
+    hasMigratedFromFileSystem &&
+    hasMigratedToLanguageFolders
 
   return {
     isLoadingCompleted: isCompleted,

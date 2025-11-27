@@ -1,33 +1,33 @@
 // TODO : is this file still in use ? If not, remove it
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
-import SectionList from '~common/ui/SectionList'
-import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useTranslation } from 'react-i18next'
+import AlphabetList from '~common/AlphabetList'
+import Empty from '~common/Empty'
 import Header from '~common/Header'
-import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
+import SearchInput from '~common/SearchInput'
+import SectionTitle from '~common/SectionTitle'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import SectionList from '~common/ui/SectionList'
+import Text from '~common/ui/Text'
+import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
 import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
-import Empty from '~common/Empty'
-import AlphabetList from '~common/AlphabetList'
-import SectionTitle from '~common/SectionTitle'
-import {
-  useSearchValue,
-  useResultsByLetterOrSearch,
-} from '../lexique/useUtilities'
-import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
-import DictionnaireItem from './DictionnaireItem'
-import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { PrimitiveAtom } from 'jotai/vanilla'
-import { DictionariesTab } from '../../state/tabs'
 import { MainStackProps } from '~navigation/type'
+import { DictionariesTab } from '../../state/tabs'
+import {
+  useResultsByLetterOrSearch,
+  useSearchValue,
+} from '../lexique/useUtilities'
+import DictionnaireItem from './DictionnaireItem'
 
-const useSectionResults = results => {
+const useSectionResults = (results) => {
   const [sectionResults, setSectionResults] = useState(null)
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const useSectionResults = results => {
     }
     const sectionResults = results.reduce((list, dbItem) => {
       const listItem = list.find(
-        item =>
+        (item) =>
           item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
       )
       if (!listItem) {
@@ -147,7 +147,7 @@ const DictionnaireScreen = ({
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
           />
         ) : (
           <Empty

@@ -1,5 +1,5 @@
 import type BottomSheet from '@gorhom/bottom-sheet'
-import React, { useCallback } from 'react'
+import React, { memo, useCallback } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'
@@ -84,4 +84,4 @@ const VerseFormatBottomSheet = ({
   )
 }
 
-export default VerseFormatBottomSheet
+export default memo(VerseFormatBottomSheet)

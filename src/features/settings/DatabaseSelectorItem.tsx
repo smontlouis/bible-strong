@@ -7,16 +7,15 @@ import { Alert, TouchableOpacity } from 'react-native'
 import ProgressCircle from 'react-native-progress/Circle'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
-import { getIfDatabaseNeedsDownload } from '~helpers/databases'
-import { getDatabasesRef } from '~helpers/firebase'
-
 import {
-  dictionnaireDB,
-  mhyDB,
-  naveDB,
-  strongDB,
-  tresorDB,
-} from '~helpers/sqlite'
+  getIfDatabaseNeedsDownload,
+  getIfDatabaseNeedsDownloadForLang,
+  getDbPath,
+} from '~helpers/databases'
+import { getDatabasesRef, getDatabaseUrl } from '~helpers/firebase'
+import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
+
+import { dbManager } from '~helpers/sqlite'
 
 import { withTranslation } from 'react-i18next'
 import SnackBar from '~common/SnackBar'
@@ -74,10 +73,30 @@ class DBSelectorItem extends React.Component {
   }
 
   async componentDidMount() {
-    const versionNeedsDownload = await getIfDatabaseNeedsDownload(
-      this.props.database
-    )
+    const { database, lang } = this.props
+    // Use language-aware check if lang prop is provided
+    const versionNeedsDownload = lang
+      ? await getIfDatabaseNeedsDownloadForLang(database, lang)
+      : await getIfDatabaseNeedsDownload(database)
     this.setState({ versionNeedsDownload })
+  }
+
+  // Get the actual path based on lang prop
+  getPath = () => {
+    const { database, lang, path } = this.props
+    if (lang) {
+      return getDbPath(database as DatabaseId, lang)
+    }
+    return path
+  }
+
+  // Get the download URL based on lang prop
+  getDownloadUrl = () => {
+    const { database, lang } = this.props
+    if (lang) {
+      return getDatabaseUrl(database as DatabaseId, lang)
+    }
+    return getDatabasesRef()[database]
   }
 
   calculateProgress = ({ totalBytesWritten }) => {
@@ -87,16 +106,17 @@ class DBSelectorItem extends React.Component {
   }
 
   startDownload = async () => {
-    const { path, database, t } = this.props
+    const { database, lang, t } = this.props
     this.setState({ isLoading: true })
 
-    const uri = getDatabasesRef()[database]
+    const uri = this.getDownloadUrl()
+    const downloadPath = this.getPath()
 
-    console.log(`Downloading ${uri} to ${path}`)
+    console.log(`Downloading ${uri} to ${downloadPath}`)
     try {
       await FileSystem.createDownloadResumable(
         uri,
-        path,
+        downloadPath,
         undefined,
         this.calculateProgress
       ).downloadAsync()
@@ -104,30 +124,16 @@ class DBSelectorItem extends React.Component {
       console.log('Download finished')
 
       this.setState({ versionNeedsDownload: false, isLoading: false })
-      switch (this.props.database) {
-        case 'STRONG': {
-          await strongDB.init()
-          break
-        }
-        case 'DICTIONNAIRE': {
-          await dictionnaireDB.init()
-          break
-        }
-        case 'TRESOR': {
-          await tresorDB.init()
-          break
-        }
-        case 'MHY': {
-          await mhyDB.init()
-          break
-        }
-        case 'NAVE': {
-          await naveDB.init()
-          break
-        }
-        default: {
-          console.log('Database download finished: Nothing to do')
-        }
+
+      // Initialize the database after download
+      // Use dbManager for language-aware initialization
+      if (lang) {
+        const db = dbManager.getDB(database as DatabaseId, lang)
+        await db.init()
+      } else {
+        // Fallback for legacy usage without lang prop
+        const db = dbManager.getDB(database as DatabaseId, 'fr')
+        await db.init()
       }
     } catch (e) {
       console.log(e)
@@ -142,44 +148,30 @@ class DBSelectorItem extends React.Component {
   }
 
   delete = async () => {
-    const { path } = this.props
+    const { database, lang } = this.props
     const [, dispatch] = this.context
 
     dispatch({
       type:
-        this.props.database === 'STRONG'
+        database === 'STRONG'
           ? 'strong.reset'
           : 'dictionnaire.reset',
     })
-    switch (this.props.database) {
-      case 'STRONG': {
-        await strongDB.delete()
-        break
-      }
-      case 'DICTIONNAIRE': {
-        await dictionnaireDB.delete()
-        break
-      }
-      case 'TRESOR': {
-        await tresorDB.delete()
-        break
-      }
-      case 'MHY': {
-        await mhyDB.delete()
-        this.props.dispatch(setSettingsCommentaires(false))
-        break
-      }
-      case 'NAVE': {
-        await naveDB.delete()
-        break
-      }
-      default: {
-        console.log('Database download finished: Nothing to do')
-      }
+
+    // Use dbManager to delete the database
+    const effectiveLang = lang || 'fr'
+    const db = dbManager.getDB(database as DatabaseId, effectiveLang)
+    await db.delete()
+
+    if (database === 'MHY') {
+      this.props.dispatch(setSettingsCommentaires(false))
     }
 
-    const file = await FileSystem.getInfoAsync(path)
-    FileSystem.deleteAsync(file.uri)
+    const downloadPath = this.getPath()
+    const file = await FileSystem.getInfoAsync(downloadPath)
+    if (file.exists) {
+      await FileSystem.deleteAsync(file.uri)
+    }
     this.setState({ versionNeedsDownload: true })
   }
 

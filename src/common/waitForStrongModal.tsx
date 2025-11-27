@@ -5,13 +5,14 @@ import Loading from '~common/Loading'
 import { useWaitForDatabase } from '~common/waitForStrongDB'
 import Progress from './ui/Progress'
 
-const waitForModal = WrappedComponent => props => {
+const waitForModal = (WrappedComponent) => (props) => {
   const {
     isLoading,
     startDownload,
     proposeDownload,
     setStartDownload,
     progress,
+    resourceLang,
   } = useWaitForDatabase()
 
   if (isLoading && startDownload) {
@@ -43,7 +44,7 @@ const waitForModal = WrappedComponent => props => {
     )
   }
 
-  return <WrappedComponent {...props} />
+  return <WrappedComponent key={resourceLang} {...props} />
 }
 
 export default waitForModal

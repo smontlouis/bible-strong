@@ -10,7 +10,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { getVersions, getVersionsBySections } from '~helpers/bibleVersions'
 import { getDatabases } from '~helpers/databases'
-import { biblesRef, getDatabasesRef } from '~helpers/firebase'
+import { biblesRef, getDatabaseUrl, getDatabasesRef } from '~helpers/firebase'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
 import { ResourceToDownload, selectedResourcesAtom } from './atom'
@@ -35,7 +35,9 @@ const DownloadFiles = ({
     const path = requireBiblePath(defaultVersion.id)
     const uri =
       defaultVersion.id === 'INT'
-        ? getDatabasesRef().INTERLINEAIRE
+        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
+        : defaultVersion.id === 'INT_EN'
+        ? getDatabaseUrl('INTERLINEAIRE', 'en')
         : biblesRef[defaultVersion.id]
 
     return {
@@ -132,7 +134,9 @@ const DownloadFiles = ({
                 const path = requireBiblePath(version.id)
                 const uri =
                   version.id === 'INT'
-                    ? getDatabasesRef().INTERLINEAIRE
+                    ? getDatabaseUrl('INTERLINEAIRE', 'fr')
+                    : version.id === 'INT_EN'
+                    ? getDatabaseUrl('INTERLINEAIRE', 'en')
                     : biblesRef[version.id]
 
                 onPressItem({

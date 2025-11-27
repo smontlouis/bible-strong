@@ -1,8 +1,8 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
-import memoize from './memoize'
+import { memoizeWithLang } from './memoize'
 
-const loadStrongVersesCount = memoize((book: number, reference: string) =>
+const loadStrongVersesCount = memoizeWithLang('STRONG', (book: number, reference: string) =>
   catchDatabaseError(async () => {
     const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
     const result = await SQLStrongTransaction(

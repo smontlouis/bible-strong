@@ -301,7 +301,7 @@ const Verse = ({
     )
   }
 
-  if (version === 'INT') {
+  if (version === 'INT' || version === 'INT_EN') {
     if (isINTComplete) {
       return (
         <InterlinearVerseComplete

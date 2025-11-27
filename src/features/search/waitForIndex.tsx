@@ -1,68 +1,91 @@
 import * as FileSystem from 'expo-file-system'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDispatch } from 'react-redux'
+import { useAtomValue } from 'jotai'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import SnackBar from '~common/SnackBar'
 import Progress from '~common/ui/Progress'
-import { getDatabasesRef } from '~helpers/firebase'
+import { getDatabaseUrl } from '~helpers/firebase'
+import { getDbPath, databases } from '~helpers/databases'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 const IDX_LIGHT_FILE_SIZE = 16795170
 
 export const useWaitForIndex = () => {
+  const { t } = useTranslation()
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
   const [progress, setProgress] = useState<number>(0)
   const [idxFile, setIdxFile] = useState<FileSystem.FileInfo | null>(null)
-  const dispatch = useDispatch()
+
+  // Get current resource language from Jotai
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const resourceLang = resourcesLanguage.SEARCH
+
+  const prevLangRef = useRef<ResourceLanguage>(resourceLang)
 
   useEffect(() => {
+    // Reset state when language changes
+    if (prevLangRef.current !== resourceLang) {
+      prevLangRef.current = resourceLang
+      setLoading(true)
+      setProposeDownload(false)
+      setStartDownload(false)
+      setProgress(0)
+      setIdxFile(null)
+    }
+
     const loadIndex = async () => {
-      const idxPath = `${FileSystem.documentDirectory}idx-light.json`
-      let idxFile = await FileSystem.getInfoAsync(idxPath)
+      const idxPath = getDbPath('SEARCH', resourceLang)
+      let currentIdxFile = await FileSystem.getInfoAsync(idxPath)
 
-      // if (__DEV__) {
-      //   if (idxFile.exists) {
-      //     FileSystem.deleteAsync(idxFile.uri)
-      //     idxFile = await FileSystem.getInfoAsync(idxPath)
-      //   }
-      // }
+      setIdxFile(currentIdxFile)
 
-      setIdxFile(idxFile)
-
-      if (!idxFile.exists) {
+      if (!currentIdxFile.exists) {
         // Waiting for user to accept to download
         if (!startDownload) {
           setProposeDownload(true)
           return
         }
 
-        const idxUri = getDatabasesRef().SEARCH
+        const idxUri = getDatabaseUrl('SEARCH', resourceLang)
 
-        console.log(`Downloading ${idxUri} to ${idxPath}`)
+        console.log(`[Search] Downloading ${idxUri} to ${idxPath}`)
+
+        // Ensure directory exists
+        const dirPath = idxPath.substring(0, idxPath.lastIndexOf('/'))
+        const dirInfo = await FileSystem.getInfoAsync(dirPath)
+        if (!dirInfo.exists) {
+          await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true })
+        }
 
         try {
+          const fileSize =
+            databases(resourceLang).SEARCH?.fileSize || IDX_LIGHT_FILE_SIZE
           await FileSystem.createDownloadResumable(
             idxUri,
             idxPath,
             undefined,
-            ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
+            ({ totalBytesWritten }) => {
               const idxProgress =
-                Math.floor((totalBytesWritten / IDX_LIGHT_FILE_SIZE) * 100) /
-                100
+                Math.floor((totalBytesWritten / fileSize) * 100) / 100
               setProgress(idxProgress)
             }
           ).downloadAsync()
 
-          console.log('Download finished')
-          idxFile = await FileSystem.getInfoAsync(idxPath)
-          setIdxFile(idxFile)
+          console.log('[Search] Download finished')
+          currentIdxFile = await FileSystem.getInfoAsync(idxPath)
+          setIdxFile(currentIdxFile)
           setLoading(false)
         } catch (e) {
+          console.log(e)
           SnackBar.show(
-            "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
+            t(
+              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+            ),
             'danger'
           )
           setProposeDownload(true)
@@ -74,7 +97,8 @@ export const useWaitForIndex = () => {
     }
 
     loadIndex()
-  }, [dispatch, startDownload])
+  }, [startDownload, resourceLang, t])
+
   return {
     isLoading,
     idxFile,
@@ -82,10 +106,11 @@ export const useWaitForIndex = () => {
     proposeDownload,
     startDownload,
     setStartDownload,
+    resourceLang,
   }
 }
 
-const waitForIndex = WrappedComponent => props => {
+const waitForIndex = (WrappedComponent) => (props) => {
   const { t } = useTranslation()
   const {
     isLoading,
@@ -94,6 +119,7 @@ const waitForIndex = WrappedComponent => props => {
     proposeDownload,
     startDownload,
     setStartDownload,
+    resourceLang,
   } = useWaitForIndex()
 
   if (isLoading && startDownload) {
@@ -116,7 +142,14 @@ const waitForIndex = WrappedComponent => props => {
   }
 
   if (idxFile && idxFile.exists) {
-    return <WrappedComponent idxFile={idxFile} {...props} />
+    return (
+      <WrappedComponent
+        key={resourceLang}
+        idxFile={idxFile}
+        resourceLang={resourceLang}
+        {...props}
+      />
+    )
   }
 
   return <Loading message={t('Chargement...')} />

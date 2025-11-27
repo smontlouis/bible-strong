@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { View } from 'react-native-animatable'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import LanguagePopOver from '~common/LanguagePopOver'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { BibleResource, StudyNavigateBibleType, Verse } from '~common/types'
@@ -105,13 +106,20 @@ const ResourcesModal = memo(
 
     const getOptionsByResourceType = () => {
       switch (resourceType) {
+        case 'strong':
+          return <LanguagePopOver resourceId="STRONG" />
+        case 'dictionary':
+          return <LanguagePopOver resourceId="DICTIONNAIRE" />
+        case 'nave':
+          return <LanguagePopOver resourceId="NAVE" />
         case 'commentary': {
           return (
-            <PopOverMenu
-              width={24}
-              height={54}
-              popover={
-                <>
+            <Box row alignItems="center">
+              <LanguagePopOver resourceId="COMMENTARIES" />
+              <PopOverMenu
+                width={24}
+                height={54}
+                popover={
                   <MenuOption
                     onSelect={() => {
                       openInNewTab({
@@ -130,9 +138,9 @@ const ResourcesModal = memo(
                       <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
                     </Box>
                   </MenuOption>
-                </>
-              }
-            />
+                }
+              />
+            </Box>
           )
         }
         default:

@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
+import { useAtomValue } from 'jotai'
 import booksDesc from '~assets/bible_versions/books-desc'
 import DropdownMenu from '~common/DropdownMenu'
 import Empty from '~common/Empty'
@@ -10,23 +11,33 @@ import SearchInput from '~common/SearchInput'
 import Box from '~common/ui/Box'
 import loadBible from '~helpers/loadBible'
 import useDebounce from '~helpers/useDebounce'
-import useLanguage from '~helpers/useLanguage'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import bibleLSG from './bibleLSG'
 import loadIndexCache from './loadIndexCache'
 import LocalSearchResults from './LocalSearchResults'
 import waitForIndex from './waitForIndex'
 
-const timeout = ms => new Promise(r => setTimeout(r, ms))
+const timeout = (ms) => new Promise((r) => setTimeout(r, ms))
 
 type Props = {
   idxFile: FileSystem.FileInfo
   searchValue: string
   setSearchValue: (value: string) => void
+  resourceLang?: 'fr' | 'en'
 }
 
-const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
+const LocalSearchScreen = ({
+  idxFile,
+  searchValue,
+  setSearchValue,
+  resourceLang,
+}: Props) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+
+  // Get resource language from Jotai if not passed as prop
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const lang = resourceLang || resourcesLanguage.SEARCH
+
   const index = useRef<FileSystem.FileInfo>()
   const [isLoading, setLoading] = useState(true)
   const debouncedSearchValue = useDebounce(searchValue, 300)
@@ -43,7 +54,7 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
       Chapitres: 0,
     },
     ...booksDesc,
-  ].map(book => ({
+  ].map((book) => ({
     value: book.Numero,
     label: t(book.Nom),
   }))
@@ -76,17 +87,18 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
 
   useEffect(() => {
     const setIndexCache = async () => {
-      index.current = await loadIndexCache(idxFile)
-      bibleLSG.set(await loadBible(isFR ? 'LSG' : 'KJV'))
+      index.current = await loadIndexCache(idxFile, lang)
+      // Load appropriate Bible based on resource language
+      bibleLSG.set(await loadBible(lang === 'fr' ? 'LSG' : 'KJV'))
       setLoading(false)
     }
     setIndexCache()
-  }, [idxFile])
+  }, [idxFile, lang])
 
   useEffect(() => {
     if (isLoading) return
 
-    const filterResults = results => {
+    const filterResults = (results) => {
       if (!section && !book && !order) {
         return results
       }
@@ -132,7 +144,7 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue }: Props) => {
         }
       }
 
-      return results.filter(r => {
+      return results.filter((r) => {
         let isPristine = true
         const [bookRef, chapterRef, verseRef] = r.ref.split('-')
 

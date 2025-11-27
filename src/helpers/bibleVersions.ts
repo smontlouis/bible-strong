@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system'
 import { getLangIsFr } from '~i18n'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
-import { databaseInterlineaireName, getDatabases } from './databases'
+import { getDatabases, getDbPath } from './databases'
 import { initSQLiteDir } from './sqlite'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
@@ -13,18 +13,17 @@ export const getIfVersionNeedsUpdate = async (versionId: string) => {
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {
   if (versionId === 'INT') {
-    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-
     await initSQLiteDir()
-
-    const dbPath = `${sqliteDirPath}/${databaseInterlineaireName}`
+    const dbPath = getDbPath('INTERLINEAIRE', 'fr')
     const file = await FileSystem.getInfoAsync(dbPath)
+    return !file.exists
+  }
 
-    if (!file.exists) {
-      return true
-    }
-
-    return false
+  if (versionId === 'INT_EN') {
+    await initSQLiteDir()
+    const dbPath = getDbPath('INTERLINEAIRE', 'en')
+    const file = await FileSystem.getInfoAsync(dbPath)
+    return !file.exists
   }
 
   if (versionId === 'LSGS' || versionId === 'KJVS') {
@@ -198,9 +197,9 @@ export const versions = {
   INT: {
     id: 'INT',
     name: 'Bible Interlinéaire',
-    name_en: 'Interlinear Bible',
+    name_en: 'Interlinear Bible (FR)',
     c: '©',
-    type: null,
+    type: 'fr',
   },
   KJF: {
     id: 'KJF',
@@ -288,6 +287,13 @@ export const versions = {
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
     },
+  },
+  INT_EN: {
+    id: 'INT_EN',
+    name: 'Bible Interlinéaire (EN)',
+    name_en: 'Interlinear Bible',
+    c: '©',
+    type: 'en',
   },
   NKJV: {
     id: 'NKJV',
@@ -436,19 +442,7 @@ export const versions = {
 }
 
 export const getVersions = () => {
-  if (getLangIsFr()) {
-    return versions
-  }
-
-  const versions_en = Object.fromEntries(
-    Object.keys(versions)
-      .filter(v => versions[v].type !== 'fr')
-      .map(v => {
-        return [v, versions[v]]
-      })
-  )
-
-  return versions_en
+  return versions
 }
 
 interface VersionsBySection {
@@ -467,17 +461,13 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'NVS78P':
       case 'S21': {
         sectionArray[0].data.push(version)
-
         return sectionArray
       }
       case 'KJV':
+      case 'KJVS':
       case 'NKJV':
       case 'NIV':
       case 'ESV':
-      case 'BHS':
-      case 'SBLGNT':
-      case 'TR1624':
-      case 'TR1894':
       case 'AMP':
       case 'NASB2020':
       case 'EASY':
@@ -486,12 +476,17 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'GW':
       case 'CSB':
       case 'NLT':
-      case 'DEL':
-      case 'LXX': {
+      case 'INT_EN': {
         sectionArray[2].data.push(version)
         return sectionArray
       }
-      case 'KJVS': {
+      case 'BHS':
+      case 'SBLGNT':
+      case 'TR1624':
+      case 'TR1894':
+      case 'DEL':
+      case 'LXX': {
+        sectionArray[3].data.push(version)
         return sectionArray
       }
       default: {
@@ -503,6 +498,7 @@ export const versionsBySections: VersionsBySection[] = Object.values(
   <VersionsBySection[]>[
     { title: 'Versions Louis Segond', data: [] },
     { title: 'Autres versions', data: [] },
+    { title: 'Versions anglaises', data: [] },
     { title: 'Versions étrangères', data: [] },
   ]
 )
@@ -515,7 +511,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
     switch (version.id) {
       case 'KJV':
       case 'KJVS':
-      case 'INT':
+      case 'INT_EN':
       case 'NKJV':
       case 'NIV':
       case 'AMP':
@@ -530,13 +526,35 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
         sectionArray[0].data.push(versionEn)
         return sectionArray
       }
+      case 'LSG':
+      case 'LSGS':
+      case 'INT':
+      case 'NBS':
+      case 'NEG79':
+      case 'NVS78P':
+      case 'S21':
+      case 'KJF':
+      case 'DBY':
+      case 'OST':
+      case 'CHU':
+      case 'BDS':
+      case 'FMAR':
+      case 'BFC':
+      case 'FRC97':
+      case 'NFC':
+      case 'BCC1923':
+      case 'PDV2017':
+      case 'POV': {
+        sectionArray[1].data.push(versionEn)
+        return sectionArray
+      }
       case 'BHS':
       case 'SBLGNT':
       case 'TR1624':
       case 'TR1894':
       case 'DEL':
       case 'LXX': {
-        sectionArray[1].data.push(versionEn)
+        sectionArray[2].data.push(versionEn)
         return sectionArray
       }
       default: {
@@ -546,6 +564,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
   },
   <VersionsBySection[]>[
     { title: 'English versions', data: [] },
+    { title: 'French versions', data: [] },
     { title: 'Other versions', data: [] },
   ]
 )
@@ -559,4 +578,7 @@ export const getVersionsBySections = () => {
 }
 
 export const isStrongVersion = (version: string) =>
-  version === 'INT' || version === 'LSGS' || version === 'KJVS'
+  version === 'INT' ||
+  version === 'INT_EN' ||
+  version === 'LSGS' ||
+  version === 'KJVS'

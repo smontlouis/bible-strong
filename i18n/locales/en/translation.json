@@ -590,6 +590,23 @@
   "app.exportDesc": "Normally your data is automatically synchronized, but in some cases it may happen that you need to do it manually. \n\nWhen you export your data, a file is created on your phone. You can then share it by email or other means of your choice.",
   "app.importDesc": "The import file must be in SAVE.BIBLESTRONG format and contain data from your account. \n\nWARNING, imports crushes all existing data. Make sure you have a recent backup before continuing.",
 
+  "backups.title": "Automatic Backups",
+  "backups.description": "Your data is automatically backed up regularly. The 10 most recent backups are kept.",
+  "backups.none": "No backups available at this time.\nBackups will be created automatically.",
+  "backups.count": "{{count}} backup(s)",
+  "backups.loading": "Loading...",
+  "backups.restore": "Restore",
+  "backups.restoreTitle": "Restore this backup?",
+  "backups.restoreMessage": "Restore this backup from {{date}}?\n\n⚠️ Your current data will be permanently replaced by this backup.",
+  "backups.restoreSuccess": "Backup successfully restored",
+  "backups.restoreError": "Error restoring backup",
+  "backups.cancel": "Cancel",
+  "backups.refresh": "Refresh",
+  "backups.size": "Size",
+  "backups.studies": "{{count}} studies",
+  "backups.notes": "{{count}} notes",
+  "backups.highlights": "{{count}} highlights",
+
   "audio.speed": "Speed",
   "audio.pitch": "Pitch",
   "audio.repeat": "Repeat",
@@ -631,5 +648,29 @@
   "bookSelector.withVerses": "With verses",
   "bookSelector.withoutVerses": "Without verses",
 
-  "reset": "Reset"
+  "reset": "Reset",
+
+  "language.appLanguage": "App Language",
+  "language.appLanguageDesc": "Changes the interface language and resets all resources to this language.",
+
+  "resourceLanguage.title": "Change Language",
+  "resourceLanguage.description": "You can customize each resource's language individually.",
+  "resourceLanguage.setAllTo": "Set all to",
+  "resourceLanguage.allFrench": "All in French",
+  "resourceLanguage.allEnglish": "All in English",
+  "resourceLanguage.perResource": "Per resource",
+  "resourceLanguage.strongDesc": "Hebrew and Greek word definitions",
+  "resourceLanguage.dictDesc": "Westphal Bible Dictionary",
+  "resourceLanguage.naveDesc": "Topical Bible index",
+  "resourceLanguage.interlineaireDesc": "Hebrew/Greek interlinear text",
+  "resourceLanguage.timelineDesc": "Biblical timeline",
+  "resourceLanguage.searchDesc": "Full-text search index",
+  "resourceLanguage.note": "Note: Changing a resource's language may require a new download if the database for that language is not yet available.",
+
+  "downloads.databasesFr": "Databases - French",
+  "downloads.databasesEn": "Databases - English",
+  "downloads.crossReferences": "Cross-references",
+
+  "menu.language": "Language",
+  "menu.languageChanged": "Resource language changed to {{language}}"
 }

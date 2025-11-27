@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
 import { Image } from 'expo-image'
-import React, { memo, useMemo, useState } from 'react'
+import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
 import { StackActions, useNavigation } from '@react-navigation/native'
@@ -13,12 +13,12 @@ import Snackbar from '~common/SnackBar'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import { Status } from '~common/types'
 import Box, { AnimatableBox } from '~common/ui/Box'
-import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
-import useLanguage from '~helpers/useLanguage'
+import { useAtomValue } from 'jotai'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
 import { MainStackProps } from '~navigation/type'
 import { timeout } from '~helpers/timeout'
@@ -33,69 +33,90 @@ interface Props {
   comment: CommentProps | EGWComment
 }
 
-const useFrenchTranslation = (id: string) => {
+// Hook for automatic translation based on selected language
+const useCommentTranslation = (id: string, content: string) => {
   const [status, setStatus] = useState<Status>('Idle')
-  const [contentFR, setContentFR] = useState('')
+  const [translatedContent, setTranslatedContent] = useState('')
   const { t } = useTranslation()
 
-  const startTranslation = async (text: string) => {
-    try {
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
+  const commentLang = resourcesLanguage.COMMENTARIES
+
+  useEffect(() => {
+    // If English is selected, no translation needed
+    if (commentLang === 'en') {
+      setTranslatedContent('')
+      setStatus('Idle')
+      return
+    }
+
+    // French is selected - load translation automatically
+    const loadTranslation = async () => {
       setStatus('Pending')
 
-      const commentRef = await firebaseDb
-        .collection('commentaries-FR')
-        .doc(id.toString())
-        .get()
+      try {
+        // Check cache first
+        const commentRef = await firebaseDb
+          .collection('commentaries-FR')
+          .doc(id.toString())
+          .get()
 
-      if (commentRef.exists) {
-        setContentFR(commentRef.data()!.content)
+        if (commentRef.exists) {
+          setTranslatedContent(commentRef.data()!.content)
+          setStatus('Resolved')
+          return
+        }
+
+        // Not in cache - translate via DeepL
+        const data = `auth_key=${
+          process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY
+        }&text=${encodeURIComponent(
+          content
+        )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
+
+        const [err, res] = await to(
+          fetch('https://api.deepl.com/v2/translate', {
+            method: 'POST',
+            body: data,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Length': data.length.toString(),
+            },
+          })
+        )
+
+        if (err) {
+          console.log('Error', err)
+          setStatus('Rejected')
+          return
+        }
+
+        const result = await res?.json()
+
+        if (result.message === 'Quota Exceeded') {
+          Snackbar.show(t('comment.quotaExceeded'))
+          setStatus('Rejected')
+          return
+        }
+
+        // Cache the translation
+        await firebaseDb
+          .collection('commentaries-FR')
+          .doc(id.toString())
+          .set({ content: result.translations[0].text })
+
+        setTranslatedContent(result.translations[0].text)
         setStatus('Resolved')
-        return
+      } catch (e) {
+        console.log(e)
+        setStatus('Rejected')
       }
-
-      const data = `auth_key=${
-        process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY
-      }&text=${encodeURIComponent(
-        text
-      )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
-
-      const [err, res] = await to(
-        fetch('https://api.deepl.com/v2/translate', {
-          method: 'POST',
-          body: data,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': data.length.toString(),
-          },
-        })
-      )
-
-      if (err) {
-        console.log('Error', err)
-        return
-      }
-
-      const result = await res?.json()
-
-      if (result.message === 'Quota Exceeded') {
-        Snackbar.show(t('comment.quotaExceeded'))
-      }
-
-      await firebaseDb
-        .collection('commentaries-FR')
-        .doc(id.toString())
-        .set({ content: result.translations[0].text })
-
-      setContentFR(result.translations[0].text)
-      setStatus('Resolved')
-      Snackbar.show(t('comment.thanksTranslation'))
-    } catch (e) {
-      console.log(e)
-      setStatus('Rejected')
     }
-  }
 
-  return { status, contentFR, startTranslation }
+    loadTranslation()
+  }, [commentLang, id, content, t])
+
+  return { status, translatedContent }
 }
 
 const fastImageStyle = { width: 40, height: 40 }
@@ -112,7 +133,7 @@ const Comment = ({ comment }: Props) => {
     [cacheImage]
   )
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const { status, translatedContent } = useCommentTranslation(id, content)
 
   const openLink = (href: string, innerHTML: string, type: string) => {
     if (type.includes('egwlink_bible')) {
@@ -142,7 +163,7 @@ const Comment = ({ comment }: Props) => {
       const message = `${resource.author}
 ${resource.name}
 
-${truncHTML(contentFR || content, 10000).text}
+${truncHTML(translatedContent || content, 10000).text}
 
 https://bible-strong.app
       `
@@ -153,8 +174,6 @@ https://bible-strong.app
       Sentry.captureException(e)
     }
   }
-
-  const { status, contentFR, startTranslation } = useFrenchTranslation(id)
 
   return (
     <Box m={20} marginBottom={0} p={20} rounded lightShadow bg="reverse">
@@ -200,7 +219,7 @@ https://bible-strong.app
       <Box overflow="hidden" mt={10}>
         <Box height={isCollapsed ? 100 : undefined}>
           <StylizedHTMLView
-            value={contentFR || content}
+            value={translatedContent || content}
             onLinkPress={openLink}
           />
           {href && (
@@ -218,17 +237,11 @@ https://bible-strong.app
           )}
         </Box>
         <Box row center>
-          {isFR && !contentFR && (
+          {status === 'Pending' && (
             <Box center style={{ marginRight: 'auto' }}>
-              <Button
-                reverse
-                small
-                onPress={() =>
-                  status !== 'Pending' && startTranslation(content)
-                }
-              >
-                {status === 'Pending' ? 'Traduction...' : 'Traduire'}
-              </Button>
+              <Text color="grey" fontSize={12}>
+                {t('Traduction en cours...')}
+              </Text>
             </Box>
           )}
           <LinkBox center height={40} onPress={() => setCollapsed((s) => !s)}>
