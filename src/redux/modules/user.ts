@@ -65,6 +65,7 @@ export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
 export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
 
 export const RECEIVE_LIVE_UPDATES = 'user/RECEIVE_LIVE_UPDATES'
+export const RECEIVE_SUBCOLLECTION_UPDATES = 'user/RECEIVE_SUBCOLLECTION_UPDATES'
 export const IMPORT_DATA = 'user/IMPORT_DATA'
 
 export interface Study {
@@ -298,15 +299,63 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.provider = provider
       draft.subscription = subscription
 
-      // Preserve studies
-      const studies = draft.bible.studies
+      // Preserve subcollection data (managed separately)
+      const currentHighlights = draft.bible.highlights
+      const currentNotes = draft.bible.notes
+      const currentTags = draft.bible.tags
+      const currentStrongsHebreu = draft.bible.strongsHebreu
+      const currentStrongsGrec = draft.bible.strongsGrec
+      const currentWords = draft.bible.words
+      const currentNaves = draft.bible.naves
+      const currentStudies = draft.bible.studies
 
-      // Merge bible
+      // Merge bible (only settings and other non-subcollection data)
       draft.bible = deepmerge(getInitialState().bible, bible || {})
 
-      // Restore studies
-      draft.bible.studies = studies
+      // Restore subcollection data
+      draft.bible.highlights = currentHighlights
+      draft.bible.notes = currentNotes
+      draft.bible.tags = currentTags
+      draft.bible.strongsHebreu = currentStrongsHebreu
+      draft.bible.strongsGrec = currentStrongsGrec
+      draft.bible.words = currentWords
+      draft.bible.naves = currentNaves
+      draft.bible.studies = currentStudies
 
+      break
+    }
+
+    case RECEIVE_SUBCOLLECTION_UPDATES: {
+      const { collection, data } = action.payload as {
+        collection: 'highlights' | 'notes' | 'tags' | 'strongsHebreu' | 'strongsGrec' | 'words' | 'naves'
+        data: Record<string, unknown>
+        isInitialLoad: boolean
+      }
+
+      // Update the specific subcollection
+      switch (collection) {
+        case 'highlights':
+          draft.bible.highlights = data as HighlightsObj
+          break
+        case 'notes':
+          draft.bible.notes = data as NotesObj
+          break
+        case 'tags':
+          draft.bible.tags = data as TagsObj
+          break
+        case 'strongsHebreu':
+          draft.bible.strongsHebreu = data
+          break
+        case 'strongsGrec':
+          draft.bible.strongsGrec = data
+          break
+        case 'words':
+          draft.bible.words = data
+          break
+        case 'naves':
+          draft.bible.naves = data
+          break
+      }
       break
     }
 
@@ -470,6 +519,21 @@ export function receiveLiveUpdates({
   return {
     type: RECEIVE_LIVE_UPDATES,
     payload: { remoteUserData },
+  }
+}
+
+export function receiveSubcollectionUpdates({
+  collection,
+  data,
+  isInitialLoad,
+}: {
+  collection: 'highlights' | 'notes' | 'tags' | 'strongsHebreu' | 'strongsGrec' | 'words' | 'naves'
+  data: Record<string, unknown>
+  isInitialLoad: boolean
+}) {
+  return {
+    type: RECEIVE_SUBCOLLECTION_UPDATES,
+    payload: { collection, data, isInitialLoad },
   }
 }
 

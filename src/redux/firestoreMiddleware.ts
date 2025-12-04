@@ -58,15 +58,137 @@ import { RootState } from '~redux/modules/reducer'
 import { diff } from '~helpers/deep-obj'
 import Snackbar from '~common/SnackBar'
 import i18n from '~i18n'
+import {
+  type SubcollectionName,
+  SUBCOLLECTION_NAMES,
+  batchWriteSubcollection,
+  type BatchChanges,
+} from '~helpers/firestoreSubcollections'
+import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration'
 
-export const removeUndefinedVariables = (obj) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+export const removeUndefinedVariables = (obj) =>
+  JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+
+/**
+ * Détecte les changements dans une sous-collection à partir du diff
+ * Retourne les éléments ajoutés/modifiés et supprimés
+ */
+function extractSubcollectionChanges(
+  diffData: any,
+  deleteMarker: any
+): BatchChanges {
+  const changes: BatchChanges = {
+    set: {},
+    delete: [],
+  }
+
+  if (!diffData) return changes
+
+  for (const [id, value] of Object.entries(diffData)) {
+    if (value === deleteMarker) {
+      // Élément supprimé
+      changes.delete.push(id)
+    } else if (value && typeof value === 'object') {
+      // Élément ajouté ou modifié
+      changes.set[id] = value
+    }
+  }
+
+  return changes
+}
+
+/**
+ * Synchronise les changements d'une sous-collection vers Firestore
+ */
+async function syncSubcollectionChanges(
+  userId: string,
+  collection: SubcollectionName,
+  diffData: any,
+  fullData: any,
+  deleteMarker: any
+): Promise<void> {
+  const changes = extractSubcollectionChanges(diffData, deleteMarker)
+
+  // Pour les modifications, on a besoin des données complètes car le diff ne contient que les champs modifiés
+  for (const id of Object.keys(changes.set)) {
+    if (fullData && fullData[id]) {
+      changes.set[id] = removeUndefinedVariables(fullData[id])
+    }
+  }
+
+  const totalOps =
+    Object.keys(changes.set).length + changes.delete.length
+
+  if (totalOps === 0) return
+
+  console.log(
+    `[Sync] Syncing ${collection}: ${Object.keys(changes.set).length} set, ${changes.delete.length} delete`
+  )
+
+  // Utiliser batch pour efficacité
+  await batchWriteSubcollection(userId, collection, changes)
+}
+
+/**
+ * Gère les erreurs de sync avec retry sur permission-denied
+ */
+async function handleSyncWithRetry(
+  operation: () => Promise<void>,
+  userId: string,
+  actionName: string,
+  state: RootState
+): Promise<boolean> {
+  try {
+    await operation()
+    return true
+  } catch (error: any) {
+    console.error(`[Sync] ${actionName} failed:`, error)
+
+    // SAFETY NET: Si permission-denied, tente un refresh manuel du token
+    if (error.code === 'permission-denied') {
+      console.warn(
+        '[Sync] Permission denied detected, attempting manual token refresh...'
+      )
+
+      const refreshed = await tokenManager.tryRefresh()
+
+      if (refreshed) {
+        try {
+          await operation()
+          console.log('[Sync] Retry succeeded after token refresh')
+          return true
+        } catch (retryError: any) {
+          console.error('[Sync] Retry failed after token refresh:', retryError)
+          Sentry.captureException(retryError, {
+            tags: { feature: 'sync', action: 'retry_after_refresh' },
+            extra: { userId, originalError: error.code },
+          })
+        }
+      }
+    }
+
+    Sentry.captureException(error, {
+      tags: { feature: 'sync', action: actionName },
+      extra: { userId, errorCode: error.code },
+    })
+
+    // SAFETY: Créer un backup immédiat en cas d'erreur de sync
+    autoBackupManager.createBackupNow(state, 'sync_error').catch((backupError) => {
+      console.error('[AutoBackup] Failed to create error backup:', backupError)
+    })
+
+    Snackbar.show(i18n.t('app.syncError'), 'danger')
+    return false
+  }
+}
 
 export default (store) => (next) => async (action) => {
   const oldState = store.getState()
   const result = next(action)
   const state = store.getState()
 
-  const diffState: any = diff(oldState, state, firestore.FieldValue.delete())
+  const deleteMarker = firestore.FieldValue.delete()
+  const diffState: any = diff(oldState, state, deleteMarker)
 
   // FIX BUG #1: Vérifier Firebase Auth au lieu de Redux user.id
   const currentUser = auth().currentUser
@@ -76,39 +198,33 @@ export default (store) => (next) => async (action) => {
     return result
   }
 
-  // PAS de force refresh systématique - le SDK Firestore le gère automatiquement
-  // On fait confiance au SDK sauf si on détecte un problème (voir error handling plus bas)
-
+  const userId = currentUser.uid
   const { user, plan }: RootState = state
-  const userDoc = firebaseDb.collection('users').doc(currentUser.uid)
+  const userDoc = firebaseDb.collection('users').doc(userId)
 
   // Schedule un backup automatique après chaque changement (debounced 30s)
-  // Garantit que les données ne peuvent jamais être perdues
   autoBackupManager.scheduleBackup(state)
 
   switch (action.type) {
-    // case IMPORT_DATA:
+    // ========== PLAN SYNC ==========
     case removePlan.type:
     case fetchPlan.fulfilled.type:
     case resetPlan.type:
     case markAsRead.type: {
       try {
-        await userDoc.set(
-          {
-            plan: plan.ongoingPlans,
-          },
-          { merge: true }
-        )
+        await userDoc.set({ plan: plan.ongoingPlans }, { merge: true })
       } catch (error) {
         console.log('error', error)
         Snackbar.show(i18n.t('app.syncError'), 'danger')
         Sentry.captureException(error, {
           tags: { feature: 'sync', action: 'plan_sync' },
-          extra: { userId: currentUser.uid },
+          extra: { userId },
         })
       }
       break
     }
+
+    // ========== SETTINGS SYNC (reste dans le document user) ==========
     case SET_SETTINGS_ALIGN_CONTENT:
     case SET_SETTINGS_LINE_HEIGHT:
     case INCREASE_SETTINGS_FONTSIZE_SCALE:
@@ -121,184 +237,292 @@ export default (store) => (next) => async (action) => {
     case SET_SETTINGS_NOTES_DISPLAY:
     case SET_SETTINGS_COMMENTS_DISPLAY:
     case CHANGE_COLOR:
-    case CREATE_STUDY:
-    case UPDATE_STUDY:
-    case PUBLISH_STUDY:
-    case ADD_NOTE:
-    case REMOVE_NOTE:
-    case ADD_HIGHLIGHT:
-    case CHANGE_HIGHLIGHT_COLOR:
-    case ADD_TAG:
-    case REMOVE_HIGHLIGHT:
-    case TOGGLE_TAG_ENTITY:
     case TOGGLE_COMPARE_VERSION:
     case RESET_COMPARE_VERSION:
-    case REMOVE_TAG:
     case TOGGLE_SETTINGS_SHARE_APP_NAME:
     case TOGGLE_SETTINGS_SHARE_INLINE_VERSES:
     case TOGGLE_SETTINGS_SHARE_QUOTES:
     case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS:
-    case SAVE_ALL_LOGS_AS_SEEN:
-    case IMPORT_DATA:
-    case UPDATE_TAG: {
-      if (!diffState?.user?.bible) break
+    case SAVE_ALL_LOGS_AS_SEEN: {
+      if (!diffState?.user?.bible?.settings) break
 
-      const { studies, ...diffStateUserBible } = diffState.user.bible
-
-      if (Object.keys(diffStateUserBible).length !== 0) {
-        try {
+      await handleSyncWithRetry(
+        async () => {
           await userDoc.set(
-            { bible: removeUndefinedVariables(diffStateUserBible) },
+            { bible: { settings: removeUndefinedVariables(diffState.user.bible.settings) } },
             { merge: true }
           )
-        } catch (error: any) {
-          console.error('[Sync] User bible sync failed:', error)
-
-          // SAFETY NET: Si permission-denied, tente un refresh manuel du token
-          // (cas edge où SDK n'a pas eu le temps de refresh après background prolongé)
-          if (error.code === 'permission-denied') {
-            console.warn(
-              '[Sync] Permission denied detected, attempting manual token refresh...'
-            )
-
-            const refreshed = await tokenManager.tryRefresh()
-
-            if (refreshed) {
-              // Retry l'opération après refresh
-              try {
-                await userDoc.set(
-                  { bible: removeUndefinedVariables(diffStateUserBible) },
-                  { merge: true }
-                )
-                console.log('[Sync] Retry succeeded after token refresh')
-                return // Success, pas besoin de snackbar
-              } catch (retryError: any) {
-                console.error(
-                  '[Sync] Retry failed after token refresh:',
-                  retryError
-                )
-                Sentry.captureException(retryError, {
-                  tags: { feature: 'sync', action: 'retry_after_refresh' },
-                  extra: { userId: currentUser.uid, originalError: error.code },
-                })
-              }
-            }
-          }
-
-          // Afficher erreur seulement si retry a échoué ou autre type d'erreur
-          Sentry.captureException(error, {
-            tags: { feature: 'sync', action: 'user_bible_sync' },
-            extra: { userId: currentUser.uid, errorCode: error.code },
-          })
-
-          // SAFETY: Créer un backup immédiat en cas d'erreur de sync
-          // Garantit que les données ne sont jamais perdues
-          autoBackupManager
-            .createBackupNow(state, 'sync_error')
-            .catch((backupError) => {
-              console.error(
-                '[AutoBackup] Failed to create error backup:',
-                backupError
-              )
-            })
-
-          Snackbar.show(i18n.t('app.syncError'), 'danger')
-        }
-      }
-
-      if (studies) {
-        // FIX BUG #2: Utiliser Promise.all avec await pour garantir la synchronisation
-        try {
-          await Promise.all(
-            Object.entries(studies).map(async ([studyId, obj]) => {
-              const studyDoc = firebaseDb.collection('studies').doc(studyId)
-              const studyContent =
-                state.user.bible.studies[studyId]?.content?.ops
-
-              try {
-                await studyDoc.set(
-                  {
-                    ...removeUndefinedVariables(obj),
-                    content: {
-                      // handle array weird form from diff object
-                      ops: studyContent || [],
-                    },
-                  },
-                  { merge: true }
-                )
-                console.log(`Study ${studyId} synced successfully`)
-              } catch (studyError) {
-                // FIX BUG #3: Logger les erreurs au lieu de les avaler
-                console.error(`Failed to sync study ${studyId}:`, studyError)
-                Sentry.captureException(studyError, {
-                  tags: {
-                    feature: 'sync',
-                    action: 'study_sync',
-                    studyId,
-                  },
-                  extra: {
-                    userId: currentUser.uid,
-                    studyTitle: obj?.title || 'unknown',
-                  },
-                })
-                // Re-throw pour que Promise.all catch l'erreur
-                throw studyError
-              }
-            })
-          )
-        } catch (studiesError) {
-          console.error('Studies sync failed:', studiesError)
-          Snackbar.show(i18n.t('app.syncError'), 'danger')
-          // Note: Les études restent dans l'état local et seront retentées au prochain changement
-        }
-      }
-
+        },
+        userId,
+        'settings_sync',
+        state
+      )
       break
     }
-    case DELETE_STUDY: {
-      if (!diffState?.user?.bible) return
+
+    // ========== NOTES SYNC (sous-collection) ==========
+    case ADD_NOTE:
+    case REMOVE_NOTE: {
+      if (!diffState?.user?.bible?.notes) break
+
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'notes',
+            diffState.user.bible.notes,
+            user.bible.notes,
+            deleteMarker
+          )
+        },
+        userId,
+        'notes_sync',
+        state
+      )
+      break
+    }
+
+    // ========== HIGHLIGHTS SYNC (sous-collection) ==========
+    case ADD_HIGHLIGHT:
+    case REMOVE_HIGHLIGHT:
+    case CHANGE_HIGHLIGHT_COLOR: {
+      if (!diffState?.user?.bible?.highlights) break
+
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'highlights',
+            diffState.user.bible.highlights,
+            user.bible.highlights,
+            deleteMarker
+          )
+        },
+        userId,
+        'highlights_sync',
+        state
+      )
+
+      // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
+      if (diffState?.user?.bible?.tags) {
+        await handleSyncWithRetry(
+          async () => {
+            await syncSubcollectionChanges(
+              userId,
+              'tags',
+              diffState.user.bible.tags,
+              user.bible.tags,
+              deleteMarker
+            )
+          },
+          userId,
+          'tags_sync_from_highlight',
+          state
+        )
+      }
+      break
+    }
+
+    // ========== TAGS SYNC (sous-collection) ==========
+    case ADD_TAG:
+    case REMOVE_TAG:
+    case UPDATE_TAG: {
+      if (!diffState?.user?.bible?.tags) break
+
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'tags',
+            diffState.user.bible.tags,
+            user.bible.tags,
+            deleteMarker
+          )
+        },
+        userId,
+        'tags_sync',
+        state
+      )
+      break
+    }
+
+    // ========== TOGGLE TAG ENTITY (modifie tag ET entity) ==========
+    case TOGGLE_TAG_ENTITY: {
+      if (!diffState?.user?.bible) break
+
+      // Sync les tags modifiés
+      if (diffState.user.bible.tags) {
+        await handleSyncWithRetry(
+          async () => {
+            await syncSubcollectionChanges(
+              userId,
+              'tags',
+              diffState.user.bible.tags,
+              user.bible.tags,
+              deleteMarker
+            )
+          },
+          userId,
+          'tags_sync_toggle',
+          state
+        )
+      }
+
+      // Sync les entités modifiées (highlights, notes, etc.)
+      for (const collection of SUBCOLLECTION_NAMES) {
+        if (collection !== 'tags' && diffState.user.bible[collection]) {
+          await handleSyncWithRetry(
+            async () => {
+              await syncSubcollectionChanges(
+                userId,
+                collection,
+                diffState.user.bible[collection],
+                user.bible[collection],
+                deleteMarker
+              )
+            },
+            userId,
+            `${collection}_sync_toggle`,
+            state
+          )
+        }
+      }
+      break
+    }
+
+    // ========== STUDIES SYNC (collection séparée - inchangé) ==========
+    case CREATE_STUDY:
+    case UPDATE_STUDY:
+    case PUBLISH_STUDY: {
+      if (!diffState?.user?.bible?.studies) break
+
       const { studies } = diffState.user.bible
 
-      if (studies) {
-        // FIX BUG #2: Utiliser Promise.all avec await pour garantir la suppression
+      try {
+        await Promise.all(
+          Object.entries(studies).map(async ([studyId, obj]) => {
+            const studyDoc = firebaseDb.collection('studies').doc(studyId)
+            const studyContent = state.user.bible.studies[studyId]?.content?.ops
+
+            try {
+              await studyDoc.set(
+                {
+                  ...removeUndefinedVariables(obj),
+                  content: { ops: studyContent || [] },
+                },
+                { merge: true }
+              )
+              console.log(`Study ${studyId} synced successfully`)
+            } catch (studyError) {
+              console.error(`Failed to sync study ${studyId}:`, studyError)
+              Sentry.captureException(studyError, {
+                tags: { feature: 'sync', action: 'study_sync', studyId },
+                extra: { userId, studyTitle: (obj as any)?.title || 'unknown' },
+              })
+              throw studyError
+            }
+          })
+        )
+      } catch (studiesError) {
+        console.error('Studies sync failed:', studiesError)
+        Snackbar.show(i18n.t('app.syncError'), 'danger')
+      }
+      break
+    }
+
+    case DELETE_STUDY: {
+      if (!diffState?.user?.bible?.studies) break
+      const { studies } = diffState.user.bible
+
+      try {
+        await Promise.all(
+          Object.entries(studies).map(async ([studyId]) => {
+            const studyDocRef = firebaseDb.collection('studies').doc(studyId)
+
+            try {
+              const studyDoc = await studyDocRef.get()
+              if (!studyDoc.exists) {
+                console.log(`Study ${studyId} already deleted`)
+                return
+              }
+
+              await studyDocRef.delete()
+              console.log(`Study ${studyId} deleted successfully`)
+            } catch (deleteError) {
+              console.error(`Failed to delete study ${studyId}:`, deleteError)
+              Sentry.captureException(deleteError, {
+                tags: { feature: 'sync', action: 'study_delete', studyId },
+                extra: { userId },
+              })
+              throw deleteError
+            }
+          })
+        )
+      } catch (deletionError) {
+        console.error('Studies deletion failed:', deletionError)
+        Snackbar.show(i18n.t('app.syncError'), 'danger')
+      }
+      break
+    }
+
+    // ========== IMPORT DATA (migration vers sous-collections) ==========
+    case IMPORT_DATA: {
+      const { bible, studies, plan: importedPlan } = action.payload
+
+      await handleSyncWithRetry(
+        async () => {
+          // 1. Migrer les données vers les sous-collections
+          await migrateImportedDataToSubcollections(userId, {
+            highlights: bible?.highlights,
+            notes: bible?.notes,
+            tags: bible?.tags,
+            strongsHebreu: bible?.strongsHebreu,
+            strongsGrec: bible?.strongsGrec,
+            words: bible?.words,
+            naves: bible?.naves,
+          })
+
+          // 2. Sync settings dans le document user
+          if (bible?.settings) {
+            await userDoc.set(
+              { bible: { settings: removeUndefinedVariables(bible.settings) } },
+              { merge: true }
+            )
+          }
+
+          // 3. Sync plan
+          if (importedPlan) {
+            await userDoc.set({ plan: importedPlan }, { merge: true })
+          }
+        },
+        userId,
+        'import_data',
+        state
+      )
+
+      // 4. Sync studies (collection séparée)
+      if (studies && Object.keys(studies).length > 0) {
         try {
           await Promise.all(
-            Object.entries(studies).map(async ([studyId]) => {
-              const studyDocRef = firebaseDb.collection('studies').doc(studyId)
-
-              try {
-                const studyDoc = await studyDocRef.get()
-                if (!studyDoc.exists) {
-                  console.log(`Study ${studyId} already deleted`)
-                  return
-                }
-
-                await studyDocRef.delete()
-                console.log(`Study ${studyId} deleted successfully`)
-              } catch (deleteError) {
-                console.error(`Failed to delete study ${studyId}:`, deleteError)
-                Sentry.captureException(deleteError, {
-                  tags: {
-                    feature: 'sync',
-                    action: 'study_delete',
-                    studyId,
-                  },
-                  extra: { userId: currentUser.uid },
-                })
-                throw deleteError
-              }
+            Object.entries(studies).map(async ([studyId, study]) => {
+              await firebaseDb
+                .collection('studies')
+                .doc(studyId)
+                .set(removeUndefinedVariables(study), { merge: true })
             })
           )
-        } catch (deletionError) {
-          console.error('Studies deletion failed:', deletionError)
+          console.log('[Sync] Studies imported successfully')
+        } catch (studiesError) {
+          console.error('[Sync] Failed to import studies:', studiesError)
           Snackbar.show(i18n.t('app.syncError'), 'danger')
         }
       }
       break
     }
+
+    // ========== SUBSCRIPTION SYNC ==========
     case USER_UPDATE_PROFILE:
     case SET_SUBSCRIPTION: {
-      // FIX BUG #2: Ajouter await pour garantir la synchronisation
       try {
         await userDoc.set(
           { subscription: removeUndefinedVariables(user.subscription) },
@@ -309,12 +533,13 @@ export default (store) => (next) => async (action) => {
         console.error('Subscription sync failed:', subError)
         Sentry.captureException(subError, {
           tags: { feature: 'sync', action: 'subscription_update' },
-          extra: { userId: currentUser.uid },
+          extra: { userId },
         })
         Snackbar.show(i18n.t('app.syncError'), 'danger')
       }
       break
     }
+
     default:
   }
 
