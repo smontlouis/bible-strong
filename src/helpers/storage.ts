@@ -173,24 +173,10 @@ export const mmkvStorage: Storage = {
  */
 export const useMigrateToLanguageFolders = () => {
   const [hasMigrated, setHasMigrated] = useState(hasMigratedToLanguageFolders)
-  const state = useSelector((state: RootState) => state)
 
   useEffect(() => {
     if (!hasMigratedToLanguageFolders) {
       InteractionManager.runAfterInteractions(async () => {
-        try {
-          // PROTECTION: Créer un backup avant la migration
-          // Garantit qu'aucune donnée ne peut être perdue si la migration échoue
-          console.log(
-            '[Migration] Creating backup before language folder migration...'
-          )
-          await autoBackupManager.createBackupNow(state, 'auto')
-          console.log('[Migration] Backup created successfully')
-        } catch (backupError) {
-          console.error('[Migration] Failed to create backup:', backupError)
-          // Continue quand même avec la migration
-        }
-
         try {
           // Import dynamically to avoid circular dependencies
           const { migrateToLanguageFolders } = await import(
