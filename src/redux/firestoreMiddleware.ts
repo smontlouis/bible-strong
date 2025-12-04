@@ -59,7 +59,7 @@ import { diff } from '~helpers/deep-obj'
 import Snackbar from '~common/SnackBar'
 import i18n from '~i18n'
 
-export const r = (obj) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+export const removeUndefinedVariables = (obj) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
 export default (store) => (next) => async (action) => {
   const oldState = store.getState()
@@ -102,6 +102,10 @@ export default (store) => (next) => async (action) => {
       } catch (error) {
         console.log('error', error)
         Snackbar.show(i18n.t('app.syncError'), 'danger')
+        Sentry.captureException(error, {
+          tags: { feature: 'sync', action: 'plan_sync' },
+          extra: { userId: currentUser.uid },
+        })
       }
       break
     }
@@ -143,7 +147,10 @@ export default (store) => (next) => async (action) => {
 
       if (Object.keys(diffStateUserBible).length !== 0) {
         try {
-          await userDoc.set({ bible: diffStateUserBible }, { merge: true })
+          await userDoc.set(
+            { bible: removeUndefinedVariables(diffStateUserBible) },
+            { merge: true }
+          )
         } catch (error: any) {
           console.error('[Sync] User bible sync failed:', error)
 
@@ -160,7 +167,7 @@ export default (store) => (next) => async (action) => {
               // Retry l'opération après refresh
               try {
                 await userDoc.set(
-                  { bible: diffStateUserBible },
+                  { bible: removeUndefinedVariables(diffStateUserBible) },
                   { merge: true }
                 )
                 console.log('[Sync] Retry succeeded after token refresh')
@@ -186,9 +193,14 @@ export default (store) => (next) => async (action) => {
 
           // SAFETY: Créer un backup immédiat en cas d'erreur de sync
           // Garantit que les données ne sont jamais perdues
-          autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
-            console.error('[AutoBackup] Failed to create error backup:', backupError)
-          })
+          autoBackupManager
+            .createBackupNow(state, 'sync_error')
+            .catch((backupError) => {
+              console.error(
+                '[AutoBackup] Failed to create error backup:',
+                backupError
+              )
+            })
 
           Snackbar.show(i18n.t('app.syncError'), 'danger')
         }
@@ -206,7 +218,7 @@ export default (store) => (next) => async (action) => {
               try {
                 await studyDoc.set(
                   {
-                    ...obj,
+                    ...removeUndefinedVariables(obj),
                     content: {
                       // handle array weird form from diff object
                       ops: studyContent || [],
@@ -288,7 +300,10 @@ export default (store) => (next) => async (action) => {
     case SET_SUBSCRIPTION: {
       // FIX BUG #2: Ajouter await pour garantir la synchronisation
       try {
-        await userDoc.set({ subscription: user.subscription }, { merge: true })
+        await userDoc.set(
+          { subscription: removeUndefinedVariables(user.subscription) },
+          { merge: true }
+        )
         console.log('Subscription synced successfully')
       } catch (subError) {
         console.error('Subscription sync failed:', subError)
