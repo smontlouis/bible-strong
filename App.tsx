@@ -4,13 +4,15 @@ import * as Sentry from '@sentry/react-native'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import React, { memo, useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, LogBox, Text, View } from 'react-native'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import { persistor, store } from '~redux/store'
 
+import { SystemBars } from 'react-native-edge-to-edge'
 import { configureReanimatedLogger } from 'react-native-reanimated'
+import { hydrateTabsAtom } from 'src/state/hydrateTabsAtom'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { checkDatabasesStorage } from '~helpers/sqlite'
 import {
@@ -21,7 +23,6 @@ import {
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import InitApp from './InitApp'
 import { setI18n } from './i18n'
-import { SystemBars } from 'react-native-edge-to-edge'
 
 configureReanimatedLogger({
   strict: false,
@@ -62,9 +63,11 @@ const loadResourcesAsync = async () => {
 
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
+  const [isTabsHydrated, setIsTabsHydrated] = useState(false)
   const hasMigratedFromAsyncStorage = useMigrateFromAsyncStorage()
   const hasMigratedFromFileSystem = useMigrateFromFileSystemStorage()
   const hasMigratedToLanguageFolders = useMigrateToLanguageFolders()
+  const hasHydratedRef = useRef(false)
 
   const [status, setStatus] = useState('')
   useEffect(() => {
@@ -84,13 +87,24 @@ const useAppLoad = () => {
     })()
   }, [])
 
-  useRemoteConfig()
-
-  const isCompleted =
-    isLoadingCompleted &&
+  // Hydrate tabs from MMKV after all migrations are complete
+  // This must happen before InitApp renders to avoid race conditions
+  const migrationsComplete =
     hasMigratedFromAsyncStorage &&
     hasMigratedFromFileSystem &&
     hasMigratedToLanguageFolders
+
+  useEffect(() => {
+    if (migrationsComplete && !hasHydratedRef.current) {
+      hasHydratedRef.current = true
+      hydrateTabsAtom()
+      setIsTabsHydrated(true)
+    }
+  }, [migrationsComplete])
+
+  useRemoteConfig()
+
+  const isCompleted = isLoadingCompleted && migrationsComplete && isTabsHydrated
 
   return {
     isLoadingCompleted: isCompleted,

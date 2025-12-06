@@ -4,7 +4,11 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(npx tsc:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(xargs cat:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
