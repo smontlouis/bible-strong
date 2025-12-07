@@ -1,8 +1,8 @@
 import React, { createContext, useContext } from 'react'
-import { atom } from 'jotai/vanilla'
 import { useSetAtom } from 'jotai/react'
 import { BibleTab } from '../../../../state/tabs'
 import SelectBibleReferenceModal from './SelectBibleReferenceModal'
+import { selectBibleReferenceDataAtom } from './atoms'
 
 interface SelectBibleReferenceContextType {
   openBibleReferenceModal: (params: {
@@ -12,10 +12,6 @@ interface SelectBibleReferenceContextType {
 
 const SelectBibleReferenceContext =
   createContext<SelectBibleReferenceContextType | null>(null)
-
-export const selectBibleReferenceDataAtom = atom<{
-  onSelect?: (data: BibleTab['data']['temp']) => void
-}>({})
 
 export const useSelectBibleReference = () => {
   const context = useContext(SelectBibleReferenceContext)

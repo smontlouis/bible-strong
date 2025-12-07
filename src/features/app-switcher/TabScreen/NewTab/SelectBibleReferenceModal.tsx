@@ -11,7 +11,7 @@ import {
   getDefaultBibleTab,
   useBibleTabActions,
 } from '../../../../state/tabs'
-import { selectBibleReferenceDataAtom } from './SelectBibleReferenceModalProvider'
+import { selectBibleReferenceDataAtom } from './atoms'
 
 export interface SelectBibleReferenceModalProps {
   isOpen: boolean

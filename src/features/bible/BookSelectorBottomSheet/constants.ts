@@ -8,4 +8,3 @@ export type SelectionEvent = {
 
 // Définir une constante pour l'event name pour éviter les typos
 export const BOOK_SELECTION_EVENT = 'book-selection'
-
