@@ -101,7 +101,6 @@ const FireAuth = class {
       }
 
       console.log('No user, do nothing...')
-      this.onLogout?.()
       this.user = null
     })
   }
