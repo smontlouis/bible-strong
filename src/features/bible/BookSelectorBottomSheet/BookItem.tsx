@@ -1,4 +1,3 @@
-import { useAtomValue } from 'jotai/react'
 import { MotiView } from 'moti'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,8 +9,7 @@ import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import AccordionItem from './AccordionItem'
-import { BOOK_SELECTION_EVENT } from './BookSelectorBottomSheet'
-import { bookSelectorVersesAtom } from './atom'
+import { BOOK_SELECTION_EVENT } from './constants'
 
 interface BookItemProps {
   book: Book

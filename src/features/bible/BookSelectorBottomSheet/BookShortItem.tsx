@@ -9,11 +9,11 @@ import {
 } from 'react-native'
 import Popover from 'react-native-popover-view'
 import { Book } from '~assets/bible_versions/books-desc'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 import { wp } from '~helpers/utils'
-import { BOOK_SELECTION_EVENT } from './BookSelectorBottomSheet'
+import { BOOK_SELECTION_EVENT } from './constants'
 
 interface BookShortItemProps {
   book: Book

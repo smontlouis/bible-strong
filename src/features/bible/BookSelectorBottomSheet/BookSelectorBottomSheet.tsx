@@ -1,6 +1,6 @@
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
@@ -9,7 +9,7 @@ import { DeviceEventEmitter, FlatList } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BibleTab, BibleTabActions } from 'src/state/tabs'
-import books, { Book } from '~assets/bible_versions/books-desc'
+import books from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -19,22 +19,14 @@ import {
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
 import { bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
-import BookItem, { itemHeight } from './BookItem'
+import { itemHeight } from './BookItem'
+import { BookSelectorList } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
+import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseBottomSheet, {
   tempSelectedBookAtom,
   tempSelectedChapterAtom,
 } from './VerseBottomSheet'
-import { BookSelectorList } from './BookSelectorList'
-
-export type SelectionEvent = {
-  type: 'select' | 'longPress'
-  book: Book
-  chapter: number
-}
-
-// Définir une constante pour l'event name pour éviter les typos
-export const BOOK_SELECTION_EVENT = 'book-selection'
 interface BookSelectorBottomSheetProps {
   selectedBookNum?: number
   bottomSheetRef: React.RefObject<BottomSheet>
