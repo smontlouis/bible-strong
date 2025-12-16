@@ -283,7 +283,6 @@ const TagScreen = ({
               Notes
             </Text>
             {notes.map((n) => {
-              console.log('n', n)
               return (
                 <NoteItem t={t} isFR={isFR} key={n.date.toString()} item={n} />
               )
