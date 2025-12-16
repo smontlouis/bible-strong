@@ -1,13 +1,13 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import auth from '@react-native-firebase/auth'
-import sizeof from 'firestore-size'
+import remoteConfig from '@react-native-firebase/remote-config'
 import React, { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
-import remoteConfig from '@react-native-firebase/remote-config'
 import { useSelector } from 'react-redux'
+import { shallowEqual } from 'recompose'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -19,17 +19,16 @@ import Box, { SafeAreaBox } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import useLogin from '~helpers/useLogin'
-import { shallowEqual } from 'recompose'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
+import useLogin from '~helpers/useLogin'
 import { r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 
 import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 import { HelpTip } from '~features/tips/HelpTip'
+import { MainStackProps } from '~navigation/type'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
   flexDirection: 'row',
@@ -64,13 +63,8 @@ const shareMessage = () => {
 }
 
 const Infos = memo(() => {
-  const bibleJSON = useSelector((state: RootState) => state.user.bible)
-
   return (
     <Box row justifyContent="flex-end" px={10}>
-      <Text color="grey" fontSize={9} marginRight={10}>
-        {Math.trunc(sizeof(bibleJSON) / 1000)}kb/1Mb
-      </Text>
       <Text color="grey" fontSize={9}>
         Version: {app.version} {Platform.Version}
       </Text>
