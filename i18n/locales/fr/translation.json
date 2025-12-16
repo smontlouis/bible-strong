@@ -676,5 +676,16 @@
   "downloads.crossReferences": "Références croisées",
 
   "menu.language": "Langue",
-  "menu.languageChanged": "Langue de la ressource changée en {{language}}"
+  "menu.languageChanged": "Langue de la ressource changée en {{language}}",
+
+  "migration.inProgress": "Migration en cours...",
+  "migration.resuming": "Reprise de la migration...",
+  "migration.failed": "Migration échouée",
+  "migration.partiallyFailed": "Migration partiellement échouée",
+  "migration.description": "Vos données sont en cours de mise à jour. Veuillez ne pas fermer l'application.",
+  "migration.errorDescription": "Une erreur est survenue lors de la migration de vos données.",
+  "migration.internetRequired": "Connexion internet requise",
+  "migration.partialError": "Certaines données n'ont pas pu être migrées: ",
+  "migration.contactSupport": "Veuillez contacter le développeur pour assistance.",
+  "migration.contactButton": "Contacter le support"
 }

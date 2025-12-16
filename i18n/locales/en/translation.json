@@ -672,5 +672,16 @@
   "downloads.crossReferences": "Cross-references",
 
   "menu.language": "Language",
-  "menu.languageChanged": "Resource language changed to {{language}}"
+  "menu.languageChanged": "Resource language changed to {{language}}",
+
+  "migration.inProgress": "Migration in progress...",
+  "migration.resuming": "Resuming migration...",
+  "migration.failed": "Migration failed",
+  "migration.partiallyFailed": "Migration partially failed",
+  "migration.description": "Your data is being updated. Please do not close the application.",
+  "migration.errorDescription": "An error occurred while migrating your data.",
+  "migration.internetRequired": "Internet connection required",
+  "migration.partialError": "Some data could not be migrated: ",
+  "migration.contactSupport": "Please contact the developer for assistance.",
+  "migration.contactButton": "Contact support"
 }

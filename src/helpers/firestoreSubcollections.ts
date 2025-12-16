@@ -29,6 +29,19 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
 const BATCH_CHUNK_SIZE = 400
 
 /**
+ * Valide si un ID est valide pour Firestore
+ * Document IDs cannot be empty, contain '/', or be '.' or '..'
+ */
+function isValidDocumentId(docId: string): boolean {
+  if (!docId || docId.length === 0) return false
+  if (docId === '.' || docId === '..') return false
+  if (docId.includes('/')) return false
+  // Check for reasonable length (Firestore limit is 1500 bytes)
+  if (docId.length > 1500) return false
+  return true
+}
+
+/**
  * Obtient une référence à une sous-collection
  */
 export function getSubcollectionRef(
@@ -96,27 +109,54 @@ export interface BatchChanges {
 }
 
 /**
+ * Callback pour le suivi de progression des chunks
+ */
+export type ChunkProgressCallback = (
+  chunkIndex: number,
+  totalChunks: number
+) => void
+
+/**
  * Écrit plusieurs documents en batch avec chunking automatique
  * Gère les batchs de plus de 500 opérations
  */
 export async function batchWriteSubcollection(
   userId: string,
   collection: SubcollectionName,
-  changes: BatchChanges
+  changes: BatchChanges,
+  onChunkProgress?: ChunkProgressCallback
 ): Promise<void> {
   const collectionRef = getSubcollectionRef(userId, collection)
 
   // Préparer toutes les opérations
   const operations: Array<{ type: 'set' | 'delete'; docId: string; data?: any }> = []
+  const skippedIds: string[] = []
 
-  // Ajouter les opérations set
+  // Ajouter les opérations set (avec validation des IDs)
   for (const [docId, data] of Object.entries(changes.set)) {
-    operations.push({ type: 'set', docId, data })
+    if (isValidDocumentId(docId)) {
+      operations.push({ type: 'set', docId, data })
+    } else {
+      skippedIds.push(docId || '(empty)')
+    }
   }
 
-  // Ajouter les opérations delete
+  // Ajouter les opérations delete (avec validation des IDs)
   for (const docId of changes.delete) {
-    operations.push({ type: 'delete', docId })
+    if (isValidDocumentId(docId)) {
+      operations.push({ type: 'delete', docId })
+    } else {
+      skippedIds.push(docId || '(empty)')
+    }
+  }
+
+  // Log skipped IDs if any
+  if (skippedIds.length > 0) {
+    console.warn(
+      `[Subcollections] Skipped ${skippedIds.length} invalid document ID(s) in ${collection}:`,
+      skippedIds.slice(0, 5).join(', '),
+      skippedIds.length > 5 ? `... and ${skippedIds.length - 5} more` : ''
+    )
   }
 
   if (operations.length === 0) {
@@ -152,6 +192,9 @@ export async function batchWriteSubcollection(
       console.log(
         `[Subcollections] Chunk ${i + 1}/${chunks.length} committed (${chunk.length} ops)`
       )
+
+      // Report chunk progress
+      onChunkProgress?.(i + 1, chunks.length)
     }
   } catch (error) {
     console.error(`[Subcollections] Batch write failed for ${collection}:`, error)
@@ -170,7 +213,8 @@ export async function batchWriteSubcollection(
 export async function writeAllToSubcollection(
   userId: string,
   collection: SubcollectionName,
-  data: { [id: string]: any }
+  data: { [id: string]: any },
+  onChunkProgress?: ChunkProgressCallback
 ): Promise<void> {
   if (!data || Object.keys(data).length === 0) {
     console.log(`[Subcollections] No data to write to ${collection}`)
@@ -182,7 +226,7 @@ export async function writeAllToSubcollection(
     delete: [],
   }
 
-  await batchWriteSubcollection(userId, collection, changes)
+  await batchWriteSubcollection(userId, collection, changes, onChunkProgress)
 }
 
 /**

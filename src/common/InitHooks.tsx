@@ -12,6 +12,7 @@ import {
   getDatabaseUpdate,
   getVersionUpdate,
 } from '~redux/modules/user'
+import MigrationModal from '~common/MigrationModal'
 
 export interface InitHooksProps {}
 
@@ -51,7 +52,7 @@ const InitHooks = ({}: InitHooksProps) => {
 
   useLiveUpdates()
 
-  return null
+  return <MigrationModal />
 }
 
 export default InitHooks

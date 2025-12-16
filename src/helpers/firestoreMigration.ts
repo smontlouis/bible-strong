@@ -6,8 +6,41 @@ import {
   SUBCOLLECTION_NAMES,
   SubcollectionName,
   writeAllToSubcollection,
+  type ChunkProgressCallback,
 } from './firestoreSubcollections'
+
+// Batch chunk size (must match firestoreSubcollections.ts)
+const BATCH_CHUNK_SIZE = 400
 import { RootState } from '~redux/modules/reducer'
+import type { MigrationState } from './migrationState'
+import {
+  createInitialMigrationState,
+  setMigrationState,
+  updateCollectionStatus,
+  clearMigrationState,
+  getCollectionsToMigrate,
+} from './migrationState'
+
+/**
+ * Progress update sent to the UI during migration
+ */
+export interface MigrationProgressUpdate {
+  currentCollection: SubcollectionName | null
+  collectionsCompleted: number
+  totalCollections: number
+  overallProgress: number
+  message: string
+}
+
+/**
+ * Result of a resumable migration
+ */
+export interface MigrationResult {
+  success: boolean
+  partialFailure: boolean
+  failedCollections: SubcollectionName[]
+  error?: string
+}
 
 /**
  * Vérifie si un utilisateur a déjà été migré vers les sous-collections
@@ -17,9 +50,66 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
     const userDoc = await firebaseDb.collection('users').doc(userId).get()
     const userData = userDoc.data()
     return userData?._migrated === true
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Migration] Failed to check migration status:', error)
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'check_migration_status',
+      },
+      extra: {
+        userId,
+        errorMessage: error?.message,
+      },
+    })
     return false
+  }
+}
+
+/**
+ * Vérifie si l'utilisateur a des données embedded dans bible.* qui doivent être migrées
+ * Ceci est important pour la migration incrémentale: même si _migrated est true,
+ * une ancienne application sur un autre appareil peut avoir continué à synchroniser
+ * des données vers le document principal (bible.highlights, bible.notes, etc.)
+ */
+export async function checkForEmbeddedData(userId: string): Promise<{
+  hasEmbeddedData: boolean
+  collectionsWithData: SubcollectionName[]
+}> {
+  try {
+    const userDoc = await firebaseDb.collection('users').doc(userId).get()
+    const userData = userDoc.data()
+
+    if (!userData?.bible) {
+      return { hasEmbeddedData: false, collectionsWithData: [] }
+    }
+
+    const bible = userData.bible
+    const collectionsWithData: SubcollectionName[] = []
+
+    for (const collection of SUBCOLLECTION_NAMES) {
+      if (bible[collection] && Object.keys(bible[collection]).length > 0) {
+        collectionsWithData.push(collection)
+      }
+    }
+
+    return {
+      hasEmbeddedData: collectionsWithData.length > 0,
+      collectionsWithData,
+    }
+  } catch (error: any) {
+    console.error('[Migration] Failed to check for embedded data:', error)
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'check_embedded_data',
+      },
+      extra: {
+        userId,
+        errorMessage: error?.message,
+      },
+    })
+    return { hasEmbeddedData: false, collectionsWithData: [] }
   }
 }
 
@@ -27,23 +117,53 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
  * Marque un utilisateur comme migré
  */
 async function markAsMigrated(userId: string): Promise<void> {
-  await firebaseDb.collection('users').doc(userId).update({
-    _migrated: true,
-  })
+  try {
+    await firebaseDb.collection('users').doc(userId).update({
+      _migrated: true,
+    })
+  } catch (error: any) {
+    console.error('[Migration] Failed to mark user as migrated:', error)
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'mark_as_migrated',
+      },
+      extra: {
+        userId,
+        errorMessage: error?.message,
+      },
+    })
+    throw error // Re-throw to let caller handle it
+  }
 }
 
 /**
  * Supprime les données embedded du document principal après migration
  */
 async function removeEmbeddedData(userId: string): Promise<void> {
-  const updates: { [key: string]: any } = {}
+  try {
+    const updates: { [key: string]: any } = {}
 
-  for (const collection of SUBCOLLECTION_NAMES) {
-    updates[`bible.${collection}`] = firestore.FieldValue.delete()
+    for (const collection of SUBCOLLECTION_NAMES) {
+      updates[`bible.${collection}`] = firestore.FieldValue.delete()
+    }
+
+    await firebaseDb.collection('users').doc(userId).update(updates)
+    console.log('[Migration] Embedded data removed from user document')
+  } catch (error: any) {
+    console.error('[Migration] Failed to remove embedded data:', error)
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'remove_embedded_data',
+      },
+      extra: {
+        userId,
+        errorMessage: error?.message,
+      },
+    })
+    throw error // Re-throw to let caller handle it
   }
-
-  await firebaseDb.collection('users').doc(userId).update(updates)
-  console.log('[Migration] Embedded data removed from user document')
 }
 
 /**
@@ -215,4 +335,283 @@ export function countItemsToMigrate(bible: any): number {
     }
   }
   return count
+}
+
+/**
+ * Migre les données utilisateur vers les sous-collections Firestore avec support de reprise
+ *
+ * Cette fonction:
+ * 1. Vérifie l'état de migration existant (pour reprise)
+ * 2. Crée un backup avant migration (sécurité)
+ * 3. Migre chaque collection individuellement avec gestion d'erreur
+ * 4. Persiste l'état après chaque collection pour permettre la reprise
+ * 5. Continue même si certaines collections échouent (migration partielle)
+ *
+ * @param userId - L'ID Firebase de l'utilisateur
+ * @param state - L'état Redux actuel (pour le backup)
+ * @param existingMigrationState - L'état de migration existant (pour reprise)
+ * @param onProgress - Callback pour le suivi de progression
+ */
+export async function resumableMigrateUserData(
+  userId: string,
+  state: RootState,
+  existingMigrationState: MigrationState | null,
+  onProgress: (progress: MigrationProgressUpdate) => void
+): Promise<MigrationResult> {
+  const failedCollections: SubcollectionName[] = []
+  let completedCollections: SubcollectionName[] = []
+
+  const reportProgress = (update: Partial<MigrationProgressUpdate>) => {
+    const progress: MigrationProgressUpdate = {
+      currentCollection: update.currentCollection ?? null,
+      collectionsCompleted: update.collectionsCompleted ?? completedCollections.length,
+      totalCollections: SUBCOLLECTION_NAMES.length,
+      overallProgress: update.overallProgress ?? completedCollections.length / SUBCOLLECTION_NAMES.length,
+      message: update.message ?? '',
+    }
+    console.log(`[Migration] ${progress.message} (${Math.round(progress.overallProgress * 100)}%)`)
+    onProgress(progress)
+  }
+
+  try {
+    // 1. Vérifier si des données embedded existent (IMPORTANT pour migration incrémentale)
+    // Même si _migrated est true, une ancienne app peut avoir continué à synchroniser
+    reportProgress({ message: 'Vérification des données...', overallProgress: 0 })
+    const { hasEmbeddedData, collectionsWithData } = await checkForEmbeddedData(userId)
+
+    if (!hasEmbeddedData) {
+      // Pas de données embedded - s'assurer que _migrated est défini
+      console.log('[Migration] No embedded data found')
+      const alreadyMigrated = await isUserMigrated(userId)
+      if (!alreadyMigrated) {
+        console.log('[Migration] Marking user as migrated (no data to migrate)')
+        await markAsMigrated(userId)
+      }
+      clearMigrationState()
+      return { success: true, partialFailure: false, failedCollections: [] }
+    }
+
+    // Des données embedded existent - procéder à la migration
+    console.log(`[Migration] Found embedded data in: ${collectionsWithData.join(', ')}`)
+
+    // 2. Initialiser ou reprendre l'état de migration
+    let migrationState: MigrationState
+    if (existingMigrationState && existingMigrationState.userId === userId) {
+      console.log('[Migration] Resuming existing migration')
+      migrationState = existingMigrationState
+      // Récupérer les collections déjà complétées
+      completedCollections = SUBCOLLECTION_NAMES.filter(
+        (name) => migrationState.collections[name].status === 'completed'
+      )
+    } else {
+      console.log('[Migration] Starting new migration')
+      migrationState = createInitialMigrationState(userId)
+      setMigrationState(migrationState)
+    }
+
+    // 3. Créer un backup avant migration (seulement si nouvelle migration)
+    if (!existingMigrationState) {
+      reportProgress({ message: 'Création du backup de sécurité...', overallProgress: 0.05 })
+      const backupCreated = await autoBackupManager.createBackupNow(state, 'pre_migration')
+      if (!backupCreated) {
+        console.warn('[Migration] Backup creation failed, but continuing with migration')
+      }
+    }
+
+    // 4. Lire les données embedded du document user
+    reportProgress({ message: 'Lecture des données existantes...', overallProgress: 0.1 })
+    const userDoc = await firebaseDb.collection('users').doc(userId).get()
+    const userData = userDoc.data()
+
+    if (!userData?.bible) {
+      console.log('[Migration] No bible data found, marking as migrated')
+      await markAsMigrated(userId)
+      clearMigrationState()
+      return { success: true, partialFailure: false, failedCollections: [] }
+    }
+
+    const bible = userData.bible
+
+    // 5. Déterminer les collections à migrer
+    const collectionsToMigrate = getCollectionsToMigrate(migrationState).filter(
+      (name) => bible[name] && Object.keys(bible[name]).length > 0
+    )
+
+    // Ajouter les collections vides comme complétées
+    const emptyCollections = SUBCOLLECTION_NAMES.filter(
+      (name) =>
+        !bible[name] ||
+        Object.keys(bible[name]).length === 0
+    )
+    for (const emptyCollection of emptyCollections) {
+      if (migrationState.collections[emptyCollection].status !== 'completed') {
+        updateCollectionStatus(emptyCollection, 'completed', 0)
+        completedCollections.push(emptyCollection)
+      }
+    }
+
+    if (collectionsToMigrate.length === 0) {
+      console.log('[Migration] No data to migrate, marking as migrated')
+      await markAsMigrated(userId)
+      clearMigrationState()
+      return { success: true, partialFailure: false, failedCollections: [] }
+    }
+
+    console.log(`[Migration] Collections to migrate: ${collectionsToMigrate.join(', ')}`)
+
+    // 6. Calculer le nombre total de chunks pour une progression précise
+    const collectionChunks: { collection: SubcollectionName; itemCount: number; chunkCount: number }[] = []
+    let totalChunks = 0
+
+    for (const collection of collectionsToMigrate) {
+      const data = bible[collection]
+      const itemCount = Object.keys(data).length
+      const chunkCount = Math.ceil(itemCount / BATCH_CHUNK_SIZE)
+      collectionChunks.push({ collection, itemCount, chunkCount })
+      totalChunks += chunkCount
+    }
+
+    console.log(`[Migration] Total chunks to process: ${totalChunks}`)
+
+    let completedChunks = 0
+
+    // 7. Migrer chaque collection individuellement
+    for (const { collection, itemCount, chunkCount } of collectionChunks) {
+      const data = bible[collection]
+
+      // Calculer la progression basée sur les chunks
+      const baseProgress = 0.1 + (0.75 * completedChunks) / totalChunks
+
+      reportProgress({
+        currentCollection: collection,
+        message: `Migration de ${collection} (${itemCount} éléments, ${chunkCount} chunk${chunkCount > 1 ? 's' : ''})...`,
+        overallProgress: baseProgress,
+      })
+
+      // Marquer comme en cours
+      updateCollectionStatus(collection, 'in_progress', itemCount)
+
+      try {
+        // Callback pour mettre à jour la progression à chaque chunk
+        const onChunkProgress: ChunkProgressCallback = (chunkIndex, _totalChunks) => {
+          const currentProgress = 0.1 + (0.75 * (completedChunks + chunkIndex)) / totalChunks
+          reportProgress({
+            currentCollection: collection,
+            message: `Migration de ${collection} (chunk ${chunkIndex}/${_totalChunks})...`,
+            overallProgress: currentProgress,
+          })
+        }
+
+        await writeAllToSubcollection(userId, collection, data, onChunkProgress)
+
+        // Mettre à jour les chunks complétés
+        completedChunks += chunkCount
+
+        // Marquer comme complété
+        updateCollectionStatus(collection, 'completed', itemCount)
+        completedCollections.push(collection)
+
+        const endProgress = 0.1 + (0.75 * completedChunks) / totalChunks
+        reportProgress({
+          currentCollection: collection,
+          collectionsCompleted: completedCollections.length,
+          message: `${collection} migré avec succès`,
+          overallProgress: endProgress,
+        })
+      } catch (error: any) {
+        console.error(`[Migration] Failed to migrate ${collection}:`, error)
+
+        // Capturer l'erreur dans Sentry avec contexte détaillé
+        Sentry.captureException(error, {
+          tags: {
+            feature: 'firestore_migration',
+            collection,
+            action: 'migrate_collection',
+          },
+          extra: {
+            userId,
+            collectionName: collection,
+            itemCount,
+            completedCollections: completedCollections.join(', '),
+            failedCollections: failedCollections.join(', '),
+            errorMessage: error.message,
+          },
+        })
+
+        // Marquer comme échoué et continuer
+        updateCollectionStatus(collection, 'failed', itemCount, error.message)
+        failedCollections.push(collection)
+
+        // Continuer avec la prochaine collection
+      }
+    }
+
+    // 8. Vérifier si toutes les collections ont été migrées
+    const allCompleted = failedCollections.length === 0
+    const hasPartialFailure = failedCollections.length > 0 && completedCollections.length > 0
+
+    if (allCompleted) {
+      // 9. FIRST: Supprimer les données embedded (libérer de l'espace pour les documents proches de 1MB)
+      reportProgress({ message: 'Nettoyage des anciennes données...', overallProgress: 0.88 })
+      await removeEmbeddedData(userId)
+
+      // 10. THEN: Marquer comme migré sur Firestore (maintenant il y a de la place)
+      reportProgress({ message: 'Finalisation de la migration...', overallProgress: 0.95 })
+      await markAsMigrated(userId)
+
+      // 11. Nettoyer l'état de migration local
+      clearMigrationState()
+
+      reportProgress({ message: 'Migration terminée avec succès!', overallProgress: 1 })
+      console.log('[Migration] Migration completed successfully')
+
+      return { success: true, partialFailure: false, failedCollections: [] }
+    } else {
+      // Migration partielle - ne pas marquer comme migré
+      const errorMessage = `Migration partielle: ${failedCollections.length} collection(s) échouée(s)`
+      console.error(`[Migration] ${errorMessage}:`, failedCollections)
+
+      // Capturer la migration partielle dans Sentry
+      Sentry.captureMessage(errorMessage, {
+        level: 'error',
+        tags: {
+          feature: 'firestore_migration',
+          action: 'partial_failure',
+        },
+        extra: {
+          userId,
+          failedCollections: failedCollections.join(', '),
+          completedCollections: completedCollections.join(', '),
+        },
+      })
+
+      return {
+        success: false,
+        partialFailure: hasPartialFailure,
+        failedCollections,
+        error: errorMessage,
+      }
+    }
+  } catch (error: any) {
+    console.error('[Migration] Migration failed with unexpected error:', error)
+
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'unexpected_error',
+      },
+      extra: {
+        userId,
+        completedCollections: completedCollections.join(', '),
+        failedCollections: failedCollections.join(', '),
+      },
+    })
+
+    return {
+      success: false,
+      partialFailure: completedCollections.length > 0,
+      failedCollections,
+      error: error.message || 'Erreur inattendue lors de la migration',
+    }
+  }
 }

@@ -32,12 +32,12 @@ import { RootState } from '~redux/modules/reducer'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-export const sortVersesByDate = p =>
+export const sortVersesByDate = (p) =>
   Object.keys(p).reduce((arr, verse, i) => {
     const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
     const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
 
-    if (!arr.find(a => a.date === p[verse].date)) {
+    if (!arr.find((a) => a.date === p[verse].date)) {
       arr.push({
         date: p[verse].date,
         color: p[verse].color,
@@ -47,7 +47,7 @@ export const sortVersesByDate = p =>
       })
     }
 
-    const dateInArray = arr.find(a => a.date === p[verse].date)
+    const dateInArray = arr.find((a) => a.date === p[verse].date)
     if (dateInArray) {
       dateInArray.stringIds[verse] = true
       dateInArray.verseIds.push(formattedVerse)
@@ -123,7 +123,7 @@ const TagScreen = ({
     strongsGrec,
     strongsHebreu,
   } = useSelector(
-    state => ({
+    (state) => ({
       highlights: tag.highlights
         ? sortVersesByDate(
             Object.keys(tag.highlights).reduce(
@@ -139,33 +139,33 @@ const TagScreen = ({
         : [],
       notes: tag.notes
         ? Object.keys(tag.notes)
-            .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
-            .filter(c => c)
+            .map((id) => ({ id, reference: '', ...state.user.bible.notes[id] }))
+            .filter((c) => c && c.date)
         : [],
       studies: tag.studies
         ? Object.keys(tag.studies)
-            .map(id => state.user.bible.studies[id])
-            .filter(c => c)
+            .map((id) => state.user.bible.studies[id])
+            .filter((c) => c)
         : [],
       naves: tag.naves
         ? Object.keys(tag.naves)
-            .map(id => state.user.bible.naves[id])
-            .filter(c => c)
+            .map((id) => state.user.bible.naves[id])
+            .filter((c) => c)
         : [],
       words: tag.words
         ? Object.keys(tag.words)
-            .map(id => state.user.bible.words[id])
-            .filter(c => c)
+            .map((id) => state.user.bible.words[id])
+            .filter((c) => c)
         : [],
       strongsHebreu: tag.strongsHebreu
         ? Object.keys(tag.strongsHebreu)
-            .map(id => state.user.bible.strongsHebreu[id])
-            .filter(c => c)
+            .map((id) => state.user.bible.strongsHebreu[id])
+            .filter((c) => c)
         : [],
       strongsGrec: tag.strongsGrec
         ? Object.keys(tag.strongsGrec)
-            .map(id => state.user.bible.strongsGrec[id])
-            .filter(c => c)
+            .map((id) => state.user.bible.strongsGrec[id])
+            .filter((c) => c)
         : [],
     }),
     shallowEqual
@@ -205,7 +205,7 @@ const TagScreen = ({
               Strongs
             </Text>
             <Box row wrap px={20}>
-              {strongsGrec.map(s => {
+              {strongsGrec.map((s) => {
                 return (
                   <LexiqueResultItem
                     key={s.id + s.title}
@@ -215,7 +215,7 @@ const TagScreen = ({
                   />
                 )
               })}
-              {strongsHebreu.map(s => {
+              {strongsHebreu.map((s) => {
                 return (
                   <LexiqueResultItem
                     key={s.id + s.title}
@@ -234,7 +234,7 @@ const TagScreen = ({
               {t('Thèmes nave')}
             </Text>
             <Box row wrap px={20}>
-              {naves.map(s => {
+              {naves.map((s) => {
                 return (
                   <NaveResultItem
                     key={s.id}
@@ -253,7 +253,7 @@ const TagScreen = ({
               {t('Dictionnaire')}
             </Text>
             <Box row wrap px={20}>
-              {words.map(s => {
+              {words.map((s) => {
                 return <DictionnaryResultItem key={s.id} word={s.title} />
               })}
             </Box>
@@ -265,7 +265,7 @@ const TagScreen = ({
               {t('Surbrillances')}
             </Text>
 
-            {highlights.map(h => {
+            {highlights.map((h) => {
               const { color, date, verseIds, tags } = h
               return (
                 <HighlightItem
@@ -282,7 +282,8 @@ const TagScreen = ({
             <Text padding={20} fontSize={25} title>
               Notes
             </Text>
-            {notes.map(n => {
+            {notes.map((n) => {
+              console.log('n', n)
               return (
                 <NoteItem t={t} isFR={isFR} key={n.date.toString()} item={n} />
               )
@@ -296,7 +297,7 @@ const TagScreen = ({
               {t('Études')}
             </Text>
             <Box row style={{ flexWrap: 'wrap' }}>
-              {studies.map(item => {
+              {studies.map((item) => {
                 return <StudyItem key={tag.id} study={item} />
               })}
             </Box>
@@ -308,7 +309,7 @@ const TagScreen = ({
         isOpen={!!titlePrompt}
         title={titlePrompt.name}
         onClosed={() => setTitlePrompt(false)}
-        onSave={value => {
+        onSave={(value) => {
           dispatch(updateTag(titlePrompt.id, value))
         }}
       />
