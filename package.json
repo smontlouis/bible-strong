@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "21.2.2",
+  "version": "21.2.3",
   "scripts": {
     "eas-build-pre-install": "corepack enable",
     "start": "expo start --dev-client",
