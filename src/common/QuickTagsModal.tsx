@@ -14,6 +14,7 @@ import AnimatedCircularProgress from '~common/AnimatedCircularProgress'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+// @ts-ignore
 const StylizedModal = styled(Modal)(({ theme }) => ({
   justifyContent: 'flex-end',
   alignItems: 'center',
@@ -35,12 +36,12 @@ const WrapperIcon = styled.TouchableOpacity(({ theme }) => ({
   elevation: 2,
 }))
 
-const StyledIcon = styled(Icon.FontAwesome)(({ theme, isDisabled }) => ({
+const StyledIcon = styled(Icon.FontAwesome)(({ theme }: any) => ({
   color: 'rgb(210,210,210)',
 }))
 
-const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
-  const progressRef = React.useRef()
+const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }: any) => {
+  const progressRef = React.useRef<any>()
   const { t } = useTranslation()
 
   React.useEffect(() => {
@@ -50,6 +51,7 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
   }, [item])
 
   return (
+    // @ts-ignore
     <StylizedModal
       isVisible={!!item}
       backdropOpacity={0.1}
@@ -75,6 +77,7 @@ const QuickTagsModal = ({ theme, item, onClosed, setMultipleTagsItem }) => {
               }, 500)
             }}
           >
+            {/* @ts-ignore */}
             <StyledIcon size={20} name="tags" />
           </WrapperIcon>
         )}

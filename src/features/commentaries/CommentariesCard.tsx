@@ -33,8 +33,6 @@ const CommentariesCard = ({
     onChangeVerse(commentaryTab.data.verse)
   }, [commentaryTab.data.verse])
 
-  return (
-    <CommentariesTabScreen hasHeader={false} commentaryAtom={onTheFlyAtom} />
-  )
+  return <CommentariesTabScreen hasHeader={false} commentaryAtom={onTheFlyAtom} />
 }
 export default CommentariesCard

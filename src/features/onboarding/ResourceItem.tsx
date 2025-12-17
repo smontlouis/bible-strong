@@ -13,14 +13,7 @@ type Props = {
   onPress?: () => void
 }
 
-const DownloadItem = ({
-  name,
-  subTitle,
-  fileSize,
-  isSelected,
-  isDisabled,
-  onPress,
-}: Props) => {
+const DownloadItem = ({ name, subTitle, fileSize, isSelected, isDisabled, onPress }: Props) => {
   return (
     <TouchableBox
       px={20}
@@ -31,12 +24,7 @@ const DownloadItem = ({
     >
       <VStack spacing={1 / 2} flex={1}>
         <HStack>
-          <Text
-            flex
-            fontSize={18}
-            color={isSelected ? 'primary' : 'default'}
-            bold={isSelected}
-          >
+          <Text flex fontSize={18} color={isSelected ? 'primary' : 'default'} bold={isSelected}>
             {name}
           </Text>
           {fileSize && (

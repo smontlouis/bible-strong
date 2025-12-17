@@ -21,11 +21,7 @@ const SwitchButton = ({
       borderRadius={20}
       my={10}
     >
-      <Text
-        color={isSelected ? 'reverse' : 'primary'}
-        textAlign="center"
-        fontSize={11}
-      >
+      <Text color={isSelected ? 'reverse' : 'primary'} textAlign="center" fontSize={11}>
         {children}
       </Text>
     </Box>

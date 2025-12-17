@@ -26,8 +26,9 @@ const VideoSlice = ({ title, description, url }: VideoSliceProps) => {
         videoId={videoId}
         // onChangeState={event => console.log(event)}
         onReady={() => console.log('ready')}
-        onError={e => console.log(e)}
+        onError={(e: any) => console.log(e)}
         // onPlaybackQualityChange={q => console.log(q)}
+        // @ts-ignore
         placeholder={title}
       />
     </Box>

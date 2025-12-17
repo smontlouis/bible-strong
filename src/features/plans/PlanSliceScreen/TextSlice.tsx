@@ -21,12 +21,7 @@ const TextSlice = ({ description, subType }: TextSliceProps) => {
       })}
     >
       {isDevotional && (
-        <FeatherIcon
-          color="primary"
-          name="minus"
-          style={{ marginBottom: 20 }}
-          size={30}
-        />
+        <FeatherIcon color="primary" name="minus" style={{ marginBottom: 20 }} size={30} />
       )}
       <Paragraph
         scaleLineHeight={1}
@@ -36,12 +31,7 @@ const TextSlice = ({ description, subType }: TextSliceProps) => {
         {content}
       </Paragraph>
       {isDevotional && (
-        <FeatherIcon
-          color="primary"
-          name="minus"
-          style={{ marginTop: 20 }}
-          size={30}
-        />
+        <FeatherIcon color="primary" name="minus" style={{ marginTop: 20 }} size={30} />
       )}
     </Box>
   )

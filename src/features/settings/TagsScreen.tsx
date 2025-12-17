@@ -45,8 +45,7 @@ type TagItemProps = {
 
 const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   const { t } = useTranslation()
-  const highlightsNumber =
-    item.highlights && Object.keys(item.highlights).length
+  const highlightsNumber = item.highlights && Object.keys(item.highlights).length
   const notesNumber = item.notes && Object.keys(item.notes).length
   const studiesNumber = item.studies && Object.keys(item.studies).length
 
@@ -88,8 +87,7 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
               {!!highlightsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {highlightsNumber}{' '}
-                    {t('surbrillance', { count: highlightsNumber })}
+                    {highlightsNumber} {t('surbrillance', { count: highlightsNumber })}
                   </Text>
                 </Chip>
               )}
@@ -119,9 +117,7 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   )
 }
 
-const TagsScreen = ({
-  navigation,
-}: StackScreenProps<MainStackProps, 'Tags'>) => {
+const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) => {
   const { t } = useTranslation()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
@@ -142,21 +138,17 @@ const TagsScreen = ({
   }, [isOpen, open])
 
   const promptLogout = () => {
-    Alert.alert(
-      t('Attention'),
-      t('Êtes-vous vraiment sur de supprimer ce tag ?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => {
-            dispatch(removeTag(isOpen?.id))
-            close()
-          },
-          style: 'destructive',
+    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer ce tag ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          dispatch(removeTag(isOpen?.id))
+          close()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   return (
@@ -182,17 +174,10 @@ const TagsScreen = ({
           contentContainerStyle={{ paddingBottom: 70 }}
         />
       ) : (
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={t('Aucune étiquette...')}
-        />
+        <Empty source={require('~assets/images/empty.json')} message={t('Aucune étiquette...')} />
       )}
 
-      <Modal.Body
-        ref={ref}
-        onModalClose={() => setOpen(undefined)}
-        enableDynamicSizing
-      >
+      <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
         <Modal.Item
           bold
           onPress={() => {
@@ -221,6 +206,7 @@ const TagsScreen = ({
           }
         }}
       />
+      {/* @ts-ignore */}
       <FabButton
         icon="add"
         onPress={() => {

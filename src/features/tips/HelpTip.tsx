@@ -40,11 +40,7 @@ export const HelpTip = ({
         {description}
       </Text>
       <TouchableOpacity onPress={() => dismissTip(id)}>
-        <FeatherIcon
-          name="x"
-          size={20}
-          color={type === 'info' ? 'tertiary' : 'reverse'}
-        />
+        <FeatherIcon name="x" size={20} color={type === 'info' ? 'tertiary' : 'reverse'} />
       </TouchableOpacity>
     </HStack>
   )

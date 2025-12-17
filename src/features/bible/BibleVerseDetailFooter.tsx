@@ -21,15 +21,12 @@ const BibleVerseDetailFooter = ({
   goToNextVerse,
   goToPrevVerse,
   versesInCurrentChapter,
-}) => {
+}: any) => {
   const { t } = useTranslation()
   return (
     <Box row paddingLeft={20} paddingRight={20} my={20}>
       {!(verseNumber == 1) && (
-        <IconButton
-          activeOpacity={0.5}
-          onPress={() => goToPrevVerse(versesInCurrentChapter)}
-        >
+        <IconButton activeOpacity={0.5} onPress={() => goToPrevVerse(versesInCurrentChapter)}>
           <FeatherIcon name="arrow-left-circle" size={20} />
           <Text paddingLeft={10} color="darkGrey">
             {t('Verset précédent')}
@@ -38,10 +35,7 @@ const BibleVerseDetailFooter = ({
       )}
       <Box flex />
       {!(verseNumber == versesInCurrentChapter) && (
-        <IconButton
-          activeOpacity={0.5}
-          onPress={() => goToNextVerse(versesInCurrentChapter)}
-        >
+        <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
           <Text paddingRight={10} color="darkGrey">
             {t('Verset suivant')}
           </Text>

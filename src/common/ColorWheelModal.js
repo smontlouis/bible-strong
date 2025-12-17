@@ -68,9 +68,7 @@ const SelectBlockModal = ({ currentColor = {}, onClosed, t }) => {
           <>
             <Box height={200}>
               <ColorPicker
-                onChangeColor={(...color) =>
-                  setChosenColor(colorsys.hslToHex(...color))
-                }
+                onChangeColor={(...color) => setChosenColor(colorsys.hslToHex(...color))}
               />
             </Box>
             <Box row padding={10} center>

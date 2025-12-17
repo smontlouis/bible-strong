@@ -1,12 +1,7 @@
 import to from 'await-to-js'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  ActivityIndicator,
-  PermissionsAndroid,
-  Platform,
-  Share,
-} from 'react-native'
+import { ActivityIndicator, PermissionsAndroid, Platform, Share } from 'react-native'
 import { useDispatch } from 'react-redux'
 import RNFetchBlob from 'rn-fetch-blob'
 import slugify from 'slugify'
@@ -27,9 +22,7 @@ interface Props {
 }
 
 const useStudyStatus = (study: Study) => {
-  const { current: url } = React.useRef(
-    `https://bible-strong.app/studies/${study.id}`
-  )
+  const { current: url } = React.useRef(`https://bible-strong.app/studies/${study.id}`)
   const [status, setStatus] = useState<Status>('Idle')
   const [data, setData] = useState<number>()
   const [error, setError] = useState<Error>()
@@ -60,6 +53,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
 
+  // @ts-ignore
   const onPublishStudy = () => isConnected && dispatch(publishStudy(study.id))
 
   const copyToClipboard = async (url: string) => {
@@ -104,9 +98,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           {
             title: t('Accès au dossier de téléchargement'),
-            message: t(
-              'Bible Strong aimerait stocker les études dans votre dossier "Downloads"'
-            ),
+            message: t('Bible Strong aimerait stocker les études dans votre dossier "Downloads"'),
             buttonNeutral: t('Demandez plus tard'),
             buttonNegative: t('Annuler'),
             buttonPositive: t('Ok'),
@@ -174,6 +166,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
                     row
                     alignItems="center"
                     py={10}
+                    // @ts-ignore
                     onPress={() => dispatch(publishStudy(study.id, false))}
                   >
                     <FeatherIcon name="link-2" color="success" size={20} />
@@ -217,11 +210,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               alignItems="center"
               py={10}
               onPress={async () => {
-                const result = await shareVerse(
-                  study.title,
-                  study.user.displayName,
-                  url
-                )
+                const result = await shareVerse(study.title, study.user.displayName, url)
                 if (result.action === Share.sharedAction) {
                   onClosed()
                 }
@@ -231,12 +220,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               <Text ml={20}>{t('Partager')}</Text>
             </LinkBox>
             {(pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
-              <LinkBox
-                row
-                alignItems="center"
-                py={10}
-                onPress={() => exportPDF()}
-              >
+              <LinkBox row alignItems="center" py={10} onPress={() => exportPDF()}>
                 <MaterialIcon name="picture-as-pdf" size={20} />
                 {pdfStatus === 'Idle' ? (
                   <Text ml={20}>{t('Exporter en pdf')}</Text>
@@ -265,12 +249,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
       ) : (
         <>
           <Box p={20}>
-            <LinkBox
-              row
-              alignItems="center"
-              onPress={onPublishStudy}
-              disabled={!isConnected}
-            >
+            <LinkBox row alignItems="center" onPress={onPublishStudy} disabled={!isConnected}>
               <Text>{t("Publier l'étude")}</Text>
             </LinkBox>
           </Box>

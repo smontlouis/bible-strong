@@ -3,7 +3,17 @@ import { withTheme } from '@emotion/react'
 import Svg, { G, Path } from 'react-native-svg'
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 
-const SvgComponent = ({ color, theme, size = 22, ...props }) => (
+const SvgComponent = ({
+  color,
+  theme,
+  size = 22,
+  ...props
+}: {
+  color: any
+  theme: any
+  size?: number
+  [key: string]: any
+}) => (
   <Svg width={size} height={size} viewBox="0 0 18 22" {...props}>
     <G id="Page-1" stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">
       <G id="Group" transform="translate(1.000000, 1.000000)">

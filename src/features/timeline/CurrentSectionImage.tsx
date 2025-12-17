@@ -1,9 +1,5 @@
 import React from 'react'
-import {
-  SharedValue,
-  useAnimatedStyle,
-  useDerivedValue,
-} from 'react-native-reanimated'
+import { SharedValue, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 import SectionImage from './SectionImage'
 import { ShallowTimelineSection } from './types'

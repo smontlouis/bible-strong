@@ -7,12 +7,8 @@ import * as FileSystem from 'expo-file-system'
 const events = require('~assets/timeline/events.txt')
 
 export const getEvents = async () => {
-  const [{ localUri }] = await Asset.loadAsync(
-    require('~assets/timeline/events.txt')
-  )
+  const [{ localUri }] = await Asset.loadAsync(require('~assets/timeline/events.txt'))
 
-  const json = JSON.parse(
-    await FileSystem.readAsStringAsync(localUri as string)
-  )
+  const json = JSON.parse(await FileSystem.readAsStringAsync(localUri as string))
   return json as TimelineSection[]
 }

@@ -202,22 +202,13 @@ export type StrongReference = {
   error?: string
 }
 
-export type StudyNavigateBibleType =
-  | 'verse'
-  | 'verse-block'
-  | 'strong'
-  | 'strong-block'
+export type StudyNavigateBibleType = 'verse' | 'verse-block' | 'strong' | 'strong-block'
 
 export type VerseIds = {
   [verse: string]: true
 }
 
-export type BibleResource =
-  | 'strong'
-  | 'commentary'
-  | 'dictionary'
-  | 'nave'
-  | 'reference'
+export type BibleResource = 'strong' | 'commentary' | 'dictionary' | 'nave' | 'reference'
 
 export type RemoteConfigValue = 'enable_tts_public'
 

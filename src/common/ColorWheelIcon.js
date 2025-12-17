@@ -6,11 +6,7 @@ const SvgComponent = props => (
   <Svg width="25px" height="25px" viewBox="0 0 25 25" {...props}>
     <G id="Page-1" stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">
       <G id="BYR_color_wheel" fillRule="nonzero">
-        <G
-          id="a-link"
-          transform="translate(19.895833, 9.231771)"
-          fill="#FD5308"
-        >
+        <G id="a-link" transform="translate(19.895833, 9.231771)" fill="#FD5308">
           <Path
             d="M0.0557421875,5.30813802 C0.417352785,3.98107201 0.417352785,2.58142799 0.0557421875,1.25436198 L4.61686198,0.0208203125 C5.19693239,2.15573949 5.19693239,4.40676051 4.61686198,6.54167969"
             id="a"

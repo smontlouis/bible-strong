@@ -50,16 +50,7 @@ interface ItemProps {
 }
 
 const Body = forwardRef<BottomSheet, ModalBodyProps>(
-  (
-    {
-      withPortal,
-      children,
-      headerComponent,
-      enableScrollView = true,
-      ...props
-    },
-    ref
-  ) => {
+  ({ withPortal, children, headerComponent, enableScrollView = true, ...props }, ref) => {
     const Wrapper = withPortal ? Portal : React.Fragment
     const insets = useSafeAreaInsets()
     const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -79,14 +70,11 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
           {...bottomSheetStyles}
           {...props}
         >
-          {headerComponent && (
-            <BottomSheetView>{headerComponent}</BottomSheetView>
-          )}
+          {headerComponent && <BottomSheetView>{headerComponent}</BottomSheetView>}
           {enableScrollView ? (
             <BottomSheetScrollView
               contentContainerStyle={{
-                paddingBottom:
-                  bottomBarHeight + (props.footerComponent ? 54 : 0),
+                paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
               }}
             >
               {children}
@@ -95,8 +83,7 @@ const Body = forwardRef<BottomSheet, ModalBodyProps>(
             <BottomSheetView
               style={{
                 flex: 1,
-                paddingBottom:
-                  bottomBarHeight + (props.footerComponent ? 54 : 0),
+                paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
               }}
             >
               {children}

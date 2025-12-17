@@ -1,22 +1,13 @@
 import BottomSheet from '@gorhom/bottom-sheet'
 import { atom, PrimitiveAtom } from 'jotai/vanilla'
-import React, {
-  createContext,
-  useContext,
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-} from 'react'
+import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from 'react'
 import {
   BibleTab,
   BibleTabActions,
   defaultBibleAtom,
   useBibleTabActions,
 } from '../../../state/tabs'
-import BookSelectorBottomSheet, {
-  bookSelectorDataAtom,
-} from './BookSelectorBottomSheet'
+import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'
 import VersionSelectorBottomSheet, {
   versionSelectorDataAtom,
 } from '../VersionSelectorBottomSheet/VersionSelectorBottomSheet'
@@ -50,18 +41,12 @@ const BookSelectorContext = createContext<BookSelectorContextType | null>(null)
 export const useBookAndVersionSelector = () => {
   const context = useContext(BookSelectorContext)
   if (!context) {
-    throw new Error(
-      'useBookAndVersionSelector must be used within a BookSelectorProvider'
-    )
+    throw new Error('useBookAndVersionSelector must be used within a BookSelectorProvider')
   }
   return context
 }
 
-export const BookSelectorBottomSheetProvider = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
+export const BookSelectorBottomSheetProvider = ({ children }: { children: React.ReactNode }) => {
   const bookBottomSheetRef = useRef<BottomSheet>(null)
   const versionBottomSheetRef = useRef<BottomSheet>(null)
   const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
@@ -94,9 +79,7 @@ export const BookSelectorBottomSheetProvider = ({
   }
 
   return (
-    <BookSelectorContext.Provider
-      value={{ openBookSelector, openVersionSelector }}
-    >
+    <BookSelectorContext.Provider value={{ openBookSelector, openVersionSelector }}>
       {children}
       <BookSelectorBottomSheet bottomSheetRef={bookBottomSheetRef} />
       <VersionSelectorBottomSheet bottomSheetRef={versionBottomSheetRef} />

@@ -12,9 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-const LoginScreen = ({
-  navigation,
-}: StackScreenProps<MainStackProps, 'Login'>) => {
+const LoginScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Login'>) => {
   const { isLogged } = useLogin()
   const { t } = useTranslation()
 
@@ -33,9 +31,7 @@ const LoginScreen = ({
             {t('Bienvenue !')}
           </Text>
           <Paragraph scaleLineHeight={-2} marginBottom={10}>
-            {t(
-              'Connectez-vous pour sauvegarder toutes vos données sur le cloud !'
-            )}
+            {t('Connectez-vous pour sauvegarder toutes vos données sur le cloud !')}
           </Paragraph>
           <Login />
         </Box>

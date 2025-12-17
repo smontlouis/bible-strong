@@ -1,9 +1,5 @@
 import React from 'react'
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-} from 'react-native-reanimated'
+import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 import { wpUI } from '~helpers/utils'
 import SectionImage from './SectionImage'
@@ -16,12 +12,7 @@ interface Props {
 
 const PrevSectionImage = ({ x, prevEvent }: Props) => {
   const style = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      x.value,
-      [0, wpUI(100)],
-      [0, 1],
-      Extrapolation.CLAMP
-    )
+    const opacity = interpolate(x.value, [0, wpUI(100)], [0, 1], Extrapolation.CLAMP)
     return { opacity }
   })
 

@@ -26,6 +26,7 @@ interface Verse {
 }
 
 const ConcordanceByBook = () => {
+  // @ts-ignore
   const navigation = useNavigation()
   const route = useRoute<RouteProp<MainStackProps, 'ConcordanceByBook'>>()
   const { t } = useTranslation()
@@ -74,17 +75,17 @@ const ConcordanceByBook = () => {
             contentContainerStyle={{ padding: 20 }}
             removeClippedSubviews
             data={verses}
-            keyExtractor={item =>
-              `${item.Livre}-${item.Chapitre}-${item.Verset}`
-            }
-            renderItem={({ item }) => (
-              <ConcordanceVerse
-                navigation={navigation}
-                concordanceFor={Code}
-                verse={item}
-                t={t}
-              />
-            )}
+            keyExtractor={(item: any) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
+            renderItem={({ item }: any) => {
+              const props = {
+                navigation,
+                concordanceFor: Code,
+                verse: item,
+                t,
+              }
+              // @ts-ignore
+              return <ConcordanceVerse {...props} />
+            }}
           />
         </Box>
       )}

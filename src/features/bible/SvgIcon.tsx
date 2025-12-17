@@ -8,8 +8,9 @@ const Div = styled.View(() => ({
   justifyContent: 'center',
 }))
 
-class SvgIcon extends React.Component {
+class SvgIcon extends React.Component<any> {
   render() {
+    // @ts-ignore
     const { isSelected, color, size = 20, icon: Icon, theme } = this.props
     return (
       <Div>

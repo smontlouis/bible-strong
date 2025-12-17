@@ -11,13 +11,7 @@ type PlayButtonProps = {
   isLoading?: boolean
 }
 
-const PlayButton = ({
-  disabled,
-  isPlaying,
-  onToggle,
-  error,
-  isLoading,
-}: PlayButtonProps) => {
+const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayButtonProps) => {
   if (error) {
     return (
       <Box width={50} height={50} bg="reverse" mx={10} center>

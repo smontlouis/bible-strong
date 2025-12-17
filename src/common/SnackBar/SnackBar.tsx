@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
 interface Props {
   // Behaviour
   fadeOutDuration?: number
-  duration?: string
+  duration?: number
   isStatic?: boolean
   tapToClose?: boolean
 
@@ -100,6 +100,7 @@ interface Props {
   buttonColor: string
   textColor: string
   position: string
+  insets?: any
 }
 
 interface State {
@@ -150,15 +151,12 @@ class SnackBar extends Component<Props, State> {
   }
 
   show = () => {
-    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } =
-      this.state
+    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } = this.state
 
     const { fadeOutDuration, isStatic, duration, position } = this.props
 
-    const initialPosition =
-      position === 'top' ? INITIAL_POSITION_TOP : INITIAL_POSITION_BOTTOM
-    const transformOffsetY =
-      position === 'top' ? transformOffsetYTop : transformOffsetYBottom
+    const initialPosition = position === 'top' ? INITIAL_POSITION_TOP : INITIAL_POSITION_BOTTOM
+    const transformOffsetY = position === 'top' ? transformOffsetYTop : transformOffsetYBottom
 
     Animated.parallel([
       Animated.timing(transformOpacity, {
@@ -187,13 +185,11 @@ class SnackBar extends Component<Props, State> {
   }
 
   hide = () => {
-    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } =
-      this.state
+    const { transformOpacity, transformOffsetYTop, transformOffsetYBottom } = this.state
 
     const { fadeOutDuration, onAutoDismiss, position } = this.props
 
-    const transformOffsetY =
-      position === 'top' ? transformOffsetYTop : transformOffsetYBottom
+    const transformOffsetY = position === 'top' ? transformOffsetYTop : transformOffsetYBottom
     const toPosition = position === 'top' ? TO_POSITION_TOP : TO_POSITION_BOTTOM
 
     Animated.parallel([
@@ -214,6 +210,7 @@ class SnackBar extends Component<Props, State> {
     })
   }
 
+  // @ts-ignore
   renderButton = (text: string, onPress: () => void, style?: object) => {
     const { buttonColor } = this.props
 
@@ -225,29 +222,15 @@ class SnackBar extends Component<Props, State> {
           this.hide()
         }}
       >
-        <Text style={[styles.button, style, { color: buttonColor }]}>
-          {text}
-        </Text>
+        <Text style={[styles.button, style, { color: buttonColor }]}>{text}</Text>
       </TouchableOpacity>
     )
   }
 
   renderContent = () => {
-    const {
-      confirmText,
-      onConfirm,
-      cancelText,
-      onCancel,
-      title,
-      textColor,
-      textStyle,
-    } = this.props
+    const { confirmText, onConfirm, cancelText, onCancel, title, textColor, textStyle } = this.props
 
-    const titleElement = (
-      <Text style={[styles.text, { color: textColor }, textStyle]}>
-        {title}
-      </Text>
-    )
+    const titleElement = <Text style={[styles.text, { color: textColor }, textStyle]}>{title}</Text>
 
     if (confirmText && cancelText) {
       return (
@@ -274,8 +257,7 @@ class SnackBar extends Component<Props, State> {
   }
 
   render() {
-    const { style, renderContent, backgroundColor, position, tapToClose } =
-      this.props
+    const { style, renderContent, backgroundColor, position, tapToClose } = this.props
 
     const isTop = position === 'top'
     const transformOffsetY = isTop
@@ -285,13 +267,13 @@ class SnackBar extends Component<Props, State> {
       <TouchableWithoutFeedback onPress={() => tapToClose && this.hide()}>
         <Animated.View
           style={[
-            (isTop && styles.containerTop) ||
-              (!isTop && styles.containerBottom),
+            (isTop && styles.containerTop) || (!isTop && styles.containerBottom),
             {
               opacity: this.state.transformOpacity,
               transform: [{ translateY: transformOffsetY }],
               backgroundColor,
-              marginBottom: this.props.insets.bottom,
+              // @ts-ignore
+              marginBottom: this.props.insets?.bottom,
               left: 10,
               right: 10,
               borderRadius: 10,
@@ -306,4 +288,5 @@ class SnackBar extends Component<Props, State> {
   }
 }
 
+// @ts-ignore
 export default withSafeAreaInsets(SnackBar)

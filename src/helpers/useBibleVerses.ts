@@ -4,9 +4,7 @@ import { Verse } from '~common/types'
 import loadBible from '~helpers/loadBible'
 import { defaultBibleAtom } from '../state/tabs'
 
-export const verseStringToObject = (
-  arrayString: string[]
-): Omit<Verse, 'Texte'>[] => {
+export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
   return arrayString.map(string => {
     const [Livre, Chapitre, Verset] = string.split('-')
     return { Livre, Chapitre, Verset }
@@ -31,9 +29,7 @@ const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
           Livre: Number(Livre),
           Chapitre: Number(Chapitre),
         }))
-        .filter(v =>
-          verseIds.find(vI => Number(vI.Verset) === Number(v.Verset))
-        )
+        .filter(v => verseIds.find(vI => Number(vI.Verset) === Number(v.Verset)))
       setVerses(versesWithText)
     }
     loadVerses()

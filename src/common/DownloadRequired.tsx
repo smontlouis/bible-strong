@@ -32,12 +32,7 @@ const DownloadRequired = ({
   const { t } = useTranslation()
   return (
     <Container isSafe={size === 'large'}>
-      {hasHeader && (
-        <Header
-          title={t('Téléchargement nécessaire')}
-          hasBackButton={hasBackButton}
-        />
-      )}
+      {hasHeader && <Header title={t('Téléchargement nécessaire')} hasBackButton={hasBackButton} />}
       <Box flex center padding={padding}>
         <Box center maxWidth={300}>
           <Icon.Feather

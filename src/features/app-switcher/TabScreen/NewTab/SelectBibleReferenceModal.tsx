@@ -6,11 +6,7 @@ import Modal from '~common/Modal'
 import BibleSelect from '~features/bible/BibleSelect'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import wait from '~helpers/wait'
-import {
-  BibleTab,
-  getDefaultBibleTab,
-  useBibleTabActions,
-} from '../../../../state/tabs'
+import { BibleTab, getDefaultBibleTab, useBibleTabActions } from '../../../../state/tabs'
 import { selectBibleReferenceDataAtom } from './atoms'
 
 export interface SelectBibleReferenceModalProps {
@@ -20,10 +16,7 @@ export interface SelectBibleReferenceModalProps {
 
 const bibleAtom = atom(getDefaultBibleTab())
 
-const SelectBibleReferenceModal = ({
-  isOpen,
-  onClose,
-}: SelectBibleReferenceModalProps) => {
+const SelectBibleReferenceModal = ({ isOpen, onClose }: SelectBibleReferenceModalProps) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)

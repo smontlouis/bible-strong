@@ -20,7 +20,7 @@ const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
   backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent',
 }))
 
-const Highlight = ({ attribute, hit, highlight }) => {
+const Highlight = ({ attribute, hit, highlight }: any) => {
   const navigation = useNavigation()
   const highlights = highlight({
     highlightProperty: '_highlightResult',
@@ -29,9 +29,7 @@ const Highlight = ({ attribute, hit, highlight }) => {
   })
 
   const [book, chapter, verse] = hit.ref.split('-')
-  const { title } = formatVerseContent([
-    { Livre: book, Chapitre: chapter, Verset: verse },
-  ])
+  const { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
   const onPress = () =>
     navigation.navigate('BibleView', {
       isReadOnly: true,
@@ -46,7 +44,7 @@ const Highlight = ({ attribute, hit, highlight }) => {
         {title}
       </Text>
       <Paragraph small>
-        {highlights.map(({ value, isHighlighted }, index) => {
+        {highlights.map(({ value, isHighlighted }: any, index: any) => {
           return (
             <StyledParagraph isLight={isHighlighted} small key={index}>
               {value}

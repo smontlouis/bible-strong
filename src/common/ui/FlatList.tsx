@@ -3,7 +3,8 @@ import React, { useMemo } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
-const FlatList = styled.FlatList(({ theme, orientation, bg }) => ({
+// @ts-ignore
+const FlatList = styled.FlatList(({ theme, orientation, bg }: any) => ({
   paddingBottom: 30,
   backgroundColor: theme.colors[bg] || theme.colors.reverse,
   borderTopLeftRadius: 30,
@@ -32,26 +33,20 @@ const fadeIn = {
   },
 }
 
-const AnimatedFlatList = React.forwardRef(
-  ({ contentContainerStyle, ...props }, ref) => {
-    const insets = useSafeAreaInsets()
-    const orientation = useDeviceOrientation()
-    const style = useMemo(
-      () => ({
-        paddingBottom: 10 + insets.bottom,
-        ...contentContainerStyle,
-      }),
-      []
-    )
-    return (
-      <FlatList
-        orientation={orientation}
-        contentContainerStyle={style}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
+const AnimatedFlatList = React.forwardRef(({ contentContainerStyle, ...props }: any, ref: any) => {
+  const insets = useSafeAreaInsets()
+  const orientation = useDeviceOrientation()
+  const style = useMemo(
+    () => ({
+      paddingBottom: 10 + insets.bottom,
+      ...contentContainerStyle,
+    }),
+    []
+  )
+  return (
+    // @ts-ignore
+    <FlatList orientation={orientation} contentContainerStyle={style} ref={ref} {...props} />
+  )
+})
 
 export default AnimatedFlatList

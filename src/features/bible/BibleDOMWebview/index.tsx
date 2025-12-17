@@ -34,9 +34,7 @@ class BibleWebView extends Component<WebViewProps> {
 
     const run = `
       (function() {
-        document.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(
-          message
-        )}}));
+        document.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(message)}}));
       })();
       true;
     `
@@ -70,10 +68,7 @@ class BibleWebView extends Component<WebViewProps> {
         const { onChangeResourceTypeSelectVerse } = this.props
         const { Livre, Chapitre, Verset } = action.params.verse
         console.log(`${Livre}-${Chapitre}-${Verset}`)
-        onChangeResourceTypeSelectVerse(
-          'strong',
-          `${Livre}-${Chapitre}-${Verset}`
-        )
+        onChangeResourceTypeSelectVerse('strong', `${Livre}-${Chapitre}-${Verset}`)
 
         break
       }
@@ -140,9 +135,7 @@ class BibleWebView extends Component<WebViewProps> {
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
         const { navigation } = this.props
-        const book = Object.keys(books).find(
-          key => books[key][0].toUpperCase() === action.bookCode
-        )
+        const book = Object.keys(books).find(key => books[key][0].toUpperCase() === action.bookCode)
 
         if (!book) {
           SnackBar.show("Erreur lors de l'ouverture du verset")

@@ -44,12 +44,7 @@ const BibleShareOptionsScreen = () => {
   const dispatch = useDispatch()
   const [message, setMessage] = useState('')
 
-  const {
-    hasVerseNumbers,
-    hasInlineVerses,
-    hasQuotes,
-    hasAppName,
-  } = useShareOptions()
+  const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
 
   useEffect(() => {
     ;(async () => {
@@ -73,53 +68,37 @@ const BibleShareOptionsScreen = () => {
     <Container>
       <Header hasBackButton title={t('bible.settings.shareOptions')} />
       <ScrollView>
-        <Box
-          paddingHorizontal={20}
-          paddingVertical={10}
-          row
-          alignItems="center"
-        >
+        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasVerseNumbers')}</Text>
           <Switch
             value={hasVerseNumbers}
+            // @ts-ignore
             onValueChange={() => dispatch(toggleSettingsShareVerseNumbers())}
           />
         </Box>
-        <Box
-          paddingHorizontal={20}
-          paddingVertical={10}
-          row
-          alignItems="center"
-        >
+        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasInlineVerses')}</Text>
           <Switch
             value={hasInlineVerses}
+            // @ts-ignore
             onValueChange={() => dispatch(toggleSettingsShareLineBreaks())}
           />
         </Box>
-        <Box
-          paddingHorizontal={20}
-          paddingVertical={10}
-          row
-          alignItems="center"
-        >
+        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasQuotes')}</Text>
           <Switch
             value={hasQuotes}
+            // @ts-ignore
             onValueChange={() => dispatch(toggleSettingsShareQuotes())}
           />
         </Box>
-        <Box
-          paddingHorizontal={20}
-          paddingVertical={10}
-          row
-          alignItems="center"
-        >
+        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Box flex>
             <Text>{t('bible.settings.hasAppName')}</Text>
           </Box>
           <Switch
             value={hasAppName}
+            // @ts-ignore
             onValueChange={() => dispatch(toggleSettingsShareAppName())}
           />
         </Box>

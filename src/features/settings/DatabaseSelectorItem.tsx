@@ -26,28 +26,24 @@ import { DBStateContext } from '~helpers/databaseState'
 import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
 
-const Container = styled.View(
-  ({ needsUpdate, theme }: { needsUpdate: boolean; theme: Theme }) => ({
-    padding: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-    ...(needsUpdate
-      ? {
-          borderLeftColor: theme.colors.success,
-          borderLeftWidth: 5,
-        }
-      : {}),
-  })
-)
+const Container = styled.View(({ needsUpdate, theme }: { needsUpdate: boolean; theme: Theme }) => ({
+  padding: 20,
+  paddingTop: 10,
+  paddingBottom: 10,
+  ...(needsUpdate
+    ? {
+        borderLeftColor: theme.colors.success,
+        borderLeftWidth: 5,
+      }
+    : {}),
+}))
 
-const TextName = styled.Text(
-  ({ isSelected, theme }: { isSelected: boolean; theme: Theme }) => ({
-    color: isSelected ? theme.colors.primary : theme.colors.default,
-    fontSize: 16,
-    fontWeight: 'bold',
-    backgroundColor: 'transparent',
-  })
-)
+const TextName = styled.Text(({ isSelected, theme }: { isSelected: boolean; theme: Theme }) => ({
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontSize: 16,
+  fontWeight: 'bold',
+  backgroundColor: 'transparent',
+}))
 
 const TextCopyright = styled.Text(
   ({ isSelected, theme }: { isSelected: boolean; theme: Theme }) => ({
@@ -63,7 +59,7 @@ const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.quart,
 }))
 
-class DBSelectorItem extends React.Component {
+class DBSelectorItem extends React.Component<any, any> {
   static contextType = DBStateContext
 
   state = {
@@ -99,7 +95,7 @@ class DBSelectorItem extends React.Component {
     return getDatabasesRef()[database]
   }
 
-  calculateProgress = ({ totalBytesWritten }) => {
+  calculateProgress = ({ totalBytesWritten }: any) => {
     const { fileSize } = this.props
     const fileProgress = Math.floor((totalBytesWritten / fileSize) * 100) / 100
     this.setState({ fileProgress })
@@ -138,9 +134,7 @@ class DBSelectorItem extends React.Component {
     } catch (e) {
       console.log(e)
       SnackBar.show(
-        t(
-          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-        ),
+        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."),
         'danger'
       )
       this.setState({ isLoading: false })
@@ -149,13 +143,11 @@ class DBSelectorItem extends React.Component {
 
   delete = async () => {
     const { database, lang } = this.props
+    // @ts-ignore
     const [, dispatch] = this.context
 
     dispatch({
-      type:
-        database === 'STRONG'
-          ? 'strong.reset'
-          : 'dictionnaire.reset',
+      type: database === 'STRONG' ? 'strong.reset' : 'dictionnaire.reset',
     })
 
     // Use dbManager to delete the database
@@ -178,9 +170,7 @@ class DBSelectorItem extends React.Component {
   confirmDelete = () => {
     Alert.alert(
       this.props.t('Attention'),
-      this.props.t(
-        'Êtes-vous vraiment sur de supprimer cette base de données ?'
-      ),
+      this.props.t('Êtes-vous vraiment sur de supprimer cette base de données ?'),
       [
         { text: this.props.t('Non'), onPress: () => null, style: 'cancel' },
         {
@@ -209,11 +199,19 @@ class DBSelectorItem extends React.Component {
 
     if (versionNeedsDownload) {
       return (
-        <Container>
+        <Container needsUpdate={false} theme={theme}>
           <Box flex row>
             <Box disabled flex>
-              <TextName>{name}</TextName>
-              {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
+              {/* @ts-ignore */}
+              <TextName isSelected={false} theme={theme}>
+                {name}
+              </TextName>
+              {/* @ts-ignore */}
+              {subTitle && (
+                <TextCopyright isSelected={false} theme={theme}>
+                  {subTitle}
+                </TextCopyright>
+              )}
             </Box>
             {!isLoading && (
               <TouchableOpacity
@@ -229,12 +227,7 @@ class DBSelectorItem extends React.Component {
               </TouchableOpacity>
             )}
             {isLoading && (
-              <Box
-                width={100}
-                justifyContent="center"
-                alignItems="flex-end"
-                mr={10}
-              >
+              <Box width={100} justifyContent="center" alignItems="flex-end" mr={10}>
                 <ProgressCircle
                   size={25}
                   progress={fileProgress}
@@ -252,28 +245,26 @@ class DBSelectorItem extends React.Component {
     }
 
     return (
-      <Container needsUpdate={needsUpdate}>
+      <Container needsUpdate={needsUpdate} theme={theme}>
         <Box flex row center>
           <Box flex>
-            <TextName>{name}</TextName>
-            {subTitle && <TextCopyright>{subTitle}</TextCopyright>}
+            {/* @ts-ignore */}
+            <TextName isSelected={false} theme={theme}>
+              {name}
+            </TextName>
+            {/* @ts-ignore */}
+            {subTitle && (
+              <TextCopyright isSelected={false} theme={theme}>
+                {subTitle}
+              </TextCopyright>
+            )}
           </Box>
           {needsUpdate ? (
-            <TouchableOpacity
-              onPress={this.updateVersion}
-              style={{ padding: 10 }}
-            >
-              <Icon.Feather
-                color={theme.colors.success}
-                name="download"
-                size={18}
-              />
+            <TouchableOpacity onPress={this.updateVersion} style={{ padding: 10 }}>
+              <Icon.Feather color={theme.colors.success} name="download" size={18} />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity
-              onPress={this.confirmDelete}
-              style={{ padding: 10 }}
-            >
+            <TouchableOpacity onPress={this.confirmDelete} style={{ padding: 10 }}>
               <DeleteIcon name="trash-2" size={18} />
             </TouchableOpacity>
           )}
@@ -286,7 +277,9 @@ class DBSelectorItem extends React.Component {
 export default compose(
   withTranslation(),
   withTheme,
-  connect((state, ownProps) => ({
+  // @ts-ignore
+  connect((state: any, ownProps: any) => ({
     needsUpdate: state.user.needsUpdate[ownProps.database],
   }))
+  // @ts-ignore
 )(DBSelectorItem)

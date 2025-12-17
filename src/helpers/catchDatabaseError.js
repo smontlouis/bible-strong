@@ -37,13 +37,9 @@ const catchDBError = async fn => {
       return { error: 'DISK_IO' }
     }
 
-    SnackBar.show(
-      i18n.t('Une error est survenue, le développeur en a été informé.'),
-      'danger',
-      {
-        duration: 5000,
-      }
-    )
+    SnackBar.show(i18n.t('Une error est survenue, le développeur en a été informé.'), 'danger', {
+      duration: 5000,
+    })
 
     console.log(e)
 

@@ -17,20 +17,18 @@ const Tag = styled(Box)(({ theme }) => ({
   marginTop: 5,
 }))
 
-const TagList = ({ tags, limit }) => {
+const TagList = ({ tags, limit }: { tags: any; limit: any }) => {
   const navigation = useNavigation()
 
   if (!tags || !Object.values(tags).length) {
     return null
   }
 
-  const array = limit
-    ? Object.values(tags).slice(0, limit)
-    : Object.values(tags)
+  const array = limit ? Object.values(tags).slice(0, limit) : Object.values(tags)
 
   return (
     <Box wrap row>
-      {array.map(tag => (
+      {array.map((tag: any) => (
         <TouchableBox
           key={tag.id}
           onPress={() =>

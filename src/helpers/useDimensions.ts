@@ -13,7 +13,7 @@ export default function useDimensions() {
   })
 
   useEffect(() => {
-    const onChange = ({ window, screen }) => {
+    const onChange = ({ window, screen }: any) => {
       setDimensions({ window, screen })
     }
 

@@ -17,13 +17,11 @@ import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 
 const Changelog = () => {
-  const changelog = useSelector(
-    (state: RootState) => state.user.changelog.data,
-    shallowEqual
-  )
+  const changelog = useSelector((state: RootState) => state.user.changelog.data, shallowEqual)
   const { t } = useTranslation()
   const isFR = useLanguage()
 
+  // @ts-ignore
   changelog.sort((a, b) => b.date - a.date)
 
   return (
@@ -40,13 +38,9 @@ const Changelog = () => {
           <Border marginTop={15} />
           <Box marginTop={10}>
             {changelog.map(log => {
-              const formattedDate = distanceInWords(
-                Number(log.date),
-                Date.now(),
-                {
-                  locale: isFR ? fr : enGB,
-                }
-              )
+              const formattedDate = distanceInWords(Number(log.date), Date.now(), {
+                locale: isFR ? fr : enGB,
+              })
               return (
                 <Box key={log.date} marginTop={10} marginBottom={10}>
                   <Box row alignItems="flex-start">

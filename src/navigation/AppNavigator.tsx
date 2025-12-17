@@ -10,9 +10,7 @@ import {
 import MainStackNavigator from './MainStackNavigator'
 
 // Helper types for navigation ref and route ref
-type NavigationRef = NavigationContainerRefWithCurrent<
-  ReactNavigation.RootParamList
->
+type NavigationRef = NavigationContainerRefWithCurrent<ReactNavigation.RootParamList>
 type RouteRef = React.MutableRefObject<Route<string> | undefined>
 
 const setCurrentRoute = (navigationRef: NavigationRef, routeRef: RouteRef) => {
@@ -22,10 +20,7 @@ const setCurrentRoute = (navigationRef: NavigationRef, routeRef: RouteRef) => {
   routeRef.current = current_route
 }
 
-const onNavigationStateChange = (
-  navigationRef: NavigationRef,
-  routeRef: RouteRef
-) => {
+const onNavigationStateChange = (navigationRef: NavigationRef, routeRef: RouteRef) => {
   const currentRoute = navigationRef.getCurrentRoute()
 
   if (routeRef.current == undefined) return

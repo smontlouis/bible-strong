@@ -37,9 +37,7 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isStudySettingsOpen, setStudySettings] = React.useState(false)
   const [titlePrompt, setTitlePrompt] = React.useState(false)
-  const [pendingStudyId, setPendingStudyId] = React.useState<string | null>(
-    null
-  )
+  const [pendingStudyId, setPendingStudyId] = React.useState<string | null>(null)
 
   const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
   const studies = useSelector(
@@ -104,13 +102,11 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
             selectedChip={selectedChip}
             hasBackButton={hasBackButton}
           />
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('Aucune étude...')}
-          />
+          <Empty source={require('~assets/images/empty.json')} message={t('Aucune étude...')} />
         </>
       )}
       {isLogged && (
+        // @ts-ignore
         <FabButton
           icon="add"
           onPress={() => {
@@ -142,7 +138,7 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
       <StudyTitlePrompt
         titlePrompt={titlePrompt}
         onClosed={() => setTitlePrompt(false)}
-        onSave={(id, title) => {
+        onSave={(id: any, title: any) => {
           dispatch(updateStudy({ id, title, modified_at: Date.now() }))
         }}
       />

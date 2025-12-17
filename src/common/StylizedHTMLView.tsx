@@ -9,7 +9,7 @@ export const textStyle = {
   fontSize: 19,
 }
 
-export const styles = theme => ({
+export const styles = (theme: any) => ({
   h1: {
     fontWeight: 'bold',
     fontSize: 24,
@@ -87,8 +87,8 @@ export const styles = theme => ({
   },
 })
 
-const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => {
-  function renderNode(node, index, siblings, parent, defaultRenderer) {
+const StylizedHTMLView = ({ htmlStyle, theme, ...props }: any) => {
+  function renderNode(node: any, index: any, siblings: any, parent: any, defaultRenderer: any) {
     if (node.name === 'span') {
       return (
         <Text selectable key={index}>
@@ -99,11 +99,8 @@ const StylizedHTMLView = ({ htmlStyle, theme, ...props }) => {
   }
 
   return (
-    <HTMLView
-      stylesheet={{ ...styles(theme), ...htmlStyle }}
-      {...props}
-      renderNode={renderNode}
-    />
+    // @ts-ignore
+    <HTMLView stylesheet={{ ...styles(theme), ...htmlStyle }} {...props} renderNode={renderNode} />
   )
 }
 

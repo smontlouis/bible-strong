@@ -10,7 +10,7 @@ import { useWaitForDatabase } from '~common/waitForStrongDB'
 import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
 
-const hideIfNoDatabase = WrappedComponent => props => {
+const hideIfNoDatabase = (WrappedComponent: any) => (props: any) => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
 
   if (isLoading || proposeDownload) {
@@ -22,7 +22,7 @@ const hideIfNoDatabase = WrappedComponent => props => {
 const LIMIT = 5
 const height = 40
 
-const LexiqueResultsWidget = ({ searchValue }) => {
+const LexiqueResultsWidget = ({ searchValue }: any) => {
   const [error, setError] = useState(false)
   const [limit, setLimit] = useState(LIMIT)
 
@@ -47,17 +47,10 @@ const LexiqueResultsWidget = ({ searchValue }) => {
 
   return (
     <>
-      {results.slice(0, limit).map(strong => {
+      {results.slice(0, limit).map((strong: any) => {
         const { Grec, Mot, Code } = strong
         const variant = Grec ? 'grec' : 'hebreu'
-        return (
-          <LexiqueResultItem
-            key={Code + Mot}
-            id={Code}
-            title={Mot}
-            variant={variant}
-          />
-        )
+        return <LexiqueResultItem key={Code + Mot} id={Code} title={Mot} variant={variant} />
       })}
       {results.length > limit && (
         <Link onPress={() => setLimit(l => l + 5)}>

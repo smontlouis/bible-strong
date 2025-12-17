@@ -20,19 +20,16 @@ import { RootState } from '~redux/modules/reducer'
 import DetailsModal from '../PlanScreen/DetailsModal'
 import { useFireStorage } from '../plan.hooks'
 
-const ExplorePlanItem = (
-  {
-    id,
-    title,
-    downloads,
-    description,
-    image,
-    author,
-    type,
-    // navigation,
-    featured,
-  } /*: OnlinePlan & { navigation: StackNavigationProp<any, >> }*/
-) => {
+const ExplorePlanItem = ({
+  id,
+  title,
+  downloads,
+  description,
+  image,
+  author,
+  type,
+  featured,
+}: any) => {
   const navigation = useNavigation()
   const { t } = useTranslation()
   const modalRef = React.useRef<BottomSheet>(null)
@@ -102,18 +99,16 @@ const ExplorePlanItem = (
           author={author}
           downloads={downloads}
           description={description}
-          footerComponent={props => (
+          // @ts-ignore
+          footerComponent={(props: any) => (
             <BottomSheetFooter {...props}>
-              <Box
-                paddingBottom={10 + insets.bottom}
-                paddingHorizontal={20}
-                paddingTop={10}
-              >
+              <Box paddingBottom={10 + insets.bottom} paddingHorizontal={20} paddingTop={10}>
                 <Button
                   success
                   disabled={hasAlreadyStarted || isLoading}
                   onPress={() => {
                     setIsLoading(true)
+                    // @ts-ignore
                     dispatch(fetchPlan({ id, update: true }))
                       .then(() => {
                         setIsLoading(false)
@@ -121,7 +116,7 @@ const ExplorePlanItem = (
                         modalRef?.current?.close()
                         SnackBar.show(t('Plan ajouté avec succès'))
                       })
-                      .catch(e => {
+                      .catch((e: any) => {
                         console.log(e)
                         setIsLoading(false)
                         SnackBar.show(
@@ -136,8 +131,8 @@ const ExplorePlanItem = (
                   {hasAlreadyStarted
                     ? t('Plan démarré')
                     : isLoading
-                    ? t('Chargement...')
-                    : t('Démarrer ce plan')}
+                      ? t('Chargement...')
+                      : t('Démarrer ce plan')}
                 </Button>
               </Box>
             </BottomSheetFooter>

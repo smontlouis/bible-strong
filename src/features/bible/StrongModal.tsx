@@ -9,75 +9,64 @@ import Box from '~common/ui/Box'
 import waitForStrongModal from '~common/waitForStrongModal'
 import StrongCard from '~features/bible/StrongCard'
 import { isStrongVersion } from '~helpers/bibleVersions'
-import {
-  onAnimateModalClose,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { usePrevious } from '~helpers/usePrevious'
 
-const StrongCardWrapper = waitForStrongModal(
-  ({ navigation, selectedCode, onClosed }) => {
-    const theme = useTheme()
-    const [isLoading, setIsLoading] = useState(true)
-    const [strongReference, setStrongReference] = useState(null)
-    const [error, setError] = useState(false)
+const StrongCardWrapper = waitForStrongModal(({ navigation, selectedCode, onClosed }: any) => {
+  const theme = useTheme()
+  const [isLoading, setIsLoading] = useState(true)
+  const [strongReference, setStrongReference] = useState<any>(null)
+  const [error, setError] = useState(false)
 
-    useEffect(() => {
-      const loadStrong = async () => {
-        if (selectedCode?.reference) {
-          setError(false)
-          setIsLoading(true)
-          const strongReference = await loadStrongReference(
-            selectedCode.reference,
-            selectedCode.book
-          )
-          setStrongReference(strongReference)
+  useEffect(() => {
+    const loadStrong = async () => {
+      if (selectedCode?.reference) {
+        setError(false)
+        setIsLoading(true)
+        const strongReference = await loadStrongReference(selectedCode.reference, selectedCode.book)
+        setStrongReference(strongReference)
 
-          if (strongReference?.error || !strongReference) {
-            setError(true)
-            setIsLoading(false)
-            return
-          }
-
-          setIsLoading(false)
-        }
-        if (!selectedCode?.reference) {
+        if (strongReference?.error || !strongReference) {
           setError(true)
+          setIsLoading(false)
+          return
         }
+
+        setIsLoading(false)
       }
-
-      loadStrong()
-    }, [selectedCode])
-
-    if (error) {
-      return (
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message="Une erreur est survenue..."
-        />
-      )
+      if (!selectedCode?.reference) {
+        setError(true)
+      }
     }
 
-    if (isLoading) {
-      return (
-        <Box flex center height={200}>
-          <ActivityIndicator color={theme.colors.grey} />
-        </Box>
-      )
-    }
+    loadStrong()
+  }, [selectedCode])
+
+  if (error) {
     return (
-      <StrongCard
-        theme={theme}
-        navigation={navigation}
-        book={selectedCode?.book}
-        strongReference={strongReference}
-        isModal
-        onClosed={onClosed}
-      />
+      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
     )
   }
-)
+
+  if (isLoading) {
+    return (
+      <Box flex center height={200}>
+        <ActivityIndicator color={theme.colors.grey} />
+      </Box>
+    )
+  }
+  return (
+    <StrongCard
+      theme={theme}
+      navigation={navigation}
+      book={selectedCode?.book}
+      strongReference={strongReference}
+      isModal
+      onClosed={onClosed}
+    />
+  )
+})
 
 interface StrongModalProps {
   onClosed: () => void

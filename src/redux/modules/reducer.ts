@@ -6,7 +6,7 @@ import { mmkvStorage } from '~helpers/storage'
 import plan from './plan'
 import user from './user'
 
-const planPersistConfig = {
+const planPersistConfig: any = {
   key: 'plan',
   keyPrefix: '',
   storage: mmkvStorage,

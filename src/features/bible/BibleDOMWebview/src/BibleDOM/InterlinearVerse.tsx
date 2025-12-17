@@ -37,8 +37,7 @@ const AbsoluteSection = styled('div')<RootStyles & { isSelected?: boolean }>(
     background: colors[theme].reverse,
     minWidth: '50px',
     border: `3px solid ${colors[theme].primary}`,
-    boxShadow:
-      'rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
+    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
     ...(isSelected
       ? {
           zIndex: 3,
@@ -163,13 +162,7 @@ interface Props {
   selectedCode?: SelectedCode | null
 }
 
-const InterlinearVerse = ({
-  verse,
-  settings,
-  isHebreu,
-  secondaryVerse,
-  selectedCode,
-}: Props) => {
+const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedCode }: Props) => {
   const dispatch = useDispatch()
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
@@ -185,9 +178,7 @@ const InterlinearVerse = ({
     <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
       {secondaryVerse && showSecondaryVerse && (
         <VerseText settings={settings}>
-          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>
-            ✕
-          </CloseVerseText>
+          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>✕</CloseVerseText>
           {secondaryVerse.Verset} {secondaryVerse.Texte}
         </VerseText>
       )}
@@ -197,25 +188,15 @@ const InterlinearVerse = ({
         const isSelected = selectedCode?.reference?.toString() === code
 
         return (
-          <div
-            key={i}
-            style={{ position: 'relative', display: 'inline-block' }}
-          >
+          <div key={i} style={{ position: 'relative', display: 'inline-block' }}>
             <AbsoluteSection settings={settings} isSelected={isSelected}>
               <Code settings={settings}>{code}</Code>
               <AbsoluteHebreu settings={settings}>{hebreu}</AbsoluteHebreu>
               <Mot settings={settings}>{mot}</Mot>
-              {phonetique && (
-                <Phonetique settings={settings}>{phonetique}</Phonetique>
-              )}
-              {parsingTag && (
-                <ParsingTag settings={settings}>{parsingTag}</ParsingTag>
-              )}
+              {phonetique && <Phonetique settings={settings}>{phonetique}</Phonetique>}
+              {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
             </AbsoluteSection>
-            <Section
-              onClick={() => navigateToStrong(code, isHebreu)}
-              settings={settings}
-            >
+            <Section onClick={() => navigateToStrong(code, isHebreu)} settings={settings}>
               <Hebreu isSelected={isSelected} settings={settings}>
                 {hebreu}
               </Hebreu>

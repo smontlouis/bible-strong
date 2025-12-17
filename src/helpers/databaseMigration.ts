@@ -48,9 +48,7 @@ const JSON_DBS_TO_MIGRATE: DatabaseId[] = ['TIMELINE', 'SEARCH']
  *   fr/bible-timeline-events.json
  *   en/bible-timeline-events.json
  */
-export async function migrateToLanguageFolders(
-  currentLang: ResourceLanguage
-): Promise<void> {
+export async function migrateToLanguageFolders(currentLang: ResourceLanguage): Promise<void> {
   console.log('[DB Migration] Starting migration to language folders...')
   console.log(`[DB Migration] Current language: ${currentLang}`)
 
@@ -82,10 +80,7 @@ export async function migrateToLanguageFolders(
 /**
  * Migrate a SQLite database from old location to new language-specific location
  */
-async function migrateSqliteDb(
-  dbId: DatabaseId,
-  targetLang: ResourceLanguage
-): Promise<void> {
+async function migrateSqliteDb(dbId: DatabaseId, targetLang: ResourceLanguage): Promise<void> {
   const fileName = getDbFileName(dbId)
   const oldPath = `${BASE_SQLITE_DIR}/${fileName}`
   const newPath = `${getSqliteDirPath(targetLang)}/${fileName}`
@@ -107,10 +102,7 @@ async function migrateTresorDb(): Promise<void> {
 /**
  * Migrate a JSON file from old location to new language-specific location
  */
-async function migrateJsonFile(
-  dbId: DatabaseId,
-  targetLang: ResourceLanguage
-): Promise<void> {
+async function migrateJsonFile(dbId: DatabaseId, targetLang: ResourceLanguage): Promise<void> {
   const fileName = getDbFileName(dbId)
   const oldPath = `${FileSystem.documentDirectory}${fileName}`
   const newPath = `${getJsonDirPath(targetLang)}/${fileName}`
@@ -121,11 +113,7 @@ async function migrateJsonFile(
 /**
  * Move a file if it exists at the old path and doesn't exist at the new path
  */
-async function moveFileIfExists(
-  oldPath: string,
-  newPath: string,
-  dbId: string
-): Promise<void> {
+async function moveFileIfExists(oldPath: string, newPath: string, dbId: string): Promise<void> {
   try {
     const oldFileInfo = await FileSystem.getInfoAsync(oldPath)
 
@@ -137,9 +125,7 @@ async function moveFileIfExists(
     // Check if file already exists at new location
     const newFileInfo = await FileSystem.getInfoAsync(newPath)
     if (newFileInfo.exists) {
-      console.log(
-        `[DB Migration] ${dbId}: File already exists at new location, removing old file`
-      )
+      console.log(`[DB Migration] ${dbId}: File already exists at new location, removing old file`)
       await FileSystem.deleteAsync(oldPath, { idempotent: true })
       return
     }

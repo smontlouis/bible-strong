@@ -6,10 +6,7 @@ import { StudyTab } from '../../state/tabs'
 import StudiesTabScreen from './StudiesTabScreen'
 import { MainStackProps } from '~navigation/type'
 
-const StudiesScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'Studies'>) => {
+const StudiesScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Studies'>) => {
   const studyId = route.params?.studyId
 
   const onTheFlyAtom = useMemo(
@@ -27,12 +24,6 @@ const StudiesScreen = ({
     []
   )
 
-  return (
-    <StudiesTabScreen
-      studyAtom={onTheFlyAtom}
-      navigation={navigation}
-      route={route}
-    />
-  )
+  return <StudiesTabScreen studyAtom={onTheFlyAtom} navigation={navigation} route={route} />
 }
 export default StudiesScreen

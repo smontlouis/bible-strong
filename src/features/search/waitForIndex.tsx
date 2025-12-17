@@ -63,15 +63,13 @@ export const useWaitForIndex = () => {
         }
 
         try {
-          const fileSize =
-            databases(resourceLang).SEARCH?.fileSize || IDX_LIGHT_FILE_SIZE
+          const fileSize = databases(resourceLang).SEARCH?.fileSize || IDX_LIGHT_FILE_SIZE
           await FileSystem.createDownloadResumable(
             idxUri,
             idxPath,
             undefined,
             ({ totalBytesWritten }) => {
-              const idxProgress =
-                Math.floor((totalBytesWritten / fileSize) * 100) / 100
+              const idxProgress = Math.floor((totalBytesWritten / fileSize) * 100) / 100
               setProgress(idxProgress)
             }
           ).downloadAsync()
@@ -110,7 +108,7 @@ export const useWaitForIndex = () => {
   }
 }
 
-const waitForIndex = (WrappedComponent) => (props) => {
+const waitForIndex = (WrappedComponent: any) => (props: any) => {
   const { t } = useTranslation()
   const {
     isLoading,

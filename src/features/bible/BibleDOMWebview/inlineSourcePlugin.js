@@ -15,17 +15,10 @@ export default ({
   writeBundle(outputOptions, bundle) {
     Object.values(bundle).forEach(async file => {
       if (file.type !== 'asset' || !filter(file.fileName)) return
-      const data = (file.source = await inlineSource(
-        file.source.toString(),
-        options
-      ))
-      fs.writeFile(
-        `${outputOptions.dir}/${file.fileName}`,
-        data,
-        (err, data) => {
-          if (err) return console.log(err)
-        }
-      )
+      const data = (file.source = await inlineSource(file.source.toString(), options))
+      fs.writeFile(`${outputOptions.dir}/${file.fileName}`, data, (err, data) => {
+        if (err) return console.log(err)
+      })
     })
   },
 })

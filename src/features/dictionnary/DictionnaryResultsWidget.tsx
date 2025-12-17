@@ -10,7 +10,7 @@ import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import DictionnaryResultItem from './DictionaryResultItem'
 
-const hideIfNoDatabase = WrappedComponent => props => {
+const hideIfNoDatabase = (WrappedComponent: any) => (props: any) => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
 
   if (isLoading || proposeDownload) {
@@ -24,7 +24,7 @@ const height = 40
 const color1 = '#ffd255'
 const color2 = '#ffbc00'
 
-const LexiqueResultsWidget = ({ searchValue }) => {
+const LexiqueResultsWidget = ({ searchValue }: any) => {
   const [error, setError] = useState(false)
   const [limit, setLimit] = useState(LIMIT)
 
@@ -49,7 +49,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
 
   return (
     <>
-      {results.slice(0, limit).map(ref => {
+      {results.slice(0, limit).map((ref: any) => {
         const { word } = ref
         return <DictionnaryResultItem key={word} word={word} />
       })}
@@ -74,11 +74,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                 borderRadius: 3,
               }}
             >
-              <LinearGradient
-                start={[0.1, 0.2]}
-                style={{ height }}
-                colors={[color1, color2]}
-              />
+              <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
             </Box>
             <Text title fontSize={14} style={{ color: 'white' }}>
               + {results.length - limit}

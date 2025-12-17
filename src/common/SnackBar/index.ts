@@ -1,7 +1,7 @@
 import SnackBarManager from './SnackBarManager'
 const SnackBar = new SnackBarManager()
 
-const getBackgroundColor = type => {
+const getBackgroundColor = (type: any) => {
   switch (type) {
     case 'info':
       return '#2E302E'

@@ -1,22 +1,12 @@
 import styled from '@emotion/native'
 import React, { forwardRef } from 'react'
-import {
-  DimensionValue,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native'
+import { DimensionValue, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 import Animated, { Easing } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Animatable from 'react-native-animatable'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { TouchableOpacityProps } from 'react-native-gesture-handler'
-import {
-  motify,
-  MotiTransitionProp,
-  StyleValueWithReplacedTransforms,
-} from 'moti'
+import { motify, MotiTransitionProp, StyleValueWithReplacedTransforms } from 'moti'
 import Text from './Text'
 import { ImageStyle } from 'expo-image'
 
@@ -162,8 +152,7 @@ const Box = styled.View<BoxProps>(props => ({
   borderLeftWidth: props.borderLeftWidth,
   borderRightWidth: props.borderRightWidth,
   borderColor:
-    props.theme.colors[props.borderColor as keyof typeof props.theme.colors] ??
-    props.borderColor,
+    props.theme.colors[props.borderColor as keyof typeof props.theme.colors] ?? props.borderColor,
   transform: props.transform,
   borderRadius: props.borderRadius,
   borderTopLeftRadius: props.borderTopLeftRadius,
@@ -193,15 +182,13 @@ const Box = styled.View<BoxProps>(props => ({
   flexDirection: props.row ? 'row' : 'column',
   flexShrink: props.flexShrink,
 
-  opacity: props.disabled ? 0.3 : props.opacity ?? 1,
+  opacity: props.disabled ? 0.3 : (props.opacity ?? 1),
 
   backgroundColor: props.theme.colors[
     (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
   ]
-    ? props.theme.colors[
-        (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
-      ]
-    : props.backgroundColor ?? props.bg,
+    ? props.theme.colors[(props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors]
+    : (props.backgroundColor ?? props.bg),
 
   ...(props.background
     ? {
@@ -286,23 +273,14 @@ export const AnimatedSafeAreaBox = forwardRef<
   Animated.AnimateProps<BoxProps> & { hasBottomTabBar?: boolean }
 >((props, ref) => {
   const insets = useSafeAreaInsets()
-  return (
-    <AnimatedBox
-      ref={ref}
-      paddingTop={insets.top}
-      paddingBottom={insets.bottom}
-      {...props}
-    />
-  )
+  return <AnimatedBox ref={ref} paddingTop={insets.top} paddingBottom={insets.bottom} {...props} />
 })
 const BasicTouchableBox = Box.withComponent(TouchableOpacity)
 export const TouchableBox = (props: BoxProps & TouchableOpacityProps) => (
   <BasicTouchableBox {...props} activeOpacity={0.6} />
 )
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
-export const AnimatedTouchableBox = Animated.createAnimatedComponent(
-  BasicTouchableBox
-)
+export const AnimatedTouchableBox = Animated.createAnimatedComponent(BasicTouchableBox)
 export const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
 export const MotiTouchableBox = motify(BasicTouchableBox)()

@@ -4,7 +4,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import NaveModalItem from './NaveModalItem'
 
-const NaveModalForVerse = ({ items, label }) => {
+const NaveModalForVerse = ({ items, label }: any) => {
   if (!items) {
     return null
   }
@@ -15,7 +15,7 @@ const NaveModalForVerse = ({ items, label }) => {
         {label}
       </Text>
       <Box row wrap marginTop={5} marginBottom={20}>
-        {items.map((item, i) => (
+        {items.map((item: any, i: number) => (
           <NaveModalItem key={i} item={item} />
         ))}
       </Box>

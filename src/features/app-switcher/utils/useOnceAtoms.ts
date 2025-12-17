@@ -6,9 +6,7 @@ export const useOnceAtoms = () => {
   const initialTabIndex = useRef(getDefaultStore().get(activeTabIndexAtom))
   const initialAtomId = useRef(
     (
-      getDefaultStore().get(tabsAtomsAtom)[
-        initialTabIndex.current
-      ] as unknown as TabItem
+      getDefaultStore().get(tabsAtomsAtom)[initialTabIndex.current] as unknown as TabItem
     )?.toString()
   )
 

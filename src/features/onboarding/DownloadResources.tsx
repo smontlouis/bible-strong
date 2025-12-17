@@ -1,10 +1,7 @@
 import { useTheme } from '@emotion/react'
 import to from 'await-to-js'
 import * as FileSystem from 'expo-file-system'
-import {
-  DownloadProgressData,
-  FileSystemNetworkTaskProgressCallback,
-} from 'expo-file-system'
+import { DownloadProgressData, FileSystemNetworkTaskProgressCallback } from 'expo-file-system'
 import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,11 +29,11 @@ const DownloadResources = ({ setFirstTime }: DownloadResourcesProps) => {
 
   const calculateProgress: (
     fileSize: number
-  ) => FileSystemNetworkTaskProgressCallback<DownloadProgressData> = (
-    fileSize: number
-  ) => ({ totalBytesWritten }) => {
-    setFileProgress(Math.floor((totalBytesWritten / fileSize) * 100) / 100)
-  }
+  ) => FileSystemNetworkTaskProgressCallback<DownloadProgressData> =
+    (fileSize: number) =>
+    ({ totalBytesWritten }) => {
+      setFileProgress(Math.floor((totalBytesWritten / fileSize) * 100) / 100)
+    }
 
   useEffect(() => {
     ;(async () => {

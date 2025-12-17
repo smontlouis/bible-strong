@@ -1,10 +1,7 @@
 import React from 'react'
 
 import { useTheme } from '@emotion/react'
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { Image as RNImage } from 'react-native'
@@ -18,8 +15,7 @@ import { Theme } from '~themes'
 
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
-interface Props
-  extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
+interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
   modalRefDetails: React.RefObject<BottomSheet>
   headerComponent?: React.ReactNode
   footerComponent?: () => React.ReactNode

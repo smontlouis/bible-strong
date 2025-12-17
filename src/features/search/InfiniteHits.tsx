@@ -1,8 +1,5 @@
 import React from 'react'
-import {
-  connectInfiniteHits,
-  connectStateResults,
-} from 'react-instantsearch-native'
+import { connectInfiniteHits, connectStateResults } from 'react-instantsearch-native'
 import FlatList from '~common/ui/FlatList'
 
 import Box from '~common/ui/Box'
@@ -53,9 +50,7 @@ const InfiniteHits = ({
             {error ? (
               <Empty
                 source={require('~assets/images/empty.json')}
-                message={t(
-                  "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
-                )}
+                message={t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")}
               />
             ) : (
               <Box paddingHorizontal={20}>
@@ -69,9 +64,10 @@ const InfiniteHits = ({
           </Box>
         }
         data={hits}
-        keyExtractor={(item) => item.objectID}
+        keyExtractor={(item: any) => item.objectID}
         onEndReached={() => hasMore && refineNext()}
-        renderItem={({ item }) => (
+        renderItem={({ item }: any) => (
+          // @ts-ignore
           <Highlight attribute={isFR ? 'LSG' : 'KJV'} hit={item} />
         )}
       />
@@ -79,4 +75,5 @@ const InfiniteHits = ({
   )
 }
 
+// @ts-ignore
 export default connectInfiniteHits(connectStateResults(InfiniteHits))

@@ -45,16 +45,8 @@ const ReadingSlice = ({
 }: ComputedReadingSlice & Props) => {
   const isNext = status === 'Next'
   return (
-    <Link
-      route="PlanSlice"
-      params={{ readingSlice: { id, planId, title, slices } }}
-    >
-      <Box
-        paddingLeft={28}
-        paddingTop={15}
-        backgroundColor="reverse"
-        position="relative"
-      >
+    <Link route="PlanSlice" params={{ readingSlice: { id, planId, title, slices } }}>
+      <Box paddingLeft={28} paddingTop={15} backgroundColor="reverse" position="relative">
         <FineLine />
         <Box row marginBottom={15}>
           <Box flex>
@@ -74,9 +66,7 @@ const ReadingSlice = ({
                 <EntitySlice
                   status={status}
                   isSectionCompleted={isSectionCompleted}
-                  isLast={
-                    i === slices.filter(f => f.type !== 'Image').length - 1
-                  }
+                  isLast={i === slices.filter(f => f.type !== 'Image').length - 1}
                   key={slice.id}
                   {...slice}
                 />

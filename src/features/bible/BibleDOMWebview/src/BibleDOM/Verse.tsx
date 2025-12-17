@@ -14,11 +14,7 @@ import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import { RootState } from '../../../../../redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
-import {
-  SelectedCode,
-  StudyNavigateBibleType,
-  Verse as TVerse,
-} from '../../../../../common/types'
+import { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '../../../../../common/types'
 import { NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import VerseTextFormatting from './VerseTextFormatting'
 import { ContainerText } from './ContainerText'
@@ -29,11 +25,7 @@ import VerseTags from './VerseTags'
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleLineHeight(
-      isParallel ? 26 : 32,
-      lineHeight,
-      fontSizeScale
-    ),
+    lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
   })
 )
 
@@ -199,12 +191,7 @@ const Verse = ({
         navigateToBibleVerseDetail()
       }
     }
-  }, [
-    isSelectionMode,
-    settings.press,
-    toggleSelectVerse,
-    navigateToBibleVerseDetail,
-  ])
+  }, [isSelectionMode, settings.press, toggleSelectVerse, navigateToBibleVerseDetail])
 
   const onTouchStart = useCallback(() => {
     shouldShortPressRef.current = true
@@ -343,15 +330,9 @@ const Verse = ({
         <NumberText isFocused={isFocused} settings={settings}>
           {verse.Verset}{' '}
         </NumberText>
-        {notesCount &&
-          settings.notesDisplay !== 'inline' &&
-          !isSelectionMode && (
-            <NotesCount
-              settings={settings}
-              onClick={navigateToVerseNotes}
-              count={notesCount}
-            />
-          )}
+        {notesCount && settings.notesDisplay !== 'inline' && !isSelectionMode && (
+          <NotesCount settings={settings} onClick={navigateToVerseNotes} count={notesCount} />
+        )}
         <VerseText
           isParallel={isParallel}
           settings={settings}

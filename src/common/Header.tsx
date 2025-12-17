@@ -43,12 +43,7 @@ const Header = ({
           )}
         </Box>
         <Box flex center>
-          <Text
-            numberOfLines={1}
-            title
-            fontSize={smallSize ? 16 : fontSize}
-            onPress={onTitlePress}
-          >
+          <Text numberOfLines={1} title fontSize={smallSize ? 16 : fontSize} onPress={onTitlePress}>
             {title}
           </Text>
         </Box>

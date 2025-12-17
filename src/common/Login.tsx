@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
-import appleAuth, {
-  AppleButton,
-} from '@invertase/react-native-apple-authentication'
+import appleAuth, { AppleButton } from '@invertase/react-native-apple-authentication'
 
 import SnackBar from '~common/SnackBar'
 import Link from '~common/Link'
@@ -16,7 +14,8 @@ import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
 import { useTranslation } from 'react-i18next'
 
-const SocialButton = styled.TouchableOpacity(({ theme, color }) => ({
+// @ts-ignore
+const SocialButton = styled.TouchableOpacity(({ theme, color }: any) => ({
   flexDirection: 'row',
   borderRadius: 48,
   height: 48,
@@ -32,15 +31,16 @@ const ButtonIcon = styled(Icon.FontAwesome)(() => ({
   marginRight: 15,
 }))
 
-const ButtonText = styled(Text)(({ theme, color }) => ({
+// @ts-ignore
+const ButtonText = styled(Text)(({ theme, color }: any) => ({
   fontSize: 16,
-  color: color || theme.colors.defaut,
+  color: color || theme.colors.default,
 }))
 
 const defaultEmail = __DEV__ ? 'test@test.com' : ''
 const defaultPassword = __DEV__ ? 'testtest' : ''
 
-const Login = ({ theme }) => {
+const Login = ({ theme }: any) => {
   const { t } = useTranslation()
   const [isLoading, setLoading] = useState(false)
   const [email, setEmail] = useState(defaultEmail)
@@ -48,7 +48,7 @@ const Login = ({ theme }) => {
 
   const onGoogleLogin = async () => {
     setLoading(true)
-    const isStillLoading = await FireAuth.googleLogin()
+    const isStillLoading: any = await FireAuth.googleLogin()
     setLoading(isStillLoading)
   }
 
@@ -64,13 +64,13 @@ const Login = ({ theme }) => {
       return false
     }
     setLoading(true)
-    const isStillLoading = await FireAuth.login(email, password)
+    const isStillLoading: any = await FireAuth.login(email, password)
     setLoading(isStillLoading)
   }
 
   const onAppleLogin = async () => {
     setLoading(true)
-    const isStillLoading = await FireAuth.appleLogin()
+    const isStillLoading: any = await FireAuth.appleLogin()
     setLoading(isStillLoading)
   }
 
@@ -80,7 +80,7 @@ const Login = ({ theme }) => {
       return false
     }
     setLoading(true)
-    const isStillLoading = await FireAuth.resetPassword(email)
+    const isStillLoading: any = await FireAuth.resetPassword(email)
     setLoading(isStillLoading)
   }
 
@@ -89,24 +89,21 @@ const Login = ({ theme }) => {
       <Box>
         <TextInput
           placeholder="Email"
-          leftIcon={
-            <Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />
-          }
+          leftIcon={<Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />}
           onChangeText={setEmail}
           value={email}
         />
         <Spacer />
         <TextInput
           placeholder={t('Mot de passe')}
-          leftIcon={
-            <Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />
-          }
+          leftIcon={<Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />}
           secureTextEntry
           onChangeText={setPassword}
           value={password}
         />
         <Box alignItems="flex-end" marginTop={10}>
           <Link onPress={resetPassword}>
+            {/* @ts-ignore */}
             <Text underline>{t('Mot de passe oublié ?')}</Text>
           </Link>
         </Box>
@@ -117,6 +114,7 @@ const Login = ({ theme }) => {
       </Box>
       <Spacer />
       <Box center>
+        {/* @ts-ignore */}
         <Text titleItalic fontSize={16}>
           {t('- ou -')}
         </Text>
@@ -132,11 +130,8 @@ const Login = ({ theme }) => {
       )}
       <Spacer />
       <Box row>
-        <SocialButton
-          disabled={isLoading}
-          onPress={onGoogleLogin}
-          color="#D14C3E"
-        >
+        {/* @ts-ignore */}
+        <SocialButton disabled={isLoading} onPress={onGoogleLogin} color="#D14C3E">
           <ButtonIcon size={20} name="google" color="white" />
           <ButtonText color="white">Google</ButtonText>
         </SocialButton>
@@ -153,6 +148,7 @@ const Login = ({ theme }) => {
       <Spacer size={2} />
       <Box center pb={20}>
         <Link route="Register">
+          {/* @ts-ignore */}
           <Text underline>{t('Pas de compte ? Inscrivez-vous.')}</Text>
         </Link>
       </Box>

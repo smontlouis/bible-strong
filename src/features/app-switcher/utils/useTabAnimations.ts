@@ -1,11 +1,7 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useCallback } from 'react'
 import { runOnJS, withDelay, withTiming } from 'react-native-reanimated'
-import {
-  activeTabIndexAtom,
-  appSwitcherModeAtom,
-  tabsAtomsAtom,
-} from '../../../state/tabs'
+import { activeTabIndexAtom, appSwitcherModeAtom, tabsAtomsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 import useTabConstants from './useTabConstants'
@@ -18,8 +14,7 @@ export const useTabAnimations = () => {
   const { HEIGHT } = useTabConstants()
   const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
-  const { activeTabPreview, activeTabScreen, tabPreviewCarousel } =
-    useAppSwitcherContext()
+  const { activeTabPreview, activeTabScreen, tabPreviewCarousel } = useAppSwitcherContext()
 
   const setAtomId = (index: number) => {
     const atomId = getDefaultStore().get(tabsAtomsAtom)[index].toString()
@@ -40,13 +35,9 @@ export const useTabAnimations = () => {
   const minimizeTab = useCallback(() => {
     'worklet'
     activeTabScreen.opacity.value = withTiming(0)
-    activeTabPreview.animationProgress.value = withTiming(
-      0,
-      tabTimingConfig,
-      () => {
-        activeTabPreview.zIndex.value = 2
-      }
-    )
+    activeTabPreview.animationProgress.value = withTiming(0, tabTimingConfig, () => {
+      activeTabPreview.zIndex.value = 2
+    })
     runOnJS(setAppSwitcherMode)('list')
     activeTabScreen.atomId.value = null
   }, [])
@@ -61,23 +52,19 @@ export const useTabAnimations = () => {
       activeTabPreview.top.value = top
       activeTabPreview.index.value = index
 
-      activeTabPreview.animationProgress.value = withTiming(
-        1,
-        tabTimingConfig,
-        () => {
-          runOnJS(setActiveTabIndex)(index)
-          runOnJS(setAtomId)(index)
-          runOnJS(setActiveTabOpacity)()
-          // activeTabScreen.opacity.value = withTiming(1, undefined, () => {
-          //   // !TODO - Fix scroll to top
-          //   // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
-          //   //   const scrollToTop =
-          //   //     Math.round(top) - STATUS_BAR_HEIGHT - SCREEN_MARGIN
-          //   //   scrollTo(scrollView.ref, 0, scrollToTop, false)
-          //   // }
-          // })
-        }
-      )
+      activeTabPreview.animationProgress.value = withTiming(1, tabTimingConfig, () => {
+        runOnJS(setActiveTabIndex)(index)
+        runOnJS(setAtomId)(index)
+        runOnJS(setActiveTabOpacity)()
+        // activeTabScreen.opacity.value = withTiming(1, undefined, () => {
+        //   // !TODO - Fix scroll to top
+        //   // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
+        //   //   const scrollToTop =
+        //   //     Math.round(top) - STATUS_BAR_HEIGHT - SCREEN_MARGIN
+        //   //   scrollTo(scrollView.ref, 0, scrollToTop, false)
+        //   // }
+        // })
+      })
     },
     [setAtomId]
   )
@@ -92,30 +79,26 @@ export const useTabAnimations = () => {
     activeTabScreen.atomId.value = null
     runOnJS(setActiveTabIndex)(index)
 
-    activeTabPreview.index.value = withTiming(
-      index,
-      { duration: 400 },
-      (finished) => {
-        if (!finished) return
+    activeTabPreview.index.value = withTiming(index, { duration: 400 }, finished => {
+      if (!finished) return
 
-        runOnJS(setAtomId)(index)
-        tabPreviewCarousel.opacity.value = withDelay(
-          200,
-          withTiming(0, undefined, (finish) => {
-            if (!finish) {
-              tabPreviewCarousel.opacity.value = 1
-              return
-            }
-            tabPreviewCarousel.translateY.value = HEIGHT
-            activeTabPreview.zIndex.value = 3
-            runOnJS(takeActiveTabSnapshot)(
-              activeTabPreview.index.value,
-              activeTabScreen.atomId.value || ''
-            )
-          })
-        )
-      }
-    )
+      runOnJS(setAtomId)(index)
+      tabPreviewCarousel.opacity.value = withDelay(
+        200,
+        withTiming(0, undefined, finish => {
+          if (!finish) {
+            tabPreviewCarousel.opacity.value = 1
+            return
+          }
+          tabPreviewCarousel.translateY.value = HEIGHT
+          activeTabPreview.zIndex.value = 3
+          runOnJS(takeActiveTabSnapshot)(
+            activeTabPreview.index.value,
+            activeTabScreen.atomId.value || ''
+          )
+        })
+      )
+    })
   }
 
   return { minimizeTab, expandTab, slideToIndex }

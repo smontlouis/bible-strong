@@ -17,11 +17,7 @@ interface StudiesTabScreenProps {
   studyAtom: PrimitiveAtom<StudyTab>
 }
 
-const StudiesTabScreen = ({
-  studyAtom,
-  navigation,
-  route,
-}: StudiesTabScreenProps) => {
+const StudiesTabScreen = ({ studyAtom, navigation, route }: StudiesTabScreenProps) => {
   const [studyTab] = useAtom(studyAtom)
 
   const {
@@ -30,18 +26,16 @@ const StudiesTabScreen = ({
   } = studyTab
 
   if (!studyId) {
-    return (
-      <AllStudiesTabScreen
-        hasBackButton={hasBackButton}
-        navigation={navigation}
-      />
-    )
+    return <AllStudiesTabScreen hasBackButton={hasBackButton} navigation={navigation} />
   }
 
   return (
     <EditStudyScreen
+      // @ts-ignore
       studyAtom={studyAtom}
+      // @ts-ignore
       navigation={navigation}
+      // @ts-ignore
       route={{
         ...route,
         params: {
@@ -51,6 +45,7 @@ const StudiesTabScreen = ({
           openedFromTab: true,
         },
       }}
+      // @ts-ignore
       studyId={studyId}
     />
   )

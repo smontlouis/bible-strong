@@ -52,7 +52,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-function clearEmpties(o) {
+function clearEmpties(o: any) {
   for (const k in o) {
     if (!o[k] || typeof o[k] !== 'object') {
       continue // If null or not an object, skip to the next iteration
@@ -67,18 +67,11 @@ function clearEmpties(o) {
   return o
 }
 
-const PericopeScreen = ({
-  navigation,
-}: {
-  navigation: StackNavigationProp<MainStackProps>
-}) => {
+const PericopeScreen = ({ navigation }: { navigation: StackNavigationProp<MainStackProps> }) => {
   const { t } = useTranslation()
   const [bible] = useAtom(defaultBibleAtom)
 
-  const {
-    selectedVersion: initialVersion,
-    selectedBook: initialBook,
-  } = bible.data
+  const { selectedVersion: initialVersion, selectedBook: initialBook } = bible.data
 
   const [version, setVersion] = useState(initialVersion)
   const [book, setBook] = useState(initialBook)
@@ -116,16 +109,15 @@ const PericopeScreen = ({
           {!Object.keys(pericopeBook).length ? (
             <Empty
               source={require('~assets/images/empty.json')}
-              message={t(
-                'Aucun péricope pour ce Livre, essayez avec une autre version.'
-              )}
+              message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
             />
           ) : (
-            Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => {
+            Object.entries(pericopeBook).map(([chapterKey, chapterObject]: any) => {
               return (
                 <React.Fragment key={chapterKey}>
                   {!!Object.keys(chapterObject).length && (
                     <Text
+                      // @ts-ignore
                       titleItalic
                       color="tertiary"
                       fontSize={12}
@@ -134,38 +126,32 @@ const PericopeScreen = ({
                       {t('CHAPITRE')} {chapterKey}
                     </Text>
                   )}
-                  {Object.entries(chapterObject).map(
-                    ([verseKey, verseObject]) => {
-                      const { h1, h2, h3, h4 } = verseObject
-                      return (
-                        <TouchableOpacity
-                          key={verseKey}
-                          onPress={() =>
-                            versionNeedsDownload
-                              ? SnackBar.show(
-                                  t(
-                                    'Vous devez télécharger cette version de la Bible.'
-                                  )
-                                )
-                              : navigation.dispatch(
-                                  StackActions.push('BibleView', {
-                                    isReadOnly: true,
-                                    book,
-                                    chapter: Number(chapterKey),
-                                    version,
-                                    verse: 1,
-                                  })
-                                )
-                          }
-                        >
-                          {h1 && <H1>{h1}</H1>}
-                          {h2 && <H2>{h2}</H2>}
-                          {h3 && <H3>{h3}</H3>}
-                          {h4 && <H4>{h4}</H4>}
-                        </TouchableOpacity>
-                      )
-                    }
-                  )}
+                  {Object.entries(chapterObject).map(([verseKey, verseObject]: any) => {
+                    const { h1, h2, h3, h4 } = verseObject
+                    return (
+                      <TouchableOpacity
+                        key={verseKey}
+                        onPress={() =>
+                          versionNeedsDownload
+                            ? SnackBar.show(t('Vous devez télécharger cette version de la Bible.'))
+                            : navigation.dispatch(
+                                StackActions.push('BibleView', {
+                                  isReadOnly: true,
+                                  book,
+                                  chapter: Number(chapterKey),
+                                  version,
+                                  verse: 1,
+                                })
+                              )
+                        }
+                      >
+                        {h1 && <H1>{h1}</H1>}
+                        {h2 && <H2>{h2}</H2>}
+                        {h3 && <H3>{h3}</H3>}
+                        {h4 && <H4>{h4}</H4>}
+                      </TouchableOpacity>
+                    )
+                  })}
                 </React.Fragment>
               )
             })
@@ -185,10 +171,7 @@ const PericopeScreen = ({
           </Link>
         )}
         {book.Numero != 66 && (
-          <Link
-            onPress={() => setBook(books[book.Numero])}
-            style={{ marginLeft: 'auto' }}
-          >
+          <Link onPress={() => setBook(books[book.Numero])} style={{ marginLeft: 'auto' }}>
             <StyledIcon name="arrow-right" size={30} />
           </Link>
         )}

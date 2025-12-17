@@ -11,10 +11,7 @@ export const useOpenInNewTab = () => {
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const { triggerSlideNewTab } = useSlideNewTab()
 
-  const openInNewTab = (
-    data?: TabItem,
-    params: { autoRedirect?: true } = {}
-  ) => {
+  const openInNewTab = (data?: TabItem, params: { autoRedirect?: true } = {}) => {
     const newTabId = `new-${Date.now()}`
     dispatchTabs({
       type: 'insert',

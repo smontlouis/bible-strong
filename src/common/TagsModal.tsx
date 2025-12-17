@@ -17,12 +17,13 @@ import Modal from './Modal'
 import { FeatherIcon } from './ui/Icon'
 import Spacer from './ui/Spacer'
 
+// @ts-ignore
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
   color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
-const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
+const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }: any) => {
   const { ref, open } = useBottomSheet()
 
   // Refactor this
@@ -71,12 +72,8 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }) => {
       <Box row wrap p={20}>
         {result.length || !keyword ? (
           <>
-            <Chip
-              label={t('Tout')}
-              isSelected={!selectedChip}
-              onPress={() => onSelected(null)}
-            />
-            {result.map(chip => (
+            <Chip label={t('Tout')} isSelected={!selectedChip} onPress={() => onSelected(null)} />
+            {result.map((chip: any) => (
               <Chip
                 key={chip.id}
                 label={chip.name}

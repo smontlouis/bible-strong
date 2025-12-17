@@ -113,9 +113,7 @@ const useLoadSound = ({
 
   const bibleVersion = getVersions()[version] as Version
 
-  const audioTitle = `${t(book.Nom)} ${chapter}:${
-    currentVerse.current
-  } ${version}`
+  const audioTitle = `${t(book.Nom)} ${chapter}:${currentVerse.current} ${version}`
   const audioSubtitle = bibleVersion?.name
 
   useEffect(() => {
@@ -279,11 +277,7 @@ const AudioTTSFooter = ({
   }
 
   return (
-    <AudioContainer
-      onReduce={onReduce}
-      audioMode="tts"
-      onChangeMode={onChangeMode}
-    >
+    <AudioContainer onReduce={onReduce} audioMode="tts" onChangeMode={onChangeMode}>
       <Text color="grey" textAlign="center" fontSize={12} bold>
         {audioTitle}
       </Text>
@@ -322,11 +316,7 @@ const AudioTTSFooter = ({
             <FeatherIcon name="chevron-right" size={18} color="tertiary" />
           </TouchableBox>
         </Box>
-        <ChapterButton
-          hasNextChapter={hasNextChapter}
-          direction="right"
-          onPress={onNextChapter}
-        />
+        <ChapterButton hasNextChapter={hasNextChapter} direction="right" onPress={onNextChapter} />
       </Box>
       <HStack alignItems="center" justifyContent="center" mt={10}>
         <TTSVoiceButton currentVersion={version} />

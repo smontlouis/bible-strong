@@ -8,16 +8,12 @@ export interface VerseBase {
   verse: number
 }
 
-export const searchReference = async (
-  ref?: string
-): Promise<VerseBase | null> => {
+export const searchReference = async (ref?: string): Promise<VerseBase | null> => {
   if (!ref) return null
   let reference = ref.trim().toLowerCase()
   const bible = await loadBible(getLangIsFr() ? 'LSG' : 'KJV')
 
-  const findBook = books.find(book =>
-    reference.includes(i18n.t(book.Nom).toLowerCase())
-  )
+  const findBook = books.find(book => reference.includes(i18n.t(book.Nom).toLowerCase()))
 
   if (!findBook) {
     return null
@@ -49,8 +45,7 @@ export const searchReference = async (
         verse: 1,
       }
     } else {
-      const count = Object.keys(bible[findBook.Numero][findBook.Chapitres])
-        .length
+      const count = Object.keys(bible[findBook.Numero][findBook.Chapitres]).length
 
       return {
         book: findBook.Numero,

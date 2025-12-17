@@ -1,10 +1,6 @@
 import produce, { Draft } from 'immer'
 import { Appearance } from 'react-native'
-import {
-  PreferredColorScheme,
-  PreferredDarkTheme,
-  PreferredLightTheme,
-} from '~common/types'
+import { PreferredColorScheme, PreferredDarkTheme, PreferredLightTheme } from '~common/types'
 
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -19,27 +15,19 @@ import { UserState } from '../user'
 
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 export const SET_SETTINGS_LINE_HEIGHT = 'user/SET_SETTINGS_LINE_HEIGHT'
-export const INCREASE_SETTINGS_FONTSIZE_SCALE =
-  'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
-export const DECREASE_SETTINGS_FONTSIZE_SCALE =
-  'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
+export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
+export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE_SCALE'
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
-export const SET_SETTINGS_COMMENTS_DISPLAY =
-  'user/SET_SETTINGS_COMMENTS_DISPLAY'
+export const SET_SETTINGS_COMMENTS_DISPLAY = 'user/SET_SETTINGS_COMMENTS_DISPLAY'
 export const CHANGE_COLOR = 'user/CHANGE_COLOR'
-export const SET_SETTINGS_PREFERRED_COLOR_SCHEME =
-  'user/SET_SETTINGS_PREFERRED_COLOR_SCHEME'
-export const SET_SETTINGS_PREFERRED_LIGHT_THEME =
-  'user/SET_SETTINGS_PREFERRED_LIGHT_THEME'
-export const SET_SETTINGS_PREFERRED_DARK_THEME =
-  'user/SET_SETTINGS_PREFERRED_DARK_THEME'
+export const SET_SETTINGS_PREFERRED_COLOR_SCHEME = 'user/SET_SETTINGS_PREFERRED_COLOR_SCHEME'
+export const SET_SETTINGS_PREFERRED_LIGHT_THEME = 'user/SET_SETTINGS_PREFERRED_LIGHT_THEME'
+export const SET_SETTINGS_PREFERRED_DARK_THEME = 'user/SET_SETTINGS_PREFERRED_DARK_THEME'
 
-export const TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS =
-  'user/SET_SETTINGS_SHARE_VERSE_NUMBERS'
-export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES =
-  'user/SET_SETTINGS_SHARE_INLINE_VERSES'
+export const TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS = 'user/SET_SETTINGS_SHARE_VERSE_NUMBERS'
+export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES = 'user/SET_SETTINGS_SHARE_INLINE_VERSES'
 export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
 export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 
@@ -146,23 +134,21 @@ export default produce((draft: Draft<UserState>, action) => {
       break
     }
     case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS: {
-      draft.bible.settings.shareVerses.hasVerseNumbers = !draft.bible.settings
-        .shareVerses.hasVerseNumbers
+      draft.bible.settings.shareVerses.hasVerseNumbers =
+        !draft.bible.settings.shareVerses.hasVerseNumbers
       break
     }
     case TOGGLE_SETTINGS_SHARE_INLINE_VERSES: {
-      draft.bible.settings.shareVerses.hasInlineVerses = !draft.bible.settings
-        .shareVerses.hasInlineVerses
+      draft.bible.settings.shareVerses.hasInlineVerses =
+        !draft.bible.settings.shareVerses.hasInlineVerses
       break
     }
     case TOGGLE_SETTINGS_SHARE_QUOTES: {
-      draft.bible.settings.shareVerses.hasQuotes = !draft.bible.settings
-        .shareVerses.hasQuotes
+      draft.bible.settings.shareVerses.hasQuotes = !draft.bible.settings.shareVerses.hasQuotes
       break
     }
     case TOGGLE_SETTINGS_SHARE_APP_NAME: {
-      draft.bible.settings.shareVerses.hasAppName = !draft.bible.settings
-        .shareVerses.hasAppName
+      draft.bible.settings.shareVerses.hasAppName = !draft.bible.settings.shareVerses.hasAppName
       break
     }
     default:
@@ -245,13 +231,7 @@ export function setSettingsPress(payload: string) {
   }
 }
 
-export function changeColor({
-  name,
-  color,
-}: {
-  name: keyof typeof defaultColors
-  color: string
-}) {
+export function changeColor({ name, color }: { name: keyof typeof defaultColors; color: string }) {
   return {
     type: CHANGE_COLOR,
     name,

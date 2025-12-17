@@ -6,9 +6,7 @@ import { SearchTab } from '../../state/tabs'
 import SearchTabScreen from './SearchTabScreen'
 import { MainStackProps } from '~navigation/type'
 
-const SearchScreen = ({
-  navigation,
-}: StackScreenProps<MainStackProps, 'Search'>) => {
+const SearchScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Search'>) => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<SearchTab>({

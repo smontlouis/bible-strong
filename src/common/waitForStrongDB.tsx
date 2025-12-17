@@ -17,11 +17,7 @@ import Progress from './ui/Progress'
 
 const STRONG_FILE_SIZE = 34941952
 
-const useStrong = (
-  dispatch: any,
-  startDownload: any,
-  lang: ResourceLanguage
-) => {
+const useStrong = (dispatch: any, startDownload: any, lang: ResourceLanguage) => {
   const { t } = useTranslation()
   const prevLangRef = useRef<ResourceLanguage>(lang)
 
@@ -79,9 +75,7 @@ const useStrong = (
                 dbPath,
                 undefined,
                 ({ totalBytesWritten }) => {
-                  const idxProgress =
-                    Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) /
-                    100
+                  const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
                   dispatch({
                     type: 'strong.setProgress',
                     payload: idxProgress,
@@ -173,14 +167,8 @@ const waitForDatabase =
   <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
   (props: any) => {
     const { t } = useTranslation()
-    const {
-      isLoading,
-      progress,
-      proposeDownload,
-      startDownload,
-      setStartDownload,
-      resourceLang,
-    } = useWaitForDatabase()
+    const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
+      useWaitForDatabase()
 
     if (isLoading && startDownload) {
       return (
@@ -198,9 +186,7 @@ const waitForDatabase =
           hasBackButton={hasBackButton}
           size={size}
           hasHeader={hasHeader}
-          title={t(
-            'La base de données strong est requise pour accéder à cette page.'
-          )}
+          title={t('La base de données strong est requise pour accéder à cette page.')}
           setStartDownload={setStartDownload}
           fileSize={35}
         />

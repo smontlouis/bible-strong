@@ -59,12 +59,12 @@ class TokenManager {
       Sentry.captureException(error, {
         tags: {
           feature: 'token_manager',
-          action: 'manual_refresh'
+          action: 'manual_refresh',
         },
         extra: {
           userId: currentUser.uid,
-          lastRefreshTime: this.lastRefreshTime
-        }
+          lastRefreshTime: this.lastRefreshTime,
+        },
       })
 
       return false

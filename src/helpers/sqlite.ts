@@ -53,9 +53,7 @@ class DB {
     try {
       if (this.db) {
         await this.db.closeAsync()
-        await FileSystem.deleteAsync(
-          `${FileSystem.documentDirectory}SQLite/${this.name}`
-        )
+        await FileSystem.deleteAsync(`${FileSystem.documentDirectory}SQLite/${this.name}`)
         console.log('Database deleted:', this.name)
       }
     } catch (error) {
@@ -106,14 +104,9 @@ class LanguageAwareDB {
         undefined,
         this.path.replace(`/${fileName}`, '')
       )
-      console.log(
-        `[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`
-      )
+      console.log(`[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`)
     } catch (error) {
-      console.error(
-        `[DBManager] Error opening ${this.dbId} (${this.lang}):`,
-        error
-      )
+      console.error(`[DBManager] Error opening ${this.dbId} (${this.lang}):`, error)
       throw error
     }
   }
@@ -193,12 +186,10 @@ class DBManager {
    * Useful for memory management when switching languages
    */
   async closeLanguageDatabases(lang: ResourceLanguage): Promise<void> {
-    const keysToClose = Array.from(this.instances.keys()).filter((key) =>
-      key.startsWith(`${lang}_`)
-    )
+    const keysToClose = Array.from(this.instances.keys()).filter(key => key.startsWith(`${lang}_`))
 
     await Promise.all(
-      keysToClose.map(async (key) => {
+      keysToClose.map(async key => {
         const db = this.instances.get(key)
         if (db) {
           await db.close()
@@ -213,9 +204,7 @@ class DBManager {
    * Close all database instances
    */
   async closeAll(): Promise<void> {
-    await Promise.all(
-      Array.from(this.instances.values()).map((db) => db.close())
-    )
+    await Promise.all(Array.from(this.instances.values()).map(db => db.close()))
     console.log('[DBManager] Closed all databases')
   }
 
@@ -258,7 +247,7 @@ export const deleteAllDatabases = async () => {
   if (intFile.exists) FileSystem.deleteAsync(intFile.uri)
 
   await Promise.all(
-    Object.values(getDatabases()).map(async (db) => {
+    Object.values(getDatabases()).map(async db => {
       const file = await FileSystem.getInfoAsync(db.path)
       if (file.exists) await FileSystem.deleteAsync(file.uri)
     })
@@ -313,28 +302,21 @@ export const checkDatabasesStorage = async () => {
       databaseTresorName,
       databaseMhyName,
       databaseNaveName,
-    ].map((dbName) => checkForDatabase(dbName, dir))
+    ].map(dbName => checkForDatabase(dbName, dir))
   )
 }
 
-export const checkForDatabase = async (
-  dbName: string,
-  filesInDir: string[]
-) => {
+export const checkForDatabase = async (dbName: string, filesInDir: string[]) => {
   const filePath = `${FileSystem.documentDirectory}SQLite/${dbName}`
   const file = await FileSystem.getInfoAsync(filePath)
 
   // If file does not exist, find the first file that starts with dbName, and rename it to dbName
   if (!file.exists) {
-    const fileToRename = filesInDir.find((f) =>
-      f.startsWith(dbName.replace('.sqlite', ''))
-    )
+    const fileToRename = filesInDir.find(f => f.startsWith(dbName.replace('.sqlite', '')))
     if (fileToRename) {
       // Check if file is not empty
       console.log('Rename file', fileToRename)
-      const fileToRenameInfo = await FileSystem.getInfoAsync(
-        `${sqliteDirPath}/${fileToRename}`
-      )
+      const fileToRenameInfo = await FileSystem.getInfoAsync(`${sqliteDirPath}/${fileToRename}`)
 
       if (fileToRenameInfo.exists && fileToRenameInfo.size !== 0) {
         console.log(`Renaming ${fileToRename} to ${dbName}`)
@@ -349,9 +331,9 @@ export const checkForDatabase = async (
 
   // Remove all OTHER files that start with dbName
   const filesToRemove = filesInDir.filter(
-    (f) => f.startsWith(dbName.replace('.sqlite', '')) && f !== dbName
+    f => f.startsWith(dbName.replace('.sqlite', '')) && f !== dbName
   )
-  filesToRemove.map((f) => FileSystem.deleteAsync(`${sqliteDirPath}/${f}`))
+  filesToRemove.map(f => FileSystem.deleteAsync(`${sqliteDirPath}/${f}`))
 }
 
 // Check if a database exists for a specific language

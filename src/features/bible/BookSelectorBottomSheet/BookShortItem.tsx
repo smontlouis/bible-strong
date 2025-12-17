@@ -1,12 +1,7 @@
 import { Theme, useTheme } from '@emotion/react'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  DeviceEventEmitter,
-  ScrollView,
-  TouchableOpacity,
-  useWindowDimensions,
-} from 'react-native'
+import { DeviceEventEmitter, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native'
 import Popover from 'react-native-popover-view'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
@@ -21,22 +16,14 @@ interface BookShortItemProps {
   isNT: boolean
   onChange: (book: Book) => void
 }
-export const BookShortItem = ({
-  book,
-  isSelected,
-  isNT,
-  onChange,
-}: BookShortItemProps) => {
+export const BookShortItem = ({ book, isSelected, isNT, onChange }: BookShortItemProps) => {
   const { t } = useTranslation()
   const theme: Theme = useTheme()
   const bookName = t(book.Nom).replace(/\s/g, '').substr(0, 3)
   const [showPopover, setShowPopover] = useState(false)
   const { width: windowWidth } = useWindowDimensions()
 
-  const chapters = useMemo(
-    () => Array.from({ length: book.Chapitres }, (_, i) => i + 1),
-    [book]
-  )
+  const chapters = useMemo(() => Array.from({ length: book.Chapitres }, (_, i) => i + 1), [book])
 
   // Configuration pour le centrage des éléments
   const ITEM_WIDTH = 40
@@ -46,8 +33,7 @@ export const BookShortItem = ({
 
   const availableWidth = MAX_WIDTH - PADDING * 2
   const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
-  const totalItemsWidth =
-    itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
+  const totalItemsWidth = itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
   const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
   const handleChapterSelect = (chapter: number) => {
@@ -78,12 +64,7 @@ export const BookShortItem = ({
       }}
       from={
         <TouchableOpacity onPress={() => setShowPopover(true)}>
-          <Box
-            alignItems="center"
-            justifyContent="center"
-            height={45}
-            width={wp(99) / 5}
-          >
+          <Box alignItems="center" justifyContent="center" height={45} width={wp(99) / 5}>
             <Text
               {...{
                 color: isSelected ? 'primary' : isNT ? 'quart' : 'default',
@@ -112,7 +93,7 @@ export const BookShortItem = ({
             alignSelf: 'center',
           }}
         >
-          {chapters.map((chapter) => (
+          {chapters.map(chapter => (
             <TouchableOpacity
               key={chapter}
               onPress={() => handleChapterSelect(chapter)}

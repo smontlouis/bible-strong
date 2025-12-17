@@ -17,7 +17,7 @@ import loadIndexCache from './loadIndexCache'
 import LocalSearchResults from './LocalSearchResults'
 import waitForIndex from './waitForIndex'
 
-const timeout = (ms) => new Promise((r) => setTimeout(r, ms))
+const timeout = (ms: any) => new Promise(r => setTimeout(r, ms))
 
 type Props = {
   idxFile: FileSystem.FileInfo
@@ -26,19 +26,14 @@ type Props = {
   resourceLang?: 'fr' | 'en'
 }
 
-const LocalSearchScreen = ({
-  idxFile,
-  searchValue,
-  setSearchValue,
-  resourceLang,
-}: Props) => {
+const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue, resourceLang }: Props) => {
   const { t } = useTranslation()
 
   // Get resource language from Jotai if not passed as prop
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const lang = resourceLang || resourcesLanguage.SEARCH
 
-  const index = useRef<FileSystem.FileInfo>()
+  const index = useRef<any>()
   const [isLoading, setLoading] = useState(true)
   const debouncedSearchValue = useDebounce(searchValue, 300)
   const [results, setResults] = useState(null)
@@ -54,7 +49,7 @@ const LocalSearchScreen = ({
       Chapitres: 0,
     },
     ...booksDesc,
-  ].map((book) => ({
+  ].map(book => ({
     value: book.Numero,
     label: t(book.Nom),
   }))
@@ -98,7 +93,7 @@ const LocalSearchScreen = ({
   useEffect(() => {
     if (isLoading) return
 
-    const filterResults = (results) => {
+    const filterResults = (results: any) => {
       if (!section && !book && !order) {
         return results
       }
@@ -106,17 +101,17 @@ const LocalSearchScreen = ({
       if (order === 'a') {
         // HEAVY
         if (results) {
-          results.sort(({ ref: a }, { ref: b }) => {
-            function chunkify(t) {
-              const tz = []
+          results.sort(({ ref: a }: any, { ref: b }: any) => {
+            function chunkify(t: any) {
+              const tz: any = []
               let x = 0
               let y = -1
-              let n = 0
+              let n: any = 0
               let i
               let j
 
               while ((i = (j = t.charAt(x++)).charCodeAt(0))) {
-                const m = i == 46 || (i >= 48 && i <= 57)
+                const m: any = i == 46 || (i >= 48 && i <= 57)
                 if (m !== n) {
                   tz[++y] = ''
                   n = m
@@ -129,10 +124,10 @@ const LocalSearchScreen = ({
             const aa = chunkify(a)
             const bb = chunkify(b)
 
-            for (x = 0; aa[x] && bb[x]; x++) {
+            for (let x = 0; aa[x] && bb[x]; x++) {
               if (aa[x] !== bb[x]) {
-                const c = Number(aa[x])
-                const d = Number(bb[x])
+                const c: any = Number(aa[x])
+                const d: any = Number(bb[x])
                 if (c == aa[x] && d == bb[x]) {
                   return c - d
                 }
@@ -144,7 +139,7 @@ const LocalSearchScreen = ({
         }
       }
 
-      return results.filter((r) => {
+      return results.filter((r: any) => {
         let isPristine = true
         const [bookRef, chapterRef, verseRef] = r.ref.split('-')
 
@@ -180,8 +175,10 @@ const LocalSearchScreen = ({
 
           const results = index.current.search(val)
 
+          // @ts-ignore
           setResults(filterResults(results))
         } catch (e) {
+          // @ts-ignore
           setResults([])
         }
       } else {
@@ -226,16 +223,16 @@ const LocalSearchScreen = ({
         />
         <DropdownMenu
           title={t('Livre')}
+          // @ts-ignore
           currentValue={book}
+          // @ts-ignore
           setValue={setBook}
+          // @ts-ignore
           choices={books}
         />
       </ScrollView>
       {debouncedSearchValue && Array.isArray(results) ? (
-        <LocalSearchResults
-          searchValue={debouncedSearchValue}
-          results={results}
-        />
+        <LocalSearchResults searchValue={debouncedSearchValue} results={results} />
       ) : (
         <Empty
           source={require('~assets/images/search-loop.json')}

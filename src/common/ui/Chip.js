@@ -6,9 +6,7 @@ import Text from '~common/ui/Text'
 
 const StyledChip = styled.View(({ theme, isSelected }) => ({
   borderRadius: 20,
-  backgroundColor: isSelected
-    ? theme.colors.primary
-    : theme.colors.lightPrimary,
+  backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
   paddingTop: 5,
   paddingBottom: 5,
   paddingLeft: 12,

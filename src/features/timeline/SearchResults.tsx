@@ -3,7 +3,7 @@ import React from 'react'
 import InfiniteHits from './InfiniteHits'
 import Empty from '~common/Empty'
 
-const SearchResults = ({ searchValue }) => {
+const SearchResults = ({ searchValue }: any) => {
   if (!searchValue) {
     return (
       <Empty
@@ -13,6 +13,7 @@ const SearchResults = ({ searchValue }) => {
     )
   }
 
+  // @ts-ignore
   return <InfiniteHits searchValue={searchValue} />
 }
 

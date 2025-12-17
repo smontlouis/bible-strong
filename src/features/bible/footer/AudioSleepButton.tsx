@@ -52,11 +52,7 @@ const AudioSleepButton = (props: AudioSleepButtonProps) => {
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
-          <IonIcon
-            name="timer-outline"
-            size={18}
-            color={isActive ? 'primary' : 'grey'}
-          />
+          <IonIcon name="timer-outline" size={18} color={isActive ? 'primary' : 'grey'} />
           <Text ml={5} bold fontSize={10} color={isActive ? 'primary' : 'grey'}>
             {isActive ? secondsToMinutes(elapsed / 1000) : t('audio.timer')}
           </Text>

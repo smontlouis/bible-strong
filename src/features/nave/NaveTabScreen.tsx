@@ -19,10 +19,7 @@ import waitForNaveDB from '~common/waitForNaveDB'
 import useLanguage from '~helpers/useLanguage'
 
 import NaveItem from './NaveItem'
-import {
-  useSearchValue,
-  useResultsByLetterOrSearch,
-} from '../lexique/useUtilities'
+import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { NavesTab } from '../../state/tabs'
@@ -31,18 +28,16 @@ import { MainStackProps } from '~navigation/type'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 
-const useSectionResults = results => {
-  const [sectionResults, setSectionResults] = useState(null)
+const useSectionResults = (results: any) => {
+  const [sectionResults, setSectionResults] = useState<any>(null)
 
   useEffect(() => {
     if (!results.length) {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list, naveItem) => {
-      const listItem = list.find(
-        item => item.title && item.title === naveItem.letter
-      )
+    const sectionResults = results.reduce((list: any, naveItem: any) => {
+      const listItem = list.find((item: any) => item.title && item.title === naveItem.letter)
       if (!listItem) {
         list.push({ title: naveItem.letter, data: [naveItem] })
       } else {
@@ -77,7 +72,9 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
   const sectionResults = useSectionResults(results)
 
   useEffect(() => {
+    // @ts-ignore
     if (results.error) {
+      // @ts-ignore
       setError(results.error)
     }
   }, [results])
@@ -89,6 +86,7 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
         <Empty
           source={require('~assets/images/empty.json')}
           message={`${t('Impossible de charger la nave...')}${
+            // @ts-ignore
             error === 'CORRUPTED_DATABASE'
               ? t(
                   '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -109,11 +107,7 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
           <Box row alignItems="center">
             {isFR && (
               <Link route="NaveWarning" padding>
-                <Icon.Feather
-                  size={20}
-                  name="alert-triangle"
-                  color="rgb(255,188,0)"
-                />
+                <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
               </Link>
             )}
             <PopOverMenu
@@ -149,6 +143,7 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
+            // @ts-ignore
             getItemLayout={sectionListGetItemLayout({
               getItemHeight: () => 60,
               getSectionHeaderHeight: () => 50,
@@ -157,30 +152,20 @@ const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
             })}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="quint">
-                <Text
-                  title
-                  fontWeight="bold"
-                  fontSize={16}
-                  style={{ color: 'white' }}
-                >
+                <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
                   {title.toUpperCase()}
                 </Text>
               </SectionTitle>
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={item => item.name_lower}
+            keyExtractor={(item: any) => item.name_lower}
           />
         ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('Aucun mot trouvé...')}
-          />
+          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
         )}
       </Box>
-      {!searchValue && (
-        <AlphabetList color="quint" letter={letter} setLetter={setLetter} />
-      )}
+      {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}
     </Container>
   )
 }

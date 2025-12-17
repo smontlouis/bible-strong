@@ -40,8 +40,7 @@ export const USER_SELECTABLE_DBS: DatabaseId[] = [
 // Databases that only exist in French
 export const FRENCH_ONLY_DBS: DatabaseId[] = ['MHY']
 
-export const isSharedDB = (dbId: DatabaseId): boolean =>
-  SHARED_DBS.includes(dbId)
+export const isSharedDB = (dbId: DatabaseId): boolean => SHARED_DBS.includes(dbId)
 
 export const isLanguageSpecificDB = (dbId: DatabaseId): boolean =>
   LANGUAGE_SPECIFIC_DBS.includes(dbId)

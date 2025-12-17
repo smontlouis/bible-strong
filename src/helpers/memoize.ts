@@ -1,7 +1,4 @@
-import {
-  getResourceLanguage,
-  type ResourcesLanguageState,
-} from 'src/state/resourcesLanguage'
+import { getResourceLanguage, type ResourcesLanguageState } from 'src/state/resourcesLanguage'
 
 /**
  * createCacheKeyFromArgs
@@ -14,9 +11,7 @@ import {
 export const createCacheKeyFromArgs = (args: any[]) =>
   args.reduce(
     (cacheKey, arg) =>
-      (cacheKey += `_${
-        typeof arg === 'object' ? JSON.stringify(args) : `${arg}`
-      }_`),
+      (cacheKey += `_${typeof arg === 'object' ? JSON.stringify(args) : `${arg}`}_`),
     ''
   )
 

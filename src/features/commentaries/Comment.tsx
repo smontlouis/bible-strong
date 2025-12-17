@@ -25,7 +25,7 @@ import { timeout } from '~helpers/timeout'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
-  const bookNumber = books.find((b) => b[1] === bookName)?.[0]
+  const bookNumber = books.find(b => b[1] === bookName)?.[0]
   return bookNumber || ''
 }
 
@@ -56,10 +56,7 @@ const useCommentTranslation = (id: string, content: string) => {
 
       try {
         // Check cache first
-        const commentRef = await firebaseDb
-          .collection('commentaries-FR')
-          .doc(id.toString())
-          .get()
+        const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
 
         if (commentRef.exists) {
           setTranslatedContent(commentRef.data()!.content)
@@ -68,9 +65,7 @@ const useCommentTranslation = (id: string, content: string) => {
         }
 
         // Not in cache - translate via DeepL
-        const data = `auth_key=${
-          process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY
-        }&text=${encodeURIComponent(
+        const data = `auth_key=${process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY}&text=${encodeURIComponent(
           content
         )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
 
@@ -177,11 +172,9 @@ https://bible-strong.app
 
   return (
     <Box m={20} marginBottom={0} p={20} rounded lightShadow bg="reverse">
-      <LinkBox row onPress={() => setCollapsed((s) => !s)}>
+      <LinkBox row onPress={() => setCollapsed(s => !s)}>
         <Box center width={40} height={40} borderRadius={20}>
-          {cacheImage && (
-            <Image style={fastImageStyle} source={fastImageSource} />
-          )}
+          {cacheImage && <Image style={fastImageStyle} source={fastImageSource} />}
         </Box>
         <Box ml={10} flex>
           <Text title fontSize={20}>
@@ -218,18 +211,11 @@ https://bible-strong.app
       </LinkBox>
       <Box overflow="hidden" mt={10}>
         <Box height={isCollapsed ? 100 : undefined}>
-          <StylizedHTMLView
-            value={translatedContent || content}
-            onLinkPress={openLink}
-          />
+          <StylizedHTMLView value={translatedContent || content} onLinkPress={openLink} />
           {href && (
             <Box my={20}>
               <Link href={`https://m.egwwritings.org${href}`}>
-                <Text
-                  color="primary"
-                  fontSize={18}
-                  style={{ textDecorationLine: 'underline' }}
-                >
+                <Text color="primary" fontSize={18} style={{ textDecorationLine: 'underline' }}>
                   {t('Lire dans le contexte')}
                 </Text>
               </Link>
@@ -244,7 +230,7 @@ https://bible-strong.app
               </Text>
             </Box>
           )}
-          <LinkBox center height={40} onPress={() => setCollapsed((s) => !s)}>
+          <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
             {/* @ts-expect-error */}
             <AnimatableBox
               width={17}

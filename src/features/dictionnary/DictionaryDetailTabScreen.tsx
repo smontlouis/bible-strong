@@ -42,10 +42,7 @@ interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
 }
 
-const DictionnaryDetailScreen = ({
-  navigation,
-  dictionaryAtom,
-}: DictionaryDetailScreenProps) => {
+const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetailScreenProps) => {
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
 
   const {
@@ -56,18 +53,20 @@ const DictionnaryDetailScreen = ({
   const dispatch = useDispatch()
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
-  const [dictionnaireItem, setDictionnaireItem] = useState(null)
+  const [dictionnaireItem, setDictionnaireItem] = useState<any>(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
   const tags = useSelector(
+    // @ts-ignore
     (state: RootState) => state.user.bible.words[word]?.tags,
     shallowEqual
   )
 
   const setTitle = (title: string) =>
     setDictionaryTab(
-      produce((draft) => {
+      // @ts-ignore
+      produce(draft => {
         draft.title = title
       })
     )
@@ -77,7 +76,7 @@ const DictionnaryDetailScreen = ({
   }, [word])
 
   useEffect(() => {
-    loadDictionnaireItem(word).then((result) => {
+    loadDictionnaireItem(word).then(result => {
       setDictionnaireItem(result)
 
       addHistory({
@@ -88,16 +87,15 @@ const DictionnaryDetailScreen = ({
     })
   }, [word])
 
-  const openLink = ({ href, content, type }) => {
+  const openLink = ({ href, content, type }: any) => {
     if (type === 'verse') {
       try {
         const sanitizedHref = href.replace(String.fromCharCode(160), ' ')
-        const book = books.find((b) => sanitizedHref.includes(b.Nom))
+        const book = books.find(b => sanitizedHref.includes(b.Nom))
         const splittedHref = sanitizedHref
           .replace(String.fromCharCode(160), ' ')
           .split(/\b\s+(?!$)/)
-        const [chapter, verse] =
-          splittedHref[splittedHref.length - 1].split('.')
+        const [chapter, verse] = splittedHref[splittedHref.length - 1].split('.')
         navigation.navigate('BibleView', {
           isReadOnly: true,
           book,
@@ -108,9 +106,7 @@ const DictionnaryDetailScreen = ({
         Snackbar.show('Impossible de charger ce mot.')
       }
     } else {
-      navigation.dispatch(
-        StackActions.push('DictionnaryDetail', { word: href })
-      )
+      navigation.dispatch(StackActions.push('DictionnaryDetail', { word: href }))
     }
   }
 
@@ -118,12 +114,11 @@ const DictionnaryDetailScreen = ({
 
   const shareDefinition = async () => {
     try {
-      const message = `${word} \n\n${truncHTML(
-        dictionnaireItem.definition,
-        4000
-      )
+      // @ts-ignore
+      const message = `${word} \n\n${truncHTML(dictionnaireItem.definition, 4000)
         .text.replace(/&#/g, '\\')
         .replace(/\\x([0-9A-F]+);/gi, function () {
+          // @ts-ignore
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
       await timeout(400)
@@ -189,7 +184,8 @@ const DictionnaryDetailScreen = ({
       />
       {tags && (
         <Box mt={10} px={20}>
-          <TagList tags={tags} />
+          {/* @ts-ignore */}
+          <TagList tags={tags} limit={undefined} />
         </Box>
       )}
       <Box
@@ -202,9 +198,7 @@ const DictionnaryDetailScreen = ({
         }}
       >
         {dictionnaireItem?.definition && (
-          <WebView
-            {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))}
-          />
+          <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
         )}
       </Box>
     </Container>

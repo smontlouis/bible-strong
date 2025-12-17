@@ -71,7 +71,7 @@ interface StrongScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
-const keyExtractor = (item) => `${item.Livre}-${item.Chapitre}-${item.Verset}`
+const keyExtractor = (item: any) => `${item.Livre}-${item.Chapitre}-${item.Verset}`
 const flatListStyle = { paddingTop: 10 }
 
 const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
@@ -79,15 +79,14 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   let {
     hasBackButton,
+    // @ts-ignore
     data: { book, reference, strongReference: strongReferenceParam },
   } = strongTab
 
   const [error, setError] = useState<string | undefined>()
-  const [strongReference, setStrongReference] = useState<
-    StrongReference | undefined
-  >()
-  const [verses, setVerses] = useState([])
-  const [count, setCount] = useState(0)
+  const [strongReference, setStrongReference] = useState<StrongReference | undefined>()
+  const [verses, setVerses] = useState<any[]>([])
+  const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
@@ -106,17 +105,13 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   const setTitle = (title: string) =>
     setStrongTab(
-      produce((draft) => {
+      produce(draft => {
         draft.title = title
       })
     )
 
   useEffect(() => {
-    setTitle(
-      `${strongReference?.Hebreu ? t('Hébreu') : t('Grec')} ${
-        strongReference?.Mot
-      }`
-    )
+    setTitle(`${strongReference?.Hebreu ? t('Hébreu') : t('Grec')} ${strongReference?.Mot}`)
   }, [strongReference?.Mot, strongReference?.Hebreu, t])
 
   useEffect(() => {
@@ -139,14 +134,8 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
       type: 'strong',
     })
     setStrongReference(strongReferenceParam)
-    const firstFoundVerses = await loadFirstFoundVerses(
-      book,
-      strongReferenceParam.Code
-    )
-    const strongVersesCount = await loadStrongVersesCount(
-      book,
-      strongReferenceParam.Code
-    )
+    const firstFoundVerses = await loadFirstFoundVerses(book, strongReferenceParam.Code)
+    const strongVersesCount = await loadStrongVersesCount(book, strongReferenceParam.Code)
 
     setVerses(firstFoundVerses)
     setCount(strongVersesCount[0]?.versesCount)
@@ -154,8 +143,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   }
 
   const shareContent = async () => {
-    const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG } =
-      strongReference!
+    const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG } = strongReference!
 
     let toCopy = Phonetique ? `${Mot} ${Phonetique}\n` : `${Mot}`
     toCopy += Type ? `${Type}\n---\n\n` : '---\n\n'
@@ -175,6 +163,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   }
 
   const linkToStrong = (url: string, ref: number) => {
+    // @ts-ignore
     navigation.dispatch(
       StackActions.push('Strong', {
         book,
@@ -183,17 +172,8 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
     )
   }
 
-  const {
-    Code,
-    Hebreu,
-    Grec,
-    Mot,
-    Phonetique,
-    Definition,
-    Origine,
-    Type,
-    LSG,
-  } = strongReference || {}
+  const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG } =
+    strongReference || {}
 
   if (error) {
     return (
@@ -228,8 +208,11 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
               <>
                 <MenuOption
                   onSelect={() =>
+                    // @ts-ignore
                     setMultipleTagsItem({
+                      // @ts-ignore
                       id: Code,
+                      // @ts-ignore
                       title: Mot,
                       entity: Grec ? 'strongsGrec' : 'strongsHebreu',
                     })
@@ -274,6 +257,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
         <Box>
           {tags && (
             <Box marginBottom={10}>
+              {/* @ts-ignore */}
               <TagList tags={tags} />
             </Box>
           )}
@@ -285,9 +269,12 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                   {t('Mot Hébreu')}:&nbsp;
                   <Word>{Hebreu}</Word>
                 </Paragraph>
+                {/* @ts-ignore */}
                 <Box ml={15} mb={4}>
+                  {/* @ts-ignore */}
                   <ListenToStrong
                     type={Hebreu ? 'hebreu' : 'grec'}
+                    // @ts-ignore
                     code={Code}
                   />
                 </Box>
@@ -301,9 +288,12 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                   {t('Mot Grec')}:&nbsp;
                   <Word>{Grec}</Word>
                 </Paragraph>
+                {/* @ts-ignore */}
                 <Box ml={15} mb={4}>
+                  {/* @ts-ignore */}
                   <ListenToStrong
                     type={Hebreu ? 'hebreu' : 'grec'}
+                    // @ts-ignore
                     code={Code}
                   />
                 </Box>
@@ -320,9 +310,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
           )}
           {!!LSG && (
             <ViewItem>
-              <SubTitle color="tertiary">
-                {t('Généralement traduit par')}
-              </SubTitle>
+              <SubTitle color="tertiary">{t('Généralement traduit par')}</SubTitle>
               <StylizedHTMLView value={LSG} />
             </ViewItem>
           )}
@@ -346,19 +334,14 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                   <Text color="darkGrey" fontSize={16} marginBottom={3}>
                     {t('Concordance')}
                   </Text>
-                  <Box
-                    px={10}
-                    py={5}
-                    ml={10}
-                    bg="lightPrimary"
-                    borderRadius={20}
-                  >
+                  <Box px={10} py={5} ml={10} bg="lightPrimary" borderRadius={20}>
                     <Text>{count}</Text>
                   </Box>
                   {count > 15 && (
                     <LinkBox
                       ml="auto"
                       route="Concordance"
+                      // @ts-ignore
                       params={{ strongReference, book }}
                       bg="opacity5"
                       borderRadius={20}

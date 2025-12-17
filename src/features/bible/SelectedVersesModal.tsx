@@ -14,20 +14,13 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
 import SnackBar from '~common/SnackBar'
-import type {
-  BibleResource,
-  StudyNavigateBibleType,
-  VerseIds,
-} from '~common/types'
+import type { BibleResource, StudyNavigateBibleType, VerseIds } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import { openedFromTabAtom } from '~features/studies/atom'
-import {
-  onAnimateModalClose,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
@@ -40,15 +33,13 @@ import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
-const HalfContainer = styled.View<{ border?: boolean }>(
-  ({ border, theme }) => ({
-    borderBottomColor: theme.colors.border,
-    borderBottomWidth: border ? 1 : 0,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    height: 60,
-  })
-)
+const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
+  borderBottomColor: theme.colors.border,
+  borderBottomWidth: border ? 1 : 0,
+  flexDirection: 'row',
+  alignItems: 'stretch',
+  height: 60,
+}))
 
 type Props = {
   isVisible: boolean
@@ -104,8 +95,7 @@ const VersesModal = ({
     }
   }, [isVisible])
 
-  const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } =
-    useShareOptions()
+  const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
 
   useEffect(() => {
     const title = verseToReference(selectedVerses)
@@ -154,6 +144,7 @@ const VersesModal = ({
   }, [])
 
   const compareVerses = useCallback(() => {
+    // @ts-ignore
     navigation.navigate('BibleCompareVerses', {
       selectedVerses,
     })
@@ -172,6 +163,7 @@ const VersesModal = ({
       verses: selectedVerses,
       version,
     })
+    // @ts-ignore
     navigation.navigate(openedFromTab ? 'AppSwitcher' : 'EditStudy', {
       ...cleanParams(),
       type: isSelectionMode,
@@ -214,51 +206,22 @@ const VersesModal = ({
         }}
       >
         {isSelectionMode ? (
-          <HStack
-            gap={10}
-            width="100%"
-            alignItems="center"
-            justifyContent="center"
-            py={10}
-          >
+          <HStack gap={10} width="100%" alignItems="center" justifyContent="center" py={10}>
             <Text bold fontSize={18} textAlign="center">
               {selectedVersesTitle.toUpperCase()}
             </Text>
-            <TouchableIcon
-              name="arrow-right"
-              size={20}
-              onPress={sendVerseData}
-              noFlex
-            />
+            <TouchableIcon name="arrow-right" size={20} onPress={sendVerseData} noFlex />
           </HStack>
         ) : (
           <>
             <HalfContainer border>
-              <TouchableCircle
-                color={colors.color1}
-                onPress={() => addHighlight('color1')}
-              />
-              <TouchableCircle
-                color={colors.color2}
-                onPress={() => addHighlight('color2')}
-              />
-              <TouchableCircle
-                color={colors.color3}
-                onPress={() => addHighlight('color3')}
-              />
-              <TouchableCircle
-                color={colors.color4}
-                onPress={() => addHighlight('color4')}
-              />
-              <TouchableCircle
-                color={colors.color5}
-                onPress={() => addHighlight('color5')}
-              />
+              <TouchableCircle color={colors.color1} onPress={() => addHighlight('color1')} />
+              <TouchableCircle color={colors.color2} onPress={() => addHighlight('color2')} />
+              <TouchableCircle color={colors.color3} onPress={() => addHighlight('color3')} />
+              <TouchableCircle color={colors.color4} onPress={() => addHighlight('color4')} />
+              <TouchableCircle color={colors.color5} onPress={() => addHighlight('color5')} />
               {isSelectedVerseHighlighted && (
-                <TouchableIcon
-                  name="x-circle"
-                  onPress={() => removeHighlight()}
-                />
+                <TouchableIcon name="x-circle" onPress={() => removeHighlight()} />
               )}
             </HalfContainer>
             <HalfContainer>
@@ -333,36 +296,17 @@ const VersesModal = ({
                   overflow: 'visible',
                 }}
               >
-                <TouchableChip
-                  name="layers"
-                  onPress={compareVerses}
-                  label={t('Comparer')}
-                />
+                <TouchableChip name="layers" onPress={compareVerses} label={t('Comparer')} />
                 <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
-                <TouchableChip
-                  name="file-plus"
-                  onPress={onCreateNoteClick}
-                  label={t('Note')}
-                />
+                <TouchableChip name="file-plus" onPress={onCreateNoteClick} label={t('Note')} />
                 <TouchableChip
                   name="feather"
                   onPress={onAddToStudy}
                   label={t('study.addToStudy')}
                 />
-                <TouchableChip
-                  name="copy"
-                  onPress={copyToClipboard}
-                  label={t('Copier')}
-                />
-                <TouchableChip
-                  name="share-2"
-                  onPress={shareVerse}
-                  label={t('Partager')}
-                />
-                <TouchableChip
-                  onPress={selectAllVerses}
-                  label={t('Tout sélectionner')}
-                />
+                <TouchableChip name="copy" onPress={copyToClipboard} label={t('Copier')} />
+                <TouchableChip name="share-2" onPress={shareVerse} label={t('Partager')} />
+                <TouchableChip onPress={selectAllVerses} label={t('Tout sélectionner')} />
               </ScrollView>
             </HalfContainer>
           </>

@@ -51,6 +51,7 @@ export default ({
   return (
     <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled} {...props}>
       <StyledIcon
+        // @ts-ignore
         name={name}
         size={size}
         color={color}

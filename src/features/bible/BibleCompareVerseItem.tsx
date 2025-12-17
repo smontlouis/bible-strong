@@ -6,10 +6,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
-import {
-  getIfVersionNeedsDownload,
-  isStrongVersion,
-} from '~helpers/bibleVersions'
+import { getIfVersionNeedsDownload, isStrongVersion } from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
 import books from '~assets/bible_versions/books-desc'
 
@@ -19,8 +16,9 @@ const Container = styled.View(({ theme }) => ({
   borderTopWidth: 1,
 }))
 
-class CompareVerseItem extends React.Component {
+class CompareVerseItem extends React.Component<any> {
   async componentDidMount() {
+    // @ts-ignore
     const { selectedVerses, versionId, position } = this.props
     const versionNeedsDownload = await getIfVersionNeedsDownload(versionId)
 
@@ -48,6 +46,7 @@ class CompareVerseItem extends React.Component {
 
   render() {
     const { content, versionNeedsDownload } = this.state
+    // @ts-ignore
     const { versionId, name, selectedVerses } = this.props
 
     const focusVerses = Object.keys(selectedVerses)
@@ -56,9 +55,7 @@ class CompareVerseItem extends React.Component {
 
     focusVerses.sort((a, b) => a - b)
 
-    const [book, chapter, verse] = Object.keys(selectedVerses)[0]
-      .split('-')
-      .map(Number)
+    const [book, chapter, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
 
     if ((!content && versionNeedsDownload) || isStrongVersion(versionId)) {
       return null

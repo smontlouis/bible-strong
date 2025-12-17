@@ -76,9 +76,7 @@ export default produce((draft: Draft<BibleState>, action) => {
       break
     }
     case REMOVE_PARALLEL_VERSION: {
-      draft.parallelVersions = draft.parallelVersions.filter(
-        (p, i) => i !== action.payload
-      )
+      draft.parallelVersions = draft.parallelVersions.filter((p, i) => i !== action.payload)
       break
     }
     case REMOVE_ALL_PARALLEL_VERSIONS: {
@@ -176,9 +174,7 @@ export default produce((draft: Draft<BibleState>, action) => {
 
       if (currentChapter === 1) {
         const currentBook = draft.selectedBook
-        const currentBookIndex = books.findIndex(
-          b => b.Numero === currentBook.Numero
-        )
+        const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
 
         const prevBook = books[currentBookIndex - 1]
         draft.selectedBook = prevBook
@@ -212,9 +208,7 @@ export default produce((draft: Draft<BibleState>, action) => {
       const currentBook = draft.selectedBook
 
       if (currentChapter === currentBook.Chapitres) {
-        const currentBookIndex = books.findIndex(
-          b => b.Numero === currentBook.Numero
-        )
+        const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
 
         const nextBook = books[currentBookIndex + 1]
 
@@ -255,7 +249,7 @@ export function toggleSelectionMode() {
   }
 }
 
-export function removeParallelVersion(index) {
+export function removeParallelVersion(index: any) {
   return {
     type: REMOVE_PARALLEL_VERSION,
     payload: index,
@@ -268,28 +262,28 @@ export function removeAllParallelVersions() {
   }
 }
 
-export function setTempSelectedBook(book) {
+export function setTempSelectedBook(book: any) {
   return {
     type: SET_TEMP_SELECTED_BOOK,
     book,
   }
 }
 
-export function setTempSelectedChapter(chapter) {
+export function setTempSelectedChapter(chapter: any) {
   return {
     type: SET_TEMP_SELECTED_CHAPTER,
     chapter,
   }
 }
 
-export function setTempSelectedVerse(verse) {
+export function setTempSelectedVerse(verse: any) {
   return {
     type: SET_TEMP_SELECTED_VERSE,
     verse,
   }
 }
 
-export function setSelectedVerse(verse) {
+export function setSelectedVerse(verse: any) {
   return {
     type: SET_SELECTED_VERSE,
     verse,
@@ -302,17 +296,18 @@ export function validateSelected() {
   }
 }
 
-export function setAllAndValidateSelected(selected) {
+export function setAllAndValidateSelected(selected: any) {
   return {
     type: SET_ALL_AND_VALIDATE_SELECTED,
     selected,
   }
 }
 
-export function setAllAndValidateSelectedAsync(selected) {
-  return dispatch =>
+export function setAllAndValidateSelectedAsync(selected: any) {
+  return (dispatch: any) =>
     new Promise(resolve => {
       dispatch(setAllAndValidateSelected(selected))
+      // @ts-ignore
       resolve()
     })
 }
@@ -348,8 +343,8 @@ export function goToNextChapter() {
   }
 }
 
-export function goToNextVerse(nbVerses) {
-  return (dispatch, getState) => {
+export function goToNextVerse(nbVerses: any) {
+  return (dispatch: any, getState: any) => {
     let { selectedVerse } = getState().bible
 
     if (selectedVerse === nbVerses) {
@@ -360,8 +355,8 @@ export function goToNextVerse(nbVerses) {
   }
 }
 
-export function goToPrevVerse(nbVerses) {
-  return (dispatch, getState) => {
+export function goToPrevVerse(nbVerses: any) {
+  return (dispatch: any, getState: any) => {
     let { selectedVerse } = getState().bible
 
     if (selectedVerse === 1) {
@@ -372,21 +367,21 @@ export function goToPrevVerse(nbVerses) {
   }
 }
 
-export function addSelectedVerse(id) {
+export function addSelectedVerse(id: any) {
   return {
     type: ADD_HIGHLIGHTED_VERSE,
     id,
   }
 }
 
-export function addAllSelectedVerses(ids) {
+export function addAllSelectedVerses(ids: any) {
   return {
     type: ADD_HIGHLIGHTED_VERSES,
     ids,
   }
 }
 
-export function removeSelectedVerse(id) {
+export function removeSelectedVerse(id: any) {
   return {
     type: REMOVE_HIGHLIGHTED_VERSE,
     id,

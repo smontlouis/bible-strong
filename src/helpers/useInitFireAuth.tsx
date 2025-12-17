@@ -21,7 +21,7 @@ const useInitFireAuth = () => {
     }
 
     const emailVerified = () => dispatch(UserActions.verifyEmail())
-    const onUserChange = (profile) => console.log('user changed')
+    const onUserChange = (profile: any) => console.log('user changed')
     const onLogout = async () => {
       // PROTECTION: Créer un backup avant de déconnecter
       // Garantit qu'aucune donnée non-sync ne peut être perdue
@@ -37,7 +37,7 @@ const useInitFireAuth = () => {
       dispatch(UserActions.onUserLogout())
       resetAtoms()
     }
-    const onError = (e) => {
+    const onError = (e: any) => {
       if (e.code === 'auth/internal-error') {
         SnackBar.show(i18n.t("Une erreur s'est produite"))
       }
@@ -45,20 +45,13 @@ const useInitFireAuth = () => {
         e.code === 'auth/account-exists-with-different-credential' ||
         e.code === 'auth/email-already-in-use'
       ) {
-        SnackBar.show(
-          i18n.t('Cet utilisateur existe déjà avec un autre compte.')
-        )
+        SnackBar.show(i18n.t('Cet utilisateur existe déjà avec un autre compte.'))
       }
       if (e.code === 'auth/weak-password') {
         SnackBar.show(i18n.t('Le mot de passe est trop court.'))
       }
-      if (
-        e.code === 'auth/wrong-password' ||
-        e.code === 'auth/user-not-found'
-      ) {
-        SnackBar.show(
-          i18n.t('Mot de passe invalide ou utilisateur inexistant.')
-        )
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+        SnackBar.show(i18n.t('Mot de passe invalide ou utilisateur inexistant.'))
       }
       if (e.code === 'auth/invalid-email') {
         SnackBar.show(i18n.t('Format email invalide.'))
@@ -71,14 +64,7 @@ const useInitFireAuth = () => {
       console.log(e.code)
     }
 
-    FireAuth.init(
-      onLogin,
-      onUserChange,
-      onLogout,
-      emailVerified,
-      onError,
-      dispatch
-    )
+    FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)
   }, [dispatch])
 }
 

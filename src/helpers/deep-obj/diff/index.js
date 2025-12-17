@@ -9,9 +9,7 @@ const diff = (lhs, rhs, deletedValue) => {
   const r = properObject(rhs)
 
   const deletedValues = Object.keys(l).reduce((acc, key) => {
-    return r.hasOwnProperty(key)
-      ? acc
-      : { ...acc, [key]: deletedValue || undefined }
+    return r.hasOwnProperty(key) ? acc : { ...acc, [key]: deletedValue || undefined }
   }, {})
 
   if (isDate(l) || isDate(r)) {
@@ -24,8 +22,7 @@ const diff = (lhs, rhs, deletedValue) => {
 
     const difference = diff(l[key], r[key], deletedValue)
 
-    if (isObject(difference) && isEmpty(difference) && !isDate(difference))
-      return acc // return no diff
+    if (isObject(difference) && isEmpty(difference) && !isDate(difference)) return acc // return no diff
 
     return { ...acc, [key]: difference } // return updated key
   }, deletedValues)

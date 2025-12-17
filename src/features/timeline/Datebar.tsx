@@ -49,13 +49,7 @@ const Datebar = ({
       }))}
     >
       {values.map(value => (
-        <Box
-          key={value}
-          width={100}
-          left={-50}
-          alignItems="center"
-          justifyContent="flex-end"
-        >
+        <Box key={value} width={100} left={-50} alignItems="center" justifyContent="flex-end">
           <Box p={5} borderRadius={3} mb={3}>
             <Text color={color} title fontWeight="bold" fontSize={10}>
               {value < 2020 ? Math.abs(value) : t('Futur')}

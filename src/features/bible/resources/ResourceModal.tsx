@@ -23,10 +23,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
@@ -68,13 +65,7 @@ type Props = {
 // }
 
 const ResourcesModal = memo(
-  ({
-    resourceModalRef,
-    resourceType,
-    onChangeResourceType,
-    bibleAtom,
-    isSelectionMode,
-  }: Props) => {
+  ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)
@@ -211,16 +202,15 @@ const Resource = ({
     data: { selectedVersion, selectedVerses },
   } = bible
   const selectedVerse = Object.keys(selectedVerses)[0]
-  const [Livre, Chapitre, Verset] = selectedVerse
-    ? selectedVerse?.split('-')
-    : []
+  const [Livre, Chapitre, Verset] = selectedVerse ? selectedVerse?.split('-') : []
 
-  const verseObj = {
+  // @ts-ignore
+  const verseObj: any = {
     Livre,
     Chapitre,
     Verset,
     Texte: '',
-  } as Verse
+  }
 
   const updateVerse = (incr: number) => {
     actions.selectSelectedVerse(`${Livre}-${Chapitre}-${Number(Verset) + incr}`)
@@ -229,7 +219,7 @@ const Resource = ({
   if (!selectedVerse) return null
 
   return (
-    <Slides index={resources.findIndex((r) => r === resourceType)}>
+    <Slides index={resources.findIndex(r => r === resourceType)}>
       <Slide key="strong">
         <View
           style={{
@@ -251,10 +241,7 @@ const Resource = ({
             paddingBottom: bottomBarHeight + 54,
           }}
         >
-          <DictionnaireVerseDetailCard
-            verse={verseObj}
-            updateVerse={updateVerse}
-          />
+          <DictionnaireVerseDetailCard verse={verseObj} updateVerse={updateVerse} />
         </View>
       </Slide>
       <Slide key="nave">
@@ -272,10 +259,7 @@ const Resource = ({
             paddingBottom: bottomBarHeight + 54,
           }}
         >
-          <ReferenceCard
-            selectedVerse={selectedVerse}
-            version={selectedVersion}
-          />
+          <ReferenceCard selectedVerse={selectedVerse} version={selectedVersion} />
         </BottomSheetScrollView>
       </Slide>
       <Slide key="commentary">
@@ -284,10 +268,7 @@ const Resource = ({
             paddingBottom: bottomBarHeight + 54,
           }}
         >
-          <CommentariesCard
-            verse={selectedVerse}
-            onChangeVerse={actions.selectSelectedVerse}
-          />
+          <CommentariesCard verse={selectedVerse} onChangeVerse={actions.selectSelectedVerse} />
         </BottomSheetScrollView>
       </Slide>
     </Slides>

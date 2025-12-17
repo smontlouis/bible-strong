@@ -7,11 +7,7 @@ import { useDispatch } from 'react-redux'
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
-import {
-  getChangelog,
-  getDatabaseUpdate,
-  getVersionUpdate,
-} from '~redux/modules/user'
+import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
 import MigrationModal from '~common/MigrationModal'
 
 export interface InitHooksProps {}
@@ -40,8 +36,11 @@ const InitHooks = ({}: InitHooksProps) => {
       console.error('Failed to initialize AutoBackupManager:', err)
     })
 
+    // @ts-ignore
     dispatch(getChangelog())
+    // @ts-ignore
     dispatch(getVersionUpdate())
+    // @ts-ignore
     dispatch(getDatabaseUpdate())
     const event = AppState.addEventListener('change', handleAppStateChange)
 

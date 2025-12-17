@@ -10,17 +10,15 @@ const Div = styled('div')<RootStyles>(({ settings: { theme } }) => ({
   display: 'inline-flex',
 }))
 
-const Tag = styled('div')<RootStyles>(
-  ({ settings: { theme, colors, fontSizeScale } }) => ({
-    fontFamily: 'arial',
-    padding: '2px 4px',
-    borderRadius: '40px',
-    color: colors[theme].default,
-    backgroundColor: colors[theme].lightGrey,
-    fontSize: scaleFontSize(12, fontSizeScale),
-    marginLeft: '5px',
-  })
-)
+const Tag = styled('div')<RootStyles>(({ settings: { theme, colors, fontSizeScale } }) => ({
+  fontFamily: 'arial',
+  padding: '2px 4px',
+  borderRadius: '40px',
+  color: colors[theme].default,
+  backgroundColor: colors[theme].lightGrey,
+  fontSize: scaleFontSize(12, fontSizeScale),
+  marginLeft: '5px',
+}))
 
 interface Props {
   settings: RootState['user']['bible']['settings']

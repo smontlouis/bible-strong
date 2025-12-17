@@ -45,16 +45,13 @@ const EventPeriod = ({ event }: { event: Event }) => {
 
   if (!event.startDate && !event.endDate) return null
 
-  const startDate = event.startDate
-    ? new Date(event.startDate._seconds * 1000)
-    : null
+  const startDate = event.startDate ? new Date(event.startDate._seconds * 1000) : null
   const endDate = event.endDate ? new Date(event.endDate._seconds * 1000) : null
 
   if (startDate && endDate) {
     return (
       <Text bold color="white" fontSize={12}>
-        {format(startDate, 'dd MMM yy', { locale })} -{' '}
-        {format(endDate, 'dd MMM yy', { locale })}
+        {format(startDate, 'dd MMM yy', { locale })} - {format(endDate, 'dd MMM yy', { locale })}
       </Text>
     )
   }
@@ -129,14 +126,7 @@ export const Events = () => {
           </MaskedView>
         )}
         <HStack gap={8} alignItems="center">
-          <HStack
-            bg="lightPrimary"
-            borderRadius={10}
-            center
-            height={22}
-            gap={4}
-            px={8}
-          >
+          <HStack bg="lightPrimary" borderRadius={10} center height={22} gap={4} px={8}>
             <Text bold fontSize={12}>
               {t('event')}
             </Text>

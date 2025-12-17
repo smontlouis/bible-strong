@@ -35,9 +35,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const appleIsReviewing = remoteConfig()
-    .getValue('apple_reviewing')
-    .asBoolean()
+  const appleIsReviewing = remoteConfig().getValue('apple_reviewing').asBoolean()
 
   return (
     <Box bg="lightGrey" flex={1}>
@@ -68,11 +66,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
             }}
           >
             <StrongOfTheDay type="grec" />
-            <StrongOfTheDay
-              type="hebreu"
-              color1="rgba(248,131,121,1)"
-              color2="rgba(255,77,93,1)"
-            />
+            <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
             <NaveOfTheDay />
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
@@ -105,9 +99,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
             <Box flex>
               <Button
                 color="#3b5998"
-                onPress={() =>
-                  Linking.openURL('https://www.facebook.com/fr.bible.strong')
-                }
+                onPress={() => Linking.openURL('https://www.facebook.com/fr.bible.strong')}
                 leftIcon={
                   <FeatherIcon
                     name="facebook"
@@ -155,9 +147,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
             end={[0.5, 0.9]}
             style={{ height: 100 }}
             colors={[
-              `${Color(theme.colors.lightGrey)
-                .alpha(0)
-                .string()}`,
+              `${Color(theme.colors.lightGrey).alpha(0).string()}`,
               `${theme.colors.lightGrey}`,
             ]}
           />
@@ -179,10 +169,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
   )
 }
 
-const HomeScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'Home'>) => {
+const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Home'>) => {
   const closeHome = route.params.closeHome
 
   return <Home closeHome={closeHome} navigation={navigation} />

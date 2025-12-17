@@ -44,16 +44,13 @@ const loadNaveByVerset = (verse: string) =>
       const naveReferenceResultForVerse = await fetchData(verse)
 
       // Fetch for chapter
-      const chapter = verse
-        .split('-')
-        .slice(0, -1)
-        .join('-') // 1-1-1 => 1-1
+      const chapter = verse.split('-').slice(0, -1).join('-') // 1-1-1 => 1-1
 
       const naveReferenceResultForChapter = await fetchData(chapter)
 
       return [naveReferenceResultForVerse, naveReferenceResultForChapter] as [
         NaveTopicsQuery | undefined,
-        NaveTopicsQuery | undefined
+        NaveTopicsQuery | undefined,
       ]
     },
     () => {

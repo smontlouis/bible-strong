@@ -22,9 +22,7 @@ const loadDictionnaireWords = async (v: string) =>
         return []
       }
 
-      return (JSON.parse(result[0].ref) as string[]).map(word =>
-        word.toLowerCase()
-      )
+      return (JSON.parse(result[0].ref) as string[]).map(word => word.toLowerCase())
     },
     () => {
       Sentry.withScope(scope => {

@@ -9,19 +9,22 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
-const StyledText = styled(Text)(({ theme, isSelected }) => ({
+// @ts-ignore
+const StyledText = styled(Text)(({ theme, isSelected }: any) => ({
   fontWeight: isSelected ? 'bold' : 'normal',
 }))
 
-const StyledUnderline = styled(Box)(({ theme, color }) => ({
+// @ts-ignore
+const StyledUnderline = styled(Box)(({ theme, color }: any) => ({
   marginTop: 5,
   height: 8,
   width: 30,
   borderRadius: 5,
+  // @ts-ignore
   backgroundColor: color ? theme.colors[color] : theme.colors.primary,
 }))
 
-const AlphabetList = ({ color, setLetter, letter }) => {
+const AlphabetList = ({ color, setLetter, letter }: any) => {
   const CarouselAlphabet = useRef<ICarouselInstance>(null)
   const index = alphabet.findIndex(l => l === letter.toUpperCase())
 
@@ -50,26 +53,25 @@ const AlphabetList = ({ color, setLetter, letter }) => {
           width={25}
           height={30}
           data={alphabet}
-          renderItem={({ item: section }) => (
+          renderItem={({ item: section }: any) => (
             <TouchableOpacity
               onPress={() => {
                 setLetter(section)
               }}
             >
+              {/* @ts-ignore */}
               <Box isSelected={letter === section}>
-                <StyledText
-                  isSelected={letter === section}
-                  textAlign="center"
-                  fontSize={26}
-                >
+                {/* @ts-ignore */}
+                <StyledText isSelected={letter === section} textAlign="center" fontSize={26}>
                   {section.toUpperCase()}
                 </StyledText>
               </Box>
             </TouchableOpacity>
           )}
-          onSnapToItem={index => setLetter(alphabet[index])}
+          onSnapToItem={(index: any) => setLetter(alphabet[index])}
         />
         <Box center>
+          {/* @ts-ignore */}
           <StyledUnderline color={color} />
         </Box>
       </Box>

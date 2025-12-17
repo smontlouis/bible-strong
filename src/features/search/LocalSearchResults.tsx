@@ -15,7 +15,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import LocalSearchItem from './LocalSearchItem'
 import bibleLSG from './bibleLSG'
 
-const LocalSearchResults = ({ results = [], searchValue }) => {
+const LocalSearchResults = ({ results = [], searchValue }: any) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const navigation = useNavigation()
@@ -57,9 +57,7 @@ const LocalSearchResults = ({ results = [], searchValue }) => {
       keyExtractor={result => result.ref}
       renderItem={({ item: result, index }) => {
         const [book, chapter, verse] = result.ref.split('-')
-        const { title } = formatVerseContent([
-          { Livre: book, Chapitre: chapter, Verset: verse },
-        ])
+        const { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
         const metaData = result.matchData.metadata
         const positions = Object.keys(metaData)
           .reduce((acc, item) => acc.concat(metaData[item]?.text?.position), [])

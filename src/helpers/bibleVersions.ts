@@ -239,9 +239,7 @@ export const versions = {
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://www.bible.audio/media/sem/${
         bookNum > 39 ? 'nt' : 'at'
-      }/${bookNum.toString().padStart(2, '0')}_${chapterNum
-        .toString()
-        .padStart(3, '0')}.mp3`
+      }/${bookNum.toString().padStart(2, '0')}_${chapterNum.toString().padStart(3, '0')}.mp3`
     },
   },
   FMAR: {
@@ -322,9 +320,10 @@ export const versions = {
     type: 'en',
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return `https://www.bible.audio/media/niv/${
-        bookNum > 39 ? 'nt' : 'at'
-      }/${(bookNum > 39 ? bookNum - 39 : bookNum)
+      return `https://www.bible.audio/media/niv/${bookNum > 39 ? 'nt' : 'at'}/${(bookNum > 39
+        ? bookNum - 39
+        : bookNum
+      )
         .toString()
         .padStart(2, '0')}_${chapterNum.toString().padStart(3, '0')}.mp3`
     },
@@ -449,9 +448,7 @@ interface VersionsBySection {
   title: string
   data: Version[]
 }
-export const versionsBySections: VersionsBySection[] = Object.values(
-  versions
-).reduce(
+export const versionsBySections: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
     switch (version.id) {
       case 'LSG':
@@ -460,6 +457,7 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'NEG79':
       case 'NVS78P':
       case 'S21': {
+        // @ts-ignore
         sectionArray[0].data.push(version)
         return sectionArray
       }
@@ -477,6 +475,7 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'CSB':
       case 'NLT':
       case 'INT_EN': {
+        // @ts-ignore
         sectionArray[2].data.push(version)
         return sectionArray
       }
@@ -486,10 +485,12 @@ export const versionsBySections: VersionsBySection[] = Object.values(
       case 'TR1894':
       case 'DEL':
       case 'LXX': {
+        // @ts-ignore
         sectionArray[3].data.push(version)
         return sectionArray
       }
       default: {
+        // @ts-ignore
         sectionArray[1].data.push(version)
         return sectionArray
       }
@@ -503,10 +504,9 @@ export const versionsBySections: VersionsBySection[] = Object.values(
   ]
 )
 
-export const versionsBySections_en: VersionsBySection[] = Object.values(
-  versions
-).reduce(
+export const versionsBySections_en: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
+    // @ts-ignore
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':
@@ -523,6 +523,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
       case 'CSB':
       case 'NLT':
       case 'ESV': {
+        // @ts-ignore
         sectionArray[0].data.push(versionEn)
         return sectionArray
       }
@@ -545,6 +546,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
       case 'BCC1923':
       case 'PDV2017':
       case 'POV': {
+        // @ts-ignore
         sectionArray[1].data.push(versionEn)
         return sectionArray
       }
@@ -554,6 +556,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(
       case 'TR1894':
       case 'DEL':
       case 'LXX': {
+        // @ts-ignore
         sectionArray[2].data.push(versionEn)
         return sectionArray
       }
@@ -578,7 +581,4 @@ export const getVersionsBySections = () => {
 }
 
 export const isStrongVersion = (version: string) =>
-  version === 'INT' ||
-  version === 'INT_EN' ||
-  version === 'LSGS' ||
-  version === 'KJVS'
+  version === 'INT' || version === 'INT_EN' || version === 'LSGS' || version === 'KJVS'

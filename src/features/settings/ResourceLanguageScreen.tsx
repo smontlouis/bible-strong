@@ -82,9 +82,7 @@ const LanguageButton = ({ lang, isSelected, onPress }: LanguageButtonProps) => {
         borderRadius={16}
         center
         style={{
-          backgroundColor: isSelected
-            ? theme.colors.primary
-            : theme.colors.lightGrey,
+          backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightGrey,
           borderWidth: 1,
           borderColor: isSelected ? theme.colors.primary : theme.colors.border,
         }}
@@ -109,12 +107,7 @@ interface ResourceRowProps {
   onLanguageChange: (lang: ResourceLanguage) => void
 }
 
-const ResourceRow = ({
-  label,
-  description,
-  currentLang,
-  onLanguageChange,
-}: ResourceRowProps) => {
+const ResourceRow = ({ label, description, currentLang, onLanguageChange }: ResourceRowProps) => {
   const { t } = useTranslation()
 
   return (
@@ -146,25 +139,20 @@ const ResourceRow = ({
   )
 }
 
-const ResourceLanguageScreen = ({}: StackScreenProps<
-  MainStackProps,
-  'ResourceLanguage'
->) => {
+const ResourceLanguageScreen = ({}: StackScreenProps<MainStackProps, 'ResourceLanguage'>) => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
   const theme = useTheme()
   const actions = useBibleTabActions(defaultBibleAtom)
 
-  const [resourcesLanguages, setResourcesLanguages] = useAtom(
-    resourcesLanguageAtom
-  )
+  const [resourcesLanguages, setResourcesLanguages] = useAtom(resourcesLanguageAtom)
   const currentAppLang = i18n.language as ResourceLanguage
 
   const handleLanguageChange = (
     resourceId: keyof ResourcesLanguageState,
     lang: ResourceLanguage
   ) => {
-    setResourcesLanguages((prev) => ({ ...prev, [resourceId]: lang }))
+    setResourcesLanguages(prev => ({ ...prev, [resourceId]: lang }))
   }
 
   // Change app language + all resources
@@ -211,21 +199,12 @@ const ResourceLanguageScreen = ({}: StackScreenProps<
                 center
                 style={{
                   backgroundColor:
-                    currentAppLang === 'fr'
-                      ? theme.colors.primary
-                      : theme.colors.lightGrey,
+                    currentAppLang === 'fr' ? theme.colors.primary : theme.colors.lightGrey,
                   borderWidth: 2,
-                  borderColor:
-                    currentAppLang === 'fr'
-                      ? theme.colors.primary
-                      : theme.colors.border,
+                  borderColor: currentAppLang === 'fr' ? theme.colors.primary : theme.colors.border,
                 }}
               >
-                <Text
-                  bold
-                  fontSize={16}
-                  color={currentAppLang === 'fr' ? 'reverse' : 'default'}
-                >
+                <Text bold fontSize={16} color={currentAppLang === 'fr' ? 'reverse' : 'default'}>
                   Français
                 </Text>
               </Box>
@@ -243,21 +222,12 @@ const ResourceLanguageScreen = ({}: StackScreenProps<
                 center
                 style={{
                   backgroundColor:
-                    currentAppLang === 'en'
-                      ? theme.colors.primary
-                      : theme.colors.lightGrey,
+                    currentAppLang === 'en' ? theme.colors.primary : theme.colors.lightGrey,
                   borderWidth: 2,
-                  borderColor:
-                    currentAppLang === 'en'
-                      ? theme.colors.primary
-                      : theme.colors.border,
+                  borderColor: currentAppLang === 'en' ? theme.colors.primary : theme.colors.border,
                 }}
               >
-                <Text
-                  bold
-                  fontSize={16}
-                  color={currentAppLang === 'en' ? 'reverse' : 'default'}
-                >
+                <Text bold fontSize={16} color={currentAppLang === 'en' ? 'reverse' : 'default'}>
                   English
                 </Text>
               </Box>
@@ -278,15 +248,13 @@ const ResourceLanguageScreen = ({}: StackScreenProps<
             </Text>
           </Box>
 
-          {RESOURCES_CONFIG.map((resource) => (
+          {RESOURCES_CONFIG.map(resource => (
             <React.Fragment key={resource.id}>
               <ResourceRow
                 label={resource.labelKey}
                 description={resource.descriptionKey}
                 currentLang={resourcesLanguages[resource.id]}
-                onLanguageChange={(lang) =>
-                  handleLanguageChange(resource.id, lang)
-                }
+                onLanguageChange={lang => handleLanguageChange(resource.id, lang)}
               />
               <Border marginHorizontal={20} />
             </React.Fragment>

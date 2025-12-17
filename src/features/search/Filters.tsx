@@ -5,7 +5,7 @@ import RefinementList from './RefinementList'
 import Box from '~common/ui/Box'
 import { MAX_WIDTH } from '~helpers/useDimensions'
 
-const Filters = ({}) => (
+const Filters = () => (
   <Box maxWidth={MAX_WIDTH} width="100%" marginLeft="auto" marginRight="auto">
     <ScrollView
       horizontal
@@ -14,7 +14,9 @@ const Filters = ({}) => (
         flexDirection: 'row',
       }}
     >
+      {/* @ts-ignore */}
       <RefinementList attribute="section" />
+      {/* @ts-ignore */}
       <RefinementList attribute="book" limit={100} />
     </ScrollView>
   </Box>

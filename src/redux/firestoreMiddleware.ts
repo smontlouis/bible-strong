@@ -66,17 +66,13 @@ import {
 } from '~helpers/firestoreSubcollections'
 import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration'
 
-export const removeUndefinedVariables = (obj) =>
-  JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+export const removeUndefinedVariables = (obj: any) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
 /**
  * Détecte les changements dans une sous-collection à partir du diff
  * Retourne les éléments ajoutés/modifiés et supprimés
  */
-function extractSubcollectionChanges(
-  diffData: any,
-  deleteMarker: any
-): BatchChanges {
+function extractSubcollectionChanges(diffData: any, deleteMarker: any): BatchChanges {
   const changes: BatchChanges = {
     set: {},
     delete: [],
@@ -116,8 +112,7 @@ async function syncSubcollectionChanges(
     }
   }
 
-  const totalOps =
-    Object.keys(changes.set).length + changes.delete.length
+  const totalOps = Object.keys(changes.set).length + changes.delete.length
 
   if (totalOps === 0) return
 
@@ -146,9 +141,7 @@ async function handleSyncWithRetry(
 
     // SAFETY NET: Si permission-denied, tente un refresh manuel du token
     if (error.code === 'permission-denied') {
-      console.warn(
-        '[Sync] Permission denied detected, attempting manual token refresh...'
-      )
+      console.warn('[Sync] Permission denied detected, attempting manual token refresh...')
 
       const refreshed = await tokenManager.tryRefresh()
 
@@ -173,7 +166,7 @@ async function handleSyncWithRetry(
     })
 
     // SAFETY: Créer un backup immédiat en cas d'erreur de sync
-    autoBackupManager.createBackupNow(state, 'sync_error').catch((backupError) => {
+    autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
       console.error('[AutoBackup] Failed to create error backup:', backupError)
     })
 
@@ -182,7 +175,7 @@ async function handleSyncWithRetry(
   }
 }
 
-export default (store) => (next) => async (action) => {
+export default (store: any) => (next: any) => async (action: any) => {
   const oldState = store.getState()
   const result = next(action)
   const state = store.getState()

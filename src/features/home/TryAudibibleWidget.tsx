@@ -29,11 +29,7 @@ const TryAudibibleWidget = () => {
         row
       >
         <Box pos="absolute" left={0} right={0} top={0} height={100} rounded>
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height: 100 }}
-            colors={[color1, color2]}
-          />
+          <LinearGradient start={[0.1, 0.2]} style={{ height: 100 }} colors={[color1, color2]} />
         </Box>
         <Image
           style={{

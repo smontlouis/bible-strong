@@ -35,7 +35,7 @@ class VerseBlock extends Embed {
           arrayVerses: verses,
           book,
           chapter,
-          verse
+          verse,
         })
       }
     })
@@ -88,7 +88,7 @@ class VerseBlock extends Embed {
     // see `remove` implementation on:
     // https://github.com/quilljs/parchment/blob/master/src/blot/abstract/shadow.ts
     this.remove()
-    
+
     // schedule cursor positioning after quill is done with whatever has scheduled
     setTimeout(() => quill.setSelection(cursorPosition, Quill.sources.API), 0)
   }

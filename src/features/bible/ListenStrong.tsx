@@ -63,9 +63,7 @@ const ListenToStrong = ({ type, code }: Props) => {
   const onPlaybackStatusUpdate = (playbackStatus: AVPlaybackStatus) => {
     if (!playbackStatus.isLoaded) {
       if (playbackStatus.error) {
-        console.log(
-          `Encountered a fatal error during playback: ${playbackStatus.error}`
-        )
+        console.log(`Encountered a fatal error during playback: ${playbackStatus.error}`)
         setAudioStatus('Error')
       }
     } else {
@@ -104,22 +102,12 @@ const ListenToStrong = ({ type, code }: Props) => {
       )}
       {audioStatus === 'Playing' && (
         <Box>
-          <FeatherIcon
-            name="play-circle"
-            size={20}
-            color="primary"
-            style={{ opacity: 0.5 }}
-          />
+          <FeatherIcon name="play-circle" size={20} color="primary" style={{ opacity: 0.5 }} />
         </Box>
       )}
       {audioStatus === 'Error' && (
         <LinkBox onPress={playAudio}>
-          <MaterialIcon
-            name="error"
-            size={20}
-            color="grey"
-            style={{ opacity: 0.5 }}
-          />
+          <MaterialIcon name="error" size={20} color="grey" style={{ opacity: 0.5 }} />
         </LinkBox>
       )}
     </Box>

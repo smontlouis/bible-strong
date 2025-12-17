@@ -57,6 +57,7 @@ const PauseText = ({ children }: Props) => {
         <Box style={StyleSheet.absoluteFillObject} center>
           <AnimatableCircle
             duration={2300}
+            // @ts-ignore
             animation={circleBig}
             easing="ease-in-out-cubic"
             direction="alternate"
@@ -67,6 +68,7 @@ const PauseText = ({ children }: Props) => {
         <Box style={StyleSheet.absoluteFillObject} center>
           <AnimatableCircle
             duration={2300}
+            // @ts-ignore
             animation={circleMedium}
             easing="ease-in-out-cubic"
             direction="alternate"
@@ -75,8 +77,10 @@ const PauseText = ({ children }: Props) => {
           />
         </Box>
         <Box style={StyleSheet.absoluteFillObject} center>
+          {/* @ts-ignore */}
           <AnimatableCircle
             duration={2300}
+            // @ts-ignore
             animation={circleSmall}
             easing="ease-in-out-cubic"
             direction="alternate"

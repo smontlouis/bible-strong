@@ -8,10 +8,7 @@ import Text from '~common/ui/Text'
 
 const StyledNaveItem = styled.View(({ theme }) => ({
   borderRadius: 5,
-  backgroundColor: Color(theme.colors.quint)
-    .alpha(0.2)
-    .lighten(0.5)
-    .string(),
+  backgroundColor: Color(theme.colors.quint).alpha(0.2).lighten(0.5).string(),
   paddingTop: 5,
   paddingBottom: 5,
   paddingLeft: 12,
@@ -20,9 +17,10 @@ const StyledNaveItem = styled.View(({ theme }) => ({
   marginBottom: 5,
 }))
 
-const NaveItem = ({ item: { name, name_lower } }) => {
+const NaveItem = ({ item: { name, name_lower } }: any) => {
   return (
     <Link route="NaveDetail" params={{ name, name_lower }}>
+      {/* @ts-ignore */}
       <StyledNaveItem marginBottom={30}>
         <Text color="quint" title fontSize={14}>
           {name}

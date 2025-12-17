@@ -6,11 +6,11 @@ import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import { calculateLabel } from './constants'
 
-const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
+const StyledParagraph = styled(Paragraph)(({ theme, isLight }: any) => ({
   backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent',
 }))
 
-const Highlight = ({ attribute, hit, highlight }) => {
+const Highlight = ({ attribute, hit, highlight }: any) => {
   const highlights = highlight({
     highlightProperty: '_highlightResult',
     attribute,
@@ -20,14 +20,9 @@ const Highlight = ({ attribute, hit, highlight }) => {
   return (
     <Box>
       <Paragraph small fontFamily="title">
-        {highlights.map(({ value, isHighlighted }, index) => {
+        {highlights.map(({ value, isHighlighted }: any, index: any) => {
           return (
-            <StyledParagraph
-              fontFamily="title"
-              isLight={isHighlighted}
-              small
-              key={index}
-            >
+            <StyledParagraph fontFamily="title" isLight={isHighlighted} small key={index}>
               {value}
             </StyledParagraph>
           )

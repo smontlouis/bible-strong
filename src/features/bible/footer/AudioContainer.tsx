@@ -1,17 +1,9 @@
-import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
 import { useDerivedValue } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 import Link from '~common/Link'
-import Box, {
-  BoxProps,
-  HStack,
-  MotiBox,
-  motiTransition,
-  TouchableBox,
-} from '~common/ui/Box'
+import Box, { BoxProps, HStack, MotiBox, motiTransition, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -29,11 +21,8 @@ type ChipProps = {
   isActive?: boolean
 }
 
-const Chip = ({
-  children,
-  isActive,
-  ...props
-}: ChipProps & BoxProps & TouchableOpacityProps) => (
+const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & TouchableOpacityProps) => (
+  // @ts-ignore
   <TouchableBox
     py={3}
     px={6}
@@ -49,12 +38,7 @@ const Chip = ({
   </TouchableBox>
 )
 
-const AudioContainer = ({
-  children,
-  onReduce,
-  audioMode,
-  onChangeMode,
-}: AudioContainerProps) => {
+const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioContainerProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <MotiBox
@@ -69,6 +53,7 @@ const AudioContainer = ({
       right={20}
       position="absolute"
       borderRadius={30}
+      // @ts-ignore
       animate={useDerivedValue(() => {
         return {
           translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
@@ -79,25 +64,15 @@ const AudioContainer = ({
       <HStack row pos="absolute" top={8} right={20} zIndex={10} gap={3}>
         {!!onChangeMode && (
           <>
-            <Chip
-              isActive={audioMode === 'url'}
-              onPress={() => onChangeMode('url')}
-            >
+            <Chip isActive={audioMode === 'url'} onPress={() => onChangeMode('url')}>
               Audio
             </Chip>
-            <Chip
-              isActive={audioMode === 'tts'}
-              onPress={() => onChangeMode('tts')}
-            >
+            <Chip isActive={audioMode === 'tts'} onPress={() => onChangeMode('tts')}>
               TTS
             </Chip>
           </>
         )}
-        <Chip
-          onPress={() =>
-            Linking.openURL('https://click.audibible.app/5nmN/stephane30')
-          }
-        >
+        <Chip onPress={() => Linking.openURL('https://click.audibible.app/5nmN/stephane30')}>
           Audibible
         </Chip>
       </HStack>

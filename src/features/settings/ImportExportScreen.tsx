@@ -79,6 +79,7 @@ const LastSave = () => {
       <Text bold>{t('app.lastSave')}</Text>
       {lastSave ? (
         <Text marginTop={5} color="grey">
+          {/* @ts-ignore */}
           {format((lastSave?.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
         </Text>
       ) : (
@@ -92,9 +93,7 @@ const LastSave = () => {
 const ExportButton = ({
   setLastSave,
 }: {
-  setLastSave: React.Dispatch<
-    React.SetStateAction<FileSystem.FileInfo | undefined>
-  >
+  setLastSave: React.Dispatch<React.SetStateAction<FileSystem.FileInfo | undefined>>
 }) => {
   const { t } = useTranslation()
 
@@ -112,7 +111,7 @@ const ExportButton = ({
 
     const UTI = 'save.biblestrong'
 
-    await Sharing.shareAsync(fileUri, { UTI }).catch((error) => {
+    await Sharing.shareAsync(fileUri, { UTI }).catch(error => {
       console.log(error)
     })
   }
@@ -121,7 +120,7 @@ const ExportButton = ({
     setIsSyncing(true)
 
     try {
-      const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+      const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
       const json = JSON.stringify({
         bible: sanitizeUserBible(user.bible),
         plan: plan.ongoingPlans,
@@ -144,10 +143,10 @@ const ExportButton = ({
             'save.biblestrong',
             'application/json'
           )
-            .then(async (uri) => {
+            .then(async uri => {
               await FileSystem.writeAsStringAsync(uri, json)
             })
-            .catch((e) => console.log(e))
+            .catch(e => console.log(e))
         } else {
           await exportAsync(json)
         }
@@ -166,13 +165,7 @@ const ExportButton = ({
   }
 
   return (
-    <Button
-      style={{ width: 130, marginTop: 20 }}
-      reverse
-      small
-      onPress={sync}
-      disabled={isSyncing}
-    >
+    <Button style={{ width: 130, marginTop: 20 }} reverse small onPress={sync} disabled={isSyncing}>
       <Text fontSize={15}>{isSyncing ? 'Export...' : t('app.export')}</Text>
     </Button>
   )
@@ -207,12 +200,7 @@ const ImportSave = () => {
   }
 
   return (
-    <Button
-      style={{ width: 130, marginTop: 20 }}
-      reverse
-      small
-      onPress={importSave}
-    >
+    <Button style={{ width: 130, marginTop: 20 }} reverse small onPress={importSave}>
       <Text fontSize={15}>{t('app.import')}</Text>
     </Button>
   )
@@ -261,9 +249,7 @@ const AutoBackupsList = () => {
           onPress: async () => {
             setIsRestoring(true)
             try {
-              const backupData = await autoBackupManager.restoreBackup(
-                backup.filename
-              )
+              const backupData = await autoBackupManager.restoreBackup(backup.filename)
 
               if (!backupData) {
                 throw new Error('Failed to read backup')
@@ -304,18 +290,11 @@ const AutoBackupsList = () => {
           {t('backups.count', { count: backups.length })} -{' '}
           {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB
         </Text>
-        <Button
-          small
-          onPress={loadBackups}
-          disabled={isLoading}
-          style={{ paddingHorizontal: 10 }}
-        >
-          <Text fontSize={11}>
-            {isLoading ? '...' : '🔄 ' + t('backups.refresh')}
-          </Text>
+        <Button small onPress={loadBackups} disabled={isLoading} style={{ paddingHorizontal: 10 }}>
+          <Text fontSize={11}>{isLoading ? '...' : '🔄 ' + t('backups.refresh')}</Text>
         </Button>
       </Box>
-      {backups.map((backup) => (
+      {backups.map(backup => (
         <Box
           key={backup.filename}
           mb={10}

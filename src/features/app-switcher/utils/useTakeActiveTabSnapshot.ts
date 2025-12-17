@@ -20,12 +20,15 @@ const useTakeActiveTabSnapshot = () => {
         throw new Error('No active tab')
       }
 
+      // @ts-ignore
       const data = await captureRef(cachedTabScreenRef, {
         result: 'base64',
         format: 'png',
       }).catch(error => console.error('Oops, snapshot failed', error))
 
+      // @ts-ignore
       const resolution = /^(\d+):(\d+)\|/g.exec(data)
+      // @ts-ignore
       const base64 = data.substr((resolution || [''])[0].length || 0)
 
       setTabs(

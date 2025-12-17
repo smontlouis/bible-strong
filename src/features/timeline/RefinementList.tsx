@@ -23,23 +23,24 @@ const lookupTable = {
   },
 }
 
-const RefinementList = ({ items, refine, attribute, ...props }) => {
+const RefinementList = ({ items, refine, attribute, ...props }: any) => {
   const { t } = useTranslation()
-  const currentValue = items.find(c => c.isRefined)?.label || ''
-  items.sort((a, b) => Number(a.label) < Number(b.label))
+  const currentValue = items.find((c: any) => c.isRefined)?.label || ''
+  items.sort((a: any, b: any) => Number(a.label) < Number(b.label))
   const choices = [
     { label: t('Tout'), value: '' },
-    ...items.map(item => {
+    ...items.map((item: any) => {
       const value = item.label
       return {
         value,
+        // @ts-ignore
         label: t(lookupTable[attribute][value]),
         subLabel: item.count,
       }
     }),
   ]
 
-  choices.sort((a, b) => {
+  choices.sort((a: any, b: any) => {
     if (Number(a.value) < Number(b.value)) {
       return -1
     }
@@ -51,9 +52,10 @@ const RefinementList = ({ items, refine, attribute, ...props }) => {
 
   return (
     <DropdownMenu
+      // @ts-ignore
       title={t(lookupTable[attribute].title)}
       currentValue={currentValue}
-      setValue={value => refine(value)}
+      setValue={(value: any) => refine(value)}
       choices={choices}
     />
   )

@@ -3,14 +3,7 @@
  */
 import React, { Component } from 'react'
 
-import {
-  Keyboard,
-  LayoutAnimation,
-  View,
-  Dimensions,
-  Platform,
-  StyleSheet,
-} from 'react-native'
+import { Keyboard, LayoutAnimation, View, Dimensions, Platform, StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({
   container: {
@@ -52,10 +45,8 @@ export default class KeyboardSpacer extends Component {
   }
 
   componentDidMount() {
-    const updateListener =
-      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
-    const resetListener =
-      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
+    const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
+    const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
     this._listeners = [
       Keyboard.addListener(updateListener, this.updateKeyboardSpace),
       Keyboard.addListener(resetListener, this.resetKeyboardSpace),
@@ -86,8 +77,7 @@ export default class KeyboardSpacer extends Component {
     // when external physical keyboard is connected
     // event.endCoordinates.height still equals virtual keyboard height
     // however only the keyboard toolbar is showing if there should be one
-    const keyboardSpace =
-      screenHeight - event.endCoordinates.screenY + this.props.topSpacing
+    const keyboardSpace = screenHeight - event.endCoordinates.screenY + this.props.topSpacing
     this.setState(
       {
         keyboardSpace,
@@ -119,13 +109,7 @@ export default class KeyboardSpacer extends Component {
 
   render() {
     return (
-      <View
-        style={[
-          styles.container,
-          { height: this.state.keyboardSpace },
-          this.props.style,
-        ]}
-      />
+      <View style={[styles.container, { height: this.state.keyboardSpace }, this.props.style]} />
     )
   }
 }

@@ -10,9 +10,6 @@ export const ttsRepeatAtom = atomWithAsyncStorage('ttsRepeat', false)
 export const audioSleepTimeAtom = atom(0)
 export const audioSleepMinutesAtom = atom('off')
 export const audioSpeedAtom = atomWithAsyncStorage('audioSpeed', 1)
-export const audioRepeatAtom = atomWithAsyncStorage<RepeatMode>(
-  'audioRepeat',
-  RepeatMode.Off
-)
+export const audioRepeatAtom = atomWithAsyncStorage<RepeatMode>('audioRepeat', RepeatMode.Off)
 
 export const playingBibleTabIdAtom = atom<string>('')

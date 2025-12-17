@@ -87,8 +87,11 @@ const EditHeader = ({
       <Box row height={50} center>
         <Box flex justifyContent="center">
           <Link
+            // @ts-ignore
             onPress={setReadOnly}
+            // @ts-ignore
             underlayColor="transparent"
+            // @ts-ignore
             style={{ marginRight: 15 }}
           >
             <ValidateIcon name="check" size={25} />

@@ -28,10 +28,10 @@ const StudyLink = styled(Link)(({ theme }: { theme: Theme }) => ({
 }))
 
 type StudyItemProps = {
-  study: Study,
-  theme: Theme,
-  setStudySettings?: any,
-  navigation: any,
+  study: Study
+  theme: Theme
+  setStudySettings?: any
+  navigation: any
 }
 
 const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProps) => {
@@ -46,9 +46,13 @@ const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProp
   return (
     <Box width={r(['50%', '50%', '33%', '33%'])}>
       <StudyLink
+        // @ts-ignore
         key={study.id}
+        // @ts-ignore
         route="EditStudy"
+        // @ts-ignore
         params={{ studyId: study.id }}
+        // @ts-ignore
         navigation={navigation}
       >
         <Box
@@ -65,6 +69,7 @@ const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProp
           </Text>
           {study.content ? (
             <>
+              {/* @ts-ignore */}
               <Text bold scale={-2} marginTop={4}>
                 {study.title}
               </Text>
@@ -75,6 +80,7 @@ const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProp
             </>
           ) : (
             <>
+              {/* @ts-ignore */}
               <Text bold scale={-2} marginTop={4} color="border">
                 {t('Étude vide')}
               </Text>

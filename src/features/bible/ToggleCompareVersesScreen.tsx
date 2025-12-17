@@ -13,20 +13,22 @@ import { getVersionsBySections, isStrongVersion } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
 import Switch from '~common/ui/Switch'
 
-const TextVersion = styled.Text(({ isSelected, theme }) => ({
+// @ts-ignore
+const TextVersion = styled.Text(({ isSelected, theme }: any) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 12,
   opacity: 0.5,
   fontWeight: 'bold',
 }))
 
-const TextName = styled.Text(({ isSelected, theme }) => ({
+// @ts-ignore
+const TextName = styled.Text(({ isSelected, theme }: any) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   backgroundColor: 'transparent',
 }))
 
-const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
+const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }: any) => {
   if (isStrongVersion(version.id)) {
     return null
   }
@@ -44,7 +46,7 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }) => {
 
 const ToggleCompareVersesScreen = () => {
   const versionsToCompare = useSelector(
-    state => Object.keys(state.user.bible.settings.compare),
+    (state: any) => Object.keys(state.user.bible.settings.compare),
     shallowEqual
   )
   const dispatch = useDispatch()

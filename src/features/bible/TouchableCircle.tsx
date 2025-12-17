@@ -7,14 +7,15 @@ const Touchable = styled.TouchableOpacity(() => ({
   justifyContent: 'center',
 }))
 
-const Container = styled.View(({ color, size }) => ({
+// @ts-ignore
+const Container = styled.View(({ color, size }: any) => ({
   width: size,
   height: size,
   borderRadius: size / 2,
   backgroundColor: color,
 }))
 
-const TouchableCircle = ({ color, onPress, size = 16, ...props }) => {
+const TouchableCircle = ({ color, onPress, size = 16, ...props }: any) => {
   return (
     <Touchable onPress={onPress}>
       <Container color={color} size={size} {...props} />

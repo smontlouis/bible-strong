@@ -1,2 +1,1 @@
-export const scaleFontSize = (value: number, scale: number) =>
-  `${value + scale * 0.1 * value}px` // Scale
+export const scaleFontSize = (value: number, scale: number) => `${value + scale * 0.1 * value}px` // Scale

@@ -37,9 +37,7 @@ const TouchableSvgIcon = memo(
           width={size}
           height={size}
           color={
-            disabled
-              ? theme.colors.grey
-              : theme.colors[color as keyof typeof theme.colors] || color
+            disabled ? theme.colors.grey : theme.colors[color as keyof typeof theme.colors] || color
           }
           fill={isSelected ? theme.colors.primary : theme.colors.grey}
         />

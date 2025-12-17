@@ -16,11 +16,5 @@ const StyledTextArea = styled.TextInput(({ theme }) => ({
 
 export default (props: TextInputProps) => {
   const theme = useTheme()
-  return (
-    <StyledTextArea
-      placeholderTextColor={theme.colors.grey}
-      multiline
-      {...props}
-    />
-  )
+  return <StyledTextArea placeholderTextColor={theme.colors.grey} multiline {...props} />
 }

@@ -3,11 +3,7 @@ import { SubcollectionName, SUBCOLLECTION_NAMES } from './firestoreSubcollection
 
 const MIGRATION_STATE_KEY = 'firestore_migration_state'
 
-export type MigrationCollectionStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'completed'
-  | 'failed'
+export type MigrationCollectionStatus = 'pending' | 'in_progress' | 'completed' | 'failed'
 
 export interface MigrationCollectionState {
   status: MigrationCollectionStatus
@@ -110,20 +106,18 @@ export const hasPendingMigration = (state: MigrationState | null): boolean => {
   if (!state) return false
 
   return Object.values(state.collections).some(
-    (c) => c.status === 'pending' || c.status === 'in_progress'
+    c => c.status === 'pending' || c.status === 'in_progress'
   )
 }
 
 /**
  * Get the list of collections that need to be migrated (pending or failed)
  */
-export const getCollectionsToMigrate = (
-  state: MigrationState | null
-): SubcollectionName[] => {
+export const getCollectionsToMigrate = (state: MigrationState | null): SubcollectionName[] => {
   if (!state) return [...SUBCOLLECTION_NAMES]
 
   return SUBCOLLECTION_NAMES.filter(
-    (name) =>
+    name =>
       state.collections[name].status === 'pending' ||
       state.collections[name].status === 'in_progress' ||
       state.collections[name].status === 'failed'
@@ -133,27 +127,19 @@ export const getCollectionsToMigrate = (
 /**
  * Get the list of collections that failed
  */
-export const getFailedCollections = (
-  state: MigrationState | null
-): SubcollectionName[] => {
+export const getFailedCollections = (state: MigrationState | null): SubcollectionName[] => {
   if (!state) return []
 
-  return SUBCOLLECTION_NAMES.filter(
-    (name) => state.collections[name].status === 'failed'
-  )
+  return SUBCOLLECTION_NAMES.filter(name => state.collections[name].status === 'failed')
 }
 
 /**
  * Calculate overall migration progress (0-1)
  */
-export const calculateOverallProgress = (
-  state: MigrationState | null
-): number => {
+export const calculateOverallProgress = (state: MigrationState | null): number => {
   if (!state) return 0
 
-  const completed = Object.values(state.collections).filter(
-    (c) => c.status === 'completed'
-  ).length
+  const completed = Object.values(state.collections).filter(c => c.status === 'completed').length
 
   return completed / SUBCOLLECTION_NAMES.length
 }

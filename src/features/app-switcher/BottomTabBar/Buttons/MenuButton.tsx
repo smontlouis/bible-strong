@@ -30,11 +30,7 @@ const MenuButton = ({ openMenu }: { openMenu: () => void }) => {
       <FeatherIcon name="more-horizontal" size={28} color="tertiary" />
 
       {hasUpdate && (
-        <AnimatedCircle
-          animation="pulse"
-          easing="ease-out"
-          iterationCount="infinite"
-        />
+        <AnimatedCircle animation="pulse" easing="ease-out" iterationCount="infinite" />
       )}
     </TouchableBox>
   )

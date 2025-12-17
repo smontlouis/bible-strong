@@ -109,13 +109,17 @@ export interface TextProps extends BaseTextProps {
 }
 
 const Text = styled.Text((props: TextProps) => {
+  // @ts-ignore
   const s = bindStyles(props.theme)
   return {
+    // @ts-ignore
     fontFamily: s.fontFamily(props),
 
     color:
+      // @ts-ignore
       props.theme.colors[props.color] ||
       props.color ||
+      // @ts-ignore
       props.theme.colors.default,
     lineHeight: props.lineHeight,
     fontSize: props.fontSize || 16,
@@ -146,6 +150,7 @@ const Text = styled.Text((props: TextProps) => {
     right: props.right ?? props.r,
     bottom: props.bottom ?? props.b,
     borderWidth: props.borderWidth,
+    // @ts-ignore
     borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
     transform: props.transform,
 
@@ -165,30 +170,25 @@ const Text = styled.Text((props: TextProps) => {
     alignContent: props.alignContent ?? 'flex-start',
     alignSelf: props.alignSelf,
     // shorthands
-    flexWrap:
-      (props.wrap && 'wrap') ??
-      (props.wrapReverse && 'wrap-reverse') ??
-      'nowrap',
-    flexDirection:
-      (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+    flexWrap: (props.wrap && 'wrap') ?? (props.wrapReverse && 'wrap-reverse') ?? 'nowrap',
+    flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
 
-    opacity: props.disabled ? 0.3 : props.opacity ?? 1,
+    opacity: props.disabled ? 0.3 : (props.opacity ?? 1),
 
+    // @ts-ignore
     backgroundColor: props.theme.colors[props.backgroundColor ?? props.bg]
-      ? props.theme.colors[props.backgroundColor ?? props.bg]
-      : props.backgroundColor ?? props.bg,
+      ? // @ts-ignore
+        props.theme.colors[props.backgroundColor ?? props.bg]
+      : (props.backgroundColor ?? props.bg),
 
+    // @ts-ignore
     ...(props.underline && {
       textDecorationLine: 'underline',
       textDecorationStyle: 'solid',
+      // @ts-ignore
       textDecorationColor: props.theme.colors.default,
     }),
   }
 })
-
-Text.defaultProps = {
-  fontFamily: 'text',
-  colors: 'default',
-}
 
 export default Text

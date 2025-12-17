@@ -2,11 +2,7 @@ import produce from 'immer'
 import { atom } from 'jotai/vanilla'
 import { VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
-import {
-  activeTabIndexAtomOriginal,
-  getDefaultBibleTab,
-  tabsAtom,
-} from './tabs'
+import { activeTabIndexAtomOriginal, getDefaultBibleTab, tabsAtom } from './tabs'
 import { makeMutable } from 'react-native-reanimated'
 
 export interface Diff {
@@ -64,11 +60,7 @@ export type HistoryNaveItem = BaseHistoryItem & {
   name_lower: string
 }
 
-export type HistoryItem =
-  | HistoryStrongItem
-  | HistoryVerseItem
-  | HistoryWordItem
-  | HistoryNaveItem
+export type HistoryItem = HistoryStrongItem | HistoryVerseItem | HistoryWordItem | HistoryNaveItem
 
 export const checkHistoryItemType = <Type extends HistoryItem>(
   item: HistoryItem | undefined,
@@ -77,13 +69,10 @@ export const checkHistoryItemType = <Type extends HistoryItem>(
   return item?.type === type
 }
 
-export const historyBaseAtom = atomWithAsyncStorage<HistoryItem[]>(
-  'history',
-  []
-)
+export const historyBaseAtom = atomWithAsyncStorage<HistoryItem[]>('history', [])
 
 export const historyAtom = atom(
-  (get) => get(historyBaseAtom),
+  get => get(historyBaseAtom),
   (get, set, newItem: HistoryItem) => {
     const history = get(historyBaseAtom)
 
@@ -135,7 +124,7 @@ export const historyAtom = atom(
 
     set(
       historyBaseAtom,
-      produce(history, (draft) => {
+      produce(history, draft => {
         draft.unshift(newItem)
         draft.slice(0, 50)
       })

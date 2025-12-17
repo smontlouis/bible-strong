@@ -13,10 +13,8 @@ const VersesList = React.memo(({ groupedHighlights, setSettings }: Props) => {
   return (
     <FlatList
       data={groupedHighlights}
-      keyExtractor={item => item.date.toString()}
-      renderItem={({
-        item: { color, date, highlightsObj, tags, stringIds },
-      }) => (
+      keyExtractor={(item: any) => item.date.toString()}
+      renderItem={({ item: { color, date, highlightsObj, tags, stringIds } }: any) => (
         <VerseComponent
           {...{
             color,

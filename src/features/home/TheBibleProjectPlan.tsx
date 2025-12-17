@@ -19,9 +19,7 @@ const TheBibleProject = () => {
 
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress } =
-    plans.find(
-      p => p.id === (isFR ? 'bible-project-plan' : 'bible-project-plan-en')
-    ) || {}
+    plans.find(p => p.id === (isFR ? 'bible-project-plan' : 'bible-project-plan-en')) || {}
   const theme: Theme = useTheme()
 
   if (!id) {

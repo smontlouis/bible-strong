@@ -70,24 +70,13 @@ const Timeline = ({
   const eventModalRef = React.useRef<BottomSheet>(null)
   const searchModalRef = React.useRef<BottomSheet>(null)
 
-  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(
-    null
-  )
+  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
 
   const onTimelineDetailsOpen = () => {
     modalRef.current?.expand()
   }
 
-  const {
-    x,
-    y,
-    lineX,
-    year,
-    width,
-    height,
-    yearsToPx,
-    calculateEventWidth,
-  } = useTimeline({
+  const { x, y, lineX, year, width, height, yearsToPx, calculateEventWidth } = useTimeline({
     startYear,
     endYear,
     interval,
@@ -108,9 +97,7 @@ const Timeline = ({
       />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
-      {!isLast && (
-        <NextSectionImage x={x} width={width} nextEvent={nextEvent} />
-      )}
+      {!isLast && <NextSectionImage x={x} width={width} nextEvent={nextEvent} />}
       <CurrentSectionImage
         isReady={isReady}
         currentEvent={{
@@ -197,16 +184,19 @@ const Timeline = ({
           interval,
         }}
       />
+      {/* @ts-ignore */}
       <InstantSearch
         indexName={isFR ? 'bible-timeline' : 'bible-timeline-en'}
         searchClient={searchClient}
       >
+        {/* @ts-ignore */}
         <SearchInTimelineModal
           modalRef={searchModalRef}
           eventModalRef={eventModalRef}
           setEvent={setEvent}
         />
       </InstantSearch>
+      {/* @ts-ignore */}
       <EventDetailsModal modalRef={eventModalRef} event={event} />
     </Box>
   )

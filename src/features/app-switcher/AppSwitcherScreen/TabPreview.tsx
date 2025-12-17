@@ -6,11 +6,7 @@ import { FadeIn, LinearTransition, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
 import { selectAtom } from 'jotai/vanilla/utils'
-import Box, {
-  AnimatedBox,
-  AnimatedTouchableBox,
-  BoxProps,
-} from '~common/ui/Box'
+import Box, { AnimatedBox, AnimatedTouchableBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
@@ -23,39 +19,23 @@ interface TabPreviewProps {
   tabAtom: PrimitiveAtom<TabItem>
 }
 
-const TabPreview = ({
-  index,
-  tabAtom,
-  ...props
-}: TabPreviewProps & BoxProps) => {
+const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) => {
   const theme = useTheme()
 
   const base64Preview = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, (tab) => tab.base64Preview), [])
+    useMemo(() => selectAtom(tabAtom, tab => tab.base64Preview), [])
   )
 
-  const type = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, (tab) => tab.type), [])
-  )
-  const isRemovable = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, (tab) => tab.isRemovable), [])
-  )
+  const type = useAtomValue(useMemo(() => selectAtom(tabAtom, tab => tab.type), []))
+  const isRemovable = useAtomValue(useMemo(() => selectAtom(tabAtom, tab => tab.isRemovable), []))
 
-  const { GAP, TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT, TEXTBOX_HEIGHT } =
-    useTabConstants()
+  const { GAP, TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT, TEXTBOX_HEIGHT } = useTabConstants()
 
-  const {
-    ref,
-    boxStyles,
-    previewImageStyles,
-    textStyles,
-    xStyles,
-    onOpen,
-    onClose,
-  } = useTabPreview({
-    index,
-    tabAtom,
-  })
+  const { ref, boxStyles, previewImageStyles, textStyles, xStyles, onOpen, onClose } =
+    useTabPreview({
+      index,
+      tabAtom,
+    })
 
   console.log('tabAtom', tabAtom.toString())
 
@@ -102,13 +82,7 @@ const TabPreview = ({
               source={{ uri: `data:image/png;base64,${base64Preview}` }}
             />
           )}
-          <Box
-            center
-            width={80}
-            height={80}
-            borderRadius={40}
-            backgroundColor="lightGrey"
-          >
+          <Box center width={80} height={80} borderRadius={40} backgroundColor="lightGrey">
             <Box>{getIconByTabType(type, 30)}</Box>
           </Box>
         </>
@@ -125,14 +99,7 @@ const TabPreview = ({
             style={xStyles}
             onPress={onClose}
           >
-            <Box
-              bg="reverse"
-              width={24}
-              height={24}
-              borderRadius={12}
-              center
-              lightShadow
-            >
+            <Box bg="reverse" width={24} height={24} borderRadius={12} center lightShadow>
               <FeatherIcon name="x" size={16} />
             </Box>
           </AnimatedTouchableBox>
@@ -154,9 +121,7 @@ const TabPreview = ({
 }
 
 const Title = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) => {
-  const title = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, (tab) => tab.title), [])
-  )
+  const title = useAtomValue(useMemo(() => selectAtom(tabAtom, tab => tab.title), []))
   return (
     <Text ml={8} fontSize={12} title numberOfLines={1} ellipsizeMode="middle">
       {title}

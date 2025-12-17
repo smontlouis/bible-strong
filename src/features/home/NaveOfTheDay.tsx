@@ -13,10 +13,7 @@ import RandomButton from './RandomButton'
 import waitForNaveWidget from './waitForNaveWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 
-const NaveOfTheDay = ({
-  color1 = 'rgb(80, 83, 140)',
-  color2 = 'rgb(48, 51, 107)',
-}) => {
+const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
@@ -78,12 +75,7 @@ const NaveOfTheDay = ({
           </Paragraph>
         </Box>
         <Link route="Nave" style={{ width: '100%' }}>
-          <Box
-            row
-            center
-            backgroundColor="rgba(0,0,0,0.1)"
-            paddingVertical={10}
-          >
+          <Box row center backgroundColor="rgba(0,0,0,0.1)" paddingVertical={10}>
             <NaveIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text color="white" bold fontSize={12}>
               {t('Thèmes Nave')}

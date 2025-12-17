@@ -3,13 +3,7 @@ import { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 import { offset } from './constants'
 
-const Line = ({
-  lineX,
-  color,
-}: {
-  lineX: SharedValue<number>
-  color: string
-}) => {
+const Line = ({ lineX, color }: { lineX: SharedValue<number>; color: string }) => {
   return (
     <AnimatedBox
       pointerEvents="none"

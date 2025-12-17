@@ -41,21 +41,17 @@ const Menu = ({ modalRefDetails, planId, navigation }: Props) => {
   }
 
   const onRemovePress = () => {
-    Alert.alert(
-      t('Attention'),
-      t('Êtes-vous sûr de vouloir arrêter ce plan ?'),
-      [
-        { text: t('Annuler'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Supprimer'),
-          onPress: () => {
-            dispatch(removePlan(planId))
-            navigation.goBack()
-          },
-          style: 'destructive',
+    Alert.alert(t('Attention'), t('Êtes-vous sûr de vouloir arrêter ce plan ?'), [
+      { text: t('Annuler'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Supprimer'),
+        onPress: () => {
+          dispatch(removePlan(planId))
+          navigation.goBack()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   return (

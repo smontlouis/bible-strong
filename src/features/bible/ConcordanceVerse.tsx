@@ -41,12 +41,8 @@ class ConcordanceVerse extends React.Component<Props> {
     this.formatVerse(verse, concordanceFor)
   }
 
-  formatVerse = async (strongVerse, concordanceFor) => {
-    const { formattedTexte } = await verseToStrong(
-      strongVerse,
-      concordanceFor,
-      true
-    )
+  formatVerse = async (strongVerse: any, concordanceFor: any) => {
+    const { formattedTexte } = await verseToStrong(strongVerse, concordanceFor, true)
     this.setState({ formattedTexte })
   }
 

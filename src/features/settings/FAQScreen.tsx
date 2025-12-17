@@ -20,9 +20,7 @@ const FAQScreen = () => {
             {t('Bienvenue')},
           </Text>
           <Paragraph scaleLineHeight={-1} marginBottom={20}>
-            {t(
-              "J'ai regroupé ici la plupart des questions qui me sont régulièrement posées."
-            )}
+            {t("J'ai regroupé ici la plupart des questions qui me sont régulièrement posées.")}
           </Paragraph>
           <Accordion
             title={

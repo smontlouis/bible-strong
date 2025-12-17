@@ -24,31 +24,19 @@ interface AddToStudyModalProps {
   onClose?: () => void
 }
 
-const AddToStudyModal = ({
-  bottomSheetRef,
-  onSelectStudy,
-  onClose,
-}: AddToStudyModalProps) => {
+const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyModalProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
 
-  const studies = useSelector(
-    (state: RootState) => state.user.bible.studies,
-    shallowEqual
-  )
+  const studies = useSelector((state: RootState) => state.user.bible.studies, shallowEqual)
 
   // Sort studies by modified_at (most recent first)
   const sortedStudies = useMemo(() => {
-    return Object.values(studies).sort(
-      (a, b) => Number(b.modified_at) - Number(a.modified_at)
-    )
+    return Object.values(studies).sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
   }, [studies])
 
   const fuzzyOptions = useMemo(() => ({ keys: ['title'] }), [])
-  const { keyword, result, search, resetSearch } = useFuzzy(
-    sortedStudies,
-    fuzzyOptions
-  )
+  const { keyword, result, search, resetSearch } = useFuzzy(sortedStudies, fuzzyOptions)
 
   const handleSelectStudy = (studyId: string) => {
     onSelectStudy(studyId)
@@ -83,13 +71,9 @@ const AddToStudyModal = ({
   )
 
   const renderStudyItem = ({ item }: { item: Study }) => {
-    const formattedDate = distanceInWords(
-      Number(item.modified_at),
-      Date.now(),
-      {
-        locale: isFR ? fr : enGB,
-      }
-    )
+    const formattedDate = distanceInWords(Number(item.modified_at), Date.now(), {
+      locale: isFR ? fr : enGB,
+    })
 
     return (
       <TouchableOpacity onPress={() => handleSelectStudy(item.id)}>
@@ -136,17 +120,14 @@ const AddToStudyModal = ({
     >
       <BottomSheetFlashList
         ListHeaderComponent={renderNewStudyButton}
-        data={result.filter((item) => item.id)}
+        data={result.filter(item => item.id)}
         renderItem={renderStudyItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         estimatedItemSize={72}
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={
           <Box flex justifyContent="center" alignItems="center" padding={40}>
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message={t('study.noStudies')}
-            />
+            <Empty source={require('~assets/images/empty.json')} message={t('study.noStudies')} />
           </Box>
         }
       />

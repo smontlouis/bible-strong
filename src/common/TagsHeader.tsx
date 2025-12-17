@@ -26,7 +26,7 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
+const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }: any) => {
   const { t } = useTranslation()
   return (
     <HeaderBox row bg="reverse">
@@ -43,9 +43,7 @@ const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }) => {
         </Text>
       </Box>
       <TouchableBox onPress={() => setIsOpen(!isOpen)}>
-        <StyledText numberOfLines={1}>
-          {selectedChip ? selectedChip.name : t('Filtrer')}
-        </StyledText>
+        <StyledText numberOfLines={1}>{selectedChip ? selectedChip.name : t('Filtrer')}</StyledText>
         <FeatherIcon name="chevron-down" size={15} />
       </TouchableBox>
     </HeaderBox>

@@ -39,9 +39,7 @@ const MyPlanListScreen = () => {
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20 }}
       bg="lightGrey"
       data={plans}
-      renderItem={({ item }: { item: ComputedPlanItem }) => (
-        <PlanItem {...item} />
-      )}
+      renderItem={({ item }: { item: ComputedPlanItem }) => <PlanItem {...item} />}
       keyExtractor={(item: ComputedPlanItem) => item.id}
       ItemSeparatorComponent={Spacer}
     />

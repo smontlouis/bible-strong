@@ -76,18 +76,11 @@ const WrapperButton = styled.TouchableOpacity(
   })
 )
 
+// @ts-ignore
 const WrapperLink = WrapperButton.withComponent(Link)
 
 const TextButton = styled.Text(
-  ({
-    theme,
-    small,
-    reverse,
-  }: {
-    theme: Theme
-    small?: boolean
-    reverse?: boolean
-  }) => ({
+  ({ theme, small, reverse }: { theme: Theme; small?: boolean; reverse?: boolean }) => ({
     color: reverse ? theme.colors.darkGrey : 'white',
     fontWeight: 'bold',
     fontSize: 16,
@@ -119,10 +112,13 @@ const Button = ({
   const Component = onPress ? WrapperButton : WrapperLink
 
   return (
+    // @ts-ignore
     <Box flex={fullWidth}>
+      {/* @ts-ignore */}
       <Component
         fullWidth={fullWidth}
         disabled={disabled || isLoading}
+        // @ts-ignore
         route={route}
         onPress={!disabled ? onPress : () => {}}
         style={style}
@@ -138,6 +134,7 @@ const Button = ({
         ) : (
           <>
             {leftIcon}
+            {/* @ts-ignore */}
             <TextButton small={small} reverse={reverse}>
               {children}
             </TextButton>

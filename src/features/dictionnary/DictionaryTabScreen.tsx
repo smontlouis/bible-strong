@@ -21,24 +21,20 @@ import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
 import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
 import { MainStackProps } from '~navigation/type'
 import { DictionariesTab } from '../../state/tabs'
-import {
-  useResultsByLetterOrSearch,
-  useSearchValue,
-} from '../lexique/useUtilities'
+import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 
-const useSectionResults = (results) => {
-  const [sectionResults, setSectionResults] = useState(null)
+const useSectionResults = (results: any) => {
+  const [sectionResults, setSectionResults] = useState<any>(null)
 
   useEffect(() => {
     if (!results.length) {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list, dbItem) => {
+    const sectionResults = results.reduce((list: any, dbItem: any) => {
       const listItem = list.find(
-        (item) =>
-          item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
+        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
       )
       if (!listItem) {
         list.push({
@@ -63,10 +59,7 @@ interface DictionariesTabScreenProps {
   hasBackButton?: boolean
 }
 
-const DictionnaireScreen = ({
-  hasBackButton,
-  navigation,
-}: DictionariesTabScreenProps) => {
+const DictionnaireScreen = ({ hasBackButton, navigation }: DictionariesTabScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
@@ -80,7 +73,9 @@ const DictionnaireScreen = ({
   const sectionResults = useSectionResults(results)
 
   useEffect(() => {
+    // @ts-ignore
     if (results.error) {
+      // @ts-ignore
       setError(results.error)
     }
   }, [results])
@@ -92,6 +87,7 @@ const DictionnaireScreen = ({
         <Empty
           source={require('~assets/images/empty.json')}
           message={`${t('Impossible de charger le dictionnaire...')}${
+            // @ts-ignore
             error === 'CORRUPTED_DATABASE'
               ? t(
                   '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -105,11 +101,7 @@ const DictionnaireScreen = ({
 
   return (
     <Container>
-      <Header
-        hasBackButton={hasBackButton}
-        fontSize={18}
-        title={t('Dictionnaire Westphal')}
-      />
+      <Header hasBackButton={hasBackButton} fontSize={18} title={t('Dictionnaire Westphal')} />
       <Box px={20}>
         <SearchInput
           placeholder={t('Recherche par mot')}
@@ -124,14 +116,11 @@ const DictionnaireScreen = ({
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem
-                key={id}
-                navigation={navigation}
-                {...{ word }}
-              />
+              <DictionnaireItem key={id} navigation={navigation} {...{ word }} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
+            // @ts-ignore
             getItemLayout={sectionListGetItemLayout({
               getItemHeight: () => 60,
               getSectionHeaderHeight: () => 50,
@@ -147,18 +136,13 @@ const DictionnaireScreen = ({
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
           />
         ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('Aucun mot trouvé...')}
-          />
+          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
         )}
       </Box>
-      {!searchValue && (
-        <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />
-      )}
+      {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}
     </Container>
   )
 }

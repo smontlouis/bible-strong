@@ -11,11 +11,7 @@ export const DispatchProvider = ({
   children: React.ReactNode
   dispatch: DispatchContextType
 }) => {
-  return (
-    <DispatchContext.Provider value={dispatch}>
-      {children}
-    </DispatchContext.Provider>
-  )
+  return <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
 }
 
 export const useDispatch = () => {

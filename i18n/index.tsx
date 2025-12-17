@@ -25,7 +25,7 @@ const languageDetector = {
   type: 'languageDetector',
   async: true,
   init: () => {},
-  detect: async callback => {
+  detect: async (callback: any) => {
     try {
       AsyncStorage.getItem('lang').then(language => {
         if (language) {
@@ -48,6 +48,7 @@ const languageDetector = {
 export const setI18n = async () =>
   await i18n
     .use(initReactI18next)
+    // @ts-ignore
     .use(languageDetector)
     .init({
       debug: __DEV__,

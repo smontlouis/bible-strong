@@ -25,6 +25,7 @@ const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
   height: 15,
   alignSelf: 'flex-end',
   borderRadius: 7,
+  // @ts-ignore
   backgroundColor: color ? theme.colors[color] : theme.colors.border,
   justifyContent: 'center',
   alignItems: 'center',
@@ -32,7 +33,7 @@ const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
   marginBottom: 5,
 }))
 
-const HistoryItem = ({ item }) => {
+const HistoryItem = ({ item }: any) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
 
@@ -70,9 +71,7 @@ const HistoryItem = ({ item }) => {
     const ago = distanceInWords(Number(date), Date.now(), {
       locale: isFR ? fr : enGB,
     })
-    let { title } = formatVerseContent([
-      { Livre: book, Chapitre: chapter, Verset: verse },
-    ])
+    let { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
     if (title.endsWith(':1')) {
       title = title.substring(0, title.length - 2)
     }
@@ -92,6 +91,7 @@ const HistoryItem = ({ item }) => {
             {title} {version}
           </Text>
           <Box marginLeft="auto">
+            {/* @ts-ignore */}
             <Chip>
               <Text bold fontSize={8}>
                 {t('Verset')}
@@ -179,14 +179,11 @@ const History = () => {
           <FlatList
             removeClippedSubviews
             data={history}
-            keyExtractor={item => item.date.toString()}
-            renderItem={({ item }) => <HistoryItem item={item} />}
+            keyExtractor={(item: any) => item.date.toString()}
+            renderItem={({ item }: any) => <HistoryItem item={item} />}
           />
         ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message="Historique vide..."
-          />
+          <Empty source={require('~assets/images/empty.json')} message="Historique vide..." />
         )}
       </Box>
     </Container>

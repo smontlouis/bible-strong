@@ -56,9 +56,7 @@ export class QueryClient {
 
   getQuery = <TData,>(options: Omit<QueryOptions<TData>, 'staleTime'>) => {
     const queryHash = JSON.stringify(options.queryKey)
-    let query = this.queries.find(d => d.queryHash === queryHash) as Query<
-      TData
-    >
+    let query = this.queries.find(d => d.queryHash === queryHash) as Query<TData>
 
     if (!query) {
       query = createQuery<TData>(this, options)
@@ -69,10 +67,7 @@ export class QueryClient {
   }
 }
 
-export function QueryClientProvider({
-  children,
-  client,
-}: QueryClientProviderProps) {
+export function QueryClientProvider({ children, client }: QueryClientProviderProps) {
   return <Context.Provider value={client}>{children}</Context.Provider>
 }
 
@@ -230,10 +225,7 @@ function createQueryObserver<TData>(
       return unsubscribe
     },
     fetch: () => {
-      if (
-        !query.state.lastUpdated ||
-        Date.now() - query.state.lastUpdated > staleTime
-      ) {
+      if (!query.state.lastUpdated || Date.now() - query.state.lastUpdated > staleTime) {
         query.fetch()
       }
     },

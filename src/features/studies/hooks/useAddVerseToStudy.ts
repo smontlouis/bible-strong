@@ -33,11 +33,7 @@ export const useAddVerseToStudy = () => {
   const studies = useSelector((state: RootState) => state.user.bible.studies)
   const { slideToIndex } = useTabAnimations()
 
-  const addVerseToStudy = (
-    studyId: string,
-    verseData: VerseData,
-    format: VerseFormat
-  ) => {
+  const addVerseToStudy = (studyId: string, verseData: VerseData, format: VerseFormat) => {
     const study = studies[studyId]
     const isNewStudy = !study
 
@@ -45,10 +41,7 @@ export const useAddVerseToStudy = () => {
     let delta: QuillDelta
     if (study?.content) {
       try {
-        delta =
-          typeof study.content === 'string'
-            ? JSON.parse(study.content)
-            : study.content
+        delta = typeof study.content === 'string' ? JSON.parse(study.content) : study.content
       } catch (e) {
         console.error('Error parsing study content:', e)
         delta = { ops: [] }
@@ -91,8 +84,10 @@ export const useAddVerseToStudy = () => {
     // Update study in Redux
     // If new study, also set title and created_at
     dispatch(
+      // @ts-ignore
       updateStudy({
         id: studyId,
+        // @ts-ignore
         content: delta,
         modified_at: Date.now(),
         ...(isNewStudy
@@ -112,9 +107,7 @@ export const useAddVerseToStudy = () => {
       confirmText: t('study.openStudy'),
       onConfirm: () => {
         // Create new study tab
-        const studyIndex = tabs.findIndex(
-          (tab) => (tab as StudyTab).data.studyId === studyId
-        )
+        const studyIndex = tabs.findIndex(tab => (tab as StudyTab).data.studyId === studyId)
         if (studyIndex !== -1) {
           slideToIndex(studyIndex)
           return

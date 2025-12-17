@@ -45,10 +45,7 @@ const useTabButtonPress = () => {
   useDidUpdate(() => {
     scale.value = withDelay(
       300,
-      withSequence(
-        withTiming(1.2, { duration: 500 }),
-        withTiming(1, { duration: 500 })
-      )
+      withSequence(withTiming(1.2, { duration: 500 }), withTiming(1, { duration: 500 }))
     )
   }, [tabsCount, scale])
 

@@ -3,7 +3,7 @@ import useLogin from '~helpers/useLogin'
 
 import LoginModal from './LoginModal'
 
-const withLogin = Component => props => {
+const withLogin = (Component: any) => (props: any) => {
   const { isLogged } = useLogin()
 
   return (

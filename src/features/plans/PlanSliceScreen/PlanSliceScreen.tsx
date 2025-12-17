@@ -42,10 +42,7 @@ const extractTitle = (slice: EntitySlice) => {
   }
 }
 
-const PlanSliceScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
+const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
   const { id, title, slices, planId } = route.params.readingSlice || {}
 
   const { t } = useTranslation()
@@ -54,9 +51,7 @@ const PlanSliceScreen = ({
 
   const isRead = useSelector(
     (state: RootState) =>
-      state.plan.ongoingPlans.find((oP) => oP.id === planId)?.readingSlices[
-        id
-      ] === 'Completed'
+      state.plan.ongoingPlans.find(oP => oP.id === planId)?.readingSlices[id] === 'Completed'
   )
   const [bible] = useAtom(defaultBibleAtom)
   const { openVersionSelector } = useBookAndVersionSelector()
@@ -68,13 +63,13 @@ const PlanSliceScreen = ({
   }
 
   const mainSlice: EntitySlice | undefined = slices.find(
-    (s) => s.type === 'Chapter' || s.type === 'Verse'
+    s => s.type === 'Chapter' || s.type === 'Verse'
   )
   const sliceTitle = mainSlice ? extractTitle(mainSlice) : ''
 
   const share = async () => {
     const textSlices = await Promise.all(
-      slices.map(async (slice) => {
+      slices.map(async slice => {
         switch (slice.type) {
           case 'Chapter': {
             return await chapterSliceToText(slice, version)
@@ -127,13 +122,12 @@ const PlanSliceScreen = ({
                       style={{ opacity: isRead ? 0.3 : 1 }}
                     />
                     <Text marginLeft={10}>
-                      {isRead
-                        ? t('Marquer comme non lu')
-                        : t('Marquer comme lu')}
+                      {isRead ? t('Marquer comme non lu') : t('Marquer comme lu')}
                     </Text>
                   </Box>
                 </MenuOption>
                 <MenuOption
+                  // @ts-ignore
                   onSelect={() => openVersionSelector(defaultBibleAtom)}
                 >
                   <Box row alignItems="center">
@@ -175,13 +169,7 @@ const PlanSliceScreen = ({
             row
           >
             <FeatherIcon name="check" size={20} color="reverse" />
-            <Paragraph
-              marginLeft={5}
-              color="reverse"
-              scale={-2}
-              fontFamily="text"
-              bold
-            >
+            <Paragraph marginLeft={5} color="reverse" scale={-2} fontFamily="text" bold>
               {t('Vous avez déjà terminé cette lecture.')}
             </Paragraph>
           </Box>
@@ -196,7 +184,7 @@ const PlanSliceScreen = ({
             <Paragraph scale={3}>{title}</Paragraph>
           </Box>
         )}
-        {slices.map((slice) => (
+        {slices.map(slice => (
           <Slice key={slice.id} {...slice} />
         ))}
         <Box height={80} center marginTop={30}>

@@ -18,10 +18,7 @@ const initialState = {
 
 describe('Bible Reducer', () => {
   it('should handle SET_TEMP_SELECTED_BOOK', () => {
-    const newState = reducer(
-      undefined,
-      BibleActions.setTempSelectedBook(booksDesc[2])
-    )
+    const newState = reducer(undefined, BibleActions.setTempSelectedBook(booksDesc[2]))
     expect(newState).toEqual({
       ...initialState,
       temp: {

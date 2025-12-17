@@ -12,10 +12,7 @@ interface ChapterSelectorScreenProps {
   onNavigate: (index: number) => void
 }
 
-const ChapterSelector = ({
-  bibleAtom,
-  onNavigate,
-}: ChapterSelectorScreenProps) => {
+const ChapterSelector = ({ bibleAtom, onNavigate }: ChapterSelectorScreenProps) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const {

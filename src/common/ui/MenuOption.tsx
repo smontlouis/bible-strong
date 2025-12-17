@@ -1,8 +1,5 @@
 import React from 'react'
-import {
-  MenuOption as BaseMenuOption,
-  MenuOptionProps,
-} from 'react-native-popup-menu'
+import { MenuOption as BaseMenuOption, MenuOptionProps } from 'react-native-popup-menu'
 import { usePopOver } from '../PopOverContext'
 import Box, { TouchableBox } from './Box'
 
@@ -11,11 +8,7 @@ interface ExtendedMenuOptionProps extends Omit<MenuOptionProps, 'onSelect'> {
   onSelect?: (value?: any) => void
 }
 
-const MenuOption = ({
-  onSelect,
-  closeOnSelect = true,
-  ...props
-}: ExtendedMenuOptionProps) => {
+const MenuOption = ({ onSelect, closeOnSelect = true, ...props }: ExtendedMenuOptionProps) => {
   const { onClose } = usePopOver()
 
   const handleSelect = (value?: any) => {

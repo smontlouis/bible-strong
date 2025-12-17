@@ -14,11 +14,7 @@ export interface BibleSelectProps {
   onLongPressComplete?: (verse: number) => void
 }
 
-const BibleSelect = ({
-  bibleAtom,
-  onComplete,
-  onLongPressComplete,
-}: BibleSelectProps) => {
+const BibleSelect = ({ bibleAtom, onComplete, onLongPressComplete }: BibleSelectProps) => {
   const [index, setIndex] = useState(0)
   return (
     <Box flex>

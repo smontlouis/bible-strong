@@ -57,14 +57,8 @@ const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
       <Box padding={20}>
         {(!!naveItemsForChapter || !!naveItemsForVerse) && (
           <>
-            <NaveForVerse
-              items={naveItemsForVerse}
-              label={t('Concernant le verset')}
-            />
-            <NaveForVerse
-              items={naveItemsForChapter}
-              label={t('Concernant le chapitre entier')}
-            />
+            <NaveForVerse items={naveItemsForVerse} label={t('Concernant le verset')} />
+            <NaveForVerse items={naveItemsForChapter} label={t('Concernant le chapitre entier')} />
           </>
         )}
       </Box>

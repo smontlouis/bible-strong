@@ -64,7 +64,7 @@ export const BookSelectorList = ({
           paddingBottom: insets.bottom,
         }}
       >
-        {Object.values(books).map((book) => (
+        {Object.values(books).map(book => (
           <BookShortItem
             isNT={book.Numero >= 40}
             key={book.Numero}
@@ -87,8 +87,8 @@ export const BookSelectorList = ({
         offset: itemHeight * index,
         index,
       })}
-      onScrollToIndexFailed={(error) => console.log('scroll failed', error)}
-      keyExtractor={(item) => item.Numero.toString()}
+      onScrollToIndexFailed={error => console.log('scroll failed', error)}
+      keyExtractor={item => item.Numero.toString()}
       maintainVisibleContentPosition={{
         minIndexForVisible: 0,
       }}

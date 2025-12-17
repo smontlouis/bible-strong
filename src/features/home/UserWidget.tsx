@@ -72,28 +72,27 @@ const GenerateImage = ({ name }: { name: string }) => (
   </GenerateImageContainer>
 )
 
-const Chip = styled(Link)(
-  ({ theme, hightlighted }: { theme: Theme; hightlighted?: boolean }) => ({
-    borderRadius: 10,
-    backgroundColor: theme.colors.reverse,
-    paddingVertical: 10,
-    paddingHorizontal: 13,
-    marginRight: 10,
-    shadowColor: 'rgb(89,131,240)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 7,
-    elevation: 1,
-    overflow: 'visible',
+const Chip = styled(Link)(({ theme, hightlighted }: { theme: Theme; hightlighted?: boolean }) => ({
+  borderRadius: 10,
+  backgroundColor: theme.colors.reverse,
+  paddingVertical: 10,
+  paddingHorizontal: 13,
+  marginRight: 10,
+  shadowColor: 'rgb(89,131,240)',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 7,
+  elevation: 1,
+  overflow: 'visible',
 
-    ...(hightlighted && {
-      elevation: 0,
-      shadowOpacity: 0,
-    }),
-  })
-)
+  ...(hightlighted && {
+    elevation: 0,
+    shadowOpacity: 0,
+  }),
+}))
 
-const ChipIcon = styled(Icon.Feather)(({ theme, color }) => ({
+const ChipIcon = styled(Icon.Feather)(({ theme, color }: any) => ({
+  // @ts-ignore
   color: theme.colors[color] || theme.colors.grey,
   marginRight: 5,
 }))
@@ -110,46 +109,27 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
   const highlights = useSelector(
     (state: RootState) => Object.keys(state.user.bible.highlights).length
   )
-  const notes = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.notes).length
-  )
-  const studies = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.studies).length
-  )
-  const tags = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.tags).length
-  )
+  const notes = useSelector((state: RootState) => Object.keys(state.user.bible.notes).length)
+  const studies = useSelector((state: RootState) => Object.keys(state.user.bible.studies).length)
+  const tags = useSelector((state: RootState) => Object.keys(state.user.bible.tags).length)
 
   const [currentVOD, setCurrentVOD] = useState(0)
 
   if (!isLogged) {
     return (
       <Container>
-        <Box
-          paddingHorizontal={20}
-          borderRadius={30}
-          marginHorizontal={20}
-          bg="reverse"
-          py={20}
-        >
+        <Box paddingHorizontal={20} borderRadius={30} marginHorizontal={20} bg="reverse" py={20}>
           <Text marginTop={20} title fontSize={25} flex>
             {t('Bienvenue')}
           </Text>
           <Paragraph marginTop={20} marginBottom={20}>
-            {t(
-              'Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !'
-            )}
+            {t('Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !')}
           </Paragraph>
           <Button
             route="Login"
             navigation={navigation}
             rightIcon={
-              <Icon.Feather
-                name="arrow-right"
-                size={20}
-                color="white"
-                style={{ marginLeft: 10 }}
-              />
+              <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
             }
           >
             {t('Je me connecte')}
@@ -239,6 +219,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
             overflow: 'visible',
           }}
         >
+          {/* @ts-ignore */}
           <Chip route="History" hightlighted>
             <MaterialIcon name="history" size={20} />
             <Text mt={5} fontSize={12}>
@@ -252,9 +233,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
                 {highlights}
               </Text>
             </Box>
-            <Text fontSize={12}>
-              {t('surbrillance', { count: highlights })}
-            </Text>
+            <Text fontSize={12}>{t('surbrillance', { count: highlights })}</Text>
           </Chip>
           <Chip route="BibleVerseNotes">
             <Box row>

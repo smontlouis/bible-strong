@@ -49,28 +49,24 @@ const StyledComment = styled('div')<RootStyles>(
   })
 )
 
-const ReadMore = styled('div')<RootStyles>(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
-    fontSize: scaleFontSize(15, fontSizeScale),
-    fontFamily,
-    textAlign: 'center',
-    height: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '20px 0',
-  })
-)
+const ReadMore = styled('div')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontSize: scaleFontSize(15, fontSizeScale),
+  fontFamily,
+  textAlign: 'center',
+  height: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  margin: '20px 0',
+}))
 
-const Intro = styled('div')<RootStyles>(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
-    fontSize: scaleFontSize(15, fontSizeScale),
-    fontFamily,
-    textAlign: 'center',
-    paddingBottom: scaleFontSize(20, fontSizeScale),
-    paddingTop: scaleFontSize(15, fontSizeScale),
-  })
-)
+const Intro = styled('div')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontSize: scaleFontSize(15, fontSizeScale),
+  fontFamily,
+  textAlign: 'center',
+  paddingBottom: scaleFontSize(20, fontSizeScale),
+  paddingTop: scaleFontSize(15, fontSizeScale),
+}))
 
 const Copyright = styled('div')<RootStyles>(
   ({ settings: { theme, colors, fontSizeScale, fontFamily } }) => ({
@@ -150,10 +146,7 @@ const Comment = ({ id, settings, comment, isIntro }: Props) => {
       {readMore && (
         <StyledComment settings={settings}>
           {isIntro && <Intro settings={settings}>Introduction</Intro>}
-          <div
-            dangerouslySetInnerHTML={{ __html: mhyComment }}
-            style={{ paddingBottom: 20 }}
-          />
+          <div dangerouslySetInnerHTML={{ __html: mhyComment }} style={{ paddingBottom: 20 }} />
         </StyledComment>
       )}
       <ReadMore onClick={onReadMore} settings={settings}>

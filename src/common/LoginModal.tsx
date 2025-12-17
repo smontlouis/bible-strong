@@ -13,10 +13,7 @@ import Text from '~common/ui/Text'
 import Back from './Back'
 import { FeatherIcon } from './ui/Icon'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 
 // More like StudiesLoginModal
 

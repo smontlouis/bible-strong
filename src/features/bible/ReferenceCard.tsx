@@ -16,13 +16,7 @@ import getVersesContent from '~helpers/getVersesContent'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { VersionCode } from '../../state/tabs'
 
-const ReferenceItem = ({
-  reference,
-  version,
-}: {
-  reference: string
-  version: VersionCode
-}) => {
+const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
   const [Verse, setVerse] = useState<VerseRefContent | null>(null)
 
   useEffect(() => {
@@ -62,13 +56,7 @@ const ReferenceItem = ({
 }
 
 export const ReferenceCard = waitForTresorModal(
-  ({
-    selectedVerse,
-    version,
-  }: {
-    selectedVerse: string
-    version: VersionCode
-  }) => {
+  ({ selectedVerse, version }: { selectedVerse: string; version: VersionCode }) => {
     const theme = useTheme()
 
     const { isLoading, error, data } = useQuery({
@@ -78,10 +66,7 @@ export const ReferenceCard = waitForTresorModal(
 
     if (error) {
       return (
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message="Une erreur est survenue..."
-        />
+        <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
       )
     }
 
@@ -105,16 +90,8 @@ export const ReferenceCard = waitForTresorModal(
   }
 )
 
-const References = ({
-  references,
-  version,
-}: {
-  references: any
-  version: VersionCode
-}) => {
-  const refs = references.commentaires
-    ? JSON.parse(references.commentaires)
-    : []
+const References = ({ references, version }: { references: any; version: VersionCode }) => {
+  const refs = references.commentaires ? JSON.parse(references.commentaires) : []
 
   if (!refs.length) {
     return (
@@ -127,22 +104,14 @@ const References = ({
 
   return (
     <ScrollView>
-      {refs.map((ref, i) => {
+      {refs.map((ref: any, i: any) => {
         const splittedRef = ref.split('-')
         if (splittedRef.length === 3 && splittedRef[0] > 0) {
-          return (
-            <ReferenceItem key={ref + i} reference={ref} version={version} />
-          )
+          return <ReferenceItem key={ref + i} reference={ref} version={version} />
         }
 
         return (
-          <Text
-            title
-            key={ref}
-            fontSize={20}
-            marginBottom={5}
-            color="lightPrimary"
-          >
+          <Text title key={ref} fontSize={20} marginBottom={5} color="lightPrimary">
             {splittedRef}
           </Text>
         )

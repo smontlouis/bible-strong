@@ -23,13 +23,7 @@ const StyledReference = styled('div')<RootStyles & { isSelected: boolean }>(
   })
 )
 
-const BibleStrongRef = ({
-  book,
-  reference,
-}: {
-  book: string | number
-  reference: string
-}) => {
+const BibleStrongRef = ({ book, reference }: { book: string | number; reference: string }) => {
   const dispatch = useDispatch()
   const { selectedCode, settings, onTouchMove } = useContext(VerseContext)
   const isSelected = Number(selectedCode?.reference) === Number(reference)
@@ -58,17 +52,15 @@ const verseToStrong = ({
   Texte,
   Livre,
 }: Pick<Verse, 'Texte' | 'Livre'>): Promise<(string | JSX.Element)[]> =>
-  new Promise((resolve) => {
+  new Promise(resolve => {
     // STRONG
-    const splittedTexte = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map(
-      (item, i) => {
-        if (Number.isInteger(Number(item))) {
-          return <BibleStrongRef book={Livre} reference={item} key={i} />
-        }
-
-        return item
+    const splittedTexte = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map((item, i) => {
+      if (Number.isInteger(Number(item))) {
+        return <BibleStrongRef book={Livre} reference={item} key={i} />
       }
-    )
+
+      return item
+    })
     return resolve(splittedTexte)
   })
 

@@ -5,16 +5,10 @@ import DownloadRequired from '~common/DownloadRequired'
 import { DownloadingWidget, WidgetLoading, WidgetContainer } from './widget'
 import { useTranslation } from 'react-i18next'
 
-const waitForWidget = WrappedComponent => props => {
+const waitForWidget = (WrappedComponent: any) => (props: any) => {
   const { t } = useTranslation()
-  const {
-    isLoading,
-    startDownload,
-    proposeDownload,
-    setStartDownload,
-    progress,
-    resourceLang,
-  } = useWaitForDatabase()
+  const { isLoading, startDownload, proposeDownload, setStartDownload, progress, resourceLang } =
+    useWaitForDatabase()
 
   if (isLoading && startDownload) {
     return <DownloadingWidget progress={progress} />

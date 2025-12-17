@@ -53,12 +53,10 @@ export default async ({
     try {
       const [book, chapter, verse] = key.split('-')
       const text = bible[book][chapter][verse]
-      const inlineVerseContent =
-        hasInlineVerses && index !== selectedVerses.length - 1 ? '' : '\n'
+      const inlineVerseContent = hasInlineVerses && index !== selectedVerses.length - 1 ? '' : '\n'
       const verseNumberContent = hasVerseNumbers ? `${verse}. ` : ''
       const quoteStartContent = hasQuotes && index === 0 ? '« ' : ''
-      const quoteEndContent =
-        hasQuotes && index === selectedVerses.length - 1 ? ' »' : ''
+      const quoteEndContent = hasQuotes && index === selectedVerses.length - 1 ? ' »' : ''
 
       versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent}`
     } catch (e) {

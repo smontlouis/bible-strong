@@ -5,13 +5,10 @@ import SelectBibleReferenceModal from './SelectBibleReferenceModal'
 import { selectBibleReferenceDataAtom } from './atoms'
 
 interface SelectBibleReferenceContextType {
-  openBibleReferenceModal: (params: {
-    onSelect: (data: BibleTab['data']['temp']) => void
-  }) => void
+  openBibleReferenceModal: (params: { onSelect: (data: BibleTab['data']['temp']) => void }) => void
 }
 
-const SelectBibleReferenceContext =
-  createContext<SelectBibleReferenceContextType | null>(null)
+const SelectBibleReferenceContext = createContext<SelectBibleReferenceContextType | null>(null)
 
 export const useSelectBibleReference = () => {
   const context = useContext(SelectBibleReferenceContext)
@@ -23,11 +20,7 @@ export const useSelectBibleReference = () => {
   return context
 }
 
-export const SelectBibleReferenceModalProvider = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
+export const SelectBibleReferenceModalProvider = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const setSelectBibleReferenceData = useSetAtom(selectBibleReferenceDataAtom)
 
@@ -43,10 +36,7 @@ export const SelectBibleReferenceModalProvider = ({
   return (
     <SelectBibleReferenceContext.Provider value={{ openBibleReferenceModal }}>
       {children}
-      <SelectBibleReferenceModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
+      <SelectBibleReferenceModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </SelectBibleReferenceContext.Provider>
   )
 }

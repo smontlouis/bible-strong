@@ -32,14 +32,7 @@ const TabPreviewCarousel = ({ tabsAtoms }: TabPreviewCarouselProps) => {
   })
 
   return (
-    <AnimatedBox
-      row
-      position="absolute"
-      top={0}
-      left={0}
-      bg="lightGrey"
-      style={styles}
-    >
+    <AnimatedBox row position="absolute" top={0} left={0} bg="lightGrey" style={styles}>
       {tabsAtoms.map((tabAtom, i) => (
         <TabPreview key={`${tabAtom}`} index={i} tabAtom={tabAtom} />
       ))}

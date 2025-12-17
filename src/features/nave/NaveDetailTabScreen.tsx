@@ -45,10 +45,11 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   const dispatch = useDispatch()
   const addHistory = useSetAtom(historyAtom)
 
-  const [naveItem, setNaveItem] = useState(null)
+  const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const tags = useSelector(
+    // @ts-ignore
     (state: RootState) => state.user.bible.naves[name_lower]?.tags,
     shallowEqual
   )
@@ -56,7 +57,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
 
   const setTitle = (title: string) =>
     setNaveTab(
-      produce((draft) => {
+      produce(draft => {
         draft.title = title
       })
     )
@@ -66,7 +67,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   }, [naveItem?.name, name])
 
   useEffect(() => {
-    loadNaveItem(name_lower).then((result) => {
+    loadNaveItem(name_lower).then(result => {
       setNaveItem(result)
       addHistory({
         name: result.name,
@@ -77,7 +78,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     })
   }, [name, name_lower])
 
-  const openLink = ({ href }) => {
+  const openLink = ({ href }: any) => {
     const [type, item] = href.split('=')
 
     if (type === 'v') {
@@ -113,6 +114,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     try {
       const message = `${name} \n\n${truncHTML(naveItem.description, 4000)
         .text.replace(/&#/g, '\\')
+        // @ts-ignore
         .replace(/\\x([0-9A-F]+);/gi, function () {
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
@@ -181,6 +183,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
       />
       {tags && (
         <Box mt={10} px={20}>
+          {/* @ts-ignore */}
           <TagList tags={tags} />
         </Box>
       )}
@@ -194,6 +197,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
         }}
       >
         {naveItem?.description && (
+          // @ts-ignore
           <WebView {...webviewProps(naveItem.description)} />
         )}
       </Box>

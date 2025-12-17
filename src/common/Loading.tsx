@@ -23,7 +23,7 @@ interface Props {
 }
 
 const Loading = ({ message, subMessage, style, children }: Props) => {
-  const [isReady] = useTimeout(3000)
+  const [isReady] = useTimeout(3000) as [() => boolean, ...any[]]
   const theme: Theme = useTheme()
 
   return (
@@ -42,13 +42,7 @@ const Loading = ({ message, subMessage, style, children }: Props) => {
         </Box>
       )}
       {children && (
-        <Box
-          marginTop={20}
-          width={200}
-          marginLeft="auto"
-          marginRight="auto"
-          center
-        >
+        <Box marginTop={20} width={200} marginLeft="auto" marginRight="auto" center>
           {children}
         </Box>
       )}

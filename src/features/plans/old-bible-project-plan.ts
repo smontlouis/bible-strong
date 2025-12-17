@@ -1,5 +1,6 @@
 import { Plan } from 'src/common/types'
 
+// @ts-ignore
 export const bibleProjectPlan: Plan = {
   id: 'bible-project-plan',
   title: 'Lire les écritures',
@@ -47,8 +48,7 @@ export const bibleProjectPlan: Plan = {
               id: '0',
               type: 'Video',
               title: 'Vidéo : Image de Dieu',
-              description:
-                "Explorez le thème de l'image de Dieu vu dans la lecture précédente.",
+              description: "Explorez le thème de l'image de Dieu vu dans la lecture précédente.",
               url: 'https://www.youtube.com/watch?v=sDnohPQxLD8',
             },
             { id: '1', src: '1_genesis_1', type: 'Image' },

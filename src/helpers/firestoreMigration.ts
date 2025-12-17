@@ -222,7 +222,7 @@ export async function migrateUserDataToSubcollections(
 
     // 4. Migrer chaque collection
     const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-      (name) => bible[name] && Object.keys(bible[name]).length > 0
+      name => bible[name] && Object.keys(bible[name]).length > 0
     )
 
     if (collectionsToMigrate.length === 0) {
@@ -231,7 +231,10 @@ export async function migrateUserDataToSubcollections(
       return { success: true }
     }
 
-    console.log(`[Migration] Migrating ${collectionsToMigrate.length} collections:`, collectionsToMigrate)
+    console.log(
+      `[Migration] Migrating ${collectionsToMigrate.length} collections:`,
+      collectionsToMigrate
+    )
 
     for (let i = 0; i < collectionsToMigrate.length; i++) {
       const collection = collectionsToMigrate[i]
@@ -239,10 +242,7 @@ export async function migrateUserDataToSubcollections(
       const itemCount = Object.keys(data).length
 
       const baseProgress = 0.1 + (0.7 * i) / collectionsToMigrate.length
-      reportProgress(
-        `Migration de ${collection} (${itemCount} éléments)...`,
-        baseProgress
-      )
+      reportProgress(`Migration de ${collection} (${itemCount} éléments)...`, baseProgress)
 
       await writeAllToSubcollection(userId, collection, data)
 
@@ -366,7 +366,8 @@ export async function resumableMigrateUserData(
       currentCollection: update.currentCollection ?? null,
       collectionsCompleted: update.collectionsCompleted ?? completedCollections.length,
       totalCollections: SUBCOLLECTION_NAMES.length,
-      overallProgress: update.overallProgress ?? completedCollections.length / SUBCOLLECTION_NAMES.length,
+      overallProgress:
+        update.overallProgress ?? completedCollections.length / SUBCOLLECTION_NAMES.length,
       message: update.message ?? '',
     }
     console.log(`[Migration] ${progress.message} (${Math.round(progress.overallProgress * 100)}%)`)
@@ -401,7 +402,7 @@ export async function resumableMigrateUserData(
       migrationState = existingMigrationState
       // Récupérer les collections déjà complétées
       completedCollections = SUBCOLLECTION_NAMES.filter(
-        (name) => migrationState.collections[name].status === 'completed'
+        name => migrationState.collections[name].status === 'completed'
       )
     } else {
       console.log('[Migration] Starting new migration')
@@ -434,14 +435,12 @@ export async function resumableMigrateUserData(
 
     // 5. Déterminer les collections à migrer
     const collectionsToMigrate = getCollectionsToMigrate(migrationState).filter(
-      (name) => bible[name] && Object.keys(bible[name]).length > 0
+      name => bible[name] && Object.keys(bible[name]).length > 0
     )
 
     // Ajouter les collections vides comme complétées
     const emptyCollections = SUBCOLLECTION_NAMES.filter(
-      (name) =>
-        !bible[name] ||
-        Object.keys(bible[name]).length === 0
+      name => !bible[name] || Object.keys(bible[name]).length === 0
     )
     for (const emptyCollection of emptyCollections) {
       if (migrationState.collections[emptyCollection].status !== 'completed') {
@@ -460,7 +459,11 @@ export async function resumableMigrateUserData(
     console.log(`[Migration] Collections to migrate: ${collectionsToMigrate.join(', ')}`)
 
     // 6. Calculer le nombre total de chunks pour une progression précise
-    const collectionChunks: { collection: SubcollectionName; itemCount: number; chunkCount: number }[] = []
+    const collectionChunks: {
+      collection: SubcollectionName
+      itemCount: number
+      chunkCount: number
+    }[] = []
     let totalChunks = 0
 
     for (const collection of collectionsToMigrate) {

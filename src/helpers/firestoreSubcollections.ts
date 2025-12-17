@@ -44,10 +44,7 @@ function isValidDocumentId(docId: string): boolean {
 /**
  * Obtient une référence à une sous-collection
  */
-export function getSubcollectionRef(
-  userId: string,
-  collection: SubcollectionName
-) {
+export function getSubcollectionRef(userId: string, collection: SubcollectionName) {
   return firebaseDb.collection('users').doc(userId).collection(collection)
 }
 
@@ -64,10 +61,7 @@ export async function writeToSubcollection(
     const ref = getSubcollectionRef(userId, collection).doc(docId)
     await ref.set(data, { merge: true })
   } catch (error) {
-    console.error(
-      `[Subcollections] Failed to write to ${collection}/${docId}:`,
-      error
-    )
+    console.error(`[Subcollections] Failed to write to ${collection}/${docId}:`, error)
     Sentry.captureException(error, {
       tags: { feature: 'subcollections', action: 'write', collection },
       extra: { userId, docId },
@@ -88,10 +82,7 @@ export async function deleteFromSubcollection(
     const ref = getSubcollectionRef(userId, collection).doc(docId)
     await ref.delete()
   } catch (error) {
-    console.error(
-      `[Subcollections] Failed to delete from ${collection}/${docId}:`,
-      error
-    )
+    console.error(`[Subcollections] Failed to delete from ${collection}/${docId}:`, error)
     Sentry.captureException(error, {
       tags: { feature: 'subcollections', action: 'delete', collection },
       extra: { userId, docId },
@@ -111,10 +102,7 @@ export interface BatchChanges {
 /**
  * Callback pour le suivi de progression des chunks
  */
-export type ChunkProgressCallback = (
-  chunkIndex: number,
-  totalChunks: number
-) => void
+export type ChunkProgressCallback = (chunkIndex: number, totalChunks: number) => void
 
 /**
  * Écrit plusieurs documents en batch avec chunking automatique
@@ -164,7 +152,7 @@ export async function batchWriteSubcollection(
   }
 
   // Découper en chunks
-  const chunks: typeof operations[] = []
+  const chunks: (typeof operations)[] = []
   for (let i = 0; i < operations.length; i += BATCH_CHUNK_SIZE) {
     chunks.push(operations.slice(i, i + BATCH_CHUNK_SIZE))
   }
@@ -247,7 +235,7 @@ export async function clearSubcollection(
       return
     }
 
-    const docIds = snapshot.docs.map((doc) => doc.id)
+    const docIds = snapshot.docs.map(doc => doc.id)
 
     await batchWriteSubcollection(userId, collection, {
       set: {},
@@ -278,7 +266,7 @@ export async function fetchSubcollection(
     const snapshot = await collectionRef.get()
 
     const result: { [id: string]: any } = {}
-    snapshot.forEach((doc) => {
+    snapshot.forEach(doc => {
       result[doc.id] = doc.data()
     })
 
@@ -319,7 +307,7 @@ export function subscribeToSubcollection(
   let isFirstSnapshot = true
 
   const unsubscribe = collectionRef.onSnapshot(
-    (snapshot) => {
+    snapshot => {
       // Ignorer les changements locaux
       if (snapshot.metadata.hasPendingWrites) {
         return
@@ -327,7 +315,7 @@ export function subscribeToSubcollection(
 
       // Construire l'objet complet
       const data: { [id: string]: any } = {}
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         data[doc.id] = doc.data()
       })
 
@@ -347,7 +335,7 @@ export function subscribeToSubcollection(
       const modified: { [id: string]: any } = {}
       const removed: string[] = []
 
-      snapshot.docChanges().forEach((change) => {
+      snapshot.docChanges().forEach(change => {
         const docData = change.doc.data()
         const docId = change.doc.id
 
@@ -366,7 +354,7 @@ export function subscribeToSubcollection(
 
       onChange(data, { added, modified, removed })
     },
-    (error) => {
+    error => {
       console.error(`[Subcollections] Subscription error for ${collection}:`, error)
       Sentry.captureException(error, {
         tags: { feature: 'subcollections', action: 'subscribe', collection },
@@ -391,10 +379,7 @@ export async function existsInSubcollection(
     const doc = await ref.get()
     return doc.exists
   } catch (error) {
-    console.error(
-      `[Subcollections] Failed to check existence in ${collection}/${docId}:`,
-      error
-    )
+    console.error(`[Subcollections] Failed to check existence in ${collection}/${docId}:`, error)
     return false
   }
 }

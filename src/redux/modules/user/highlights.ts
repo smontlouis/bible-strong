@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { Dispatch } from 'redux'
-import { SelectedVerses } from '../../state/tabs'
+import { SelectedVerses } from 'src/state/tabs'
 import { clearSelectedVerses } from '../bible.old'
 import { removeEntityInTags } from '../utils'
 
@@ -8,7 +8,7 @@ export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const CHANGE_HIGHLIGHT_COLOR = 'user/CHANGE_HIGHLIGHT_COLOR'
 
-const addDateAndColorToVerses = (verses, highlightedVerses, color) => {
+const addDateAndColorToVerses = (verses: any, highlightedVerses: any, color: any) => {
   const date = Date.now()
   const formattedObj = Object.keys(verses).reduce((obj, verse) => {
     return {
@@ -61,31 +61,23 @@ export function addHighlight({
   color: string
   selectedVerses: SelectedVerses
 }) {
-  return (dispatch: Dispatch, getState) => {
+  return (dispatch: Dispatch, getState: any) => {
     const highlightedVerses = getState().user.bible.highlights
 
     return dispatch({
       type: ADD_HIGHLIGHT,
-      selectedVerses: addDateAndColorToVerses(
-        selectedVerses,
-        highlightedVerses,
-        color
-      ),
+      selectedVerses: addDateAndColorToVerses(selectedVerses, highlightedVerses, color),
     })
   }
 }
 
-export function removeHighlight({
-  selectedVerses,
-}: {
-  selectedVerses: SelectedVerses
-}) {
+export function removeHighlight({ selectedVerses }: { selectedVerses: SelectedVerses }) {
   return {
     type: REMOVE_HIGHLIGHT,
     selectedVerses,
   }
 }
 
-export function changeHighlightColor(verseIds, color) {
+export function changeHighlightColor(verseIds: any, color: any) {
   return { type: CHANGE_HIGHLIGHT_COLOR, verseIds, color }
 }

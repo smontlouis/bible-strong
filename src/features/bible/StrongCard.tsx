@@ -26,7 +26,8 @@ const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth
 
-const Container = styled(Box)(({ isModal }) => ({
+// @ts-ignore
+const Container = styled(Box)(({ isModal }: any) => ({
   width: itemWidth,
   flex: 1,
   paddingHorizontal: itemHorizontalMargin,
@@ -79,12 +80,14 @@ const smallTextStyle = (theme: Theme) => ({
 })
 
 type Props = {
-  index: number
+  index?: number
   theme: Theme
   book: string
   strongReference: StrongReference
   navigation: StackNavigationProp<MainStackProps>
-  isSelectionMode: StudyNavigateBibleType
+  isSelectionMode?: StudyNavigateBibleType
+  isModal?: boolean
+  onClosed?: () => void
 }
 
 const StrongCard = (props: Props) => {
@@ -92,30 +95,26 @@ const StrongCard = (props: Props) => {
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const openStrong = () => {
-    onClosed?.()
     const {
       book,
       strongReference,
       navigation,
       isSelectionMode,
-      strongReference: {
-        Code,
-        Type,
-        Mot,
-        Phonetique,
-        Definition,
-        LSG,
-        Hebreu,
-        Grec,
-      },
+      onClosed,
+      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec },
     } = props
+
+    onClosed?.()
 
     if (isSelectionMode) {
       if (openedFromTab) {
+        // @ts-ignore
         navigation.navigate('AppSwitcher')
       } else {
+        // @ts-ignore
         navigation.navigate('EditStudy', {
           ...cleanParams(),
+          // @ts-ignore
           type: isSelectionMode,
           title: Mot,
           codeStrong: Code,
@@ -137,22 +136,14 @@ const StrongCard = (props: Props) => {
 
   const {
     isSelectionMode,
-    strongReference: {
-      Code,
-      Hebreu,
-      Grec,
-      Type,
-      Mot,
-      Phonetique,
-      Definition,
-      LSG,
-    },
+    strongReference: { Code, Hebreu, Grec, Type, Mot, Phonetique, Definition, LSG },
     theme,
     isModal,
     onClosed,
   } = props
 
   return (
+    // @ts-ignore
     <Container overflow isModal={isModal}>
       {/* <Shadow overflow /> */}
       <Box paddingTop={20}>
@@ -171,6 +162,7 @@ const StrongCard = (props: Props) => {
                 </Text>
               </Link>
               <Box mr={10} mt={3}>
+                {/* @ts-ignore */}
                 <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code} />
               </Box>
               <Link onPress={openStrong}>
@@ -216,9 +208,7 @@ const StrongCard = (props: Props) => {
         )}
         {!!LSG && (
           <ViewItem>
-            <SubTitle color="darkGrey">
-              {t('Généralement traduit par')}
-            </SubTitle>
+            <SubTitle color="darkGrey">{t('Généralement traduit par')}</SubTitle>
             <StylizedHTMLView
               htmlStyle={{
                 p: { ...smallTextStyle(theme) },

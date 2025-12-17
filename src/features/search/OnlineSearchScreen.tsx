@@ -18,10 +18,7 @@ interface SearchScreenProps {
   setSearchValue: (value: string) => void
 }
 
-const OnlineSearchScreen = ({
-  searchValue,
-  setSearchValue,
-}: SearchScreenProps) => {
+const OnlineSearchScreen = ({ searchValue, setSearchValue }: SearchScreenProps) => {
   const { t } = useTranslation()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const isFR = resourcesLanguage.SEARCH === 'fr'
@@ -50,13 +47,16 @@ const OnlineSearchScreen = ({
 
   return (
     <>
+      {/* @ts-ignore */}
       <InstantSearch indexName="bible-lsg" searchClient={searchClient}>
+        {/* @ts-ignore */}
         <Configure restrictSearchableAttributes={isFR ? ['LSG'] : ['KJV']} />
         <>
+          {/* @ts-ignore */}
           <SearchBox
             placeholder={t('search.placeholder')}
             value={searchValue}
-            onChange={(v) => {
+            onChange={v => {
               setSearchValue(v)
               setIsDirty(true)
             }}

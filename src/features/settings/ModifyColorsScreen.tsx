@@ -13,7 +13,7 @@ import { changeColor } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
-const ColorSquare = styled.View(({ color, size }) => ({
+const ColorSquare = styled.View(({ color, size }: any) => ({
   width: size,
   height: size,
   borderRadius: size / 4,
@@ -23,11 +23,11 @@ const ColorSquare = styled.View(({ color, size }) => ({
 
 const ModifyColorsScreen = () => {
   const { t } = useTranslation()
-  const [currentColor, setColorWheelOpen] = useState(null)
+  const [currentColor, setColorWheelOpen] = useState<any>(null)
   const dispatch = useDispatch()
   const { theme: currentTheme } = useCurrentThemeSelector()
   const { colors } = useSelector(
-    state => ({
+    (state: any) => ({
       colors: state.user.bible.settings.colors[currentTheme],
     }),
     shallowEqual
@@ -46,12 +46,12 @@ const ModifyColorsScreen = () => {
                   setColorWheelOpen({
                     number: i + 1,
                     name: `color${i + 1}`,
-                    color: colors[`color${i + 1}`],
+                    color: colors[`color${i + 1}` as any],
                   })
                 }
               >
                 <Box row padding={10} alignItems="center">
-                  <ColorSquare size={30} color={colors[`color${i + 1}`]} />
+                  <ColorSquare size={30} color={colors[`color${i + 1}` as any]} />
                   <Text bold>
                     {t('Couleur')} {i + 1}
                   </Text>
@@ -61,17 +61,14 @@ const ModifyColorsScreen = () => {
                 noFlex
                 name="refresh-cw"
                 // Reset color
+                // @ts-ignore
                 onPress={() => dispatch(changeColor({ name: `color${i + 1}` }))}
               />
             </Box>
           ))}
         </Box>
       </ScrollView>
-      <ColorWheelModal
-        currentColor={currentColor}
-        onClosed={() => setColorWheelOpen(false)}
-        t={t}
-      />
+      <ColorWheelModal currentColor={currentColor} onClosed={() => setColorWheelOpen(null)} t={t} />
     </Container>
   )
 }

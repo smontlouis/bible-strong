@@ -16,10 +16,7 @@ import Circle from '~common/ui/Circle'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import fonts from '~helpers/fonts'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -38,26 +35,22 @@ import {
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
-export const HalfContainer = styled.View<{ border?: boolean }>(
-  ({ border, theme }) => ({
-    paddingHorizontal: 20,
-    paddingRight: 10,
-    paddingVertical: 15,
-    borderBottomColor: theme.colors.border,
-    borderBottomWidth: border ? 1 : 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-  })
-)
+export const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
+  paddingHorizontal: 20,
+  paddingRight: 10,
+  paddingVertical: 15,
+  borderBottomColor: theme.colors.border,
+  borderBottomWidth: border ? 1 : 0,
+  flexDirection: 'row',
+  alignItems: 'center',
+}))
 
-export const FontText = styled(Paragraph)<{ isSelected: boolean }>(
-  ({ isSelected, theme }) => ({
-    fontSize: 16,
-    paddingLeft: 15,
-    paddingRight: 15,
-    color: isSelected ? theme.colors.primary : theme.colors.default,
-  })
-)
+export const FontText = styled(Paragraph)<{ isSelected: boolean }>(({ isSelected, theme }) => ({
+  fontSize: 16,
+  paddingLeft: 15,
+  paddingRight: 15,
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+}))
 
 export const useParamsModalLabels = () => {
   const { t } = useTranslation()
@@ -142,9 +135,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const dispatch = useDispatch()
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
-  const fontSizeScale = useSelector(
-    (state: RootState) => state.user.bible.settings.fontSizeScale
-  )
+  const fontSizeScale = useSelector((state: RootState) => state.user.bible.settings.fontSizeScale)
   const preferredColorScheme = useSelector(
     (state: RootState) => state.user.bible.settings.preferredColorScheme
   )
@@ -154,32 +145,22 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const preferredLightTheme = useSelector(
     (state: RootState) => state.user.bible.settings.preferredLightTheme
   )
-  const alignContent = useSelector(
-    (state: RootState) => state.user.bible.settings.alignContent
-  )
-  const lineHeight = useSelector(
-    (state: RootState) => state.user.bible.settings.lineHeight
-  )
-  const textDisplay = useSelector(
-    (state: RootState) => state.user.bible.settings.textDisplay
-  )
-  const notesDisplay = useSelector(
-    (state: RootState) => state.user.bible.settings.notesDisplay
-  )
-  const press = useSelector(
-    (state: RootState) => state.user.bible.settings.press
-  )
+  const alignContent = useSelector((state: RootState) => state.user.bible.settings.alignContent)
+  const lineHeight = useSelector((state: RootState) => state.user.bible.settings.lineHeight)
+  const textDisplay = useSelector((state: RootState) => state.user.bible.settings.textDisplay)
+  const notesDisplay = useSelector((state: RootState) => state.user.bible.settings.notesDisplay)
+  const press = useSelector((state: RootState) => state.user.bible.settings.press)
 
   const fontsViewRef = React.useRef(null)
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
-  const initialScrollIndex = fonts.findIndex((f) => f === fontFamily)
+  const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
   const insets = useSafeAreaInsets()
   return (
     <BottomSheetModal
       ref={modalRef}
       enablePanDownToClose
-      backdropComponent={(props) => renderBackdrop({ ...props, opacity: 0.1 })}
+      backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
       enableDynamicSizing={false}
       snapPoints={['40%']}
       activeOffsetY={[-20, 20]}
@@ -220,41 +201,25 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           <Text marginLeft={5} fontSize={12} bold>
             {preferredLightThemeToString[preferredLightTheme]}
           </Text>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
-          >
+          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}>
             <Circle
               isSelected={preferredLightTheme === 'default'}
               size={20}
               color="rgb(255,255,255)"
             />
           </LinkBox>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
-          >
+          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}>
             <Circle
               isSelected={preferredLightTheme === 'sepia'}
               size={20}
               color="rgb(245,242,227)"
             />
           </LinkBox>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
-          >
-            <Circle
-              isSelected={preferredLightTheme === 'nature'}
-              size={20}
-              color="#EAF9EC"
-            />
+          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}>
+            <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
           </LinkBox>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
-          >
-            <Circle
-              isSelected={preferredLightTheme === 'sunset'}
-              size={20}
-              color="#FAE0D5"
-            />
+          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}>
+            <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
           </LinkBox>
         </HalfContainer>
         <HalfContainer border>
@@ -262,57 +227,28 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           <Text marginLeft={5} fontSize={12} bold>
             {preferredDarkThemeToString[preferredDarkTheme]}
           </Text>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
-          >
-            <Circle
-              isSelected={preferredDarkTheme === 'dark'}
-              size={20}
-              color="rgb(18,45,66)"
-            />
+          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}>
+            <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
           </LinkBox>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
-          >
-            <Circle
-              isSelected={preferredDarkTheme === 'black'}
-              size={20}
-              color="black"
-            />
+          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}>
+            <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
           </LinkBox>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
-          >
-            <Circle
-              isSelected={preferredDarkTheme === 'mauve'}
-              size={20}
-              color="rgb(51,4,46)"
-            />
+          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}>
+            <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
           </LinkBox>
-          <LinkBox
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
-          >
-            <Circle
-              isSelected={preferredDarkTheme === 'night'}
-              size={20}
-              color="rgb(0,50,100)"
-            />
+          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}>
+            <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
           </LinkBox>
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>{t('Taille du texte')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>{`${
-            100 + fontSizeScale * 10
-          }%`}</Text>
+          <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             name="type"
             size={15}
             onPress={() => dispatch(decreaseSettingsFontSizeScale())}
           />
-          <TouchableIcon
-            name="type"
-            onPress={() => dispatch(increaseSettingsFontSizeScale())}
-          />
+          <TouchableIcon name="type" onPress={() => dispatch(increaseSettingsFontSizeScale())} />
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>{t('Alignement du texte')}</Text>
@@ -357,9 +293,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           </Text>
           <TouchableIcon
             isSelected
-            name={
-              textDisplay === 'inline' ? 'arrow-right' : 'corner-down-right'
-            }
+            name={textDisplay === 'inline' ? 'arrow-right' : 'corner-down-right'}
             onPress={() => {
               const nextDisplay = textDisplay === 'inline' ? 'block' : 'inline'
               dispatch(setSettingsTextDisplay(nextDisplay))
@@ -390,8 +324,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             icon={press === 'shortPress' ? IconShortPress : IconLongPress}
             isSelected
             onPress={() => {
-              const nextPress =
-                press === 'shortPress' ? 'longPress' : 'shortPress'
+              const nextPress = press === 'shortPress' ? 'longPress' : 'shortPress'
               dispatch(setSettingsPress(nextPress))
             }}
             size={25}
@@ -411,20 +344,15 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
               offset: 100 * index,
               index,
             })}
-            initialScrollIndex={
-              initialScrollIndex === -1 ? 0 : initialScrollIndex
-            }
+            initialScrollIndex={initialScrollIndex === -1 ? 0 : initialScrollIndex}
             style={{ paddingVertical: 15 }}
             data={['Literata Book', ...fonts]}
-            keyExtractor={(item) => item}
+            keyExtractor={item => item}
             renderItem={({ item }) => {
               const isSelected = fontFamily === item
               return (
                 <Link onPress={() => dispatch(setFontFamily(item))}>
-                  <FontText
-                    isSelected={isSelected}
-                    style={{ fontFamily: item }}
-                  >
+                  <FontText isSelected={isSelected} style={{ fontFamily: item }}>
                     {item}
                   </FontText>
                 </Link>

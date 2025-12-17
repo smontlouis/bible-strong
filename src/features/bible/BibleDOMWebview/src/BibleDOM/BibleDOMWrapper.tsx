@@ -32,10 +32,7 @@ export type RootStyles = {
 
 export type PericopeChapter = Pericope[string][string]
 
-export type Dispatch = (props: {
-  type: string
-  [key: string]: any
-}) => Promise<void>
+export type Dispatch = (props: { type: string; [key: string]: any }) => Promise<void>
 
 export type WebViewProps = {
   bibleAtom: PrimitiveAtom<BibleTab>

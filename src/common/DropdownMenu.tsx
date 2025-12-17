@@ -61,13 +61,7 @@ const DropdownMenu = ({
           ref={ref}
           snapPoints={['40%']}
           headerComponent={
-            <Box
-              px={20}
-              py={15}
-              center
-              borderColor="border"
-              borderBottomWidth={1}
-            >
+            <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
               <Text bold fontSize={20}>
                 {title}
               </Text>
@@ -75,11 +69,7 @@ const DropdownMenu = ({
           }
         >
           {choices.map(({ value, label, subLabel }) => (
-            <Modal.Item
-              key={value}
-              tag={subLabel}
-              onPress={() => onItemPress(value)}
-            >
+            <Modal.Item key={value} tag={subLabel} onPress={() => onItemPress(value)}>
               {label}
             </Modal.Item>
           ))}

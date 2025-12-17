@@ -36,9 +36,7 @@ const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
       <Box padding={20}>
         {subType === 'pray' && (
           <PauseText>
-            {t(
-              'Entrez dans un temps de prière\n et méditez sur le psaume\nsuivant'
-            )}
+            {t('Entrez dans un temps de prière\n et méditez sur le psaume\nsuivant')}
           </PauseText>
         )}
         <Box>

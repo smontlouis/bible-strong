@@ -10,16 +10,9 @@ const Accordion = ({ title, children }: Props) => {
   const [expanded, setExpanded] = React.useState(false)
   return (
     <Box py={20}>
-      <TouchableBox
-        row
-        onPress={() => setExpanded(s => !s)}
-        alignItems="center"
-      >
+      <TouchableBox row onPress={() => setExpanded(s => !s)} alignItems="center">
         <Box flex>{title}</Box>
-        <FeatherIcon
-          name={expanded ? 'chevron-up' : 'chevron-down'}
-          size={24}
-        />
+        <FeatherIcon name={expanded ? 'chevron-up' : 'chevron-down'} size={24} />
       </TouchableBox>
       {expanded && <Box py={20}>{children}</Box>}
     </Box>

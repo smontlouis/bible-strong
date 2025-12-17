@@ -94,6 +94,6 @@ const Link = <R extends keyof MainStackProps>({
 }
 
 type LinkBoxProps = React.FC<BoxProps & LinkProps<keyof MainStackProps>>
-export const LinkBox = (Box.withComponent(Link) as unknown) as LinkBoxProps
+export const LinkBox = Box.withComponent(Link) as unknown as LinkBoxProps
 
 export default Link

@@ -4,16 +4,10 @@ import { Theme } from '~themes'
 
 import { TimelineEvent as TimelineEventProps } from './types'
 
-import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetFlatList, BottomSheetView } from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import {
-  connectInfiniteHits,
-  connectStateResults,
-} from 'react-instantsearch-native'
+import { connectInfiniteHits, connectStateResults } from 'react-instantsearch-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
@@ -30,6 +24,12 @@ interface Props {
   modalRef: React.RefObject<BottomSheet>
   eventModalRef: React.RefObject<BottomSheet>
   setEvent: (event: Partial<TimelineEventProps>) => void
+  hits?: any
+  hasMore?: any
+  refine?: any
+  allSearchResults?: any
+  error?: any
+  searching?: any
 }
 const SearchInTimelineModal = ({
   modalRef,
@@ -58,7 +58,7 @@ const SearchInTimelineModal = ({
     setSearchValue('')
   }, [])
 
-  const onOpenEvent = event => {
+  const onOpenEvent = (event: any) => {
     eventModalRef.current?.expand()
     setEvent(event)
   }
@@ -78,6 +78,7 @@ const SearchInTimelineModal = ({
     >
       <BottomSheetView>
         <Box pt={20}>
+          {/* @ts-ignore */}
           <SearchBox
             value={searchValue}
             onChange={setSearchValue}
@@ -91,7 +92,8 @@ const SearchInTimelineModal = ({
       <BottomSheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={submittedValue ? hits : []}
-        keyExtractor={item => item.objectID}
+        // @ts-ignore
+        keyExtractor={(item: any) => item.objectID}
         onEndReached={() => {
           hasMore && refine()
         }}
@@ -104,9 +106,7 @@ const SearchInTimelineModal = ({
           ) : error ? (
             <Empty
               source={require('~assets/images/empty.json')}
-              message={t(
-                "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
-              )}
+              message={t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")}
             />
           ) : (
             <Box paddingHorizontal={20}>
@@ -118,21 +118,27 @@ const SearchInTimelineModal = ({
             </Box>
           )
         }
-        renderItem={({ item }) => (
+        // @ts-ignore
+        renderItem={({ item }: any) => (
           <LinkBox mx={20} my={20} onPress={() => onOpenEvent(item)} row>
+            {/* @ts-ignore */}
             {item.image && (
               <Box mr={20}>
                 <Image
                   style={{ width: 70, height: 70, borderRadius: 10 }}
                   source={{
+                    // @ts-ignore
                     uri: item.image,
                   }}
                 />
               </Box>
             )}
             <Box>
+              {/* @ts-ignore */}
               <Highlight attribute="title" hit={item} />
+              {/* @ts-ignore */}
               <Snippet attribute="description" hit={item} />
+              {/* @ts-ignore */}
               <Snippet attribute="article" hit={item} />
             </Box>
           </LinkBox>

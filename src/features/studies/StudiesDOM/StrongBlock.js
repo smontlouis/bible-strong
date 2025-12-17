@@ -16,16 +16,8 @@ class StrongBlock extends Embed {
 
   static create(data) {
     const node = super.create(data)
-    const {
-      title,
-      codeStrong,
-      strongType,
-      phonetique,
-      definition,
-      translatedBy,
-      book,
-      original,
-    } = data
+    const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } =
+      data
     node.innerHTML = ReactDOMServer.renderToString(
       <Strong
         {...{
@@ -46,9 +38,7 @@ class StrongBlock extends Embed {
     node.setAttribute('autocapitalize', 'off')
 
     node.addEventListener('click', () => {
-      const isReadOnly = document
-        .querySelector('#editor')
-        .classList.contains('ql-disabled')
+      const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
       if (isReadOnly) {
         console.log(`${codeStrong} ${book}`)
         dispatch('VIEW_BIBLE_STRONG', {

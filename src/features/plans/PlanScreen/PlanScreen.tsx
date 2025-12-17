@@ -13,26 +13,15 @@ import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
 import { MainStackProps } from '~navigation/type'
 
-const PlanScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'Plan'>) => {
-  const {
-    id,
-    title,
-    image,
-    description,
-    author,
-  }: ComputedPlanItem = route.params.plan
+const PlanScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Plan'>) => {
+  const { id, title, image, description, author }: ComputedPlanItem = route.params.plan
   const modalRef = React.useRef<BottomSheet>(null)
   const modalRefDetails = React.useRef<BottomSheet>(null)
   const cacheImage = useFireStorage(image)
 
   const plan = useComputedPlan(id)
   const progress = plan?.progress
-  const prevProgress: number | undefined = usePrevious<number | undefined>(
-    progress
-  )
+  const prevProgress: number | undefined = usePrevious<number | undefined>(progress)
 
   React.useEffect(() => {
     if (progress != null && prevProgress != null && prevProgress !== progress) {
@@ -49,13 +38,7 @@ const PlanScreen = ({
         hasBackButton
         rightComponent={
           <PopOverMenu
-            popover={
-              <Menu
-                modalRefDetails={modalRefDetails}
-                planId={id}
-                navigation={navigation}
-              />
-            }
+            popover={<Menu modalRefDetails={modalRefDetails} planId={id} navigation={navigation} />}
           />
         }
       />

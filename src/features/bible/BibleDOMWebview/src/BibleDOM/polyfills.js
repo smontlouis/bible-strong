@@ -29,13 +29,7 @@ if (!Array.prototype.includes) {
       let k = Math.max(n >= 0 ? n : len - Math.abs(n), 0)
 
       function sameValueZero(x, y) {
-        return (
-          x === y ||
-          (typeof x === 'number' &&
-            typeof y === 'number' &&
-            isNaN(x) &&
-            isNaN(y))
-        )
+        return x === y || (typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y))
       }
 
       // 7. Repeat, while k < len
@@ -57,7 +51,7 @@ if (!Array.prototype.includes) {
 
 // Polyfill for Object.entries
 if (!Object.entries) {
-  Object.entries = function(obj) {
+  Object.entries = function (obj) {
     const ownProps = Object.keys(obj)
 
     let i = ownProps.length
@@ -70,7 +64,7 @@ if (!Object.entries) {
 
 // Polyfill for NodeList.forEarch
 if (window.NodeList && !NodeList.prototype.forEach) {
-  NodeList.prototype.forEach = function(callback, thisArg) {
+  NodeList.prototype.forEach = function (callback, thisArg) {
     thisArg = thisArg || window
     for (let i = 0; i < this.length; i++) {
       callback.call(thisArg, this[i], i, this)

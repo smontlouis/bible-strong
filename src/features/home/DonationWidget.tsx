@@ -29,19 +29,8 @@ const DonationWidget = () => {
         overflow="hidden"
         center
       >
-        <Box
-          pos="absolute"
-          left={0}
-          right={0}
-          top={0}
-          height={130}
-          borderRadius={30}
-        >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height: 130 }}
-            colors={[color1, color2]}
-          />
+        <Box pos="absolute" left={0} right={0} top={0} height={130} borderRadius={30}>
+          <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
         <Lottie
           autoPlay

@@ -41,9 +41,7 @@ export const calculateLabel = (start: number, end: number) => {
   }
 
   if (start < 0 && end < 0) {
-    return `${absStart}-${absEnd} ${i18n.t('av.JC')}${
-      range > 50 ? ` (${range})` : ''
-    }`
+    return `${absStart}-${absEnd} ${i18n.t('av.JC')}${range > 50 ? ` (${range})` : ''}`
   }
 
   if (start > 0 && end > 0) {
@@ -51,9 +49,7 @@ export const calculateLabel = (start: number, end: number) => {
   }
 
   if (start < 0 && end > 0) {
-    return `${absStart} ${i18n.t('av.JC')} ${i18n.t('à')} ${end}${
-      range > 50 ? ` (${range})` : ''
-    }`
+    return `${absStart} ${i18n.t('av.JC')} ${i18n.t('à')} ${end}${range > 50 ? ` (${range})` : ''}`
   }
 
   return start

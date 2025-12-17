@@ -37,40 +37,16 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
 
   const { settings } = useSelector(
     (state: RootState) => ({
-      settings: produce(state.user.bible.settings, (draftState) => {
+      settings: produce(state.user.bible.settings, draftState => {
         // TODO: WHY IS THIS HERE?
-        draftState.colors.default = deepmerge(
-          defaultColors,
-          draftState.colors.default || {}
-        )
-        draftState.colors.dark = deepmerge(
-          darkColors,
-          draftState.colors.dark || {}
-        )
-        draftState.colors.black = deepmerge(
-          blackColors,
-          draftState.colors.black || {}
-        )
-        draftState.colors.sepia = deepmerge(
-          sepiaColors,
-          draftState.colors.sepia || {}
-        )
-        draftState.colors.mauve = deepmerge(
-          mauveColors,
-          draftState.colors.mauve || {}
-        )
-        draftState.colors.nature = deepmerge(
-          natureColors,
-          draftState.colors.nature || {}
-        )
-        draftState.colors.night = deepmerge(
-          nightColors,
-          draftState.colors.night || {}
-        )
-        draftState.colors.sunset = deepmerge(
-          sunsetColors,
-          draftState.colors.sunset || {}
-        )
+        draftState.colors.default = deepmerge(defaultColors, draftState.colors.default || {})
+        draftState.colors.dark = deepmerge(darkColors, draftState.colors.dark || {})
+        draftState.colors.black = deepmerge(blackColors, draftState.colors.black || {})
+        draftState.colors.sepia = deepmerge(sepiaColors, draftState.colors.sepia || {})
+        draftState.colors.mauve = deepmerge(mauveColors, draftState.colors.mauve || {})
+        draftState.colors.nature = deepmerge(natureColors, draftState.colors.nature || {})
+        draftState.colors.night = deepmerge(nightColors, draftState.colors.night || {})
+        draftState.colors.sunset = deepmerge(sunsetColors, draftState.colors.sunset || {})
         // TODO: END - WHY IS THIS HERE?
 
         const preferredColorScheme = draftState.preferredColorScheme || 'auto'
@@ -123,7 +99,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
 
   const handleBibleViewerReload = () => {
     console.log('Bible component failed to mount, forcing reload')
-    setReloadKey((prev) => prev + 1)
+    setReloadKey(prev => prev + 1)
     getDefaultStore().set(isBibleViewReloadingAtom, true)
   }
 

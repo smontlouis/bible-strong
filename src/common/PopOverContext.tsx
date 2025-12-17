@@ -4,9 +4,7 @@ interface PopOverContextType {
   onClose: () => void
 }
 
-export const PopOverContext = createContext<PopOverContextType | undefined>(
-  undefined
-)
+export const PopOverContext = createContext<PopOverContextType | undefined>(undefined)
 
 export const usePopOver = () => {
   const context = useContext(PopOverContext)

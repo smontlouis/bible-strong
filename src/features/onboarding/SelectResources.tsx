@@ -16,19 +16,11 @@ import useLanguage from '~helpers/useLanguage'
 import { ResourceToDownload, selectedResourcesAtom } from './atom'
 import ResourceItem from './ResourceItem'
 
-const DownloadFiles = ({
-  setStep,
-}: {
-  setStep: React.Dispatch<React.SetStateAction<number>>
-}) => {
+const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
-  const databases = Object.values(getDatabases()).filter(db =>
-    !isFR ? db.id !== 'MHY' : true
-  )
-  const [selectedResources, setSelectedResources] = useAtom(
-    selectedResourcesAtom
-  )
+  const databases = Object.values(getDatabases()).filter(db => (!isFR ? db.id !== 'MHY' : true))
+  const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
 
   const getDefaultVersion = (): ResourceToDownload => {
     const defaultVersion = isFR ? getVersions().LSG : getVersions().KJV
@@ -37,8 +29,8 @@ const DownloadFiles = ({
       defaultVersion.id === 'INT'
         ? getDatabaseUrl('INTERLINEAIRE', 'fr')
         : defaultVersion.id === 'INT_EN'
-        ? getDatabaseUrl('INTERLINEAIRE', 'en')
-        : biblesRef[defaultVersion.id]
+          ? getDatabaseUrl('INTERLINEAIRE', 'en')
+          : biblesRef[defaultVersion.id]
 
     return {
       id: defaultVersion.id,
@@ -91,9 +83,7 @@ const DownloadFiles = ({
                 name={db.name}
                 subTitle={db.desc}
                 fileSize={db.fileSize}
-                isSelected={Boolean(
-                  selectedResources.find(r => r.id === db.id)
-                )}
+                isSelected={Boolean(selectedResources.find(r => r.id === db.id))}
                 onPress={() =>
                   onPressItem({
                     id: db.id,
@@ -126,9 +116,7 @@ const DownloadFiles = ({
           version.id === 'LSGS' || version.id === 'KJVS' ? null : (
             <ResourceItem
               name={version.name}
-              isSelected={Boolean(
-                selectedResources.find(r => r.id === version.id)
-              )}
+              isSelected={Boolean(selectedResources.find(r => r.id === version.id))}
               isDisabled={version.id === (isFR ? 'LSG' : 'KJV')}
               onPress={() => {
                 const path = requireBiblePath(version.id)
@@ -136,8 +124,8 @@ const DownloadFiles = ({
                   version.id === 'INT'
                     ? getDatabaseUrl('INTERLINEAIRE', 'fr')
                     : version.id === 'INT_EN'
-                    ? getDatabaseUrl('INTERLINEAIRE', 'en')
-                    : biblesRef[version.id]
+                      ? getDatabaseUrl('INTERLINEAIRE', 'en')
+                      : biblesRef[version.id]
 
                 onPressItem({
                   id: version.id,

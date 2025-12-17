@@ -32,12 +32,12 @@ import { RootState } from '~redux/modules/reducer'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-export const sortVersesByDate = (p) =>
-  Object.keys(p).reduce((arr, verse, i) => {
+export const sortVersesByDate = (p: any) =>
+  Object.keys(p).reduce((arr: any, verse, i) => {
     const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
     const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
 
-    if (!arr.find((a) => a.date === p[verse].date)) {
+    if (!arr.find((a: any) => a.date === p[verse].date)) {
       arr.push({
         date: p[verse].date,
         color: p[verse].color,
@@ -47,20 +47,20 @@ export const sortVersesByDate = (p) =>
       })
     }
 
-    const dateInArray = arr.find((a) => a.date === p[verse].date)
+    const dateInArray = arr.find((a: any) => a.date === p[verse].date)
     if (dateInArray) {
       dateInArray.stringIds[verse] = true
       dateInArray.verseIds.push(formattedVerse)
-      dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
+      dateInArray.verseIds.sort((a: any, b: any) => Number(a.Verset) - Number(b.Verset))
       dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
     }
 
-    arr.sort((a, b) => Number(b.date) - Number(a.date))
+    arr.sort((a: any, b: any) => Number(b.date) - Number(a.date))
 
     return arr
   }, [])
 
-const NoteItem = ({ item, t, isFR }) => {
+const NoteItem = ({ item, t, isFR }: any) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
@@ -84,6 +84,7 @@ const NoteItem = ({ item, t, isFR }) => {
           </Text>
         </Box>
         {!!item.title && (
+          // @ts-ignore
           <Text title fontSize={16} scale={-2}>
             {item.title}
           </Text>
@@ -93,6 +94,7 @@ const NoteItem = ({ item, t, isFR }) => {
             {truncate(item.description, 100)}
           </Paragraph>
         )}
+        {/* @ts-ignore */}
         <TagList tags={item.tags} />
       </Box>
       <Border />
@@ -100,30 +102,16 @@ const NoteItem = ({ item, t, isFR }) => {
   )
 }
 
-const TagScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'Tag'>) => {
+const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'>) => {
   const tagId = route.params.tagId
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const isFR = useLanguage()
 
-  const tag = useSelector(
-    (state: RootState) => state.user.bible.tags[tagId],
-    shallowEqual
-  )
+  const tag = useSelector((state: RootState) => state.user.bible.tags[tagId], shallowEqual)
 
-  const {
-    highlights,
-    notes,
-    studies,
-    naves,
-    words,
-    strongsGrec,
-    strongsHebreu,
-  } = useSelector(
-    (state) => ({
+  const { highlights, notes, studies, naves, words, strongsGrec, strongsHebreu } = useSelector(
+    (state: any) => ({
       highlights: tag.highlights
         ? sortVersesByDate(
             Object.keys(tag.highlights).reduce(
@@ -139,38 +127,38 @@ const TagScreen = ({
         : [],
       notes: tag.notes
         ? Object.keys(tag.notes)
-            .map((id) => ({ id, reference: '', ...state.user.bible.notes[id] }))
-            .filter((c) => c && c.date)
+            .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
+            .filter(c => c && c.date)
         : [],
       studies: tag.studies
         ? Object.keys(tag.studies)
-            .map((id) => state.user.bible.studies[id])
-            .filter((c) => c)
+            .map(id => state.user.bible.studies[id])
+            .filter(c => c)
         : [],
       naves: tag.naves
         ? Object.keys(tag.naves)
-            .map((id) => state.user.bible.naves[id])
-            .filter((c) => c)
+            .map(id => state.user.bible.naves[id])
+            .filter(c => c)
         : [],
       words: tag.words
         ? Object.keys(tag.words)
-            .map((id) => state.user.bible.words[id])
-            .filter((c) => c)
+            .map(id => state.user.bible.words[id])
+            .filter(c => c)
         : [],
       strongsHebreu: tag.strongsHebreu
         ? Object.keys(tag.strongsHebreu)
-            .map((id) => state.user.bible.strongsHebreu[id])
-            .filter((c) => c)
+            .map(id => state.user.bible.strongsHebreu[id])
+            .filter(c => c)
         : [],
       strongsGrec: tag.strongsGrec
         ? Object.keys(tag.strongsGrec)
-            .map((id) => state.user.bible.strongsGrec[id])
-            .filter((c) => c)
+            .map(id => state.user.bible.strongsGrec[id])
+            .filter(c => c)
         : [],
     }),
     shallowEqual
   )
-  const [titlePrompt, setTitlePrompt] = React.useState(false)
+  const [titlePrompt, setTitlePrompt] = React.useState<any>(false)
 
   return (
     <Container>
@@ -178,10 +166,7 @@ const TagScreen = ({
         hasBackButton
         title={tag.name}
         rightComponent={
-          <Link
-            onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })}
-            padding
-          >
+          <Link onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })} padding>
             <FeatherIcon size={20} name="edit-3" />
           </Link>
         }
@@ -205,7 +190,7 @@ const TagScreen = ({
               Strongs
             </Text>
             <Box row wrap px={20}>
-              {strongsGrec.map((s) => {
+              {strongsGrec.map(s => {
                 return (
                   <LexiqueResultItem
                     key={s.id + s.title}
@@ -215,7 +200,7 @@ const TagScreen = ({
                   />
                 )
               })}
-              {strongsHebreu.map((s) => {
+              {strongsHebreu.map(s => {
                 return (
                   <LexiqueResultItem
                     key={s.id + s.title}
@@ -234,12 +219,17 @@ const TagScreen = ({
               {t('Thèmes nave')}
             </Text>
             <Box row wrap px={20}>
-              {naves.map((s) => {
+              {naves.map((s: any) => {
                 return (
+                  // @ts-ignore
                   <NaveResultItem
+                    // @ts-ignore
                     key={s.id}
+                    // @ts-ignore
                     name_lower={s.id}
+                    // @ts-ignore
                     name={s.title}
+                    // @ts-ignore
                     variant="grec"
                   />
                 )
@@ -253,7 +243,7 @@ const TagScreen = ({
               {t('Dictionnaire')}
             </Text>
             <Box row wrap px={20}>
-              {words.map((s) => {
+              {words.map(s => {
                 return <DictionnaryResultItem key={s.id} word={s.title} />
               })}
             </Box>
@@ -261,18 +251,14 @@ const TagScreen = ({
         )}
         {!!highlights.length && (
           <Box>
-            <Text padding={20} fontSize={25} title>
+            {/* @ts-ignore */}
+            <Text padding={20} fontSize={25} title scale={undefined}>
               {t('Surbrillances')}
             </Text>
 
-            {highlights.map((h) => {
+            {highlights.map((h: any) => {
               const { color, date, verseIds, tags } = h
-              return (
-                <HighlightItem
-                  key={date}
-                  {...{ color, date, verseIds, tags }}
-                />
-              )
+              return <HighlightItem key={date} {...{ color, date, verseIds, tags }} />
             })}
           </Box>
         )}
@@ -282,10 +268,8 @@ const TagScreen = ({
             <Text padding={20} fontSize={25} title>
               Notes
             </Text>
-            {notes.map((n) => {
-              return (
-                <NoteItem t={t} isFR={isFR} key={n.date.toString()} item={n} />
-              )
+            {notes.map(n => {
+              return <NoteItem t={t} isFR={isFR} key={n.date.toString()} item={n} />
             })}
           </Box>
         )}
@@ -296,7 +280,10 @@ const TagScreen = ({
               {t('Études')}
             </Text>
             <Box row style={{ flexWrap: 'wrap' }}>
-              {studies.map((item) => {
+              {studies.map(item => {
+                {
+                  /* @ts-ignore */
+                }
                 return <StudyItem key={tag.id} study={item} />
               })}
             </Box>
@@ -308,7 +295,7 @@ const TagScreen = ({
         isOpen={!!titlePrompt}
         title={titlePrompt.name}
         onClosed={() => setTitlePrompt(false)}
-        onSave={(value) => {
+        onSave={(value: any) => {
           dispatch(updateTag(titlePrompt.id, value))
         }}
       />

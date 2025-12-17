@@ -17,13 +17,7 @@ import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import { useTabAnimations } from '../utils/useTabAnimations'
 import useTabConstants from '../utils/useTabConstants'
 
-const useTabPreview = ({
-  index,
-  tabAtom,
-}: {
-  index: number
-  tabAtom: PrimitiveAtom<TabItem>
-}) => {
+const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAtom<TabItem> }) => {
   const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
@@ -56,6 +50,7 @@ const useTabPreview = ({
         activeTabPreview.zIndex.value = 3
 
         const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
+        // @ts-ignore
         runOnUI(scrollTo)(scrollView.ref, 0, scrollToTop, false)
       })()
     }

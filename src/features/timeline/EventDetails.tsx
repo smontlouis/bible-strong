@@ -6,17 +6,11 @@ import Paragraph from '~common/ui/Paragraph'
 import waitForTimeline from '~common/waitForTimeline'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { calculateLabel } from './constants'
-import {
-  TimelineEventDetail,
-  TimelineEvent as TimelineEventProps,
-} from './types'
+import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
 import Media from './EventDetailsMedia'
 
-const Description = ({
-  description,
-  article,
-}: Partial<TimelineEventDetail>) => {
+const Description = ({ description, article }: Partial<TimelineEventDetail>) => {
   return (
     <Box px={20}>
       <Paragraph fontFamily="title" mb={10}>
@@ -40,16 +34,11 @@ const EventDetails = waitForTimeline(
     titleEn,
     start,
     end,
-  }: Pick<
-    TimelineEventProps,
-    'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
-  >) => {
+  }: Pick<TimelineEventProps, 'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'>) => {
     const isFR = useLanguage()
     const date = calculateLabel(start, end)
     const event = useMemo(() => {
-      return (bibleMemoize.timeline as TimelineEventDetail[]).find(
-        (e) => e.slug === slug
-      )
+      return (bibleMemoize.timeline as TimelineEventDetail[]).find(e => e.slug === slug)
     }, [slug])
 
     if (!event) {
@@ -72,12 +61,7 @@ const EventDetails = waitForTimeline(
           <Paragraph textAlign="center" fontFamily="title" scale={3} flex>
             {isFR ? title : titleEn}
           </Paragraph>
-          <Paragraph
-            color="grey"
-            scale={-2}
-            textAlign="center"
-            fontFamily="text"
-          >
+          <Paragraph color="grey" scale={-2} textAlign="center" fontFamily="text">
             {date}
           </Paragraph>
         </Box>

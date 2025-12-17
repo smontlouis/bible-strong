@@ -52,22 +52,14 @@ const StudiesDomWrapper = ({
   }
 
   useEffect(() => {
-    const updateListener =
-      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
-    const resetListener =
-      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
+    const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
+    const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
 
     const showKeyboard = () => setIsKeyboardOpened(true)
     const hideKeyboard = () => setIsKeyboardOpened(false)
 
-    const keyboardShowListener = Keyboard.addListener(
-      updateListener,
-      showKeyboard
-    )
-    const keyboardHideListener = Keyboard.addListener(
-      resetListener,
-      hideKeyboard
-    )
+    const keyboardShowListener = Keyboard.addListener(updateListener, showKeyboard)
+    const keyboardHideListener = Keyboard.addListener(resetListener, hideKeyboard)
 
     return () => {
       keyboardShowListener.remove()
@@ -87,22 +79,20 @@ const StudiesDomWrapper = ({
   }, [isCurrentTab])
 
   useEffect(() => {
+    // @ts-ignore
     if (!params?.type) return
 
+    // @ts-ignore
     if (params.type.includes('verse')) {
+      // @ts-ignore
       const isBlock = params.type.includes('block')
       dispatchToWebView('FOCUS_EDITOR')
-      dispatchToWebView(
-        isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES',
-        params
-      )
+      dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', params)
     } else {
+      // @ts-ignore
       const isBlock = params.type.includes('block')
       dispatchToWebView('FOCUS_EDITOR')
-      dispatchToWebView(
-        isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG',
-        params
-      )
+      dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', params)
     }
   }, [params])
 
@@ -125,8 +115,7 @@ const StudiesDomWrapper = ({
         case 'TEXT_CHANGED':
           if (onDeltaChangeCallback) {
             delete msgData.payload.type
-            const { delta, deltaChange, deltaOld, changeSource } =
-              msgData.payload
+            const { delta, deltaChange, deltaOld, changeSource } = msgData.payload
             onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
           }
           break
@@ -215,6 +204,7 @@ const StudiesDomWrapper = ({
         }}
       />
       {isKeyboardOpened && (
+        // @ts-ignore
         <StudyFooter
           navigateBibleView={navigateBibleView}
           dispatchToWebView={dispatchToWebView}

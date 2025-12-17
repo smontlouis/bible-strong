@@ -10,13 +10,9 @@ import {
 
 const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
-const useHTMLView = ({
-  onLinkClicked,
-}: {
-  onLinkClicked: (href: string) => void
-}) => {
+const useHTMLView = ({ onLinkClicked }: { onLinkClicked: (href: string) => void }) => {
   const theme: Theme = useTheme()
-  const ref = useRef()
+  const ref = useRef<any>()
 
   const onMessage = useCallback((event: any) => {
     const action = JSON.parse(event.nativeEvent.data)
@@ -92,17 +88,13 @@ const useHTMLView = ({
         originWhitelist: ['*'],
         source: { html: wrapHTML(html) },
         onMessage,
-        onContentProcessDidTerminate: (
-          syntheticEvent: WebViewTerminatedEvent
-        ) => {
+        onContentProcessDidTerminate: (syntheticEvent: WebViewTerminatedEvent) => {
           const { nativeEvent } = syntheticEvent
           console.warn('Content process terminated, reloading...')
           ref.current?.reload()
           Sentry.captureException(nativeEvent)
         },
-        onRenderProcessGone: (
-          syntheticEvent: WebViewRenderProcessGoneEvent
-        ) => {
+        onRenderProcessGone: (syntheticEvent: WebViewRenderProcessGoneEvent) => {
           const { nativeEvent } = syntheticEvent
           ref.current?.reload()
           Sentry.captureException(nativeEvent)

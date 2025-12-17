@@ -44,14 +44,7 @@ const VerseResultWidget = ({ searchValue }: Props) => {
         focusVerses: [verse],
       }}
     >
-      <Box
-        center
-        rounded
-        marginRight={10}
-        marginBottom={10}
-        height={height}
-        paddingHorizontal={20}
-      >
+      <Box center rounded marginRight={10} marginBottom={10} height={height} paddingHorizontal={20}>
         <Box
           style={{
             position: 'absolute',
@@ -62,11 +55,7 @@ const VerseResultWidget = ({ searchValue }: Props) => {
             borderRadius: 3,
           }}
         >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height }}
-            colors={[color1, color2]}
-          />
+          <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
         </Box>
         <Text title fontSize={14} style={{ color: 'white' }}>
           {title}

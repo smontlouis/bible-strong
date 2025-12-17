@@ -76,7 +76,7 @@ const verseToDictionnary = async (
     const regExp = new RegExp(regExpString, 'gmi')
     const splittedVerseText = verseText.split(regExp)
 
-    const formattedVerseText = splittedVerseText.map((item, i) => {
+    const formattedVerseText = splittedVerseText.map((item: any, i: any) => {
       if (dictionnaryWordsInVerse.includes(item.toLowerCase())) {
         return <DictionnaireVerseReference key={i} word={item} />
       }
@@ -84,7 +84,7 @@ const verseToDictionnary = async (
       const words = item.split(' ')
       return (
         <React.Fragment key={i}>
-          {words.map((w, j) => (
+          {words.map((w: any, j: any) => (
             <Paragraph key={j}>{w} </Paragraph>
           ))}
         </React.Fragment>
@@ -110,9 +110,7 @@ const useFormattedText = ({
 }) => {
   const [currentWord, setCurrentWord] = useState<string>()
   const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
-  const [formattedText, setFormattedText] = useState<
-    JSX.Element | JSX.Element[]
-  >()
+  const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
   const [boxHeight, setBoxHeight] = useState(0)
 
   const isFR = resourceLang === 'fr'
@@ -126,22 +124,19 @@ const useFormattedText = ({
       }
       setCurrentWord(wordsInVerse[0])
       const bible = await loadBible(isFR ? 'LSG' : 'KJV')
-      const verseToDictionnaryText = await verseToDictionnary(
-        verse,
-        wordsInVerse,
-        bible
-      )
+      const verseToDictionnaryText = await verseToDictionnary(verse, wordsInVerse, bible)
       setFormattedText(verseToDictionnaryText)
       setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
     })()
   }, [wordsInVerse, verse, isFR, Chapitre, Livre])
 
+  // @ts-ignore
   const { error: wordsError, data: words } = useQuery({
     enabled: Boolean(wordsInVerse),
     queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () =>
       Promise.all(
-        wordsInVerse!.map(async w => {
+        wordsInVerse!.map(async (w: any) => {
           const word = await loadDictionnaireItem(w)
           return word
         })
@@ -179,19 +174,18 @@ const DictionnaireVerseDetailScreen = ({
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
 
-  const { status, error: dictionaryWordsError, data: wordsInVerse } = useQuery({
+  // @ts-ignore
+  const {
+    status,
+    error: dictionaryWordsError,
+    data: wordsInVerse,
+  } = useQuery({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () => loadDictionnaireWords(`${Livre}-${Chapitre}-${Verset}`),
   })
 
-  const {
-    wordsError,
-    formattedText,
-    words,
-    currentWord,
-    setCurrentWord,
-    versesInCurrentChapter,
-  } = useFormattedText({ verse, wordsInVerse, status, resourceLang })
+  const { wordsError, formattedText, words, currentWord, setCurrentWord, versesInCurrentChapter } =
+    useFormattedText({ verse, wordsInVerse, status, resourceLang })
 
   if (dictionaryWordsError || wordsError) {
     return (
@@ -208,7 +202,7 @@ const DictionnaireVerseDetailScreen = ({
     return <Loading />
   }
 
-  const currentWordIndex = wordsInVerse.findIndex(w => w === currentWord)
+  const currentWordIndex = wordsInVerse.findIndex((w: any) => w === currentWord)
 
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
@@ -262,13 +256,9 @@ const DictionnaireVerseDetailScreen = ({
             defaultIndex={currentWordIndex === -1 ? 0 : currentWordIndex}
             data={words}
             renderItem={({ item, index }) => (
-              <DictionnaireCard
-                navigation={navigation}
-                dictionnaireRef={item}
-                index={index}
-              />
+              <DictionnaireCard navigation={navigation} dictionnaireRef={item} index={index} />
             )}
-            onSnapToItem={index => setCurrentWord(wordsInVerse[index])}
+            onSnapToItem={(index: any) => setCurrentWord(wordsInVerse[index])}
           />
         ) : (
           <Empty

@@ -13,7 +13,7 @@ import Header from '~common/Header'
 import SnackBar from '~common/SnackBar'
 import { useTranslation } from 'react-i18next'
 
-const LoginScreen = ({ theme }) => {
+const LoginScreen = ({ theme }: any) => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,6 +27,7 @@ const LoginScreen = ({ theme }) => {
     }
     setLoading(true)
     const isStillLoading = await FireAuth.register(username, email, password)
+    // @ts-ignore
     setLoading(isStillLoading)
   }
 
@@ -37,37 +38,19 @@ const LoginScreen = ({ theme }) => {
         <Box padding={20}>
           <TextInput
             placeholder={t('Nom')}
-            leftIcon={
-              <Icon.Feather
-                name="user"
-                size={20}
-                color={theme.colors.darkGrey}
-              />
-            }
+            leftIcon={<Icon.Feather name="user" size={20} color={theme.colors.darkGrey} />}
             onChangeText={setUsername}
           />
           <Spacer />
           <TextInput
             placeholder="Email"
-            leftIcon={
-              <Icon.Feather
-                name="mail"
-                size={20}
-                color={theme.colors.darkGrey}
-              />
-            }
+            leftIcon={<Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />}
             onChangeText={setEmail}
           />
           <Spacer />
           <TextInput
             placeholder={t('Mot de passe')}
-            leftIcon={
-              <Icon.Feather
-                name="lock"
-                size={20}
-                color={theme.colors.darkGrey}
-              />
-            }
+            leftIcon={<Icon.Feather name="lock" size={20} color={theme.colors.darkGrey} />}
             onChangeText={setPassword}
             secureTextEntry
           />

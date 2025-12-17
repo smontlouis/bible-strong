@@ -21,8 +21,7 @@ const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
   }, [setRepeatMode])
 
   const onToggle = async () => {
-    const newValue =
-      repeatMode === RepeatMode.Off ? RepeatMode.Track : RepeatMode.Off
+    const newValue = repeatMode === RepeatMode.Off ? RepeatMode.Track : RepeatMode.Off
 
     setRepeatMode(newValue)
     await TrackPlayer.setRepeatMode(newValue)
@@ -33,11 +32,7 @@ const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
   return (
     <TouchableBox onPress={onToggle}>
       <AudioChip {...props} isActive={isActive}>
-        <FeatherIcon
-          name="repeat"
-          size={14}
-          color={isActive ? 'primary' : 'grey'}
-        />
+        <FeatherIcon name="repeat" size={14} color={isActive ? 'primary' : 'grey'} />
         <Text ml={5} bold fontSize={10} color={isActive ? 'primary' : 'grey'}>
           {t('audio.repeat')}
         </Text>

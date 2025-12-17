@@ -51,13 +51,7 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
             />
           )}
           <Box center>
-            <Box
-              center
-              width={80}
-              height={80}
-              borderRadius={40}
-              backgroundColor="lightGrey"
-            >
+            <Box center width={80} height={80} borderRadius={40} backgroundColor="lightGrey">
               <Box opacity={0.6}>{getIconByTabType(type, 30)}</Box>
             </Box>
             <Spacer />

@@ -1,9 +1,5 @@
 import React from 'react'
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-} from 'react-native-reanimated'
+import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 import { wp, wpUI } from '~helpers/utils'
 import SectionImage from './SectionImage'

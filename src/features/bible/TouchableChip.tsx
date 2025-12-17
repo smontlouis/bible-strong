@@ -17,11 +17,10 @@ const Touchable = styled.TouchableOpacity(({ disabled, theme }) => ({
 }))
 
 const StyledIcon = styled(Icon.Feather)<{ isSelected?: boolean }>(
-  ({ color, isSelected, theme, disabled }) => ({
+  // @ts-ignore
+  ({ color, isSelected, theme, disabled }: any) => ({
     marginRight: 8,
-    color: disabled
-      ? theme.colors.grey
-      : theme.colors[color] || theme.colors.primary,
+    color: disabled ? theme.colors.grey : theme.colors[color] || theme.colors.primary,
     ...(isSelected && {
       color: theme.colors.primary,
     }),
@@ -38,15 +37,7 @@ type Props = {
   name?: any
 }
 
-export default ({
-  onPress,
-  color,
-  isSelected,
-  size = 17,
-  label,
-  disabled,
-  name,
-}: Props) => {
+export default ({ onPress, color, isSelected, size = 17, label, disabled, name }: Props) => {
   return (
     <Touchable onPress={onPress} disabled={disabled}>
       {name && (

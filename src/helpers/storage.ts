@@ -13,19 +13,13 @@ const deepmerge = require('@fastify/deepmerge')()
 export const storage = new MMKV()
 
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
-export const hasMigratedFromAsyncStorage = storage.getBoolean(
-  'hasMigratedFromAsyncStorage'
-)
+export const hasMigratedFromAsyncStorage = storage.getBoolean('hasMigratedFromAsyncStorage')
 
 // Flag to track if data has been migrated from FileSystem
-export const hasMigratedFromFileSystem = storage.getBoolean(
-  'hasMigratedFromFileSystem'
-)
+export const hasMigratedFromFileSystem = storage.getBoolean('hasMigratedFromFileSystem')
 
 // Flag to track if databases have been migrated to language folders
-export const hasMigratedToLanguageFolders = storage.getBoolean(
-  'hasMigratedToLanguageFolders'
-)
+export const hasMigratedToLanguageFolders = storage.getBoolean('hasMigratedToLanguageFolders')
 
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export async function migrateFromAsyncStorage(): Promise<void> {
@@ -48,10 +42,7 @@ export async function migrateFromAsyncStorage(): Promise<void> {
         AsyncStorage.removeItem(key)
       }
     } catch (error) {
-      console.error(
-        `Failed to migrate key "${key}" from AsyncStorage to MMKV!`,
-        error
-      )
+      console.error(`Failed to migrate key "${key}" from AsyncStorage to MMKV!`, error)
       throw error
     }
   }
@@ -100,10 +91,7 @@ export async function migrateFromFileSystemStorage(): Promise<void> {
         const fileStorageContent = JSON.parse(content)
         const mmkvStorageContent = JSON.parse(storage.getString('root') || '{}')
 
-        const mergedStorageContent = deepmerge(
-          mmkvStorageContent,
-          fileStorageContent
-        )
+        const mergedStorageContent = deepmerge(mmkvStorageContent, fileStorageContent)
         storage.set('root', JSON.stringify(mergedStorageContent))
 
         console.log(`Migrated root key from FileSystem to MMKV`)
@@ -156,11 +144,11 @@ export const mmkvStorage: Storage = {
     storage.set(key, value)
     return Promise.resolve(true)
   },
-  getItem: (key) => {
+  getItem: key => {
     const value = storage.getString(key)
     return Promise.resolve(value)
   },
-  removeItem: (key) => {
+  removeItem: key => {
     storage.delete(key)
     return Promise.resolve()
   },
@@ -179,9 +167,7 @@ export const useMigrateToLanguageFolders = () => {
       InteractionManager.runAfterInteractions(async () => {
         try {
           // Import dynamically to avoid circular dependencies
-          const { migrateToLanguageFolders } = await import(
-            '~helpers/databaseMigration'
-          )
+          const { migrateToLanguageFolders } = await import('~helpers/databaseMigration')
           const { getLangIsFr } = await import('~i18n')
 
           // Use current UI language as the target for migration

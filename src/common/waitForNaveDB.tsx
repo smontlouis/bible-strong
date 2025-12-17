@@ -75,8 +75,7 @@ export const useWaitForDatabase = () => {
                 dbPath,
                 undefined,
                 ({ totalBytesWritten }) => {
-                  const idxProgress =
-                    Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
+                  const idxProgress = Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
                   setProgress(idxProgress)
                 }
               ).downloadAsync()
@@ -131,14 +130,8 @@ const waitForDatabase =
   <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
   (props: any) => {
     const { t } = useTranslation()
-    const {
-      isLoading,
-      progress,
-      proposeDownload,
-      startDownload,
-      setStartDownload,
-      resourceLang,
-    } = useWaitForDatabase()
+    const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
+      useWaitForDatabase()
 
     if (isLoading && startDownload) {
       return (

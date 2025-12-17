@@ -51,7 +51,6 @@ export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
 export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
 export const RESET_COMPARE_VERSION = 'user/RESET_COMPARE_VERSION'
 
-
 export const GET_CHANGELOG = 'user/GET_CHANGELOG'
 export const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
 export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
@@ -282,15 +281,8 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
 
     case RECEIVE_LIVE_UPDATES: {
-      const {
-        id,
-        email,
-        displayName,
-        photoURL,
-        provider,
-        bible,
-        subscription,
-      } = action.payload.remoteUserData as FireStoreUserData
+      const { id, email, displayName, photoURL, provider, bible, subscription } = action.payload
+        .remoteUserData as FireStoreUserData
 
       draft.id = id
       draft.email = email
@@ -327,7 +319,14 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
     case RECEIVE_SUBCOLLECTION_UPDATES: {
       const { collection, data } = action.payload as {
-        collection: 'highlights' | 'notes' | 'tags' | 'strongsHebreu' | 'strongsGrec' | 'words' | 'naves'
+        collection:
+          | 'highlights'
+          | 'notes'
+          | 'tags'
+          | 'strongsHebreu'
+          | 'strongsGrec'
+          | 'words'
+          | 'naves'
         data: Record<string, unknown>
         isInitialLoad: boolean
       }
@@ -376,14 +375,8 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
      */
     case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
-      const {
-        id,
-        email,
-        displayName,
-        photoURL,
-        provider,
-        emailVerified,
-      } = action.profile as FireAuthProfile
+      const { id, email, displayName, photoURL, provider, emailVerified } =
+        action.profile as FireAuthProfile
 
       draft.id = id
       draft.email = email
@@ -406,7 +399,8 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       }
     }
     case SAVE_ALL_LOGS_AS_SEEN: {
-      action.payload.forEach(log => {
+      action.payload.forEach((log: any) => {
+        // @ts-ignore
         draft.bible.changelog[log.date] = true
       })
       break
@@ -431,6 +425,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
     case GET_CHANGELOG_SUCCESS: {
       draft.changelog.isLoading = false
+      // @ts-ignore
       draft.changelog.lastSeen = Date.now().toString()
       draft.changelog.data = [...draft.changelog.data, ...action.payload]
       break
@@ -472,7 +467,7 @@ export function verifyEmail() {
 }
 
 // FONT-FAMILY
-export function setFontFamily(payload) {
+export function setFontFamily(payload: any) {
   return {
     type: SET_FONT_FAMILY,
     payload,
@@ -480,7 +475,7 @@ export function setFontFamily(payload) {
 }
 
 // CHANGELOG
-export function saveAllLogsAsSeen(payload) {
+export function saveAllLogsAsSeen(payload: any) {
   return {
     type: SAVE_ALL_LOGS_AS_SEEN,
     payload,
@@ -504,18 +499,14 @@ export function onUserLogout() {
   }
 }
 
-export function onUserUpdateProfile(profile) {
+export function onUserUpdateProfile(profile: any) {
   return {
     type: USER_UPDATE_PROFILE,
     payload: profile,
   }
 }
 
-export function receiveLiveUpdates({
-  remoteUserData,
-}: {
-  remoteUserData: FireStoreUserData
-}) {
+export function receiveLiveUpdates({ remoteUserData }: { remoteUserData: FireStoreUserData }) {
   return {
     type: RECEIVE_LIVE_UPDATES,
     payload: { remoteUserData },
@@ -545,7 +536,7 @@ export function setNotificationVOD(payload: string) {
   }
 }
 
-export function setNotificationId(payload) {
+export function setNotificationId(payload: any) {
   return {
     type: SET_NOTIFICATION_ID,
     payload,
@@ -569,7 +560,7 @@ export function resetCompareVersion(payload: 'LSG' | 'KJV') {
 
 // Changelog
 export function getChangelog() {
-  return async (dispatch, getState) => {
+  return async (dispatch: any, getState: any) => {
     dispatch({
       type: GET_CHANGELOG,
     })
@@ -583,8 +574,8 @@ export function getChangelog() {
     try {
       const querySnapshot = await changelogDoc.get({ source: 'server' })
 
-      const changelog = []
-      querySnapshot.forEach(doc => {
+      const changelog: any = []
+      querySnapshot.forEach((doc: any) => {
         changelog.push(doc.data())
       })
 
@@ -598,7 +589,7 @@ export function getChangelog() {
   }
 }
 
-export function addChangelog(payload) {
+export function addChangelog(payload: any) {
   return {
     type: GET_CHANGELOG_SUCCESS,
     payload,

@@ -19,13 +19,7 @@ const AudioButton = ({
   type = 'url',
 }: AudioButtonProps) => {
   if (error) {
-    return (
-      <FeatherIcon
-        name="x"
-        size={20}
-        color={isPlaying || isBuffering ? 'reverse' : ''}
-      />
-    )
+    return <FeatherIcon name="x" size={20} color={isPlaying || isBuffering ? 'reverse' : ''} />
   }
 
   if (isPlaying && (isLoading || isBuffering)) {
@@ -34,11 +28,7 @@ const AudioButton = ({
 
   if (type === 'tts') {
     return (
-      <Text
-        fontSize={12}
-        bold
-        color={isPlaying || isBuffering ? 'reverse' : ''}
-      >
+      <Text fontSize={12} bold color={isPlaying || isBuffering ? 'reverse' : ''}>
         TTS
       </Text>
     )

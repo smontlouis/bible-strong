@@ -7,10 +7,7 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Theme } from '~themes'
-import {
-  ResourcesLanguageState,
-  useResourceLanguage,
-} from 'src/state/resourcesLanguage'
+import { ResourcesLanguageState, useResourceLanguage } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 interface Props {
@@ -45,23 +42,13 @@ const LanguagePopOver = ({ resourceId }: Props) => {
     >
       <Box paddingVertical={5}>
         <TouchableOpacity onPress={() => handleSelect('fr')}>
-          <HStack
-            alignItems="center"
-            paddingVertical={10}
-            paddingHorizontal={15}
-            gap={10}
-          >
+          <HStack alignItems="center" paddingVertical={10} paddingHorizontal={15} gap={10}>
             <Text flex>Français</Text>
             {currentLang === 'fr' && <FeatherIcon name="check" size={16} />}
           </HStack>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleSelect('en')}>
-          <HStack
-            alignItems="center"
-            paddingVertical={10}
-            paddingHorizontal={15}
-            gap={10}
-          >
+          <HStack alignItems="center" paddingVertical={10} paddingHorizontal={15} gap={10}>
             <Text flex>English</Text>
             {currentLang === 'en' && <FeatherIcon name="check" size={16} />}
           </HStack>

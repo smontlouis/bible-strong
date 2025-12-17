@@ -35,10 +35,7 @@ function AccordionItem({
   }))
 
   return (
-    <Animated.View
-      key={`accordionItem_${viewKey}`}
-      style={[styles.animatedView, bodyStyle, style]}
-    >
+    <Animated.View key={`accordionItem_${viewKey}`} style={[styles.animatedView, bodyStyle, style]}>
       <View
         onLayout={e => {
           height.value = e.nativeEvent.layout.height

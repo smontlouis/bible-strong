@@ -98,54 +98,52 @@ export type TabScreenProps = {
   route: RouteProp<MainStackProps>
 }
 
-const TabScreen = forwardRef<View, TabScreenProps>(
-  ({ tabAtom, navigation, route }, ref) => {
-    const tab = useAtomValue(tabAtom)
-    const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
-    const { activeTabScreen } = useAppSwitcherContext()
-    const tabAtomId = tabAtom.toString()
+const TabScreen = forwardRef<View, TabScreenProps>(({ tabAtom, navigation, route }, ref) => {
+  const tab = useAtomValue(tabAtom)
+  const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
+  const { activeTabScreen } = useAppSwitcherContext()
+  const tabAtomId = tabAtom.toString()
 
-    const imageStyles = useAnimatedStyle(() => {
-      return {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: WIDTH,
-        bottom: 0,
-        opacity: activeTabScreen.opacity.value,
-        transform: [
-          {
-            translateY: activeTabScreen.atomId.value === tabAtomId ? 0 : HEIGHT,
-          },
-        ],
-      }
-    })
-
-    const { component: Component, atomName } = getComponentTab(tab) || {}
-
-    if (Component && atomName) {
-      return (
-        <TabScreenWrapper style={imageStyles} ref={ref}>
-          {/* @ts-ignore */}
-          <Component
-            {...{
-              [atomName]: tabAtom,
-              navigation,
-              route,
-            }}
-          />
-        </TabScreenWrapper>
-      )
+  const imageStyles = useAnimatedStyle(() => {
+    return {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: WIDTH,
+      bottom: 0,
+      opacity: activeTabScreen.opacity.value,
+      transform: [
+        {
+          translateY: activeTabScreen.atomId.value === tabAtomId ? 0 : HEIGHT,
+        },
+      ],
     }
+  })
 
+  const { component: Component, atomName } = getComponentTab(tab) || {}
+
+  if (Component && atomName) {
     return (
       <TabScreenWrapper style={imageStyles} ref={ref}>
-        <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
-          <Text>{tab.title} - need component</Text>
-        </Box>
+        {/* @ts-ignore */}
+        <Component
+          {...{
+            [atomName]: tabAtom,
+            navigation,
+            route,
+          }}
+        />
       </TabScreenWrapper>
     )
   }
-)
+
+  return (
+    <TabScreenWrapper style={imageStyles} ref={ref}>
+      <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
+        <Text>{tab.title} - need component</Text>
+      </Box>
+    </TabScreenWrapper>
+  )
+})
 
 export default memo(TabScreen)

@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box from '~common/ui/Box'
 import TextInput from '~common/ui/TextInput'
 
+// @ts-ignore
 const StylizedModal = styled(Modal)({
   justifyContent: 'flex-end',
   margin: 0,
@@ -27,12 +28,13 @@ const Container = styled.View(({ theme }) => ({
   paddingBottom: useSafeAreaInsets().bottom || 10,
 }))
 
-const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
+const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }: any) => ({
   marginLeft: 10,
+  // @ts-ignore
   color: isDisabled ? theme.colors.border : theme.colors.primary,
 }))
 
-const TitlePrompt = ({ isOpen, title, onClosed, onSave, placeholder }) => {
+const TitlePrompt = ({ isOpen, title, onClosed, onSave, placeholder }: any) => {
   const [value, setValue] = useState(title)
 
   const onSaveTitle = () => {
@@ -50,6 +52,7 @@ const TitlePrompt = ({ isOpen, title, onClosed, onSave, placeholder }) => {
   }, [title])
 
   return (
+    // @ts-ignore
     <StylizedModal
       backdropOpacity={0.3}
       isVisible={isOpen}
@@ -71,11 +74,8 @@ const TitlePrompt = ({ isOpen, title, onClosed, onSave, placeholder }) => {
             />
           </Box>
           <TouchableOpacity onPress={onSaveTitle}>
-            <StyledIcon
-              isDisabled={!value || !value.trim()}
-              name="check"
-              size={30}
-            />
+            {/* @ts-ignore */}
+            <StyledIcon isDisabled={!value || !value.trim()} name="check" size={30} />
           </TouchableOpacity>
         </Box>
       </Container>

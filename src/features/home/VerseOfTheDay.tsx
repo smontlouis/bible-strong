@@ -16,10 +16,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { removeBreakLines } from '~helpers/utils'
 import { zeroFill } from '~helpers/zeroFill'
 import { RootState } from '~redux/modules/reducer'
@@ -55,13 +52,7 @@ const dayToAgo = (day: number, t: TFunction<'translation'>) => {
   }
 }
 
-const VerseOfTheDay = ({
-  addDay,
-  isFirst,
-  isLast,
-  currentVOD,
-  setCurrentVOD,
-}: Props) => {
+const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: Props) => {
   const { t } = useTranslation()
   const [timerPickerOpen, setTimePicker] = useState(false)
   const verseOfTheDay = useVerseOfTheDay(addDay)
@@ -76,9 +67,7 @@ const VerseOfTheDay = ({
   const { current: ago } = useRef(dayToAgo(addDay, t))
   const notificationModalRef = React.useRef<BottomSheet>(null)
 
-  const [initialHour, initialMinutes] = verseOfTheDayTime
-    .split(':')
-    .map(n => Number(n))
+  const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map((n: any) => Number(n))
 
   const initialDate = new Date()
   initialDate.setHours(initialHour || 0, initialMinutes || 0, 0, 0)
@@ -90,9 +79,7 @@ const VerseOfTheDay = ({
     const minutes = zeroFill(dateObject.getMinutes())
 
     dispatch(setNotificationVOD(`${hours}:${minutes}`))
-    SnackBar.show(
-      `Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`
-    )
+    SnackBar.show(`Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`)
   }
 
   const openTimePicker = () => {
@@ -119,6 +106,7 @@ const VerseOfTheDay = ({
     )
   }
 
+  // @ts-ignore
   if (verseOfTheDay.error) {
     return (
       <Empty
@@ -160,10 +148,7 @@ const VerseOfTheDay = ({
         <Box row alignItems="center">
           <Box row center mt={5} opacity={0.5}>
             {!addDay && (
-              <Link
-                onPress={() => notificationModalRef.current?.expand()}
-                size={30}
-              >
+              <Link onPress={() => notificationModalRef.current?.expand()} size={30}>
                 <FeatherIcon size={16} name="bell" />
               </Link>
             )}
@@ -228,12 +213,7 @@ const VerseOfTheDay = ({
                 />
               </Box>
               {!!verseOfTheDayTime && (
-                <LinkBox
-                  row
-                  alignItems="center"
-                  mt={10}
-                  onPress={openTimePicker}
-                >
+                <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
                   <Text>{t("Choisir l'heure")}:</Text>
                   <Text bold> {verseOfTheDayTime}</Text>
                   <Box ml={5}>

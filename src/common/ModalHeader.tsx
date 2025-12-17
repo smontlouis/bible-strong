@@ -13,13 +13,7 @@ interface Props {
   rightComponent?: JSX.Element
 }
 
-const ModalHeader = ({
-  title,
-  subTitle,
-  onClose,
-  children,
-  rightComponent,
-}: Props) => {
+const ModalHeader = ({ title, subTitle, onClose, children, rightComponent }: Props) => {
   return (
     <BottomSheetView>
       <Box bg="reverse" borderColor="border" borderBottomWidth={1}>

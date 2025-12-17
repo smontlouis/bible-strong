@@ -40,11 +40,7 @@ interface BibleNoteModalProps {
   onClosed: () => void
 }
 
-const useCurrentNote = ({
-  noteVerses,
-}: {
-  noteVerses: VerseIds | undefined
-}) => {
+const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) => {
   const note = useSelector((state: RootState) => {
     const notes = state.user.bible.notes
     const orderedVerses = orderVerses(noteVerses || {})
@@ -99,30 +95,24 @@ const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
 
   const onSaveNoteFunc = () => {
     dispatch(
-      addNote(
-        { ...currentNote, title, description, date: Date.now() },
-        noteVerses!
-      )
+      // @ts-ignore
+      addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses!)
     )
     setIsEditing(false)
   }
 
   const deleteNoteFunc = (noteId: string) => {
-    Alert.alert(
-      t('Attention'),
-      t('Voulez-vous vraiment supprimer cette note?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => {
-            dispatch(deleteNote(noteId))
-            close()
-          },
-          style: 'destructive',
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          dispatch(deleteNote(noteId))
+          close()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   const cancelEditing = () => {
@@ -199,9 +189,7 @@ ${currentNote?.description}
                         <Text marginLeft={10}>{t('Éditer les tags')}</Text>
                       </Box>
                     </MenuOption>
-                    <MenuOption
-                      onSelect={() => deleteNoteFunc(currentNote?.id!)}
-                    >
+                    <MenuOption onSelect={() => deleteNoteFunc(currentNote?.id!)}>
                       <Box row alignItems="center">
                         <FeatherIcon name="trash-2" size={15} />
                         <Text marginLeft={10}>{t('Supprimer')}</Text>
@@ -214,7 +202,7 @@ ${currentNote?.description}
           }
         />
       }
-      footerComponent={(props) =>
+      footerComponent={props =>
         isEditing ? (
           <BottomSheetFooter {...props}>
             <HStack
@@ -278,6 +266,7 @@ ${currentNote?.description}
               </Text>
               <ScrollView style={{ flex: 1 }}>
                 <Paragraph small>{currentNote?.description}</Paragraph>
+                {/* @ts-ignore */}
                 <TagList tags={currentNote?.tags} />
               </ScrollView>
             </Box>

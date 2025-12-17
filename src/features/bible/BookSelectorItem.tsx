@@ -14,11 +14,7 @@ interface BookSelectorItemProps {
 
 const itemHeight = 46
 
-const BookSelectorItem = ({
-  book,
-  isSelected,
-  onBookSelect,
-}: BookSelectorItemProps) => {
+const BookSelectorItem = ({ book, isSelected, onBookSelect }: BookSelectorItemProps) => {
   const { t } = useTranslation()
 
   return (
@@ -30,12 +26,7 @@ const BookSelectorItem = ({
           height={itemHeight}
           alignItems="center"
         >
-          <Text
-            fontSize={16}
-            color={isSelected ? 'primary' : 'default'}
-            bold={isSelected}
-            flex
-          >
+          <Text fontSize={16} color={isSelected ? 'primary' : 'default'} bold={isSelected} flex>
             {t(book.Nom)}
           </Text>
         </HStack>

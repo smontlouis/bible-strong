@@ -8,9 +8,7 @@ const styledProps = (map, fallback) => props => {
   const keysFromProps = Object.keys(map).filter(key => !!props[key])
   if (keysFromProps.length > 1) {
     if (process.env.NODE_ENV !== 'production') {
-      console.error(
-        `[styledProps] Multiple props provided: ${keysFromProps.join(', ')}.`
-      )
+      console.error(`[styledProps] Multiple props provided: ${keysFromProps.join(', ')}.`)
     }
   }
   const keyFromProps = keysFromProps[0]
@@ -20,11 +18,6 @@ const styledProps = (map, fallback) => props => {
   if (fallback) {
     if (props[fallback] && map[props[fallback]] !== undefined) {
       return map[props[fallback]]
-    }
-    if (process.env.NODE_ENV !== 'production') {
-      console.error(
-        `[styledProps] Unknown fallback prop provided: ${fallback}.`
-      )
     }
   }
   return undefined

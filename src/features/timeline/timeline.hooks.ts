@@ -2,11 +2,7 @@ import React, { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { viewportWidth, wp, wpUI } from '~helpers/utils'
 import { mapRange, scrollViewHeight } from './constants'
-import {
-  interpolate,
-  useDerivedValue,
-  useSharedValue,
-} from 'react-native-reanimated'
+import { interpolate, useDerivedValue, useSharedValue } from 'react-native-reanimated'
 
 export const useTimeline = ({
   startYear,
@@ -21,9 +17,7 @@ export const useTimeline = ({
   const x = useSharedValue(viewportWidth)
   const y = useSharedValue(0)
   const { current: ratio } = React.useRef(100 / interval) // 1 year = 1px with ratio = 1
-  const { current: scrollViewWidth } = React.useRef(
-    Math.abs(startYear - endYear) * ratio
-  )
+  const { current: scrollViewWidth } = React.useRef(Math.abs(startYear - endYear) * ratio)
 
   const width = scrollViewWidth + wp(100)
   const height = scrollViewHeight + 200
@@ -34,12 +28,7 @@ export const useTimeline = ({
 
   const year = useDerivedValue(() => {
     const currentYearNb = Math.round(
-      interpolate(
-        x.value * -1,
-        [0, scrollViewWidth],
-        [startYear, endYear],
-        'extend'
-      )
+      interpolate(x.value * -1, [0, scrollViewWidth], [startYear, endYear], 'extend')
     )
     if (currentYearNb >= yearNow) {
       return futurString
@@ -57,13 +46,15 @@ export const useTimeline = ({
     )
   })
 
-  const {
-    current: yearRange,
-  }: MutableRefObject<[number, number]> = React.useRef([startYear, endYear])
+  const { current: yearRange }: MutableRefObject<[number, number]> = React.useRef([
+    startYear,
+    endYear,
+  ])
 
-  const {
-    current: timelineWidth,
-  }: MutableRefObject<[number, number]> = React.useRef([0, scrollViewWidth])
+  const { current: timelineWidth }: MutableRefObject<[number, number]> = React.useRef([
+    0,
+    scrollViewWidth,
+  ])
 
   const yearsToPx = React.useCallback(
     (years: number) => Math.round(mapRange(years, yearRange, timelineWidth)),
@@ -78,9 +69,7 @@ export const useTimeline = ({
   const calculateEventWidth = React.useCallback(
     (yearStart: number, yearEnd: number, isFixed?: boolean) => {
       const year = Math.abs(yearStart - yearEnd)
-      return isFixed || yearsToPx(yearRange[0] + year) < 200
-        ? 200
-        : yearsToPx(yearRange[0] + year)
+      return isFixed || yearsToPx(yearRange[0] + year) < 200 ? 200 : yearsToPx(yearRange[0] + year)
     },
     [yearRange, yearsToPx]
   )

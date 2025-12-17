@@ -46,14 +46,13 @@ const ExploreScreen = () => {
   const status = useSelector((state: RootState) => state.plan.onlineStatus)
   const plans = useSelector((state: RootState) => {
     const onlinePlans = [...state.plan.onlinePlans]
-    onlinePlans.sort((a, b) =>
-      a.featured === b.featured ? 0 : a.featured ? -1 : 1
-    )
+    onlinePlans.sort((a, b) => (a.featured === b.featured ? 0 : a.featured ? -1 : 1))
 
     return onlinePlans
   }, shallowEqual)
 
   React.useEffect(() => {
+    // @ts-ignore
     dispatch(fetchPlans())
   }, [dispatch])
 
@@ -63,6 +62,7 @@ const ExploreScreen = () => {
         refreshControl={
           <RefreshControl
             refreshing={false}
+            // @ts-ignore
             onRefresh={() => dispatch(fetchPlans())}
           />
         }
@@ -80,6 +80,7 @@ const ExploreScreen = () => {
       refreshControl={
         <RefreshControl
           refreshing={status === 'Pending'}
+          // @ts-ignore
           onRefresh={() => dispatch(fetchPlans())}
         />
       }
@@ -101,8 +102,8 @@ const ExploreScreen = () => {
         </LangButton>
       </Box>
       {plans
-        .filter(p => p.lang === lang)
-        .map(plan => (
+        .filter((p: any) => p.lang === lang)
+        .map((plan: any) => (
           <ExplorePlanItem key={plan.id} {...plan} />
         ))}
     </ScrollView>

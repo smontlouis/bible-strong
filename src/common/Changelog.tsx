@@ -19,6 +19,7 @@ import styled from '@emotion/native'
 import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
 
+// @ts-ignore
 const StylizedModal = styled(Modal)(({ theme }) => ({
   height: 400,
   width: '80%',
@@ -83,13 +84,8 @@ const Changelog = () => {
     (state: RootState) => Object.keys(state.user.bible.changelog),
     shallowEqual
   )
-  const changelog = useSelector(
-    (state: RootState) => state.user.changelog.data,
-    shallowEqual
-  )
-  const changelogIsLoading = useSelector(
-    (state: RootState) => state.user.changelog.isLoading
-  )
+  const changelog = useSelector((state: RootState) => state.user.changelog.data, shallowEqual)
+  const changelogIsLoading = useSelector((state: RootState) => state.user.changelog.isLoading)
 
   const getAttribute = (log: ChangelogItem, attr: keyof ChangelogItem) => {
     if (isFR) {
@@ -103,6 +99,7 @@ const Changelog = () => {
     const newLogs = findNewLogs(seenLogs, changelog)
 
     return (
+      // @ts-ignore
       <StylizedModal
         isOpen
         onClosed={() => {}}
@@ -123,13 +120,9 @@ const Changelog = () => {
             <Border marginTop={15} />
             <Box marginTop={10}>
               {newLogs.map(log => {
-                const formattedDate = distanceInWords(
-                  Number(log.date),
-                  Date.now(),
-                  {
-                    locale: isFR ? fr : enGB,
-                  }
-                )
+                const formattedDate = distanceInWords(Number(log.date), Date.now(), {
+                  locale: isFR ? fr : enGB,
+                })
                 return (
                   <Box key={log.date} marginTop={10} marginBottom={10}>
                     <Box row alignItems="flex-start">
@@ -145,9 +138,7 @@ const Changelog = () => {
                     <Text fontSize={10} color="grey">
                       {t('Il y a {{formattedDate}}', { formattedDate })}
                     </Text>
-                    <Text marginTop={10}>
-                      {getAttribute(log, 'description')}
-                    </Text>
+                    <Text marginTop={10}>{getAttribute(log, 'description')}</Text>
                   </Box>
                 )
               })}

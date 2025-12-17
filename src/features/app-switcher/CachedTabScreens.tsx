@@ -26,8 +26,8 @@ const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
   return (
     <>
       {tabsAtoms
-        .filter((tabAtom) => cachedTabIds.includes(tabAtom.toString()))
-        .map((tabAtom) => (
+        .filter(tabAtom => cachedTabIds.includes(tabAtom.toString()))
+        .map(tabAtom => (
           <TabScreenRefMemoize
             key={tabAtom.toString()}
             tabAtom={tabAtom}

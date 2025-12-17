@@ -2,7 +2,7 @@ import * as React from 'react'
 import { withTheme } from '@emotion/react'
 import Svg, { Path } from 'react-native-svg'
 
-function SvgComponent({ color, theme, ...props }) {
+function SvgComponent({ color, theme, ...props }: { color: any; theme: any; [key: string]: any }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 24 24" {...props}>
       <Path

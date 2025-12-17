@@ -1,14 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite'
 import { dbManager } from '~helpers/sqlite'
-import {
-  DatabaseId,
-  ResourceLanguage,
-  isSharedDB,
-} from '~helpers/databaseTypes'
-import {
-  getResourceLanguage,
-  type ResourcesLanguageState,
-} from 'src/state/resourcesLanguage'
+import { DatabaseId, ResourceLanguage, isSharedDB } from '~helpers/databaseTypes'
+import { getResourceLanguage, type ResourcesLanguageState } from 'src/state/resourcesLanguage'
 
 // Legacy transaction wrapper - kept for potential custom use cases
 const getSQLTransaction =
@@ -64,10 +57,7 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
       const allRows = await db.get()?.getAllAsync(sqlReq, args)
       return (allRows || []) as T[]
     } catch (error) {
-      console.log(
-        `[SQLTransaction] Error executing sql on ${dbId} (${lang}):`,
-        error
-      )
+      console.log(`[SQLTransaction] Error executing sql on ${dbId} (${lang}):`, error)
       throw error
     }
   }
@@ -87,10 +77,7 @@ const getSQLTransactionForLang = (dbId: DatabaseId, lang: ResourceLanguage) => {
       const allRows = await db.get()?.getAllAsync(sqlReq, args)
       return (allRows || []) as T[]
     } catch (error) {
-      console.log(
-        `[SQLTransaction] Error executing sql on ${dbId} (${lang}):`,
-        error
-      )
+      console.log(`[SQLTransaction] Error executing sql on ${dbId} (${lang}):`, error)
       throw error
     }
   }
@@ -99,13 +86,11 @@ const getSQLTransactionForLang = (dbId: DatabaseId, lang: ResourceLanguage) => {
 // Language-aware transaction exports
 // These automatically use the correct language based on Redux state
 export const SQLStrongTransaction = getLanguageAwareSQLTransaction('STRONG')
-export const SQLDictionnaireTransaction =
-  getLanguageAwareSQLTransaction('DICTIONNAIRE')
+export const SQLDictionnaireTransaction = getLanguageAwareSQLTransaction('DICTIONNAIRE')
 export const SQLNaveTransaction = getLanguageAwareSQLTransaction('NAVE')
 export const SQLTresorTransaction = getLanguageAwareSQLTransaction('TRESOR')
 export const SQLMHYTransaction = getLanguageAwareSQLTransaction('MHY')
-export const SQLInterlineaireTransaction =
-  getLanguageAwareSQLTransaction('INTERLINEAIRE')
+export const SQLInterlineaireTransaction = getLanguageAwareSQLTransaction('INTERLINEAIRE')
 
 // Aliases for explicit naming (same as above)
 export const SQLStrongTransactionLang = SQLStrongTransaction
@@ -116,8 +101,4 @@ export const SQLMHYTransactionLang = SQLMHYTransaction
 export const SQLInterlineaireTransactionLang = SQLInterlineaireTransaction
 
 // Export factory functions for custom usage
-export {
-  getSQLTransaction,
-  getLanguageAwareSQLTransaction,
-  getSQLTransactionForLang,
-}
+export { getSQLTransaction, getLanguageAwareSQLTransaction, getSQLTransactionForLang }

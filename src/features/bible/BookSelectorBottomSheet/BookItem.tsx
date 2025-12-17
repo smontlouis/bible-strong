@@ -26,10 +26,7 @@ const BookItem = memo(
     const { width: windowWidth } = useWindowDimensions()
     const isExpanded = useDerivedValue(() => expandedBook.value === book.Numero)
 
-    const chapters = useMemo(
-      () => Array.from({ length: book.Chapitres }, (_, i) => i + 1),
-      [book]
-    )
+    const chapters = useMemo(() => Array.from({ length: book.Chapitres }, (_, i) => i + 1), [book])
 
     const ITEM_WIDTH = 60
     const ITEM_GAP = 10
@@ -38,8 +35,7 @@ const BookItem = memo(
 
     const availableWidth = MAX_WIDTH - PADDING * 2
     const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
-    const totalItemsWidth =
-      itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
+    const totalItemsWidth = itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
     const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
     const handleChapterSelect = (chapter: number) => {
@@ -60,22 +56,14 @@ const BookItem = memo(
 
     return (
       <Box>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => onBookSelect(book)}
-        >
+        <TouchableOpacity activeOpacity={0.8} onPress={() => onBookSelect(book)}>
           <HStack
             px={20}
             backgroundColor={isSelected ? 'lightGrey' : 'transparent'}
             height={itemHeight}
             alignItems="center"
           >
-            <Text
-              fontSize={16}
-              color={isSelected ? 'primary' : 'default'}
-              bold={isSelected}
-              flex
-            >
+            <Text fontSize={16} color={isSelected ? 'primary' : 'default'} bold={isSelected} flex>
               {t(book.Nom)}
             </Text>
             <MotiView
@@ -88,12 +76,7 @@ const BookItem = memo(
                 transform: [{ rotate: isExpanded.value ? '180deg' : '0deg' }],
               }))}
             >
-              <FeatherIcon
-                color="grey"
-                name="chevron-down"
-                size={24}
-                style={{ opacity: 0.5 }}
-              />
+              <FeatherIcon color="grey" name="chevron-down" size={24} style={{ opacity: 0.5 }} />
             </MotiView>
           </HStack>
         </TouchableOpacity>
@@ -108,7 +91,7 @@ const BookItem = memo(
               alignSelf: 'center',
             }}
           >
-            {chapters.map((chapter) => (
+            {chapters.map(chapter => (
               <TouchableOpacity
                 key={chapter}
                 onPress={() => handleChapterSelect(chapter)}

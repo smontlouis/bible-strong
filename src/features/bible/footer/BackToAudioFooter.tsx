@@ -3,14 +3,10 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+// @ts-ignore
 import { isFullScreenBibleValue } from 'src/state/app'
 import { Book } from '~assets/bible_versions/books-desc'
-import {
-  MotiHStack,
-  MotiTouchableBox,
-  motiTransition,
-  TouchableBox,
-} from '~common/ui/Box'
+import { MotiHStack, MotiTouchableBox, motiTransition, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -59,11 +55,10 @@ const BackToAudioFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         left={10}
+        // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value
-              ? HEADER_HEIGHT + insets.bottom + 60
-              : 0,
+            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 60 : 0,
           }
         })}
         {...motiTransition}
@@ -79,6 +74,7 @@ const BackToAudioFooter = ({
         padding={2}
         borderRadius={50}
         overflow="visible"
+        // @ts-ignore
         animate={useDerivedValue(() => {
           return {
             translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
@@ -99,12 +95,7 @@ const BackToAudioFooter = ({
           row
         >
           <Text color="reverse">{t('audio.goBack')}</Text>
-          <FeatherIcon
-            name="volume-2"
-            style={{ marginLeft: 10 }}
-            size={20}
-            color="reverse"
-          />
+          <FeatherIcon name="volume-2" style={{ marginLeft: 10 }} size={20} color="reverse" />
         </TouchableBox>
       </MotiHStack>
       <MotiTouchableBox
@@ -121,11 +112,10 @@ const BackToAudioFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         right={10}
+        // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value
-              ? HEADER_HEIGHT + insets.bottom + 60
-              : 0,
+            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 60 : 0,
           }
         })}
         {...motiTransition}

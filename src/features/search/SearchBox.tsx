@@ -15,14 +15,7 @@ type Props = SearchBoxProvided &
     onClear: () => void
   }
 
-const SearchBox = ({
-  refine,
-  value,
-  onChange,
-  placeholder,
-  onSubmit,
-  onClear,
-}: Props) => {
+const SearchBox = ({ refine, value, onChange, placeholder, onSubmit, onClear }: Props) => {
   return (
     <Box px={20}>
       <SearchInput

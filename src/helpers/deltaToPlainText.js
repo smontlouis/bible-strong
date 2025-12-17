@@ -1,4 +1,4 @@
-export const deltaToPlainText = (delta) => {
+export const deltaToPlainText = delta => {
   try {
     // handle array weird form from diff object
     delta = Array.isArray(delta) ? delta : Object.values(delta)

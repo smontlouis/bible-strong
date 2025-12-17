@@ -29,27 +29,24 @@ const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
 
   const noteId = isOpen
   const note = useSelector(
+    // @ts-ignore
     state => state.user.bible.notes[noteId],
     shallowEqual
   )
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  const deleteNoteConfirmation = id => {
-    Alert.alert(
-      t('Attention'),
-      t('Voulez-vous vraiment supprimer cette note?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => {
-            dispatch(deleteNote(id))
-            close()
-          },
-          style: 'destructive',
+  const deleteNoteConfirmation = (id: any) => {
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          dispatch(deleteNote(id))
+          close()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   return (
@@ -58,6 +55,7 @@ const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
         onPress={() => {
           close()
           setTimeout(() => {
+            // @ts-ignore
             openNoteEditor(noteId)
           }, 500)
         }}
@@ -69,6 +67,7 @@ const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
         onPress={() => {
           close()
           setTimeout(() => {
+            // @ts-ignore
             setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
           }, 500)
         }}
@@ -76,11 +75,7 @@ const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
       >
         {t('Éditer les tags')}
       </Modal.Item>
-      <Modal.Item
-        bold
-        color="quart"
-        onPress={() => deleteNoteConfirmation(noteId)}
-      >
+      <Modal.Item bold color="quart" onPress={() => deleteNoteConfirmation(noteId)}>
         {t('Supprimer')}
       </Modal.Item>
     </Modal.Body>

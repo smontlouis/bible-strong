@@ -5,11 +5,11 @@ import Text from '~common/ui/Text'
 import styled from '@emotion/native'
 import Paragraph from '~common/ui/Paragraph'
 
-const StyledParagraph = styled(Paragraph)(({ theme, isLight }) => ({
+const StyledParagraph = styled(Paragraph)(({ theme, isLight }: any) => ({
   backgroundColor: isLight ? theme.colors.lightPrimary : 'transparent',
 }))
 
-const Snippet = ({ highlight, attribute, hit }) => {
+const Snippet = ({ highlight, attribute, hit }: any) => {
   const parsedHit = highlight({
     highlightProperty: '_snippetResult',
     attribute,
@@ -23,7 +23,7 @@ const Snippet = ({ highlight, attribute, hit }) => {
   return (
     <Box>
       <Paragraph small>
-        {parsedHit.map(({ value, isHighlighted }, index) => {
+        {parsedHit.map(({ value, isHighlighted }: any, index: any) => {
           return (
             <StyledParagraph isLight={isHighlighted} small key={index}>
               {value}

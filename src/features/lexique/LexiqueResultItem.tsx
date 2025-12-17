@@ -18,19 +18,8 @@ const LexiqueResultItem = ({ variant, id, title }: Props) => {
   const color2 = isGrec ? 'rgb(89,131,240)' : 'rgba(255,77,93,1)'
 
   return (
-    <Link
-      key={id + title}
-      route="Strong"
-      params={{ book: isGrec ? 40 : 1, reference: id }}
-    >
-      <Box
-        center
-        rounded
-        marginRight={10}
-        marginBottom={10}
-        height={height}
-        paddingHorizontal={20}
-      >
+    <Link key={id + title} route="Strong" params={{ book: isGrec ? 40 : 1, reference: id }}>
+      <Box center rounded marginRight={10} marginBottom={10} height={height} paddingHorizontal={20}>
         <Box
           style={{
             position: 'absolute',
@@ -41,18 +30,9 @@ const LexiqueResultItem = ({ variant, id, title }: Props) => {
             borderRadius: 3,
           }}
         >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height }}
-            colors={[color1, color2]}
-          />
+          <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
         </Box>
-        <Box
-          backgroundColor="rgba(0,0,0,0.1)"
-          paddingHorizontal={3}
-          paddingVertical={2}
-          rounded
-        >
+        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={3} paddingVertical={2} rounded>
           <Text fontSize={7} style={{ color: 'white' }}>
             {id} {isGrec ? 'Grec' : 'Hébreu'}
           </Text>

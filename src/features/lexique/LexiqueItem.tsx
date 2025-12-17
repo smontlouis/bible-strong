@@ -20,7 +20,7 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const Chip = styled(Box)(({ theme, isHebreu }) => ({
+const Chip = styled(Box)(({ theme, isHebreu }: any) => ({
   borderRadius: 10,
   backgroundColor: isHebreu ? theme.colors.lightPrimary : theme.colors.border,
   paddingTop: 2,
@@ -40,13 +40,14 @@ const LexiqueItem = memo(
     navigation,
   }: any & StackNavigationProp<MainStackProps>) => {
     const { t } = useTranslation()
+    // That's why : `const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'` - Ok this is not the best implementation
+    const linkProps: any = {
+      route: 'Strong' as any,
+      navigation,
+      params: { book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code },
+    }
     return (
-      // That's why : `const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'` - Ok this is not the best implementation
-      <Link
-        route="Strong"
-        navigation={navigation}
-        params={{ book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code }}
-      >
+      <Link {...linkProps}>
         <SectionItem>
           <Box row>
             <Chip isHebreu={lexiqueType === 'Hébreu'}>

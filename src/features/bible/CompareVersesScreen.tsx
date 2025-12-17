@@ -27,11 +27,6 @@ const CompareVersesScreen = ({
     []
   )
 
-  return (
-    <CompareVersesTabScreen
-      compareAtom={onTheFlyAtom}
-      navigation={navigation}
-    />
-  )
+  return <CompareVersesTabScreen compareAtom={onTheFlyAtom} navigation={navigation} />
 }
 export default CompareVersesScreen

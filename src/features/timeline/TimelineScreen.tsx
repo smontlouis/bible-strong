@@ -2,20 +2,14 @@ import React, { useRef, useCallback } from 'react'
 import { View } from 'react-native'
 
 import TimelineSection from './TimelineSection'
-import {
-  TimelineSection as TimelineSectionProps,
-  ShallowTimelineSection,
-} from './types'
+import { TimelineSection as TimelineSectionProps, ShallowTimelineSection } from './types'
 
 import { StackScreenProps } from '@react-navigation/stack'
 import { useQuery } from '~helpers/react-query-lite'
 import { getEvents } from './events'
 import { MainStackProps } from '~navigation/type'
 
-const omitEvents = ({
-  events,
-  ...rest
-}: TimelineSectionProps): ShallowTimelineSection => rest
+const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
 
 const Timeline = ({ route }: StackScreenProps<MainStackProps, 'Timeline'>) => {
   const goTo = route.params.goTo // navigation.getParam('goTo', 0)

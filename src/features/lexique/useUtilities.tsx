@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/react-native'
 
 import useDebounce from '~helpers/useDebounce'
 
-export const useSearchValue = ({ onDebouncedValue } = {}) => {
+export const useSearchValue = ({ onDebouncedValue }: any = {}) => {
   const [searchValue, setSearchValue] = useState('')
   const debouncedSearchValue = useDebounce(searchValue, 300)
 
@@ -17,10 +17,10 @@ export const useSearchValue = ({ onDebouncedValue } = {}) => {
   return { searchValue, debouncedSearchValue, setSearchValue }
 }
 
-export const useResults = (asyncFunc, parameter) => {
-  const [results, setResults] = useState([])
+export const useResults = (asyncFunc: any, parameter: any) => {
+  const [results, setResults] = useState<any>([])
   useEffect(() => {
-    asyncFunc(parameter).then(results => {
+    asyncFunc(parameter).then((results: any) => {
       if (!results) {
         Sentry.captureMessage('useResults: Results is undefined', {
           extra: {
@@ -35,13 +35,13 @@ export const useResults = (asyncFunc, parameter) => {
   return results
 }
 
-export const useResultsByLetterOrSearch = (search = {}, letter = {}) => {
-  const [results, setResults] = useState([])
+export const useResultsByLetterOrSearch = (search: any = {}, letter: any = {}) => {
+  const [results, setResults] = useState<any>([])
   const [isLoading, setLoading] = useState(true)
   useEffect(() => {
     if (search.value) {
       setLoading(true)
-      search.query(search.value).then(results => {
+      search.query(search.value).then((results: any) => {
         setResults(results)
         setLoading(false)
       })
@@ -50,7 +50,7 @@ export const useResultsByLetterOrSearch = (search = {}, letter = {}) => {
 
     if (letter.value) {
       setLoading(true)
-      letter.query(letter.value).then(results => {
+      letter.query(letter.value).then((results: any) => {
         setResults(results)
         setLoading(false)
       })

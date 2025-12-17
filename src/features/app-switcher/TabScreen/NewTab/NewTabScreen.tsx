@@ -24,7 +24,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
         <Header title={t('tabs.new')} />
         <Box flex center row>
           <Box row wrap center>
-            {tabTypes.map((type) => (
+            {tabTypes.map(type => (
               <NewTabItem key={type} type={type} newAtom={newAtom} />
             ))}
           </Box>

@@ -7,9 +7,7 @@ import { StrongsTab } from '../../state/tabs'
 import LexiqueTabScreen from './LexiqueTabScreen'
 import { MainStackProps } from '~navigation/type'
 
-const LexiqueScreen = ({
-  navigation,
-}: StackScreenProps<MainStackProps, 'Lexique'>) => {
+const LexiqueScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Lexique'>) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -24,12 +22,6 @@ const LexiqueScreen = ({
     []
   )
 
-  return (
-    <LexiqueTabScreen
-      strongsAtom={onTheFlyAtom}
-      navigation={navigation}
-      hasBackButton
-    />
-  )
+  return <LexiqueTabScreen strongsAtom={onTheFlyAtom} navigation={navigation} hasBackButton />
 }
 export default LexiqueScreen

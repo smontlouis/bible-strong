@@ -7,7 +7,7 @@ import { MaterialIcon } from '~common/ui/Icon'
 import { useDispatch } from 'react-redux'
 import { markAsRead } from '~redux/modules/plan'
 
-const StyledLink = styled(Link)(({ theme }) => ({
+const StyledLink = styled(Link)(({ theme }: any) => ({
   backgroundColor: theme.colors.success,
   width: 60,
   height: 60,

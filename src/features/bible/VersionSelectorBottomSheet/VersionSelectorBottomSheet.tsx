@@ -8,17 +8,9 @@ import { useAtomValue } from 'jotai/react'
 import { atom, PrimitiveAtom } from 'jotai/vanilla'
 
 import { getVersionsBySections } from '~helpers/bibleVersions'
-import {
-  BibleTab,
-  BibleTabActions,
-  useBibleTabActions,
-  VersionCode,
-} from '../../../state/tabs'
+import { BibleTab, BibleTabActions, useBibleTabActions, VersionCode } from '../../../state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
@@ -33,16 +25,12 @@ export const versionSelectorDataAtom = atom<{
   parallelVersionIndex?: number
 }>({})
 
-const VersionSelectorBottomSheet = ({
-  bottomSheetRef,
-}: VersionSelectorBottomSheetProps) => {
+const VersionSelectorBottomSheet = ({ bottomSheetRef }: VersionSelectorBottomSheetProps) => {
   const insets = useSafeAreaInsets()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { t } = useTranslation()
 
-  const { actions, data, parallelVersionIndex } = useAtomValue(
-    versionSelectorDataAtom
-  )
+  const { actions, data, parallelVersionIndex } = useAtomValue(versionSelectorDataAtom)
 
   const handleVersionSelect = (vers: VersionCode) => {
     if (!actions) return

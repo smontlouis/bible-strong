@@ -13,35 +13,27 @@ import { RootState } from '~redux/modules/reducer'
 import VerseTags from './VerseTags'
 import { scaleLineHeight } from './scaleLineHeight'
 
-export const Wrapper = styled('span')<RootStyles>(
-  ({ settings: { textDisplay } }) => ({
-    display: textDisplay,
-    ...(textDisplay === 'block'
-      ? {
-          marginBottom: '5px',
-        }
-      : {}),
-  })
-)
+export const Wrapper = styled('span')<RootStyles>(({ settings: { textDisplay } }) => ({
+  display: textDisplay,
+  ...(textDisplay === 'block'
+    ? {
+        marginBottom: '5px',
+      }
+    : {}),
+}))
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, fontFamily, lineHeight } }) => ({
     fontFamily,
 
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleLineHeight(
-      isParallel ? 26 : 32,
-      lineHeight,
-      fontSizeScale
-    ),
+    lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
   })
 )
 
-const NumberText = styled('span')<RootStyles>(
-  ({ settings: { fontSizeScale } }) => ({
-    fontSize: scaleFontSize(14, fontSizeScale),
-  })
-)
+const NumberText = styled('span')<RootStyles>(({ settings: { fontSizeScale } }) => ({
+  fontSize: scaleFontSize(14, fontSizeScale),
+}))
 
 interface Props {
   isParallel?: boolean
@@ -95,11 +87,9 @@ const VerseTextFormatting = ({
   }, [verse.Texte])
 
   useEffect(() => {
-    verseToStrong({ Texte: verse.Texte, Livre: verse.Livre }).then(
-      (formattedText) => {
-        setText(formattedText)
-      }
-    )
+    verseToStrong({ Texte: verse.Texte, Livre: verse.Livre }).then(formattedText => {
+      setText(formattedText)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verse.Livre, verse.Texte])
 
@@ -122,11 +112,7 @@ const VerseTextFormatting = ({
         >
           <NumberText settings={settings}>{verse.Verset} </NumberText>
           {notesCount && !inlineNotedVerses && !isSelectionMode && (
-            <NotesCount
-              settings={settings}
-              onClick={navigateToVerseNotes}
-              count={notesCount}
-            />
+            <NotesCount settings={settings} onClick={navigateToVerseNotes} count={notesCount} />
           )}
           <VerseText
             isParallel={isParallel}

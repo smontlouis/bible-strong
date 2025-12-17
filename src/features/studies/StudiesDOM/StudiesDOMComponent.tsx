@@ -4,6 +4,7 @@ import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
 import { forwardRef, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
+// @ts-ignore
 import Quill from './quill'
 import './quill.snow.css'
 
@@ -41,10 +42,10 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
-  const quillRef = useRef(null)
-  const inlineVerseModuleRef = useRef(null)
-  const blockVerseModuleRef = useRef(null)
-  const formatModuleRef = useRef(null)
+  const quillRef = useRef<any>(null)
+  const inlineVerseModuleRef = useRef<any>(null)
+  const blockVerseModuleRef = useRef<any>(null)
+  const formatModuleRef = useRef<any>(null)
 
   useEffect(() => {
     loadEditor({ fontFamily, language })
@@ -53,19 +54,26 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
   useEffect(() => {
     if (!isReadOnly) {
       // Can edit
+      // @ts-ignore
       quillRef.current.enable()
+      // @ts-ignore
       quillRef.current.focus()
 
+      // @ts-ignore
       quillRef.current.focus()
       setTimeout(() => {
+        // @ts-ignore
         document.querySelector('.ql-editor').focus()
       }, 0)
     } else {
       // Read only
+      // @ts-ignore
       quillRef.current.blur()
+      // @ts-ignore
       quillRef.current.enable(false)
 
       // Blur
+      // @ts-ignore
       quillRef.current.blur()
     }
   }, [isReadOnly])
@@ -73,55 +81,66 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
   useDOMImperativeHandle(
     ref,
     () => ({
-      dispatch: (event) => {
+      dispatch: (event: any) => {
         try {
           const msgData = event
 
           switch (msgData.type) {
             case 'FOCUS_EDITOR':
+              // @ts-ignore
               quillRef.current.focus()
               setTimeout(() => {
+                // @ts-ignore
                 document.querySelector('.ql-editor').focus()
               }, 0)
               break
             case 'BLUR_EDITOR':
+              // @ts-ignore
               quillRef.current.blur()
               break
             case 'GET_BIBLE_VERSES':
+              // @ts-ignore
               inlineVerseModuleRef.current =
+                // @ts-ignore
                 quillRef.current.getModule('inline-verse')
+              // @ts-ignore
               inlineVerseModuleRef.current.receiveVerseLink(msgData.payload)
               break
             case 'GET_BIBLE_STRONG':
+              // @ts-ignore
               inlineVerseModuleRef.current =
+                // @ts-ignore
                 quillRef.current.getModule('inline-verse')
+              // @ts-ignore
               inlineVerseModuleRef.current.receiveStrongLink(msgData.payload)
               break
             case 'GET_BIBLE_VERSES_BLOCK':
+              // @ts-ignore
               blockVerseModuleRef.current =
+                // @ts-ignore
                 quillRef.current.getModule('block-verse')
+              // @ts-ignore
               blockVerseModuleRef.current.receiveVerseBlock(msgData.payload)
               break
             case 'GET_BIBLE_STRONG_BLOCK':
+              // @ts-ignore
               blockVerseModuleRef.current =
+                // @ts-ignore
                 quillRef.current.getModule('block-verse')
+              // @ts-ignore
               blockVerseModuleRef.current.receiveStrongBlock(msgData.payload)
               break
             case 'BLOCK_DIVIDER': {
+              // @ts-ignore
               const range = quillRef.current.getSelection(true)
-              quillRef.current.insertEmbed(
-                range.index,
-                'divider',
-                true,
-                Quill.sources.USER
-              )
-              quillRef.current.setSelection(
-                range.index + 1,
-                Quill.sources.SILENT
-              )
+              // @ts-ignore
+              quillRef.current.insertEmbed(range.index, 'divider', true, Quill.sources.USER)
+              // @ts-ignore
+              quillRef.current.setSelection(range.index + 1, Quill.sources.SILENT)
               break
             }
             case 'TOGGLE_FORMAT': {
+              // @ts-ignore
               formatModuleRef.current = quillRef.current.getModule('format')
               const { type, value } = msgData.payload
 
@@ -129,33 +148,43 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
 
               switch (type) {
                 case 'UNDO':
+                  // @ts-ignore
                   quillRef.current.history.undo()
                   break
                 case 'REDO':
+                  // @ts-ignore
                   quillRef.current.history.redo()
                   break
                 case 'BOLD':
+                  // @ts-ignore
                   formatModuleRef.current.format('bold', value)
                   break
                 case 'ITALIC':
+                  // @ts-ignore
                   formatModuleRef.current.format('italic', value)
                   break
                 case 'UNDERLINE':
+                  // @ts-ignore
                   formatModuleRef.current.format('underline', value)
                   break
                 case 'BLOCKQUOTE':
+                  // @ts-ignore
                   formatModuleRef.current.format('blockquote', value)
                   break
                 case 'LIST':
+                  // @ts-ignore
                   formatModuleRef.current.format('list', value)
                   break
                 case 'HEADER':
+                  // @ts-ignore
                   formatModuleRef.current.format('header', value)
                   break
                 case 'BACKGROUND':
+                  // @ts-ignore
                   formatModuleRef.current.format('background', value)
                   break
                 case 'COLOR':
+                  // @ts-ignore
                   formatModuleRef.current.format('color', value)
                   break
                 default:
@@ -174,6 +203,7 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
       },
       reloadEditor: (content: any) => {
         if (quillRef.current) {
+          // @ts-ignore
           quillRef.current.setContents(content, Quill.sources.SILENT)
         }
       },
@@ -181,9 +211,10 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
     []
   )
 
-  const onChangeText = (delta, oldDelta, source) => {
+  const onChangeText = (delta: any, oldDelta: any, source: any) => {
     dispatch('TEXT_CHANGED', {
       type: 'success',
+      // @ts-ignore
       delta: quillRef.current.getContents(),
       deltaChange: delta,
       deltaOld: oldDelta,
@@ -192,30 +223,34 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
   }
 
   const addTextChangeEventToEditor = () => {
+    // @ts-ignore
     quillRef.current.on('text-change', debounce(onChangeText, 500))
 
-    quillRef.current.on(Quill.events.EDITOR_CHANGE, (type, range) => {
+    // @ts-ignore
+    quillRef.current.on(Quill.events.EDITOR_CHANGE, (type: any, range: any) => {
       const isReadOnly =
+        // @ts-ignore
         quillRef.current.container.classList.contains('ql-disabled')
 
       if (isReadOnly) return
       if (type !== Quill.events.SELECTION_CHANGE) return
 
       if (range) {
+        // @ts-ignore
         const selectedBottom = quillRef.current.getBounds(range).bottom
 
         setTimeout(() => {
           const windowHeight = document.body.getBoundingClientRect().height
 
           if (selectedBottom > windowHeight) {
+            // @ts-ignore
             document
               .querySelector('.ql-editor')
+              // @ts-ignore
               .scrollTo(
                 0,
-                document.querySelector('.ql-editor').scrollTop +
-                  selectedBottom -
-                  windowHeight +
-                  30
+                // @ts-ignore
+                document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30
               )
           }
         }, 300)
@@ -223,14 +258,9 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
     })
   }
 
-  const loadEditor = ({
-    fontFamily,
-    language,
-  }: {
-    fontFamily: string
-    language: string
-  }) => {
+  const loadEditor = ({ fontFamily, language }: { fontFamily: string; language: string }) => {
     document.getElementById('editor')!.style.fontFamily = fontFamily
+    // @ts-ignore
     quillRef.current = new Quill('#editor', {
       theme: 'snow',
       modules: {
@@ -239,16 +269,17 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
         'block-verse': true,
         format: true,
       },
-      placeholder:
-        language === 'fr' ? 'Créer votre étude...' : 'Create your study...',
+      placeholder: language === 'fr' ? 'Créer votre étude...' : 'Create your study...',
       readOnly: true,
     })
 
     console.log('loading editor')
+    // @ts-ignore
     quillRef.current.focus()
 
     console.log('editor initialized')
 
+    // @ts-ignore
     quillRef.current.setContents(contentToDisplay, Quill.sources.SILENT)
 
     addTextChangeEventToEditor()
@@ -258,8 +289,7 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
     <div
       id="editor"
       style={{
-        filter:
-          colorScheme === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none',
+        filter: colorScheme === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none',
       }}
     />
   )

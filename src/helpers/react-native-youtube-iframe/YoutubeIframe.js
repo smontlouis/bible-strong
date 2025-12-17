@@ -71,25 +71,19 @@ const YoutubeIframe = (
         })
       },
       getPlaybackRate: () => {
-        webViewRef.current.injectJavaScript(
-          PLAYER_FUNCTIONS.getPlaybackRateScript
-        )
+        webViewRef.current.injectJavaScript(PLAYER_FUNCTIONS.getPlaybackRateScript)
         return new Promise(resolve => {
           eventEmitter.current.once('getPlaybackRate', resolve)
         })
       },
       getAvailablePlaybackRates: () => {
-        webViewRef.current.injectJavaScript(
-          PLAYER_FUNCTIONS.getAvailablePlaybackRatesScript
-        )
+        webViewRef.current.injectJavaScript(PLAYER_FUNCTIONS.getAvailablePlaybackRatesScript)
         return new Promise(resolve => {
           eventEmitter.current.once('getAvailablePlaybackRates', resolve)
         })
       },
       seekTo: (seconds, allowSeekAhead) => {
-        webViewRef.current.injectJavaScript(
-          PLAYER_FUNCTIONS.seekToScript(seconds, allowSeekAhead)
-        )
+        webViewRef.current.injectJavaScript(PLAYER_FUNCTIONS.seekToScript(seconds, allowSeekAhead))
       },
     }),
     []
@@ -109,9 +103,7 @@ const YoutubeIframe = (
         webViewRef.current.injectJavaScript(PLAYER_FUNCTIONS.unMuteVideo)
       }
       webViewRef.current.injectJavaScript(PLAYER_FUNCTIONS.setVolume(volume))
-      webViewRef.current.injectJavaScript(
-        PLAYER_FUNCTIONS.setPlaybackRate(playbackRate)
-      )
+      webViewRef.current.injectJavaScript(PLAYER_FUNCTIONS.setPlaybackRate(playbackRate))
     }
   }, [play, playerReady, mute, volume, playbackRate])
 
@@ -128,11 +120,7 @@ const YoutubeIframe = (
             setPlayerReady(true)
             if (Array.isArray(playList)) {
               webViewRef.current.injectJavaScript(
-                PLAYER_FUNCTIONS.loadPlaylist(
-                  playList,
-                  playListStartIndex,
-                  play
-                )
+                PLAYER_FUNCTIONS.loadPlaylist(playList, playListStartIndex, play)
               )
             }
             break
@@ -182,9 +170,7 @@ const YoutubeIframe = (
         allowsFullscreenVideo={!initialPlayerParams?.preventFullScreen}
         source={{ html: MAIN_SCRIPT(videoId, playList, initialPlayerParams) }}
         userAgent={
-          forceAndroidAutoplay
-            ? Platform.select({ android: CUSTOM_USER_AGENT, ios: '' })
-            : ''
+          forceAndroidAutoplay ? Platform.select({ android: CUSTOM_USER_AGENT, ios: '' }) : ''
         }
         onShouldStartLoadWithRequest={request => {
           return request.mainDocumentURL === 'about:blank'

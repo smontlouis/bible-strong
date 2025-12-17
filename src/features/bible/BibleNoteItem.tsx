@@ -56,16 +56,17 @@ const BibleNoteItem = ({ item, setNoteSettings, navigation }: Props) => {
           verse: Number(Verset),
           focusVerses: [Number(Verset)],
         }}
+        // @ts-ignore
         navigation={navigation}
       >
         <Box flex>
           <Box row justifyContent="space-between">
             <Text color="darkGrey" bold fontSize={11}>
-              {item.reference} -{' '}
-              {t('Il y a {{formattedDate}}', { formattedDate })}
+              {item.reference} - {t('Il y a {{formattedDate}}', { formattedDate })}
             </Text>
           </Box>
           {!!item.notes.title && (
+            // @ts-ignore
             <Text title fontSize={16} scale={-2}>
               {item.notes.title}
             </Text>
@@ -75,14 +76,11 @@ const BibleNoteItem = ({ item, setNoteSettings, navigation }: Props) => {
               {truncate(item.notes.description, 100)}
             </Paragraph>
           )}
+          {/* @ts-ignore */}
           <TagList tags={item.notes.tags} />
         </Box>
-        <Link padding onPress={() => setNoteSettings(item.noteId) }>
-          <Icon.Feather
-            name="more-vertical"
-            size={20}
-            color={theme.colors.tertiary}
-          />
+        <Link padding onPress={() => setNoteSettings(item.noteId)}>
+          <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
         </Link>
       </NoteLink>
       <Border marginHorizontal={20} />

@@ -14,9 +14,7 @@ const useMeasureTabPreview = () => {
     pageY: number
   }> =>
     new Promise(resolve => {
-      tabPreviews.refs[
-        index
-      ].current?.measure((x, y, width, height, pageX, pageY) =>
+      tabPreviews.refs[index].current?.measure((x, y, width, height, pageX, pageY) =>
         resolve({ x, y, width, height, pageX, pageY })
       )
     })

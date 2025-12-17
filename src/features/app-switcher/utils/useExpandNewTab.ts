@@ -15,8 +15,7 @@ export const useExpandNewTab = () => {
   const [tabId, setTabId] = useState<string | null>(null)
 
   useEffect(() => {
-    const isNewTab =
-      tabsCount > prevTabsCount && typeof prevTabsCount !== 'undefined'
+    const isNewTab = tabsCount > prevTabsCount && typeof prevTabsCount !== 'undefined'
     ;(async () => {
       if (isNewTab && tabId) {
         await wait(0)

@@ -42,9 +42,7 @@ const BibleVerseNotes = ({
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [isTagsOpen, setIsTagsOpen] = useState(false)
   const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
-  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(
-    null
-  )
+  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(null)
   const dispatch = useDispatch()
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
 
@@ -74,7 +72,7 @@ const BibleVerseNotes = ({
           return true
         })
         .map(note => {
-          const verseNumbers = {}
+          const verseNumbers: any = {}
           note[0].split('/').map(ref => {
             verseNumbers[ref] = true
           })
@@ -92,7 +90,7 @@ const BibleVerseNotes = ({
     const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
       return accuRefs
-    }, {})
+    }, {} as any)
 
     setNoteVerses(noteVerses)
   }
@@ -105,18 +103,15 @@ const BibleVerseNotes = ({
   const closeNoteSettings = () => setIsNoteSettingsOpen(null)
 
   const deleteNote = (noteId: string) => {
-    Alert.alert(
-      t('Attention'),
-      t('Voulez-vous vraiment supprimer cette note?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => dispatch(deleteNote(noteId)),
-          style: 'destructive',
-        },
-      ]
-    )
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        // @ts-ignore
+        onPress: () => dispatch(deleteNote(noteId)),
+        style: 'destructive',
+      },
+    ])
   }
 
   const renderNote = ({ item, index }: { item: TNote; index: number }) => {

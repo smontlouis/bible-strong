@@ -9,12 +9,7 @@ export interface ChapterButtonProps {
   direction: 'left' | 'right'
 }
 
-const ChapterButton = ({
-  direction,
-  hasNextChapter,
-  disabled,
-  onPress,
-}: ChapterButtonProps) => {
+const ChapterButton = ({ direction, hasNextChapter, disabled, onPress }: ChapterButtonProps) => {
   return (
     <Box width={40} height={40} overflow="visible">
       {hasNextChapter && (

@@ -27,33 +27,18 @@ const extractTitle = (props: EntitySliceProps) => {
   }
 }
 
-const renderIcon = (
-  props: EntitySliceProps,
-  isComplete: boolean,
-  isNext: boolean
-) => {
+const renderIcon = (props: EntitySliceProps, isComplete: boolean, isNext: boolean) => {
   switch (props.type) {
     case 'Text':
-      return (
-        <FeatherIcon
-          name="type"
-          size={7}
-          color={isComplete ? 'white' : 'primary'}
-        />
-      )
+      return <FeatherIcon name="type" size={7} color={isComplete ? 'white' : 'primary'} />
     case 'Video':
-      return (
-        <MaterialIcon
-          name="play-arrow"
-          size={13}
-          color={isComplete ? 'white' : 'primary'}
-        />
-      )
+      return <MaterialIcon name="play-arrow" size={13} color={isComplete ? 'white' : 'primary'} />
     case 'Verse':
     case 'Chapter':
       return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
       ) : isNext ? null : (
+        // @ts-ignore
         <SmallCircle />
       )
 
@@ -61,11 +46,13 @@ const renderIcon = (
       return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
       ) : isNext ? null : (
+        // @ts-ignore
         <SmallCircle />
       )
   }
 }
 
+// @ts-ignore
 const SmallCircle = styled(Box)(({ theme }: { theme: any }) => ({
   width: 6,
   height: 6,
@@ -76,24 +63,23 @@ const SmallCircle = styled(Box)(({ theme }: { theme: any }) => ({
   justifyContent: 'center',
 }))
 
-const Circle = styled(Box)(
-  ({ theme, isComplete, isNext, isSectionCompleted }) => ({
-    width: 18,
-    height: 18,
-    backgroundColor: isSectionCompleted
-      ? theme.colors.success
-      : isComplete
+// @ts-ignore
+const Circle = styled(Box)(({ theme, isComplete, isNext, isSectionCompleted }: any) => ({
+  width: 18,
+  height: 18,
+  backgroundColor: isSectionCompleted
+    ? theme.colors.success
+    : isComplete
       ? theme.colors.primary
       : theme.colors.lightPrimary,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...(isNext && {
-      borderWidth: 2,
-      borderColor: theme.colors.primary,
-    }),
-  })
-)
+  borderRadius: 9,
+  alignItems: 'center',
+  justifyContent: 'center',
+  ...(isNext && {
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+  }),
+}))
 
 const Line = styled(Box)(
   ({
@@ -112,8 +98,8 @@ const Line = styled(Box)(
     backgroundColor: isSectionCompleted
       ? theme.colors.success
       : isComplete || isNext
-      ? theme.colors.primary
-      : theme.colors.lightPrimary,
+        ? theme.colors.primary
+        : theme.colors.lightPrimary,
   })
 )
 
@@ -136,26 +122,16 @@ const EntitySlice = (props: EntitySliceProps & Props) => {
   return (
     <Box row>
       <Box marginRight={25} center>
-        <Circle
-          isSectionCompleted={isSectionCompleted}
-          isComplete={isComplete}
-          isNext={isNext}
-        >
+        {/* @ts-ignore */}
+        <Circle isSectionCompleted={isSectionCompleted} isComplete={isComplete} isNext={isNext}>
           {renderIcon(props, isComplete, isNext)}
         </Circle>
         {!isLast && (
-          <Line
-            isComplete={isComplete}
-            isNext={isNext}
-            isSectionCompleted={isSectionCompleted}
-          />
+          // @ts-ignore
+          <Line isComplete={isComplete} isNext={isNext} isSectionCompleted={isSectionCompleted} />
         )}
       </Box>
-      <Text
-        style={{ flex: 1 }}
-        numberOfLines={1}
-        opacity={isComplete || isNext ? 1 : 0.6}
-      >
+      <Text style={{ flex: 1 }} numberOfLines={1} opacity={isComplete || isNext ? 1 : 0.6}>
         {title}
       </Text>
     </Box>

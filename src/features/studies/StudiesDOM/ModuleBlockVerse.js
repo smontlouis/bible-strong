@@ -41,16 +41,8 @@ class ModuleBlockVerse extends Module {
     this.quill.focus()
     console.log(`STRONG RECEIVED: ${JSON.stringify(data)}`)
 
-    const {
-      title,
-      codeStrong,
-      strongType,
-      phonetique,
-      definition,
-      translatedBy,
-      book,
-      original,
-    } = data
+    const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } =
+      data
 
     const range = this.quill.selection.savedRange
     if (!range || range.length != 0) return

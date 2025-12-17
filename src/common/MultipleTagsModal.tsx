@@ -20,6 +20,7 @@ import Modal from './Modal'
 import { FeatherIcon } from './ui/Icon'
 import Spacer from './ui/Spacer'
 
+// @ts-ignore
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
   marginLeft: 10,
   color: isDisabled ? theme.colors.border : theme.colors.primary,
@@ -43,25 +44,30 @@ const MultipleTagsModal = () => {
     }
   }, [item])
 
-  let currentItems = []
+  let currentItems: any = []
 
   currentItems = useSelector((state: RootState) => {
+    // @ts-ignore
     if (item.ids) {
-      return Object.keys(item.ids).map(id => ({
+      // @ts-ignore
+      return Object.keys(item.ids).map((id: any) => ({
         id,
+        // @ts-ignore
         ...state.user.bible[item.entity][id],
       }))
     }
 
     return [
+      // @ts-ignore
       state.user.bible[item.entity]
-        ? { id: item.id, ...state.user.bible[item.entity][item.id] }
+        ? // @ts-ignore
+          { id: item.id, ...state.user.bible[item.entity][item.id] }
         : {},
     ]
   })
 
   const selectedChips = currentItems.reduce(
-    (acc, curr) => ({ ...acc, ...(curr.tags && curr.tags) }),
+    (acc: any, curr: any) => ({ ...acc, ...(curr.tags && curr.tags) }),
     {}
   )
 
@@ -74,7 +80,9 @@ const MultipleTagsModal = () => {
   }
 
   useEffect(() => {
+    // @ts-ignore
     if (item.ids) {
+      // @ts-ignore
       const title = verseToReference(item.ids)
       setHighlightTitle(title)
     }
@@ -87,10 +95,15 @@ const MultipleTagsModal = () => {
       headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>
+            {/* @ts-ignore */}
             {item.entity !== 'highlights'
-              ? `${t('Étiquettes pour')} "${currentItems[0].title ||
+              ? // @ts-ignore
+                `${t('Étiquettes pour')} "${
+                  currentItems[0].title ||
+                  // @ts-ignore
                   item.title ||
-                  ''}"`
+                  ''
+                }"`
               : `${t('Étiquettes pour')} ${highlightTitle}`}
           </Text>
           <Spacer />
@@ -107,19 +120,14 @@ const MultipleTagsModal = () => {
     >
       <Box flex>
         {result.length ? (
-          <ScrollView
-            contentContainerStyle={{ padding: 20 }}
-            style={{ flex: 1 }}
-          >
+          <ScrollView contentContainerStyle={{ padding: 20 }} style={{ flex: 1 }}>
             <Box row wrap>
-              {result.map(chip => (
+              {result.map((chip: any) => (
                 <Chip
                   key={chip.id}
                   label={chip.name}
                   isSelected={selectedChips && selectedChips[chip.id]}
-                  onPress={() =>
-                    dispatch(toggleTagEntity({ item, tagId: chip.id }))
-                  }
+                  onPress={() => dispatch(toggleTagEntity({ item, tagId: chip.id }))}
                 />
               ))}
             </Box>

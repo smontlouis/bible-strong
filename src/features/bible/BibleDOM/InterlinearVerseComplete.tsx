@@ -145,13 +145,7 @@ interface Props {
   selectedCode: SelectedCode | null
 }
 
-const InterlinearVerse = ({
-  verse,
-  settings,
-  isHebreu,
-  secondaryVerse,
-  selectedCode,
-}: Props) => {
+const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedCode }: Props) => {
   const dispatch = useDispatch()
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
@@ -167,16 +161,11 @@ const InterlinearVerse = ({
     <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
       {secondaryVerse && showSecondaryVerse && (
         <VerseText settings={settings}>
-          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>
-            ✕
-          </CloseVerseText>
+          <CloseVerseText onClick={() => setShowSecondaryVerse(false)}>✕</CloseVerseText>
           {secondaryVerse.Verset} {secondaryVerse.Texte}
         </VerseText>
       )}
-      <NumberText
-        settings={settings}
-        onClick={() => setShowSecondaryVerse(s => !s)}
-      >
+      <NumberText settings={settings} onClick={() => setShowSecondaryVerse(s => !s)}>
         <svg width={15} x="0px" y="0px" viewBox="0 0 54.308 54.308">
           <path
             fill={settings.colors[settings.theme].default}
@@ -208,9 +197,7 @@ const InterlinearVerse = ({
                 {phonetique}
               </Phonetique>
             )}
-            {parsingTag && (
-              <ParsingTag settings={settings}>{parsingTag}</ParsingTag>
-            )}
+            {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
           </Section>
         )
       })}

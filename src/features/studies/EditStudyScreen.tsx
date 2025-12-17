@@ -22,12 +22,7 @@ type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
   studyAtom?: PrimitiveAtom<StudyTab>
 }
 
-const EditStudyScreen = ({
-  studyAtom,
-  navigation,
-  route,
-  ...props
-}: EditStudyScreenProps) => {
+const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudyScreenProps) => {
   const { t } = useTranslation()
 
   const studyId = useMemo(() => route.params.studyId, [])
@@ -37,15 +32,11 @@ const EditStudyScreen = ({
 
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
-  const [titlePrompt, setTitlePrompt] = useState<
-    { id: string; title: string } | false
-  >(false)
+  const [titlePrompt, setTitlePrompt] = useState<{ id: string; title: string } | false>(false)
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
-  const currentStudy = useSelector(
-    (state: RootState) => state.user.bible.studies[studyId]
-  )
+  const currentStudy = useSelector((state: RootState) => state.user.bible.studies[studyId])
 
   const onDeltaChangeCallback = (
     delta: string | null,
@@ -112,6 +103,7 @@ const EditStudyScreen = ({
         }}
       />
       {isReadOnly && (
+        // @ts-ignore
         <FabButton icon="edit" onPress={() => setIsReadOnly(false)} />
       )}
     </Container>

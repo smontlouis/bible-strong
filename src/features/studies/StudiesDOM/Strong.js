@@ -10,9 +10,9 @@ const Strong = ({ title, code, phonetique, original }) => (
         [{phonetique}] - {code} - {original}
       </div>
       <div className="block-strong--arrow">
-        <ArrowRight color='rgb(9,132,227)' />
+        <ArrowRight color="rgb(9,132,227)" />
       </div>
-    <div className='block-delete' />
+      <div className="block-delete" />
     </div>
   </>
 )

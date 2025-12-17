@@ -19,10 +19,7 @@ function randomIntFromInterval(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const DictionnaireOfTheDay = ({
-  color1 = 'rgba(86,204,242,1)',
-  color2 = 'rgba(47,128,237,1)',
-}) => {
+const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const [error, setError] = useState(false)
@@ -34,9 +31,7 @@ const DictionnaireOfTheDay = ({
 
       // UGLY HACK
       const strongReference = await loadDictionnaireItemByRowId(
-        isFR
-          ? randomIntFromInterval(5437, 10872)
-          : randomIntFromInterval(1, 8620)
+        isFR ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
       )
       if (!strongReference || strongReference.error) {
         setError(strongReference?.error || true)
@@ -90,17 +85,8 @@ const DictionnaireOfTheDay = ({
           </Paragraph>
         </Box>
         <Link route="Dictionnaire" style={{ width: '100%' }}>
-          <Box
-            row
-            center
-            backgroundColor="rgba(0,0,0,0.04)"
-            paddingVertical={10}
-          >
-            <DictionnaireIcon
-              style={{ marginRight: 10 }}
-              size={20}
-              color="white"
-            />
+          <Box row center backgroundColor="rgba(0,0,0,0.04)" paddingVertical={10}>
+            <DictionnaireIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text color="white" bold fontSize={12}>
               {t('Dictionnaire W.')}
             </Text>

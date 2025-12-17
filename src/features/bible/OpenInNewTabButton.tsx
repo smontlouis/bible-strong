@@ -11,12 +11,7 @@ interface OpenInNewTabButtonProps {
   version: VersionCode
 }
 
-export const OpenInNewTabButton = ({
-  book,
-  chapter,
-  verse,
-  version,
-}: OpenInNewTabButtonProps) => {
+export const OpenInNewTabButton = ({ book, chapter, verse, version }: OpenInNewTabButtonProps) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
 

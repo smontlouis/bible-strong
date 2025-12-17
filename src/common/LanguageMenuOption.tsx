@@ -1,8 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import {
-  ResourcesLanguageState,
-  useResourceLanguage,
-} from 'src/state/resourcesLanguage'
+import { ResourcesLanguageState, useResourceLanguage } from 'src/state/resourcesLanguage'
 
 import Snackbar from '~common/SnackBar'
 import Box from '~common/ui/Box'

@@ -25,7 +25,7 @@ class InlineVerse extends Inline {
           arrayVerses: verses,
           book,
           chapter,
-          verse
+          verse,
         })
       }
     })
@@ -36,7 +36,7 @@ class InlineVerse extends Inline {
   static formats(domNode) {
     return {
       title: domNode.getAttribute('data-title'),
-      verses: JSON.parse(domNode.getAttribute('data-verses'))
+      verses: JSON.parse(domNode.getAttribute('data-verses')),
     }
   }
 }

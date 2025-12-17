@@ -100,11 +100,10 @@ const Header = ({
       top={0}
       left={0}
       // zIndex={1}
+      // @ts-ignore
       animate={useDerivedValue(() => {
         return {
-          height: isFullScreenBibleValue.value
-            ? 20 + insets.top
-            : HEADER_HEIGHT + insets.top,
+          height: isFullScreenBibleValue.value ? 20 + insets.top : HEADER_HEIGHT + insets.top,
         }
       })}
       {...motiTransition}
@@ -122,6 +121,7 @@ const Header = ({
               justifyContent="center"
               width={50}
               height={32}
+              // @ts-ignore
               animate={useDerivedValue(() => {
                 return {
                   translateY: isFullScreenBibleValue.value ? -5 : 0,
@@ -156,6 +156,7 @@ const Header = ({
                 bottom={0}
                 right={0}
                 top={0}
+                // @ts-ignore
                 animate={useDerivedValue(() => {
                   return {
                     opacity: isFullScreenBibleValue.value ? 0 : 1,
@@ -165,6 +166,7 @@ const Header = ({
               <MotiText
                 fontWeight="bold"
                 fontSize={14}
+                // @ts-ignore
                 animate={useDerivedValue(() => {
                   return {
                     translateY: isFullScreenBibleValue.value ? -5 : 0,
@@ -172,9 +174,7 @@ const Header = ({
                 })}
                 {...motiTransition}
               >
-                {isSmall
-                  ? truncate(`${t(bookName)} ${chapter}`, 10)
-                  : `${t(bookName)} ${chapter}`}
+                {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
               </MotiText>
             </TouchableBox>
           </HStack>
@@ -199,6 +199,7 @@ const Header = ({
               bottom={0}
               right={0}
               top={0}
+              // @ts-ignore
               animate={useDerivedValue(() => {
                 return {
                   opacity: isFullScreenBibleValue.value ? 0 : 1,
@@ -208,6 +209,7 @@ const Header = ({
             <MotiText
               fontWeight="bold"
               fontSize={14}
+              // @ts-ignore
               animate={useDerivedValue(() => {
                 return {
                   translateY: isFullScreenBibleValue.value ? -5 : 0,
@@ -226,17 +228,14 @@ const Header = ({
               center
               width={40}
               height="100%"
+              // @ts-ignore
               animate={useDerivedValue(() => {
                 return {
                   opacity: isFullScreenBibleValue.value ? 0 : 1,
                 }
               })}
             >
-              <FeatherIcon
-                name="chevrons-down"
-                size={20}
-                style={{ opacity: 0.3 }}
-              />
+              <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
             </MotiBox>
           }
           popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
@@ -249,6 +248,7 @@ const Header = ({
                   center
                   width={40}
                   height="100%"
+                  // @ts-ignore
                   animate={useDerivedValue(() => {
                     return {
                       opacity: isFullScreenBibleValue.value ? 0 : 1,
@@ -270,16 +270,12 @@ const Header = ({
                     <MenuOption onSelect={onOpenCommentaire}>
                       <Box row alignItems="center">
                         <MaterialIcon name="chat" size={20} />
-                        <Text marginLeft={10}>
-                          {t('Commentaire désactivé')}
-                        </Text>
+                        <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
                       </Box>
                     </MenuOption>
                   )}
                   {commentsDisplay && isFR && (
-                    <MenuOption
-                      onSelect={() => dispatch(setSettingsCommentaires(false))}
-                    >
+                    <MenuOption onSelect={() => dispatch(setSettingsCommentaires(false))}>
                       <Box row alignItems="center">
                         <MaterialIcon name="chat" size={20} color="primary" />
                         <Text marginLeft={10}>{t('Commentaire activé')}</Text>
@@ -287,16 +283,10 @@ const Header = ({
                     </MenuOption>
                   )}
                   <MenuOption
-                    onSelect={
-                      isParallel
-                        ? removeAllParallelVersions
-                        : addParallelVersion
-                    }
+                    onSelect={isParallel ? removeAllParallelVersions : addParallelVersion}
                   >
                     <Box row alignItems="center">
-                      <ParallelIcon
-                        color={isParallel ? 'primary' : 'default'}
-                      />
+                      <ParallelIcon color={isParallel ? 'primary' : 'default'} />
                       <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
                     </Box>
                   </MenuOption>

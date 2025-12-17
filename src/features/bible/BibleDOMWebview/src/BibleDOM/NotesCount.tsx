@@ -2,9 +2,7 @@ import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '../../../../../redux/modules/reducer'
 
-const SvgContainer = styled<RootStyles>(
-  'svg'
-)(({ settings: { fontSizeScale } }) => ({}))
+const SvgContainer = styled<RootStyles>('svg')(({ settings: { fontSizeScale } }) => ({}))
 
 const Div = styled<RootStyles>('div')(({ settings: { theme } }) => ({
   position: 'relative',

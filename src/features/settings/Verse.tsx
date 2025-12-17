@@ -29,7 +29,7 @@ const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
 }))
 
-const Circle = styled(Box)(({ colors, color }) => ({
+const Circle = styled(Box)(({ colors, color }: any) => ({
   width: 15,
   height: 15,
   borderRadius: 3,
@@ -53,7 +53,7 @@ const VerseComponent = ({
   tags,
   // navigation,
   setSettings,
-}) => {
+}: any) => {
   const navigation = useNavigation()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
@@ -74,22 +74,26 @@ const VerseComponent = ({
   const formattedDate = distanceInWords(Number(date), Date.now(), {
     locale: isFR ? fr : enGB,
   })
+  // @ts-ignore
   const { Livre, Chapitre, Verset } = verses[0]
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() =>
+        // @ts-ignore
         navigation.navigate('BibleView', {
           isReadOnly: true,
+          // @ts-ignore
           book: books[Livre - 1],
-          chapter: Chapitre,
-          verse: Verset,
+          chapter: Number(Chapitre),
+          verse: Number(Verset),
         })
       }
     >
       <Container>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <Box flex row alignItems="center">
+            {/* @ts-ignore */}
             <Circle colors={colors} color={color} />
             <Text fontSize={14} marginLeft={5} title>
               {title}
@@ -119,6 +123,7 @@ const VerseComponent = ({
         <Paragraph scale={-2} medium marginBottom={15}>
           {truncate(removeBreakLines(content), 200)}
         </Paragraph>
+        {/* @ts-ignore */}
         <TagList tags={tags} />
       </Container>
     </TouchableOpacity>

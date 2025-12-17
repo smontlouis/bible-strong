@@ -32,22 +32,21 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
 
   const setSearchValue = (value: string) =>
     setSearchTab(
-      produce((draft) => {
+      produce(draft => {
         draft.data.searchValue = value
       })
     )
 
   const toggleSearchMode = () =>
     setSearchTab(
-      produce((draft) => {
-        draft.data.searchMode =
-          draft.data.searchMode === 'online' ? 'offline' : 'online'
+      produce(draft => {
+        draft.data.searchMode = draft.data.searchMode === 'online' ? 'offline' : 'online'
       })
     )
 
   const setTitle = (title: string) =>
     setSearchTab(
-      produce((draft) => {
+      produce(draft => {
         draft.title = title
       })
     )
@@ -63,10 +62,7 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
         rightComponent={
           <Box row alignItems="center">
             <Box mr={10}>
-              <Switch
-                value={searchMode === 'online'}
-                onValueChange={toggleSearchMode}
-              />
+              <Switch value={searchMode === 'online'} onValueChange={toggleSearchMode} />
             </Box>
             <PopOverMenu
               popover={
@@ -79,15 +75,9 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
         }
       />
       {searchMode === 'online' ? (
-        <OnlineSearchScreen
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-        />
+        <OnlineSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
       ) : (
-        <LocalSearchScreen
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-        />
+        <LocalSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
       )}
     </Container>
   )

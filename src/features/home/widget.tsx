@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 export const itemWidth = wp(50) > 300 ? 300 : wp(50)
 export const itemHeight = 120
 
-export const WidgetContainer = props => (
+export const WidgetContainer = (props: any) => (
   <Box
     center
     rounded

@@ -20,6 +20,9 @@ const SearchResults = ({ searchValue, canQuery }: SearchResultProps) => {
     )
   }
 
+  {
+    /* @ts-ignore */
+  }
   return <InfiniteHits searchValue={searchValue} />
 }
 

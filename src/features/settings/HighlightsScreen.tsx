@@ -37,18 +37,12 @@ export type GroupedHighlights = {
   tags: TagsObj
 }[]
 
-const filterByChip = (chipId: string, highlightsObj: HighlightsObj) => ([vId]: [
-  string,
-  Highlight
-]) =>
-  chipId
-    ? Boolean(highlightsObj[vId].tags && highlightsObj[vId].tags[chipId])
-    : true
+const filterByChip =
+  (chipId: string, highlightsObj: HighlightsObj) =>
+  ([vId]: [string, Highlight]) =>
+    chipId ? Boolean(highlightsObj[vId].tags && highlightsObj[vId].tags[chipId]) : true
 
-const groupHighlightsByDate = (
-  arr: GroupedHighlights,
-  highlightTuple: [string, Highlight]
-) => {
+const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, Highlight]) => {
   const [highlightId, highlight] = highlightTuple
   const [Livre, Chapitre, Verset] = highlightId.split('-').map(Number)
   const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
@@ -67,9 +61,7 @@ const groupHighlightsByDate = (
   if (dateInArray) {
     dateInArray.stringIds[highlightId] = true
     dateInArray.highlightsObj.push(formattedVerse)
-    dateInArray.highlightsObj.sort(
-      (a, b) => Number(a.Verset) - Number(b.Verset)
-    )
+    dateInArray.highlightsObj.sort((a, b) => Number(a.Verset) - Number(b.Verset))
     dateInArray.tags = { ...dateInArray.tags, ...highlight.tags }
   }
 
@@ -80,10 +72,7 @@ const groupHighlightsByDate = (
 
 const HighlightsScreen = () => {
   const { t } = useTranslation()
-  const highlightsObj = useSelector(
-    (state: RootState) => state.user.bible.highlights,
-    shallowEqual
-  )
+  const highlightsObj = useSelector((state: RootState) => state.user.bible.highlights, shallowEqual)
   const { theme: currentTheme } = useCurrentThemeSelector()
   const colors = useSelector(
     (state: RootState) => state.user.bible.settings.colors[currentTheme],
@@ -91,8 +80,8 @@ const HighlightsScreen = () => {
   )
 
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState()
-  const [isChangeColorOpen, setIsChangeColorOpen] = React.useState()
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState<any>()
+  const [isChangeColorOpen, setIsChangeColorOpen] = React.useState<any>()
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
   const [selectedChip, setSelectedChip] = React.useState<Chip>()
   const dispatch = useDispatch()
@@ -116,32 +105,23 @@ const HighlightsScreen = () => {
   const groupedHighlights = useMemo(() => {
     const highlights = Object.entries(highlightsObj)
     highlights.sort((a, b) => Number(b[1].date) - Number(a[1].date))
-    return (chipId
-      ? highlights.filter(filterByChip(chipId, highlightsObj))
-      : highlights
-    )
+    return (chipId ? highlights.filter(filterByChip(chipId, highlightsObj)) : highlights)
       .splice(0, 100)
       .reduce(groupHighlightsByDate, [])
   }, [chipId, highlightsObj])
 
   const promptLogout = () => {
-    Alert.alert(
-      t('Attention'),
-      t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => {
-            dispatch(
-              removeHighlight({ selectedVerses: isSettingsOpen?.stringIds })
-            )
-            close()
-          },
-          style: 'destructive',
+    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          dispatch(removeHighlight({ selectedVerses: isSettingsOpen?.stringIds }))
+          close()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   const changeColor = (color: string) => {
@@ -165,21 +145,14 @@ const HighlightsScreen = () => {
         selectedChip={selectedChip}
       />
       {groupedHighlights?.length ? (
-        <VersesList
-          setSettings={setIsSettingsOpen}
-          groupedHighlights={groupedHighlights}
-        />
+        <VersesList setSettings={setIsSettingsOpen} groupedHighlights={groupedHighlights} />
       ) : (
         <Empty
           source={require('~assets/images/empty.json')}
           message={t("Vous n'avez pas encore rien surligné...")}
         />
       )}
-      <Modal.Body
-        ref={ref}
-        onModalClose={() => setIsSettingsOpen(undefined)}
-        enableDynamicSizing
-      >
+      <Modal.Body ref={ref} onModalClose={() => setIsSettingsOpen(undefined)} enableDynamicSizing>
         <Modal.Item
           bold
           onPress={() => {
@@ -211,26 +184,11 @@ const HighlightsScreen = () => {
         enableDynamicSizing
       >
         <Box row my={20} mx={20}>
-          <TouchableCircle
-            color={colors.color1}
-            onPress={() => changeColor('color1')}
-          />
-          <TouchableCircle
-            color={colors.color2}
-            onPress={() => changeColor('color2')}
-          />
-          <TouchableCircle
-            color={colors.color3}
-            onPress={() => changeColor('color3')}
-          />
-          <TouchableCircle
-            color={colors.color4}
-            onPress={() => changeColor('color4')}
-          />
-          <TouchableCircle
-            color={colors.color5}
-            onPress={() => changeColor('color5')}
-          />
+          <TouchableCircle color={colors.color1} onPress={() => changeColor('color1')} />
+          <TouchableCircle color={colors.color2} onPress={() => changeColor('color2')} />
+          <TouchableCircle color={colors.color3} onPress={() => changeColor('color3')} />
+          <TouchableCircle color={colors.color4} onPress={() => changeColor('color4')} />
+          <TouchableCircle color={colors.color5} onPress={() => changeColor('color5')} />
         </Box>
       </Modal.Body>
     </Container>

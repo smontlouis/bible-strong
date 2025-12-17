@@ -27,9 +27,7 @@ const initialMigrationProgress: MigrationProgress = {
   failedCollections: [],
 }
 
-export const migrationProgressAtom = atom<MigrationProgress>(
-  initialMigrationProgress
-)
+export const migrationProgressAtom = atom<MigrationProgress>(initialMigrationProgress)
 
 export const resetMigrationProgressAtom = atom(null, (get, set) => {
   set(migrationProgressAtom, initialMigrationProgress)

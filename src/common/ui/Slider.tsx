@@ -19,9 +19,7 @@ export type SliderContextProps = {
   index: number
 }
 
-export const SliderContext = createContext<SliderContextProps | undefined>(
-  undefined
-)
+export const SliderContext = createContext<SliderContextProps | undefined>(undefined)
 
 type SliderProviderProps = {
   children: React.ReactNode
@@ -89,9 +87,7 @@ export const Slide = ({ slideIndex, ...props }: BoxProps & SlideProps) => {
   const SlideIn = (values: EntryAnimationsValues & ExitAnimationsValues) => {
     'worklet'
 
-    return direction.value === 'left'
-      ? slideInRightAnimation(values)
-      : slideInLeftAnimation(values)
+    return direction.value === 'left' ? slideInRightAnimation(values) : slideInLeftAnimation(values)
   }
 
   const SlideOut = (values: EntryAnimationsValues & ExitAnimationsValues) => {
@@ -112,11 +108,6 @@ export const Slide = ({ slideIndex, ...props }: BoxProps & SlideProps) => {
   }
 
   return (
-    <AnimatedBox
-      entering={ifEnabled(SlideIn)}
-      exiting={ifEnabled(SlideOut)}
-      flex={1}
-      {...props}
-    />
+    <AnimatedBox entering={ifEnabled(SlideIn)} exiting={ifEnabled(SlideOut)} flex={1} {...props} />
   )
 }

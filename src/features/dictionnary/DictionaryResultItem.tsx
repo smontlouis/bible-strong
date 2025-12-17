@@ -15,14 +15,7 @@ const DictionnaryResultItem = ({ word }: Props) => {
 
   return (
     <Link key={word} route="DictionnaryDetail" params={{ word }}>
-      <Box
-        center
-        rounded
-        marginRight={10}
-        marginBottom={10}
-        height={height}
-        paddingHorizontal={10}
-      >
+      <Box center rounded marginRight={10} marginBottom={10} height={height} paddingHorizontal={10}>
         <Box
           style={{
             position: 'absolute',
@@ -33,18 +26,9 @@ const DictionnaryResultItem = ({ word }: Props) => {
             borderRadius: 3,
           }}
         >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height }}
-            colors={[color1, color2]}
-          />
+          <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
         </Box>
-        <Box
-          backgroundColor="rgba(0,0,0,0.1)"
-          paddingHorizontal={3}
-          paddingVertical={2}
-          rounded
-        >
+        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={3} paddingVertical={2} rounded>
           <Text fontSize={7} style={{ color: 'white' }}>
             Mot
           </Text>

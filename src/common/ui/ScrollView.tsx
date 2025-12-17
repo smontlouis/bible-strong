@@ -5,54 +5,23 @@ import { useTheme } from '@emotion/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useDeviceOrientation from '~helpers/useDeviceOrientation'
 
-{
-  /* <ScrollView
-  {...props}
-  orientation={orientation}
-  contentContainerStyle={{
-    paddingTop: 20,
-    paddingBottom: 20,
-    ...contentContainerStyle,
-  }}
->
-  <Box
-    maxWidth={orientation.maxWidth}
-    ml="auto"
-    mr="auto"
-    width="100%"
-    backgroundColor={theme.colors[backgroundColor] || theme.colors.reverse}
-    borderTopRightRadius={30}
-    borderTopLeftRadius={30}
-    {...(orientation.tablet && {
-      marginTop: 20,
-      marginBottom: 50,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-    })}
-  >
-    {children}
-  </Box>
-</ScrollView> */
-}
+// @ts-ignore
+const ScrollView = styled.ScrollView(({ theme, orientation, backgroundColor }: any) => ({
+  backgroundColor: theme.colors[backgroundColor] || theme.colors.reverse,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
+  maxWidth: orientation.maxWidth,
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '100%',
 
-const ScrollView = styled.ScrollView(
-  ({ theme, orientation, backgroundColor }) => ({
-    backgroundColor: theme.colors[backgroundColor] || theme.colors.reverse,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    maxWidth: orientation.maxWidth,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: '100%',
-
-    ...(orientation.tablet && {
-      marginTop: 20,
-      marginBottom: 50,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-    }),
-  })
-)
+  ...(orientation.tablet && {
+    marginTop: 20,
+    marginBottom: 50,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  }),
+}))
 
 const fadeIn = {
   from: {
@@ -81,6 +50,7 @@ export const HomeScrollView = ({
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   return (
+    // @ts-ignore
     <ScrollView
       {...props}
       orientation={orientation}
@@ -98,9 +68,10 @@ export const HomeScrollView = ({
   )
 }
 
-export default ({ children, contentContainerStyle = {}, ...props }) => {
+export default ({ children, contentContainerStyle = {}, ...props }: any) => {
   const orientation = useDeviceOrientation()
   return (
+    // @ts-ignore
     <ScrollView
       {...props}
       orientation={orientation}

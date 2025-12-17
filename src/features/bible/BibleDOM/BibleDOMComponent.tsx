@@ -34,10 +34,7 @@ import { scaleFontSize } from './scaleFontSize'
 import './swiped-events'
 import Verse from './Verse'
 import { useFonts } from 'expo-font'
-import {
-  HEADER_HEIGHT,
-  HEADER_HEIGHT_MIN,
-} from '~features/app-switcher/utils/constants'
+import { HEADER_HEIGHT, HEADER_HEIGHT_MIN } from '~features/app-switcher/utils/constants'
 
 declare global {
   interface Window {
@@ -56,18 +53,13 @@ const forwardProps = [
   'highlightedColor',
   'rtl',
 ]
-setup(
-  React.createElement,
-  undefined,
-  undefined,
-  (props: { [key: string]: any }) => {
-    for (let prop in props) {
-      if (forwardProps.includes(prop)) {
-        delete props[prop]
-      }
+setup(React.createElement, undefined, undefined, (props: { [key: string]: any }) => {
+  for (let prop in props) {
+    if (forwardProps.includes(prop)) {
+      delete props[prop]
     }
   }
-)
+})
 
 type Props = Pick<
   WebViewProps,
@@ -97,54 +89,44 @@ const extractParallelVerse = (
   parallelVerses: ParallelVerse[],
   verse: TVerse,
   version: string
-) => [
-  { version, verse },
-  ...parallelVerses.map((p) => ({ version: p.id, verse: p.verses[i] })),
-]
+) => [{ version, verse }, ...parallelVerses.map(p => ({ version: p.id, verse: p.verses[i] }))]
 
-const extractParallelVersionTitles = (
-  parallelVerses: ParallelVerse[],
-  currentVersion: string
-) => {
+const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
   if (!parallelVerses?.length) return []
 
-  return [currentVersion, ...parallelVerses.map((p) => p.id)]
+  return [currentVersion, ...parallelVerses.map(p => p.id)]
 }
 
-const Container = styled('div')<
-  RootStyles & { rtl: boolean; isParallelVerse: boolean }
->(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
-  maxWidth: isParallelVerse ? 'none' : '800px',
-  margin: '0 auto',
-  padding: isParallelVerse ? '10px 5px' : '10px 15px',
-  paddingBottom: '300px',
-  textAlign: alignContent,
-  background: colors[theme].reverse,
-  color: colors[theme].default,
-  direction: rtl ? 'rtl' : 'ltr',
-  paddingTop: `${HEADER_HEIGHT + 10}px`,
-  ...(rtl ? { textAlign: 'right' } : {}),
+const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: boolean }>(
+  ({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
+    maxWidth: isParallelVerse ? 'none' : '800px',
+    margin: '0 auto',
+    padding: isParallelVerse ? '10px 5px' : '10px 15px',
+    paddingBottom: '300px',
+    textAlign: alignContent,
+    background: colors[theme].reverse,
+    color: colors[theme].default,
+    direction: rtl ? 'rtl' : 'ltr',
+    paddingTop: `${HEADER_HEIGHT + 10}px`,
+    ...(rtl ? { textAlign: 'right' } : {}),
+  })
+)
+
+const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+  textAlign: 'right',
+  marginBottom: '20px',
+  fontFamily: 'arial',
+  fontSize: '13px',
+  color: colors[theme].darkGrey,
 }))
 
-const RightDirection = styled('div')<RootStyles>(
-  ({ settings: { theme, colors } }) => ({
-    textAlign: 'right',
-    marginBottom: '20px',
-    fontFamily: 'arial',
-    fontSize: '13px',
-    color: colors[theme].darkGrey,
-  })
-)
-
-const IntMode = styled('div')<RootStyles>(
-  ({ settings: { theme, colors } }) => ({
-    textAlign: 'right',
-    marginBottom: '20px',
-    fontFamily: 'arial',
-    fontSize: '13px',
-    color: colors[theme].default,
-  })
-)
+const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+  textAlign: 'right',
+  marginBottom: '20px',
+  fontFamily: 'arial',
+  fontSize: '13px',
+  color: colors[theme].default,
+}))
 
 const Span = styled('span')({})
 
@@ -180,42 +162,36 @@ const H4 = styled('h4')<RootStyles & { isHebreu: boolean }>(
   })
 )
 
-const VersionTitle = styled('div')<RootStyles>(
-  ({ settings: { fontSizeScale, fontFamily } }) => ({
-    fontFamily,
-    fontWeight: 'bold',
-    fontSize: scaleFontSize(18, fontSizeScale),
-  })
-)
+const VersionTitle = styled('div')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontWeight: 'bold',
+  fontSize: scaleFontSize(18, fontSizeScale),
+}))
 
-const VersionsContainer = styled('div')<RootStyles>(
-  ({ settings: { theme, colors } }) => ({
-    display: 'flex',
-    position: 'sticky',
-    top: 'var(--header-height)',
-    background: colors[theme].reverse,
-    paddingTop: '5px',
-    paddingBottom: '10px',
-    transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
-  })
-)
+const VersionsContainer = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+  display: 'flex',
+  position: 'sticky',
+  top: 'var(--header-height)',
+  background: colors[theme].reverse,
+  paddingTop: '5px',
+  paddingBottom: '10px',
+  transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
+}))
 
 const mediaQueries = ['@media (min-width: 640px)']
 
-const ResponsivePlusIcon = styled(PlusIcon)<RootStyles>(
-  ({ settings: { theme, colors } }) => ({
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    right: '0',
-    color: colors[theme].primary,
-    display: 'none',
+const ResponsivePlusIcon = styled(PlusIcon)<RootStyles>(({ settings: { theme, colors } }) => ({
+  position: 'absolute',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  right: '0',
+  color: colors[theme].primary,
+  display: 'none',
 
-    [mediaQueries[0]]: {
-      display: 'block',
-    },
-  })
-)
+  [mediaQueries[0]]: {
+    display: 'block',
+  },
+}))
 
 const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
   if (pericopeChapter && pericopeChapter[verse]) {
@@ -256,10 +232,7 @@ const VersesRenderer = ({
     }).catch(console.error)
 
     // Set initial header height CSS variable
-    document.documentElement.style.setProperty(
-      '--header-height',
-      `${HEADER_HEIGHT}px`
-    )
+    document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
   }, [])
 
   useEffect(() => {
@@ -280,8 +253,7 @@ const VersesRenderer = ({
       const velocity = Math.abs(scrollDiff / timeDiff)
 
       // Get total scrollable height
-      const totalHeight =
-        document.documentElement.scrollHeight - window.innerHeight
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight
 
       // Don't dispatch if scroll is beyond boundaries (iOS momentum scrolling)
       if (currentScrollTop < 0 || currentScrollTop > totalHeight) {
@@ -289,10 +261,7 @@ const VersesRenderer = ({
           dispatch({
             type: SWIPE_UP,
           })
-          document.documentElement.style.setProperty(
-            '--header-height',
-            `${HEADER_HEIGHT}px`
-          )
+          document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
         }
         reachedBoundaries = true
         return
@@ -307,20 +276,14 @@ const VersesRenderer = ({
           dispatch({
             type: SWIPE_DOWN,
           })
-          document.documentElement.style.setProperty(
-            '--header-height',
-            `${HEADER_HEIGHT_MIN}px`
-          )
+          document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT_MIN}px`)
           canSwipeDown = false
           canSwipeUp = true
         } else if (scrollDiff < 0 && canSwipeUp) {
           dispatch({
             type: SWIPE_UP,
           })
-          document.documentElement.style.setProperty(
-            '--header-height',
-            `${HEADER_HEIGHT}px`
-          )
+          document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
           canSwipeUp = false
           canSwipeDown = true
         }
@@ -358,8 +321,7 @@ const VersesRenderer = ({
 
   useEffect(() => {
     if (settings?.theme) {
-      document.body.style.backgroundColor =
-        settings.colors[settings.theme].reverse
+      document.body.style.backgroundColor = settings.colors[settings.theme].reverse
     }
   }, [settings?.theme])
 
@@ -383,9 +345,7 @@ const VersesRenderer = ({
     })
   }, [verseToScroll, hasVerses])
 
-  const sortVersesToTags = (
-    highlightedVerses: HighlightsObj
-  ): TaggedVerse[] | null => {
+  const sortVersesToTags = (highlightedVerses: HighlightsObj): TaggedVerse[] | null => {
     if (!highlightedVerses) return null
     const p = highlightedVerses
     const taggedVerses = Object.keys(p).reduce(
@@ -402,7 +362,7 @@ const VersesRenderer = ({
         const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
         const formattedVerse = { Livre, Chapitre, Verset, Texte: '' }
 
-        if (!arr.find((a) => a.date === p[verse].date)) {
+        if (!arr.find(a => a.date === p[verse].date)) {
           arr.push({
             date: p[verse].date,
             color: p[verse].color,
@@ -411,12 +371,10 @@ const VersesRenderer = ({
           })
         }
 
-        const dateInArray = arr.find((a) => a.date === p[verse].date)
+        const dateInArray = arr.find(a => a.date === p[verse].date)
         if (dateInArray) {
           dateInArray.verseIds.push(verse)
-          dateInArray.verseIds.sort(
-            (a, b) => Number(a.Verset) - Number(b.Verset)
-          )
+          dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
           dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
         }
 
@@ -427,7 +385,7 @@ const VersesRenderer = ({
       []
     )
 
-    return taggedVerses.map((verse) => ({
+    return taggedVerses.map(verse => ({
       ...verse,
       lastVerse: verse.verseIds[verse.verseIds.length - 1],
       tags: Object.values(verse.tags),
@@ -438,7 +396,7 @@ const VersesRenderer = ({
     const newNotedVerses: { [key: string]: number } = {}
     if (verses?.length) {
       const { Livre, Chapitre } = verses[0]
-      Object.keys(notedVerses).map((key) => {
+      Object.keys(notedVerses).map(key => {
         const firstVerseRef = key.split('/')[0]
         const bookNumber = parseInt(firstVerseRef.split('-')[0])
         const chapterNumber = parseInt(firstVerseRef.split('-')[1])
@@ -490,23 +448,23 @@ const VersesRenderer = ({
     return newNotedVerses
   }
 
-  const transformComments = (
-    comments: { [key: string]: string } | null,
-    versesLength: number
-  ) => {
+  const transformComments = (comments: { [key: string]: string } | null, versesLength: number) => {
     if (!comments) return null
 
-    return Object.entries(comments).reduce((acc, [key, value], i) => {
-      if (key === '0') {
-        return { ...acc, [key]: value }
-      }
+    return Object.entries(comments).reduce(
+      (acc, [key, value], i) => {
+        if (key === '0') {
+          return { ...acc, [key]: value }
+        }
 
-      if (Object.entries(comments)[i + 1]) {
-        const newKey = Number(Object.keys(comments)[i + 1]) - 1
-        return { ...acc, [newKey]: value }
-      }
-      return { ...acc, [versesLength]: value }
-    }, {} as { [key: string]: string })
+        if (Object.entries(comments)[i + 1]) {
+          const newKey = Number(Object.keys(comments)[i + 1]) - 1
+          return { ...acc, [newKey]: value }
+        }
+        return { ...acc, [versesLength]: value }
+      },
+      {} as { [key: string]: string }
+    )
   }
 
   const navigateToPericope = () => {
@@ -538,7 +496,8 @@ const VersesRenderer = ({
   const comments = transformComments(originalComments, verses.length)
 
   const isHebreu =
-    version === 'BHS' || ((version === 'INT' || version === 'INT_EN') && Number(verses[0].Livre) < 40)
+    version === 'BHS' ||
+    ((version === 'INT' || version === 'INT_EN') && Number(verses[0].Livre) < 40)
   const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
@@ -551,11 +510,7 @@ const VersesRenderer = ({
 
   return (
     <DispatchProvider dispatch={dispatch}>
-      <Container
-        rtl={isHebreu}
-        settings={settings}
-        isParallelVerse={isParallelVerse}
-      >
+      <Container rtl={isHebreu} settings={settings} isParallelVerse={isParallelVerse}>
         {isParallelVerse && (
           <VersionsContainer settings={settings}>
             {parallelVersionTitles?.map((p, i) => (
@@ -584,48 +539,29 @@ const VersesRenderer = ({
               </div>
             ))}
             {parallelVerses.length < 3 && (
-              <ResponsivePlusIcon
-                settings={settings}
-                onClick={() => addParallelVersion()}
-              />
+              <ResponsivePlusIcon settings={settings} onClick={() => addParallelVersion()} />
             )}
           </VersionsContainer>
         )}
         {(version === 'INT' || version === 'INT_EN') && (
-          <IntMode
-            settings={settings}
-            onClick={() => setIsINTComplete(!isINTComplete)}
-          >
+          <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
             {isINTComplete ? 'Mode 1' : 'Mode 2'}
           </IntMode>
         )}
-        {isHebreu && (
-          <RightDirection settings={settings}>
-            Sens de la lecture ←
-          </RightDirection>
-        )}
+        {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
         {!!introComment && settings.commentsDisplay && (
-          <Comment
-            isIntro
-            id="comment-0"
-            settings={settings}
-            comment={introComment}
-          />
+          <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
         )}
 
         {verses.map((verse, i) => {
           if (verse.Verset == 0) return null
 
           const { Livre, Chapitre, Verset } = verse
-          const isSelected = Boolean(
-            selectedVerses[`${Livre}-${Chapitre}-${Verset}`]
-          )
+          const isSelected = Boolean(selectedVerses[`${Livre}-${Chapitre}-${Verset}`])
           const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
-          const isHighlighted = Boolean(
-            highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
-          )
+          const isHighlighted = Boolean(highlightedVerses[`${Livre}-${Chapitre}-${Verset}`])
           const tag: TaggedVerse | undefined = taggedVerses?.find(
-            (v) => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
+            v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
           )
           const highlightedColor = isHighlighted
             ? (highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
@@ -635,58 +571,37 @@ const VersesRenderer = ({
           const notesCount = notedVersesCount[Verset]
           const notesText = notedVersesText[Verset]
           const comment = comments?.[Verset]
-          const isFocused = focusVerses
-            ? focusVerses.includes(Number(Verset))
-            : undefined
+          const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
           const isVerseToScroll = verseToScroll == Verset
           const secondaryVerse = secondaryVerses && secondaryVerses[i]
           const parallelVerse = isParallelVerse
             ? extractParallelVerse(i, parallelVerses, verse, version)
             : []
 
-          const { h1, h2, h3, h4 } = getPericopeVerse(
-            pericopeChapter,
-            Number(Verset)
-          )
+          const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
 
           return (
             <Span key={`${Livre}-${Chapitre}-${Verset}`}>
               {h1 && (
-                <H1
-                  isHebreu={isHebreu}
-                  settings={settings}
-                  onClick={navigateToPericope}
-                >
+                <H1 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
                   {h1}
                   <ExternalIcon />
                 </H1>
               )}
               {h2 && (
-                <H2
-                  isHebreu={isHebreu}
-                  settings={settings}
-                  onClick={navigateToPericope}
-                >
+                <H2 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
                   {h2}
                   <ExternalIcon />
                 </H2>
               )}
               {h3 && (
-                <H3
-                  isHebreu={isHebreu}
-                  settings={settings}
-                  onClick={navigateToPericope}
-                >
+                <H3 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
                   {h3}
                   <ExternalIcon />
                 </H3>
               )}
               {h4 && (
-                <H4
-                  isHebreu={isHebreu}
-                  settings={settings}
-                  onClick={navigateToPericope}
-                >
+                <H4 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
                   {h4}
                   <ExternalIcon />
                 </H4>
@@ -712,11 +627,7 @@ const VersesRenderer = ({
                 tag={tag}
               />
               {!!comment && settings.commentsDisplay && (
-                <Comment
-                  id={`comment-${verse.Verset}`}
-                  settings={settings}
-                  comment={comment}
-                />
+                <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
               )}
             </Span>
           )

@@ -13,16 +13,9 @@ import Link, { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
 import Text from '~common/ui/Text'
-import {
-  FontText,
-  HalfContainer,
-  useParamsModalLabels,
-} from '~features/bible/BibleParamsModal'
+import { FontText, HalfContainer, useParamsModalLabels } from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import fonts from '~helpers/fonts'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -59,11 +52,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
     shallowEqual
   )
 
-  const {
-    preferredColorSchemeToString,
-    preferredLightThemeToString,
-    preferredDarkThemeToString,
-  } = useParamsModalLabels()
+  const { preferredColorSchemeToString, preferredLightThemeToString, preferredDarkThemeToString } =
+    useParamsModalLabels()
 
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
@@ -82,17 +72,13 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
         <Box padding={20} paddingBottom={20 + useSafeAreaInsets().bottom}>
           <HalfContainer border>
             <Text flex={5}>{t('Taille du texte')}</Text>
-            <Text marginLeft={5} fontSize={12} bold>{`${100 +
-              fontSizeScale * 10}%`}</Text>
+            <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
             <TouchableIcon
               name="type"
               size={15}
               onPress={() => dispatch(decreaseSettingsFontSizeScale())}
             />
-            <TouchableIcon
-              name="type"
-              onPress={() => dispatch(increaseSettingsFontSizeScale())}
-            />
+            <TouchableIcon name="type" onPress={() => dispatch(increaseSettingsFontSizeScale())} />
           </HalfContainer>
           <HalfContainer border>
             <Text flex={5}>{t('Thème')}</Text>
@@ -120,43 +106,25 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             <Text marginLeft={5} fontSize={12} bold>
               {preferredLightThemeToString[preferredLightTheme]}
             </Text>
-            <LinkBox
-              onPress={() =>
-                dispatch(setSettingsPreferredLightTheme('default'))
-              }
-            >
+            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}>
               <Circle
                 isSelected={preferredLightTheme === 'default'}
                 size={20}
                 color="rgb(255,255,255)"
               />
             </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
-            >
+            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}>
               <Circle
                 isSelected={preferredLightTheme === 'sepia'}
                 size={20}
                 color="rgb(245,242,227)"
               />
             </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
-            >
-              <Circle
-                isSelected={preferredLightTheme === 'nature'}
-                size={20}
-                color="#EAF9EC"
-              />
+            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}>
+              <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
             </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
-            >
-              <Circle
-                isSelected={preferredLightTheme === 'sunset'}
-                size={20}
-                color="#FAE0D5"
-              />
+            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}>
+              <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
             </LinkBox>
           </HalfContainer>
           <HalfContainer border>
@@ -164,41 +132,17 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             <Text marginLeft={5} fontSize={12} bold>
               {preferredDarkThemeToString[preferredDarkTheme]}
             </Text>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'dark'}
-                size={20}
-                color="rgb(18,45,66)"
-              />
+            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}>
+              <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
             </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'black'}
-                size={20}
-                color="black"
-              />
+            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}>
+              <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
             </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'mauve'}
-                size={20}
-                color="rgb(51,4,46)"
-              />
+            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}>
+              <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
             </LinkBox>
-            <LinkBox
-              onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
-            >
-              <Circle
-                isSelected={preferredDarkTheme === 'night'}
-                size={20}
-                color="rgb(0,50,100)"
-              />
+            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}>
+              <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
             </LinkBox>
           </HalfContainer>
           <Box>
@@ -210,9 +154,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
                 offset: 100 * index,
                 index,
               })}
-              initialScrollIndex={
-                initialScrollIndex === -1 ? 0 : initialScrollIndex
-              }
+              initialScrollIndex={initialScrollIndex === -1 ? 0 : initialScrollIndex}
               style={{ paddingVertical: 15 }}
               data={['Literata Book', ...fonts]}
               keyExtractor={item => item}
@@ -220,11 +162,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
                 const isSelected = fontFamily === item
                 return (
                   <Link onPress={() => dispatch(setFontFamily(item))}>
-                    <FontText
-                      scale={-2}
-                      isSelected={isSelected}
-                      style={{ fontFamily: item }}
-                    >
+                    <FontText scale={-2} isSelected={isSelected} style={{ fontFamily: item }}>
                       {item}
                     </FontText>
                   </Link>

@@ -23,10 +23,7 @@ function friction(value: number) {
 
   const res = Math.max(
     1,
-    Math.min(
-      MAX_FRICTION,
-      1 + (Math.abs(value) * (MAX_FRICTION - 1)) / MAX_VALUE
-    )
+    Math.min(MAX_FRICTION, 1 + (Math.abs(value) * (MAX_FRICTION - 1)) / MAX_VALUE)
   )
 
   if (value < 0) {
@@ -346,10 +343,7 @@ export default memo(
     useEffect(() => {
       if (canStartAnimation.value === 0) {
         x.value = entrance ? wpUI(100) : lowerBoundX - wpUI(100)
-        canStartAnimation.value = withDelay(
-          1500,
-          withTiming(1, { duration: 0 })
-        )
+        canStartAnimation.value = withDelay(1500, withTiming(1, { duration: 0 }))
       }
     }, [])
 
@@ -359,13 +353,9 @@ export default memo(
         if (canStartAnimation.value === 1) {
           if (!isReady.value) {
             opacity.value = 1
-            x.value = withTiming(
-              entrance ? 0 : lowerBoundX,
-              { duration: 1000 },
-              () => {
-                isReady.value = 1
-              }
-            )
+            x.value = withTiming(entrance ? 0 : lowerBoundX, { duration: 1000 }, () => {
+              isReady.value = 1
+            })
           }
         }
       }
@@ -414,29 +404,19 @@ export default memo(
             !isFirst &&
             (x.value - upperBoundX > 100 || e.velocityX > 1800)
           ) {
-            x.value = withTiming(
-              upperBoundX + wpUI(100),
-              { duration: 300 },
-              () => {
-                runOnJS(onPrev)()
-              }
-            )
+            x.value = withTiming(upperBoundX + wpUI(100), { duration: 300 }, () => {
+              runOnJS(onPrev)()
+            })
           } else if (
             direction === 'right' &&
             !isLast &&
             (x.value - lowerBoundX < -100 || e.velocityX < -1800)
           ) {
-            x.value = withTiming(
-              lowerBoundX - wpUI(100),
-              { duration: 300 },
-              () => {
-                runOnJS(onNext)()
-              }
-            )
+            x.value = withTiming(lowerBoundX - wpUI(100), { duration: 300 }, () => {
+              runOnJS(onNext)()
+            })
           } else {
-            x.value = withTiming(
-              Math.max(lowerBoundX, Math.min(upperBoundX, x.value))
-            )
+            x.value = withTiming(Math.max(lowerBoundX, Math.min(upperBoundX, x.value)))
           }
         } else {
           x.value = withDecay({
@@ -449,9 +429,7 @@ export default memo(
         }
         const isInBoundY = y.value >= lowerBoundY && y.value <= upperBoundY
         if (!isInBoundY) {
-          y.value = withTiming(
-            Math.max(lowerBoundY, Math.min(upperBoundY, y.value))
-          )
+          y.value = withTiming(Math.max(lowerBoundY, Math.min(upperBoundY, y.value)))
         } else {
           y.value = withDecay({
             velocity: e.velocityY,
@@ -476,9 +454,7 @@ export default memo(
         }}
       >
         <GestureDetector gesture={panGesture}>
-          <Animated.View style={[{ width, height }, animatedStyles]}>
-            {children}
-          </Animated.View>
+          <Animated.View style={[{ width, height }, animatedStyles]}>{children}</Animated.View>
         </GestureDetector>
       </View>
     )

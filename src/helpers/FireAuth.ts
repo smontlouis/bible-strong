@@ -35,12 +35,12 @@ const FireAuth = class {
   onError = null
 
   async init(
-    onLogin,
-    onUserChange,
-    onLogout,
-    onEmailVerified,
-    onError,
-    dispatch
+    onLogin: any,
+    onUserChange: any,
+    onLogout: any,
+    onEmailVerified: any,
+    onError: any,
+    dispatch: any
   ) {
     this.onUserChange = onUserChange
     this.onLogout = onLogout
@@ -50,11 +50,10 @@ const FireAuth = class {
 
     GoogleSignin.configure({
       scopes: ['profile', 'email', 'openid'],
-      webClientId:
-        '204116128917-56eubi7hu2f0k3rnb6dn8q3sfv23588l.apps.googleusercontent.com',
+      webClientId: '204116128917-56eubi7hu2f0k3rnb6dn8q3sfv23588l.apps.googleusercontent.com',
     })
 
-    auth().onAuthStateChanged(async (user) => {
+    auth().onAuthStateChanged(async user => {
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
@@ -87,9 +86,11 @@ const FireAuth = class {
             /**
              * 1.b. We call the onLogin callback dispatching onUserLoginSuccess
              */
+            // @ts-ignore
             this.onLogin({ profile })
           }
 
+          // @ts-ignore
           this.user = user // Store user
 
           if (!__DEV__) {
@@ -106,7 +107,7 @@ const FireAuth = class {
   }
 
   appleLogin = () =>
-    new Promise(async (resolve) => {
+    new Promise(async resolve => {
       try {
         const appleAuthRequestResponse = await appleAuth.performRequest({
           requestedOperation: appleAuth.Operation.LOGIN,
@@ -118,22 +119,15 @@ const FireAuth = class {
         // can be null in some scenarios
         if (identityToken) {
           // 3). create a Firebase `AppleAuthProvider` credential
-          const appleCredential = auth.AppleAuthProvider.credential(
-            identityToken,
-            nonce
-          )
-          const userCredential = await auth().signInWithCredential(
-            appleCredential
-          )
+          const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce)
+          const userCredential = await auth().signInWithCredential(appleCredential)
 
-          console.log(
-            `Firebase authenticated via Apple, UID: ${userCredential.user.uid}`
-          )
+          console.log(`Firebase authenticated via Apple, UID: ${userCredential.user.uid}`)
           resolve(false)
         } else {
           resolve(false)
         }
-      } catch (e) {
+      } catch (e: any) {
         if (e.code === 'ERR_CANCELED') {
           console.log('ERR_CANCELED')
         } else {
@@ -169,7 +163,7 @@ const FireAuth = class {
   //   })
 
   googleLogin = () =>
-    new Promise(async (resolve) => {
+    new Promise(async resolve => {
       try {
         await GoogleSignin.hasPlayServices()
         const signInResult = await GoogleSignin.signIn()
@@ -188,41 +182,41 @@ const FireAuth = class {
       }
     })
 
-  onCredentialSuccess = async (credential, resolve) => {
+  onCredentialSuccess = async (credential: any, resolve: any) => {
     try {
       const user = await auth().signInWithCredential(credential)
 
       console.log('user signed in ', user)
       SnackBar.show(i18n.t('Connexion réussie'))
       return resolve(true)
-    } catch (e) {
+    } catch (e: any) {
       console.log(e.code)
       if (e.code === 'auth/account-exists-with-different-credential') {
-        SnackBar.show(
-          i18n.t('Cet utilisateur existe déjà avec un autre compte.'),
-          'danger'
-        )
+        SnackBar.show(i18n.t('Cet utilisateur existe déjà avec un autre compte.'), 'danger')
       }
       return resolve(false)
     }
   }
 
-  login = (email, password) =>
-    new Promise(async (resolve) => {
+  login = (email: any, password: any) =>
+    new Promise(async resolve => {
       try {
         auth()
           .signInWithEmailAndPassword(email.trim(), password.trim())
           .then(() => {
+            // @ts-ignore
             resolve(true)
           })
-          .catch((err) => {
+          .catch(err => {
             if (this.onError) {
+              // @ts-ignore
               this.onError(err)
             }
             resolve(false)
           })
       } catch (e) {
         if (this.onError) {
+          // @ts-ignore
           this.onError(e)
         }
         resolve(false)
@@ -232,9 +226,10 @@ const FireAuth = class {
   sendEmailVerification = async () => {
     const user = auth().currentUser
     try {
+      // @ts-ignore
       await user.sendEmailVerification()
       SnackBar.show(i18n.t('Email envoyé'))
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'auth/too-many-requests') {
         SnackBar.show(i18n.t('Un mail a déjà été envoyé. Réessayez plus tard'))
       } else {
@@ -243,31 +238,34 @@ const FireAuth = class {
     }
   }
 
-  resetPassword = (email) =>
-    new Promise(async (resolve) => {
+  resetPassword = (email: any) =>
+    new Promise(async resolve => {
       try {
         auth()
           .sendPasswordResetEmail(email)
           .then(() => {
             SnackBar.show(i18n.t('Email envoyé.'))
+            // @ts-ignore
             resolve(false)
           })
-          .catch((err) => {
+          .catch(err => {
             if (this.onError) {
+              // @ts-ignore
               this.onError(err)
             }
             resolve(false)
           })
       } catch (e) {
         if (this.onError) {
+          // @ts-ignore
           this.onError(e)
         }
         resolve(false)
       }
     })
 
-  register = (username, email, password) =>
-    new Promise(async (resolve) => {
+  register = (username: any, email: any, password: any) =>
+    new Promise(async resolve => {
       try {
         auth()
           .createUserWithEmailAndPassword(email, password)
@@ -278,16 +276,19 @@ const FireAuth = class {
               .set({ displayName: username }, { merge: true })
 
             user.sendEmailVerification()
+            // @ts-ignore
             return resolve(true)
           })
-          .catch((err) => {
+          .catch(err => {
             if (this.onError) {
+              // @ts-ignore
               this.onError(err)
             }
             return resolve(false)
           })
       } catch (e) {
         if (this.onError) {
+          // @ts-ignore
           this.onError(e)
         }
         return resolve(false)
@@ -299,6 +300,7 @@ const FireAuth = class {
 
     // Sign-out successful.
     this.user = null
+    // @ts-ignore
     this.onLogout?.()
 
     // Reset token manager state

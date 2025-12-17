@@ -45,13 +45,9 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
       throw new Error('DISK_IO')
     }
 
-    SnackBar.show(
-      i18n.t('Une error est survenue, le développeur en a été informé.'),
-      'danger',
-      {
-        duration: 5000,
-      }
-    )
+    SnackBar.show(i18n.t('Une error est survenue, le développeur en a été informé.'), 'danger', {
+      duration: 5000,
+    })
 
     console.log(e)
     Sentry.captureException(e)

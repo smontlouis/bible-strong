@@ -30,13 +30,10 @@ player.seekTo(${seconds}, ${allowSeekAhead})
   pauseVideo: 'player.pauseVideo(); true;',
   muteVideo: 'player.mute(); true;',
   unMuteVideo: 'player.unMute(); true;',
-  setPlaybackRate: playbackRate =>
-    `player.setPlaybackRate(${playbackRate}); true;`,
+  setPlaybackRate: playbackRate => `player.setPlaybackRate(${playbackRate}); true;`,
   setVolume: volume => `player.setVolume(${volume}); true;`,
   loadPlaylist: (playList, startIndex, play) => `
-  player.${play ? 'loadPlaylist' : 'cuePlaylist'}({playlist: ${JSON.stringify(
-    playList
-  )},
+  player.${play ? 'loadPlaylist' : 'cuePlaylist'}({playlist: ${JSON.stringify(playList)},
     index: ${startIndex || 0}}); true;`,
 }
 

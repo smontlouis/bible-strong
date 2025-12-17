@@ -27,15 +27,16 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const getPrevNextVersions = (versionsArray, version) => {
-  const index = versionsArray.findIndex(v => v === version)
+const getPrevNextVersions = (versionsArray: any, version: any) => {
+  const index = versionsArray.findIndex((v: any) => v === version)
   return [versionsArray[index - 1], versionsArray[index + 1]]
 }
 
-const Header = ({ hasBackButton, isModal, title, version, setVersion }) => {
+const Header = ({ hasBackButton, isModal, title, version, setVersion }: any) => {
   const versionsArray = Object.keys(getVersions())
   const [prevVersion, nextVersion] = getPrevNextVersions(versionsArray, version)
   return (
+    // @ts-ignore
     <HeaderBox row overflow="visibility">
       <Box justifyContent="center">
         {hasBackButton && (

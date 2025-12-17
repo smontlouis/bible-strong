@@ -1,23 +1,15 @@
 import React from 'react'
 
 import SectionList from '~common/ui/SectionList'
-import {
-  ComputedPlan,
-  ComputedSection,
-  ComputedReadingSlice,
-} from '~common/types'
+import { ComputedPlan, ComputedSection, ComputedReadingSlice } from '~common/types'
 import ReadingSlice from './ReadingSlice'
 import SectionHeader from './SectionHeader'
 
 const PlanSectionList = ({ id, sections }: ComputedPlan) => {
-  const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>(
-    []
-  )
+  const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>([])
 
   React.useEffect(() => {
-    const currentSectionId = sections.find(s =>
-      s.data.find(d => d.status === 'Next')
-    )?.id
+    const currentSectionId = sections.find(s => s.data.find(d => d.status === 'Next'))?.id
     if (currentSectionId) {
       setExpandedSectionIds([currentSectionId])
     }
@@ -41,6 +33,7 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
           data: expandedSectionIds.includes(s.id) ? s.data : [],
         }))}
         keyExtractor={(section: ComputedSection) => section.id}
+        // @ts-ignore
         renderItem={({
           item: slice,
           index,
@@ -61,6 +54,7 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
             isLast={index === section.data.length - 1}
           />
         )}
+        // @ts-ignore
         renderSectionHeader={({ section }: { section: ComputedSection }) => (
           <SectionHeader
             key={section.id}

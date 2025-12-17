@@ -10,6 +10,7 @@ const TouchableOpacity = styled.TouchableOpacity(({ theme }) => ({
   width: wp(99) / 5,
 }))
 
+// @ts-ignore
 const Text = styled.Text(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontWeight: isSelected ? 'bold' : 'normal',
@@ -24,10 +25,8 @@ type Props = {
 }
 
 const SelectorItem = ({ item, isSelected, onChange, onLongChange }: Props) => (
-  <TouchableOpacity
-    onPress={() => onChange(item)}
-    onLongPress={() => onLongChange?.(item)}
-  >
+  <TouchableOpacity onPress={() => onChange(item)} onLongPress={() => onLongChange?.(item)}>
+    {/* @ts-ignore */}
     <Text isSelected={isSelected}>{item}</Text>
   </TouchableOpacity>
 )

@@ -6,7 +6,7 @@ import Text from '~common/ui/Text'
 export const DebugView = () => {
   const setTabs = useSetAtom(tabsAtom)
   const addTabs = () => {
-    setTabs((s) => [
+    setTabs(s => [
       ...s,
       ...Array.from({ length: 100 }, (_, i) => ({
         ...getDefaultBibleTab(),

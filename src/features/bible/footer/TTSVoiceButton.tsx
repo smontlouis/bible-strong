@@ -16,9 +16,7 @@ export interface TTSVoiceButtonProps extends BoxProps {
   currentVersion: VersionCode
 }
 
-const filterToKnownLanguages = (versionCode: VersionCode) => (
-  voice: Speech.Voice
-) => {
+const filterToKnownLanguages = (versionCode: VersionCode) => (voice: Speech.Voice) => {
   const bibleVersion = versions[versionCode]
 
   const knownLanguages = (() => {
@@ -33,11 +31,10 @@ const filterToKnownLanguages = (versionCode: VersionCode) => (
 
 const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
   const { t } = useTranslation()
-  const [voices, setVoices] = React.useState<Speech.Voice[] | undefined>(
-    undefined
-  )
+  const [voices, setVoices] = React.useState<Speech.Voice[] | undefined>(undefined)
   const [selectedVoice, setSelectedVoice] = useAtom(ttsVoiceAtom)
-  const choices =
+  const choices: any =
+    // @ts-ignore
     [
       {
         value: 'default',
@@ -71,11 +68,7 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
-          <FeatherIcon
-            name="mic"
-            size={14}
-            color={isActive ? 'primary' : 'default'}
-          />
+          <FeatherIcon name="mic" size={14} color={isActive ? 'primary' : 'default'} />
           <Text
             ml={5}
             bold

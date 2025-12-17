@@ -40,10 +40,7 @@ export function getVersionUpdate() {
 
       dispatch({
         type: GET_VERSION_UPDATE_SUCCESS,
-        payload: versionsNeedUpdate.reduce(
-          (acc, curr) => ({ ...acc, ...curr }),
-          {}
-        ),
+        payload: versionsNeedUpdate.reduce((acc, curr) => ({ ...acc, ...curr }), {}),
       })
     } catch (e) {
       dispatch({
@@ -76,10 +73,7 @@ export function getDatabaseUpdate() {
 
       dispatch({
         type: GET_VERSION_UPDATE_SUCCESS,
-        payload: databasesNeedUpdate.reduce(
-          (acc, curr) => ({ ...acc, ...curr }),
-          {}
-        ),
+        payload: databasesNeedUpdate.reduce((acc, curr) => ({ ...acc, ...curr }), {}),
       })
     } catch (e) {
       dispatch({

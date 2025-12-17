@@ -77,7 +77,9 @@ export default {
   5: (state: RootState) => {
     return {
       ...state,
+      // @ts-ignore
       bible: {
+        // @ts-ignore
         ...state.bible,
       },
     }
@@ -186,7 +188,9 @@ export default {
   12: (state: RootState) => {
     return {
       ...state,
+      // @ts-ignore
       bible: {
+        // @ts-ignore
         ...state.bible,
       },
     }
@@ -247,7 +251,9 @@ export default {
   18: (state: RootState) => {
     return {
       ...state,
+      // @ts-ignore
       bible: {
+        // @ts-ignore
         ...state.bible,
         parallelVersions: [],
       },
@@ -284,7 +290,9 @@ export default {
         ...state.user,
         subscription: undefined,
       },
+      // @ts-ignore
       bible: {
+        // @ts-ignore
         ...state.bible,
         selectionMode: 'grid',
       },

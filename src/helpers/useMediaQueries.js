@@ -27,8 +27,7 @@ export const useMediaQueriesArray = () => {
   const mediaQuery = useMediaQueries()
   const dimensionsArray = ['xs', 'sm', 'md', 'lg']
   const mqPosition = dimensionsArray.findIndex(d => d === mediaQuery)
-  return styles =>
-    Array.isArray(styles) ? styles[mqPosition] : styles[mediaQuery]
+  return styles => (Array.isArray(styles) ? styles[mqPosition] : styles[mediaQuery])
 }
 
 export default useMediaQueries

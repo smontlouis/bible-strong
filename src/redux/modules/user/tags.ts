@@ -33,7 +33,7 @@ export default produce((draft, action) => {
 
       entitiesArray.forEach(ent => {
         const entities = draft.bible[ent]
-        Object.values(entities).forEach(entity => {
+        Object.values(entities).forEach((entity: any) => {
           const entityTags = entity.tags
           if (entityTags && entityTags[action.id]) {
             entityTags[action.id].name = action.value
@@ -48,7 +48,7 @@ export default produce((draft, action) => {
 
       entitiesArray.forEach(ent => {
         const entities = draft.bible[ent]
-        Object.values(entities).forEach(entity => {
+        Object.values(entities).forEach((entity: any) => {
           const entityTags = entity.tags
           if (entityTags && entityTags[action.payload]) {
             delete entityTags[action.payload]
@@ -61,8 +61,7 @@ export default produce((draft, action) => {
       const { item, tagId } = action.payload
 
       if (item.ids) {
-        const hasTag =
-          draft.bible[item.entity][Object.keys(item.ids)[0]]?.tags?.[tagId]
+        const hasTag = draft.bible[item.entity][Object.keys(item.ids)[0]]?.tags?.[tagId]
 
         Object.keys(item.ids).forEach(id => {
           // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
@@ -104,13 +103,8 @@ export default produce((draft, action) => {
           delete draft.bible[item.entity][item.id].tags[tagId]
 
           // If words / strongs / nave, delete unused entity
-          if (
-            ['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(
-              item.entity
-            )
-          ) {
-            const hasTags = Object.keys(draft.bible[item.entity][item.id].tags)
-              .length
+          if (['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(item.entity)) {
+            const hasTags = Object.keys(draft.bible[item.entity][item.id].tags).length
 
             if (!hasTags) {
               delete draft.bible[item.entity][item.id]
@@ -142,14 +136,14 @@ export default produce((draft, action) => {
 })
 
 // TAGS
-export function addTag(payload) {
+export function addTag(payload: any) {
   return {
     type: ADD_TAG,
     payload,
   }
 }
 
-export function updateTag(id, value) {
+export function updateTag(id: any, value: any) {
   return {
     type: UPDATE_TAG,
     id,
@@ -157,14 +151,14 @@ export function updateTag(id, value) {
   }
 }
 
-export function removeTag(payload) {
+export function removeTag(payload: any) {
   return {
     type: REMOVE_TAG,
     payload,
   }
 }
 
-export function toggleTagEntity({ item, tagId }) {
+export function toggleTagEntity({ item, tagId }: any) {
   return {
     type: TOGGLE_TAG_ENTITY,
     payload: { item, tagId },

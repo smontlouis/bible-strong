@@ -44,21 +44,18 @@ export const useFirestoreMigration = () => {
    * Uses checkForEmbeddedData to support incremental migration
    * (old app on another device may still sync to embedded bible.*)
    */
-  const checkMigrationNeeded = useCallback(
-    async (userId: string): Promise<boolean> => {
-      // Check if there's embedded data to migrate
-      // This is more accurate than checking _migrated flag alone
-      const { hasEmbeddedData } = await checkForEmbeddedData(userId)
-      if (!hasEmbeddedData) {
-        // No embedded data - clear any stale local migration state
-        clearMigrationState()
-        return false
-      }
+  const checkMigrationNeeded = useCallback(async (userId: string): Promise<boolean> => {
+    // Check if there's embedded data to migrate
+    // This is more accurate than checking _migrated flag alone
+    const { hasEmbeddedData } = await checkForEmbeddedData(userId)
+    if (!hasEmbeddedData) {
+      // No embedded data - clear any stale local migration state
+      clearMigrationState()
+      return false
+    }
 
-      return true
-    },
-    []
-  )
+    return true
+  }, [])
 
   /**
    * Start or resume the migration process
@@ -93,9 +90,7 @@ export const useFirestoreMigration = () => {
           collectionsCompleted: 0,
           totalCollections: 7,
           overallProgress: 0,
-          message: isResuming
-            ? 'Reprise de la migration...'
-            : 'Démarrage de la migration...',
+          message: isResuming ? 'Reprise de la migration...' : 'Démarrage de la migration...',
           error: null,
           hasPartialFailure: false,
           failedCollections: [],
@@ -128,14 +123,13 @@ export const useFirestoreMigration = () => {
           }))
 
           // Small delay before hiding the modal
-          await new Promise((resolve) => setTimeout(resolve, 1500))
+          await new Promise(resolve => setTimeout(resolve, 1500))
           resetProgress()
 
           return true
         } else {
           // Migration failed or partially failed
-          const failedCollections =
-            result.failedCollections as SubcollectionName[]
+          const failedCollections = result.failedCollections as SubcollectionName[]
 
           setProgress((prev: MigrationProgress) => ({
             ...prev,

@@ -41,6 +41,7 @@ const PlanItem = ({
     <Link
       route="Plan"
       params={{
+        // @ts-ignore
         plan: {
           id,
           title,
@@ -115,12 +116,7 @@ const PlanItem = ({
           center
           marginLeft={20}
         >
-          <FeatherIcon
-            name="chevron-right"
-            color="reverse"
-            size={17}
-            style={{ marginLeft: 2 }}
-          />
+          <FeatherIcon name="chevron-right" color="reverse" size={17} style={{ marginLeft: 2 }} />
         </Box>
       </Box>
     </Link>

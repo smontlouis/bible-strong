@@ -87,8 +87,7 @@ const calculateProgress = (
   return (
     ongoingReadingSlices.filter(oReadingSlice =>
       readingSlices.find(
-        rSlice =>
-          rSlice.id === oReadingSlice.id && oReadingSlice.status === 'Completed'
+        rSlice => rSlice.id === oReadingSlice.id && oReadingSlice.status === 'Completed'
       )
     ).length / readingSlices.length
   )
@@ -108,9 +107,7 @@ const transformSections = (
     progress: calculateProgress(s.readingSlices, ongoingReadingSlices),
     readingSlices: undefined,
     data: s.readingSlices.map(rSlice => {
-      const ongoingReadingSlice = ongoingReadingSlices?.find(
-        r => r.id === rSlice.id
-      )
+      const ongoingReadingSlice = ongoingReadingSlices?.find(r => r.id === rSlice.id)
       if (ongoingReadingSlice) {
         return {
           ...rSlice,
@@ -149,20 +146,17 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
       []
     )
 
-    const onGoingReadingSlicesArray = Object.entries(
-      ongoingPlan?.readingSlices
-    ).map(([id, status]) => ({
-      id,
-      status,
-    }))
+    const onGoingReadingSlicesArray = Object.entries(ongoingPlan?.readingSlices).map(
+      ([id, status]) => ({
+        id,
+        status,
+      })
+    )
 
     return {
       ...plan,
       status: ongoingPlan.status,
-      progress: calculateProgress(
-        flattenedReadingSlices,
-        onGoingReadingSlicesArray
-      ),
+      progress: calculateProgress(flattenedReadingSlices, onGoingReadingSlicesArray),
       sections: transformSections(plan.sections, onGoingReadingSlicesArray),
     }
   }
@@ -202,48 +196,40 @@ const compareOngoingPlans = (prev: OngoingPlan[], next: OngoingPlan[]) => {
  * Return computed plan items for the plan list
  */
 export const useComputedPlanItems = (): ComputedPlanItem[] => {
-  const myPlans = useSelector(
-    (state: RootState) => state.plan.myPlans,
-    compareMyPlans
-  )
+  const myPlans = useSelector((state: RootState) => state.plan.myPlans, compareMyPlans)
   const ongoingPlans = useSelector(
     (state: RootState) => state.plan.ongoingPlans,
     compareOngoingPlans
   )
 
-  const computedPlansItems: ComputedPlanItem[] = myPlans.map(
-    ({ sections, ...plan }) => {
-      const ongoingPlan = ongoingPlans.find(uP => uP.id === plan.id)
+  const computedPlansItems: ComputedPlanItem[] = myPlans.map(({ sections, ...plan }) => {
+    const ongoingPlan = ongoingPlans.find(uP => uP.id === plan.id)
 
-      if (ongoingPlan) {
-        const onGoingReadingSlicesArray = Object.entries(
-          ongoingPlan?.readingSlices
-        ).map(([id, status]) => ({
+    if (ongoingPlan) {
+      const onGoingReadingSlicesArray = Object.entries(ongoingPlan?.readingSlices).map(
+        ([id, status]) => ({
           id,
           status,
-        }))
+        })
+      )
 
-        // Calculate progress
-        const flattenedReadingSlices: ReadingSlice[] = sections.reduce(
-          (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
-          []
-        )
-        return {
-          ...plan,
-          status: ongoingPlan.status,
-          progress: calculateProgress(
-            flattenedReadingSlices,
-            onGoingReadingSlicesArray
-          ),
-        }
-      }
+      // Calculate progress
+      const flattenedReadingSlices: ReadingSlice[] = sections.reduce(
+        (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
+        []
+      )
       return {
         ...plan,
-        status: 'Idle',
-        progress: 0,
+        status: ongoingPlan.status,
+        progress: calculateProgress(flattenedReadingSlices, onGoingReadingSlicesArray),
       }
     }
-  )
+    return {
+      ...plan,
+      status: 'Idle',
+      progress: 0,
+    }
+  })
 
   return computedPlansItems
 }
@@ -255,22 +241,20 @@ export const useDownloadPlans = () => {
   const myPlans = useSelector((state: RootState) => state.plan.myPlans)
   const [isLoading, setIsLoading] = React.useState(false)
   const dispatch = useDispatch()
-  const ongoingPlans = useSelector(
-    (state: RootState) => state.plan.ongoingPlans,
-    shallowEqual
-  )
+  const ongoingPlans = useSelector((state: RootState) => state.plan.ongoingPlans, shallowEqual)
 
   React.useEffect(() => {
     ;(async () => {
       const planNeedsToBeDownloaded = ongoingPlans.filter(
-        plan => !myPlans.find(myPlan => myPlan.id === plan.id)
+        (plan: any) => !myPlans.find((myPlan: any) => myPlan.id === plan.id)
       )
 
       let err
       ;[err] = await to(
         Promise.all(
-          planNeedsToBeDownloaded.map(async planToDownload => {
+          planNeedsToBeDownloaded.map(async (planToDownload: any) => {
             setIsLoading(true)
+            // @ts-ignore
             return (await dispatch(fetchPlan({ id: planToDownload.id }))) as any
           })
         )
@@ -279,9 +263,7 @@ export const useDownloadPlans = () => {
       setIsLoading(false)
 
       if (err) {
-        SnackBar.show(
-          'Impossible de télécharger vos plans, vérifiez votre connexion internet.'
-        )
+        SnackBar.show('Impossible de télécharger vos plans, vérifiez votre connexion internet.')
       }
     })()
   }, [])
@@ -296,6 +278,7 @@ export const useDownloadPlans = () => {
 export const useUpdatePlans = () => {
   const dispatch = useDispatch()
   React.useEffect(() => {
+    // @ts-ignore
     dispatch(updatePlans())
   }, [dispatch])
 }
@@ -308,9 +291,10 @@ const chapterStringToArray = (chapters: string) => {
   const [book, numberRange] = chapters.split('|')
   const [startChapter, endChapter] = numberRange.split('-').map(Number)
 
-  return (endChapter
-    ? range(startChapter, endChapter).map(n => `${book}-${n}`)
-    : [`${book}-${startChapter}`]
+  return (
+    endChapter
+      ? range(startChapter, endChapter).map(n => `${book}-${n}`)
+      : [`${book}-${startChapter}`]
   ).map(c => c.split('-'))
 }
 
@@ -326,33 +310,33 @@ export const getChaptersForPlan = async (
   const book = chapters.split('|').map(Number)[0]
   const bookName = i18n.t(books[book - 1].Nom)
   const chaptersRange = chapterStringToArray(chapters)
+  // @ts-ignore
   const bible = await loadBible(version)
+  // @ts-ignore
   const pericope = await getBiblePericope(version)
 
-  const content: ChapterForPlanContent[] = chaptersRange.map(
-    (cRange: string[]) => {
-      const [, chapter] = cRange.map(Number)
-      const chapterContent = Object.keys(bible[book][chapter]).map(v => ({
-        Pericope: pericope?.[book]?.[chapter]?.[v] || {},
-        Verset: v,
-        Texte: bible[book][chapter][v],
-      }))
+  const content: ChapterForPlanContent[] = chaptersRange.map((cRange: string[]) => {
+    const [, chapter] = cRange.map(Number)
+    const chapterContent = Object.keys(bible[book][chapter]).map((v: any) => ({
+      Pericope: pericope?.[book]?.[chapter]?.[v] || {},
+      Verset: v,
+      Texte: bible[book][chapter][v],
+    }))
 
-      return {
-        title: `${i18n.t('Chapitre')} ${chapter}`,
-        verses: chapterContent,
-        viewMore: {
-          route: 'BibleView',
-          params: {
-            isReadOnly: true,
-            book,
-            chapter,
-            verse: 1,
-          },
+    return {
+      title: `${i18n.t('Chapitre')} ${chapter}`,
+      verses: chapterContent,
+      viewMore: {
+        route: 'BibleView',
+        params: {
+          isReadOnly: true,
+          book,
+          chapter,
+          verse: 1,
         },
-      }
+      },
     }
-  )
+  })
 
   return { bookName, chapters: content }
 }
@@ -385,21 +369,21 @@ export const useChapterToContent = (chapters: string) => {
  * @param verses
  * @param version
  */
-export const getVersesForPlan = async (
-  verses: string,
-  version: string
-): Promise<VerseForPlan> => {
+export const getVersesForPlan = async (verses: string, version: string): Promise<VerseForPlan> => {
   const [book, rest] = verses.split('|')
   const bookName = verseToReference(verses, { isPlan: true })
 
   const [chapter, numberRange] = rest.split(':')
   const [startVerse, endVerse] = numberRange.split('-').map(Number)
-  const versesRange: number[][] = (endVerse
-    ? range(startVerse, endVerse).map(n => `${book}-${chapter}-${n}`)
-    : [`${book}-${chapter}-${startVerse}`]
+  const versesRange: number[][] = (
+    endVerse
+      ? range(startVerse, endVerse).map(n => `${book}-${chapter}-${n}`)
+      : [`${book}-${chapter}-${startVerse}`]
   ).map(c => c.split('-').map(Number))
 
+  // @ts-ignore
   const bible = await loadBible(version)
+  // @ts-ignore
   const pericope = await getBiblePericope(version)
 
   const content: VerseContent[] = versesRange.map((vRange: number[]) => {
@@ -422,6 +406,7 @@ export const getVersesForPlan = async (
         isReadOnly: true,
         book: Number(book),
         chapter: Number(chapter),
+        // @ts-ignore
         verse: startVerse,
       },
     },
@@ -454,9 +439,7 @@ export const useVersesToContent = (verses: string) => {
 export const useFireStorage = (src?: string) => {
   const [imageUrl, setImageUrl] = React.useState<string>()
   const dispatch = useDispatch()
-  const cachedUri = useSelector(
-    (state: RootState) => src && state.plan.images[src]
-  )
+  const cachedUri = useSelector((state: RootState) => src && state.plan.images[src])
 
   React.useEffect(() => {
     if (!src) return
@@ -469,6 +452,7 @@ export const useFireStorage = (src?: string) => {
       try {
         const uri = cdnUrl(`images/${src}.png`)
         setImageUrl(uri)
+        // @ts-ignore
         dispatch(cacheImage({ id: src, value: uri }))
       } catch (e) {
         console.log(`can't find: images/${src}`)

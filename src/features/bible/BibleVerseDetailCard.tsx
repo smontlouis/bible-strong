@@ -105,11 +105,7 @@ interface State {
   formattedTexte: React.ReactNode | null
 }
 
-const BibleVerseDetailCard: React.FC<Props> = ({
-  verse,
-  isSelectionMode,
-  updateVerse,
-}) => {
+const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateVerse }) => {
   const navigation = useNavigation()
   const theme = useTheme()
   const { t } = useTranslation()
@@ -132,8 +128,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       return
     }
 
-    const versesInCurrentChapter =
-      countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
+    const versesInCurrentChapter = countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
 
     setState(prev => ({ ...prev, versesInCurrentChapter }))
     formatVerse(strongVerse)
@@ -161,8 +156,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const goToCarouselItem = (ref: string | number) => {
     setState(prev => ({
       ...prev,
-      currentStrongReference:
-        state.strongReferences.find(r => r.Code === Number(ref)) || null,
+      currentStrongReference: state.strongReferences.find(r => r.Code === Number(ref)) || null,
     }))
   }
 
@@ -173,19 +167,17 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     }))
   }
 
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: StrongReference
-    index: number
-  }) => {
+  const renderItem = ({ item, index }: { item: StrongReference; index: number }) => {
     return (
       <StrongCard
         theme={theme}
+        // @ts-ignore
         isSelectionMode={isSelectionMode}
+        // @ts-ignore
         navigation={navigation}
+        // @ts-ignore
         book={verse.Livre}
+        // @ts-ignore
         strongReference={item}
         index={index}
       />
@@ -196,12 +188,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     loadPage()
   }, [verse.Verset])
 
-  const {
-    isCarouselLoading,
-    versesInCurrentChapter,
-    error,
-    formattedTexte,
-  } = state
+  const { isCarouselLoading, versesInCurrentChapter, error, formattedTexte } = state
 
   if (error) {
     return (
@@ -287,11 +274,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             data={state.strongReferences}
             renderItem={renderItem}
             onSnapToItem={onSnapToItem}
-            defaultIndex={
-              currentStrongReferenceIndex === -1
-                ? 0
-                : currentStrongReferenceIndex
-            }
+            defaultIndex={currentStrongReferenceIndex === -1 ? 0 : currentStrongReferenceIndex}
           />
         )}
       </Box>

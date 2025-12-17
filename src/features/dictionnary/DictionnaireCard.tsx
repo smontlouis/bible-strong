@@ -49,15 +49,16 @@ const IconFeather = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const smallTextStyle = theme => ({
+const smallTextStyle = (theme: any) => ({
   lineHeight: 18,
   fontSize: 12,
   color: theme.colors.default,
   fontFamily: theme.fontFamily.paragraph,
 })
 
-class StrongCard extends React.Component {
+class StrongCard extends React.Component<any> {
   openStrong = () => {
+    // @ts-ignore
     const {
       navigation,
       isSelectionMode,
@@ -72,11 +73,8 @@ class StrongCard extends React.Component {
   }
 
   render() {
-    const {
-      isSelectionMode,
-      dictionnaireRef: { word, definition } = {},
-      theme,
-    } = this.props
+    // @ts-ignore
+    const { isSelectionMode, dictionnaireRef: { word, definition } = {}, theme } = this.props
 
     if (!word) {
       return (
@@ -98,6 +96,7 @@ class StrongCard extends React.Component {
 
     const { html } = truncHTML(definition.replace(/\n/gi, ''), 500)
     return (
+      // @ts-ignore
       <Container overflow>
         {/* <Shadow overflow /> */}
         <Box paddingTop={10}>
@@ -116,9 +115,11 @@ class StrongCard extends React.Component {
           </Box>
         </Box>
 
+        {/* @ts-ignore */}
         <BottomSheetScrollView style={{ marginBottom: 15 }}>
           {!!definition && (
             <ViewItem>
+              {/* @ts-ignore */}
               <StylizedHTMLView
                 htmlStyle={{
                   p: { ...smallTextStyle(theme) },

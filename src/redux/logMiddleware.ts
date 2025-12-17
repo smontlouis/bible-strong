@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 
-export const logger = store => next => action => {
+export const logger = (store: any) => (next: any) => (action: any) => {
   Sentry.addBreadcrumb({
     category: 'Dispatch',
     message: action.type,
@@ -14,7 +14,7 @@ export const logger = store => next => action => {
   return result
 }
 
-export const crashReporter = store => next => action => {
+export const crashReporter = (store: any) => (next: any) => (action: any) => {
   try {
     return next(action)
   } catch (err) {

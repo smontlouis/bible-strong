@@ -29,12 +29,7 @@ const DetailedHeader = ({
           <FeatherIcon name={'arrow-left'} size={20} />
         </Back>
       )}
-      <Box
-        flex
-        marginTop={-5}
-        paddingVertical={20}
-        paddingLeft={hasBackButton ? 0 : 20}
-      >
+      <Box flex marginTop={-5} paddingVertical={20} paddingLeft={hasBackButton ? 0 : 20}>
         <Text title fontSize={22}>
           {title}
           {!!detail && (
@@ -45,16 +40,12 @@ const DetailedHeader = ({
           )}
         </Text>
         {!!subtitle && (
+          // @ts-ignore
           <Text titleItalic color="darkGrey">
             {subtitle}
           </Text>
         )}
-        <Box
-          marginTop={10}
-          width={35}
-          height={3}
-          backgroundColor={borderColor}
-        />
+        <Box marginTop={10} width={35} height={3} backgroundColor={borderColor} />
       </Box>
       {rightComponent}
     </Box>

@@ -10,7 +10,7 @@ import { useWaitForDatabase } from '~common/waitForNaveDB'
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import NaveResultItem from './NaveResultItem'
 
-const hideIfNoDatabase = WrappedComponent => props => {
+const hideIfNoDatabase = (WrappedComponent: any) => (props: any) => {
   const { isLoading, proposeDownload } = useWaitForDatabase()
 
   if (isLoading || proposeDownload) {
@@ -24,7 +24,7 @@ const height = 40
 const color1 = 'rgb(80, 83, 140)'
 const color2 = 'rgb(48, 51, 107)'
 
-const LexiqueResultsWidget = ({ searchValue }) => {
+const LexiqueResultsWidget = ({ searchValue }: any) => {
   const [error, setError] = useState(false)
   const [limit, setLimit] = useState(LIMIT)
 
@@ -49,18 +49,12 @@ const LexiqueResultsWidget = ({ searchValue }) => {
 
   return (
     <>
-      {results.slice(0, limit).map(ref => {
+      {results.slice(0, limit).map((ref: any) => {
         const { name_lower, name } = ref
-        return (
-          <NaveResultItem
-            key={name_lower}
-            name={name}
-            name_lower={name_lower}
-          />
-        )
+        return <NaveResultItem key={name_lower} name={name} name_lower={name_lower} />
       })}
       {results.length > limit && (
-        <Link onPress={() => setLimit(l => l + 5)}>
+        <Link onPress={() => setLimit((l: number) => l + 5)}>
           <Box
             opacity={0.5}
             center
@@ -80,11 +74,7 @@ const LexiqueResultsWidget = ({ searchValue }) => {
                 borderRadius: 3,
               }}
             >
-              <LinearGradient
-                start={[0.1, 0.2]}
-                style={{ height }}
-                colors={[color1, color2]}
-              />
+              <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
             </Box>
             <Text title fontSize={14} style={{ color: 'white' }}>
               + {results.length - limit}

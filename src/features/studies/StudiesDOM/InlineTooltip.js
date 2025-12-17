@@ -45,10 +45,7 @@ class InlineTooltip extends Tooltip {
           return
         }
 
-        const [linkVerse, offsetVerse] = this.quill.scroll.descendant(
-          InlineVerseBlot,
-          range.index
-        )
+        const [linkVerse, offsetVerse] = this.quill.scroll.descendant(InlineVerseBlot, range.index)
 
         const [linkStrong, offsetStrong] = this.quill.scroll.descendant(
           InlineStrongBlot,

@@ -20,7 +20,7 @@ export default class SnackBarManager {
     callback && callback()
   }
 
-  _removeCurrent = (callback) => {
+  _removeCurrent = callback => {
     if (!this.current) {
       callback && callback()
       return
@@ -66,7 +66,7 @@ export default class SnackBarManager {
     this._setCurrent(props, callback)
   }
 
-  dismiss = (callback) => {
+  dismiss = callback => {
     this._removeCurrent(() => {
       if (!this.queue.length) {
         callback && callback()
@@ -78,7 +78,7 @@ export default class SnackBarManager {
     })
   }
 
-  _isItemAlreadyExistById = (props) => {
-    return props.id && this.queue.find((item) => item.id === props.id)
+  _isItemAlreadyExistById = props => {
+    return props.id && this.queue.find(item => item.id === props.id)
   }
 }

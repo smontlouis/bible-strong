@@ -24,11 +24,7 @@ interface Props extends TimelineEventProps {
   yearsToPx: (years: number) => number
   eventModalRef: React.RefObject<BottomSheet>
   setEvent: (event: Partial<TimelineEventProps>) => void
-  calculateEventWidth: (
-    yearStart: number,
-    yearEnd: number,
-    isFixed?: boolean
-  ) => number
+  calculateEventWidth: (yearStart: number, yearEnd: number, isFixed?: boolean) => number
 }
 
 const descSize = 140
@@ -53,9 +49,7 @@ const TimelineEvent = ({
   const isFR = useLanguage()
   const { current: top } = React.useRef(rowToPx(row))
   const { current: left } = React.useRef(yearsToPx(start))
-  const { current: width } = React.useRef(
-    calculateEventWidth(start, end, isFixed)
-  )
+  const { current: width } = React.useRef(calculateEventWidth(start, end, isFixed))
 
   const label = calculateLabel(start, end)
 
@@ -138,12 +132,7 @@ const TimelineEvent = ({
           {label}
         </Text>
       </AnimatedBox>
-      <Box
-        ml="auto"
-        width={imageSize}
-        borderTopRightRadius={10}
-        borderBottomRightRadius={10}
-      >
+      <Box ml="auto" width={imageSize} borderTopRightRadius={10} borderBottomRightRadius={10}>
         <Image
           style={{ width: imageSize, height: '100%' }}
           source={{

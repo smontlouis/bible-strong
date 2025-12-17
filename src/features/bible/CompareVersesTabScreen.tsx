@@ -30,10 +30,7 @@ interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
 }
 
-const CompareVersesTabScreen = ({
-  compareAtom,
-  navigation,
-}: CompareVersesTabScreenProps) => {
+const CompareVersesTabScreen = ({ compareAtom, navigation }: CompareVersesTabScreenProps) => {
   const [compareTab, setCompareTab] = useAtom(compareAtom)
   const { t } = useTranslation()
   const setSelectedVerses = (v: SelectedVerses) =>
@@ -55,17 +52,15 @@ const CompareVersesTabScreen = ({
     data: { selectedVerses },
   } = compareTab
 
-  const [prevNextItems, setPrevNextItems] = React.useState()
+  const [prevNextItems, setPrevNextItems] = React.useState<any>()
   const title = verseToReference(selectedVerses)
   const openInNewTab = useOpenInNewTab()
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
   }, [title])
 
-  const goToVerse = value => {
-    const [livre, chapitre, verse] = Object.keys(selectedVerses)[0]
-      .split('-')
-      .map(Number)
+  const goToVerse = (value: any) => {
+    const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
     setSelectedVerses({ [`${livre}-${chapitre}-${verse + value}`]: true })
   }
 
@@ -87,7 +82,8 @@ const CompareVersesTabScreen = ({
   }, [selectedVerses])
 
   const versionsToCompare = useSelector(
-    state => Object.keys(state.user.bible.settings.compare),
+    // @ts-ignore
+    (state: any) => Object.keys(state.user.bible.settings.compare),
     shallowEqual
   )
 
@@ -101,14 +97,10 @@ const CompareVersesTabScreen = ({
           <PopOverMenu
             popover={
               <>
-                <MenuOption
-                  onSelect={() => navigation.navigate('ToggleCompareVerses')}
-                >
+                <MenuOption onSelect={() => navigation.navigate('ToggleCompareVerses')}>
                   <Box row alignItems="center">
                     <FeatherIcon name="check-square" size={15} />
-                    <Text marginLeft={10}>
-                      {t('common.chooseCompareVersions')}
-                    </Text>
+                    <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
                   </Box>
                 </MenuOption>
                 <MenuOption
@@ -135,9 +127,8 @@ const CompareVersesTabScreen = ({
         }
       />
       <ScrollView>
-        {!Object.entries(versions).filter(([versionId]) =>
-          versionsToCompare.includes(versionId)
-        ).length ? (
+        {!Object.entries(versions).filter(([versionId]) => versionsToCompare.includes(versionId))
+          .length ? (
           <Empty
             source={require('~assets/images/empty.json')}
             message="Aucune version à comparer..."

@@ -16,13 +16,7 @@ interface Props extends PopoverProps {
   height?: number
 }
 
-const PopOverMenu = ({
-  element,
-  popover,
-  width = 60,
-  height = 60,
-  ...props
-}: Props) => {
+const PopOverMenu = ({ element, popover, width = 60, height = 60, ...props }: Props) => {
   const theme: Theme = useTheme()
   const [showPopover, setShowPopover] = useState(false)
 

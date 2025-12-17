@@ -1,12 +1,8 @@
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+// @ts-ignore
 import { isFullScreenBibleValue } from 'src/state/app'
-import {
-  MotiHStack,
-  MotiTouchableBox,
-  motiTransition,
-  TouchableBox,
-} from '~common/ui/Box'
+import { MotiHStack, MotiTouchableBox, motiTransition, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
@@ -52,11 +48,10 @@ const BasicFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         left={10}
+        // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value
-              ? HEADER_HEIGHT + insets.bottom + 60
-              : 0,
+            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 60 : 0,
           }
         })}
         {...motiTransition}
@@ -85,11 +80,10 @@ const BasicFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         right={10}
+        // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value
-              ? HEADER_HEIGHT + insets.bottom + 60
-              : 0,
+            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 60 : 0,
           }
         })}
         {...motiTransition}
@@ -124,6 +118,7 @@ const PlayableButtons = ({
       padding={2}
       borderRadius={50}
       overflow="visible"
+      // @ts-ignore
       animate={useDerivedValue(() => {
         return {
           translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
@@ -149,6 +144,7 @@ const PlayableButtons = ({
           isPlaying={isPlaying}
           isLoading={isLoading}
           error={hasError}
+          // @ts-ignore
           type={type}
         />
       </TouchableBox>

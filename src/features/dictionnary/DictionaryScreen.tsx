@@ -7,9 +7,7 @@ import { DictionariesTab } from '../../state/tabs'
 import DictionaryTabScreen from './DictionaryTabScreen'
 import { MainStackProps } from '~navigation/type'
 
-const DictionaryScreen = ({
-  navigation,
-}: StackScreenProps<MainStackProps, 'Dictionnaire'>) => {
+const DictionaryScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Dictionnaire'>) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -25,11 +23,7 @@ const DictionaryScreen = ({
   )
 
   return (
-    <DictionaryTabScreen
-      dictionariesAtom={onTheFlyAtom}
-      navigation={navigation}
-      hasBackButton
-    />
+    <DictionaryTabScreen dictionariesAtom={onTheFlyAtom} navigation={navigation} hasBackButton />
   )
 }
 export default DictionaryScreen

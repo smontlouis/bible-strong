@@ -26,8 +26,7 @@ const VerseSelector = ({
     },
   } = bible
 
-  const versesInCurrentChapter =
-    countLsgChapters[`${selectedBook.Numero}-${selectedChapter}`]
+  const versesInCurrentChapter = countLsgChapters[`${selectedBook.Numero}-${selectedChapter}`]
 
   const onValidate = (verse: number) => {
     actions.setTempSelectedVerse(verse)

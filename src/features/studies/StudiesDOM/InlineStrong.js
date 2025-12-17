@@ -14,9 +14,7 @@ class InlineStrong extends Inline {
     node.setAttribute('data-book', book)
 
     node.addEventListener('click', () => {
-      const isReadOnly = document
-        .querySelector('#editor')
-        .classList.contains('ql-disabled')
+      const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
       if (isReadOnly) {
         console.log(`${codeStrong} ${book}`)
         dispatch('VIEW_BIBLE_STRONG', {

@@ -14,19 +14,13 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { HelpTip } from '~features/tips/HelpTip'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import { itemHeight } from './BookItem'
 import { BookSelectorList } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
-import VerseBottomSheet, {
-  tempSelectedBookAtom,
-  tempSelectedChapterAtom,
-} from './VerseBottomSheet'
+import VerseBottomSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseBottomSheet'
 interface BookSelectorBottomSheetProps {
   selectedBookNum?: number
   bottomSheetRef: React.RefObject<BottomSheet>
@@ -37,9 +31,7 @@ export const bookSelectorDataAtom = atom<{
   data?: BibleTab['data']
 }>({})
 
-const BookSelectorBottomSheet = ({
-  bottomSheetRef,
-}: BookSelectorBottomSheetProps) => {
+const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProps) => {
   const insets = useSafeAreaInsets()
   const expandedBook = useSharedValue<number | null>(null)
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -104,21 +96,12 @@ const BookSelectorBottomSheet = ({
       }
     }
     //
-    const subscription = DeviceEventEmitter.addListener(
-      BOOK_SELECTION_EVENT,
-      handleSelection
-    )
+    const subscription = DeviceEventEmitter.addListener(BOOK_SELECTION_EVENT, handleSelection)
     //
     return () => {
       subscription.remove()
     }
-  }, [
-    bookSelectorActions,
-    openInNewTab,
-    t,
-    bookSelectorData,
-    bookSelectorHasVerses,
-  ])
+  }, [bookSelectorActions, openInNewTab, t, bookSelectorData, bookSelectorHasVerses])
 
   const data = useMemo(() => {
     const booksArray = Object.values(books)
@@ -129,7 +112,7 @@ const BookSelectorBottomSheet = ({
   }, [isAlphabetical])
 
   const initialScrollIndex = data.findIndex(
-    (book) => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
+    book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
   )
 
   return (
@@ -176,10 +159,7 @@ const BookSelectorBottomSheet = ({
               <BookSelectorParams />
             </HStack>
           </BottomSheetView>
-          <HelpTip
-            id="chapter-selector"
-            description={t('tips.chapterSelector')}
-          />
+          <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
           <BookSelectorList
             data={data}
             initialScrollIndex={initialScrollIndex}

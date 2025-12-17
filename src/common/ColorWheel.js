@@ -1,12 +1,5 @@
 import React, { Component } from 'react'
-import {
-  Animated,
-  Image,
-  Dimensions,
-  PanResponder,
-  StyleSheet,
-  View,
-} from 'react-native'
+import { Animated, Image, Dimensions, PanResponder, StyleSheet, View } from 'react-native'
 import colorsys from 'colorsys'
 
 export class ColorWheel extends Component {
@@ -195,8 +188,7 @@ export class ColorWheel extends Component {
       },
     ]
 
-    const panHandlers =
-      (this._panResponder && this._panResponder.panHandlers) || {}
+    const panHandlers = (this._panResponder && this._panResponder.panHandlers) || {}
 
     return (
       <View

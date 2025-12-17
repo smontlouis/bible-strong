@@ -1,7 +1,4 @@
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
@@ -15,10 +12,7 @@ import { Verse } from '~common/types'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
@@ -63,11 +57,7 @@ const VerseBottomSheet = ({
       tempSelectedChapter?.toString() || '',
     ],
     queryFn: () =>
-      loadBibleChapter(
-        tempSelectedBook?.Numero,
-        tempSelectedChapter,
-        version
-      ) as Promise<Verse[]>,
+      loadBibleChapter(tempSelectedBook?.Numero, tempSelectedChapter, version) as Promise<Verse[]>,
     enabled: !!tempSelectedBook && !!tempSelectedChapter && !!version,
   })
 
@@ -111,8 +101,7 @@ const VerseBottomSheet = ({
   const availableWidth = MAX_WIDTH - PADDING * 2
   const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
 
-  const totalItemsWidth =
-    itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
+  const totalItemsWidth = itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
 
   const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 

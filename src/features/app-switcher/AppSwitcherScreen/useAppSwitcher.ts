@@ -1,7 +1,4 @@
-import {
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-} from 'react-native-reanimated'
+import { useAnimatedScrollHandler, useAnimatedStyle } from 'react-native-reanimated'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 
 const useAppSwitcher = () => {

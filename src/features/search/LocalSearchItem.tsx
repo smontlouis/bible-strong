@@ -10,9 +10,9 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-const formatText = (sentence, array) => {
+const formatText = (sentence: any, array: any) => {
   return array.reduce(
-    ({ offset, result, phrase }, [position, range], i) => {
+    ({ offset, result, phrase }: any, [position, range]: any, i: any) => {
       const before = phrase.substr(0, position - offset)
       const highlighted = (
         <Text bold color="primary" key={i}>
@@ -35,10 +35,8 @@ const formatText = (sentence, array) => {
   )
 }
 
-const LocalSearchItem = ({ reference, text, positions, onPress }) => {
-  const { result } = positions.length
-    ? formatText(text, positions)
-    : { result: text }
+const LocalSearchItem = ({ reference, text, positions, onPress }: any) => {
+  const { result } = positions.length ? formatText(text, positions) : { result: text }
   return (
     <Container onPress={onPress}>
       <Text title fontSize={16} marginBottom={5}>

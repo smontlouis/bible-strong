@@ -10,11 +10,7 @@ import Text from '~common/ui/Text'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
-export const VerseSelectorPopup = ({
-  bibleAtom,
-}: {
-  bibleAtom: PrimitiveAtom<BibleTab>
-}) => {
+export const VerseSelectorPopup = ({ bibleAtom }: { bibleAtom: PrimitiveAtom<BibleTab> }) => {
   const { t } = useTranslation()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
@@ -38,8 +34,7 @@ export const VerseSelectorPopup = ({
 
   const { data: verses } = useQuery({
     queryKey: ['bible', version, book.Numero.toString(), chapter.toString()],
-    queryFn: () =>
-      loadBibleChapter(book.Numero, chapter, version) as Promise<Verse[]>,
+    queryFn: () => loadBibleChapter(book.Numero, chapter, version) as Promise<Verse[]>,
   })
 
   const renderItem = ({ item }: { item: Verse[] }) => (

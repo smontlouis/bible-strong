@@ -34,10 +34,7 @@ class ModuleInlineVerse extends Module {
           title,
           verses,
         })
-        this.quill.setSelection(
-          this.range.index + this.range.length + 1,
-          Quill.sources.SILENT
-        )
+        this.quill.setSelection(this.range.index + this.range.length + 1, Quill.sources.SILENT)
       } else {
         this.quill.insertText(this.range.index, title, 'inline-verse', {
           title,
@@ -62,10 +59,7 @@ class ModuleInlineVerse extends Module {
           codeStrong,
           book,
         })
-        this.quill.setSelection(
-          this.range.index + this.range.length + 1,
-          Quill.sources.SILENT
-        )
+        this.quill.setSelection(this.range.index + this.range.length + 1, Quill.sources.SILENT)
       } else {
         this.quill.insertText(this.range.index, title, 'inline-strong', {
           title,

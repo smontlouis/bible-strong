@@ -7,8 +7,10 @@ import { Theme } from '~themes'
 function BibleProjectIcon({ color, ...props }: React.SVGProps<SVGSVGElement>) {
   const theme: Theme = useTheme()
   return (
+    // @ts-ignore
     <Svg width={30} height={30} viewBox="0 0 195 164" {...props}>
       <G
+        // @ts-ignore
         fill={theme.colors[color] || color || theme.colors.primary}
         fillRule="nonzero"
       >

@@ -75,8 +75,7 @@ export const useWaitForDatabase = () => {
             undefined,
             ({ totalBytesWritten }) => {
               const fileSize = databases(resourceLang).TIMELINE.fileSize
-              const idxProgress =
-                Math.floor((totalBytesWritten / fileSize) * 100) / 100
+              const idxProgress = Math.floor((totalBytesWritten / fileSize) * 100) / 100
               setProgress(idxProgress)
             }
           ).downloadAsync()
@@ -129,58 +128,47 @@ export const useWaitForDatabase = () => {
   }
 }
 
-const waitForDatabase =
-  (WrappedComponent: React.ComponentType<any>) => (props: any) => {
-    const { t } = useTranslation()
-    const {
-      isLoading,
-      progress,
-      proposeDownload,
-      startDownload,
-      setStartDownload,
-      resourceLang,
-    } = useWaitForDatabase()
+const waitForDatabase = (WrappedComponent: React.ComponentType<any>) => (props: any) => {
+  const { t } = useTranslation()
+  const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
+    useWaitForDatabase()
 
-    if (isLoading && startDownload) {
-      return (
-        <Box center height={hp(80)}>
-          <Loading message={t('Téléchargement de la chronologie...')}>
-            <Progress progress={progress} />
-          </Loading>
-        </Box>
-      )
-    }
-
-    if (isLoading && proposeDownload) {
-      return (
-        <Box center height={hp(80)}>
-          <DownloadRequired
-            title={t(
-              'La chronologie biblique est requise pour accéder à ce module.'
-            )}
-            setStartDownload={setStartDownload}
-            fileSize={Math.round(
-              databases(resourceLang).TIMELINE.fileSize / 1000000
-            )}
-          />
-        </Box>
-      )
-    }
-
-    if (isLoading) {
-      return (
-        <Box height={hp(80)} center>
-          <Loading
-            message={t('Chargement de la base de données...')}
-            subMessage={t(
-              "Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
-            )}
-          />
-        </Box>
-      )
-    }
-
-    return <WrappedComponent key={resourceLang} {...props} />
+  if (isLoading && startDownload) {
+    return (
+      <Box center height={hp(80)}>
+        <Loading message={t('Téléchargement de la chronologie...')}>
+          <Progress progress={progress} />
+        </Loading>
+      </Box>
+    )
   }
+
+  if (isLoading && proposeDownload) {
+    return (
+      <Box center height={hp(80)}>
+        <DownloadRequired
+          title={t('La chronologie biblique est requise pour accéder à ce module.')}
+          setStartDownload={setStartDownload}
+          fileSize={Math.round(databases(resourceLang).TIMELINE.fileSize / 1000000)}
+        />
+      </Box>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <Box height={hp(80)} center>
+        <Loading
+          message={t('Chargement de la base de données...')}
+          subMessage={t(
+            "Merci de patienter, la première fois peut prendre plusieurs secondes... Si au bout de 30s il ne se passe rien, n'hésitez pas à redémarrer l'app."
+          )}
+        />
+      </Box>
+    )
+  }
+
+  return <WrappedComponent key={resourceLang} {...props} />
+}
 
 export default waitForDatabase

@@ -11,20 +11,13 @@ import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
-// @ts-expect-error
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+// @ts-ignore
 import books from '~assets/bible_versions/books'
 import { Book } from '~assets/bible_versions/books-desc'
 import Snackbar from '~common/SnackBar'
-import {
-  Pericope,
-  SelectedCode,
-  StudyNavigateBibleType,
-  Tag,
-  Verse,
-  VerseIds,
-} from '~common/types'
+import { Pericope, SelectedCode, StudyNavigateBibleType, Tag, Verse, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
@@ -68,10 +61,7 @@ export type RootStyles = {
 
 export type PericopeChapter = Pericope[string][string]
 
-export type Dispatch = (props: {
-  type: string
-  [key: string]: any
-}) => Promise<void>
+export type Dispatch = (props: { type: string; [key: string]: any }) => Promise<void>
 
 export type WebViewProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -97,16 +87,16 @@ export type WebViewProps = {
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
-  openNoteModal: any
+  openNoteModal?: any
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
-  removeParallelVersion: any
-  addParallelVersion: any
-  goToPrevChapter: any
-  goToNextChapter: any
-  setMultipleTagsItem: any
-  onChangeResourceTypeSelectVerse: any
+  removeParallelVersion?: any
+  addParallelVersion?: any
+  goToPrevChapter?: any
+  goToNextChapter?: any
+  setMultipleTagsItem?: any
+  onChangeResourceTypeSelectVerse?: any
   onMountTimeout?: () => void
 }
 
@@ -177,7 +167,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     return () => clearTimeout(timeoutId)
   }, [])
 
-  const dispatch: Dispatch = async (action) => {
+  const dispatch: Dispatch = async action => {
     switch (action.type) {
       case 'DOM_COMPONENT_MOUNTED': {
         // Mark component as mounted
@@ -188,15 +178,13 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         const { onChangeResourceTypeSelectVerse } = props
         const { Livre, Chapitre, Verset } = action.params.verse
         console.log(`${Livre}-${Chapitre}-${Verset}`)
-        onChangeResourceTypeSelectVerse(
-          'strong',
-          `${Livre}-${Chapitre}-${Verset}`
-        )
+        onChangeResourceTypeSelectVerse('strong', `${Livre}-${Chapitre}-${Verset}`)
 
         break
       }
       case NAVIGATE_TO_VERSE_NOTES: {
         const { navigation } = props
+        // @ts-ignore
         navigation.navigate('BibleVerseNotes', {
           verse: action.payload,
           withBack: true,
@@ -205,6 +193,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
       case NAVIGATE_TO_PERICOPE: {
         const { navigation } = props
+        // @ts-ignore
         navigation.navigate('Pericope')
         break
       }
@@ -218,14 +207,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
             setSelectedVersion: (version: VersionCode) =>
               getDefaultStore().set(
                 bibleAtom,
-                produce((draft) => {
+                produce(draft => {
                   draft.data.selectedVersion = version
                 })
               ),
             setParallelVersion: (version: VersionCode, index: number) =>
               getDefaultStore().set(
                 bibleAtom,
-                produce((draft) => {
+                produce(draft => {
                   draft.data.parallelVersions[index] = version
                 })
               ),
@@ -277,9 +266,8 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
         const { navigation } = props
-        const book = Object.keys(books).find(
-          (key) => books[key][0].toUpperCase() === action.bookCode
-        )
+        // @ts-ignore
+        const book = Object.keys(books).find(key => books[key][0].toUpperCase() === action.bookCode)
 
         if (!book) {
           Snackbar.show("Erreur lors de l'ouverture du verset")

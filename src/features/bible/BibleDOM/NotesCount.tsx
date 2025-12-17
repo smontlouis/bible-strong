@@ -3,10 +3,13 @@ import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { SvgProps } from 'react-native-svg'
 
+// @ts-ignore
 const SvgContainer = styled<RootStyles & SvgProps>(
   'svg'
+  // @ts-ignore
 )(({ settings: { fontSizeScale } }) => ({}))
 
+// @ts-ignore
 const Div = styled<RootStyles>('div')(({ settings: { theme } }) => ({
   position: 'relative',
   display: 'inline-block',
@@ -14,6 +17,7 @@ const Div = styled<RootStyles>('div')(({ settings: { theme } }) => ({
   marginRight: '10px',
 }))
 
+// @ts-ignore
 const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
   background: colors[theme].primary,
   position: 'absolute',
@@ -37,28 +41,31 @@ interface Props {
   onClick: () => void
 }
 
-const NotesCount = ({ count, settings, onClick }: Props) => (
-  <Div settings={settings}>
-    <SvgContainer
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      settings={settings}
-      onClick={onClick}
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
-    </SvgContainer>
-    <Count settings={settings}>{count}</Count>
-  </Div>
-)
+const NotesCount = ({ count, settings, onClick }: Props) => {
+  return (
+    <Div settings={settings}>
+      <SvgContainer
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        settings={settings}
+        // @ts-ignore
+        onClick={onClick}
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <polyline points="10 9 9 9 8 9" />
+      </SvgContainer>
+      <Count settings={settings}>{count}</Count>
+    </Div>
+  )
+}
 
 export default NotesCount

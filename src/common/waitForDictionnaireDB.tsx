@@ -77,9 +77,7 @@ export const useWaitForDatabase = () => {
 
               const sqliteDbUri = getDatabaseUrl('DICTIONNAIRE', resourceLang)
 
-              console.log(
-                `[Dictionnaire] Downloading ${sqliteDbUri} to ${dbPath}`
-              )
+              console.log(`[Dictionnaire] Downloading ${sqliteDbUri} to ${dbPath}`)
 
               await initSQLiteDirForLang(resourceLang)
 
@@ -89,9 +87,7 @@ export const useWaitForDatabase = () => {
                 undefined,
                 ({ totalBytesWritten }) => {
                   const idxProgress =
-                    Math.floor(
-                      (totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100
-                    ) / 100
+                    Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
                   dispatch({
                     type: 'dictionnaire.setProgress',
                     payload: idxProgress,
@@ -166,14 +162,8 @@ const waitForDatabase =
   <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
   (props: any) => {
     const { t } = useTranslation()
-    const {
-      isLoading,
-      progress,
-      proposeDownload,
-      startDownload,
-      setStartDownload,
-      resourceLang,
-    } = useWaitForDatabase()
+    const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
+      useWaitForDatabase()
 
     if (isLoading && startDownload) {
       return (
@@ -191,9 +181,7 @@ const waitForDatabase =
           hasBackButton={hasBackButton}
           hasHeader={hasHeader}
           size={size}
-          title={t(
-            'La base de données dictionnaire est requise pour accéder à cette page.'
-          )}
+          title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
           setStartDownload={setStartDownload}
           fileSize={22}
         />
@@ -204,9 +192,7 @@ const waitForDatabase =
       return (
         <Loading
           message={t('Chargement du dictionnaire...')}
-          subMessage={t(
-            'Merci de patienter, la première fois peut prendre plusieurs secondes...'
-          )}
+          subMessage={t('Merci de patienter, la première fois peut prendre plusieurs secondes...')}
         />
       )
     }

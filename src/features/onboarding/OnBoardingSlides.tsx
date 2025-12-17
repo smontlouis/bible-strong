@@ -23,14 +23,7 @@ const itemWidth = slideWidth
 const Item = ({ item }: { item: Slide; index: number }) => {
   const r = useMediaQueriesArray()
   return (
-    <VStack
-      overflow="visible"
-      px={20}
-      spacing={2}
-      flex
-      justifyContent="center"
-      bg="reverse"
-    >
+    <VStack overflow="visible" px={20} spacing={2} flex justifyContent="center" bg="reverse">
       {item.image && (
         <Image
           source={item.image}
@@ -92,9 +85,7 @@ const OnBoardingSlides = ({
         {activeSlide === 3 ? (
           <Button onPress={() => setStep(1)}>{t('Commencer')}</Button>
         ) : (
-          <Button onPress={() => carousel.current?.next()}>
-            {t('Suivant')}
-          </Button>
+          <Button onPress={() => carousel.current?.next()}>{t('Suivant')}</Button>
         )}
         <TouchableBox onPress={() => setStep(1)} marginTop={20} center>
           <Text fontSize={12}>{t('Passer').toUpperCase()}</Text>

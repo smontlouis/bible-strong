@@ -27,6 +27,7 @@ const SectionItem = styled(Box)(({ theme }) => ({
 const DictionnaireItem = memo(({ name_lower, name, navigation }: Props) => (
   <Link
     route="NaveDetail"
+    // @ts-ignore
     navigation={navigation}
     params={{ name_lower, name }}
   >

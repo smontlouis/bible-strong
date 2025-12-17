@@ -26,9 +26,7 @@ const SectionImage = ({
   return (
     <Box flex bg="reverse" row>
       <Box width={60} center>
-        {direction === 'previous' && (
-          <FeatherIcon name="chevron-left" size={60} />
-        )}
+        {direction === 'previous' && <FeatherIcon name="chevron-left" size={60} />}
       </Box>
       <Box flex center>
         <Text title fontSize={20}>
@@ -55,14 +53,7 @@ const SectionImage = ({
             }}
           />
         </Box>
-        <Box
-          lightShadow
-          mt={50}
-          bg={color}
-          width={50}
-          height={10}
-          borderRadius={10}
-        />
+        <Box lightShadow mt={50} bg={color} width={50} height={10} borderRadius={10} />
       </Box>
       <Box width={60} center>
         {direction === 'next' && <FeatherIcon name="chevron-right" size={60} />}

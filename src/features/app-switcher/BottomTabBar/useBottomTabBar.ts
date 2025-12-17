@@ -29,15 +29,11 @@ const fromTo = (animations: Animation[]) => {
   animations.forEach(animation => {
     const { animatedValue } = animation
     animatedValue.value = animation.fromValue
-    animatedValue.value = withTiming(
-      animation.toValue,
-      animation.options,
-      () => {
-        if (animation.onFinishValue !== undefined) {
-          animatedValue.value = animation.onFinishValue
-        }
+    animatedValue.value = withTiming(animation.toValue, animation.options, () => {
+      if (animation.onFinishValue !== undefined) {
+        animatedValue.value = animation.onFinishValue
       }
-    )
+    })
   })
 }
 
@@ -68,10 +64,7 @@ const useBottomTabBar = () => {
   }
 
   useEffect(() => {
-    if (
-      activeTabPreview.index.value === 0 &&
-      activeTabPreview.animationProgress.value === 0
-    ) {
+    if (activeTabPreview.index.value === 0 && activeTabPreview.animationProgress.value === 0) {
       setAppSwitcherMode('list')
     }
   }, [])

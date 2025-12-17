@@ -12,9 +12,7 @@ const verseToStrong = memoize(
         const references = []
 
         // STRONG -- We don't want what is in parentheses
-        const splittedTexte = Texte.split(
-          /\s*(\(?\d+[^{.|\s}]?\d+(?!\.?\d)\)?)/g
-        )
+        const splittedTexte = Texte.split(/\s*(\(?\d+[^{.|\s}]?\d+(?!\.?\d)\)?)/g)
         if (!splittedTexte[splittedTexte.length - 1].trim()) {
           splittedTexte.pop()
         }

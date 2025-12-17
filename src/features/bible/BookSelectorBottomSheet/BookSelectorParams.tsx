@@ -5,25 +5,19 @@ import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import {
-  bookSelectorSelectionModeAtom,
-  bookSelectorSortAtom,
-  bookSelectorVersesAtom,
-} from './atom'
+import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 
 export const BookSelectorParams = () => {
   const { t } = useTranslation()
 
   const [sort, setSort] = useAtom(bookSelectorSortAtom)
   const isAlphabetical = sort === 'alphabetical'
-  const [selectionMode, setSelectionMode] = useAtom(
-    bookSelectorSelectionModeAtom
-  )
+  const [selectionMode, setSelectionMode] = useAtom(bookSelectorSelectionModeAtom)
   const [verses, setVerses] = useAtom(bookSelectorVersesAtom)
   const hasVerses = verses === 'with-verses'
 
   const handleSortToggle = () => {
-    setSort((prev) => (prev === 'alphabetical' ? 'classical' : 'alphabetical'))
+    setSort(prev => (prev === 'alphabetical' ? 'classical' : 'alphabetical'))
   }
 
   return (
@@ -47,9 +41,7 @@ export const BookSelectorParams = () => {
 
           <MenuOption
             onSelect={() => {
-              setVerses((v) =>
-                v === 'with-verses' ? 'without-verses' : 'with-verses'
-              )
+              setVerses(v => (v === 'with-verses' ? 'without-verses' : 'with-verses'))
             }}
             closeOnSelect={false}
           >
@@ -60,23 +52,18 @@ export const BookSelectorParams = () => {
                 color={hasVerses ? 'primary' : 'grey'}
               />
               <Text marginLeft={10}>
-                {hasVerses
-                  ? t('bookSelector.withVerses')
-                  : t('bookSelector.withoutVerses')}
+                {hasVerses ? t('bookSelector.withVerses') : t('bookSelector.withoutVerses')}
               </Text>
             </Box>
           </MenuOption>
           <MenuOption
             onSelect={() => {
-              setSelectionMode((s) => (s === 'grid' ? 'list' : 'grid'))
+              setSelectionMode(s => (s === 'grid' ? 'list' : 'grid'))
             }}
             closeOnSelect={false}
           >
             <Box row alignItems="center">
-              <FeatherIcon
-                name={selectionMode === 'grid' ? 'grid' : 'menu'}
-                size={20}
-              />
+              <FeatherIcon name={selectionMode === 'grid' ? 'grid' : 'menu'} size={20} />
               <Text marginLeft={10}>
                 {selectionMode === 'grid'
                   ? t('bookSelector.selectionMode.grid')

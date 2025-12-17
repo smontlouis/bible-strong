@@ -1,9 +1,5 @@
 import { useTheme } from '@emotion/react'
-import {
-  BottomSheetBackdrop,
-  BottomSheetProps,
-  SCREEN_WIDTH,
-} from '@gorhom/bottom-sheet'
+import { BottomSheetBackdrop, BottomSheetProps, SCREEN_WIDTH } from '@gorhom/bottom-sheet'
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
 import { useId } from 'react'
 

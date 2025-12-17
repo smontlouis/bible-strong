@@ -1,6 +1,4 @@
-import React, { Component, useState } from 'react'
-
-import PlanSelectTabNavigator from '~navigation/PlanSelectTabNavigator'
+import React, { useState } from 'react'
 
 import SelectTabBar from '~common/SelectTabBar'
 import Box from '~common/ui/Box'

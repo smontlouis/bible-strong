@@ -11,14 +11,7 @@ export const ADD_STUDIES = 'user/ADD_STUDIES'
 export default produce((draft, action) => {
   switch (action.type) {
     case UPDATE_STUDY: {
-      const {
-        id,
-        content,
-        title,
-        modified_at,
-        created_at,
-        tags,
-      } = action.payload
+      const { id, content, title, modified_at, created_at, tags } = action.payload
 
       draft.bible.studies[id] = {
         id,
@@ -88,8 +81,8 @@ export function deleteStudy(id: string) {
   }
 }
 
-export function publishStudy(id, publish = true) {
-  return async dispatch => {
+export function publishStudy(id: any, publish = true) {
+  return async (dispatch: any) => {
     await dispatch({
       type: PUBLISH_STUDY,
       payload: id,

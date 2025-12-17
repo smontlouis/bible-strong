@@ -8,14 +8,13 @@ interface TabScreenWrapperProps {
   style: AnimatedStyleProp<ViewStyle | ImageStyle | TextStyle>
 }
 
-const TabScreenWrapper = forwardRef<View, TabScreenWrapperProps>(
-  ({ style, children }, ref) => {
-    return (
-      <AnimatedBox bg="reverse" style={style} ref={ref}>
-        {children}
-      </AnimatedBox>
-    )
-  }
-)
+const TabScreenWrapper = forwardRef<View, TabScreenWrapperProps>(({ style, children }, ref) => {
+  return (
+    // @ts-ignore
+    <AnimatedBox bg="reverse" style={style} ref={ref}>
+      {children}
+    </AnimatedBox>
+  )
+})
 
 export default TabScreenWrapper

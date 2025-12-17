@@ -30,12 +30,7 @@ const SuccessModal = ({ modalRef, isPlanCompleted }: Props) => {
       }}
     >
       <BottomSheetScrollView scrollEnabled={false}>
-        <Box
-          flex={1}
-          justifyContent="flex-end"
-          paddingVertical={40}
-          paddingHorizontal={20}
-        >
+        <Box flex={1} justifyContent="flex-end" paddingVertical={40} paddingHorizontal={20}>
           <Box center>
             <Lottie
               autoPlay

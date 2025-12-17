@@ -18,28 +18,21 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { useNavigation } from '@react-navigation/native'
 import { StrongReference } from '~common/types'
 
-const StrongOfTheDay = ({
-  type,
-  color1 = 'rgb(69,150,220)',
-  color2 = 'rgb(89,131,240)',
-}) => {
+const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131,240)' }: any) => {
   const { t } = useTranslation()
 
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<any>(false)
   const [startRandom, setStartRandom] = useState(true)
-  const [strongReference, setStrongRef] = useState<StrongReference | undefined>(
-    undefined
-  )
+  const [strongReference, setStrongRef] = useState<StrongReference | undefined>(undefined)
 
   useEffect(() => {
     const loadStrong = async () => {
       if (!startRandom) return
 
-      const strongReference = await loadRandomStrongReference(
-        type === 'grec' ? 40 : 1
-      )
+      const strongReference = await loadRandomStrongReference(type === 'grec' ? 40 : 1)
 
       if (!strongReference) {
+        // @ts-ignore
         setError('NOT_FOUND')
       }
 
@@ -93,20 +86,11 @@ const StrongOfTheDay = ({
             borderRadius: 3,
           }}
         >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height: 130 }}
-            colors={[color1, color2]}
-          />
+          <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
         <RandomButton onPress={() => setStartRandom(true)} />
         <Box flex={1} center mt={20}>
-          <Box
-            backgroundColor="rgba(0,0,0,0.1)"
-            paddingHorizontal={5}
-            paddingVertical={3}
-            rounded
-          >
+          <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
             <Text fontSize={10} style={{ color: 'white' }}>
               {type === 'grec' ? t('Grec') : t('Hébreu')}
             </Text>
@@ -124,12 +108,7 @@ const StrongOfTheDay = ({
           </Paragraph>
         </Box>
         <Link route="Lexique" style={{ width: '100%' }}>
-          <Box
-            row
-            center
-            backgroundColor="rgba(0,0,0,0.04)"
-            paddingVertical={10}
-          >
+          <Box row center backgroundColor="rgba(0,0,0,0.04)" paddingVertical={10}>
             <LexiqueIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text color="white" bold fontSize={12}>
               {t('Lexique')}

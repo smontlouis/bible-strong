@@ -27,11 +27,6 @@ const DictionaryDetailScreen = ({
     []
   )
 
-  return (
-    <DictionaryDetailTabScreen
-      dictionaryAtom={onTheFlyAtom}
-      navigation={navigation}
-    />
-  )
+  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} navigation={navigation} />
 }
 export default DictionaryDetailScreen

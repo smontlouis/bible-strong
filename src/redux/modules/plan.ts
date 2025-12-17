@@ -1,21 +1,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import {
-  OngoingPlan,
-  OnlinePlan,
-  Plan,
-  ReadingSlice,
-  Section,
-  Status,
-} from '~common/types'
+import { OngoingPlan, OnlinePlan, Plan, ReadingSlice, Section, Status } from '~common/types'
 import { firebaseDb, increment } from '~helpers/firebase'
 // import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
-import {
-  FireStoreUserData,
-  IMPORT_DATA,
-  RECEIVE_LIVE_UPDATES,
-  USER_LOGOUT,
-} from './user'
+import { FireStoreUserData, IMPORT_DATA, RECEIVE_LIVE_UPDATES, USER_LOGOUT } from './user'
 
 // const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
 // const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
@@ -61,11 +49,7 @@ export const fetchPlan = createAsyncThunk(
       planRef.update({ downloads: increment })
     }
 
-    const snapshot = await firebaseDb
-      .collection('plans')
-      .doc(id)
-      .collection('plan-sections')
-      .get()
+    const snapshot = await firebaseDb.collection('plans').doc(id).collection('plan-sections').get()
     const sections = snapshot.docs.map(x => x.data()) as Section[]
 
     return { ...plan, sections }
@@ -118,26 +102,20 @@ const planSlice = createSlice({
       state.images[action.payload.id] = action.payload.value
     },
     removePlan(state, action: PayloadAction<string>) {
-      const planToResetIndex = state.ongoingPlans.findIndex(
-        plan => plan.id === action.payload
-      )
+      const planToResetIndex = state.ongoingPlans.findIndex(plan => plan.id === action.payload)
 
       if (planToResetIndex !== -1) {
         state.ongoingPlans.splice(planToResetIndex, 1)
       }
 
-      const planToDeleteIndex = state.myPlans.findIndex(
-        plan => plan.id === action.payload
-      )
+      const planToDeleteIndex = state.myPlans.findIndex(plan => plan.id === action.payload)
 
       if (planToDeleteIndex !== -1) {
         state.myPlans.splice(planToDeleteIndex, 1)
       }
     },
     resetPlan(state, action: PayloadAction<string>) {
-      const planToDeleteIndex = state.ongoingPlans.findIndex(
-        plan => plan.id === action.payload
-      )
+      const planToDeleteIndex = state.ongoingPlans.findIndex(plan => plan.id === action.payload)
 
       if (planToDeleteIndex !== -1) {
         state.ongoingPlans.splice(planToDeleteIndex, 1)
@@ -146,22 +124,15 @@ const planSlice = createSlice({
     addPlan(state, action: PayloadAction<Plan>) {
       state.myPlans.push(action.payload)
     },
-    markAsRead(
-      state,
-      action: PayloadAction<{ readingSliceId: string; planId: string }>
-    ) {
+    markAsRead(state, action: PayloadAction<{ readingSliceId: string; planId: string }>) {
       const { readingSliceId, planId } = action.payload
 
       let ongoingPlan = state.ongoingPlans.find(oP => oP.id === planId)
       const plan = state.myPlans.find(p => p.id === planId)
       const flattenedReadingSlices =
-        plan?.sections.reduce(
-          (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
-          []
-        ) || []
-      const readingSliceIndex = flattenedReadingSlices.findIndex(
-        c => c.id === readingSliceId
-      )
+        plan?.sections.reduce((acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices], []) ||
+        []
+      const readingSliceIndex = flattenedReadingSlices.findIndex(c => c.id === readingSliceId)
 
       // Create ongoingPlan if don't exists
       if (!ongoingPlan) {
@@ -189,8 +160,7 @@ const planSlice = createSlice({
 
         // Put next on previous
         Object.keys(ongoingPlan.readingSlices).forEach(key => {
-          if (ongoingPlan?.readingSlices[key] === 'Next')
-            delete ongoingPlan?.readingSlices[key]
+          if (ongoingPlan?.readingSlices[key] === 'Next') delete ongoingPlan?.readingSlices[key]
         })
         const prevReadingSliceId = flattenedReadingSlices[readingSliceIndex]?.id
         if (prevReadingSliceId) {
@@ -201,28 +171,21 @@ const planSlice = createSlice({
 
         //Put next on next
         Object.keys(ongoingPlan.readingSlices).forEach(key => {
-          if (ongoingPlan?.readingSlices[key] === 'Next')
-            delete ongoingPlan?.readingSlices[key]
+          if (ongoingPlan?.readingSlices[key] === 'Next') delete ongoingPlan?.readingSlices[key]
         })
-        const nextReadingSliceId =
-          flattenedReadingSlices[readingSliceIndex + 1]?.id
-        if (
-          nextReadingSliceId &&
-          ongoingPlan.readingSlices[nextReadingSliceId] !== 'Completed'
-        ) {
+        const nextReadingSliceId = flattenedReadingSlices[readingSliceIndex + 1]?.id
+        if (nextReadingSliceId && ongoingPlan.readingSlices[nextReadingSliceId] !== 'Completed') {
           ongoingPlan.readingSlices[nextReadingSliceId] = 'Next'
         }
       }
 
       // Check if plan is complete
       const readingSlicesLength =
-        plan?.sections.reduce(
-          (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
-          []
-        ).length || 0
-      const ongoingReadingSlicesLength = Object.values(
-        ongoingPlan.readingSlices
-      ).filter(status => status === 'Completed').length
+        plan?.sections.reduce((acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices], [])
+          .length || 0
+      const ongoingReadingSlicesLength = Object.values(ongoingPlan.readingSlices).filter(
+        status => status === 'Completed'
+      ).length
 
       if (readingSlicesLength === ongoingReadingSlicesLength) {
         ongoingPlan.status = 'Completed'
@@ -232,44 +195,36 @@ const planSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(
-      fetchPlan.fulfilled,
-      (state, action: PayloadAction<Plan>) => {
-        let planAlreadyExistsIndex = state.myPlans.findIndex(
-          myPlan => action.payload.id === myPlan.id
-        )
-        if (planAlreadyExistsIndex !== -1) {
-          state.myPlans[planAlreadyExistsIndex] = action.payload
-        } else {
-          state.myPlans.push(action.payload)
-        }
-
-        const ongoingPlan = state.ongoingPlans.find(
-          oP => oP.id === action.payload.id
-        )
-
-        if (!ongoingPlan) {
-          state.ongoingPlans.push({
-            id: action.payload.id,
-            status: 'Idle',
-            readingSlices: {},
-          })
-        }
+    builder.addCase(fetchPlan.fulfilled, (state, action: PayloadAction<Plan>) => {
+      let planAlreadyExistsIndex = state.myPlans.findIndex(
+        myPlan => action.payload.id === myPlan.id
+      )
+      if (planAlreadyExistsIndex !== -1) {
+        state.myPlans[planAlreadyExistsIndex] = action.payload
+      } else {
+        state.myPlans.push(action.payload)
       }
-    )
+
+      const ongoingPlan = state.ongoingPlans.find(oP => oP.id === action.payload.id)
+
+      if (!ongoingPlan) {
+        state.ongoingPlans.push({
+          id: action.payload.id,
+          status: 'Idle',
+          readingSlices: {},
+        })
+      }
+    })
     builder.addCase(fetchPlans.pending, state => {
       state.onlineStatus = 'Pending'
     })
     builder.addCase(fetchPlans.rejected, state => {
       state.onlineStatus = 'Rejected'
     })
-    builder.addCase(
-      fetchPlans.fulfilled,
-      (state, action: PayloadAction<OnlinePlan[]>) => {
-        state.onlineStatus = 'Resolved'
-        state.onlinePlans = action.payload
-      }
-    )
+    builder.addCase(fetchPlans.fulfilled, (state, action: PayloadAction<OnlinePlan[]>) => {
+      state.onlineStatus = 'Resolved'
+      state.onlinePlans = action.payload
+    })
     builder.addCase(RECEIVE_LIVE_UPDATES, (state, action: any) => {
       const { plan } = action.payload.remoteUserData as FireStoreUserData
 
@@ -292,11 +247,5 @@ const planSlice = createSlice({
   },
 })
 
-export const {
-  cacheImage,
-  resetPlan,
-  markAsRead,
-  removePlan,
-  addPlan,
-} = planSlice.actions
+export const { cacheImage, resetPlan, markAsRead, removePlan, addPlan } = planSlice.actions
 export default planSlice.reducer

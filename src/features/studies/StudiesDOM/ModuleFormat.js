@@ -4,7 +4,7 @@ import { dispatch } from './dispatch'
 const Module = Quill.import('core/module')
 
 class ModuleFormat extends Module {
-  constructor (quill, options) {
+  constructor(quill, options) {
     super(quill, options)
 
     this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
@@ -19,13 +19,13 @@ class ModuleFormat extends Module {
   }
 
   // This function is useful to toggle active class
-  update (range) {
+  update(range) {
     // Get what format are applied on given range
     const formats = range == null ? {} : this.quill.getFormat(range)
     dispatch('ACTIVE_FORMATS', JSON.stringify(formats))
   }
 
-  format (name, value = true) {
+  format(name, value = true) {
     this.quill.format(name, value, Quill.sources.USER)
     const range = this.quill.getSelection(true)
     this.update(range)
@@ -51,7 +51,7 @@ ModuleFormat.DEFAULTS = {
     //     this.quill.removeFormat(range, Quill.sources.USER)
     //   }
     // },
-    indent (value) {
+    indent(value) {
       const range = this.quill.getSelection()
       const formats = this.quill.getFormat(range)
       const indent = parseInt(formats.indent || 0, 10)
@@ -61,7 +61,7 @@ ModuleFormat.DEFAULTS = {
         this.quill.format('indent', indent + modifier, Quill.sources.USER)
       }
     },
-    list (value) {
+    list(value) {
       const range = this.quill.getSelection()
       const formats = this.quill.getFormat(range)
       if (value === 'check') {
@@ -73,10 +73,13 @@ ModuleFormat.DEFAULTS = {
       } else {
         this.quill.format('list', value, Quill.sources.USER)
       }
-    }
-  }
+    },
+  },
 }
 
-Quill.register({
-  'modules/format': ModuleFormat
-}, true)
+Quill.register(
+  {
+    'modules/format': ModuleFormat,
+  },
+  true
+)

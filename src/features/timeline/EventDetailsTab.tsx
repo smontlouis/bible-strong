@@ -61,6 +61,7 @@ const EventDetailsTab = ({
         const isRouteActive = routeIndex === activeRouteIndex
 
         return (
+          // @ts-ignore
           <TabItem
             key={routeIndex}
             isFirst={routeIndex === 0}

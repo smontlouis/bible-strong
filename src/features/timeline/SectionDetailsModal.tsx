@@ -1,9 +1,6 @@
 import React from 'react'
 
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -11,10 +8,7 @@ import InlineLink from '~common/InlineLink'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import useLanguage from '~helpers/useLanguage'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
@@ -83,14 +77,7 @@ const SectionDetailsModal = ({
               }}
             />
           </Box>
-          <Box
-            lightShadow
-            bg={color}
-            width={50}
-            height={10}
-            borderRadius={10}
-            my={50}
-          />
+          <Box lightShadow bg={color} width={50} height={10} borderRadius={10} my={50} />
           <Paragraph>{isFR ? description : descriptionEn}</Paragraph>
           <Paragraph scale={-2} mt={80} textAlign="center">
             {`${t('Vous souhaitez aller plus loin ?')}\n`}

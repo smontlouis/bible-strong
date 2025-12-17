@@ -10,6 +10,7 @@ import DownloadResources from './DownloadResources'
 import OnBoardingSlides from './OnBoardingSlides'
 import SelectResources from './SelectResources'
 
+// @ts-ignore
 const StylizedModal = styled(Modal)(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
   width: '100%',
@@ -24,9 +25,7 @@ const useCheckMandatoryVersions = () => {
   const actions = useBibleTabActions(defaultBibleAtom)
   useEffect(() => {
     ;(async () => {
-      const lsgNeedsDownload = await getIfVersionNeedsDownload(
-        isFR ? 'LSG' : 'KJV'
-      )
+      const lsgNeedsDownload = await getIfVersionNeedsDownload(isFR ? 'LSG' : 'KJV')
 
       if (lsgNeedsDownload) {
         console.log('Needs download, open onboarding.')
@@ -43,10 +42,11 @@ const useCheckMandatoryVersions = () => {
 }
 
 const OnBoarding = () => {
-  const [step, setStep] = React.useState(0)
+  const [step, setStep] = React.useState<number>(0)
   const { isFirstTime, setFirstTime } = useCheckMandatoryVersions()
 
   return (
+    // @ts-ignore
     <StylizedModal isVisible={isFirstTime}>
       {step === 0 && <OnBoardingSlides setStep={setStep} />}
       {step === 1 && <SelectResources setStep={setStep} />}

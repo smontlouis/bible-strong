@@ -72,11 +72,7 @@ const MigrationModal = () => {
     >
       <ModalContent>
         <IconContainer>
-          <FeatherIcon
-            name={hasError ? 'alert-circle' : 'database'}
-            size={50}
-            color="primary"
-          />
+          <FeatherIcon name={hasError ? 'alert-circle' : 'database'} size={50} color="primary" />
         </IconContainer>
 
         <Text bold fontSize={24} textAlign="center" marginBottom={10}>
@@ -85,14 +81,12 @@ const MigrationModal = () => {
               ? t('migration.partiallyFailed')
               : t('migration.failed')
             : progress.isResuming
-            ? t('migration.resuming')
-            : t('migration.inProgress')}
+              ? t('migration.resuming')
+              : t('migration.inProgress')}
         </Text>
 
         <Text textAlign="center" color="grey" marginBottom={20}>
-          {hasError
-            ? t('migration.errorDescription')
-            : t('migration.description')}
+          {hasError ? t('migration.errorDescription') : t('migration.description')}
         </Text>
 
         {!hasError && (
@@ -125,18 +119,12 @@ const MigrationModal = () => {
             <ErrorBox>
               <Text fontSize={12} color="grey">
                 {progress.hasPartialFailure
-                  ? t('migration.partialError') +
-                    progress.failedCollections.join(', ')
+                  ? t('migration.partialError') + progress.failedCollections.join(', ')
                   : progress.error}
               </Text>
             </ErrorBox>
 
-            <Text
-              textAlign="center"
-              fontSize={14}
-              color="grey"
-              marginBottom={20}
-            >
+            <Text textAlign="center" fontSize={14} color="grey" marginBottom={20}>
               {t('migration.contactSupport')}
             </Text>
 

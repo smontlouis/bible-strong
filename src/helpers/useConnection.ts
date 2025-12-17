@@ -5,10 +5,9 @@ const useConnection = () => {
   const [isConnected, setIsConnected] = useState(true)
 
   useEffect(() => {
-    const handleConnectivityChange = ({
-      isConnected: userIsConnected,
-    }: NetInfoState) => {
+    const handleConnectivityChange = ({ isConnected: userIsConnected }: NetInfoState) => {
       console.log('Is connected: ', userIsConnected)
+      // @ts-ignore
       setIsConnected(userIsConnected)
     }
 

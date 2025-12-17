@@ -16,12 +16,7 @@ export interface UseDisclosureProps {
  * @see Docs https://chakra-ui.com/docs/hooks/use-disclosure
  */
 export function useDisclosure(props: UseDisclosureProps = {}) {
-  const {
-    onClose: onCloseProp,
-    onOpen: onOpenProp,
-    isOpen: isOpenProp,
-    id: idProp,
-  } = props
+  const { onClose: onCloseProp, onOpen: onOpenProp, isOpen: isOpenProp, id: idProp } = props
 
   const handleOpen = useCallbackRef(onOpenProp)
   const handleClose = useCallbackRef(onCloseProp)

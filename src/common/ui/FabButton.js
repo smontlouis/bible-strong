@@ -32,11 +32,7 @@ const Fab = ({ icon, onPress, route, params, component: Component }) => {
         bottom: bottomBarHeight + 30,
       }}
     >
-      {Component ? (
-        <Component color="white" />
-      ) : (
-        <StyledIcon name={icon} size={22} />
-      )}
+      {Component ? <Component color="white" /> : <StyledIcon name={icon} size={22} />}
     </StyledLink>
   )
 }

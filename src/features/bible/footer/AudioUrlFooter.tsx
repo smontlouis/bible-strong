@@ -25,11 +25,7 @@ import AudioSpeedButton from './AudioSpeedButton'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
 import PlayButton from './PlayButton'
-import {
-  audioSleepMinutesAtom,
-  audioSleepTimeAtom,
-  playingBibleTabIdAtom,
-} from './atom'
+import { audioSleepMinutesAtom, audioSleepTimeAtom, playingBibleTabIdAtom } from './atom'
 
 type UseLoadSoundProps = {
   audioUrl?: string
@@ -93,9 +89,7 @@ const useLoadSound = ({
   const hasAutoTrackChange = useRef(false)
   const [audioSleepTime, setAudioSleepTime] = useAtom(audioSleepTimeAtom)
   const setAudioSleepMinutes = useSetAtom(audioSleepMinutesAtom)
-  const [playingBibleTabId, setPlayingBibleTabId] = useAtom(
-    playingBibleTabIdAtom
-  )
+  const [playingBibleTabId, setPlayingBibleTabId] = useAtom(playingBibleTabIdAtom)
   const isCurrentTabPlaying = playingBibleTabId === bibleAtom.toString()
 
   useTrackPlayerEvents(events, async event => {
@@ -120,10 +114,7 @@ const useLoadSound = ({
     if (event.type === Event.PlaybackProgressUpdated && isCurrentTabPlaying) {
       const track = await TrackPlayer.getTrack(event.track)
 
-      if (
-        track &&
-        (track?.book?.Numero !== book.Numero || track?.chapter !== chapter)
-      ) {
+      if (track && (track?.book?.Numero !== book.Numero || track?.chapter !== chapter)) {
         hasAutoTrackChange.current = true
         goToChapter({
           book: track?.book,
@@ -135,9 +126,7 @@ const useLoadSound = ({
 
   const isPlaying = playerState === State.Playing
   const isLoading =
-    playerState === State.Buffering ||
-    playerState === State.Loading ||
-    playerState === State.None
+    playerState === State.Buffering || playerState === State.Loading || playerState === State.None
 
   const onPlay = async () => {
     setPlayingBibleTabId(bibleAtom.toString())
@@ -211,15 +200,13 @@ const useLoadSound = ({
           progressUpdateEventInterval: 1,
 
           android: {
-            appKilledPlaybackBehavior:
-              AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+            appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
           },
         })
 
         await TrackPlayer.add(tracks)
         const trackIndex = tracks.findIndex(
-          track =>
-            track.book.Numero === book.Numero && track.chapter === chapter
+          track => track.book.Numero === book.Numero && track.chapter === chapter
         )
         await TrackPlayer.skip(trackIndex)
       } catch (e) {
@@ -246,9 +233,7 @@ const useLoadSound = ({
       try {
         await TrackPlayer.skip(trackIndex)
 
-        const duration = await TrackPlayer.getProgress().then(
-          progress => progress.duration
-        )
+        const duration = await TrackPlayer.getProgress().then(progress => progress.duration)
         await TrackPlayer.updateMetadataForTrack(trackIndex, {
           duration,
         })
@@ -336,11 +321,7 @@ const AudioUrlFooter = ({
   }
 
   return (
-    <AudioContainer
-      onReduce={onReduce}
-      audioMode="url"
-      onChangeMode={onChangeMode}
-    >
+    <AudioContainer onReduce={onReduce} audioMode="url" onChangeMode={onChangeMode}>
       <AudioBar duration={progress.duration} position={progress.position} />
       <Box flex row overflow="visible" center mt={10}>
         <ChapterButton

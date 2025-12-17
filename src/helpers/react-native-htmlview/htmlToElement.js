@@ -14,23 +14,13 @@ function htmlToElement(rawHtml, opts, done) {
 
     return dom.map((node, index, list) => {
       if (opts.customRenderer) {
-        const rendered = opts.customRenderer(
-          node,
-          index,
-          list,
-          parent,
-          domToElement
-        )
+        const rendered = opts.customRenderer(node, index, list, parent, domToElement)
         if (rendered || rendered === null) return rendered
       }
 
       if (node.type === 'text') {
         return (
-          <Text
-            selectable
-            key={index}
-            style={parent ? opts.styles[parent.name] : opts.styles.p}
-          >
+          <Text selectable key={index} style={parent ? opts.styles[parent.name] : opts.styles.p}>
             {entities.decodeHTML(node.data)}
           </Text>
         )
@@ -53,9 +43,7 @@ function htmlToElement(rawHtml, opts, done) {
             {node.name === 'li' ? BULLET : null}
             {domToElement(node.children, node)}
             {node.name === 'br' ? LINE_BREAK : null}
-            {node.name === 'p' && index < list.length - 1
-              ? PARAGRAPH_BREAK
-              : null}
+            {node.name === 'p' && index < list.length - 1 ? PARAGRAPH_BREAK : null}
             {node.name === 'h1' ||
             node.name === 'h2' ||
             node.name === 'h3' ||

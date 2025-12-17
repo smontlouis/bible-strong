@@ -66,8 +66,7 @@ export const events: TimelineSection[] = [
       {
         id: 665,
         title: 'Seth',
-        image:
-          'http://timeline.biblehistory.com/media/images/t/seth_8-5-2013%205-05-51%20PM.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/seth_8-5-2013%205-05-51%20PM.jpg',
         slug: 'seth',
         start: -3824,
         end: -2912,
@@ -143,8 +142,7 @@ export const events: TimelineSection[] = [
       {
         id: 672,
         title: "Le ministère prophétique d'Hénoc",
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Enoch_5-21-2013%209-53-09%20AM.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Enoch_5-21-2013%209-53-09%20AM.jpg',
         slug: 'enochs-prophetic-ministry',
         start: -3267,
         end: -2967,
@@ -168,8 +166,7 @@ export const events: TimelineSection[] = [
   {
     id: '2',
     image: 'http://timeline.biblehistory.com/css/img/period_2.jpg',
-    description:
-      'Du ministère de Noé et du déluge mondial à Cush, Nimrod et la tour de Babel.',
+    description: 'Du ministère de Noé et du déluge mondial à Cush, Nimrod et la tour de Babel.',
     startYear: -2900,
     endYear: -1950,
     interval: 25,
@@ -365,8 +362,7 @@ export const events: TimelineSection[] = [
         id: 623,
         title: 'Job',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Job1_8-7-2013%2010-50-16%20AM.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Job1_8-7-2013%2010-50-16%20AM.jpg',
         slug: 'job',
         start: -2185,
         end: -1945,
@@ -653,8 +649,7 @@ export const events: TimelineSection[] = [
         id: 611,
         title: 'Ismael',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Navez_Agar_et_Ismael.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Navez_Agar_et_Ismael.jpg',
         slug: 'ishmael',
         start: -1860,
         end: -1723,
@@ -1306,8 +1301,7 @@ export const events: TimelineSection[] = [
         id: 623,
         title: 'Job',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Job1_8-7-2013%2010-50-16%20AM.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Job1_8-7-2013%2010-50-16%20AM.jpg',
         slug: 'job',
         start: -2185,
         end: -1945,
@@ -1421,8 +1415,7 @@ export const events: TimelineSection[] = [
       },
       {
         id: 725,
-        title:
-          "Les Égyptiens chassent les Hyksos, l'Égyptien du Nouveau Royaume",
+        title: "Les Égyptiens chassent les Hyksos, l'Égyptien du Nouveau Royaume",
         slug: 'egyptians-drive-out-hyksos-new-kingdom-egyptian',
         start: -1566,
         end: -1566,
@@ -1886,8 +1879,7 @@ export const events: TimelineSection[] = [
         id: 755,
         title: 'Ehud',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Ehud_5-6-2013%205-07-09%20PM.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Ehud_5-6-2013%205-07-09%20PM.jpg',
         slug: 'ehud',
         start: -1318,
         end: -1217,
@@ -2810,8 +2802,7 @@ export const events: TimelineSection[] = [
         id: 872,
         title: 'Nadab',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Nadab_of_Israel.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Nadab_of_Israel.jpg',
         slug: 'nadab',
         start: -933,
         end: -909,
@@ -3080,8 +3071,7 @@ export const events: TimelineSection[] = [
         id: 899,
         title: 'Elisha',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/ElishaRaisingShunammitesSon.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/ElishaRaisingShunammitesSon.jpg',
         slug: 'elisha',
         start: -885,
         end: -798,
@@ -3424,8 +3414,7 @@ export const events: TimelineSection[] = [
       },
       {
         id: 934,
-        title:
-          'Elisha met en garde une femme shunamite contre une famine de 7 ans',
+        title: 'Elisha met en garde une femme shunamite contre une famine de 7 ans',
         slug: 'elisha-warns-shunammite-woman-of-7-year-famine',
         start: -839,
         end: -839,
@@ -3691,8 +3680,7 @@ export const events: TimelineSection[] = [
         id: 992,
         title: 'Sennacherib',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Sennacherib.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Sennacherib.jpg',
         slug: 'sennacherib',
         start: -735,
         end: -681,
@@ -3911,8 +3899,7 @@ export const events: TimelineSection[] = [
         id: 417,
         title: 'Nahum',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Nahum-prophet.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Nahum-prophet.jpg',
         slug: 'nahum',
         start: -683,
         end: -610,
@@ -4163,8 +4150,7 @@ export const events: TimelineSection[] = [
         id: 872,
         title: 'Nadab',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Nadab_of_Israel.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Nadab_of_Israel.jpg',
         slug: 'nadab',
         start: -933,
         end: -909,
@@ -4737,8 +4723,7 @@ export const events: TimelineSection[] = [
         id: 550,
         title: 'Artaxerxes III',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Persepolis_Artaxerxes_III_tomb.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Persepolis_Artaxerxes_III_tomb.jpg',
         slug: 'artaxerxes-iii',
         start: -400,
         end: -338,
@@ -5021,8 +5006,7 @@ export const events: TimelineSection[] = [
         id: 417,
         title: 'Nahum',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Nahum-prophet.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Nahum-prophet.jpg',
         slug: 'nahum',
         start: -683,
         end: -610,
@@ -5181,8 +5165,7 @@ export const events: TimelineSection[] = [
         id: 581,
         title: 'Simeon',
         approx: true,
-        image:
-          'http://timeline.biblehistory.com/media/images/t/Yegorov-Simeon_the_Righteous.jpg',
+        image: 'http://timeline.biblehistory.com/media/images/t/Yegorov-Simeon_the_Righteous.jpg',
         slug: 'simeon-of-the-temple',
         start: -90,
         end: 3,
@@ -5899,8 +5882,7 @@ export const events: TimelineSection[] = [
       },
       {
         id: 1207,
-        title:
-          "Barnabas et Paul emmènent l'aide aux victimes de la famine à Jérusalem",
+        title: "Barnabas et Paul emmènent l'aide aux victimes de la famine à Jérusalem",
         slug: 'barnabas-and-paul-take-famine-relief-to-jerusalem',
         start: 45,
         end: 45,
@@ -7572,8 +7554,7 @@ export const events: TimelineSection[] = [
       },
       {
         id: 1247,
-        title:
-          'Persécution mondiale par les bêtes venant de la Mer et de la Terre',
+        title: 'Persécution mondiale par les bêtes venant de la Mer et de la Terre',
         slug: 'global-persecution-by-sea-earth-beasts',
         start: 2020,
         end: 2020,
@@ -7635,8 +7616,7 @@ export const events: TimelineSection[] = [
       },
       {
         id: 1257,
-        title:
-          'Emprisonnement de Satan sur Terre / Jugement des saints du Ciel',
+        title: 'Emprisonnement de Satan sur Terre / Jugement des saints du Ciel',
         image:
           'http://timeline.biblehistory.com/media/images/t/GoodSalt-millennium-1_8-5-2013%2012-13-14%20PM.jpg',
         slug: 'imprisonment-of-satan-on-earth-judgment-by-saints-in-heaven',
@@ -7788,9 +7768,6 @@ export const events: TimelineSection[] = [
   },
 ]
 
-export const flattenedEvents: TimelineEvent[] = events.reduce(
-  (acc: TimelineEvent[], curr) => {
-    return [...acc, ...curr.events]
-  },
-  []
-)
+export const flattenedEvents: TimelineEvent[] = events.reduce((acc: TimelineEvent[], curr) => {
+  return [...acc, ...curr.events]
+}, [])

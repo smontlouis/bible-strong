@@ -7,9 +7,7 @@ import { NavesTab } from '../../state/tabs'
 import NaveTabScreen from './NaveTabScreen'
 import { MainStackProps } from '~navigation/type'
 
-const NaveScreen = ({
-  navigation,
-}: StackScreenProps<MainStackProps, 'Nave'>) => {
+const NaveScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Nave'>) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -24,12 +22,6 @@ const NaveScreen = ({
     []
   )
 
-  return (
-    <NaveTabScreen
-      navesAtom={onTheFlyAtom}
-      navigation={navigation}
-      hasBackButton
-    />
-  )
+  return <NaveTabScreen navesAtom={onTheFlyAtom} navigation={navigation} hasBackButton />
 }
 export default NaveScreen

@@ -5,11 +5,7 @@ import Carousel from 'react-native-reanimated-carousel'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import { wp } from '~helpers/utils'
-import {
-  TimelineEvent,
-  TimelineEventDetail,
-  TimelineEvent as TimelineEventProps,
-} from './types'
+import { TimelineEvent, TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
@@ -27,13 +23,10 @@ const Media = ({
   scriptures,
   videos,
   related,
-}: Pick<
-  TimelineEventDetail,
-  'images' | 'scriptures' | 'videos' | 'related'
->) => {
+}: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'>) => {
   const { t } = useTranslation()
   const eventModalRef = React.useRef<BottomSheet>(null)
-  const [event, setEvent] = React.useState<Partial<TimelineEventProps>>(null)
+  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
 
   const { data: events } = useQuery({
     queryKey: 'timeline',
@@ -65,11 +58,7 @@ const Media = ({
           </Paragraph>
           <Carousel
             data={images}
-            renderItem={({
-              item,
-            }: {
-              item: TimelineEventDetail['images'][0]
-            }) => (
+            renderItem={({ item }: { item: TimelineEventDetail['images'][0] }) => (
               <Box>
                 <Image
                   style={{ width: imageWidth, height: imageWidth }}
@@ -104,9 +93,7 @@ const Media = ({
             <Link
               key={r.slug}
               onPress={() => {
-                const foundEvent = flattenedEvents?.find(
-                  ev => ev.slug === r.slug
-                )
+                const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
                 if (foundEvent) {
                   setEvent(foundEvent)
                   eventModalRef.current?.expand()
@@ -126,6 +113,7 @@ const Media = ({
             </Link>
           ))}
           <Portal>
+            {/* @ts-ignore */}
             <EventDetailsModal modalRef={eventModalRef} event={event} />
           </Portal>
         </Box>
@@ -135,4 +123,3 @@ const Media = ({
 }
 
 export default Media
-

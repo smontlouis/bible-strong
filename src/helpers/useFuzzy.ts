@@ -44,9 +44,7 @@ function useFuzzy<T>(
     return new Fuse(data, { ...defaultOptions, ...options, getFn })
   }, [data, options])
 
-  const result = keyword
-    ? searcher.search(removeAccents(keyword)).map(c => c.item)
-    : data
+  const result = keyword ? searcher.search(removeAccents(keyword)).map(c => c.item) : data
 
   return {
     keyword,

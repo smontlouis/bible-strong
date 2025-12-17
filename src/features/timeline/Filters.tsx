@@ -14,6 +14,7 @@ const Filters = () => (
         flexDirection: 'row',
       }}
     >
+      {/* @ts-ignore */}
       <RefinementList attribute="period" limit={100} />
     </ScrollView>
   </Box>

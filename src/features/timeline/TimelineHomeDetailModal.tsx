@@ -8,10 +8,7 @@ import Accordion from '~common/ui/Accordion'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import {
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet>
@@ -85,9 +82,7 @@ Chacune de ces sections est divisée en périodes plus spécifiques pour facilit
           <Accordion
             title={
               <Text title fontSize={18}>
-                {t(
-                  'Comment avez-vous déterminé les dates, en particulier la date de création ?'
-                )}
+                {t('Comment avez-vous déterminé les dates, en particulier la date de création ?')}
               </Text>
             }
           >
@@ -125,9 +120,7 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
           <Accordion
             title={
               <Text title fontSize={18}>
-                {t(
-                  'Quelles sont vos principales sources pour la chronologie ?'
-                )}
+                {t('Quelles sont vos principales sources pour la chronologie ?')}
               </Text>
             }
           >

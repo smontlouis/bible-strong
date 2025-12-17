@@ -7,26 +7,11 @@ import { StackScreenProps } from '@react-navigation/stack'
 import { atom } from 'jotai/vanilla'
 import { isEmpty } from '~helpers/deep-obj/utils'
 import { MainStackProps } from '~navigation/type'
-import {
-  BibleTab,
-  defaultBibleAtom,
-  getDefaultBibleTab,
-} from '../../state/tabs'
+import { BibleTab, defaultBibleAtom, getDefaultBibleTab } from '../../state/tabs'
 import BibleTabScreen from './BibleTabScreen'
 
-const BibleScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'BibleView'>) => {
-  const {
-    focusVerses,
-    isSelectionMode,
-    isReadOnly,
-    book,
-    chapter,
-    verse,
-    version,
-  } = route.params
+const BibleScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'BibleView'>) => {
+  const { focusVerses, isSelectionMode, isReadOnly, book, chapter, verse, version } = route.params
 
   const initialValues = produce(getDefaultBibleTab(), draft => {
     draft.id = `bible-${Date.now()}`

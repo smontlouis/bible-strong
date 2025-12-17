@@ -22,7 +22,7 @@ import Text from '~common/ui/Text'
 import { firebaseDb } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
-import { r } from '~redux/firestoreMiddleware'
+import { removeUndefinedVariables as r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 
@@ -49,7 +49,8 @@ const Circle = styled.View(({ theme }) => ({
 
 const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
 
-const StyledIcon = styled(Icon.Feather)(({ theme, color }) => ({
+const StyledIcon = styled(Icon.Feather)(({ theme, color }: any) => ({
+  // @ts-ignore
   color: theme.colors[color] || theme.colors.grey,
   marginRight: 15,
 }))
@@ -89,7 +90,7 @@ const ManualSync = memo(() => {
   const sync = async () => {
     SnackBar.show(t('app.syncing'))
     setIsSyncing(true)
-    const sanitizeUserBible = ({ changelog, studies, ...rest }) => rest
+    const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
     await userDoc.update(
       r({
         bible: sanitizeUserBible(user.bible),
@@ -133,7 +134,7 @@ export const More = ({ closeMenu }: MoreProps) => {
 
   const isFR = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
-    Object.values(state.user.needsUpdate).some((v) => v)
+    Object.values(state.user.needsUpdate).some(v => v)
   )
 
   const { t } = useTranslation()
@@ -156,6 +157,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             {
               text: t('Delete'),
               onPress: async () => {
+                // @ts-ignore
                 firebaseDb.collection('users').doc(user.id).delete()
 
                 const authUser = auth().currentUser
@@ -172,9 +174,7 @@ export const More = ({ closeMenu }: MoreProps) => {
     ])
   }
 
-  const appleIsReviewing = remoteConfig()
-    .getValue('apple_reviewing')
-    .asBoolean()
+  const appleIsReviewing = remoteConfig().getValue('apple_reviewing').asBoolean()
 
   // All the LinkItem should define params if they use route
   // There should be a way to type params using the route name
@@ -214,11 +214,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             </Text>
           </LinkItem>
           <LinkItem route="Plans">
-            <MaterialIcon
-              name="playlist-add-check"
-              size={25}
-              style={{ marginRight: 15 }}
-            />
+            <MaterialIcon name="playlist-add-check" size={25} style={{ marginRight: 15 }} />
             <Text bold fontSize={15}>
               {t('Plans')}
             </Text>
@@ -245,22 +241,13 @@ export const More = ({ closeMenu }: MoreProps) => {
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
           <LinkItem route="ResourceLanguage">
-            <MaterialIcon
-              name="language"
-              size={25}
-              color="grey"
-              style={{ marginRight: 15 }}
-            />
+            <MaterialIcon name="language" size={25} color="grey" style={{ marginRight: 15 }} />
             <Text fontSize={15}>{t('Changer la langue')}</Text>
           </LinkItem>
           <LinkItem route="Downloads">
             <Box>
               {hasUpdate && (
-                <AnimatedCircle
-                  animation="pulse"
-                  easing="ease-out"
-                  iterationCount="infinite"
-                />
+                <AnimatedCircle animation="pulse" easing="ease-out" iterationCount="infinite" />
               )}
               <StyledIcon name="download" size={25} />
             </Box>
@@ -304,11 +291,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
           {!appleIsReviewing && (
             <LinkItem
-              href={
-                isFR
-                  ? 'https://bible-strong.app/fr/give'
-                  : 'https://bible-strong.app/give'
-              }
+              href={isFR ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'}
             >
               <StyledIcon name="dollar-sign" size={25} />
               <Text fontSize={15}>{t('Contribuer')}</Text>
@@ -362,11 +345,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
           <LinkItem
             style={{ paddingVertical: 10 }}
-            href={
-              isFR
-                ? 'https://bible-strong.app/eula'
-                : 'https://bible-strong.app/eula-en'
-            }
+            href={isFR ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'}
           >
             <Text fontSize={15} color="grey">
               {t("Conditions d'utilisation")}

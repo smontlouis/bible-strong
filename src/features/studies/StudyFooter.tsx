@@ -3,13 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import Color from 'color'
 import React, { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
-import {
-  Menu,
-  MenuOptions,
-  MenuTrigger,
-  renderers,
-  withMenuContext,
-} from 'react-native-popup-menu'
+import { Menu, MenuOptions, MenuTrigger, renderers, withMenuContext } from 'react-native-popup-menu'
 
 import { useTranslation } from 'react-i18next'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
@@ -22,10 +16,7 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import useMediaQueries from '~helpers/useMediaQueries'
-import {
-  MenuOption as BaseMenuOption,
-  MenuOptionProps,
-} from 'react-native-popup-menu'
+import { MenuOption as BaseMenuOption, MenuOptionProps } from 'react-native-popup-menu'
 import { useTheme } from '@emotion/react'
 
 const { Popover } = renderers
@@ -35,7 +26,7 @@ const TouchableIcon = styled(TouchableOpacity)(() => ({
   marginHorizontal: 10,
 }))
 
-const PopOverMenu = ({ element, popover, ...props }) => {
+const PopOverMenu = ({ element, popover, ...props }: any) => {
   const theme = useTheme()
   return (
     <Menu renderer={Popover} rendererProps={{ placement: 'top' }} {...props}>
@@ -71,7 +62,7 @@ const MenuOption = (props: MenuOptionProps) => {
   )
 }
 
-const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
+const SelectHeading = ({ dispatchToWebView, activeFormats }: any) => {
   const { t } = useTranslation()
   const headings = [
     { label: 'Normal', value: 0 },
@@ -79,7 +70,7 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
     { label: 'Sous-titre', value: 2 },
   ]
 
-  const headerTitle = {
+  const headerTitle: any = {
     0: 'Normal',
     1: 'Titre',
     2: 'Sous-titre',
@@ -106,19 +97,12 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
           <Text fontSize={15} bold color="primary">
             {t(getHeaderTitle())}
           </Text>
-          <Box
-            marginLeft={5}
-            rounded
-            backgroundColor="primary"
-            width={18}
-            height={18}
-            center
-          >
+          <Box marginLeft={5} rounded backgroundColor="primary" width={18} height={18} center>
             <FeatherIcon name="chevron-up" color="reverse" size={18} />
           </Box>
         </Box>
       }
-      popover={headings.map((h) => (
+      popover={headings.map(h => (
         <MenuOption
           key={h.label}
           onSelect={() => {
@@ -137,8 +121,8 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
                   ? 'primary'
                   : 'grey'
                 : h.value === 0
-                ? 'primary'
-                : 'grey'
+                  ? 'primary'
+                  : 'grey'
             }
           >
             {t(h.label)}
@@ -149,22 +133,14 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }) => {
   )
 }
 
-const colors = [
-  '#cc0000',
-  '#f1c232',
-  '#6aa84f',
-  '#45818e',
-  '#3d85c6',
-  '#674ea7',
-  '#a64d79',
-]
+const colors = ['#cc0000', '#f1c232', '#6aa84f', '#45818e', '#3d85c6', '#674ea7', '#a64d79']
 const lighten = ['0.3', '0.5', '0.7', '0.9']
 
-const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
-  const [colorModal, setOpenColorModal] = React.useState()
+const SelectMore = ({ dispatchToWebView, activeFormats, ctx }: any) => {
+  const [colorModal, setOpenColorModal] = React.useState<any>()
   const { t } = useTranslation()
 
-  const setColor = (color) => {
+  const setColor = (color: any) => {
     dispatchToWebView('TOGGLE_FORMAT', {
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
       value: color,
@@ -173,7 +149,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
 
   return (
     <PopOverMenu
-      onClose={() => setOpenColorModal()}
+      onClose={() => setOpenColorModal(undefined)}
       element={<FeatherIcon name="more-horizontal" size={18} color="primary" />}
       popover={
         colorModal ? (
@@ -192,15 +168,15 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                 {t('reset')}
               </Text>
             </TouchableBox>
-            {lighten.map((l) => (
+            {lighten.map((l: any) => (
               <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
-                {colors.map((c) => (
+                {colors.map((c: any) => (
                   <TouchableCircle
                     key={c}
                     size={20}
-                    color={Color(c).lighten(l).string()}
+                    color={Color(c).lighten(Number(l)).string()}
                     onPress={() => {
-                      setColor(Color(c).lighten(l).string())
+                      setColor(Color(c).lighten(Number(l)).string())
                       ctx.menuActions.closeMenu()
                     }}
                   />
@@ -211,6 +187,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
         ) : (
           <Box>
             <Box row>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.background}
                 style={{ marginHorizontal: 10 }}
@@ -218,6 +195,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
               >
                 <BackgroundIcon color={activeFormats.background} />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.color}
                 style={{ marginHorizontal: 10 }}
@@ -225,6 +203,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
               >
                 <ColorIcon color={activeFormats.color} />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.blockquote}
                 style={{ marginHorizontal: 10 }}
@@ -240,6 +219,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
             </Box>
             <Border marginTop={10} />
             <Box row marginTop={10}>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.list === 'bullet'}
                 style={{ marginHorizontal: 10 }}
@@ -252,6 +232,7 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
               >
                 <FeatherIcon color="primary" name="list" size={20} />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.list === 'ordered'}
                 style={{ marginHorizontal: 10 }}
@@ -262,12 +243,9 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
                   })
                 }
               >
-                <MaterialIcon
-                  color="primary"
-                  name="format-list-numbered"
-                  size={20}
-                />
+                <MaterialIcon color="primary" name="format-list-numbered" size={20} />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 style={{ marginHorizontal: 10 }}
                 onPress={() => {
@@ -279,18 +257,10 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
             </Box>
             <Border marginTop={10} />
             <Box row marginTop={10}>
-              <TouchableIcon
-                onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
-                }
-              >
+              <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}>
                 <MaterialIcon name="undo" size={20} color="primary" />
               </TouchableIcon>
-              <TouchableIcon
-                onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
-                }
-              >
+              <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}>
                 <MaterialIcon name="redo" size={20} color="primary" />
               </TouchableIcon>
             </Box>
@@ -301,50 +271,30 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }) => {
   )
 }
 
-const SelectBlock = ({ navigateBibleView }) => {
+const SelectBlock = ({ navigateBibleView }: any) => {
   const { t } = useTranslation()
   return (
     <PopOverMenu
       element={
-        <MaterialIcon
-          name="add-box"
-          size={22}
-          color="primary"
-          style={{ marginLeft: 'auto' }}
-        />
+        <MaterialIcon name="add-box" size={22} color="primary" style={{ marginLeft: 'auto' }} />
       }
       popover={
         <>
           <MenuOption onSelect={() => navigateBibleView('verse')}>
             <Box row alignItems="center">
-              <FeatherIcon
-                color="quint"
-                size={20}
-                name="link-2"
-                style={{ marginRight: 15 }}
-              />
+              <FeatherIcon color="quint" size={20} name="link-2" style={{ marginRight: 15 }} />
               <Text>{t('Insérer un lien de verset')}</Text>
             </Box>
           </MenuOption>
           <MenuOption onSelect={() => navigateBibleView('verse-block')}>
             <Box row alignItems="center">
-              <MaterialIcon
-                color="quint"
-                size={24}
-                name="short-text"
-                style={{ marginRight: 15 }}
-              />
+              <MaterialIcon color="quint" size={24} name="short-text" style={{ marginRight: 15 }} />
               <Text>{t('Insérer un texte de verset')}</Text>
             </Box>
           </MenuOption>
           <MenuOption onSelect={() => navigateBibleView('strong')}>
             <Box row alignItems="center">
-              <FeatherIcon
-                color="primary"
-                size={20}
-                name="link-2"
-                style={{ marginRight: 15 }}
-              />
+              <FeatherIcon color="primary" size={20} name="link-2" style={{ marginRight: 15 }} />
               <Text>{t('Insérer un lien de strong')}</Text>
             </Box>
           </MenuOption>
@@ -365,7 +315,7 @@ const SelectBlock = ({ navigateBibleView }) => {
   )
 }
 
-const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }) => ({
+const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }: any) => ({
   width: 25,
   height: 25,
   alignItems: 'center',
@@ -375,7 +325,7 @@ const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }) => ({
 
 const FormatIconForPopover = FormatIcon.withComponent(Box)
 
-const ColorPopover = ({ type, setColor, ctx }) => (
+const ColorPopover = ({ type, setColor, ctx }: any) => (
   <Box width={200}>
     <Box row marginBottom={15} padding={5} alignItems="center">
       <Icon.Feather
@@ -397,15 +347,15 @@ const ColorPopover = ({ type, setColor, ctx }) => (
         Aucune
       </Text>
     </Box>
-    {lighten.map((l) => (
+    {lighten.map((l: any) => (
       <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
-        {colors.map((c) => (
+        {colors.map((c: any) => (
           <TouchableCircle
             key={c}
             size={20}
-            color={Color(c).lighten(l).string()}
+            color={Color(c).lighten(Number(l)).string()}
             onPress={() => {
-              setColor(type, Color(c).lighten(l).string())
+              setColor(type, Color(c).lighten(Number(l)).string())
               ctx.menuActions.closeMenu()
             }}
           />
@@ -416,10 +366,10 @@ const ColorPopover = ({ type, setColor, ctx }) => (
 )
 
 const StudyFooter = memo(
-  ({ dispatchToWebView, navigateBibleView, activeFormats, ctx }) => {
+  ({ dispatchToWebView, navigateBibleView, activeFormats, ctx }: any) => {
     const deviceSize = useMediaQueries()
 
-    const setColor = (colorModal, color) => {
+    const setColor = (colorModal: any, color: any) => {
       dispatchToWebView('TOGGLE_FORMAT', {
         type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
         value: color,
@@ -429,10 +379,8 @@ const StudyFooter = memo(
     return (
       <Box row height={50} backgroundColor="reverse" alignItems="center">
         <Box row flex center paddingLeft={10}>
-          <SelectHeading
-            dispatchToWebView={dispatchToWebView}
-            activeFormats={activeFormats}
-          />
+          <SelectHeading dispatchToWebView={dispatchToWebView} activeFormats={activeFormats} />
+          {/* @ts-ignore */}
           <FormatIcon
             isSelected={activeFormats.bold}
             onPress={() =>
@@ -445,6 +393,7 @@ const StudyFooter = memo(
           >
             <FeatherIcon color="primary" name="bold" size={16} />
           </FormatIcon>
+          {/* @ts-ignore */}
           <FormatIcon
             isSelected={activeFormats.italic}
             onPress={() =>
@@ -457,6 +406,7 @@ const StudyFooter = memo(
           >
             <FeatherIcon color="primary" name="italic" size={16} />
           </FormatIcon>
+          {/* @ts-ignore */}
           <FormatIcon
             isSelected={activeFormats.underline}
             onPress={() =>
@@ -486,13 +436,7 @@ const StudyFooter = memo(
                     <BackgroundIcon color={activeFormats.background} />
                   </FormatIconForPopover>
                 }
-                popover={
-                  <ColorPopover
-                    type="background"
-                    ctx={ctx}
-                    setColor={setColor}
-                  />
-                }
+                popover={<ColorPopover type="background" ctx={ctx} setColor={setColor} />}
               />
               <PopOverMenu
                 element={
@@ -503,10 +447,9 @@ const StudyFooter = memo(
                     <ColorIcon color={activeFormats.color} />
                   </FormatIconForPopover>
                 }
-                popover={
-                  <ColorPopover type="color" ctx={ctx} setColor={setColor} />
-                }
+                popover={<ColorPopover type="color" ctx={ctx} setColor={setColor} />}
               />
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.blockquote}
                 style={{ marginHorizontal: 10 }}
@@ -519,6 +462,7 @@ const StudyFooter = memo(
               >
                 <QuoteIcon color="primary" />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.list === 'bullet'}
                 style={{ marginHorizontal: 10 }}
@@ -531,6 +475,7 @@ const StudyFooter = memo(
               >
                 <FeatherIcon color="primary" name="list" size={20} />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 isSelected={activeFormats.list === 'ordered'}
                 style={{ marginHorizontal: 10 }}
@@ -541,12 +486,9 @@ const StudyFooter = memo(
                   })
                 }
               >
-                <MaterialIcon
-                  color="primary"
-                  name="format-list-numbered"
-                  size={20}
-                />
+                <MaterialIcon color="primary" name="format-list-numbered" size={20} />
               </FormatIcon>
+              {/* @ts-ignore */}
               <FormatIcon
                 style={{ marginHorizontal: 10 }}
                 onPress={() => {
@@ -555,18 +497,10 @@ const StudyFooter = memo(
               >
                 <FeatherIcon size={20} name="minus" color="primary" />
               </FormatIcon>
-              <TouchableIcon
-                onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })
-                }
-              >
+              <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}>
                 <MaterialIcon name="undo" size={20} color="primary" />
               </TouchableIcon>
-              <TouchableIcon
-                onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })
-                }
-              >
+              <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}>
                 <MaterialIcon name="redo" size={20} color="primary" />
               </TouchableIcon>
             </>
@@ -581,10 +515,7 @@ const StudyFooter = memo(
     )
   },
   (prevProps, nextProps) => {
-    return (
-      JSON.stringify(prevProps.activeFormats) ===
-      JSON.stringify(nextProps.activeFormats)
-    )
+    return JSON.stringify(prevProps.activeFormats) === JSON.stringify(nextProps.activeFormats)
   }
 )
 

@@ -54,9 +54,7 @@ export const useWaitForDatabase = () => {
                 dbPath,
                 undefined,
                 ({ totalBytesWritten }) => {
-                  const idxProgress =
-                    Math.floor((totalBytesWritten / TRESOR_FILE_SIZE) * 100) /
-                    100
+                  const idxProgress = Math.floor((totalBytesWritten / TRESOR_FILE_SIZE) * 100) / 100
                   setProgress(idxProgress)
                 }
               ).downloadAsync()
@@ -98,15 +96,11 @@ export const useWaitForDatabase = () => {
 
 const waitForDatabase =
   <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
-  (props) => {
+  // @ts-ignore
+  (props: T) => {
     const { t } = useTranslation()
-    const {
-      isLoading,
-      progress,
-      proposeDownload,
-      startDownload,
-      setStartDownload,
-    } = useWaitForDatabase()
+    const { isLoading, progress, proposeDownload, startDownload, setStartDownload } =
+      useWaitForDatabase()
 
     if (isLoading && startDownload) {
       return (
@@ -142,6 +136,7 @@ const waitForDatabase =
       )
     }
 
+    // @ts-ignore
     return <WrappedComponent {...props} />
   }
 

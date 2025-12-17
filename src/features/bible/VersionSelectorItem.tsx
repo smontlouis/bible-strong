@@ -15,11 +15,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import {
-  getIfVersionNeedsDownload,
-  isStrongVersion,
-  Version,
-} from '~helpers/bibleVersions'
+import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
@@ -63,13 +59,11 @@ const TextCopyright = styled.Text(
   })
 )
 
-const TextName = styled.Text(
-  ({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
-    color: isSelected ? theme.colors.primary : theme.colors.default,
-    fontSize: 16,
-    backgroundColor: 'transparent',
-  })
-)
+const TextName = styled.Text(({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontSize: 16,
+  backgroundColor: 'transparent',
+}))
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.quart,
@@ -87,24 +81,14 @@ interface Props {
   shareFn?: (fn: () => void) => void
 }
 
-const VersionSelectorItem = ({
-  version,
-  isSelected,
-  onChange,
-  isParameters,
-  shareFn,
-}: Props) => {
+const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shareFn }: Props) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const theme: Theme = useTheme()
-  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<
-    boolean
-  >()
+  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
   const [fileProgress, setFileProgress] = React.useState(0)
   const [isLoading, setIsLoading] = React.useState(false)
-  const needsUpdate = useSelector(
-    (state: RootState) => state.user.needsUpdate[version.id]
-  )
+  const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
 
   React.useEffect(() => {
@@ -122,11 +106,8 @@ const VersionSelectorItem = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const calculateProgress: FileSystem.DownloadProgressCallback = ({
-    totalBytesWritten,
-  }) => {
-    const fileProgress =
-      Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
+  const calculateProgress: FileSystem.DownloadProgressCallback = ({ totalBytesWritten }) => {
+    const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
     setFileProgress(fileProgress)
   }
 
@@ -138,8 +119,8 @@ const VersionSelectorItem = ({
       version.id === 'INT'
         ? getDatabaseUrl('INTERLINEAIRE', 'fr')
         : version.id === 'INT_EN'
-        ? getDatabaseUrl('INTERLINEAIRE', 'en')
-        : biblesRef[version.id]
+          ? getDatabaseUrl('INTERLINEAIRE', 'en')
+          : biblesRef[version.id]
 
     console.log(`Downloading ${uri} to ${path}`)
     try {
@@ -162,9 +143,7 @@ const VersionSelectorItem = ({
     } catch (e) {
       console.log(e)
       SnackBar.show(
-        t(
-          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-        ),
+        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."),
         'danger'
       )
       setIsLoading(false)
@@ -194,18 +173,14 @@ const VersionSelectorItem = ({
   }
 
   const confirmDelete = () => {
-    Alert.alert(
-      t('Attention'),
-      t('Êtes-vous vraiment sur de supprimer cette version ?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: deleteVersion,
-          style: 'destructive',
-        },
-      ]
-    )
+    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette version ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: deleteVersion,
+        style: 'destructive',
+      },
+    ])
   }
 
   if (
@@ -218,11 +193,14 @@ const VersionSelectorItem = ({
 
   if (versionNeedsDownload) {
     return (
+      // @ts-ignore
       <Container>
         <Box flex row>
           <Box disabled flex>
+            {/* @ts-ignore */}
             <TextVersion>{version.id}</TextVersion>
             <HStack alignItems="center">
+              {/* @ts-ignore */}
               <TextName>{version.name}</TextName>
               {version?.hasAudio && (
                 <Box>
@@ -230,6 +208,7 @@ const VersionSelectorItem = ({
                 </Box>
               )}
             </HStack>
+            {/* @ts-ignore */}
             <TextCopyright>{version.c}</TextCopyright>
           </Box>
           {!isLoading && version.id !== 'LSGS' && version.id !== 'KJVS' && (
@@ -246,12 +225,7 @@ const VersionSelectorItem = ({
             </TouchableOpacity>
           )}
           {isLoading && (
-            <Box
-              width={80}
-              justifyContent="center"
-              alignItems="flex-end"
-              mr={10}
-            >
+            <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
               <ProgressCircle
                 size={20}
                 progress={fileProgress}
@@ -270,10 +244,13 @@ const VersionSelectorItem = ({
 
   if (isParameters) {
     return (
+      // @ts-ignore
       <Container needsUpdate={needsUpdate}>
         <Box flex row center>
           <Box flex>
+            {/* @ts-ignore */}
             <TextVersion>{version.id}</TextVersion>
+            {/* @ts-ignore */}
             <TextName>{version.name}</TextName>
           </Box>
           {needsUpdate ? (
@@ -294,13 +271,17 @@ const VersionSelectorItem = ({
   }
 
   return (
+    // @ts-ignore
     <TouchableContainer
       needsUpdate={needsUpdate}
+      // @ts-ignore
       onPress={() => onChange && onChange(version.id)}
     >
       <Box flex>
+        {/* @ts-ignore */}
         <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
         <HStack alignItems="center">
+          {/* @ts-ignore */}
           <TextName isSelected={isSelected}>{version.name}</TextName>
           {version?.hasAudio && (
             <Box>
@@ -308,6 +289,7 @@ const VersionSelectorItem = ({
             </Box>
           )}
         </HStack>
+        {/* @ts-ignore */}
         <TextCopyright>{version.c}</TextCopyright>
       </Box>
     </TouchableContainer>

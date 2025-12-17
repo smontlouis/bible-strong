@@ -44,7 +44,7 @@ class AutoBackupManager {
     } catch (error) {
       console.error('[AutoBackup] Failed to initialize:', error)
       Sentry.captureException(error, {
-        tags: { feature: 'auto_backup', action: 'initialize' }
+        tags: { feature: 'auto_backup', action: 'initialize' },
       })
     }
   }
@@ -83,10 +83,7 @@ class AutoBackupManager {
   /**
    * Crée un backup des données utilisateur
    */
-  private async createBackup(
-    state: RootState,
-    trigger: BackupTrigger
-  ): Promise<boolean> {
+  private async createBackup(state: RootState, trigger: BackupTrigger): Promise<boolean> {
     if (!this.isInitialized) {
       await this.initialize()
     }
@@ -98,7 +95,7 @@ class AutoBackupManager {
       const newData = {
         bible: sanitizeUserBible(state.user.bible),
         plan: state.plan.ongoingPlans,
-        studies: state.user.bible.studies
+        studies: state.user.bible.studies,
       }
 
       // Restrictions UNIQUEMENT pour auto backups
@@ -106,7 +103,9 @@ class AutoBackupManager {
         // Vérifier si 24h se sont écoulées depuis le dernier auto backup
         const timeSinceLastAutoBackup = Date.now() - this.lastAutoBackupTime
         if (timeSinceLastAutoBackup < this.AUTO_BACKUP_INTERVAL) {
-          const hoursRemaining = Math.ceil((this.AUTO_BACKUP_INTERVAL - timeSinceLastAutoBackup) / (60 * 60 * 1000))
+          const hoursRemaining = Math.ceil(
+            (this.AUTO_BACKUP_INTERVAL - timeSinceLastAutoBackup) / (60 * 60 * 1000)
+          )
           console.log(`[AutoBackup] Auto backup skipped (next in ~${hoursRemaining}h)`)
           return false
         }
@@ -128,7 +127,7 @@ class AutoBackupManager {
         version: 1,
         timestamp,
         trigger,
-        data: newData
+        data: newData,
       }
 
       // Serialize en JSON
@@ -136,7 +135,7 @@ class AutoBackupManager {
 
       // Écrire le fichier
       await FileSystem.writeAsStringAsync(filepath, json, {
-        encoding: FileSystem.EncodingType.UTF8
+        encoding: FileSystem.EncodingType.UTF8,
       })
 
       // Vérifier l'intégrité (peut lire le fichier)
@@ -158,7 +157,7 @@ class AutoBackupManager {
       console.error('[AutoBackup] Failed to create backup:', error)
       Sentry.captureException(error, {
         tags: { feature: 'auto_backup', action: 'create', trigger },
-        extra: { userId: state.user.id }
+        extra: { userId: state.user.id },
       })
       return false
     }
@@ -248,7 +247,9 @@ class AutoBackupManager {
           const timestamp = parseInt(file.replace('backup_', '').replace('.json', ''))
 
           // Calculer les statistiques en lisant le backup
-          let stats: { notesCount: number; highlightsCount: number; studiesCount: number } | undefined
+          let stats:
+            | { notesCount: number; highlightsCount: number; studiesCount: number }
+            | undefined
           try {
             const json = await FileSystem.readAsStringAsync(filepath)
             const backup: BackupData = JSON.parse(json)
@@ -256,7 +257,7 @@ class AutoBackupManager {
             stats = {
               notesCount: Object.keys(backup.data?.bible?.notes || {}).length,
               highlightsCount: Object.keys(backup.data?.bible?.highlights || {}).length,
-              studiesCount: Object.keys(backup.data?.studies || {}).length
+              studiesCount: Object.keys(backup.data?.studies || {}).length,
             }
           } catch (error) {
             console.warn(`[AutoBackup] Failed to read stats for ${file}:`, error)
@@ -269,7 +270,7 @@ class AutoBackupManager {
             timestamp,
             size: info.size || 0,
             modificationTime: info.modificationTime || 0,
-            stats
+            stats,
           })
         }
       }
@@ -302,7 +303,7 @@ class AutoBackupManager {
       console.error('[AutoBackup] Failed to restore backup:', error)
       Sentry.captureException(error, {
         tags: { feature: 'auto_backup', action: 'restore' },
-        extra: { filename }
+        extra: { filename },
       })
       return null
     }
@@ -332,11 +333,11 @@ class AutoBackupManager {
 // Types
 
 export type BackupTrigger =
-  | 'auto'           // Backup automatique (debounced)
-  | 'logout'         // Avant déconnexion
-  | 'sync_error'     // Après erreur de sync
-  | 'manual'         // Déclenché manuellement par l'utilisateur
-  | 'pre_migration'  // Avant migration vers sous-collections Firestore
+  | 'auto' // Backup automatique (debounced)
+  | 'logout' // Avant déconnexion
+  | 'sync_error' // Après erreur de sync
+  | 'manual' // Déclenché manuellement par l'utilisateur
+  | 'pre_migration' // Avant migration vers sous-collections Firestore
 
 export interface BackupData {
   version: number

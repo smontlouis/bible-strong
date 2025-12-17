@@ -59,10 +59,7 @@ const StyledVerse = styled.View({
 })
 
 const fetchComments = memoize(async (verse: string) => {
-  const verseCommentRef = await firebaseDb
-    .collection('verse-commentaries')
-    .doc(verse)
-    .get()
+  const verseCommentRef = await firebaseDb.collection('verse-commentaries').doc(verse).get()
 
   if (!verseCommentRef.exists) {
     throw new Error('NOT_FOUND')
@@ -78,7 +75,7 @@ const fetchComments = memoize(async (verse: string) => {
     .where('isSDA', '==', false)
     .get()
 
-  const comments = snapshot.docs.map((x) => x.data())
+  const comments = snapshot.docs.map(x => x.data())
 
   return { ...verseComment, comments } as Comments
 })
@@ -103,7 +100,7 @@ const fetchMoreComments = memoize(async (verse: string, id?: string) => {
 
   const snapshot = await query
 
-  const comments = snapshot.docs.map((x) => x.data()) as CommentType[]
+  const comments = snapshot.docs.map(x => x.data()) as CommentType[]
 
   return comments
 })
@@ -127,10 +124,10 @@ const useComments = (verse: string) => {
     setMoreStatus('Pending')
     const comments = await fetchMoreComments(verse, id)
 
-    setData((s) => {
+    setData(s => {
       return { ...s, comments: [...s!.comments, ...comments] } as Comments
     })
-    setPage((s) => s + comments.length)
+    setPage(s => s + comments.length)
     setMoreStatus('Resolved')
   }
 
@@ -155,8 +152,7 @@ const useComments = (verse: string) => {
 }
 
 const useVerseInCurrentChapter = (book: string, chapter: string) => {
-  const [versesInCurrentChapter, setVersesInCurrentChapter] =
-    React.useState<number>()
+  const [versesInCurrentChapter, setVersesInCurrentChapter] = React.useState<number>()
   useEffect(() => {
     ;(async () => {
       const v = countLsgChapters[`${book}-${chapter}`]
@@ -171,10 +167,7 @@ interface CommentariesScreenProps {
   commentaryAtom: PrimitiveAtom<CommentaryTab>
 }
 
-const CommentariesTabScreen = ({
-  hasHeader = true,
-  commentaryAtom,
-}: CommentariesScreenProps) => {
+const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: CommentariesScreenProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const theme: Theme = useTheme()
@@ -190,14 +183,16 @@ const CommentariesTabScreen = ({
 
   const setVerse = (v: string) =>
     setCommentaryTab(
-      produce((draft) => {
+      // @ts-ignore
+      produce(draft => {
         draft.data.verse = v
       })
     )
 
   const setTitle = (title: string) =>
     setCommentaryTab(
-      produce((draft) => {
+      // @ts-ignore
+      produce(draft => {
         draft.title = title
       })
     )
@@ -205,13 +200,14 @@ const CommentariesTabScreen = ({
   const { status, data, loadMore, canLoad, moreStatus } = useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
 
-  const { title: headerTitle } = verseFormatted
-    ? formatVerseContent([verse])
-    : t('Chargement')
+  // @ts-ignore
+  const { title: headerTitle } = verseFormatted ? formatVerseContent([verse]) : t('Chargement')
 
   const [verseText] = useBibleVerses(verseFormatted)
   const { versesInCurrentChapter } = useVerseInCurrentChapter(
+    // @ts-ignore
     verseText?.Livre,
+    // @ts-ignore
     verseText?.Chapitre
   )
   const updateVerse = (value: -1 | 1) => {
@@ -296,9 +292,7 @@ const CommentariesTabScreen = ({
           ) : status === 'Rejected' ? (
             <Empty
               source={require('~assets/images/empty.json')}
-              message={t(
-                "Une erreur est survenue. Assurez-vous d'être connecté à Internet."
-              )}
+              message={t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")}
             />
           ) : (
             <>

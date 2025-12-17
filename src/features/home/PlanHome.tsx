@@ -17,11 +17,7 @@ import CircleImage from '~common/ui/CircleImage'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import {
-  useComputedPlanItems,
-  useFireStorage,
-  useUpdatePlans,
-} from '~features/plans/plan.hooks'
+import { useComputedPlanItems, useFireStorage, useUpdatePlans } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { addPlan } from '~redux/modules/plan'
@@ -43,9 +39,7 @@ const useGetFirstPlans = () => {
     )
     if (!localUri) return
     try {
-      const plan: Plan = JSON.parse(
-        await FileSystem.readAsStringAsync(localUri)
-      )
+      const plan: Plan = JSON.parse(await FileSystem.readAsStringAsync(localUri))
       dispatch(addPlan(plan))
     } catch (error) {
       console.log(error)
@@ -111,11 +105,7 @@ const PlanHome = () => {
               size={40}
               progress={progress}
               borderWidth={0}
-              color={
-                status === 'Completed'
-                  ? theme.colors.success
-                  : theme.colors.primary
-              }
+              color={status === 'Completed' ? theme.colors.success : theme.colors.primary}
               unfilledColor={theme.colors.lightGrey}
               thickness={2}
               fill="none"
@@ -137,12 +127,7 @@ const PlanHome = () => {
               <Paragraph fontFamily="title" scale={-2} scaleLineHeight={-2}>
                 {title}
               </Paragraph>
-              <Paragraph
-                scale={-3}
-                scaleLineHeight={-1}
-                fontFamily="text"
-                color="grey"
-              >
+              <Paragraph scale={-3} scaleLineHeight={-1} fontFamily="text" color="grey">
                 {t('Continuer ce plan')}
               </Paragraph>
             </Box>

@@ -27,17 +27,17 @@ import { MainStackProps } from '~navigation/type'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 
-const useSectionResults = results => {
-  const [sectionResults, setSectionResults] = useState(null)
+const useSectionResults = (results: any) => {
+  const [sectionResults, setSectionResults] = useState<any>(null)
 
   useEffect(() => {
     if (!results.length) {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list, dbItem) => {
+    const sectionResults = results.reduce((list: any, dbItem: any) => {
       const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
+        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
       )
       if (!listItem) {
         list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
@@ -59,11 +59,7 @@ interface StrongsTabScreenProps {
   hasBackButton?: boolean
 }
 
-const LexiqueTabScreen = ({
-  strongsAtom,
-  navigation,
-  hasBackButton,
-}: StrongsTabScreenProps) => {
+const LexiqueTabScreen = ({ strongsAtom, navigation, hasBackButton }: StrongsTabScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
@@ -90,6 +86,7 @@ const LexiqueTabScreen = ({
           source={require('~assets/images/empty.json')}
           message={`${t('Impossible de charger la strong pour ce verset...')}
             ${
+              // @ts-ignore
               error === 'CORRUPTED_DATABASE'
                 ? t(
                     '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -129,17 +126,12 @@ const LexiqueTabScreen = ({
           <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
           <SectionList
-            renderItem={({
-              item: { Mot, Grec, Hebreu, Code, lexiqueType },
-              index,
-            }) => (
-              <LexiqueItem
-                key={index}
-                {...{ Mot, Grec, Hebreu, Code, lexiqueType, navigation }}
-              />
+            renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (
+              <LexiqueItem key={index} {...{ Mot, Grec, Hebreu, Code, lexiqueType, navigation }} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
+            // @ts-ignore
             getItemLayout={sectionListGetItemLayout({
               getItemHeight: () => 80,
               getSectionHeaderHeight: () => 50,
@@ -155,7 +147,7 @@ const LexiqueTabScreen = ({
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={item => item.Mot + item.Code}
+            keyExtractor={(item: any) => item.Mot + item.Code}
           />
         ) : (
           <Empty

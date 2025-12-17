@@ -77,11 +77,7 @@ const initSQLiteDir = async () => {
 
 // Initialize all language-specific directories
 export const initLanguageDirs = async (lang: ResourceLanguage) => {
-  const dirs = [
-    getSqliteDirPath(lang),
-    getSharedSqliteDirPath(),
-    getJsonDirPath(lang),
-  ]
+  const dirs = [getSqliteDirPath(lang), getSharedSqliteDirPath(), getJsonDirPath(lang)]
 
   for (const dir of dirs) {
     const dirInfo = await FileSystem.getInfoAsync(dir)
@@ -175,9 +171,7 @@ export const databases = (lang?: ResourceLanguage) => {
     NAVE: {
       id: 'NAVE' as const,
       name: i18n.t('Bible thématique Nave'),
-      desc: i18n.t(
-        'Plus de 20.000 sujets et sous-thèmes, et 100.000 références aux Écritures.'
-      ),
+      desc: i18n.t('Plus de 20.000 sujets et sous-thèmes, et 100.000 références aux Écritures.'),
       fileSize: 7448576,
       path: getDbPath('NAVE', effectiveLang),
     },
@@ -193,9 +187,7 @@ export const databases = (lang?: ResourceLanguage) => {
     MHY: {
       id: 'MHY' as const,
       name: i18n.t('Commentaires'),
-      desc: i18n.t(
-        'Commentaires concis de Matthew Henry. Traduction Dominique Osché.'
-      ),
+      desc: i18n.t('Commentaires concis de Matthew Henry. Traduction Dominique Osché.'),
       fileSize: 6574080,
       path: getDbPath('MHY', effectiveLang),
     },
@@ -209,9 +201,7 @@ export const databases = (lang?: ResourceLanguage) => {
     TIMELINE: {
       id: 'TIMELINE' as const,
       name: i18n.t('Chronologie de la Bible'),
-      desc: i18n.t(
-        'Chronologie des événements bibliques'
-      ),
+      desc: i18n.t('Chronologie des événements bibliques'),
       fileSize: 3187836,
       path: getDbPath('TIMELINE', effectiveLang),
     },

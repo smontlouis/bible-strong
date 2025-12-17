@@ -28,7 +28,7 @@ import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
 import { getDayOfTheYear } from './getDayOfTheYear'
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
-  const [verseOfTheDay, setVOD] = useState(false)
+  const [verseOfTheDay, setVOD] = useState<any>(false)
 
   useEffect(() => {
     const dayOfTheYear =
@@ -37,6 +37,7 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
         : getDayOfTheYear(addDay) + 1
     const loadVerse = async () => {
       try {
+        // @ts-ignore
         const [bookName, chapter, verse] = VOD[dayOfTheYear].split('.')
         const book = booksDesc2.find(b => b[1] === bookName)?.[0]
         const vod = await getVersesContent({
@@ -44,6 +45,7 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
           version,
         })
         setVOD({
+          // @ts-ignore
           v: VOD[dayOfTheYear],
           book: Number(book),
           chapter: Number(chapter),
@@ -79,21 +81,13 @@ export const useVerseOfTheDay = (addDay: number) => {
   const verseOfTheDayPlus1Content = verseOfTheDayPlus1?.content
 
   useEffect(() => {
-    if (
-      addDay ||
-      !verseOfTheDayContent ||
-      !verseOfTheDayPlus1Content ||
-      !verseOfTheDayTime
-    )
-      return
+    if (addDay || !verseOfTheDayContent || !verseOfTheDayPlus1Content || !verseOfTheDayTime) return
 
     const scheduleNotification = async () => {
       try {
         await notifee.cancelAllNotifications()
 
-        const [vodHours, vodMinutes] = verseOfTheDayTime
-          .split(':')
-          .map((n: string) => Number(n))
+        const [vodHours, vodMinutes] = verseOfTheDayTime.split(':').map((n: any) => Number(n))
         const nowDate = new Date(Date.now())
         const nowHour = nowDate.getHours()
         const nowMinutes = nowDate.getMinutes()
@@ -105,11 +99,16 @@ export const useVerseOfTheDay = (addDay: number) => {
             ? 1
             : 0
 
-        const date = (compose(
+        // @ts-ignore
+        const date: any = compose(
+          // @ts-ignore
           setMinutes(vodMinutes),
+          // @ts-ignore
           setHours(vodHours),
+          // @ts-ignore
           addDays(addDay)
-        )(nowDate) as unknown) as Date
+          // @ts-ignore
+        )(nowDate) as unknown as Date
 
         const channelId = await notifee.createChannel({
           id: 'vod-notifications',
@@ -155,13 +154,11 @@ export const useVerseOfTheDay = (addDay: number) => {
       }
     }
     const initNotifications = async () => {
-      const hasPermissions = await new Promise(resolve => {
+      const hasPermissions = await new Promise<any>(resolve => {
         notifee
           .requestPermission()
           .then(settings => {
-            resolve(
-              settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED
-            )
+            resolve(settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED)
           })
           .catch(() => {
             resolve(false)

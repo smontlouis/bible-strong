@@ -16,13 +16,7 @@ import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual } from 'recompose'
-import {
-  BibleResource,
-  Pericope,
-  SelectedCode,
-  Verse,
-  VerseIds,
-} from '~common/types'
+import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
@@ -33,11 +27,7 @@ import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
-import {
-  historyAtom,
-  isFullScreenBibleValue,
-  multipleTagsModalAtom,
-} from '../../state/app'
+import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 // import BibleWebView from './BibleDOMWebview'
@@ -50,11 +40,7 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import { LoadingView } from './LoadingView'
 
-const getPericopeChapter = (
-  pericope: Pericope | null,
-  book: number,
-  chapter: number
-) => {
+const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
     return pericope[book][chapter]
   }
@@ -75,23 +61,24 @@ const useBottomSheetDisclosure = <T,>() => {
   const [isOpen, setIsOpen] = useState<T | null>(null)
   const onOpen = setIsOpen
   const onClose = useRef(() => setIsOpen(null)).current
-  const onToggle = useRef(() =>
-    setIsOpen((s) => (s === null ? null : s))
-  ).current
+  const onToggle = useRef(() => setIsOpen(s => (s === null ? null : s))).current
 
   return { isOpen, onOpen, onClose, onToggle }
 }
 
 const formatVerses = (verses: string[]) =>
   verses.reduce((acc, v, i, array) => {
+    // @ts-ignore
     if (v === array[i - 1] + 1 && v === array[i + 1] - 1) {
       // if suite > 2
       return acc
     }
+    // @ts-ignore
     if (v === array[i - 1] + 1 && v !== array[i + 1] - 1) {
       // if endSuite
       return `${acc}-${v}`
     }
+    // @ts-ignore
     if (array[i - 1] && v - 1 !== array[i - 1]) {
       // if not preceded by - 1
       return `${acc},${v}`
@@ -113,9 +100,7 @@ const BibleViewer = ({
   const [verses, setVerses] = useState<Verse[]>([])
   const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
-  const [comments, setComments] = useState<{ [key: string]: string } | null>(
-    null
-  )
+  const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const strongModalDisclosure = useBottomSheetDisclosure<SelectedCode>()
@@ -164,7 +149,7 @@ const BibleViewer = ({
 
   const selectAllVerses = () => {
     const selectedVersesToAdd: VerseIds = Object.fromEntries(
-      verses.map((v) => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
+      verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
     )
     actions.selectAllVerses(selectedVersesToAdd)
   }
@@ -198,14 +183,12 @@ const BibleViewer = ({
   }, shallowEqual)
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
-    Boolean(
-      Object.keys(selectedVerses).find((s) => state.user.bible.highlights[s])
-    )
+    Boolean(Object.keys(selectedVerses).find(s => state.user.bible.highlights[s]))
   )
 
   useEffect(() => {
     // Settimeout ?
-    loadVerses().catch((e) => {
+    loadVerses().catch(e => {
       console.log(e)
       setError(true)
       setIsLoading(false)
@@ -220,7 +203,7 @@ const BibleViewer = ({
         try {
           setComments(JSON.parse(mhyComments.commentaires))
         } catch (e) {
-          Sentry.withScope((scope) => {
+          Sentry.withScope(scope => {
             scope.setExtra('Reference', `${book.Numero}-${chapter}`)
             scope.setExtra('Comments', mhyComments.commentaires)
             Sentry.captureException('Comments corrupted')
@@ -238,11 +221,7 @@ const BibleViewer = ({
     const parallelVersesToLoad: ParallelVerse[] = []
     if (parallelVersions.length) {
       for (const p of parallelVersions) {
-        const pVerses = (await loadBibleChapter(
-          book.Numero,
-          chapter,
-          p
-        )) as Verse[]
+        const pVerses = (await loadBibleChapter(book.Numero, chapter, p)) as Verse[]
         parallelVersesToLoad.push({ id: p, verses: pVerses })
       }
     }
@@ -292,11 +271,13 @@ const BibleViewer = ({
     setTimeout(() => {
       setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
     }, 300)
+    // @ts-ignore
     dispatch(addHighlight({ color, selectedVerses }))
     actions.clearSelectedVerses()
   }
 
   const addTag = () => {
+    // @ts-ignore
     dispatch(addHighlight({ color: '', selectedVerses }))
     actions.clearSelectedVerses()
 
@@ -307,7 +288,7 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    setNoteVerses((s) => (s ? undefined : selectedVerses))
+    setNoteVerses(s => (s ? undefined : selectedVerses))
   }
 
   const closeNoteModal = () => {
@@ -322,7 +303,7 @@ const BibleViewer = ({
       }, {} as VerseIds)
       setNoteVerses(noteVersesToLoad)
     } catch (e) {
-      Sentry.withScope((scope) => {
+      Sentry.withScope(scope => {
         scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
         scope.setExtra('Note', noteId)
         Sentry.captureMessage('Note corrumpted')
@@ -366,11 +347,7 @@ const BibleViewer = ({
     (format: 'inline' | 'block') => {
       if (!pendingVerseData) return
 
-      addVerseToStudy(
-        pendingVerseData.studyId,
-        pendingVerseData.verseData,
-        format
-      )
+      addVerseToStudy(pendingVerseData.studyId, pendingVerseData.verseData, format)
 
       // Close both modals and reset state
       verseFormatModal.close()
@@ -378,13 +355,7 @@ const BibleViewer = ({
       setPendingVerseData(null)
       actions.clearSelectedVerses()
     },
-    [
-      pendingVerseData,
-      addVerseToStudy,
-      verseFormatModal,
-      addToStudyModal,
-      actions,
-    ]
+    [pendingVerseData, addVerseToStudy, verseFormatModal, addToStudyModal, actions]
   )
 
   const handleCloseFormatBottomSheet = useCallback(() => {
@@ -398,9 +369,7 @@ const BibleViewer = ({
   // Déplacer le hook en dehors de la condition de rendu
   const translationY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value
-        ? HEADER_HEIGHT + insets.bottom + 20
-        : 0,
+      translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 20 : 0,
     }
   })
 
@@ -414,6 +383,7 @@ const BibleViewer = ({
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
         verseFormatted={
+          // @ts-ignore
           focusVerses ? formatVerses(focusVerses) : verse.toString()
         }
         isParallel={parallelVersions.length > 0}
@@ -455,11 +425,7 @@ const BibleViewer = ({
           notedVerses={notesByChapter}
           settings={settings}
           verseToScroll={verse}
-          pericopeChapter={getPericopeChapter(
-            pericope.current,
-            book.Numero,
-            chapter
-          )}
+          pericopeChapter={getPericopeChapter(pericope.current, book.Numero, chapter)}
           openNoteModal={openNoteModal}
           setSelectedCode={strongModalDisclosure.onOpen}
           selectedCode={strongModalDisclosure.isOpen}
@@ -493,22 +459,18 @@ const BibleViewer = ({
           bottom={0}
           left={0}
           right={0}
+          // @ts-ignore
           animate={translationY}
           {...motiTransition}
         >
-          <OpenInNewTabButton
-            book={book}
-            chapter={chapter}
-            verse={verse}
-            version={version}
-          />
+          <OpenInNewTabButton book={book} chapter={chapter} verse={verse} version={version} />
         </MotiBox>
       )}
       <SelectedVersesModal
         isVisible={modalIsVisible}
         isSelectionMode={isSelectionMode}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
-        onChangeResourceType={(val) => {
+        onChangeResourceType={val => {
           onChangeResourceType(val)
           resourceModal.open()
         }}
@@ -516,6 +478,7 @@ const BibleViewer = ({
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
+          // @ts-ignore
           dispatch(removeHighlight({ selectedVerses }))
           actions.clearSelectedVerses()
         }}
@@ -544,10 +507,7 @@ const BibleViewer = ({
         onChangeResourceType={onChangeResourceType}
         isSelectionMode={isSelectionMode}
       />
-      <BibleParamsModal
-        navigation={navigation}
-        modalRef={bibleParamsModal.ref}
-      />
+      <BibleParamsModal navigation={navigation} modalRef={bibleParamsModal.ref} />
       <AddToStudyModal
         bottomSheetRef={addToStudyModal.ref}
         onSelectStudy={handleSelectStudy}

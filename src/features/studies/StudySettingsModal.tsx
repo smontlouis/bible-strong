@@ -14,10 +14,10 @@ import PublishStudyMenuItem from './PublishStudyMenuItem'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 
 interface Props {
-  isOpen: boolean
+  isOpen: any
   onClosed: () => void
   theme: Theme
-  setTitlePrompt: React.Dispatch<React.SetStateAction<boolean>>
+  setTitlePrompt: any
 }
 
 const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
@@ -25,6 +25,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   const dispatch = useDispatch()
   const studyId = isOpen
   const study = useSelector(
+    // @ts-ignore
     (state: RootState) => state.user.bible.studies[studyId],
     shallowEqual
   )
@@ -34,21 +35,17 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   const { ref, open, close } = useBottomSheet()
 
   const deleteStudyConfirmation = (id: string) => {
-    Alert.alert(
-      t('Attention'),
-      t('Voulez-vous vraiment supprimer cette étude?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => {
-            dispatch(deleteStudy(id))
-            close()
-          },
-          style: 'destructive',
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          dispatch(deleteStudy(id))
+          close()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   useEffect(() => {
@@ -58,12 +55,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   }, [isOpen, open])
 
   return (
-    <Modal.Body
-      ref={ref}
-      onModalClose={onClosed}
-      enableDynamicSizing
-      withPortal
-    >
+    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing withPortal>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <Modal.Item
         onPress={() => {
@@ -95,6 +87,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       <Modal.Item
         onPress={() => {
           close()
+          // @ts-ignore
           setTitlePrompt({ id: study.id, title: study.title })
         }}
       >
@@ -102,6 +95,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       </Modal.Item>
       <Modal.Item
         color="quart"
+        // @ts-ignore
         onPress={() => deleteStudyConfirmation(studyId)}
       >
         {t('Supprimer')}
