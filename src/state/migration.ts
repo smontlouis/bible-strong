@@ -1,4 +1,4 @@
-import { atom } from 'jotai/vanilla'
+import { atom, getDefaultStore } from 'jotai/vanilla'
 import { SubcollectionName } from '~helpers/firestoreSubcollections'
 
 export interface MigrationProgress {
@@ -32,3 +32,21 @@ export const migrationProgressAtom = atom<MigrationProgress>(initialMigrationPro
 export const resetMigrationProgressAtom = atom(null, (get, set) => {
   set(migrationProgressAtom, initialMigrationProgress)
 })
+
+/**
+ * Update migration progress from non-React code (e.g., Redux middleware)
+ * Uses Jotai's default store to access the atom
+ */
+export function setMigrationProgressFromOutsideReact(progress: Partial<MigrationProgress>) {
+  const store = getDefaultStore()
+  const current = store.get(migrationProgressAtom)
+  store.set(migrationProgressAtom, { ...current, ...progress })
+}
+
+/**
+ * Reset migration progress from non-React code
+ */
+export function resetMigrationProgressFromOutsideReact() {
+  const store = getDefaultStore()
+  store.set(migrationProgressAtom, initialMigrationProgress)
+}

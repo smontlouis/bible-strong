@@ -20,6 +20,10 @@ import {
   clearMigrationState,
   getCollectionsToMigrate,
 } from './migrationState'
+import {
+  setMigrationProgressFromOutsideReact,
+  resetMigrationProgressFromOutsideReact,
+} from 'src/state/migration'
 
 /**
  * Progress update sent to the UI during migration
@@ -280,6 +284,7 @@ export async function migrateUserDataToSubcollections(
  * Utilisé lors de la restauration de backups ou import de fichiers
  *
  * Cette fonction ne crée PAS de backup car elle est appelée lors d'une restauration
+ * Elle affiche le modal de migration pour montrer la progression à l'utilisateur
  *
  * @param userId - L'ID Firebase de l'utilisateur
  * @param data - Les données à migrer (format embedded)
@@ -298,22 +303,63 @@ export async function migrateImportedDataToSubcollections(
 ): Promise<void> {
   console.log('[Migration] Migrating imported data to subcollections')
 
+  // Determine which collections have data to migrate
+  const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
+    name => data[name] && Object.keys(data[name]).length > 0
+  )
+
+  if (collectionsToMigrate.length === 0) {
+    console.log('[Migration] No data to migrate')
+    await markAsMigrated(userId)
+    return
+  }
+
+  // Show migration modal
+  setMigrationProgressFromOutsideReact({
+    isActive: true,
+    isResuming: false,
+    currentCollection: null,
+    collectionsCompleted: 0,
+    totalCollections: collectionsToMigrate.length,
+    overallProgress: 0,
+    message: 'Démarrage de la migration...',
+    error: null,
+    hasPartialFailure: false,
+    failedCollections: [],
+  })
+
   try {
-    // Migrer chaque collection qui a des données
-    for (const collection of SUBCOLLECTION_NAMES) {
-      const collectionData = data[collection]
-      if (collectionData && Object.keys(collectionData).length > 0) {
-        console.log(
-          `[Migration] Writing ${Object.keys(collectionData).length} items to ${collection}`
-        )
-        await writeAllToSubcollection(userId, collection, collectionData)
-      }
+    // Migrate each collection with progress updates
+    for (let i = 0; i < collectionsToMigrate.length; i++) {
+      const collection = collectionsToMigrate[i]
+      const collectionData = data[collection]!
+      const itemCount = Object.keys(collectionData).length
+
+      setMigrationProgressFromOutsideReact({
+        currentCollection: collection,
+        collectionsCompleted: i,
+        overallProgress: i / collectionsToMigrate.length,
+        message: `Migration de ${collection} (${itemCount} éléments)...`,
+      })
+
+      console.log(`[Migration] Writing ${itemCount} items to ${collection}`)
+      await writeAllToSubcollection(userId, collection, collectionData)
     }
 
-    // S'assurer que l'utilisateur est marqué comme migré
+    // Mark user as migrated
     await markAsMigrated(userId)
 
+    // Show success
+    setMigrationProgressFromOutsideReact({
+      collectionsCompleted: collectionsToMigrate.length,
+      overallProgress: 1,
+      message: 'Migration terminée avec succès!',
+    })
+
     console.log('[Migration] Imported data migration completed')
+
+    // Small delay before hiding modal
+    await new Promise(resolve => setTimeout(resolve, 1500))
   } catch (error) {
     console.error('[Migration] Failed to migrate imported data:', error)
     Sentry.captureException(error, {
@@ -321,6 +367,9 @@ export async function migrateImportedDataToSubcollections(
       extra: { userId },
     })
     throw error
+  } finally {
+    // Always hide the modal when done
+    resetMigrationProgressFromOutsideReact()
   }
 }
 
