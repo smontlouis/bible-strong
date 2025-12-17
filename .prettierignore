@@ -1,0 +1,28 @@
+# Build outputs
+dist/
+android/
+ios/
+builds/
+
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+
+# Assets
+*.json
+*.md
+
+# WebView bundles
+src/features/bible/bibleWebView/
+src/features/studies/studiesWebView/
+
+# Vendor files
+src/helpers/react-native-htmlview/vendor/
+src/helpers/lunr.*.min.js
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa

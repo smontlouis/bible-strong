@@ -18,5 +18,12 @@
       "~i18n": ["i18n"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": [
+    "node_modules",
+    "src/features/timeline/events.old.ts",
+    "src/features/bible/bibleWebView",
+    "src/features/bible/BibleDOMWebview",
+    "src/features/studies/studiesWebView"
+  ]
 }
