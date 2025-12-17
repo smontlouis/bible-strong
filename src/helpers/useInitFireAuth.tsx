@@ -1,6 +1,6 @@
 import { useSetAtom } from 'jotai/react'
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useRef } from 'react'
+import { useDispatch, useStore } from 'react-redux'
 import SnackBar from '~common/SnackBar'
 import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
@@ -12,7 +12,7 @@ import { RootState } from '~redux/modules/reducer'
 const useInitFireAuth = () => {
   const dispatch = useDispatch()
   const resetAtoms = useSetAtom(resetUserAtomsAtom)
-  const state = useSelector((state: RootState) => state)
+  const store = useStore<RootState>()
 
   useEffect(() => {
     const onLogin = ({ profile }: { profile: FireAuthProfile }) => {
@@ -27,7 +27,8 @@ const useInitFireAuth = () => {
       // Garantit qu'aucune donnée non-sync ne peut être perdue
       try {
         console.log('[Logout] Creating backup before logout...')
-        await autoBackupManager.createBackupNow(state, 'logout')
+        const currentState = store.getState()
+        await autoBackupManager.createBackupNow(currentState, 'logout')
         console.log('[Logout] Backup created successfully')
       } catch (error) {
         console.error('[Logout] Failed to create backup:', error)
@@ -65,7 +66,7 @@ const useInitFireAuth = () => {
     }
 
     FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)
-  }, [dispatch])
+  }, [dispatch, store, resetAtoms])
 }
 
 export default useInitFireAuth

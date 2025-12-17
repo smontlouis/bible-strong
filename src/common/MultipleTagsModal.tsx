@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { useAtomValue } from 'jotai/react'
-import React, { memo, useEffect, useState } from 'react'
+import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -44,27 +44,27 @@ const MultipleTagsModal = () => {
     }
   }, [item])
 
-  let currentItems: any = []
+  // @ts-ignore
+  const entityData = useSelector((state: RootState) => state.user.bible[item.entity])
 
-  currentItems = useSelector((state: RootState) => {
+  const currentItems = useMemo(() => {
     // @ts-ignore
     if (item.ids) {
       // @ts-ignore
       return Object.keys(item.ids).map((id: any) => ({
         id,
-        // @ts-ignore
-        ...state.user.bible[item.entity][id],
+        ...entityData?.[id],
       }))
     }
 
     return [
-      // @ts-ignore
-      state.user.bible[item.entity]
+      entityData
         ? // @ts-ignore
-          { id: item.id, ...state.user.bible[item.entity][item.id] }
+          { id: item.id, ...entityData[item.id] }
         : {},
     ]
-  })
+    // @ts-ignore
+  }, [item.ids, item.id, entityData])
 
   const selectedChips = currentItems.reduce(
     (acc: any, curr: any) => ({ ...acc, ...(curr.tags && curr.tags) }),

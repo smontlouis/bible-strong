@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system'
 import produce from 'immer'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Appearance } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -35,44 +35,44 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const [reloadKey, setReloadKey] = useState(0)
   const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
 
-  const { settings } = useSelector(
-    (state: RootState) => ({
-      settings: produce(state.user.bible.settings, draftState => {
-        // TODO: WHY IS THIS HERE?
-        draftState.colors.default = deepmerge(defaultColors, draftState.colors.default || {})
-        draftState.colors.dark = deepmerge(darkColors, draftState.colors.dark || {})
-        draftState.colors.black = deepmerge(blackColors, draftState.colors.black || {})
-        draftState.colors.sepia = deepmerge(sepiaColors, draftState.colors.sepia || {})
-        draftState.colors.mauve = deepmerge(mauveColors, draftState.colors.mauve || {})
-        draftState.colors.nature = deepmerge(natureColors, draftState.colors.nature || {})
-        draftState.colors.night = deepmerge(nightColors, draftState.colors.night || {})
-        draftState.colors.sunset = deepmerge(sunsetColors, draftState.colors.sunset || {})
-        // TODO: END - WHY IS THIS HERE?
+  const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
+  const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
 
-        const preferredColorScheme = draftState.preferredColorScheme || 'auto'
-        const preferredDarkTheme = draftState.preferredDarkTheme || 'dark'
-        const preferredLightTheme = draftState.preferredLightTheme || 'default'
-        const systemColorScheme = Appearance.getColorScheme()
+  const settings = useMemo(() => {
+    return produce(rawSettings, draftState => {
+      // TODO: WHY IS THIS HERE?
+      draftState.colors.default = deepmerge(defaultColors, draftState.colors.default || {})
+      draftState.colors.dark = deepmerge(darkColors, draftState.colors.dark || {})
+      draftState.colors.black = deepmerge(blackColors, draftState.colors.black || {})
+      draftState.colors.sepia = deepmerge(sepiaColors, draftState.colors.sepia || {})
+      draftState.colors.mauve = deepmerge(mauveColors, draftState.colors.mauve || {})
+      draftState.colors.nature = deepmerge(natureColors, draftState.colors.nature || {})
+      draftState.colors.night = deepmerge(nightColors, draftState.colors.night || {})
+      draftState.colors.sunset = deepmerge(sunsetColors, draftState.colors.sunset || {})
+      // TODO: END - WHY IS THIS HERE?
 
-        // Provide derived theme as a settings now that we removed it from the redux store
-        draftState.theme =
-          (() => {
-            if (preferredColorScheme === 'auto') {
-              if (systemColorScheme === 'dark') {
-                return preferredDarkTheme
-              }
-              return preferredLightTheme
+      const preferredColorScheme = draftState.preferredColorScheme || 'auto'
+      const preferredDarkTheme = draftState.preferredDarkTheme || 'dark'
+      const preferredLightTheme = draftState.preferredLightTheme || 'default'
+      const systemColorScheme = Appearance.getColorScheme()
+
+      // Provide derived theme as a settings now that we removed it from the redux store
+      draftState.theme =
+        (() => {
+          if (preferredColorScheme === 'auto') {
+            if (systemColorScheme === 'dark') {
+              return preferredDarkTheme
             }
-
-            if (preferredColorScheme === 'dark') return preferredDarkTheme
             return preferredLightTheme
-          })() || 'default'
+          }
 
-        draftState.fontFamily = state.user.fontFamily
-      }),
-    }),
-    shallowEqual
-  )
+          if (preferredColorScheme === 'dark') return preferredDarkTheme
+          return preferredLightTheme
+        })() || 'default'
+
+      draftState.fontFamily = fontFamily
+    })
+  }, [rawSettings, fontFamily])
 
   const getIfMhyCommentsNeedsDownload = async () => {
     const path = getDatabases().MHY.path
