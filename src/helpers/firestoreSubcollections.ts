@@ -29,16 +29,39 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
 const BATCH_CHUNK_SIZE = 400
 
 /**
- * Valide si un ID est valide pour Firestore
- * Document IDs cannot be empty, contain '/', or be '.' or '..'
+ * Résultat de la validation d'un ID de document
  */
-function isValidDocumentId(docId: string): boolean {
-  if (!docId || docId.length === 0) return false
-  if (docId === '.' || docId === '..') return false
-  if (docId.includes('/')) return false
+interface ValidationResult {
+  valid: boolean
+  reason?: 'empty' | 'reserved_name' | 'too_long'
+}
+
+/**
+ * Encode un ID de document pour Firestore (remplace / par __SLASH__)
+ * Nécessaire car les IDs avec / sont utilisés pour les notes multi-versets
+ */
+function encodeDocumentId(docId: string): string {
+  return docId.replace(/\//g, '__SLASH__')
+}
+
+/**
+ * Decode un ID de document depuis Firestore
+ */
+function decodeDocumentId(docId: string): string {
+  return docId.replace(/__SLASH__/g, '/')
+}
+
+/**
+ * Valide un ID de document Firestore et retourne la raison si invalide
+ * Note: Les slashs sont autorisés car ils seront encodés avant écriture
+ */
+function validateDocumentId(docId: string): ValidationResult {
+  if (!docId || docId.length === 0) return { valid: false, reason: 'empty' }
+  if (docId === '.' || docId === '..') return { valid: false, reason: 'reserved_name' }
+  // Slashs autorisés - ils seront encodés en __SLASH__ avant écriture
   // Check for reasonable length (Firestore limit is 1500 bytes)
-  if (docId.length > 1500) return false
-  return true
+  if (docId.length > 1500) return { valid: false, reason: 'too_long' }
+  return { valid: true }
 }
 
 /**
@@ -58,7 +81,7 @@ export async function writeToSubcollection(
   data: any
 ): Promise<void> {
   try {
-    const ref = getSubcollectionRef(userId, collection).doc(docId)
+    const ref = getSubcollectionRef(userId, collection).doc(encodeDocumentId(docId))
     await ref.set(data, { merge: true })
   } catch (error) {
     console.error(`[Subcollections] Failed to write to ${collection}/${docId}:`, error)
@@ -79,7 +102,7 @@ export async function deleteFromSubcollection(
   docId: string
 ): Promise<void> {
   try {
-    const ref = getSubcollectionRef(userId, collection).doc(docId)
+    const ref = getSubcollectionRef(userId, collection).doc(encodeDocumentId(docId))
     await ref.delete()
   } catch (error) {
     console.error(`[Subcollections] Failed to delete from ${collection}/${docId}:`, error)
@@ -117,34 +140,53 @@ export async function batchWriteSubcollection(
   const collectionRef = getSubcollectionRef(userId, collection)
 
   // Préparer toutes les opérations
-  const operations: Array<{ type: 'set' | 'delete'; docId: string; data?: any }> = []
-  const skippedIds: string[] = []
+  const operations: { type: 'set' | 'delete'; docId: string; data?: any }[] = []
+  const skippedItems: { docId: string; reason: string }[] = []
 
-  // Ajouter les opérations set (avec validation des IDs)
+  // Ajouter les opérations set (avec validation et encodage des IDs)
   for (const [docId, data] of Object.entries(changes.set)) {
-    if (isValidDocumentId(docId)) {
-      operations.push({ type: 'set', docId, data })
+    const validation = validateDocumentId(docId)
+    if (validation.valid) {
+      operations.push({ type: 'set', docId: encodeDocumentId(docId), data })
     } else {
-      skippedIds.push(docId || '(empty)')
+      skippedItems.push({ docId: docId || '(empty)', reason: validation.reason! })
     }
   }
 
-  // Ajouter les opérations delete (avec validation des IDs)
+  // Ajouter les opérations delete (avec validation et encodage des IDs)
   for (const docId of changes.delete) {
-    if (isValidDocumentId(docId)) {
-      operations.push({ type: 'delete', docId })
+    const validation = validateDocumentId(docId)
+    if (validation.valid) {
+      operations.push({ type: 'delete', docId: encodeDocumentId(docId) })
     } else {
-      skippedIds.push(docId || '(empty)')
+      skippedItems.push({ docId: docId || '(empty)', reason: validation.reason! })
     }
   }
 
-  // Log skipped IDs if any
-  if (skippedIds.length > 0) {
+  // Enhanced logging: show ALL skipped items grouped by reason
+  if (skippedItems.length > 0) {
     console.warn(
-      `[Subcollections] Skipped ${skippedIds.length} invalid document ID(s) in ${collection}:`,
-      skippedIds.slice(0, 5).join(', '),
-      skippedIds.length > 5 ? `... and ${skippedIds.length - 5} more` : ''
+      `[Subcollections] ⚠️ Skipped ${skippedItems.length} invalid document(s) in ${collection}:`
     )
+
+    // Group by reason for clearer output
+    const byReason: { [reason: string]: string[] } = {}
+    for (const item of skippedItems) {
+      if (!byReason[item.reason]) byReason[item.reason] = []
+      byReason[item.reason].push(item.docId)
+    }
+
+    for (const [reason, docIds] of Object.entries(byReason)) {
+      console.warn(`[Subcollections]   - ${reason}: ${docIds.length} item(s)`)
+      // Show first 10 IDs for each reason (for debugging)
+      if (docIds.length <= 10) {
+        console.warn(`[Subcollections]     IDs: ${docIds.join(', ')}`)
+      } else {
+        console.warn(
+          `[Subcollections]     IDs: ${docIds.slice(0, 10).join(', ')} ... and ${docIds.length - 10} more`
+        )
+      }
+    }
   }
 
   if (operations.length === 0) {
@@ -177,13 +219,22 @@ export async function batchWriteSubcollection(
       }
 
       await batch.commit()
+      const setOps = chunk.filter(op => op.type === 'set').length
+      const deleteOps = chunk.filter(op => op.type === 'delete').length
       console.log(
-        `[Subcollections] Chunk ${i + 1}/${chunks.length} committed (${chunk.length} ops)`
+        `[Subcollections] Chunk ${i + 1}/${chunks.length} committed (${setOps} SET, ${deleteOps} DELETE)`
       )
 
       // Report chunk progress
       onChunkProgress?.(i + 1, chunks.length)
     }
+
+    // Final summary
+    const totalSkipped = skippedItems.length
+    const totalProcessed = operations.length
+    console.log(
+      `[Subcollections] ✅ ${collection} batch complete: ${totalProcessed} processed, ${totalSkipped} skipped`
+    )
   } catch (error) {
     console.error(`[Subcollections] Batch write failed for ${collection}:`, error)
     Sentry.captureException(error, {
@@ -223,7 +274,8 @@ export async function writeAllToSubcollection(
  */
 export async function clearSubcollection(
   userId: string,
-  collection: SubcollectionName
+  collection: SubcollectionName,
+  onChunkProgress?: ChunkProgressCallback
 ): Promise<void> {
   const collectionRef = getSubcollectionRef(userId, collection)
 
@@ -232,15 +284,22 @@ export async function clearSubcollection(
 
     if (snapshot.empty) {
       console.log(`[Subcollections] ${collection} is already empty`)
+      // Call progress callback with 1/1 to indicate completion
+      onChunkProgress?.(1, 1)
       return
     }
 
     const docIds = snapshot.docs.map(doc => doc.id)
 
-    await batchWriteSubcollection(userId, collection, {
-      set: {},
-      delete: docIds,
-    })
+    await batchWriteSubcollection(
+      userId,
+      collection,
+      {
+        set: {},
+        delete: docIds,
+      },
+      onChunkProgress
+    )
 
     console.log(`[Subcollections] Cleared ${collection}: ${docIds.length} docs deleted`)
   } catch (error) {
@@ -267,7 +326,7 @@ export async function fetchSubcollection(
 
     const result: { [id: string]: any } = {}
     snapshot.forEach(doc => {
-      result[doc.id] = doc.data()
+      result[decodeDocumentId(doc.id)] = doc.data()
     })
 
     console.log(`[Subcollections] Fetched ${collection}: ${Object.keys(result).length} docs`)
@@ -313,10 +372,10 @@ export function subscribeToSubcollection(
         return
       }
 
-      // Construire l'objet complet
+      // Construire l'objet complet (avec décodage des IDs)
       const data: { [id: string]: any } = {}
       snapshot.forEach(doc => {
-        data[doc.id] = doc.data()
+        data[decodeDocumentId(doc.id)] = doc.data()
       })
 
       // Pour le premier snapshot, on envoie tout comme "added"
@@ -337,7 +396,7 @@ export function subscribeToSubcollection(
 
       snapshot.docChanges().forEach(change => {
         const docData = change.doc.data()
-        const docId = change.doc.id
+        const docId = decodeDocumentId(change.doc.id)
 
         switch (change.type) {
           case 'added':
@@ -375,7 +434,7 @@ export async function existsInSubcollection(
   docId: string
 ): Promise<boolean> {
   try {
-    const ref = getSubcollectionRef(userId, collection).doc(docId)
+    const ref = getSubcollectionRef(userId, collection).doc(encodeDocumentId(docId))
     const doc = await ref.get()
     return doc.exists
   } catch (error) {

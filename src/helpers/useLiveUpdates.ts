@@ -19,6 +19,7 @@ import { subscribeToSubcollection, SUBCOLLECTION_NAMES } from './firestoreSubcol
 import { checkForEmbeddedData } from './firestoreMigration'
 import { useFirestoreMigration } from './useFirestoreMigration'
 import { store } from '~redux/store'
+import { isMigrationInProgress } from 'src/state/migration'
 
 let isFirstSnapshotListener = true
 
@@ -125,6 +126,14 @@ const useLiveUpdates = () => {
       // Subscribe to each subcollection
       for (const collection of SUBCOLLECTION_NAMES) {
         const unsubscribe = subscribeToSubcollection(user.id, collection, (data, changes) => {
+          // Skip updates while migration is in progress to prevent race conditions
+          // Migration writes in chunks, and between chunks the listener could fire
+          // with incomplete/stale data, overwriting the correctly-imported Redux state
+          if (isMigrationInProgress()) {
+            console.log(`[LiveUpdates] Skipping ${collection} update - migration in progress`)
+            return
+          }
+
           console.log(`[LiveUpdates] ${collection} updated:`, Object.keys(data).length, 'items')
 
           // Dispatch l'update pour cette collection spécifique

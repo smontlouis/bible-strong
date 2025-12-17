@@ -4,6 +4,7 @@ import { SubcollectionName } from '~helpers/firestoreSubcollections'
 export interface MigrationProgress {
   isActive: boolean
   isResuming: boolean
+  isMigrating: boolean // Flag to indicate migration in progress (prevents listener race conditions)
   currentCollection: SubcollectionName | null
   collectionsCompleted: number
   totalCollections: number
@@ -17,6 +18,7 @@ export interface MigrationProgress {
 const initialMigrationProgress: MigrationProgress = {
   isActive: false,
   isResuming: false,
+  isMigrating: false,
   currentCollection: null,
   collectionsCompleted: 0,
   totalCollections: 7,
@@ -49,4 +51,13 @@ export function setMigrationProgressFromOutsideReact(progress: Partial<Migration
 export function resetMigrationProgressFromOutsideReact() {
   const store = getDefaultStore()
   store.set(migrationProgressAtom, initialMigrationProgress)
+}
+
+/**
+ * Check if migration is currently in progress
+ * Used by listeners to avoid race conditions during migration
+ */
+export function isMigrationInProgress(): boolean {
+  const store = getDefaultStore()
+  return store.get(migrationProgressAtom).isMigrating
 }

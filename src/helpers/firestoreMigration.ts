@@ -6,6 +6,7 @@ import {
   SUBCOLLECTION_NAMES,
   SubcollectionName,
   writeAllToSubcollection,
+  clearSubcollection,
   type ChunkProgressCallback,
 } from './firestoreSubcollections'
 
@@ -283,8 +284,10 @@ export async function migrateUserDataToSubcollections(
  * Migre des données importées vers les sous-collections
  * Utilisé lors de la restauration de backups ou import de fichiers
  *
- * Cette fonction ne crée PAS de backup car elle est appelée lors d'une restauration
- * Elle affiche le modal de migration pour montrer la progression à l'utilisateur
+ * Cette fonction:
+ * 1. EFFACE les sous-collections existantes
+ * 2. Écrit les nouvelles données du backup
+ * 3. Affiche le modal de migration pour montrer la progression
  *
  * @param userId - L'ID Firebase de l'utilisateur
  * @param data - Les données à migrer (format embedded)
@@ -301,7 +304,16 @@ export async function migrateImportedDataToSubcollections(
     naves?: { [id: string]: any }
   }
 ): Promise<void> {
-  console.log('[Migration] Migrating imported data to subcollections')
+  console.log('[Migration] ========================================')
+  console.log('[Migration] Starting imported data migration')
+  console.log('[Migration] User ID:', userId)
+
+  // Log data counts for debugging
+  console.log('[Migration] Data counts to import:')
+  for (const collection of SUBCOLLECTION_NAMES) {
+    const count = data[collection] ? Object.keys(data[collection]).length : 0
+    console.log(`[Migration]   - ${collection}: ${count} items`)
+  }
 
   // Determine which collections have data to migrate
   const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
@@ -309,59 +321,110 @@ export async function migrateImportedDataToSubcollections(
   )
 
   if (collectionsToMigrate.length === 0) {
-    console.log('[Migration] No data to migrate')
+    console.log('[Migration] WARNING: No data to migrate - all collections empty!')
     await markAsMigrated(userId)
     return
   }
 
-  // Show migration modal
+  console.log('[Migration] Collections to migrate:', collectionsToMigrate.join(', '))
+
+  // Show migration modal and set isMigrating flag to prevent listener race conditions
   setMigrationProgressFromOutsideReact({
     isActive: true,
     isResuming: false,
+    isMigrating: true,
     currentCollection: null,
     collectionsCompleted: 0,
     totalCollections: collectionsToMigrate.length,
     overallProgress: 0,
-    message: 'Démarrage de la migration...',
+    message: 'Démarrage de la restauration...',
     error: null,
     hasPartialFailure: false,
     failedCollections: [],
   })
 
   try {
-    // Migrate each collection with progress updates
-    for (let i = 0; i < collectionsToMigrate.length; i++) {
+    const totalCollections = collectionsToMigrate.length
+
+    // Process each collection: clear existing data, then write new data
+    for (let i = 0; i < totalCollections; i++) {
       const collection = collectionsToMigrate[i]
       const collectionData = data[collection]!
       const itemCount = Object.keys(collectionData).length
 
+      // Base progress for this collection (0 to 1 range for each collection)
+      const collectionProgress = 1 / totalCollections
+      const baseProgress = i * collectionProgress
+
+      // STEP 1: Clear existing subcollection (first half of collection progress)
       setMigrationProgressFromOutsideReact({
         currentCollection: collection,
         collectionsCompleted: i,
-        overallProgress: i / collectionsToMigrate.length,
-        message: `Migration de ${collection} (${itemCount} éléments)...`,
+        overallProgress: baseProgress,
+        message: `Remplacement de ${collection}...`,
       })
 
-      console.log(`[Migration] Writing ${itemCount} items to ${collection}`)
-      await writeAllToSubcollection(userId, collection, collectionData)
+      console.log(`[Migration] STEP 1: Clearing existing ${collection} subcollection...`)
+      await clearSubcollection(userId, collection, (chunkIndex, totalChunks) => {
+        // Progress during clear: baseProgress + (chunk progress * half of collection progress)
+        const clearProgress = baseProgress + (chunkIndex / totalChunks) * (collectionProgress / 2)
+        setMigrationProgressFromOutsideReact({
+          overallProgress: clearProgress,
+          message: `Remplacement de ${collection}...`,
+        })
+      })
+      console.log(`[Migration] ${collection} cleared successfully`)
+
+      // STEP 2: Write new data (second half of collection progress)
+      const writeBaseProgress = baseProgress + collectionProgress / 2
+
+      setMigrationProgressFromOutsideReact({
+        currentCollection: collection,
+        collectionsCompleted: i,
+        overallProgress: writeBaseProgress,
+        message: `Remplacement de ${collection} (${itemCount} éléments)...`,
+      })
+
+      console.log(`[Migration] STEP 2: Writing ${itemCount} items to ${collection}...`)
+      await writeAllToSubcollection(
+        userId,
+        collection,
+        collectionData,
+        (chunkIndex, totalChunks) => {
+          // Progress during write: writeBaseProgress + (chunk progress * half of collection progress)
+          const writeProgress =
+            writeBaseProgress + (chunkIndex / totalChunks) * (collectionProgress / 2)
+          setMigrationProgressFromOutsideReact({
+            overallProgress: writeProgress,
+            message: `Remplacement de ${collection} (${itemCount} éléments)...`,
+          })
+        }
+      )
+      console.log(`[Migration] ${collection} written successfully`)
     }
 
     // Mark user as migrated
+    console.log('[Migration] Marking user as migrated...')
     await markAsMigrated(userId)
 
-    // Show success
+    // Show success and allow listener updates again
     setMigrationProgressFromOutsideReact({
       collectionsCompleted: collectionsToMigrate.length,
       overallProgress: 1,
-      message: 'Migration terminée avec succès!',
+      message: 'Restauration terminée avec succès!',
+      isMigrating: false,
     })
 
-    console.log('[Migration] Imported data migration completed')
+    console.log('[Migration] ========================================')
+    console.log('[Migration] Imported data migration COMPLETED SUCCESSFULLY')
+    console.log('[Migration] ========================================')
 
     // Small delay before hiding modal
     await new Promise(resolve => setTimeout(resolve, 1500))
   } catch (error) {
-    console.error('[Migration] Failed to migrate imported data:', error)
+    console.error('[Migration] ========================================')
+    console.error('[Migration] FAILED to migrate imported data:', error)
+    console.error('[Migration] ========================================')
     Sentry.captureException(error, {
       tags: { feature: 'migration', action: 'migrate_imported_data' },
       extra: { userId },
