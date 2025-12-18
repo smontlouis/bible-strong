@@ -1,5 +1,5 @@
 import { useTheme } from '@emotion/react'
-import { useCallback, useRef } from 'react'
+import { useRef } from 'react'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
 import * as Sentry from '@sentry/react-native'
@@ -14,15 +14,15 @@ const useHTMLView = ({ onLinkClicked }: { onLinkClicked: (href: string) => void 
   const theme: Theme = useTheme()
   const ref = useRef<any>()
 
-  const onMessage = useCallback((event: any) => {
+  const onMessage = (event: any) => {
     const action = JSON.parse(event.nativeEvent.data)
 
     if (action.type === 'link') {
       onLinkClicked(action.payload)
     }
-  }, [])
+  }
 
-  const wrapHTML = useCallback((html: string) => {
+  const wrapHTML = (html: string) => {
     return `
     <!DOCTYPE html>
       <html lang="fr">
@@ -78,7 +78,7 @@ const useHTMLView = ({ onLinkClicked }: { onLinkClicked: (href: string) => void 
         ${html}
       </body>
     </html>`
-  }, [])
+  }
 
   return {
     webviewProps(html: string) {

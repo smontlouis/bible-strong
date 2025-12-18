@@ -9,6 +9,7 @@
 - book selector issue overlap
 - bible scrollview issue overlap
 - Police & parametres -> bottom sheet not appearing
+- study click on text size
 
 - logout issue with plan
 - bring back eas updates

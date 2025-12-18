@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { memo } from 'react'
+import React from 'react'
 
 import Back from '~common/Back'
 import Link from '~common/Link'
@@ -74,4 +74,4 @@ const Header = ({ hasBackButton, isModal, title, version, setVersion }: any) => 
   )
 }
 
-export default memo(Header)
+export default Header

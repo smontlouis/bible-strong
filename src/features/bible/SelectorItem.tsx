@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import React, { memo } from 'react'
+import React from 'react'
 
 import { wp } from '~helpers/utils'
 
@@ -31,4 +31,4 @@ const SelectorItem = ({ item, isSelected, onChange, onLongChange }: Props) => (
   </TouchableOpacity>
 )
 
-export default memo(SelectorItem)
+export default SelectorItem

@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react'
+import React, { useEffect } from 'react'
 
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -92,4 +92,4 @@ const BibleFooter = ({
   return null
 }
 
-export default memo(BibleFooter)
+export default BibleFooter

@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { useTheme, withTheme } from '@emotion/react'
-import React, { memo } from 'react'
+import React from 'react'
 
 import Text from '~common/ui/Text'
 
@@ -11,8 +11,7 @@ const Touchable = styled.TouchableOpacity(({ disabled }) => ({
   opacity: disabled ? 0.3 : 1,
 }))
 
-const TouchableSvgIcon = memo(
-  ({
+const TouchableSvgIcon = ({
     onPress,
     isSelected,
     color,
@@ -49,6 +48,5 @@ const TouchableSvgIcon = memo(
       </Touchable>
     )
   }
-)
 
 export default withTheme(TouchableSvgIcon)

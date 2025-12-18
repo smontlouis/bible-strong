@@ -134,5 +134,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-channel-name': process.env.EAS_BUILD_CHANNEL,
     },
   },
+  experiments: {
+    reactCompiler: true,
+  },
   runtimeVersion: '1.0.2',
 })

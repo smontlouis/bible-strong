@@ -1,10 +1,11 @@
 const expoConfig = require('eslint-config-expo/flat')
 const prettierPlugin = require('eslint-plugin-prettier')
 const prettierConfig = require('eslint-config-prettier')
-
+const reactCompiler = require('eslint-plugin-react-compiler')
 module.exports = [
   ...expoConfig,
   prettierConfig,
+  reactCompiler.configs.recommended,
   {
     plugins: {
       prettier: prettierPlugin,

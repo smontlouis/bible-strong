@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function useTimeoutFn(fn, ms = 0) {
   const ready = useRef(false)
   const timeout = useRef()
   const callback = useRef(fn)
 
-  const isReady = useCallback(() => ready.current, [])
+  const isReady = () => ready.current
 
-  const set = useCallback(() => {
+  const set = () => {
     ready.current = false
     timeout.current && clearTimeout(timeout.current)
 
@@ -15,12 +15,12 @@ export default function useTimeoutFn(fn, ms = 0) {
       ready.current = true
       callback.current()
     }, ms)
-  }, [ms])
+  }
 
-  const clear = useCallback(() => {
+  const clear = () => {
     ready.current = null
     timeout.current && clearTimeout(timeout.current)
-  }, [])
+  }
 
   // update ref when function changes
   useEffect(() => {

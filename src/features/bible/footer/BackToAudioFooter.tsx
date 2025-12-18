@@ -1,5 +1,4 @@
 import { useAtomValue } from 'jotai/react'
-import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -126,4 +125,4 @@ const BackToAudioFooter = ({
   )
 }
 
-export default memo(BackToAudioFooter)
+export default BackToAudioFooter

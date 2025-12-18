@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -96,7 +96,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
 
-  const selectStrongTags = useMemo(() => makeStrongTagsSelector(), [])
+  const selectStrongTags = makeStrongTagsSelector()
   const code = strongReferenceParam?.Code || reference
   const isGreek = book > 39
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))

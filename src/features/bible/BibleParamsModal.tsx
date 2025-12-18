@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React from 'react'
 import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
@@ -393,4 +393,4 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   )
 }
 
-export default memo(BibleParamsModal)
+export default BibleParamsModal

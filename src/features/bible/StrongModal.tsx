@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 
 import { useTheme } from '@emotion/react'
@@ -123,4 +123,4 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
   )
 }
 
-export default memo(StrongModal)
+export default StrongModal

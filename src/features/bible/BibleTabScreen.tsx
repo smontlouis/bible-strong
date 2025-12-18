@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import produce from 'immer'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Appearance } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -33,13 +33,12 @@ interface BibleTabScreenProps {
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [reloadKey, setReloadKey] = useState(0)
-  const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
+  const isBibleViewReloadingAtom = atom(false)
 
   const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
 
-  const settings = useMemo(() => {
-    return produce(rawSettings, draftState => {
+  const settings = produce(rawSettings, draftState => {
       // TODO: WHY IS THIS HERE?
       draftState.colors.default = deepmerge(defaultColors, draftState.colors.default || {})
       draftState.colors.dark = deepmerge(darkColors, draftState.colors.dark || {})
@@ -72,7 +71,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
 
       draftState.fontFamily = fontFamily
     })
-  }, [rawSettings, fontFamily])
 
   const getIfMhyCommentsNeedsDownload = async () => {
     const path = getDatabases().MHY.path

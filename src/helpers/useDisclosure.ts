@@ -1,4 +1,4 @@
-import { useCallback, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { useCallbackRef } from './useCallbackRef'
 
 export interface UseDisclosureProps {
@@ -30,27 +30,27 @@ export function useDisclosure(props: UseDisclosureProps = {}) {
   const uid = useId()
   const id = idProp ?? `disclosure-${uid}`
 
-  const onClose = useCallback(() => {
+  const onClose = () => {
     if (!isControlled) {
       setIsOpen(false)
     }
     handleClose?.()
-  }, [isControlled, handleClose])
+  }
 
-  const onOpen = useCallback(() => {
+  const onOpen = () => {
     if (!isControlled) {
       setIsOpen(true)
     }
     handleOpen?.()
-  }, [isControlled, handleOpen])
+  }
 
-  const onToggle = useCallback(() => {
+  const onToggle = () => {
     if (isOpen) {
       onClose()
     } else {
       onOpen()
     }
-  }, [isOpen, onOpen, onClose])
+  }
 
   return {
     isOpen,

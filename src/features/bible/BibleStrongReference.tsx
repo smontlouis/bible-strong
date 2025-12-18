@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import React, { memo } from 'react'
+import React from 'react'
 
 import { CarouselConsumer } from '~helpers/CarouselContext'
 
@@ -109,4 +109,4 @@ const BibleStrongRef = ({ small, reference, word, book, concordanceFor }: any) =
   )
 }
 
-export default memo(BibleStrongRef)
+export default BibleStrongRef

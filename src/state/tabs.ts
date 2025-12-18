@@ -2,7 +2,6 @@ import produce from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom, PrimitiveAtom } from 'jotai/vanilla'
 import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
-import { useCallback, useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types'
@@ -353,216 +352,159 @@ export type BibleTabActions = ReturnType<typeof useBibleTabActions>
 export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setBibleTab = useSetAtom(tabAtom)
 
-  const setSelectedVersion = useCallback(
-    (selectedVersion: VersionCode) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedVersion = selectedVersion
-        })
-      ),
-    [setBibleTab]
-  )
+  const setSelectedVersion = (selectedVersion: VersionCode) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedVersion = selectedVersion
+      })
+    )
 
-  const setSelectedBook = useCallback(
-    (selectedBook: Book) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedBook = selectedBook
-        })
-      ),
-    [setBibleTab]
-  )
+  const setSelectedBook = (selectedBook: Book) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedBook = selectedBook
+      })
+    )
 
-  const setSelectedChapter = useCallback(
-    (selectedChapter: number) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedChapter = selectedChapter
-        })
-      ),
-    [setBibleTab]
-  )
+  const setSelectedChapter = (selectedChapter: number) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedChapter = selectedChapter
+      })
+    )
 
-  const setSelectedVerse = useCallback(
-    (selectedVerse: number) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedVerse = selectedVerse
-        })
-      ),
-    [setBibleTab]
-  )
+  const setSelectedVerse = (selectedVerse: number) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedVerse = selectedVerse
+      })
+    )
 
-  const addParallelVersion = useCallback(
-    () =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.parallelVersions.push(getLangIsFr() ? 'LSG' : 'KJV')
-        })
-      ),
-    [setBibleTab]
-  )
+  const addParallelVersion = () =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.parallelVersions.push(getLangIsFr() ? 'LSG' : 'KJV')
+      })
+    )
 
-  const setParallelVersion = useCallback(
-    (version: VersionCode, index: number) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.parallelVersions[index] = version
-        })
-      ),
-    [setBibleTab]
-  )
+  const setParallelVersion = (version: VersionCode, index: number) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.parallelVersions[index] = version
+      })
+    )
 
-  const removeParallelVersion = useCallback(
-    (index: number) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.parallelVersions = draft.data.parallelVersions.filter((p, i) => i !== index)
-        })
-      ),
-    [setBibleTab]
-  )
+  const removeParallelVersion = (index: number) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.parallelVersions = draft.data.parallelVersions.filter((p, i) => i !== index)
+      })
+    )
 
-  const removeAllParallelVersions = useCallback(
-    () =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.parallelVersions = []
-        })
-      ),
-    [setBibleTab]
-  )
+  const removeAllParallelVersions = () =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.parallelVersions = []
+      })
+    )
 
-  const setTempSelectedBook = useCallback(
-    (selectedBook: Book) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.temp.selectedBook = selectedBook
-        })
-      ),
-    [setBibleTab]
-  )
+  const setTempSelectedBook = (selectedBook: Book) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.temp.selectedBook = selectedBook
+      })
+    )
 
-  const setTempSelectedChapter = useCallback(
-    (selectedChapter: number) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.temp.selectedChapter = selectedChapter
-        })
-      ),
-    [setBibleTab]
-  )
+  const setTempSelectedChapter = (selectedChapter: number) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.temp.selectedChapter = selectedChapter
+      })
+    )
 
-  const setTempSelectedVerse = useCallback(
-    (selectedVerse: number) =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.temp.selectedVerse = selectedVerse
-        })
-      ),
-    [setBibleTab]
-  )
+  const setTempSelectedVerse = (selectedVerse: number) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.temp.selectedVerse = selectedVerse
+      })
+    )
 
-  const resetTempSelected = useCallback(
-    () =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.temp.selectedBook = draft.data.selectedBook
-          draft.data.temp.selectedChapter = draft.data.selectedChapter
-          draft.data.temp.selectedVerse = draft.data.selectedVerse
-        })
-      ),
-    [setBibleTab]
-  )
+  const resetTempSelected = () =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.temp.selectedBook = draft.data.selectedBook
+        draft.data.temp.selectedChapter = draft.data.selectedChapter
+        draft.data.temp.selectedVerse = draft.data.selectedVerse
+      })
+    )
 
-  const validateTempSelected = useCallback(
-    () =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedBook = draft.data.temp.selectedBook
-          draft.data.selectedChapter = draft.data.temp.selectedChapter
-          draft.data.selectedVerse = draft.data.temp.selectedVerse
-        })
-      ),
-    [setBibleTab]
-  )
+  const validateTempSelected = () =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedBook = draft.data.temp.selectedBook
+        draft.data.selectedChapter = draft.data.temp.selectedChapter
+        draft.data.selectedVerse = draft.data.temp.selectedVerse
+      })
+    )
 
-  const toggleSelectionMode = useCallback(
-    () =>
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectionMode = draft.data.selectionMode === 'grid' ? 'list' : 'grid'
-        })
-      ),
-    [setBibleTab]
-  )
+  const toggleSelectionMode = () =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectionMode = draft.data.selectionMode === 'grid' ? 'list' : 'grid'
+      })
+    )
 
-  const selectAllVerses = useCallback(
-    (ids: VerseIds) => {
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedVerses = ids
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const selectAllVerses = (ids: VerseIds) => {
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedVerses = ids
+      })
+    )
+  }
 
-  const addSelectedVerse = useCallback(
-    (id: string) => {
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedVerses[id] = true
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const addSelectedVerse = (id: string) => {
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedVerses[id] = true
+      })
+    )
+  }
 
-  const removeSelectedVerse = useCallback(
-    (id: string) => {
-      setBibleTab(
-        produce(draft => {
-          delete draft.data.selectedVerses[id]
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const removeSelectedVerse = (id: string) => {
+    setBibleTab(
+      produce(draft => {
+        delete draft.data.selectedVerses[id]
+      })
+    )
+  }
 
-  const selectSelectedVerse = useCallback(
-    (id: string) => {
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedVerses = {
-            [id]: true,
-          }
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const selectSelectedVerse = (id: string) => {
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedVerses = {
+          [id]: true,
+        }
+      })
+    )
+  }
 
-  const setTitle = useCallback(
-    (title: string) => {
-      setBibleTab(
-        produce(draft => {
-          draft.title = title
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const setTitle = (title: string) => {
+    setBibleTab(
+      produce(draft => {
+        draft.title = title
+      })
+    )
+  }
 
-  const clearSelectedVerses = useCallback(() => {
+  const clearSelectedVerses = () => {
     setBibleTab(
       produce(draft => {
         draft.data.selectedVerses = {}
       })
     )
-  }, [setBibleTab])
+  }
 
-  const goToPrevChapter = useCallback(() => {
+  const goToPrevChapter = () => {
     setBibleTab(
       produce(draft => {
         if (draft.data.selectedBook.Numero === 1 && draft.data.selectedChapter === 1) {
@@ -597,9 +539,9 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         return
       })
     )
-  }, [setBibleTab])
+  }
 
-  const goToNextChapter = useCallback(() => {
+  const goToNextChapter = () => {
     setBibleTab(
       produce(draft => {
         if (
@@ -638,82 +580,71 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         return
       })
     )
-  }, [setBibleTab])
+  }
 
-  const goToChapter = useCallback(
-    ({ book, chapter }: { book: Book; chapter: number }) => {
-      setBibleTab(
-        produce(draft => {
-          draft.data.selectedBook = book
-          draft.data.selectedChapter = chapter
-          draft.data.selectedVerse = 1
-          draft.data.temp = {
-            selectedBook: book,
-            selectedChapter: 1,
-            selectedVerse: 1,
-          }
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const goToChapter = ({ book, chapter }: { book: Book; chapter: number }) => {
+    setBibleTab(
+      produce(draft => {
+        draft.data.selectedBook = book
+        draft.data.selectedChapter = chapter
+        draft.data.selectedVerse = 1
+        draft.data.temp = {
+          selectedBook: book,
+          selectedChapter: 1,
+          selectedVerse: 1,
+        }
+      })
+    )
+  }
 
-  const setAllAndValidateSelected = useCallback(
-    (selected: { book: Book; chapter: number; verse: number; version: VersionCode }) => {
-      setBibleTab(
-        produce(draft => {
-          draft.data.temp = {
-            selectedBook: selected.book,
-            selectedChapter: selected.chapter,
-            selectedVerse: selected.verse,
-          }
-          draft.data.selectedVersion = selected.version
-          draft.data.selectedBook = selected.book
-          draft.data.selectedChapter = selected.chapter
-          draft.data.selectedVerse = selected.verse
-        })
-      )
-    },
-    [setBibleTab]
-  )
+  const setAllAndValidateSelected = (selected: { book: Book; chapter: number; verse: number; version: VersionCode }) => {
+    setBibleTab(
+      produce(draft => {
+        draft.data.temp = {
+          selectedBook: selected.book,
+          selectedChapter: selected.chapter,
+          selectedVerse: selected.verse,
+        }
+        draft.data.selectedVersion = selected.version
+        draft.data.selectedBook = selected.book
+        draft.data.selectedChapter = selected.chapter
+        draft.data.selectedVerse = selected.verse
+      })
+    )
+  }
 
-  const actions = useMemo(
-    () => ({
-      setSelectedVersion,
-      setSelectedBook,
-      setSelectedChapter,
-      setSelectedVerse,
+  return {
+    setSelectedVersion,
+    setSelectedBook,
+    setSelectedChapter,
+    setSelectedVerse,
 
-      addParallelVersion,
-      removeParallelVersion,
-      removeAllParallelVersions,
-      setParallelVersion,
+    addParallelVersion,
+    removeParallelVersion,
+    removeAllParallelVersions,
+    setParallelVersion,
 
-      setTempSelectedBook,
-      setTempSelectedChapter,
-      setTempSelectedVerse,
-      resetTempSelected,
-      validateTempSelected,
+    setTempSelectedBook,
+    setTempSelectedChapter,
+    setTempSelectedVerse,
+    resetTempSelected,
+    validateTempSelected,
 
-      toggleSelectionMode,
+    toggleSelectionMode,
 
-      selectAllVerses,
-      addSelectedVerse,
-      removeSelectedVerse,
-      clearSelectedVerses,
-      selectSelectedVerse,
+    selectAllVerses,
+    addSelectedVerse,
+    removeSelectedVerse,
+    clearSelectedVerses,
+    selectSelectedVerse,
 
-      goToNextChapter,
-      goToPrevChapter,
-      goToChapter,
+    goToNextChapter,
+    goToPrevChapter,
+    goToChapter,
 
-      setAllAndValidateSelected,
-      setTitle,
-    }),
-    [setBibleTab]
-  )
-
-  return actions
+    setAllAndValidateSelected,
+    setTitle,
+  }
 }
 
 export type AppSwitcherMode = 'list' | 'view'

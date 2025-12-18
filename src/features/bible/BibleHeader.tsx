@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react'
+import { useEffect } from 'react'
 
 import { StackNavigationProp } from '@react-navigation/stack'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -75,6 +75,55 @@ const Header = ({
 
   const { addParallelVersion, removeAllParallelVersions } = actions
 
+  // useDerivedValue hooks must be at the top level
+  const headerHeight = useDerivedValue(() => {
+    return {
+      height: isFullScreenBibleValue.value ? 20 + insets.top : HEADER_HEIGHT + insets.top,
+    }
+  })
+
+  const backButtonTranslateY = useDerivedValue(() => {
+    return {
+      translateY: isFullScreenBibleValue.value ? -5 : 0,
+    }
+  })
+
+  const bookSelectorOpacity = useDerivedValue(() => {
+    return {
+      opacity: isFullScreenBibleValue.value ? 0 : 1,
+    }
+  })
+
+  const bookSelectorTranslateY = useDerivedValue(() => {
+    return {
+      translateY: isFullScreenBibleValue.value ? -5 : 0,
+    }
+  })
+
+  const versionSelectorOpacity = useDerivedValue(() => {
+    return {
+      opacity: isFullScreenBibleValue.value ? 0 : 1,
+    }
+  })
+
+  const versionSelectorTranslateY = useDerivedValue(() => {
+    return {
+      translateY: isFullScreenBibleValue.value ? -5 : 0,
+    }
+  })
+
+  const verseSelectorOpacity = useDerivedValue(() => {
+    return {
+      opacity: isFullScreenBibleValue.value ? 0 : 1,
+    }
+  })
+
+  const menuOpacity = useDerivedValue(() => {
+    return {
+      opacity: isFullScreenBibleValue.value ? 0 : 1,
+    }
+  })
+
   const onOpenCommentaire = async () => {
     const needsDownload = await getIfDatabaseNeedsDownload('MHY')
 
@@ -101,11 +150,7 @@ const Header = ({
       left={0}
       // zIndex={1}
       // @ts-ignore
-      animate={useDerivedValue(() => {
-        return {
-          height: isFullScreenBibleValue.value ? 20 + insets.top : HEADER_HEIGHT + insets.top,
-        }
-      })}
+      animate={headerHeight}
       {...motiTransition}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
@@ -122,11 +167,7 @@ const Header = ({
               width={50}
               height={32}
               // @ts-ignore
-              animate={useDerivedValue(() => {
-                return {
-                  translateY: isFullScreenBibleValue.value ? -5 : 0,
-                }
-              })}
+              animate={backButtonTranslateY}
               {...motiTransition}
             >
               <FeatherIcon name="arrow-left" size={20} />
@@ -157,21 +198,13 @@ const Header = ({
                 right={0}
                 top={0}
                 // @ts-ignore
-                animate={useDerivedValue(() => {
-                  return {
-                    opacity: isFullScreenBibleValue.value ? 0 : 1,
-                  }
-                })}
+                animate={bookSelectorOpacity}
               />
               <MotiText
                 fontWeight="bold"
                 fontSize={14}
                 // @ts-ignore
-                animate={useDerivedValue(() => {
-                  return {
-                    translateY: isFullScreenBibleValue.value ? -5 : 0,
-                  }
-                })}
+                animate={bookSelectorTranslateY}
                 {...motiTransition}
               >
                 {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
@@ -200,21 +233,13 @@ const Header = ({
               right={0}
               top={0}
               // @ts-ignore
-              animate={useDerivedValue(() => {
-                return {
-                  opacity: isFullScreenBibleValue.value ? 0 : 1,
-                }
-              })}
+              animate={versionSelectorOpacity}
             />
             <MotiText
               fontWeight="bold"
               fontSize={14}
               // @ts-ignore
-              animate={useDerivedValue(() => {
-                return {
-                  translateY: isFullScreenBibleValue.value ? -5 : 0,
-                }
-              })}
+              animate={versionSelectorTranslateY}
               {...motiTransition}
             >
               {version}
@@ -229,11 +254,7 @@ const Header = ({
               width={40}
               height="100%"
               // @ts-ignore
-              animate={useDerivedValue(() => {
-                return {
-                  opacity: isFullScreenBibleValue.value ? 0 : 1,
-                }
-              })}
+              animate={verseSelectorOpacity}
             >
               <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
             </MotiBox>
@@ -249,11 +270,7 @@ const Header = ({
                   width={40}
                   height="100%"
                   // @ts-ignore
-                  animate={useDerivedValue(() => {
-                    return {
-                      opacity: isFullScreenBibleValue.value ? 0 : 1,
-                    }
-                  })}
+                  animate={menuOpacity}
                 >
                   <FeatherIcon name="more-vertical" size={18} />
                 </MotiBox>
@@ -306,4 +323,4 @@ const Header = ({
   )
 }
 
-export default memo(Header)
+export default Header

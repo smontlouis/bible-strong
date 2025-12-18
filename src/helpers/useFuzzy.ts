@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function removeAccents(obj: any) {
   if (typeof obj === 'string' || obj instanceof String) {
@@ -36,13 +36,11 @@ function useFuzzy<T>(
     setKeyword(defaultValue || '')
   }, [defaultValue])
 
-  const searcher = useMemo(() => {
-    const defaultOptions: Fuse.IFuseOptions<T> = {
-      threshold: 0,
-      ignoreFieldNorm: true,
-    }
-    return new Fuse(data, { ...defaultOptions, ...options, getFn })
-  }, [data, options])
+  const defaultOptions: Fuse.IFuseOptions<T> = {
+    threshold: 0,
+    ignoreFieldNorm: true,
+  }
+  const searcher = new Fuse(data, { ...defaultOptions, ...options, getFn })
 
   const result = keyword ? searcher.search(removeAccents(keyword)).map(c => c.item) : data
 

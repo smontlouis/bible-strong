@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { memo, useState } from 'react'
+import React, { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native'
 import { useSelector } from 'react-redux'
 import Link from '~common/Link'
@@ -268,4 +268,4 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
   )
 }
 
-export default memo(UserWidget)
+export default UserWidget

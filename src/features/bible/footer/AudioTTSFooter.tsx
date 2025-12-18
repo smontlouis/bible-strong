@@ -1,7 +1,7 @@
 import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from 'expo-audio'
 import * as Speech from 'expo-speech'
 import { useAtomValue } from 'jotai/react'
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { VersionCode } from 'src/state/tabs'
@@ -56,14 +56,11 @@ const useLoadSound = ({
   const isRepeat = useAtomValue(ttsRepeatAtom)
   const { t } = useTranslation()
 
-  const onNextChapter = useCallback(
-    ({ ignoreDone }: { ignoreDone?: boolean } = {}) => {
-      ignoreSpeechDone.current = ignoreDone ?? isPlaying
-      currentVerse.current = 1
-      goToNextChapter()
-    },
-    [isPlaying, goToNextChapter]
-  )
+  const onNextChapter = ({ ignoreDone }: { ignoreDone?: boolean } = {}) => {
+    ignoreSpeechDone.current = ignoreDone ?? isPlaying
+    currentVerse.current = 1
+    goToNextChapter()
+  }
 
   const onPrevChapter = () => {
     ignoreSpeechDone.current = isPlaying
@@ -325,4 +322,4 @@ const AudioTTSFooter = ({
   )
 }
 
-export default memo(AudioTTSFooter)
+export default AudioTTSFooter

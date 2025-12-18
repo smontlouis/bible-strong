@@ -98,9 +98,7 @@ export const useVerseOfTheDay = (addDay: number) => {
             ? 1
             : 0
 
-        const date = setMinutes(vodMinutes)(
-          setHours(vodHours)(addDays(addDay)(nowDate))
-        )
+        const date = setMinutes(vodMinutes)(setHours(vodHours)(addDays(addDay)(nowDate)))
 
         const channelId = await notifee.createChannel({
           id: 'vod-notifications',
@@ -135,7 +133,7 @@ export const useVerseOfTheDay = (addDay: number) => {
         )
 
         console.log(
-          `Notification set at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
+          `[Notification] Notificationset at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
             !addDay
               ? removeBreakLines(verseOfTheDayContent)
               : removeBreakLines(verseOfTheDayPlus1Content)

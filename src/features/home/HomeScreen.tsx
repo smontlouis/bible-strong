@@ -1,6 +1,6 @@
 import Color from 'color'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
-import React, { memo } from 'react'
+import React from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
 import Box, { TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -174,4 +174,4 @@ const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Hom
 
   return <Home closeHome={closeHome} navigation={navigation} />
 }
-export default memo(HomeScreen)
+export default HomeScreen

@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
-import React, { memo, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import * as Animatable from 'react-native-animatable'
@@ -229,4 +229,4 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
   )
 }
 
-export default memo(VerseOfTheDay)
+export default VerseOfTheDay
