@@ -30,15 +30,12 @@ const BookSelector = ({ bibleAtom, onNavigate }: BookSelectorScreenProps) => {
     actions.setTempSelectedBook(book)
   }
 
-  const renderItem = useCallback(
-    ({ item: book }: { item: Book }) => (
-      <BookSelectorItem
-        book={book}
-        isSelected={book.Numero === selectedBook.Numero}
-        onBookSelect={onBookChange}
-      />
-    ),
-    [selectedBook.Numero]
+  const renderItem = ({ item: book }: { item: Book }) => (
+    <BookSelectorItem
+      book={book}
+      isSelected={book.Numero === selectedBook.Numero}
+      onBookSelect={onBookChange}
+    />
   )
 
   return (

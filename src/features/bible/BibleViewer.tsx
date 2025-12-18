@@ -21,12 +21,16 @@ import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
-import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useBottomSheet } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
-import { makeHighlightsByChapterSelector, makeNotesByChapterSelector, makeIsSelectedVerseHighlightedSelector } from '~redux/selectors/bible'
+import {
+  makeHighlightsByChapterSelector,
+  makeNotesByChapterSelector,
+  makeIsSelectedVerseHighlightedSelector,
+} from '~redux/selectors/bible'
 import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
@@ -107,7 +111,7 @@ const BibleViewer = ({
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
-  const bibleParamsModal = useBottomSheetModal()
+  const bibleParamsModal = useBottomSheet()
   const resourceModal = useBottomSheet()
 
   // Add to study modal states
@@ -159,18 +163,21 @@ const BibleViewer = ({
   // Create memoized selectors
   const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
   const selectNotesByChapter = useMemo(() => makeNotesByChapterSelector(), [])
-  const selectIsSelectedVerseHighlighted = useMemo(() => makeIsSelectedVerseHighlightedSelector(), [])
-
-  const highlightedVersesByChapter = useSelector(
-    (state: RootState) => selectHighlightsByChapter(state, book.Numero, chapter)
+  const selectIsSelectedVerseHighlighted = useMemo(
+    () => makeIsSelectedVerseHighlightedSelector(),
+    []
   )
 
-  const notesByChapter = useSelector(
-    (state: RootState) => selectNotesByChapter(state, book.Numero, chapter)
+  const highlightedVersesByChapter = useSelector((state: RootState) =>
+    selectHighlightsByChapter(state, book.Numero, chapter)
   )
 
-  const isSelectedVerseHighlighted = useSelector(
-    (state: RootState) => selectIsSelectedVerseHighlighted(state, selectedVerses)
+  const notesByChapter = useSelector((state: RootState) =>
+    selectNotesByChapter(state, book.Numero, chapter)
+  )
+
+  const isSelectedVerseHighlighted = useSelector((state: RootState) =>
+    selectIsSelectedVerseHighlighted(state, selectedVerses)
   )
 
   useEffect(() => {

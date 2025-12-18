@@ -76,19 +76,17 @@ const SearchInTimelineModal = ({
       key={key}
       {...bottomSheetStyles}
     >
-      <BottomSheetView>
-        <Box pt={20}>
-          {/* @ts-ignore */}
-          <SearchBox
-            value={searchValue}
-            onChange={setSearchValue}
-            onSubmit={onSubmit}
-            onClear={onClear}
-            placeholder={t('Rechercher un événement dans la Bible')}
-          />
-          <Filters />
-        </Box>
-      </BottomSheetView>
+      <Box pt={20}>
+        {/* @ts-ignore */}
+        <SearchBox
+          value={searchValue}
+          onChange={setSearchValue}
+          onSubmit={onSubmit}
+          onClear={onClear}
+          placeholder={t('Rechercher un événement dans la Bible')}
+        />
+        <Filters />
+      </Box>
       <BottomSheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={submittedValue ? hits : []}

@@ -35,27 +35,25 @@ type Props = {
 const BibleSelectTabBar = ({ index, onChange }: Props) => {
   const { t } = useTranslation()
   return (
-    <BottomSheetView>
-      <Box row>
-        {routes.map((route, routeIndex) => {
-          const isRouteActive = routeIndex === index
+    <Box row>
+      {routes.map((route, routeIndex) => {
+        const isRouteActive = routeIndex === index
 
-          return (
-            <TabItem
-              key={routeIndex}
-              isRouteActive={isRouteActive}
-              onPress={() => {
-                onChange(routeIndex)
-              }}
-            >
-              <Text color={isRouteActive ? 'primary' : 'grey'} bold>
-                {t(route)}
-              </Text>
-            </TabItem>
-          )
-        })}
-      </Box>
-    </BottomSheetView>
+        return (
+          <TabItem
+            key={routeIndex}
+            isRouteActive={isRouteActive}
+            onPress={() => {
+              onChange(routeIndex)
+            }}
+          >
+            <Text color={isRouteActive ? 'primary' : 'grey'} bold>
+              {t(route)}
+            </Text>
+          </TabItem>
+        )
+      })}
+    </Box>
   )
 }
 

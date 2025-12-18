@@ -144,21 +144,19 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
           }}
           {...bottomSheetStyles}
         >
-          <BottomSheetView>
-            <HStack
-              height={54}
-              justifyContent="center"
-              alignItems="center"
-              borderBottomWidth={1}
-              borderColor="lightGrey"
-            >
-              <Box px={20} width={60}></Box>
-              <Text flex textAlign="center" fontSize={16} bold>
-                {t('Livres')}
-              </Text>
-              <BookSelectorParams />
-            </HStack>
-          </BottomSheetView>
+          <HStack
+            height={54}
+            justifyContent="center"
+            alignItems="center"
+            borderBottomWidth={1}
+            borderColor="lightGrey"
+          >
+            <Box px={20} width={60}></Box>
+            <Text flex textAlign="center" fontSize={16} bold>
+              {t('Livres')}
+            </Text>
+            <BookSelectorParams />
+          </HStack>
           <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
           <BookSelectorList
             data={data}

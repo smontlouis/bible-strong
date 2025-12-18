@@ -117,13 +117,11 @@ const VerseBottomSheet = ({
       backdropComponent={renderBackdrop}
       {...bottomSheetStyles}
     >
-      <BottomSheetView>
-        <Box px={10} py={10} borderBottomWidth={1} borderColor="border">
-          <Text fontWeight="bold" textAlign="center">
-            {t('goToVerse')}
-          </Text>
-        </Box>
-      </BottomSheetView>
+      <Box px={10} py={10} borderBottomWidth={1} borderColor="border">
+        <Text fontWeight="bold" textAlign="center">
+          {t('goToVerse')}
+        </Text>
+      </Box>
       <BottomSheetScrollView
         contentContainerStyle={{
           paddingTop: 10,

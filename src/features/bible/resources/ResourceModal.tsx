@@ -2,6 +2,7 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetScrollView,
+  BottomSheetView,
 } from '@gorhom/bottom-sheet/'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -173,11 +174,13 @@ const ResourcesModal = memo(
           onClose={() => resourceModalRef.current?.close()}
         />
         {resourceType && (
-          <Resource
-            resourceType={resourceType}
-            bibleAtom={bibleAtom}
-            isSelectionMode={isSelectionMode}
-          />
+          <View style={{ flex: 1 }}>
+            <Resource
+              resourceType={resourceType}
+              bibleAtom={bibleAtom}
+              isSelectionMode={isSelectionMode}
+            />
+          </View>
         )}
       </BottomSheet>
     )
