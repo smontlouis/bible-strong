@@ -1,13 +1,18 @@
 import { useEffect } from 'react'
-import remoteConfig from '@react-native-firebase/remote-config'
+import {
+  getRemoteConfig,
+  setDefaults,
+  fetchAndActivate,
+} from '@react-native-firebase/remote-config'
 
 export const useRemoteConfig = () => {
   useEffect(() => {
     ;(async () => {
-      await remoteConfig().setDefaults({
+      const rc = getRemoteConfig()
+      await setDefaults(rc, {
         apple_reviewing: false,
       })
-      const fetchedRemotely = await remoteConfig().fetchAndActivate()
+      const fetchedRemotely = await fetchAndActivate(rc)
 
       if (fetchedRemotely) {
         console.log('Configs were retrieved from the backend and activated.')

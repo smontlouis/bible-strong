@@ -1,6 +1,15 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { OngoingPlan, OnlinePlan, Plan, ReadingSlice, Section, Status } from '~common/types'
-import { firebaseDb, increment } from '~helpers/firebase'
+import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import {
+  firebaseDb,
+  increment,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from '~helpers/firebase'
 // import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
 import { FireStoreUserData, IMPORT_DATA, RECEIVE_LIVE_UPDATES, USER_LOGOUT } from './user'
@@ -26,31 +35,33 @@ const initialState: PlanModel = {
   images: {},
 }
 
-const docsArr = async (db: typeof firebaseDb, collection: string) => {
-  const snapshot = await db.collection(collection).get()
+const docsArr = async (collectionName: string) => {
+  const snapshot = await getDocs(collection(firebaseDb, collectionName))
 
-  return snapshot.docs.map(x => x.data())
+  return snapshot.docs.map((x: FirebaseFirestoreTypes.QueryDocumentSnapshot) => x.data())
 }
 
 export const fetchPlans = createAsyncThunk('plan/fetchPlans', async () => {
-  const results = (await docsArr(firebaseDb, 'plans')) as OnlinePlan[]
+  const results = (await docsArr('plans')) as OnlinePlan[]
   return results
 })
 
 export const fetchPlan = createAsyncThunk(
   'plan/fetchPlan',
   async ({ id, update = false }: { id: string; update?: boolean }) => {
-    const planRef = firebaseDb.collection('plans').doc(id)
+    const planRef = doc(firebaseDb, 'plans', id)
 
-    const planSnapshot = await planRef.get()
+    const planSnapshot = await getDoc(planRef)
     const plan = planSnapshot.data() as OnlinePlan
 
     if (update) {
-      planRef.update({ downloads: increment })
+      updateDoc(planRef, { downloads: increment })
     }
 
-    const snapshot = await firebaseDb.collection('plans').doc(id).collection('plan-sections').get()
-    const sections = snapshot.docs.map(x => x.data()) as Section[]
+    const snapshot = await getDocs(collection(firebaseDb, 'plans', id, 'plan-sections'))
+    const sections = snapshot.docs.map((x: FirebaseFirestoreTypes.QueryDocumentSnapshot) =>
+      x.data()
+    ) as Section[]
 
     return { ...plan, sections }
   }

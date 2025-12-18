@@ -1,15 +1,44 @@
-import firestore from '@react-native-firebase/firestore'
-import storage from '@react-native-firebase/storage'
+import {
+  getFirestore,
+  increment as firestoreIncrement,
+  deleteField as firestoreDeleteField,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  writeBatch,
+  query,
+  where,
+} from '@react-native-firebase/firestore'
+import { getStorage, ref } from '@react-native-firebase/storage'
 import { getLangIsFr } from '~i18n'
 import { ResourceLanguage, DatabaseId, isSharedDB } from '~helpers/databaseTypes'
 
-export const firebaseDb = firestore()
-export const storageRef = storage().ref()
-export const increment = firestore.FieldValue.increment(1)
+// Firebase instances (modular API)
+export const firebaseDb = getFirestore()
+export const storageRef = ref(getStorage())
+export const increment = firestoreIncrement(1)
 
-storage().setMaxOperationRetryTime(2000)
-storage().setMaxUploadRetryTime(2000)
-storage().setMaxDownloadRetryTime(2000)
+// Re-export modular Firestore functions for use in other files
+export {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  writeBatch,
+  query,
+  where,
+  firestoreDeleteField as deleteField,
+  firestoreIncrement,
+}
 
 export const CDN_URL = 'https://assets.bible-strong.app/'
 export const cdnUrl = (path: string) => `${CDN_URL}${path}`

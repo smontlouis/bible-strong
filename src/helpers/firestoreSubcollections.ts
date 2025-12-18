@@ -1,5 +1,16 @@
 import * as Sentry from '@sentry/react-native'
-import { firebaseDb } from './firebase'
+import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import {
+  firebaseDb,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  deleteDoc,
+  onSnapshot,
+  writeBatch,
+} from './firebase'
 
 /**
  * Types pour les sous-collections
@@ -67,8 +78,8 @@ function validateDocumentId(docId: string): ValidationResult {
 /**
  * Obtient une référence à une sous-collection
  */
-export function getSubcollectionRef(userId: string, collection: SubcollectionName) {
-  return firebaseDb.collection('users').doc(userId).collection(collection)
+export function getSubcollectionRef(userId: string, collectionName: SubcollectionName) {
+  return collection(firebaseDb, 'users', userId, collectionName)
 }
 
 /**
@@ -76,17 +87,17 @@ export function getSubcollectionRef(userId: string, collection: SubcollectionNam
  */
 export async function writeToSubcollection(
   userId: string,
-  collection: SubcollectionName,
+  collectionName: SubcollectionName,
   docId: string,
   data: any
 ): Promise<void> {
   try {
-    const ref = getSubcollectionRef(userId, collection).doc(encodeDocumentId(docId))
-    await ref.set(data, { merge: true })
+    const docRef = doc(getSubcollectionRef(userId, collectionName), encodeDocumentId(docId))
+    await setDoc(docRef, data, { merge: true })
   } catch (error) {
-    console.error(`[Subcollections] Failed to write to ${collection}/${docId}:`, error)
+    console.error(`[Subcollections] Failed to write to ${collectionName}/${docId}:`, error)
     Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'write', collection },
+      tags: { feature: 'subcollections', action: 'write', collection: collectionName },
       extra: { userId, docId },
     })
     throw error
@@ -98,16 +109,16 @@ export async function writeToSubcollection(
  */
 export async function deleteFromSubcollection(
   userId: string,
-  collection: SubcollectionName,
+  collectionName: SubcollectionName,
   docId: string
 ): Promise<void> {
   try {
-    const ref = getSubcollectionRef(userId, collection).doc(encodeDocumentId(docId))
-    await ref.delete()
+    const docRef = doc(getSubcollectionRef(userId, collectionName), encodeDocumentId(docId))
+    await deleteDoc(docRef)
   } catch (error) {
-    console.error(`[Subcollections] Failed to delete from ${collection}/${docId}:`, error)
+    console.error(`[Subcollections] Failed to delete from ${collectionName}/${docId}:`, error)
     Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'delete', collection },
+      tags: { feature: 'subcollections', action: 'delete', collection: collectionName },
       extra: { userId, docId },
     })
     throw error
@@ -133,11 +144,11 @@ export type ChunkProgressCallback = (chunkIndex: number, totalChunks: number) =>
  */
 export async function batchWriteSubcollection(
   userId: string,
-  collection: SubcollectionName,
+  collectionName: SubcollectionName,
   changes: BatchChanges,
   onChunkProgress?: ChunkProgressCallback
 ): Promise<void> {
-  const collectionRef = getSubcollectionRef(userId, collection)
+  const collectionRef = getSubcollectionRef(userId, collectionName)
 
   // Préparer toutes les opérations
   const operations: { type: 'set' | 'delete'; docId: string; data?: any }[] = []
@@ -166,7 +177,7 @@ export async function batchWriteSubcollection(
   // Enhanced logging: show ALL skipped items grouped by reason
   if (skippedItems.length > 0) {
     console.warn(
-      `[Subcollections] ⚠️ Skipped ${skippedItems.length} invalid document(s) in ${collection}:`
+      `[Subcollections] ⚠️ Skipped ${skippedItems.length} invalid document(s) in ${collectionName}:`
     )
 
     // Group by reason for clearer output
@@ -200,17 +211,17 @@ export async function batchWriteSubcollection(
   }
 
   console.log(
-    `[Subcollections] Batch write to ${collection}: ${operations.length} ops in ${chunks.length} chunk(s)`
+    `[Subcollections] Batch write to ${collectionName}: ${operations.length} ops in ${chunks.length} chunk(s)`
   )
 
   try {
     // Exécuter chaque chunk séquentiellement
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i]
-      const batch = firebaseDb.batch()
+      const batch = writeBatch(firebaseDb)
 
       for (const op of chunk) {
-        const docRef = collectionRef.doc(op.docId)
+        const docRef = doc(collectionRef, op.docId)
         if (op.type === 'set') {
           batch.set(docRef, op.data, { merge: true })
         } else {
@@ -233,12 +244,12 @@ export async function batchWriteSubcollection(
     const totalSkipped = skippedItems.length
     const totalProcessed = operations.length
     console.log(
-      `[Subcollections] ✅ ${collection} batch complete: ${totalProcessed} processed, ${totalSkipped} skipped`
+      `[Subcollections] ✅ ${collectionName} batch complete: ${totalProcessed} processed, ${totalSkipped} skipped`
     )
   } catch (error) {
-    console.error(`[Subcollections] Batch write failed for ${collection}:`, error)
+    console.error(`[Subcollections] Batch write failed for ${collectionName}:`, error)
     Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'batch_write', collection },
+      tags: { feature: 'subcollections', action: 'batch_write', collection: collectionName },
       extra: { userId, operationsCount: operations.length },
     })
     throw error
@@ -274,26 +285,26 @@ export async function writeAllToSubcollection(
  */
 export async function clearSubcollection(
   userId: string,
-  collection: SubcollectionName,
+  collectionName: SubcollectionName,
   onChunkProgress?: ChunkProgressCallback
 ): Promise<void> {
-  const collectionRef = getSubcollectionRef(userId, collection)
+  const collectionRef = getSubcollectionRef(userId, collectionName)
 
   try {
-    const snapshot = await collectionRef.get()
+    const snapshot = await getDocs(collectionRef)
 
     if (snapshot.empty) {
-      console.log(`[Subcollections] ${collection} is already empty`)
+      console.log(`[Subcollections] ${collectionName} is already empty`)
       // Call progress callback with 1/1 to indicate completion
       onChunkProgress?.(1, 1)
       return
     }
 
-    const docIds = snapshot.docs.map(doc => doc.id)
+    const docIds = snapshot.docs.map((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => docSnap.id)
 
     await batchWriteSubcollection(
       userId,
-      collection,
+      collectionName,
       {
         set: {},
         delete: docIds,
@@ -301,11 +312,11 @@ export async function clearSubcollection(
       onChunkProgress
     )
 
-    console.log(`[Subcollections] Cleared ${collection}: ${docIds.length} docs deleted`)
+    console.log(`[Subcollections] Cleared ${collectionName}: ${docIds.length} docs deleted`)
   } catch (error) {
-    console.error(`[Subcollections] Failed to clear ${collection}:`, error)
+    console.error(`[Subcollections] Failed to clear ${collectionName}:`, error)
     Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'clear', collection },
+      tags: { feature: 'subcollections', action: 'clear', collection: collectionName },
       extra: { userId },
     })
     throw error
@@ -318,23 +329,23 @@ export async function clearSubcollection(
  */
 export async function fetchSubcollection(
   userId: string,
-  collection: SubcollectionName
+  collectionName: SubcollectionName
 ): Promise<{ [id: string]: any }> {
   try {
-    const collectionRef = getSubcollectionRef(userId, collection)
-    const snapshot = await collectionRef.get()
+    const collectionRef = getSubcollectionRef(userId, collectionName)
+    const snapshot = await getDocs(collectionRef)
 
     const result: { [id: string]: any } = {}
-    snapshot.forEach(doc => {
-      result[decodeDocumentId(doc.id)] = doc.data()
+    snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+      result[decodeDocumentId(docSnap.id)] = docSnap.data()
     })
 
-    console.log(`[Subcollections] Fetched ${collection}: ${Object.keys(result).length} docs`)
+    console.log(`[Subcollections] Fetched ${collectionName}: ${Object.keys(result).length} docs`)
     return result
   } catch (error) {
-    console.error(`[Subcollections] Failed to fetch ${collection}:`, error)
+    console.error(`[Subcollections] Failed to fetch ${collectionName}:`, error)
     Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'fetch', collection },
+      tags: { feature: 'subcollections', action: 'fetch', collection: collectionName },
       extra: { userId },
     })
     throw error
@@ -359,13 +370,14 @@ export type SubcollectionChangeCallback = (
  */
 export function subscribeToSubcollection(
   userId: string,
-  collection: SubcollectionName,
+  collectionName: SubcollectionName,
   onChange: SubcollectionChangeCallback
 ): () => void {
-  const collectionRef = getSubcollectionRef(userId, collection)
+  const collectionRef = getSubcollectionRef(userId, collectionName)
   let isFirstSnapshot = true
 
-  const unsubscribe = collectionRef.onSnapshot(
+  const unsubscribe = onSnapshot(
+    collectionRef,
     snapshot => {
       // Ignorer les changements locaux
       if (snapshot.metadata.hasPendingWrites) {
@@ -374,8 +386,8 @@ export function subscribeToSubcollection(
 
       // Construire l'objet complet (avec décodage des IDs)
       const data: { [id: string]: any } = {}
-      snapshot.forEach(doc => {
-        data[decodeDocumentId(doc.id)] = doc.data()
+      snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+        data[decodeDocumentId(docSnap.id)] = docSnap.data()
       })
 
       // Pour le premier snapshot, on envoie tout comme "added"
@@ -394,7 +406,7 @@ export function subscribeToSubcollection(
       const modified: { [id: string]: any } = {}
       const removed: string[] = []
 
-      snapshot.docChanges().forEach(change => {
+      snapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
         const docData = change.doc.data()
         const docId = decodeDocumentId(change.doc.id)
 
@@ -414,9 +426,9 @@ export function subscribeToSubcollection(
       onChange(data, { added, modified, removed })
     },
     error => {
-      console.error(`[Subcollections] Subscription error for ${collection}:`, error)
+      console.error(`[Subcollections] Subscription error for ${collectionName}:`, error)
       Sentry.captureException(error, {
-        tags: { feature: 'subcollections', action: 'subscribe', collection },
+        tags: { feature: 'subcollections', action: 'subscribe', collection: collectionName },
         extra: { userId },
       })
     }
@@ -430,15 +442,15 @@ export function subscribeToSubcollection(
  */
 export async function existsInSubcollection(
   userId: string,
-  collection: SubcollectionName,
+  collectionName: SubcollectionName,
   docId: string
 ): Promise<boolean> {
   try {
-    const ref = getSubcollectionRef(userId, collection).doc(encodeDocumentId(docId))
-    const doc = await ref.get()
-    return doc.exists
+    const docRef = doc(getSubcollectionRef(userId, collectionName), encodeDocumentId(docId))
+    const docSnap = await getDoc(docRef)
+    return docSnap.exists()
   } catch (error) {
-    console.error(`[Subcollections] Failed to check existence in ${collection}/${docId}:`, error)
+    console.error(`[Subcollections] Failed to check existence in ${collectionName}/${docId}:`, error)
     return false
   }
 }

@@ -1,5 +1,4 @@
-import firestore from '@react-native-firebase/firestore'
-import auth from '@react-native-firebase/auth'
+import { getAuth } from '@react-native-firebase/auth'
 import * as Sentry from '@sentry/react-native'
 import { tokenManager } from '~helpers/TokenManager'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
@@ -52,7 +51,7 @@ import {
   IMPORT_DATA,
 } from './modules/user'
 
-import { firebaseDb } from '../helpers/firebase'
+import { firebaseDb, doc, setDoc, getDoc, deleteDoc, deleteField } from '../helpers/firebase'
 import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { diff } from '~helpers/deep-obj'
@@ -180,11 +179,11 @@ export default (store: any) => (next: any) => async (action: any) => {
   const result = next(action)
   const state = store.getState()
 
-  const deleteMarker = firestore.FieldValue.delete()
+  const deleteMarker = deleteField()
   const diffState: any = diff(oldState, state, deleteMarker)
 
   // FIX BUG #1: Vérifier Firebase Auth au lieu de Redux user.id
-  const currentUser = auth().currentUser
+  const currentUser = getAuth().currentUser
 
   if (!currentUser || !state.user.id) {
     // Pas d'utilisateur Firebase Auth authentifié
@@ -193,7 +192,7 @@ export default (store: any) => (next: any) => async (action: any) => {
 
   const userId = currentUser.uid
   const { user, plan }: RootState = state
-  const userDoc = firebaseDb.collection('users').doc(userId)
+  const userDocRef = doc(firebaseDb, 'users', userId)
 
   // Schedule un backup automatique après chaque changement (debounced 30s)
   autoBackupManager.scheduleBackup(state)
@@ -205,7 +204,7 @@ export default (store: any) => (next: any) => async (action: any) => {
     case resetPlan.type:
     case markAsRead.type: {
       try {
-        await userDoc.set({ plan: plan.ongoingPlans }, { merge: true })
+        await setDoc(userDocRef, { plan: plan.ongoingPlans }, { merge: true })
       } catch (error) {
         console.log('error', error)
         Snackbar.show(i18n.t('app.syncError'), 'danger')
@@ -241,7 +240,8 @@ export default (store: any) => (next: any) => async (action: any) => {
 
       await handleSyncWithRetry(
         async () => {
-          await userDoc.set(
+          await setDoc(
+            userDocRef,
             { bible: { settings: removeUndefinedVariables(diffState.user.bible.settings) } },
             { merge: true }
           )
@@ -394,11 +394,12 @@ export default (store: any) => (next: any) => async (action: any) => {
       try {
         await Promise.all(
           Object.entries(studies).map(async ([studyId, obj]) => {
-            const studyDoc = firebaseDb.collection('studies').doc(studyId)
+            const studyDocRef = doc(firebaseDb, 'studies', studyId)
             const studyContent = state.user.bible.studies[studyId]?.content?.ops
 
             try {
-              await studyDoc.set(
+              await setDoc(
+                studyDocRef,
                 {
                   ...removeUndefinedVariables(obj),
                   content: { ops: studyContent || [] },
@@ -430,16 +431,16 @@ export default (store: any) => (next: any) => async (action: any) => {
       try {
         await Promise.all(
           Object.entries(studies).map(async ([studyId]) => {
-            const studyDocRef = firebaseDb.collection('studies').doc(studyId)
+            const studyDocRef = doc(firebaseDb, 'studies', studyId)
 
             try {
-              const studyDoc = await studyDocRef.get()
-              if (!studyDoc.exists) {
+              const studyDocSnap = await getDoc(studyDocRef)
+              if (!studyDocSnap.exists()) {
                 console.log(`Study ${studyId} already deleted`)
                 return
               }
 
-              await studyDocRef.delete()
+              await deleteDoc(studyDocRef)
               console.log(`Study ${studyId} deleted successfully`)
             } catch (deleteError) {
               console.error(`Failed to delete study ${studyId}:`, deleteError)
@@ -477,7 +478,8 @@ export default (store: any) => (next: any) => async (action: any) => {
 
           // 2. Sync settings dans le document user
           if (bible?.settings) {
-            await userDoc.set(
+            await setDoc(
+              userDocRef,
               { bible: { settings: removeUndefinedVariables(bible.settings) } },
               { merge: true }
             )
@@ -485,7 +487,7 @@ export default (store: any) => (next: any) => async (action: any) => {
 
           // 3. Sync plan
           if (importedPlan) {
-            await userDoc.set({ plan: importedPlan }, { merge: true })
+            await setDoc(userDocRef, { plan: importedPlan }, { merge: true })
           }
         },
         userId,
@@ -498,10 +500,9 @@ export default (store: any) => (next: any) => async (action: any) => {
         try {
           await Promise.all(
             Object.entries(studies).map(async ([studyId, study]) => {
-              await firebaseDb
-                .collection('studies')
-                .doc(studyId)
-                .set(removeUndefinedVariables(study), { merge: true })
+              await setDoc(doc(firebaseDb, 'studies', studyId), removeUndefinedVariables(study), {
+                merge: true,
+              })
             })
           )
           console.log('[Sync] Studies imported successfully')
@@ -517,7 +518,8 @@ export default (store: any) => (next: any) => async (action: any) => {
     case USER_UPDATE_PROFILE:
     case SET_SUBSCRIPTION: {
       try {
-        await userDoc.set(
+        await setDoc(
+          userDocRef,
           { subscription: removeUndefinedVariables(user.subscription) },
           { merge: true }
         )

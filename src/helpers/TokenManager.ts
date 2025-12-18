@@ -1,4 +1,4 @@
-import auth from '@react-native-firebase/auth'
+import { getAuth } from '@react-native-firebase/auth'
 import * as Sentry from '@sentry/react-native'
 
 /**
@@ -31,7 +31,7 @@ class TokenManager {
    * @returns true si refresh réussi, false sinon
    */
   async tryRefresh(): Promise<boolean> {
-    const currentUser = auth().currentUser
+    const currentUser = getAuth().currentUser
 
     if (!currentUser) {
       console.warn('[TokenManager] No current user, cannot refresh')
@@ -76,7 +76,7 @@ class TokenManager {
    * Wrapper utile pour vérifier auth state
    */
   isAuthenticated(): boolean {
-    return !!auth().currentUser
+    return !!getAuth().currentUser
   }
 
   /**

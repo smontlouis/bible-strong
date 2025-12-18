@@ -1,5 +1,5 @@
 import * as Icon from '@expo/vector-icons'
-import analytics from '@react-native-firebase/analytics'
+import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
@@ -74,7 +74,7 @@ const useAppLoad = () => {
       await checkDatabasesStorage()
       setIsLoadingCompleted(true)
       if (!__DEV__) {
-        analytics().logScreenView({
+        logScreenView(getAnalytics(), {
           screen_class: 'Bible',
           screen_name: 'Bible',
         })

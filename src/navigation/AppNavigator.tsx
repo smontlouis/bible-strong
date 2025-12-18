@@ -1,5 +1,5 @@
 import React from 'react'
-import analytics from '@react-native-firebase/analytics'
+import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 import {
   NavigationContainer,
@@ -32,7 +32,7 @@ const onNavigationStateChange = (navigationRef: NavigationRef, routeRef: RouteRe
 
   if (prevScreen != currentScreen) {
     if (!__DEV__) {
-      analytics().logScreenView({
+      logScreenView(getAnalytics(), {
         screen_class: currentScreen,
         screen_name: currentScreen,
       })

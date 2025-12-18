@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import auth from '@react-native-firebase/auth'
-import remoteConfig from '@react-native-firebase/remote-config'
+import { getAuth } from '@react-native-firebase/auth'
+import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React, { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
@@ -18,7 +18,7 @@ import Box, { SafeAreaBox } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { firebaseDb } from '~helpers/firebase'
+import { firebaseDb, doc, updateDoc, deleteDoc, setDoc } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import { removeUndefinedVariables as r } from '~redux/firestoreMiddleware'
@@ -84,13 +84,14 @@ const ManualSync = memo(() => {
     }),
     shallowEqual
   )
-  const userDoc = firebaseDb.collection('users').doc(user.id)
+  const userDocRef = doc(firebaseDb, 'users', user.id)
 
   const sync = async () => {
     SnackBar.show(t('app.syncing'))
     setIsSyncing(true)
     const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
-    await userDoc.update(
+    await updateDoc(
+      userDocRef,
       r({
         bible: sanitizeUserBible(user.bible),
         plan: plan.ongoingPlans,
@@ -101,8 +102,8 @@ const ManualSync = memo(() => {
     if (studies) {
       await Promise.all(
         Object.entries(studies).map(async ([studyId, study]) => {
-          const studyDoc = firebaseDb.collection('studies').doc(studyId)
-          await studyDoc.set(study, { merge: true })
+          const studyDocRef = doc(firebaseDb, 'studies', studyId)
+          await setDoc(studyDocRef, study, { merge: true })
         })
       )
       console.log('Studies synced')
@@ -157,9 +158,9 @@ export const More = ({ closeMenu }: MoreProps) => {
               text: t('Delete'),
               onPress: async () => {
                 // @ts-ignore
-                firebaseDb.collection('users').doc(user.id).delete()
+                await deleteDoc(doc(firebaseDb, 'users', user.id))
 
-                const authUser = auth().currentUser
+                const authUser = getAuth().currentUser
                 await authUser?.delete()
 
                 logout()
@@ -173,7 +174,7 @@ export const More = ({ closeMenu }: MoreProps) => {
     ])
   }
 
-  const appleIsReviewing = remoteConfig().getValue('apple_reviewing').asBoolean()
+  const appleIsReviewing = getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
 
   // All the LinkItem should define params if they use route
   // There should be a way to type params using the route name

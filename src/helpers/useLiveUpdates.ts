@@ -12,7 +12,8 @@ import {
   type StudyMutation,
   updateStudy,
 } from '~redux/modules/user'
-import { firebaseDb } from './firebase'
+import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import { firebaseDb, doc, collection, query, where, onSnapshot } from './firebase'
 import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
 import { subscribeToSubcollection, SUBCOLLECTION_NAMES } from './firestoreSubcollections'
@@ -84,44 +85,40 @@ const useLiveUpdates = () => {
       }
 
       // Subscribe to user document (settings, subscription, etc.)
-      unsuscribeUsers = firebaseDb
-        .collection('users')
-        .doc(user.id)
-        .onSnapshot(doc => {
-          const source = doc?.metadata.hasPendingWrites ? 'Local' : 'Server'
-          if (source === 'Local' || !doc) return
+      unsuscribeUsers = onSnapshot(doc(firebaseDb, 'users', user.id), docSnapshot => {
+        const source = docSnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
+        if (source === 'Local' || !docSnapshot) return
 
-          const userData = doc.data() as FireStoreUserData | undefined
+        const userData = docSnapshot.data() as FireStoreUserData | undefined
 
-          if (!userData?.id) {
-            return
-          }
+        if (!userData?.id) {
+          return
+        }
 
-          // Ne pas inclure les sous-collections dans les live updates
-          // Elles sont gérées séparément
-          const { bible, ...otherUserData } = userData
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const {
-            highlights: _h,
-            notes: _n,
-            tags: _t,
-            strongsHebreu: _sh,
-            strongsGrec: _sg,
-            words: _w,
-            naves: _nv,
-            ...otherBible
-          } = bible || {}
+        // Ne pas inclure les sous-collections dans les live updates
+        // Elles sont gérées séparément
+        const { bible, ...otherUserData } = userData
+        const {
+          highlights: _h,
+          notes: _n,
+          tags: _t,
+          strongsHebreu: _sh,
+          strongsGrec: _sg,
+          words: _w,
+          naves: _nv,
+          ...otherBible
+        } = bible || {}
 
-          dispatch(
-            receiveLiveUpdates({
-              remoteUserData: {
-                ...otherUserData,
-                bible: otherBible,
-                // @ts-ignore
-              } as FireStoreUserData,
-            })
-          )
-        })
+        dispatch(
+          receiveLiveUpdates({
+            remoteUserData: {
+              ...otherUserData,
+              bible: otherBible,
+              // @ts-ignore
+            } as FireStoreUserData,
+          })
+        )
+      })
 
       // Subscribe to each subcollection
       for (const collection of SUBCOLLECTION_NAMES) {
@@ -149,24 +146,23 @@ const useLiveUpdates = () => {
       }
 
       // Subscribe to studies collection
-      unsuscribeStudies = firebaseDb
-        .collection('studies')
-        .where('user.id', '==', user.id)
-        .onSnapshot(querySnapshot => {
+      unsuscribeStudies = onSnapshot(
+        query(collection(firebaseDb, 'studies'), where('user.id', '==', user.id)),
+        querySnapshot => {
           const source = querySnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
           if (source === 'Local' || !querySnapshot) return
 
           if (isNewlyLogged || !hasStudies) {
             const studies = {} as { [key: string]: Study }
-            querySnapshot.forEach(doc => {
-              const study = doc.data() as Study
+            querySnapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+              const study = docSnap.data() as Study
               studies[study.id] = study
             })
 
             console.log('add all studies')
             dispatch(addStudies(studies))
           } else {
-            querySnapshot.docChanges().forEach(change => {
+            querySnapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
               // Ignore first listener adding all documents
               if (isFirstSnapshotListener) return
 
@@ -195,7 +191,8 @@ const useLiveUpdates = () => {
           }
 
           isFirstSnapshotListener = false
-        })
+        }
+      )
     }
 
     if (isLogged && isLoading === false) {

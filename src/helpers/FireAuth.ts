@@ -1,10 +1,20 @@
 import appleAuth from '@invertase/react-native-apple-authentication'
-import analytics from '@react-native-firebase/analytics'
-import auth from '@react-native-firebase/auth'
+import { getAnalytics, setUserId as analyticsSetUserId } from '@react-native-firebase/analytics'
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  AppleAuthProvider,
+  GoogleAuthProvider,
+} from '@react-native-firebase/auth'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
 import SnackBar from '~common/SnackBar'
-import { firebaseDb } from '~helpers/firebase'
+import { firebaseDb, doc, setDoc } from '~helpers/firebase'
 import { tokenManager } from '~helpers/TokenManager'
 import i18n from '~i18n'
 
@@ -53,7 +63,8 @@ const FireAuth = class {
       webClientId: '204116128917-56eubi7hu2f0k3rnb6dn8q3sfv23588l.apps.googleusercontent.com',
     })
 
-    auth().onAuthStateChanged(async user => {
+    const authInstance = getAuth()
+    onAuthStateChanged(authInstance, async user => {
       if (user && user.isAnonymous) {
         console.log('Deprecated, user exists and is anonymous ', user.uid)
         return
@@ -94,7 +105,7 @@ const FireAuth = class {
           this.user = user // Store user
 
           if (!__DEV__) {
-            analytics().setUserId(profile.id)
+            analyticsSetUserId(getAnalytics(), profile.id)
           }
           Sentry.getCurrentScope().setUser(profile)
           return
@@ -119,8 +130,8 @@ const FireAuth = class {
         // can be null in some scenarios
         if (identityToken) {
           // 3). create a Firebase `AppleAuthProvider` credential
-          const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce)
-          const userCredential = await auth().signInWithCredential(appleCredential)
+          const appleCredential = AppleAuthProvider.credential(identityToken, nonce)
+          const userCredential = await signInWithCredential(getAuth(), appleCredential)
 
           console.log(`Firebase authenticated via Apple, UID: ${userCredential.user.uid}`)
           resolve(false)
@@ -173,7 +184,7 @@ const FireAuth = class {
           throw new Error('No ID token found')
         }
 
-        const googleCredential = auth.GoogleAuthProvider.credential(idToken)
+        const googleCredential = GoogleAuthProvider.credential(idToken)
         return this.onCredentialSuccess(googleCredential, resolve)
       } catch (e) {
         SnackBar.show(i18n.t('Une erreur est survenue'))
@@ -184,7 +195,7 @@ const FireAuth = class {
 
   onCredentialSuccess = async (credential: any, resolve: any) => {
     try {
-      const user = await auth().signInWithCredential(credential)
+      const user = await signInWithCredential(getAuth(), credential)
 
       console.log('user signed in ', user)
       SnackBar.show(i18n.t('Connexion réussie'))
@@ -201,8 +212,7 @@ const FireAuth = class {
   login = (email: any, password: any) =>
     new Promise(async resolve => {
       try {
-        auth()
-          .signInWithEmailAndPassword(email.trim(), password.trim())
+        signInWithEmailAndPassword(getAuth(), email.trim(), password.trim())
           .then(() => {
             // @ts-ignore
             resolve(true)
@@ -224,7 +234,7 @@ const FireAuth = class {
     })
 
   sendEmailVerification = async () => {
-    const user = auth().currentUser
+    const user = getAuth().currentUser
     try {
       // @ts-ignore
       await user.sendEmailVerification()
@@ -241,8 +251,7 @@ const FireAuth = class {
   resetPassword = (email: any) =>
     new Promise(async resolve => {
       try {
-        auth()
-          .sendPasswordResetEmail(email)
+        sendPasswordResetEmail(getAuth(), email)
           .then(() => {
             SnackBar.show(i18n.t('Email envoyé.'))
             // @ts-ignore
@@ -267,13 +276,9 @@ const FireAuth = class {
   register = (username: any, email: any, password: any) =>
     new Promise(async resolve => {
       try {
-        auth()
-          .createUserWithEmailAndPassword(email, password)
+        createUserWithEmailAndPassword(getAuth(), email, password)
           .then(({ user }) => {
-            firebaseDb
-              .collection('users')
-              .doc(user.uid)
-              .set({ displayName: username }, { merge: true })
+            setDoc(doc(firebaseDb, 'users', user.uid), { displayName: username }, { merge: true })
 
             user.sendEmailVerification()
             // @ts-ignore
@@ -296,7 +301,7 @@ const FireAuth = class {
     })
 
   logout = () => {
-    auth().signOut()
+    signOut(getAuth())
 
     // Sign-out successful.
     this.user = null

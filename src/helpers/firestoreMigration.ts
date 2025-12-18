@@ -1,6 +1,5 @@
-import firestore from '@react-native-firebase/firestore'
 import * as Sentry from '@sentry/react-native'
-import { firebaseDb } from './firebase'
+import { firebaseDb, doc, getDoc, updateDoc, deleteField } from './firebase'
 import { autoBackupManager } from './AutoBackupManager'
 import {
   SUBCOLLECTION_NAMES,
@@ -52,8 +51,9 @@ export interface MigrationResult {
  */
 export async function isUserMigrated(userId: string): Promise<boolean> {
   try {
-    const userDoc = await firebaseDb.collection('users').doc(userId).get()
-    const userData = userDoc.data()
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    const userDocSnap = await getDoc(userDocRef)
+    const userData = userDocSnap.data()
     return userData?._migrated === true
   } catch (error: any) {
     console.error('[Migration] Failed to check migration status:', error)
@@ -82,8 +82,9 @@ export async function checkForEmbeddedData(userId: string): Promise<{
   collectionsWithData: SubcollectionName[]
 }> {
   try {
-    const userDoc = await firebaseDb.collection('users').doc(userId).get()
-    const userData = userDoc.data()
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    const userDocSnap = await getDoc(userDocRef)
+    const userData = userDocSnap.data()
 
     if (!userData?.bible) {
       return { hasEmbeddedData: false, collectionsWithData: [] }
@@ -123,7 +124,8 @@ export async function checkForEmbeddedData(userId: string): Promise<{
  */
 async function markAsMigrated(userId: string): Promise<void> {
   try {
-    await firebaseDb.collection('users').doc(userId).update({
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    await updateDoc(userDocRef, {
       _migrated: true,
     })
   } catch (error: any) {
@@ -149,11 +151,12 @@ async function removeEmbeddedData(userId: string): Promise<void> {
   try {
     const updates: { [key: string]: any } = {}
 
-    for (const collection of SUBCOLLECTION_NAMES) {
-      updates[`bible.${collection}`] = firestore.FieldValue.delete()
+    for (const collectionName of SUBCOLLECTION_NAMES) {
+      updates[`bible.${collectionName}`] = deleteField()
     }
 
-    await firebaseDb.collection('users').doc(userId).update(updates)
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    await updateDoc(userDocRef, updates)
     console.log('[Migration] Embedded data removed from user document')
   } catch (error: any) {
     console.error('[Migration] Failed to remove embedded data:', error)
@@ -214,8 +217,9 @@ export async function migrateUserDataToSubcollections(
 
     // 3. Lire les données embedded du document user
     reportProgress('Lecture des données existantes...', 0.1)
-    const userDoc = await firebaseDb.collection('users').doc(userId).get()
-    const userData = userDoc.data()
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    const userDocSnap = await getDoc(userDocRef)
+    const userData = userDocSnap.data()
 
     if (!userData?.bible) {
       console.log('[Migration] No bible data found, marking as migrated')
@@ -533,8 +537,9 @@ export async function resumableMigrateUserData(
 
     // 4. Lire les données embedded du document user
     reportProgress({ message: 'Lecture des données existantes...', overallProgress: 0.1 })
-    const userDoc = await firebaseDb.collection('users').doc(userId).get()
-    const userData = userDoc.data()
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    const userDocSnap = await getDoc(userDocRef)
+    const userData = userDocSnap.data()
 
     if (!userData?.bible) {
       console.log('[Migration] No bible data found, marking as migrated')

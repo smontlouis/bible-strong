@@ -1,5 +1,5 @@
 import Color from 'color'
-import remoteConfig from '@react-native-firebase/remote-config'
+import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React, { memo } from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
 import Box, { TouchableBox, VStack } from '~common/ui/Box'
@@ -35,7 +35,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const appleIsReviewing = remoteConfig().getValue('apple_reviewing').asBoolean()
+  const appleIsReviewing = getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
 
   return (
     <Box bg="lightGrey" flex={1}>
