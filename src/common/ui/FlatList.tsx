@@ -33,7 +33,7 @@ const fadeIn = {
   },
 }
 
-const AnimatedFlatList = React.forwardRef(({ contentContainerStyle, ...props }: any, ref: any) => {
+const AnimatedFlatList = ({ contentContainerStyle, ref, ...props }: any) => {
   const insets = useSafeAreaInsets()
   const orientation = useDeviceOrientation()
   const style = useMemo(
@@ -47,6 +47,6 @@ const AnimatedFlatList = React.forwardRef(({ contentContainerStyle, ...props }: 
     // @ts-ignore
     <FlatList orientation={orientation} contentContainerStyle={style} ref={ref} {...props} />
   )
-})
+}
 
 export default AnimatedFlatList

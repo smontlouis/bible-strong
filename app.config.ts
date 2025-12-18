@@ -2,9 +2,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  newArchEnabled: false,
   name: process.env.APP_NAME ?? 'dev - Bible Strong',
-  jsEngine: 'hermes',
   description: 'Bible strong for french people',
   slug: 'bible-strong',
   primaryColor: '#ffffff',
@@ -55,6 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     'expo-asset',
     'expo-sqlite',
+    'expo-audio',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     [

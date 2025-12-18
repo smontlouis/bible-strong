@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
-import React, { forwardRef } from 'react'
+import React, { Ref } from 'react'
 import { DimensionValue, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
-import Animated, { Easing } from 'react-native-reanimated'
+import Animated, { AnimatedProps, Easing } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Animatable from 'react-native-animatable'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -241,12 +241,14 @@ export const VStack = styled(Box)({
   flexDirection: 'column',
 })
 
-export const SafeAreaBox = forwardRef<
-  View,
-  BoxProps & {
-    isPadding?: boolean
-  }
->(({ isPadding = true, ...props }, ref) => {
+export const SafeAreaBox = ({
+  isPadding = true,
+  ref,
+  ...props
+}: BoxProps & {
+  isPadding?: boolean
+  ref?: Ref<View>
+}) => {
   const insets = useSafeAreaInsets()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
@@ -266,15 +268,15 @@ export const SafeAreaBox = forwardRef<
       {...props}
     />
   )
-})
+}
 
-export const AnimatedSafeAreaBox = forwardRef<
-  View,
-  Animated.AnimateProps<BoxProps> & { hasBottomTabBar?: boolean }
->((props, ref) => {
+export const AnimatedSafeAreaBox = ({
+  ref,
+  ...props
+}: AnimatedProps<BoxProps> & { hasBottomTabBar?: boolean; ref?: Ref<View> }) => {
   const insets = useSafeAreaInsets()
   return <AnimatedBox ref={ref} paddingTop={insets.top} paddingBottom={insets.bottom} {...props} />
-})
+}
 const BasicTouchableBox = Box.withComponent(TouchableOpacity)
 export const TouchableBox = (props: BoxProps & TouchableOpacityProps) => (
   <BasicTouchableBox {...props} activeOpacity={0.6} />

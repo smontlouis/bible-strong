@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import { getDbPath } from './databases'
 
 export const requireBiblePath = (id: string) => {

@@ -1,6 +1,6 @@
 import { getLangIsFr } from '~i18n'
 import { Asset } from 'expo-asset'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import { VersionCode } from 'src/state/tabs'
 import { Pericope } from '~common/types'
 

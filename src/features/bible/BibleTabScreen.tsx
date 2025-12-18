@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import produce from 'immer'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Appearance } from 'react-native'

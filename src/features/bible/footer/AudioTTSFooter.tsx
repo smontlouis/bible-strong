@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av'
+import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from 'expo-audio'
 import * as Speech from 'expo-speech'
 import { useAtomValue } from 'jotai/react'
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -31,10 +31,9 @@ type UseLoadSoundProps = {
   goToPrevChapter: () => void
 }
 
-const soundObject = new Audio.Sound()
-if (Platform.OS === 'ios') {
-  soundObject.loadAsync(require('~assets/sounds/empty.mp3'))
-}
+// iOS workaround: play silent audio to enable TTS in silent mode
+const silentPlayer: AudioPlayer | null =
+  Platform.OS === 'ios' ? createAudioPlayer(require('~assets/sounds/empty.mp3')) : null
 
 const useLoadSound = ({
   book,
@@ -132,12 +131,10 @@ const useLoadSound = ({
 
           // IOS hack to play tts in silent mode
           if (Platform.OS === 'ios') {
-            await Audio.setAudioModeAsync({
-              playsInSilentModeIOS: true,
+            await setAudioModeAsync({
+              playsInSilentMode: true,
             })
-            if (soundObject._loaded) {
-              await soundObject.playAsync()
-            }
+            silentPlayer?.play()
           }
 
           Speech.speak(verses[currentVerse.current], {

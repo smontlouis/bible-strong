@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { Portal } from '@gorhom/portal'
-import React, { forwardRef } from 'react'
+import React, { Ref } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
 import BottomSheet, {
@@ -41,6 +41,7 @@ interface ModalBodyProps extends BottomSheetProps {
   style?: any
   onModalClose?: () => void
   enableScrollView?: boolean
+  ref?: Ref<BottomSheet>
 }
 
 interface ItemProps {
@@ -49,51 +50,56 @@ interface ItemProps {
   onPress: () => void
 }
 
-const Body = forwardRef<BottomSheet, ModalBodyProps>(
-  ({ withPortal, children, headerComponent, enableScrollView = true, ...props }, ref) => {
-    const Wrapper = withPortal ? Portal : React.Fragment
-    const insets = useSafeAreaInsets()
-    const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-    const { bottomBarHeight } = useBottomBarHeightInTab()
-    return (
-      <Wrapper>
-        <BottomSheet
-          ref={ref}
-          index={-1}
-          topInset={insets.top}
-          enablePanDownToClose
-          enableDynamicSizing={false}
-          backdropComponent={renderBackdrop}
-          activeOffsetY={[-20, 20]}
-          onAnimate={onAnimateModalClose(props.onModalClose)}
-          key={key}
-          {...bottomSheetStyles}
-          {...props}
-        >
-          {headerComponent && <BottomSheetView>{headerComponent}</BottomSheetView>}
-          {enableScrollView ? (
-            <BottomSheetScrollView
-              contentContainerStyle={{
-                paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
-              }}
-            >
-              {children}
-            </BottomSheetScrollView>
-          ) : (
-            <BottomSheetView
-              style={{
-                flex: 1,
-                paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
-              }}
-            >
-              {children}
-            </BottomSheetView>
-          )}
-        </BottomSheet>
-      </Wrapper>
-    )
-  }
-)
+const Body = ({
+  withPortal,
+  children,
+  headerComponent,
+  enableScrollView = true,
+  ref,
+  ...props
+}: ModalBodyProps) => {
+  const Wrapper = withPortal ? Portal : React.Fragment
+  const insets = useSafeAreaInsets()
+  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+  const { bottomBarHeight } = useBottomBarHeightInTab()
+  return (
+    <Wrapper>
+      <BottomSheet
+        ref={ref}
+        index={-1}
+        topInset={insets.top}
+        enablePanDownToClose
+        enableDynamicSizing={false}
+        backdropComponent={renderBackdrop}
+        activeOffsetY={[-20, 20]}
+        onAnimate={onAnimateModalClose(props.onModalClose)}
+        key={key}
+        {...bottomSheetStyles}
+        {...props}
+      >
+        {headerComponent && <BottomSheetView>{headerComponent}</BottomSheetView>}
+        {enableScrollView ? (
+          <BottomSheetScrollView
+            contentContainerStyle={{
+              paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
+            }}
+          >
+            {children}
+          </BottomSheetScrollView>
+        ) : (
+          <BottomSheetView
+            style={{
+              flex: 1,
+              paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
+            }}
+          >
+            {children}
+          </BottomSheetView>
+        )}
+      </BottomSheet>
+    </Wrapper>
+  )
+}
 
 const Item = ({ children, tag, onPress, ...props }: ItemProps & TextProps) => (
   <Touchy onPress={onPress}>

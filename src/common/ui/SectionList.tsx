@@ -36,23 +36,27 @@ const SectionList = styled.SectionList(
   })
 )
 
-export default React.forwardRef(
-  ({ contentContainerStyle, ...props }: SectionListProps<any>, ref: any) => {
-    const orientation = useDeviceOrientation()
-    const insets = useSafeAreaInsets()
-    const style = useMemo(
-      () => ({
-        paddingBottom: 10 + insets.bottom,
-        // @ts-ignore
-        ...contentContainerStyle,
-      }),
-      []
-    )
-    return (
-      <View style={{ flex: 1 }}>
-        {/* @ts-ignore */}
-        <SectionList orientation={orientation} contentContainerStyle={style} ref={ref} {...props} />
-      </View>
-    )
-  }
-)
+const AnimatedSectionList = ({
+  contentContainerStyle,
+  ref,
+  ...props
+}: SectionListProps<any> & { ref?: any }) => {
+  const orientation = useDeviceOrientation()
+  const insets = useSafeAreaInsets()
+  const style = useMemo(
+    () => ({
+      paddingBottom: 10 + insets.bottom,
+      // @ts-ignore
+      ...contentContainerStyle,
+    }),
+    []
+  )
+  return (
+    <View style={{ flex: 1 }}>
+      {/* @ts-ignore */}
+      <SectionList orientation={orientation} contentContainerStyle={style} ref={ref} {...props} />
+    </View>
+  )
+}
+
+export default AnimatedSectionList

@@ -1,6 +1,6 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
-import React, { forwardRef, memo } from 'react'
+import React, { memo, Ref } from 'react'
 import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'
 
@@ -96,9 +96,10 @@ export type TabScreenProps = {
   tabAtom: PrimitiveAtom<TabItem>
   navigation: StackNavigationProp<MainStackProps>
   route: RouteProp<MainStackProps>
+  ref?: Ref<View>
 }
 
-const TabScreen = forwardRef<View, TabScreenProps>(({ tabAtom, navigation, route }, ref) => {
+const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
   const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
@@ -144,6 +145,6 @@ const TabScreen = forwardRef<View, TabScreenProps>(({ tabAtom, navigation, route
       </Box>
     </TabScreenWrapper>
   )
-})
+}
 
 export default memo(TabScreen)

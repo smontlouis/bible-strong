@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { timeout } from '~helpers/timeout'
 import i18n from '~i18n'

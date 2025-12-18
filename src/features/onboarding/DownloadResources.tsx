@@ -1,7 +1,10 @@
 import { useTheme } from '@emotion/react'
 import to from 'await-to-js'
-import * as FileSystem from 'expo-file-system'
-import { DownloadProgressData, FileSystemNetworkTaskProgressCallback } from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
+import {
+  DownloadProgressData,
+  FileSystemNetworkTaskProgressCallback,
+} from 'expo-file-system/legacy'
 import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

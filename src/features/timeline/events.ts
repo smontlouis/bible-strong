@@ -1,6 +1,6 @@
 import { TimelineSection, TimelineEvent } from './types'
 import { Asset } from 'expo-asset'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 
 // Manually unfixed : 1242 - 1244
 // export const events: TimelineSection[] = require('~assets/timeline/events.txt')

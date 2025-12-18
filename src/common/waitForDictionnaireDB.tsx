@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import React, { useEffect, useRef } from 'react'
 import { useAtomValue } from 'jotai'
 

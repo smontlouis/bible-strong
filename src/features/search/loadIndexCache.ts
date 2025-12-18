@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 // Initialize lunr plugins once at module load

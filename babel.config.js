@@ -1,6 +1,6 @@
 module.exports = function (api) {
   let platform
-  api.caller((caller) => {
+  api.caller(caller => {
     platform = caller.platform
   })
 
@@ -26,7 +26,7 @@ module.exports = function (api) {
           },
         },
       ],
-      'react-native-reanimated/plugin',
+      'react-native-worklets/plugin',
     ],
     env: {
       production: {

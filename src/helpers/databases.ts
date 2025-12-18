@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import to from 'await-to-js'
 
 import { getDatabasesRef } from '~helpers/firebase'

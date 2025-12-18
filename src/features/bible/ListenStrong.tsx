@@ -1,91 +1,74 @@
-import to from 'await-to-js'
-import { AVPlaybackStatus, Audio } from 'expo-av'
-import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio'
+import React, { useEffect, useRef } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import { FeatherIcon } from '~common/ui/Icon'
 
-type AudioStatus = 'Idle' | 'Loading' | 'Playing' | 'Error'
+type AudioStatus = 'Idle' | 'Loading' | 'Playing'
 
 interface Props {
   type: 'hebreu' | 'grec'
   code: number
 }
 
-const cachedSounds: { [x: string]: Audio.Sound } = {}
-
 const ListenToStrong = ({ type, code }: Props) => {
-  const soundObject = React.useRef(new Audio.Sound())
   const codeId = `${code}`.padStart(4, '0')
-  const { t } = useTranslation()
   const url =
     type === 'hebreu'
       ? `https://content.swncdn.com/biblestudytools/audio/lexicons/hebrew-mp3/${codeId}h.mp3`
       : `https://content.swncdn.com/biblestudytools/audio/lexicons/greek-mp3/${codeId}g.mp3`
 
-  const [audioStatus, setAudioStatus] = useState<AudioStatus>('Idle')
+  const player = useAudioPlayer(url)
+  const status = useAudioPlayerStatus(player)
+  const hasFinishedRef = useRef(false)
+
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      interruptionModeIOS: 0,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      interruptionModeAndroid: 2,
-      staysActiveInBackground: true,
-      playThroughEarpieceAndroid: false,
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
     })
   }, [])
 
+  // Detect when playback finishes and reset
   useEffect(() => {
-    ;(async () => {
-      if (cachedSounds[url]) {
-        soundObject.current = cachedSounds[url]
-        soundObject.current.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-        return
-      }
-      try {
-        setAudioStatus('Loading')
-        await soundObject.current.loadAsync({
-          uri: url,
-        })
-        soundObject.current.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-        setAudioStatus('Idle')
-        cachedSounds[url] = soundObject.current
-      } catch (error) {
-        console.log(error)
-        setAudioStatus('Error')
-      }
-    })()
-  }, [])
-
-  const onPlaybackStatusUpdate = (playbackStatus: AVPlaybackStatus) => {
-    if (!playbackStatus.isLoaded) {
-      if (playbackStatus.error) {
-        console.log(`Encountered a fatal error during playback: ${playbackStatus.error}`)
-        setAudioStatus('Error')
-      }
-    } else {
-      if (playbackStatus.isPlaying) {
-        setAudioStatus('Playing')
-      } else {
-        setAudioStatus('Idle')
-      }
-
-      if (playbackStatus.isBuffering) {
-        setAudioStatus('Loading')
-      }
-
-      if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-        setAudioStatus('Idle')
-        soundObject.current.stopAsync()
-      }
+    if (
+      status.duration > 0 &&
+      status.currentTime >= status.duration &&
+      !status.playing &&
+      !hasFinishedRef.current
+    ) {
+      hasFinishedRef.current = true
+      // Reset position for next play
+      player.seekTo(0)
     }
+    // Reset the flag when playing starts again
+    if (status.playing) {
+      hasFinishedRef.current = false
+    }
+  }, [status.currentTime, status.duration, status.playing, player])
+
+  const getAudioStatus = (): AudioStatus => {
+    if (!status.isLoaded && !status.isBuffering) {
+      return 'Idle'
+    }
+    if (status.isBuffering) {
+      return 'Loading'
+    }
+    if (status.playing) {
+      return 'Playing'
+    }
+    return 'Idle'
   }
 
+  const audioStatus = getAudioStatus()
+
   const playAudio = async () => {
-    const [err] = await to(soundObject.current.playAsync())
+    try {
+      player.play()
+    } catch (error) {
+      console.log('Error playing audio:', error)
+    }
   }
 
   return (
@@ -104,11 +87,6 @@ const ListenToStrong = ({ type, code }: Props) => {
         <Box>
           <FeatherIcon name="play-circle" size={20} color="primary" style={{ opacity: 0.5 }} />
         </Box>
-      )}
-      {audioStatus === 'Error' && (
-        <LinkBox onPress={playAudio}>
-          <MaterialIcon name="error" size={20} color="grey" style={{ opacity: 0.5 }} />
-        </LinkBox>
       )}
     </Box>
   )

@@ -2,7 +2,7 @@
 
 import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
-import { forwardRef, useEffect, useRef } from 'react'
+import { Ref, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
 // @ts-ignore
 import Quill from './quill'
@@ -28,16 +28,21 @@ interface Props {
   }
   isReadOnly: boolean
   colorScheme: 'light' | 'dark'
+  ref?: Ref<StudyDOMRef>
 }
 
 export interface StudyDOMRef extends DOMImperativeFactory {
   dispatch: (event: any) => void
 }
 
-export default forwardRef<StudyDOMRef, Props>(function MyComponent(
-  { fontFamily, language, contentToDisplay, isReadOnly, colorScheme },
-  ref
-) {
+export default function StudiesDOMComponent({
+  fontFamily,
+  language,
+  contentToDisplay,
+  isReadOnly,
+  colorScheme,
+  ref,
+}: Props) {
   const [loaded] = useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
@@ -79,6 +84,7 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
   }, [isReadOnly])
 
   useDOMImperativeHandle(
+    // @ts-ignore - ref is optional in React 19 pattern
     ref,
     () => ({
       dispatch: (event: any) => {
@@ -293,4 +299,4 @@ export default forwardRef<StudyDOMRef, Props>(function MyComponent(
       }}
     />
   )
-})
+}

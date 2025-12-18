@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import * as Sentry from '@sentry/react-native'
 import { RootState } from '~redux/modules/reducer'
 
