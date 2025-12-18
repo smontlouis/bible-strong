@@ -1,8 +1,8 @@
 import distanceInWords from 'date-fns/formatDistance'
 import enGB from 'date-fns/locale/en-GB'
 import fr from 'date-fns/locale/fr'
-import React from 'react'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import React, { useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '~common/Header'
 import TitlePrompt from '~common/TitlePrompt'
@@ -31,34 +31,8 @@ import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
-
-export const sortVersesByDate = (p: any) =>
-  Object.keys(p).reduce((arr: any, verse, i) => {
-    const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
-    const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
-
-    if (!arr.find((a: any) => a.date === p[verse].date)) {
-      arr.push({
-        date: p[verse].date,
-        color: p[verse].color,
-        verseIds: [],
-        stringIds: {},
-        tags: {},
-      })
-    }
-
-    const dateInArray = arr.find((a: any) => a.date === p[verse].date)
-    if (dateInArray) {
-      dateInArray.stringIds[verse] = true
-      dateInArray.verseIds.push(formattedVerse)
-      dateInArray.verseIds.sort((a: any, b: any) => Number(a.Verset) - Number(b.Verset))
-      dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
-    }
-
-    arr.sort((a: any, b: any) => Number(b.date) - Number(a.date))
-
-    return arr
-  }, [])
+import { makeTagDataSelector } from '~redux/selectors/bible'
+import { makeTagByIdSelector } from '~redux/selectors/tags'
 
 const NoteItem = ({ item, t, isFR }: any) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
@@ -108,57 +82,36 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
   const { t } = useTranslation()
   const isFR = useLanguage()
 
-  const tag = useSelector((state: RootState) => state.user.bible.tags[tagId], shallowEqual)
+  // Create memoized selectors
+  const selectTagById = useMemo(() => makeTagByIdSelector(), [])
+  const selectTagData = useMemo(() => makeTagDataSelector(), [])
+
+  const tag = useSelector((state: RootState) => selectTagById(state, tagId))
 
   const { highlights, notes, studies, naves, words, strongsGrec, strongsHebreu } = useSelector(
-    (state: any) => ({
-      highlights: tag.highlights
-        ? sortVersesByDate(
-            Object.keys(tag.highlights).reduce(
-              (arr, id) => ({
-                ...arr,
-                ...(state.user.bible.highlights[id] && {
-                  [id]: state.user.bible.highlights[id],
-                }),
-              }),
-              {}
-            )
-          )
-        : [],
-      notes: tag.notes
-        ? Object.keys(tag.notes)
-            .map(id => ({ id, reference: '', ...state.user.bible.notes[id] }))
-            .filter(c => c && c.date)
-        : [],
-      studies: tag.studies
-        ? Object.keys(tag.studies)
-            .map(id => state.user.bible.studies[id])
-            .filter(c => c)
-        : [],
-      naves: tag.naves
-        ? Object.keys(tag.naves)
-            .map(id => state.user.bible.naves[id])
-            .filter(c => c)
-        : [],
-      words: tag.words
-        ? Object.keys(tag.words)
-            .map(id => state.user.bible.words[id])
-            .filter(c => c)
-        : [],
-      strongsHebreu: tag.strongsHebreu
-        ? Object.keys(tag.strongsHebreu)
-            .map(id => state.user.bible.strongsHebreu[id])
-            .filter(c => c)
-        : [],
-      strongsGrec: tag.strongsGrec
-        ? Object.keys(tag.strongsGrec)
-            .map(id => state.user.bible.strongsGrec[id])
-            .filter(c => c)
-        : [],
-    }),
-    shallowEqual
+    (state: RootState) => (tag ? selectTagData(state, tag) : {
+      highlights: [],
+      notes: [],
+      studies: [],
+      naves: [],
+      words: [],
+      strongsGrec: [],
+      strongsHebreu: [],
+    })
   )
   const [titlePrompt, setTitlePrompt] = React.useState<any>(false)
+
+  if (!tag) {
+    return (
+      <Container>
+        <Header hasBackButton title="" />
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message={t("Cette étiquette n'existe pas...")}
+        />
+      </Container>
+    )
+  }
 
   return (
     <Container>

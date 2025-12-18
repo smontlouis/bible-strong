@@ -8,7 +8,7 @@ import { FlatList } from 'react-native'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Link, { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
@@ -17,7 +17,7 @@ import { FontText, HalfContainer, useParamsModalLabels } from '~features/bible/B
 import TouchableIcon from '~features/bible/TouchableIcon'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import fonts from '~helpers/fonts'
-import { RootState } from '~redux/modules/reducer'
+import { selectBibleSettingsForParams } from '~redux/selectors/user'
 import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
@@ -41,16 +41,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
     preferredColorScheme,
     preferredDarkTheme,
     preferredLightTheme,
-  } = useSelector(
-    ({ user }: RootState) => ({
-      fontFamily: user.fontFamily,
-      fontSizeScale: user.bible.settings.fontSizeScale,
-      preferredColorScheme: user.bible.settings.preferredColorScheme,
-      preferredLightTheme: user.bible.settings.preferredLightTheme,
-      preferredDarkTheme: user.bible.settings.preferredDarkTheme,
-    }),
-    shallowEqual
-  )
+  } = useSelector(selectBibleSettingsForParams)
 
   const { preferredColorSchemeToString, preferredLightThemeToString, preferredDarkThemeToString } =
     useParamsModalLabels()

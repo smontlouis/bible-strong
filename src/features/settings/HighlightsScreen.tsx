@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
@@ -13,6 +13,7 @@ import Box from '~common/ui/Box'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
+import { selectHighlightsObj, makeColorsSelector } from '~redux/selectors/user'
 import {
   changeHighlightColor,
   Highlight,
@@ -72,12 +73,10 @@ const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, 
 
 const HighlightsScreen = () => {
   const { t } = useTranslation()
-  const highlightsObj = useSelector((state: RootState) => state.user.bible.highlights, shallowEqual)
+  const highlightsObj = useSelector(selectHighlightsObj)
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const colors = useSelector(
-    (state: RootState) => state.user.bible.settings.colors[currentTheme],
-    shallowEqual
-  )
+  const selectColors = useMemo(() => makeColorsSelector(), [])
+  const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = React.useState<any>()

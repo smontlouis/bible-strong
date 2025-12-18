@@ -1,8 +1,9 @@
 import * as Sentry from '@sentry/react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { Alert, ScrollView, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { createSelector } from '@reduxjs/toolkit'
 
 import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'
@@ -40,20 +41,29 @@ interface BibleNoteModalProps {
   onClosed: () => void
 }
 
-const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) => {
-  const note = useSelector((state: RootState) => {
-    const notes = state.user.bible.notes
-    const orderedVerses = orderVerses(noteVerses || {})
-    const key = Object.keys(orderedVerses).join('/')
-    if (notes[key]) {
-      return {
-        id: key,
-        ...notes[key],
-      } as Note
+// Create a memoized selector factory for current note
+const makeCurrentNoteSelector = () =>
+  createSelector(
+    [(state: RootState) => state.user.bible.notes, (_: RootState, noteKey: string) => noteKey],
+    (notes, noteKey): (Note & { id: string }) | null => {
+      if (noteKey && notes[noteKey]) {
+        return {
+          id: noteKey,
+          ...notes[noteKey],
+        }
+      }
+      return null
     }
+  )
 
-    return null
-  })
+const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) => {
+  const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
+  const noteKey = useMemo(() => {
+    const orderedVerses = orderVerses(noteVerses || {})
+    return Object.keys(orderedVerses).join('/')
+  }, [noteVerses])
+
+  const note = useSelector((state: RootState) => selectCurrentNote(state, noteKey))
 
   return note
 }

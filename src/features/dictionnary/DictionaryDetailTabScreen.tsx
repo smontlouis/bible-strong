@@ -1,8 +1,8 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Share } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
@@ -29,6 +29,7 @@ import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { timeout } from '~helpers/timeout'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
+import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
 
@@ -56,11 +57,8 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
-  const tags = useSelector(
-    // @ts-ignore
-    (state: RootState) => state.user.bible.words[word]?.tags,
-    shallowEqual
-  )
+  const selectWordTags = useMemo(() => makeWordTagsSelector(), [])
+  const tags = useSelector((state: RootState) => selectWordTags(state, word))
 
   const setTitle = (title: string) =>
     setDictionaryTab(

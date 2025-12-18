@@ -1,8 +1,8 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Share } from 'react-native'
-import { shallowEqual, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -39,6 +39,7 @@ import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { RootState } from '~redux/modules/reducer'
+import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { MainStackProps } from '~navigation/type'
@@ -95,13 +96,10 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
 
-  const tags = useSelector((state: RootState) => {
-    const code = strongReferenceParam?.Code || reference
-    const strongPart = book > 39 ? 'strongsGrec' : 'strongsHebreu'
-
-    // @ts-ignore
-    return state.user.bible[strongPart][code]?.tags
-  }, shallowEqual)
+  const selectStrongTags = useMemo(() => makeStrongTagsSelector(), [])
+  const code = strongReferenceParam?.Code || reference
+  const isGreek = book > 39
+  const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
 
   const setTitle = (title: string) =>
     setStrongTab(

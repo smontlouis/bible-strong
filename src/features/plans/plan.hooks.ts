@@ -1,10 +1,11 @@
 import to from 'await-to-js'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
 import { cdnUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
+import { makePlanByIdSelector, makeOngoingPlanByIdSelector } from '~redux/selectors/plan'
 
 import { useAtom } from 'jotai/react'
 import {
@@ -126,14 +127,11 @@ const transformSections = (
  * @param id
  */
 export const useComputedPlan = (id: string): ComputedPlan | undefined => {
-  const plan = useSelector(
-    (state: RootState) => state.plan.myPlans.find(p => p.id === id),
-    shallowEqual
-  )
-  const ongoingPlan = useSelector(
-    (state: RootState) => state.plan.ongoingPlans.find(uP => uP.id === id),
-    shallowEqual
-  )
+  const selectPlanById = useMemo(() => makePlanByIdSelector(), [])
+  const selectOngoingPlanById = useMemo(() => makeOngoingPlanByIdSelector(), [])
+
+  const plan = useSelector((state: RootState) => selectPlanById(state, id))
+  const ongoingPlan = useSelector((state: RootState) => selectOngoingPlanById(state, id))
 
   if (!plan) {
     return

@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
@@ -33,7 +33,7 @@ const MultipleTagsModal = () => {
   const { t } = useTranslation()
   const [highlightTitle, setHighlightTitle] = useState('')
   const dispatch = useDispatch()
-  const tags = useSelector(sortedTagsSelector, shallowEqual)
+  const tags = useSelector(sortedTagsSelector)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
@@ -44,8 +44,11 @@ const MultipleTagsModal = () => {
     }
   }, [item])
 
-  // @ts-ignore
-  const entityData = useSelector((state: RootState) => state.user.bible[item.entity])
+  // Select entity data based on item.entity (already memoized at store level)
+  const entityData = useSelector((state: RootState) =>
+    // @ts-ignore
+    item?.entity ? state.user.bible[item.entity] : undefined
+  )
 
   const currentItems = useMemo(() => {
     // @ts-ignore

@@ -1,13 +1,13 @@
 import styled from '@emotion/native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { shallowEqual, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -26,6 +26,7 @@ import getVersesContent from '~helpers/getVersesContent'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { cleanParams, wp } from '~helpers/utils'
 import type { RootState } from '~redux/modules/reducer'
+import { makeColorsSelector } from '~redux/selectors/user'
 import verseToReference from '../../helpers/verseToReference'
 import type { VersionCode } from '../../state/tabs'
 import TouchableChip from './TouchableChip'
@@ -79,12 +80,8 @@ const VersesModal = ({
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const { colors } = useSelector(
-    (state: RootState) => ({
-      colors: state.user.bible.settings.colors[currentTheme],
-    }),
-    shallowEqual
-  )
+  const selectColors = useMemo(() => makeColorsSelector(), [])
+  const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   useEffect(() => {
     if (isVisible) {

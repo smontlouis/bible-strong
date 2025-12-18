@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box, { MotiBox, motiTransition } from '~common/ui/Box'
@@ -26,6 +26,7 @@ import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
+import { makeHighlightsByChapterSelector, makeNotesByChapterSelector, makeIsSelectedVerseHighlightedSelector } from '~redux/selectors/bible'
 import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
@@ -155,34 +156,21 @@ const BibleViewer = ({
 
   const modalIsVisible = !!Object.keys(selectedVerses).length
 
-  const highlightedVersesByChapter = useSelector((state: RootState) => {
-    const highlightedVerses = state.user.bible.highlights
-    const bookAndChapter = `${book.Numero}-${chapter}-`
+  // Create memoized selectors
+  const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
+  const selectNotesByChapter = useMemo(() => makeNotesByChapterSelector(), [])
+  const selectIsSelectedVerseHighlighted = useMemo(() => makeIsSelectedVerseHighlightedSelector(), [])
 
-    let object: typeof highlightedVerses = {}
-    for (const key in highlightedVerses) {
-      if (key.startsWith(bookAndChapter)) {
-        object[key] = highlightedVerses[key]
-      }
-    }
-    return object
-  }, shallowEqual)
+  const highlightedVersesByChapter = useSelector(
+    (state: RootState) => selectHighlightsByChapter(state, book.Numero, chapter)
+  )
 
-  const notesByChapter = useSelector((state: RootState) => {
-    const notes = state.user.bible.notes
-    const bookAndChapter = `${book.Numero}-${chapter}-`
+  const notesByChapter = useSelector(
+    (state: RootState) => selectNotesByChapter(state, book.Numero, chapter)
+  )
 
-    let object: typeof notes = {}
-    for (const key in notes) {
-      if (key.startsWith(bookAndChapter)) {
-        object[key] = notes[key]
-      }
-    }
-    return object
-  }, shallowEqual)
-
-  const isSelectedVerseHighlighted = useSelector((state: RootState) =>
-    Boolean(Object.keys(selectedVerses).find(s => state.user.bible.highlights[s]))
+  const isSelectedVerseHighlighted = useSelector(
+    (state: RootState) => selectIsSelectedVerseHighlighted(state, selectedVerses)
   )
 
   useEffect(() => {

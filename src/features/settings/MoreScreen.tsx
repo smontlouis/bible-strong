@@ -6,7 +6,7 @@ import React, { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
-import { shallowEqual, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -23,6 +23,7 @@ import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import { removeUndefinedVariables as r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
+import { selectUserAndPlan } from '~redux/selectors/plan'
 import app from '../../../package.json'
 
 import { StackScreenProps } from '@react-navigation/stack'
@@ -77,13 +78,7 @@ const ManualSync = memo(() => {
   const { t } = useTranslation()
 
   const [isSyncing, setIsSyncing] = useState(false)
-  const { user, plan } = useSelector(
-    (state: RootState) => ({
-      user: state.user,
-      plan: state.plan,
-    }),
-    shallowEqual
-  )
+  const { user, plan } = useSelector(selectUserAndPlan)
   const userDocRef = doc(firebaseDb, 'users', user.id)
 
   const sync = async () => {

@@ -4,12 +4,17 @@
 - [x] add minimal app version
 - [x] upgrade to last expo
 
+- react-compiler
+- issue in tag bottomsheet overlap
+- book selector issue overlap
+- bible scrollview issue overlap
+- Police & parametres -> bottom sheet not appearing
+
 - logout issue with plan
 - bring back eas updates
 - firebase
 - google sign in
 - mmkv
-- react-compiler
 
 - [ ] export pdf not working
 - [ ] bookmarks feature

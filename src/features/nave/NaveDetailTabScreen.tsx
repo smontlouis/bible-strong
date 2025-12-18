@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import { StackActions } from '@react-navigation/native'
@@ -26,6 +26,7 @@ import { timeout } from '~helpers/timeout'
 import useHTMLView from '~helpers/useHTMLView'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
+import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 
@@ -48,11 +49,8 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
-  const tags = useSelector(
-    // @ts-ignore
-    (state: RootState) => state.user.bible.naves[name_lower]?.tags,
-    shallowEqual
-  )
+  const selectNaveTags = useMemo(() => makeNaveTagsSelector(), [])
+  const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower))
   const openInNewTab = useOpenInNewTab()
 
   const setTitle = (title: string) =>

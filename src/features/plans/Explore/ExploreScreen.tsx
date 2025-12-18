@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { ScrollView, RefreshControl } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { fetchPlans } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
+import { selectSortedOnlinePlans } from '~redux/selectors/plan'
 import ExplorePlanItem from './ExplorePlanItem'
 import Empty from '~common/Empty'
 import { useTranslation } from 'react-i18next'
@@ -44,12 +45,7 @@ const ExploreScreen = () => {
   const dispatch = useDispatch()
   const [lang, setLang] = useState(isFR ? 'fr' : 'en')
   const status = useSelector((state: RootState) => state.plan.onlineStatus)
-  const plans = useSelector((state: RootState) => {
-    const onlinePlans = [...state.plan.onlinePlans]
-    onlinePlans.sort((a, b) => (a.featured === b.featured ? 0 : a.featured ? -1 : 1))
-
-    return onlinePlans
-  }, shallowEqual)
+  const plans = useSelector(selectSortedOnlinePlans)
 
   React.useEffect(() => {
     // @ts-ignore

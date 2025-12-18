@@ -5,7 +5,7 @@ import * as Sharing from 'expo-sharing'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Header from '~common/Header'
 import Snackbar from '~common/SnackBar'
 import Box from '~common/ui/Box'
@@ -13,8 +13,8 @@ import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { RootState } from '~redux/modules/reducer'
 import { importData } from '~redux/modules/user'
+import { selectUserAndPlan } from '~redux/selectors/plan'
 import { autoBackupManager, BackupInfo } from '~helpers/AutoBackupManager'
 
 const ImportExport = () => {
@@ -97,13 +97,7 @@ const ExportButton = ({
   const { t } = useTranslation()
 
   const [isSyncing, setIsSyncing] = useState(false)
-  const { user, plan } = useSelector(
-    (state: RootState) => ({
-      user: state.user,
-      plan: state.plan,
-    }),
-    shallowEqual
-  )
+  const { user, plan } = useSelector(selectUserAndPlan)
 
   const exportAsync = async (json: string) => {
     const fileUri = FileSystem.documentDirectory + 'save.biblestrong'
