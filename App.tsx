@@ -4,12 +4,13 @@ import * as Sentry from '@sentry/react-native'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import React, { memo, useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, LogBox, StatusBar, Text, View } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, LogBox, Text, View } from 'react-native'
 import 'react-native-root-siblings'
 import { Provider as ReduxProvider } from 'react-redux'
 import { persistor, store } from '~redux/store'
 
+import { SystemBars } from 'react-native-edge-to-edge'
 import { configureReanimatedLogger } from 'react-native-reanimated'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { checkDatabasesStorage } from '~helpers/sqlite'
@@ -21,7 +22,6 @@ import {
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import InitApp from './InitApp'
 import { setI18n } from './i18n'
-import { SystemBars } from 'react-native-edge-to-edge'
 
 configureReanimatedLogger({
   strict: false,
@@ -29,9 +29,7 @@ configureReanimatedLogger({
 
 // Prevent native splash screen from autohiding before App component declaration
 SplashScreen.preventAutoHideAsync()
-  .then((result) =>
-    console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
-  )
+  .then(result => console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`))
   .catch(console.warn) // it's good to explicitly catch and inspect any error
 
 SplashScreen.setOptions({
@@ -126,12 +124,12 @@ const App = () => {
   )
 }
 
-const InitAppWrapper = memo(() => {
+const InitAppWrapper = () => {
   return (
     <ReduxProvider store={store}>
       <InitApp persistor={persistor} />
     </ReduxProvider>
   )
-})
+}
 
 export default Sentry.wrap(App)

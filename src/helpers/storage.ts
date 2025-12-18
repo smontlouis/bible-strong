@@ -1,16 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useState, useEffect } from 'react'
-import { InteractionManager } from 'react-native'
-import { MMKV } from 'react-native-mmkv'
-import { Storage } from 'redux-persist'
 import * as FileSystem from 'expo-file-system/legacy'
+import { useEffect, useState } from 'react'
+import { InteractionManager } from 'react-native'
+import { createMMKV } from 'react-native-mmkv'
 import RNRestart from 'react-native-restart'
-import { useSelector } from 'react-redux'
-import { RootState } from '~redux/modules/reducer'
-import { autoBackupManager } from '~helpers/AutoBackupManager'
+import { Storage } from 'redux-persist'
 const deepmerge = require('@fastify/deepmerge')()
 
-export const storage = new MMKV()
+export const storage = createMMKV()
 
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export const hasMigratedFromAsyncStorage = storage.getBoolean('hasMigratedFromAsyncStorage')
@@ -149,7 +146,7 @@ export const mmkvStorage: Storage = {
     return Promise.resolve(value)
   },
   removeItem: key => {
-    storage.delete(key)
+    storage.remove(key)
     return Promise.resolve()
   },
 }

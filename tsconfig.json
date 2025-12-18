@@ -19,7 +19,7 @@
       "~i18n": ["i18n"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "App.tsx.ol"],
   "exclude": [
     "node_modules",
     "src/features/timeline/events.old.ts",

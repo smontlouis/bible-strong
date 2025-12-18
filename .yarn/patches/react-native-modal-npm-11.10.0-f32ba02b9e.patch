@@ -1,21 +1,34 @@
 diff --git a/dist/modal.js b/dist/modal.js
-index 165cd55a960dfaccbb238807b17b0cc43e4f7bcb..b50d9fda50452b2f0d7ebd6388afc20d5486c632 100644
+index 165cd55a960dfaccbb238807b17b0cc43e4f7bcb..5e9d1fc240818d6f7db8db4abf75343ca46e9a0c 100644
 --- a/dist/modal.js
 +++ b/dist/modal.js
-@@ -403,15 +403,14 @@ export class ReactNativeModal extends React.Component {
+@@ -29,6 +29,7 @@ export class ReactNativeModal extends React.Component {
+         this.isTransitioning = false;
+         this.inSwipeClosingState = false;
+         this.currentSwipingDirection = null;
++        this.backHandlerSubscription = null;
+         this.panResponder = null;
+         this.getDeviceHeight = () => this.props.deviceHeight || this.state.deviceHeight;
+         this.getDeviceWidth = () => this.props.deviceWidth || this.state.deviceWidth;
+@@ -403,15 +404,18 @@ export class ReactNativeModal extends React.Component {
          if (this.props.onSwipe) {
              console.warn('`<Modal onSwipe="..." />` is deprecated and will be removed starting from 13.0.0. Use `<Modal onSwipeComplete="..." />` instead.');
          }
 -        DeviceEventEmitter.addListener('didUpdateDimensions', this.handleDimensionsUpdate);
--        if (this.state.isVisible) {
-+        this.deviceEvent = DeviceEventEmitter.addListener('didUpdateDimensions', this.handleDimensionsUpdate);        if (this.state.isVisible) {
++        this.deviceEvent = DeviceEventEmitter.addListener('didUpdateDimensions', this.handleDimensionsUpdate);
+         if (this.state.isVisible) {
              this.open();
          }
-         BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
+-        BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
++        this.backHandlerSubscription = BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
      }
      componentWillUnmount() {
-         BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
+-        BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
 -        DeviceEventEmitter.removeListener('didUpdateDimensions', this.handleDimensionsUpdate);
++        if (this.backHandlerSubscription) {
++            this.backHandlerSubscription.remove();
++            this.backHandlerSubscription = null;
++        }
 +        this.deviceEvent.remove();
      }
      componentDidUpdate(prevProps) {
