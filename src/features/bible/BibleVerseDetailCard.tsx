@@ -2,7 +2,6 @@ import styled from '@emotion/native'
 import { useTheme, withTheme } from '@emotion/react'
 import React, { useRef, useState, useEffect } from 'react'
 import Carousel from 'react-native-reanimated-carousel'
-import compose from 'recompose/compose'
 
 import waitForStrongDB from '~common/waitForStrongDB'
 import loadStrongReferences from '~helpers/loadStrongReferences'

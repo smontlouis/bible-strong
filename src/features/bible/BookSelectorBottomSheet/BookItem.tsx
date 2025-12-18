@@ -1,4 +1,4 @@
-import { MotiView } from 'moti'
+import { MotiView } from '@alloc/moti'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'

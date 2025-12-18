@@ -11,7 +11,6 @@ import setMinutes from 'date-fns/fp/setMinutes'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import compose from 'recompose/compose'
 import Snackbar from '~common/SnackBar'
 
 import { useAtomValue } from 'jotai/react'
@@ -99,16 +98,9 @@ export const useVerseOfTheDay = (addDay: number) => {
             ? 1
             : 0
 
-        // @ts-ignore
-        const date: any = compose(
-          // @ts-ignore
-          setMinutes(vodMinutes),
-          // @ts-ignore
-          setHours(vodHours),
-          // @ts-ignore
-          addDays(addDay)
-          // @ts-ignore
-        )(nowDate) as unknown as Date
+        const date = setMinutes(vodMinutes)(
+          setHours(vodHours)(addDays(addDay)(nowDate))
+        )
 
         const channelId = await notifee.createChannel({
           id: 'vod-notifications',

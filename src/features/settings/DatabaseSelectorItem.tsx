@@ -6,7 +6,7 @@ import React from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import ProgressCircle from 'react-native-progress/Circle'
 import { connect } from 'react-redux'
-import compose from 'recompose/compose'
+import { compose } from 'redux'
 import {
   getIfDatabaseNeedsDownload,
   getIfDatabaseNeedsDownloadForLang,

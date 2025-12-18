@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Animatable from 'react-native-animatable'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { TouchableOpacityProps } from 'react-native-gesture-handler'
-import { motify, MotiTransitionProp, StyleValueWithReplacedTransforms } from 'moti'
+import { motify, MotiTransitionProp, StyleValueWithReplacedTransforms } from '@alloc/moti'
 import Text from './Text'
 import { ImageStyle } from 'expo-image'
 
