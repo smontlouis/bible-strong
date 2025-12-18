@@ -19,8 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     versionCode: 424,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
-      process.env.ANDROID_GOOGLE_SERVICES_FILE ??
-      'firebase/dev/google-services.json',
+      process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
     adaptiveIcon: {
       foregroundImage: './assets/images/foreground-image.png',
       backgroundImage: './assets/images/background-image.png',
@@ -28,12 +27,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   ios: {
-    bundleIdentifier:
-      process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
+    bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
     buildNumber: '213',
     googleServicesFile:
-      process.env.IOS_GOOGLE_SERVICES_FILE ??
-      './firebase/dev/GoogleService-Info.plist',
+      process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',
     supportsTablet: true,
     infoPlist: {
@@ -70,9 +67,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           targetSdkVersion: 35,
           usesCleartextTraffic: true,
-          extraMavenRepos: [
-            '../../node_modules/@notifee/react-native/android/libs',
-          ],
+          extraMavenRepos: ['../../node_modules/@notifee/react-native/android/libs'],
         },
       },
     ],
