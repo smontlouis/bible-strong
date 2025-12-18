@@ -91,7 +91,7 @@ export const useWaitForDatabase = () => {
           bibleMemoize.timeline = bibleMemoize[cacheKey]
           setLoading(false)
         } catch (e) {
-          console.log(e)
+          console.log('[Timeline] Download error:', e)
           SnackBar.show(
             t(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

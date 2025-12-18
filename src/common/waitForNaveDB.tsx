@@ -92,7 +92,7 @@ export const useWaitForDatabase = () => {
               ),
               'danger'
             )
-            console.log(e)
+            console.log('[Nave] Download error:', e)
             setProposeDownload(true)
             setStartDownload(false)
           }

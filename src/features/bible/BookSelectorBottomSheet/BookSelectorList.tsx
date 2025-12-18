@@ -87,7 +87,7 @@ export const BookSelectorList = ({
         offset: itemHeight * index,
         index,
       })}
-      onScrollToIndexFailed={error => console.log('scroll failed', error)}
+      onScrollToIndexFailed={error => console.log('[Bible] Scroll failed:', error)}
       keyExtractor={item => item.Numero.toString()}
       maintainVisibleContentPosition={{
         minIndexForVisible: 0,

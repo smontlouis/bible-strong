@@ -16,7 +16,7 @@ const getSQLTransaction =
         const allRows = await getDB()?.getAllAsync(sqlReq, args)
         resolve(allRows)
       } catch (error) {
-        console.log('Error executing sql =>', error)
+        console.log('[SQLTransaction] Error executing sql =>', error)
         reject(error)
       }
     })

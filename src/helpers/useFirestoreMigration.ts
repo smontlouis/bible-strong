@@ -64,7 +64,7 @@ export const useFirestoreMigration = () => {
     async (userId: string, state: RootState): Promise<boolean> => {
       // Prevent concurrent migrations
       if (isMigratingRef.current) {
-        console.log('[useFirestoreMigration] Migration already in progress')
+        console.log('[FirestoreMigration] Migration already in progress')
         return false
       }
 
@@ -79,7 +79,7 @@ export const useFirestoreMigration = () => {
           hasPendingMigration(existingState)
 
         if (isResuming) {
-          console.log('[useFirestoreMigration] Resuming existing migration')
+          console.log('[FirestoreMigration] Resuming existing migration')
         }
 
         // Initialize progress UI

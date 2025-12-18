@@ -12,7 +12,7 @@ const OfflineNotice = () => {
 
   React.useEffect(() => {
     const handleConnectivityChange = ({ isConnected }) => {
-      console.log('Is connected: ', isConnected)
+      console.log('[Home] Is connected:', isConnected)
       setIsConnected(isConnected)
     }
 

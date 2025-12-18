@@ -15,10 +15,10 @@ export const useRemoteConfig = () => {
       const fetchedRemotely = await fetchAndActivate(rc)
 
       if (fetchedRemotely) {
-        console.log('Configs were retrieved from the backend and activated.')
+        console.log('[RemoteConfig] Configs were retrieved from the backend and activated.')
       } else {
         console.log(
-          'No configs were fetched from the backend, and the local configs were already activated'
+          '[RemoteConfig] No configs were fetched from the backend, and the local configs were already activated'
         )
       }
     })()

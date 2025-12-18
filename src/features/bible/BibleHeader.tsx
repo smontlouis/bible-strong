@@ -113,7 +113,7 @@ const Header = ({
           <Back
             onGoBack={() => {
               isFullScreenBibleValue.value = false
-              console.log('onGoBack')
+              console.log('[Bible] onGoBack')
             }}
           >
             <MotiBox

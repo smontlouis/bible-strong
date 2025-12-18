@@ -67,7 +67,7 @@ const ListenToStrong = ({ type, code }: Props) => {
     try {
       player.play()
     } catch (error) {
-      console.log('Error playing audio:', error)
+      console.log('[Bible] Error playing audio:', error)
     }
   }
 

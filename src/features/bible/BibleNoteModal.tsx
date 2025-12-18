@@ -142,7 +142,7 @@ ${currentNote?.description}
       Share.share({ message })
     } catch (e) {
       Snackbar.show(t('Erreur lors du partage.'))
-      console.log(e)
+      console.log('[Bible] Error sharing note:', e)
       Sentry.captureException(e)
     }
   }

@@ -44,7 +44,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
     deltaOld: string | null,
     changeSource: string | null
   ) => {
-    console.log('delta', delta)
+    console.log('[Studies] delta', delta)
     dispatch(
       updateStudy({
         id: currentStudy.id,

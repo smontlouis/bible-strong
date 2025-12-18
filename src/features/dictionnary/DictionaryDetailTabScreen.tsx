@@ -122,7 +122,7 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
-      console.log(e)
+      console.log('[Dictionary] Share error:', e)
     }
   }
 

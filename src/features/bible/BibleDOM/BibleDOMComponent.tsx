@@ -226,7 +226,7 @@ const VersesRenderer = ({
 
   useEffect(() => {
     // Notify parent component that we've mounted
-    console.log('WEB: DOM component mounted')
+    console.log('[Bible] WEB: DOM component mounted')
     dispatch({
       type: 'DOM_COMPONENT_MOUNTED',
     }).catch(console.error)

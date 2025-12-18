@@ -14,7 +14,7 @@ export interface InitHooksProps {}
 
 const handleAppStateChange = async (nextAppState: AppStateStatus) => {
   if (nextAppState.match(/inactive|background/)) {
-    console.log('App mode - background!')
+    console.log('[Common] App mode - background!')
 
     if (!(await Speech.isSpeakingAsync()) && Platform.OS === 'android') {
       try {

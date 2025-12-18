@@ -6,7 +6,7 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
   try {
     return await fn()
   } catch (e) {
-    console.log('Error =>', e)
+    console.log('[Database] Error =>', e)
 
     cb?.()
 
@@ -49,7 +49,7 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
       duration: 5000,
     })
 
-    console.log(e)
+    console.log('[Database] Error:', e)
     Sentry.captureException(e)
 
     throw new Error('UNKNOWN_ERROR')

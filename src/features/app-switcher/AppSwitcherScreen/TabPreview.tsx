@@ -37,7 +37,7 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
       tabAtom,
     })
 
-  console.log('tabAtom', tabAtom.toString())
+  console.log('[AppSwitcher] tabAtom', tabAtom.toString())
 
   return (
     <AnimatedTouchableBox

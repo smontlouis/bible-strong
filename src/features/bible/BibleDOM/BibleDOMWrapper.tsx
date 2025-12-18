@@ -156,10 +156,10 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     const timeoutId = setTimeout(() => {
       if (!mountedRef.current) {
         // If component hasn't mounted after 1 second, notify parent
-        console.log('DOM component NOT mounted')
+        console.log('[Bible] DOM component NOT mounted')
         onMountTimeout?.()
       } else {
-        console.log('DOM component mounted')
+        console.log('[Bible] DOM component mounted')
         setIsBibleViewReloading(false)
       }
     }, 2000)
@@ -177,7 +177,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         const { onChangeResourceTypeSelectVerse } = props
         const { Livre, Chapitre, Verset } = action.params.verse
-        console.log(`${Livre}-${Chapitre}-${Verset}`)
+        console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
         onChangeResourceTypeSelectVerse('strong', `${Livre}-${Chapitre}-${Verset}`)
 
         break
@@ -303,7 +303,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_DOWN: {
-        console.log('SWIPE_DOWN')
+        console.log('[Bible] SWIPE_DOWN')
         setIsFullScreenBible(true)
         isFullScreenBibleValue.value = true
         break

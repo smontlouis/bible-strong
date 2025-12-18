@@ -101,7 +101,7 @@ const ManualSync = memo(() => {
           await setDoc(studyDocRef, study, { merge: true })
         })
       )
-      console.log('Studies synced')
+      console.log('[Settings] Studies synced')
     }
     SnackBar.show(t('app.synced'))
     setIsSyncing(false)

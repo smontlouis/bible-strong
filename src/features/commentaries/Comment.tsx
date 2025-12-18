@@ -81,7 +81,7 @@ const useCommentTranslation = (id: string, content: string) => {
         )
 
         if (err) {
-          console.log('Error', err)
+          console.log('[Commentaries] Error:', err)
           setStatus('Rejected')
           return
         }
@@ -103,7 +103,7 @@ const useCommentTranslation = (id: string, content: string) => {
         setTranslatedContent(result.translations[0].text)
         setStatus('Resolved')
       } catch (e) {
-        console.log(e)
+        console.log('[Commentaries] Translation error:', e)
         setStatus('Rejected')
       }
     }
@@ -165,7 +165,7 @@ https://bible-strong.app
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
-      console.log(e)
+      console.log('[Commentaries] Share error:', e)
       Sentry.captureException(e)
     }
   }

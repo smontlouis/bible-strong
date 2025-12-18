@@ -90,7 +90,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
       if (settings.commentsDisplay) {
         const mhyCommentsNeedsDownload = await getIfMhyCommentsNeedsDownload()
         if (mhyCommentsNeedsDownload) {
-          console.log('Error with commentaires, deactivating...')
+          console.log('[Bible] Error with commentaires, deactivating...')
           dispatch(setSettingsCommentaires(false))
         }
       }
@@ -98,7 +98,7 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   }, [dispatch, settings.commentsDisplay])
 
   const handleBibleViewerReload = () => {
-    console.log('Bible component failed to mount, forcing reload')
+    console.log('[Bible] Bible component failed to mount, forcing reload')
     setReloadKey(prev => prev + 1)
     getDefaultStore().set(isBibleViewReloadingAtom, true)
   }

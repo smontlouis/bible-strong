@@ -91,7 +91,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
           focusVerses: verses?.split(',').map(Number),
         })
       } catch (e) {
-        console.log(e)
+        console.log('[Nave] Error loading verse:', e)
         Snackbar.show('Impossible de charger ce verset.')
       }
     }
@@ -120,7 +120,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
-      console.log(e)
+      console.log('[Nave] Share error:', e)
     }
   }
 

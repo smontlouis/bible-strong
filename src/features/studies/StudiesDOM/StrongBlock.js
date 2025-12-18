@@ -40,7 +40,7 @@ class StrongBlock extends Embed {
     node.addEventListener('click', () => {
       const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
       if (isReadOnly) {
-        console.log(`${codeStrong} ${book}`)
+        console.log(`[Studies] ${codeStrong} ${book}`)
         dispatch('VIEW_BIBLE_STRONG', {
           reference: codeStrong,
           book,

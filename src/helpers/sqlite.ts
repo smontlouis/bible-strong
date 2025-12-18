@@ -36,7 +36,7 @@ class DB {
     return new Promise(async (resolve, reject) => {
       try {
         this.db = await SQLite.openDatabaseAsync(this.name)
-        console.log(`${this.name} loaded`)
+        console.log(`[DBManager] ${this.name} loaded`)
         resolve(true)
       } catch (error) {
         console.error('Error opening database:', error)
@@ -54,7 +54,7 @@ class DB {
       if (this.db) {
         await this.db.closeAsync()
         await FileSystem.deleteAsync(`${FileSystem.documentDirectory}SQLite/${this.name}`)
-        console.log('Database deleted:', this.name)
+        console.log('[DBManager] Database deleted:', this.name)
       }
     } catch (error) {
       console.error('Error deleting database:', error)
@@ -293,7 +293,7 @@ export const checkDatabasesStorage = async () => {
   const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
   const dir = await FileSystem.readDirectoryAsync(sqliteDirPath)
 
-  console.log('Checking databases...')
+  console.log('[DBManager] Checking databases...')
   await Promise.all(
     [
       databaseStrongName,
@@ -315,16 +315,16 @@ export const checkForDatabase = async (dbName: string, filesInDir: string[]) => 
     const fileToRename = filesInDir.find(f => f.startsWith(dbName.replace('.sqlite', '')))
     if (fileToRename) {
       // Check if file is not empty
-      console.log('Rename file', fileToRename)
+      console.log('[DBManager] Rename file', fileToRename)
       const fileToRenameInfo = await FileSystem.getInfoAsync(`${sqliteDirPath}/${fileToRename}`)
 
       if (fileToRenameInfo.exists && fileToRenameInfo.size !== 0) {
-        console.log(`Renaming ${fileToRename} to ${dbName}`)
+        console.log(`[DBManager] Renaming ${fileToRename} to ${dbName}`)
         await FileSystem.moveAsync({
           from: `${sqliteDirPath}/${fileToRename}`,
           to: filePath,
         })
-        console.log('Done renaming')
+        console.log('[DBManager] Done renaming')
       }
     }
   }

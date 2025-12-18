@@ -67,7 +67,7 @@ const LastSave = () => {
       if (saveFile.exists) {
         setLastSave(saveFile)
       } else {
-        console.log('File does not exist')
+        console.log('[Settings] File does not exist')
       }
     }
     checkLastSave()
@@ -105,7 +105,7 @@ const ExportButton = ({
     const UTI = 'save.biblestrong'
 
     await Sharing.shareAsync(fileUri, { UTI }).catch(error => {
-      console.log(error)
+      console.log('[Settings] Share error:', error)
     })
   }
 
@@ -139,7 +139,7 @@ const ExportButton = ({
             .then(async uri => {
               await FileSystem.writeAsStringAsync(uri, json)
             })
-            .catch(e => console.log(e))
+            .catch(e => console.log('[Settings] Error creating file:', e))
         } else {
           await exportAsync(json)
         }
@@ -187,7 +187,7 @@ const ImportSave = () => {
         Snackbar.show(t('app.imported'))
       }
     } catch (error) {
-      console.log(error)
+      console.log('[Settings] Import error:', error)
       Snackbar.show(t('Une erreur est survenue'))
     }
   }

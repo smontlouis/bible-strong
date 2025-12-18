@@ -159,7 +159,7 @@ const useLiveUpdates = () => {
               studies[study.id] = study
             })
 
-            console.log('add all studies')
+            console.log('[LiveUpdates] Add all studies')
             dispatch(addStudies(studies))
           } else {
             querySnapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
@@ -167,7 +167,7 @@ const useLiveUpdates = () => {
               if (isFirstSnapshotListener) return
 
               if (change.type === 'added') {
-                console.log('added study: ', change.doc.data().id)
+                console.log('[LiveUpdates] Added study:', change.doc.data().id)
 
                 dispatch(
                   updateStudy({
@@ -176,7 +176,7 @@ const useLiveUpdates = () => {
                 )
               }
               if (change.type === 'modified') {
-                console.log('modified study: ', change.doc.data().id)
+                console.log('[LiveUpdates] Modified study:', change.doc.data().id)
                 dispatch(
                   updateStudy({
                     ...(change.doc.data() as StudyMutation),
@@ -184,7 +184,7 @@ const useLiveUpdates = () => {
                 )
               }
               if (change.type === 'removed') {
-                console.log('removed study: ', change.doc.data().id)
+                console.log('[LiveUpdates] Removed study:', change.doc.data().id)
                 dispatch(deleteStudy(change.doc.data().id))
               }
             })

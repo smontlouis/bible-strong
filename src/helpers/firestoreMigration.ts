@@ -56,7 +56,7 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
     const userData = userDocSnap.data()
     return userData?._migrated === true
   } catch (error: any) {
-    console.error('[Migration] Failed to check migration status:', error)
+    console.error('[FirestoreMigration] Failed to check migration status:', error)
     Sentry.captureException(error, {
       tags: {
         feature: 'firestore_migration',
@@ -104,7 +104,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
       collectionsWithData,
     }
   } catch (error: any) {
-    console.error('[Migration] Failed to check for embedded data:', error)
+    console.error('[FirestoreMigration] Failed to check for embedded data:', error)
     Sentry.captureException(error, {
       tags: {
         feature: 'firestore_migration',
@@ -129,7 +129,7 @@ async function markAsMigrated(userId: string): Promise<void> {
       _migrated: true,
     })
   } catch (error: any) {
-    console.error('[Migration] Failed to mark user as migrated:', error)
+    console.error('[FirestoreMigration] Failed to mark user as migrated:', error)
     Sentry.captureException(error, {
       tags: {
         feature: 'firestore_migration',
@@ -157,9 +157,9 @@ async function removeEmbeddedData(userId: string): Promise<void> {
 
     const userDocRef = doc(firebaseDb, 'users', userId)
     await updateDoc(userDocRef, updates)
-    console.log('[Migration] Embedded data removed from user document')
+    console.log('[FirestoreMigration] Embedded data removed from user document')
   } catch (error: any) {
-    console.error('[Migration] Failed to remove embedded data:', error)
+    console.error('[FirestoreMigration] Failed to remove embedded data:', error)
     Sentry.captureException(error, {
       tags: {
         feature: 'firestore_migration',
@@ -194,7 +194,7 @@ export async function migrateUserDataToSubcollections(
   onProgress?: (message: string, progress: number) => void
 ): Promise<{ success: boolean; error?: string }> {
   const reportProgress = (message: string, progress: number) => {
-    console.log(`[Migration] ${message} (${Math.round(progress * 100)}%)`)
+    console.log(`[FirestoreMigration] ${message} (${Math.round(progress * 100)}%)`)
     onProgress?.(message, progress)
   }
 
@@ -203,7 +203,7 @@ export async function migrateUserDataToSubcollections(
     reportProgress('Vérification du statut de migration...', 0)
     const alreadyMigrated = await isUserMigrated(userId)
     if (alreadyMigrated) {
-      console.log('[Migration] User already migrated, skipping')
+      console.log('[FirestoreMigration] User already migrated, skipping')
       return { success: true }
     }
 
@@ -211,7 +211,7 @@ export async function migrateUserDataToSubcollections(
     reportProgress('Création du backup de sécurité...', 0.05)
     const backupCreated = await autoBackupManager.createBackupNow(state, 'pre_migration')
     if (!backupCreated) {
-      console.warn('[Migration] Backup creation failed, but continuing with migration')
+      console.warn('[FirestoreMigration] Backup creation failed, but continuing with migration')
       // On continue quand même car le backup peut échouer pour diverses raisons non critiques
     }
 
@@ -222,7 +222,7 @@ export async function migrateUserDataToSubcollections(
     const userData = userDocSnap.data()
 
     if (!userData?.bible) {
-      console.log('[Migration] No bible data found, marking as migrated')
+      console.log('[FirestoreMigration] No bible data found, marking as migrated')
       await markAsMigrated(userId)
       return { success: true }
     }
@@ -235,13 +235,13 @@ export async function migrateUserDataToSubcollections(
     )
 
     if (collectionsToMigrate.length === 0) {
-      console.log('[Migration] No data to migrate, marking as migrated')
+      console.log('[FirestoreMigration] No data to migrate, marking as migrated')
       await markAsMigrated(userId)
       return { success: true }
     }
 
     console.log(
-      `[Migration] Migrating ${collectionsToMigrate.length} collections:`,
+      `[FirestoreMigration] Migrating ${collectionsToMigrate.length} collections:`,
       collectionsToMigrate
     )
 
@@ -268,11 +268,11 @@ export async function migrateUserDataToSubcollections(
     await removeEmbeddedData(userId)
 
     reportProgress('Migration terminée avec succès!', 1)
-    console.log('[Migration] Migration completed successfully')
+    console.log('[FirestoreMigration] Migration completed successfully')
 
     return { success: true }
   } catch (error: any) {
-    console.error('[Migration] Migration failed:', error)
+    console.error('[FirestoreMigration] Migration failed:', error)
     Sentry.captureException(error, {
       tags: { feature: 'migration', action: 'migrate_to_subcollections' },
       extra: { userId },
@@ -308,15 +308,15 @@ export async function migrateImportedDataToSubcollections(
     naves?: { [id: string]: any }
   }
 ): Promise<void> {
-  console.log('[Migration] ========================================')
-  console.log('[Migration] Starting imported data migration')
-  console.log('[Migration] User ID:', userId)
+  console.log('[FirestoreMigration] ========================================')
+  console.log('[FirestoreMigration] Starting imported data migration')
+  console.log('[FirestoreMigration] User ID:', userId)
 
   // Log data counts for debugging
-  console.log('[Migration] Data counts to import:')
+  console.log('[FirestoreMigration] Data counts to import:')
   for (const collection of SUBCOLLECTION_NAMES) {
     const count = data[collection] ? Object.keys(data[collection]).length : 0
-    console.log(`[Migration]   - ${collection}: ${count} items`)
+    console.log(`[FirestoreMigration]   - ${collection}: ${count} items`)
   }
 
   // Determine which collections have data to migrate
@@ -325,12 +325,12 @@ export async function migrateImportedDataToSubcollections(
   )
 
   if (collectionsToMigrate.length === 0) {
-    console.log('[Migration] WARNING: No data to migrate - all collections empty!')
+    console.log('[FirestoreMigration] WARNING: No data to migrate - all collections empty!')
     await markAsMigrated(userId)
     return
   }
 
-  console.log('[Migration] Collections to migrate:', collectionsToMigrate.join(', '))
+  console.log('[FirestoreMigration] Collections to migrate:', collectionsToMigrate.join(', '))
 
   // Show migration modal and set isMigrating flag to prevent listener race conditions
   setMigrationProgressFromOutsideReact({
@@ -368,7 +368,7 @@ export async function migrateImportedDataToSubcollections(
         message: `Remplacement de ${collection}...`,
       })
 
-      console.log(`[Migration] STEP 1: Clearing existing ${collection} subcollection...`)
+      console.log(`[FirestoreMigration] STEP 1: Clearing existing ${collection} subcollection...`)
       await clearSubcollection(userId, collection, (chunkIndex, totalChunks) => {
         // Progress during clear: baseProgress + (chunk progress * half of collection progress)
         const clearProgress = baseProgress + (chunkIndex / totalChunks) * (collectionProgress / 2)
@@ -377,7 +377,7 @@ export async function migrateImportedDataToSubcollections(
           message: `Remplacement de ${collection}...`,
         })
       })
-      console.log(`[Migration] ${collection} cleared successfully`)
+      console.log(`[FirestoreMigration] ${collection} cleared successfully`)
 
       // STEP 2: Write new data (second half of collection progress)
       const writeBaseProgress = baseProgress + collectionProgress / 2
@@ -389,7 +389,7 @@ export async function migrateImportedDataToSubcollections(
         message: `Remplacement de ${collection} (${itemCount} éléments)...`,
       })
 
-      console.log(`[Migration] STEP 2: Writing ${itemCount} items to ${collection}...`)
+      console.log(`[FirestoreMigration] STEP 2: Writing ${itemCount} items to ${collection}...`)
       await writeAllToSubcollection(
         userId,
         collection,
@@ -404,11 +404,11 @@ export async function migrateImportedDataToSubcollections(
           })
         }
       )
-      console.log(`[Migration] ${collection} written successfully`)
+      console.log(`[FirestoreMigration] ${collection} written successfully`)
     }
 
     // Mark user as migrated
-    console.log('[Migration] Marking user as migrated...')
+    console.log('[FirestoreMigration] Marking user as migrated...')
     await markAsMigrated(userId)
 
     // Show success and allow listener updates again
@@ -419,16 +419,16 @@ export async function migrateImportedDataToSubcollections(
       isMigrating: false,
     })
 
-    console.log('[Migration] ========================================')
-    console.log('[Migration] Imported data migration COMPLETED SUCCESSFULLY')
-    console.log('[Migration] ========================================')
+    console.log('[FirestoreMigration] ========================================')
+    console.log('[FirestoreMigration] Imported data migration COMPLETED SUCCESSFULLY')
+    console.log('[FirestoreMigration] ========================================')
 
     // Small delay before hiding modal
     await new Promise(resolve => setTimeout(resolve, 1500))
   } catch (error) {
-    console.error('[Migration] ========================================')
-    console.error('[Migration] FAILED to migrate imported data:', error)
-    console.error('[Migration] ========================================')
+    console.error('[FirestoreMigration] ========================================')
+    console.error('[FirestoreMigration] FAILED to migrate imported data:', error)
+    console.error('[FirestoreMigration] ========================================')
     Sentry.captureException(error, {
       tags: { feature: 'migration', action: 'migrate_imported_data' },
       extra: { userId },
@@ -486,7 +486,7 @@ export async function resumableMigrateUserData(
         update.overallProgress ?? completedCollections.length / SUBCOLLECTION_NAMES.length,
       message: update.message ?? '',
     }
-    console.log(`[Migration] ${progress.message} (${Math.round(progress.overallProgress * 100)}%)`)
+    console.log(`[FirestoreMigration] ${progress.message} (${Math.round(progress.overallProgress * 100)}%)`)
     onProgress(progress)
   }
 
@@ -498,10 +498,10 @@ export async function resumableMigrateUserData(
 
     if (!hasEmbeddedData) {
       // Pas de données embedded - s'assurer que _migrated est défini
-      console.log('[Migration] No embedded data found')
+      console.log('[FirestoreMigration] No embedded data found')
       const alreadyMigrated = await isUserMigrated(userId)
       if (!alreadyMigrated) {
-        console.log('[Migration] Marking user as migrated (no data to migrate)')
+        console.log('[FirestoreMigration] Marking user as migrated (no data to migrate)')
         await markAsMigrated(userId)
       }
       clearMigrationState()
@@ -509,19 +509,19 @@ export async function resumableMigrateUserData(
     }
 
     // Des données embedded existent - procéder à la migration
-    console.log(`[Migration] Found embedded data in: ${collectionsWithData.join(', ')}`)
+    console.log(`[FirestoreMigration] Found embedded data in: ${collectionsWithData.join(', ')}`)
 
     // 2. Initialiser ou reprendre l'état de migration
     let migrationState: MigrationState
     if (existingMigrationState && existingMigrationState.userId === userId) {
-      console.log('[Migration] Resuming existing migration')
+      console.log('[FirestoreMigration] Resuming existing migration')
       migrationState = existingMigrationState
       // Récupérer les collections déjà complétées
       completedCollections = SUBCOLLECTION_NAMES.filter(
         name => migrationState.collections[name].status === 'completed'
       )
     } else {
-      console.log('[Migration] Starting new migration')
+      console.log('[FirestoreMigration] Starting new migration')
       migrationState = createInitialMigrationState(userId)
       setMigrationState(migrationState)
     }
@@ -531,7 +531,7 @@ export async function resumableMigrateUserData(
       reportProgress({ message: 'Création du backup de sécurité...', overallProgress: 0.05 })
       const backupCreated = await autoBackupManager.createBackupNow(state, 'pre_migration')
       if (!backupCreated) {
-        console.warn('[Migration] Backup creation failed, but continuing with migration')
+        console.warn('[FirestoreMigration] Backup creation failed, but continuing with migration')
       }
     }
 
@@ -542,7 +542,7 @@ export async function resumableMigrateUserData(
     const userData = userDocSnap.data()
 
     if (!userData?.bible) {
-      console.log('[Migration] No bible data found, marking as migrated')
+      console.log('[FirestoreMigration] No bible data found, marking as migrated')
       await markAsMigrated(userId)
       clearMigrationState()
       return { success: true, partialFailure: false, failedCollections: [] }
@@ -567,13 +567,13 @@ export async function resumableMigrateUserData(
     }
 
     if (collectionsToMigrate.length === 0) {
-      console.log('[Migration] No data to migrate, marking as migrated')
+      console.log('[FirestoreMigration] No data to migrate, marking as migrated')
       await markAsMigrated(userId)
       clearMigrationState()
       return { success: true, partialFailure: false, failedCollections: [] }
     }
 
-    console.log(`[Migration] Collections to migrate: ${collectionsToMigrate.join(', ')}`)
+    console.log(`[FirestoreMigration] Collections to migrate: ${collectionsToMigrate.join(', ')}`)
 
     // 6. Calculer le nombre total de chunks pour une progression précise
     const collectionChunks: {
@@ -591,7 +591,7 @@ export async function resumableMigrateUserData(
       totalChunks += chunkCount
     }
 
-    console.log(`[Migration] Total chunks to process: ${totalChunks}`)
+    console.log(`[FirestoreMigration] Total chunks to process: ${totalChunks}`)
 
     let completedChunks = 0
 
@@ -639,7 +639,7 @@ export async function resumableMigrateUserData(
           overallProgress: endProgress,
         })
       } catch (error: any) {
-        console.error(`[Migration] Failed to migrate ${collection}:`, error)
+        console.error(`[FirestoreMigration] Failed to migrate ${collection}:`, error)
 
         // Capturer l'erreur dans Sentry avec contexte détaillé
         Sentry.captureException(error, {
@@ -683,13 +683,13 @@ export async function resumableMigrateUserData(
       clearMigrationState()
 
       reportProgress({ message: 'Migration terminée avec succès!', overallProgress: 1 })
-      console.log('[Migration] Migration completed successfully')
+      console.log('[FirestoreMigration] Migration completed successfully')
 
       return { success: true, partialFailure: false, failedCollections: [] }
     } else {
       // Migration partielle - ne pas marquer comme migré
       const errorMessage = `Migration partielle: ${failedCollections.length} collection(s) échouée(s)`
-      console.error(`[Migration] ${errorMessage}:`, failedCollections)
+      console.error(`[FirestoreMigration] ${errorMessage}:`, failedCollections)
 
       // Capturer la migration partielle dans Sentry
       Sentry.captureMessage(errorMessage, {
@@ -713,7 +713,7 @@ export async function resumableMigrateUserData(
       }
     }
   } catch (error: any) {
-    console.error('[Migration] Migration failed with unexpected error:', error)
+    console.error('[FirestoreMigration] Migration failed with unexpected error:', error)
 
     Sentry.captureException(error, {
       tags: {

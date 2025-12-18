@@ -19,7 +19,7 @@ const Slice = (slice: EntitySlice) => {
     case 'Text':
       return <TextSlice {...slice} />
     default:
-      console.log(`No component for type ${slice.type}`)
+      console.log(`[Plans] No component for type ${slice.type}`)
       return null
   }
 }

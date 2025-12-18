@@ -42,7 +42,7 @@ const useGetFirstPlans = () => {
       const plan: Plan = JSON.parse(await FileSystem.readAsStringAsync(localUri))
       dispatch(addPlan(plan))
     } catch (error) {
-      console.log(error)
+      console.log('[Home] Error loading plan:', error)
     }
   }
 

@@ -157,7 +157,7 @@ export const useVerseOfTheDay = (addDay: number) => {
           })
       })
 
-      console.log('has permissions', hasPermissions)
+      console.log('[Home] Has permissions:', hasPermissions)
 
       if (hasPermissions) {
         scheduleNotification()

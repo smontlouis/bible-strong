@@ -25,8 +25,8 @@ const VideoSlice = ({ title, description, url }: VideoSliceProps) => {
         width={iframeWidth}
         videoId={videoId}
         // onChangeState={event => console.log(event)}
-        onReady={() => console.log('ready')}
-        onError={(e: any) => console.log(e)}
+        onReady={() => console.log('[Plans] Video ready')}
+        onError={(e: any) => console.log('[Plans] Video error:', e)}
         // onPlaybackQualityChange={q => console.log(q)}
         // @ts-ignore
         placeholder={title}

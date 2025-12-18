@@ -150,7 +150,7 @@ export default function StudiesDOMComponent({
               formatModuleRef.current = quillRef.current.getModule('format')
               const { type, value } = msgData.payload
 
-              console.log(`${type} ${value}`)
+              console.log(`[Studies] ${type} ${value}`)
 
               switch (type) {
                 case 'UNDO':
@@ -200,11 +200,11 @@ export default function StudiesDOMComponent({
             }
             default:
               console.log(
-                `reactQuillEditor Error: Unhandled message type received "${msgData.type}"`
+                `[Studies] reactQuillEditor Error: Unhandled message type received "${msgData.type}"`
               )
           }
         } catch (err) {
-          console.log(`reactQuillEditor error: ${err}`)
+          console.log(`[Studies] reactQuillEditor error: ${err}`)
         }
       },
       reloadEditor: (content: any) => {
@@ -279,11 +279,11 @@ export default function StudiesDOMComponent({
       readOnly: true,
     })
 
-    console.log('loading editor')
+    console.log('[Studies] Loading editor')
     // @ts-ignore
     quillRef.current.focus()
 
-    console.log('editor initialized')
+    console.log('[Studies] Editor initialized')
 
     // @ts-ignore
     quillRef.current.setContents(contentToDisplay, Quill.sources.SILENT)

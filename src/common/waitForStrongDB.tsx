@@ -92,7 +92,7 @@ const useStrong = (dispatch: any, startDownload: any, lang: ResourceLanguage) =>
               ;(window as any)[downloadKey] = false
             }
           } catch (e) {
-            console.log(e)
+            console.log('[Strong] Download error:', e)
             SnackBar.show(
               t(
                 "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

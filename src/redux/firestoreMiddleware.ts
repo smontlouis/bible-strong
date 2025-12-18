@@ -206,7 +206,7 @@ export default (store: any) => (next: any) => async (action: any) => {
       try {
         await setDoc(userDocRef, { plan: plan.ongoingPlans }, { merge: true })
       } catch (error) {
-        console.log('error', error)
+        console.log('[Firestore] Error syncing plan:', error)
         Snackbar.show(i18n.t('app.syncError'), 'danger')
         Sentry.captureException(error, {
           tags: { feature: 'sync', action: 'plan_sync' },
@@ -406,7 +406,7 @@ export default (store: any) => (next: any) => async (action: any) => {
                 },
                 { merge: true }
               )
-              console.log(`Study ${studyId} synced successfully`)
+              console.log(`[Firestore] Study ${studyId} synced successfully`)
             } catch (studyError) {
               console.error(`Failed to sync study ${studyId}:`, studyError)
               Sentry.captureException(studyError, {
@@ -436,12 +436,12 @@ export default (store: any) => (next: any) => async (action: any) => {
             try {
               const studyDocSnap = await getDoc(studyDocRef)
               if (!studyDocSnap.exists()) {
-                console.log(`Study ${studyId} already deleted`)
+                console.log(`[Firestore] Study ${studyId} already deleted`)
                 return
               }
 
               await deleteDoc(studyDocRef)
-              console.log(`Study ${studyId} deleted successfully`)
+              console.log(`[Firestore] Study ${studyId} deleted successfully`)
             } catch (deleteError) {
               console.error(`Failed to delete study ${studyId}:`, deleteError)
               Sentry.captureException(deleteError, {
@@ -523,7 +523,7 @@ export default (store: any) => (next: any) => async (action: any) => {
           { subscription: removeUndefinedVariables(user.subscription) },
           { merge: true }
         )
-        console.log('Subscription synced successfully')
+        console.log('[Firestore] Subscription synced successfully')
       } catch (subError) {
         console.error('Subscription sync failed:', subError)
         Sentry.captureException(subError, {

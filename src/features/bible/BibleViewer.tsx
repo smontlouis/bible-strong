@@ -176,7 +176,7 @@ const BibleViewer = ({
   useEffect(() => {
     // Settimeout ?
     loadVerses().catch(e => {
-      console.log(e)
+      console.log('[Bible] Error loading verses:', e)
       setError(true)
       setIsLoading(false)
     })
@@ -360,7 +360,7 @@ const BibleViewer = ({
     }
   })
 
-  console.log('BibleViewer', version, book.Numero, chapter, verse)
+  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
   return (
     <Box flex={1} bg="reverse">

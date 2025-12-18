@@ -122,7 +122,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
           ? getDatabaseUrl('INTERLINEAIRE', 'en')
           : biblesRef[version.id]
 
-    console.log(`Downloading ${uri} to ${path}`)
+    console.log(`[Bible] Downloading ${uri} to ${path}`)
     try {
       await FileSystem.createDownloadResumable(
         uri,
@@ -131,7 +131,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
         calculateProgress
       ).downloadAsync()
 
-      console.log('Download finished')
+      console.log('[Bible] Download finished')
 
       if (version.id === 'INT' || version.id === 'INT_EN') {
         const lang = version.id === 'INT' ? 'fr' : 'en'
@@ -141,7 +141,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
       setVersionNeedsDownload(false)
       setIsLoading(false)
     } catch (e) {
-      console.log(e)
+      console.log('[Bible] Download error:', e)
       SnackBar.show(
         t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."),
         'danger'
@@ -160,7 +160,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
     const path = requireBiblePath(version.id)
     const file = await FileSystem.getInfoAsync(path)
     if (!file.uri) {
-      console.log(`Nothing to delete for ${version.id}`)
+      console.log(`[Bible] Nothing to delete for ${version.id}`)
       return
     }
     FileSystem.deleteAsync(file.uri)

@@ -70,10 +70,10 @@ const StudiesDomWrapper = ({
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom) : false
   useEffect(() => {
-    console.log('isCurrentTab', isCurrentTab)
+    console.log('[Studies] isCurrentTab', isCurrentTab)
 
     if (ref.current?.reloadEditor && isCurrentTab) {
-      console.log('hehehe')
+      console.log('[Studies] Reloading editor')
       ref.current.reloadEditor(contentToDisplay)
     }
   }, [isCurrentTab])
@@ -98,8 +98,8 @@ const StudiesDomWrapper = ({
 
   const dispatchToWebView = useCallback((type: string, payload?: any) => {
     if (ref.current) {
-      console.log('RN DISPATCH: ', type)
-      console.log(ref.current)
+      console.log('[Studies] RN DISPATCH:', type)
+      console.log('[Studies] Ref:', ref.current)
       ref.current?.dispatch({ type, payload })
     }
   }, [])
@@ -109,7 +109,7 @@ const StudiesDomWrapper = ({
     try {
       msgData = JSON.parse(event.nativeEvent.data)
 
-      console.log('DISPATCH: ', msgData.type)
+      console.log('[Studies] DISPATCH:', msgData.type)
 
       switch (msgData.type) {
         case 'TEXT_CHANGED':

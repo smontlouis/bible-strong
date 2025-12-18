@@ -98,8 +98,8 @@ const useLoadSound = ({
     }
     if (event.type === Event.PlaybackError) {
       let trackObject = await TrackPlayer.getActiveTrack()
-      console.log(trackObject?.url)
-      console.warn('An error occured while playing the current track.')
+      console.log('[Bible] Track URL:', trackObject?.url)
+      console.warn('[Bible] An error occured while playing the current track.')
       setError(true)
     }
     if (event.type === Event.PlaybackState) {
@@ -175,7 +175,7 @@ const useLoadSound = ({
       try {
         await TrackPlayer.setupPlayer()
       } catch (e) {
-        console.log('silent catch', e)
+        console.log('[Bible] Silent catch:', e)
       }
 
       // Reset player and add tracks
@@ -210,7 +210,7 @@ const useLoadSound = ({
         )
         await TrackPlayer.skip(trackIndex)
       } catch (e) {
-        console.log('silent catch', e)
+        console.log('[Bible] Silent catch:', e)
       }
       setIsSetup(true)
     })()
@@ -238,7 +238,7 @@ const useLoadSound = ({
           duration,
         })
       } catch {
-        console.log('silent catch')
+        console.log('[Bible] Silent catch')
       }
     })()
   }, [book.Numero, chapter, isSetup, tracks])

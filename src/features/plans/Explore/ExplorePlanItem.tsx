@@ -117,7 +117,7 @@ const ExplorePlanItem = ({
                         SnackBar.show(t('Plan ajouté avec succès'))
                       })
                       .catch((e: any) => {
-                        console.log(e)
+                        console.log('[Plans] Error adding plan:', e)
                         setIsLoading(false)
                         SnackBar.show(
                           t(

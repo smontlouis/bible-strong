@@ -79,7 +79,7 @@ export const useWaitForIndex = () => {
           setIdxFile(currentIdxFile)
           setLoading(false)
         } catch (e) {
-          console.log(e)
+          console.log('[Search] Download error:', e)
           SnackBar.show(
             t(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

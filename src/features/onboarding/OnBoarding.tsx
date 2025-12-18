@@ -28,7 +28,7 @@ const useCheckMandatoryVersions = () => {
       const lsgNeedsDownload = await getIfVersionNeedsDownload(isFR ? 'LSG' : 'KJV')
 
       if (lsgNeedsDownload) {
-        console.log('Needs download, open onboarding.')
+        console.log('[Onboarding] Needs download, open onboarding.')
         actions.setSelectedVersion(isFR ? 'LSG' : 'KJV')
         deleteAllDatabases()
         setFirstTime(true)

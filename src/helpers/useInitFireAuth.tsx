@@ -16,12 +16,12 @@ const useInitFireAuth = () => {
 
   useEffect(() => {
     const onLogin = ({ profile }: { profile: FireAuthProfile }) => {
-      console.log(`Bienvenue ${profile.displayName}.`)
+      console.log(`[Auth] Bienvenue ${profile.displayName}.`)
       dispatch(UserActions.onUserLoginSuccess({ profile }))
     }
 
     const emailVerified = () => dispatch(UserActions.verifyEmail())
-    const onUserChange = (profile: any) => console.log('user changed')
+    const onUserChange = (profile: any) => console.log('[Auth] User changed')
     const onLogout = async () => {
       // PROTECTION: Créer un backup avant de déconnecter
       // Garantit qu'aucune donnée non-sync ne peut être perdue
@@ -61,8 +61,8 @@ const useInitFireAuth = () => {
       if (e.code === 'auth/network-request-failed') {
         SnackBar.show(i18n.t('A network error has occurred, please try again.'))
       }
-      console.log('Error', e)
-      console.log(e.code)
+      console.log('[Auth] Error', e)
+      console.log('[Auth] Error code:', e.code)
     }
 
     FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)

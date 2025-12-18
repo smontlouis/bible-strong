@@ -66,12 +66,12 @@ const FireAuth = class {
     const authInstance = getAuth()
     onAuthStateChanged(authInstance, async user => {
       if (user && user.isAnonymous) {
-        console.log('Deprecated, user exists and is anonymous ', user.uid)
+        console.log('[Auth] Deprecated, user exists and is anonymous', user.uid)
         return
       }
 
       if (user) {
-        console.log('------ User exists: ')
+        console.log('[Auth] User exists')
 
         // Determine if user needs to verify email
         const emailVerified =
@@ -112,7 +112,7 @@ const FireAuth = class {
         }
       }
 
-      console.log('No user, do nothing...')
+      console.log('[Auth] No user, do nothing...')
       this.user = null
     })
   }
@@ -133,16 +133,16 @@ const FireAuth = class {
           const appleCredential = AppleAuthProvider.credential(identityToken, nonce)
           const userCredential = await signInWithCredential(getAuth(), appleCredential)
 
-          console.log(`Firebase authenticated via Apple, UID: ${userCredential.user.uid}`)
+          console.log(`[Auth] Firebase authenticated via Apple, UID: ${userCredential.user.uid}`)
           resolve(false)
         } else {
           resolve(false)
         }
       } catch (e: any) {
         if (e.code === 'ERR_CANCELED') {
-          console.log('ERR_CANCELED')
+          console.log('[Auth] ERR_CANCELED')
         } else {
-          console.log('OTHER_ERROR', e)
+          console.log('[Auth] OTHER_ERROR', e)
         }
         resolve(false)
       }
@@ -188,7 +188,7 @@ const FireAuth = class {
         return this.onCredentialSuccess(googleCredential, resolve)
       } catch (e) {
         SnackBar.show(i18n.t('Une erreur est survenue'))
-        console.log(e)
+        console.log('[Auth] Google login error:', e)
         return resolve(false)
       }
     })
@@ -197,11 +197,11 @@ const FireAuth = class {
     try {
       const user = await signInWithCredential(getAuth(), credential)
 
-      console.log('user signed in ', user)
+      console.log('[Auth] User signed in', user)
       SnackBar.show(i18n.t('Connexion réussie'))
       return resolve(true)
     } catch (e: any) {
-      console.log(e.code)
+      console.log('[Auth] Error code:', e.code)
       if (e.code === 'auth/account-exists-with-different-credential') {
         SnackBar.show(i18n.t('Cet utilisateur existe déjà avec un autre compte.'), 'danger')
       }

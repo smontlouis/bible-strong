@@ -20,7 +20,7 @@ export const hasMigratedToLanguageFolders = storage.getBoolean('hasMigratedToLan
 
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export async function migrateFromAsyncStorage(): Promise<void> {
-  console.log('Migrating from AsyncStorage -> MMKV...')
+  console.log('[Storage] Migrating from AsyncStorage -> MMKV...')
   const start = global.performance.now()
 
   const keys = await AsyncStorage.getAllKeys()
@@ -47,7 +47,7 @@ export async function migrateFromAsyncStorage(): Promise<void> {
   storage.set('hasMigratedFromAsyncStorage', true)
 
   const end = global.performance.now()
-  console.log(`Migrated from AsyncStorage -> MMKV in ${end - start}ms!`)
+  console.log(`[Storage] Migrated from AsyncStorage -> MMKV in ${end - start}ms!`)
 }
 
 export const useMigrateFromAsyncStorage = () => {
@@ -74,7 +74,7 @@ export const useMigrateFromAsyncStorage = () => {
  * Unlike AsyncStorage migration, this does NOT delete the original data from FileSystem
  */
 export async function migrateFromFileSystemStorage(): Promise<void> {
-  console.log('Migrating from FileSystem -> MMKV...')
+  console.log('[Storage] Migrating from FileSystem -> MMKV...')
   const start = global.performance.now()
 
   try {
@@ -91,20 +91,20 @@ export async function migrateFromFileSystemStorage(): Promise<void> {
         const mergedStorageContent = deepmerge(mmkvStorageContent, fileStorageContent)
         storage.set('root', JSON.stringify(mergedStorageContent))
 
-        console.log(`Migrated root key from FileSystem to MMKV`)
+        console.log(`[Storage] Migrated root key from FileSystem to MMKV`)
       } catch (readError) {
         console.error('Error reading or parsing persistStore file:', readError)
         throw readError
       }
     } else {
-      console.log('PersistStore file does not exist at path:', filePath)
+      console.log('[Storage] PersistStore file does not exist at path:', filePath)
     }
 
     // Mark migration as complete
     storage.set('hasMigratedFromFileSystem', true)
 
     const end = global.performance.now()
-    console.log(`Migrated from FileSystem -> MMKV in ${end - start}ms!`)
+    console.log(`[Storage] Migrated from FileSystem -> MMKV in ${end - start}ms!`)
   } catch (error) {
     console.error('Error during FileSystem to MMKV migration:', error)
     throw error

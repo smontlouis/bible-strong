@@ -18,7 +18,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.log(error)
+    console.log('[Common] Error:', error)
     Sentry.captureException(error)
   }
 

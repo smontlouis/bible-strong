@@ -143,7 +143,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
         }, 500)
       }
     } catch (e) {
-      console.log(e)
+      console.log('[Studies] Error generating PDF:', e)
       setPDFStatus('Rejected')
     }
   }

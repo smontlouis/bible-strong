@@ -108,7 +108,7 @@ class DBSelectorItem extends React.Component<any, any> {
     const uri = this.getDownloadUrl()
     const downloadPath = this.getPath()
 
-    console.log(`Downloading ${uri} to ${downloadPath}`)
+    console.log(`[Settings] Downloading ${uri} to ${downloadPath}`)
     try {
       await FileSystem.createDownloadResumable(
         uri,
@@ -117,7 +117,7 @@ class DBSelectorItem extends React.Component<any, any> {
         this.calculateProgress
       ).downloadAsync()
 
-      console.log('Download finished')
+      console.log('[Settings] Download finished')
 
       this.setState({ versionNeedsDownload: false, isLoading: false })
 
@@ -132,7 +132,7 @@ class DBSelectorItem extends React.Component<any, any> {
         await db.init()
       }
     } catch (e) {
-      console.log(e)
+      console.log('[Settings] Download error:', e)
       SnackBar.show(
         t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."),
         'danger'

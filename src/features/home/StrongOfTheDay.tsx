@@ -37,7 +37,7 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
       }
 
       if (strongReference && strongReference.error) {
-        console.log(`Failed to load strong for type ${type}`)
+        console.log(`[Home] Failed to load strong for type ${type}`)
 
         setError(true)
         return

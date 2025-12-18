@@ -37,7 +37,7 @@ const useTakeActiveTabSnapshot = () => {
         })
       )
     } catch {
-      console.log('Error taking snapshot')
+      console.log('[AppSwitcher] Error taking snapshot')
     }
   }
 }

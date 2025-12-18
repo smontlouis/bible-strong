@@ -25,7 +25,7 @@ export default function useWhyDidYouUpdate(name: any, props: any) {
       })
       // If changesObj not empty then output to console
       if (Object.keys(changesObj).length) {
-        console.log('[why-did-you-update]', name, changesObj)
+        console.log('[AppSwitcher] why-did-you-update:', name, changesObj)
       }
     }
     // Finally update previousProps with current props for next hook call

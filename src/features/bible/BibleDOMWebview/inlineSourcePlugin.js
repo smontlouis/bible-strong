@@ -17,7 +17,7 @@ export default ({
       if (file.type !== 'asset' || !filter(file.fileName)) return
       const data = (file.source = await inlineSource(file.source.toString(), options))
       fs.writeFile(`${outputOptions.dir}/${file.fileName}`, data, (err, data) => {
-        if (err) return console.log(err)
+        if (err) return console.log('[Bible] Error writing file:', err)
       })
     })
   },

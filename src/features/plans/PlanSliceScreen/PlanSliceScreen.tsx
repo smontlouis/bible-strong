@@ -100,7 +100,7 @@ const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps,
       Share.share({ message })
     } catch (e) {
       Snackbar.show('Erreur lors du partage.')
-      console.log(e)
+      console.log('[Plans] Error sharing:', e)
     }
   }
 

@@ -98,7 +98,7 @@ const Media = ({
                   setEvent(foundEvent)
                   eventModalRef.current?.expand()
                 } else {
-                  console.log("Can't open this event.")
+                  console.log("[Timeline] Can't open this event.")
                 }
               }}
             >

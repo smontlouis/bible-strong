@@ -453,7 +453,7 @@ export const useFireStorage = (src?: string) => {
         // @ts-ignore
         dispatch(cacheImage({ id: src, value: uri }))
       } catch (e) {
-        console.log(`can't find: images/${src}`)
+        console.log(`[Plans] Can't find: images/${src}`)
       }
     })()
   }, [src, cachedUri, dispatch])
