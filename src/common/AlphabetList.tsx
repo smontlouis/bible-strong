@@ -53,9 +53,10 @@ const AlphabetList = ({ color, setLetter, letter }: any) => {
           width={25}
           height={30}
           data={alphabet}
-          renderItem={({ item: section }: any) => (
+          renderItem={({ item: section, index: itemIndex }: any) => (
             <TouchableOpacity
               onPress={() => {
+                CarouselAlphabet.current?.scrollTo({ index: itemIndex, animated: true })
                 setLetter(section)
               }}
             >

@@ -4,6 +4,7 @@ import { Image } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
+import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 
 import Box, { SafeAreaBox, TouchableBox } from '~common/ui/Box'
@@ -52,10 +53,15 @@ const OnBoardingSlides = ({
   const carousel = React.useRef<ICarouselInstance>(null)
   const { t } = useTranslation()
   const slides = getSlides(t)
+  const {
+    ref: carouselContainerRef,
+    size: carouselContainerSize,
+    onLayout: onCarouselContainerLayout,
+  } = useLayoutSize()
 
   return (
     <SafeAreaBox>
-      <Box center flex>
+      <Box ref={carouselContainerRef} center flex onLayout={onCarouselContainerLayout}>
         <Carousel
           ref={carousel}
           mode="horizontal-stack"
@@ -78,6 +84,7 @@ const OnBoardingSlides = ({
             justifyContent: 'center',
           }}
           width={itemWidth}
+          height={carouselContainerSize.height}
           onScrollEnd={setActiveSlide}
         />
       </Box>

@@ -23,7 +23,8 @@ import { useTranslation, withTranslation } from 'react-i18next'
 import { useNavigation } from '@react-navigation/native'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import { hp, wp } from '~helpers/utils'
+import { useLayoutSize } from '~helpers/useLayoutSize'
+import { wp } from '~helpers/utils'
 import { ScrollView, View } from 'react-native'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { StudyNavigateBibleType } from '~common/types'
@@ -110,6 +111,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   const { t } = useTranslation()
   const carouselRef = useRef<any>(null)
   const [boxHeight, setBoxHeight] = useState(0)
+  const {
+    ref: carouselContainerRef,
+    size: carouselContainerSize,
+    onLayout: onCarouselContainerLayout,
+  } = useLayoutSize()
   const [state, setState] = useState<State>({
     error: false,
     isCarouselLoading: true,
@@ -153,6 +159,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     state.strongReferences.findIndex(r => r.Code === Number(ref))
 
   const goToCarouselItem = (ref: string | number) => {
+    const index = findRefIndex(ref)
+    if (index !== -1) {
+      carouselRef.current?.scrollTo({ index, animated: true })
+    }
     setState(prev => ({
       ...prev,
       currentStrongReference: state.strongReferences.find(r => r.Code === Number(ref)) || null,
@@ -248,7 +258,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box bg="lightGrey" flex={1}>
+      <Box ref={carouselContainerRef} bg="lightGrey" flex={1} onLayout={onCarouselContainerLayout}>
         {isCarouselLoading && <Loading />}
         {!isCarouselLoading && (
           <Carousel
@@ -256,6 +266,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
             mode="horizontal-stack"
             scrollAnimationDuration={300}
             width={itemWidth}
+            height={carouselContainerSize.height}
             onConfigurePanGesture={gestureChain => {
               gestureChain.activeOffsetX([-10, 10])
             }}

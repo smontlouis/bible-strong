@@ -5,7 +5,9 @@
       "Bash(grep:*)",
       "Bash(npx tsc:*)",
       "WebSearch",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "WebFetch(domain:github.com)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

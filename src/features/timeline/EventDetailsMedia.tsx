@@ -81,6 +81,7 @@ const Media = ({
               justifyContent: 'center',
             }}
             width={imageWidth + 20}
+            height={imageWidth + 60}
           />
         </Box>
       )}

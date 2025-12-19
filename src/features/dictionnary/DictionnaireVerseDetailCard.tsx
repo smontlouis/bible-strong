@@ -22,6 +22,7 @@ import captureError from '~helpers/captureError'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
+import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import DictionnaireCard from './DictionnaireCard'
@@ -169,6 +170,11 @@ const DictionnaireVerseDetailScreen = ({
   const { Livre, Chapitre, Verset } = verse
   const navigation = useNavigation()
   const [boxHeight, setBoxHeight] = useState(0)
+  const {
+    ref: carouselContainerRef,
+    size: carouselContainerSize,
+    onLayout: onCarouselContainerLayout,
+  } = useLayoutSize()
 
   // Get resource language from Jotai for cache key invalidation
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
@@ -186,6 +192,15 @@ const DictionnaireVerseDetailScreen = ({
 
   const { wordsError, formattedText, words, currentWord, setCurrentWord, versesInCurrentChapter } =
     useFormattedText({ verse, wordsInVerse, status, resourceLang })
+
+  const goToWord = (word: string) => {
+    if (!wordsInVerse) return
+    const index = wordsInVerse.findIndex((w: string) => w === word)
+    if (index !== -1) {
+      carousel.current?.scrollTo({ index, animated: true })
+    }
+    setCurrentWord(word)
+  }
 
   if (dictionaryWordsError || wordsError) {
     return (
@@ -215,7 +230,7 @@ const DictionnaireVerseDetailScreen = ({
             <CarouselProvider
               value={{
                 current: currentWord,
-                setCurrent: setCurrentWord,
+                setCurrent: goToWord,
               }}
             >
               <VerseText>{formattedText}</VerseText>
@@ -232,13 +247,14 @@ const DictionnaireVerseDetailScreen = ({
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box flex bg="lightGrey">
+      <Box ref={carouselContainerRef} flex bg="lightGrey" onLayout={onCarouselContainerLayout}>
         {wordsInVerse.length ? (
           <Carousel
             ref={carousel}
             mode="horizontal-stack"
             scrollAnimationDuration={300}
             width={itemWidth}
+            height={carouselContainerSize.height}
             onConfigurePanGesture={gestureChain => {
               gestureChain.activeOffsetX([-10, 10])
             }}

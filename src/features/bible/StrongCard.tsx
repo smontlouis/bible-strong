@@ -112,18 +112,22 @@ const StrongCard = (props: Props) => {
         navigation.navigate('AppSwitcher')
       } else {
         // @ts-ignore
-        navigation.navigate('EditStudy', {
-          ...cleanParams(),
-          // @ts-ignore
-          type: isSelectionMode,
-          title: Mot,
-          codeStrong: Code,
-          strongType: Type,
-          phonetique: Phonetique,
-          definition: Definition,
-          translatedBy: LSG,
-          original: Hebreu || Grec,
-          book,
+        navigation.navigate({
+          name: 'EditStudy',
+          params: {
+            ...cleanParams(),
+            // @ts-ignore
+            type: isSelectionMode,
+            title: Mot,
+            codeStrong: Code,
+            strongType: Type,
+            phonetique: Phonetique,
+            definition: Definition,
+            translatedBy: LSG,
+            original: Hebreu || Grec,
+            book,
+          },
+          merge: true,
         })
       }
     } else {
