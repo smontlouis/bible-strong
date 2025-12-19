@@ -72,8 +72,8 @@ const Media = ({
                 </Paragraph>
               </Box>
             )}
-            panGestureHandlerProps={{
-              activeOffsetX: [-10, 10],
+            onConfigurePanGesture={gestureChain => {
+              gestureChain.activeOffsetX([-10, 10])
             }}
             style={{
               width: sliderWidth,

@@ -62,8 +62,8 @@ const OnBoardingSlides = ({
           data={slides}
           loop={false}
           scrollAnimationDuration={400}
-          panGestureHandlerProps={{
-            activeOffsetX: [-3, 3],
+          onConfigurePanGesture={gestureChain => {
+            gestureChain.activeOffsetX([-3, 3])
           }}
           modeConfig={{
             opacityInterval: 0.8,

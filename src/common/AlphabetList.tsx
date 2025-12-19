@@ -42,8 +42,8 @@ const AlphabetList = ({ color, setLetter, letter }: any) => {
             parallaxScrollingOffset: 0,
             parallaxScrollingScale: 0.75,
           }}
-          panGestureHandlerProps={{
-            activeOffsetX: [-10, 10],
+          onConfigurePanGesture={gestureChain => {
+            gestureChain.activeOffsetX([-10, 10])
           }}
           style={{
             width: viewportWidth,

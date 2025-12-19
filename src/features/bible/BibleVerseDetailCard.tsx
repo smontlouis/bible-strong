@@ -256,8 +256,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
             mode="horizontal-stack"
             scrollAnimationDuration={300}
             width={itemWidth}
-            panGestureHandlerProps={{
-              activeOffsetX: [-10, 10],
+            onConfigurePanGesture={gestureChain => {
+              gestureChain.activeOffsetX([-10, 10])
             }}
             modeConfig={{
               opacityInterval: 0.8,

@@ -1,6 +1,8 @@
 # TODO
 
-- study get link / bklock
+- study get link / block
+- carousel broken
+- alphabet list should scoll to when pressed
 
 - logout issue with plan
 - bring back eas updates

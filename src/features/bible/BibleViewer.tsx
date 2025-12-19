@@ -368,7 +368,6 @@ const BibleViewer = ({
   })
 
   console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
-  console.log('[Bible] selectionMode', isSelectionMode)
 
   return (
     <Box flex={1} bg="reverse">
