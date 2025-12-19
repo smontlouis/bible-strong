@@ -167,9 +167,12 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
 }
 
 const compareMyPlans = (prev: Plan[], next: Plan[]) => {
+  if (prev.length !== next.length) {
+    return false
+  }
   // Loop and compare lastUpdate field
   for (let i = 0; i < prev.length; i++) {
-    if (prev[i].lastUpdate !== next[i].lastUpdate) {
+    if (prev[i]?.lastUpdate !== next[i]?.lastUpdate) {
       return false
     }
   }
@@ -178,11 +181,14 @@ const compareMyPlans = (prev: Plan[], next: Plan[]) => {
 }
 
 const compareOngoingPlans = (prev: OngoingPlan[], next: OngoingPlan[]) => {
+  if (prev.length !== next.length) {
+    return false
+  }
   // Loop and compare readingSlices.length field and status field
   for (let i = 0; i < prev.length; i++) {
     if (
-      prev[i].readingSlices.length !== next[i].readingSlices.length ||
-      prev[i].status !== next[i].status
+      prev[i]?.readingSlices?.length !== next[i]?.readingSlices?.length ||
+      prev[i]?.status !== next[i]?.status
     ) {
       return false
     }

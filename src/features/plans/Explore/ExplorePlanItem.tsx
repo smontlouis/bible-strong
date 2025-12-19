@@ -1,16 +1,13 @@
 // TODO : type nested screen
-import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet'
-import { Portal } from '@gorhom/portal'
+import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet'
+import { useNavigation } from '@react-navigation/native'
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useNavigation, RouteProp } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import SnackBar from '~common/SnackBar'
-import { OnlinePlan } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
@@ -32,7 +29,7 @@ const ExplorePlanItem = ({
 }: any) => {
   const navigation = useNavigation()
   const { t } = useTranslation()
-  const modalRef = React.useRef<BottomSheet>(null)
+  const modalRef = React.useRef<BottomSheetModal>(null)
   const planImage = useFireStorage(image)
   const dispatch = useDispatch()
   const hasAlreadyStarted = useSelector(
@@ -46,7 +43,7 @@ const ExplorePlanItem = ({
 
   return (
     <Box width={featured ? '100%' : '50%'}>
-      <Link onPress={() => modalRef?.current?.expand()}>
+      <Link onPress={() => modalRef?.current?.present()}>
         <Box
           bg="reverse"
           lightShadow
@@ -90,55 +87,53 @@ const ExplorePlanItem = ({
           </Box>
         </Box>
       </Link>
-      <Portal>
-        <DetailsModal
-          modalRefDetails={modalRef}
-          title={title}
-          image={planImage}
-          id={id}
-          author={author}
-          downloads={downloads}
-          description={description}
-          // @ts-ignore
-          footerComponent={(props: any) => (
-            <BottomSheetFooter {...props}>
-              <Box paddingBottom={10 + insets.bottom} paddingHorizontal={20} paddingTop={10}>
-                <Button
-                  success
-                  disabled={hasAlreadyStarted || isLoading}
-                  onPress={() => {
-                    setIsLoading(true)
-                    // @ts-ignore
-                    dispatch(fetchPlan({ id, update: true }))
-                      .then(() => {
-                        setIsLoading(false)
-                        navigation.goBack()
-                        modalRef?.current?.close()
-                        SnackBar.show(t('Plan ajouté avec succès'))
-                      })
-                      .catch((e: any) => {
-                        console.log('[Plans] Error adding plan:', e)
-                        setIsLoading(false)
-                        SnackBar.show(
-                          t(
-                            "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-                          ),
-                          'danger'
-                        )
-                      })
-                  }}
-                >
-                  {hasAlreadyStarted
-                    ? t('Plan démarré')
-                    : isLoading
-                      ? t('Chargement...')
-                      : t('Démarrer ce plan')}
-                </Button>
-              </Box>
-            </BottomSheetFooter>
-          )}
-        />
-      </Portal>
+      <DetailsModal
+        modalRefDetails={modalRef}
+        title={title}
+        image={planImage}
+        id={id}
+        author={author}
+        downloads={downloads}
+        description={description}
+        // @ts-ignore
+        footerComponent={(props: any) => (
+          <BottomSheetFooter {...props}>
+            <Box paddingBottom={10 + insets.bottom} paddingHorizontal={20} paddingTop={10}>
+              <Button
+                success
+                disabled={hasAlreadyStarted || isLoading}
+                onPress={() => {
+                  setIsLoading(true)
+                  // @ts-ignore
+                  dispatch(fetchPlan({ id, update: true }))
+                    .then(() => {
+                      setIsLoading(false)
+                      navigation.goBack()
+                      modalRef?.current?.dismiss()
+                      SnackBar.show(t('Plan ajouté avec succès'))
+                    })
+                    .catch((e: any) => {
+                      console.log('[Plans] Error adding plan:', e)
+                      setIsLoading(false)
+                      SnackBar.show(
+                        t(
+                          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
+                        ),
+                        'danger'
+                      )
+                    })
+                }}
+              >
+                {hasAlreadyStarted
+                  ? t('Plan démarré')
+                  : isLoading
+                    ? t('Chargement...')
+                    : t('Démarrer ce plan')}
+              </Button>
+            </Box>
+          </BottomSheetFooter>
+        )}
+      />
     </Box>
   )
 }

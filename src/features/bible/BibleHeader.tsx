@@ -84,7 +84,7 @@ const Header = ({
 
   const backButtonTranslateY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value ? -5 : 0,
+      translateY: isFullScreenBibleValue.value ? -2 : 0,
     }
   })
 
@@ -96,7 +96,7 @@ const Header = ({
 
   const bookSelectorTranslateY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value ? -5 : 0,
+      translateY: isFullScreenBibleValue.value ? -2 : 0,
     }
   })
 
@@ -108,7 +108,7 @@ const Header = ({
 
   const versionSelectorTranslateY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value ? -5 : 0,
+      translateY: isFullScreenBibleValue.value ? -2 : 0,
     }
   })
 

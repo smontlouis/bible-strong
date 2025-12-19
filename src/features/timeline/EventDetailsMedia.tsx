@@ -1,5 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet'
-import { Portal } from '@gorhom/portal'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React from 'react'
 import Carousel from 'react-native-reanimated-carousel'
 import Box from '~common/ui/Box'
@@ -25,7 +24,7 @@ const Media = ({
   related,
 }: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'>) => {
   const { t } = useTranslation()
-  const eventModalRef = React.useRef<BottomSheet>(null)
+  const eventModalRef = React.useRef<BottomSheetModal>(null)
   const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
 
   const { data: events } = useQuery({
@@ -97,7 +96,8 @@ const Media = ({
                 const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
                 if (foundEvent) {
                   setEvent(foundEvent)
-                  eventModalRef.current?.expand()
+                  console.log('[Timeline] Opening event modal')
+                  eventModalRef.current?.present()
                 } else {
                   console.log("[Timeline] Can't open this event.")
                 }
@@ -113,10 +113,7 @@ const Media = ({
               </Box>
             </Link>
           ))}
-          <Portal>
-            {/* @ts-ignore */}
-            <EventDetailsModal modalRef={eventModalRef} event={event} />
-          </Portal>
+          <EventDetailsModal modalRef={eventModalRef} event={event} />
         </Box>
       )}
     </Box>

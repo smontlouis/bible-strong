@@ -1,4 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetModal } from '@gorhom/bottom-sheet'
 import algoliasearch from 'algoliasearch/lite'
 import React from 'react'
 import { InstantSearch } from 'react-instantsearch-native'
@@ -67,7 +67,7 @@ const Timeline = ({
   const isFR = useLanguage()
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<BottomSheet>(null)
-  const eventModalRef = React.useRef<BottomSheet>(null)
+  const eventModalRef = React.useRef<BottomSheetModal>(null)
   const searchModalRef = React.useRef<BottomSheet>(null)
 
   const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
@@ -196,7 +196,6 @@ const Timeline = ({
           setEvent={setEvent}
         />
       </InstantSearch>
-      {/* @ts-ignore */}
       <EventDetailsModal modalRef={eventModalRef} event={event} />
     </Box>
   )
