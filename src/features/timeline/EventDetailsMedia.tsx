@@ -1,18 +1,19 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import React from 'react'
-import Carousel from 'react-native-reanimated-carousel'
-import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
-import { wp } from '~helpers/utils'
-import { TimelineEvent, TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
+import BottomSheet from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
+import Carousel from 'react-native-reanimated-carousel'
 import Link from '~common/Link'
+import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
 import { useQuery } from '~helpers/react-query-lite'
+import { wp } from '~helpers/utils'
 import EventDetailVerse from './EventDetailVerse'
 import EventDetailsModal from './EventDetailsModal'
 import { getEvents } from './events'
+import { TimelineEvent, TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
+import { Portal, PortalHost } from '@gorhom/portal'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -24,7 +25,7 @@ const Media = ({
   related,
 }: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'>) => {
   const { t } = useTranslation()
-  const eventModalRef = React.useRef<BottomSheetModal>(null)
+  const eventModalRef = React.useRef<BottomSheet>(null)
   const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
 
   const { data: events } = useQuery({
@@ -97,7 +98,7 @@ const Media = ({
                 if (foundEvent) {
                   setEvent(foundEvent)
                   console.log('[Timeline] Opening event modal')
-                  eventModalRef.current?.present()
+                  eventModalRef.current?.expand()
                 } else {
                   console.log("[Timeline] Can't open this event.")
                 }
@@ -113,7 +114,9 @@ const Media = ({
               </Box>
             </Link>
           ))}
-          <EventDetailsModal modalRef={eventModalRef} event={event} />
+          <Portal hostName="event-details-modal">
+            <EventDetailsModal modalRef={eventModalRef} event={event} />
+          </Portal>
         </Box>
       )}
     </Box>

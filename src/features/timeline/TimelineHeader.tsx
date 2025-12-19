@@ -32,7 +32,7 @@ interface Props {
   fontSize?: number
   hasBackButton?: boolean
   onPress: () => void
-  searchModalRef: React.RefObject<BottomSheet>
+  searchModalRef: React.RefObject<BottomSheet | null>
 }
 
 const TimelineHeader = ({

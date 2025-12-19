@@ -1,13 +1,13 @@
 import React from 'react'
 
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import EventDetails from './EventDetails'
 import { TimelineEvent as TimelineEventProps } from './types'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<BottomSheet | null>
   event: Partial<TimelineEventProps> | null
 }
 
@@ -19,8 +19,9 @@ const EventDetailsModal = ({
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
-    <BottomSheetModal
+    <BottomSheet
       ref={modalRef}
+      index={-1}
       enablePanDownToClose
       snapPoints={['100%']}
       enableDynamicSizing={false}
@@ -32,7 +33,7 @@ const EventDetailsModal = ({
       <BottomSheetScrollView>
         <EventDetails {...event} />
       </BottomSheetScrollView>
-    </BottomSheetModal>
+    </BottomSheet>
   )
 }
 

@@ -22,7 +22,7 @@ const LinkBox = Box.withComponent(Link)
 interface Props extends TimelineEventProps {
   x: SharedValue<number>
   yearsToPx: (years: number) => number
-  eventModalRef: React.RefObject<BottomSheet>
+  eventModalRef: React.RefObject<BottomSheet | null>
   setEvent: (event: Partial<TimelineEventProps>) => void
   calculateEventWidth: (yearStart: number, yearEnd: number, isFixed?: boolean) => number
 }

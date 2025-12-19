@@ -23,6 +23,7 @@ import {
   TimelineEvent as TimelineEventProps,
   TimelineSection as TimelineSectionProps,
 } from './types'
+import { PortalHost } from '@gorhom/portal'
 const searchClient = algoliasearch(
   process.env.EXPO_PUBLIC_ALGOLIA_APP_ID || '',
   process.env.EXPO_PUBLIC_ALGOLIA_API_KEY || ''
@@ -67,7 +68,7 @@ const Timeline = ({
   const isFR = useLanguage()
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<BottomSheet>(null)
-  const eventModalRef = React.useRef<BottomSheetModal>(null)
+  const eventModalRef = React.useRef<BottomSheet>(null)
   const searchModalRef = React.useRef<BottomSheet>(null)
 
   const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
@@ -197,6 +198,7 @@ const Timeline = ({
         />
       </InstantSearch>
       <EventDetailsModal modalRef={eventModalRef} event={event} />
+      <PortalHost name="event-details-modal" />
     </Box>
   )
 }

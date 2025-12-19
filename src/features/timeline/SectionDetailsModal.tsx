@@ -14,7 +14,7 @@ import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 
 interface Props extends ShallowTimelineSection {
-  modalRef: React.RefObject<BottomSheet>
+  modalRef: React.RefObject<BottomSheet | null>
 }
 
 const width = wp(50, 500)

@@ -32,7 +32,7 @@ import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 
 type Props = {
-  resourceModalRef: React.RefObject<BottomSheet>
+  resourceModalRef: React.RefObject<BottomSheet | null>
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>

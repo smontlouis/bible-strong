@@ -21,8 +21,8 @@ import Highlight from './Highlight'
 import Snippet from './Snippet'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheet>
-  eventModalRef: React.RefObject<BottomSheet>
+  modalRef: React.RefObject<BottomSheet | null>
+  eventModalRef: React.RefObject<BottomSheet | null>
   setEvent: (event: Partial<TimelineEventProps>) => void
   hits?: any
   hasMore?: any

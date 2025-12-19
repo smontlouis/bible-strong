@@ -104,7 +104,7 @@ const StrongCard = (props: Props) => {
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec },
     } = props
 
-    onClosed?.()
+    // onClosed?.()
 
     if (isSelectionMode) {
       if (openedFromTab) {
