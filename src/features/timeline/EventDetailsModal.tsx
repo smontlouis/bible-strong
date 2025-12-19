@@ -1,10 +1,10 @@
 import React from 'react'
 
-import BottomSheet, { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import EventDetails from './EventDetails'
 import { TimelineEvent as TimelineEventProps } from './types'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet | null>
