@@ -127,3 +127,6 @@ android/
 ios/
 
 .env
+
+
+worktree/
