@@ -3,11 +3,10 @@ import React from 'react'
 
 import styled from '@emotion/native'
 
-import { Portal } from '@gorhom/portal'
 import Modal from '~common/Modal'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 const StyledText = styled(Text)({
   fontSize: 14,
@@ -35,7 +34,7 @@ const DropdownMenu = ({
   customRender,
 }: DropdownMenuProps) => {
   const choice = choices.find(l => l.value === currentValue)
-  const { ref, open, close } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
 
   const onItemPress = (value: string) => {
     setValue(value)
@@ -56,25 +55,23 @@ const DropdownMenu = ({
           </Box>
         )}
       </TouchableBox>
-      <Portal>
-        <Modal.Body
-          ref={ref}
-          snapPoints={['40%']}
-          headerComponent={
-            <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
-              <Text bold fontSize={20}>
-                {title}
-              </Text>
-            </Box>
-          }
-        >
-          {choices.map(({ value, label, subLabel }) => (
-            <Modal.Item key={value} tag={subLabel} onPress={() => onItemPress(value)}>
-              {label}
-            </Modal.Item>
-          ))}
-        </Modal.Body>
-      </Portal>
+      <Modal.Body
+        ref={ref}
+        snapPoints={['40%']}
+        headerComponent={
+          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
+            <Text bold fontSize={20}>
+              {title}
+            </Text>
+          </Box>
+        }
+      >
+        {choices.map(({ value, label, subLabel }) => (
+          <Modal.Item key={value} tag={subLabel} onPress={() => onItemPress(value)}>
+            {label}
+          </Modal.Item>
+        ))}
+      </Modal.Body>
     </>
   )
 }

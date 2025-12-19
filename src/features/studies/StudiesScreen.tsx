@@ -21,7 +21,7 @@ const StudiesScreen = ({ navigation, route }: StackScreenProps<MainStackProps, '
           studyId,
         },
       } as StudyTab),
-    []
+    [studyId]
   )
 
   return <StudiesTabScreen studyAtom={onTheFlyAtom} navigation={navigation} route={route} />

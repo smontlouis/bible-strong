@@ -1,15 +1,6 @@
 # TODO
 
-- [x] test new data architecture feature
-- [x] add minimal app version
-- [x] upgrade to last expo
-
-- [x] react-compiler
-- issue in tag bottomsheet overlap x
-- book selector issue overlap x
-- bible scrollview issue overlap
-- Police & parametres -> bottom sheet not appearing
-- study click on text size
+- study get link / bklock
 
 - logout issue with plan
 - bring back eas updates

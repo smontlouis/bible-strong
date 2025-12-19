@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import useFuzzy from '~helpers/useFuzzy'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -28,7 +28,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 
 const MultipleTagsModal = () => {
   const item = useAtomValue(multipleTagsModalAtom)
-  const { ref, open } = useBottomSheet()
+  const { ref, open } = useBottomSheetModal()
 
   const { t } = useTranslation()
   const [highlightTitle, setHighlightTitle] = useState('')

@@ -7,12 +7,11 @@ import StrongTabScreen from './StrongTabScreen'
 import { MainStackProps } from '~navigation/type'
 
 const StrongScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Strong'>) => {
+  const book = route.params.book
   // @ts-ignore
-  const book = route.params.book // navigation.getParam('book')
+  const reference = route.params.reference
   // @ts-ignore
-  const reference = route.params.reference // navigation.getParam('reference')
-  // @ts-ignore
-  let strongReference = route.params.strongReference // navigation.getParam('strongReference')
+  let strongReference = route.params.strongReference
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -28,7 +27,7 @@ const StrongScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'S
           strongReference,
         },
       } as StrongTab),
-    []
+    [book, reference, strongReference]
   )
 
   return <StrongTabScreen navigation={navigation} strongAtom={onTheFlyAtom} />

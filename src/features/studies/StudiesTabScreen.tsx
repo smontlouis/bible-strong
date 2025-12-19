@@ -29,13 +29,12 @@ const StudiesTabScreen = ({ studyAtom, navigation, route }: StudiesTabScreenProp
     return <AllStudiesTabScreen hasBackButton={hasBackButton} navigation={navigation} />
   }
 
+  console.log('[StudiesTabScreen] studyId', studyId)
+
   return (
     <EditStudyScreen
-      // @ts-ignore
       studyAtom={studyAtom}
-      // @ts-ignore
       navigation={navigation}
-      // @ts-ignore
       route={{
         ...route,
         params: {

@@ -4,7 +4,7 @@ import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import Modal from '~common/Modal'
 import BibleSelect from '~features/bible/BibleSelect'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import wait from '~helpers/wait'
 import { BibleTab, getDefaultBibleTab, useBibleTabActions } from '../../../../state/tabs'
 import { selectBibleReferenceDataAtom } from './atoms'
@@ -20,7 +20,7 @@ const SelectBibleReferenceModal = ({ isOpen, onClose }: SelectBibleReferenceModa
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
-  const { ref, open, close } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
   const { onSelect } = useAtomValue(selectBibleReferenceDataAtom)
 
   useEffect(() => {

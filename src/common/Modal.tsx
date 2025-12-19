@@ -1,20 +1,20 @@
 import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
+import {
+  BottomSheetModal,
+  BottomSheetModalProps,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import React, { Ref } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
-import BottomSheet, {
-  BottomSheetView,
-  BottomSheetProps,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import {
   onAnimateModalClose,
   renderBackdrop,
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -33,15 +33,15 @@ const Tag = styled.View(({ theme }) => ({
   borderRadius: 3,
 }))
 
-interface ModalBodyProps extends BottomSheetProps {
+interface ModalBodyProps extends BottomSheetModalProps {
   headerComponent?: React.ReactNode
   children: React.ReactNode
   withPortal?: boolean
-  modalRef?: React.RefObject<BottomSheet>
+  modalRef?: React.RefObject<BottomSheetModal | null>
   style?: any
   onModalClose?: () => void
   enableScrollView?: boolean
-  ref?: Ref<BottomSheet>
+  ref?: Ref<BottomSheetModal | null>
 }
 
 interface ItemProps {
@@ -58,46 +58,42 @@ const Body = ({
   ref,
   ...props
 }: ModalBodyProps) => {
-  const Wrapper = withPortal ? Portal : React.Fragment
   const insets = useSafeAreaInsets()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
-    <Wrapper>
-      <BottomSheet
-        ref={ref}
-        index={-1}
-        topInset={insets.top}
-        enablePanDownToClose
-        enableDynamicSizing={false}
-        backdropComponent={renderBackdrop}
-        activeOffsetY={[-20, 20]}
-        onAnimate={onAnimateModalClose(props.onModalClose)}
-        key={key}
-        {...bottomSheetStyles}
-        {...props}
-      >
-        {headerComponent && <BottomSheetView>{headerComponent}</BottomSheetView>}
-        {enableScrollView ? (
-          <BottomSheetScrollView
-            contentContainerStyle={{
-              paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
-            }}
-          >
-            {children}
-          </BottomSheetScrollView>
-        ) : (
-          <BottomSheetView
-            style={{
-              flex: 1,
-              paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
-            }}
-          >
-            {children}
-          </BottomSheetView>
-        )}
-      </BottomSheet>
-    </Wrapper>
+    <BottomSheetModal
+      ref={ref}
+      topInset={insets.top}
+      enablePanDownToClose
+      enableDynamicSizing={false}
+      backdropComponent={renderBackdrop}
+      activeOffsetY={[-20, 20]}
+      onAnimate={onAnimateModalClose(props.onModalClose)}
+      key={key}
+      {...bottomSheetStyles}
+      {...props}
+    >
+      {headerComponent && <>{headerComponent}</>}
+      {enableScrollView ? (
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
+          }}
+        >
+          {children}
+        </BottomSheetScrollView>
+      ) : (
+        <BottomSheetView
+          style={{
+            flex: 1,
+            paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
+          }}
+        >
+          {children}
+        </BottomSheetView>
+      )}
+    </BottomSheetModal>
   )
 }
 

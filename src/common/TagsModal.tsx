@@ -7,7 +7,7 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
 import Text from '~common/ui/Text'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import useFuzzy from '~helpers/useFuzzy'
 import { addTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
@@ -23,7 +23,7 @@ const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
 }))
 
 const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }: any) => {
-  const { ref, open } = useBottomSheet()
+  const { ref, open } = useBottomSheetModal()
 
   // Refactor this
   useEffect(() => {

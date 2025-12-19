@@ -11,7 +11,7 @@ import { deleteStudy } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import { Theme } from '~themes'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 interface Props {
   isOpen: any
@@ -32,7 +32,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   const openInNewTab = useOpenInNewTab()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  const { ref, open, close } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
 
   const deleteStudyConfirmation = (id: string) => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
@@ -59,6 +59,8 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <Modal.Item
         onPress={() => {
+          if (!study) return
+
           close()
           openInNewTab(
             {
@@ -78,6 +80,8 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       </Modal.Item>
       <Modal.Item
         onPress={() => {
+          if (!study) return
+
           close()
           setMultipleTagsItem({ ...study, entity: 'studies' })
         }}
@@ -86,6 +90,8 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       </Modal.Item>
       <Modal.Item
         onPress={() => {
+          if (!study) return
+
           close()
           // @ts-ignore
           setTitlePrompt({ id: study.id, title: study.title })
@@ -95,8 +101,11 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       </Modal.Item>
       <Modal.Item
         color="quart"
-        // @ts-ignore
-        onPress={() => deleteStudyConfirmation(studyId)}
+        onPress={() => {
+          if (!study) return
+
+          deleteStudyConfirmation(studyId)
+        }}
       >
         {t('Supprimer')}
       </Modal.Item>

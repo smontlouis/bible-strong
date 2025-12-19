@@ -18,7 +18,7 @@ import FlatList from '~common/ui/FlatList'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useFuzzy from '~helpers/useFuzzy'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
@@ -129,7 +129,7 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
     keys: ['name'],
   })
   const dispatch = useDispatch()
-  const { ref, open, close } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
 
   useEffect(() => {
     if (isOpen) {

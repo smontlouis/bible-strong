@@ -1,5 +1,5 @@
 import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { Portal } from '@gorhom/portal'
 import React, { useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
@@ -65,7 +65,7 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
   )
   const insets = useSafeAreaInsets()
   const { current: ago } = useRef(dayToAgo(addDay, t))
-  const notificationModalRef = React.useRef<BottomSheet>(null)
+  const notificationModalRef = React.useRef<BottomSheetModal>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map((n: any) => Number(n))
 
@@ -148,7 +148,7 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
         <Box row alignItems="center">
           <Box row center mt={5} opacity={0.5}>
             {!addDay && (
-              <Link onPress={() => notificationModalRef.current?.expand()} size={30}>
+              <Link onPress={() => notificationModalRef.current?.present()} size={30}>
                 <FeatherIcon size={16} name="bell" />
               </Link>
             )}
@@ -185,46 +185,43 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
         onConfirm={onConfirmTimePicker}
         onCancel={() => setTimePicker(false)}
       />
-      <Portal>
-        <BottomSheet
-          ref={notificationModalRef}
-          index={-1}
-          enablePanDownToClose
-          enableDynamicSizing
-          backdropComponent={renderBackdrop}
-          key={key}
-          {...bottomSheetStyles}
-        >
-          <BottomSheetScrollView scrollEnabled={false}>
-            <Box py={30} px={20} pb={30 + insets.bottom}>
-              <Box row alignItems="center">
-                <Text bold flex>
-                  {t('Recevoir une notification quotidienne')}
-                </Text>
-                <Switch
-                  value={!!verseOfTheDayTime}
-                  onValueChange={() => {
-                    if (verseOfTheDayTime) {
-                      dispatch(setNotificationVOD(''))
-                    } else {
-                      dispatch(setNotificationVOD('07:00'))
-                    }
-                  }}
-                />
-              </Box>
-              {!!verseOfTheDayTime && (
-                <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
-                  <Text>{t("Choisir l'heure")}:</Text>
-                  <Text bold> {verseOfTheDayTime}</Text>
-                  <Box ml={5}>
-                    <FeatherIcon name="chevron-down" />
-                  </Box>
-                </LinkBox>
-              )}
+      <BottomSheetModal
+        ref={notificationModalRef}
+        enablePanDownToClose
+        enableDynamicSizing
+        backdropComponent={renderBackdrop}
+        key={key}
+        {...bottomSheetStyles}
+      >
+        <BottomSheetScrollView scrollEnabled={false}>
+          <Box py={30} px={20} pb={30 + insets.bottom}>
+            <Box row alignItems="center">
+              <Text bold flex>
+                {t('Recevoir une notification quotidienne')}
+              </Text>
+              <Switch
+                value={!!verseOfTheDayTime}
+                onValueChange={() => {
+                  if (verseOfTheDayTime) {
+                    dispatch(setNotificationVOD(''))
+                  } else {
+                    dispatch(setNotificationVOD('07:00'))
+                  }
+                }}
+              />
             </Box>
-          </BottomSheetScrollView>
-        </BottomSheet>
-      </Portal>
+            {!!verseOfTheDayTime && (
+              <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
+                <Text>{t("Choisir l'heure")}:</Text>
+                <Text bold> {verseOfTheDayTime}</Text>
+                <Box ml={5}>
+                  <FeatherIcon name="chevron-down" />
+                </Box>
+              </LinkBox>
+            )}
+          </Box>
+        </BottomSheetScrollView>
+      </BottomSheetModal>
     </Box>
   )
 }

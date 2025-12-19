@@ -120,7 +120,7 @@
     "react-native-modalbox": "^2.0.0",
     "react-native-nitro-modules": "^0.31.10",
     "react-native-popover-view": "^6.1.0",
-    "react-native-popup-menu": "^0.16.0",
+    "react-native-popup-menu": "^0.18.0",
     "react-native-progress": "^5.0.0",
     "react-native-reanimated": "~4.1.1",
     "react-native-reanimated-carousel": "^4.0.3",

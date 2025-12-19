@@ -1,4 +1,4 @@
-import type BottomSheet from '@gorhom/bottom-sheet'
+import type { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React, { memo, useCallback } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +8,7 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 
 interface VerseFormatBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheetModal | null>
   onSelectFormat: (format: 'inline' | 'block') => void
   onClose?: () => void
 }

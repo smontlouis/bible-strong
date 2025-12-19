@@ -4,7 +4,8 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(npx tsc:*)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

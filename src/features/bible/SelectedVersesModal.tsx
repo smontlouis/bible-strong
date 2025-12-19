@@ -128,32 +128,32 @@ const VersesModal = ({
     SnackBar.show(t('Copié dans le presse-papiers.'))
   }
 
-  const showStrongDetail = useCallback(() => {
+  const showStrongDetail = () => {
     onChangeResourceType('strong')
-  }, [])
+  }
 
-  const openCommentariesScreen = useCallback(() => {
+  const openCommentariesScreen = () => {
     onChangeResourceType('commentary')
-  }, [])
+  }
 
-  const showDictionaryDetail = useCallback(() => {
+  const showDictionaryDetail = () => {
     onChangeResourceType('dictionary')
-  }, [])
+  }
 
-  const compareVerses = useCallback(() => {
+  const compareVerses = () => {
     // @ts-ignore
     navigation.navigate('BibleCompareVerses', {
       selectedVerses,
     })
-  }, [selectedVerses])
+  }
 
-  const onOpenReferences = useCallback(() => {
+  const onOpenReferences = () => {
     onChangeResourceType('reference')
-  }, [])
+  }
 
-  const onOpenNave = useCallback(() => {
+  const onOpenNave = () => {
     onChangeResourceType('nave')
-  }, [])
+  }
 
   const sendVerseData = async () => {
     const { title, content } = await getVersesContent({
@@ -161,13 +161,17 @@ const VersesModal = ({
       version,
     })
     // @ts-ignore
-    navigation.navigate(openedFromTab ? 'AppSwitcher' : 'EditStudy', {
-      ...cleanParams(),
-      type: isSelectionMode,
-      title,
-      content,
-      version,
-      verses: Object.keys(selectedVerses),
+    navigation.navigate({
+      name: openedFromTab ? 'AppSwitcher' : 'EditStudy',
+      params: {
+        ...cleanParams(),
+        type: isSelectionMode,
+        title,
+        content,
+        version,
+        verses: Object.keys(selectedVerses),
+      },
+      merge: true,
     })
     close()
   }
@@ -175,9 +179,9 @@ const VersesModal = ({
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
-  const onClose = useCallback(() => {
+  const onClose = () => {
     clearSelectedVerses()
-  }, [])
+  }
 
   const { bottomBarHeight } = useBottomBarHeightInTab()
 
@@ -202,13 +206,15 @@ const VersesModal = ({
           paddingBottom: bottomBarHeight,
         }}
       >
-        {isSelectionMode ? (
+        {isSelectionMode?.includes('verse') ? (
           <HStack gap={10} width="100%" alignItems="center" justifyContent="center" py={10}>
             <Text bold fontSize={18} textAlign="center">
               {selectedVersesTitle.toUpperCase()}
             </Text>
             <TouchableIcon name="arrow-right" size={20} onPress={sendVerseData} noFlex />
           </HStack>
+        ) : isSelectionMode?.includes('strong') ? (
+          <></>
         ) : (
           <>
             <HalfContainer border>

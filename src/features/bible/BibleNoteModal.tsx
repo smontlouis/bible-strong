@@ -21,7 +21,7 @@ import Text from '~common/ui/Text'
 import TextArea from '~common/ui/TextArea'
 import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
@@ -69,7 +69,7 @@ const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) =>
 }
 
 const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
-  const { ref, open, close } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')

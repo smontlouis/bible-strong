@@ -22,7 +22,7 @@ import {
 } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import VersesList from './VersesList'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { TagsObj, Verse, VerseIds } from '~common/types'
 
 interface Chip {
@@ -86,8 +86,8 @@ const HighlightsScreen = () => {
   const dispatch = useDispatch()
   const chipId = selectedChip?.id
 
-  const { ref, open, close } = useBottomSheet()
-  const { ref: ref2, open: open2, close: close2 } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
+  const { ref: ref2, open: open2, close: close2 } = useBottomSheetModal()
 
   useEffect(() => {
     if (isSettingsOpen) {

@@ -117,62 +117,60 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
 
   return (
     <>
-      <Portal>
-        <BottomSheet
-          key={key}
-          ref={bottomSheetRef}
-          snapPoints={['100%']}
-          index={-1}
-          topInset={insets.top + 64}
-          enablePanDownToClose
-          enableDynamicSizing={false}
-          enableContentPanningGesture={false}
-          backdropComponent={renderBackdrop}
-          onAnimate={(fromIndex, toIndex) => {
-            // Opening the bottom sheet
-            if (fromIndex === -1 && toIndex === 0) {
-              flatListRef.current?.scrollToIndex({
-                index: initialScrollIndex,
-                viewOffset: itemHeight * 2,
-                animated: false,
-              })
-            }
-            // Closing the bottom sheet
-            if (fromIndex === 0 && toIndex === -1) {
-              expandedBook.value = null
-            }
-          }}
-          {...bottomSheetStyles}
+      <BottomSheet
+        key={key}
+        ref={bottomSheetRef}
+        snapPoints={['100%']}
+        index={-1}
+        topInset={insets.top + 64}
+        enablePanDownToClose
+        enableDynamicSizing={false}
+        enableContentPanningGesture={false}
+        backdropComponent={renderBackdrop}
+        onAnimate={(fromIndex, toIndex) => {
+          // Opening the bottom sheet
+          if (fromIndex === -1 && toIndex === 0) {
+            flatListRef.current?.scrollToIndex({
+              index: initialScrollIndex,
+              viewOffset: itemHeight * 2,
+              animated: false,
+            })
+          }
+          // Closing the bottom sheet
+          if (fromIndex === 0 && toIndex === -1) {
+            expandedBook.value = null
+          }
+        }}
+        {...bottomSheetStyles}
+      >
+        <HStack
+          height={54}
+          justifyContent="center"
+          alignItems="center"
+          borderBottomWidth={1}
+          borderColor="lightGrey"
         >
-          <HStack
-            height={54}
-            justifyContent="center"
-            alignItems="center"
-            borderBottomWidth={1}
-            borderColor="lightGrey"
-          >
-            <Box px={20} width={60}></Box>
-            <Text flex textAlign="center" fontSize={16} bold>
-              {t('Livres')}
-            </Text>
-            <BookSelectorParams />
-          </HStack>
-          <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
-          <BookSelectorList
-            data={data}
-            initialScrollIndex={initialScrollIndex}
-            expandedBook={expandedBook}
-            bookSelectorData={bookSelectorData}
-            flatListRef={flatListRef}
-          />
-        </BottomSheet>
-        <VerseBottomSheet
-          bottomSheetRef={verseBottomSheetRef}
-          bookSelectorRef={bottomSheetRef}
-          actions={bookSelectorActions}
-          data={bookSelectorData}
+          <Box px={20} width={60}></Box>
+          <Text flex textAlign="center" fontSize={16} bold>
+            {t('Livres')}
+          </Text>
+          <BookSelectorParams />
+        </HStack>
+        <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
+        <BookSelectorList
+          data={data}
+          initialScrollIndex={initialScrollIndex}
+          expandedBook={expandedBook}
+          bookSelectorData={bookSelectorData}
+          flatListRef={flatListRef}
         />
-      </Portal>
+      </BottomSheet>
+      <VerseBottomSheet
+        bottomSheetRef={verseBottomSheetRef}
+        bookSelectorRef={bottomSheetRef}
+        actions={bookSelectorActions}
+        data={bookSelectorData}
+      />
     </>
   )
 }

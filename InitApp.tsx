@@ -64,49 +64,47 @@ const InitApp = ({ persistor }: Props) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <SafeAreaProvider>
-          <ThemeProvider theme={theme}>
-            <MenuProvider
-              backHandler
-              customStyles={{
-                backdrop: {
-                  backgroundColor: 'black',
-                  opacity: 0.2,
-                },
-              }}
-            >
-              <QueryClientProvider client={queryClient}>
-                <PersistGate
-                  loading={
-                    <View
-                      style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <ActivityIndicator />
-                    </View>
-                  }
-                  persistor={persistor}
-                >
-                  <DBStateProvider>
-                    <ErrorBoundary>
-                      <AppSwitcherProvider>
-                        <RootSiblingParent>
-                          <InitHooks />
-                          <AppNavigator />
-                        </RootSiblingParent>
-                      </AppSwitcherProvider>
-                    </ErrorBoundary>
-                  </DBStateProvider>
-                </PersistGate>
-              </QueryClientProvider>
-            </MenuProvider>
-          </ThemeProvider>
-        </SafeAreaProvider>
-      </BottomSheetModalProvider>
+      <SafeAreaProvider>
+        <ThemeProvider theme={theme}>
+          <MenuProvider
+            backHandler
+            customStyles={{
+              backdrop: {
+                backgroundColor: 'black',
+                opacity: 0.2,
+              },
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <PersistGate
+                loading={
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <ActivityIndicator />
+                  </View>
+                }
+                persistor={persistor}
+              >
+                <DBStateProvider>
+                  <ErrorBoundary>
+                    <AppSwitcherProvider>
+                      <RootSiblingParent>
+                        <InitHooks />
+                        <AppNavigator />
+                      </RootSiblingParent>
+                    </AppSwitcherProvider>
+                  </ErrorBoundary>
+                </DBStateProvider>
+              </PersistGate>
+            </QueryClientProvider>
+          </MenuProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   )
 }

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { deleteNote } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import { VerseIds } from '~common/types'
@@ -19,7 +19,7 @@ type Props = {
 const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const { ref, open, close } = useBottomSheet()
+  const { ref, open, close } = useBottomSheetModal()
 
   useEffect(() => {
     if (isOpen) {

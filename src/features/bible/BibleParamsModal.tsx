@@ -2,7 +2,7 @@ import React from 'react'
 import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -114,7 +114,7 @@ export const useParamsModalLabels = () => {
 }
 
 interface BibleParamsModalprops {
-  modalRef: React.RefObject<BottomSheet>
+  modalRef: React.RefObject<BottomSheetModal | null>
   navigation: any
 }
 
@@ -157,9 +157,8 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
   const insets = useSafeAreaInsets()
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={modalRef}
-      index={-1}
       enablePanDownToClose
       backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
       enableDynamicSizing={false}
@@ -390,7 +389,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
       </BottomSheetScrollView>
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

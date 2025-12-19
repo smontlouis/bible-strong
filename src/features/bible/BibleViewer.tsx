@@ -21,7 +21,7 @@ import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
-import { useBottomSheet } from '~helpers/useBottomSheet'
+import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
@@ -111,12 +111,12 @@ const BibleViewer = ({
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
-  const bibleParamsModal = useBottomSheet()
+  const bibleParamsModal = useBottomSheetModal()
   const resourceModal = useBottomSheet()
 
   // Add to study modal states
-  const addToStudyModal = useBottomSheet()
-  const verseFormatModal = useBottomSheet()
+  const addToStudyModal = useBottomSheetModal()
+  const verseFormatModal = useBottomSheetModal()
   const [pendingVerseData, setPendingVerseData] = useState<{
     studyId: string
     verseData: {
@@ -368,6 +368,7 @@ const BibleViewer = ({
   })
 
   console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
+  console.log('[Bible] selectionMode', isSelectionMode)
 
   return (
     <Box flex={1} bg="reverse">

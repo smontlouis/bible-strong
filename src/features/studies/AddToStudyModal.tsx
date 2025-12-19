@@ -1,4 +1,4 @@
-import BottomSheet, { BottomSheetFlashList } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetFlashList } from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import enGB from 'date-fns/locale/en-GB'
 import fr from 'date-fns/locale/fr'
@@ -19,7 +19,7 @@ import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
 
 interface AddToStudyModalProps {
-  bottomSheetRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheetModal | null>
   onSelectStudy: (studyId: string) => void
   onClose?: () => void
 }
