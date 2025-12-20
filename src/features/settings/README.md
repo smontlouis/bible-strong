@@ -46,7 +46,7 @@ settings/
 │   ├── MoreScreen              # Menu principal des paramètres
 │   ├── DownloadsScreen         # Gestion des téléchargements
 │   ├── HighlightsScreen        # Liste des surlignages
-│   ├── ModifyColorsScreen      # Personnalisation couleurs
+│   ├── CustomHighlightColorsScreen # Personnalisation couleurs de surlignage
 │   ├── TagsScreen              # Gestion des tags
 │   ├── TagScreen               # Détail d'un tag
 │   ├── ImportExportScreen      # Import/Export données

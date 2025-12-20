@@ -166,7 +166,7 @@ export type MainStackProps = {
   DictionnaryDetail: DictionaryDetailScreenProps
   Login: undefined
   Support: undefined
-  ModifyColors: undefined
+  CustomHighlightColors: undefined
   Changelog: undefined
   ImportExport: undefined
   Pericope: undefined

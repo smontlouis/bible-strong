@@ -30,6 +30,7 @@ export const TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS = 'user/SET_SETTINGS_SHARE_VERS
 export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES = 'user/SET_SETTINGS_SHARE_INLINE_VERSES'
 export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
 export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
+export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
 
 export default produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -151,6 +152,18 @@ export default produce((draft: Draft<UserState>, action) => {
       draft.bible.settings.shareVerses.hasAppName = !draft.bible.settings.shareVerses.hasAppName
       break
     }
+    case SET_DEFAULT_COLOR_NAME: {
+      const { colorKey, name } = action.payload
+      if (!draft.bible.settings.defaultColorNames) {
+        draft.bible.settings.defaultColorNames = {}
+      }
+      if (name) {
+        draft.bible.settings.defaultColorNames[colorKey as keyof typeof draft.bible.settings.defaultColorNames] = name
+      } else {
+        delete draft.bible.settings.defaultColorNames[colorKey as keyof typeof draft.bible.settings.defaultColorNames]
+      }
+      break
+    }
     default:
       break
   }
@@ -231,7 +244,7 @@ export function setSettingsPress(payload: string) {
   }
 }
 
-export function changeColor({ name, color }: { name: keyof typeof defaultColors; color: string }) {
+export function changeColor({ name, color }: { name: keyof typeof defaultColors; color?: string }) {
   return {
     type: CHANGE_COLOR,
     name,
@@ -260,5 +273,12 @@ export function toggleSettingsShareQuotes() {
 export function toggleSettingsShareAppName() {
   return {
     type: TOGGLE_SETTINGS_SHARE_APP_NAME,
+  }
+}
+
+export function setDefaultColorName(colorKey: string, name?: string) {
+  return {
+    type: SET_DEFAULT_COLOR_NAME,
+    payload: { colorKey, name },
   }
 }

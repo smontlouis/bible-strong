@@ -21,6 +21,7 @@ import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
+import customColorsReducer from './user/customColors'
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
 import settingsReducer from './user/settings'
@@ -30,6 +31,7 @@ import versionUpdateReducer from './user/versionUpdate'
 import { reduceReducers } from './utils'
 const deepmerge = require('@fastify/deepmerge')()
 
+export * from './user/customColors'
 export * from './user/highlights'
 export * from './user/notes'
 export * from './user/settings'
@@ -110,6 +112,13 @@ export interface HighlightsObj {
   [x: string]: Highlight
 }
 
+export interface CustomColor {
+  id: string
+  hex: string
+  createdAt: number
+  name?: string
+}
+
 export interface FireStoreUserData {
   id: string
   email: string
@@ -186,6 +195,14 @@ export interface UserState {
       compare: {
         [x: string]: boolean
       }
+      customHighlightColors: CustomColor[]
+      defaultColorNames?: {
+        color1?: string
+        color2?: string
+        color3?: string
+        color4?: string
+        color5?: string
+      }
     }
   }
 }
@@ -252,6 +269,7 @@ const getInitialState = (): UserState => ({
       compare: {
         [getLangIsFr() ? 'LSG' : 'KJV']: true,
       },
+      customHighlightColors: [],
     },
   },
 })
@@ -453,7 +471,8 @@ const reducers = <typeof userReducer>(
     settingsReducer,
     tagsReducer,
     versionUpdateReducer,
-    studiesReducer
+    studiesReducer,
+    customColorsReducer
   )
 )
 

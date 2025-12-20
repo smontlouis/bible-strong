@@ -1,13 +1,12 @@
 import styled from '@emotion/native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -23,14 +22,11 @@ import { openedFromTabAtom } from '~features/studies/atom'
 import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useBottomSheet } from '~helpers/useBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { cleanParams, wp } from '~helpers/utils'
-import type { RootState } from '~redux/modules/reducer'
-import { makeColorsSelector } from '~redux/selectors/user'
 import verseToReference from '../../helpers/verseToReference'
 import type { VersionCode } from '../../state/tabs'
+import ColorCirclesBar from './ColorCirclesBar'
 import TouchableChip from './TouchableChip'
-import TouchableCircle from './TouchableCircle'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
@@ -78,10 +74,6 @@ const VersesModal = ({
   const { ref, open, close } = useBottomSheet()
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
-
-  const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
-  const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   useEffect(() => {
     if (isVisible) {
@@ -218,14 +210,12 @@ const VersesModal = ({
         ) : (
           <>
             <HalfContainer border>
-              <TouchableCircle color={colors.color1} onPress={() => addHighlight('color1')} />
-              <TouchableCircle color={colors.color2} onPress={() => addHighlight('color2')} />
-              <TouchableCircle color={colors.color3} onPress={() => addHighlight('color3')} />
-              <TouchableCircle color={colors.color4} onPress={() => addHighlight('color4')} />
-              <TouchableCircle color={colors.color5} onPress={() => addHighlight('color5')} />
-              {isSelectedVerseHighlighted && (
-                <TouchableIcon name="x-circle" onPress={() => removeHighlight()} />
-              )}
+              <ColorCirclesBar
+                isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+                addHighlight={addHighlight}
+                removeHighlight={removeHighlight}
+                onClose={close}
+              />
             </HalfContainer>
             <HalfContainer>
               <ScrollView

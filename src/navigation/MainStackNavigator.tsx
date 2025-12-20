@@ -45,7 +45,7 @@ import PericopeScreen from '../features/bible/PericopeScreen'
 import ChangelogScreen from '../features/settings/ChangelogScreen'
 import DownloadsScreen from '../features/settings/DownloadsScreen'
 import ImportExportScreen from '../features/settings/ImportExportScreen'
-import ModifyColorsScreen from '../features/settings/ModifyColorsScreen'
+import CustomHighlightColorsScreen from '../features/settings/CustomHighlightColorsScreen'
 import ResourceLanguageScreen from '../features/settings/ResourceLanguageScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
@@ -88,7 +88,7 @@ const MainStack = () => {
             />
             <MainStackNavigator.Screen name="Login" component={LoginScreen} />
             <MainStackNavigator.Screen name="Support" component={SupportScreen} />
-            <MainStackNavigator.Screen name="ModifyColors" component={ModifyColorsScreen} />
+            <MainStackNavigator.Screen name="CustomHighlightColors" component={CustomHighlightColorsScreen} />
             <MainStackNavigator.Screen name="Changelog" component={ChangelogScreen} />
             <MainStackNavigator.Screen name="ImportExport" component={ImportExportScreen} />
             <MainStackNavigator.Screen name="Pericope" component={PericopeScreen} />

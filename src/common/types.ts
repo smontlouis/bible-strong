@@ -216,3 +216,8 @@ export type SelectedCode = {
   reference: string
   book: number
 }
+
+export interface HighlightFilters {
+  colorId?: string // 'color1', 'color2', 'custom-xxx', ou undefined (tous)
+  tagId?: string // ID du tag, ou undefined (tous)
+}
