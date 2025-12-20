@@ -1,0 +1,8 @@
+{
+  "worktreeCopyPatterns": [".env*", ".vscode/**"],
+  "worktreeCopyIgnores": ["**/node_modules/**", "**/dist/**", "**/.git/**", ".worktree/**"],
+  "worktreePathTemplate": "$BASE_PATH/.worktree",
+  "postCreateCmd": ["yarn install"],
+  "terminalCommand": "code .",
+  "deleteBranchWithWorktree": true
+}

@@ -1,11 +1,11 @@
 # TODO
 
 - [ ] export pdf not working
-- [ ] bookmarks feature
-- [ ] more than 5 colors
 - [ ] fix lost password UI
 - [ ] profile screen
 - [ ] verset illustré
+- [x] more than 5 colors
+- [ ] bookmarks feature
 - [ ] insérer un lien
 - [ ] insérer un audio
 - [ ] improve notes
