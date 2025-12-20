@@ -12,7 +12,7 @@ import {
   VerseIds,
 } from '../../../../../common/types'
 import { RootState } from '../../../../../redux/modules/reducer'
-import { HighlightsObj, NotesObj } from '../../../../../redux/modules/user'
+import { HighlightsObj, NotesObj, LinksObj } from '../../../../../redux/modules/user'
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
@@ -54,10 +54,12 @@ export type WebViewProps = {
   selectedVerses: VerseIds
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
+  linkedVerses: LinksObj
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   openNoteModal: any
+  openLinkModal: any
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
@@ -73,6 +75,19 @@ export type NotedVerse = {
   id?: string
   title: string
   description: string
+  date: number
+  tags?: {
+    [x: string]: Tag
+  }
+  key: string
+  verses: string
+}
+
+export type LinkedVerse = {
+  id?: string
+  url: string
+  title: string
+  isYouTube: boolean
   date: number
   tags?: {
     [x: string]: Tag

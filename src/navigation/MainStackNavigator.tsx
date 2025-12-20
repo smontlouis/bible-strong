@@ -33,6 +33,7 @@ import SearchScreen from '~features/search/SearchScreen'
 import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
 import FAQScreen from '~features/settings/FAQScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
+import LinksScreen from '~features/settings/LinksScreen'
 import LoginScreen from '~features/settings/LoginScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
@@ -70,6 +71,7 @@ const MainStack = () => {
 
             <MainStackNavigator.Screen name="BibleVerseNotes" component={BibleVerseNotesScreen} />
             <MainStackNavigator.Screen name="Highlights" component={HighlightScreen} />
+            <MainStackNavigator.Screen name="Links" component={LinksScreen} />
             <MainStackNavigator.Screen name="Strong" component={StrongScreen} />
             <MainStackNavigator.Screen
               name="ConcordanceByBook"

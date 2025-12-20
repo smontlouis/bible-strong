@@ -152,6 +152,7 @@ export interface Tag {
   highlights?: Object // what kind of object?
   date: string
   notes?: Object // what kind of object?
+  links?: Object // what kind of object?
   studies?: Object // what kind of object?
   strongsHebreu?: Object // what kind of object?
   strongsGrec: Object // what kind of object?

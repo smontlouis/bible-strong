@@ -226,6 +226,12 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Notes')}
             </Text>
           </LinkItem>
+          <LinkItem route="Links">
+            <StyledIcon name="link" size={25} />
+            <Text bold fontSize={15}>
+              {t('Liens')}
+            </Text>
+          </LinkItem>
           <LinkItem route="Tags">
             <StyledIcon name="tag" size={25} />
             <Text bold fontSize={15}>

@@ -1,11 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '~redux/modules/reducer'
-import { HighlightsObj, NotesObj, Note, Highlight } from '~redux/modules/user'
+import { HighlightsObj, NotesObj, LinksObj, Note, Highlight, Link } from '~redux/modules/user'
 import { Tag, CurrentTheme } from '~common/types'
 
 // Base selectors
 const selectHighlights = (state: RootState) => state.user.bible.highlights
 const selectNotes = (state: RootState) => state.user.bible.notes
+const selectLinks = (state: RootState) => state.user.bible.links
 const selectStudies = (state: RootState) => state.user.bible.studies
 const selectNaves = (state: RootState) => state.user.bible.naves
 const selectWords = (state: RootState) => state.user.bible.words
@@ -39,6 +40,21 @@ export const makeNotesByChapterSelector = () =>
       for (const key in notes) {
         if (key.startsWith(prefix)) {
           result[key] = notes[key]
+        }
+      }
+      return result
+    }
+  )
+
+// Selector factory for links by chapter
+export const makeLinksByChapterSelector = () =>
+  createSelector(
+    [selectLinks, (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`],
+    (links, prefix): LinksObj => {
+      const result: LinksObj = {}
+      for (const key in links) {
+        if (key.startsWith(prefix)) {
+          result[key] = links[key]
         }
       }
       return result
@@ -96,6 +112,7 @@ export const makeTagDataSelector = () =>
     [
       selectHighlights,
       selectNotes,
+      selectLinks,
       selectStudies,
       selectNaves,
       selectWords,
@@ -103,7 +120,7 @@ export const makeTagDataSelector = () =>
       selectStrongsHebreu,
       (_: RootState, tag: Tag) => tag,
     ],
-    (highlights, notes, studies, naves, words, strongsGrec, strongsHebreu, tag) => {
+    (highlights, notes, links, studies, naves, words, strongsGrec, strongsHebreu, tag) => {
       return {
         highlights: tag.highlights
           ? sortVersesByDate(
@@ -119,6 +136,11 @@ export const makeTagDataSelector = () =>
         notes: tag.notes
           ? Object.keys(tag.notes)
               .map(id => ({ id, reference: '', ...notes[id] } as Note & { id: string; reference: string }))
+              .filter(c => c && c.date)
+          : [],
+        links: tag.links
+          ? Object.keys(tag.links)
+              .map(id => ({ id, ...links[id] } as Link & { id: string }))
               .filter(c => c && c.date)
           : [],
         studies: tag.studies
@@ -164,6 +186,26 @@ export const makeNoteByIdSelector = () =>
       return null
     }
   )
+
+// Selector for link by id (for BibleLinkModal)
+export const makeLinkByIdSelector = () =>
+  createSelector(
+    [selectLinks, (_: RootState, linkId: string) => linkId],
+    (links, linkId): (Link & { id: string }) | null => {
+      if (links[linkId]) {
+        return {
+          id: linkId,
+          ...links[linkId],
+        }
+      }
+      return null
+    }
+  )
+
+// Selector for all links (for LinksScreen) - returns LinksObj
+export const selectAllLinks = createSelector([selectLinks], links => {
+  return links || {}
+})
 
 // Selector for Strong tags
 export const makeStrongTagsSelector = () =>

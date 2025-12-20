@@ -155,6 +155,7 @@ export type MainStackProps = {
   BibleVerseDetail: BibleVerseDetailScreenProps
   BibleVerseNotes: BibleVerseNotesScreenProps
   Highlights: undefined
+  Links: undefined
   Strong: StrongScreenProps
   DictionnaireVerseDetail: DictionnaireVerseDetailScreenProps
   ConcordanceByBook: ConcordanceByBookScreenProps

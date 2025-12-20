@@ -307,6 +307,7 @@ export async function migrateImportedDataToSubcollections(
     strongsGrec?: { [id: string]: any }
     words?: { [id: string]: any }
     naves?: { [id: string]: any }
+    links?: { [id: string]: any }
   }
 ): Promise<void> {
   console.log('[FirestoreMigration] ========================================')
