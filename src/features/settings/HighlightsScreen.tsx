@@ -1,36 +1,34 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import Empty from '~common/Empty'
-import TagsHeader from '~common/TagsHeader'
-import TagsModal from '~common/TagsModal'
-import Container from '~common/ui/Container'
-
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert, ScrollView } from 'react-native'
+
+import Empty from '~common/Empty'
+import FiltersHeader from '~common/FiltersHeader'
+import FilterModal from '~common/FilterModal'
+import ColorFilterModal from '~common/ColorFilterModal'
+import TagsFilterModal from '~common/TagsFilterModal'
+import Container from '~common/ui/Container'
 import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { wp } from '~helpers/utils'
-import { RootState } from '~redux/modules/reducer'
+import { useHighlightFilters } from '~helpers/useHighlightFilters'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import type { RootState } from '~redux/modules/reducer'
 import { selectHighlightsObj, makeColorsSelector } from '~redux/selectors/user'
 import {
   changeHighlightColor,
-  CustomColor,
-  Highlight,
-  HighlightsObj,
+  type CustomColor,
+  type Highlight,
+  type HighlightsObj,
   removeHighlight,
 } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import VersesList from './VersesList'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { TagsObj, Verse, VerseIds } from '~common/types'
-
-interface Chip {
-  id: string
-  name: string
-}
+import type { TagsObj, Verse, VerseIds } from '~common/types'
 
 const MIN_ITEM_WIDTH = 40
 
@@ -42,15 +40,15 @@ export type GroupedHighlights = {
   tags: TagsObj
 }[]
 
-const filterByChip =
-  (chipId: string, highlightsObj: HighlightsObj) =>
+const filterByTag =
+  (tagId: string, highlightsObj: HighlightsObj) =>
   ([vId]: [string, Highlight]) =>
-    chipId ? Boolean(highlightsObj[vId].tags && highlightsObj[vId].tags[chipId]) : true
+    Boolean(highlightsObj[vId].tags && highlightsObj[vId].tags[tagId])
 
 const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, Highlight]) => {
   const [highlightId, highlight] = highlightTuple
   const [Livre, Chapitre, Verset] = highlightId.split('-').map(Number)
-  const formattedVerse = { Livre, Chapitre, Verset, Texte: '' } // 1-1-1 to { livre: 1, chapitre: 1, verset: 1}
+  const formattedVerse = { Livre, Chapitre, Verset, Texte: '' }
 
   if (!arr.find(a => a.date === highlight.date)) {
     arr.push({
@@ -71,12 +69,12 @@ const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, 
   }
 
   arr.sort((a, b) => Number(b.date) - Number(a.date))
-
   return arr
 }
 
 const HighlightsScreen = () => {
   const { t } = useTranslation()
+  const dispatch = useDispatch()
   const highlightsObj = useSelector(selectHighlightsObj)
   const { theme: currentTheme } = useCurrentThemeSelector()
   const selectColors = useMemo(() => makeColorsSelector(), [])
@@ -84,91 +82,149 @@ const HighlightsScreen = () => {
   const customHighlightColors = useSelector(
     (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
   )
+  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 
-  // Calculate dynamic item width for color circles
+  // Filters hook - encapsulates all filter logic
+  const {
+    filters,
+    setColorFilter,
+    setTagFilter,
+    resetFilters,
+    filterLabel,
+    colorInfo,
+    selectedTag,
+    activeFiltersCount,
+    mainModalRef,
+    colorModalRef,
+    tagsModalRef,
+    openMainModal,
+    openColorFromMain,
+    openTagsFromMain,
+  } = useHighlightFilters()
+
+  // Settings modal (for highlight actions)
+  const [settingsData, setSettingsData] = useState<{ stringIds: VerseIds } | null>(null)
+  const [changeColorData, setChangeColorData] = useState<VerseIds | null>(null)
+  const { ref: settingsRef, open: openSettings, close: closeSettings } = useBottomSheetModal()
+  const {
+    ref: colorChangeRef,
+    open: openColorChange,
+    close: closeColorChange,
+  } = useBottomSheetModal()
+
+  useEffect(() => {
+    if (settingsData) openSettings()
+  }, [settingsData, openSettings])
+
+  useEffect(() => {
+    if (changeColorData) openColorChange()
+  }, [changeColorData, openColorChange])
+
+  // Filter highlights
+  const groupedHighlights = useMemo(() => {
+    let highlights = Object.entries(highlightsObj)
+
+    if (filters.colorId) {
+      highlights = highlights.filter(([, h]) => h.color === filters.colorId)
+    }
+    if (filters.tagId) {
+      highlights = highlights.filter(filterByTag(filters.tagId, highlightsObj))
+    }
+
+    return highlights
+      .sort((a, b) => Number(b[1].date) - Number(a[1].date))
+      .slice(0, 100)
+      .reduce(groupHighlightsByDate, [])
+  }, [filters, highlightsObj])
+
+  // Dynamic width for color circles
   const screenWidth = wp(100, 500)
-  const colorItemCount = 5 + customHighlightColors.length // 5 default + custom colors
+  const colorItemCount = 5 + customHighlightColors.length
   const colorItemWidth = Math.max(screenWidth / colorItemCount, MIN_ITEM_WIDTH)
 
-  const [isTagsOpen, setTagsIsOpen] = React.useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState<any>()
-  const [isChangeColorOpen, setIsChangeColorOpen] = React.useState<any>()
-  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
-  const [selectedChip, setSelectedChip] = React.useState<Chip>()
-  const dispatch = useDispatch()
-  const chipId = selectedChip?.id
-
-  const { ref, open, close } = useBottomSheetModal()
-  const { ref: ref2, open: open2, close: close2 } = useBottomSheetModal()
-
-  useEffect(() => {
-    if (isSettingsOpen) {
-      open()
-    }
-  }, [isSettingsOpen, open])
-
-  useEffect(() => {
-    if (isChangeColorOpen) {
-      open2()
-    }
-  }, [isChangeColorOpen, open2])
-
-  const groupedHighlights = useMemo(() => {
-    const highlights = Object.entries(highlightsObj)
-    highlights.sort((a, b) => Number(b[1].date) - Number(a[1].date))
-    return (chipId ? highlights.filter(filterByChip(chipId, highlightsObj)) : highlights)
-      .splice(0, 100)
-      .reduce(groupHighlightsByDate, [])
-  }, [chipId, highlightsObj])
-
-  const promptLogout = () => {
+  const handleDelete = () => {
     Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       {
         text: t('Oui'),
         onPress: () => {
-          dispatch(removeHighlight({ selectedVerses: isSettingsOpen?.stringIds }))
-          close()
+          if (settingsData?.stringIds) {
+            dispatch(removeHighlight({ selectedVerses: settingsData.stringIds }))
+          }
+          closeSettings()
         },
         style: 'destructive',
       },
     ])
   }
 
-  const changeColor = (color: string) => {
-    dispatch(changeHighlightColor(isChangeColorOpen, color))
-    close2()
+  const handleColorChange = (color: string) => {
+    if (changeColorData) {
+      dispatch(changeHighlightColor(changeColorData, color))
+    }
+    closeColorChange()
   }
 
   return (
     <Container>
-      <TagsHeader
+      {/* Header with filter button */}
+      <FiltersHeader
         title={t('Surbrillances')}
-        setIsOpen={setTagsIsOpen}
-        isOpen={isTagsOpen}
-        selectedChip={selectedChip}
+        filterLabel={filterLabel}
+        onFilterPress={openMainModal}
         hasBackButton
       />
-      <TagsModal
-        isVisible={isTagsOpen}
-        onClosed={() => setTagsIsOpen(false)}
-        onSelected={(chip: Chip) => setSelectedChip(chip)}
-        selectedChip={selectedChip}
+
+      {/* Filter modals */}
+      <FilterModal
+        ref={mainModalRef}
+        selectedColorId={filters.colorId}
+        selectedColorName={colorInfo?.name}
+        selectedColorHex={colorInfo?.hex}
+        onColorPress={openColorFromMain}
+        selectedTagName={selectedTag?.name}
+        onTagPress={openTagsFromMain}
+        onReset={resetFilters}
+        hasActiveFilters={activeFiltersCount > 0}
       />
-      {groupedHighlights?.length ? (
-        <VersesList setSettings={setIsSettingsOpen} groupedHighlights={groupedHighlights} />
+
+      <ColorFilterModal
+        ref={colorModalRef}
+        selectedColorId={filters.colorId}
+        onSelect={colorId => {
+          setColorFilter(colorId)
+          colorModalRef.current?.dismiss()
+        }}
+      />
+
+      <TagsFilterModal
+        ref={tagsModalRef}
+        selectedTag={selectedTag}
+        onSelect={tag => {
+          setTagFilter(tag)
+          tagsModalRef.current?.dismiss()
+        }}
+      />
+
+      {/* Content */}
+      {groupedHighlights.length ? (
+        <VersesList setSettings={setSettingsData} groupedHighlights={groupedHighlights} />
       ) : (
         <Empty
           source={require('~assets/images/empty.json')}
           message={t("Vous n'avez pas encore rien surligné...")}
         />
       )}
-      <Modal.Body ref={ref} onModalClose={() => setIsSettingsOpen(undefined)} enableDynamicSizing>
+
+      {/* Settings modal */}
+      <Modal.Body ref={settingsRef} onModalClose={() => setSettingsData(null)} enableDynamicSizing>
         <Modal.Item
           bold
           onPress={() => {
-            close()
-            setIsChangeColorOpen(isSettingsOpen?.stringIds)
+            closeSettings()
+            if (settingsData?.stringIds) {
+              setChangeColorData(settingsData.stringIds)
+            }
           }}
         >
           {t('Changer la couleur')}
@@ -176,22 +232,26 @@ const HighlightsScreen = () => {
         <Modal.Item
           bold
           onPress={() => {
-            close()
-            setMultipleTagsItem({
-              entity: 'highlights',
-              ids: isSettingsOpen?.stringIds,
-            })
+            closeSettings()
+            if (settingsData?.stringIds) {
+              setMultipleTagsItem({
+                entity: 'highlights',
+                ids: settingsData.stringIds,
+              })
+            }
           }}
         >
           {t('Éditer les tags')}
         </Modal.Item>
-        <Modal.Item bold color="quart" onPress={promptLogout}>
+        <Modal.Item bold color="quart" onPress={handleDelete}>
           {t('Supprimer')}
         </Modal.Item>
       </Modal.Body>
+
+      {/* Color change modal */}
       <Modal.Body
-        ref={ref2}
-        onModalClose={() => setIsChangeColorOpen(undefined)}
+        ref={colorChangeRef}
+        onModalClose={() => setChangeColorData(null)}
         enableDynamicSizing
       >
         <ScrollView
@@ -204,25 +264,25 @@ const HighlightsScreen = () => {
           }}
         >
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color1} onPress={() => changeColor('color1')} />
+            <TouchableCircle color={colors.color1} onPress={() => handleColorChange('color1')} />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color2} onPress={() => changeColor('color2')} />
+            <TouchableCircle color={colors.color2} onPress={() => handleColorChange('color2')} />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color3} onPress={() => changeColor('color3')} />
+            <TouchableCircle color={colors.color3} onPress={() => handleColorChange('color3')} />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color4} onPress={() => changeColor('color4')} />
+            <TouchableCircle color={colors.color4} onPress={() => handleColorChange('color4')} />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color5} onPress={() => changeColor('color5')} />
+            <TouchableCircle color={colors.color5} onPress={() => handleColorChange('color5')} />
           </Box>
           {customHighlightColors.map((customColor: CustomColor) => (
             <Box key={customColor.id} width={colorItemWidth} height={60} center>
               <TouchableCircle
                 color={customColor.hex}
-                onPress={() => changeColor(customColor.id)}
+                onPress={() => handleColorChange(customColor.id)}
               />
             </Box>
           ))}

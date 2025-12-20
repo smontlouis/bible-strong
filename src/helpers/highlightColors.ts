@@ -1,6 +1,6 @@
 import { CustomColor } from '~redux/modules/user'
 
-export const TRANSPARENT_COLOR = 'transparent'
+export const TRANSPARENT_COLOR = 'rgba(0, 0, 0, 0.1)'
 
 type ThemeColors = {
   color1?: string
