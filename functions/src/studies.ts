@@ -1,20 +1,16 @@
-import * as functions from 'firebase-functions'
+import { onRequest } from 'firebase-functions/v2/https'
+import { onDocumentUpdated, onDocumentDeleted } from 'firebase-functions/v2/firestore'
 import puppeteer, { Browser } from 'puppeteer-core'
-
 import chromium from '@sparticuz/chromium-min'
 
 const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
 
-const runtimeOpts = {
-  memory: '1GB' as '1GB',
-}
-
 const bucket = admin.storage().bucket('bible-strong-app.appspot.com')
 
-export const exportStudyPDF = functions
-  .runWith(runtimeOpts)
-  .https.onRequest((req, res) => {
+export const exportStudyPDF = onRequest(
+  { memory: '1GiB' },
+  (req, res) => {
     cors(req, res, async () => {
       try {
         const { studyId } = req.body
@@ -39,12 +35,11 @@ export const exportStudyPDF = functions
               '--hide-scrollbars',
               '--disable-web-security',
             ],
-            defaultViewport: chromium.defaultViewport,
+            defaultViewport: { width: 1920, height: 1080 },
             executablePath: await chromium.executablePath(
               'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar'
             ),
-            headless: chromium.headless,
-            ignoreHTTPSErrors: true,
+            headless: true,
           })
         }
 
@@ -72,14 +67,16 @@ export const exportStudyPDF = functions
         res.status(500).send(error)
       }
     })
-  })
+  }
+)
 
-// ! TODO - Generate meta image for study
-export const onStudyUpdate = functions.firestore
-  .document('studies/{studyId}')
-  .onUpdate(async (change, context) => {
-    const newValue = change.after.data()
-    const previousValue = change.before.data()
+export const onStudyUpdate = onDocumentUpdated(
+  'studies/{studyId}',
+  async (event) => {
+    const newValue = event.data?.after.data()
+    const previousValue = event.data?.before.data()
+
+    if (!newValue || !previousValue) return
 
     if (newValue.published !== previousValue.published || newValue.published) {
       if (!newValue.published) {
@@ -93,17 +90,22 @@ export const onStudyUpdate = functions.firestore
         }
       }
     }
-  })
+  }
+)
 
-export const deleteStudy = functions.firestore
-  .document('studies/{studyId}')
-  .onDelete(async (snap, context) => {
+export const deleteStudy = onDocumentDeleted(
+  'studies/{studyId}',
+  async (event) => {
     try {
-      const { id } = snap.data()
+      const data = event.data?.data()
+      if (!data) return
+
+      const { id } = data
       await bucket.file(`images/studies/${id}.jpg`).delete()
       await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
       console.log(`Files deleted for ${id}`)
     } catch (e) {
       console.log(e)
     }
-  })
+  }
+)
