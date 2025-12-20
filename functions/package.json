@@ -1,5 +1,8 @@
 {
   "name": "bible-strong-api",
+  "engines": {
+    "node": "20"
+  },
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
