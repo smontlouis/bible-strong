@@ -1,16 +1,10 @@
 import { Response } from 'express'
 import FormData from 'form-data'
 
-export const putNoUpdateAvailableInResponseAsync = async (
+export const putNoUpdateAvailableInResponse = (
   res: Response,
   protocolVersion: number
-): Promise<Response> => {
-  if (protocolVersion === 0) {
-    throw new Error(
-      'NoUpdateAvailable directive not available in protocol version 0'
-    )
-  }
-
+) => {
   const directive = {
     type: 'noUpdateAvailable',
   }
