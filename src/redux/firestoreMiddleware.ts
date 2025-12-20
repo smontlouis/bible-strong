@@ -47,9 +47,15 @@ import {
   TOGGLE_SETTINGS_SHARE_QUOTES,
   TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
   SAVE_ALL_LOGS_AS_SEEN,
+  SET_DEFAULT_COLOR_NAME,
   //
   IMPORT_DATA,
 } from './modules/user'
+import {
+  ADD_CUSTOM_COLOR,
+  UPDATE_CUSTOM_COLOR,
+  DELETE_CUSTOM_COLOR,
+} from './modules/user/customColors'
 
 import { firebaseDb, doc, setDoc, getDoc, deleteDoc, deleteField } from '../helpers/firebase'
 import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
@@ -235,7 +241,8 @@ export default (store: any) => (next: any) => async (action: any) => {
     case TOGGLE_SETTINGS_SHARE_INLINE_VERSES:
     case TOGGLE_SETTINGS_SHARE_QUOTES:
     case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS:
-    case SAVE_ALL_LOGS_AS_SEEN: {
+    case SAVE_ALL_LOGS_AS_SEEN:
+    case SET_DEFAULT_COLOR_NAME: {
       if (!diffState?.user?.bible?.settings) break
 
       await handleSyncWithRetry(
@@ -248,6 +255,34 @@ export default (store: any) => (next: any) => async (action: any) => {
         },
         userId,
         'settings_sync',
+        state
+      )
+      break
+    }
+
+    // ========== CUSTOM HIGHLIGHT COLORS SYNC ==========
+    // Sync le tableau complet (pas le diff) pour éviter les problèmes de merge avec Firestore
+    case ADD_CUSTOM_COLOR:
+    case UPDATE_CUSTOM_COLOR:
+    case DELETE_CUSTOM_COLOR: {
+      const customHighlightColors = state.user.bible.settings.customHighlightColors ?? []
+
+      await handleSyncWithRetry(
+        async () => {
+          await setDoc(
+            userDocRef,
+            {
+              bible: {
+                settings: {
+                  customHighlightColors: removeUndefinedVariables(customHighlightColors),
+                },
+              },
+            },
+            { merge: true }
+          )
+        },
+        userId,
+        'custom_colors_sync',
         state
       )
       break

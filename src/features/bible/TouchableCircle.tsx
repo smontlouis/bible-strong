@@ -11,7 +11,7 @@ const Touchable = styled.TouchableOpacity(() => ({
 const Container = styled.View(({ color, size }: any) => ({
   width: size,
   height: size,
-  borderRadius: size / 2,
+  borderRadius: size / 3,
   backgroundColor: color,
 }))
 

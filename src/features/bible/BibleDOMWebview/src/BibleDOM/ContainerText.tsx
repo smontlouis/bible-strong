@@ -13,12 +13,27 @@ const zoom = keyframes({
   },
 })
 
+// Resolve a color ID to its hex value
+const resolveHighlightColor = (
+  colorId: string,
+  themeColors: Record<string, string>,
+  customHighlightColors: Array<{ id: string; hex: string }> = []
+): string => {
+  // Default colors (color1-color5)
+  if (colorId.startsWith('color')) {
+    return themeColors[colorId] || 'transparent'
+  }
+  // Custom colors
+  const customColor = customHighlightColors.find(c => c.id === colorId)
+  return customColor?.hex || 'transparent'
+}
+
 export const ContainerText = styled('span')<
   RootStyles & {
     isFocused?: boolean
     isTouched?: boolean
     isSelected?: boolean
-    highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
+    highlightedColor?: string
     isVerseToScroll?: boolean
   }
 >(({
@@ -27,14 +42,14 @@ export const ContainerText = styled('span')<
   isSelected,
   highlightedColor,
   isVerseToScroll,
-  settings: { theme, colors, fontFamily },
+  settings: { theme, colors, fontFamily, customHighlightColors },
 }) => {
   let background = 'transparent'
   let borderRadius = '0px'
 
   if (highlightedColor && !isSelected) {
-    const hexColor = colors[theme][highlightedColor]
-    background = convertHex(hexColor, 50)
+    const hexColor = resolveHighlightColor(highlightedColor, colors[theme], customHighlightColors)
+    background = hexColor !== 'transparent' ? convertHex(hexColor, 50) : 'transparent'
     borderRadius = '4px'
   }
   if (isTouched) {

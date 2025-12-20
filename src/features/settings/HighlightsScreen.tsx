@@ -7,15 +7,17 @@ import Container from '~common/ui/Container'
 
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { Alert, ScrollView } from 'react-native'
 import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import TouchableCircle from '~features/bible/TouchableCircle'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { wp } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { selectHighlightsObj, makeColorsSelector } from '~redux/selectors/user'
 import {
   changeHighlightColor,
+  CustomColor,
   Highlight,
   HighlightsObj,
   removeHighlight,
@@ -29,6 +31,8 @@ interface Chip {
   id: string
   name: string
 }
+
+const MIN_ITEM_WIDTH = 40
 
 export type GroupedHighlights = {
   date: number
@@ -77,6 +81,14 @@ const HighlightsScreen = () => {
   const { theme: currentTheme } = useCurrentThemeSelector()
   const selectColors = useMemo(() => makeColorsSelector(), [])
   const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
+  const customHighlightColors = useSelector(
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
+  )
+
+  // Calculate dynamic item width for color circles
+  const screenWidth = wp(100, 500)
+  const colorItemCount = 5 + customHighlightColors.length // 5 default + custom colors
+  const colorItemWidth = Math.max(screenWidth / colorItemCount, MIN_ITEM_WIDTH)
 
   const [isTagsOpen, setTagsIsOpen] = React.useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = React.useState<any>()
@@ -182,13 +194,39 @@ const HighlightsScreen = () => {
         onModalClose={() => setIsChangeColorOpen(undefined)}
         enableDynamicSizing
       >
-        <Box row my={20} mx={20}>
-          <TouchableCircle color={colors.color1} onPress={() => changeColor('color1')} />
-          <TouchableCircle color={colors.color2} onPress={() => changeColor('color2')} />
-          <TouchableCircle color={colors.color3} onPress={() => changeColor('color3')} />
-          <TouchableCircle color={colors.color4} onPress={() => changeColor('color4')} />
-          <TouchableCircle color={colors.color5} onPress={() => changeColor('color5')} />
-        </Box>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 10,
+          }}
+        >
+          <Box width={colorItemWidth} height={60} center>
+            <TouchableCircle color={colors.color1} onPress={() => changeColor('color1')} />
+          </Box>
+          <Box width={colorItemWidth} height={60} center>
+            <TouchableCircle color={colors.color2} onPress={() => changeColor('color2')} />
+          </Box>
+          <Box width={colorItemWidth} height={60} center>
+            <TouchableCircle color={colors.color3} onPress={() => changeColor('color3')} />
+          </Box>
+          <Box width={colorItemWidth} height={60} center>
+            <TouchableCircle color={colors.color4} onPress={() => changeColor('color4')} />
+          </Box>
+          <Box width={colorItemWidth} height={60} center>
+            <TouchableCircle color={colors.color5} onPress={() => changeColor('color5')} />
+          </Box>
+          {customHighlightColors.map((customColor: CustomColor) => (
+            <Box key={customColor.id} width={colorItemWidth} height={60} center>
+              <TouchableCircle
+                color={customColor.hex}
+                onPress={() => changeColor(customColor.id)}
+              />
+            </Box>
+          ))}
+        </ScrollView>
       </Modal.Body>
     </Container>
   )

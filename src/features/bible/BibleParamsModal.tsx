@@ -367,11 +367,11 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           alignItems="center"
           row
           onPress={() => {
-            navigation.navigate('ModifyColors')
+            navigation.navigate('CustomHighlightColors')
             modalRef.current?.close()
           }}
         >
-          <Text flex>{t('Couleurs des surbrillances')}</Text>
+          <Text flex>{t('Couleurs de surlignage')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
         <Border />
