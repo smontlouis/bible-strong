@@ -1,5 +1,4 @@
 import { logTypes } from '~helpers/changelog'
-import { RootState } from '~redux/modules/reducer'
 
 export type Status = 'Idle' | 'Pending' | 'Resolved' | 'Rejected'
 
@@ -220,4 +219,18 @@ export type SelectedCode = {
 export interface HighlightFilters {
   colorId?: string // 'color1', 'color2', 'custom-xxx', ou undefined (tous)
   tagId?: string // ID du tag, ou undefined (tous)
+}
+export interface Bookmark {
+  id: string
+  name: string
+  color: string
+  book: number
+  chapter: number
+  verse: number
+  date: number
+  version?: string
+}
+
+export interface BookmarksObj {
+  [id: string]: Bookmark
 }

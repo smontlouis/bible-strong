@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native'
 import { useSelector } from 'react-redux'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
+import Box, { HStack, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
@@ -76,14 +76,14 @@ const Chip = styled(Link)(({ theme, hightlighted }: { theme: Theme; hightlighted
   borderRadius: 10,
   backgroundColor: theme.colors.reverse,
   paddingVertical: 10,
-  paddingHorizontal: 13,
-  marginRight: 10,
+  paddingHorizontal: 10,
   shadowColor: 'rgb(89,131,240)',
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.1,
   shadowRadius: 7,
   elevation: 1,
   overflow: 'visible',
+  flex: 1,
 
   ...(hightlighted && {
     elevation: 0,
@@ -112,6 +112,9 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
   const notes = useSelector((state: RootState) => Object.keys(state.user.bible.notes).length)
   const studies = useSelector((state: RootState) => Object.keys(state.user.bible.studies).length)
   const tags = useSelector((state: RootState) => Object.keys(state.user.bible.tags).length)
+  const bookmarks = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.bookmarks || {}).length
+  )
 
   const [currentVOD, setCurrentVOD] = useState(0)
 
@@ -208,61 +211,74 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
         )} */}
       </Box>
       <Box bg="lightGrey">
-        <ScrollView
-          horizontal
-          style={{ maxHeight: 95, overflow: 'visible', marginTop: 10 }}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            flexDirection: 'row',
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-            overflow: 'visible',
-          }}
-        >
-          {/* @ts-ignore */}
-          <Chip route="History" hightlighted>
-            <MaterialIcon name="history" size={20} />
-            <Text mt={5} fontSize={12}>
-              {t('Historique')}
-            </Text>
-          </Chip>
-          <Chip route="Highlights">
-            <Box row>
-              <ChipIcon name="edit-3" size={20} />
-              <Text bold fontSize={20}>
-                {highlights}
+        <VStack gap={10} px={30} py={10}>
+          <HStack gap={10}>
+            <Chip route="History">
+              <MaterialIcon name="history" size={20} />
+              <Text mt={5} fontSize={11} numberOfLines={1}>
+                {t('Historique')}
               </Text>
-            </Box>
-            <Text fontSize={12}>{t('surbrillance', { count: highlights })}</Text>
-          </Chip>
-          <Chip route="BibleVerseNotes">
-            <Box row>
-              <ChipIcon name="file-text" size={20} />
-              <Text bold fontSize={20}>
-                {notes}
+            </Chip>
+            <Chip route="Bookmarks">
+              <Box row>
+                <ChipIcon name="bookmark" size={20} />
+                <Text bold fontSize={20}>
+                  {bookmarks}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {t('marque-page', { count: bookmarks })}
               </Text>
-            </Box>
-            <Text fontSize={12}>{t('note', { count: notes })}</Text>
-          </Chip>
-          <Chip route="Studies">
-            <Box row>
-              <ChipIcon name="feather" size={20} />
-              <Text bold fontSize={20}>
-                {studies}
+            </Chip>
+            <Chip route="Highlights">
+              <Box row>
+                <ChipIcon name="edit-3" size={20} />
+                <Text bold fontSize={20}>
+                  {highlights}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {t('surbrillance', { count: highlights })}
               </Text>
-            </Box>
-            <Text fontSize={12}>{t('étude', { count: studies })}</Text>
-          </Chip>
-          <Chip route="Tags">
-            <Box row>
-              <ChipIcon name="tag" size={20} />
-              <Text bold fontSize={20}>
-                {tags}
+            </Chip>
+          </HStack>
+          <HStack gap={10}>
+            <Chip route="BibleVerseNotes">
+              <Box row>
+                <ChipIcon name="file-text" size={20} />
+                <Text bold fontSize={20}>
+                  {notes}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {t('note', { count: notes })}
               </Text>
-            </Box>
-            <Text fontSize={12}> {t('étiquette', { count: tags })}</Text>
-          </Chip>
-        </ScrollView>
+            </Chip>
+            <Chip route="Studies">
+              <Box row>
+                <ChipIcon name="feather" size={20} />
+                <Text bold fontSize={20}>
+                  {studies}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {t('étude', { count: studies })}
+              </Text>
+            </Chip>
+            <Chip route="Tags">
+              <Box row>
+                <ChipIcon name="tag" size={20} />
+                <Text bold fontSize={20}>
+                  {tags}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {' '}
+                {t('étiquette', { count: tags })}
+              </Text>
+            </Chip>
+          </HStack>
+        </VStack>
       </Box>
     </Container>
   )

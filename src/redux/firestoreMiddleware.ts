@@ -16,6 +16,11 @@ import {
   //
   CHANGE_COLOR,
   //
+  ADD_BOOKMARK,
+  REMOVE_BOOKMARK,
+  UPDATE_BOOKMARK,
+  MOVE_BOOKMARK,
+  //
   ADD_NOTE,
   REMOVE_NOTE,
   //
@@ -288,6 +293,30 @@ export default (store: any) => (next: any) => async (action: any) => {
       break
     }
 
+    // ========== BOOKMARKS SYNC (sous-collection) ==========
+    case ADD_BOOKMARK:
+    case REMOVE_BOOKMARK:
+    case UPDATE_BOOKMARK:
+    case MOVE_BOOKMARK: {
+      if (!diffState?.user?.bible?.bookmarks) break
+
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'bookmarks',
+            diffState.user.bible.bookmarks,
+            user.bible.bookmarks,
+            deleteMarker
+          )
+        },
+        userId,
+        'bookmarks_sync',
+        state
+      )
+      break
+    }
+
     // ========== NOTES SYNC (sous-collection) ==========
     case ADD_NOTE:
     case REMOVE_NOTE: {
@@ -502,6 +531,7 @@ export default (store: any) => (next: any) => async (action: any) => {
         async () => {
           // 1. Migrer les données vers les sous-collections
           await migrateImportedDataToSubcollections(userId, {
+            bookmarks: bible?.bookmarks,
             highlights: bible?.highlights,
             notes: bible?.notes,
             tags: bible?.tags,

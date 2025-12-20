@@ -179,7 +179,6 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
 
       <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
         <Modal.Item
-          bold
           onPress={() => {
             if (!isOpen) return // show error ?
 
@@ -189,7 +188,7 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
         >
           {t('Éditer')}
         </Modal.Item>
-        <Modal.Item bold color="quart" onPress={promptLogout}>
+        <Modal.Item color="quart" onPress={promptLogout}>
           {t('Supprimer')}
         </Modal.Item>
       </Modal.Body>

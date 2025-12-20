@@ -1,11 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { StackNavigationProp } from '@react-navigation/stack'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
+import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { isFullScreenBibleValue } from 'src/state/app'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
@@ -19,7 +21,7 @@ import Box, {
   motiTransition,
   TouchableBox,
 } from '~common/ui/Box'
-import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
+import { FeatherIcon, IonIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
@@ -28,8 +30,11 @@ import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
+import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
+import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
@@ -68,6 +73,17 @@ const Header = ({
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
+
+  // Bookmark ref
+  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const bible = useAtomValue(bibleAtom)
+  const bookNumber = bible.data.selectedBook.Numero
+
+  // Check if current chapter has a bookmark
+  const selectBookmarkForChapter = useMemo(() => makeSelectBookmarkForChapter(), [])
+  const currentChapterBookmark = useSelector((state: RootState) =>
+    selectBookmarkForChapter(state, bookNumber, chapter)
+  )
 
   useEffect(() => {
     actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
@@ -263,6 +279,17 @@ const Header = ({
         />
         {!isSelectionMode && (
           <HStack marginLeft="auto">
+            {currentChapterBookmark && (
+              <MotiBox center width={25} height="100%" animate={menuOpacity}>
+                <TouchableBox
+                  center
+                  height="100%"
+                  onPress={() => bookmarkModalRef.current?.present()}
+                >
+                  <IonIcon name="bookmark" size={18} color={currentChapterBookmark.color} />
+                </TouchableBox>
+              </MotiBox>
+            )}
             <PopOverMenu
               element={
                 <MotiBox
@@ -313,12 +340,35 @@ const Header = ({
                       <Text marginLeft={10}>{t('Historique')}</Text>
                     </Box>
                   </MenuOption>
+                  <MenuOption onSelect={() => bookmarkModalRef.current?.present()}>
+                    <Box row alignItems="center">
+                      <IonIcon
+                        name="bookmark"
+                        size={20}
+                        color={currentChapterBookmark ? currentChapterBookmark.color : undefined}
+                      />
+                      <Text marginLeft={10}>
+                        {currentChapterBookmark
+                          ? t('Modifier le marque-page')
+                          : t('Ajouter un marque-page')}
+                      </Text>
+                    </Box>
+                  </MenuOption>
                 </>
               }
             />
           </HStack>
         )}
       </HStack>
+      <BookmarkModal
+        bottomSheetRef={bookmarkModalRef}
+        onClose={() => {}}
+        book={bookNumber}
+        chapter={chapter}
+        verse={1}
+        version={version}
+        existingBookmark={currentChapterBookmark || undefined}
+      />
     </MotiHStack>
   )
 }

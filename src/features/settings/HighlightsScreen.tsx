@@ -219,7 +219,6 @@ const HighlightsScreen = () => {
       {/* Settings modal */}
       <Modal.Body ref={settingsRef} onModalClose={() => setSettingsData(null)} enableDynamicSizing>
         <Modal.Item
-          bold
           onPress={() => {
             closeSettings()
             if (settingsData?.stringIds) {
@@ -230,7 +229,6 @@ const HighlightsScreen = () => {
           {t('Changer la couleur')}
         </Modal.Item>
         <Modal.Item
-          bold
           onPress={() => {
             closeSettings()
             if (settingsData?.stringIds) {
@@ -243,7 +241,7 @@ const HighlightsScreen = () => {
         >
           {t('Éditer les tags')}
         </Modal.Item>
-        <Modal.Item bold color="quart" onPress={handleDelete}>
+        <Modal.Item color="quart" onPress={handleDelete}>
           {t('Supprimer')}
         </Modal.Item>
       </Modal.Body>

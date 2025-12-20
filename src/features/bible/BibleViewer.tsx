@@ -21,6 +21,7 @@ import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { MainStackProps } from '~navigation/type'
@@ -31,9 +32,11 @@ import {
   makeNotesByChapterSelector,
   makeIsSelectedVerseHighlightedSelector,
 } from '~redux/selectors/bible'
+import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
+import type { Bookmark } from '~common/types'
 // import BibleWebView from './BibleDOMWebview'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
@@ -43,6 +46,7 @@ import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import { LoadingView } from './LoadingView'
+import BookmarkModal from '~features/bookmarks/BookmarkModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -111,6 +115,13 @@ const BibleViewer = ({
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
+  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{
+    book: number
+    chapter: number
+    verse: number
+  } | null>(null)
+  const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const bibleParamsModal = useBottomSheetModal()
   const resourceModal = useBottomSheet()
 
@@ -167,6 +178,7 @@ const BibleViewer = ({
     () => makeIsSelectedVerseHighlightedSelector(),
     []
   )
+  const selectBookmarksInChapter = useMemo(() => makeSelectBookmarksInChapter(), [])
 
   const highlightedVersesByChapter = useSelector((state: RootState) =>
     selectHighlightsByChapter(state, book.Numero, chapter)
@@ -178,6 +190,10 @@ const BibleViewer = ({
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
     selectIsSelectedVerseHighlighted(state, selectedVerses)
+  )
+
+  const bookmarkedVerses = useSelector((state: RootState) =>
+    selectBookmarksInChapter(state, book.Numero, chapter)
   )
 
   useEffect(() => {
@@ -360,6 +376,32 @@ const BibleViewer = ({
     setPendingVerseData(null)
   }, [])
 
+  // Bookmark handler
+  const handleAddBookmark = useCallback(() => {
+    // Get the first selected verse for the bookmark
+    const firstVerseKey = Object.keys(selectedVerses)[0]
+    if (firstVerseKey) {
+      const [bookNum, chapterNum, verseNum] = firstVerseKey.split('-').map(Number)
+      setSelectedVerseForBookmark({
+        book: bookNum,
+        chapter: chapterNum,
+        verse: verseNum,
+      })
+      setEditingBookmark(null)
+      actions.clearSelectedVerses()
+      // Use setTimeout to ensure state is updated before presenting
+      setTimeout(() => bookmarkModalRef.current?.present(), 0)
+    }
+  }, [selectedVerses, actions])
+
+  // Handler for opening bookmark modal from DOM (existing bookmark)
+  const handleOpenBookmarkModal = useCallback((bookmark: Bookmark) => {
+    setEditingBookmark(bookmark)
+    setSelectedVerseForBookmark(null)
+    // Use setTimeout to ensure state is updated before presenting
+    setTimeout(() => bookmarkModalRef.current?.present(), 0)
+  }, [])
+
   // Déplacer le hook en dehors de la condition de rendu
   const translationY = useDerivedValue(() => {
     return {
@@ -417,6 +459,7 @@ const BibleViewer = ({
           selectedVerses={selectedVerses}
           highlightedVerses={highlightedVersesByChapter}
           notedVerses={notesByChapter}
+          bookmarkedVerses={bookmarkedVerses}
           settings={settings}
           verseToScroll={verse}
           pericopeChapter={getPericopeChapter(pericope.current, book.Numero, chapter)}
@@ -431,6 +474,7 @@ const BibleViewer = ({
           setMultipleTagsItem={setMultipleTagsItem}
           onChangeResourceTypeSelectVerse={onChangeResourceTypeSelectVerse}
           onMountTimeout={onMountTimeout}
+          onOpenBookmarkModal={handleOpenBookmarkModal}
         />
       )}
       {!isReadOnly && (
@@ -481,6 +525,7 @@ const BibleViewer = ({
         selectAllVerses={selectAllVerses}
         version={version}
         onAddToStudy={handleOpenAddToStudy}
+        onAddBookmark={handleAddBookmark}
       />
       <QuickTagsModal
         item={quickTagsModal}
@@ -513,6 +558,18 @@ const BibleViewer = ({
         onClose={handleCloseFormatBottomSheet}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
+      <BookmarkModal
+        bottomSheetRef={bookmarkModalRef}
+        onClose={() => {
+          setSelectedVerseForBookmark(null)
+          setEditingBookmark(null)
+        }}
+        book={selectedVerseForBookmark?.book ?? editingBookmark?.book}
+        chapter={selectedVerseForBookmark?.chapter ?? editingBookmark?.chapter}
+        verse={selectedVerseForBookmark?.verse ?? editingBookmark?.verse}
+        version={version}
+        existingBookmark={editingBookmark || undefined}
+      />
     </Box>
   )
 }

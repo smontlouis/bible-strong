@@ -23,6 +23,7 @@ import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
 import { RootState } from '~redux/modules/reducer'
 import { HighlightsObj, NotesObj } from '~redux/modules/user'
+import type { Bookmark } from '~common/types'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import {
   ADD_PARALLEL_VERSION,
@@ -33,6 +34,7 @@ import {
   NAVIGATE_TO_STRONG,
   NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_VERSION,
+  OPEN_BOOKMARK_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   REMOVE_PARALLEL_VERSION,
   SWIPE_DOWN,
@@ -84,6 +86,7 @@ export type WebViewProps = {
   selectedVerses: VerseIds
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
+  bookmarkedVerses: Record<number, Bookmark>
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
@@ -98,6 +101,7 @@ export type WebViewProps = {
   setMultipleTagsItem?: any
   onChangeResourceTypeSelectVerse?: any
   onMountTimeout?: () => void
+  onOpenBookmarkModal?: (bookmark: Bookmark) => void
 }
 
 export type NotedVerse = {
@@ -121,6 +125,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     selectedVerses,
     highlightedVerses,
     notedVerses,
+    bookmarkedVerses,
     settings,
     verseToScroll,
     isReadOnly,
@@ -324,6 +329,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
 
+      case OPEN_BOOKMARK_MODAL: {
+        const { onOpenBookmarkModal } = props
+        if (onOpenBookmarkModal) {
+          onOpenBookmarkModal(action.payload)
+        }
+        break
+      }
+
       default: {
         break
       }
@@ -364,6 +377,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         selectedVerses={selectedVerses}
         highlightedVerses={highlightedVerses}
         notedVerses={notedVerses}
+        bookmarkedVerses={bookmarkedVerses}
         settings={settings}
         verseToScroll={verseToScroll}
         isReadOnly={isReadOnly}

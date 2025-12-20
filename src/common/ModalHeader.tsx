@@ -6,7 +6,7 @@ import { FeatherIcon } from './ui/Icon'
 
 interface Props {
   title: string
-  subTitle: string
+  subTitle?: string
   onClose?: () => void
   children?: JSX.Element
   rightComponent?: JSX.Element
@@ -16,13 +16,15 @@ const ModalHeader = ({ title, subTitle, onClose, children, rightComponent }: Pro
   return (
     <Box bg="reverse" borderColor="border" borderBottomWidth={1}>
       <Box height={54} row>
-        <Box flex paddingLeft={20}>
-          <Text numberOfLines={1} bold fontSize={16} marginTop={10}>
+        <Box flex paddingLeft={20} justifyContent="center">
+          <Text numberOfLines={1} bold fontSize={16}>
             {title}
           </Text>
-          <Text fontSize={13} color="grey">
-            {subTitle}
-          </Text>
+          {subTitle && (
+            <Text fontSize={13} color="grey">
+              {subTitle}
+            </Text>
+          )}
         </Box>
         {rightComponent}
         <TouchableBox onPress={onClose} center w={54} h={54}>

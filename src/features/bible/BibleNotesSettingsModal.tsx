@@ -59,7 +59,6 @@ const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
             openNoteEditor(noteId)
           }, 500)
         }}
-        bold
       >
         {t('Éditer')}
       </Modal.Item>
@@ -71,11 +70,10 @@ const NotesSettingsModal = ({ isOpen, onClosed, openNoteEditor }: Props) => {
             setMultipleTagsItem({ ...note, id: noteId, entity: 'notes' })
           }, 500)
         }}
-        bold
       >
         {t('Éditer les tags')}
       </Modal.Item>
-      <Modal.Item bold color="quart" onPress={() => deleteNoteConfirmation(noteId)}>
+      <Modal.Item color="quart" onPress={() => deleteNoteConfirmation(noteId)}>
         {t('Supprimer')}
       </Modal.Item>
     </Modal.Body>

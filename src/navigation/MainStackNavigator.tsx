@@ -49,6 +49,7 @@ import CustomHighlightColorsScreen from '../features/settings/CustomHighlightCol
 import ResourceLanguageScreen from '../features/settings/ResourceLanguageScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
+import BookmarksScreen from '~features/bookmarks/BookmarksScreen'
 import { PortalProvider } from '@gorhom/portal'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 
@@ -94,6 +95,7 @@ const MainStack = () => {
             <MainStackNavigator.Screen name="Pericope" component={PericopeScreen} />
             <MainStackNavigator.Screen name="History" component={HistoryScreen} />
             <MainStackNavigator.Screen name="Tags" component={TagsScreen} />
+            <MainStackNavigator.Screen name="Bookmarks" component={BookmarksScreen} />
             <MainStackNavigator.Screen name="Tag" component={TagScreen} />
             <MainStackNavigator.Screen name="Downloads" component={DownloadsScreen} />
             <MainStackNavigator.Screen name="Search" component={SearchScreen} />

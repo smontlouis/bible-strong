@@ -232,6 +232,12 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Étiquettes')}
             </Text>
           </LinkItem>
+          <LinkItem route="Bookmarks">
+            <StyledIcon name="bookmark" size={25} />
+            <Text bold fontSize={15}>
+              {t('Marque-pages')}
+            </Text>
+          </LinkItem>
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>

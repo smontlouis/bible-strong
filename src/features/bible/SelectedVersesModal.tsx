@@ -52,6 +52,7 @@ type Props = {
   selectAllVerses: () => void
   version: VersionCode
   onAddToStudy: () => void
+  onAddBookmark?: () => void
 }
 
 const VersesModal = ({
@@ -68,6 +69,7 @@ const VersesModal = ({
   selectAllVerses,
   version,
   onAddToStudy,
+  onAddBookmark,
 }: Props) => {
   const navigation = useNavigation()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
@@ -297,6 +299,14 @@ const VersesModal = ({
                   onPress={onAddToStudy}
                   label={t('study.addToStudy')}
                 />
+                {onAddBookmark && (
+                  <TouchableChip
+                    name="bookmark"
+                    onPress={onAddBookmark}
+                    label={t('Marque-page')}
+                    disabled={moreThanOneVerseSelected}
+                  />
+                )}
                 <TouchableChip name="copy" onPress={copyToClipboard} label={t('Copier')} />
                 <TouchableChip name="share-2" onPress={shareVerse} label={t('Partager')} />
                 <TouchableChip onPress={selectAllVerses} label={t('Tout sélectionner')} />

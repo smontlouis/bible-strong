@@ -299,6 +299,7 @@ export async function migrateUserDataToSubcollections(
 export async function migrateImportedDataToSubcollections(
   userId: string,
   data: {
+    bookmarks?: { [id: string]: any }
     highlights?: { [id: string]: any }
     notes?: { [id: string]: any }
     tags?: { [id: string]: any }

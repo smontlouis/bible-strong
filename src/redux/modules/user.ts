@@ -1,6 +1,7 @@
 import produce, { Draft } from 'immer'
 import { Reducer } from 'redux'
 import {
+  BookmarksObj,
   ChangelogItem,
   OngoingPlan,
   PreferredColorScheme,
@@ -21,6 +22,7 @@ import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
+import bookmarksReducer from './user/bookmarks'
 import customColorsReducer from './user/customColors'
 import highlightsReducer from './user/highlights'
 import notesReducer from './user/notes'
@@ -31,6 +33,7 @@ import versionUpdateReducer from './user/versionUpdate'
 import { reduceReducers } from './utils'
 const deepmerge = require('@fastify/deepmerge')()
 
+export * from './user/bookmarks'
 export * from './user/customColors'
 export * from './user/highlights'
 export * from './user/notes'
@@ -153,6 +156,7 @@ export interface UserState {
   fontFamily: string
   bible: {
     changelog: {}
+    bookmarks: BookmarksObj
     highlights: HighlightsObj
     notes: NotesObj
     studies: StudiesObj
@@ -229,6 +233,7 @@ const getInitialState = (): UserState => ({
   fontFamily: 'Avenir',
   bible: {
     changelog: {},
+    bookmarks: {},
     highlights: {},
     notes: {},
     studies: {},
@@ -310,6 +315,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.subscription = subscription
 
       // Preserve subcollection data (managed separately)
+      const currentBookmarks = draft.bible.bookmarks
       const currentHighlights = draft.bible.highlights
       const currentNotes = draft.bible.notes
       const currentTags = draft.bible.tags
@@ -323,6 +329,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.bible = deepmerge(getInitialState().bible, bible || {})
 
       // Restore subcollection data
+      draft.bible.bookmarks = currentBookmarks
       draft.bible.highlights = currentHighlights
       draft.bible.notes = currentNotes
       draft.bible.tags = currentTags
@@ -338,6 +345,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     case RECEIVE_SUBCOLLECTION_UPDATES: {
       const { collection, data } = action.payload as {
         collection:
+          | 'bookmarks'
           | 'highlights'
           | 'notes'
           | 'tags'
@@ -351,6 +359,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
       // Update the specific subcollection
       switch (collection) {
+        case 'bookmarks':
+          draft.bible.bookmarks = data as BookmarksObj
+          break
         case 'highlights':
           draft.bible.highlights = data as HighlightsObj
           break
@@ -466,6 +477,7 @@ const reducers = <typeof userReducer>(
   reduceReducers(
     getInitialState(),
     userReducer,
+    bookmarksReducer,
     notesReducer,
     highlightsReducer,
     settingsReducer,
@@ -537,7 +549,15 @@ export function receiveSubcollectionUpdates({
   data,
   isInitialLoad,
 }: {
-  collection: 'highlights' | 'notes' | 'tags' | 'strongsHebreu' | 'strongsGrec' | 'words' | 'naves'
+  collection:
+    | 'bookmarks'
+    | 'highlights'
+    | 'notes'
+    | 'tags'
+    | 'strongsHebreu'
+    | 'strongsGrec'
+    | 'words'
+    | 'naves'
   data: Record<string, unknown>
   isInitialLoad: boolean
 }) {

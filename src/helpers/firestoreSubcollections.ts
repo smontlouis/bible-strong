@@ -16,6 +16,7 @@ import {
  * Types pour les sous-collections
  */
 export type SubcollectionName =
+  | 'bookmarks'
   | 'highlights'
   | 'notes'
   | 'tags'
@@ -25,6 +26,7 @@ export type SubcollectionName =
   | 'naves'
 
 export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
+  'bookmarks',
   'highlights',
   'notes',
   'tags',

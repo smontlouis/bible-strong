@@ -6,15 +6,17 @@ import {
   NAVIGATE_TO_VERSE_NOTES,
   TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
+  OPEN_BOOKMARK_MODAL,
 } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
 import { scaleLineHeight } from './scaleLineHeight'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
+import BookmarkIcon from './BookmarkIcon'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
-import { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
+import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import VerseTextFormatting from './VerseTextFormatting'
 import { ContainerText } from './ContainerText'
@@ -71,6 +73,7 @@ interface Props {
   isParallelVerse?: boolean
   isINTComplete?: boolean
   tag: TaggedVerse | undefined
+  bookmark?: Bookmark
 }
 
 const Verse = ({
@@ -93,6 +96,7 @@ const Verse = ({
   isParallelVerse,
   isINTComplete,
   tag,
+  bookmark,
 }: Props) => {
   const [isTouched, setIsTouched] = useState(false)
   const detectScrollRef = useRef<any>()
@@ -140,6 +144,15 @@ const Verse = ({
       payload: id,
     })
   }, [])
+
+  const openBookmarkModal = useCallback(() => {
+    if (bookmark) {
+      dispatch({
+        type: OPEN_BOOKMARK_MODAL,
+        payload: bookmark,
+      })
+    }
+  }, [bookmark])
 
   const toggleSelectVerse = useCallback(() => {
     const { Livre, Chapitre, Verset } = verse
@@ -330,6 +343,9 @@ const Verse = ({
         <NumberText isFocused={isFocused} settings={settings}>
           {verse.Verset}{' '}
         </NumberText>
+        {bookmark && !isSelectionMode && (
+          <BookmarkIcon settings={settings} color={bookmark.color} onClick={openBookmarkModal} />
+        )}
         {notesCount && settings.notesDisplay !== 'inline' && !isSelectionMode && (
           <NotesCount settings={settings} onClick={navigateToVerseNotes} count={notesCount} />
         )}

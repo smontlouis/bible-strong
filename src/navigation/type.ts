@@ -172,6 +172,7 @@ export type MainStackProps = {
   Pericope: undefined
   History: undefined
   Tags: undefined
+  Bookmarks: undefined
   Tag: TagScreenProps
   Downloads: undefined
   Search: undefined
