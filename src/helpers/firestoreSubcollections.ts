@@ -19,6 +19,7 @@ export type SubcollectionName =
   | 'bookmarks'
   | 'highlights'
   | 'notes'
+  | 'links'
   | 'tags'
   | 'strongsHebreu'
   | 'strongsGrec'
@@ -29,6 +30,7 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
   'bookmarks',
   'highlights',
   'notes',
+  'links',
   'tags',
   'strongsHebreu',
   'strongsGrec',

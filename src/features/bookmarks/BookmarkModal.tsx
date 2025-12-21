@@ -253,28 +253,26 @@ const BookmarkModal = ({
         )
       }
     >
-      <Box paddingHorizontal={20} paddingTop={20} paddingBottom={40}>
+      <Box paddingHorizontal={20} paddingTop={20}>
         {mode === 'select' ? (
           // Selection mode - show list of existing bookmarks
           <Box>
             <Text bold marginBottom={10}>
               {t('Déplacer un marque-page existant')}
             </Text>
-            <ScrollView style={{ maxHeight: 240 }}>
-              {existingBookmarks.map(bm => (
-                <BookmarkListItem key={bm.id} onPress={() => handleSelectExistingBookmark(bm)}>
-                  <IonIcon name="bookmark" size={18} color={bm.color} />
-                  <Box flex ml={10}>
-                    <Text bold numberOfLines={1}>
-                      {bm.name}
-                    </Text>
-                    <Text fontSize={12} color="grey">
-                      {formatReference(bm.book, bm.chapter, bm.verse)}
-                    </Text>
-                  </Box>
-                </BookmarkListItem>
-              ))}
-            </ScrollView>
+            {existingBookmarks.map(bm => (
+              <BookmarkListItem key={bm.id} onPress={() => handleSelectExistingBookmark(bm)}>
+                <IonIcon name="bookmark" size={18} color={bm.color} />
+                <Box flex ml={10}>
+                  <Text bold numberOfLines={1}>
+                    {bm.name}
+                  </Text>
+                  <Text fontSize={12} color="grey">
+                    {formatReference(bm.book, bm.chapter, bm.verse)}
+                  </Text>
+                </Box>
+              </BookmarkListItem>
+            ))}
 
             <Box marginTop={10}>
               <Button

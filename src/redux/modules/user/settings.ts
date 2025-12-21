@@ -20,6 +20,7 @@ export const DECREASE_SETTINGS_FONTSIZE_SCALE = 'user/DECREASE_SETTINGS_FONTSIZE
 export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
+export const SET_SETTINGS_LINKS_DISPLAY = 'user/SET_SETTINGS_LINKS_DISPLAY'
 export const SET_SETTINGS_COMMENTS_DISPLAY = 'user/SET_SETTINGS_COMMENTS_DISPLAY'
 export const CHANGE_COLOR = 'user/CHANGE_COLOR'
 export const SET_SETTINGS_PREFERRED_COLOR_SCHEME = 'user/SET_SETTINGS_PREFERRED_COLOR_SCHEME'
@@ -118,6 +119,10 @@ export default produce((draft: Draft<UserState>, action) => {
       draft.bible.settings.notesDisplay = action.payload
       break
     }
+    case SET_SETTINGS_LINKS_DISPLAY: {
+      draft.bible.settings.linksDisplay = action.payload
+      break
+    }
     case SET_SETTINGS_COMMENTS_DISPLAY: {
       draft.bible.settings.commentsDisplay = action.payload
       break
@@ -214,6 +219,13 @@ export function setSettingsPreferredDarkTheme(payload: PreferredDarkTheme) {
 export function setSettingsNotesDisplay(payload: string) {
   return {
     type: SET_SETTINGS_NOTES_DISPLAY,
+    payload,
+  }
+}
+
+export function setSettingsLinksDisplay(payload: 'inline' | 'block') {
+  return {
+    type: SET_SETTINGS_LINKS_DISPLAY,
     payload,
   }
 }

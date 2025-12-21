@@ -30,6 +30,7 @@ import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
   makeHighlightsByChapterSelector,
   makeNotesByChapterSelector,
+  makeLinksByChapterSelector,
   makeIsSelectedVerseHighlightedSelector,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
@@ -37,7 +38,7 @@ import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../.
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 import type { Bookmark } from '~common/types'
-// import BibleWebView from './BibleDOMWebview'
+import BibleLinkModal from './BibleLinkModal'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -111,6 +112,7 @@ const BibleViewer = ({
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
+  const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
   const strongModalDisclosure = useBottomSheetDisclosure<SelectedCode>()
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
@@ -174,6 +176,7 @@ const BibleViewer = ({
   // Create memoized selectors
   const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
   const selectNotesByChapter = useMemo(() => makeNotesByChapterSelector(), [])
+  const selectLinksByChapter = useMemo(() => makeLinksByChapterSelector(), [])
   const selectIsSelectedVerseHighlighted = useMemo(
     () => makeIsSelectedVerseHighlightedSelector(),
     []
@@ -186,6 +189,10 @@ const BibleViewer = ({
 
   const notesByChapter = useSelector((state: RootState) =>
     selectNotesByChapter(state, book.Numero, chapter)
+  )
+
+  const linksByChapter = useSelector((state: RootState) =>
+    selectLinksByChapter(state, book.Numero, chapter)
   )
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
@@ -303,6 +310,30 @@ const BibleViewer = ({
 
   const closeNoteModal = () => {
     setNoteVerses(undefined)
+  }
+
+  const toggleCreateLink = () => {
+    setLinkVerses(s => (s ? undefined : selectedVerses))
+  }
+
+  const closeLinkModal = () => {
+    setLinkVerses(undefined)
+  }
+
+  const openLinkModal = (linkId: string) => {
+    try {
+      const linkVersesToLoad = linkId.split('/').reduce((accuRefs, key) => {
+        accuRefs[key] = true
+        return accuRefs
+      }, {} as VerseIds)
+      setLinkVerses(linkVersesToLoad)
+    } catch (e) {
+      Sentry.withScope(scope => {
+        scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
+        scope.setExtra('Link', linkId)
+        Sentry.captureMessage('Link corrupted')
+      })
+    }
   }
 
   const openNoteModal = (noteId: string) => {
@@ -460,10 +491,12 @@ const BibleViewer = ({
           highlightedVerses={highlightedVersesByChapter}
           notedVerses={notesByChapter}
           bookmarkedVerses={bookmarkedVerses}
+          linkedVerses={linksByChapter}
           settings={settings}
           verseToScroll={verse}
           pericopeChapter={getPericopeChapter(pericope.current, book.Numero, chapter)}
           openNoteModal={openNoteModal}
+          openLinkModal={openLinkModal}
           setSelectedCode={strongModalDisclosure.onOpen}
           selectedCode={strongModalDisclosure.isOpen}
           comments={comments}
@@ -513,6 +546,7 @@ const BibleViewer = ({
           resourceModal.open()
         }}
         onCreateNoteClick={toggleCreateNote}
+        onCreateLinkClick={toggleCreateLink}
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
@@ -533,6 +567,7 @@ const BibleViewer = ({
         setMultipleTagsItem={setMultipleTagsItem}
       />
       <BibleNoteModal onClosed={closeNoteModal} noteVerses={noteVerses} />
+      <BibleLinkModal onClosed={closeLinkModal} linkVerses={linkVerses} />
       <StrongModal
         version={version}
         selectedCode={strongModalDisclosure.isOpen}

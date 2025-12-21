@@ -24,7 +24,6 @@
     "node_modules",
     "src/features/timeline/events.old.ts",
     "src/features/bible/bibleWebView",
-    "src/features/bible/BibleDOMWebview",
     "src/features/studies/studiesWebView"
   ]
 }

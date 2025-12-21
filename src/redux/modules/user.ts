@@ -25,6 +25,7 @@ import sunsetColors from '~themes/sunsetColors'
 import bookmarksReducer from './user/bookmarks'
 import customColorsReducer from './user/customColors'
 import highlightsReducer from './user/highlights'
+import linksReducer from './user/links'
 import notesReducer from './user/notes'
 import settingsReducer from './user/settings'
 import studiesReducer from './user/studies'
@@ -36,6 +37,7 @@ const deepmerge = require('@fastify/deepmerge')()
 export * from './user/bookmarks'
 export * from './user/customColors'
 export * from './user/highlights'
+export * from './user/links'
 export * from './user/notes'
 export * from './user/settings'
 export * from './user/studies'
@@ -121,6 +123,41 @@ export interface CustomColor {
   createdAt: number
   name?: string
 }
+export interface OpenGraphData {
+  title?: string
+  description?: string
+  image?: string
+  siteName?: string
+  type?: string
+  fetchedAt: number
+}
+
+export type LinkType =
+  | 'youtube'
+  | 'twitter'
+  | 'instagram'
+  | 'tiktok'
+  | 'vimeo'
+  | 'spotify'
+  | 'facebook'
+  | 'linkedin'
+  | 'github'
+  | 'website'
+
+export interface Link {
+  id?: string
+  url: string
+  customTitle?: string
+  ogData?: OpenGraphData
+  linkType: LinkType
+  videoId?: string // Pour YouTube, Vimeo, TikTok
+  date: number
+  tags?: { [x: string]: Tag }
+}
+
+export interface LinksObj {
+  [verseKey: string]: Link // Clé: "1-1-1" ou "1-1-1/1-1-2"
+}
 
 export interface FireStoreUserData {
   id: string
@@ -159,6 +196,7 @@ export interface UserState {
     bookmarks: BookmarksObj
     highlights: HighlightsObj
     notes: NotesObj
+    links: LinksObj
     studies: StudiesObj
     tags: TagsObj
     strongsHebreu: {}
@@ -175,6 +213,7 @@ export interface UserState {
       preferredDarkTheme: PreferredDarkTheme
       press: 'shortPress' | 'longPress'
       notesDisplay: 'inline' | 'block'
+      linksDisplay: 'inline' | 'block'
       commentsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
@@ -236,6 +275,7 @@ const getInitialState = (): UserState => ({
     bookmarks: {},
     highlights: {},
     notes: {},
+    links: {},
     studies: {},
     tags: {},
     strongsHebreu: {},
@@ -252,6 +292,7 @@ const getInitialState = (): UserState => ({
       preferredDarkTheme: 'dark',
       press: 'longPress',
       notesDisplay: 'inline',
+      linksDisplay: 'inline',
       commentsDisplay: false,
       shareVerses: {
         hasVerseNumbers: true,
@@ -318,6 +359,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       const currentBookmarks = draft.bible.bookmarks
       const currentHighlights = draft.bible.highlights
       const currentNotes = draft.bible.notes
+      const currentLinks = draft.bible.links
       const currentTags = draft.bible.tags
       const currentStrongsHebreu = draft.bible.strongsHebreu
       const currentStrongsGrec = draft.bible.strongsGrec
@@ -332,6 +374,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.bible.bookmarks = currentBookmarks
       draft.bible.highlights = currentHighlights
       draft.bible.notes = currentNotes
+      draft.bible.links = currentLinks
       draft.bible.tags = currentTags
       draft.bible.strongsHebreu = currentStrongsHebreu
       draft.bible.strongsGrec = currentStrongsGrec
@@ -348,6 +391,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           | 'bookmarks'
           | 'highlights'
           | 'notes'
+          | 'links'
           | 'tags'
           | 'strongsHebreu'
           | 'strongsGrec'
@@ -367,6 +411,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           break
         case 'notes':
           draft.bible.notes = data as NotesObj
+          break
+        case 'links':
+          draft.bible.links = data as LinksObj
           break
         case 'tags':
           draft.bible.tags = data as TagsObj
@@ -479,6 +526,7 @@ const reducers = <typeof userReducer>(
     userReducer,
     bookmarksReducer,
     notesReducer,
+    linksReducer,
     highlightsReducer,
     settingsReducer,
     tagsReducer,

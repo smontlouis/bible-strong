@@ -44,6 +44,7 @@ type Props = {
   isSelectedVerseHighlighted: boolean
   onChangeResourceType: (type: BibleResource) => void
   onCreateNoteClick: () => void
+  onCreateLinkClick: () => void
   addHighlight: (color: string) => void
   addTag: () => void
   removeHighlight: () => void
@@ -61,6 +62,7 @@ const VersesModal = ({
   isSelectedVerseHighlighted,
   onChangeResourceType,
   onCreateNoteClick,
+  onCreateLinkClick,
   addHighlight,
   addTag,
   removeHighlight,
@@ -294,6 +296,7 @@ const VersesModal = ({
                 <TouchableChip name="layers" onPress={compareVerses} label={t('Comparer')} />
                 <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
                 <TouchableChip name="file-plus" onPress={onCreateNoteClick} label={t('Note')} />
+                <TouchableChip name="link" onPress={onCreateLinkClick} label={t('Lien')} />
                 <TouchableChip
                   name="feather"
                   onPress={onAddToStudy}

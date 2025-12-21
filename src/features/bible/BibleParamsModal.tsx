@@ -25,6 +25,7 @@ import {
   setFontFamily,
   setSettingsAlignContent,
   setSettingsLineHeight,
+  setSettingsLinksDisplay,
   setSettingsNotesDisplay,
   setSettingsPreferredColorScheme,
   setSettingsPreferredDarkTheme,
@@ -101,6 +102,11 @@ export const useParamsModalLabels = () => {
     block: t('En icone'),
   }
 
+  const linksDisplayToString = {
+    inline: t('À la ligne'),
+    block: t('En icone'),
+  }
+
   return {
     alignContentToString,
     lineHeightToString,
@@ -110,6 +116,7 @@ export const useParamsModalLabels = () => {
     preferredDarkThemeToString,
     pressToString,
     notesDisplayToString,
+    linksDisplayToString,
   }
 }
 
@@ -130,6 +137,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
     preferredDarkThemeToString,
     pressToString,
     notesDisplayToString,
+    linksDisplayToString,
   } = useParamsModalLabels()
 
   const dispatch = useDispatch()
@@ -149,6 +157,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
   const lineHeight = useSelector((state: RootState) => state.user.bible.settings.lineHeight)
   const textDisplay = useSelector((state: RootState) => state.user.bible.settings.textDisplay)
   const notesDisplay = useSelector((state: RootState) => state.user.bible.settings.notesDisplay)
+  const linksDisplay = useSelector((state: RootState) => state.user.bible.settings.linksDisplay)
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
 
   const fontsViewRef = React.useRef(null)
@@ -312,6 +321,20 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
             onPress={() => {
               const nextDisplay = notesDisplay === 'inline' ? 'block' : 'inline'
               dispatch(setSettingsNotesDisplay(nextDisplay))
+            }}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Affichage des liens')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {linksDisplayToString[linksDisplay || 'inline']}
+          </Text>
+          <TouchableIcon
+            isSelected
+            name={linksDisplay === 'inline' ? 'align-left' : 'link'}
+            onPress={() => {
+              const nextDisplay = (linksDisplay || 'inline') === 'inline' ? 'block' : 'inline'
+              dispatch(setSettingsLinksDisplay(nextDisplay))
             }}
           />
         </HalfContainer>

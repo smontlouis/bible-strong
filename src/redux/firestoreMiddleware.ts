@@ -24,6 +24,10 @@ import {
   ADD_NOTE,
   REMOVE_NOTE,
   //
+  ADD_LINK,
+  UPDATE_LINK,
+  REMOVE_LINK,
+  //
   ADD_TAG,
   REMOVE_TAG,
   TOGGLE_TAG_ENTITY,
@@ -339,6 +343,47 @@ export default (store: any) => (next: any) => async (action: any) => {
       break
     }
 
+    // ========== LINKS SYNC (sous-collection) ==========
+    case ADD_LINK:
+    case UPDATE_LINK:
+    case REMOVE_LINK: {
+      if (!diffState?.user?.bible?.links) break
+
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'links',
+            diffState.user.bible.links,
+            user.bible.links,
+            deleteMarker
+          )
+        },
+        userId,
+        'links_sync',
+        state
+      )
+
+      // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
+      if (diffState?.user?.bible?.tags) {
+        await handleSyncWithRetry(
+          async () => {
+            await syncSubcollectionChanges(
+              userId,
+              'tags',
+              diffState.user.bible.tags,
+              user.bible.tags,
+              deleteMarker
+            )
+          },
+          userId,
+          'tags_sync_from_link',
+          state
+        )
+      }
+      break
+    }
+
     // ========== HIGHLIGHTS SYNC (sous-collection) ==========
     case ADD_HIGHLIGHT:
     case REMOVE_HIGHLIGHT:
@@ -534,6 +579,7 @@ export default (store: any) => (next: any) => async (action: any) => {
             bookmarks: bible?.bookmarks,
             highlights: bible?.highlights,
             notes: bible?.notes,
+            links: bible?.links,
             tags: bible?.tags,
             strongsHebreu: bible?.strongsHebreu,
             strongsGrec: bible?.strongsGrec,

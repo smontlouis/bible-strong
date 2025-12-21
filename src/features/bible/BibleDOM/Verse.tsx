@@ -4,20 +4,24 @@ import { styled } from 'goober'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_NOTES,
+  NAVIGATE_TO_VERSE_LINKS,
   TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
+  NAVIGATE_TO_BIBLE_LINK,
 } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
 import { scaleLineHeight } from './scaleLineHeight'
+import LinksCount from './LinksCount'
+import LinksText from './LinksText'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import BookmarkIcon from './BookmarkIcon'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
-import { NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
+import { LinkedVerse, NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import VerseTextFormatting from './VerseTextFormatting'
 import { ContainerText } from './ContainerText'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
@@ -65,6 +69,8 @@ interface Props {
   notesCount: number
   isVerseToScroll: boolean
   notesText: NotedVerse[]
+  linksCount?: number
+  linksText?: LinkedVerse[]
   version: string
   isHebreu: boolean
   selectedCode: SelectedCode | null
@@ -86,6 +92,8 @@ const Verse = ({
   settings,
   isVerseToScroll,
   notesText,
+  linksCount,
+  linksText,
   isSelectionMode,
   version,
   isHebreu,
@@ -153,6 +161,20 @@ const Verse = ({
       })
     }
   }, [bookmark])
+  const navigateToVerseLinks = useCallback(() => {
+    const { Livre, Chapitre, Verset } = verse
+    dispatch({
+      type: NAVIGATE_TO_VERSE_LINKS,
+      payload: `${Livre}-${Chapitre}-${Verset}`,
+    })
+  }, [verse])
+
+  const navigateToLink = useCallback((id: string) => {
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_LINK,
+      payload: id,
+    })
+  }, [])
 
   const toggleSelectVerse = useCallback(() => {
     const { Livre, Chapitre, Verset } = verse
@@ -349,6 +371,14 @@ const Verse = ({
         {notesCount && settings.notesDisplay !== 'inline' && !isSelectionMode && (
           <NotesCount settings={settings} onClick={navigateToVerseNotes} count={notesCount} />
         )}
+        {linksCount && (settings.linksDisplay || 'inline') !== 'inline' && !isSelectionMode && (
+          <LinksCount
+            settings={settings}
+            onClick={navigateToVerseLinks}
+            count={linksCount}
+            linkType={linksText?.[0]?.linkType}
+          />
+        )}
         <VerseText
           isParallel={isParallel}
           settings={settings}
@@ -367,6 +397,14 @@ const Verse = ({
           settings={settings}
           onClick={navigateToNote}
           notesText={notesText}
+        />
+      )}
+      {linksText && (settings.linksDisplay || 'inline') === 'inline' && !isSelectionMode && (
+        <LinksText
+          isParallel={isParallel}
+          settings={settings}
+          onClick={navigateToLink}
+          linksText={linksText}
         />
       )}
     </Wrapper>

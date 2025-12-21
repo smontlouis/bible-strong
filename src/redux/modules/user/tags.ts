@@ -10,6 +10,7 @@ export const REMOVE_TAG = 'user/REMOVE_TAG'
 export const entitiesArray = [
   'highlights',
   'notes',
+  'links',
   'studies',
   'strongsHebreu',
   'strongsGrec',

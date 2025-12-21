@@ -3,9 +3,10 @@
 import { setup, styled } from 'goober'
 import React, { useEffect, useState } from 'react'
 import { TagsObj, Verse as TVerse } from '~common/types'
-import { HighlightsObj, NotesObj } from '~redux/modules/user'
+import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
 import {
   Dispatch,
+  LinkedVerse,
   NotedVerse,
   ParallelVerse,
   PericopeChapter,
@@ -71,6 +72,7 @@ type Props = Pick<
   | 'highlightedVerses'
   | 'notedVerses'
   | 'bookmarkedVerses'
+  | 'linkedVerses'
   | 'settings'
   | 'verseToScroll'
   | 'isReadOnly'
@@ -212,6 +214,7 @@ const VersesRenderer = ({
   highlightedVerses,
   notedVerses,
   bookmarkedVerses,
+  linkedVerses,
   settings,
   verseToScroll,
   version,
@@ -450,6 +453,67 @@ const VersesRenderer = ({
     return newNotedVerses
   }
 
+  const getLinkedVersesCount = (verses: TVerse[], linkedVerses: LinksObj | undefined) => {
+    const newLinkedVerses: { [key: string]: number } = {}
+    if (verses?.length && linkedVerses) {
+      const { Livre, Chapitre } = verses[0]
+      Object.keys(linkedVerses).map(key => {
+        const firstVerseRef = key.split('/')[0]
+        const bookNumber = parseInt(firstVerseRef.split('-')[0])
+        const chapterNumber = parseInt(firstVerseRef.split('-')[1])
+        const verseNumber = firstVerseRef.split('-')[2]
+        if (bookNumber === Livre && chapterNumber === Chapitre) {
+          if (newLinkedVerses[verseNumber])
+            newLinkedVerses[verseNumber] = newLinkedVerses[verseNumber] + 1
+          else newLinkedVerses[verseNumber] = 1
+        }
+      })
+    }
+    return newLinkedVerses
+  }
+
+  const getLinkedVersesText = (verses: TVerse[], linkedVerses: LinksObj | undefined) => {
+    const newLinkedVerses: {
+      [key: string]: LinkedVerse[]
+    } = {}
+
+    if (verses?.length && linkedVerses) {
+      const { Livre, Chapitre } = verses[0]
+      Object.entries(linkedVerses).map(([key, value]) => {
+        const versesInArray = key.split('/')
+
+        const lastVerseRef = versesInArray[versesInArray.length - 1]
+        const bookNumber = parseInt(lastVerseRef.split('-')[0])
+        const chapterNumber = parseInt(lastVerseRef.split('-')[1])
+        const verseNumber = lastVerseRef.split('-')[2]
+
+        if (bookNumber === Livre && chapterNumber === Chapitre) {
+          const title = value.customTitle || value.ogData?.title || value.url
+          const verseToPush: LinkedVerse = {
+            key,
+            verses:
+              versesInArray.length > 1
+                ? `${versesInArray[0].split('-')[2]}-${
+                    versesInArray[versesInArray.length - 1].split('-')[2]
+                  }`
+                : versesInArray[0].split('-')[2],
+            url: value.url,
+            title,
+            linkType: value.linkType || 'website',
+            date: value.date,
+            tags: value.tags,
+          }
+          if (newLinkedVerses[verseNumber]) {
+            newLinkedVerses[verseNumber].push(verseToPush)
+          } else {
+            newLinkedVerses[verseNumber] = [verseToPush]
+          }
+        }
+      })
+    }
+    return newLinkedVerses
+  }
+
   const transformComments = (comments: { [key: string]: string } | null, versesLength: number) => {
     if (!comments) return null
 
@@ -509,6 +573,8 @@ const VersesRenderer = ({
   const taggedVerses = sortVersesToTags(highlightedVerses)
   const notedVersesCount = getNotedVersesCount(verses, notedVerses)
   const notedVersesText = getNotedVersesText(verses, notedVerses)
+  const linkedVersesCount = getLinkedVersesCount(verses, linkedVerses)
+  const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
 
   return (
     <DispatchProvider dispatch={dispatch}>
@@ -572,6 +638,8 @@ const VersesRenderer = ({
 
           const notesCount = notedVersesCount[Verset]
           const notesText = notedVersesText[Verset]
+          const linksCount = linkedVersesCount[Verset]
+          const linksText = linkedVersesText[Verset]
           const comment = comments?.[Verset]
           const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
           const isVerseToScroll = verseToScroll == Verset
@@ -628,6 +696,8 @@ const VersesRenderer = ({
                 highlightedColor={highlightedColor}
                 notesCount={notesCount}
                 notesText={notesText}
+                linksCount={linksCount}
+                linksText={linksText}
                 isVerseToScroll={isVerseToScroll}
                 selectedCode={selectedCode}
                 isFocused={isFocused}

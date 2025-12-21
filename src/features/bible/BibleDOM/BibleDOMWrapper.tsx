@@ -22,11 +22,12 @@ import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
 import { RootState } from '~redux/modules/reducer'
-import { HighlightsObj, NotesObj } from '~redux/modules/user'
 import type { Bookmark } from '~common/types'
+import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import {
   ADD_PARALLEL_VERSION,
+  NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLE_VIEW,
@@ -87,10 +88,12 @@ export type WebViewProps = {
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
   bookmarkedVerses: Record<number, Bookmark>
+  linkedVerses: LinksObj
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   openNoteModal?: any
+  openLinkModal?: any
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
@@ -116,6 +119,19 @@ export type NotedVerse = {
   verses: string
 }
 
+export type LinkedVerse = {
+  id?: string
+  url: string
+  title: string
+  linkType: string
+  date: number
+  tags?: {
+    [x: string]: Tag
+  }
+  key: string
+  verses: string
+}
+
 export const BibleDOMWrapper = (props: WebViewProps) => {
   const {
     verses,
@@ -126,6 +142,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     highlightedVerses,
     notedVerses,
     bookmarkedVerses,
+    linkedVerses,
     settings,
     verseToScroll,
     isReadOnly,
@@ -269,6 +286,10 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         props.openNoteModal(action.payload)
         break
       }
+      case NAVIGATE_TO_BIBLE_LINK: {
+        props.openLinkModal?.(action.payload)
+        break
+      }
       case NAVIGATE_TO_BIBLE_VIEW: {
         const { navigation } = props
         // @ts-ignore
@@ -378,6 +399,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         highlightedVerses={highlightedVerses}
         notedVerses={notedVerses}
         bookmarkedVerses={bookmarkedVerses}
+        linkedVerses={linkedVerses}
         settings={settings}
         verseToScroll={verseToScroll}
         isReadOnly={isReadOnly}
