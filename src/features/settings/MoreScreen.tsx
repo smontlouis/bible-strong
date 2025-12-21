@@ -314,9 +314,9 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
 
           {/* <ManualSync /> */}
-          <LinkItem route="ImportExport">
-            <StyledIcon name="upload" size={25} />
-            <Text fontSize={15}>{t('app.importexport')}</Text>
+          <LinkItem route="Backup">
+            <StyledIcon name="database" size={25} />
+            <Text fontSize={15}>{t('backup.title')}</Text>
           </LinkItem>
           {/* <ExportSave /> */}
           {!isLogged && (

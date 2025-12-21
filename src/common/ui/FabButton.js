@@ -17,7 +17,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
   right: 30,
 }))
 
-const StyledIcon = styled(Icon.MaterialIcons)(({ theme }) => ({
+const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: 'white',
 }))
 

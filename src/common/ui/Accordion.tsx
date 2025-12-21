@@ -5,9 +5,10 @@ import { FeatherIcon } from './Icon'
 type Props = {
   title: React.ReactNode
   children: React.ReactNode
+  defaultExpanded?: boolean
 }
-const Accordion = ({ title, children }: Props) => {
-  const [expanded, setExpanded] = React.useState(false)
+const Accordion = ({ title, children, defaultExpanded = false }: Props) => {
+  const [expanded, setExpanded] = React.useState(defaultExpanded)
   return (
     <Box py={20}>
       <TouchableBox row onPress={() => setExpanded(s => !s)} alignItems="center">

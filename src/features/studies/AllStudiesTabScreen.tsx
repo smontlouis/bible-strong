@@ -108,7 +108,7 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
       {isLogged && (
         // @ts-ignore
         <FabButton
-          icon="add"
+          icon="plus"
           onPress={() => {
             const studyUuid = generateUUID()
             setPendingStudyId(studyUuid)

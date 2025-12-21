@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { createSelector } from '@reduxjs/toolkit'
 import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
@@ -6,7 +6,7 @@ import YoutubePlayer from 'react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -33,7 +33,6 @@ import {
   isValidUrl,
 } from '~helpers/fetchOpenGraphData'
 import orderVerses from '~helpers/orderVerses'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
@@ -41,6 +40,7 @@ import { multipleTagsModalAtom } from '../../state/app'
 
 interface BibleLinkModalProps {
   linkVerses: VerseIds | undefined
+  ref?: React.RefObject<BottomSheetModal | null>
 }
 
 const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
@@ -88,9 +88,7 @@ const getHostname = (url: string) => {
   }
 }
 
-const BibleLinkModal = ({ linkVerses }: BibleLinkModalProps) => {
-  const { ref, open, close } = useBottomSheetModal()
-
+const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
   const [url, setUrl] = useState('')
   const [customTitle, setCustomTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -106,11 +104,9 @@ const BibleLinkModal = ({ linkVerses }: BibleLinkModalProps) => {
   const insets = useSafeAreaInsets()
   const theme = useTheme()
 
-  useEffect(() => {
-    if (linkVerses) {
-      open()
-    }
-  }, [linkVerses, open])
+  const close = useCallback(() => {
+    ref?.current?.dismiss()
+  }, [ref])
 
   useEffect(() => {
     if (linkVerses) {

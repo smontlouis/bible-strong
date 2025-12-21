@@ -1,11 +1,11 @@
 import * as Sentry from '@sentry/react-native'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { createSelector } from '@reduxjs/toolkit'
 import { Alert, ScrollView, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { BottomSheetFooter } from '@gorhom/bottom-sheet/'
+import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -28,7 +28,6 @@ import TextArea from '~common/ui/TextArea'
 import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
 import { timeout } from '~helpers/timeout'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
@@ -36,7 +35,7 @@ import { multipleTagsModalAtom } from '../../state/app'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
-  onClosed: () => void
+  ref?: React.RefObject<BottomSheetModal | null>
 }
 
 // Create a memoized selector factory for current note
@@ -66,8 +65,7 @@ const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) =>
   return note
 }
 
-const BibleNoteModal = ({ noteVerses }: BibleNoteModalProps) => {
-  const { ref, open, close } = useBottomSheetModal()
+const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   const insets = useSafeAreaInsets()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -81,11 +79,9 @@ const BibleNoteModal = ({ noteVerses }: BibleNoteModalProps) => {
   const reference = verseToReference(noteVerses)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  useEffect(() => {
-    if (noteVerses) {
-      open()
-    }
-  }, [noteVerses, open])
+  const close = useCallback(() => {
+    ref?.current?.dismiss()
+  }, [ref])
 
   useEffect(() => {
     if (noteVerses) {

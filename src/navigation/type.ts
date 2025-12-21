@@ -175,6 +175,8 @@ export type MainStackProps = {
   CustomHighlightColors: undefined
   Changelog: undefined
   ImportExport: undefined
+  Backup: undefined
+  AutomaticBackups: undefined
   Pericope: undefined
   History: undefined
   Tags: undefined

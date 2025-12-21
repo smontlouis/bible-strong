@@ -13,6 +13,7 @@ import BibleNoteModal from './BibleNoteModal'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import { Tag, VerseIds } from '~common/types'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
@@ -39,6 +40,7 @@ const BibleVerseNotes = ({
   const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
+  const noteModal = useBottomSheetModal()
 
   useEffect(() => {
     loadPage()
@@ -87,6 +89,7 @@ const BibleVerseNotes = ({
     }, {} as any)
 
     setNoteVerses(noteVerses)
+    noteModal.open()
   }
 
   const closeTags = () => setIsTagsOpen(false)
@@ -132,7 +135,7 @@ const BibleVerseNotes = ({
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
-      <BibleNoteModal noteVerses={noteVerses} />
+      <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={closeTags}

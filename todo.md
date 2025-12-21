@@ -2,8 +2,9 @@
 
 - [x] more than 5 colors
 - [x] bookmarks feature
-- [ ] insérer un lien
-- [ ] improve notes
+- [x] insérer un lien
+- [x] improve notes
+- [ ] fix tags modal, and add colors
 
 - [ ] export pdf not working
 - [ ] fix lost password UI

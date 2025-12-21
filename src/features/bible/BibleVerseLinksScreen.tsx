@@ -13,6 +13,7 @@ import Empty from '~common/Empty'
 
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { MainStackProps } from '~navigation/type'
 import { Tag, VerseIds } from '~common/types'
@@ -39,6 +40,7 @@ const BibleVerseLinks = ({
   const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
   const _links = useSelector((state: RootState) => state.user.bible.links)
+  const linkModal = useBottomSheetModal()
 
   useEffect(() => {
     loadPage()
@@ -87,6 +89,7 @@ const BibleVerseLinks = ({
     }, {} as any)
 
     setLinkVerses(linkVerses)
+    linkModal.open()
   }
 
   const closeTags = () => setIsTagsOpen(false)
@@ -135,7 +138,7 @@ const BibleVerseLinks = ({
           message={t("Vous n'avez pas encore de liens...")}
         />
       )}
-      <BibleLinkModal linkVerses={linkVerses} />
+      <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={closeTags}

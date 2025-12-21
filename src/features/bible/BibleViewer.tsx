@@ -126,6 +126,8 @@ const BibleViewer = ({
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const bibleParamsModal = useBottomSheetModal()
   const resourceModal = useBottomSheet()
+  const linkModal = useBottomSheetModal()
+  const noteModal = useBottomSheetModal()
 
   // Add to study modal states
   const addToStudyModal = useBottomSheetModal()
@@ -305,19 +307,13 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    setNoteVerses(s => (s ? undefined : selectedVerses))
-  }
-
-  const closeNoteModal = () => {
-    setNoteVerses(undefined)
+    setNoteVerses(selectedVerses)
+    noteModal.open()
   }
 
   const toggleCreateLink = () => {
-    setLinkVerses(s => (s ? undefined : selectedVerses))
-  }
-
-  const closeLinkModal = () => {
-    setLinkVerses(undefined)
+    setLinkVerses(selectedVerses)
+    linkModal.open()
   }
 
   const openLinkModal = (linkId: string) => {
@@ -327,6 +323,7 @@ const BibleViewer = ({
         return accuRefs
       }, {} as VerseIds)
       setLinkVerses(linkVersesToLoad)
+      linkModal.open()
     } catch (e) {
       Sentry.withScope(scope => {
         scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
@@ -343,6 +340,7 @@ const BibleViewer = ({
         return accuRefs
       }, {} as VerseIds)
       setNoteVerses(noteVersesToLoad)
+      noteModal.open()
     } catch (e) {
       Sentry.withScope(scope => {
         scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
@@ -566,8 +564,8 @@ const BibleViewer = ({
         onClosed={() => setQuickTagsModal(false)}
         setMultipleTagsItem={setMultipleTagsItem}
       />
-      <BibleNoteModal onClosed={closeNoteModal} noteVerses={noteVerses} />
-      <BibleLinkModal onClosed={closeLinkModal} linkVerses={linkVerses} />
+      <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
+      <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
       <StrongModal
         version={version}
         selectedCode={strongModalDisclosure.isOpen}

@@ -47,6 +47,7 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   const { t } = useTranslation()
   const highlightsNumber = item.highlights && Object.keys(item.highlights).length
   const notesNumber = item.notes && Object.keys(item.notes).length
+  const linksNumber = item.links && Object.keys(item.links).length
   const studiesNumber = item.studies && Object.keys(item.studies).length
 
   const strongsNumber =
@@ -102,6 +103,13 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
                 <Chip>
                   <Text fontSize={10} color="default">
                     {studiesNumber} {t('étude', { count: studiesNumber })}
+                  </Text>
+                </Chip>
+              )}
+              {!!linksNumber && (
+                <Chip>
+                  <Text fontSize={10} color="default">
+                    {linksNumber} {t('lien', { count: linksNumber })}
                   </Text>
                 </Chip>
               )}
@@ -207,7 +215,7 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
       />
       {/* @ts-ignore */}
       <FabButton
-        icon="add"
+        icon="plus"
         onPress={() => {
           setTitlePrompt({ id: '', name: '' })
         }}

@@ -94,7 +94,7 @@ const MultipleTagsModal = () => {
   return (
     <Modal.Body
       ref={ref}
-      snapPoints={['50%']}
+      snapPoints={['70%']}
       headerComponent={
         <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
           <Text bold>
@@ -107,7 +107,7 @@ const MultipleTagsModal = () => {
                   item.title ||
                   ''
                 }"`
-              : `${t('Étiquettes pour')} ${highlightTitle}`}
+              : `${t('Étiquettes pour')} ${(highlightTitle || '').replace(/[\r\n]+/g, ' ')}`}
           </Text>
           <Spacer />
           <BottomSheetSearchInput
