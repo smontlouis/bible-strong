@@ -33,6 +33,7 @@ import {
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_STRONG,
+  NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_VERSION,
   OPEN_BOOKMARK_MODAL,
@@ -208,6 +209,15 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         const { navigation } = props
         // @ts-ignore
         navigation.navigate('BibleVerseNotes', {
+          verse: action.payload,
+          withBack: true,
+        })
+        break
+      }
+      case NAVIGATE_TO_VERSE_LINKS: {
+        const { navigation } = props
+        // @ts-ignore
+        navigation.navigate('BibleVerseLinks', {
           verse: action.payload,
           withBack: true,
         })

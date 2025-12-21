@@ -226,7 +226,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Notes')}
             </Text>
           </LinkItem>
-          <LinkItem route="Links">
+          <LinkItem route="BibleVerseLinks">
             <StyledIcon name="link" size={25} />
             <Text bold fontSize={15}>
               {t('Liens')}

@@ -115,6 +115,7 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
   const bookmarks = useSelector(
     (state: RootState) => Object.keys(state.user.bible.bookmarks || {}).length
   )
+  const links = useSelector((state: RootState) => Object.keys(state.user.bible.links || {}).length)
 
   const [currentVOD, setCurrentVOD] = useState(0)
 
@@ -213,23 +214,6 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
       <Box bg="lightGrey">
         <VStack gap={10} px={30} py={10}>
           <HStack gap={10}>
-            <Chip route="History">
-              <MaterialIcon name="history" size={20} />
-              <Text mt={5} fontSize={11} numberOfLines={1}>
-                {t('Historique')}
-              </Text>
-            </Chip>
-            <Chip route="Bookmarks">
-              <Box row>
-                <ChipIcon name="bookmark" size={20} />
-                <Text bold fontSize={20}>
-                  {bookmarks}
-                </Text>
-              </Box>
-              <Text fontSize={11} numberOfLines={1}>
-                {t('marque-page', { count: bookmarks })}
-              </Text>
-            </Chip>
             <Chip route="Highlights">
               <Box row>
                 <ChipIcon name="edit-3" size={20} />
@@ -241,8 +225,18 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
                 {t('surbrillance', { count: highlights })}
               </Text>
             </Chip>
-          </HStack>
-          <HStack gap={10}>
+
+            <Chip route="Bookmarks">
+              <Box row>
+                <ChipIcon name="bookmark" size={20} />
+                <Text bold fontSize={20}>
+                  {bookmarks}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {t('marque-page', { count: bookmarks })}
+              </Text>
+            </Chip>
             <Chip route="BibleVerseNotes">
               <Box row>
                 <ChipIcon name="file-text" size={20} />
@@ -254,6 +248,8 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
                 {t('note', { count: notes })}
               </Text>
             </Chip>
+          </HStack>
+          <HStack gap={10}>
             <Chip route="Studies">
               <Box row>
                 <ChipIcon name="feather" size={20} />
@@ -263,6 +259,17 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
               </Box>
               <Text fontSize={11} numberOfLines={1}>
                 {t('étude', { count: studies })}
+              </Text>
+            </Chip>
+            <Chip route="BibleVerseLinks">
+              <Box row>
+                <ChipIcon name="link" size={20} />
+                <Text bold fontSize={20}>
+                  {links}
+                </Text>
+              </Box>
+              <Text fontSize={11} numberOfLines={1}>
+                {t('lien', { count: links })}
               </Text>
             </Chip>
             <Chip route="Tags">

@@ -8,6 +8,7 @@ import MultipleTagsModal from '~common/MultipleTagsModal'
 import AppSwitcherScreen from '~features/app-switcher/AppSwitcherScreen/AppSwitcherScreen'
 import BibleViewScreen from '~features/bible/BibleScreen'
 import BibleVerseNotesScreen from '~features/bible/BibleVerseNotesScreen'
+import BibleVerseLinksScreen from '~features/bible/BibleVerseLinksScreen'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import BibleCompareVersesScreen from '~features/bible/CompareVersesScreen'
 import ConcordanceByBookScreen from '~features/bible/ConcordanceByBookScreen'
@@ -33,7 +34,6 @@ import SearchScreen from '~features/search/SearchScreen'
 import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
 import FAQScreen from '~features/settings/FAQScreen'
 import HighlightScreen from '~features/settings/HighlightsScreen'
-import LinksScreen from '~features/settings/LinksScreen'
 import LoginScreen from '~features/settings/LoginScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
@@ -70,8 +70,8 @@ const MainStack = () => {
             <MainStackNavigator.Screen name="Home" component={HomeScreen} />
 
             <MainStackNavigator.Screen name="BibleVerseNotes" component={BibleVerseNotesScreen} />
+            <MainStackNavigator.Screen name="BibleVerseLinks" component={BibleVerseLinksScreen} />
             <MainStackNavigator.Screen name="Highlights" component={HighlightScreen} />
-            <MainStackNavigator.Screen name="Links" component={LinksScreen} />
             <MainStackNavigator.Screen name="Strong" component={StrongScreen} />
             <MainStackNavigator.Screen
               name="ConcordanceByBook"

@@ -7,8 +7,8 @@ import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabConte
 
 const StyledLink = styled(Link)(({ theme }) => ({
   backgroundColor: theme.colors.primary,
-  width: 60,
-  height: 60,
+  width: 50,
+  height: 50,
   borderRadius: 30,
   justifyContent: 'center',
   alignItems: 'center',
@@ -32,7 +32,7 @@ const Fab = ({ icon, onPress, route, params, component: Component }) => {
         bottom: bottomBarHeight + 30,
       }}
     >
-      {Component ? <Component color="white" /> : <StyledIcon name={icon} size={22} />}
+      {Component ? <Component color="white" /> : <StyledIcon name={icon} size={18} />}
     </StyledLink>
   )
 }

@@ -4,35 +4,40 @@ import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
+import { useAtom } from 'jotai/react'
 import Modal from '~common/Modal'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { deleteNote } from '~redux/modules/user'
+import { deleteLink } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
+import { multipleTagsModalAtom } from '../../state/app'
 
 type Props = {
-  noteId: string | null
+  linkId: string | null
+  onClosed: () => void
+  title: string
 }
 
-const NotesSettingsModal = ({ noteId }: Props) => {
+const LinksSettingsModal = ({ linkId, onClosed, title }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const { ref, open, close } = useBottomSheetModal()
+  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 
   useEffect(() => {
-    if (noteId) {
+    if (linkId) {
       open()
     }
-  }, [noteId, open])
+  }, [linkId, open])
 
-  const deleteNoteConfirmation = () => {
-    if (!noteId) return
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
+  const deleteLinkConfirmation = () => {
+    if (!linkId) return
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer ce lien?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       {
         text: t('Oui'),
         onPress: () => {
-          dispatch(deleteNote(noteId))
+          dispatch(deleteLink(linkId))
           close()
         },
         style: 'destructive',
@@ -41,8 +46,8 @@ const NotesSettingsModal = ({ noteId }: Props) => {
   }
 
   const navigateToBible = () => {
-    if (!noteId) return
-    const [Livre, Chapitre, Verset] = noteId.split('/')[0].split('-')
+    if (!linkId) return
+    const [Livre, Chapitre, Verset] = linkId.split('/')[0].split('-')
     close()
     setTimeout(() => {
       // @ts-ignore
@@ -56,14 +61,24 @@ const NotesSettingsModal = ({ noteId }: Props) => {
     }, 300)
   }
 
+  const editTags = () => {
+    if (!linkId) return
+    setMultipleTagsItem({
+      title,
+      entity: 'links',
+      ids: { [linkId]: true },
+    })
+  }
+
   return (
-    <Modal.Body ref={ref} enableDynamicSizing>
+    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
       <Modal.Item onPress={navigateToBible}>{t('Voir dans la Bible')}</Modal.Item>
-      <Modal.Item color="quart" onPress={deleteNoteConfirmation}>
+      <Modal.Item onPress={editTags}>{t('Éditer les tags')}</Modal.Item>
+      <Modal.Item color="quart" onPress={deleteLinkConfirmation}>
         {t('Supprimer')}
       </Modal.Item>
     </Modal.Body>
   )
 }
 
-export default withTheme(NotesSettingsModal)
+export default withTheme(LinksSettingsModal)

@@ -1,11 +1,14 @@
 import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { createSelector } from '@reduxjs/toolkit'
 import { Alert, ScrollView, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { createSelector } from '@reduxjs/toolkit'
 
+import { BottomSheetFooter } from '@gorhom/bottom-sheet/'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
@@ -14,27 +17,22 @@ import TagList from '~common/TagList'
 import { VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Fab from '~common/ui/Fab'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Paragraph from '~common/ui/Paragraph'
+import Spacer from '~common/ui/Spacer'
+import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import TextArea from '~common/ui/TextArea'
 import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
+import { timeout } from '~helpers/timeout'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
-import { HStack } from '~common/ui/Stack'
-import Spacer from '~common/ui/Spacer'
-import { useSetAtom } from 'jotai/react'
-import FabButton from '~common/ui/FabButton'
 import { multipleTagsModalAtom } from '../../state/app'
-import Fab from '~common/ui/Fab'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { BottomSheetFooter } from '@gorhom/bottom-sheet/'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { timeout } from '~helpers/timeout'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -68,9 +66,9 @@ const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) =>
   return note
 }
 
-const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
+const BibleNoteModal = ({ noteVerses }: BibleNoteModalProps) => {
   const { ref, open, close } = useBottomSheetModal()
-
+  const insets = useSafeAreaInsets()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
@@ -82,7 +80,6 @@ const BibleNoteModal = ({ noteVerses, onClosed }: BibleNoteModalProps) => {
   const currentNote = useCurrentNote({ noteVerses })
   const reference = verseToReference(noteVerses)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
-  const { bottomBarHeight } = useBottomBarHeightInTab()
 
   useEffect(() => {
     if (noteVerses) {
@@ -158,7 +155,6 @@ ${currentNote?.description}
   return (
     <Modal.Body
       ref={ref}
-      onModalClose={onClosed}
       topInset={useSafeAreaInsets().top}
       snapPoints={['100%']}
       headerComponent={
@@ -181,7 +177,7 @@ ${currentNote?.description}
                     </MenuOption>
                     <MenuOption onSelect={onEditNote}>
                       <Box row alignItems="center">
-                        <FeatherIcon name="edit" size={15} />
+                        <FeatherIcon name="edit-2" size={15} />
                         <Text marginLeft={10}>{t('Éditer')}</Text>
                       </Box>
                     </MenuOption>
@@ -215,18 +211,14 @@ ${currentNote?.description}
       footerComponent={props =>
         isEditing ? (
           <BottomSheetFooter {...props}>
-            <HStack
-              py={10}
-              px={20}
-              justifyContent="flex-end"
-              h={80 + bottomBarHeight}
-              paddingBottom={bottomBarHeight}
-            >
-              <Box>
-                <Button reverse onPress={cancelEditing}>
-                  {t('Annuler')}
-                </Button>
-              </Box>
+            <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+              {currentNote && (
+                <Box>
+                  <Button reverse onPress={cancelEditing}>
+                    {t('Annuler')}
+                  </Button>
+                </Box>
+              )}
               <Box>
                 <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
                   {t('Sauvegarder')}
@@ -236,15 +228,9 @@ ${currentNote?.description}
           </BottomSheetFooter>
         ) : (
           <BottomSheetFooter {...props}>
-            <HStack
-              py={10}
-              px={20}
-              justifyContent="flex-end"
-              h={80 + bottomBarHeight}
-              paddingBottom={bottomBarHeight}
-            >
+            <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
               <Box>
-                <Fab icon="edit" onPress={onEditNote} />
+                <Fab icon="edit-2" onPress={onEditNote} />
               </Box>
             </HStack>
           </BottomSheetFooter>

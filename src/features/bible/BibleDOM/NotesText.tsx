@@ -3,6 +3,7 @@ import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 import { RootState } from '~redux/modules/reducer'
 import { NotedVerse, RootStyles } from './BibleDOMWrapper'
+import * as Icon from '@expo/vector-icons'
 
 const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
@@ -13,15 +14,20 @@ const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
     khtmlUserSelect: 'none',
     webkitUserSelect: 'none',
     color: colors[theme].quart,
-    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
-  })
-)
+    fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
+    lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
 
-const Verse = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale } }) => ({
-    paddingLeft: '3px',
-    fontSize: scaleFontSize(isParallel ? 9 : 14, fontSizeScale),
+    backgroundColor: colors[theme].reverse,
+    boxShadow: `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    padding: '4px 8px',
+    wordBreak: 'break-word',
+    marginRight: '4px',
+    marginLeft: '4px',
+
+    '&:active': {
+      opacity: 0.4,
+    },
   })
 )
 
@@ -42,11 +48,13 @@ const NotesText = ({ notesText, settings, onClick, isParallel }: Props) => {
           isParallel={isParallel}
           onClick={() => onClick(note.key)}
         >
-          [
-          <Verse isParallel={isParallel} settings={settings}>
-            ({note.verses}){' '}
-          </Verse>
-          <span>{truncate(note.description, 10)}</span>]
+          <Icon.Ionicons
+            color={settings.colors[settings.theme].quart}
+            name="document-text-outline"
+            size={16}
+            style={{ marginRight: 4 }}
+          />
+          <span>{truncate(note.description, 40)}</span>
         </Div>
       ))}
     </span>

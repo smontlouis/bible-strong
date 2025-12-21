@@ -41,7 +41,6 @@ import { multipleTagsModalAtom } from '../../state/app'
 
 interface BibleLinkModalProps {
   linkVerses: VerseIds | undefined
-  onClosed: () => void
 }
 
 const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
@@ -89,7 +88,7 @@ const getHostname = (url: string) => {
   }
 }
 
-const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
+const BibleLinkModal = ({ linkVerses }: BibleLinkModalProps) => {
   const { ref, open, close } = useBottomSheetModal()
 
   const [url, setUrl] = useState('')
@@ -226,7 +225,7 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
   const isYoutubeLink = currentLink?.linkType === 'youtube'
   const linkIcon = currentLink
     ? getLinkIcon(currentLink)
-    : { icon: 'link', color: theme.colors.grey }
+    : { icon: 'link', color: theme.colors.grey, textIcon: undefined }
 
   // YouTube player dimensions
   const screenWidth = Dimensions.get('window').width
@@ -236,9 +235,8 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
   return (
     <Modal.Body
       ref={ref}
-      onModalClose={onClosed}
       topInset={useSafeAreaInsets().top}
-      enableDynamicSizing
+      snapPoints={['70%']}
       headerComponent={
         <ModalHeader
           onClose={close}
@@ -253,7 +251,7 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
                   <>
                     <MenuOption onSelect={onEditLink}>
                       <Box row alignItems="center">
-                        <FeatherIcon name="edit" size={15} />
+                        <FeatherIcon name="edit-2" size={15} />
                         <Text marginLeft={10}>{t('Éditer')}</Text>
                       </Box>
                     </MenuOption>
@@ -263,6 +261,7 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
                           ...currentLink,
                           id: currentLink.id!,
                           entity: 'links',
+                          title: currentLink.ogData?.title || currentLink.customTitle || '',
                         })
                       }
                     >
@@ -306,7 +305,7 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
           <BottomSheetFooter {...props}>
             <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
               <Box>
-                <Fab icon="edit" onPress={onEditLink} />
+                <Fab icon="edit-2" onPress={onEditLink} />
               </Box>
             </HStack>
           </BottomSheetFooter>
@@ -315,35 +314,43 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
     >
       <VStack gap={10} paddingHorizontal={20} pb={20}>
         {isEditing && (
-          <>
-            <StyledTextInput
-              placeholder={t('URL du lien')}
-              onChangeText={setUrl}
-              value={url}
-              style={{ marginTop: 20 }}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-            />
-            <StyledTextInput
-              placeholder={t('Titre personnalisé (optionnel)')}
-              onChangeText={setCustomTitle}
-              value={customTitle}
-            />
-          </>
+          <VStack py={20} gap={20}>
+            <VStack gap={5}>
+              <Text>{t('URL du lien')}</Text>
+              <StyledTextInput
+                placeholder={t('URL du lien')}
+                onChangeText={setUrl}
+                value={url}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+              />
+            </VStack>
+            <VStack gap={5}>
+              <Text>{t('Titre personnalisé (optionnel)')}</Text>
+
+              <StyledTextInput
+                placeholder={t('Titre personnalisé (optionnel)')}
+                onChangeText={setCustomTitle}
+                value={customTitle}
+              />
+            </VStack>
+          </VStack>
         )}
 
         {!isEditing && currentLink && (
           <Box py={20}>
             {/* YouTube Player */}
             {isYoutubeLink && currentLink.videoId && (
-              <Box mb={20} borderRadius={10} overflow="hidden">
+              <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
                 <YoutubePlayer
                   height={playerHeight}
                   width={playerWidth}
                   videoId={currentLink.videoId}
                   onReady={() => console.log('[BibleLinkModal] YouTube ready')}
                   onError={(e: string) => console.log('[BibleLinkModal] YouTube error:', e)}
+                  viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
+                  webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
                 />
               </Box>
             )}
@@ -357,13 +364,20 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
                   height: 180,
                   borderRadius: 10,
                   marginBottom: 15,
+                  backgroundColor: theme.colors.lightGrey,
                 }}
                 resizeMode="cover"
               />
             )}
 
             <HStack alignItems="center" mb={10}>
-              <FeatherIcon name={linkIcon.icon as any} size={18} color={linkIcon.color} />
+              {linkIcon.textIcon ? (
+                <Text bold fontSize={16} color="default">
+                  {linkIcon.textIcon}
+                </Text>
+              ) : (
+                <FeatherIcon name={linkIcon.icon as any} size={18} color={linkIcon.color} />
+              )}
               <Text marginLeft={8} color="grey" fontSize={13}>
                 {currentLink.ogData?.siteName || getHostname(currentLink.url)}
               </Text>
@@ -381,7 +395,7 @@ const BibleLinkModal = ({ linkVerses, onClosed }: BibleLinkModalProps) => {
 
             {/* Open in browser button */}
             {!isYoutubeLink && (
-              <Button small reverse onPress={openInBrowser}>
+              <Button reverse onPress={openInBrowser}>
                 <HStack alignItems="center">
                   <FeatherIcon name="external-link" size={16} />
                   <Text marginLeft={8}>{t('Ouvrir dans le navigateur')}</Text>

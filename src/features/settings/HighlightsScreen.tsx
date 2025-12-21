@@ -151,6 +151,7 @@ const HighlightsScreen = () => {
           if (settingsData?.stringIds) {
             dispatch(removeHighlight({ selectedVerses: settingsData.stringIds }))
           }
+          setSettingsData(null)
           closeSettings()
         },
         style: 'destructive',
@@ -164,6 +165,9 @@ const HighlightsScreen = () => {
     }
     closeColorChange()
   }
+
+  console.log('changeColorData', changeColorData)
+  console.log('settingsData', settingsData)
 
   return (
     <Container>
@@ -217,10 +221,9 @@ const HighlightsScreen = () => {
       )}
 
       {/* Settings modal */}
-      <Modal.Body ref={settingsRef} onModalClose={() => setSettingsData(null)} enableDynamicSizing>
+      <Modal.Body ref={settingsRef} enableDynamicSizing>
         <Modal.Item
           onPress={() => {
-            closeSettings()
             if (settingsData?.stringIds) {
               setChangeColorData(settingsData.stringIds)
             }
@@ -230,7 +233,6 @@ const HighlightsScreen = () => {
         </Modal.Item>
         <Modal.Item
           onPress={() => {
-            closeSettings()
             if (settingsData?.stringIds) {
               setMultipleTagsItem({
                 entity: 'highlights',

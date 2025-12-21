@@ -70,50 +70,14 @@ export function isValidUrl(url: string): boolean {
 }
 
 /**
- * Fetch YouTube metadata via oEmbed API (public, no auth required)
- */
-async function fetchYouTubeOEmbed(url: string): Promise<OpenGraphData | null> {
-  try {
-    const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
-    const response = await fetch(oEmbedUrl)
-
-    if (!response.ok) return null
-
-    const data = await response.json()
-    const videoId = extractVideoId(url, 'youtube')
-
-    return {
-      title: data.title,
-      description: data.author_name ? `Par ${data.author_name}` : undefined,
-      image:
-        data.thumbnail_url ||
-        (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : undefined),
-      siteName: 'YouTube',
-      type: 'video',
-      fetchedAt: Date.now(),
-    }
-  } catch {
-    return null
-  }
-}
-
-/**
- * Fetch OG data - YouTube via oEmbed, others via Cloud Function
+ * Fetch OG data via Cloud Function
  * Retourne null si offline, URL invalide, ou erreur (pas grave)
  */
 export async function fetchOpenGraphData(url: string): Promise<OpenGraphData | null> {
-  // Valider l'URL avant de faire la requête
   if (!isValidUrl(url)) {
     return null
   }
 
-  // YouTube: utiliser oEmbed (pas besoin d'auth, pas de blocage)
-  const linkType = detectLinkType(url)
-  if (linkType === 'youtube') {
-    return fetchYouTubeOEmbed(url)
-  }
-
-  // Autres URLs: utiliser la Cloud Function
   try {
     const user = getAuth().currentUser
     if (!user) return null
@@ -157,9 +121,9 @@ export function getLinkDisplayTitle(link: {
 /**
  * Mapping des icônes par type de lien
  */
-export const linkTypeConfig: Record<LinkType, { icon: string; color: string }> = {
+export const linkTypeConfig: Record<LinkType, { icon: string; color: string; textIcon?: string }> = {
   youtube: { icon: 'youtube', color: '#FF0000' },
-  twitter: { icon: 'twitter', color: '#1DA1F2' },
+  twitter: { icon: 'twitter', color: '#000000', textIcon: '𝕏' },
   instagram: { icon: 'instagram', color: '#E4405F' },
   tiktok: { icon: 'music', color: '#000000' },
   vimeo: { icon: 'video', color: '#1AB7EA' },
@@ -173,6 +137,6 @@ export const linkTypeConfig: Record<LinkType, { icon: string; color: string }> =
 /**
  * Retourne l'icône et la couleur pour un lien
  */
-export function getLinkIcon(link: Link): { icon: string; color: string } {
+export function getLinkIcon(link: Link): { icon: string; color: string; textIcon?: string } {
   return linkTypeConfig[link.linkType] || linkTypeConfig.website
 }

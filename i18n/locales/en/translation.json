@@ -436,6 +436,8 @@
   "Dépublier l'étude": "Unpublish the study",
   "Publication en cours...": "Publication in progress ...",
   "Impossible de vérifier le lien": "Unable to verify link",
+  "lien": "link",
+  "lien_plural": "links",
   "Ouvrir le lien": "Open the link",
   "Copier le lien": "Copy the link",
   "Exporter en pdf": "Export to pdf",

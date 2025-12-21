@@ -6,7 +6,6 @@ import React from 'react'
 
 import * as Icon from '@expo/vector-icons'
 
-import books from '~assets/bible_versions/books-desc'
 import Link from '~common/Link'
 import TagList from '~common/TagList'
 import Border from '~common/ui/Border'
@@ -18,9 +17,6 @@ import { useTranslation } from 'react-i18next'
 import Paragraph from '~common/ui/Paragraph'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
-import { VerseIds } from '~common/types'
 
 const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   paddingVertical: 20,
@@ -31,34 +27,22 @@ const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
 
 type Props = {
   item: any
-  setNoteSettings: React.Dispatch<React.SetStateAction<null | VerseIds>>
-  navigation: StackNavigationProp<MainStackProps>
+  onPress: (noteId: string) => void
+  onMenuPress: (noteId: string) => void
 }
 
-const BibleNoteItem = ({ item, setNoteSettings, navigation }: Props) => {
+const BibleNoteItem = ({ item, onPress, onMenuPress }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const isFR = useLanguage()
 
-  const [Livre, Chapitre, Verset] = item.noteId.split('/')[0].split('-')
   const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
     locale: isFR ? fr : enGB,
   })
 
   return (
     <Box>
-      <NoteLink
-        route="BibleView"
-        params={{
-          isReadOnly: true,
-          book: books[Livre - 1],
-          chapter: Number(Chapitre),
-          verse: Number(Verset),
-          focusVerses: [Number(Verset)],
-        }}
-        // @ts-ignore
-        navigation={navigation}
-      >
+      <NoteLink onPress={() => onPress(item.noteId)}>
         <Box flex>
           <Box row justifyContent="space-between">
             <Text color="darkGrey" bold fontSize={11}>
@@ -79,7 +63,7 @@ const BibleNoteItem = ({ item, setNoteSettings, navigation }: Props) => {
           {/* @ts-ignore */}
           <TagList tags={item.notes.tags} />
         </Box>
-        <Link padding onPress={() => setNoteSettings(item.noteId)}>
+        <Link padding onPress={() => onMenuPress(item.noteId)}>
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
         </Link>
       </NoteLink>

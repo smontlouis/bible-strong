@@ -104,7 +104,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
       />
       {isReadOnly && (
         // @ts-ignore
-        <FabButton icon="edit" onPress={() => setIsReadOnly(false)} />
+        <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />
       )}
     </Container>
   )

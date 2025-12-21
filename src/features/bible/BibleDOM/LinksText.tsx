@@ -3,6 +3,7 @@ import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 import { RootState } from '~redux/modules/reducer'
 import { LinkedVerse, RootStyles } from './BibleDOMWrapper'
+import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 
 const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
@@ -12,26 +13,32 @@ const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
     msUserSelect: 'none',
     khtmlUserSelect: 'none',
     webkitUserSelect: 'none',
-    color: colors[theme].primary,
-    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 26 : 32, fontSizeScale),
-  })
-)
-
-const Verse = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale } }) => ({
-    paddingLeft: '3px',
-    fontSize: scaleFontSize(isParallel ? 9 : 14, fontSizeScale),
-  })
-)
-
-const LinkTypeIndicator = styled('span')<RootStyles & { indicatorColor: string }>(
-  ({ indicatorColor, settings: { fontSizeScale } }) => ({
-    color: indicatorColor,
+    fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
+    lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
+    backgroundColor: colors[theme].reverse,
+    boxShadow: `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    padding: '4px 8px',
+    wordBreak: 'break-word',
     marginRight: '4px',
-    fontSize: scaleFontSize(14, fontSizeScale),
+    marginLeft: '4px',
+
+    '&:active': {
+      opacity: 0.4,
+    },
   })
 )
+
+const LinkTypeIndicator = styled('span')<RootStyles>(({ settings: { fontSizeScale } }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  marginRight: '4px',
+  verticalAlign: 'middle',
+  '& svg': {
+    width: scaleFontSize(20, fontSizeScale),
+    height: scaleFontSize(20, fontSizeScale),
+  },
+}))
 
 interface Props {
   linksText: LinkedVerse[]
@@ -40,28 +47,21 @@ interface Props {
   isParallel?: boolean
 }
 
-const getLinkTypeIndicator = (linkType: string): { symbol: string; color: string } => {
-  switch (linkType) {
-    case 'youtube':
-      return { symbol: '▶', color: '#FF0000' }
-    case 'twitter':
-      return { symbol: '𝕏', color: '#1DA1F2' }
-    case 'instagram':
-      return { symbol: '📷', color: '#E4405F' }
-    case 'tiktok':
-      return { symbol: '♪', color: '#000000' }
-    case 'spotify':
-      return { symbol: '♫', color: '#1DB954' }
-    default:
-      return { symbol: '🔗', color: '#888888' }
-  }
+const renderLinkTypeIcon = (linkType: string, size: number) => {
+  const IconComponent = getLinkTypeIconComponent(linkType)
+  const color = getLinkTypeColor(linkType)
+  return <IconComponent size={size} color={color} />
 }
 
+const calculateIconSize = (baseSize: number, scale: number): number =>
+  baseSize + scale * 0.1 * baseSize
+
 const LinksText = ({ linksText, settings, onClick, isParallel }: Props) => {
+  const iconSize = calculateIconSize(isParallel ? 12 : 14, settings.fontSizeScale)
+
   return (
     <span>
       {linksText.map(link => {
-        const indicator = getLinkTypeIndicator(link.linkType)
         return (
           <Div
             key={link.key}
@@ -69,14 +69,10 @@ const LinksText = ({ linksText, settings, onClick, isParallel }: Props) => {
             isParallel={isParallel}
             onClick={() => onClick(link.key)}
           >
-            [
-            <LinkTypeIndicator settings={settings} indicatorColor={indicator.color}>
-              {indicator.symbol}
+            <LinkTypeIndicator settings={settings}>
+              {renderLinkTypeIcon(link.linkType, iconSize)}
             </LinkTypeIndicator>
-            <Verse isParallel={isParallel} settings={settings}>
-              ({link.verses}){' '}
-            </Verse>
-            <span>{truncate(link.title, 15)}</span>]
+            <span>{truncate(link.title, 36)}</span>
           </Div>
         )
       })}

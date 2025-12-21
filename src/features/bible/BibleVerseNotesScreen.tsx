@@ -1,28 +1,23 @@
-import React, { useState, useEffect } from 'react'
-import { Alert } from 'react-native'
-import { connect, useDispatch, useSelector } from 'react-redux'
-import { useTranslation } from 'react-i18next'
-import { useNavigation, useRoute } from '@react-navigation/native'
 import { StackScreenProps } from '@react-navigation/stack'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 
-import BibleNoteModal from './BibleNoteModal'
-import BibleNoteItem from './BibleNoteItem'
+import Empty from '~common/Empty'
+import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
-import Header from '~common/Header'
-import Empty from '~common/Empty'
-import MultipleTagsModal from '~common/MultipleTagsModal'
-
-import * as UserActions from '~redux/modules/user'
+import BibleNoteItem from './BibleNoteItem'
+import BibleNoteModal from './BibleNoteModal'
 
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
-import BibleNotesSettingsModal from './BibleNotesSettingsModal'
+import { Tag, VerseIds } from '~common/types'
 import verseToReference from '~helpers/verseToReference'
 import { MainStackProps } from '~navigation/type'
-import { Tag, VerseIds } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
+import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 
 type TNote = {
   noteId: string
@@ -42,8 +37,7 @@ const BibleVerseNotes = ({
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [isTagsOpen, setIsTagsOpen] = useState(false)
   const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
-  const [isNoteSettingsOpen, setIsNoteSettingsOpen] = useState<VerseIds | null>(null)
-  const dispatch = useDispatch()
+  const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
 
   useEffect(() => {
@@ -95,32 +89,15 @@ const BibleVerseNotes = ({
     setNoteVerses(noteVerses)
   }
 
-  const closeNoteEditor = () => {
-    setNoteVerses(undefined)
-  }
-
   const closeTags = () => setIsTagsOpen(false)
-  const closeNoteSettings = () => setIsNoteSettingsOpen(null)
-
-  const deleteNote = (noteId: string) => {
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        // @ts-ignore
-        onPress: () => dispatch(deleteNote(noteId)),
-        style: 'destructive',
-      },
-    ])
-  }
 
   const renderNote = ({ item, index }: { item: TNote; index: number }) => {
     return (
       <BibleNoteItem
         key={index}
         item={item}
-        setNoteSettings={setIsNoteSettingsOpen}
-        navigation={navigation}
+        onPress={openNoteEditor}
+        onMenuPress={setNoteSettingsId}
       />
     )
   }
@@ -155,18 +132,14 @@ const BibleVerseNotes = ({
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
-      <BibleNoteModal onClosed={closeNoteEditor} noteVerses={noteVerses} />
+      <BibleNoteModal noteVerses={noteVerses} />
       <TagsModal
         isVisible={isTagsOpen}
         onClosed={closeTags}
         onSelected={(chip: Tag) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
-      <BibleNotesSettingsModal
-        isOpen={isNoteSettingsOpen}
-        onClosed={closeNoteSettings}
-        openNoteEditor={openNoteEditor}
-      />
+      <BibleNotesSettingsModal noteId={noteSettingsId} />
     </Container>
   )
 }
