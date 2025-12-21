@@ -13,7 +13,7 @@
     "logs": "firebase functions:log",
     "serve-db": "firebase emulators:start --only firestore  --import=../firestore/production_export"
   },
-  "main": "lib/src/index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "@sparticuz/chromium-min": "^143.0.0",
     "@types/express": "^5.0.6",
@@ -40,8 +40,7 @@
     "multer": "emadalam/multer",
     "node-fetch": "^3.3.2",
     "puppeteer": "24.34.0",
-    "puppeteer-core": "^24.34.0",
-    "yarn": "^1.22.22"
+    "puppeteer-core": "^24.34.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

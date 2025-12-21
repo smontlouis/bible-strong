@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions'
+import * as functions from 'firebase-functions/v1'
 const admin = require('firebase-admin')
 
 export const grec = functions.https.onRequest(async (req, res) => {

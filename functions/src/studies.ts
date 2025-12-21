@@ -1,16 +1,19 @@
-import { onRequest } from 'firebase-functions/v2/https'
-import { onDocumentUpdated, onDocumentDeleted } from 'firebase-functions/v2/firestore'
+import * as functions from 'firebase-functions/v1'
 import puppeteer, { Browser } from 'puppeteer-core'
 import chromium from '@sparticuz/chromium-min'
 
 const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
 
+const runtimeOpts: functions.RuntimeOptions = {
+  memory: '1GB',
+}
+
 const bucket = admin.storage().bucket('bible-strong-app.appspot.com')
 
-export const exportStudyPDF = onRequest(
-  { memory: '1GiB' },
-  (req, res) => {
+export const exportStudyPDF = functions
+  .runWith(runtimeOpts)
+  .https.onRequest((req, res) => {
     cors(req, res, async () => {
       try {
         const { studyId } = req.body
@@ -67,16 +70,13 @@ export const exportStudyPDF = onRequest(
         res.status(500).send(error)
       }
     })
-  }
-)
+  })
 
-export const onStudyUpdate = onDocumentUpdated(
-  'studies/{studyId}',
-  async (event) => {
-    const newValue = event.data?.after.data()
-    const previousValue = event.data?.before.data()
-
-    if (!newValue || !previousValue) return
+export const onStudyUpdate = functions.firestore
+  .document('studies/{studyId}')
+  .onUpdate(async (change, context) => {
+    const newValue = change.after.data()
+    const previousValue = change.before.data()
 
     if (newValue.published !== previousValue.published || newValue.published) {
       if (!newValue.published) {
@@ -90,22 +90,17 @@ export const onStudyUpdate = onDocumentUpdated(
         }
       }
     }
-  }
-)
+  })
 
-export const deleteStudy = onDocumentDeleted(
-  'studies/{studyId}',
-  async (event) => {
+export const deleteStudy = functions.firestore
+  .document('studies/{studyId}')
+  .onDelete(async (snap, context) => {
     try {
-      const data = event.data?.data()
-      if (!data) return
-
-      const { id } = data
+      const { id } = snap.data()
       await bucket.file(`images/studies/${id}.jpg`).delete()
       await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
       console.log(`Files deleted for ${id}`)
     } catch (e) {
       console.log(e)
     }
-  }
-)
+  })

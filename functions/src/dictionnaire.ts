@@ -1,7 +1,7 @@
+import * as functions from 'firebase-functions/v1'
 import * as admin from 'firebase-admin'
-import { onRequest } from 'firebase-functions/v2/https'
 
-export const dictionnaire = onRequest(async (req, res) => {
+export const dictionnaire = functions.https.onRequest(async (req, res) => {
   try {
     const word = req.query.word as string
 

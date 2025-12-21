@@ -1,13 +1,16 @@
-import { initializeApp } from 'firebase-admin/app'
+import { initializeApp, getApps } from 'firebase-admin/app'
 import * as admin from 'firebase-admin'
 
 const serviceProdAccountKey = require('../helpers/service-account.json')
 
-initializeApp({
-  credential: admin.credential.cert(serviceProdAccountKey),
-  databaseURL: 'https://bible-strong-app.firebaseio.com',
-  storageBucket: 'bible-strong-app.appspot.com',
-})
+// Éviter double initialisation (Firebase Functions v2 peut initialiser automatiquement)
+if (getApps().length === 0) {
+  initializeApp({
+    credential: admin.credential.cert(serviceProdAccountKey),
+    databaseURL: 'https://bible-strong-app.firebaseio.com',
+    storageBucket: 'bible-strong-app.appspot.com',
+  })
+}
 
 export { grec } from './grec'
 export { hebreu } from './hebreu'
