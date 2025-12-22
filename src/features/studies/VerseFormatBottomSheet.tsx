@@ -27,10 +27,8 @@ const VerseFormatBottomSheet = ({
       withPortal
       snapPoints={[280]}
       headerComponent={
-        <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
-          <Text flex textAlign="center" fontSize={16} bold>
-            {t('study.formatChoice')}
-          </Text>
+        <Box px={20} py={20} gap={5}>
+          <Text bold>{t('study.formatChoice')}</Text>
         </Box>
       }
     >

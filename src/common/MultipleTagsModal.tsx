@@ -96,7 +96,7 @@ const MultipleTagsModal = () => {
       ref={ref}
       snapPoints={['70%']}
       headerComponent={
-        <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
+        <Box px={20} pt={10} gap={5}>
           <Text bold>
             {/* @ts-ignore */}
             {item.entity !== 'highlights'
@@ -109,7 +109,6 @@ const MultipleTagsModal = () => {
                 }"`
               : `${t('Étiquettes pour')} ${(highlightTitle || '').replace(/[\r\n]+/g, ' ')}`}
           </Text>
-          <Spacer />
           <BottomSheetSearchInput
             placeholder={t('Chercher ou créer une étiquette')}
             onChangeText={search}
@@ -123,18 +122,16 @@ const MultipleTagsModal = () => {
     >
       <Box flex>
         {result.length ? (
-          <ScrollView contentContainerStyle={{ padding: 20 }} style={{ flex: 1 }}>
-            <Box row wrap>
-              {result.map((chip: any) => (
-                <Chip
-                  key={chip.id}
-                  label={chip.name}
-                  isSelected={selectedChips && selectedChips[chip.id]}
-                  onPress={() => dispatch(toggleTagEntity({ item, tagId: chip.id }))}
-                />
-              ))}
-            </Box>
-          </ScrollView>
+          <Box row wrap p={20}>
+            {result.map((chip: any) => (
+              <Chip
+                key={chip.id}
+                label={chip.name}
+                isSelected={selectedChips && selectedChips[chip.id]}
+                onPress={() => dispatch(toggleTagEntity({ item, tagId: chip.id }))}
+              />
+            ))}
+          </Box>
         ) : keyword ? (
           <TouchableOpacity onPress={saveTag}>
             <Box row flex alignItems="center" py={10} px={30}>

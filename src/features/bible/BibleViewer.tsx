@@ -296,10 +296,6 @@ const BibleViewer = ({
   }
 
   const addTag = () => {
-    // @ts-ignore
-    dispatch(addHighlight({ color: '', selectedVerses }))
-    actions.clearSelectedVerses()
-
     setMultipleTagsItem({
       entity: 'highlights',
       ids: selectedVerses,
@@ -397,14 +393,6 @@ const BibleViewer = ({
     [pendingVerseData, addVerseToStudy, verseFormatModal, addToStudyModal, actions]
   )
 
-  const handleCloseFormatBottomSheet = useCallback(() => {
-    setPendingVerseData(null)
-  }, [])
-
-  const handleCloseAddToStudyModal = useCallback(() => {
-    setPendingVerseData(null)
-  }, [])
-
   // Bookmark handler
   const handleAddBookmark = useCallback(() => {
     // Get the first selected verse for the bookmark
@@ -417,7 +405,6 @@ const BibleViewer = ({
         verse: verseNum,
       })
       setEditingBookmark(null)
-      actions.clearSelectedVerses()
       // Use setTimeout to ensure state is updated before presenting
       setTimeout(() => bookmarkModalRef.current?.present(), 0)
     }
@@ -580,15 +567,10 @@ const BibleViewer = ({
         isSelectionMode={isSelectionMode}
       />
       <BibleParamsModal navigation={navigation} modalRef={bibleParamsModal.ref} />
-      <AddToStudyModal
-        bottomSheetRef={addToStudyModal.ref}
-        onSelectStudy={handleSelectStudy}
-        onClose={handleCloseAddToStudyModal}
-      />
+      <AddToStudyModal bottomSheetRef={addToStudyModal.ref} onSelectStudy={handleSelectStudy} />
       <VerseFormatBottomSheet
         bottomSheetRef={verseFormatModal.ref}
         onSelectFormat={handleSelectFormat}
-        onClose={handleCloseFormatBottomSheet}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
       <BookmarkModal

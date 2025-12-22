@@ -167,6 +167,7 @@ const Header = ({
       // zIndex={1}
       // @ts-ignore
       animate={headerHeight}
+      overflow="visible"
       {...motiTransition}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
@@ -279,17 +280,6 @@ const Header = ({
         />
         {!isSelectionMode && (
           <HStack marginLeft="auto">
-            {currentChapterBookmark && (
-              <MotiBox center width={25} height="100%" animate={menuOpacity}>
-                <TouchableBox
-                  center
-                  height="100%"
-                  onPress={() => bookmarkModalRef.current?.present()}
-                >
-                  <IonIcon name="bookmark" size={18} color={currentChapterBookmark.color} />
-                </TouchableBox>
-              </MotiBox>
-            )}
             <PopOverMenu
               element={
                 <MotiBox
@@ -362,13 +352,18 @@ const Header = ({
       </HStack>
       <BookmarkModal
         bottomSheetRef={bookmarkModalRef}
-        onClose={() => {}}
         book={bookNumber}
         chapter={chapter}
-        verse={1}
         version={version}
         existingBookmark={currentChapterBookmark || undefined}
       />
+      {currentChapterBookmark && (
+        <MotiBox position="absolute" right={24} bottom={-18}>
+          <TouchableBox center height="100%" onPress={() => bookmarkModalRef.current?.present()}>
+            <IonIcon name="bookmark" size={24} color={currentChapterBookmark.color} />
+          </TouchableBox>
+        </MotiBox>
+      )}
     </MotiHStack>
   )
 }

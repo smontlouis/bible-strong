@@ -57,12 +57,10 @@ const DropdownMenu = ({
       </TouchableBox>
       <Modal.Body
         ref={ref}
-        snapPoints={['40%']}
+        enableDynamicSizing
         headerComponent={
           <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
-            <Text bold fontSize={20}>
-              {title}
-            </Text>
+            <Text bold>{title}</Text>
           </Box>
         }
       >

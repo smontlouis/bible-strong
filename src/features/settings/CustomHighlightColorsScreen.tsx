@@ -3,9 +3,8 @@ import { Alert, ScrollView, TouchableOpacity, TextInput } from 'react-native'
 import styled from '@emotion/native'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 // @ts-ignore
-import colorsys from 'colorsys'
-// @ts-ignore
 import Modal from 'react-native-modal'
+import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 
@@ -171,10 +170,10 @@ const CustomHighlightColorsScreen = () => {
     setModalState(prev => ({ ...prev, isOpen: false }))
   }
 
-  const handleColorChange = (...hsl: [number, number, number]) => {
+  const handleColorChange = (color: ColorFormatsObject) => {
     setModalState(prev => ({
       ...prev,
-      chosenHex: colorsys.hslToHex(...hsl),
+      chosenHex: color.hex,
     }))
   }
 
@@ -361,7 +360,7 @@ const CustomHighlightColorsScreen = () => {
       >
         <ModalContainer style={{ paddingBottom: insets.bottom }}>
           <Box height={200}>
-            <ColorPicker onChangeColor={handleColorChange} />
+            <ColorPicker value={modalState.chosenHex} onCompleteJS={handleColorChange} />
           </Box>
           <Box padding={15}>
             <Box row alignItems="center" marginBottom={10}>

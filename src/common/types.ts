@@ -227,7 +227,7 @@ export interface Bookmark {
   color: string
   book: number
   chapter: number
-  verse: number
+  verse?: number // undefined pour les bookmarks de chapitre
   date: number
   version?: string
 }

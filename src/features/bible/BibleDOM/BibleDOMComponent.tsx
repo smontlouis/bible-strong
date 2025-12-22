@@ -650,11 +650,7 @@ const VersesRenderer = ({
 
           const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
 
-          // Only show bookmark icon for verse > 1 (chapter bookmarks are shown in header)
-          const bookmark =
-            Number(Verset) > 1 && bookmarkedVerses?.[Number(Verset)]
-              ? bookmarkedVerses[Number(Verset)]
-              : undefined
+          const bookmark = bookmarkedVerses?.[Number(Verset)]
 
           return (
             <Span key={`${Livre}-${Chapitre}-${Verset}`}>

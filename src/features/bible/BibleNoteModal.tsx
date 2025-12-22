@@ -32,6 +32,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
+import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -152,16 +153,15 @@ ${currentNote?.description}
     <Modal.Body
       ref={ref}
       topInset={useSafeAreaInsets().top}
-      snapPoints={['100%']}
+      enableDynamicSizing
       headerComponent={
         <ModalHeader
-          onClose={close}
           title={reference}
           subTitle={t('Note')}
           rightComponent={
             currentNote ? (
               <PopOverMenu
-                width={24}
+                width={54}
                 height={54}
                 popover={
                   <>
@@ -207,15 +207,15 @@ ${currentNote?.description}
       footerComponent={props =>
         isEditing ? (
           <BottomSheetFooter {...props}>
-            <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+            <HStack py={5} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
               {currentNote && (
-                <Box>
+                <Box h={MODAL_FOOTER_HEIGHT}>
                   <Button reverse onPress={cancelEditing}>
                     {t('Annuler')}
                   </Button>
                 </Box>
               )}
-              <Box>
+              <Box h={MODAL_FOOTER_HEIGHT}>
                 <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
                   {t('Sauvegarder')}
                 </Button>
@@ -233,7 +233,7 @@ ${currentNote?.description}
         )
       }
     >
-      <Box paddingHorizontal={20}>
+      <Box paddingHorizontal={20} gap={10} pb={20}>
         {isEditing && (
           <>
             <TextInput
@@ -242,7 +242,6 @@ ${currentNote?.description}
               value={title}
               style={{ marginTop: 20 }}
             />
-            <Spacer />
             <TextArea
               placeholder={t('Description')}
               onChangeText={setDescription}

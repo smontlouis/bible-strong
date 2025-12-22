@@ -6160,6 +6160,7 @@ __metadata:
     react-native-youtube-iframe: "npm:^2.4.1"
     react-redux: "npm:^9.2.0"
     react-test-renderer: "npm:18.3.1"
+    reanimated-color-picker: "npm:^4.1.1"
     redux: "npm:^4.0.5"
     redux-persist: "npm:^6.0.0"
     redux-persist-filesystem-storage: "npm:^2.1.0"
@@ -13325,6 +13326,22 @@ __metadata:
     string_decoder: "npm:^1.1.1"
     util-deprecate: "npm:^1.0.1"
   checksum: 10c0/e37be5c79c376fdd088a45fa31ea2e423e5d48854be7a22a58869b4e84d25047b193f6acb54f1012331e1bcd667ffb569c01b99d36b0bd59658fb33f513511b7
+  languageName: node
+  linkType: hard
+
+"reanimated-color-picker@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "reanimated-color-picker@npm:4.1.1"
+  peerDependencies:
+    expo: ">=44.0.0"
+    react: "*"
+    react-native: "*"
+    react-native-gesture-handler: ">=2.0.0"
+    react-native-reanimated: ">=2.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10c0/a9c7180819dabe8abc843cb48382fc59454c2bd670fe04d8ff957a3b4f6982914071a8dcdfa4d19a3a881d1240255bdb8635d3d784e17014be1b5ce6540ad1c1
   languageName: node
   linkType: hard
 

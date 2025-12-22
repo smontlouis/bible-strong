@@ -1,10 +1,9 @@
 # TODO
 
 - [x] more than 5 colors
-- [x] bookmarks feature
-- [x] insérer un lien
+- [x] bookmarks
+- [x] links
 - [x] improve notes
-- [ ] fix tags modal, and add colors
 
 - [ ] export pdf not working
 - [ ] fix lost password UI

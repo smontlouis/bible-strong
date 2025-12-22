@@ -124,6 +124,12 @@ async function syncSubcollectionChanges(
   for (const id of Object.keys(changes.set)) {
     if (fullData && fullData[id]) {
       changes.set[id] = removeUndefinedVariables(fullData[id])
+
+      // For bookmarks: explicitly delete verse field if not present (chapter-level bookmark)
+      // This prevents old verse values from persisting due to merge: true
+      if (collection === 'bookmarks' && fullData[id].verse === undefined) {
+        changes.set[id].verse = deleteMarker
+      }
     }
   }
 

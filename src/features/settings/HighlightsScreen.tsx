@@ -166,9 +166,6 @@ const HighlightsScreen = () => {
     closeColorChange()
   }
 
-  console.log('changeColorData', changeColorData)
-  console.log('settingsData', settingsData)
-
   return (
     <Container>
       {/* Header with filter button */}

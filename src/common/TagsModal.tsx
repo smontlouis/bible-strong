@@ -52,11 +52,10 @@ const TagsModal = ({ isVisible, onClosed, onSelected, selectedChip }: any) => {
       ref={ref}
       onModalClose={onClosed}
       withPortal
-      snapPoints={['50%']}
+      snapPoints={['70%']}
       headerComponent={
-        <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
+        <Box px={20} pt={10} gap={5}>
           <Text bold>{t('Étiquettes')}</Text>
-          <Spacer />
           <BottomSheetSearchInput
             placeholder={t('Chercher ou créer une étiquette')}
             onChangeText={search}

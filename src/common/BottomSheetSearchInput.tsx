@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { TextInput, TextInputProps } from 'react-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from './ui/Icon'
@@ -21,17 +21,18 @@ const BottomSheetSearchInput = ({
   ...props
 }: Props & TextInputProps) => {
   const theme = useTheme()
+
   return (
     <Box>
       <Box
         row
         center
         paddingHorizontal={20}
-        borderRadius={30}
+        borderRadius={14}
         backgroundColor="rgba(0,0,0,0.1)"
         marginTop={0}
         marginBottom={5}
-        height={50}
+        height={44}
         overflow="visible"
       >
         <Icon.Feather

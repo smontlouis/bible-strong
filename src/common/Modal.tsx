@@ -1,20 +1,20 @@
 import styled from '@emotion/native'
 import {
+  BottomSheetHandle,
   BottomSheetModal,
   BottomSheetModalProps,
   BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet'
-import { Portal } from '@gorhom/portal'
 import React, { Ref } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import {
   onAnimateModalClose,
   renderBackdrop,
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
+import { BOTTOM_INSET, MODAL_FOOTER_HEIGHT_BOTTOM_INSET } from '~helpers/constants'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -60,7 +60,22 @@ const Body = ({
 }: ModalBodyProps) => {
   const insets = useSafeAreaInsets()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-  const { bottomBarHeight } = useBottomBarHeightInTab()
+
+  // Use ref to avoid recreating renderHandle when headerComponent changes
+  // This prevents the handle from remounting and losing focus in inputs
+  const headerComponentRef = React.useRef(headerComponent)
+  headerComponentRef.current = headerComponent
+
+  const renderHandle = React.useCallback(
+    (handleProps: React.ComponentProps<typeof BottomSheetHandle>) => (
+      <>
+        <BottomSheetHandle {...handleProps} />
+        {headerComponentRef.current}
+      </>
+    ),
+    []
+  )
+
   return (
     <BottomSheetModal
       ref={ref}
@@ -70,15 +85,15 @@ const Body = ({
       backdropComponent={renderBackdrop}
       activeOffsetY={[-20, 20]}
       onAnimate={onAnimateModalClose(props.onModalClose)}
+      handleComponent={headerComponent ? renderHandle : undefined}
       key={key}
       {...bottomSheetStyles}
       {...props}
     >
-      {headerComponent && <>{headerComponent}</>}
       {enableScrollView ? (
         <BottomSheetScrollView
           contentContainerStyle={{
-            paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
+            paddingBottom: props.footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
           }}
         >
           {children}
@@ -87,7 +102,7 @@ const Body = ({
         <BottomSheetView
           style={{
             flex: 1,
-            paddingBottom: bottomBarHeight + (props.footerComponent ? 54 : 0),
+            paddingBottom: props.footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
           }}
         >
           {children}

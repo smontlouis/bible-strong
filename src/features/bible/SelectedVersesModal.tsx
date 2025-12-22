@@ -29,6 +29,8 @@ import ColorCirclesBar from './ColorCirclesBar'
 import TouchableChip from './TouchableChip'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { BOTTOM_INSET } from '~helpers/constants'
 
 const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
   borderBottomColor: theme.colors.border,
@@ -53,7 +55,7 @@ type Props = {
   selectAllVerses: () => void
   version: VersionCode
   onAddToStudy: () => void
-  onAddBookmark?: () => void
+  onAddBookmark: () => void
 }
 
 const VersesModal = ({
@@ -89,6 +91,7 @@ const VersesModal = ({
   }, [isVisible])
 
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
 
   useEffect(() => {
     const title = verseToReference(selectedVerses)
@@ -199,7 +202,7 @@ const VersesModal = ({
         style={{
           flex: 0,
           // minHeight: 100,
-          paddingBottom: bottomBarHeight,
+          paddingBottom: isFullScreenBible ? BOTTOM_INSET : bottomBarHeight,
         }}
       >
         {isSelectionMode?.includes('verse') ? (
@@ -296,20 +299,18 @@ const VersesModal = ({
                 <TouchableChip name="layers" onPress={compareVerses} label={t('Comparer')} />
                 <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
                 <TouchableChip name="file-plus" onPress={onCreateNoteClick} label={t('Note')} />
+                <TouchableChip
+                  name="bookmark"
+                  onPress={onAddBookmark}
+                  label={t('Marque-page')}
+                  disabled={moreThanOneVerseSelected}
+                />
                 <TouchableChip name="link" onPress={onCreateLinkClick} label={t('Lien')} />
                 <TouchableChip
                   name="feather"
                   onPress={onAddToStudy}
                   label={t('study.addToStudy')}
                 />
-                {onAddBookmark && (
-                  <TouchableChip
-                    name="bookmark"
-                    onPress={onAddBookmark}
-                    label={t('Marque-page')}
-                    disabled={moreThanOneVerseSelected}
-                  />
-                )}
                 <TouchableChip name="copy" onPress={copyToClipboard} label={t('Copier')} />
                 <TouchableChip name="share-2" onPress={shareVerse} label={t('Partager')} />
                 <TouchableChip onPress={selectAllVerses} label={t('Tout sélectionner')} />

@@ -66,7 +66,7 @@ export function updateBookmark(id: string, updates: Partial<Omit<Bookmark, 'id'>
 
 export function moveBookmark(
   id: string,
-  location: { book: number; chapter: number; verse: number; version?: string }
+  location: { book: number; chapter: number; verse?: number; version?: string }
 ) {
   return { type: MOVE_BOOKMARK, payload: { id, ...location } }
 }

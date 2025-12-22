@@ -21,7 +21,7 @@ export const makeSelectBookmarkForChapter = () =>
     ],
     (bookmarks, book, chapter): Bookmark | undefined => {
       return Object.values(bookmarks).find(
-        b => b.book === book && b.chapter === chapter && b.verse === 1
+        b => b.book === book && b.chapter === chapter && b.verse === undefined
       )
     }
   )
@@ -58,7 +58,7 @@ export const makeSelectBookmarksInChapter = () =>
     (bookmarks, book, chapter): Record<number, Bookmark> => {
       const result: Record<number, Bookmark> = {}
       Object.values(bookmarks).forEach(b => {
-        if (b.book === book && b.chapter === chapter) {
+        if (b.book === book && b.chapter === chapter && b.verse !== undefined) {
           result[b.verse] = b
         }
       })

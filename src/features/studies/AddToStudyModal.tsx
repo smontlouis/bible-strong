@@ -57,9 +57,8 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
         borderBottomWidth={2}
         borderColor="lightGrey"
         alignItems="center"
-        bg="lightPrimary"
       >
-        <FeatherIcon name="plus-square" size={24} color="primary" />
+        <FeatherIcon name="plus-circle" size={24} color="primary" />
         <Box flex marginLeft={16}>
           <Text fontSize={16} bold color="primary">
             {t('study.newStudy')}
@@ -102,12 +101,10 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
       ref={bottomSheetRef}
       onModalClose={onClose}
       withPortal
-      snapPoints={['90%']}
+      snapPoints={['100%']}
       headerComponent={
-        <Box paddingTop={20} paddingBottom={10} paddingHorizontal={20}>
-          <Text bold fontSize={18} marginBottom={10}>
-            {t('study.selectStudy')}
-          </Text>
+        <Box px={20} pt={10} gap={5}>
+          <Text bold>{t('study.selectStudy')}</Text>
           <BottomSheetSearchInput
             placeholder={t('study.searchStudy')}
             onChangeText={search}

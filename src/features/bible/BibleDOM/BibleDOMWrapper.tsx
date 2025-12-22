@@ -33,6 +33,7 @@ import {
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_STRONG,
+  NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_VERSION,
@@ -365,6 +366,13 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         if (onOpenBookmarkModal) {
           onOpenBookmarkModal(action.payload)
         }
+        break
+      }
+
+      case NAVIGATE_TO_TAG: {
+        const { navigation } = props
+        const { tagId } = action.payload
+        navigation.navigate('Tag', { tagId })
         break
       }
 

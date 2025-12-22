@@ -70,6 +70,18 @@ export default produce((draft, action) => {
             try {
               delete draft.bible.tags[tagId][item.entity][id]
               delete draft.bible[item.entity][id].tags[tagId]
+
+              // Delete highlight if it has no color and no remaining tags
+              if (item.entity === 'highlights') {
+                const highlight = draft.bible[item.entity][id]
+                if (
+                  highlight &&
+                  highlight.color === '' &&
+                  Object.keys(highlight.tags || {}).length === 0
+                ) {
+                  delete draft.bible[item.entity][id]
+                }
+              }
             } catch (e) {}
 
             // ADD OPERATION
@@ -78,6 +90,15 @@ export default produce((draft, action) => {
               draft.bible.tags[tagId][item.entity] = {}
             }
             draft.bible.tags[tagId][item.entity][id] = true
+
+            // Create highlight if it doesn't exist (for highlights entity only)
+            if (item.entity === 'highlights' && !draft.bible[item.entity][id]) {
+              draft.bible[item.entity][id] = {
+                color: '',
+                date: Date.now(),
+                tags: {},
+              }
+            }
 
             if (!draft.bible[item.entity][id].tags) {
               draft.bible[item.entity][id].tags = {}

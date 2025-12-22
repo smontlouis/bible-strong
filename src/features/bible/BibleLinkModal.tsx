@@ -37,6 +37,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
+import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 interface BibleLinkModalProps {
   linkVerses: VerseIds | undefined
@@ -47,6 +48,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
   color: theme.colors.default,
   height: 48,
   borderColor: theme.colors.border,
+  placeholderTextColor: theme.colors.border,
   borderWidth: 2,
   borderRadius: 10,
   paddingHorizontal: 15,
@@ -232,16 +234,15 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
     <Modal.Body
       ref={ref}
       topInset={useSafeAreaInsets().top}
-      snapPoints={['70%']}
+      enableDynamicSizing
       headerComponent={
         <ModalHeader
-          onClose={close}
           title={reference}
           subTitle={t('Lien')}
           rightComponent={
             currentLink ? (
               <PopOverMenu
-                width={24}
+                width={54}
                 height={54}
                 popover={
                   <>
@@ -299,8 +300,8 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
           </BottomSheetFooter>
         ) : (
           <BottomSheetFooter {...props}>
-            <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
-              <Box>
+            <HStack py={5} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+              <Box h={MODAL_FOOTER_HEIGHT} center>
                 <Fab icon="edit-2" onPress={onEditLink} />
               </Box>
             </HStack>
@@ -308,7 +309,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
         )
       }
     >
-      <VStack gap={10} paddingHorizontal={20} pb={20}>
+      <VStack gap={10} paddingHorizontal={20}>
         {isEditing && (
           <VStack py={20} gap={20}>
             <VStack gap={5}>

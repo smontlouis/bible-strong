@@ -8,8 +8,8 @@ const StyledTextArea = styled.TextInput(({ theme }) => ({
   borderColor: theme.colors.border,
   borderWidth: 2,
   borderRadius: 10,
-  maxHeight: 200,
-  minHeight: 100,
+  maxHeight: 300,
+  minHeight: 150,
   paddingHorizontal: 15,
   paddingVertical: 30,
 }))

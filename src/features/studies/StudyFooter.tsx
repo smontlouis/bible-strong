@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import Color from 'color'
 import React, { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { Menu, MenuOptions, MenuTrigger, renderers, withMenuContext } from 'react-native-popup-menu'
@@ -10,14 +9,15 @@ import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
 import Link from '~common/Link'
+import ColorPicker from '~common/ColorPicker'
 import Border from '~common/ui/Border'
-import Box, { TouchableBox, VStack } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import TouchableCircle from '~features/bible/TouchableCircle'
 import useMediaQueries from '~helpers/useMediaQueries'
 import { MenuOption as BaseMenuOption, MenuOptionProps } from 'react-native-popup-menu'
 import { useTheme } from '@emotion/react'
+import type { ColorFormatsObject } from 'reanimated-color-picker'
 
 const { Popover } = renderers
 
@@ -133,18 +133,24 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }: any) => {
   )
 }
 
-const colors = ['#cc0000', '#f1c232', '#6aa84f', '#45818e', '#3d85c6', '#674ea7', '#a64d79']
-const lighten = ['0.3', '0.5', '0.7', '0.9']
-
 const SelectMore = ({ dispatchToWebView, activeFormats, ctx }: any) => {
-  const [colorModal, setOpenColorModal] = React.useState<any>()
+  const [colorModal, setOpenColorModal] = React.useState<'background' | 'color' | undefined>()
   const { t } = useTranslation()
 
-  const setColor = (color: any) => {
+  const handleColorComplete = (color: ColorFormatsObject) => {
     dispatchToWebView('TOGGLE_FORMAT', {
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
-      value: color,
+      value: color.hex,
     })
+    ctx.menuActions.closeMenu()
+  }
+
+  const handleResetColor = () => {
+    dispatchToWebView('TOGGLE_FORMAT', {
+      type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
+      value: null,
+    })
+    ctx.menuActions.closeMenu()
   }
 
   return (
@@ -153,37 +159,23 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }: any) => {
       element={<FeatherIcon name="more-horizontal" size={18} color="primary" />}
       popover={
         colorModal ? (
-          <VStack width={200} gap={12}>
-            <TouchableBox
-              onPress={() => {
-                setColor(null)
-                ctx.menuActions.closeMenu()
-              }}
-              bg="lightGrey"
-              px={10}
-              py={5}
-              rounded
-            >
+          <Box width={220}>
+            <TouchableBox onPress={handleResetColor} bg="lightGrey" px={10} py={5} rounded mb={10}>
               <Text textAlign="center" fontSize={12}>
                 {t('reset')}
               </Text>
             </TouchableBox>
-            {lighten.map((l: any) => (
-              <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
-                {colors.map((c: any) => (
-                  <TouchableCircle
-                    key={c}
-                    size={20}
-                    color={Color(c).lighten(Number(l)).string()}
-                    onPress={() => {
-                      setColor(Color(c).lighten(Number(l)).string())
-                      ctx.menuActions.closeMenu()
-                    }}
-                  />
-                ))}
-              </Box>
-            ))}
-          </VStack>
+            <Box height={180}>
+              <ColorPicker
+                value={
+                  colorModal === 'background'
+                    ? activeFormats.background || '#ffffff'
+                    : activeFormats.color || '#000000'
+                }
+                onCompleteJS={handleColorComplete}
+              />
+            </Box>
+          </Box>
         ) : (
           <Box>
             <Box row>
@@ -325,45 +317,50 @@ const FormatIcon = styled(TouchableOpacity)(({ theme, isSelected }: any) => ({
 
 const FormatIconForPopover = FormatIcon.withComponent(Box)
 
-const ColorPopover = ({ type, setColor, ctx }: any) => (
-  <Box width={200}>
-    <Box row marginBottom={15} padding={5} alignItems="center">
-      <Icon.Feather
+const ColorPopover = ({
+  type,
+  setColor,
+  ctx,
+  currentColor,
+}: {
+  type: 'background' | 'color'
+  setColor: (type: string, color: string | false) => void
+  ctx: any
+  currentColor?: string
+}) => {
+  const { t } = useTranslation()
+
+  const handleColorComplete = (color: ColorFormatsObject) => {
+    setColor(type, color.hex)
+    ctx.menuActions.closeMenu()
+  }
+
+  return (
+    <Box width={220}>
+      <TouchableBox
         onPress={() => {
           setColor(type, false)
           ctx.menuActions.closeMenu()
         }}
-        name="x-circle"
-        size={23}
-        style={{ marginRight: 10 }}
-      />
-      <Text
-        onPress={() => {
-          setColor(type, false)
-          ctx.menuActions.closeMenu()
-        }}
-        fontSize={18}
+        bg="lightGrey"
+        px={10}
+        py={5}
+        rounded
+        mb={10}
       >
-        Aucune
-      </Text>
-    </Box>
-    {lighten.map((l: any) => (
-      <Box key={l} row marginBottom={l === '0.9' ? 0 : 10}>
-        {colors.map((c: any) => (
-          <TouchableCircle
-            key={c}
-            size={20}
-            color={Color(c).lighten(Number(l)).string()}
-            onPress={() => {
-              setColor(type, Color(c).lighten(Number(l)).string())
-              ctx.menuActions.closeMenu()
-            }}
-          />
-        ))}
+        <Text textAlign="center" fontSize={12}>
+          {t('reset')}
+        </Text>
+      </TouchableBox>
+      <Box height={180}>
+        <ColorPicker
+          value={currentColor || (type === 'background' ? '#ffffff' : '#000000')}
+          onCompleteJS={handleColorComplete}
+        />
       </Box>
-    ))}
-  </Box>
-)
+    </Box>
+  )
+}
 
 const StudyFooter = memo(
   ({ dispatchToWebView, navigateBibleView, activeFormats, ctx }: any) => {
@@ -436,7 +433,14 @@ const StudyFooter = memo(
                     <BackgroundIcon color={activeFormats.background} />
                   </FormatIconForPopover>
                 }
-                popover={<ColorPopover type="background" ctx={ctx} setColor={setColor} />}
+                popover={
+                  <ColorPopover
+                    type="background"
+                    ctx={ctx}
+                    setColor={setColor}
+                    currentColor={activeFormats.background}
+                  />
+                }
               />
               <PopOverMenu
                 element={
@@ -447,7 +451,14 @@ const StudyFooter = memo(
                     <ColorIcon color={activeFormats.color} />
                   </FormatIconForPopover>
                 }
-                popover={<ColorPopover type="color" ctx={ctx} setColor={setColor} />}
+                popover={
+                  <ColorPopover
+                    type="color"
+                    ctx={ctx}
+                    setColor={setColor}
+                    currentColor={activeFormats.color}
+                  />
+                }
               />
               {/* @ts-ignore */}
               <FormatIcon

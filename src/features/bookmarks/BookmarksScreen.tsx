@@ -35,7 +35,7 @@ const getBookName = (bookNumber: number): string => {
 
 const formatReference = (bookmark: Bookmark): string => {
   const bookName = getBookName(bookmark.book)
-  if (bookmark.verse === 1) {
+  if (bookmark.verse === undefined) {
     return `${bookName} ${bookmark.chapter}`
   }
   return `${bookName} ${bookmark.chapter}:${bookmark.verse}`
@@ -96,6 +96,10 @@ const BookmarksScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Bookm
   const handleCloseModal = () => {
     setSelectedBookmark(null)
   }
+
+  console.log({
+    bookmarks,
+  })
 
   return (
     <Container>

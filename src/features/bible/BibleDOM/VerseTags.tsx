@@ -1,13 +1,26 @@
+import { useState } from 'react'
 import { styled } from 'goober'
+import * as Icon from '@expo/vector-icons'
 import { scaleFontSize } from './scaleFontSize'
-import { OPEN_HIGHLIGHT_TAGS } from './dispatch'
+import { OPEN_HIGHLIGHT_TAGS, NAVIGATE_TO_TAG } from './dispatch'
 import { RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 
-const Div = styled('div')<RootStyles>(({ settings: { theme } }) => ({
-  position: 'relative',
+const IconButton = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  marginLeft: '5px',
+  fontFamily: 'arial',
+  padding: '2px 4px',
+  borderRadius: '40px',
+  color: colors[theme].default,
+  backgroundColor: colors[theme].lightGrey,
+  '&:active': {
+    opacity: 0.5,
+  },
 }))
 
 const Tag = styled('div')<RootStyles>(({ settings: { theme, colors, fontSizeScale } }) => ({
@@ -16,9 +29,32 @@ const Tag = styled('div')<RootStyles>(({ settings: { theme, colors, fontSizeScal
   borderRadius: '40px',
   color: colors[theme].default,
   backgroundColor: colors[theme].lightGrey,
-  fontSize: scaleFontSize(12, fontSizeScale),
+  fontSize: scaleFontSize(14, fontSizeScale),
   marginLeft: '5px',
+  display: 'inline-flex',
+  cursor: 'pointer',
+  '&:active': {
+    opacity: 0.5,
+  },
 }))
+
+const ExpandButton = styled('div')<RootStyles>(
+  ({ settings: { theme, colors, fontSizeScale } }) => ({
+    fontFamily: 'arial',
+    padding: '2px 4px',
+    borderRadius: '40px',
+    color: colors[theme].default,
+    backgroundColor: colors[theme].lightGrey,
+    fontSize: scaleFontSize(12, fontSizeScale),
+    marginLeft: '5px',
+    opacity: 0.7,
+    cursor: 'pointer',
+    display: 'inline-flex',
+    '&:active': {
+      opacity: 0.4,
+    },
+  })
+)
 
 interface Props {
   settings: RootState['user']['bible']['settings']
@@ -27,32 +63,82 @@ interface Props {
 
 const VerseTags = ({ tag, settings }: Props) => {
   const dispatch = useDispatch()
-  const limit = 1
+  const [isExpanded, setIsExpanded] = useState(false)
+
   if (!tag.tags?.length) {
     return null
   }
-  const tags = tag.tags.slice(0, limit)
+
+  const limit = 1
+  const hasMoreTags = tag.tags.length > limit
+  const displayedTags = isExpanded ? tag.tags : tag.tags.slice(0, limit)
+  const remainingCount = tag.tags.length - limit
+
+  const { colors, theme } = settings
+  const defaultColor = colors[theme].default
+
+  const handleTagIconClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    dispatch({
+      type: OPEN_HIGHLIGHT_TAGS,
+      payload: tag,
+    })
+  }
+
+  const handleTagClick = (tagId: string) => (e: React.MouseEvent) => {
+    e.stopPropagation()
+    dispatch({
+      type: NAVIGATE_TO_TAG,
+      payload: { tagId },
+    })
+  }
+
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsExpanded(true)
+  }
+
+  const handleCollapseClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsExpanded(false)
+  }
+
   return (
-    <Div
-      settings={settings}
-      onClick={() =>
-        dispatch({
-          type: OPEN_HIGHLIGHT_TAGS,
-          payload: tag,
-        })
-      }
-    >
-      {tags.map(t => (
-        <Tag key={t.id} settings={settings}>
+    <>
+      {/* Tag icon - opens MultipleTagsModal */}
+      <IconButton settings={settings} onClick={handleTagIconClick}>
+        <Icon.Feather
+          name="tag"
+          size={Number(scaleFontSize(14, settings.fontSizeScale).replace('px', ''))}
+          color={defaultColor}
+        />
+      </IconButton>
+
+      {/* Individual tags - clickable to navigate */}
+      {displayedTags.map(t => (
+        <Tag key={t.id} settings={settings} onClick={handleTagClick(t.id)}>
           {t.name}
         </Tag>
       ))}
-      {!!(tag.tags.length - limit) && (
-        <Tag settings={settings} style={{ opacity: 0.7 }}>
-          + {tag.tags.length - limit}
-        </Tag>
+
+      {/* +N indicator - only visible when collapsed and has more tags */}
+      {!isExpanded && hasMoreTags && (
+        <ExpandButton settings={settings} onClick={handleExpandClick}>
+          +{remainingCount}
+        </ExpandButton>
       )}
-    </Div>
+
+      {/* Collapse button - only visible when expanded */}
+      {isExpanded && hasMoreTags && (
+        <IconButton settings={settings} onClick={handleCollapseClick}>
+          <Icon.Feather
+            name="chevron-left"
+            size={Number(scaleFontSize(14, settings.fontSizeScale).replace('px', ''))}
+            color={defaultColor}
+          />
+        </IconButton>
+      )}
+    </>
   )
 }
 
