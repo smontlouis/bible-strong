@@ -132,7 +132,7 @@
     "react-native-section-list-get-item-layout": "^2.2.3",
     "react-native-svg": "15.15.1",
     "react-native-tab-view": "^2.14.0",
-    "react-native-track-player": "github:weights-ai/react-native-track-player",
+    "react-native-track-player": "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#./.yarn/patches/react-native-track-player-https-0ed4312346.patch",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-view-shot": "~4.0.3",
     "react-native-web": "^0.21.0",

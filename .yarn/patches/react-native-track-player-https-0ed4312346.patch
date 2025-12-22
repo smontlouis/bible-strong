@@ -1,0 +1,26 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index ac3347351e87bf5ec130f72e87d88b8d3b67904d..398c60d5fb7456259bbbff932cb575bd2cd337bb 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -6,7 +6,7 @@ buildscript {
+     }
+     dependencies {
+         classpath 'com.android.tools.build:gradle:4.2.2'
+-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
++        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20"
+     }
+ }
+ 
+diff --git a/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt b/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
+index 3e1c23e88c33a8197fc45180063fd192896ae829..afa8e435828e903212ebef502ea64548bc3dbc76 100644
+--- a/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
++++ b/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
+@@ -764,7 +764,7 @@ class MusicService : HeadlessJsTaskService() {
+     }
+ 
+     @MainThread
+-    override fun onBind(intent: Intent): IBinder {
++    override fun onBind(intent: Intent): IBinder? {
+         return binder
+     }
+ 

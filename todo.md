@@ -5,6 +5,10 @@
 - [x] links
 - [x] improve notes
 
+- note modal issue
+- highlights color not updated
+- studies color not working
+
 - [ ] export pdf not working
 - [ ] fix lost password UI
 - [ ] profile screen
