@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react'
-import { Alert, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import React, { useRef, useState } from 'react'
+import { Alert, ScrollView, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-// @ts-ignore
-import Modal from 'react-native-modal'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
+import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { useTheme } from '@emotion/react'
 
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
@@ -14,6 +14,8 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import Button from '~common/ui/Button'
 import ColorPicker from '~common/ColorPicker'
+import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
 import { FeatherIcon } from '~common/ui/Icon'
 import {
   addCustomColor,
@@ -57,32 +59,11 @@ const SectionTitle = styled(Text)(({ theme }) => ({
   textTransform: 'uppercase',
 }))
 
-const modalStyle = {
-  justifyContent: 'flex-end' as const,
-  margin: 0,
-}
-
-const ModalContainer = styled.View(({ theme }) => ({
-  display: 'flex',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '100%',
-  maxWidth: 600,
-  backgroundColor: theme.colors.reverse,
-  borderTopLeftRadius: 20,
-  borderTopRightRadius: 20,
-  shadowColor: theme.colors.default,
-  shadowOffset: { width: 0, height: -4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 10,
-}))
-
 const IconButton = styled(TouchableOpacity)({
   padding: 8,
 })
 
-const StyledTextInput = styled(TextInput)(({ theme }) => ({
+const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
   flex: 1,
   fontSize: 14,
   paddingVertical: 8,
@@ -95,7 +76,6 @@ const StyledTextInput = styled(TextInput)(({ theme }) => ({
 const MAX_CUSTOM_COLORS = 5
 
 type ModalState = {
-  isOpen: boolean
   mode: 'add' | 'edit-default' | 'edit-custom'
   colorKey?: ColorKey // For default colors: 'color1', 'color2', etc.
   customColor?: CustomColor // For custom colors
@@ -107,8 +87,10 @@ const CustomHighlightColorsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
+  const theme = useTheme()
+  const modalRef = useRef<BottomSheetModal>(null)
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
+  const selectColors = makeColorsSelector()
   const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   const customHighlightColors = useSelector(
@@ -124,7 +106,6 @@ const CustomHighlightColorsScreen = () => {
   const highlightsObj = useSelector((state: RootState) => state.user.bible.highlights, shallowEqual)
 
   const [modalState, setModalState] = useState<ModalState>({
-    isOpen: false,
     mode: 'add',
     chosenHex: '#ff7675',
     chosenName: '',
@@ -137,37 +118,37 @@ const CustomHighlightColorsScreen = () => {
   // Open modal for adding a new custom color
   const openAddModal = () => {
     setModalState({
-      isOpen: true,
       mode: 'add',
       chosenHex: '#ff7675',
       chosenName: '',
     })
+    modalRef.current?.present()
   }
 
   // Open modal for editing a default color
   const openEditDefaultModal = (colorKey: ColorKey, currentHex: string) => {
     setModalState({
-      isOpen: true,
       mode: 'edit-default',
       colorKey,
       chosenHex: currentHex,
       chosenName: defaultColorNames[colorKey as keyof typeof defaultColorNames] ?? '',
     })
+    modalRef.current?.present()
   }
 
   // Open modal for editing a custom color
   const openEditCustomModal = (color: CustomColor) => {
     setModalState({
-      isOpen: true,
       mode: 'edit-custom',
       customColor: color,
       chosenHex: color.hex,
       chosenName: color.name ?? '',
     })
+    modalRef.current?.present()
   }
 
   const closeModal = () => {
-    setModalState(prev => ({ ...prev, isOpen: false }))
+    modalRef.current?.dismiss()
   }
 
   const handleColorChange = (color: ColorFormatsObject) => {
@@ -350,42 +331,39 @@ const CustomHighlightColorsScreen = () => {
         )}
       </ScrollView>
 
-      <Modal
-        style={modalStyle}
-        backdropOpacity={0.3}
-        isVisible={modalState.isOpen}
-        avoidKeyboard
-        onBackButtonPress={closeModal}
-        onBackdropPress={closeModal}
+      <Modal.Body
+        ref={modalRef}
+        topInset={insets.top}
+        enableDynamicSizing
+        onModalClose={closeModal}
+        headerComponent={<ModalHeader title={getModalTitle()} />}
       >
-        <ModalContainer style={{ paddingBottom: insets.bottom }}>
-          <Box height={200}>
-            <ColorPicker value={modalState.chosenHex} onCompleteJS={handleColorChange} />
+        <Box paddingHorizontal={20} pb={20}>
+          <Box height={250}>
+            <ColorPicker value={modalState.chosenHex} onChangeJS={handleColorChange} />
           </Box>
-          <Box padding={15}>
-            <Box row alignItems="center" marginBottom={10}>
-              <ColorSquare size={40} color={modalState.chosenHex} />
-              <Text bold marginLeft={10}>
-                {getModalTitle()}
-              </Text>
-            </Box>
-            <Box row alignItems="center">
-              <StyledTextInput
-                placeholder={t('Nom de la couleur (optionnel)')}
-                placeholderTextColor="#999"
-                value={modalState.chosenName}
-                onChangeText={handleNameChange}
-                maxLength={30}
-              />
-              <Box marginLeft={10}>
-                <Button small onPress={handleSave}>
-                  {t('Valider')}
-                </Button>
-              </Box>
+          <Box row alignItems="center" marginBottom={10}>
+            <ColorSquare size={40} color={modalState.chosenHex} />
+            <Text bold marginLeft={10}>
+              {modalState.chosenHex}
+            </Text>
+          </Box>
+          <Box row alignItems="center">
+            <StyledTextInput
+              placeholder={t('Nom de la couleur (optionnel)')}
+              placeholderTextColor={theme.colors.tertiary}
+              value={modalState.chosenName}
+              onChangeText={handleNameChange}
+              maxLength={30}
+            />
+            <Box marginLeft={10}>
+              <Button small onPress={handleSave}>
+                {t('Valider')}
+              </Button>
             </Box>
           </Box>
-        </ModalContainer>
-      </Modal>
+        </Box>
+      </Modal.Body>
     </Container>
   )
 }

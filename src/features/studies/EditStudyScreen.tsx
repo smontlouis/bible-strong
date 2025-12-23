@@ -86,6 +86,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
         }}
         title={currentStudy.title}
         study={currentStudy}
+        navigation={navigation}
       />
       <StudiesDomWrapper
         isReadOnly={isReadOnly}

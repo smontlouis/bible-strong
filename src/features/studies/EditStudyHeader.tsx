@@ -1,17 +1,23 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 
+import { NavigationProp } from '@react-navigation/native'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
+import { Alert } from 'react-native'
+import { useDispatch } from 'react-redux'
 import Header from '~common/Header'
 import Link from '~common/Link'
-import PopOverMenu from '~common/PopOverMenu'
+import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
-import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { Study } from '~redux/modules/user'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { MainStackProps } from '~navigation/type'
+import { deleteStudy, Study } from '~redux/modules/user'
+import { multipleTagsModalAtom } from '../../state/app'
+import PublishStudyMenuItem from './PublishStudyMenuItem'
 
 const HeaderBox = styled(Box)({
   alignItems: 'center',
@@ -30,6 +36,7 @@ type EditHeaderProps = {
   setTitlePrompt: () => void
   hasBackButton?: boolean
   study: Study
+  navigation: NavigationProp<MainStackProps>
 }
 
 const EditHeader = ({
@@ -39,46 +46,84 @@ const EditHeader = ({
   setTitlePrompt,
   hasBackButton = true,
   study,
+  navigation,
 }: EditHeaderProps) => {
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
+  const dispatch = useDispatch()
+  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const { ref, open, close } = useBottomSheetModal()
+
+  const deleteStudyConfirmation = useCallback(() => {
+    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          dispatch(deleteStudy(study.id))
+          close()
+          navigation.goBack()
+        },
+        style: 'destructive',
+      },
+    ])
+  }, [dispatch, study.id, close, navigation, t])
 
   if (isReadOnly) {
     return (
-      <Header
-        title={title}
-        onTitlePress={setTitlePrompt}
-        hasBackButton={hasBackButton}
-        rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <MenuOption
-                  onSelect={() => {
-                    openInNewTab(
-                      {
-                        id: `study-${Date.now()}`,
-                        title: study.title,
-                        isRemovable: true,
-                        type: 'study',
-                        data: {
-                          studyId: study.id,
-                        },
-                      },
-                      { autoRedirect: true }
-                    )
-                  }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
-            }
-          />
-        }
-      />
+      <>
+        <Header
+          title={title}
+          onTitlePress={setTitlePrompt}
+          hasBackButton={hasBackButton}
+          rightComponent={
+            <Link onPress={open} padding>
+              <FeatherIcon name="more-vertical" size={20} />
+            </Link>
+          }
+        />
+        <Modal.Body ref={ref} enableDynamicSizing withPortal>
+          <PublishStudyMenuItem study={study} onClosed={close} />
+          <Modal.Item
+            onPress={() => {
+              close()
+              openInNewTab(
+                {
+                  id: `study-${Date.now()}`,
+                  title: study.title,
+                  isRemovable: true,
+                  type: 'study',
+                  data: {
+                    studyId: study.id,
+                  },
+                },
+                { autoRedirect: true }
+              )
+            }}
+          >
+            {t('tab.openInNewTab')}
+          </Modal.Item>
+          <Modal.Item
+            onPress={() => {
+              close()
+              setMultipleTagsItem({ ...study, entity: 'studies' })
+            }}
+          >
+            {t('Éditer les tags')}
+          </Modal.Item>
+          <Modal.Item
+            onPress={() => {
+              close()
+              setTitlePrompt()
+            }}
+          >
+            {t('Renommer')}
+          </Modal.Item>
+          <Modal.Item color="quart" onPress={deleteStudyConfirmation}>
+            {t('Supprimer')}
+          </Modal.Item>
+        </Modal.Body>
+      </>
     )
   }
 

@@ -1,3 +1,4 @@
+import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -5,7 +6,8 @@ import { createSelector } from '@reduxjs/toolkit'
 import { Alert, ScrollView, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { useTheme } from '@emotion/react'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -24,8 +26,6 @@ import Paragraph from '~common/ui/Paragraph'
 import Spacer from '~common/ui/Spacer'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import TextArea from '~common/ui/TextArea'
-import TextInput from '~common/ui/TextInput'
 import orderVerses from '~helpers/orderVerses'
 import { timeout } from '~helpers/timeout'
 import verseToReference from '~helpers/verseToReference'
@@ -33,6 +33,29 @@ import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
+
+const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+  color: theme.colors.default,
+  height: 48,
+  borderColor: theme.colors.border,
+  borderWidth: 2,
+  borderRadius: 10,
+  paddingHorizontal: 15,
+  fontSize: 16,
+}))
+
+const StyledTextArea = styled(BottomSheetTextInput)(({ theme }) => ({
+  color: theme.colors.default,
+  borderColor: theme.colors.border,
+  borderWidth: 2,
+  borderRadius: 10,
+  maxHeight: 300,
+  minHeight: 150,
+  paddingHorizontal: 15,
+  paddingVertical: 15,
+  fontSize: 16,
+  textAlignVertical: 'top',
+}))
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -68,6 +91,7 @@ const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) =>
 
 const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   const insets = useSafeAreaInsets()
+  const theme = useTheme()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
@@ -236,16 +260,19 @@ ${currentNote?.description}
       <Box paddingHorizontal={20} gap={10} pb={20}>
         {isEditing && (
           <>
-            <TextInput
+            <StyledTextInput
               placeholder={t('Titre')}
+              placeholderTextColor={theme.colors.border}
               onChangeText={setTitle}
               value={title}
               style={{ marginTop: 20 }}
             />
-            <TextArea
+            <StyledTextArea
               placeholder={t('Description')}
+              placeholderTextColor={theme.colors.border}
               onChangeText={setDescription}
               value={description}
+              multiline
             />
           </>
         )}

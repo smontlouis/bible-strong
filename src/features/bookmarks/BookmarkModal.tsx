@@ -92,8 +92,6 @@ const BookmarkModal = ({
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
 
-  console.log('[BookmarkModal] existingBookmark', existingBookmark)
-
   const bookmarksCount = useSelector(selectBookmarksCount)
   const existingBookmarks = useSelector(selectSortedBookmarks)
 

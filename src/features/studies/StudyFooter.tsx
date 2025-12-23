@@ -1,8 +1,9 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { memo } from 'react'
+import React, { memo, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { Menu, MenuOptions, MenuTrigger, renderers, withMenuContext } from 'react-native-popup-menu'
+import { useAtom } from 'jotai/react'
 
 import { useTranslation } from 'react-i18next'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
@@ -12,12 +13,14 @@ import Link from '~common/Link'
 import ColorPicker from '~common/ColorPicker'
 import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
+import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useMediaQueries from '~helpers/useMediaQueries'
 import { MenuOption as BaseMenuOption, MenuOptionProps } from 'react-native-popup-menu'
 import { useTheme } from '@emotion/react'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
+import { recentColorsAtom } from './atom'
 
 const { Popover } = renderers
 
@@ -134,14 +137,38 @@ const SelectHeading = ({ dispatchToWebView, activeFormats }: any) => {
 }
 
 const SelectMore = ({ dispatchToWebView, activeFormats, ctx }: any) => {
-  const [colorModal, setOpenColorModal] = React.useState<'background' | 'color' | undefined>()
+  const [colorModal, setOpenColorModal] = useState<'background' | 'color' | undefined>()
   const { t } = useTranslation()
+  const [recentColors, setRecentColors] = useAtom(recentColorsAtom)
+  const defaultColor = colorModal === 'background' ? '#ffffff' : '#000000'
+  const currentColor = colorModal === 'background' ? activeFormats.background : activeFormats.color
+  const [selectedColor, setSelectedColor] = useState(currentColor || defaultColor)
 
-  const handleColorComplete = (color: ColorFormatsObject) => {
+  // Reset selectedColor when colorModal changes
+  React.useEffect(() => {
+    if (colorModal) {
+      const newDefault = colorModal === 'background' ? '#ffffff' : '#000000'
+      const newCurrent =
+        colorModal === 'background' ? activeFormats.background : activeFormats.color
+      setSelectedColor(newCurrent || newDefault)
+    }
+  }, [colorModal, activeFormats.background, activeFormats.color])
+
+  const handleColorChange = (color: ColorFormatsObject) => {
+    setSelectedColor(color.hex)
+  }
+
+  const addToRecentColors = (color: string) => {
+    const newColors = [color, ...recentColors.filter(c => c !== color)].slice(0, 5)
+    setRecentColors(newColors)
+  }
+
+  const handleConfirm = () => {
     dispatchToWebView('TOGGLE_FORMAT', {
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
-      value: color.hex,
+      value: selectedColor,
     })
+    addToRecentColors(selectedColor)
     ctx.menuActions.closeMenu()
   }
 
@@ -159,22 +186,22 @@ const SelectMore = ({ dispatchToWebView, activeFormats, ctx }: any) => {
       element={<FeatherIcon name="more-horizontal" size={18} color="primary" />}
       popover={
         colorModal ? (
-          <Box width={220}>
-            <TouchableBox onPress={handleResetColor} bg="lightGrey" px={10} py={5} rounded mb={10}>
+          <Box width={250}>
+            <TouchableBox onPress={handleResetColor} bg="lightGrey" px={10} py={5} rounded>
               <Text textAlign="center" fontSize={12}>
                 {t('reset')}
               </Text>
             </TouchableBox>
-            <Box height={180}>
+            <Box height={280}>
               <ColorPicker
-                value={
-                  colorModal === 'background'
-                    ? activeFormats.background || '#ffffff'
-                    : activeFormats.color || '#000000'
-                }
-                onCompleteJS={handleColorComplete}
+                value={selectedColor}
+                onChangeJS={handleColorChange}
+                swatchColors={recentColors}
               />
             </Box>
+            <Button small onPress={handleConfirm}>
+              {t('Valider')}
+            </Button>
           </Box>
         ) : (
           <Box>
@@ -329,35 +356,47 @@ const ColorPopover = ({
   currentColor?: string
 }) => {
   const { t } = useTranslation()
+  const [recentColors, setRecentColors] = useAtom(recentColorsAtom)
+  const defaultColor = type === 'background' ? '#ffffff' : '#000000'
+  const [selectedColor, setSelectedColor] = useState(currentColor || defaultColor)
 
-  const handleColorComplete = (color: ColorFormatsObject) => {
-    setColor(type, color.hex)
+  const handleColorChange = (color: ColorFormatsObject) => {
+    setSelectedColor(color.hex)
+  }
+
+  const addToRecentColors = (color: string) => {
+    const newColors = [color, ...recentColors.filter(c => c !== color)].slice(0, 5)
+    setRecentColors(newColors)
+  }
+
+  const handleConfirm = () => {
+    setColor(type, selectedColor)
+    addToRecentColors(selectedColor)
+    ctx.menuActions.closeMenu()
+  }
+
+  const handleReset = () => {
+    setColor(type, false)
     ctx.menuActions.closeMenu()
   }
 
   return (
-    <Box width={220}>
-      <TouchableBox
-        onPress={() => {
-          setColor(type, false)
-          ctx.menuActions.closeMenu()
-        }}
-        bg="lightGrey"
-        px={10}
-        py={5}
-        rounded
-        mb={10}
-      >
+    <Box width={250}>
+      <TouchableBox onPress={handleReset} bg="lightGrey" px={10} py={5} rounded mb={10}>
         <Text textAlign="center" fontSize={12}>
           {t('reset')}
         </Text>
       </TouchableBox>
-      <Box height={180}>
+      <Box height={280}>
         <ColorPicker
-          value={currentColor || (type === 'background' ? '#ffffff' : '#000000')}
-          onCompleteJS={handleColorComplete}
+          value={selectedColor}
+          onChangeJS={handleColorChange}
+          swatchColors={recentColors}
         />
       </Box>
+      <Button small onPress={handleConfirm}>
+        {t('Valider')}
+      </Button>
     </Box>
   )
 }

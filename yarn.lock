@@ -6151,7 +6151,7 @@ __metadata:
     react-native-section-list-get-item-layout: "npm:^2.2.3"
     react-native-svg: "npm:15.15.1"
     react-native-tab-view: "npm:^2.14.0"
-    react-native-track-player: "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#./.yarn/patches/react-native-track-player-https-0ed4312346.patch"
+    react-native-track-player: "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch"
     react-native-url-polyfill: "npm:^2.0.0"
     react-native-view-shot: "npm:~4.0.3"
     react-native-web: "npm:^0.21.0"
@@ -13039,9 +13039,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-track-player@patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#./.yarn/patches/react-native-track-player-https-0ed4312346.patch::locator=bible-strong%40workspace%3A.":
+"react-native-track-player@patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch":
   version: 4.1.6
-  resolution: "react-native-track-player@patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#./.yarn/patches/react-native-track-player-https-0ed4312346.patch::version=4.1.6&hash=0a1687&locator=bible-strong%40workspace%3A."
+  resolution: "react-native-track-player@patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch::version=4.1.6&hash=386105"
   peerDependencies:
     react: ">=18"
     react-native: ">=0.77"
@@ -13052,7 +13052,7 @@ __metadata:
       optional: true
     shaka-player:
       optional: true
-  checksum: 10c0/7e305f552d7ea4f48a4036e0a38d3b8cd5f9b0d05b86762429b8473a4396e0b5d28acfff74813cf6f5ef44325af33f94a6481555218197916e97873544dfad4b
+  checksum: 10c0/f6869183948d32a2aee79395e76345a08fe7adb751570e92a5abaab933056501758c0763a35ee54d27d7d5fa5c1eb7f6d79c92d131f0ec387a68438a12f0190d
   languageName: node
   linkType: hard
 
