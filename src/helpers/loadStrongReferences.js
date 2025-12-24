@@ -3,6 +3,9 @@ import catchDatabaseError from '~helpers/catchDatabaseError'
 import { memoizeWithLang } from './memoize'
 
 const updateReferencesOrder = (result, references) => {
+  if (!Array.isArray(result)) {
+    return references
+  }
   const updatedResult = []
   references = [...new Set(references)] // deleting duplicate references
   references.map((ref, index) => {

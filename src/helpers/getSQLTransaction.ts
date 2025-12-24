@@ -53,6 +53,12 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
       await db.init()
     }
 
+    // Verify database was actually initialized
+    if (!db.get()) {
+      console.warn(`[SQLTransaction] Database ${dbId} (${lang}) not available`)
+      return [] as T[]
+    }
+
     try {
       const allRows = await db.get()?.getAllAsync(sqlReq, args)
       return (allRows || []) as T[]
@@ -71,6 +77,12 @@ const getSQLTransactionForLang = (dbId: DatabaseId, lang: ResourceLanguage) => {
 
     if (!db.get()) {
       await db.init()
+    }
+
+    // Verify database was actually initialized
+    if (!db.get()) {
+      console.warn(`[SQLTransaction] Database ${dbId} (${lang}) not available`)
+      return [] as T[]
     }
 
     try {

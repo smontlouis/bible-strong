@@ -101,7 +101,9 @@ class LanguageAwareDB {
       const fileName = this.path.split('/').pop()!
       this.db = await SQLite.openDatabaseAsync(
         fileName,
-        undefined,
+        {
+          useNewConnection: true,
+        },
         this.path.replace(`/${fileName}`, '')
       )
       console.log(`[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`)
