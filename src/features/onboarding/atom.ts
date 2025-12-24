@@ -9,3 +9,6 @@ export type ResourceToDownload = {
 }
 
 export const selectedResourcesAtom = atom<ResourceToDownload[]>([])
+
+// Tracks onboarding state: null = checking, true = required, false = not required
+export const isOnboardingRequiredAtom = atom<boolean | null>(null)

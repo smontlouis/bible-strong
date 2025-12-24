@@ -1,4 +1,5 @@
 import styled from '@emotion/native'
+import { useSetAtom } from 'jotai/react'
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-native-modal'
 import { deleteAllDatabases } from '~helpers/sqlite'
@@ -6,6 +7,7 @@ import useLanguage from '~helpers/useLanguage'
 
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
+import { isOnboardingRequiredAtom } from './atom'
 import DownloadResources from './DownloadResources'
 import OnBoardingSlides from './OnBoardingSlides'
 import SelectResources from './SelectResources'
@@ -21,6 +23,7 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
 const useCheckMandatoryVersions = () => {
   const isFR = useLanguage()
   const [isFirstTime, setFirstTime] = useState(false)
+  const setIsOnboardingRequired = useSetAtom(isOnboardingRequiredAtom)
 
   const actions = useBibleTabActions(defaultBibleAtom)
   useEffect(() => {
@@ -29,10 +32,12 @@ const useCheckMandatoryVersions = () => {
 
       if (lsgNeedsDownload) {
         console.log('[Onboarding] Needs download, open onboarding.')
+        setIsOnboardingRequired(true)
         actions.setSelectedVersion(isFR ? 'LSG' : 'KJV')
         deleteAllDatabases()
         setFirstTime(true)
       } else {
+        setIsOnboardingRequired(false)
         setFirstTime(false)
       }
     })()

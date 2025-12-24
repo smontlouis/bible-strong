@@ -6,6 +6,11 @@ import type { CustomColor } from '~redux/modules/user'
 import { makeColorsSelector } from '~redux/selectors/user'
 import useCurrentThemeSelector from './useCurrentThemeSelector'
 
+// Define empty defaults outside component to maintain reference stability
+// This prevents Redux selector warnings about returning different references
+const EMPTY_COLOR_NAMES = {} as Record<string, string>
+const EMPTY_CUSTOM_COLORS = [] as CustomColor[]
+
 /**
  * Hook to get the display name and hex color for a given color ID
  * Works with both default colors (color1-5) and custom colors
@@ -17,10 +22,10 @@ export function useColorInfo(colorId?: string): { name: string; hex: string } | 
   const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   const defaultColorNames = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorNames ?? {}
+    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_COLOR_NAMES
   )
   const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_CUSTOM_COLORS
   )
 
   if (!colorId) return undefined
@@ -56,10 +61,10 @@ export function useAllColors(): { id: string; name: string; hex: string }[] {
   const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   const defaultColorNames = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorNames ?? {}
+    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_COLOR_NAMES
   )
   const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_CUSTOM_COLORS
   )
 
   return useMemo(() => {

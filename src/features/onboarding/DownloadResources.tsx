@@ -15,6 +15,8 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import useLanguage from '~helpers/useLanguage'
+import { requireBiblePath } from '~helpers/requireBiblePath'
 import { selectedResourcesAtom } from './atom'
 
 export interface DownloadResourcesProps {
@@ -29,6 +31,7 @@ const DownloadResources = ({ setFirstTime }: DownloadResourcesProps) => {
   const [error, setError] = React.useState<Error | null>(null)
   const { t } = useTranslation()
   const theme = useTheme()
+  const isFR = useLanguage()
 
   const calculateProgress: (
     fileSize: number
@@ -57,6 +60,16 @@ const DownloadResources = ({ setFirstTime }: DownloadResourcesProps) => {
           setError(err)
           return
         }
+      }
+
+      // Verify that the default Bible file was downloaded successfully
+      const defaultBiblePath = requireBiblePath(isFR ? 'LSG' : 'KJV')
+      const fileInfo = await FileSystem.getInfoAsync(defaultBiblePath)
+      if (!fileInfo.exists) {
+        setError(
+          new Error(`Download verification failed: Bible file not found at ${defaultBiblePath}`)
+        )
+        return
       }
 
       setFirstTime(false)

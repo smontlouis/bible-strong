@@ -1,9 +1,11 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box, { MotiBox, motiTransition } from '~common/ui/Box'
+import { isOnboardingRequiredAtom } from '~features/onboarding/atom'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
@@ -94,6 +96,7 @@ const BibleViewer = ({
   isBibleViewReloadingAtom,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
+  const isOnboardingRequired = useAtomValue(isOnboardingRequiredAtom)
 
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -440,6 +443,16 @@ const BibleViewer = ({
   })
 
   console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
+
+  // Wait for onboarding check to complete before rendering Bible content
+  // This prevents FileNotFoundException when Bible files don't exist yet
+  if (isOnboardingRequired !== false) {
+    return (
+      <Box flex={1} bg="reverse" center>
+        <ActivityIndicator />
+      </Box>
+    )
+  }
 
   return (
     <Box flex={1} bg="reverse">

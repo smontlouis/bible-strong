@@ -3,7 +3,6 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { useEffect, useState } from 'react'
 import { InteractionManager } from 'react-native'
 import { createMMKV } from 'react-native-mmkv'
-import RNRestart from 'react-native-restart'
 import { Storage } from 'redux-persist'
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -124,7 +123,7 @@ export const useMigrateFromFileSystemStorage = () => {
         try {
           await migrateFromFileSystemStorage()
           setHasMigrated(true)
-          RNRestart.Restart()
+          // Note: No restart needed - state update is sufficient to continue app flow
         } catch (e) {
           console.error('Failed to migrate from FileSystem to MMKV:', e)
           // We don't need to fall back since we're not deleting the original data

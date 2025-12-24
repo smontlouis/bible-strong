@@ -6112,7 +6112,7 @@ __metadata:
     eslint-config-prettier: "npm:^9"
     eslint-plugin-prettier: "npm:^5"
     eslint-plugin-react-compiler: "npm:^19.1.0-rc.2"
-    expo: "npm:^54.0.0"
+    expo: "patch:expo@npm%3A54.0.29#~/.yarn/patches/expo-npm-54.0.29-02a4660d27.patch"
     expo-application: "npm:~7.0.8"
     expo-asset: "npm:~12.0.11"
     expo-asset-utils: "npm:^3.0.0"
@@ -8377,7 +8377,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:^54.0.0":
+"expo@npm:54.0.29":
   version: 54.0.29
   resolution: "expo@npm:54.0.29"
   dependencies:
@@ -8420,6 +8420,52 @@ __metadata:
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
   checksum: 10c0/4e550143de61e8cb68d03ba78e34f3f008bc670f8dd042711f38da04c59e8289b97f88c20fc6e5529f838390cd2efc95e06bab36ea49c324af46253df628f929
+  languageName: node
+  linkType: hard
+
+"expo@patch:expo@npm%3A54.0.29#~/.yarn/patches/expo-npm-54.0.29-02a4660d27.patch":
+  version: 54.0.29
+  resolution: "expo@patch:expo@npm%3A54.0.29#~/.yarn/patches/expo-npm-54.0.29-02a4660d27.patch::version=54.0.29&hash=a5978b"
+  dependencies:
+    "@babel/runtime": "npm:^7.20.0"
+    "@expo/cli": "npm:54.0.19"
+    "@expo/config": "npm:~12.0.12"
+    "@expo/config-plugins": "npm:~54.0.4"
+    "@expo/devtools": "npm:0.1.8"
+    "@expo/fingerprint": "npm:0.15.4"
+    "@expo/metro": "npm:~54.1.0"
+    "@expo/metro-config": "npm:54.0.11"
+    "@expo/vector-icons": "npm:^15.0.3"
+    "@ungap/structured-clone": "npm:^1.3.0"
+    babel-preset-expo: "npm:~54.0.8"
+    expo-asset: "npm:~12.0.11"
+    expo-constants: "npm:~18.0.12"
+    expo-file-system: "npm:~19.0.21"
+    expo-font: "npm:~14.0.10"
+    expo-keep-awake: "npm:~15.0.8"
+    expo-modules-autolinking: "npm:3.0.23"
+    expo-modules-core: "npm:3.0.29"
+    pretty-format: "npm:^29.7.0"
+    react-refresh: "npm:^0.14.2"
+    whatwg-url-without-unicode: "npm:8.0.0-3"
+  peerDependencies:
+    "@expo/dom-webview": "*"
+    "@expo/metro-runtime": "*"
+    react: "*"
+    react-native: "*"
+    react-native-webview: "*"
+  peerDependenciesMeta:
+    "@expo/dom-webview":
+      optional: true
+    "@expo/metro-runtime":
+      optional: true
+    react-native-webview:
+      optional: true
+  bin:
+    expo: bin/cli
+    expo-modules-autolinking: bin/autolinking
+    fingerprint: bin/fingerprint
+  checksum: 10c0/c71fb97fd00ed3144977733dd7dd4cc0761d6b92c9fd7892d331fab4d62b95c633090ab7b32ddad664fc4bcc5062658cd26330011f7674735962e6faed8198ab
   languageName: node
   linkType: hard
 
