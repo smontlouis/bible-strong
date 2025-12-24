@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollView, Share } from 'react-native'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
@@ -20,7 +20,6 @@ import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabConte
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import { openedFromTabAtom } from '~features/studies/atom'
 import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { useBottomSheet } from '~helpers/useBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
 import { cleanParams, wp } from '~helpers/utils'
 import verseToReference from '../../helpers/verseToReference'
@@ -29,7 +28,7 @@ import ColorCirclesBar from './ColorCirclesBar'
 import TouchableChip from './TouchableChip'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleAtom } from 'src/state/app'
 import { BOTTOM_INSET } from '~helpers/constants'
 
 const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
@@ -41,7 +40,7 @@ const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => (
 }))
 
 type Props = {
-  isVisible: boolean
+  ref?: React.RefObject<BottomSheet | null>
   isSelectionMode: StudyNavigateBibleType | undefined
   isSelectedVerseHighlighted: boolean
   onChangeResourceType: (type: BibleResource) => void
@@ -59,7 +58,7 @@ type Props = {
 }
 
 const VersesModal = ({
-  isVisible,
+  ref,
   isSelectionMode,
   isSelectedVerseHighlighted,
   onChangeResourceType,
@@ -77,18 +76,12 @@ const VersesModal = ({
 }: Props) => {
   const navigation = useNavigation()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
-  const { ref, open, close } = useBottomSheet()
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
-  useEffect(() => {
-    if (isVisible) {
-      open()
-    }
-    if (!isVisible) {
-      close()
-    }
-  }, [isVisible])
+  const close = useCallback(() => {
+    ref?.current?.close()
+  }, [ref])
 
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)

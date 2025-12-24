@@ -208,8 +208,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
       case NAVIGATE_TO_VERSE_NOTES: {
         const { navigation } = props
-        // @ts-ignore
-        navigation.navigate('BibleVerseNotes', {
+        navigation.push('BibleVerseNotes', {
           verse: action.payload,
           withBack: true,
         })
@@ -217,8 +216,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
       case NAVIGATE_TO_VERSE_LINKS: {
         const { navigation } = props
-        // @ts-ignore
-        navigation.navigate('BibleVerseLinks', {
+        navigation.push('BibleVerseLinks', {
           verse: action.payload,
           withBack: true,
         })
@@ -226,7 +224,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
       case NAVIGATE_TO_PERICOPE: {
         const { navigation } = props
-        // @ts-ignore
         navigation.navigate('Pericope')
         break
       }

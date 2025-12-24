@@ -36,11 +36,17 @@ const BibleVerseLinks = ({
   const [title, setTitle] = useState('')
   const [links, setLinks] = useState<TLink[]>([])
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
-  const [isTagsOpen, setIsTagsOpen] = useState(false)
-  const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
+  const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
   const _links = useSelector((state: RootState) => state.user.bible.links)
   const linkModal = useBottomSheetModal()
+  const tagsModal = useBottomSheetModal()
+  const linkSettingsModal = useBottomSheetModal()
+
+  const openLinkSettings = (linkId: string) => {
+    setLinkSettingsId(linkId)
+    linkSettingsModal.open()
+  }
 
   useEffect(() => {
     loadPage()
@@ -92,16 +98,13 @@ const BibleVerseLinks = ({
     linkModal.open()
   }
 
-  const closeTags = () => setIsTagsOpen(false)
-  const closeLinkSettings = () => setLinkSettingsId(null)
-
   const renderLink = ({ item, index }: { item: TLink; index: number }) => {
     return (
       <BibleLinkItem
         key={index}
         item={item}
         onPress={openLinkModal}
-        onMenuPress={setLinkSettingsId}
+        onMenuPress={openLinkSettings}
       />
     )
   }
@@ -119,8 +122,8 @@ const BibleVerseLinks = ({
       ) : (
         <TagsHeader
           title={t('Liens')}
-          setIsOpen={setIsTagsOpen}
-          isOpen={isTagsOpen}
+          setIsOpen={tagsModal.open}
+          isOpen={false}
           selectedChip={selectedChip}
           hasBackButton
         />
@@ -140,15 +143,16 @@ const BibleVerseLinks = ({
       )}
       <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
       <TagsModal
-        isVisible={isTagsOpen}
-        onClosed={closeTags}
-        onSelected={(chip: Tag) => setSelectedChip(chip)}
+        ref={tagsModal.ref}
+        onClosed={() => {}}
+        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <BibleLinksSettingsModal
+        ref={linkSettingsModal.ref}
         title={selectedLink?.link.ogData?.title || selectedLink?.link.customTitle || ''}
         linkId={linkSettingsId}
-        onClosed={closeLinkSettings}
+        onClosed={() => setLinkSettingsId(null)}
       />
     </Container>
   )

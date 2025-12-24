@@ -36,11 +36,17 @@ const BibleVerseNotes = ({
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState<TNote[]>([])
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
-  const [isTagsOpen, setIsTagsOpen] = useState(false)
-  const [selectedChip, setSelectedChip] = useState<Tag | undefined>(undefined)
+  const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   const noteModal = useBottomSheetModal()
+  const tagsModal = useBottomSheetModal()
+  const noteSettingsModal = useBottomSheetModal()
+
+  const openNoteSettings = (noteId: string) => {
+    setNoteSettingsId(noteId)
+    noteSettingsModal.open()
+  }
 
   useEffect(() => {
     loadPage()
@@ -92,15 +98,13 @@ const BibleVerseNotes = ({
     noteModal.open()
   }
 
-  const closeTags = () => setIsTagsOpen(false)
-
   const renderNote = ({ item, index }: { item: TNote; index: number }) => {
     return (
       <BibleNoteItem
         key={index}
         item={item}
         onPress={openNoteEditor}
-        onMenuPress={setNoteSettingsId}
+        onMenuPress={openNoteSettings}
       />
     )
   }
@@ -116,8 +120,8 @@ const BibleVerseNotes = ({
       ) : (
         <TagsHeader
           title="Notes"
-          setIsOpen={setIsTagsOpen}
-          isOpen={isTagsOpen}
+          setIsOpen={tagsModal.open}
+          isOpen={false}
           selectedChip={selectedChip}
           hasBackButton
         />
@@ -137,12 +141,16 @@ const BibleVerseNotes = ({
       )}
       <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
       <TagsModal
-        isVisible={isTagsOpen}
-        onClosed={closeTags}
-        onSelected={(chip: Tag) => setSelectedChip(chip)}
+        ref={tagsModal.ref}
+        onClosed={() => {}}
+        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
-      <BibleNotesSettingsModal noteId={noteSettingsId} />
+      <BibleNotesSettingsModal
+        ref={noteSettingsModal.ref}
+        noteId={noteSettingsId}
+        onClosed={() => setNoteSettingsId(null)}
+      />
     </Container>
   )
 }

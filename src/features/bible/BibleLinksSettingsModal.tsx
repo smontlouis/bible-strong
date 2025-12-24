@@ -1,34 +1,31 @@
-import { withTheme } from '@emotion/react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
-import React, { useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai/react'
 import Modal from '~common/Modal'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { deleteLink } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
 import { multipleTagsModalAtom } from '../../state/app'
 
 type Props = {
+  ref?: React.RefObject<BottomSheetModal | null>
   linkId: string | null
   onClosed: () => void
   title: string
 }
 
-const LinksSettingsModal = ({ linkId, onClosed, title }: Props) => {
+const LinksSettingsModal = ({ ref, linkId, onClosed, title }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  const { ref, open, close } = useBottomSheetModal()
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 
-  useEffect(() => {
-    if (linkId) {
-      open()
-    }
-  }, [linkId, open])
+  const close = useCallback(() => {
+    ref?.current?.dismiss()
+  }, [ref])
 
   const deleteLinkConfirmation = () => {
     if (!linkId) return
@@ -81,4 +78,4 @@ const LinksSettingsModal = ({ linkId, onClosed, title }: Props) => {
   )
 }
 
-export default withTheme(LinksSettingsModal)
+export default LinksSettingsModal

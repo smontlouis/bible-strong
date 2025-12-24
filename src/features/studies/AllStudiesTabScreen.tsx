@@ -1,14 +1,14 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
-import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import withLoginModal from '~common/withLoginModal'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
@@ -16,12 +16,12 @@ import { updateStudy } from '~redux/modules/user'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '~common/types'
+import generateUUID from '~helpers/generateUUID'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 import StudyTitlePrompt from './StudyTitlePrompt'
-import generateUUID from '~helpers/generateUUID'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
@@ -34,10 +34,19 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
   const dispatch = useDispatch()
   const r = useMediaQueriesArray()
 
-  const [isTagsOpen, setTagsIsOpen] = React.useState(false)
-  const [isStudySettingsOpen, setStudySettings] = React.useState(false)
-  const [titlePrompt, setTitlePrompt] = React.useState(false)
+  const tagsModal = useBottomSheetModal()
+  const [studySettingsId, setStudySettingsId] = React.useState<string | false>(false)
+  const studySettingsModal = useBottomSheetModal()
+  const [titlePrompt, setTitlePrompt] = React.useState<{ id: string; title: string } | false>(false)
   const [pendingStudyId, setPendingStudyId] = React.useState<string | null>(null)
+
+  const openStudySettings = useCallback(
+    (studyId: string) => {
+      setStudySettingsId(studyId)
+      studySettingsModal.open()
+    },
+    [studySettingsModal]
+  )
 
   const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
   const studies = useSelector(
@@ -74,8 +83,8 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
           ListHeaderComponent={
             <TagsHeader
               title={t('Études')}
-              setIsOpen={setTagsIsOpen}
-              isOpen={isTagsOpen}
+              setIsOpen={tagsModal.open}
+              isOpen={false}
               selectedChip={selectedChip}
               hasBackButton={hasBackButton}
             />
@@ -88,7 +97,7 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
             <StudyItem
               key={item.id}
               study={item}
-              setStudySettings={setStudySettings}
+              setStudySettings={openStudySettings}
               navigation={navigation}
             />
           )}
@@ -97,8 +106,8 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
         <>
           <TagsHeader
             title={t('Études')}
-            setIsOpen={setTagsIsOpen}
-            isOpen={isTagsOpen}
+            setIsOpen={tagsModal.open}
+            isOpen={false}
             selectedChip={selectedChip}
             hasBackButton={hasBackButton}
           />
@@ -125,14 +134,15 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
         />
       )}
       <TagsModal
-        isVisible={isTagsOpen}
-        onClosed={() => setTagsIsOpen(false)}
-        onSelected={(chip: Tag) => setSelectedChip(chip)}
+        ref={tagsModal.ref}
+        onClosed={() => {}}
+        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <StudySettingsModal
-        isOpen={isStudySettingsOpen}
-        onClosed={() => setStudySettings(false)}
+        ref={studySettingsModal.ref}
+        studyId={studySettingsId}
+        onClosed={() => setStudySettingsId(false)}
         setTitlePrompt={setTitlePrompt}
       />
       <StudyTitlePrompt

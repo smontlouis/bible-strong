@@ -66,15 +66,6 @@ interface BibleViewerProps {
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
 }
 
-const useBottomSheetDisclosure = <T,>() => {
-  const [isOpen, setIsOpen] = useState<T | null>(null)
-  const onOpen = setIsOpen
-  const onClose = useRef(() => setIsOpen(null)).current
-  const onToggle = useRef(() => setIsOpen(s => (s === null ? null : s))).current
-
-  return { isOpen, onOpen, onClose, onToggle }
-}
-
 const formatVerses = (verses: string[]) =>
   verses.reduce((acc, v, i, array) => {
     // @ts-ignore
@@ -113,7 +104,8 @@ const BibleViewer = ({
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
-  const strongModalDisclosure = useBottomSheetDisclosure<SelectedCode>()
+  const strongModal = useBottomSheet()
+  const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const [quickTagsModal, setQuickTagsModal] = useState<
     { ids: VerseIds; entity: string } | { id: string; entity: string } | false
   >(false)
@@ -126,6 +118,7 @@ const BibleViewer = ({
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const bibleParamsModal = useBottomSheetModal()
   const resourceModal = useBottomSheet()
+  const versesModal = useBottomSheet()
   const linkModal = useBottomSheetModal()
   const noteModal = useBottomSheetModal()
 
@@ -173,7 +166,14 @@ const BibleViewer = ({
     actions.selectAllVerses(selectedVersesToAdd)
   }
 
-  const modalIsVisible = !!Object.keys(selectedVerses).length
+  // Open/close verses modal based on selected verses
+  useEffect(() => {
+    if (Object.keys(selectedVerses).length > 0) {
+      versesModal.open()
+    } else {
+      versesModal.close()
+    }
+  }, [selectedVerses, versesModal])
 
   // Create memoized selectors
   const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
@@ -418,6 +418,20 @@ const BibleViewer = ({
     setTimeout(() => bookmarkModalRef.current?.present(), 0)
   }, [])
 
+  const setSelectedCode = useCallback(
+    (code: SelectedCode | null) => {
+      setSelectedCodeState(code)
+      if (code) {
+        strongModal.open()
+      }
+    },
+    [strongModal]
+  )
+
+  const clearSelectedCode = useCallback(() => {
+    setSelectedCodeState(null)
+  }, [])
+
   // Déplacer le hook en dehors de la condition de rendu
   const translationY = useDerivedValue(() => {
     return {
@@ -482,8 +496,8 @@ const BibleViewer = ({
           pericopeChapter={getPericopeChapter(pericope.current, book.Numero, chapter)}
           openNoteModal={openNoteModal}
           openLinkModal={openLinkModal}
-          setSelectedCode={strongModalDisclosure.onOpen}
-          selectedCode={strongModalDisclosure.isOpen}
+          setSelectedCode={setSelectedCode}
+          selectedCode={selectedCode}
           comments={comments}
           removeParallelVersion={actions.removeParallelVersion}
           addParallelVersion={actions.addParallelVersion}
@@ -523,7 +537,7 @@ const BibleViewer = ({
         </MotiBox>
       )}
       <SelectedVersesModal
-        isVisible={modalIsVisible}
+        ref={versesModal.ref}
         isSelectionMode={isSelectionMode}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
         onChangeResourceType={val => {
@@ -554,9 +568,10 @@ const BibleViewer = ({
       <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
       <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
       <StrongModal
+        ref={strongModal.ref}
         version={version}
-        selectedCode={strongModalDisclosure.isOpen}
-        onClosed={strongModalDisclosure.onClose}
+        selectedCode={selectedCode}
+        onClosed={clearSelectedCode}
       />
 
       <ResourcesModal

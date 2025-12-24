@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 
 import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
@@ -11,7 +11,6 @@ import StrongCard from '~features/bible/StrongCard'
 import { isStrongVersion } from '~helpers/bibleVersions'
 import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadStrongReference from '~helpers/loadStrongReference'
-import { usePrevious } from '~helpers/usePrevious'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const StrongCardWrapper = waitForStrongModal(({ navigation, selectedCode, onClosed }: any) => {
@@ -70,6 +69,7 @@ const StrongCardWrapper = waitForStrongModal(({ navigation, selectedCode, onClos
 })
 
 interface StrongModalProps {
+  ref?: React.RefObject<BottomSheet | null>
   onClosed: () => void
   selectedCode: {
     reference: string
@@ -78,23 +78,10 @@ interface StrongModalProps {
   version: string
 }
 
-const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
-  const modalRef = React.useRef<BottomSheet>(null)
+const StrongModal = ({ ref, onClosed, selectedCode, version }: StrongModalProps) => {
   const navigation = useNavigation()
   const theme = useTheme()
-  const hasSelectedCode = !!selectedCode
-  const hasPrevSelectedCode = usePrevious(hasSelectedCode)
   const insets = useSafeAreaInsets()
-
-  useEffect(() => {
-    if (hasSelectedCode && !hasPrevSelectedCode) {
-      modalRef.current?.snapToIndex(0)
-    }
-
-    if (!hasSelectedCode && hasPrevSelectedCode) {
-      modalRef.current?.close()
-    }
-  }, [hasSelectedCode, hasPrevSelectedCode])
 
   useEffect(() => {
     if (isStrongVersion(version)) {
@@ -107,7 +94,7 @@ const StrongModal = ({ onClosed, selectedCode, version }: StrongModalProps) => {
   return (
     <BottomSheet
       index={-1}
-      ref={modalRef}
+      ref={ref}
       onAnimate={onAnimateModalClose(onClosed)}
       snapPoints={[300, '75%']}
       enableDynamicSizing={false}

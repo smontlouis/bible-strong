@@ -1,29 +1,27 @@
-import { withTheme } from '@emotion/react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
-import React, { useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
 import Modal from '~common/Modal'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { deleteNote } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
 
 type Props = {
+  ref?: React.RefObject<BottomSheetModal | null>
   noteId: string | null
+  onClosed?: () => void
 }
 
-const NotesSettingsModal = ({ noteId }: Props) => {
+const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  const { ref, open, close } = useBottomSheetModal()
 
-  useEffect(() => {
-    if (noteId) {
-      open()
-    }
-  }, [noteId, open])
+  const close = useCallback(() => {
+    ref?.current?.dismiss()
+  }, [ref])
 
   const deleteNoteConfirmation = () => {
     if (!noteId) return
@@ -57,7 +55,7 @@ const NotesSettingsModal = ({ noteId }: Props) => {
   }
 
   return (
-    <Modal.Body ref={ref} enableDynamicSizing>
+    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
       <Modal.Item onPress={navigateToBible}>{t('Voir dans la Bible')}</Modal.Item>
       <Modal.Item color="quart" onPress={deleteNoteConfirmation}>
         {t('Supprimer')}
@@ -66,4 +64,4 @@ const NotesSettingsModal = ({ noteId }: Props) => {
   )
 }
 
-export default withTheme(NotesSettingsModal)
+export default NotesSettingsModal

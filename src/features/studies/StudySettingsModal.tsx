@@ -1,6 +1,5 @@
-import { withTheme } from '@emotion/react'
 import { useSetAtom } from 'jotai/react'
-import React, { useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -9,30 +8,29 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
-import { Theme } from '~themes'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
 interface Props {
-  isOpen: any
+  ref?: React.RefObject<BottomSheetModal | null>
+  studyId: string | false
   onClosed: () => void
-  theme: Theme
-  setTitlePrompt: any
+  setTitlePrompt: (data: { id: string; title: string }) => void
 }
 
-const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
+const StudySettingsModal = ({ ref, studyId, onClosed, setTitlePrompt }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const studyId = isOpen
   const study = useSelector(
-    // @ts-ignore
-    (state: RootState) => state.user.bible.studies[studyId],
+    (state: RootState) => (studyId ? state.user.bible.studies[studyId] : undefined),
     shallowEqual
   )
   const openInNewTab = useOpenInNewTab()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  const { ref, open, close } = useBottomSheetModal()
+  const close = useCallback(() => {
+    ref?.current?.dismiss()
+  }, [ref])
 
   const deleteStudyConfirmation = (id: string) => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
@@ -47,12 +45,6 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       },
     ])
   }
-
-  useEffect(() => {
-    if (isOpen) {
-      open()
-    }
-  }, [isOpen, open])
 
   return (
     <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing withPortal>
@@ -93,7 +85,6 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
           if (!study) return
 
           close()
-          // @ts-ignore
           setTitlePrompt({ id: study.id, title: study.title })
         }}
       >
@@ -102,7 +93,7 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
       <Modal.Item
         color="quart"
         onPress={() => {
-          if (!study) return
+          if (!study || !studyId) return
 
           deleteStudyConfirmation(studyId)
         }}
@@ -113,4 +104,4 @@ const StudySettingsModal = ({ isOpen, onClosed, setTitlePrompt }: Props) => {
   )
 }
 
-export default withTheme(StudySettingsModal)
+export default StudySettingsModal

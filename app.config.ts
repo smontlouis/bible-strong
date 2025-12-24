@@ -14,7 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 425,
+    versionCode: 426,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
@@ -26,7 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '214',
+    buildNumber: '215',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',
