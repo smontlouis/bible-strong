@@ -17,3 +17,9 @@
 - [ ] Parcours spirituel
 
 - GROS PROBLEME SUR EXPO 54
+
+ANDROID
+
+- press on tree dots in item issue
+- snackbar not working
+- issue with lexicon

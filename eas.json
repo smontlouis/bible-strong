@@ -20,7 +20,10 @@
     },
     "staging": {
       "channel": "staging",
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "channel": "production"
