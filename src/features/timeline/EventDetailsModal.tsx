@@ -1,6 +1,9 @@
 import React from 'react'
 
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  BottomSheetScrollView,
+  BottomSheetScrollViewMethods,
+} from '@gorhom/bottom-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import EventDetails from './EventDetails'
@@ -8,14 +11,11 @@ import { TimelineEvent as TimelineEventProps } from './types'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet | null>
+  scrollViewRef: React.RefObject<BottomSheetScrollViewMethods | null>
   event: Partial<TimelineEventProps> | null
 }
 
-const EventDetailsModal = ({
-  modalRef,
-
-  event,
-}: Props) => {
+const EventDetailsModal = ({ modalRef, scrollViewRef, event }: Props) => {
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
@@ -30,7 +30,7 @@ const EventDetailsModal = ({
       key={key}
       {...bottomSheetStyles}
     >
-      <BottomSheetScrollView>
+      <BottomSheetScrollView ref={scrollViewRef}>
         <EventDetails {...event} />
       </BottomSheetScrollView>
     </BottomSheet>

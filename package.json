@@ -68,7 +68,7 @@
     "date-fns": "^2.9.0",
     "debounce": "^1.2.0",
     "deprecated-react-native-prop-types": "^4.0.0",
-    "expo": "^54.0.0",
+    "expo": "patch:expo@npm%3A54.0.29#~/.yarn/patches/expo-npm-54.0.29-02a4660d27.patch",
     "expo-application": "~7.0.8",
     "expo-asset": "~12.0.11",
     "expo-asset-utils": "^3.0.0",

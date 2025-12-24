@@ -1,4 +1,3 @@
-import BottomSheet from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,10 +9,9 @@ import Paragraph from '~common/ui/Paragraph'
 import { useQuery } from '~helpers/react-query-lite'
 import { wp } from '~helpers/utils'
 import EventDetailVerse from './EventDetailVerse'
-import EventDetailsModal from './EventDetailsModal'
+import { useEventDetailsModal } from './EventDetailsModalContext'
 import { getEvents } from './events'
-import { TimelineEvent, TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
-import { Portal, PortalHost } from '@gorhom/portal'
+import { TimelineEvent, TimelineEventDetail } from './types'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -25,8 +23,7 @@ const Media = ({
   related,
 }: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'>) => {
   const { t } = useTranslation()
-  const eventModalRef = React.useRef<BottomSheet>(null)
-  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
+  const { openEvent } = useEventDetailsModal()
 
   const { data: events } = useQuery({
     queryKey: 'timeline',
@@ -96,9 +93,7 @@ const Media = ({
               onPress={() => {
                 const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
                 if (foundEvent) {
-                  setEvent(foundEvent)
-                  console.log('[Timeline] Opening event modal')
-                  eventModalRef.current?.expand()
+                  openEvent(foundEvent)
                 } else {
                   console.log("[Timeline] Can't open this event.")
                 }
@@ -114,9 +109,6 @@ const Media = ({
               </Box>
             </Link>
           ))}
-          <Portal hostName="event-details-modal">
-            <EventDetailsModal modalRef={eventModalRef} event={event} />
-          </Portal>
         </Box>
       )}
     </Box>
