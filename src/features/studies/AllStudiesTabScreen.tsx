@@ -1,8 +1,10 @@
-import React, { useCallback } from 'react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import React, { useCallback, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
+import RenameModal from '~common/RenameModal'
 import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import Container from '~common/ui/Container'
@@ -21,7 +23,6 @@ import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
-import StudyTitlePrompt from './StudyTitlePrompt'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
@@ -37,7 +38,8 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
   const tagsModal = useBottomSheetModal()
   const [studySettingsId, setStudySettingsId] = React.useState<string | false>(false)
   const studySettingsModal = useBottomSheetModal()
-  const [titlePrompt, setTitlePrompt] = React.useState<{ id: string; title: string } | false>(false)
+  const renameModalRef = useRef<BottomSheetModal>(null)
+  const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = React.useState<string | null>(null)
 
   const openStudySettings = useCallback(
@@ -47,6 +49,11 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
     },
     [studySettingsModal]
   )
+
+  const openRenameModal = useCallback((data: { id: string; title: string }) => {
+    setStudyToRename(data)
+    renameModalRef.current?.present()
+  }, [])
 
   const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
   const studies = useSelector(
@@ -143,13 +150,17 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
         ref={studySettingsModal.ref}
         studyId={studySettingsId}
         onClosed={() => setStudySettingsId(false)}
-        setTitlePrompt={setTitlePrompt}
+        openRenameModal={openRenameModal}
       />
-      <StudyTitlePrompt
-        titlePrompt={titlePrompt}
-        onClosed={() => setTitlePrompt(false)}
-        onSave={(id: any, title: any) => {
-          dispatch(updateStudy({ id, title, modified_at: Date.now() }))
+      <RenameModal
+        bottomSheetRef={renameModalRef}
+        title={t("Renommer l'étude")}
+        placeholder={t("Nom de l'étude")}
+        initialValue={studyToRename?.title}
+        onSave={value => {
+          if (studyToRename) {
+            dispatch(updateStudy({ id: studyToRename.id, title: value, modified_at: Date.now() }))
+          }
         }}
       />
     </Container>

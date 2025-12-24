@@ -12,6 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
+  newArchEnabled: true,
 
   android: {
     versionCode: 428,

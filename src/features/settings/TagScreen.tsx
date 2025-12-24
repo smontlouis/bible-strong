@@ -1,11 +1,12 @@
+import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import distanceInWords from 'date-fns/formatDistance'
 import enGB from 'date-fns/locale/en-GB'
 import fr from 'date-fns/locale/fr'
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '~common/Header'
-import TitlePrompt from '~common/TitlePrompt'
+import RenameModal from '~common/RenameModal'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
@@ -190,7 +191,8 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
             strongsHebreu: [],
           }
     )
-  const [titlePrompt, setTitlePrompt] = React.useState<any>(false)
+  const renameModalRef = useRef<BottomSheetModal>(null)
+  const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
 
   if (!tag) {
     return (
@@ -210,7 +212,13 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
         hasBackButton
         title={tag.name}
         rightComponent={
-          <Link onPress={() => setTitlePrompt({ id: tag.id, name: tag.name })} padding>
+          <Link
+            onPress={() => {
+              setTagToRename({ id: tag.id, name: tag.name })
+              renameModalRef.current?.present()
+            }}
+            padding
+          >
             <FeatherIcon size={20} name="edit-3" />
           </Link>
         }
@@ -357,13 +365,15 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
           </Box>
         )}
       </ScrollView>
-      <TitlePrompt
+      <RenameModal
+        bottomSheetRef={renameModalRef}
+        title={t("Renommer l'étiquette")}
         placeholder={t("Nom de l'étiquette")}
-        isOpen={!!titlePrompt}
-        title={titlePrompt.name}
-        onClosed={() => setTitlePrompt(false)}
-        onSave={(value: any) => {
-          dispatch(updateTag(titlePrompt.id, value))
+        initialValue={tagToRename?.name}
+        onSave={value => {
+          if (tagToRename) {
+            dispatch(updateTag(tagToRename.id, value))
+          }
         }}
       />
     </Container>

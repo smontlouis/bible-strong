@@ -33,7 +33,7 @@ type EditHeaderProps = {
   isReadOnly: boolean
   setReadOnly: () => void
   title: string
-  setTitlePrompt: () => void
+  openRenameModal: () => void
   hasBackButton?: boolean
   study: Study
   navigation: NavigationProp<MainStackProps>
@@ -43,7 +43,7 @@ const EditHeader = ({
   isReadOnly,
   setReadOnly,
   title,
-  setTitlePrompt,
+  openRenameModal,
   hasBackButton = true,
   study,
   navigation,
@@ -74,7 +74,7 @@ const EditHeader = ({
       <>
         <Header
           title={title}
-          onTitlePress={setTitlePrompt}
+          onTitlePress={openRenameModal}
           hasBackButton={hasBackButton}
           rightComponent={
             <Link onPress={open} padding>
@@ -114,7 +114,7 @@ const EditHeader = ({
           <Modal.Item
             onPress={() => {
               close()
-              setTitlePrompt()
+              openRenameModal()
             }}
           >
             {t('Renommer')}

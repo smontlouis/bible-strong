@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
-import React, { useEffect, useState } from 'react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
@@ -8,8 +9,8 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
+import RenameModal from '~common/RenameModal'
 import SearchInput from '~common/SearchInput'
-import TitlePrompt from '~common/TitlePrompt'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -129,10 +130,8 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
   const { t } = useTranslation()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
-  const [titlePrompt, setTitlePrompt] = React.useState<{
-    id: string
-    name: string
-  }>()
+  const renameModalRef = useRef<BottomSheetModal>(null)
+  const [tagToEdit, setTagToEdit] = useState<{ id: string; name: string } | null>(null)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
@@ -188,10 +187,11 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
       <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
         <Modal.Item
           onPress={() => {
-            if (!isOpen) return // show error ?
+            if (!isOpen) return
 
             close()
-            setTitlePrompt({ id: isOpen.id, name: isOpen.name })
+            setTagToEdit({ id: isOpen.id, name: isOpen.name })
+            renameModalRef.current?.present()
           }}
         >
           {t('Éditer')}
@@ -200,14 +200,14 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
           {t('Supprimer')}
         </Modal.Item>
       </Modal.Body>
-      <TitlePrompt
+      <RenameModal
+        bottomSheetRef={renameModalRef}
+        title={tagToEdit?.id ? t("Renommer l'étiquette") : t('Nouvelle étiquette')}
         placeholder={t("Nom de l'étiquette")}
-        isOpen={!!titlePrompt}
-        title={titlePrompt?.name}
-        onClosed={() => setTitlePrompt(undefined)}
-        onSave={(value: string) => {
-          if (titlePrompt?.id) {
-            dispatch(updateTag(titlePrompt.id, value))
+        initialValue={tagToEdit?.name}
+        onSave={value => {
+          if (tagToEdit?.id) {
+            dispatch(updateTag(tagToEdit.id, value))
           } else {
             dispatch(addTag(value))
           }
@@ -217,7 +217,8 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
       <FabButton
         icon="plus"
         onPress={() => {
-          setTitlePrompt({ id: '', name: '' })
+          setTagToEdit({ id: '', name: '' })
+          renameModalRef.current?.present()
         }}
       />
     </Container>

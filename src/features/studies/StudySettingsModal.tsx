@@ -15,10 +15,10 @@ interface Props {
   ref?: React.RefObject<BottomSheetModal | null>
   studyId: string | false
   onClosed: () => void
-  setTitlePrompt: (data: { id: string; title: string }) => void
+  openRenameModal: (data: { id: string; title: string }) => void
 }
 
-const StudySettingsModal = ({ ref, studyId, onClosed, setTitlePrompt }: Props) => {
+const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const study = useSelector(
@@ -85,7 +85,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, setTitlePrompt }: Props) =
           if (!study) return
 
           close()
-          setTitlePrompt({ id: study.id, title: study.title })
+          openRenameModal({ id: study.id, title: study.title })
         }}
       >
         {t('Renommer')}

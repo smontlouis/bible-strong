@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useFocusEffect } from '@react-navigation/native'
@@ -6,6 +7,7 @@ import { StackScreenProps } from '@react-navigation/stack'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleValue } from 'src/state/app'
+import RenameModal from '~common/RenameModal'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import { MainStackProps } from '~navigation/type'
@@ -13,7 +15,6 @@ import { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
-import StudyTitlePrompt from './StudyTitlePrompt'
 import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -32,7 +33,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
 
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
-  const [titlePrompt, setTitlePrompt] = useState<{ id: string; title: string } | false>(false)
+  const renameModalRef = useRef<BottomSheetModal>(null)
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
@@ -75,12 +76,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
       <EditStudyHeader
         isReadOnly={isReadOnly}
         hasBackButton={hasBackButton}
-        setTitlePrompt={() =>
-          setTitlePrompt({
-            id: currentStudy.id,
-            title: currentStudy.title,
-          })
-        }
+        openRenameModal={() => renameModalRef.current?.present()}
         setReadOnly={() => {
           setIsReadOnly(true)
         }}
@@ -96,11 +92,13 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
         params={route.params}
         studyAtom={studyAtom}
       />
-      <StudyTitlePrompt
-        titlePrompt={titlePrompt}
-        onClosed={() => setTitlePrompt(false)}
-        onSave={(id: string, title: string) => {
-          dispatch(updateStudy({ id, title, modified_at: Date.now() }))
+      <RenameModal
+        bottomSheetRef={renameModalRef}
+        title={t("Renommer l'étude")}
+        placeholder={t("Nom de l'étude")}
+        initialValue={currentStudy.title}
+        onSave={value => {
+          dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
       {isReadOnly && (
