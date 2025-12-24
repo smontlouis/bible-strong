@@ -12,7 +12,7 @@ import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Border from '~common/ui/Border'
 import Box, { SafeAreaBox } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
@@ -82,7 +82,7 @@ const ManualSync = memo(() => {
   const userDocRef = doc(firebaseDb, 'users', user.id)
 
   const sync = async () => {
-    SnackBar.show(t('app.syncing'))
+    toast(t('app.syncing'))
     setIsSyncing(true)
     const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
     await updateDoc(
@@ -103,7 +103,7 @@ const ManualSync = memo(() => {
       )
       console.log('[Settings] Studies synced')
     }
-    SnackBar.show(t('app.synced'))
+    toast.success(t('app.synced'))
     setIsSyncing(false)
   }
 

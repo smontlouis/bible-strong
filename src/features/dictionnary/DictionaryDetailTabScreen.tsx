@@ -20,7 +20,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import TagList from '~common/TagList'
 import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
@@ -100,7 +100,7 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
           verse: parseInt(verse, 10),
         })
       } catch (e) {
-        Snackbar.show('Impossible de charger ce mot.')
+        toast.error('Impossible de charger ce mot.')
       }
     } else {
       navigation.dispatch(StackActions.push('DictionnaryDetail', { word: href }))
@@ -121,7 +121,7 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
       await timeout(400)
       Share.share({ message })
     } catch (e) {
-      Snackbar.show('Erreur lors du partage.')
+      toast.error('Erreur lors du partage.')
       console.log('[Dictionary] Share error:', e)
     }
   }

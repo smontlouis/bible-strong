@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { ComputedReadingSlice, EntitySlice } from '~common/types'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -99,7 +99,7 @@ const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps,
       await timeout(400)
       Share.share({ message })
     } catch (e) {
-      Snackbar.show('Erreur lors du partage.')
+      toast.error('Erreur lors du partage.')
       console.log('[Plans] Error sharing:', e)
     }
   }

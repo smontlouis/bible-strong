@@ -148,6 +148,7 @@
     "rn-fetch-blob": "^0.12.0",
     "rn-placeholder": "^3.0.3",
     "slugify": "^1.4.0",
+    "sonner-native": "^0.22.2",
     "trunc-html": "^1.1.2"
   },
   "devDependencies": {

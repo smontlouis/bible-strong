@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import i18n from '~i18n'
 
 const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
@@ -11,9 +11,7 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
     cb?.()
 
     if (!e) {
-      SnackBar.show(i18n.t('Une error est survenue.'), 'danger', {
-        duration: 5000,
-      })
+      toast.error(i18n.t('Une error est survenue.'), { duration: 5000 })
       throw new Error('UNKNOWN_ERROR')
     }
 
@@ -21,11 +19,10 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
     const diskError = e.toString().includes('Error code 10: disk I/O error')
 
     if (corruptedDBError) {
-      SnackBar.show(
+      toast.error(
         i18n.t(
           'Une error est survenue, la base de données est peut-être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
         ),
-        'danger',
         { duration: 5000 }
       )
 
@@ -38,14 +35,12 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
     }
 
     if (diskError) {
-      SnackBar.show(i18n.t('Redémarrez votre application'), 'danger', {
-        duration: 5000,
-      })
+      toast.error(i18n.t('Redémarrez votre application'), { duration: 5000 })
 
       throw new Error('DISK_IO')
     }
 
-    SnackBar.show(i18n.t('Une error est survenue, le développeur en a été informé.'), 'danger', {
+    toast.error(i18n.t('Une error est survenue, le développeur en a été informé.'), {
       duration: 5000,
     })
 

@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import React, { useEffect, useState } from 'react'
 
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
@@ -66,11 +66,10 @@ export const useWaitForDatabase = () => {
             }
           } catch (e) {
             console.log('[Tresor] Download error:', e)
-            SnackBar.show(
+            toast.error(
               t(
                 "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              ),
-              'danger'
+              )
             )
             setProposeDownload(true)
             setStartDownload(false)

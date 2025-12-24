@@ -18,7 +18,7 @@ import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 import { dbManager } from '~helpers/sqlite'
 
 import { withTranslation } from 'react-i18next'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -133,9 +133,8 @@ class DBSelectorItem extends React.Component<any, any> {
       }
     } catch (e) {
       console.log('[Settings] Download error:', e)
-      SnackBar.show(
-        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."),
-        'danger'
+      toast.error(
+        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.")
       )
       this.setState({ isLoading: false })
     }

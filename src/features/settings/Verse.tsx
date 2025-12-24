@@ -110,6 +110,8 @@ const VerseComponent = ({
             <LinkBox
               p={4}
               ml={10}
+              // @ts-ignore
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={() =>
                 setSettings({
                   stringIds,

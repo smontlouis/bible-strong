@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import RNFetchBlob from 'rn-fetch-blob'
 import slugify from 'slugify'
 import { LinkBox } from '~common/Link'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { Status } from '~common/types'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
@@ -58,7 +58,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
 
   const copyToClipboard = async (url: string) => {
     Clipboard.setString(url)
-    SnackBar.show(t('Copié dans le presse-papiers.'))
+    toast(t('Copié dans le presse-papiers.'))
   }
 
   const shareVerse = async (title: string, userName: string, url: string) => {

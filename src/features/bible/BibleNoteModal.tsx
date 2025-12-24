@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import TagList from '~common/TagList'
 import { VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
@@ -159,7 +159,7 @@ ${currentNote?.description}
       await timeout(400)
       Share.share({ message })
     } catch (e) {
-      Snackbar.show(t('Erreur lors du partage.'))
+      toast.error(t('Erreur lors du partage.'))
       console.log('[Bible] Error sharing note:', e)
       Sentry.captureException(e)
     }

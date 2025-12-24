@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import React, { useEffect, useState, useRef } from 'react'
 import { useAtomValue } from 'jotai'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
@@ -86,11 +86,10 @@ export const useWaitForDatabase = () => {
               ;(window as any)[downloadKey] = false
             }
           } catch (e) {
-            SnackBar.show(
+            toast.error(
               t(
                 "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              ),
-              'danger'
+              )
             )
             console.log('[Nave] Download error:', e)
             setProposeDownload(true)

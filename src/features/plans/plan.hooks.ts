@@ -21,7 +21,7 @@ import {
 } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBible from '~helpers/loadBible'
 import { range } from '~helpers/range'
@@ -267,7 +267,7 @@ export const useDownloadPlans = () => {
       setIsLoading(false)
 
       if (err) {
-        SnackBar.show('Impossible de télécharger vos plans, vérifiez votre connexion internet.')
+        toast.error('Impossible de télécharger vos plans, vérifiez votre connexion internet.')
       }
     })()
   }, [])

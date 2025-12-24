@@ -9,7 +9,7 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import truncHTML from 'trunc-html'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
 import Link, { LinkBox } from '~common/Link'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import { Status } from '~common/types'
 import Box, { AnimatableBox } from '~common/ui/Box'
@@ -89,7 +89,7 @@ const useCommentTranslation = (id: string, content: string) => {
         const result = await res?.json()
 
         if (result.message === 'Quota Exceeded') {
-          Snackbar.show(t('comment.quotaExceeded'))
+          toast.error(t('comment.quotaExceeded'))
           setStatus('Rejected')
           return
         }
@@ -164,7 +164,7 @@ https://bible-strong.app
       `
       Share.share({ message })
     } catch (e) {
-      Snackbar.show('Erreur lors du partage.')
+      toast.error('Erreur lors du partage.')
       console.log('[Commentaries] Share error:', e)
       Sentry.captureException(e)
     }

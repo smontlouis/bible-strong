@@ -4,7 +4,7 @@ import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import appleAuth, { AppleButton } from '@invertase/react-native-apple-authentication'
 
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Link from '~common/Link'
 import TextInput from '~common/ui/TextInput'
 import Button from '~common/ui/Button'
@@ -60,7 +60,7 @@ const Login = ({ theme }: any) => {
 
   const onLogin = async () => {
     if (!email || !password) {
-      SnackBar.show(t('Veuillez remplir les champs'))
+      toast.error(t('Veuillez remplir les champs'))
       return false
     }
     setLoading(true)
@@ -76,7 +76,7 @@ const Login = ({ theme }: any) => {
 
   const resetPassword = async () => {
     if (!email) {
-      SnackBar.show(t('Veuillez remplir les champs'))
+      toast.error(t('Veuillez remplir les champs'))
       return false
     }
     setLoading(true)

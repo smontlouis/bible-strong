@@ -71,7 +71,7 @@ import { firebaseDb, doc, setDoc, getDoc, deleteDoc, deleteField } from '../help
 import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { diff } from '~helpers/deep-obj'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import i18n from '~i18n'
 import {
   type SubcollectionName,
@@ -191,7 +191,7 @@ async function handleSyncWithRetry(
       console.error('[AutoBackup] Failed to create error backup:', backupError)
     })
 
-    Snackbar.show(i18n.t('app.syncError'), 'danger')
+    toast.error(i18n.t('app.syncError'))
     return false
   }
 }
@@ -229,7 +229,7 @@ export default (store: any) => (next: any) => async (action: any) => {
         await setDoc(userDocRef, { plan: plan.ongoingPlans }, { merge: true })
       } catch (error) {
         console.log('[Firestore] Error syncing plan:', error)
-        Snackbar.show(i18n.t('app.syncError'), 'danger')
+        toast.error(i18n.t('app.syncError'))
         Sentry.captureException(error, {
           tags: { feature: 'sync', action: 'plan_sync' },
           extra: { userId },
@@ -536,7 +536,7 @@ export default (store: any) => (next: any) => async (action: any) => {
         )
       } catch (studiesError) {
         console.error('Studies sync failed:', studiesError)
-        Snackbar.show(i18n.t('app.syncError'), 'danger')
+        toast.error(i18n.t('app.syncError'))
       }
       break
     }
@@ -571,7 +571,7 @@ export default (store: any) => (next: any) => async (action: any) => {
         )
       } catch (deletionError) {
         console.error('Studies deletion failed:', deletionError)
-        Snackbar.show(i18n.t('app.syncError'), 'danger')
+        toast.error(i18n.t('app.syncError'))
       }
       break
     }
@@ -627,7 +627,7 @@ export default (store: any) => (next: any) => async (action: any) => {
           console.log('[Sync] Studies imported successfully')
         } catch (studiesError) {
           console.error('[Sync] Failed to import studies:', studiesError)
-          Snackbar.show(i18n.t('app.syncError'), 'danger')
+          toast.error(i18n.t('app.syncError'))
         }
       }
       break
@@ -649,7 +649,7 @@ export default (store: any) => (next: any) => async (action: any) => {
           tags: { feature: 'sync', action: 'subscription_update' },
           extra: { userId },
         })
-        Snackbar.show(i18n.t('app.syncError'), 'danger')
+        toast.error(i18n.t('app.syncError'))
       }
       break
     }

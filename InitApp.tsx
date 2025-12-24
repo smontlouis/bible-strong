@@ -2,7 +2,7 @@ import { ThemeProvider } from '@emotion/react'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { useKeepAwake } from 'expo-keep-awake'
 import { memo, useEffect, useMemo } from 'react'
-import { ActivityIndicator, StatusBar, View } from 'react-native'
+import { ActivityIndicator, StatusBar, useColorScheme, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { MenuProvider } from 'react-native-popup-menu'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -22,6 +22,7 @@ import { RootState } from '~redux/modules/reducer'
 import getTheme, { Theme, baseTheme } from '~themes/index'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { RootSiblingParent } from 'react-native-root-siblings'
+import { Toaster } from 'sonner-native'
 
 interface Props {
   persistor: Persistor
@@ -42,7 +43,8 @@ const queryClient = new QueryClient()
 
 const InitApp = ({ persistor }: Props) => {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
-  const { theme: currentTheme } = useCurrentThemeSelector()
+  const { theme: currentTheme, colorScheme } = useCurrentThemeSelector()
+
   useKeepAwake()
   useUpdates()
 
@@ -96,6 +98,14 @@ const InitApp = ({ persistor }: Props) => {
                       <RootSiblingParent>
                         <InitHooks />
                         <AppNavigator />
+                        <Toaster
+                          duration={3000}
+                          theme={colorScheme}
+                          position="bottom-center"
+                          icons={{
+                            info: <></>,
+                          }}
+                        />
                       </RootSiblingParent>
                     </AppSwitcherProvider>
                   </ErrorBoundary>

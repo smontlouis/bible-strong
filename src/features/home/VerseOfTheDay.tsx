@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Fade, Placeholder, PlaceholderLine } from 'rn-placeholder'
 import Empty from '~common/Empty'
 import Link, { LinkBox } from '~common/Link'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Switch from '~common/ui/Switch'
@@ -79,7 +79,7 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
     const minutes = zeroFill(dateObject.getMinutes())
 
     dispatch(setNotificationVOD(`${hours}:${minutes}`))
-    SnackBar.show(`Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`)
+    toast(`Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`)
   }
 
   const openTimePicker = () => {

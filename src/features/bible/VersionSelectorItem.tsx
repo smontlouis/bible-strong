@@ -10,7 +10,7 @@ import { dbManager } from '~helpers/sqlite'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
@@ -142,9 +142,8 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
       setIsLoading(false)
     } catch (e) {
       console.log('[Bible] Download error:', e)
-      SnackBar.show(
-        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."),
-        'danger'
+      toast.error(
+        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.")
       )
       setIsLoading(false)
     }

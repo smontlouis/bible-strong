@@ -12,7 +12,7 @@ import { isFullScreenBibleValue } from 'src/state/app'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box, {
   HStack,
   MotiBox,
@@ -144,7 +144,7 @@ const Header = ({
     const needsDownload = await getIfDatabaseNeedsDownload('MHY')
 
     if (needsDownload) {
-      SnackBar.show(t('Téléchargez la base de commentaires Matthew Henry'))
+      toast(t('Téléchargez la base de commentaires Matthew Henry'))
       navigation.navigate('Downloads')
       return
     }

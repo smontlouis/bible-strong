@@ -556,7 +556,7 @@
   "tabs.commentary": "Commentary",
   "tabs.tab": "tab",
   "tabs.tab_plural": "tabs",
-  "tabs.created": "Tab created",
+  "tabs.created": "New tab created",
 
   "study.addToStudy": "Add to study",
   "study.selectStudy": "Select a study",
@@ -571,7 +571,7 @@
   "study.openStudy": "Open",
   "study.noStudies": "No studies found",
 
-  "common.goTo": "Go to",
+  "common.goTo": "Go to tab",
   "common.chooseCompareVersions": "Choose versions to compare",
 
   "premium.earlyAccess": "Early access",

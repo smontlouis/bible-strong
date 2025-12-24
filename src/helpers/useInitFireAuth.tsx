@@ -1,7 +1,7 @@
 import { useSetAtom } from 'jotai/react'
 import { useEffect, useRef } from 'react'
 import { useDispatch, useStore } from 'react-redux'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import i18n from '~i18n'
@@ -40,26 +40,26 @@ const useInitFireAuth = () => {
     }
     const onError = (e: any) => {
       if (e.code === 'auth/internal-error') {
-        SnackBar.show(i18n.t("Une erreur s'est produite"))
+        toast.error(i18n.t("Une erreur s'est produite"))
       }
       if (
         e.code === 'auth/account-exists-with-different-credential' ||
         e.code === 'auth/email-already-in-use'
       ) {
-        SnackBar.show(i18n.t('Cet utilisateur existe déjà avec un autre compte.'))
+        toast.error(i18n.t('Cet utilisateur existe déjà avec un autre compte.'))
       }
       if (e.code === 'auth/weak-password') {
-        SnackBar.show(i18n.t('Le mot de passe est trop court.'))
+        toast.error(i18n.t('Le mot de passe est trop court.'))
       }
       if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
-        SnackBar.show(i18n.t('Mot de passe invalide ou utilisateur inexistant.'))
+        toast.error(i18n.t('Mot de passe invalide ou utilisateur inexistant.'))
       }
       if (e.code === 'auth/invalid-email') {
-        SnackBar.show(i18n.t('Format email invalide.'))
+        toast.error(i18n.t('Format email invalide.'))
       }
 
       if (e.code === 'auth/network-request-failed') {
-        SnackBar.show(i18n.t('A network error has occurred, please try again.'))
+        toast.error(i18n.t('A network error has occurred, please try again.'))
       }
       console.log('[Auth] Error', e)
       console.log('[Auth] Error code:', e.code)

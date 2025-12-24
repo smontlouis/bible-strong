@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'
 
@@ -26,11 +26,15 @@ export const useOpenInNewTab = () => {
     })
 
     if (!params.autoRedirect) {
-      Snackbar.show(t('tabs.created'), 'info', {
-        confirmText: t('common.goTo'),
-        onConfirm: () => {
-          navigation.navigate('AppSwitcher')
-          triggerSlideNewTab(newTabId)
+      console.log('openInNewTab', t('tabs.created'))
+      toast(t('tabs.created'), {
+        action: {
+          label: t('common.goTo'),
+          onClick: () => {
+            navigation.navigate('AppSwitcher')
+            triggerSlideNewTab(newTabId)
+            toast.dismiss()
+          },
         },
       })
     } else {

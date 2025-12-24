@@ -12,7 +12,7 @@ import books from '~assets/bible_versions/books-desc'
 import ColorPicker from '~common/ColorPicker'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import type { Bookmark } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -176,7 +176,7 @@ const BookmarkModal = ({
           color: selectedColor,
         })
       )
-      Snackbar.show(t('Marque-page modifié'))
+      toast(t('Marque-page modifié'))
     } else {
       // Creating new bookmark
       if (bookmarksCount >= MAX_BOOKMARKS) {
@@ -198,7 +198,7 @@ const BookmarkModal = ({
       }
 
       dispatch(addBookmark(newBookmark))
-      Snackbar.show(t('Marque-page créé'))
+      toast(t('Marque-page créé'))
     }
 
     handleClose()
@@ -214,7 +214,7 @@ const BookmarkModal = ({
         version,
       })
     )
-    Snackbar.show(t('Marque-page déplacé'))
+    toast(t('Marque-page déplacé'))
     handleClose()
   }
 
@@ -228,7 +228,7 @@ const BookmarkModal = ({
         style: 'destructive',
         onPress: () => {
           dispatch(removeBookmark(existingBookmark.id))
-          Snackbar.show(t('Marque-page supprimé'))
+          toast(t('Marque-page supprimé'))
           handleClose()
         },
       },

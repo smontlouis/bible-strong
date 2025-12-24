@@ -556,7 +556,7 @@
   "tabs.commentary": "Commentaire",
   "tabs.tab": "onglet",
   "tabs.tab_plural": "onglets",
-  "tabs.created": "Onglet créé",
+  "tabs.created": "Nouvel onglet créé",
 
   "study.addToStudy": "Ajouter à une étude",
   "study.selectStudy": "Sélectionner une étude",
@@ -571,7 +571,7 @@
   "study.openStudy": "Ouvrir",
   "study.noStudies": "Aucune étude trouvée",
 
-  "common.goTo": "Aller à",
+  "common.goTo": "Aller à l'onglet",
   "common.chooseCompareVersions": "Choisir les versions à comparer",
 
   "premium.earlyAccess": "Accès anticipé",

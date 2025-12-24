@@ -5,10 +5,6 @@
 - [x] links
 - [x] improve notes
 
-- note modal issue
-- highlights color not updated
-- studies color not working
-
 - [x] export pdf not working
 - [ ] fix lost password UI
 - [ ] profile screen
@@ -20,6 +16,4 @@
 
 ANDROID
 
-- press on tree dots in item issue
-- snackbar not working
 - issue with lexicon

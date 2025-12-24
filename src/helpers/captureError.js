@@ -1,7 +1,7 @@
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 
 const captureError = (e, message) => {
-  SnackBar.show(message, 'danger')
+  toast.error(message)
   console.log(e)
 }
 

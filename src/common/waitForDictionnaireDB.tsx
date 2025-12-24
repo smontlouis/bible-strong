@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
 import { getDatabaseUrl } from '~helpers/firebase'
@@ -104,11 +104,10 @@ export const useWaitForDatabase = () => {
               ;(window as any)[downloadKey] = false
             }
           } catch (e) {
-            SnackBar.show(
+            toast.error(
               t(
                 "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              ),
-              'danger'
+              )
             )
             dispatch({
               type: 'dictionnaire.setProposeDownload',

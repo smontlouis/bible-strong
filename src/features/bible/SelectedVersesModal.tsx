@@ -12,7 +12,7 @@ import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import type { BibleResource, StudyNavigateBibleType, VerseIds } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -117,7 +117,7 @@ const VersesModal = ({
       hasAppName,
     })
     Clipboard.setString(message)
-    SnackBar.show(t('Copié dans le presse-papiers.'))
+    toast(t('Copié dans le presse-papiers.'))
   }
 
   const showStrongDetail = () => {

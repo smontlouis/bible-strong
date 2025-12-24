@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import { useDispatch } from 'react-redux'
 import Header from '~common/Header'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -84,10 +84,10 @@ const AutoBackupsList = () => {
 
               dispatch(importData(backupData.data))
 
-              Snackbar.show(t('backups.restoreSuccess'), 'success')
+              toast.success(t('backups.restoreSuccess'))
             } catch (error) {
               console.error('Failed to restore backup:', error)
-              Snackbar.show(t('backups.restoreError'), 'danger')
+              toast.error(t('backups.restoreError'))
             } finally {
               setIsRestoring(false)
             }
@@ -142,10 +142,10 @@ const AutoBackupsList = () => {
         })
       }
 
-      Snackbar.show(t('backups.exportSuccess'))
+      toast.success(t('backups.exportSuccess'))
     } catch (error) {
       console.error('Failed to export backup:', error)
-      Snackbar.show(t('Une erreur est survenue'))
+      toast.error(t('Une erreur est survenue'))
     } finally {
       setIsExporting(null)
     }

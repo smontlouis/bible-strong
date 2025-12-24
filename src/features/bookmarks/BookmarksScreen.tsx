@@ -97,10 +97,6 @@ const BookmarksScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Bookm
     setSelectedBookmark(null)
   }
 
-  console.log({
-    bookmarks,
-  })
-
   return (
     <Container>
       <Header hasBackButton title={t('Marque-pages')} />

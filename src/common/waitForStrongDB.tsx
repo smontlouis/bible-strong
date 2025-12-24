@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
 import { getDatabaseUrl } from '~helpers/firebase'
@@ -93,11 +93,10 @@ const useStrong = (dispatch: any, startDownload: any, lang: ResourceLanguage) =>
             }
           } catch (e) {
             console.log('[Strong] Download error:', e)
-            SnackBar.show(
+            toast.error(
               t(
                 "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              ),
-              'danger'
+              )
             )
             dispatch({
               type: 'strong.setProposeDownload',

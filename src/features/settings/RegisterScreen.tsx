@@ -10,7 +10,7 @@ import Spacer from '~common/ui/Spacer'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Header from '~common/Header'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
 
 const LoginScreen = ({ theme }: any) => {
@@ -22,7 +22,7 @@ const LoginScreen = ({ theme }: any) => {
 
   const onRegister = async () => {
     if (!username || !email || !password) {
-      SnackBar.show(t('Veuillez remplir les champs'))
+      toast(t('Veuillez remplir les champs'))
       return false
     }
     setLoading(true)

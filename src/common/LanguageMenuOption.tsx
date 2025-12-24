@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { ResourcesLanguageState, useResourceLanguage } from 'src/state/resourcesLanguage'
 
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -24,7 +24,7 @@ const LanguageMenuOption = ({ resourceId }: LanguageMenuOptionProps) => {
     const newLang: ResourceLanguage = currentLang === 'fr' ? 'en' : 'fr'
     setLang(newLang)
     const newLangLabel = newLang === 'fr' ? 'Français' : 'English'
-    Snackbar.show(t('menu.languageChanged', { language: newLangLabel }))
+    toast(t('menu.languageChanged', { language: newLangLabel }))
   }
 
   const languageLabel = currentLang === 'fr' ? 'Français' : 'English'

@@ -127,6 +127,7 @@ const Box = styled.View<BoxProps>(props => ({
   left: props.left ?? props.l,
   right: props.right ?? props.r,
   bottom: props.bottom ?? props.b,
+  hitSlop: props.hitSlop,
 
   padding: props.padding ?? props.p,
   paddingTop: props.paddingTop ?? props.pt,

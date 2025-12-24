@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 // @ts-ignore
 import books from '~assets/bible_versions/books'
 import { Book } from '~assets/bible_versions/books-desc'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { Pericope, SelectedCode, StudyNavigateBibleType, Tag, Verse, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
@@ -304,7 +304,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         const book = Object.keys(books).find(key => books[key][0].toUpperCase() === action.bookCode)
 
         if (!book) {
-          Snackbar.show("Erreur lors de l'ouverture du verset")
+          toast.error("Erreur lors de l'ouverture du verset")
           Sentry.captureMessage(JSON.stringify(action))
           return
         }

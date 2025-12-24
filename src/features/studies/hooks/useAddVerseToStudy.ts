@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import type { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import { StudyTab, tabsAtom, tabsAtomsAtom } from '../../../state/tabs'
@@ -103,30 +103,33 @@ export const useAddVerseToStudy = () => {
     const newTabId = `new-${Date.now()}`
     const studyTitle = study?.title || t('Document sans titre')
 
-    Snackbar.show(t('study.verseAdded'), 'info', {
-      confirmText: t('study.openStudy'),
-      onConfirm: () => {
-        // Create new study tab
-        const studyIndex = tabs.findIndex(tab => (tab as StudyTab).data.studyId === studyId)
-        if (studyIndex !== -1) {
-          slideToIndex(studyIndex)
-          return
-        }
-        dispatchTabs({
-          type: 'insert',
-          value: {
-            id: newTabId,
-            title: studyTitle,
-            isRemovable: true,
-            type: 'study',
-            data: {
-              studyId,
+    toast(t('study.verseAdded'), {
+      action: {
+        label: t('study.openStudy'),
+        onClick: () => {
+          // Create new study tab
+          const studyIndex = tabs.findIndex(tab => (tab as StudyTab).data.studyId === studyId)
+          if (studyIndex !== -1) {
+            slideToIndex(studyIndex)
+            return
+          }
+          dispatchTabs({
+            type: 'insert',
+            value: {
+              id: newTabId,
+              title: studyTitle,
+              isRemovable: true,
+              type: 'study',
+              data: {
+                studyId,
+              },
             },
-          },
-        })
-        // Navigate to AppSwitcher and slide to new tab
-        navigation.navigate('AppSwitcher')
-        triggerSlideNewTab(newTabId)
+          })
+          // Navigate to AppSwitcher and slide to new tab
+          navigation.navigate('AppSwitcher')
+          triggerSlideNewTab(newTabId)
+          toast.dismiss()
+        },
       },
     })
   }

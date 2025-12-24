@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
@@ -110,16 +110,15 @@ const ExplorePlanItem = ({
                       setIsLoading(false)
                       navigation.goBack()
                       modalRef?.current?.dismiss()
-                      SnackBar.show(t('Plan ajouté avec succès'))
+                      toast.success(t('Plan ajouté avec succès'))
                     })
                     .catch((e: any) => {
                       console.log('[Plans] Error adding plan:', e)
                       setIsLoading(false)
-                      SnackBar.show(
+                      toast.error(
                         t(
                           "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-                        ),
-                        'danger'
+                        )
                       )
                     })
                 }}

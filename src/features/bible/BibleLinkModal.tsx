@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import TagList from '~common/TagList'
 import { VerseIds } from '~common/types'
 import Box, { VStack } from '~common/ui/Box'
@@ -130,7 +130,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
 
     // Valider l'URL
     if (!isValidUrl(url)) {
-      Snackbar.show(t('URL invalide'))
+      toast.error(t('URL invalide'))
       return
     }
 
@@ -209,11 +209,11 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       if (canOpen) {
         await Linking.openURL(urlToOpen)
       } else {
-        Snackbar.show(t("Impossible d'ouvrir ce lien"))
+        toast.error(t("Impossible d'ouvrir ce lien"))
       }
     } catch (error) {
       console.error('[BibleLinkModal] Error opening URL:', error)
-      Snackbar.show(t("Erreur lors de l'ouverture du lien"))
+      toast.error(t("Erreur lors de l'ouverture du lien"))
     }
   }
 

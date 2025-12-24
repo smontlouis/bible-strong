@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Header from '~common/Header'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -139,9 +139,9 @@ const ExportButton = ({
 
       const saveFile = await FileSystem.getInfoAsync(fileUri)
       setLastSave(saveFile)
-      Snackbar.show(t('app.exported'))
+      toast.success(t('app.exported'))
     } catch (error) {
-      Snackbar.show(t('Une erreur est survenue'))
+      toast.error(t('Une erreur est survenue'))
     } finally {
       setIsSyncing(false)
     }
@@ -174,11 +174,11 @@ const ImportSave = () => {
         }
 
         dispatch(importData(data))
-        Snackbar.show(t('app.imported'))
+        toast.success(t('app.imported'))
       }
     } catch (error) {
       console.log('[Settings] Import error:', error)
-      Snackbar.show(t('Une erreur est survenue'))
+      toast.error(t('Une erreur est survenue'))
     }
   }
 

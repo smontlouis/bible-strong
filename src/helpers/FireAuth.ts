@@ -13,7 +13,7 @@ import {
 } from '@react-native-firebase/auth'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { firebaseDb, doc, setDoc } from '~helpers/firebase'
 import { tokenManager } from '~helpers/TokenManager'
 import i18n from '~i18n'
@@ -187,7 +187,7 @@ const FireAuth = class {
         const googleCredential = GoogleAuthProvider.credential(idToken)
         return this.onCredentialSuccess(googleCredential, resolve)
       } catch (e) {
-        SnackBar.show(i18n.t('Une erreur est survenue'))
+        toast.error(i18n.t('Une erreur est survenue'))
         console.log('[Auth] Google login error:', e)
         return resolve(false)
       }
@@ -198,12 +198,12 @@ const FireAuth = class {
       const user = await signInWithCredential(getAuth(), credential)
 
       console.log('[Auth] User signed in', user)
-      SnackBar.show(i18n.t('Connexion réussie'))
+      toast.success(i18n.t('Connexion réussie'))
       return resolve(true)
     } catch (e: any) {
       console.log('[Auth] Error code:', e.code)
       if (e.code === 'auth/account-exists-with-different-credential') {
-        SnackBar.show(i18n.t('Cet utilisateur existe déjà avec un autre compte.'), 'danger')
+        toast.error(i18n.t('Cet utilisateur existe déjà avec un autre compte.'))
       }
       return resolve(false)
     }
@@ -238,12 +238,12 @@ const FireAuth = class {
     try {
       // @ts-ignore
       await user.sendEmailVerification()
-      SnackBar.show(i18n.t('Email envoyé'))
+      toast.success(i18n.t('Email envoyé'))
     } catch (e: any) {
       if (e.code === 'auth/too-many-requests') {
-        SnackBar.show(i18n.t('Un mail a déjà été envoyé. Réessayez plus tard'))
+        toast.error(i18n.t('Un mail a déjà été envoyé. Réessayez plus tard'))
       } else {
-        SnackBar.show(i18n.t("Impossible d'envoyer l'email"))
+        toast.error(i18n.t("Impossible d'envoyer l'email"))
       }
     }
   }
@@ -253,7 +253,7 @@ const FireAuth = class {
       try {
         sendPasswordResetEmail(getAuth(), email)
           .then(() => {
-            SnackBar.show(i18n.t('Email envoyé.'))
+            toast.success(i18n.t('Email envoyé.'))
             // @ts-ignore
             resolve(false)
           })
@@ -311,7 +311,7 @@ const FireAuth = class {
     // Reset token manager state
     tokenManager.reset()
 
-    SnackBar.show(i18n.t('Vous êtes déconnecté.'))
+    toast(i18n.t('Vous êtes déconnecté.'))
   }
 }
 

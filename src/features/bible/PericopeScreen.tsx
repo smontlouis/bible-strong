@@ -15,7 +15,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
 import { useAtom } from 'jotai/react'
 import { defaultBibleAtom } from '../../state/tabs'
@@ -133,7 +133,7 @@ const PericopeScreen = ({ navigation }: { navigation: StackNavigationProp<MainSt
                         key={verseKey}
                         onPress={() =>
                           versionNeedsDownload
-                            ? SnackBar.show(t('Vous devez télécharger cette version de la Bible.'))
+                            ? toast(t('Vous devez télécharger cette version de la Bible.'))
                             : navigation.dispatch(
                                 StackActions.push('BibleView', {
                                   isReadOnly: true,

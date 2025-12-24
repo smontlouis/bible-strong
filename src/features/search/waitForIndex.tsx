@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import SnackBar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 import Progress from '~common/ui/Progress'
 import { getDatabaseUrl } from '~helpers/firebase'
 import { getDbPath, databases } from '~helpers/databases'
@@ -80,11 +80,10 @@ export const useWaitForIndex = () => {
           setLoading(false)
         } catch (e) {
           console.log('[Search] Download error:', e)
-          SnackBar.show(
+          toast.error(
             t(
               "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-            ),
-            'danger'
+            )
           )
           setProposeDownload(true)
           setStartDownload(false)

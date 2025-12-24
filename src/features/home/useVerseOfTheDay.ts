@@ -11,7 +11,7 @@ import setMinutes from 'date-fns/fp/setMinutes'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import Snackbar from '~common/SnackBar'
+import { toast } from 'sonner-native'
 
 import { useAtomValue } from 'jotai/react'
 import { selectAtom } from 'jotai/vanilla/utils'
@@ -161,7 +161,7 @@ export const useVerseOfTheDay = (addDay: number) => {
         scheduleNotification()
       } else {
         dispatch(setNotificationVOD(''))
-        Snackbar.show(t('vod.permissionNeeded'))
+        toast(t('vod.permissionNeeded'))
       }
     }
     initNotifications()
