@@ -470,6 +470,7 @@ const BibleViewer = ({
         bookName={book.Nom}
         chapter={chapter}
         hasBackButton={isReadOnly || Boolean(isSelectionMode)}
+        selectedVerses={selectedVerses}
       />
       {error && (
         <Box flex={1} zIndex={-1}>

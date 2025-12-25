@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react'
 
 import { StackNavigationProp } from '@react-navigation/stack'
+import { VerseIds } from '~common/types'
+import verseToReference from '~helpers/verseToReference'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -50,6 +52,7 @@ interface BibleHeaderProps {
   verseFormatted: string
   isSelectionMode?: boolean
   isParallel?: boolean
+  selectedVerses?: VerseIds
 }
 
 const Header = ({
@@ -64,6 +67,7 @@ const Header = ({
   verseFormatted,
   isSelectionMode,
   isParallel,
+  selectedVerses,
 }: BibleHeaderProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
@@ -78,6 +82,10 @@ const Header = ({
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const bible = useAtomValue(bibleAtom)
   const bookNumber = bible.data.selectedBook.Numero
+
+  // Check if verses are selected
+  const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
+  const selectedVersesReference = hasSelectedVerses ? verseToReference(selectedVerses) : ''
 
   // Check if current chapter has a bookmark
   const selectBookmarkForChapter = useMemo(() => makeSelectBookmarkForChapter(), [])
@@ -191,95 +199,87 @@ const Header = ({
             </MotiBox>
           </Back>
         )}
-        <HStack alignItems="center" gap={3}>
-          <HStack>
-            <TouchableBox
-              onPress={() => {
-                openBookSelector({
-                  actions,
-                  data: getDefaultStore().get(bibleAtom).data,
-                })
-              }}
-              center
-              pl={12}
-              pr={7}
-              height={32}
-            >
-              <MotiBox
-                bg="lightGrey"
-                borderTopLeftRadius={20}
-                borderBottomLeftRadius={20}
-                position="absolute"
-                left={0}
-                bottom={0}
-                right={0}
-                top={0}
-                // @ts-ignore
-                animate={bookSelectorOpacity}
-              />
-              <MotiText
-                fontWeight="bold"
-                fontSize={14}
-                // @ts-ignore
-                animate={bookSelectorTranslateY}
-                {...motiTransition}
+        {hasSelectedVerses ? (
+          <Box flex={1} center>
+            <Text fontWeight="bold" fontSize={14}>
+              {selectedVersesReference}
+            </Text>
+          </Box>
+        ) : (
+          <>
+            <HStack alignItems="center" gap={3}>
+              <HStack>
+                <TouchableBox
+                  onPress={() => {
+                    openBookSelector({
+                      actions,
+                      data: getDefaultStore().get(bibleAtom).data,
+                    })
+                  }}
+                  center
+                  pl={12}
+                  pr={7}
+                  height={32}
+                >
+                  <MotiBox
+                    bg="lightGrey"
+                    borderTopLeftRadius={20}
+                    borderBottomLeftRadius={20}
+                    position="absolute"
+                    left={0}
+                    bottom={0}
+                    right={0}
+                    top={0}
+                    // @ts-ignore
+                    animate={bookSelectorOpacity}
+                  />
+                  <MotiText
+                    fontWeight="bold"
+                    fontSize={14}
+                    // @ts-ignore
+                    animate={bookSelectorTranslateY}
+                    {...motiTransition}
+                  >
+                    {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
+                  </MotiText>
+                </TouchableBox>
+              </HStack>
+              <TouchableBox
+                onPress={() =>
+                  openVersionSelector({
+                    actions,
+                    data: getDefaultStore().get(bibleAtom).data,
+                  })
+                }
+                center
+                pl={7}
+                pr={12}
+                height={32}
               >
-                {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
-              </MotiText>
-            </TouchableBox>
-          </HStack>
-          <TouchableBox
-            onPress={() =>
-              openVersionSelector({
-                actions,
-                data: getDefaultStore().get(bibleAtom).data,
-              })
-            }
-            center
-            pl={7}
-            pr={12}
-            height={32}
-          >
-            <MotiBox
-              bg="lightGrey"
-              borderTopRightRadius={20}
-              borderBottomRightRadius={20}
-              position="absolute"
-              left={0}
-              bottom={0}
-              right={0}
-              top={0}
-              // @ts-ignore
-              animate={versionSelectorOpacity}
-            />
-            <MotiText
-              fontWeight="bold"
-              fontSize={14}
-              // @ts-ignore
-              animate={versionSelectorTranslateY}
-              {...motiTransition}
-            >
-              {version}
-            </MotiText>
-          </TouchableBox>
-        </HStack>
+                <MotiBox
+                  bg="lightGrey"
+                  borderTopRightRadius={20}
+                  borderBottomRightRadius={20}
+                  position="absolute"
+                  left={0}
+                  bottom={0}
+                  right={0}
+                  top={0}
+                  // @ts-ignore
+                  animate={versionSelectorOpacity}
+                />
+                <MotiText
+                  fontWeight="bold"
+                  fontSize={14}
+                  // @ts-ignore
+                  animate={versionSelectorTranslateY}
+                  {...motiTransition}
+                >
+                  {version}
+                </MotiText>
+              </TouchableBox>
+            </HStack>
 
-        <PopOverMenu
-          element={
-            <MotiBox
-              center
-              width={40}
-              height="100%"
-              // @ts-ignore
-              animate={verseSelectorOpacity}
-            >
-              <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
-            </MotiBox>
-          }
-          popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
-        />
-        {!isSelectionMode && (
-          <HStack marginLeft="auto">
             <PopOverMenu
               element={
                 <MotiBox
@@ -287,67 +287,85 @@ const Header = ({
                   width={40}
                   height="100%"
                   // @ts-ignore
-                  animate={menuOpacity}
+                  animate={verseSelectorOpacity}
                 >
-                  <FeatherIcon name="more-vertical" size={18} />
+                  <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
                 </MotiBox>
               }
-              popover={
-                <>
-                  <MenuOption onSelect={onBibleParamsClick}>
-                    <Box row alignItems="center">
-                      <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
-                      <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
-                    </Box>
-                  </MenuOption>
-                  {!commentsDisplay && isFR && (
-                    <MenuOption onSelect={onOpenCommentaire}>
-                      <Box row alignItems="center">
-                        <MaterialIcon name="chat" size={20} />
-                        <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
-                      </Box>
-                    </MenuOption>
-                  )}
-                  {commentsDisplay && isFR && (
-                    <MenuOption onSelect={() => dispatch(setSettingsCommentaires(false))}>
-                      <Box row alignItems="center">
-                        <MaterialIcon name="chat" size={20} color="primary" />
-                        <Text marginLeft={10}>{t('Commentaire activé')}</Text>
-                      </Box>
-                    </MenuOption>
-                  )}
-                  <MenuOption
-                    onSelect={isParallel ? removeAllParallelVersions : addParallelVersion}
-                  >
-                    <Box row alignItems="center">
-                      <ParallelIcon color={isParallel ? 'primary' : 'default'} />
-                      <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption onSelect={() => navigation.navigate('History')}>
-                    <Box row alignItems="center">
-                      <MaterialIcon name="history" size={20} />
-                      <Text marginLeft={10}>{t('Historique')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption onSelect={() => bookmarkModalRef.current?.present()}>
-                    <Box row alignItems="center">
-                      <IonIcon
-                        name="bookmark"
-                        size={20}
-                        color={currentChapterBookmark ? currentChapterBookmark.color : undefined}
-                      />
-                      <Text marginLeft={10}>
-                        {currentChapterBookmark
-                          ? t('Modifier le marque-page')
-                          : t('Ajouter un marque-page')}
-                      </Text>
-                    </Box>
-                  </MenuOption>
-                </>
-              }
+              popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
             />
-          </HStack>
+            {!isSelectionMode && (
+              <HStack marginLeft="auto">
+                <PopOverMenu
+                  element={
+                    <MotiBox
+                      center
+                      width={40}
+                      height="100%"
+                      // @ts-ignore
+                      animate={menuOpacity}
+                    >
+                      <FeatherIcon name="more-vertical" size={18} />
+                    </MotiBox>
+                  }
+                  popover={
+                    <>
+                      <MenuOption onSelect={onBibleParamsClick}>
+                        <Box row alignItems="center">
+                          <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
+                          <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
+                        </Box>
+                      </MenuOption>
+                      {!commentsDisplay && isFR && (
+                        <MenuOption onSelect={onOpenCommentaire}>
+                          <Box row alignItems="center">
+                            <MaterialIcon name="chat" size={20} />
+                            <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
+                          </Box>
+                        </MenuOption>
+                      )}
+                      {commentsDisplay && isFR && (
+                        <MenuOption onSelect={() => dispatch(setSettingsCommentaires(false))}>
+                          <Box row alignItems="center">
+                            <MaterialIcon name="chat" size={20} color="primary" />
+                            <Text marginLeft={10}>{t('Commentaire activé')}</Text>
+                          </Box>
+                        </MenuOption>
+                      )}
+                      <MenuOption
+                        onSelect={isParallel ? removeAllParallelVersions : addParallelVersion}
+                      >
+                        <Box row alignItems="center">
+                          <ParallelIcon color={isParallel ? 'primary' : 'default'} />
+                          <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => navigation.navigate('History')}>
+                        <Box row alignItems="center">
+                          <MaterialIcon name="history" size={20} />
+                          <Text marginLeft={10}>{t('Historique')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => bookmarkModalRef.current?.present()}>
+                        <Box row alignItems="center">
+                          <IonIcon
+                            name="bookmark"
+                            size={20}
+                            color={currentChapterBookmark ? currentChapterBookmark.color : undefined}
+                          />
+                          <Text marginLeft={10}>
+                            {currentChapterBookmark
+                              ? t('Modifier le marque-page')
+                              : t('Ajouter un marque-page')}
+                          </Text>
+                        </Box>
+                      </MenuOption>
+                    </>
+                  }
+                />
+              </HStack>
+            )}
+          </>
         )}
       </HStack>
       <BookmarkModal
