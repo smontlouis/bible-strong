@@ -11,7 +11,7 @@ import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 
-import { UserState } from '../user'
+import { HighlightType, UserState } from '../user'
 
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 export const SET_SETTINGS_LINE_HEIGHT = 'user/SET_SETTINGS_LINE_HEIGHT'
@@ -32,6 +32,7 @@ export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES = 'user/SET_SETTINGS_SHARE_INLI
 export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
 export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
+export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 
 export default produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -169,6 +170,18 @@ export default produce((draft: Draft<UserState>, action) => {
       }
       break
     }
+    case SET_DEFAULT_COLOR_TYPE: {
+      const { colorKey, type } = action.payload as { colorKey: string; type?: HighlightType }
+      if (!draft.bible.settings.defaultColorTypes) {
+        draft.bible.settings.defaultColorTypes = {}
+      }
+      if (type && type !== 'background') {
+        draft.bible.settings.defaultColorTypes[colorKey as keyof typeof draft.bible.settings.defaultColorTypes] = type
+      } else {
+        delete draft.bible.settings.defaultColorTypes[colorKey as keyof typeof draft.bible.settings.defaultColorTypes]
+      }
+      break
+    }
     default:
       break
   }
@@ -292,5 +305,12 @@ export function setDefaultColorName(colorKey: string, name?: string) {
   return {
     type: SET_DEFAULT_COLOR_NAME,
     payload: { colorKey, name },
+  }
+}
+
+export function setDefaultColorType(colorKey: string, type?: HighlightType) {
+  return {
+    type: SET_DEFAULT_COLOR_TYPE,
+    payload: { colorKey, type },
   }
 }

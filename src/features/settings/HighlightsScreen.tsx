@@ -12,7 +12,7 @@ import TagsFilterModal from '~common/TagsFilterModal'
 import Container from '~common/ui/Container'
 import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
-import TouchableCircle from '~features/bible/TouchableCircle'
+import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { wp } from '~helpers/utils'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
@@ -81,6 +81,9 @@ const HighlightsScreen = () => {
   const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
   const customHighlightColors = useSelector(
     (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
+  )
+  const defaultColorTypes = useSelector(
+    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? {}
   )
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 
@@ -261,24 +264,45 @@ const HighlightsScreen = () => {
           }}
         >
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color1} onPress={() => handleColorChange('color1')} />
+            <HighlightTypeIndicator
+              color={colors.color1}
+              type={defaultColorTypes.color1 || 'background'}
+              onPress={() => handleColorChange('color1')}
+            />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color2} onPress={() => handleColorChange('color2')} />
+            <HighlightTypeIndicator
+              color={colors.color2}
+              type={defaultColorTypes.color2 || 'background'}
+              onPress={() => handleColorChange('color2')}
+            />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color3} onPress={() => handleColorChange('color3')} />
+            <HighlightTypeIndicator
+              color={colors.color3}
+              type={defaultColorTypes.color3 || 'background'}
+              onPress={() => handleColorChange('color3')}
+            />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color4} onPress={() => handleColorChange('color4')} />
+            <HighlightTypeIndicator
+              color={colors.color4}
+              type={defaultColorTypes.color4 || 'background'}
+              onPress={() => handleColorChange('color4')}
+            />
           </Box>
           <Box width={colorItemWidth} height={60} center>
-            <TouchableCircle color={colors.color5} onPress={() => handleColorChange('color5')} />
+            <HighlightTypeIndicator
+              color={colors.color5}
+              type={defaultColorTypes.color5 || 'background'}
+              onPress={() => handleColorChange('color5')}
+            />
           </Box>
           {customHighlightColors.map((customColor: CustomColor) => (
             <Box key={customColor.id} width={colorItemWidth} height={60} center>
-              <TouchableCircle
+              <HighlightTypeIndicator
                 color={customColor.hex}
+                type={customColor.type || 'background'}
                 onPress={() => handleColorChange(customColor.id)}
               />
             </Box>

@@ -1,23 +1,17 @@
 import { useAtom, useAtomValue } from 'jotai/react'
 import React, { useCallback, useEffect, useRef } from 'react'
 
-import { BackHandler } from 'react-native'
+import { BackHandler, useWindowDimensions } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import ReanimatedDrawerLayout, {
-  DrawerLayoutMethods,
-  DrawerPosition,
-  DrawerType,
-} from 'react-native-gesture-handler/ReanimatedDrawerLayout'
 
 import { StackScreenProps } from '@react-navigation/stack'
-import Animated from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
-import { wp } from '~helpers/utils'
 import { MainStackProps } from '~navigation/type'
 import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -35,6 +29,9 @@ type AppSwitcherScreenFuncs = {
 }
 
 export const TAB_PREVIEW_SCALE = 0.6
+
+const DRAWER_WIDTH_PERCENT = 0.95
+const MAX_DRAWER_WIDTH = 450
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
@@ -97,44 +94,41 @@ const AppSwitcherScreen = ({
 }
 
 const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
-  const moreDrawerRef = useRef<DrawerLayoutMethods>(null)
-  const homeDrawerRef = useRef<DrawerLayoutMethods>(null)
+  const { width: screenWidth } = useWindowDimensions()
+  const drawerWidth = Math.min(screenWidth * DRAWER_WIDTH_PERCENT, MAX_DRAWER_WIDTH)
+
   const tabsCount = useAtomValue(tabsCountAtom)
-  const isMenuOpen = React.useRef(false)
-  const isHomeOpen = React.useRef(false)
+  const isMenuOpen = useRef(false)
+  const isHomeOpen = useRef(false)
+
+  // SharedValue pour la position: -1 (menu), 0 (centre), 1 (home)
+  const position = useSharedValue(0)
 
   const openMenu = useCallback(() => {
-    moreDrawerRef.current?.openDrawer()
+    position.set(withSpring(-1))
     isMenuOpen.current = true
-  }, [])
+  }, [position])
 
   const closeMenu = useCallback(() => {
-    moreDrawerRef.current?.closeDrawer()
+    position.set(withSpring(0))
     isMenuOpen.current = false
-  }, [])
+  }, [position])
 
   const openHome = useCallback(() => {
-    homeDrawerRef.current?.openDrawer()
+    position.set(withSpring(1))
     isHomeOpen.current = true
-  }, [])
+  }, [position])
 
   const closeHome = useCallback(() => {
-    homeDrawerRef.current?.closeDrawer()
+    position.set(withSpring(0))
     isHomeOpen.current = false
-  }, [])
+  }, [position])
 
   // Not the best, but when adding a new tab, close home drawer
   useEffect(() => {
     closeHome()
     closeMenu()
   }, [tabsCount, closeHome, closeMenu])
-
-  const renderHomeScreen = useCallback(
-    () => <Home closeHome={closeHome} navigation={props.navigation} />,
-    [closeHome, props.navigation]
-  )
-
-  const renderMoreScreen = useCallback(() => <More closeMenu={closeMenu} />, [closeMenu])
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -154,26 +148,30 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
     return () => backHandler.remove()
   }, [closeHome, closeMenu])
 
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: position.get() * drawerWidth }],
+  }))
+
   return (
-    <ReanimatedDrawerLayout
-      ref={homeDrawerRef}
-      drawerWidth={wp(95, 450)}
-      drawerPosition={DrawerPosition.LEFT}
-      drawerType={DrawerType.SLIDE}
-      overlayColor="rgba(0,0,0,0)"
-      renderNavigationView={renderHomeScreen}
-    >
-      <ReanimatedDrawerLayout
-        ref={moreDrawerRef}
-        drawerWidth={wp(95, 450)}
-        drawerPosition={DrawerPosition.RIGHT}
-        drawerType={DrawerType.SLIDE}
-        overlayColor="rgba(0,0,0,0)"
-        renderNavigationView={renderMoreScreen}
+    <Box flex={1} bg="lightGrey" overflow="hidden">
+      <AnimatedBox
+        row
+        flex={1}
+        style={[{ width: drawerWidth * 2 + screenWidth, marginLeft: -drawerWidth }, containerStyle]}
       >
-        <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
-      </ReanimatedDrawerLayout>
-    </ReanimatedDrawerLayout>
+        <Box width={drawerWidth}>
+          <Home closeHome={closeHome} navigation={props.navigation} />
+        </Box>
+
+        <Box width={screenWidth}>
+          <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
+        </Box>
+
+        <Box width={drawerWidth}>
+          <More closeMenu={closeMenu} />
+        </Box>
+      </AnimatedBox>
+    </Box>
   )
 }
 

@@ -58,6 +58,7 @@ import {
   TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
   SAVE_ALL_LOGS_AS_SEEN,
   SET_DEFAULT_COLOR_NAME,
+  SET_DEFAULT_COLOR_TYPE,
   //
   IMPORT_DATA,
 } from './modules/user'
@@ -259,7 +260,8 @@ export default (store: any) => (next: any) => async (action: any) => {
     case TOGGLE_SETTINGS_SHARE_QUOTES:
     case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS:
     case SAVE_ALL_LOGS_AS_SEEN:
-    case SET_DEFAULT_COLOR_NAME: {
+    case SET_DEFAULT_COLOR_NAME:
+    case SET_DEFAULT_COLOR_TYPE: {
       if (!diffState?.user?.bible?.settings) break
 
       await handleSyncWithRetry(

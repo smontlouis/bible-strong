@@ -107,6 +107,8 @@ export interface NotesObj {
   [x: string]: Note
 }
 
+export type HighlightType = 'background' | 'textColor' | 'underline'
+
 export type Highlight = {
   color: string
   tags: TagsObj
@@ -122,6 +124,7 @@ export interface CustomColor {
   hex: string
   createdAt: number
   name?: string
+  type?: HighlightType
 }
 export interface OpenGraphData {
   title?: string
@@ -245,6 +248,13 @@ export interface UserState {
         color3?: string
         color4?: string
         color5?: string
+      }
+      defaultColorTypes?: {
+        color1?: HighlightType
+        color2?: HighlightType
+        color3?: HighlightType
+        color4?: HighlightType
+        color5?: HighlightType
       }
     }
   }
