@@ -1,5 +1,5 @@
 import React from 'react'
-import NetInfo from '@react-native-community/netinfo'
+import useConnection from '~helpers/useConnection'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -7,21 +7,8 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
 
 const OfflineNotice = () => {
-  const [isConnected, setIsConnected] = React.useState(true)
+  const isConnected = useConnection()
   const { t } = useTranslation()
-
-  React.useEffect(() => {
-    const handleConnectivityChange = ({ isConnected }) => {
-      console.log('[Home] Is connected:', isConnected)
-      setIsConnected(isConnected)
-    }
-
-    const unsubscribe = NetInfo.addEventListener(handleConnectivityChange)
-
-    return () => {
-      unsubscribe()
-    }
-  }, [])
 
   if (isConnected) {
     return null

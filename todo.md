@@ -16,6 +16,5 @@
 
 ANDROID
 
-- changelog modal not centered
-- plan detail modal
 - replace all contextmenu ?
+- issue with scrollview in selectedversesmodal

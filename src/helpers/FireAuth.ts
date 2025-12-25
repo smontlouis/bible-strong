@@ -300,8 +300,8 @@ const FireAuth = class {
       }
     })
 
-  logout = () => {
-    signOut(getAuth())
+  logout = async () => {
+    await signOut(getAuth())
 
     // Sign-out successful.
     this.user = null

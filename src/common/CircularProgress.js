@@ -106,4 +106,7 @@ CircularProgress.defaultProps = {
   rotation: 90,
   lineCap: 'butt',
   arcSweepAngle: 360,
+  size: 100,
+  width: 3,
+  fill: 0,
 }

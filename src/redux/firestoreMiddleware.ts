@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react-native'
 import { tokenManager } from '~helpers/TokenManager'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import {
+  USER_LOGOUT,
   USER_UPDATE_PROFILE,
   //
   SET_SETTINGS_ALIGN_CONTENT,
@@ -227,6 +228,12 @@ async function handleSyncWithRetry(
 export default (store: any) => (next: any) => async (action: any) => {
   const oldState = store.getState()
   const result = next(action)
+
+  // Early return for logout - prevent race conditions with app lifecycle
+  if (action.type === USER_LOGOUT) {
+    return result
+  }
+
   const state = store.getState()
 
   const deleteMarker = deleteField()

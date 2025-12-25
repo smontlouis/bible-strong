@@ -275,11 +275,13 @@ export const activeTabIndexAtom = atom(
 
     if (value !== -1) {
       const tabsAtoms = get(tabsAtomsAtom)
-      const atomId = tabsAtoms[value].toString()
+      if (value >= 0 && value < tabsAtoms.length) {
+        const atomId = tabsAtoms[value].toString()
 
-      const cachedTabIds = get(cachedTabIdsAtom)
-      if (!cachedTabIds.includes(atomId)) {
-        set(cachedTabIdsAtom, [atomId, ...cachedTabIds].slice(0, maxCachedTabs))
+        const cachedTabIds = get(cachedTabIdsAtom)
+        if (!cachedTabIds.includes(atomId)) {
+          set(cachedTabIdsAtom, [atomId, ...cachedTabIds].slice(0, maxCachedTabs))
+        }
       }
     }
   }
@@ -288,8 +290,12 @@ export const activeTabIndexAtom = atom(
 export const activeAtomIdAtom = atom(get => {
   const tabsAtoms = get(tabsAtomsAtom)
   const activeTabIndex = get(activeTabIndexAtom)
-  const atomId = tabsAtoms[activeTabIndex].toString()
 
+  if (activeTabIndex < 0 || activeTabIndex >= tabsAtoms.length) {
+    return ''
+  }
+
+  const atomId = tabsAtoms[activeTabIndex].toString()
   return atomId
 })
 
@@ -319,10 +325,19 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
 
   const tabsAtoms = get(tabsAtomsAtom)
 
+  if (tabsAtoms.length === 0) {
+    return []
+  }
+
   // If activeTab is bible tab, only cache it
   if (activeTabIndex === 0 || tabsAtoms.length === 1) {
     return [tabsAtoms[0].toString()]
   }
+
+  if (activeTabIndex >= tabsAtoms.length) {
+    return [tabsAtoms[0].toString()]
+  }
+
   // Cache the first tab (bible) and the active tab
   return [tabsAtoms[0].toString(), tabsAtoms[activeTabIndex].toString()]
 })
@@ -337,11 +352,17 @@ export const checkTabType = <Type extends TabItem>(
 export const defaultBibleAtom = atom(
   get => {
     const tabsAtoms = get(tabsAtomsAtom)
+    if (tabsAtoms.length === 0) {
+      return getDefaultBibleTab()
+    }
     const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
     return get(defaultBibleTabAtom)
   },
   (get, set, value: BibleTab) => {
     const tabsAtoms = get(tabsAtomsAtom)
+    if (tabsAtoms.length === 0) {
+      return
+    }
     const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
     set(defaultBibleTabAtom, value)
   }
