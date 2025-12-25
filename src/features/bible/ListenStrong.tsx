@@ -41,6 +41,7 @@ const ListenToStrong = ({ type, code }: Props) => {
       hasFinishedRef.current = true
       // Reset position for next play
       player.seekTo(0)
+      player.pause()
     }
     // Reset the flag when playing starts again
     if (status.playing) {

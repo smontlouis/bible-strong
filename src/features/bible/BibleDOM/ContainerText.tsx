@@ -66,7 +66,7 @@ const getHighlightStyles = (hex: string, type: HighlightType, theme: string) => 
     case 'underline':
       // Partial background at bottom - like a real highlighter marker
       return {
-        background: `linear-gradient(to top, ${convertHex(hex, 60)} 20%, transparent 20%)`,
+        background: `linear-gradient(to top, ${convertHex(hex, 60)} 15%, transparent 15%)`,
         borderRadius: '0px',
         color: undefined,
       }

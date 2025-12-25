@@ -1,5 +1,10 @@
 import React, { useRef, useEffect } from 'react'
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetBackdrop,
+  BottomSheetFooter,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
@@ -107,6 +112,15 @@ const Changelog = () => {
       snapPoints={['40%']}
       enablePanDownToClose={true}
       backdropComponent={props => renderBackdrop({ ...props, pressBehavior: 'none' })}
+      footerComponent={props => (
+        <BottomSheetFooter {...props}>
+          <Box px={20} pt={5} paddingBottom={insets.bottom} alignItems="flex-end" bg="reverse">
+            <Button onPress={handleClose} small>
+              {t('Fermer')}
+            </Button>
+          </Box>
+        </BottomSheetFooter>
+      )}
       key={key}
       {...bottomSheetStyles}
       style={{
@@ -152,11 +166,6 @@ const Changelog = () => {
           </Box>
         </Box>
       </BottomSheetScrollView>
-      <Box padding={20} alignItems="flex-end">
-        <Button onPress={handleClose} small>
-          {t('Fermer')}
-        </Button>
-      </Box>
     </BottomSheetModal>
   )
 }
