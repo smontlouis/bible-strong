@@ -16,4 +16,5 @@
 
 ANDROID
 
-- issue with lexicon
+- changelog modal issue
+- slow slide to open home

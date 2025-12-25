@@ -1,19 +1,16 @@
-import styled from '@emotion/native'
-import React, { useEffect, useRef } from 'react'
-import { ScrollView } from 'react-native'
-import Modal from 'react-native-modal'
+import React, { useRef } from 'react'
 
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Login from './Login'
 
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text from '~common/ui/Text'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import Back from './Back'
 import { FeatherIcon } from './ui/Icon'
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 
 // More like StudiesLoginModal
 

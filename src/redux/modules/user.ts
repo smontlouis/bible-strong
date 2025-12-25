@@ -366,6 +366,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       const currentWords = draft.bible.words
       const currentNaves = draft.bible.naves
       const currentStudies = draft.bible.studies
+      const currentChangelog = draft.bible.changelog
 
       // Merge bible (only settings and other non-subcollection data)
       draft.bible = deepmerge(getInitialState().bible, bible || {})
@@ -381,6 +382,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.bible.words = currentWords
       draft.bible.naves = currentNaves
       draft.bible.studies = currentStudies
+      draft.bible.changelog = currentChangelog
 
       break
     }
@@ -436,12 +438,14 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
 
     case IMPORT_DATA: {
       const { bible, studies } = action.payload
+      const currentChangelog = draft.bible.changelog
 
       // Merge bible
       draft.bible = deepmerge(getInitialState().bible, bible || {})
 
-      // Restore studies
+      // Restore studies and changelog
       draft.bible.studies = studies
+      draft.bible.changelog = currentChangelog
 
       break
     }
