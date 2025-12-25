@@ -1,9 +1,13 @@
 import { useAtom, useAtomValue } from 'jotai/react'
-import React, { memo, useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
 import { BackHandler } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import DrawerLayout from 'react-native-gesture-handler/DrawerLayout'
+import ReanimatedDrawerLayout, {
+  DrawerLayoutMethods,
+  DrawerPosition,
+  DrawerType,
+} from 'react-native-gesture-handler/ReanimatedDrawerLayout'
 
 import { StackScreenProps } from '@react-navigation/stack'
 import Animated from 'react-native-reanimated'
@@ -34,72 +38,67 @@ export const TAB_PREVIEW_SCALE = 0.6
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
-const AppSwitcherScreen = memo(
-  ({
-    navigation,
-    route,
-    openHome,
-    openMenu,
-  }: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
-    const [tabsAtoms] = useAtom(tabsAtomsAtom)
-    const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
-    const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
-    const { scrollView } = useAppSwitcherContext()
-    const insets = useSafeAreaInsets()
+const AppSwitcherScreen = ({
+  navigation,
+  route,
+  openHome,
+  openMenu,
+}: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
+  const [tabsAtoms] = useAtom(tabsAtomsAtom)
+  const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
+  const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
+  const { scrollView } = useAppSwitcherContext()
+  const insets = useSafeAreaInsets()
 
-    return (
-      <TabContextProvider>
-        <Box flex={1} bg="lightGrey">
-          <AnimatedScrollView
-            // @ts-ignore
-            ref={scrollView.ref}
-            showsVerticalScrollIndicator={false}
-            // onScroll={scrollHandler}
-            // scrollEventThrottle={16}
-            contentContainerStyle={{
-              paddingTop: SCREEN_MARGIN + insets.top,
-              paddingLeft: PADDING_HORIZONTAL,
-              paddingRight: PADDING_HORIZONTAL,
-              paddingBottom: TAB_ICON_SIZE + 60,
-              minHeight: '100%',
-            }}
+  return (
+    <TabContextProvider>
+      <Box flex={1} bg="lightGrey">
+        <AnimatedScrollView
+          ref={scrollView.ref}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingTop: SCREEN_MARGIN + insets.top,
+            paddingLeft: PADDING_HORIZONTAL,
+            paddingRight: PADDING_HORIZONTAL,
+            paddingBottom: TAB_ICON_SIZE + 60,
+            minHeight: '100%',
+          }}
+        >
+          <AnimatedBox
+            overflow="visible"
+            row
+            style={[
+              scrollViewBoxStyle,
+              {
+                flexWrap: 'wrap',
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start',
+              },
+            ]}
           >
-            <AnimatedBox
-              overflow="visible"
-              row
-              style={[
-                scrollViewBoxStyle,
-                {
-                  flexWrap: 'wrap',
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'flex-start',
-                },
-              ]}
-            >
-              {tabsAtoms.map((tabAtom, i) => (
-                <TabPreview
-                  key={`${tabAtom}`}
-                  index={i}
-                  tabAtom={tabAtom}
-                  marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
-                />
-              ))}
-              {__DEV__ && <DebugView />}
-            </AnimatedBox>
-          </AnimatedScrollView>
-          <CachedTabScreens navigation={navigation} route={route} />
-          <TabPreviewCarousel tabsAtoms={tabsAtoms} />
-          <BottomTabBar openMenu={openMenu} openHome={openHome} />
-        </Box>
-      </TabContextProvider>
-    )
-  }
-)
+            {tabsAtoms.map((tabAtom, i) => (
+              <TabPreview
+                key={`${tabAtom}`}
+                index={i}
+                tabAtom={tabAtom}
+                marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
+              />
+            ))}
+            {__DEV__ && <DebugView />}
+          </AnimatedBox>
+        </AnimatedScrollView>
+        <CachedTabScreens navigation={navigation} route={route} />
+        <TabPreviewCarousel tabsAtoms={tabsAtoms} />
+        <BottomTabBar openMenu={openMenu} openHome={openHome} />
+      </Box>
+    </TabContextProvider>
+  )
+}
 
 const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
-  const moreDrawerRef = useRef<DrawerLayout>(null)
-  const homeDrawerRef = useRef<DrawerLayout>(null)
+  const moreDrawerRef = useRef<DrawerLayoutMethods>(null)
+  const homeDrawerRef = useRef<DrawerLayoutMethods>(null)
   const tabsCount = useAtomValue(tabsCountAtom)
   const isMenuOpen = React.useRef(false)
   const isHomeOpen = React.useRef(false)
@@ -132,7 +131,7 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
 
   const renderHomeScreen = useCallback(
     () => <Home closeHome={closeHome} navigation={props.navigation} />,
-    [closeHome]
+    [closeHome, props.navigation]
   )
 
   const renderMoreScreen = useCallback(() => <More closeMenu={closeMenu} />, [closeMenu])
@@ -156,28 +155,25 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
   }, [closeHome, closeMenu])
 
   return (
-    <DrawerLayout // should use drawer navigator
+    <ReanimatedDrawerLayout
       ref={homeDrawerRef}
       drawerWidth={wp(95, 450)}
-      drawerPosition="left"
-      drawerType="slide"
-      useNativeAnimations={false}
+      drawerPosition={DrawerPosition.LEFT}
+      drawerType={DrawerType.SLIDE}
       overlayColor="rgba(0,0,0,0)"
       renderNavigationView={renderHomeScreen}
-      drawerLockMode="locked-closed"
     >
-      <DrawerLayout
+      <ReanimatedDrawerLayout
         ref={moreDrawerRef}
         drawerWidth={wp(95, 450)}
-        drawerPosition="right"
-        drawerType="slide"
+        drawerPosition={DrawerPosition.RIGHT}
+        drawerType={DrawerType.SLIDE}
         overlayColor="rgba(0,0,0,0)"
         renderNavigationView={renderMoreScreen}
-        drawerLockMode="locked-closed"
       >
         <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
-      </DrawerLayout>
-    </DrawerLayout>
+      </ReanimatedDrawerLayout>
+    </ReanimatedDrawerLayout>
   )
 }
 

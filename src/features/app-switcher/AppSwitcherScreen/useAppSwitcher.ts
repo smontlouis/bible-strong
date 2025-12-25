@@ -8,12 +8,12 @@ const useAppSwitcher = () => {
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: event => {
-      scrollView.y.value = event.contentOffset.y
+      scrollView.y.set(event.contentOffset.y)
     },
   })
 
   const scrollViewBoxStyle = useAnimatedStyle(() => {
-    return { paddingBottom: scrollView.padding.value }
+    return { paddingBottom: scrollView.padding.get() }
   })
 
   return {

@@ -19,7 +19,7 @@ type AppSwitcherContextValues = {
     atomId: SharedValue<string | null>
   }
   scrollView: {
-    ref: React.RefObject<ScrollView>
+    ref: React.RefObject<ScrollView | null>
     y: SharedValue<number>
     padding: SharedValue<number>
   }
@@ -69,7 +69,7 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
 
   const activeTabScreen = {
     opacity: useSharedValue(1),
-    atomId: useSharedValue(initialAtomId),
+    atomId: useSharedValue(initialAtomId) as SharedValue<string | null>,
   }
 
   const tabPreviewCarousel = {
@@ -78,18 +78,14 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
     opacity: useSharedValue(0),
   }
 
-  // @ts-ignore
-  const contextValue: AppSwitcherContextValues = React.useMemo(
-    () => ({
-      isBottomTabBarVisible,
-      activeTabPreview,
-      activeTabScreen,
-      scrollView,
-      tabPreviews,
-      tabPreviewCarousel,
-    }),
-    []
-  )
+  const contextValue: AppSwitcherContextValues = {
+    isBottomTabBarVisible,
+    activeTabPreview,
+    activeTabScreen,
+    scrollView,
+    tabPreviews,
+    tabPreviewCarousel,
+  }
 
   return (
     <AppSwitcherContext.Provider value={contextValue}>
