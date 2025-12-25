@@ -2,22 +2,17 @@ import React, { useRef, useState } from 'react'
 import { Alert, ScrollView, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import type { ColorFormatsObject } from 'reanimated-color-picker'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
-import { useTheme } from '@emotion/react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
 import Container from '~common/ui/Container'
-import Box, { HStack } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Header from '~common/Header'
-import Button from '~common/ui/Button'
-import ColorPicker from '~common/ColorPicker'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
 import { FeatherIcon } from '~common/ui/Icon'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
+import ColorEditModal from '~common/ColorEditModal'
+import { HelpTip } from '~features/tips/HelpTip'
 import {
   addCustomColor,
   updateCustomColor,
@@ -32,7 +27,6 @@ import {
 import type { RootState } from '~redux/modules/reducer'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { makeColorsSelector } from '~redux/selectors/user'
-import { HIGHLIGHT_BACKGROUND_OPACITY_HEX, getContrastTextColor } from '~helpers/highlightUtils'
 import getTheme from '~themes/index'
 import defaultColors from '~themes/colors'
 
@@ -59,39 +53,6 @@ const IconButton = styled(TouchableOpacity)({
   padding: 8,
 })
 
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
-  flex: 1,
-  fontSize: 14,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  backgroundColor: theme.colors.opacity5,
-  borderRadius: 8,
-  color: theme.colors.default,
-}))
-
-const TypeSelectorContainer = styled.View({
-  flexDirection: 'row',
-  marginTop: 15,
-})
-
-const TypeButton = styled(TouchableOpacity)<{ isSelected: boolean }>(({ theme, isSelected }) => ({
-  flex: 1,
-  paddingVertical: 10,
-  paddingHorizontal: 8,
-  borderRadius: 20,
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.opacity5,
-  alignItems: 'center',
-}))
-
-const PreviewContainer = styled.View(({ theme }) => ({
-  padding: 15,
-  borderRadius: 8,
-  backgroundColor: theme.colors.opacity5,
-  marginTop: 10,
-  marginBottom: 15,
-  height: 80,
-}))
-
 const MAX_CUSTOM_COLORS = 5
 
 type ModalState = {
@@ -106,10 +67,8 @@ type ModalState = {
 const CustomHighlightColorsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const insets = useSafeAreaInsets()
-  const theme = useTheme()
   const modalRef = useRef<BottomSheetModal>(null)
-  const { theme: currentTheme, colorScheme } = useCurrentThemeSelector()
+  const { theme: currentTheme } = useCurrentThemeSelector()
   const selectColors = makeColorsSelector()
   const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
@@ -178,50 +137,16 @@ const CustomHighlightColorsScreen = () => {
     modalRef.current?.present()
   }
 
-  const closeModal = () => {
-    modalRef.current?.dismiss()
-  }
-
-  const handleColorChange = (color: ColorFormatsObject) => {
-    setModalState(prev => ({
-      ...prev,
-      chosenHex: color.hex,
-    }))
-  }
-
-  const handleNameChange = (name: string) => {
-    setModalState(prev => ({
-      ...prev,
-      chosenName: name,
-    }))
-  }
-
-  const handleTypeChange = (type: HighlightType) => {
-    setModalState(prev => ({
-      ...prev,
-      chosenType: type,
-    }))
-  }
-
-  const handleSave = () => {
-    const trimmedName = modalState.chosenName.trim() || undefined
+  const handleSave = (hex: string, name: string | undefined, type: HighlightType) => {
     if (modalState.mode === 'add') {
-      dispatch(addCustomColor(modalState.chosenHex, trimmedName, modalState.chosenType))
+      dispatch(addCustomColor(hex, name, type))
     } else if (modalState.mode === 'edit-default' && modalState.colorKey) {
-      dispatch(changeColor({ name: modalState.colorKey, color: modalState.chosenHex }))
-      dispatch(setDefaultColorName(modalState.colorKey, trimmedName))
-      dispatch(setDefaultColorType(modalState.colorKey, modalState.chosenType))
+      dispatch(changeColor({ name: modalState.colorKey, color: hex }))
+      dispatch(setDefaultColorName(modalState.colorKey, name))
+      dispatch(setDefaultColorType(modalState.colorKey, type))
     } else if (modalState.mode === 'edit-custom' && modalState.customColor) {
-      dispatch(
-        updateCustomColor(
-          modalState.customColor.id,
-          modalState.chosenHex,
-          trimmedName,
-          modalState.chosenType
-        )
-      )
+      dispatch(updateCustomColor(modalState.customColor.id, hex, name, type))
     }
-    closeModal()
   }
 
   const resetDefaultColor = (colorKey: ColorKey) => {
@@ -265,19 +190,6 @@ const CustomHighlightColorsScreen = () => {
     }
   }
 
-  const getModalTitle = () => {
-    switch (modalState.mode) {
-      case 'add':
-        return t('Nouvelle couleur')
-      case 'edit-default':
-        return t('Modifier la couleur')
-      case 'edit-custom':
-        return t('Modifier la couleur')
-      default:
-        return ''
-    }
-  }
-
   // Check if default color has been modified from its original value
   const isDefaultColorModified = (colorKey: ColorKey) => {
     const currentColor = themeColors[colorKey as keyof typeof themeColors]
@@ -290,6 +202,7 @@ const CustomHighlightColorsScreen = () => {
     <Container>
       <Header hasBackButton title={t('Couleurs de surlignage')} />
       <ScrollView>
+        <HelpTip id="highlight-color-long-press" description={t('highlight_color_long_press')} />
         <SectionTitle>{t('Couleurs par défaut')}</SectionTitle>
         {([1, 2, 3, 4, 5] as const).map(i => {
           const colorKey = `color${i}` as ColorKey
@@ -387,109 +300,14 @@ const CustomHighlightColorsScreen = () => {
         )}
       </ScrollView>
 
-      <Modal.Body
-        ref={modalRef}
-        topInset={insets.top}
-        enableDynamicSizing
-        onModalClose={closeModal}
-        headerComponent={<ModalHeader title={getModalTitle()} />}
-      >
-        <Box paddingHorizontal={20} pb={20}>
-          <Box height={250}>
-            <ColorPicker value={modalState.chosenHex} onChangeJS={handleColorChange} />
-          </Box>
-          <Box row alignItems="center">
-            <StyledTextInput
-              placeholder={t('Nom de la couleur (optionnel)')}
-              placeholderTextColor={theme.colors.tertiary}
-              value={modalState.chosenName}
-              onChangeText={handleNameChange}
-              maxLength={30}
-            />
-          </Box>
-
-          <Text fontSize={12} color="tertiary" marginTop={20}>
-            {t('Type de surlignage')}
-          </Text>
-          <TypeSelectorContainer>
-            <TypeButton
-              isSelected={modalState.chosenType === 'background'}
-              onPress={() => handleTypeChange('background')}
-              style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-            >
-              <Text
-                fontSize={12}
-                bold
-                color={modalState.chosenType === 'background' ? 'reverse' : 'default'}
-              >
-                {t('Fond')}
-              </Text>
-            </TypeButton>
-            <TypeButton
-              isSelected={modalState.chosenType === 'textColor'}
-              onPress={() => handleTypeChange('textColor')}
-              style={{ borderRadius: 0 }}
-            >
-              <Text
-                fontSize={12}
-                bold
-                color={modalState.chosenType === 'textColor' ? 'reverse' : 'default'}
-              >
-                {t('Texte')}
-              </Text>
-            </TypeButton>
-            <TypeButton
-              isSelected={modalState.chosenType === 'underline'}
-              onPress={() => handleTypeChange('underline')}
-              style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-            >
-              <Text
-                fontSize={12}
-                bold
-                color={modalState.chosenType === 'underline' ? 'reverse' : 'default'}
-              >
-                {t('Soulignement')}
-              </Text>
-            </TypeButton>
-          </TypeSelectorContainer>
-
-          <PreviewContainer>
-            <HStack gap={10}>
-              <Text fontSize={12} color="tertiary" marginBottom={8}>
-                {t('Aperçu')}
-              </Text>
-              <Text fontSize={12} color="default">
-                {modalState.chosenHex}
-              </Text>
-            </HStack>
-            <Text
-              fontSize={18}
-              style={
-                modalState.chosenType === 'background'
-                  ? {
-                      backgroundColor: `${modalState.chosenHex}${HIGHLIGHT_BACKGROUND_OPACITY_HEX}`,
-                      borderRadius: 4,
-                      paddingHorizontal: 4,
-                      paddingVertical: 2,
-                      color:
-                        getContrastTextColor(modalState.chosenHex, colorScheme === 'dark') ??
-                        theme.colors.default,
-                    }
-                  : modalState.chosenType === 'textColor'
-                    ? { color: modalState.chosenHex }
-                    : {
-                        borderBottomWidth: 4,
-                        borderBottomColor: `${modalState.chosenHex}99`,
-                      }
-              }
-            >
-              {t('Exemple de verset')}
-            </Text>
-          </PreviewContainer>
-
-          <Button onPress={handleSave}>{t('Valider')}</Button>
-        </Box>
-      </Modal.Body>
+      <ColorEditModal
+        modalRef={modalRef}
+        mode={modalState.mode === 'add' ? 'add' : 'edit'}
+        initialHex={modalState.chosenHex}
+        initialName={modalState.chosenName}
+        initialType={modalState.chosenType}
+        onSave={handleSave}
+      />
     </Container>
   )
 }

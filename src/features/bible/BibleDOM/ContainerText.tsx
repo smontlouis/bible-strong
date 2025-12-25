@@ -1,10 +1,7 @@
 import { keyframes, styled } from 'goober'
 import { convertHex } from './convertHex'
 import { RootStyles } from './BibleDOMWrapper'
-import {
-  HIGHLIGHT_BACKGROUND_OPACITY,
-  getContrastTextColor,
-} from '../../../helpers/highlightUtils'
+import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '../../../helpers/highlightUtils'
 
 type HighlightType = 'background' | 'textColor' | 'underline'
 
@@ -104,7 +101,7 @@ export const ContainerText = styled('span')<
     color: undefined as string | undefined,
   }
 
-  if (highlightedColor && !isSelected) {
+  if (highlightedColor) {
     const { hex, type } = resolveHighlightInfo(
       highlightedColor,
       colors[theme],

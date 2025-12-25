@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity, View, StyleSheet } from 'react-native'
+import { View } from 'react-native'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import Text from '~common/ui/Text'
@@ -29,6 +29,7 @@ type Props = {
   type?: HighlightType
   size?: number
   onPress?: () => void
+  onLongPress?: () => void
   disabled?: boolean
 }
 
@@ -37,6 +38,7 @@ const HighlightTypeIndicator = ({
   type = 'background',
   size = 30,
   onPress,
+  onLongPress,
   disabled = false,
 }: Props) => {
   const theme = useTheme()
@@ -91,9 +93,9 @@ const HighlightTypeIndicator = ({
     }
   }
 
-  if (onPress) {
+  if (onPress || onLongPress) {
     return (
-      <Touchable onPress={onPress} disabled={disabled}>
+      <Touchable onPress={onPress} onLongPress={onLongPress} disabled={disabled}>
         {renderIndicator()}
       </Touchable>
     )

@@ -183,7 +183,6 @@ export const More = ({ closeMenu }: MoreProps) => {
         }}
       >
         <Box paddingVertical={10}>
-          <HelpTip id="manual-backup" description={t('tips.manual-backup')} />
           <LinkItem route="Lexique">
             <LexiqueIcon style={{ marginRight: 15 }} size={25} />
             <Text color="primary" bold fontSize={15}>

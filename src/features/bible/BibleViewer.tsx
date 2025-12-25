@@ -290,12 +290,12 @@ const BibleViewer = ({
   }
 
   const addHiglightAndOpenQuickTags = (color: string) => {
-    setTimeout(() => {
-      setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
-    }, 300)
-    // @ts-ignore
+    // setTimeout(() => {
+    //   setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
+    // }, 300)
+    // // @ts-ignore
     dispatch(addHighlight({ color, selectedVerses }))
-    actions.clearSelectedVerses()
+    // actions.clearSelectedVerses()
   }
 
   const addTag = () => {

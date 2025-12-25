@@ -24,11 +24,11 @@ export const HelpTip = ({
     <HStack
       gap={10}
       bg={type === 'info' ? 'opacity50' : 'quart'}
-      py={20}
+      py={10}
       px={14}
       alignItems="center"
-      borderBottomWidth={1}
-      borderColor="border"
+      marginHorizontal={10}
+      style={{ boxShadow: '0 0 5px 0 rgba(0, 0, 0, 0.1)', borderRadius: 10 }}
       {...props}
     >
       <FeatherIcon

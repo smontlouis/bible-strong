@@ -398,6 +398,7 @@
   "Soulignement": "Underline",
   "Aperçu": "Preview",
   "Exemple de verset": "Sample verse text",
+  "highlight_color_long_press": "Long press on a color in the verse selector to edit it directly.",
   "Filtres": "Filters",
   "filtres": "filters",
   "Filtrer par couleur": "Filter by color",
