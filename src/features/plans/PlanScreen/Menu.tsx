@@ -1,18 +1,18 @@
-import BottomSheet from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { StackNavigationProp } from '@react-navigation/stack'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { useDispatch } from 'react-redux'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import { removePlan, resetPlan } from '~redux/modules/plan'
 import { MainStackProps } from '~navigation/type'
+import { removePlan, resetPlan } from '~redux/modules/plan'
 
 interface Props {
-  modalRefDetails: React.RefObject<BottomSheet>
+  modalRefDetails: React.RefObject<BottomSheetModal | null>
   planId: string
   navigation: StackNavigationProp<MainStackProps, 'Plan'>
 }
@@ -56,7 +56,7 @@ const Menu = ({ modalRefDetails, planId, navigation }: Props) => {
 
   return (
     <>
-      <MenuOption onSelect={() => modalRefDetails.current?.expand()}>
+      <MenuOption onSelect={() => modalRefDetails.current?.present()}>
         <Box row alignItems="center">
           <FeatherIcon name="eye" size={15} />
           <Text marginLeft={10}>{t('Détails')}</Text>

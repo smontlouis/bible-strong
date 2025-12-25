@@ -151,6 +151,8 @@ const CustomHighlightColorsScreen = () => {
 
   const resetDefaultColor = (colorKey: ColorKey) => {
     dispatch(changeColor({ name: colorKey }))
+    dispatch(setDefaultColorType(colorKey, 'background'))
+    dispatch(setDefaultColorName(colorKey, undefined))
   }
 
   const getHighlightsWithColor = (colorId: string) => {
@@ -195,7 +197,11 @@ const CustomHighlightColorsScreen = () => {
     const currentColor = themeColors[colorKey as keyof typeof themeColors]
     const themeDefaults = getTheme[currentTheme]?.colors
     const originalColor = themeDefaults?.[colorKey as keyof typeof themeDefaults]
-    return currentColor !== originalColor
+    const currentType = defaultColorTypes[colorKey as keyof typeof defaultColorTypes]
+    const isTypeModified = currentType && currentType !== 'background'
+    const currentName = defaultColorNames[colorKey as keyof typeof defaultColorNames]
+    const isNameModified = !!currentName
+    return currentColor !== originalColor || isTypeModified || isNameModified
   }
 
   return (

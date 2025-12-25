@@ -1,22 +1,23 @@
-import BottomSheet from '@gorhom/bottom-sheet'
-import React from 'react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { StackScreenProps } from '@react-navigation/stack'
+import React from 'react'
 import { ComputedPlanItem } from 'src/common/types'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import Container from '~common/ui/Container'
 import { usePrevious } from '~helpers/usePrevious'
+import { MainStackProps } from '~navigation/type'
 import { useComputedPlan, useFireStorage } from '../plan.hooks'
 import DetailsModal from './DetailsModal'
 import Menu from './Menu'
 import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
-import { MainStackProps } from '~navigation/type'
 
 const PlanScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Plan'>) => {
   const { id, title, image, description, author }: ComputedPlanItem = route.params.plan
-  const modalRef = React.useRef<BottomSheet>(null)
-  const modalRefDetails = React.useRef<BottomSheet>(null)
+  const modalRef = React.useRef<BottomSheetMethods | null>(null)
+  const modalRefDetails = React.useRef<BottomSheetModal | null>(null)
   const cacheImage = useFireStorage(image)
 
   const plan = useComputedPlan(id)

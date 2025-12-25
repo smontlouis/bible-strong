@@ -7,9 +7,10 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import { renderBackdrop } from '~helpers/bottomSheetHelpers'
+import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheet>
+  modalRef: React.RefObject<BottomSheetMethods | null>
   isPlanCompleted: boolean
 }
 

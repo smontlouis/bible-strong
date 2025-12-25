@@ -22,6 +22,8 @@ const TextContainer = styled.View<{ size: number }>(({ size }) => ({
   height: size,
   alignItems: 'center',
   justifyContent: 'center',
+  boxShadow: 'inset 0 0 2px 0 rgba(0, 0, 0, 0.15)',
+  borderRadius: size / 3,
 }))
 
 type Props = {
@@ -68,7 +70,8 @@ const HighlightTypeIndicator = ({
               style={{
                 fontSize,
                 fontWeight: 'bold',
-                color: theme.colors.default,
+                color: theme.colors.darkGrey,
+                opacity: 0.6,
               }}
             >
               A
@@ -80,8 +83,10 @@ const HighlightTypeIndicator = ({
                 left: size * 0.15,
                 right: size * 0.15,
                 height: size * 0.2,
-                backgroundColor: color + '99',
-                borderRadius: 2,
+                borderWidth: size * 0.05,
+                borderColor: theme.colors.reverse,
+                backgroundColor: color,
+                borderRadius: size * 0.3,
               }}
             />
           </TextContainer>
@@ -95,7 +100,7 @@ const HighlightTypeIndicator = ({
 
   if (onPress || onLongPress) {
     return (
-      <Touchable onPress={onPress} onLongPress={onLongPress} disabled={disabled}>
+      <Touchable onPress={onPress} onLongPress={onLongPress} disabled={disabled} hitSlop={10}>
         {renderIndicator()}
       </Touchable>
     )

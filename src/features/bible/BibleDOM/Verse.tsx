@@ -52,7 +52,7 @@ const Wrapper = styled('span')<RootStyles & { isSelectedMode?: boolean; isSelect
       : {}),
     ...(isSelectedMode && !isSelected
       ? {
-          opacity: 0.5,
+          opacity: 0.3,
         }
       : {}),
   })

@@ -16,5 +16,6 @@
 
 ANDROID
 
-- changelog modal issue
-- slow slide to open home
+- changelog modal not centered
+- plan detail modal
+- replace all contextmenu ?
