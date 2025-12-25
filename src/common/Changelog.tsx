@@ -114,7 +114,7 @@ const Changelog = () => {
       backdropComponent={props => renderBackdrop({ ...props, pressBehavior: 'none' })}
       footerComponent={props => (
         <BottomSheetFooter {...props}>
-          <Box px={20} pt={5} paddingBottom={insets.bottom} alignItems="flex-end" bg="reverse">
+          <Box px={20} pt={5} paddingBottom={insets.bottom + 5} alignItems="flex-end" bg="reverse">
             <Button onPress={handleClose} small>
               {t('Fermer')}
             </Button>

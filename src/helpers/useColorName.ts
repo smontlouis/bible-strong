@@ -33,9 +33,9 @@ export function useColorInfo(colorId?: string): { name: string; hex: string } | 
   // Default color (color1, color2, etc.)
   if (colorId.startsWith('color')) {
     const colorNumber = colorId.slice(-1)
-    const name =
-      defaultColorNames[colorId as keyof typeof defaultColorNames] ||
-      `${t('Couleur')} ${colorNumber}`
+    const nameValue = defaultColorNames[colorId as keyof typeof defaultColorNames]
+    // Defensive check: ensure name is a string (protect against corrupted data like {_type: 'delete'})
+    const name = typeof nameValue === 'string' ? nameValue : `${t('Couleur')} ${colorNumber}`
     const hex = themeColors[colorId as keyof typeof themeColors]
     return { name, hex }
   }
@@ -43,7 +43,9 @@ export function useColorInfo(colorId?: string): { name: string; hex: string } | 
   // Custom color
   const customColor = customHighlightColors.find((c: CustomColor) => c.id === colorId)
   if (customColor) {
-    const name: string = customColor.name || t('Couleur personnalisée')
+    // Defensive check: ensure name is a string (protect against corrupted data)
+    const name: string =
+      typeof customColor.name === 'string' ? customColor.name : t('Couleur personnalisée')
     const hex: string = customColor.hex
     return { name, hex }
   }
@@ -73,19 +75,23 @@ export function useAllColors(): { id: string; name: string; hex: string }[] {
     // Add default colors
     for (let i = 1; i <= 5; i++) {
       const colorKey = `color${i}` as keyof typeof themeColors
+      const nameValue = defaultColorNames[colorKey as keyof typeof defaultColorNames]
       colors.push({
         id: `color${i}`,
-        name:
-          defaultColorNames[colorKey as keyof typeof defaultColorNames] || `${t('Couleur')} ${i}`,
+        // Defensive check: ensure name is a string (protect against corrupted data like {_type: 'delete'})
+        name: typeof nameValue === 'string' ? nameValue : `${t('Couleur')} ${i}`,
         hex: themeColors[colorKey] as string,
       })
     }
 
     // Add custom colors
     customHighlightColors.forEach((color: CustomColor, index: number) => {
+      // Defensive check: ensure name is a string (protect against corrupted data)
+      const colorName =
+        typeof color.name === 'string' ? color.name : `${t('Couleur personnalisée')} ${index + 1}`
       colors.push({
         id: color.id,
-        name: color.name || `${t('Couleur personnalisée')} ${index + 1}`,
+        name: colorName,
         hex: color.hex,
       })
     })

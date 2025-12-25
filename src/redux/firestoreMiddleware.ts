@@ -85,6 +85,33 @@ import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration
 export const removeUndefinedVariables = (obj: any) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
 /**
+ * Nettoie un objet pour Firestore en supprimant les valeurs undefined
+ * tout en préservant les sentinels Firestore (comme deleteField())
+ */
+export const cleanForFirestore = (obj: any): any => {
+  if (obj === undefined) return undefined
+  if (obj === null) return null
+  if (typeof obj !== 'object') return obj
+
+  // Préserver les sentinels Firestore (comme deleteField())
+  // Les sentinels ont une propriété _methodName ou isEqual
+  if (obj._methodName || typeof obj.isEqual === 'function') return obj
+
+  if (Array.isArray(obj)) {
+    return obj.map(cleanForFirestore).filter(v => v !== undefined)
+  }
+
+  const result: any = {}
+  for (const key of Object.keys(obj)) {
+    const value = cleanForFirestore(obj[key])
+    if (value !== undefined) {
+      result[key] = value
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined
+}
+
+/**
  * Détecte les changements dans une sous-collection à partir du diff
  * Retourne les éléments ajoutés/modifiés et supprimés
  */
@@ -268,7 +295,7 @@ export default (store: any) => (next: any) => async (action: any) => {
         async () => {
           await setDoc(
             userDocRef,
-            { bible: { settings: removeUndefinedVariables(diffState.user.bible.settings) } },
+            { bible: { settings: cleanForFirestore(diffState.user.bible.settings) } },
             { merge: true }
           )
         },

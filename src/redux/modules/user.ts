@@ -34,6 +34,33 @@ import versionUpdateReducer from './user/versionUpdate'
 import { reduceReducers } from './utils'
 const deepmerge = require('@fastify/deepmerge')()
 
+/**
+ * Nettoie les données corrompues de Firestore
+ * Supprime les objets {_type: 'delete'} qui n'auraient pas dû être stockés
+ */
+const cleanCorruptedFirestoreData = (obj: any): any => {
+  if (obj === null || obj === undefined) return obj
+  if (typeof obj !== 'object') return obj
+
+  // Detect corrupted Firestore sentinel that was serialized
+  if (obj._type === 'delete') {
+    return undefined
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(cleanCorruptedFirestoreData).filter(v => v !== undefined)
+  }
+
+  const result: any = {}
+  for (const key of Object.keys(obj)) {
+    const cleanedValue = cleanCorruptedFirestoreData(obj[key])
+    if (cleanedValue !== undefined) {
+      result[key] = cleanedValue
+    }
+  }
+  return result
+}
+
 export * from './user/bookmarks'
 export * from './user/customColors'
 export * from './user/highlights'
@@ -379,7 +406,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       const currentChangelog = draft.bible.changelog
 
       // Merge bible (only settings and other non-subcollection data)
-      draft.bible = deepmerge(getInitialState().bible, bible || {})
+      // Clean corrupted data before merging (removes {_type: 'delete'} objects)
+      const cleanedBible = cleanCorruptedFirestoreData(bible || {})
+      draft.bible = deepmerge(getInitialState().bible, cleanedBible)
 
       // Restore subcollection data
       draft.bible.bookmarks = currentBookmarks
@@ -450,8 +479,9 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       const { bible, studies } = action.payload
       const currentChangelog = draft.bible.changelog
 
-      // Merge bible
-      draft.bible = deepmerge(getInitialState().bible, bible || {})
+      // Merge bible (clean corrupted data before merging)
+      const cleanedBible = cleanCorruptedFirestoreData(bible || {})
+      draft.bible = deepmerge(getInitialState().bible, cleanedBible)
 
       // Restore studies and changelog
       draft.bible.studies = studies

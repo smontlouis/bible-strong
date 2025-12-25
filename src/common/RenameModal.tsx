@@ -79,7 +79,7 @@ const RenameModal = ({
             py={5}
             px={20}
             justifyContent="flex-end"
-            paddingBottom={insets.bottom}
+            paddingBottom={insets.bottom + 5}
             bg="reverse"
           >
             <Box>

@@ -247,7 +247,13 @@ ${currentNote?.description}
           </BottomSheetFooter>
         ) : (
           <BottomSheetFooter {...props}>
-            <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+            <HStack
+              py={10}
+              px={20}
+              justifyContent="flex-end"
+              paddingBottom={insets.bottom + 5}
+              bg="reverse"
+            >
               <Box>
                 <Fab icon="edit-2" onPress={onEditNote} />
               </Box>
