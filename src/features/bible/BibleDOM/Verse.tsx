@@ -41,14 +41,22 @@ const NumberText = styled<RootStyles & { isFocused?: boolean }>('span')(
   })
 )
 
-const Wrapper = styled('span')<RootStyles>(({ settings: { textDisplay } }) => ({
-  display: textDisplay,
-  ...(textDisplay === 'block'
-    ? {
-        marginBottom: '5px',
-      }
-    : {}),
-}))
+const Wrapper = styled('span')<RootStyles & { isSelectedMode?: boolean; isSelected?: boolean }>(
+  ({ settings: { textDisplay }, isSelectedMode, isSelected }) => ({
+    display: textDisplay,
+    transition: 'opacity 0.3s ease',
+    ...(textDisplay === 'block'
+      ? {
+          marginBottom: '5px',
+        }
+      : {}),
+    ...(isSelectedMode && !isSelected
+      ? {
+          opacity: 0.5,
+        }
+      : {}),
+  })
+)
 
 const Spacer = styled('div')(() => ({
   marginTop: '5px',
@@ -355,7 +363,12 @@ const Verse = ({
   }
 
   return (
-    <Wrapper settings={settings} id={`verset-${verse.Verset}`}>
+    <Wrapper
+      settings={settings}
+      id={`verset-${verse.Verset}`}
+      isSelectedMode={isSelectedMode}
+      isSelected={isSelected}
+    >
       <ContainerText
         isFocused={isFocused}
         settings={settings}

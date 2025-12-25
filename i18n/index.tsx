@@ -18,8 +18,7 @@ const resources = {
 }
 
 const fallback = { languageTag: 'fr', isRTL: false }
-const { languageTag } =
-  RNLocalize.findBestAvailableLanguage(['en', 'fr']) || fallback
+const { languageTag } = RNLocalize.findBestAvailableLanguage(['en', 'fr']) || fallback
 
 const languageDetector = {
   type: 'languageDetector',
@@ -51,7 +50,7 @@ export const setI18n = async () =>
     // @ts-ignore
     .use(languageDetector)
     .init({
-      debug: __DEV__,
+      // debug: __DEV__,
       resources,
       fallbackLng: 'fr',
       keySeparator: false,
@@ -61,7 +60,6 @@ export const setI18n = async () =>
       cleanCode: true,
     })
 
-export const getLangIsFr = () =>
-  i18n.language ? i18n.language === 'fr' : languageTag === 'fr'
+export const getLangIsFr = () => (i18n.language ? i18n.language === 'fr' : languageTag === 'fr')
 
 export default i18n
