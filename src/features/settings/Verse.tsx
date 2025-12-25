@@ -15,6 +15,7 @@ import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
+import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import truncate from '~helpers/truncate'
 import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
@@ -24,19 +25,11 @@ import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
-import { CustomColor } from '~redux/modules/user'
+import { CustomColor, HighlightType } from '~redux/modules/user'
 import { resolveHighlightColor } from '~helpers/highlightColors'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
-}))
-
-const Circle = styled(Box)(({ backgroundColor }: { backgroundColor: string }) => ({
-  width: 15,
-  height: 15,
-  borderRadius: 3,
-  backgroundColor,
-  marginRight: 5,
 }))
 
 const Container = styled(Box)(({ theme }) => ({
@@ -61,15 +54,29 @@ const VerseComponent = ({
   const { t } = useTranslation()
   const isFR = useLanguage()
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const { themeColors, customHighlightColors } = useSelector(
+  const { themeColors, customHighlightColors, defaultColorTypes } = useSelector(
     (state: RootState) => ({
       themeColors: state.user.bible.settings.colors[currentTheme],
       customHighlightColors: state.user.bible.settings.customHighlightColors ?? [],
+      defaultColorTypes: state.user.bible.settings.defaultColorTypes ?? {},
     }),
     shallowEqual
   )
 
   const resolvedColor = resolveHighlightColor(color, themeColors, customHighlightColors)
+
+  // Resolve highlight type based on color ID
+  const resolveHighlightType = (colorId: string): HighlightType => {
+    // Default colors (color1, color2, etc.)
+    if (colorId.startsWith('color')) {
+      return defaultColorTypes[colorId as keyof typeof defaultColorTypes] || 'background'
+    }
+    // Custom colors
+    const customColor = customHighlightColors.find((c: CustomColor) => c.id === colorId)
+    return customColor?.type || 'background'
+  }
+
+  const highlightType = resolveHighlightType(color)
 
   if (!verses.length) {
     return null
@@ -98,8 +105,8 @@ const VerseComponent = ({
       <Container>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <Box flex row alignItems="center">
-            <Circle backgroundColor={resolvedColor} />
-            <Text fontSize={14} marginLeft={5} title>
+            <HighlightTypeIndicator color={resolvedColor} type={highlightType} size={15} />
+            <Text fontSize={14} marginLeft={10} title>
               {title}
             </Text>
           </Box>

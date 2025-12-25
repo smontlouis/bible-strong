@@ -268,6 +268,7 @@ const HighlightsScreen = () => {
               color={colors.color1}
               type={defaultColorTypes.color1 || 'background'}
               onPress={() => handleColorChange('color1')}
+              size={20}
             />
           </Box>
           <Box width={colorItemWidth} height={60} center>
@@ -275,6 +276,7 @@ const HighlightsScreen = () => {
               color={colors.color2}
               type={defaultColorTypes.color2 || 'background'}
               onPress={() => handleColorChange('color2')}
+              size={20}
             />
           </Box>
           <Box width={colorItemWidth} height={60} center>
@@ -282,6 +284,7 @@ const HighlightsScreen = () => {
               color={colors.color3}
               type={defaultColorTypes.color3 || 'background'}
               onPress={() => handleColorChange('color3')}
+              size={20}
             />
           </Box>
           <Box width={colorItemWidth} height={60} center>
@@ -289,6 +292,7 @@ const HighlightsScreen = () => {
               color={colors.color4}
               type={defaultColorTypes.color4 || 'background'}
               onPress={() => handleColorChange('color4')}
+              size={20}
             />
           </Box>
           <Box width={colorItemWidth} height={60} center>
@@ -296,6 +300,7 @@ const HighlightsScreen = () => {
               color={colors.color5}
               type={defaultColorTypes.color5 || 'background'}
               onPress={() => handleColorChange('color5')}
+              size={20}
             />
           </Box>
           {customHighlightColors.map((customColor: CustomColor) => (
@@ -304,6 +309,7 @@ const HighlightsScreen = () => {
                 color={customColor.hex}
                 type={customColor.type || 'background'}
                 onPress={() => handleColorChange(customColor.id)}
+                size={20}
               />
             </Box>
           ))}

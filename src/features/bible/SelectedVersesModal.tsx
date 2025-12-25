@@ -1,7 +1,8 @@
 import styled from '@emotion/native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ScrollView, Share } from 'react-native'
+import { Share } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
