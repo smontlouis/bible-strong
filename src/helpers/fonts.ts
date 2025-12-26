@@ -12,6 +12,16 @@ const fonts = {
     'Helvetica',
     'Iowan Old Style',
   ],
+  web: [
+    'Georgia',
+    'Times New Roman',
+    'Arial',
+    'Helvetica',
+    'Verdana',
+    'Trebuchet MS',
+    'Courier New',
+    'monospace',
+  ],
 }
 
-export default fonts[Platform.OS as 'ios' | 'android']
+export default fonts[Platform.OS as 'ios' | 'android' | 'web']

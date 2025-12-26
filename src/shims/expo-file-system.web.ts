@@ -101,11 +101,30 @@ export const getInfoAsync = async (
   }
 }
 
+// Check if a URI is a bundled asset URL (from expo-asset on web)
+const isAssetUrl = (uri: string): boolean => {
+  return uri.startsWith('/assets/') || uri.startsWith('http://') || uri.startsWith('https://')
+}
+
 // Read file as string
 export const readAsStringAsync = async (
   fileUri: string,
   _options?: { encoding?: string }
 ): Promise<string> => {
+  // Handle bundled assets (from expo-asset on web)
+  if (isAssetUrl(fileUri)) {
+    try {
+      const response = await fetch(fileUri)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch asset: ${response.status}`)
+      }
+      return await response.text()
+    } catch (e) {
+      throw new Error(`Failed to read asset: ${fileUri} - ${e}`)
+    }
+  }
+
+  // Handle files stored in IndexedDB
   const store = await getStore('readonly')
   const path = normalizePath(fileUri)
 

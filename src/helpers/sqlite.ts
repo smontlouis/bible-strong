@@ -20,6 +20,7 @@ import {
   getSharedSqliteDirPath,
   BASE_SQLITE_DIR,
 } from './databaseTypes'
+import { Platform } from 'react-native'
 
 // Original DB class for backward compatibility
 class DB {
@@ -102,7 +103,7 @@ class LanguageAwareDB {
       this.db = await SQLite.openDatabaseAsync(
         fileName,
         {
-          useNewConnection: true,
+          useNewConnection: Platform.OS === 'web' ? false : true,
         },
         this.path.replace(`/${fileName}`, '')
       )
