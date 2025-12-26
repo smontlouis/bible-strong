@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useEffect, useState } from 'react'
-import { InteractionManager } from 'react-native'
+import { InteractionManager, Platform } from 'react-native'
 import { createMMKV } from 'react-native-mmkv'
 import { Storage } from 'redux-persist'
 const deepmerge = require('@fastify/deepmerge')()
@@ -50,9 +50,14 @@ export async function migrateFromAsyncStorage(): Promise<void> {
 }
 
 export const useMigrateFromAsyncStorage = () => {
-  const [hasMigrated, setHasMigrated] = useState(hasMigratedFromAsyncStorage)
+  const [hasMigrated, setHasMigrated] = useState(
+    Platform.OS === 'web' ? true : hasMigratedFromAsyncStorage
+  )
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      return
+    }
     if (!hasMigratedFromAsyncStorage) {
       InteractionManager.runAfterInteractions(async () => {
         try {

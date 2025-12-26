@@ -30,7 +30,18 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { firebaseDb } from '~helpers/firebase'
+import {
+  firebaseDb,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+} from '~helpers/firebase'
 import memoize from '~helpers/memoize'
 import useLanguage from '~helpers/useLanguage'
 import { Theme } from '~themes'
@@ -59,21 +70,20 @@ const StyledVerse = styled.View({
 })
 
 const fetchComments = memoize(async (verse: string) => {
-  const verseCommentRef = await firebaseDb.collection('verse-commentaries').doc(verse).get()
+  const verseCommentRef = await getDoc(doc(firebaseDb, 'verse-commentaries', verse))
 
-  if (!verseCommentRef.exists) {
+  if (!verseCommentRef.exists()) {
     throw new Error('NOT_FOUND')
   }
 
   const verseComment = verseCommentRef.data()
 
-  const snapshot = await firebaseDb
-    .collection('verse-commentaries')
-    .doc(verse)
-    .collection('commentaries')
-    .orderBy('order')
-    .where('isSDA', '==', false)
-    .get()
+  const commentsQuery = query(
+    collection(firebaseDb, 'verse-commentaries', verse, 'commentaries'),
+    orderBy('order'),
+    where('isSDA', '==', false)
+  )
+  const snapshot = await getDocs(commentsQuery)
 
   const comments = snapshot.docs.map(x => x.data())
 
@@ -81,24 +91,13 @@ const fetchComments = memoize(async (verse: string) => {
 })
 
 const fetchMoreComments = memoize(async (verse: string, id?: string) => {
-  const query = id
-    ? firebaseDb
-        .collection('verse-commentaries')
-        .doc(verse)
-        .collection('commentaries')
-        .orderBy('id')
-        .startAfter(id)
-        .limit(8)
-        .get()
-    : firebaseDb
-        .collection('verse-commentaries')
-        .doc(verse)
-        .collection('commentaries')
-        .orderBy('id')
-        .limit(8)
-        .get()
+  const commentsCollectionRef = collection(firebaseDb, 'verse-commentaries', verse, 'commentaries')
 
-  const snapshot = await query
+  const moreQuery = id
+    ? query(commentsCollectionRef, orderBy('id'), startAfter(id), limit(8))
+    : query(commentsCollectionRef, orderBy('id'), limit(8))
+
+  const snapshot = await getDocs(moreQuery)
 
   const comments = snapshot.docs.map(x => x.data()) as CommentType[]
 

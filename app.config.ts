@@ -7,7 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'bible-strong',
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
-  platforms: ['ios', 'android'],
+  platforms: ['ios', 'android', 'web'],
   version: '22.0.2',
   orientation: 'default',
   icon: './assets/images/icon-2.png',

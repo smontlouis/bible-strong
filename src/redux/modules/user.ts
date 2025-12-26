@@ -12,7 +12,15 @@ import {
   TagsObj,
 } from '~common/types'
 import { FireAuthProfile } from '~helpers/FireAuth'
-import { firebaseDb } from '~helpers/firebase'
+import {
+  firebaseDb,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+} from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -696,18 +704,19 @@ export function getChangelog() {
       type: GET_CHANGELOG,
     })
     const lastChangelog = getState().user.changelog.lastSeen.toString()
-    const changelogDoc = firebaseDb
-      .collection('changelog')
-      .where('date', '>', lastChangelog)
-      .orderBy('date', 'desc')
-      .limit(20)
+    const changelogQuery = query(
+      collection(firebaseDb, 'changelog'),
+      where('date', '>', lastChangelog),
+      orderBy('date', 'desc'),
+      limit(20)
+    )
 
     try {
-      const querySnapshot = await changelogDoc.get({ source: 'server' })
+      const querySnapshot = await getDocs(changelogQuery)
 
       const changelog: any = []
-      querySnapshot.forEach((doc: any) => {
-        changelog.push(doc.data())
+      querySnapshot.forEach((docSnapshot: any) => {
+        changelog.push(docSnapshot.data())
       })
 
       return dispatch(addChangelog(changelog))

@@ -13,6 +13,9 @@ import {
   writeBatch,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
 } from '@react-native-firebase/firestore'
 import { getStorage, ref } from '@react-native-firebase/storage'
 import { getLangIsFr } from '~i18n'
@@ -36,6 +39,9 @@ export {
   writeBatch,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
   firestoreDeleteField as deleteField,
   firestoreIncrement,
 }

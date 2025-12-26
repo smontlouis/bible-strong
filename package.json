@@ -21,7 +21,8 @@
     "typecheck": "tsc --noEmit",
     "i18n": "i18next 'src/**/*.{js,ts,tsx}' '!src/features/bible/bibleWebView/**' '!src/features/studies/studiesWebView/**'",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "web": "expo start --web"
   },
   "dependencies": {
     "@alloc/moti": "^54.0.0-beta.8",
@@ -38,6 +39,7 @@
     "@gorhom/bottom-sheet": "5.2.6",
     "@gorhom/portal": "^1.0.14",
     "@invertase/react-native-apple-authentication": "^2.3.0",
+    "@lottiefiles/dotlottie-react": "^0.17.12",
     "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.14.0",
@@ -89,6 +91,7 @@
     "expo-sqlite": "~16.0.10",
     "expo-system-ui": "~6.0.9",
     "expo-updates": "~29.0.15",
+    "firebase": "^12.7.0",
     "firestore-size": "^2.0.7",
     "fuse.js": "^6.4.6",
     "global": "^4.4.0",
@@ -136,6 +139,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-view-shot": "~4.0.3",
     "react-native-web": "^0.21.0",
+    "react-native-web-webview": "^1.0.2",
     "react-native-webview": "13.15.0",
     "react-native-worklets": "^0.7.1",
     "react-native-youtube-iframe": "^2.4.1",
@@ -147,6 +151,7 @@
     "redux-thunk": "^2.3.0",
     "rn-fetch-blob": "^0.12.0",
     "rn-placeholder": "^3.0.3",
+    "shaka-player": "^4.16.12",
     "slugify": "^1.4.0",
     "sonner-native": "^0.22.2",
     "trunc-html": "^1.1.2"

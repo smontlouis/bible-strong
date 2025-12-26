@@ -16,7 +16,7 @@ import Box, { AnimatableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
-import { firebaseDb } from '~helpers/firebase'
+import { firebaseDb, collection, doc, getDoc, setDoc } from '~helpers/firebase'
 import { useAtomValue } from 'jotai'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
@@ -56,9 +56,9 @@ const useCommentTranslation = (id: string, content: string) => {
 
       try {
         // Check cache first
-        const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
+        const commentRef = await getDoc(doc(firebaseDb, 'commentaries-FR', id.toString()))
 
-        if (commentRef.exists) {
+        if (commentRef.exists()) {
           setTranslatedContent(commentRef.data()!.content)
           setStatus('Resolved')
           return
@@ -95,10 +95,9 @@ const useCommentTranslation = (id: string, content: string) => {
         }
 
         // Cache the translation
-        await firebaseDb
-          .collection('commentaries-FR')
-          .doc(id.toString())
-          .set({ content: result.translations[0].text })
+        await setDoc(doc(firebaseDb, 'commentaries-FR', id.toString()), {
+          content: result.translations[0].text,
+        })
 
         setTranslatedContent(result.translations[0].text)
         setStatus('Resolved')

@@ -73,6 +73,33 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
     try {
       setPDFStatus('Pending')
       const file_name = slugify(study.title)
+
+      // Web platform uses the fetch API with automatic download via shim
+      if (Platform.OS === 'web') {
+        const res = await RNFetchBlob.config({
+          fileCache: true,
+          appendExt: 'pdf',
+        }).fetch(
+          'POST',
+          'https://us-central1-bible-strong-app.cloudfunctions.net/exportStudyPDF',
+          {
+            'Content-Type': 'application/json',
+          },
+          JSON.stringify({ studyId: study.id })
+        )
+
+        const resStatus = res.info().status
+        if (resStatus !== 200) {
+          setPDFStatus('Rejected')
+          return
+        }
+
+        setPDFStatus('Resolved')
+        onClosed()
+        return
+      }
+
+      // Native platforms (iOS/Android)
       const dirPath = Platform.select({
         ios: RNFetchBlob.fs.dirs.DocumentDir,
         android: RNFetchBlob.fs.dirs.DownloadDir,
