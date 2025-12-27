@@ -17,12 +17,11 @@ import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
-import { useAtom } from 'jotai/react'
-import { defaultBibleAtom } from '../../state/tabs'
 import { useQuery } from '~helpers/react-query-lite'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { StackActions } from '@react-navigation/native'
+import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 
 const H1 = styled(Paragraph)(() => ({
   fontSize: 24,
@@ -69,12 +68,10 @@ function clearEmpties(o: any) {
 
 const PericopeScreen = ({ navigation }: { navigation: StackNavigationProp<MainStackProps> }) => {
   const { t } = useTranslation()
-  const [bible] = useAtom(defaultBibleAtom)
+  const defaultVersion = useDefaultBibleVersion()
 
-  const { selectedVersion: initialVersion, selectedBook: initialBook } = bible.data
-
-  const [version, setVersion] = useState(initialVersion)
-  const [book, setBook] = useState(initialBook)
+  const [version, setVersion] = useState(defaultVersion)
+  const [book, setBook] = useState(books[0]) // Default to Genesis
   const [versionNeedsDownload, setVersionNeedsDownload] = useState(false)
 
   const { data: pericope } = useQuery({

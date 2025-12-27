@@ -234,6 +234,7 @@ export interface UserState {
     words: {}
     naves: {}
     settings: {
+      defaultBibleVersion?: string
       alignContent: 'left' | 'justify'
       lineHeight: 'normal' | 'small' | 'large'
       fontSizeScale: number
@@ -320,6 +321,7 @@ const getInitialState = (): UserState => ({
     words: {},
     naves: {},
     settings: {
+      defaultBibleVersion: getLangIsFr() ? 'LSG' : 'KJV',
       alignContent: 'left',
       lineHeight: 'normal',
       fontSizeScale: 0,

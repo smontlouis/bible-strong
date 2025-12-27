@@ -33,6 +33,7 @@ export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
 export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
 export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
+export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
 
 export default produce((draft: Draft<UserState>, action) => {
   switch (action.type) {
@@ -182,6 +183,10 @@ export default produce((draft: Draft<UserState>, action) => {
       }
       break
     }
+    case SET_DEFAULT_BIBLE_VERSION: {
+      draft.bible.settings.defaultBibleVersion = action.payload
+      break
+    }
     default:
       break
   }
@@ -312,5 +317,12 @@ export function setDefaultColorType(colorKey: string, type?: HighlightType) {
   return {
     type: SET_DEFAULT_COLOR_TYPE,
     payload: { colorKey, type },
+  }
+}
+
+export function setDefaultBibleVersion(payload: string) {
+  return {
+    type: SET_DEFAULT_BIBLE_VERSION,
+    payload,
   }
 }

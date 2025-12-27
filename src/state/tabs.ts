@@ -143,13 +143,13 @@ export const tabTypes = [
   'commentary',
 ] as const
 
-export const getDefaultBibleTab = (): BibleTab => ({
-  id: 'bible',
-  isRemovable: false,
+export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
+  id: `bible-${Date.now()}`,
+  isRemovable: true,
   title: 'Genèse 1:1',
   type: 'bible',
   data: {
-    selectedVersion: getLangIsFr() ? 'LSG' : 'KJV',
+    selectedVersion: version || (getLangIsFr() ? 'LSG' : 'KJV'),
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
     selectedVerse: 1,
@@ -257,7 +257,28 @@ export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
   0
 )
 
-export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [getDefaultBibleTab()])
+// Migration function to make all existing tabs removable
+const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
+  return tabs.map(tab => {
+    const needsIdMigration = tab.id === 'bible'
+    const needsRemovableMigration = tab.isRemovable === false
+
+    if (needsIdMigration || needsRemovableMigration) {
+      return {
+        ...tab,
+        id: needsIdMigration
+          ? `bible-${Date.now()}-${Math.random().toString(36).slice(2)}`
+          : tab.id,
+        isRemovable: true,
+      }
+    }
+    return tab
+  })
+}
+
+export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [getDefaultBibleTab()], {
+  migrate: migrateTabsToRemovable,
+})
 
 export const activeTabIndexAtom = atom(
   get => {
@@ -317,7 +338,7 @@ export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 export const tabsCountAtom = atom(get => get(tabsAtom).length)
 
 export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
-  let activeTabIndex = get(activeTabIndexAtom)
+  const activeTabIndex = get(activeTabIndexAtom)
 
   if (activeTabIndex === -1) {
     return []
@@ -329,17 +350,13 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
     return []
   }
 
-  // If activeTab is bible tab, only cache it
-  if (activeTabIndex === 0 || tabsAtoms.length === 1) {
-    return [tabsAtoms[0].toString()]
-  }
-
   if (activeTabIndex >= tabsAtoms.length) {
-    return [tabsAtoms[0].toString()]
+    // Fallback to first tab if index is out of bounds
+    return tabsAtoms.length > 0 ? [tabsAtoms[0].toString()] : []
   }
 
-  // Cache the first tab (bible) and the active tab
-  return [tabsAtoms[0].toString(), tabsAtoms[activeTabIndex].toString()]
+  // Cache only the active tab (no special treatment for first tab)
+  return [tabsAtoms[activeTabIndex].toString()]
 })
 
 export const checkTabType = <Type extends TabItem>(
@@ -348,25 +365,6 @@ export const checkTabType = <Type extends TabItem>(
 ): tab is Type => {
   return tab?.type === type
 }
-
-export const defaultBibleAtom = atom(
-  get => {
-    const tabsAtoms = get(tabsAtomsAtom)
-    if (tabsAtoms.length === 0) {
-      return getDefaultBibleTab()
-    }
-    const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
-    return get(defaultBibleTabAtom)
-  },
-  (get, set, value: BibleTab) => {
-    const tabsAtoms = get(tabsAtomsAtom)
-    if (tabsAtoms.length === 0) {
-      return
-    }
-    const defaultBibleTabAtom = tabsAtoms[0] as PrimitiveAtom<BibleTab>
-    set(defaultBibleTabAtom, value)
-  }
-) as PrimitiveAtom<BibleTab>
 
 export type BibleTabActions = ReturnType<typeof useBibleTabActions>
 
@@ -618,7 +616,12 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
-  const setAllAndValidateSelected = (selected: { book: Book; chapter: number; verse: number; version: VersionCode }) => {
+  const setAllAndValidateSelected = (selected: {
+    book: Book
+    chapter: number
+    verse: number
+    version: VersionCode
+  }) => {
     setBibleTab(
       produce(draft => {
         draft.data.temp = {

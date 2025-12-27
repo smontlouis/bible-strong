@@ -10,6 +10,7 @@ import { dbManager } from '~helpers/sqlite'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
@@ -21,9 +22,11 @@ import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
 import { isOnboardingRequiredAtom } from '~features/onboarding/atom'
 import { RootState } from '~redux/modules/reducer'
-import { setVersionUpdated } from '~redux/modules/user'
+import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
-import { VersionCode } from 'src/state/tabs'
+import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
+import { getLangIsFr } from '~i18n'
+import { store } from '~redux/store'
 
 const BIBLE_FILESIZE = 2500000
 
@@ -81,9 +84,17 @@ interface Props {
   onChange?: (id: VersionCode) => void
   isParameters?: boolean
   shareFn?: (fn: () => void) => void
+  onDownloadComplete?: (id: VersionCode) => void
 }
 
-const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shareFn }: Props) => {
+const VersionSelectorItem = ({
+  version,
+  isSelected,
+  onChange,
+  isParameters,
+  shareFn,
+  onDownloadComplete,
+}: Props) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const theme: Theme = useTheme()
@@ -143,6 +154,11 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
 
       setVersionNeedsDownload(false)
       setIsLoading(false)
+
+      // Call onDownloadComplete callback if provided
+      if (onDownloadComplete) {
+        onDownloadComplete(version.id as VersionCode)
+      }
     } catch (e) {
       console.log('[Bible] Download error:', e)
       toast.error(
@@ -150,7 +166,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
       )
       setIsLoading(false)
     }
-  }, [version.id])
+  }, [version.id, onDownloadComplete])
 
   const updateVersion = async () => {
     await deleteVersion()
@@ -159,6 +175,59 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
   }
 
   const deleteVersion = async () => {
+    // Check if we're deleting the default Bible version
+    const state = store.getState()
+    const defaultVersion = state.user.bible.settings.defaultBibleVersion
+    const fallback: VersionCode = getLangIsFr() ? 'LSG' : 'KJV'
+
+    if (version.id === defaultVersion) {
+      // Switch to fallback version (LSG for French, KJV for English)
+      dispatch(setDefaultBibleVersion(fallback))
+      toast.info(t('bibleDefaults.switchedToFallback', { version: fallback }))
+    }
+
+    // Update all tabs that use this version
+    const jotaiStore = getDefaultStore()
+    const tabs = jotaiStore.get(tabsAtom)
+    const updatedTabs = tabs.map(tab => {
+      if (tab.type !== 'bible') return tab
+
+      const bibleTab = tab as BibleTab
+      let needsUpdate = false
+      let newSelectedVersion = bibleTab.data.selectedVersion
+      let newParallelVersions = bibleTab.data.parallelVersions
+
+      // Check if selectedVersion matches deleted version
+      if (bibleTab.data.selectedVersion === version.id) {
+        newSelectedVersion = fallback
+        needsUpdate = true
+      }
+
+      // Check if any parallelVersions match deleted version
+      if (bibleTab.data.parallelVersions.includes(version.id as VersionCode)) {
+        newParallelVersions = bibleTab.data.parallelVersions.filter(v => v !== version.id)
+        needsUpdate = true
+      }
+
+      if (needsUpdate) {
+        return {
+          ...bibleTab,
+          data: {
+            ...bibleTab.data,
+            selectedVersion: newSelectedVersion,
+            parallelVersions: newParallelVersions,
+          },
+        }
+      }
+
+      return tab
+    })
+
+    // Only update if there were changes
+    if (JSON.stringify(tabs) !== JSON.stringify(updatedTabs)) {
+      jotaiStore.set(tabsAtom, updatedTabs)
+    }
+
     const path = requireBiblePath(version.id)
     const file = await FileSystem.getInfoAsync(path)
     if (!file.uri) {

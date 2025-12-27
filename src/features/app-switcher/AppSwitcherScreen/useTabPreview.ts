@@ -1,6 +1,7 @@
-import { useAtomValue, useSetAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Extrapolate,
   interpolate,
@@ -18,15 +19,15 @@ import { useTabAnimations } from '../utils/useTabAnimations'
 import useTabConstants from '../utils/useTabConstants'
 
 const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAtom<TabItem> }) => {
+  const { t } = useTranslation()
   const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
+  const { expandTab } = useTabAnimations()
 
   // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
   tabPreviews.refs[index] = useAnimatedRef<AnimatedBox>()
   const ref = tabPreviews.refs[index]
-
-  const { expandTab } = useTabAnimations()
 
   const {
     TAB_PREVIEW_WIDTH,
@@ -74,12 +75,39 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
     scrollView.padding.value = withTiming(0)
   }
 
-  const onClose = () => {
+  const onClose = async () => {
     activeTabPreview.zIndex.value = 1
     onDelete()
     const tabsCount = getDefaultStore().get(tabsCountAtom)
-    // If deleting last tab, choose the previous one
-    if (tabsCount - 1 === activeTabPreview.index.value) {
+
+    // If all tabs are deleted, create a new tab automatically and open it
+    if (tabsCount === 0) {
+      const newTabId = `new-${Date.now()}`
+      dispatchTabs({
+        type: 'insert',
+        value: {
+          id: newTabId,
+          title: t('tabs.new'),
+          isRemovable: true,
+          type: 'new',
+          data: {},
+        },
+      })
+      activeTabPreview.index.value = 0
+
+      // Wait for the tab to be rendered, then expand it
+      await wait(400)
+      const { pageX, pageY } = await measureTabPreview(0)
+      expandTab({
+        index: 0,
+        left: pageX,
+        top: pageY,
+      })
+      return
+    }
+
+    // If deleting last tab in list, choose the previous one
+    if (tabsCount === activeTabPreview.index.value) {
       activeTabPreview.index.value -= 1
     }
   }

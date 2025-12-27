@@ -18,12 +18,36 @@ function clearAll(): void {
   storage.clearAll()
 }
 
-const atomWithAsyncStorage = <T>(key: string, initialValue: T) =>
+interface AtomWithAsyncStorageOptions<T> {
+  migrate?: (value: T) => T
+}
+
+const atomWithAsyncStorage = <T>(
+  key: string,
+  initialValue: T,
+  options?: AtomWithAsyncStorageOptions<T>
+) =>
   atomWithStorage<T>(
     key,
     initialValue,
     createJSONStorage<T>(() => ({
-      getItem,
+      getItem: (k: string) => {
+        const value = getItem(k)
+        if (value && options?.migrate) {
+          try {
+            const parsed = JSON.parse(value) as T
+            const migrated = options.migrate(parsed)
+            // If migration changed the value, save it
+            if (JSON.stringify(migrated) !== value) {
+              setItem(k, JSON.stringify(migrated))
+            }
+            return JSON.stringify(migrated)
+          } catch {
+            return value
+          }
+        }
+        return value
+      },
       setItem,
       removeItem,
       clearAll,

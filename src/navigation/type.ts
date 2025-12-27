@@ -202,6 +202,7 @@ export type MainStackProps = {
   Commentaries: CommentariesScreenProps
   BibleShareOptions: undefined
   ResourceLanguage: undefined
+  BibleDefaults: undefined
 }
 
 declare global {

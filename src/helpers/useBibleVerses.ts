@@ -1,8 +1,7 @@
-import { useAtom } from 'jotai/react'
 import React from 'react'
 import { Verse } from '~common/types'
 import loadBible from '~helpers/loadBible'
-import { defaultBibleAtom } from '../state/tabs'
+import { useDefaultBibleVersion } from '../state/useDefaultBibleVersion'
 
 export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
   return arrayString.map(string => {
@@ -14,8 +13,7 @@ export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>
 const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
   const [verses, setVerses] = React.useState<Verse[]>([])
 
-  const [bible] = useAtom(defaultBibleAtom)
-  const { selectedVersion: version } = bible.data
+  const version = useDefaultBibleVersion()
 
   React.useEffect(() => {
     const loadVerses = async () => {

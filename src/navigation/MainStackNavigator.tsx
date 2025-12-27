@@ -50,6 +50,7 @@ import BackupScreen from '../features/settings/BackupScreen'
 import AutomaticBackupsScreen from '../features/settings/AutomaticBackupsScreen'
 import CustomHighlightColorsScreen from '../features/settings/CustomHighlightColorsScreen'
 import ResourceLanguageScreen from '../features/settings/ResourceLanguageScreen'
+import BibleDefaultsScreen from '../features/settings/BibleDefaultsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import BookmarksScreen from '~features/bookmarks/BookmarksScreen'
@@ -133,6 +134,7 @@ const MainStack = () => {
               component={BibleShareOptionsScreen}
             />
             <MainStackNavigator.Screen name="ResourceLanguage" component={ResourceLanguageScreen} />
+            <MainStackNavigator.Screen name="BibleDefaults" component={BibleDefaultsScreen} />
           </MainStackNavigator.Navigator>
 
           <ChangelogModal />

@@ -739,5 +739,12 @@
   "migration.internetRequired": "Connexion internet requise",
   "migration.partialError": "Certaines données n'ont pas pu être migrées: ",
   "migration.contactSupport": "Veuillez contacter le développeur pour assistance.",
-  "migration.contactButton": "Contacter le support"
+  "migration.contactButton": "Contacter le support",
+
+  "bibleDefaults.title": "Bible par défaut",
+  "bibleDefaults.defaultVersion": "Version par défaut",
+  "bibleDefaults.defaultVersionDescription": "Cette version sera utilisée pour les versets du jour, les plans de lecture, les nouveaux onglets Bible, etc.",
+  "bibleDefaults.frenchVersions": "Versions françaises",
+  "bibleDefaults.englishVersions": "Versions anglaises",
+  "bibleDefaults.switchedToFallback": "La Bible par défaut a été changée pour {{version}}"
 }

@@ -7,7 +7,6 @@ import { cdnUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 import { makePlanByIdSelector, makeOngoingPlanByIdSelector } from '~redux/selectors/plan'
 
-import { useAtom } from 'jotai/react'
 import {
   ComputedPlan,
   ComputedPlanItem,
@@ -26,7 +25,7 @@ import getBiblePericope from '~helpers/getBiblePericope'
 import loadBible from '~helpers/loadBible'
 import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
-import { defaultBibleAtom } from '../../state/tabs'
+import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 
 interface VerseContent {
   Pericope: {
@@ -349,8 +348,7 @@ export const useChapterToContent = (chapters: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<ChapterForPlan>()
 
-  const [bible] = useAtom(defaultBibleAtom)
-  const { selectedVersion: version } = bible.data
+  const version = useDefaultBibleVersion()
 
   React.useEffect(() => {
     ;(async () => {
@@ -421,8 +419,7 @@ export const useVersesToContent = (verses: string) => {
   const [status, setStatus] = React.useState<Status>('Idle')
   const [content, setContent] = React.useState<VerseForPlan>()
 
-  const [bible] = useAtom(defaultBibleAtom)
-  const { selectedVersion: version } = bible.data
+  const version = useDefaultBibleVersion()
 
   React.useEffect(() => {
     ;(async () => {

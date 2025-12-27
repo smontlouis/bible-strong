@@ -14,6 +14,7 @@ import {
   TabItem,
 } from '../../../../state/tabs'
 import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
+import { useDefaultBibleVersion } from '../../../../state/useDefaultBibleVersion'
 
 interface NewTabItemProps {
   type: TabItem['type']
@@ -23,6 +24,7 @@ interface NewTabItemProps {
 const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
   const [tab, setTab] = useAtom(newAtom)
   const { openBibleReferenceModal } = useSelectBibleReference()
+  const defaultVersion = useDefaultBibleVersion()
 
   const onBibleSelectDone = (data: BibleTab['data']['temp']) => {
     const getData = () => {
@@ -39,7 +41,7 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
         }
       }
 
-      return { ...getDefaultBibleTab().data, ...data }
+      return { ...getDefaultBibleTab(defaultVersion).data, ...data }
     }
     setTab({
       ...tab,
@@ -50,12 +52,25 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
   }
 
   const onPress = () => {
-    if (['compare', 'commentary', 'bible'].includes(type)) {
+    // Bible: ouvrir directement avec les données par défaut
+    if (type === 'bible') {
+      setTab({
+        ...tab,
+        // @ts-ignore
+        type: 'bible',
+        data: getDefaultBibleTab(defaultVersion).data,
+      })
+      return
+    }
+
+    // Compare et Commentary: afficher le sélecteur de versets
+    if (['compare', 'commentary'].includes(type)) {
       openBibleReferenceModal({
         onSelect: onBibleSelectDone,
       })
       return
     }
+
     // @ts-ignore
     setTab({ ...tab, base64Preview: '', type, ...getDefaultData(type) })
   }

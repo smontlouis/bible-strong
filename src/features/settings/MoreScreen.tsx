@@ -250,6 +250,10 @@ export const More = ({ closeMenu }: MoreProps) => {
             <MaterialIcon name="language" size={25} color="grey" style={{ marginRight: 15 }} />
             <Text fontSize={15}>{t('Changer la langue')}</Text>
           </LinkItem>
+          <LinkItem route="BibleDefaults">
+            <StyledIcon name="book-open" size={25} />
+            <Text fontSize={15}>{t('bibleDefaults.title')}</Text>
+          </LinkItem>
           <LinkItem route="Downloads">
             <Box>
               {hasUpdate && (

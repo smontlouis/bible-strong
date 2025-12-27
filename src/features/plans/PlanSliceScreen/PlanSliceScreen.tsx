@@ -2,7 +2,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import MenuOption from '~common/ui/MenuOption'
 
-import { useAtom } from 'jotai/react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import Header from '~common/Header'
@@ -19,7 +19,9 @@ import chapterToReference from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 import { markAsRead } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
-import { defaultBibleAtom } from '../../../state/tabs'
+import { setDefaultBibleVersion } from '~redux/modules/user'
+import { useDefaultBibleVersion } from '../../../state/useDefaultBibleVersion'
+import { BibleTab } from '../../../state/tabs'
 import ParamsModal from './ParamsModal'
 import PauseText from './PauseText'
 import ReadButton from './ReadButton'
@@ -53,9 +55,31 @@ const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps,
     (state: RootState) =>
       state.plan.ongoingPlans.find(oP => oP.id === planId)?.readingSlices[id] === 'Completed'
   )
-  const [bible] = useAtom(defaultBibleAtom)
+  const version = useDefaultBibleVersion()
   const { openVersionSelector } = useBookAndVersionSelector()
-  const { selectedVersion: version } = bible.data
+
+  // Actions that dispatch to Redux for changing default version
+  const versionActions = useMemo(
+    () => ({
+      setSelectedVersion: (v: string) => dispatch(setDefaultBibleVersion(v)),
+      setParallelVersion: () => {}, // Not used in plans
+    }),
+    [dispatch]
+  )
+
+  // Minimal data required for version selector
+  const versionData: BibleTab['data'] = useMemo(
+    () => ({
+      selectedVersion: version,
+      parallelVersions: [],
+      selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
+      selectedChapter: 1,
+      selectedVerse: 1,
+      focusVerses: undefined,
+      tab: 'bible',
+    }),
+    [version]
+  )
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id, planId }))
@@ -127,8 +151,9 @@ const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps,
                   </Box>
                 </MenuOption>
                 <MenuOption
-                  // @ts-ignore
-                  onSelect={() => openVersionSelector(defaultBibleAtom)}
+                  onSelect={() =>
+                    openVersionSelector({ actions: versionActions, data: versionData })
+                  }
                 >
                   <Box row alignItems="center">
                     <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>

@@ -13,8 +13,6 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner-native'
 
-import { useAtomValue } from 'jotai/react'
-import { selectAtom } from 'jotai/vanilla/utils'
 import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import extractFirstName from '~helpers/extractFirstName'
@@ -23,7 +21,8 @@ import useLogin from '~helpers/useLogin'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { setNotificationVOD } from '~redux/modules/user'
-import { BibleTab, defaultBibleAtom, VersionCode } from '../../state/tabs'
+import { VersionCode } from '../../state/tabs'
+import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { getDayOfTheYear } from './getDayOfTheYear'
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
@@ -61,13 +60,11 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   return verseOfTheDay
 }
 
-const selectorVersion = (atom: BibleTab) => atom.data.selectedVersion
-
 export const useVerseOfTheDay = (addDay: number) => {
   const { user } = useLogin()
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const version = useAtomValue(selectAtom(defaultBibleAtom, selectorVersion))
+  const version = useDefaultBibleVersion()
 
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay

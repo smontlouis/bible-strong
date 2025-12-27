@@ -4,7 +4,6 @@ import React, { createContext, useContext, useRef, useState, useCallback, useEff
 import {
   BibleTab,
   BibleTabActions,
-  defaultBibleAtom,
   useBibleTabActions,
 } from '../../../state/tabs'
 import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'

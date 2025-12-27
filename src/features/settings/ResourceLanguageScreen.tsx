@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ScrollView from '~common/ui/ScrollView'
 import Border from '~common/ui/Border'
-import { resetCompareVersion } from '~redux/modules/user'
+import { resetCompareVersion, setDefaultBibleVersion } from '~redux/modules/user'
 import {
   resourcesLanguageAtom,
   resetAllResourcesLanguage,
@@ -19,7 +19,6 @@ import { TouchableOpacity, StyleSheet } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
-import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
 
 // Resource configuration for display
 // Note: MHY is excluded because it only exists in French
@@ -143,7 +142,6 @@ const ResourceLanguageScreen = ({}: StackScreenProps<MainStackProps, 'ResourceLa
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
   const theme = useTheme()
-  const actions = useBibleTabActions(defaultBibleAtom)
 
   const [resourcesLanguages, setResourcesLanguages] = useAtom(resourcesLanguageAtom)
   const currentAppLang = i18n.language as ResourceLanguage
@@ -167,7 +165,7 @@ const ResourceLanguageScreen = ({}: StackScreenProps<MainStackProps, 'ResourceLa
 
     // Change default Bible version
     const defaultVersion = lang === 'fr' ? 'LSG' : 'KJV'
-    actions.setSelectedVersion(defaultVersion)
+    dispatch(setDefaultBibleVersion(defaultVersion))
     dispatch(resetCompareVersion(defaultVersion))
   }
 
