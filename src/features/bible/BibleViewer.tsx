@@ -209,14 +209,17 @@ const BibleViewer = ({
   )
 
   useEffect(() => {
-    // Settimeout ?
+    // Don't load verses if onboarding is still in progress
+    if (isOnboardingRequired !== false) {
+      return
+    }
     loadVerses().catch(e => {
       console.log('[Bible] Error loading verses:', e)
       setError(true)
       setIsLoading(false)
     })
     actions.clearSelectedVerses()
-  }, [book, chapter, version, JSON.stringify(parallelVersions)])
+  }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingRequired])
 
   useEffect(() => {
     ;(async () => {

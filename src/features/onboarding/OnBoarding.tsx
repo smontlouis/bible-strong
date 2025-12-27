@@ -1,12 +1,13 @@
 import styled from '@emotion/native'
-import { useSetAtom } from 'jotai/react'
-import React, { useEffect, useState } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
+import React, { useEffect } from 'react'
 import Modal from 'react-native-modal'
+import { useDispatch } from 'react-redux'
 import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
 
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import { defaultBibleAtom, useBibleTabActions } from '../../state/tabs'
+import { setDefaultBibleVersion } from '~redux/modules/user'
 import { isOnboardingRequiredAtom } from './atom'
 import DownloadResources from './DownloadResources'
 import OnBoardingSlides from './OnBoardingSlides'
@@ -22,40 +23,43 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
 
 const useCheckMandatoryVersions = () => {
   const isFR = useLanguage()
-  const [isFirstTime, setFirstTime] = useState(false)
+  const dispatch = useDispatch()
   const setIsOnboardingRequired = useSetAtom(isOnboardingRequiredAtom)
 
-  const actions = useBibleTabActions(defaultBibleAtom)
   useEffect(() => {
     ;(async () => {
-      const lsgNeedsDownload = await getIfVersionNeedsDownload(isFR ? 'LSG' : 'KJV')
+      try {
+        const lsgNeedsDownload = await getIfVersionNeedsDownload(isFR ? 'LSG' : 'KJV')
 
-      if (lsgNeedsDownload) {
-        console.log('[Onboarding] Needs download, open onboarding.')
+        if (lsgNeedsDownload) {
+          console.log('[Onboarding] Needs download, open onboarding.')
+          setIsOnboardingRequired(true)
+          dispatch(setDefaultBibleVersion(isFR ? 'LSG' : 'KJV'))
+          deleteAllDatabases()
+        } else {
+          setIsOnboardingRequired(false)
+        }
+      } catch (error) {
+        console.error('[Onboarding] Error checking version:', error)
+        // On error, assume onboarding is required to be safe
         setIsOnboardingRequired(true)
-        actions.setSelectedVersion(isFR ? 'LSG' : 'KJV')
-        deleteAllDatabases()
-        setFirstTime(true)
-      } else {
-        setIsOnboardingRequired(false)
-        setFirstTime(false)
+        dispatch(setDefaultBibleVersion(isFR ? 'LSG' : 'KJV'))
       }
     })()
-  }, [isFR])
-
-  return { isFirstTime, setFirstTime }
+  }, [isFR, dispatch])
 }
 
 const OnBoarding = () => {
   const [step, setStep] = React.useState<number>(0)
-  const { isFirstTime, setFirstTime } = useCheckMandatoryVersions()
+  const isOnboardingRequired = useAtomValue(isOnboardingRequiredAtom)
+  useCheckMandatoryVersions()
 
   return (
     // @ts-ignore
-    <StylizedModal isVisible={isFirstTime}>
+    <StylizedModal isVisible={isOnboardingRequired === true}>
       {step === 0 && <OnBoardingSlides setStep={setStep} />}
       {step === 1 && <SelectResources setStep={setStep} />}
-      {step === 2 && <DownloadResources setFirstTime={setFirstTime} />}
+      {step === 2 && <DownloadResources />}
     </StylizedModal>
   )
 }

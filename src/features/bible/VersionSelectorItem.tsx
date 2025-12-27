@@ -9,6 +9,7 @@ import { dbManager } from '~helpers/sqlite'
 
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
+import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
@@ -18,6 +19,7 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
+import { isOnboardingRequiredAtom } from '~features/onboarding/atom'
 import { RootState } from '~redux/modules/reducer'
 import { setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
@@ -90,6 +92,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
   const [isLoading, setIsLoading] = React.useState(false)
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
+  const isOnboardingRequired = useAtomValue(isOnboardingRequiredAtom)
 
   React.useEffect(() => {
     ;(async () => {
@@ -104,7 +107,7 @@ const VersionSelectorItem = ({ version, isSelected, onChange, isParameters, shar
       setVersionNeedsDownload(v)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isOnboardingRequired]) // Re-check when onboarding completes
 
   const calculateProgress: FileSystem.DownloadProgressCallback = ({ totalBytesWritten }) => {
     const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
