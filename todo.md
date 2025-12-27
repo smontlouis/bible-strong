@@ -12,9 +12,5 @@
 - [ ] insérer un audio
 - [ ] Parcours spirituel
 
-- GROS PROBLEME SUR EXPO 54
-
-ANDROID
-
-- replace all contextmenu ?
-- issue with scrollview in selectedversesmodal
+- new tab design
+- tab design

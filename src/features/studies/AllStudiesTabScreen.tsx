@@ -18,6 +18,7 @@ import { updateStudy } from '~redux/modules/user'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '~common/types'
+import { useTabContext } from '~features/app-switcher/context/TabContext'
 import generateUUID from '~helpers/generateUUID'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
@@ -27,11 +28,13 @@ import StudySettingsModal from './StudySettingsModal'
 type StudiesScreenProps = {
   hasBackButton?: boolean
   navigation: StackNavigationProp<MainStackProps>
+  onStudySelect?: (studyId: string) => void
 }
 
-const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
+const StudiesScreen = ({ hasBackButton, navigation, onStudySelect }: StudiesScreenProps) => {
   const { t } = useTranslation()
   const { isLogged } = useLogin()
+  const { isInTab } = useTabContext()
   const dispatch = useDispatch()
   const r = useMediaQueriesArray()
 
@@ -55,6 +58,19 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
     renameModalRef.current?.present()
   }, [])
 
+  const onStudyPress = useCallback(
+    (studyId: string) => {
+      if (isInTab && onStudySelect) {
+        onStudySelect(studyId)
+      } else {
+        navigation.navigate('EditStudy', {
+          studyId,
+        })
+      }
+    },
+    [isInTab, onStudySelect, navigation]
+  )
+
   const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
   const studies = useSelector(
     (state: RootState) => Object.values(state.user.bible.studies),
@@ -65,16 +81,13 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
     pendingStudyId ? state.user.bible.studies[pendingStudyId] : null
   )
 
-  // Navigate to the edit study screen when a new study is created
+  // Open the study when a new study is created
   React.useEffect(() => {
     if (pendingStudyId && pendingStudy) {
-      navigation.navigate('EditStudy', {
-        canEdit: true,
-        studyId: pendingStudyId,
-      })
+      onStudyPress(pendingStudyId)
       setPendingStudyId(null)
     }
-  }, [pendingStudy, pendingStudyId])
+  }, [pendingStudy, pendingStudyId, onStudyPress])
 
   const filteredStudies = studies.filter(s =>
     selectedChip ? s.tags && s.tags[selectedChip.id] : true
@@ -106,6 +119,7 @@ const StudiesScreen = ({ hasBackButton, navigation }: StudiesScreenProps) => {
               study={item}
               setStudySettings={openStudySettings}
               navigation={navigation}
+              onPress={onStudyPress}
             />
           )}
         />

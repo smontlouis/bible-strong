@@ -3,6 +3,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useMemo } from 'react'
 import { Image, StyleSheet } from 'react-native'
 import { FadeIn, LinearTransition, ZoomOut } from 'react-native-reanimated'
+import Color from 'color'
 
 import { useTheme } from '@emotion/react'
 import { selectAtom } from 'jotai/vanilla/utils'
@@ -13,6 +14,7 @@ import { TabItem } from '../../../state/tabs'
 import getIconByTabType from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
+import { LinearGradient } from 'expo-linear-gradient'
 
 interface TabPreviewProps {
   index: number
@@ -48,7 +50,7 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
       style={boxStyles}
       marginBottom={GAP}
       width={TAB_PREVIEW_WIDTH}
-      height={TAB_PREVIEW_HEIGHT + TEXTBOX_HEIGHT}
+      height={TAB_PREVIEW_HEIGHT}
       onPress={onOpen}
       activeOpacity={0.8}
       {...props}
@@ -82,10 +84,44 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
               source={{ uri: `data:image/png;base64,${base64Preview}` }}
             />
           )}
-          <Box center width={80} height={80} borderRadius={40} backgroundColor="lightGrey">
+          <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">
             <Box>{getIconByTabType(type, 30)}</Box>
           </Box>
+          <LinearGradient
+            start={[0, 0]}
+            end={[0, 1]}
+            style={{
+              height: 60,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+            }}
+            colors={[
+              `${Color(theme.colors.reverse).alpha(1).string()}`,
+              `${Color(theme.colors.reverse).alpha(0).string()}`,
+            ]}
+          />
         </>
+
+        <AnimatedTouchableBox
+          style={textStyles}
+          row
+          alignItems="center"
+          overflow="visible"
+          position="absolute"
+          top={0}
+          left={0}
+          right={40}
+          height={40}
+          pl={14}
+          pr={5}
+        >
+          {getIconByTabType(type, 16)}
+          <Title tabAtom={tabAtom} />
+        </AnimatedTouchableBox>
 
         {isRemovable && (
           <AnimatedTouchableBox
@@ -105,17 +141,6 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
           </AnimatedTouchableBox>
         )}
       </AnimatedBox>
-      <AnimatedTouchableBox
-        style={textStyles}
-        marginTop={10}
-        row
-        alignItems="center"
-        justifyContent="center"
-        overflow="visible"
-      >
-        {getIconByTabType(type, 16)}
-        <Title tabAtom={tabAtom} />
-      </AnimatedTouchableBox>
     </AnimatedTouchableBox>
   )
 }

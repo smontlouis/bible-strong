@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useFocusEffect } from '@react-navigation/native'
 import { StackScreenProps } from '@react-navigation/stack'
-import { useSetAtom } from 'jotai/react'
+import produce from 'immer'
+import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleValue } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
@@ -21,6 +22,29 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 
 type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
   studyAtom?: PrimitiveAtom<StudyTab>
+}
+
+// Component to update tab title when study title changes
+const TabTitleUpdater = ({
+  studyAtom,
+  title,
+}: {
+  studyAtom: PrimitiveAtom<StudyTab>
+  title: string
+}) => {
+  const [, setStudyTab] = useAtom(studyAtom)
+
+  useEffect(() => {
+    if (title) {
+      setStudyTab(
+        produce(draft => {
+          draft.title = title
+        })
+      )
+    }
+  }, [title, setStudyTab])
+
+  return null
 }
 
 const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudyScreenProps) => {
@@ -73,6 +97,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
 
   return (
     <Container>
+      {studyAtom && <TabTitleUpdater studyAtom={studyAtom} title={currentStudy.title} />}
       <EditStudyHeader
         isReadOnly={isReadOnly}
         hasBackButton={hasBackButton}

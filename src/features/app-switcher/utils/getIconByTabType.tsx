@@ -27,6 +27,8 @@ const getIconByTabType = (type: TabItem['type'], size = 14) => {
       return <NaveIcon width={size} height={size} />
     case 'study':
       return <FeatherIcon name="feather" size={size} />
+    case 'notes':
+      return <FeatherIcon name="file-text" size={size} />
     case 'new':
       return <FeatherIcon name="plus" size={size} />
     default:

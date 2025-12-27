@@ -25,6 +25,7 @@ import MenuOption from '~common/ui/MenuOption'
 import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import orderVerses from '~helpers/orderVerses'
 import { timeout } from '~helpers/timeout'
@@ -102,10 +103,25 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   const currentNote = useCurrentNote({ noteVerses })
   const reference = verseToReference(noteVerses)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const openInNewTab = useOpenInNewTab()
 
   const close = useCallback(() => {
     ref?.current?.dismiss()
   }, [ref])
+
+  const openNoteInNewTab = useCallback(() => {
+    if (!currentNote?.id) return
+    close()
+    setTimeout(() => {
+      openInNewTab({
+        id: `notes-${Date.now()}`,
+        title: t('Notes'),
+        isRemovable: true,
+        type: 'notes',
+        data: { noteId: currentNote.id },
+      })
+    }, 300)
+  }, [currentNote?.id, close, openInNewTab, t])
 
   useEffect(() => {
     if (noteVerses) {
@@ -212,6 +228,12 @@ ${currentNote?.description}
                       <Box row alignItems="center">
                         <FeatherIcon name="tag" size={15} />
                         <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                      </Box>
+                    </MenuOption>
+                    <MenuOption onSelect={openNoteInNewTab}>
+                      <Box row alignItems="center">
+                        <FeatherIcon name="external-link" size={15} />
+                        <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
                       </Box>
                     </MenuOption>
                     <MenuOption onSelect={() => deleteNoteFunc(currentNote?.id!)}>

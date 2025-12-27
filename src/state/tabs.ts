@@ -106,6 +106,13 @@ export interface StudyTab extends TabBase {
   }
 }
 
+export interface NotesTab extends TabBase {
+  type: 'notes'
+  data: {
+    noteId?: string // undefined = list, defined = detail
+  }
+}
+
 export interface NewTab extends TabBase {
   type: 'new'
   data: {}
@@ -129,6 +136,7 @@ export type TabItem =
   | NaveTab
   | DictionaryTab
   | StudyTab
+  | NotesTab
   | CommentaryTab
   | NewTab
 
@@ -137,6 +145,7 @@ export const tabTypes = [
   'search',
   'compare',
   'study',
+  'notes',
   'strongs',
   'naves',
   'dictionaries',
@@ -234,6 +243,12 @@ export const getDefaultData = <T extends TabItem>(
     case 'study': {
       return {
         title: i18n.t('Études'),
+        data: {},
+      }
+    }
+    case 'notes': {
+      return {
+        title: i18n.t('Notes'),
         data: {},
       }
     }

@@ -27,14 +27,15 @@ const StudyLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   margin: 10,
 }))
 
-type StudyItemProps = {
+export type StudyItemProps = {
   study: Study
   theme: Theme
   setStudySettings?: any
   navigation: any
+  onPress?: (studyId: string) => void
 }
 
-const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProps) => {
+const StudyItem = ({ study, theme, setStudySettings, navigation, onPress }: StudyItemProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
 
@@ -48,12 +49,13 @@ const StudyItem = ({ study, theme, setStudySettings, navigation }: StudyItemProp
       <StudyLink
         // @ts-ignore
         key={study.id}
-        // @ts-ignore
-        route="EditStudy"
-        // @ts-ignore
-        params={{ studyId: study.id }}
-        // @ts-ignore
-        navigation={navigation}
+        {...(onPress
+          ? { onPress: () => onPress(study.id) }
+          : {
+              route: 'EditStudy',
+              params: { studyId: study.id },
+              navigation,
+            })}
       >
         <Box
           flex

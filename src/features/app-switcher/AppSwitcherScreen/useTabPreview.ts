@@ -164,16 +164,16 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   const textStyles = useAnimatedStyle(() => {
     if (activeTabPreview.index.value === index) {
       return {
-        top: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [0, -activeTabPreview.top.value]
-        ),
-        left: interpolate(
-          activeTabPreview.animationProgress.value,
-          [0, 1],
-          [0, -activeTabPreview.left.value]
-        ),
+        // top: interpolate(
+        //   activeTabPreview.animationProgress.value,
+        //   [0, 1],
+        //   [0, -activeTabPreview.top.value]
+        // ),
+        // left: interpolate(
+        //   activeTabPreview.animationProgress.value,
+        //   [0, 1],
+        //   [0, -activeTabPreview.left.value]
+        // ),
         opacity: interpolate(
           activeTabPreview.animationProgress.value,
           [0, 1],

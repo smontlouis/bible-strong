@@ -1,43 +1,34 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
+import produce from 'immer'
+import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
 import Modal from '~common/Modal'
+import books from '~assets/bible_versions/books-desc'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { deleteNote } from '~redux/modules/user'
-import books from '~assets/bible_versions/books-desc'
+import { NotesTab } from '~state/tabs'
 
 type Props = {
   ref?: React.RefObject<BottomSheetModal | null>
   noteId: string | null
   onClosed?: () => void
+  notesAtom: PrimitiveAtom<NotesTab>
 }
 
-const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
+const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const openInNewTab = useOpenInNewTab()
+  const [, setNotesTab] = useAtom(notesAtom)
 
   const close = useCallback(() => {
     ref?.current?.dismiss()
   }, [ref])
-
-  const openNoteInNewTab = () => {
-    if (!noteId) return
-    close()
-    setTimeout(() => {
-      openInNewTab({
-        id: `notes-${Date.now()}`,
-        title: t('Notes'),
-        isRemovable: true,
-        type: 'notes',
-        data: { noteId },
-      })
-    }, 300)
-  }
 
   const deleteNoteConfirmation = () => {
     if (!noteId) return
@@ -70,8 +61,33 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
     }, 300)
   }
 
+  const openNoteInNewTab = () => {
+    if (!noteId) return
+    close()
+    setTimeout(() => {
+      openInNewTab({
+        id: `notes-${Date.now()}`,
+        title: t('Notes'),
+        isRemovable: true,
+        type: 'notes',
+        data: { noteId },
+      })
+    }, 300)
+  }
+
+  const openNoteDetail = () => {
+    if (!noteId) return
+    close()
+    setNotesTab(
+      produce(draft => {
+        draft.data.noteId = noteId
+      })
+    )
+  }
+
   return (
     <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
+      <Modal.Item onPress={openNoteDetail}>{t('Voir la note')}</Modal.Item>
       <Modal.Item onPress={navigateToBible}>{t('Voir dans la Bible')}</Modal.Item>
       <Modal.Item onPress={openNoteInNewTab}>{t('tab.openInNewTab')}</Modal.Item>
       <Modal.Item color="quart" onPress={deleteNoteConfirmation}>

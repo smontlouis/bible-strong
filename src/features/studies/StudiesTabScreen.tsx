@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import withLoginModal from '~common/withLoginModal'
 
+import produce from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -9,7 +10,7 @@ import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
 import { MainStackProps } from '~navigation/type'
-import { CommonActions, RouteProp } from '@react-navigation/native'
+import { RouteProp } from '@react-navigation/native'
 
 interface StudiesTabScreenProps {
   navigation: StackNavigationProp<MainStackProps, 'EditStudy'>
@@ -18,15 +19,32 @@ interface StudiesTabScreenProps {
 }
 
 const StudiesTabScreen = ({ studyAtom, navigation, route }: StudiesTabScreenProps) => {
-  const [studyTab] = useAtom(studyAtom)
+  const [studyTab, setStudyTab] = useAtom(studyAtom)
 
   const {
     data: { studyId },
     hasBackButton,
   } = studyTab
 
+  const onStudySelect = useCallback(
+    (id: string) => {
+      setStudyTab(
+        produce(draft => {
+          draft.data.studyId = id
+        })
+      )
+    },
+    [setStudyTab]
+  )
+
   if (!studyId) {
-    return <AllStudiesTabScreen hasBackButton={hasBackButton} navigation={navigation} />
+    return (
+      <AllStudiesTabScreen
+        hasBackButton={hasBackButton}
+        navigation={navigation}
+        onStudySelect={onStudySelect}
+      />
+    )
   }
 
   console.log('[StudiesTabScreen] studyId', studyId)
