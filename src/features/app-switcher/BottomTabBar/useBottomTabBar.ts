@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import {
   SharedValue,
@@ -9,7 +9,7 @@ import {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePrevious } from '~helpers/usePrevious'
-import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
+import { appSwitcherModeAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
@@ -41,7 +41,6 @@ const useBottomTabBar = () => {
   const [appSwitcherMode, setAppSwitcherMode] = useAtom(appSwitcherModeAtom)
   const prevAppSwitcherMode = usePrevious(appSwitcherMode)
 
-  const tabsCount = useAtomValue(tabsCountAtom)
   const { expandTab } = useTabAnimations()
   const { activeTabPreview } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
@@ -154,7 +153,6 @@ const useBottomTabBar = () => {
     onPress,
     listStyles,
     viewStyles,
-    tabsCount,
   }
 }
 

@@ -9,6 +9,7 @@ Bible Strong is a React Native application for Bible study in French, featuring 
 ## Essential Commands
 
 ### Development
+
 ```bash
 # Start development server
 yarn start
@@ -19,6 +20,7 @@ yarn ios      # Run on iOS device/simulator
 ```
 
 ### Building
+
 ```bash
 # Android builds (local)
 yarn build:android:dev      # Development build
@@ -34,6 +36,7 @@ yarn build:ios:prod         # Production build
 ```
 
 ### Code Quality
+
 ```bash
 # Run linting
 yarn lint
@@ -46,6 +49,7 @@ yarn i18n
 ```
 
 ### Maintenance
+
 ```bash
 # Clean and reinstall dependencies
 yarn clean
@@ -54,6 +58,7 @@ yarn clean
 ## Architecture
 
 ### Directory Structure
+
 - `src/features/` - Feature-based modules (bible, studies, plans, search, timeline, etc.)
 - `src/common/` - Shared UI components and utilities
 - `src/redux/` - Redux store configuration and modules
@@ -82,6 +87,7 @@ yarn clean
 ### Environment Configuration
 
 The app uses environment-based builds with different Firebase configurations:
+
 - Development: `.env.development`
 - Staging: `.env.staging`
 - Production: `.env.production`
@@ -121,16 +127,65 @@ The app uses environment-based builds with different Firebase configurations:
 ## Common Tasks
 
 ### Adding a New Bible Version
+
 1. Add the SQLite database file to `src/assets/bible_versions/`
 2. Update the version list in the appropriate configuration
 3. Test offline functionality
 
 ### Modifying Bible Display
+
 - Edit files in `src/features/bible/bibleWebView/src/`
 - Run the development server to see changes
 - Test text selection, highlighting, and note-taking features
 
 ### Working with Themes
+
 - Theme definitions are in `src/themes/`
 - User theme preferences are stored in Redux under `user.bible.settings.theme`
 - Use the `useTheme` hook to access current theme colors
+
+## Reanimated 4 Best Practices
+
+Le projet utilise **React Native Reanimated 4.x**. Voici les bonnes pratiques à suivre :
+
+### Accesseurs SharedValue
+
+Pour compatibilité avec React Compiler, utiliser `.get()` et `.set()` au lieu de `.value` :
+
+```typescript
+// ❌ Ancienne API (encore supportée mais non recommandée)
+const sv = useSharedValue(0)
+sv.value = 100
+console.log(sv.value)
+
+// ✅ Nouvelle API recommandée (compatible React Compiler)
+const sv = useSharedValue(0)
+sv.set(100)
+sv.set(v => v + 50)  // avec callback
+console.log(sv.get())
+```
+
+### useAnimatedStyle
+
+```typescript
+const animatedStyle = useAnimatedStyle(() => {
+  return {
+    opacity: interpolate(scrollX.get(), [0, 100], [0, 1], Extrapolation.CLAMP),
+    transform: [{ translateX: scrollX.get() }],
+  }
+})
+```
+
+### Règles importantes
+
+1. **Ne jamais lire/modifier les SharedValues pendant le render** - utiliser callbacks (`useAnimatedStyle`, `useEffect`)
+2. **Éviter les mutations dans `useAnimatedStyle`** - peut causer des boucles infinies
+3. **Les styles animés ont priorité** sur les styles statiques
+4. **Utiliser `interpolate` avec `Extrapolation.CLAMP`** pour limiter les valeurs
+5. **Préférer les propriétés non-layout** (`transform`, `opacity`) aux propriétés layout (`top`, `width`)
+
+### Documentation
+
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.

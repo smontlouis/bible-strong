@@ -1,8 +1,7 @@
-import { useTranslation } from 'react-i18next'
 import { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleValue } from 'src/state/app'
-import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
+import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import AddTabButton from './Buttons/AddTabButton'
@@ -11,6 +10,7 @@ import HomeButton from './Buttons/HomeButton'
 import MenuButton from './Buttons/MenuButton'
 import SearchButton from './Buttons/SearchButton'
 import TabButton from './Buttons/TabButton'
+import GroupTitleButton from './GroupTitleButton'
 import useBottomTabBar from './useBottomTabBar'
 
 type BottomTabBarProps = {
@@ -19,8 +19,7 @@ type BottomTabBarProps = {
 }
 
 const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
-  const { onPress, listStyles, viewStyles, tabsCount } = useBottomTabBar()
-  const { t } = useTranslation()
+  const { onPress, listStyles, viewStyles } = useBottomTabBar()
   const insets = useSafeAreaInsets()
   const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
 
@@ -77,11 +76,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         key="list"
       >
         <AddTabButton />
-        <Box flex center>
-          <Text color={'default'}>
-            {tabsCount} {t('tabs.tab', { count: tabsCount })}
-          </Text>
-        </Box>
+        <GroupTitleButton />
         <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
           <Text bold>OK</Text>
         </TouchableBox>

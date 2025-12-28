@@ -2,6 +2,7 @@ import { bindStyles } from '~helpers/styledProps'
 import styled from '@emotion/native'
 import { Theme } from '~themes'
 import { TextProps as BaseTextProps } from 'react-native'
+import Animated from 'react-native-reanimated'
 
 export interface TextProps extends BaseTextProps {
   children?: React.ReactNode
@@ -190,5 +191,7 @@ const Text = styled.Text((props: TextProps) => {
     }),
   }
 })
+
+export const AnimatedText = Animated.createAnimatedComponent(Text)
 
 export default Text

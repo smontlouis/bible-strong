@@ -6,8 +6,13 @@ import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
 import books, { Book } from '~assets/bible_versions/books-desc'
 import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
+import { storage } from '~helpers/storage'
 import { versions } from '~helpers/bibleVersions'
 import i18n, { getLangIsFr } from '~i18n'
+
+// ============================================================================
+// TAB TYPES
+// ============================================================================
 
 export type TabBase = {
   id: string
@@ -152,6 +157,26 @@ export const tabTypes = [
   'commentary',
 ] as const
 
+// ============================================================================
+// TAB GROUP TYPES
+// ============================================================================
+
+export interface TabGroup {
+  id: string
+  name: string
+  isDefault: boolean
+  tabs: TabItem[]
+  activeTabIndex: number
+  createdAt: number
+}
+
+export const MAX_TAB_GROUPS = 5
+export const DEFAULT_GROUP_ID = 'default-group'
+
+// ============================================================================
+// DEFAULT FACTORIES
+// ============================================================================
+
 export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   id: `bible-${Date.now()}`,
   isRemovable: true,
@@ -174,6 +199,15 @@ export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
     isSelectionMode: undefined,
     isReadOnly: false,
   },
+})
+
+export const createDefaultGroup = (version?: VersionCode): TabGroup => ({
+  id: DEFAULT_GROUP_ID,
+  name: i18n.t('Principal'),
+  isDefault: true,
+  tabs: [getDefaultBibleTab(version)],
+  activeTabIndex: 0,
+  createdAt: 0,
 })
 
 export const getDefaultData = <T extends TabItem>(
@@ -265,12 +299,9 @@ export const getDefaultData = <T extends TabItem>(
   }
 }
 
-const maxCachedTabs = 5
-
-export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
-  'activeTabIndexAtomOriginal',
-  0
-)
+// ============================================================================
+// MIGRATIONS
+// ============================================================================
 
 // Migration function to make all existing tabs removable
 const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
@@ -291,24 +322,155 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
   })
 }
 
-export const tabsAtom = atomWithAsyncStorage<TabItem[]>('tabsAtom', [getDefaultBibleTab()], {
-  migrate: migrateTabsToRemovable,
+// Migration function for tab groups
+const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
+  // If already valid tab groups structure with real data (not just default)
+  if (groups.length > 0 && groups[0].tabs !== undefined && groups[0].tabs.length > 0) {
+    // Check if this is actual migrated data (not just the default group with default tab)
+    const firstTab = groups[0].tabs[0]
+    const isDefaultData =
+      groups.length === 1 &&
+      groups[0].id === DEFAULT_GROUP_ID &&
+      groups[0].tabs.length === 1 &&
+      firstTab?.type === 'bible' &&
+      firstTab?.id?.startsWith('bible-')
+
+    if (!isDefaultData) {
+      // Real data exists, just apply tab migrations
+      return groups.map(group => ({
+        ...group,
+        tabs: migrateTabsToRemovable(group.tabs),
+      }))
+    }
+  }
+
+  // Try to migrate from old tabsAtom storage key
+  try {
+    const oldTabsJson = storage.getString('tabsAtom')
+    const oldActiveIndexJson = storage.getString('activeTabIndexAtomOriginal')
+
+    if (oldTabsJson) {
+      const oldTabs = JSON.parse(oldTabsJson) as TabItem[]
+      if (oldTabs.length > 0) {
+        const activeIndex = oldActiveIndexJson ? JSON.parse(oldActiveIndexJson) : 0
+
+        console.log('[TabGroups] Migrating', oldTabs.length, 'tabs from old storage')
+
+        return [
+          {
+            id: DEFAULT_GROUP_ID,
+            name: i18n.t('Principal'),
+            isDefault: true,
+            tabs: migrateTabsToRemovable(oldTabs),
+            activeTabIndex: Math.min(activeIndex, oldTabs.length - 1),
+            createdAt: 0,
+          },
+        ]
+      }
+    }
+  } catch (e) {
+    console.error('[TabGroups] Migration from old storage failed:', e)
+  }
+
+  // Fallback: create default group
+  return [createDefaultGroup()]
+}
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const maxCachedTabs = 5
+
+// ============================================================================
+// CORE GROUP ATOMS
+// ============================================================================
+
+// Main groups atom with persistence
+export const tabGroupsAtom = atomWithAsyncStorage<TabGroup[]>(
+  'tabGroupsAtom',
+  [createDefaultGroup()],
+  { migrate: migrateTabGroups }
+)
+
+// Active group ID (persisted)
+export const activeGroupIdAtom = atomWithAsyncStorage<string>('activeGroupIdAtom', DEFAULT_GROUP_ID)
+
+// Get current active group (derived)
+export const activeGroupAtom = atom(get => {
+  const groups = get(tabGroupsAtom)
+  const activeId = get(activeGroupIdAtom)
+  return groups.find(g => g.id === activeId) || groups[0]
 })
 
+// Number of groups
+export const groupsCountAtom = atom(get => get(tabGroupsAtom).length)
+
+// ============================================================================
+// BACKWARD COMPATIBLE ATOMS (for existing consumers)
+// ============================================================================
+
+// Get/set tabs for current group - this replaces the old tabsAtom
+// Supports both direct values and updater functions for backward compatibility
+export const tabsAtom = atom(
+  get => {
+    const activeGroup = get(activeGroupAtom)
+    return activeGroup.tabs
+  },
+  (get, set, newTabsOrUpdater: TabItem[] | ((prev: TabItem[]) => TabItem[])) => {
+    const groups = get(tabGroupsAtom)
+    const activeId = get(activeGroupIdAtom)
+    const currentTabs = get(activeGroupAtom).tabs
+
+    // Support updater function pattern: setTabs(prev => [...prev, newTab])
+    const newTabs =
+      typeof newTabsOrUpdater === 'function' ? newTabsOrUpdater(currentTabs) : newTabsOrUpdater
+
+    set(
+      tabGroupsAtom,
+      groups.map(g => (g.id === activeId ? { ...g, tabs: newTabs } : g))
+    )
+  }
+)
+
+// Split atom for fine-grained tab updates
+export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
+
+// Number of tabs in current group
+export const tabsCountAtom = atom(get => get(tabsAtom).length)
+
+// Legacy atom - kept for compatibility but no longer used directly
+export const activeTabIndexAtomOriginal = atomWithAsyncStorage<number>(
+  'activeTabIndexAtomOriginal',
+  0
+)
+
+// Active tab index - now stored in the group
 export const activeTabIndexAtom = atom(
   get => {
+    const activeGroup = get(activeGroupAtom)
     const tabsAtoms = get(tabsAtomsAtom)
-    if (
-      (get(activeTabIndexAtomOriginal) !== 0 && tabsAtoms.length === 1) ||
-      get(activeTabIndexAtomOriginal) > tabsAtoms.length - 1
-    ) {
+
+    // Bounds checking
+    if (activeGroup.activeTabIndex >= tabsAtoms.length) {
+      return Math.max(0, tabsAtoms.length - 1)
+    }
+    if (activeGroup.activeTabIndex < 0) {
       return 0
     }
-    return get(activeTabIndexAtomOriginal)
+    return activeGroup.activeTabIndex
   },
   (get, set, value: number) => {
-    set(activeTabIndexAtomOriginal, value)
+    const groups = get(tabGroupsAtom)
+    const activeId = get(activeGroupIdAtom)
 
+    // Update the active tab index in the group
+    set(
+      tabGroupsAtom,
+      groups.map(g => (g.id === activeId ? { ...g, activeTabIndex: value } : g))
+    )
+
+    // Update cache (existing logic)
     if (value !== -1) {
       const tabsAtoms = get(tabsAtomsAtom)
       if (value >= 0 && value < tabsAtoms.length) {
@@ -323,6 +485,7 @@ export const activeTabIndexAtom = atom(
   }
 )
 
+// Active atom ID (derived)
 export const activeAtomIdAtom = atom(get => {
   const tabsAtoms = get(tabsAtomsAtom)
   const activeTabIndex = get(activeTabIndexAtom)
@@ -335,23 +498,7 @@ export const activeAtomIdAtom = atom(get => {
   return atomId
 })
 
-export const useIsCurrentTab = () => {
-  const activeAtomId = useAtomValue(activeAtomIdAtom)
-
-  return <T>(at: PrimitiveAtom<T>) => {
-    return activeAtomId === at.toString()
-  }
-}
-
-export const useFindTabIndex = (atomId: string) => {
-  const tabsAtoms = useAtomValue(tabsAtomsAtom)
-
-  return tabsAtoms.findIndex(tab => tab.toString() === atomId)
-}
-
-export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
-export const tabsCountAtom = atom(get => get(tabsAtom).length)
-
+// Cached tab IDs (global cache shared across all groups)
 export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
   const activeTabIndex = get(activeTabIndexAtom)
 
@@ -374,12 +521,34 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
   return [tabsAtoms[activeTabIndex].toString()]
 })
 
+// ============================================================================
+// UTILITY FUNCTIONS AND HOOKS
+// ============================================================================
+
+export const useIsCurrentTab = () => {
+  const activeAtomId = useAtomValue(activeAtomIdAtom)
+
+  return <T>(at: PrimitiveAtom<T>) => {
+    return activeAtomId === at.toString()
+  }
+}
+
+export const useFindTabIndex = (atomId: string) => {
+  const tabsAtoms = useAtomValue(tabsAtomsAtom)
+
+  return tabsAtoms.findIndex(tab => tab.toString() === atomId)
+}
+
 export const checkTabType = <Type extends TabItem>(
   tab: TabItem | undefined,
   type: TabItem['type']
 ): tab is Type => {
   return tab?.type === type
 }
+
+// ============================================================================
+// BIBLE TAB ACTIONS
+// ============================================================================
 
 export type BibleTabActions = ReturnType<typeof useBibleTabActions>
 
@@ -685,6 +854,28 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setTitle,
   }
 }
+
+// ============================================================================
+// TAB GROUP ACTIONS
+// ============================================================================
+
+/**
+ * Close all tabs in the current group (replaces with a single default Bible tab)
+ */
+export const closeAllTabsAtom = atom(null, (get, set) => {
+  const groups = get(tabGroupsAtom)
+  const activeId = get(activeGroupIdAtom)
+
+  set(
+    tabGroupsAtom,
+    groups.map(g => (g.id === activeId ? { ...g, tabs: [], activeTabIndex: 0 } : g))
+  )
+  set(cachedTabIdsAtom, [])
+})
+
+// ============================================================================
+// APP SWITCHER MODE
+// ============================================================================
 
 export type AppSwitcherMode = 'list' | 'view'
 export const appSwitcherModeAtom = atom<AppSwitcherMode>('view')

@@ -2,7 +2,13 @@ import produce from 'immer'
 import { atom } from 'jotai/vanilla'
 import { VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
-import { activeTabIndexAtomOriginal, getDefaultBibleTab, tabsAtom } from './tabs'
+import {
+  tabGroupsAtom,
+  activeGroupIdAtom,
+  cachedTabIdsAtom,
+  createDefaultGroup,
+  DEFAULT_GROUP_ID,
+} from './tabs'
 import { makeMutable } from 'react-native-reanimated'
 
 export interface Diff {
@@ -26,8 +32,10 @@ type MultipleTagsModalProps =
 export const multipleTagsModalAtom = atom<MultipleTagsModalProps>(false)
 
 export const resetUserAtomsAtom = atom(null, (get, set) => {
-  set(activeTabIndexAtomOriginal, 0)
-  set(tabsAtom, [getDefaultBibleTab()])
+  // Reset to a single default group with one Bible tab
+  set(tabGroupsAtom, [createDefaultGroup()])
+  set(activeGroupIdAtom, DEFAULT_GROUP_ID)
+  set(cachedTabIdsAtom, [])
 })
 
 type BaseHistoryItem = {

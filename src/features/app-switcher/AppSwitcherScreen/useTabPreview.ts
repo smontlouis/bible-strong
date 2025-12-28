@@ -20,7 +20,7 @@ import useTabConstants from '../utils/useTabConstants'
 
 const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAtom<TabItem> }) => {
   const { t } = useTranslation()
-  const { activeTabPreview, tabPreviews, scrollView } = useAppSwitcherContext()
+  const { activeTabPreview, tabPreviews, scrollView, isInitialMount } = useAppSwitcherContext()
   const measureTabPreview = useMeasureTabPreview()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const { expandTab } = useTabAnimations()
@@ -41,8 +41,9 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   } = useTabConstants()
 
   // On mount, measure the initial tab preview
+  // Only scroll on initial app mount, not when switching groups
   useEffect(() => {
-    if (index === activeTabPreview.index.value) {
+    if (index === activeTabPreview.index.value && isInitialMount.current) {
       ;(async () => {
         await wait(300)
         const { pageX, pageY } = await measureTabPreview(index)
@@ -53,6 +54,9 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
         const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
         // @ts-ignore
         runOnUI(scrollTo)(scrollView.ref, 0, scrollToTop, false)
+
+        // Mark initial mount as complete to prevent scroll on group switches
+        isInitialMount.current = false
       })()
     }
   }, [])

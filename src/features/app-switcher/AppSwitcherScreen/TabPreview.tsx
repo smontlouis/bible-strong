@@ -2,7 +2,7 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useMemo } from 'react'
 import { Image, StyleSheet } from 'react-native'
-import { FadeIn, LinearTransition, ZoomOut } from 'react-native-reanimated'
+import { LinearTransition, ZoomOut } from 'react-native-reanimated'
 import Color from 'color'
 
 import { useTheme } from '@emotion/react'
@@ -44,7 +44,6 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
   return (
     <AnimatedTouchableBox
       layout={LinearTransition}
-      entering={FadeIn}
       exiting={ZoomOut}
       overflow="visible"
       style={boxStyles}

@@ -2,26 +2,19 @@ import { useAtom, useAtomValue } from 'jotai/react'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { BackHandler, useWindowDimensions } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
 
 import { StackScreenProps } from '@react-navigation/stack'
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
-import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
 import { MainStackProps } from '~navigation/type'
 import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import CachedTabScreens from '../CachedTabScreens'
 import { TabContextProvider } from '../context/TabContext'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
-import useTabConstants from '../utils/useTabConstants'
-import { DebugView } from './DebugView'
-import TabPreview from './TabPreview'
-import useAppSwitcher from './useAppSwitcher'
+import TabGroupPager from './TabGroupPager'
 
 type AppSwitcherScreenFuncs = {
   openMenu: () => void
@@ -33,8 +26,6 @@ export const TAB_PREVIEW_SCALE = 0.6
 const DRAWER_WIDTH_PERCENT = 0.95
 const MAX_DRAWER_WIDTH = 450
 
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
-
 const AppSwitcherScreen = ({
   navigation,
   route,
@@ -42,49 +33,11 @@ const AppSwitcherScreen = ({
   openMenu,
 }: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
   const [tabsAtoms] = useAtom(tabsAtomsAtom)
-  const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
-  const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
-  const { scrollView } = useAppSwitcherContext()
-  const insets = useSafeAreaInsets()
 
   return (
     <TabContextProvider>
       <Box flex={1} bg="lightGrey">
-        <AnimatedScrollView
-          ref={scrollView.ref}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingTop: SCREEN_MARGIN + insets.top,
-            paddingLeft: PADDING_HORIZONTAL,
-            paddingRight: PADDING_HORIZONTAL,
-            paddingBottom: TAB_ICON_SIZE + 60,
-            minHeight: '100%',
-          }}
-        >
-          <AnimatedBox
-            overflow="visible"
-            row
-            style={[
-              scrollViewBoxStyle,
-              {
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                justifyContent: 'flex-start',
-              },
-            ]}
-          >
-            {tabsAtoms.map((tabAtom, i) => (
-              <TabPreview
-                key={`${tabAtom}`}
-                index={i}
-                tabAtom={tabAtom}
-                marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
-              />
-            ))}
-            {__DEV__ && <DebugView />}
-          </AnimatedBox>
-        </AnimatedScrollView>
+        <TabGroupPager />
         <CachedTabScreens navigation={navigation} route={route} />
         <TabPreviewCarousel tabsAtoms={tabsAtoms} />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />

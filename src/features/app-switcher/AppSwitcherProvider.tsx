@@ -1,4 +1,4 @@
-import React, { createContext, memo, useContext, useMemo } from 'react'
+import React, { createContext, memo, useContext, useMemo, useRef } from 'react'
 import { ScrollView, View } from 'react-native'
 import { SharedValue, useAnimatedRef, useSharedValue } from 'react-native-reanimated'
 import { useOnceAtoms } from './utils/useOnceAtoms'
@@ -30,6 +30,18 @@ type AppSwitcherContextValues = {
     translateY: SharedValue<number>
     opacity: SharedValue<number>
   }
+  // Tab groups pagination
+  activeGroupIndex: SharedValue<number>
+  groupPager: {
+    ref: React.RefObject<ScrollView | null>
+  }
+  // Create group page
+  createGroupPage: {
+    isFullyVisible: SharedValue<boolean>
+    navigateTo: React.MutableRefObject<(() => void) | null>
+  }
+  // Flag to track initial app mount (for scroll behavior)
+  isInitialMount: React.MutableRefObject<boolean>
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(undefined)
@@ -40,6 +52,7 @@ interface AppSwitcherProviderProps {
 
 export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps) => {
   const scrollViewRef = useAnimatedRef<ScrollView>()
+  const groupPagerRef = useAnimatedRef<ScrollView>()
   const { initialAtomId, initialTabIndex } = useOnceAtoms()
   const memoizedChildren = useMemo(() => children, [])
   const { HEIGHT } = useTabConstants()
@@ -78,6 +91,22 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
     opacity: useSharedValue(0),
   }
 
+  // Tab groups pagination
+  const activeGroupIndex = useSharedValue(0)
+  const groupPager = {
+    ref: groupPagerRef,
+  }
+
+  // Create group page
+  const navigateToCreatePageRef = useRef<(() => void) | null>(null)
+  const createGroupPage = {
+    isFullyVisible: useSharedValue(false),
+    navigateTo: navigateToCreatePageRef,
+  }
+
+  // Flag to track initial app mount (for scroll behavior)
+  const isInitialMount = useRef(true)
+
   const contextValue: AppSwitcherContextValues = {
     isBottomTabBarVisible,
     activeTabPreview,
@@ -85,6 +114,10 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
     scrollView,
     tabPreviews,
     tabPreviewCarousel,
+    activeGroupIndex,
+    groupPager,
+    createGroupPage,
+    isInitialMount,
   }
 
   return (
