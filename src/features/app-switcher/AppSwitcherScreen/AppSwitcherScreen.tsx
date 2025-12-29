@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai/react'
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { BackHandler, useWindowDimensions } from 'react-native'
 
@@ -57,31 +57,31 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
   // SharedValue pour la position: -1 (menu), 0 (centre), 1 (home)
   const position = useSharedValue(0)
 
-  const openMenu = useCallback(() => {
+  const openMenu = () => {
     position.set(withSpring(-1))
     isMenuOpen.current = true
-  }, [position])
+  }
 
-  const closeMenu = useCallback(() => {
+  const closeMenu = () => {
     position.set(withSpring(0))
     isMenuOpen.current = false
-  }, [position])
+  }
 
-  const openHome = useCallback(() => {
+  const openHome = () => {
     position.set(withSpring(1))
     isHomeOpen.current = true
-  }, [position])
+  }
 
-  const closeHome = useCallback(() => {
+  const closeHome = () => {
     position.set(withSpring(0))
     isHomeOpen.current = false
-  }, [position])
+  }
 
   // Not the best, but when adding a new tab, close home drawer
   useEffect(() => {
     closeHome()
     closeMenu()
-  }, [tabsCount, closeHome, closeMenu])
+  }, [tabsCount])
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -99,7 +99,7 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
     })
 
     return () => backHandler.remove()
-  }, [closeHome, closeMenu])
+  }, [])
 
   const containerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: position.get() * drawerWidth }],

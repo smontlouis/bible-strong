@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai/react'
-import React, { memo, useMemo } from 'react'
+import React, { memo } from 'react'
 import { View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import useDynamicRefs from '~helpers/useDynamicRefs'
@@ -41,7 +41,7 @@ const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
 
 const TabScreenRefMemoize = memo((props: TabScreenProps) => {
   const [, setRef] = useDynamicRefs<View>()
-  const ref = useMemo(() => setRef(props.tabAtom.toString()), [])
+  const ref = setRef(props.tabAtom.toString())
 
   return <TabScreen {...props} ref={ref} />
 })

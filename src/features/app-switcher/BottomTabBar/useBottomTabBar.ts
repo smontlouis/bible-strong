@@ -1,4 +1,5 @@
 import { useAtom } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect } from 'react'
 import {
   SharedValue,
@@ -9,7 +10,7 @@ import {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePrevious } from '~helpers/usePrevious'
-import { appSwitcherModeAtom } from '../../../state/tabs'
+import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
@@ -63,7 +64,8 @@ const useBottomTabBar = () => {
   }
 
   useEffect(() => {
-    if (activeTabPreview.index.value === 0 && activeTabPreview.animationProgress.value === 0) {
+    const tabsCount = getDefaultStore().get(tabsCountAtom)
+    if (tabsCount === 0) {
       setAppSwitcherMode('list')
     }
   }, [])

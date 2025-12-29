@@ -579,6 +579,8 @@
   "tabs.deleteGroupMessage": "Tous les onglets de ce groupe seront fermés.",
   "tabs.groupDeleted": "Groupe supprimé",
   "tabs.groupRenamed": "Groupe renommé",
+  "tabs.noTabs": "Aucun onglet",
+  "tabs.create": "Créer un onglet",
 
   "common.create": "Créer",
   "common.cancel": "Annuler",

@@ -1,6 +1,6 @@
-import React, { createContext, memo, useContext, useMemo, useRef } from 'react'
-import { ScrollView, View } from 'react-native'
-import { SharedValue, useAnimatedRef, useSharedValue } from 'react-native-reanimated'
+import React, { createContext, useContext, useRef } from 'react'
+import { ScrollView, useWindowDimensions, View } from 'react-native'
+import { SharedValue, useAnimatedRef, useSharedValue, withSpring } from 'react-native-reanimated'
 import { useOnceAtoms } from './utils/useOnceAtoms'
 import useTabConstants from './utils/useTabConstants'
 
@@ -34,11 +34,13 @@ type AppSwitcherContextValues = {
   activeGroupIndex: SharedValue<number>
   groupPager: {
     ref: React.RefObject<ScrollView | null>
+    translateX: SharedValue<number>
+    scrollX: SharedValue<number>
+    navigateToPage: (pageIndex: number, groupsLength: number) => void
   }
   // Create group page
   createGroupPage: {
     isFullyVisible: SharedValue<boolean>
-    navigateTo: React.MutableRefObject<(() => void) | null>
   }
   // Flag to track initial app mount (for scroll behavior)
   isInitialMount: React.MutableRefObject<boolean>
@@ -50,14 +52,14 @@ interface AppSwitcherProviderProps {
   children: React.ReactNode
 }
 
-export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps) => {
+export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const scrollViewRef = useAnimatedRef<ScrollView>()
   const groupPagerRef = useAnimatedRef<ScrollView>()
   const { initialAtomId, initialTabIndex } = useOnceAtoms()
-  const memoizedChildren = useMemo(() => children, [])
   const { HEIGHT } = useTabConstants()
+  const { width } = useWindowDimensions()
 
-  const tabPreviewRefs = useMemo(() => new Array(100), [])
+  const tabPreviewRefs = useRef(new Array(100)).current
 
   const isBottomTabBarVisible = useSharedValue(1)
 
@@ -81,7 +83,7 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
   }
 
   const activeTabScreen = {
-    opacity: useSharedValue(1),
+    opacity: useSharedValue(initialAtomId ? 1 : 0),
     atomId: useSharedValue(initialAtomId) as SharedValue<string | null>,
   }
 
@@ -93,15 +95,31 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
 
   // Tab groups pagination
   const activeGroupIndex = useSharedValue(0)
+  const pagerTranslateX = useSharedValue(0)
+  const pagerScrollX = useSharedValue(0)
+  const createGroupPageIsFullyVisible = useSharedValue(false)
+
+  const navigateToPage = (pageIndex: number, groupsLength: number) => {
+    const targetX = -pageIndex * width
+    pagerTranslateX.value = withSpring(targetX)
+    pagerScrollX.value = withSpring(-targetX)
+    activeGroupIndex.value = pageIndex
+
+    // Update createGroupPage.isFullyVisible
+    const createPagePosition = groupsLength * width
+    createGroupPageIsFullyVisible.value = -targetX >= createPagePosition - 10
+  }
+
   const groupPager = {
     ref: groupPagerRef,
+    translateX: pagerTranslateX,
+    scrollX: pagerScrollX,
+    navigateToPage,
   }
 
   // Create group page
-  const navigateToCreatePageRef = useRef<(() => void) | null>(null)
   const createGroupPage = {
-    isFullyVisible: useSharedValue(false),
-    navigateTo: navigateToCreatePageRef,
+    isFullyVisible: createGroupPageIsFullyVisible,
   }
 
   // Flag to track initial app mount (for scroll behavior)
@@ -122,10 +140,10 @@ export const AppSwitcherProvider = memo(({ children }: AppSwitcherProviderProps)
 
   return (
     <AppSwitcherContext.Provider value={contextValue}>
-      {memoizedChildren}
+      {children}
     </AppSwitcherContext.Provider>
   )
-})
+}
 
 export const useAppSwitcherContext = () => {
   const context = useContext(AppSwitcherContext)

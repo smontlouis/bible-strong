@@ -1,11 +1,10 @@
-import React, { memo, useRef } from 'react'
+import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import Box, { AnimatedBox, FadingText } from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import PopOverMenu from '~common/PopOverMenu'
-import { useActiveGroup, useRenameGroup } from '../../../state/tabGroups'
+import { useActiveGroup, useRenameGroup, useTabGroups } from '../../../state/tabGroups'
 import { tabsCountAtom } from '../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
 import GroupActionsPopover from './GroupActionsPopover'
@@ -13,21 +12,22 @@ import RenameModal from '~common/RenameModal'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { LinearTransition } from 'react-native-reanimated'
 
-const GroupTitleButton = memo(() => {
+const GroupTitleButton = () => {
   const { t } = useTranslation()
   const activeGroup = useActiveGroup()
+  const groups = useTabGroups()
   const tabsCount = useAtomValue(tabsCountAtom)
   const renameGroup = useRenameGroup()
   const renameSheetRef = useRef<BottomSheetModal>(null)
-  const { createGroupPage } = useAppSwitcherContext()
+  const { groupPager } = useAppSwitcherContext()
 
   const displayName = activeGroup.isDefault
     ? `${tabsCount} ${t('tabs.tab', { count: tabsCount })}`
     : activeGroup.name
 
   const handleOpenCreateGroup = () => {
-    // Navigate to the create group page instead of opening bottom sheet
-    createGroupPage.navigateTo.current?.()
+    // Navigate to the create group page (last page in carousel)
+    groupPager.navigateToPage(groups.length, groups.length)
   }
 
   const handleOpenRename = () => {
@@ -75,8 +75,6 @@ const GroupTitleButton = memo(() => {
       )}
     </Box>
   )
-})
-
-GroupTitleButton.displayName = 'GroupTitleButton'
+}
 
 export default GroupTitleButton

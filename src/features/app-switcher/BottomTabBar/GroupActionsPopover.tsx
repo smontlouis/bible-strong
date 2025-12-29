@@ -18,13 +18,7 @@ interface PopoverItemProps {
 
 const PopoverItem = memo(({ icon, label, onPress, destructive }: PopoverItemProps) => {
   return (
-    <TouchableBox
-      row
-      alignItems="center"
-      py={12}
-      px={16}
-      onPress={onPress}
-    >
+    <TouchableBox row alignItems="center" py={12} px={16} onPress={onPress}>
       <FeatherIcon
         name={icon as any}
         size={18}
@@ -69,18 +63,14 @@ const GroupActionsPopover = memo(
 
     const handleDelete = () => {
       onClose()
-      Alert.alert(
-        t('tabs.deleteGroupTitle'),
-        t('tabs.deleteGroupMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: () => deleteGroup(group.id),
-          },
-        ]
-      )
+      Alert.alert(t('tabs.deleteGroupTitle'), t('tabs.deleteGroupMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => deleteGroup(group.id),
+        },
+      ])
     }
 
     const handleCreateGroup = () => {
@@ -95,18 +85,10 @@ const GroupActionsPopover = memo(
 
     return (
       <Box minWidth={200}>
-        <PopoverItem
-          icon="x-circle"
-          label={t('tabs.closeAll')}
-          onPress={handleCloseAllTabs}
-        />
+        <PopoverItem icon="x-circle" label={t('tabs.closeAll')} onPress={handleCloseAllTabs} />
         {!group.isDefault && (
           <>
-            <PopoverItem
-              icon="edit-2"
-              label={t('tabs.renameGroup')}
-              onPress={handleRename}
-            />
+            <PopoverItem icon="edit-2" label={t('tabs.renameGroup')} onPress={handleRename} />
             <PopoverItem
               icon="trash-2"
               label={t('tabs.deleteGroup')}
@@ -117,11 +99,7 @@ const GroupActionsPopover = memo(
         )}
         <Box height={1} bg="border" marginVertical={4} />
         {canCreateGroup && (
-          <PopoverItem
-            icon="plus"
-            label={t('tabs.newGroup')}
-            onPress={handleCreateGroup}
-          />
+          <PopoverItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
         )}
       </Box>
     )

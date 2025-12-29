@@ -28,7 +28,8 @@ const useTabButtonPress = () => {
   const scale = useSharedValue(1)
 
   const onPress = async () => {
-    if (!tabs[activeTabIndex].base64Preview) {
+    // If there are tabs, take a snapshot before minimizing
+    if (tabs.length > 0 && !tabs[activeTabIndex]?.base64Preview) {
       await takeActiveTabSnapshot(activeTabIndex, activeAtomId)
     }
     minimizeTab()

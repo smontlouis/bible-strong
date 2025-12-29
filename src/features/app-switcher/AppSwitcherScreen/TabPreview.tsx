@@ -1,12 +1,11 @@
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { memo, useMemo } from 'react'
+import React, { memo } from 'react'
 import { Image, StyleSheet } from 'react-native'
 import { LinearTransition, ZoomOut } from 'react-native-reanimated'
 import Color from 'color'
 
 import { useTheme } from '@emotion/react'
-import { selectAtom } from 'jotai/vanilla/utils'
 import Box, { AnimatedBox, AnimatedTouchableBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -23,13 +22,9 @@ interface TabPreviewProps {
 
 const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) => {
   const theme = useTheme()
+  const tab = useAtomValue(tabAtom)
 
-  const base64Preview = useAtomValue(
-    useMemo(() => selectAtom(tabAtom, tab => tab.base64Preview), [])
-  )
-
-  const type = useAtomValue(useMemo(() => selectAtom(tabAtom, tab => tab.type), []))
-  const isRemovable = useAtomValue(useMemo(() => selectAtom(tabAtom, tab => tab.isRemovable), []))
+  const { base64Preview, type, isRemovable } = tab
 
   const { GAP, TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT, TEXTBOX_HEIGHT } = useTabConstants()
 
@@ -145,10 +140,10 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
 }
 
 const Title = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) => {
-  const title = useAtomValue(useMemo(() => selectAtom(tabAtom, tab => tab.title), []))
+  const tab = useAtomValue(tabAtom)
   return (
     <Text ml={8} fontSize={12} title numberOfLines={1} ellipsizeMode="middle">
-      {title}
+      {tab.title}
     </Text>
   )
 }

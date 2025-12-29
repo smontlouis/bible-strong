@@ -1,5 +1,5 @@
 import { useTheme } from '@emotion/react'
-import React, { memo, useCallback, useRef, useState } from 'react'
+import React, { memo, useRef, useState } from 'react'
 import { Keyboard, TextInput, useWindowDimensions, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
@@ -78,12 +78,12 @@ const CreateGroupPage = memo(
     })
 
     // Auto-focus when fully visible
-    const focusInput = useCallback(() => {
+    const focusInput = () => {
       inputRef.current?.focus()
-    }, [])
+    }
 
     // Reset l'état quand on quitte la page (swipe vers groupe précédent)
-    const resetState = useCallback(() => {
+    const resetState = () => {
       // Marquer qu'on est en train de swiper pour désactiver onBlur
       isSwipingRef.current = true
 
@@ -94,14 +94,14 @@ const CreateGroupPage = memo(
       }
       setName('')
       Keyboard.dismiss()
-    }, [])
+    }
 
     // Reset les flags quand on arrive sur la page
-    const onPageVisible = useCallback(() => {
+    const onPageVisible = () => {
       isSwipingRef.current = false
       isCreatingRef.current = false
       focusInput()
-    }, [focusInput])
+    }
 
     useAnimatedReaction(
       () => createGroupPage.isFullyVisible.get(),
@@ -115,13 +115,13 @@ const CreateGroupPage = memo(
       }
     )
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
       setName('')
       Keyboard.dismiss()
       onCancel()
-    }, [onCancel])
+    }
 
-    const handleCreate = useCallback(() => {
+    const handleCreate = () => {
       if (!name.trim()) return
 
       // Marquer qu'on est en train de créer pour éviter le reset
@@ -137,7 +137,7 @@ const CreateGroupPage = memo(
         // Si la création a échoué, réinitialiser le flag
         isCreatingRef.current = false
       }
-    }, [name, createGroup, switchGroup, onGroupCreated])
+    }
 
     const isDisabled = !name.trim()
 

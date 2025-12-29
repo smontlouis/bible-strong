@@ -1,12 +1,17 @@
-import { useAtomValue, useSetAtom } from 'jotai/react'
-import { useCallback } from 'react'
-import { runOnJS, withDelay, withTiming } from 'react-native-reanimated'
-import { activeTabIndexAtom, appSwitcherModeAtom, tabsAtomsAtom } from '../../../state/tabs'
+import { useSetAtom } from 'jotai/react'
+import { withDelay, withTiming } from 'react-native-reanimated'
+import {
+  activeTabIndexAtom,
+  appSwitcherModeAtom,
+  tabsAtomsAtom,
+  tabsCountAtom,
+} from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 import useTabConstants from './useTabConstants'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
 import { getDefaultStore } from 'jotai/vanilla'
+import { runOnJS } from 'react-native-worklets'
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
@@ -21,7 +26,7 @@ export const useTabAnimations = () => {
     activeTabScreen.atomId.value = atomId
   }
 
-  const setActiveTabOpacity = useCallback(() => {
+  const setActiveTabOpacity = () => {
     setTimeout(() => {
       activeTabScreen.opacity.value = withTiming(1, undefined, () => {
         runOnJS(takeActiveTabSnapshot)(
@@ -30,9 +35,9 @@ export const useTabAnimations = () => {
         )
       })
     }, 50)
-  }, [activeTabScreen.opacity])
+  }
 
-  const minimizeTab = useCallback(() => {
+  const minimizeTab = () => {
     'worklet'
     activeTabScreen.opacity.value = withTiming(0)
     activeTabPreview.animationProgress.value = withTiming(0, tabTimingConfig, () => {
@@ -40,37 +45,36 @@ export const useTabAnimations = () => {
     })
     runOnJS(setAppSwitcherMode)('list')
     activeTabScreen.atomId.value = null
-  }, [])
+  }
 
-  const expandTab = useCallback(
-    ({ index, left, top }: { index: number; left: number; top: number }) => {
-      'worklet'
+  const expandTab = ({ index, left, top }: { index: number; left: number; top: number }) => {
+    'worklet'
 
-      runOnJS(setAppSwitcherMode)('view')
-      activeTabPreview.zIndex.value = 3
-      activeTabPreview.left.value = left
-      activeTabPreview.top.value = top
-      activeTabPreview.index.value = index
+    runOnJS(setAppSwitcherMode)('view')
+    activeTabPreview.zIndex.value = 3
+    activeTabPreview.left.value = left
+    activeTabPreview.top.value = top
+    activeTabPreview.index.value = index
 
-      activeTabPreview.animationProgress.value = withTiming(1, tabTimingConfig, () => {
+    activeTabPreview.animationProgress.value = withTiming(1, tabTimingConfig, () => {
+      runOnJS(setActiveTabIndex)(index)
+      runOnJS(setAtomId)(index)
+      runOnJS(setActiveTabOpacity)()
+    })
+  }
+
+  const slideToIndex = (index: number) => {
+    // Cas spécial: en mode 'view' avec le même index (ex: création d'onglet depuis état vide)
+    if (activeTabPreview.index.value === index) {
+      const tabsCount = getDefaultStore().get(tabsCountAtom)
+      const currentMode = getDefaultStore().get(appSwitcherModeAtom)
+
+      // Si on est en mode 'view' et il y a des tabs, on doit quand même afficher l'écran
+      if (currentMode === 'view' && tabsCount > 0) {
         runOnJS(setActiveTabIndex)(index)
         runOnJS(setAtomId)(index)
         runOnJS(setActiveTabOpacity)()
-        // activeTabScreen.opacity.value = withTiming(1, undefined, () => {
-        //   // !TODO - Fix scroll to top
-        //   // if (Math.round(top) !== STATUS_BAR_HEIGHT + SCREEN_MARGIN) {
-        //   //   const scrollToTop =
-        //   //     Math.round(top) - STATUS_BAR_HEIGHT - SCREEN_MARGIN
-        //   //   scrollTo(scrollView.ref, 0, scrollToTop, false)
-        //   // }
-        // })
-      })
-    },
-    [setAtomId]
-  )
-
-  const slideToIndex = (index: number) => {
-    if (activeTabPreview.index.value === index) {
+      }
       return
     }
 

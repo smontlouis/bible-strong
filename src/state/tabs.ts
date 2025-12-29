@@ -324,19 +324,19 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
 
 // Migration function for tab groups
 const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
-  // If already valid tab groups structure with real data (not just default)
-  if (groups.length > 0 && groups[0].tabs !== undefined && groups[0].tabs.length > 0) {
-    // Check if this is actual migrated data (not just the default group with default tab)
+  // If valid tab groups structure exists (even if empty), just apply tab migrations
+  if (groups.length > 0 && groups[0].tabs !== undefined) {
+    // Check if this is just the default initial data (single group with single default bible tab)
     const firstTab = groups[0].tabs[0]
-    const isDefaultData =
+    const isDefaultInitialData =
       groups.length === 1 &&
       groups[0].id === DEFAULT_GROUP_ID &&
       groups[0].tabs.length === 1 &&
       firstTab?.type === 'bible' &&
       firstTab?.id?.startsWith('bible-')
 
-    if (!isDefaultData) {
-      // Real data exists, just apply tab migrations
+    // If not default initial data, keep the existing groups (even if empty)
+    if (!isDefaultInitialData) {
       return groups.map(group => ({
         ...group,
         tabs: migrateTabsToRemovable(group.tabs),
@@ -355,6 +355,10 @@ const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
         const activeIndex = oldActiveIndexJson ? JSON.parse(oldActiveIndexJson) : 0
 
         console.log('[TabGroups] Migrating', oldTabs.length, 'tabs from old storage')
+
+        // Delete old storage keys after successful migration
+        storage.remove('tabsAtom')
+        storage.remove('activeTabIndexAtomOriginal')
 
         return [
           {
@@ -860,7 +864,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 // ============================================================================
 
 /**
- * Close all tabs in the current group (replaces with a single default Bible tab)
+ * Close all tabs in the current group
  */
 export const closeAllTabsAtom = atom(null, (get, set) => {
   const groups = get(tabGroupsAtom)
