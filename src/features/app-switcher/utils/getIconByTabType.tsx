@@ -13,17 +13,14 @@ const getIconByTabType = (type: TabItem['type'], size = 14) => {
     case 'compare':
       return <FeatherIcon name="repeat" size={size} />
     case 'strong':
-    case 'strongs':
       return <LexiqueIcon width={size} height={size} />
     case 'commentary':
       return <CommentIcon width={size} height={size} color="#26A69A" />
     case 'dictionary':
-    case 'dictionaries':
       return <DictionnaryIcon width={size} height={size} />
     case 'search':
       return <FeatherIcon name="search" size={size} />
     case 'nave':
-    case 'naves':
       return <NaveIcon width={size} height={size} />
     case 'study':
       return <FeatherIcon name="feather" size={size} />

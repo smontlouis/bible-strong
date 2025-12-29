@@ -12,12 +12,11 @@ import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
-import FlatList from '~common/ui/FlatList'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import ConcordanceVerse from './ConcordanceVerse'
-import ListenToStrong from './ListenStrong'
+import ConcordanceVerse from '~features/bible/ConcordanceVerse'
+import ListenToStrong from '~features/bible/ListenStrong'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -38,6 +37,7 @@ import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
@@ -67,20 +67,17 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-interface StrongScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'Strong'>
+interface StrongDetailScreenProps {
+  navigation: StackNavigationProp<MainStackProps>
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
-const keyExtractor = (item: any) => `${item.Livre}-${item.Chapitre}-${item.Verset}`
-const flatListStyle = { paddingTop: 10 }
-
-const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
+const StrongDetailScreen = ({ navigation, strongAtom }: StrongDetailScreenProps) => {
   const [strongTab, setStrongTab] = useAtom(strongAtom)
+  const { isInTab } = useTabContext()
 
-  let {
+  const {
     hasBackButton,
-    // @ts-ignore
     data: { book, reference, strongReference: strongReferenceParam },
   } = strongTab
 
@@ -97,9 +94,23 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   const openInNewTab = useOpenInNewTab()
 
   const selectStrongTags = makeStrongTagsSelector()
-  const code = strongReferenceParam?.Code || reference
-  const isGreek = book > 39
+  const code = strongReferenceParam?.Code || reference || ''
+  const isGreek = (book || 1) > 39
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
+
+  // Go back to list view (for tab context)
+  const goBack = useCallback(() => {
+    if (isInTab) {
+      setStrongTab(
+        produce(draft => {
+          draft.title = t('Lexique')
+          draft.data = {}
+        })
+      )
+    } else {
+      navigation.goBack()
+    }
+  }, [isInTab, setStrongTab, navigation, t])
 
   const setTitle = (title: string) =>
     setStrongTab(
@@ -114,26 +125,32 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [reference, book])
 
   const loadData = async () => {
+    let loadedStrongReference = strongReferenceParam
+
     if (reference) {
-      strongReferenceParam = await loadStrongReference(reference, book)
-      if (strongReferenceParam?.error) {
-        setError(strongReferenceParam.error)
+      loadedStrongReference = await loadStrongReference(reference, book || 1)
+      if (loadedStrongReference?.error) {
+        setError(loadedStrongReference.error)
         return
       }
     }
 
+    if (!loadedStrongReference) {
+      return
+    }
+
     addHistory({
-      ...strongReferenceParam,
-      book,
+      ...loadedStrongReference,
+      book: book || 1,
       date: Date.now(),
       type: 'strong',
     })
-    setStrongReference(strongReferenceParam)
-    const firstFoundVerses = await loadFirstFoundVerses(book, strongReferenceParam.Code)
-    const strongVersesCount = await loadStrongVersesCount(book, strongReferenceParam.Code)
+    setStrongReference(loadedStrongReference)
+    const firstFoundVerses = await loadFirstFoundVerses(book || 1, loadedStrongReference.Code)
+    const strongVersesCount = await loadStrongVersesCount(book || 1, loadedStrongReference.Code)
 
     setVerses(firstFoundVerses)
     setCount(strongVersesCount[0]?.versesCount)
@@ -161,13 +178,23 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   }
 
   const linkToStrong = (url: string, ref: number) => {
-    // @ts-ignore
-    navigation.dispatch(
-      StackActions.push('Strong', {
-        book,
-        reference: ref,
-      })
-    )
+    if (isInTab) {
+      // In tab context, update the tab data instead of navigating
+      setStrongTab(
+        produce(draft => {
+          draft.data.book = book
+          draft.data.reference = String(ref)
+          draft.data.strongReference = undefined
+        })
+      )
+    } else {
+      navigation.dispatch(
+        StackActions.push('Strong', {
+          book,
+          reference: ref,
+        })
+      )
+    }
   }
 
   const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG } =
@@ -176,7 +203,7 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   if (error) {
     return (
       <Container>
-        <Header hasBackButton={hasBackButton} title="Désolé..." />
+        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`Impossible de charger la strong pour ce verset...${
@@ -190,13 +217,19 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   }
 
   if (!strongReference) {
-    return null
+    return (
+      <Container>
+        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title={t('Lexique')} />
+        <Loading message={t('Chargement...')} />
+      </Container>
+    )
   }
 
   return (
     <Container>
       <DetailedHeader
-        hasBackButton={hasBackButton}
+        hasBackButton={!isInTab}
+        onCustomBackPress={goBack}
         title={capitalize(Mot)}
         detail={Phonetique}
         subtitle={Type}
@@ -206,12 +239,9 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
               <>
                 <MenuOption
                   onSelect={() =>
-                    // @ts-ignore
                     setMultipleTagsItem({
-                      // @ts-ignore
-                      id: Code,
-                      // @ts-ignore
-                      title: Mot,
+                      id: Code!,
+                      title: Mot!,
                       entity: Grec ? 'strongsGrec' : 'strongsHebreu',
                     })
                   }
@@ -255,7 +285,6 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
         <Box>
           {tags && (
             <Box marginBottom={10}>
-              {/* @ts-ignore */}
               <TagList tags={tags} />
             </Box>
           )}
@@ -267,13 +296,10 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                   {t('Mot Hébreu')}:&nbsp;
                   <Word>{Hebreu}</Word>
                 </Paragraph>
-                {/* @ts-ignore */}
                 <Box ml={15} mb={4}>
-                  {/* @ts-ignore */}
                   <ListenToStrong
                     type={Hebreu ? 'hebreu' : 'grec'}
-                    // @ts-ignore
-                    code={Code}
+                    code={Code!}
                   />
                 </Box>
               </Box>
@@ -286,13 +312,10 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                   {t('Mot Grec')}:&nbsp;
                   <Word>{Grec}</Word>
                 </Paragraph>
-                {/* @ts-ignore */}
                 <Box ml={15} mb={4}>
-                  {/* @ts-ignore */}
                   <ListenToStrong
                     type={Hebreu ? 'hebreu' : 'grec'}
-                    // @ts-ignore
-                    code={Code}
+                    code={Code!}
                   />
                 </Box>
               </Box>
@@ -339,7 +362,6 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
                     <LinkBox
                       ml="auto"
                       route="Concordance"
-                      // @ts-ignore
                       params={{ strongReference, book }}
                       bg="opacity5"
                       borderRadius={20}
@@ -384,4 +406,4 @@ const StrongScreen = ({ navigation, strongAtom }: StrongScreenProps) => {
   )
 }
 
-export default waitForStrongDB()(StrongScreen)
+export default waitForStrongDB()(StrongDetailScreen)

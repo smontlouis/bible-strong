@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import { StackActions } from '@react-navigation/native'
@@ -11,6 +11,8 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import DetailedHeader from '~common/DetailedHeader'
+import Header from '~common/Header'
+import Loading from '~common/Loading'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from 'sonner-native'
 import TagList from '~common/TagList'
@@ -21,6 +23,7 @@ import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadNaveItem from '~helpers/loadNaveItem'
 import { timeout } from '~helpers/timeout'
 import useHTMLView from '~helpers/useHTMLView'
@@ -31,26 +34,40 @@ import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 
 interface NaveDetailScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'NaveDetail'>
+  navigation: StackNavigationProp<MainStackProps>
   naveAtom: PrimitiveAtom<NaveTab>
 }
 
 const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   const [naveTab, setNaveTab] = useAtom(naveAtom)
+  const { isInTab } = useTabContext()
 
   const {
     hasBackButton,
     data: { name_lower, name },
   } = naveTab
 
-  const dispatch = useDispatch()
   const addHistory = useSetAtom(historyAtom)
+
+  // Go back to list view (for tab context)
+  const goBack = useCallback(() => {
+    if (isInTab) {
+      setNaveTab(
+        produce(draft => {
+          draft.title = 'Thèmes Nave'
+          draft.data = {}
+        })
+      )
+    } else {
+      navigation.goBack()
+    }
+  }, [isInTab, setNaveTab, navigation])
 
   const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const selectNaveTags = useMemo(() => makeNaveTagsSelector(), [])
-  const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower))
+  const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
 
   const setTitle = (title: string) =>
@@ -65,6 +82,7 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
   }, [naveItem?.name, name])
 
   useEffect(() => {
+    if (!name_lower) return
     loadNaveItem(name_lower).then(result => {
       setNaveItem(result)
       addHistory({
@@ -97,12 +115,22 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     }
 
     if (type === 'w') {
-      navigation.dispatch(
-        StackActions.push('NaveDetail', {
-          name_lower: item,
-          name: item,
-        })
-      )
+      if (isInTab) {
+        // In tab context, update the tab data instead of navigating
+        setNaveTab(
+          produce(draft => {
+            draft.data.name_lower = item
+            draft.data.name = item
+          })
+        )
+      } else {
+        navigation.dispatch(
+          StackActions.push('NaveDetail', {
+            name_lower: item,
+            name: item,
+          })
+        )
+      }
     }
   }
 
@@ -124,10 +152,26 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
     }
   }
 
+  // Guard: name_lower should always be defined when this screen is rendered
+  // (NaveTabScreen only renders this when name_lower is defined)
+  if (!name_lower) {
+    return null
+  }
+
+  if (!naveItem) {
+    return (
+      <Container>
+        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title="Thèmes Nave" />
+        <Loading message={t('Chargement...')} />
+      </Container>
+    )
+  }
+
   return (
     <Container>
       <DetailedHeader
-        hasBackButton={hasBackButton}
+        hasBackButton={!isInTab}
+        onCustomBackPress={goBack}
         title={naveItem?.name || name}
         subtitle={naveItem?.name_lower}
         borderColor="quint"

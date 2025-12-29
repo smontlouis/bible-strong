@@ -9,12 +9,9 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleTabScreen from '~features/bible/BibleTabScreen'
 import CompareVersesTabScreen from '~features/bible/CompareVersesTabScreen'
-import StrongTabScreen from '~features/bible/StrongTabScreen'
+import StrongTabScreen from '~features/lexique/StrongTabScreen'
 import CommentariesTabScreen from '~features/commentaries/CommentariesTabScreen'
-import DictionaryDetailTabScreen from '~features/dictionnary/DictionaryDetailTabScreen'
 import DictionaryTabScreen from '~features/dictionnary/DictionaryTabScreen'
-import LexiqueTabScreen from '~features/lexique/LexiqueTabScreen'
-import NaveDetailTabScreen from '~features/nave/NaveDetailTabScreen'
 import NaveTabScreen from '~features/nave/NaveTabScreen'
 import { NotesTabScreen } from '~features/notes'
 import SearchTabScreen from '~features/search/SearchTabScreen'
@@ -45,35 +42,20 @@ const getComponentTab = (tab: TabItem) => {
         component: StrongTabScreen,
         atomName: 'strongAtom',
       }
-    case 'strongs':
-      return {
-        component: LexiqueTabScreen,
-        atomName: 'strongsAtom',
-      }
-    case 'naves':
+    case 'nave':
       return {
         component: NaveTabScreen,
-        atomName: 'navesAtom',
+        atomName: 'naveAtom',
       }
-    case 'dictionaries':
+    case 'dictionary':
       return {
         component: DictionaryTabScreen,
-        atomName: 'dictionariesAtom',
+        atomName: 'dictionaryAtom',
       }
     case 'commentary':
       return {
         component: CommentariesTabScreen,
         atomName: 'commentaryAtom',
-      }
-    case 'dictionary':
-      return {
-        component: DictionaryDetailTabScreen,
-        atomName: 'dictionaryAtom',
-      }
-    case 'nave':
-      return {
-        component: NaveDetailTabScreen,
-        atomName: 'naveAtom',
       }
     case 'search':
       return {

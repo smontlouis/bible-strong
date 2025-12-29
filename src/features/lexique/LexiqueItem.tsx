@@ -1,5 +1,6 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
+import { Pressable } from 'react-native'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -7,7 +8,6 @@ import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
-import { useNavigation } from '@react-navigation/native'
 
 const SectionItem = styled(Box)(({ theme }) => ({
   height: 80,
@@ -30,6 +30,16 @@ const Chip = styled(Box)(({ theme, isHebreu }: any) => ({
   marginBottom: 3,
 }))
 
+interface LexiqueItemProps {
+  Mot: string
+  Grec?: string
+  Hebreu?: string
+  Code: string
+  lexiqueType: string
+  navigation: StackNavigationProp<MainStackProps>
+  onSelect?: (book: number, reference: string) => void
+}
+
 const LexiqueItem = memo(
   ({
     Mot,
@@ -38,34 +48,49 @@ const LexiqueItem = memo(
     Code,
     lexiqueType,
     navigation,
-  }: any & StackNavigationProp<MainStackProps>) => {
+    onSelect,
+  }: LexiqueItemProps) => {
     const { t } = useTranslation()
-    // That's why : `const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'` - Ok this is not the best implementation
-    const linkProps: any = {
-      route: 'Strong' as any,
-      navigation,
-      params: { book: lexiqueType === 'Hébreu' ? 1 : 40, reference: Code },
+    const book = lexiqueType === 'Hébreu' ? 1 : 40
+
+    const handlePress = useCallback(() => {
+      if (onSelect) {
+        onSelect(book, Code)
+      } else {
+        navigation.navigate('Strong', { book, reference: Code })
+      }
+    }, [onSelect, book, Code, navigation])
+
+    const content = (
+      <SectionItem>
+        <Box row>
+          <Chip isHebreu={lexiqueType === 'Hébreu'}>
+            <Text fontSize={10}>{t(lexiqueType)}</Text>
+          </Chip>
+          <Chip marginLeft={5}>
+            <Text fontSize={10}>{Code}</Text>
+          </Chip>
+        </Box>
+        <Box row>
+          <Text title fontSize={18} color="default" flex paddingRight={20}>
+            {Mot}
+          </Text>
+          <Text fontSize={18} color="default">
+            {Grec || Hebreu}
+          </Text>
+        </Box>
+      </SectionItem>
+    )
+
+    // If onSelect is provided, use Pressable directly instead of Link
+    if (onSelect) {
+      return <Pressable onPress={handlePress}>{content}</Pressable>
     }
+
+    // Otherwise use Link for standard navigation
     return (
-      <Link {...linkProps}>
-        <SectionItem>
-          <Box row>
-            <Chip isHebreu={lexiqueType === 'Hébreu'}>
-              <Text fontSize={10}>{t(lexiqueType)}</Text>
-            </Chip>
-            <Chip marginLeft={5}>
-              <Text fontSize={10}>{Code}</Text>
-            </Chip>
-          </Box>
-          <Box row>
-            <Text title fontSize={18} color="default" flex paddingRight={20}>
-              {Mot}
-            </Text>
-            <Text fontSize={18} color="default">
-              {Grec || Hebreu}
-            </Text>
-          </Box>
-        </SectionItem>
+      <Link route="Strong" navigation={navigation} params={{ book, reference: Code }}>
+        {content}
       </Link>
     )
   }

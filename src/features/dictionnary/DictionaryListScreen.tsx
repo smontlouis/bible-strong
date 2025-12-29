@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
+import { StackNavigationProp } from '@react-navigation/stack'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -11,21 +14,14 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
+import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import loadLexiqueByLetter from '~helpers/loadLexiqueByLetter'
-import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
-
-import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
-
-import { PrimitiveAtom } from 'jotai/vanilla'
-import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
-import waitForStrongDB from '~common/waitForStrongDB'
-import { StrongsTab } from '../../state/tabs'
-import LexiqueItem from './LexiqueItem'
+import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
+import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
 import { MainStackProps } from '~navigation/type'
-import PopOverMenu from '~common/PopOverMenu'
-import LanguageMenuOption from '~common/LanguageMenuOption'
+import { DictionaryTab } from '../../state/tabs'
+import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
+import DictionnaireItem from './DictionnaireItem'
 
 const useSectionResults = (results: any) => {
   const [sectionResults, setSectionResults] = useState<any>(null)
@@ -37,10 +33,13 @@ const useSectionResults = (results: any) => {
     }
     const sectionResults = results.reduce((list: any, dbItem: any) => {
       const listItem = list.find(
-        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
+        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
       )
       if (!listItem) {
-        list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
+        list.push({
+          title: getFirstLetterFrom(dbItem.sanitized_word),
+          data: [dbItem],
+        })
       } else {
         listItem.data.push(dbItem)
       }
@@ -53,27 +52,30 @@ const useSectionResults = (results: any) => {
   return sectionResults
 }
 
-interface StrongsTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'Lexique'>
-  strongsAtom: PrimitiveAtom<StrongsTab>
+interface DictionaryListScreenProps {
+  navigation: StackNavigationProp<MainStackProps>
+  dictionaryAtom: PrimitiveAtom<DictionaryTab>
   hasBackButton?: boolean
+  onWordSelect?: (word: string) => void
 }
 
-const LexiqueTabScreen = ({ strongsAtom, navigation, hasBackButton }: StrongsTabScreenProps) => {
+const DictionaryListScreen = ({ hasBackButton, navigation, onWordSelect }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadLexiqueBySearch, value: debouncedSearchValue },
-    { query: loadLexiqueByLetter, value: letter }
+    { query: loadDictionnaireBySearch, value: debouncedSearchValue },
+    { query: loadDictionnaireByLetter, value: letter }
   )
 
   const sectionResults = useSectionResults(results)
 
   useEffect(() => {
+    // @ts-ignore
     if (results.error) {
+      // @ts-ignore
       setError(results.error)
     }
   }, [results])
@@ -84,15 +86,14 @@ const LexiqueTabScreen = ({ strongsAtom, navigation, hasBackButton }: StrongsTab
         <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
         <Empty
           source={require('~assets/images/empty.json')}
-          message={`${t('Impossible de charger la strong pour ce verset...')}
-            ${
-              // @ts-ignore
-              error === 'CORRUPTED_DATABASE'
-                ? t(
-                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                  )
-                : ''
-            }`}
+          message={`${t('Impossible de charger le dictionnaire...')}${
+            // @ts-ignore
+            error === 'CORRUPTED_DATABASE'
+              ? t(
+                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                )
+              : ''
+          }`}
         />
       </Container>
     )
@@ -100,22 +101,10 @@ const LexiqueTabScreen = ({ strongsAtom, navigation, hasBackButton }: StrongsTab
 
   return (
     <Container>
-      <Header
-        hasBackButton={hasBackButton}
-        title={t('Lexique')}
-        rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <LanguageMenuOption resourceId="STRONG" />
-              </>
-            }
-          />
-        }
-      />
+      <Header hasBackButton={hasBackButton} fontSize={18} title={t('Dictionnaire Westphal')} />
       <Box px={20}>
         <SearchInput
-          placeholder={t('Recherche par code ou par mot')}
+          placeholder={t('Recherche par mot')}
           onChangeText={setSearchValue}
           value={searchValue}
           onDelete={() => setSearchValue('')}
@@ -126,20 +115,25 @@ const LexiqueTabScreen = ({ strongsAtom, navigation, hasBackButton }: StrongsTab
           <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
           <SectionList
-            renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (
-              <LexiqueItem key={index} {...{ Mot, Grec, Hebreu, Code, lexiqueType, navigation }} />
+            renderItem={({ item: { id, word } }) => (
+              <DictionnaireItem
+                key={id}
+                navigation={navigation}
+                word={word}
+                onSelect={onWordSelect}
+              />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
             // @ts-ignore
             getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 80,
+              getItemHeight: () => 60,
               getSectionHeaderHeight: () => 50,
               getSeparatorHeight: () => 0,
               getSectionFooterHeight: () => 0,
             })}
             renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle color="primary">
+              <SectionTitle color="secondary">
                 <Text title fontWeight="bold" fontSize={16} color="reverse">
                   {title}
                 </Text>
@@ -147,21 +141,18 @@ const LexiqueTabScreen = ({ strongsAtom, navigation, hasBackButton }: StrongsTab
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={(item: any) => item.Mot + item.Code}
+            keyExtractor={item => item.id}
           />
         ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('Aucune strong trouvée...')}
-          />
+          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
         )}
       </Box>
-      {!searchValue && <AlphabetList letter={letter} setLetter={setLetter} />}
+      {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}
     </Container>
   )
 }
 
-export default waitForStrongDB({
+export default waitForDictionnaireDB({
   hasBackButton: true,
   hasHeader: true,
-})(LexiqueTabScreen)
+})(DictionaryListScreen)

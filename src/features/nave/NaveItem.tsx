@@ -1,5 +1,6 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
+import { Pressable } from 'react-native'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -7,10 +8,11 @@ import Text from '~common/ui/Text'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 
-type Props = {
+interface NaveItemProps {
   name_lower: string
   name: string
   navigation: StackNavigationProp<MainStackProps>
+  onSelect?: (name_lower: string, name: string) => void
 }
 
 const SectionItem = styled(Box)(({ theme }) => ({
@@ -24,13 +26,16 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const DictionnaireItem = memo(({ name_lower, name, navigation }: Props) => (
-  <Link
-    route="NaveDetail"
-    // @ts-ignore
-    navigation={navigation}
-    params={{ name_lower, name }}
-  >
+const NaveItem = memo(({ name_lower, name, navigation, onSelect }: NaveItemProps) => {
+  const handlePress = useCallback(() => {
+    if (onSelect) {
+      onSelect(name_lower, name)
+    } else {
+      navigation.navigate('NaveDetail', { name_lower, name })
+    }
+  }, [onSelect, name_lower, name, navigation])
+
+  const content = (
     <SectionItem>
       <Box row>
         <Text title fontSize={18} color="default" flex paddingRight={20}>
@@ -38,7 +43,19 @@ const DictionnaireItem = memo(({ name_lower, name, navigation }: Props) => (
         </Text>
       </Box>
     </SectionItem>
-  </Link>
-))
+  )
 
-export default DictionnaireItem
+  // If onSelect is provided, use Pressable directly instead of Link
+  if (onSelect) {
+    return <Pressable onPress={handlePress}>{content}</Pressable>
+  }
+
+  // Otherwise use Link for standard navigation
+  return (
+    <Link route="NaveDetail" navigation={navigation} params={{ name_lower, name }}>
+      {content}
+    </Link>
+  )
+})
+
+export default NaveItem

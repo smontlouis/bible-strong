@@ -16,6 +16,7 @@ import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { useCreateGroup, useSwitchGroup } from '../../../state/tabGroups'
+import { Image } from 'expo-image'
 
 interface CreateGroupPageProps {
   scrollX: SharedValue<number>
@@ -164,7 +165,12 @@ const CreateGroupPage = memo(
             bottom={0}
           >
             <Box center bg="reverse" p={20} borderRadius={24}>
-              <FeatherIcon name="plus-circle" size={70} color="default" style={{ opacity: 0.2 }} />
+              <Image
+                source={require('~assets/images/new-group-tab.svg')}
+                style={{ width: 120, height: 120, opacity: 0.3 }}
+                tintColor={theme.colors.tertiary}
+                contentFit="contain"
+              />
             </Box>
           </Box>
           <Box

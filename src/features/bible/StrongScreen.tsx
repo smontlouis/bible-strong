@@ -3,7 +3,7 @@ import { atom } from 'jotai/vanilla'
 import { useMemo } from 'react'
 import { StackScreenProps } from '@react-navigation/stack'
 import { StrongTab } from '../../state/tabs'
-import StrongTabScreen from './StrongTabScreen'
+import StrongDetailScreen from '~features/lexique/StrongDetailScreen'
 import { MainStackProps } from '~navigation/type'
 
 const StrongScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Strong'>) => {
@@ -30,7 +30,7 @@ const StrongScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'S
     [book, reference, strongReference]
   )
 
-  return <StrongTabScreen navigation={navigation} strongAtom={onTheFlyAtom} />
+  return <StrongDetailScreen navigation={navigation} strongAtom={onTheFlyAtom} />
 }
 
 export default StrongScreen

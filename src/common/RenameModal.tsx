@@ -91,7 +91,7 @@ const RenameModal = ({
         </BottomSheetFooter>
       )}
     >
-      <Box paddingHorizontal={20} paddingTop={20}>
+      <Box paddingHorizontal={20} py={20}>
         <StyledTextInput
           placeholder={placeholder}
           placeholderTextColor={theme.colors.border}

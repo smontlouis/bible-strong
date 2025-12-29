@@ -1,14 +1,16 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Share } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
+import Header from '~common/Header'
+import Loading from '~common/Loading'
 import Text from '~common/ui/Text'
 import useHTMLView from '~helpers/useHTMLView'
 
@@ -25,6 +27,7 @@ import TagList from '~common/TagList'
 import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { timeout } from '~helpers/timeout'
 import { MainStackProps } from '~navigation/type'
@@ -38,27 +41,41 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 interface DictionaryDetailScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'DictionnaryDetail'>
+  navigation: StackNavigationProp<MainStackProps>
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
 }
 
 const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetailScreenProps) => {
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
+  const { isInTab } = useTabContext()
 
   const {
     hasBackButton,
     data: { word },
   } = dictionaryTab
 
-  const dispatch = useDispatch()
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const [dictionnaireItem, setDictionnaireItem] = useState<any>(null)
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
+  // Go back to list view (for tab context)
+  const goBack = useCallback(() => {
+    if (isInTab) {
+      setDictionaryTab(
+        produce(draft => {
+          draft.title = 'Dictionnaire'
+          draft.data = {}
+        })
+      )
+    } else {
+      navigation.goBack()
+    }
+  }, [isInTab, setDictionaryTab, navigation])
+
   const selectWordTags = useMemo(() => makeWordTagsSelector(), [])
-  const tags = useSelector((state: RootState) => selectWordTags(state, word))
+  const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
 
   const setTitle = (title: string) =>
     setDictionaryTab(
@@ -69,10 +86,13 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
     )
 
   useEffect(() => {
-    setTitle(word)
+    if (word) {
+      setTitle(word)
+    }
   }, [word])
 
   useEffect(() => {
+    if (!word) return
     loadDictionnaireItem(word).then(result => {
       setDictionnaireItem(result)
 
@@ -103,7 +123,16 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
         toast.error('Impossible de charger ce mot.')
       }
     } else {
-      navigation.dispatch(StackActions.push('DictionnaryDetail', { word: href }))
+      if (isInTab) {
+        // In tab context, update the tab data instead of navigating
+        setDictionaryTab(
+          produce(draft => {
+            draft.data.word = href
+          })
+        )
+      } else {
+        navigation.dispatch(StackActions.push('DictionnaryDetail', { word: href }))
+      }
     }
   }
 
@@ -126,10 +155,26 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
     }
   }
 
+  // Guard: word should always be defined when this screen is rendered
+  // (DictionaryTabScreen only renders this when word is defined)
+  if (!word) {
+    return null
+  }
+
+  if (!dictionnaireItem) {
+    return (
+      <Container>
+        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title={t('Dictionnaire')} />
+        <Loading message={t('Chargement...')} />
+      </Container>
+    )
+  }
+
   return (
     <Container>
       <DetailedHeader
-        hasBackButton={hasBackButton}
+        hasBackButton={!isInTab}
+        onCustomBackPress={goBack}
         title={word}
         borderColor="secondary"
         rightComponent={

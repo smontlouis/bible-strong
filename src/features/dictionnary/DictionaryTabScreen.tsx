@@ -1,153 +1,60 @@
-// TODO : is this file still in use ? If not, remove it
-import React, { useEffect, useState } from 'react'
-import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
+import React, { useCallback } from 'react'
 
-import { StackNavigationProp } from '@react-navigation/stack'
+import produce from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { useTranslation } from 'react-i18next'
-import AlphabetList from '~common/AlphabetList'
-import Empty from '~common/Empty'
-import Header from '~common/Header'
-import Loading from '~common/Loading'
-import SearchInput from '~common/SearchInput'
-import SectionTitle from '~common/SectionTitle'
-import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
-import SectionList from '~common/ui/SectionList'
-import Text from '~common/ui/Text'
-import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
-import { getFirstLetterFrom } from '~helpers/alphabet'
-import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
-import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
+import { useAtom } from 'jotai/react'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { DictionaryTab } from '../../state/tabs'
+import DictionaryListScreen from './DictionaryListScreen'
+import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 import { MainStackProps } from '~navigation/type'
-import { DictionariesTab } from '../../state/tabs'
-import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
-import DictionnaireItem from './DictionnaireItem'
+import { RouteProp } from '@react-navigation/native'
 
-const useSectionResults = (results: any) => {
-  const [sectionResults, setSectionResults] = useState<any>(null)
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
-    }
-    const sectionResults = results.reduce((list: any, dbItem: any) => {
-      const listItem = list.find(
-        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
-      )
-      if (!listItem) {
-        list.push({
-          title: getFirstLetterFrom(dbItem.sanitized_word),
-          data: [dbItem],
-        })
-      } else {
-        listItem.data.push(dbItem)
-      }
-
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
-}
-
-interface DictionariesTabScreenProps {
+interface DictionaryTabScreenProps {
   navigation: StackNavigationProp<MainStackProps>
-  dictionariesAtom: PrimitiveAtom<DictionariesTab>
-  hasBackButton?: boolean
+  route: RouteProp<MainStackProps>
+  dictionaryAtom: PrimitiveAtom<DictionaryTab>
 }
 
-const DictionnaireScreen = ({ hasBackButton, navigation }: DictionariesTabScreenProps) => {
-  const { t } = useTranslation()
-  const [error, setError] = useState(false)
-  const [letter, setLetter] = useState('a')
-  const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+const DictionaryTabScreen = ({ dictionaryAtom, navigation }: DictionaryTabScreenProps) => {
+  const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadDictionnaireBySearch, value: debouncedSearchValue },
-    { query: loadDictionnaireByLetter, value: letter }
+  const {
+    data: { word },
+    hasBackButton,
+  } = dictionaryTab
+
+  // Determine if we're in list or detail view
+  const hasDetail = !!word
+
+  const onWordSelect = useCallback(
+    (selectedWord: string) => {
+      setDictionaryTab(
+        produce(draft => {
+          draft.data.word = selectedWord
+        })
+      )
+    },
+    [setDictionaryTab]
   )
 
-  const sectionResults = useSectionResults(results)
-
-  useEffect(() => {
-    // @ts-ignore
-    if (results.error) {
-      // @ts-ignore
-      setError(results.error)
-    }
-  }, [results])
-
-  if (error) {
+  if (!hasDetail) {
     return (
-      <Container>
-        <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={`${t('Impossible de charger le dictionnaire...')}${
-            // @ts-ignore
-            error === 'CORRUPTED_DATABASE'
-              ? t(
-                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                )
-              : ''
-          }`}
-        />
-      </Container>
+      <DictionaryListScreen
+        hasBackButton={hasBackButton}
+        navigation={navigation}
+        dictionaryAtom={dictionaryAtom}
+        onWordSelect={onWordSelect}
+      />
     )
   }
 
   return (
-    <Container>
-      <Header hasBackButton={hasBackButton} fontSize={18} title={t('Dictionnaire Westphal')} />
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('Recherche par mot')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
-      </Box>
-      <Box flex paddingTop={20}>
-        {isLoading ? (
-          <Loading message={t('Chargement...')} />
-        ) : sectionResults.length ? (
-          <SectionList
-            renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem key={id} navigation={navigation} {...{ word }} />
-            )}
-            removeClippedSubviews
-            maxToRenderPerBatch={100}
-            // @ts-ignore
-            getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 60,
-              getSectionHeaderHeight: () => 50,
-              getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0,
-            })}
-            renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle color="secondary">
-                <Text title fontWeight="bold" fontSize={16} color="reverse">
-                  {title}
-                </Text>
-              </SectionTitle>
-            )}
-            stickySectionHeadersEnabled
-            sections={sectionResults}
-            keyExtractor={item => item.id}
-          />
-        ) : (
-          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
-        )}
-      </Box>
-      {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}
-    </Container>
+    <DictionaryDetailTabScreen
+      dictionaryAtom={dictionaryAtom}
+      navigation={navigation}
+    />
   )
 }
 
-export default waitForDictionnaireDB({
-  hasBackButton: true,
-  hasHeader: true,
-})(DictionnaireScreen)
+export default DictionaryTabScreen

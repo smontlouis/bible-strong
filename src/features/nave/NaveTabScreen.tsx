@@ -1,176 +1,61 @@
-import React, { useState, useEffect } from 'react'
-import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
+import React, { useCallback } from 'react'
 
-import * as Icon from '@expo/vector-icons'
-import SectionList from '~common/ui/SectionList'
-import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Header from '~common/Header'
-import Link from '~common/Link'
-import SearchInput from '~common/SearchInput'
-import Loading from '~common/Loading'
-import loadNaveByLetter from '~helpers/loadNaveByLetter'
-import loadNaveBySearch from '~helpers/loadNaveBySearch'
-import Empty from '~common/Empty'
-import AlphabetList from '~common/AlphabetList'
-import SectionTitle from '~common/SectionTitle'
-import waitForNaveDB from '~common/waitForNaveDB'
-import useLanguage from '~helpers/useLanguage'
-
-import NaveItem from './NaveItem'
-import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
-import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { NavesTab } from '../../state/tabs'
+import produce from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { useAtom } from 'jotai/react'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { NaveTab } from '../../state/tabs'
+import NaveListScreen from './NaveListScreen'
+import NaveDetailTabScreen from './NaveDetailTabScreen'
 import { MainStackProps } from '~navigation/type'
-import PopOverMenu from '~common/PopOverMenu'
-import LanguageMenuOption from '~common/LanguageMenuOption'
-
-const useSectionResults = (results: any) => {
-  const [sectionResults, setSectionResults] = useState<any>(null)
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
-    }
-    const sectionResults = results.reduce((list: any, naveItem: any) => {
-      const listItem = list.find((item: any) => item.title && item.title === naveItem.letter)
-      if (!listItem) {
-        list.push({ title: naveItem.letter, data: [naveItem] })
-      } else {
-        listItem.data.push(naveItem)
-      }
-
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
-}
+import { RouteProp } from '@react-navigation/native'
 
 interface NaveTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'Nave'>
-  navesAtom: PrimitiveAtom<NavesTab>
-  hasBackButton?: boolean
+  navigation: StackNavigationProp<MainStackProps>
+  route: RouteProp<MainStackProps>
+  naveAtom: PrimitiveAtom<NaveTab>
 }
 
-const NaveTabScreen = ({ hasBackButton, navigation }: NaveTabScreenProps) => {
-  const { t } = useTranslation()
-  const isFR = useLanguage()
-  const [error, setError] = useState(false)
-  const [letter, setLetter] = useState('a')
-  const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+const NaveTabScreen = ({ naveAtom, navigation }: NaveTabScreenProps) => {
+  const [naveTab, setNaveTab] = useAtom(naveAtom)
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadNaveBySearch, value: debouncedSearchValue },
-    { query: loadNaveByLetter, value: letter }
+  const {
+    data: { name_lower },
+    hasBackButton,
+  } = naveTab
+
+  // Determine if we're in list or detail view
+  const hasDetail = !!name_lower
+
+  const onNaveSelect = useCallback(
+    (nameLower: string, name: string) => {
+      setNaveTab(
+        produce(draft => {
+          draft.data.name_lower = nameLower
+          draft.data.name = name
+        })
+      )
+    },
+    [setNaveTab]
   )
-  const sectionResults = useSectionResults(results)
 
-  useEffect(() => {
-    // @ts-ignore
-    if (results.error) {
-      // @ts-ignore
-      setError(results.error)
-    }
-  }, [results])
-
-  if (error) {
+  if (!hasDetail) {
     return (
-      <Container>
-        <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={`${t('Impossible de charger la nave...')}${
-            // @ts-ignore
-            error === 'CORRUPTED_DATABASE'
-              ? t(
-                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                )
-              : ''
-          }`}
-        />
-      </Container>
+      <NaveListScreen
+        hasBackButton={hasBackButton}
+        navigation={navigation}
+        naveAtom={naveAtom}
+        onNaveSelect={onNaveSelect}
+      />
     )
   }
 
   return (
-    <Container>
-      <Header
-        hasBackButton={hasBackButton}
-        title={t('Thématique Nave')}
-        rightComponent={
-          <Box row alignItems="center">
-            {isFR && (
-              <Link route="NaveWarning" padding>
-                <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
-              </Link>
-            )}
-            <PopOverMenu
-              popover={
-                <>
-                  <LanguageMenuOption resourceId="NAVE" />
-                </>
-              }
-            />
-          </Box>
-        }
-      />
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('Recherche par mot')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
-      </Box>
-      <Box flex paddingTop={20}>
-        {isLoading ? (
-          <Loading message={t('Chargement...')} />
-        ) : sectionResults.length ? (
-          <SectionList
-            renderItem={({ item: { name_lower, name } }) => (
-              <NaveItem
-                key={name_lower}
-                navigation={navigation}
-                name_lower={name_lower}
-                name={name}
-              />
-            )}
-            removeClippedSubviews
-            maxToRenderPerBatch={100}
-            // @ts-ignore
-            getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 60,
-              getSectionHeaderHeight: () => 50,
-              getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0,
-            })}
-            renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle color="quint">
-                <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
-                  {title.toUpperCase()}
-                </Text>
-              </SectionTitle>
-            )}
-            stickySectionHeadersEnabled
-            sections={sectionResults}
-            keyExtractor={(item: any) => item.name_lower}
-          />
-        ) : (
-          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
-        )}
-      </Box>
-      {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}
-    </Container>
+    <NaveDetailTabScreen
+      naveAtom={naveAtom}
+      navigation={navigation}
+    />
   )
 }
 
-export default waitForNaveDB({
-  hasHeader: true,
-  hasBackButton: true,
-})(NaveTabScreen)
+export default NaveTabScreen

@@ -83,10 +83,23 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
     return { opacity }
   })
 
+  // Group name header (only for non-default groups)
+  const GroupHeader = () => {
+    if (group.isDefault) return null
+    return (
+      <Box pt={SCREEN_MARGIN + insets.top} pb={20}>
+        <Text fontSize={30} color="default">
+          {group.name}
+        </Text>
+      </Box>
+    )
+  }
+
   // Empty state for non-default groups with no tabs
   if (group.tabs?.length === 0) {
     return (
       <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey" zIndex={2}>
+        <GroupHeader />
         <Box flex={1} center>
           <Image
             source={require('~assets/images/tabs.svg')}
@@ -120,13 +133,14 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            paddingTop: SCREEN_MARGIN + insets.top,
+            paddingTop: group.isDefault ? SCREEN_MARGIN + insets.top : 0,
             paddingLeft: PADDING_HORIZONTAL,
             paddingRight: PADDING_HORIZONTAL,
             paddingBottom: TAB_ICON_SIZE + 60,
             minHeight: '100%',
           }}
         >
+          <GroupHeader />
           <Box
             overflow="visible"
             row
@@ -157,13 +171,15 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
         ref={scrollView.ref}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: SCREEN_MARGIN + insets.top,
+          paddingTop: group.isDefault ? SCREEN_MARGIN + insets.top : 0,
           paddingLeft: PADDING_HORIZONTAL,
           paddingRight: PADDING_HORIZONTAL,
           paddingBottom: TAB_ICON_SIZE + 60,
           minHeight: '100%',
         }}
       >
+        <GroupHeader />
+
         <AnimatedBox
           overflow="visible"
           row

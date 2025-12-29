@@ -63,36 +63,17 @@ export interface CompareTab extends TabBase {
 
 export interface StrongTab extends TabBase {
   type: 'strong'
-  data:
-    | {
-        book: number
-        reference: string
-      }
-    | {
-        book: number
-        strongReference: StrongReference
-      }
-}
-
-export interface StrongsTab extends TabBase {
-  type: 'strongs'
-  data: {}
-}
-
-export interface NavesTab extends TabBase {
-  type: 'naves'
-  data: {}
-}
-
-export interface DictionariesTab extends TabBase {
-  type: 'dictionaries'
-  data: {}
+  data: {
+    book?: number
+    reference?: string
+    strongReference?: StrongReference
+  }
 }
 
 export interface NaveTab extends TabBase {
   type: 'nave'
   data: {
-    name_lower: string
+    name_lower?: string
     name?: string
   }
 }
@@ -100,7 +81,7 @@ export interface NaveTab extends TabBase {
 export interface DictionaryTab extends TabBase {
   type: 'dictionary'
   data: {
-    word: string
+    word?: string
   }
 }
 
@@ -135,9 +116,6 @@ export type TabItem =
   | SearchTab
   | CompareTab
   | StrongTab
-  | StrongsTab
-  | NavesTab
-  | DictionariesTab
   | NaveTab
   | DictionaryTab
   | StudyTab
@@ -151,9 +129,9 @@ export const tabTypes = [
   'compare',
   'study',
   'notes',
-  'strongs',
-  'naves',
-  'dictionaries',
+  'strong',
+  'nave',
+  'dictionary',
   'commentary',
 ] as const
 
@@ -234,41 +212,19 @@ export const getDefaultData = <T extends TabItem>(
         },
       }
     }
-    case 'strongs': {
+    case 'strong': {
       return {
         title: i18n.t('Lexique'),
         data: {},
       }
     }
-    case 'strong': {
-      return {
-        data: {
-          book: 1,
-          reference: '1',
-        },
-      }
-    }
     case 'nave': {
-      return {
-        data: {
-          name_lower: 'aaron',
-        },
-      }
-    }
-    case 'naves': {
       return {
         title: i18n.t('Thèmes Nave'),
         data: {},
       }
     }
     case 'dictionary': {
-      return {
-        data: {
-          word: 'aaron',
-        },
-      }
-    }
-    case 'dictionaries': {
       return {
         title: i18n.t('Dictionnaire'),
         data: {},
@@ -303,9 +259,40 @@ export const getDefaultData = <T extends TabItem>(
 // MIGRATIONS
 // ============================================================================
 
+// Migration function to convert old tab types to unified types
+const migrateTabTypes = (tab: TabItem): TabItem => {
+  // Migrate old plural types to unified singular types with empty data
+  const tabType = tab.type as string
+  if (tabType === 'strongs') {
+    return {
+      ...tab,
+      type: 'strong',
+      data: {},
+    } as StrongTab
+  }
+  if (tabType === 'naves') {
+    return {
+      ...tab,
+      type: 'nave',
+      data: {},
+    } as NaveTab
+  }
+  if (tabType === 'dictionaries') {
+    return {
+      ...tab,
+      type: 'dictionary',
+      data: {},
+    } as DictionaryTab
+  }
+  return tab
+}
+
 // Migration function to make all existing tabs removable
 const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
   return tabs.map(tab => {
+    // First migrate old tab types
+    tab = migrateTabTypes(tab)
+
     const needsIdMigration = tab.id === 'bible'
     const needsRemovableMigration = tab.isRemovable === false
 
