@@ -43,7 +43,7 @@ const GroupTitleButton = () => {
       <PopOverMenu
         element={
           <AnimatedBox row center py={8} px={12} layout={LinearTransition}>
-            <FadingText color="default" fontSize={14}>
+            <FadingText color="default" fontSize={14} numberOfLines={1}>
               {displayName}
             </FadingText>
             <AnimatedBox layout={LinearTransition}>

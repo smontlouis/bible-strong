@@ -99,6 +99,7 @@ const VerseComponent = ({
           book: books[Livre - 1],
           chapter: Number(Chapitre),
           verse: Number(Verset),
+          focusVerses: verses.map(v => Number(v.Verset)),
         })
       }
     >

@@ -1,6 +1,5 @@
 import { useAtomValue } from 'jotai/react'
-import { useState, useEffect } from 'react'
-import { usePrevious } from '~helpers/usePrevious'
+import { useEffect, useState } from 'react'
 import wait from '~helpers/wait'
 import { tabsCountAtom } from '../../../state/tabs'
 import { useTabAnimations } from './useTabAnimations'

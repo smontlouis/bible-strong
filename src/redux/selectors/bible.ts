@@ -89,6 +89,23 @@ export const makeColorsByThemeSelector = () =>
     (colors, theme) => colors[theme]
   )
 
+// Selector factory for counting grouped highlights (by unique date) for a tag
+export const makeGroupedHighlightsCountSelector = () =>
+  createSelector(
+    [selectHighlights, (_: RootState, tagHighlights: Object | undefined) => tagHighlights],
+    (highlights, tagHighlights): number => {
+      if (!tagHighlights) return 0
+      const uniqueDates = new Set<number>()
+      for (const id of Object.keys(tagHighlights)) {
+        const highlight = highlights[id]
+        if (highlight?.date) {
+          uniqueDates.add(highlight.date)
+        }
+      }
+      return uniqueDates.size
+    }
+  )
+
 // Helper function for TagScreen - sorts verses by date
 const sortVersesByDate = (p: Record<string, Highlight>) =>
   Object.keys(p).reduce((arr: any[], verse) => {

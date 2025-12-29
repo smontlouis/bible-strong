@@ -142,6 +142,7 @@
     "react-redux": "^9.2.0",
     "reanimated-color-picker": "^4.1.1",
     "redux": "^4.0.5",
+    "redux-devtools-expo-dev-plugin": "^2.0.0",
     "redux-persist": "^6.0.0",
     "redux-persist-filesystem-storage": "^2.1.0",
     "redux-thunk": "^2.3.0",

@@ -581,6 +581,8 @@
   "tabs.groupRenamed": "Group renamed",
   "tabs.noTabs": "No tabs",
   "tabs.create": "Create a tab",
+  "tabs.createGroupFromTag": "Create tab group",
+  "tabs.groupCreatedWithCount": "Group created with {{count}} tabs",
 
   "common.create": "Create",
   "common.cancel": "Cancel",

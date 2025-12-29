@@ -1,5 +1,6 @@
-import { createStore, compose, applyMiddleware } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
+import { composeWithDevTools } from 'redux-devtools-expo-dev-plugin'
 import { persistStore, persistReducer, createMigrate, getStoredState } from 'redux-persist'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
@@ -38,7 +39,8 @@ function configureStore() {
 
   // @ts-ignore
   const persistedReducer = persistReducer(persistConfig, reducer)
-  const store = compose(applyMiddleware(...middleware))(createStore)(persistedReducer)
+  const composeEnhancers = __DEV__ ? composeWithDevTools : (f: any) => f
+  const store = composeEnhancers(applyMiddleware(...middleware))(createStore)(persistedReducer)
   const persistor = persistStore(store)
   // persistor.purge() // Purge async storage
   // storage.clearAll()

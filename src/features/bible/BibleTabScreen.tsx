@@ -39,38 +39,38 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
 
   const settings = produce(rawSettings, draftState => {
-      // TODO: WHY IS THIS HERE?
-      draftState.colors.default = deepmerge(defaultColors, draftState.colors.default || {})
-      draftState.colors.dark = deepmerge(darkColors, draftState.colors.dark || {})
-      draftState.colors.black = deepmerge(blackColors, draftState.colors.black || {})
-      draftState.colors.sepia = deepmerge(sepiaColors, draftState.colors.sepia || {})
-      draftState.colors.mauve = deepmerge(mauveColors, draftState.colors.mauve || {})
-      draftState.colors.nature = deepmerge(natureColors, draftState.colors.nature || {})
-      draftState.colors.night = deepmerge(nightColors, draftState.colors.night || {})
-      draftState.colors.sunset = deepmerge(sunsetColors, draftState.colors.sunset || {})
-      // TODO: END - WHY IS THIS HERE?
+    // TODO: WHY IS THIS HERE?
+    draftState.colors.default = deepmerge(defaultColors, draftState.colors.default || {})
+    draftState.colors.dark = deepmerge(darkColors, draftState.colors.dark || {})
+    draftState.colors.black = deepmerge(blackColors, draftState.colors.black || {})
+    draftState.colors.sepia = deepmerge(sepiaColors, draftState.colors.sepia || {})
+    draftState.colors.mauve = deepmerge(mauveColors, draftState.colors.mauve || {})
+    draftState.colors.nature = deepmerge(natureColors, draftState.colors.nature || {})
+    draftState.colors.night = deepmerge(nightColors, draftState.colors.night || {})
+    draftState.colors.sunset = deepmerge(sunsetColors, draftState.colors.sunset || {})
+    // TODO: END - WHY IS THIS HERE?
 
-      const preferredColorScheme = draftState.preferredColorScheme || 'auto'
-      const preferredDarkTheme = draftState.preferredDarkTheme || 'dark'
-      const preferredLightTheme = draftState.preferredLightTheme || 'default'
-      const systemColorScheme = Appearance.getColorScheme()
+    const preferredColorScheme = draftState.preferredColorScheme || 'auto'
+    const preferredDarkTheme = draftState.preferredDarkTheme || 'dark'
+    const preferredLightTheme = draftState.preferredLightTheme || 'default'
+    const systemColorScheme = Appearance.getColorScheme()
 
-      // Provide derived theme as a settings now that we removed it from the redux store
-      draftState.theme =
-        (() => {
-          if (preferredColorScheme === 'auto') {
-            if (systemColorScheme === 'dark') {
-              return preferredDarkTheme
-            }
-            return preferredLightTheme
+    // Provide derived theme as a settings now that we removed it from the redux store
+    draftState.theme =
+      (() => {
+        if (preferredColorScheme === 'auto') {
+          if (systemColorScheme === 'dark') {
+            return preferredDarkTheme
           }
-
-          if (preferredColorScheme === 'dark') return preferredDarkTheme
           return preferredLightTheme
-        })() || 'default'
+        }
 
-      draftState.fontFamily = fontFamily
-    })
+        if (preferredColorScheme === 'dark') return preferredDarkTheme
+        return preferredLightTheme
+      })() || 'default'
+
+    draftState.fontFamily = fontFamily
+  })
 
   const getIfMhyCommentsNeedsDownload = async () => {
     const path = getDatabases().MHY.path

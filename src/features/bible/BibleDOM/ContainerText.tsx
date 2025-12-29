@@ -142,7 +142,7 @@ export const ContainerText = styled('span')<
       : {}),
     ...(isFocused === false
       ? {
-          opacity: 0.5,
+          opacity: 0.3,
         }
       : {}),
   }

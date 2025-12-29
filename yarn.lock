@@ -1861,7 +1861,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.26.9, @babel/runtime@npm:^7.9.2":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 10c0/792ce7af9750fb9b93879cc9d1db175701c4689da890e6ced242ea0207c9da411ccf16dc04e689cc01158b28d7898c40d75598f4559109f761c12ce01e959bf7
@@ -4347,6 +4347,65 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@redux-devtools/core@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "@redux-devtools/core@npm:4.1.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.26.9"
+    "@redux-devtools/instrument": "npm:^2.2.0"
+  peerDependencies:
+    react: ^16.8.4 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-redux: ^7.0.0 || ^8.0.0 || ^9.0.0
+    redux: ^3.5.2 || ^4.0.0 || ^5.0.0
+  checksum: 10c0/02a436c3c3f46a29e03f12b2659ed48c3952b8ee984fb997401b0fdf84e3df12f65b6fe73679a4d45efa12eff8e202460da1d68e981502514507c0b5abae4676
+  languageName: node
+  linkType: hard
+
+"@redux-devtools/instrument@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@redux-devtools/instrument@npm:2.2.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    lodash: "npm:^4.17.21"
+  peerDependencies:
+    redux: ^3.4.0 || ^4.0.0 || ^5.0.0
+  checksum: 10c0/266cd15f1ef144bbb4a2ea472c096d2a4fa72341c4c892827d633a3c85b62d1240a35aaeab71a29020f1da4da0ab2f778c176fb30c35546f6a5020a26ba1c56a
+  languageName: node
+  linkType: hard
+
+"@redux-devtools/serialize@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@redux-devtools/serialize@npm:0.4.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    jsan: "npm:^3.1.14"
+  peerDependencies:
+    immutable: ^4.0.0
+  checksum: 10c0/9906d5fea1214ed82cb453d9a06b76c31fb9ddeea1f5fab18220af721f82c0efce6764353865cced3c481f0e421bfdd45701f2aea19a7678db07c56a5cdd5ad8
+  languageName: node
+  linkType: hard
+
+"@redux-devtools/utils@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@redux-devtools/utils@npm:3.1.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.26.9"
+    "@redux-devtools/core": "npm:^4.1.1"
+    "@redux-devtools/serialize": "npm:^0.4.2"
+    "@types/get-params": "npm:^0.1.2"
+    get-params: "npm:^0.1.2"
+    immutable: "npm:^4.3.7"
+    jsan: "npm:^3.1.14"
+    nanoid: "npm:^5.1.2"
+    redux: "npm:^5.0.1"
+  peerDependencies:
+    "@redux-devtools/core": ^4.1.1
+    immutable: ^4.3.7
+    redux: ^4.0.0 || ^5.0.0
+  checksum: 10c0/ea03fee3e633329d0d8cb84d7fb3aa739302b5e190fed23987e0663de4654e1d26be1ea01a61082b7497b8ac11a029fc4516a9f26d7aa057b5056e53fff170a0
+  languageName: node
+  linkType: hard
+
 "@reduxjs/toolkit@npm:^1.3.4":
   version: 1.9.7
   resolution: "@reduxjs/toolkit@npm:1.9.7"
@@ -4739,6 +4798,13 @@ __metadata:
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
   checksum: 10c0/39d34d1afaa338ab9763f37ad6066e3f349444f9052b9676a7cc0252ef9485a41c6d81c9c4e0d26e9077993354edf25efc853f3224dd4b447175ef62bdcc86a5
+  languageName: node
+  linkType: hard
+
+"@types/get-params@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@types/get-params@npm:0.1.2"
+  checksum: 10c0/7138af23d6acf0737d462263b8d2e5decfd282f1164aa7e2783c2fc9aeb2ec6aa10f6288605740356a916ecc4d27e01c1d8e6ad4c4fd0cd92790b8f482063cf6
   languageName: node
   linkType: hard
 
@@ -6191,6 +6257,7 @@ __metadata:
     react-test-renderer: "npm:18.3.1"
     reanimated-color-picker: "npm:^4.1.1"
     redux: "npm:^4.0.5"
+    redux-devtools-expo-dev-plugin: "npm:^2.0.0"
     redux-persist: "npm:^6.0.0"
     redux-persist-filesystem-storage: "npm:^2.1.0"
     redux-thunk: "npm:^2.3.0"
@@ -8993,6 +9060,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"get-params@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "get-params@npm:0.1.2"
+  checksum: 10c0/bf83ed37d2c5e9d9cf04b0d9d380fa3f29997e4c4c5cbbcda0112747a43148111ab5a054e1681819aeb24b98726053196b183830ad9a4b246bdc5f79af5792f7
+  languageName: node
+  linkType: hard
+
 "get-proto@npm:^1.0.0, get-proto@npm:^1.0.1":
   version: 1.0.1
   resolution: "get-proto@npm:1.0.1"
@@ -9493,6 +9567,13 @@ __metadata:
   version: 9.0.21
   resolution: "immer@npm:9.0.21"
   checksum: 10c0/03ea3ed5d4d72e8bd428df4a38ad7e483ea8308e9a113d3b42e0ea2cc0cc38340eb0a6aca69592abbbf047c685dbda04e3d34bf2ff438ab57339ed0a34cc0a05
+  languageName: node
+  linkType: hard
+
+"immutable@npm:^4.3.7":
+  version: 4.3.7
+  resolution: "immutable@npm:4.3.7"
+  checksum: 10c0/9b099197081b22f6433003e34929da8ecddbbdc1474cdc8aa3b7669dee4adda349c06143de22def36016d1b6de5322b043eccd7a11db1dad2ca85dad4fff5435
   languageName: node
   linkType: hard
 
@@ -10646,6 +10727,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsan@npm:^3.1.14":
+  version: 3.1.14
+  resolution: "jsan@npm:3.1.14"
+  checksum: 10c0/86b6738e90769d8e717849f7bd9ba4742a4ffb1edfa28354521e0c8f106a3addd15eb79d723b47dc9867c70ed06245e4ee14cb2a10c99b91ea612071688137dc
+  languageName: node
+  linkType: hard
+
 "jsc-safe-url@npm:^0.2.2, jsc-safe-url@npm:^0.2.4":
   version: 0.2.4
   resolution: "jsc-safe-url@npm:0.2.4"
@@ -11010,7 +11098,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.19":
+"lodash@npm:^4.17.19, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
@@ -11927,6 +12015,15 @@ __metadata:
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10c0/40e7f70b3d15f725ca072dfc4f74e81fcf1fbb02e491cf58ac0c79093adc9b0a73b152bcde57df4b79cd097e13023d7504acb38404a4da7bc1cd8e887b82fe0b
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^5.1.2":
+  version: 5.1.6
+  resolution: "nanoid@npm:5.1.6"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10c0/27b5b055ad8332cf4f0f9f6e2a494aa7e5ded89df4cab8c8490d4eabefe72c4423971d2745d22002868b1d50576a5e42b7b05214733b19f576382323282dd26e
   languageName: node
   linkType: hard
 
@@ -13661,6 +13758,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"redux-devtools-expo-dev-plugin@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "redux-devtools-expo-dev-plugin@npm:2.0.0"
+  dependencies:
+    "@redux-devtools/instrument": "npm:^2.2.0"
+    "@redux-devtools/utils": "npm:^3.1.1"
+    jsan: "npm:^3.1.14"
+  peerDependencies:
+    expo: ">=53"
+    redux: "*"
+  checksum: 10c0/0fbb37419751037c58fe08bcd173590cd4eea9ab65037eb8df27d23ed3e5322341cb8a9088ca8bed1913ba8db35e581d0c7bf7a4357042f1c04a4e231cbf3ba4
+  languageName: node
+  linkType: hard
+
 "redux-persist-filesystem-storage@npm:^2.1.0":
   version: 2.2.0
   resolution: "redux-persist-filesystem-storage@npm:2.2.0"
@@ -13694,6 +13805,13 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.9.2"
   checksum: 10c0/136d98b3d5dbed1cd6279c8c18a6a74c416db98b8a432a46836bdd668475de6279a2d4fd9d1363f63904e00f0678a8a3e7fa532c897163340baf1e71bb42c742
+  languageName: node
+  linkType: hard
+
+"redux@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "redux@npm:5.0.1"
+  checksum: 10c0/b10c28357194f38e7d53b760ed5e64faa317cc63de1fb95bc5d9e127fab956392344368c357b8e7a9bedb0c35b111e7efa522210cfdc3b3c75e5074718e9069c
   languageName: node
   linkType: hard
 

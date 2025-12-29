@@ -1,8 +1,8 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
 
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
@@ -22,9 +22,12 @@ import useFuzzy from '~helpers/useFuzzy'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
+import { makeTagDataSelector, makeGroupedHighlightsCountSelector } from '~redux/selectors/bible'
 import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { Tag } from '~common/types'
+import { RootState } from '~redux/modules/reducer'
+import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -46,7 +49,10 @@ type TagItemProps = {
 
 const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   const { t } = useTranslation()
-  const highlightsNumber = item.highlights && Object.keys(item.highlights).length
+  const selectGroupedHighlightsCount = useMemo(() => makeGroupedHighlightsCountSelector(), [])
+  const highlightsNumber = useSelector((state: RootState) =>
+    selectGroupedHighlightsCount(state, item.highlights)
+  )
   const notesNumber = item.notes && Object.keys(item.notes).length
   const linksNumber = item.links && Object.keys(item.links).length
   const studiesNumber = item.studies && Object.keys(item.studies).length
@@ -137,6 +143,9 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
   })
   const dispatch = useDispatch()
   const { ref, open, close } = useBottomSheetModal()
+  const store = useStore<RootState>()
+  const selectTagData = useMemo(() => makeTagDataSelector(), [])
+  const createTabGroupFromTag = useCreateTabGroupFromTag()
 
   useEffect(() => {
     if (isOpen) {
@@ -156,6 +165,13 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
         style: 'destructive',
       },
     ])
+  }
+
+  const handleOpenInTabGroup = () => {
+    if (!isOpen) return
+    const tagData = selectTagData(store.getState(), isOpen)
+    createTabGroupFromTag(isOpen, tagData)
+    close()
   }
 
   return (
@@ -195,6 +211,9 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
           }}
         >
           {t('Éditer')}
+        </Modal.Item>
+        <Modal.Item onPress={handleOpenInTabGroup}>
+          {t('tabs.createGroupFromTag')}
         </Modal.Item>
         <Modal.Item color="quart" onPress={promptLogout}>
           {t('Supprimer')}

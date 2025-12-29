@@ -3,16 +3,20 @@ import distanceInWords from 'date-fns/formatDistance'
 import enGB from 'date-fns/locale/en-GB'
 import fr from 'date-fns/locale/fr'
 import React, { useMemo, useRef, useState } from 'react'
+import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '~common/Header'
+import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import ScrollView from '~common/ui/ScrollView'
 import HighlightItem from '~features/settings/Verse'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { updateTag, Link as LinkModel, LinkType } from '~redux/modules/user'
+import { updateTag, removeTag, Link as LinkModel, LinkType } from '~redux/modules/user'
+import { useCreateTabGroupFromTag, TagData } from './useCreateTabGroupFromTag'
 
 import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
@@ -193,6 +197,39 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
     )
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
+  const createTabGroupFromTag = useCreateTabGroupFromTag()
+
+  const handleDelete = () => {
+    if (!tag) return
+    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer ce tag ?'), [
+      { text: t('Non'), style: 'cancel' },
+      {
+        text: t('Oui'),
+        style: 'destructive',
+        onPress: () => {
+          dispatch(removeTag(tag.id))
+          navigation.goBack()
+        },
+      },
+    ])
+  }
+
+  const handleOpenInTabGroup = () => {
+    if (!tag) return
+
+    const tagData: TagData = {
+      highlights,
+      notes,
+      links,
+      studies,
+      naves,
+      words,
+      strongsGrec,
+      strongsHebreu,
+    }
+
+    createTabGroupFromTag(tag, tagData)
+  }
 
   if (!tag) {
     return (
@@ -212,15 +249,37 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
         hasBackButton
         title={tag.name}
         rightComponent={
-          <Link
-            onPress={() => {
-              setTagToRename({ id: tag.id, name: tag.name })
-              renameModalRef.current?.present()
-            }}
-            padding
-          >
-            <FeatherIcon size={20} name="edit-3" />
-          </Link>
+          <PopOverMenu
+            popover={
+              <>
+                <MenuOption
+                  onSelect={() => {
+                    setTagToRename({ id: tag.id, name: tag.name })
+                    renameModalRef.current?.present()
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="edit-3" size={15} />
+                    <Text marginLeft={10}>{t('Éditer')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={handleOpenInTabGroup}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="layers" size={15} />
+                    <Text marginLeft={10}>{t('tabs.createGroupFromTag')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption onSelect={handleDelete}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="trash-2" size={15} color="quart" />
+                    <Text marginLeft={10} color="quart">
+                      {t('Supprimer')}
+                    </Text>
+                  </Box>
+                </MenuOption>
+              </>
+            }
+          />
         }
       />
       <ScrollView>

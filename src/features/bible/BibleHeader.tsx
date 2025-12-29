@@ -31,6 +31,7 @@ import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
+import { usePrevious } from '~helpers/usePrevious'
 import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
@@ -93,9 +94,17 @@ const Header = ({
     selectBookmarkForChapter(state, bookNumber, chapter)
   )
 
+  // Track previous book and chapter to avoid overwriting custom titles
+  const prevBook = usePrevious(bookName)
+  const prevChapter = usePrevious(chapter)
+
   useEffect(() => {
-    actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
-  }, [actions, bookName, chapter, version, t])
+    // Only update title if book or chapter changed (not on first mount)
+    // prevBook is undefined on first render, so we skip the update
+    if (prevBook !== undefined && (prevBook !== bookName || prevChapter !== chapter)) {
+      actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
+    }
+  }, [actions, bookName, chapter, version, t, prevBook, prevChapter])
 
   const { addParallelVersion, removeAllParallelVersions } = actions
 

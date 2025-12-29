@@ -581,6 +581,8 @@
   "tabs.groupRenamed": "Groupe renommé",
   "tabs.noTabs": "Aucun onglet",
   "tabs.create": "Créer un onglet",
+  "tabs.createGroupFromTag": "Créer un groupe d'onglets",
+  "tabs.groupCreatedWithCount": "Groupe créé avec {{count}} onglets",
 
   "common.create": "Créer",
   "common.cancel": "Annuler",
