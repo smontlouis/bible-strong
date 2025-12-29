@@ -37,7 +37,7 @@ export const Slides = ({ children, index }: SliderProviderProps) => {
 
   useEffect(() => {
     if (prevIndex !== undefined && prevIndex !== index) {
-      direction.value = prevIndex < index ? 'left' : 'right'
+      direction.set(prevIndex < index ? 'left' : 'right')
     }
   }, [index, prevIndex, direction])
 
@@ -87,13 +87,13 @@ export const Slide = ({ slideIndex, ...props }: BoxProps & SlideProps) => {
   const SlideIn = (values: EntryAnimationsValues & ExitAnimationsValues) => {
     'worklet'
 
-    return direction.value === 'left' ? slideInRightAnimation(values) : slideInLeftAnimation(values)
+    return direction.get() === 'left' ? slideInRightAnimation(values) : slideInLeftAnimation(values)
   }
 
   const SlideOut = (values: EntryAnimationsValues & ExitAnimationsValues) => {
     'worklet'
 
-    return direction.value === 'left'
+    return direction.get() === 'left'
       ? slideOutLeftAnimation(values)
       : slideOutRightAnimation(values)
   }

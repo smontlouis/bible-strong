@@ -58,7 +58,7 @@ const TabGroupPager = () => {
     .failOffsetY([-10, 10])
     .onStart(() => {
       'worklet'
-      startX.set(translateX.value)
+      startX.set(translateX.get())
     })
     .onUpdate(event => {
       'worklet'
@@ -66,19 +66,19 @@ const TabGroupPager = () => {
       const maxTranslateX = 0
 
       const newX = startX.get() + event.translationX
-      translateX.value = rubberBandClamp(newX, minTranslateX, maxTranslateX)
-      scrollX.value = -translateX.value
+      translateX.set(rubberBandClamp(newX, minTranslateX, maxTranslateX))
+      scrollX.set(-translateX.get())
 
-      const pageIndex = Math.round(-translateX.value / width)
-      activeGroupIndex.value = pageIndex
+      const pageIndex = Math.round(-translateX.get() / width)
+      activeGroupIndex.set(pageIndex)
 
       const createPagePosition = groups.length * width
-      const isOnCreatePage = -translateX.value >= createPagePosition - 10
-      createGroupPage.isFullyVisible.value = isOnCreatePage
+      const isOnCreatePage = -translateX.get() >= createPagePosition - 10
+      createGroupPage.isFullyVisible.set(isOnCreatePage)
     })
     .onEnd(event => {
       'worklet'
-      const currentPage = -translateX.value / width
+      const currentPage = -translateX.get() / width
       let targetPage: number
 
       if (Math.abs(event.velocityX) > VELOCITY_THRESHOLD) {
@@ -91,22 +91,24 @@ const TabGroupPager = () => {
 
       const targetX = -targetPage * width
 
-      translateX.value = withSpring(targetX, undefined, finished => {
-        'worklet'
-        if (finished && targetPage < groups.length) {
-          runOnJS(handleGroupChange)(targetPage)
-        }
-      })
+      translateX.set(
+        withSpring(targetX, undefined, finished => {
+          'worklet'
+          if (finished && targetPage < groups.length) {
+            runOnJS(handleGroupChange)(targetPage)
+          }
+        })
+      )
 
-      scrollX.value = withSpring(-targetX)
-      activeGroupIndex.value = targetPage
+      scrollX.set(withSpring(-targetX))
+      activeGroupIndex.set(targetPage)
 
       const createPagePosition = groups.length * width
-      createGroupPage.isFullyVisible.value = -targetX >= createPagePosition - 10
+      createGroupPage.isFullyVisible.set(-targetX >= createPagePosition - 10)
     })
 
   const containerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
+    transform: [{ translateX: translateX.get() }],
   }))
 
   const scrollToPreviousGroup = () => {

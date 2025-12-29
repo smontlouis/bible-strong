@@ -1,5 +1,5 @@
 import { useSetAtom } from 'jotai/react'
-import { getDefaultBibleTab, tabsAtom, tabsAtomsAtom } from 'src/state/tabs'
+import { getDefaultBibleTab, tabsAtom } from 'src/state/tabs'
 import { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 

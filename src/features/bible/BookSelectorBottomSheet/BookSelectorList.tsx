@@ -27,7 +27,7 @@ export const BookSelectorList = ({
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
 
   const handleBookSelect = (book: Book) => {
-    expandedBook.value = expandedBook.value === book.Numero ? null : book.Numero
+    expandedBook.set(expandedBook.get() === book.Numero ? null : book.Numero)
   }
 
   const renderItem = useCallback(

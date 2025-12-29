@@ -24,7 +24,7 @@ const BookItem = memo(
   ({ book, isSelected, onBookSelect, expandedBook }: BookItemProps) => {
     const { t } = useTranslation()
     const { width: windowWidth } = useWindowDimensions()
-    const isExpanded = useDerivedValue(() => expandedBook.value === book.Numero)
+    const isExpanded = useDerivedValue(() => expandedBook.get() === book.Numero)
 
     const chapters = useMemo(() => Array.from({ length: book.Chapitres }, (_, i) => i + 1), [book])
 
@@ -73,7 +73,7 @@ const BookItem = memo(
               }}
               // @ts-expect-error
               animate={useDerivedValue(() => ({
-                transform: [{ rotate: isExpanded.value ? '180deg' : '0deg' }],
+                transform: [{ rotate: isExpanded.get() ? '180deg' : '0deg' }],
               }))}
             >
               <FeatherIcon color="grey" name="chevron-down" size={24} style={{ opacity: 0.5 }} />

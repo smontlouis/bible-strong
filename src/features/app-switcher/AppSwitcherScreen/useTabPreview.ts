@@ -41,13 +41,13 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   // On mount, measure the initial tab preview
   // Only scroll on initial app mount, not when switching groups
   useEffect(() => {
-    if (index === activeTabPreview.index.value && isInitialMount.current) {
+    if (index === activeTabPreview.index.get() && isInitialMount.current) {
       ;(async () => {
         await wait(300)
         const { pageX, pageY } = await measureTabPreview(index)
-        activeTabPreview.top.value = pageY
-        activeTabPreview.left.value = pageX
-        activeTabPreview.zIndex.value = 3
+        activeTabPreview.top.set(pageY)
+        activeTabPreview.left.set(pageX)
+        activeTabPreview.zIndex.set(3)
 
         const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
         // @ts-ignore
@@ -69,30 +69,30 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   }
 
   const onDelete = () => {
-    scrollView.padding.value = TAB_PREVIEW_HEIGHT + GAP + 20
+    scrollView.padding.set(TAB_PREVIEW_HEIGHT + GAP + 20)
     dispatchTabs({
       type: 'remove',
       atom: tabAtom,
     })
-    scrollView.padding.value = withTiming(0)
+    scrollView.padding.set(withTiming(0))
   }
 
   const onClose = () => {
-    activeTabPreview.zIndex.value = 1
+    activeTabPreview.zIndex.set(1)
     onDelete()
     const tabsCount = getDefaultStore().get(tabsCountAtom)
 
     // If deleting last tab in list, choose the previous one
-    if (tabsCount === activeTabPreview.index.value) {
-      activeTabPreview.index.value -= 1
+    if (tabsCount === activeTabPreview.index.get()) {
+      activeTabPreview.index.set(activeTabPreview.index.get() - 1)
     }
   }
 
   const boxStyles = useAnimatedStyle(() => {
-    if (activeTabPreview.index.value === index) {
+    if (activeTabPreview.index.get() === index) {
       return {
         position: 'relative',
-        zIndex: activeTabPreview.zIndex.value,
+        zIndex: activeTabPreview.zIndex.get(),
       }
     }
     return {
@@ -102,27 +102,27 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   })
 
   const previewImageStyles = useAnimatedStyle(() => {
-    if (activeTabPreview.index.value === index) {
+    if (activeTabPreview.index.get() === index) {
       return {
         width: interpolate(
-          activeTabPreview.animationProgress.value,
+          activeTabPreview.animationProgress.get(),
           [0, 1],
           [TAB_PREVIEW_WIDTH, WIDTH]
         ),
         height: interpolate(
-          activeTabPreview.animationProgress.value,
+          activeTabPreview.animationProgress.get(),
           [0, 1],
           [TAB_PREVIEW_HEIGHT, HEIGHT]
         ),
         top: interpolate(
-          activeTabPreview.animationProgress.value,
+          activeTabPreview.animationProgress.get(),
           [0, 1],
-          [0, -activeTabPreview.top.value]
+          [0, -activeTabPreview.top.get()]
         ),
         left: interpolate(
-          activeTabPreview.animationProgress.value,
+          activeTabPreview.animationProgress.get(),
           [0, 1],
-          [0, -activeTabPreview.left.value]
+          [0, -activeTabPreview.left.get()]
         ),
         borderRadius: TAB_BORDER_RADIUS,
       }
@@ -138,20 +138,20 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   })
 
   const textStyles = useAnimatedStyle(() => {
-    if (activeTabPreview.index.value === index) {
+    if (activeTabPreview.index.get() === index) {
       return {
         // top: interpolate(
-        //   activeTabPreview.animationProgress.value,
+        //   activeTabPreview.animationProgress.get(),
         //   [0, 1],
-        //   [0, -activeTabPreview.top.value]
+        //   [0, -activeTabPreview.top.get()]
         // ),
         // left: interpolate(
-        //   activeTabPreview.animationProgress.value,
+        //   activeTabPreview.animationProgress.get(),
         //   [0, 1],
-        //   [0, -activeTabPreview.left.value]
+        //   [0, -activeTabPreview.left.get()]
         // ),
         opacity: interpolate(
-          activeTabPreview.animationProgress.value,
+          activeTabPreview.animationProgress.get(),
           [0, 1],
           [1, 0],
           Extrapolate.CLAMP
@@ -169,7 +169,7 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   const xStyles = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
-        activeTabPreview.animationProgress.value,
+        activeTabPreview.animationProgress.get(),
         [0, 1],
         [1, 0],
         Extrapolate.CLAMP

@@ -56,7 +56,7 @@ const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioCo
       // @ts-ignore
       animate={useDerivedValue(() => {
         return {
-          translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
+          translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT : 0,
         }
       })}
       {...motiTransition}

@@ -26,19 +26,19 @@ function AccordionItem({
   const height = useSharedValue(0)
 
   const derivedHeight = useDerivedValue(() =>
-    withTiming(height.value * Number(isExpanded.value), {
+    withTiming(height.get() * Number(isExpanded.get()), {
       duration,
     })
   )
   const bodyStyle = useAnimatedStyle(() => ({
-    height: derivedHeight.value,
+    height: derivedHeight.get(),
   }))
 
   return (
     <Animated.View key={`accordionItem_${viewKey}`} style={[styles.animatedView, bodyStyle, style]}>
       <View
         onLayout={e => {
-          height.value = e.nativeEvent.layout.height
+          height.set(e.nativeEvent.layout.height)
         }}
         style={styles.wrapper}
       >

@@ -57,7 +57,7 @@ const BackToAudioFooter = ({
         // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 60 : 0,
+            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT + insets.bottom + 60 : 0,
           }
         })}
         {...motiTransition}
@@ -76,7 +76,7 @@ const BackToAudioFooter = ({
         // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT : 0,
+            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT : 0,
           }
         })}
         {...motiTransition}
@@ -114,7 +114,7 @@ const BackToAudioFooter = ({
         // @ts-ignore
         animate={useDerivedValue(() => {
           return {
-            translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 60 : 0,
+            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT + insets.bottom + 60 : 0,
           }
         })}
         {...motiTransition}

@@ -28,7 +28,7 @@ export const useTimeline = ({
 
   const year = useDerivedValue(() => {
     const currentYearNb = Math.round(
-      interpolate(x.value * -1, [0, scrollViewWidth], [startYear, endYear], 'extend')
+      interpolate(x.get() * -1, [0, scrollViewWidth], [startYear, endYear], 'extend')
     )
     if (currentYearNb >= yearNow) {
       return futurString
@@ -40,7 +40,7 @@ export const useTimeline = ({
 
   const lineX = useDerivedValue(() => {
     return interpolate(
-      x.value,
+      x.get(),
       [-width, -width + wpUI(100), 0, wpUI(100)],
       [-wpUI(100), 0, 0, wpUI(100)]
     )

@@ -27,7 +27,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
     return {
       transform: [
         {
-          translateY: withTiming(isFullScreenBibleValue.value ? bottomBarHeight : 0, {
+          translateY: withTiming(isFullScreenBibleValue.get() ? bottomBarHeight : 0, {
             duration: 300,
             easing: Easing.bezier(0.13, 0.69, 0.5, 0.98),
           }),

@@ -12,7 +12,7 @@ interface Props {
 
 const PrevSectionImage = ({ x, prevEvent }: Props) => {
   const style = useAnimatedStyle(() => {
-    const opacity = interpolate(x.value, [0, wpUI(100)], [0, 1], Extrapolation.CLAMP)
+    const opacity = interpolate(x.get(), [0, wpUI(100)], [0, 1], Extrapolation.CLAMP)
     return { opacity }
   })
 

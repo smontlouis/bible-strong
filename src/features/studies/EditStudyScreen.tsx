@@ -86,7 +86,7 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
 
   useFocusEffect(
     useCallback(() => {
-      isFullScreenBibleValue.value = false
+      isFullScreenBibleValue.set(false)
     }, [])
   )
 

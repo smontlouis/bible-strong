@@ -138,7 +138,7 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
           }
           // Closing the bottom sheet
           if (fromIndex === 0 && toIndex === -1) {
-            expandedBook.value = null
+            expandedBook.set(null)
           }
         }}
         {...bottomSheetStyles}

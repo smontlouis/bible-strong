@@ -118,10 +118,10 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
       left: 0,
       width: WIDTH,
       bottom: 0,
-      opacity: activeTabScreen.opacity.value,
+      opacity: activeTabScreen.opacity.get(),
       transform: [
         {
-          translateY: activeTabScreen.atomId.value === tabAtomId ? 0 : HEIGHT,
+          translateY: activeTabScreen.atomId.get() === tabAtomId ? 0 : HEIGHT,
         },
       ],
     }

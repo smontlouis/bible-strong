@@ -339,12 +339,12 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case SWIPE_DOWN: {
         console.log('[Bible] SWIPE_DOWN')
         setIsFullScreenBible(true)
-        isFullScreenBibleValue.value = true
+        isFullScreenBibleValue.set(true)
         break
       }
       case SWIPE_UP: {
         setIsFullScreenBible(false)
-        isFullScreenBibleValue.value = false
+        isFullScreenBibleValue.set(false)
         break
       }
       case OPEN_HIGHLIGHT_TAGS: {

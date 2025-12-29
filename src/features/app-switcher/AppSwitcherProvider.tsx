@@ -101,13 +101,13 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
 
   const navigateToPage = (pageIndex: number, groupsLength: number) => {
     const targetX = -pageIndex * width
-    pagerTranslateX.value = withSpring(targetX)
-    pagerScrollX.value = withSpring(-targetX)
-    activeGroupIndex.value = pageIndex
+    pagerTranslateX.set(withSpring(targetX))
+    pagerScrollX.set(withSpring(-targetX))
+    activeGroupIndex.set(pageIndex)
 
     // Update createGroupPage.isFullyVisible
     const createPagePosition = groupsLength * width
-    createGroupPageIsFullyVisible.value = -targetX >= createPagePosition - 10
+    createGroupPageIsFullyVisible.set(-targetX >= createPagePosition - 10)
   }
 
   const groupPager = {

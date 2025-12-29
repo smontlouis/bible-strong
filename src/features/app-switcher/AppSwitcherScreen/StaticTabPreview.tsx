@@ -1,15 +1,15 @@
-import React, { memo } from 'react'
-import { Image, StyleSheet } from 'react-native'
 import Color from 'color'
+import React from 'react'
+import { Image, StyleSheet } from 'react-native'
 
 import { useTheme } from '@emotion/react'
+import { LinearGradient } from 'expo-linear-gradient'
 import Box, { BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
 import getIconByTabType from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
-import { LinearGradient } from 'expo-linear-gradient'
 
 interface StaticTabPreviewProps {
   tab: TabItem
@@ -114,4 +114,4 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
   )
 }
 
-export default memo(StaticTabPreview)
+export default StaticTabPreview

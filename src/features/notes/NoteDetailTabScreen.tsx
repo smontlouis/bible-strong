@@ -98,7 +98,7 @@ const NoteDetailTabScreen = ({ navigation, notesAtom, noteId }: NoteDetailTabScr
 
   useEffect(() => {
     if (isCurrentTab) {
-      isFullScreenBibleValue.value = false
+      isFullScreenBibleValue.set(false)
     }
   }, [isCurrentTab])
 

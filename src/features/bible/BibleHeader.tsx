@@ -102,49 +102,49 @@ const Header = ({
   // useDerivedValue hooks must be at the top level
   const headerHeight = useDerivedValue(() => {
     return {
-      height: isFullScreenBibleValue.value ? 20 + insets.top : HEADER_HEIGHT + insets.top,
+      height: isFullScreenBibleValue.get() ? 20 + insets.top : HEADER_HEIGHT + insets.top,
     }
   })
 
   const backButtonTranslateY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value ? -2 : 0,
+      translateY: isFullScreenBibleValue.get() ? -2 : 0,
     }
   })
 
   const bookSelectorOpacity = useDerivedValue(() => {
     return {
-      opacity: isFullScreenBibleValue.value ? 0 : 1,
+      opacity: isFullScreenBibleValue.get() ? 0 : 1,
     }
   })
 
   const bookSelectorTranslateY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value ? -2 : 0,
+      translateY: isFullScreenBibleValue.get() ? -2 : 0,
     }
   })
 
   const versionSelectorOpacity = useDerivedValue(() => {
     return {
-      opacity: isFullScreenBibleValue.value ? 0 : 1,
+      opacity: isFullScreenBibleValue.get() ? 0 : 1,
     }
   })
 
   const versionSelectorTranslateY = useDerivedValue(() => {
     return {
-      translateY: isFullScreenBibleValue.value ? -2 : 0,
+      translateY: isFullScreenBibleValue.get() ? -2 : 0,
     }
   })
 
   const verseSelectorOpacity = useDerivedValue(() => {
     return {
-      opacity: isFullScreenBibleValue.value ? 0 : 1,
+      opacity: isFullScreenBibleValue.get() ? 0 : 1,
     }
   })
 
   const menuOpacity = useDerivedValue(() => {
     return {
-      opacity: isFullScreenBibleValue.value ? 0 : 1,
+      opacity: isFullScreenBibleValue.get() ? 0 : 1,
     }
   })
 
@@ -182,7 +182,7 @@ const Header = ({
         {(isSelectionMode || hasBackButton) && (
           <Back
             onGoBack={() => {
-              isFullScreenBibleValue.value = false
+              isFullScreenBibleValue.set(false)
               console.log('[Bible] onGoBack')
             }}
           >

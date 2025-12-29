@@ -10,10 +10,10 @@ interface Props {
 }
 
 const CurrentSectionImage = ({ isReady, currentEvent }: Props) => {
-  const opacity = useDerivedValue(() => (isReady.value === 1 ? 0 : 1))
+  const opacity = useDerivedValue(() => (isReady.get() === 1 ? 0 : 1))
 
   const style = useAnimatedStyle(() => {
-    return { opacity: opacity.value }
+    return { opacity: opacity.get() }
   })
 
   return (

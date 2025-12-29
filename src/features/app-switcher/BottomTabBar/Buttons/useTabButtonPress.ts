@@ -38,16 +38,16 @@ const useTabButtonPress = () => {
   const iconStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        scale: scale.value,
+        scale: scale.get(),
       },
     ],
   }))
 
   useDidUpdate(() => {
-    scale.value = withDelay(
+    scale.set(withDelay(
       300,
       withSequence(withTiming(1.2, { duration: 500 }), withTiming(1, { duration: 500 }))
-    )
+    ))
   }, [tabsCount, scale])
 
   return { onPress, tabsCount, iconStyle }

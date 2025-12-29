@@ -341,103 +341,103 @@ export default memo(
     const deltaY = useSharedValue(0)
 
     useEffect(() => {
-      if (canStartAnimation.value === 0) {
-        x.value = entrance ? wpUI(100) : lowerBoundX - wpUI(100)
-        canStartAnimation.value = withDelay(1500, withTiming(1, { duration: 0 }))
+      if (canStartAnimation.get() === 0) {
+        x.set(entrance ? wpUI(100) : lowerBoundX - wpUI(100))
+        canStartAnimation.set(withDelay(1500, withTiming(1, { duration: 0 })))
       }
     }, [])
 
     useAnimatedReaction(
-      () => canStartAnimation.value,
+      () => canStartAnimation.get(),
       () => {
-        if (canStartAnimation.value === 1) {
-          if (!isReady.value) {
-            opacity.value = 1
-            x.value = withTiming(entrance ? 0 : lowerBoundX, { duration: 1000 }, () => {
-              isReady.value = 1
-            })
+        if (canStartAnimation.get() === 1) {
+          if (!isReady.get()) {
+            opacity.set(1)
+            x.set(withTiming(entrance ? 0 : lowerBoundX, { duration: 1000 }, () => {
+              isReady.set(1)
+            }))
           }
         }
       }
     )
 
     const animatedStyles = useAnimatedStyle(() => ({
-      opacity: opacity.value,
-      transform: [{ translateY: y.value }, { translateX: x.value }],
+      opacity: opacity.get(),
+      transform: [{ translateY: y.get() }, { translateX: x.get() }],
     }))
 
     const panGesture = Gesture.Pan()
       .onStart(e => {
-        deltaX.value = x.value
-        deltaY.value = y.value
+        deltaX.set(x.get())
+        deltaY.set(y.get())
       })
       .onUpdate(e => {
-        const translateX = deltaX.value + e.translationX
-        const translateY = deltaY.value + e.translationY
+        const translateX = deltaX.get() + e.translationX
+        const translateY = deltaY.get() + e.translationY
 
         // Apply friction when reaching the bounds
-        const isInBoundX = x.value >= lowerBoundX && x.value <= upperBoundX
+        const isInBoundX = x.get() >= lowerBoundX && x.get() <= upperBoundX
         if (!isInBoundX) {
-          const bound = x.value < lowerBoundX ? lowerBoundX : upperBoundX
+          const bound = x.get() < lowerBoundX ? lowerBoundX : upperBoundX
           const distance = bound - translateX
-          x.value = bound - friction(distance)
+          x.set(bound - friction(distance))
         } else {
-          x.value = translateX
+          x.set(translateX)
         }
 
-        const isInBoundY = y.value >= lowerBoundY && y.value <= upperBoundY
+        const isInBoundY = y.get() >= lowerBoundY && y.get() <= upperBoundY
         if (!isInBoundY) {
-          const bound = y.value < lowerBoundY ? lowerBoundY : upperBoundY
+          const bound = y.get() < lowerBoundY ? lowerBoundY : upperBoundY
           const distance = bound - translateY
-          y.value = bound - friction(distance)
+          y.set(bound - friction(distance))
         } else {
-          y.value = deltaY.value + e.translationY
+          y.set(deltaY.get() + e.translationY)
         }
       })
       .onEnd(e => {
-        const isInBoundX = x.value >= lowerBoundX && x.value <= upperBoundX
+        const isInBoundX = x.get() >= lowerBoundX && x.get() <= upperBoundX
         if (!isInBoundX) {
           const direction = e.velocityX > 0 ? 'left' : 'right'
 
           if (
             direction === 'left' &&
             !isFirst &&
-            (x.value - upperBoundX > 100 || e.velocityX > 1800)
+            (x.get() - upperBoundX > 100 || e.velocityX > 1800)
           ) {
-            x.value = withTiming(upperBoundX + wpUI(100), { duration: 300 }, () => {
+            x.set(withTiming(upperBoundX + wpUI(100), { duration: 300 }, () => {
               runOnJS(onPrev)()
-            })
+            }))
           } else if (
             direction === 'right' &&
             !isLast &&
-            (x.value - lowerBoundX < -100 || e.velocityX < -1800)
+            (x.get() - lowerBoundX < -100 || e.velocityX < -1800)
           ) {
-            x.value = withTiming(lowerBoundX - wpUI(100), { duration: 300 }, () => {
+            x.set(withTiming(lowerBoundX - wpUI(100), { duration: 300 }, () => {
               runOnJS(onNext)()
-            })
+            }))
           } else {
-            x.value = withTiming(Math.max(lowerBoundX, Math.min(upperBoundX, x.value)))
+            x.set(withTiming(Math.max(lowerBoundX, Math.min(upperBoundX, x.get()))))
           }
         } else {
-          x.value = withDecay({
+          x.set(withDecay({
             velocity: e.velocityX,
             clamp: [lowerBoundX, upperBoundX],
             rubberBandEffect: true,
             rubberBandFactor: 1,
             velocityFactor: 0.6,
-          })
+          }))
         }
-        const isInBoundY = y.value >= lowerBoundY && y.value <= upperBoundY
+        const isInBoundY = y.get() >= lowerBoundY && y.get() <= upperBoundY
         if (!isInBoundY) {
-          y.value = withTiming(Math.max(lowerBoundY, Math.min(upperBoundY, y.value)))
+          y.set(withTiming(Math.max(lowerBoundY, Math.min(upperBoundY, y.get()))))
         } else {
-          y.value = withDecay({
+          y.set(withDecay({
             velocity: e.velocityY,
             clamp: [lowerBoundY, upperBoundY],
             rubberBandEffect: true,
             rubberBandFactor: 1,
             velocityFactor: 0.6,
-          })
+          }))
         }
       })
 

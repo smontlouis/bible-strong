@@ -29,12 +29,12 @@ const fromTo = (animations: Animation[]) => {
 
   animations.forEach(animation => {
     const { animatedValue } = animation
-    animatedValue.value = animation.fromValue
-    animatedValue.value = withTiming(animation.toValue, animation.options, () => {
+    animatedValue.set(animation.fromValue)
+    animatedValue.set(withTiming(animation.toValue, animation.options, () => {
       if (animation.onFinishValue !== undefined) {
-        animatedValue.value = animation.onFinishValue
+        animatedValue.set(animation.onFinishValue)
       }
-    })
+    }))
   })
 }
 
@@ -54,7 +54,7 @@ const useBottomTabBar = () => {
   const bottomBarListOpacity = useSharedValue(0)
 
   const onPress = async () => {
-    const index = activeTabPreview.index.value
+    const index = activeTabPreview.index.get()
     const { pageX, pageY } = await measureTabPreview(index)
     expandTab({
       index,
@@ -133,10 +133,10 @@ const useBottomTabBar = () => {
     return {
       transform: [
         {
-          translateY: bottomBarListY.value,
+          translateY: bottomBarListY.get(),
         },
       ],
-      opacity: bottomBarListOpacity.value,
+      opacity: bottomBarListOpacity.get(),
     }
   })
 
@@ -144,10 +144,10 @@ const useBottomTabBar = () => {
     return {
       transform: [
         {
-          translateY: bottomBarViewY.value,
+          translateY: bottomBarViewY.get(),
         },
       ],
-      opacity: bottomBarViewOpacity.value,
+      opacity: bottomBarViewOpacity.get(),
     }
   })
 

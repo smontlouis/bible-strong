@@ -23,49 +23,55 @@ export const useTabAnimations = () => {
 
   const setAtomId = (index: number) => {
     const atomId = getDefaultStore().get(tabsAtomsAtom)[index].toString()
-    activeTabScreen.atomId.value = atomId
+    activeTabScreen.atomId.set(atomId)
   }
 
   const setActiveTabOpacity = () => {
     setTimeout(() => {
-      activeTabScreen.opacity.value = withTiming(1, undefined, () => {
-        runOnJS(takeActiveTabSnapshot)(
-          activeTabPreview.index.value,
-          activeTabScreen.atomId.value || ''
-        )
-      })
+      activeTabScreen.opacity.set(
+        withTiming(1, undefined, () => {
+          runOnJS(takeActiveTabSnapshot)(
+            activeTabPreview.index.get(),
+            activeTabScreen.atomId.get() || ''
+          )
+        })
+      )
     }, 50)
   }
 
   const minimizeTab = () => {
     'worklet'
-    activeTabScreen.opacity.value = withTiming(0)
-    activeTabPreview.animationProgress.value = withTiming(0, tabTimingConfig, () => {
-      activeTabPreview.zIndex.value = 2
-    })
+    activeTabScreen.opacity.set(withTiming(0))
+    activeTabPreview.animationProgress.set(
+      withTiming(0, tabTimingConfig, () => {
+        activeTabPreview.zIndex.set(2)
+      })
+    )
     runOnJS(setAppSwitcherMode)('list')
-    activeTabScreen.atomId.value = null
+    activeTabScreen.atomId.set(null)
   }
 
   const expandTab = ({ index, left, top }: { index: number; left: number; top: number }) => {
     'worklet'
 
     runOnJS(setAppSwitcherMode)('view')
-    activeTabPreview.zIndex.value = 3
-    activeTabPreview.left.value = left
-    activeTabPreview.top.value = top
-    activeTabPreview.index.value = index
+    activeTabPreview.zIndex.set(3)
+    activeTabPreview.left.set(left)
+    activeTabPreview.top.set(top)
+    activeTabPreview.index.set(index)
 
-    activeTabPreview.animationProgress.value = withTiming(1, tabTimingConfig, () => {
-      runOnJS(setActiveTabIndex)(index)
-      runOnJS(setAtomId)(index)
-      runOnJS(setActiveTabOpacity)()
-    })
+    activeTabPreview.animationProgress.set(
+      withTiming(1, tabTimingConfig, () => {
+        runOnJS(setActiveTabIndex)(index)
+        runOnJS(setAtomId)(index)
+        runOnJS(setActiveTabOpacity)()
+      })
+    )
   }
 
   const slideToIndex = (index: number) => {
     // Cas spécial: en mode 'view' avec le même index (ex: création d'onglet depuis état vide)
-    if (activeTabPreview.index.value === index) {
+    if (activeTabPreview.index.get() === index) {
       const tabsCount = getDefaultStore().get(tabsCountAtom)
       const currentMode = getDefaultStore().get(appSwitcherModeAtom)
 
@@ -78,31 +84,35 @@ export const useTabAnimations = () => {
       return
     }
 
-    tabPreviewCarousel.opacity.value = 1
-    tabPreviewCarousel.translateY.value = 0
-    activeTabScreen.atomId.value = null
+    tabPreviewCarousel.opacity.set(1)
+    tabPreviewCarousel.translateY.set(0)
+    activeTabScreen.atomId.set(null)
     runOnJS(setActiveTabIndex)(index)
 
-    activeTabPreview.index.value = withTiming(index, { duration: 400 }, finished => {
-      if (!finished) return
+    activeTabPreview.index.set(
+      withTiming(index, { duration: 400 }, finished => {
+        if (!finished) return
 
-      runOnJS(setAtomId)(index)
-      tabPreviewCarousel.opacity.value = withDelay(
-        200,
-        withTiming(0, undefined, finish => {
-          if (!finish) {
-            tabPreviewCarousel.opacity.value = 1
-            return
-          }
-          tabPreviewCarousel.translateY.value = HEIGHT
-          activeTabPreview.zIndex.value = 3
-          runOnJS(takeActiveTabSnapshot)(
-            activeTabPreview.index.value,
-            activeTabScreen.atomId.value || ''
+        runOnJS(setAtomId)(index)
+        tabPreviewCarousel.opacity.set(
+          withDelay(
+            200,
+            withTiming(0, undefined, finish => {
+              if (!finish) {
+                tabPreviewCarousel.opacity.set(1)
+                return
+              }
+              tabPreviewCarousel.translateY.set(HEIGHT)
+              activeTabPreview.zIndex.set(3)
+              runOnJS(takeActiveTabSnapshot)(
+                activeTabPreview.index.get(),
+                activeTabScreen.atomId.get() || ''
+              )
+            })
           )
-        })
-      )
-    })
+        )
+      })
+    )
   }
 
   return { minimizeTab, expandTab, slideToIndex }
