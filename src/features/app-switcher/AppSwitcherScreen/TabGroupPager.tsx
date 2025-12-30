@@ -1,12 +1,14 @@
-import { useAtomValue, useSetAtom } from 'jotai/react'
-import React, { useEffect } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
+import { useAtomValue } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
+import React, { useCallback, useDeferredValue } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
 
 import { AnimatedBox } from '~common/ui/Box'
-import { activeGroupIdAtom, tabGroupsAtom, cachedTabIdsAtom } from '../../../state/tabs'
+import { activeGroupIdAtom, tabGroupsAtom, bufferedGroupIdsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import CreateGroupPage from './CreateGroupPage'
 import TabGroupPage from './TabGroupPage'
@@ -30,10 +32,24 @@ const rubberBandClamp = (value: number, min: number, max: number): number => {
 const TabGroupPager = () => {
   const { width } = useWindowDimensions()
   const groups = useAtomValue(tabGroupsAtom)
-  const activeGroupId = useAtomValue(activeGroupIdAtom)
-  const setActiveGroupId = useSetAtom(activeGroupIdAtom)
-  const setCachedTabIds = useSetAtom(cachedTabIdsAtom)
+  const bufferedGroupIds = useAtomValue(bufferedGroupIdsAtom)
+  // Différer le chargement des groupes adjacents (basse priorité)
+  const deferredBufferedGroupIds = useDeferredValue(bufferedGroupIds)
   const { activeGroupIndex, groupPager, createGroupPage } = useAppSwitcherContext()
+
+  // Check if a group is in the buffer
+  // - Active group: toujours bufferisé immédiatement
+  // - Groupes adjacents: bufferisés en différé (basse priorité)
+  const isGroupBuffered = useCallback(
+    (groupId: string) => {
+      const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
+      // Groupe actif = priorité haute (immédiat)
+      if (groupId === activeGroupId) return true
+      // Groupes adjacents = priorité basse (différé)
+      return deferredBufferedGroupIds.includes(groupId)
+    },
+    [deferredBufferedGroupIds]
+  )
 
   const totalPages = groups.length + 1
 
@@ -43,15 +59,13 @@ const TabGroupPager = () => {
   // Local value for gesture start position
   const startX = useSharedValue(0)
 
-  const handleGroupChange = (newIndex: number) => {
-    if (newIndex >= 0 && newIndex < groups.length) {
-      const newGroupId = groups[newIndex].id
-      if (newGroupId !== activeGroupId) {
-        setCachedTabIds([])
-        setActiveGroupId(newGroupId)
-      }
-    }
-  }
+  // Wrapper pour appeler navigateToPage depuis le UI thread
+  const handleNavigateToPage = useCallback(
+    (targetPage: number) => {
+      navigateToPage(targetPage, groups.length)
+    },
+    [navigateToPage, groups.length]
+  )
 
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
@@ -91,21 +105,12 @@ const TabGroupPager = () => {
 
       const targetX = -targetPage * width
 
-      // SOLUTION 1: Change group before animation
+      // Naviguer vers la page cible (qui set aussi activeGroupIdAtom)
       if (targetPage < groups.length) {
-        runOnJS(handleGroupChange)(targetPage)
+        runOnJS(handleNavigateToPage)(targetPage)
       }
 
-      translateX.set(
-        withSpring(targetX, undefined, finished => {
-          'worklet'
-          // SOLUTION 2: Change group after animation
-          // if (finished && targetPage < groups.length) {
-          //   runOnJS(handleGroupChange)(targetPage)
-          // }
-        })
-      )
-
+      translateX.set(withSpring(targetX))
       scrollX.set(withSpring(-targetX))
       activeGroupIndex.set(targetPage)
 
@@ -120,20 +125,25 @@ const TabGroupPager = () => {
   const scrollToPreviousGroup = () => {
     const targetPage = Math.max(0, groups.length - 1)
     navigateToPage(targetPage, groups.length)
-    handleGroupChange(targetPage)
   }
 
   const handleGroupCreated = (_groupId: string) => {
-    // Navigation is handled by the sync useEffect when activeGroupId changes
+    // Navigation is handled by CreateGroupPage calling navigateToPage
   }
 
-  // Sync pager position when activeGroupId changes externally
-  useEffect(() => {
-    const activeIndex = groups.findIndex(g => g.id === activeGroupId)
-    if (activeIndex !== -1) {
-      navigateToPage(activeIndex, groups.length)
-    }
-  }, [activeGroupId, groups, navigateToPage])
+  // Sync pager position when screen gains focus (for external changes like useCreateTabGroupFromTag)
+  useFocusEffect(
+    useCallback(() => {
+      const currentGroupId = getDefaultStore().get(activeGroupIdAtom)
+      const currentIndex = groups.findIndex(g => g.id === currentGroupId)
+      if (currentIndex !== -1 && currentIndex !== activeGroupIndex.get()) {
+        // Position sans animation (on arrive sur l'écran)
+        translateX.set(-currentIndex * width)
+        scrollX.set(currentIndex * width)
+        activeGroupIndex.set(currentIndex)
+      }
+    }, [groups, activeGroupIndex, translateX, scrollX, width])
+  )
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -144,7 +154,7 @@ const TabGroupPager = () => {
               key={group.id}
               group={group}
               index={index}
-              isActive={group.id === activeGroupId}
+              isBuffered={isGroupBuffered(group.id)}
               scrollX={scrollX}
               groupCount={groups.length}
             />

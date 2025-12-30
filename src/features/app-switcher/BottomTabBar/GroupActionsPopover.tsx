@@ -1,4 +1,4 @@
-import { useSetAtom } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -7,7 +7,8 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useDeleteGroup } from '../../../state/tabGroups'
-import { TabGroup, closeAllTabsAtom } from '../../../state/tabs'
+import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
+import { useAppSwitcherContext } from '../AppSwitcherProvider'
 
 interface PopoverItemProps {
   icon: string
@@ -46,6 +47,8 @@ const GroupActionsPopover = memo(
     const { onClose } = usePopOver()
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
     const deleteGroup = useDeleteGroup()
+    const groups = useAtomValue(tabGroupsAtom)
+    const { groupPager } = useAppSwitcherContext()
 
     const handleCloseAllTabs = () => {
       closeAllTabs()
@@ -67,7 +70,17 @@ const GroupActionsPopover = memo(
         {
           text: t('common.delete'),
           style: 'destructive',
-          onPress: () => deleteGroup(group.id),
+          onPress: () => {
+            // Calculer l'index de navigation AVANT la suppression
+            const currentIndex = groups.findIndex(g => g.id === group.id)
+            const targetIndex = Math.max(0, currentIndex - 1)
+
+            // Supprimer le groupe
+            deleteGroup(group.id)
+
+            // Naviguer vers le groupe précédent (ou default)
+            groupPager.navigateToPage(targetIndex, groups.length - 1)
+          },
         },
       ])
     }

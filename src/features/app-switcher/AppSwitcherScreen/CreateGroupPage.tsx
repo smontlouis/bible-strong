@@ -17,7 +17,7 @@ import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import { useCreateGroup, useSwitchGroup } from '../../../state/tabGroups'
+import { useCreateGroup, getTabGroups } from '../../../state/tabGroups'
 import { GROUP_COLORS } from '../../../state/tabs'
 import { Image } from 'expo-image'
 
@@ -34,7 +34,7 @@ const CreateGroupPage = memo(
     const { t } = useTranslation()
     const theme = useTheme()
     const insets = useSafeAreaInsets()
-    const { createGroupPage } = useAppSwitcherContext()
+    const { createGroupPage, groupPager } = useAppSwitcherContext()
 
     const [name, setName] = useState('')
     const [selectedColor, setSelectedColor] = useState<string>(GROUP_COLORS[0])
@@ -42,7 +42,6 @@ const CreateGroupPage = memo(
     const isCreatingRef = useRef(false)
     const isSwipingRef = useRef(false)
     const createGroup = useCreateGroup()
-    const switchGroup = useSwitchGroup()
 
     // Position où commence la page "+" (après tous les groupes)
     const startPosition = groupCount * width
@@ -136,7 +135,11 @@ const CreateGroupPage = memo(
 
       const newGroupId = createGroup({ name: name.trim(), color: selectedColor })
       if (newGroupId) {
-        switchGroup(newGroupId)
+        // Calculer l'index du nouveau groupe et naviguer
+        const groups = getTabGroups()
+        const newGroupIndex = groups.findIndex(g => g.id === newGroupId)
+        groupPager.navigateToPage(newGroupIndex, groups.length)
+
         setName('')
         setSelectedColor(GROUP_COLORS[0])
         Keyboard.dismiss()

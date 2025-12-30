@@ -103,6 +103,7 @@
     "lunr-languages": "^1.9.0",
     "metro": "^0.83.1",
     "postinstall-postinstall": "^2.1.0",
+    "pressto": "^0.6.0",
     "promise": "^8.3.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",

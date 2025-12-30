@@ -1,17 +1,16 @@
-import { PrimitiveAtom } from 'jotai/vanilla'
-import React from 'react'
+import { useAtomValue } from 'jotai/react'
+import React, { useDeferredValue } from 'react'
 import { useAnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
-import { TabItem } from '../../../state/tabs'
+import { tabsAtomsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 
-export interface TabPreviewCarouselProps {
-  tabsAtoms: PrimitiveAtom<TabItem>[]
-}
-
-const TabPreviewCarousel = ({ tabsAtoms }: TabPreviewCarouselProps) => {
+const TabPreviewCarousel = () => {
+  const tabsAtoms = useAtomValue(tabsAtomsAtom)
+  // Basse priorité : React peut différer ce render
+  const deferredTabsAtoms = useDeferredValue(tabsAtoms)
   const { activeTabPreview, tabPreviewCarousel } = useAppSwitcherContext()
   const { WIDTH, GAP } = useTabConstants()
   const styles = useAnimatedStyle(() => {
@@ -33,7 +32,7 @@ const TabPreviewCarousel = ({ tabsAtoms }: TabPreviewCarouselProps) => {
 
   return (
     <AnimatedBox row position="absolute" top={0} left={0} bg="lightGrey" style={styles}>
-      {tabsAtoms.map((tabAtom, i) => (
+      {deferredTabsAtoms.map((tabAtom, i) => (
         <TabPreview key={`${tabAtom}`} index={i} tabAtom={tabAtom} />
       ))}
     </AnimatedBox>

@@ -442,6 +442,75 @@ export const tabsAtom = atom(
 // Split atom for fine-grained tab updates
 export const tabsAtomsAtom = splitAtom(tabsAtom, tab => tab.id)
 
+// ============================================================================
+// PER-GROUP ATOMS (for buffered groups optimization)
+// ============================================================================
+
+// Create a tabs atom for a specific group by ID
+const createGroupTabsAtom = (groupId: string) =>
+  atom(
+    get => {
+      const groups = get(tabGroupsAtom)
+      const group = groups.find(g => g.id === groupId)
+      return group?.tabs ?? []
+    },
+    (get, set, newTabsOrUpdater: TabItem[] | ((prev: TabItem[]) => TabItem[])) => {
+      const groups = get(tabGroupsAtom)
+      const group = groups.find(g => g.id === groupId)
+      if (!group) return
+
+      const currentTabs = group.tabs
+      const newTabs =
+        typeof newTabsOrUpdater === 'function' ? newTabsOrUpdater(currentTabs) : newTabsOrUpdater
+
+      set(
+        tabGroupsAtom,
+        groups.map(g => (g.id === groupId ? { ...g, tabs: newTabs } : g))
+      )
+    }
+  )
+
+// Cache for per-group split atoms to avoid recreation
+// Use the same type as tabsAtomsAtom for consistency
+const groupTabsAtomCache = new Map<string, typeof tabsAtomsAtom>()
+
+// Get split atoms for a specific group (cached)
+export const getGroupTabsAtomsAtom = (groupId: string) => {
+  if (!groupTabsAtomCache.has(groupId)) {
+    const groupTabsAtom = createGroupTabsAtom(groupId)
+    groupTabsAtomCache.set(groupId, splitAtom(groupTabsAtom, tab => tab.id))
+  }
+  return groupTabsAtomCache.get(groupId)!
+}
+
+// Cleanup function for when groups are deleted
+export const cleanupGroupTabsAtomCache = (groupId: string) => {
+  groupTabsAtomCache.delete(groupId)
+}
+
+// Derived atom for buffered group IDs (active + adjacent groups)
+export const bufferedGroupIdsAtom = atom(get => {
+  const groups = get(tabGroupsAtom)
+  const activeId = get(activeGroupIdAtom)
+  const activeIndex = groups.findIndex(g => g.id === activeId)
+
+  if (activeIndex === -1) return [activeId]
+
+  const buffered: string[] = [activeId]
+
+  // Add left neighbor
+  if (activeIndex > 0) {
+    buffered.push(groups[activeIndex - 1].id)
+  }
+
+  // Add right neighbor
+  if (activeIndex < groups.length - 1) {
+    buffered.push(groups[activeIndex + 1].id)
+  }
+
+  return buffered
+})
+
 // Number of tabs in current group
 export const tabsCountAtom = atom(get => get(tabsAtom).length)
 

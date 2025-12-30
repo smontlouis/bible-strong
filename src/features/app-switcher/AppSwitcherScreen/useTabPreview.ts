@@ -1,31 +1,58 @@
-import { useSetAtom } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
-  Extrapolate,
+  Extrapolation,
   interpolate,
-  runOnUI,
   scrollTo,
   useAnimatedRef,
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated'
 import wait from '~helpers/wait'
-import { TabItem, tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
+import {
+  TabItem,
+  tabsCountAtom,
+  activeGroupIdAtom,
+  getGroupTabsAtomsAtom,
+} from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import { useTabAnimations } from '../utils/useTabAnimations'
 import useTabConstants from '../utils/useTabConstants'
+import { runOnUI } from 'react-native-worklets'
+import { View } from 'react-native'
 
-const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAtom<TabItem> }) => {
-  const { activeTabPreview, tabPreviews, scrollView, isInitialMount } = useAppSwitcherContext()
+const useTabPreview = ({
+  index,
+  tabAtom,
+  groupId,
+}: {
+  index: number
+  tabAtom: PrimitiveAtom<TabItem>
+  groupId: string
+}) => {
+  const { activeTabPreview, tabPreviews, scrollView, flashListRefs } = useAppSwitcherContext()
+  const isInitialMount = useRef(true)
   const measureTabPreview = useMeasureTabPreview()
-  const dispatchTabs = useSetAtom(tabsAtomsAtom)
+  // Utiliser l'atom per-group au lieu de l'atom global
+  const groupTabsAtomsAtom = useMemo(() => getGroupTabsAtomsAtom(groupId), [groupId])
+  const dispatchTabs = useSetAtom(groupTabsAtomsAtom)
   const { expandTab } = useTabAnimations()
 
-  // @ts-ignore: FIXME(TS) correct type for createAnimatedComponent
-  tabPreviews.refs[index] = useAnimatedRef<AnimatedBox>()
-  const ref = tabPreviews.refs[index]
+  // Determine if this group is active - isolated subscription per TabPreview
+  const activeGroupId = useAtomValue(activeGroupIdAtom)
+  const isActiveGroup = groupId === activeGroupId
+
+  const ref = useAnimatedRef<View>()
+
+  // Register ref using the provider's function to satisfy React Compiler
+  // (modification happens in the hook where the value was constructed)
+  useEffect(() => {
+    if (isActiveGroup) {
+      tabPreviews.registerRef(index, ref)
+    }
+  }, [isActiveGroup, index, tabPreviews, ref])
 
   const {
     TAB_PREVIEW_WIDTH,
@@ -40,8 +67,9 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
 
   // On mount, measure the initial tab preview
   // Only scroll on initial app mount, not when switching groups
+  // Only run for the active group to avoid conflicts with buffered groups
   useEffect(() => {
-    if (index === activeTabPreview.index.get() && isInitialMount.current) {
+    if (isActiveGroup && index === activeTabPreview.index.get() && isInitialMount.current) {
       ;(async () => {
         await wait(300)
         const { pageX, pageY } = await measureTabPreview(index)
@@ -49,15 +77,17 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
         activeTabPreview.left.set(pageX)
         activeTabPreview.zIndex.set(3)
 
-        const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
-        // @ts-ignore
-        runOnUI(scrollTo)(scrollView.ref, 0, scrollToTop, false)
+        const activeFlashListRef = flashListRefs.getActiveRef()
+        if (activeFlashListRef) {
+          const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
+          runOnUI(scrollTo)(activeFlashListRef, 0, scrollToTop, false)
+        }
 
         // Mark initial mount as complete to prevent scroll on group switches
         isInitialMount.current = false
       })()
     }
-  }, [])
+  }, [isActiveGroup])
 
   const onOpen = async () => {
     const { pageX, pageY } = await measureTabPreview(index)
@@ -154,7 +184,7 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
           activeTabPreview.animationProgress.get(),
           [0, 1],
           [1, 0],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       }
     }
@@ -167,12 +197,16 @@ const useTabPreview = ({ index, tabAtom }: { index: number; tabAtom: PrimitiveAt
   })
 
   const xStyles = useAnimatedStyle(() => {
+    // Seulement interpoler pour le tab actif
+    if (activeTabPreview.index.get() !== index) {
+      return { opacity: 1 }
+    }
     return {
       opacity: interpolate(
         activeTabPreview.animationProgress.get(),
         [0, 1],
         [1, 0],
-        Extrapolate.CLAMP
+        Extrapolation.CLAMP
       ),
     }
   })

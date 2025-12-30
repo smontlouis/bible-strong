@@ -6216,6 +6216,7 @@ __metadata:
     lunr-languages: "npm:^1.9.0"
     metro: "npm:^0.83.1"
     postinstall-postinstall: "npm:^2.1.0"
+    pressto: "npm:^0.6.0"
     prettier: "npm:^3"
     promise: "npm:^8.3.0"
     react: "npm:19.1.0"
@@ -12746,6 +12747,19 @@ __metadata:
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
   checksum: 10c0/b00d617431e7886c520a6f498a2e14c75ec58f6d93ba48c3b639cf241b54232d90daa05d83a9e9b9fef6baa63cb7e1e4602c2372fea5bc169668401eb127d0cd
+  languageName: node
+  linkType: hard
+
+"pressto@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "pressto@npm:0.6.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-gesture-handler: "*"
+    react-native-reanimated: "*"
+    react-native-worklets: "*"
+  checksum: 10c0/4ede198a1d0193c82f9c3b2e673679a52f1b578d3aa90cf5869bbae6b6a6af5bcde0d552b68aee4affb3e77cc8b5dc6a88943a4f4464ec91c355f4d5f4281091
   languageName: node
   linkType: hard
 

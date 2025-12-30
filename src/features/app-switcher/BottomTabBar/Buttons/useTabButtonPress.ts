@@ -10,6 +10,7 @@ import useTakeActiveTabSnapshot from '~features/app-switcher/utils/useTakeActive
 import useDidUpdate from '~helpers/useDidUpdate'
 import {
   activeAtomIdAtom,
+  activeGroupAtom,
   activeTabIndexAtom,
   tabsAtom,
   tabsCountAtom,
@@ -21,6 +22,7 @@ const useTabButtonPress = () => {
   const activeAtomId = useAtomValue(activeAtomIdAtom)
   const tabs = useAtomValue(tabsAtom)
   const tabsCount = useAtomValue(tabsCountAtom)
+  const activeGroup = useAtomValue(activeGroupAtom)
   const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
 
   const { minimizeTab } = useTabAnimations()
@@ -44,13 +46,20 @@ const useTabButtonPress = () => {
   }))
 
   useDidUpdate(() => {
-    scale.set(withDelay(
-      300,
-      withSequence(withTiming(1.2, { duration: 500 }), withTiming(1, { duration: 500 }))
-    ))
+    scale.set(
+      withDelay(
+        300,
+        withSequence(withTiming(1.2, { duration: 500 }), withTiming(1, { duration: 500 }))
+      )
+    )
   }, [tabsCount, scale])
 
-  return { onPress, tabsCount, iconStyle }
+  return {
+    onPress,
+    tabsCount,
+    iconStyle,
+    groupColor: activeGroup.color,
+  }
 }
 
 export default useTabButtonPress

@@ -32,14 +32,12 @@ const AppSwitcherScreen = ({
   openHome,
   openMenu,
 }: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
-  const [tabsAtoms] = useAtom(tabsAtomsAtom)
-
   return (
     <TabContextProvider>
       <Box flex={1} bg="lightGrey">
         <TabGroupPager />
         <CachedTabScreens navigation={navigation} route={route} />
-        <TabPreviewCarousel tabsAtoms={tabsAtoms} />
+        <TabPreviewCarousel />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>
     </TabContextProvider>

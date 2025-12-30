@@ -1,12 +1,14 @@
+import { FlashList, FlashListRef, ListRenderItemInfo } from '@shopify/flash-list'
 import { useAtom } from 'jotai/react'
-import React from 'react'
+import { PrimitiveAtom } from 'jotai/vanilla'
+import React, { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity, useWindowDimensions } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { TouchableOpacity, useWindowDimensions, ViewStyle } from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
   SharedValue,
+  useAnimatedRef,
   useAnimatedStyle,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -18,7 +20,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { useAddTabToGroup } from '../../../state/tabGroups'
-import { TabGroup, tabsAtomsAtom } from '../../../state/tabs'
+import { TabGroup, TabItem, getGroupTabsAtomsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { useExpandNewTab } from '../utils/useExpandNewTab'
 import useTabConstants from '../utils/useTabConstants'
@@ -26,12 +28,12 @@ import StaticTabPreview from './StaticTabPreview'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
 
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList<PrimitiveAtom<TabItem>>)
 
 interface TabGroupPageProps {
   group: TabGroup
   index: number
-  isActive: boolean
+  isBuffered: boolean
   scrollX: SharedValue<number>
   groupCount: number
 }
@@ -77,17 +79,28 @@ const GroupHeader = ({
   )
 }
 
-const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupPageProps) => {
+const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGroupPageProps) => {
   const { t } = useTranslation()
   const { width } = useWindowDimensions()
-  const [tabsAtoms] = useAtom(tabsAtomsAtom)
+
+  // Get split atoms for this specific group (cached)
+  const groupTabsAtomsAtom = useMemo(() => getGroupTabsAtomsAtom(group.id), [group.id])
+  const [tabsAtoms] = useAtom(groupTabsAtomsAtom)
   const addTabToGroup = useAddTabToGroup()
   const { triggerExpandNewTab } = useExpandNewTab()
   const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
-  const { PADDING_HORIZONTAL, scrollViewBoxStyle } = useAppSwitcher()
-  const { scrollView } = useAppSwitcherContext()
+  const { PADDING_HORIZONTAL } = useAppSwitcher()
+  const { flashListRefs } = useAppSwitcherContext()
   const insets = useSafeAreaInsets()
   const theme = useTheme()
+
+  // Create and register FlashList ref for this group
+  const flashListRef = useAnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>()
+  useEffect(() => {
+    if (isBuffered) {
+      flashListRefs.registerRef(group.id, flashListRef)
+    }
+  }, [isBuffered, group.id, flashListRefs, flashListRef])
 
   const handleCreateTab = () => {
     const newTabId = `new-${Date.now()}`
@@ -124,6 +137,36 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
     return { opacity }
   })
 
+  const contentContainerStyle: ViewStyle = {
+    paddingTop: group.isDefault ? SCREEN_MARGIN + insets.top : 0,
+    paddingHorizontal: PADDING_HORIZONTAL,
+    paddingBottom: TAB_ICON_SIZE + 60,
+  }
+
+  const renderActiveItem = ({
+    item: tabAtom,
+    index: i,
+  }: ListRenderItemInfo<PrimitiveAtom<TabItem>>) => (
+    <TabPreview
+      index={i}
+      tabAtom={tabAtom}
+      groupId={group.id}
+      marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
+    />
+  )
+
+  const renderStaticItem = ({ item: tab, index: i }: ListRenderItemInfo<TabItem>) => (
+    <StaticTabPreview tab={tab} index={i} marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0} />
+  )
+
+  const keyExtractorActive = (item: PrimitiveAtom<TabItem>) => `${item}`
+
+  const keyExtractorStatic = (item: TabItem) => item.id
+
+  const ListHeaderComponentActive = <GroupHeader group={group} />
+
+  const ListHeaderComponentStatic = <GroupHeader group={group} skipExiting />
+
   // Empty state for non-default groups with no tabs
   if (group.tabs?.length === 0) {
     return (
@@ -156,83 +199,37 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
     )
   }
 
-  // Pour les groupes non-actifs: rendu statique avec group.tabs
-  if (!isActive) {
+  // Pour les groupes non-bufferises: rendu statique avec group.tabs
+  // (groupes bufferises = actif + adjacents gauche/droite)
+  if (!isBuffered) {
     return (
       <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey">
-        <ScrollView
+        <FlashList
+          data={group.tabs}
+          numColumns={TABS_PER_ROW}
+          keyExtractor={keyExtractorStatic}
+          renderItem={renderStaticItem}
+          ListHeaderComponent={ListHeaderComponentStatic}
+          contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingTop: group.isDefault ? SCREEN_MARGIN + insets.top : 0,
-            paddingLeft: PADDING_HORIZONTAL,
-            paddingRight: PADDING_HORIZONTAL,
-            paddingBottom: TAB_ICON_SIZE + 60,
-            minHeight: '100%',
-          }}
-        >
-          <GroupHeader group={group} skipExiting />
-          <Box
-            overflow="visible"
-            row
-            style={{
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              justifyContent: 'flex-start',
-            }}
-          >
-            {group.tabs.map((tab, i) => (
-              <StaticTabPreview
-                key={tab.id}
-                tab={tab}
-                index={i}
-                marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
-              />
-            ))}
-          </Box>
-        </ScrollView>
+        />
       </AnimatedBox>
     )
   }
 
+  // Pour les groupes bufferises: rendu avec atoms (actif + adjacents)
   return (
-    <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey" zIndex={2}>
-      <AnimatedScrollView
-        ref={scrollView.ref}
+    <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey">
+      <AnimatedFlashList
+        ref={flashListRef}
+        data={tabsAtoms}
+        numColumns={TABS_PER_ROW}
+        keyExtractor={keyExtractorActive}
+        renderItem={renderActiveItem}
+        ListHeaderComponent={ListHeaderComponentActive}
+        contentContainerStyle={contentContainerStyle}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingTop: group.isDefault ? SCREEN_MARGIN + insets.top : 0,
-          paddingLeft: PADDING_HORIZONTAL,
-          paddingRight: PADDING_HORIZONTAL,
-          paddingBottom: TAB_ICON_SIZE + 60,
-          minHeight: '100%',
-        }}
-      >
-        <GroupHeader group={group} />
-
-        <AnimatedBox
-          overflow="visible"
-          row
-          style={[
-            scrollViewBoxStyle,
-            {
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              justifyContent: 'flex-start',
-            },
-          ]}
-        >
-          {tabsAtoms.map((tabAtom, i) => (
-            <TabPreview
-              key={`${tabAtom}`}
-              index={i}
-              tabAtom={tabAtom}
-              marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
-            />
-          ))}
-        </AnimatedBox>
-      </AnimatedScrollView>
+      />
     </AnimatedBox>
   )
 }

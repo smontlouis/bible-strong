@@ -4,7 +4,7 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import Box, { AnimatedBox, FadingText } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import PopOverMenu from '~common/PopOverMenu'
-import { useActiveGroup, useRenameGroup, useTabGroups } from '../../../state/tabGroups'
+import { useActiveGroup, useRenameGroup, getTabGroups } from '../../../state/tabGroups'
 import { tabsCountAtom } from '../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
 import GroupActionsPopover from './GroupActionsPopover'
@@ -15,7 +15,6 @@ import { LinearTransition } from 'react-native-reanimated'
 const GroupTitleButton = () => {
   const { t } = useTranslation()
   const activeGroup = useActiveGroup()
-  const groups = useTabGroups()
   const tabsCount = useAtomValue(tabsCountAtom)
   const renameGroup = useRenameGroup()
   const renameSheetRef = useRef<BottomSheetModal>(null)
@@ -27,7 +26,9 @@ const GroupTitleButton = () => {
 
   const handleOpenCreateGroup = () => {
     // Navigate to the create group page (last page in carousel)
-    groupPager.navigateToPage(groups.length, groups.length)
+    // Read groups.length only when needed (no subscription)
+    const groupsLength = getTabGroups().length
+    groupPager.navigateToPage(groupsLength, groupsLength)
   }
 
   const handleOpenRename = () => {
@@ -42,19 +43,32 @@ const GroupTitleButton = () => {
     <Box flex={1}>
       <PopOverMenu
         element={
-          <AnimatedBox row center py={8} px={12} layout={LinearTransition}>
-            <FadingText color="default" fontSize={14} numberOfLines={1}>
-              {displayName}
-            </FadingText>
-            <AnimatedBox layout={LinearTransition}>
-              <FeatherIcon
-                name="chevron-down"
-                size={16}
-                color="tertiary"
-                style={{ marginLeft: 4 }}
-              />
+          <Box row center>
+            <AnimatedBox
+              row
+              py={6}
+              px={12}
+              borderRadius={20}
+              layout={LinearTransition}
+              style={{
+                backgroundColor: activeGroup.color || 'transparent',
+                transitionProperty: 'backgroundColor',
+                transitionDuration: 300,
+              }}
+            >
+              <FadingText color="default" fontSize={14} numberOfLines={1}>
+                {displayName}
+              </FadingText>
+              <AnimatedBox layout={LinearTransition}>
+                <FeatherIcon
+                  name="chevron-down"
+                  size={16}
+                  color="tertiary"
+                  style={{ marginLeft: 4 }}
+                />
+              </AnimatedBox>
             </AnimatedBox>
-          </AnimatedBox>
+          </Box>
         }
         popover={
           <GroupActionsPopover

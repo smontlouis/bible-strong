@@ -1,25 +1,20 @@
-import { useAtomValue } from 'jotai/react'
-import { useEffect, useState } from 'react'
-import wait from '~helpers/wait'
+import { getDefaultStore } from 'jotai'
+import { useCallback } from 'react'
 import { tabsCountAtom } from '../../../state/tabs'
 import { useTabAnimations } from './useTabAnimations'
 
 export const useSlideNewTab = () => {
-  const tabsCount = useAtomValue(tabsCountAtom)
   const { slideToIndex } = useTabAnimations()
 
-  const [tabId, setTabId] = useState<string | null>(null)
+  const triggerSlideNewTab = useCallback(
+    (tabIndex: string) => {
+      setTimeout(() => {
+        const tabsCount = getDefaultStore().get(tabsCountAtom)
+        slideToIndex(tabsCount - 1)
+      }, 0)
+    },
+    [slideToIndex]
+  )
 
-  useEffect(() => {
-    ;(async () => {
-      if (tabId) {
-        await wait(0)
-        const index = tabsCount - 1
-        slideToIndex(index)
-        setTabId(null)
-      }
-    })()
-  }, [tabId, tabsCount])
-
-  return { triggerSlideNewTab: setTabId }
+  return { triggerSlideNewTab }
 }

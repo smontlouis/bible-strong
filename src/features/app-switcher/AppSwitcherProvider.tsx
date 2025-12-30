@@ -1,8 +1,16 @@
-import React, { createContext, useContext, useRef } from 'react'
+import React, { createContext, useCallback, useContext, useRef } from 'react'
 import { ScrollView, useWindowDimensions, View } from 'react-native'
-import { SharedValue, useAnimatedRef, useSharedValue, withSpring } from 'react-native-reanimated'
+import {
+  AnimatedRef,
+  SharedValue,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated'
 import { useOnceAtoms } from './utils/useOnceAtoms'
 import useTabConstants from './utils/useTabConstants'
+import { FlashListRef } from '@shopify/flash-list'
+import { TabItem, activeGroupIdAtom, tabGroupsAtom, cachedTabIdsAtom } from '~state/tabs'
+import { PrimitiveAtom, getDefaultStore } from 'jotai'
 
 type AppSwitcherContextValues = {
   isBottomTabBarVisible: SharedValue<number>
@@ -18,13 +26,17 @@ type AppSwitcherContextValues = {
     opacity: SharedValue<number>
     atomId: SharedValue<string | null>
   }
+  flashListRefs: {
+    registerRef: (groupId: string, ref: AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>) => void
+    getActiveRef: () => AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>> | undefined
+  }
   scrollView: {
-    ref: React.RefObject<ScrollView | null>
     y: SharedValue<number>
     padding: SharedValue<number>
   }
   tabPreviews: {
-    refs: React.RefObject<View>[]
+    refs: React.RefObject<React.RefObject<View>[]>
+    registerRef: (index: number, ref: AnimatedRef<View>) => void
   }
   tabPreviewCarousel: {
     translateY: SharedValue<number>
@@ -42,8 +54,6 @@ type AppSwitcherContextValues = {
   createGroupPage: {
     isFullyVisible: SharedValue<boolean>
   }
-  // Flag to track initial app mount (for scroll behavior)
-  isInitialMount: React.MutableRefObject<boolean>
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(undefined)
@@ -53,24 +63,52 @@ interface AppSwitcherProviderProps {
 }
 
 export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
-  const scrollViewRef = useAnimatedRef<ScrollView>()
-  const groupPagerRef = useAnimatedRef<ScrollView>()
+  const groupPagerRef = useRef<ScrollView>(null)
   const { initialAtomId, initialTabIndex } = useOnceAtoms()
   const { HEIGHT } = useTabConstants()
   const { width } = useWindowDimensions()
 
-  const tabPreviewRefs = useRef(new Array(100)).current
+  const tabPreviewRefs = useRef(new Array(100))
 
   const isBottomTabBarVisible = useSharedValue(1)
 
   const scrollView = {
-    ref: scrollViewRef,
     y: useSharedValue(0),
     padding: useSharedValue(0),
   }
 
+  const registerTabPreviewRef = useCallback(
+    (index: number, ref: AnimatedRef<View>) => {
+      tabPreviewRefs.current[index] = ref
+    },
+    [tabPreviewRefs]
+  )
+
   const tabPreviews = {
     refs: tabPreviewRefs,
+    registerRef: registerTabPreviewRef,
+  }
+
+  // FlashList refs per group - allows scrolling in the active group's list
+  const flashListRefsMap = useRef(
+    new Map<string, AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>>()
+  )
+
+  const registerFlashListRef = useCallback(
+    (groupId: string, ref: AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>) => {
+      flashListRefsMap.current.set(groupId, ref)
+    },
+    []
+  )
+
+  const getActiveFlashListRef = useCallback(() => {
+    const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
+    return flashListRefsMap.current.get(activeGroupId)
+  }, [])
+
+  const flashListRefs = {
+    registerRef: registerFlashListRef,
+    getActiveRef: getActiveFlashListRef,
   }
 
   const activeTabPreview = {
@@ -100,6 +138,10 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const createGroupPageIsFullyVisible = useSharedValue(false)
 
   const navigateToPage = (pageIndex: number, groupsLength: number) => {
+    const store = getDefaultStore()
+    const groups = store.get(tabGroupsAtom)
+
+    // Animation du pager
     const targetX = -pageIndex * width
     pagerTranslateX.set(withSpring(targetX))
     pagerScrollX.set(withSpring(-targetX))
@@ -108,6 +150,16 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     // Update createGroupPage.isFullyVisible
     const createPagePosition = groupsLength * width
     createGroupPageIsFullyVisible.set(-targetX >= createPagePosition - 10)
+
+    // Set activeGroupId (si c'est une page de groupe, pas la page de création)
+    if (pageIndex < groups.length) {
+      const newGroupId = groups[pageIndex].id
+      const currentActiveId = store.get(activeGroupIdAtom)
+      if (newGroupId !== currentActiveId) {
+        store.set(cachedTabIdsAtom, [])
+        store.set(activeGroupIdAtom, newGroupId)
+      }
+    }
   }
 
   const groupPager = {
@@ -122,27 +174,20 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     isFullyVisible: createGroupPageIsFullyVisible,
   }
 
-  // Flag to track initial app mount (for scroll behavior)
-  const isInitialMount = useRef(true)
-
   const contextValue: AppSwitcherContextValues = {
     isBottomTabBarVisible,
     activeTabPreview,
     activeTabScreen,
+    flashListRefs,
     scrollView,
     tabPreviews,
     tabPreviewCarousel,
     activeGroupIndex,
     groupPager,
     createGroupPage,
-    isInitialMount,
   }
 
-  return (
-    <AppSwitcherContext.Provider value={contextValue}>
-      {children}
-    </AppSwitcherContext.Provider>
-  )
+  return <AppSwitcherContext.Provider value={contextValue}>{children}</AppSwitcherContext.Provider>
 }
 
 export const useAppSwitcherContext = () => {

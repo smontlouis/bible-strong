@@ -14,6 +14,7 @@ import {
   getDefaultBibleTab,
   groupsCountAtom,
   GROUP_COLORS,
+  cleanupGroupTabsAtomCache,
 } from './tabs'
 
 // ============================================================================
@@ -119,17 +120,17 @@ export const deleteGroupAtom = atom(null, (get, set, groupId: string) => {
     cachedIds.filter(id => !groupTabIds.includes(id))
   )
 
+  // Clean up per-group atom cache
+  cleanupGroupTabsAtomCache(groupId)
+
   // Remove the group
   set(
     tabGroupsAtom,
     groups.filter(g => g.id !== groupId)
   )
 
-  // If we deleted the active group, switch to the default group
-  const activeId = get(activeGroupIdAtom)
-  if (activeId === groupId) {
-    set(activeGroupIdAtom, DEFAULT_GROUP_ID)
-  }
+  // Note: Navigation après suppression est gérée par l'appelant (GroupActionsPopover)
+  // via groupPager.navigateToPage() qui set aussi activeGroupIdAtom
 
   return true
 })
