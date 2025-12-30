@@ -1,13 +1,13 @@
-import React, { memo } from 'react'
-import { Alert } from 'react-native'
-import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
-import Box, { TouchableBox } from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { FeatherIcon } from '~common/ui/Icon'
+import React, { memo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Alert } from 'react-native'
 import { usePopOver } from '~common/PopOverContext'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom } from '../../../state/tabs'
-import { useDeleteGroup, useGroupsCount } from '../../../state/tabGroups'
 
 interface PopoverItemProps {
   icon: string
@@ -46,7 +46,6 @@ const GroupActionsPopover = memo(
     const { onClose } = usePopOver()
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
     const deleteGroup = useDeleteGroup()
-    const groupsCount = useGroupsCount()
 
     const handleCloseAllTabs = () => {
       closeAllTabs()
@@ -81,8 +80,6 @@ const GroupActionsPopover = memo(
       }, 100)
     }
 
-    const canCreateGroup = groupsCount < 5
-
     return (
       <Box minWidth={200}>
         <PopoverItem icon="x-circle" label={t('tabs.closeAll')} onPress={handleCloseAllTabs} />
@@ -98,9 +95,7 @@ const GroupActionsPopover = memo(
           </>
         )}
         <Box height={1} bg="border" marginVertical={4} />
-        {canCreateGroup && (
-          <PopoverItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
-        )}
+        <PopoverItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
       </Box>
     )
   }

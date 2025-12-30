@@ -8,7 +8,13 @@ import generateUUID from '~helpers/generateUUID'
 import formatVerseContent from '~helpers/formatVerseContent'
 import verseToReference from '~helpers/verseToReference'
 import { useCreateGroup, useSwitchGroup, useGroupsCount } from '~state/tabGroups'
-import { tabGroupsAtom, TabItem, getDefaultBibleTab, MAX_TAB_GROUPS } from '~state/tabs'
+import {
+  tabGroupsAtom,
+  TabItem,
+  getDefaultBibleTab,
+  MAX_TAB_GROUPS,
+  GROUP_COLORS,
+} from '~state/tabs'
 import { Note, Link, Study } from '~redux/modules/user'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
 
@@ -205,7 +211,7 @@ export const useCreateTabGroupFromTag = () => {
     }
 
     // Créer le groupe avec tous les tabs
-    const groupId = createGroup(tag.name)
+    const groupId = createGroup({ name: tag.name, color: GROUP_COLORS[0] })
     if (!groupId) return false
 
     // Remplacer les tabs du groupe (qui a un tab par défaut) par nos tabs

@@ -10,7 +10,7 @@ import Box, { AnimatedBox, AnimatedTouchableBox, BoxProps } from '~common/ui/Box
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
-import getIconByTabType from '../utils/getIconByTabType'
+import TabIcon from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -79,7 +79,9 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
             />
           )}
           <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">
-            <Box>{getIconByTabType(type, 30)}</Box>
+            <Box>
+              <TabIcon type={type} size={30} />
+            </Box>
           </Box>
           <LinearGradient
             start={[0, 0]}
@@ -113,7 +115,7 @@ const TabPreview = ({ index, tabAtom, ...props }: TabPreviewProps & BoxProps) =>
           pl={14}
           pr={5}
         >
-          {getIconByTabType(type, 16)}
+          <TabIcon type={type} size={16} />
           <Title tabAtom={tabAtom} />
         </AnimatedTouchableBox>
 

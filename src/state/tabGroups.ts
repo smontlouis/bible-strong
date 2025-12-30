@@ -13,6 +13,7 @@ import {
   DEFAULT_GROUP_ID,
   getDefaultBibleTab,
   groupsCountAtom,
+  GROUP_COLORS,
 } from './tabs'
 
 // ============================================================================
@@ -29,26 +30,30 @@ export const generateGroupId = () => `group-${Date.now()}`
  * Create a new tab group
  * Returns the new group ID or null if max groups reached
  */
-export const createGroupAtom = atom(null, (get, set, name: string) => {
-  const groups = get(tabGroupsAtom)
+export const createGroupAtom = atom(
+  null,
+  (get, set, { name, color }: { name: string; color: string }) => {
+    const groups = get(tabGroupsAtom)
 
-  if (groups.length >= MAX_TAB_GROUPS) {
-    console.warn('[TabGroups] Maximum group limit reached')
-    return null
+    if (groups.length >= MAX_TAB_GROUPS) {
+      console.warn('[TabGroups] Maximum group limit reached')
+      return null
+    }
+
+    const newGroup: TabGroup = {
+      id: generateGroupId(),
+      name,
+      color,
+      isDefault: false,
+      tabs: [getDefaultBibleTab()],
+      activeTabIndex: 0,
+      createdAt: Date.now(),
+    }
+
+    set(tabGroupsAtom, [...groups, newGroup])
+    return newGroup.id
   }
-
-  const newGroup: TabGroup = {
-    id: generateGroupId(),
-    name,
-    isDefault: false,
-    tabs: [getDefaultBibleTab()],
-    activeTabIndex: 0,
-    createdAt: Date.now(),
-  }
-
-  set(tabGroupsAtom, [...groups, newGroup])
-  return newGroup.id
-})
+)
 
 /**
  * Switch to a different tab group
@@ -340,7 +345,10 @@ export const switchGroupFromOutsideReact = (groupId: string): boolean => {
 }
 
 /** Create a new group (outside React) */
-export const createGroupFromOutsideReact = (name: string): string | null => {
+export const createGroupFromOutsideReact = (
+  name: string,
+  color: string = GROUP_COLORS[0]
+): string | null => {
   const store = getDefaultStore()
   const groups = store.get(tabGroupsAtom)
 
@@ -351,6 +359,7 @@ export const createGroupFromOutsideReact = (name: string): string | null => {
   const newGroup: TabGroup = {
     id: generateGroupId(),
     name,
+    color,
     isDefault: false,
     tabs: [getDefaultBibleTab()],
     activeTabIndex: 0,

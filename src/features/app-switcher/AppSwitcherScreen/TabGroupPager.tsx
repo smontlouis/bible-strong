@@ -91,12 +91,18 @@ const TabGroupPager = () => {
 
       const targetX = -targetPage * width
 
+      // SOLUTION 1: Change group before animation
+      if (targetPage < groups.length) {
+        runOnJS(handleGroupChange)(targetPage)
+      }
+
       translateX.set(
         withSpring(targetX, undefined, finished => {
           'worklet'
-          if (finished && targetPage < groups.length) {
-            runOnJS(handleGroupChange)(targetPage)
-          }
+          // SOLUTION 2: Change group after animation
+          // if (finished && targetPage < groups.length) {
+          //   runOnJS(handleGroupChange)(targetPage)
+          // }
         })
       )
 

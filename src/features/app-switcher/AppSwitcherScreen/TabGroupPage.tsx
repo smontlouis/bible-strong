@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
-import Box, { AnimatedBox } from '~common/ui/Box'
+import Box, { AnimatedBox, FadingBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
@@ -34,6 +34,47 @@ interface TabGroupPageProps {
   isActive: boolean
   scrollX: SharedValue<number>
   groupCount: number
+}
+
+// Group name header (only for non-default groups)
+const GroupHeader = ({
+  skipEntering = true,
+  skipExiting = false,
+  group,
+}: {
+  group: TabGroup
+  skipEntering?: boolean
+  skipExiting?: boolean
+}) => {
+  const insets = useSafeAreaInsets()
+  const { SCREEN_MARGIN } = useTabConstants()
+
+  if (group.isDefault) return null
+  return (
+    <FadingBox
+      keyProp={group.id}
+      direction="bottom"
+      pt={SCREEN_MARGIN + insets.top}
+      pb={20}
+      skipEntering={skipEntering}
+      skipExiting={skipExiting}
+      row
+      alignItems="center"
+      gap={12}
+    >
+      <Box bg={group.color} width={16} height={16} borderRadius={8} />
+      <Text
+        fontSize={30}
+        color="default"
+        numberOfLines={1}
+        flex={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+      >
+        {group.name}
+      </Text>
+    </FadingBox>
+  )
 }
 
 const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupPageProps) => {
@@ -83,45 +124,34 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
     return { opacity }
   })
 
-  // Group name header (only for non-default groups)
-  const GroupHeader = () => {
-    if (group.isDefault) return null
-    return (
-      <Box pt={SCREEN_MARGIN + insets.top} pb={20}>
-        <Text fontSize={30} color="default">
-          {group.name}
-        </Text>
-      </Box>
-    )
-  }
-
   // Empty state for non-default groups with no tabs
   if (group.tabs?.length === 0) {
     return (
       <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey" zIndex={2}>
-        <GroupHeader />
-        <Box flex={1} center>
-          <Image
-            source={require('~assets/images/tabs.svg')}
-            style={{ width: 150, height: 150, opacity: 0.3 }}
-            tintColor={theme.colors.tertiary}
-          />
-          <TouchableOpacity onPress={handleCreateTab}>
-            <Box
-              bg="primary"
-              paddingVertical={12}
-              paddingHorizontal={20}
-              borderRadius={24}
-              row
-              center
-            >
-              <FeatherIcon name="plus" color="white" size={20} />
-              <Text color="white" ml={8} bold>
-                {t('tabs.create')}
-              </Text>
-            </Box>
-          </TouchableOpacity>
-        </Box>
+        <FadingBox keyProp={group.id} direction="bottom" flex={1} skipEntering={false}>
+          <Box flex={1} center>
+            <Image
+              source={require('~assets/images/tabs.svg')}
+              style={{ width: 150, height: 150, opacity: 0.3 }}
+              tintColor={theme.colors.tertiary}
+            />
+            <TouchableOpacity onPress={handleCreateTab}>
+              <Box
+                bg="primary"
+                paddingVertical={12}
+                paddingHorizontal={20}
+                borderRadius={24}
+                row
+                center
+              >
+                <FeatherIcon name="plus" color="white" size={20} />
+                <Text color="white" ml={8} bold>
+                  {t('tabs.create')}
+                </Text>
+              </Box>
+            </TouchableOpacity>
+          </Box>
+        </FadingBox>
       </AnimatedBox>
     )
   }
@@ -140,7 +170,7 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
             minHeight: '100%',
           }}
         >
-          <GroupHeader />
+          <GroupHeader group={group} skipExiting />
           <Box
             overflow="visible"
             row
@@ -178,7 +208,7 @@ const TabGroupPage = ({ group, index, isActive, scrollX, groupCount }: TabGroupP
           minHeight: '100%',
         }}
       >
-        <GroupHeader />
+        <GroupHeader group={group} />
 
         <AnimatedBox
           overflow="visible"

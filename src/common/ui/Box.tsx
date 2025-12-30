@@ -249,6 +249,8 @@ const Box = styled.View<BoxProps>(props => ({
         boxShadow: 'inset 0 0 0 2px red',
       }
     : {}),
+
+  borderCurve: 'continuous',
 }))
 
 export const HStack = styled(Box)({

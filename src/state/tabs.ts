@@ -139,16 +139,31 @@ export const tabTypes = [
 // TAB GROUP TYPES
 // ============================================================================
 
+export const GROUP_COLORS = [
+  '#636e72', // Grey
+  '#81ecec', // Cyan
+  '#74b9ff', // Bleu
+  '#a29bfe', // Violet
+  '#fd79a8', // Rose
+  '#ff7675', // Rouge
+  '#fdcb6e', // Jaune
+  '#55efc4', // Vert menthe
+  '#ffeaa7', // Jaune pâle
+] as const
+
+export type GroupColor = (typeof GROUP_COLORS)[number]
+
 export interface TabGroup {
   id: string
   name: string
+  color?: string
   isDefault: boolean
   tabs: TabItem[]
   activeTabIndex: number
   createdAt: number
 }
 
-export const MAX_TAB_GROUPS = 5
+export const MAX_TAB_GROUPS = 8
 export const DEFAULT_GROUP_ID = 'default-group'
 
 // ============================================================================

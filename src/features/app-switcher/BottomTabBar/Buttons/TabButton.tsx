@@ -14,7 +14,7 @@ const TabButton = ({}: TabButtonProps) => {
         size={20}
         borderWidth={2}
         borderColor="tertiary"
-        borderRadius={3}
+        borderRadius={5}
         center
         style={iconStyle}
       >

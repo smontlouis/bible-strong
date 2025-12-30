@@ -1,20 +1,19 @@
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import getIconByTabType from '~features/app-switcher/utils/getIconByTabType'
-import { useDisclosure } from '~helpers/useDisclosure'
+import TabIcon from '~features/app-switcher/utils/getIconByTabType'
 import {
   BibleTab,
+  getDefaultBibleTab,
   getDefaultData,
   NewTab,
-  getDefaultBibleTab,
   TabItem,
 } from '../../../../state/tabs'
-import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
 import { useDefaultBibleVersion } from '../../../../state/useDefaultBibleVersion'
+import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
 
 interface NewTabItemProps {
   type: TabItem['type']
@@ -95,7 +94,7 @@ const NewTabItem = ({ type, newAtom }: NewTabItemProps) => {
       rounded
       onPress={onPress}
     >
-      {getIconByTabType(type, 26)}
+      <TabIcon type={type} size={26} />
       <Text opacity={0.4} title mt={8} fontSize={14} lightShadow>
         {t(`tabs.${type}`)}
       </Text>

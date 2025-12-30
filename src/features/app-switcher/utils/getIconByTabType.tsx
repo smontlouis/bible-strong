@@ -1,36 +1,41 @@
-import CommentIcon from '~common/CommentIcon'
-import DictionnaryIcon from '~common/DictionnaryIcon'
+import { useTheme } from '@emotion/react'
+import { Image } from 'expo-image'
 import React from 'react'
-import LexiqueIcon from '~common/LexiqueIcon'
-import NaveIcon from '~common/NaveIcon'
-import { FeatherIcon } from '~common/ui/Icon'
 import { TabItem } from '../../../state/tabs'
 
-const getIconByTabType = (type: TabItem['type'], size = 14) => {
-  switch (type) {
-    case 'bible':
-      return <FeatherIcon name="book-open" size={size} />
-    case 'compare':
-      return <FeatherIcon name="repeat" size={size} />
-    case 'strong':
-      return <LexiqueIcon width={size} height={size} />
-    case 'commentary':
-      return <CommentIcon width={size} height={size} color="#26A69A" />
-    case 'dictionary':
-      return <DictionnaryIcon width={size} height={size} />
-    case 'search':
-      return <FeatherIcon name="search" size={size} />
-    case 'nave':
-      return <NaveIcon width={size} height={size} />
-    case 'study':
-      return <FeatherIcon name="feather" size={size} />
-    case 'notes':
-      return <FeatherIcon name="file-text" size={size} />
-    case 'new':
-      return <FeatherIcon name="plus" size={size} />
-    default:
-      return <FeatherIcon name="x" size={size} />
-  }
+const icons = {
+  bible: require('~assets/images/tab-icons/book-open.svg'),
+  compare: require('~assets/images/tab-icons/repeat.svg'),
+  strong: require('~assets/images/tab-icons/lexique.svg'),
+  commentary: require('~assets/images/tab-icons/comment.svg'),
+  dictionary: require('~assets/images/tab-icons/dictionary.svg'),
+  search: require('~assets/images/tab-icons/search.svg'),
+  nave: require('~assets/images/tab-icons/nave.svg'),
+  study: require('~assets/images/tab-icons/feather.svg'),
+  notes: require('~assets/images/tab-icons/file-text.svg'),
+  new: require('~assets/images/tab-icons/plus.svg'),
+  default: require('~assets/images/tab-icons/x.svg'),
 }
 
-export default getIconByTabType
+interface TabIconProps {
+  type: TabItem['type']
+  size?: number
+  color?: string
+}
+
+const TabIcon = ({ type, size = 14, color }: TabIconProps) => {
+  const theme = useTheme()
+  const source = icons[type as keyof typeof icons] || icons.default
+  const tintColor = color || theme.colors.default
+
+  return (
+    <Image
+      source={source}
+      style={{ width: size, height: size }}
+      tintColor={tintColor}
+      contentFit="contain"
+    />
+  )
+}
+
+export default TabIcon

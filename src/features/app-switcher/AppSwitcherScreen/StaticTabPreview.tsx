@@ -8,7 +8,7 @@ import Box, { BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
-import getIconByTabType from '../utils/getIconByTabType'
+import TabIcon from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 
 interface StaticTabPreviewProps {
@@ -62,7 +62,9 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
           />
         )}
         <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">
-          <Box>{getIconByTabType(tab.type, 30)}</Box>
+          <Box>
+            <TabIcon type={tab.type} size={30} />
+          </Box>
         </Box>
         <LinearGradient
           start={[0, 0]}
@@ -95,7 +97,7 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
           pl={14}
           pr={5}
         >
-          {getIconByTabType(tab.type, 16)}
+          <TabIcon type={tab.type} size={16} />
           <Text ml={8} fontSize={12} title numberOfLines={1} ellipsizeMode="middle">
             {tab.title}
           </Text>

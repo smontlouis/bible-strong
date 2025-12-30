@@ -8,7 +8,7 @@ import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
-import getIconByTabType from '../utils/getIconByTabType'
+import TabIcon from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 
 interface TabPreviewProps {
@@ -52,7 +52,9 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
           )}
           <Box center>
             <Box center width={80} height={80} borderRadius={40} backgroundColor="lightGrey">
-              <Box opacity={0.6}>{getIconByTabType(type, 30)}</Box>
+              <Box opacity={0.6}>
+                <TabIcon type={type} size={30} />
+              </Box>
             </Box>
             <Spacer />
             <Text opacity={0.5} fontSize={14} color="grey" bold>

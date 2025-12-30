@@ -2,6 +2,7 @@ import { useTheme } from '@emotion/react'
 import React, { memo, useRef, useState } from 'react'
 import { Keyboard, TextInput, useWindowDimensions, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { toast } from 'sonner-native'
 import {
   useAnimatedStyle,
   useAnimatedReaction,
@@ -14,8 +15,10 @@ import { useTranslation } from 'react-i18next'
 
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { HStack } from '~common/ui/Stack'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { useCreateGroup, useSwitchGroup } from '../../../state/tabGroups'
+import { GROUP_COLORS } from '../../../state/tabs'
 import { Image } from 'expo-image'
 
 interface CreateGroupPageProps {
@@ -34,6 +37,7 @@ const CreateGroupPage = memo(
     const { createGroupPage } = useAppSwitcherContext()
 
     const [name, setName] = useState('')
+    const [selectedColor, setSelectedColor] = useState<string>(GROUP_COLORS[0])
     const inputRef = useRef<TextInput>(null)
     const isCreatingRef = useRef(false)
     const isSwipingRef = useRef(false)
@@ -94,6 +98,7 @@ const CreateGroupPage = memo(
         return
       }
       setName('')
+      setSelectedColor(GROUP_COLORS[0])
       Keyboard.dismiss()
     }
 
@@ -118,6 +123,7 @@ const CreateGroupPage = memo(
 
     const handleCancel = () => {
       setName('')
+      setSelectedColor(GROUP_COLORS[0])
       Keyboard.dismiss()
       onCancel()
     }
@@ -128,14 +134,16 @@ const CreateGroupPage = memo(
       // Marquer qu'on est en train de créer pour éviter le reset
       isCreatingRef.current = true
 
-      const newGroupId = createGroup(name.trim())
+      const newGroupId = createGroup({ name: name.trim(), color: selectedColor })
       if (newGroupId) {
         switchGroup(newGroupId)
         setName('')
+        setSelectedColor(GROUP_COLORS[0])
         Keyboard.dismiss()
         onGroupCreated(newGroupId)
       } else {
-        // Si la création a échoué, réinitialiser le flag
+        // Si la création a échoué (limite atteinte), afficher le toast
+        toast.error(t('Limite de groupes atteinte'))
         isCreatingRef.current = false
       }
     }
@@ -196,7 +204,7 @@ const CreateGroupPage = memo(
             </TouchableBox>
           </Box>
 
-          <Box flex={1} paddingHorizontal={20}>
+          <Box flex={1} paddingHorizontal={20} gap={12}>
             <TextInput
               ref={inputRef}
               value={name}
@@ -213,6 +221,25 @@ const CreateGroupPage = memo(
                 color: theme.colors.default,
               }}
             />
+            <HStack gap={12} overflow="visible">
+              {GROUP_COLORS.map(color => (
+                <TouchableBox
+                  key={color}
+                  onPress={() => setSelectedColor(color)}
+                  width={20}
+                  height={20}
+                  borderRadius={10}
+                  center
+                  style={{
+                    backgroundColor: color,
+                  }}
+                >
+                  {selectedColor === color && (
+                    <Box width={10} height={10} borderRadius={5} bg="black" opacity={0.5} />
+                  )}
+                </TouchableBox>
+              ))}
+            </HStack>
           </Box>
         </ScrollView>
       </AnimatedBox>
