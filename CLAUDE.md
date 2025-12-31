@@ -4,55 +4,61 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Bible Strong is a React Native application for Bible study in French, featuring Strong's concordance, reading plans, study notes, and various Bible translations. It's built with Expo SDK 52 and supports both iOS and Android platforms.
+Bible Strong is a React Native application for Bible study, primarily targeting French-speaking users but with English support. Key features include:
+
+- **Multiple Bible translations**: 40+ versions in French, English, Hebrew, and Greek
+- **Strong's concordance**: Hebrew and Greek word studies with interlinear versions
+- **Reading plans**: Yearly and meditation-style plans with progress tracking
+- **Study tools**: Notes, highlights, bookmarks, cross-references, and verse linking
+- **Nave's Topical Bible**: Thematic Bible study reference
+- **Audio Bible**: Streaming playback with background audio support
+- **Timeline**: Biblical history visualization
+- **Offline support**: Core functionality works without internet
+
+**Tech Stack**: Expo SDK 54, React Native 0.81, TypeScript, Redux Toolkit, Jotai, Emotion, SQLite
 
 ## Essential Commands
 
 ### Development
 
 ```bash
-# Start development server
-yarn start
-
-# Run on local devices/simulators
-yarn android  # Run on Android device/emulator
-yarn ios      # Run on iOS device/simulator
+yarn start              # Start Expo dev server with custom dev client
+yarn android            # Run on Android device/emulator
+yarn ios                # Run on iOS device/simulator
 ```
 
 ### Building
 
 ```bash
-# Android builds (local)
-yarn build:android:dev      # Development build
-yarn build:android:staging  # Staging build
-yarn build:android:prod     # Production build
-yarn build:android:prod:apk # Production APK
+# Android
+yarn build:android:dev       # Development build
+yarn build:android:staging   # Staging APK
+yarn build:android:prod      # Production AAB
+yarn build:android:prod:apk  # Production APK
 
-# iOS builds (local)
-yarn build:ios:dev          # Development build
-yarn build:ios:dev-sim      # Development simulator build
-yarn build:ios:staging      # Staging build
-yarn build:ios:prod         # Production build
+# iOS
+yarn build:ios:dev           # Development build
+yarn build:ios:dev-sim       # Simulator build
+yarn build:ios:staging       # Staging build
+yarn build:ios:prod          # Production build
 ```
 
 ### Code Quality
 
 ```bash
-# Run linting
-yarn lint
-
-# Run tests (limited test coverage)
-yarn test
-
-# Extract i18n strings
-yarn i18n
+yarn lint                # ESLint check
+yarn lint:fix            # ESLint auto-fix
+yarn format              # Prettier format
+yarn format:check        # Prettier check
+yarn typecheck           # TypeScript type checking
+yarn test                # Run Jest tests
+yarn i18n                # Extract i18n strings
 ```
 
 ### Maintenance
 
 ```bash
-# Clean and reinstall dependencies
-yarn clean
+yarn clean               # Remove node_modules and caches, reinstall
 ```
 
 ## Architecture
@@ -69,12 +75,12 @@ yarn clean
 
 ### Key Architectural Patterns
 
-1. **Feature-Based Organization**: Each major feature has its own directory under `src/features/` containing components, screens, and related logic.
+1. **Feature-Based Organization**: Each feature is self-contained with its own screens, components, and logic.
 
 2. **State Management**:
-   - Redux Toolkit for global state (user data, Bible versions, settings)
-   - Jotai atoms for local component state
-   - Redux-persist for offline storage
+   - **Redux Toolkit + Persist**: Global persistent state (user data, settings, highlights, notes)
+   - **Jotai atoms**: Tab state, local UI state (`src/state/tabs.ts`)
+   - **MMKV**: Fast key-value storage for Redux persist
 
 3. **Multi-Tab Bible System**: Custom tab management allowing multiple Bible instances open simultaneously (`src/features/bible/BibleTabScreen.tsx`).
 
@@ -92,37 +98,130 @@ The app uses environment-based builds with different Firebase configurations:
 - Staging: `.env.staging`
 - Production: `.env.production`
 
-### Database Structure
+### Data Storage
 
-- SQLite databases for Bible versions stored in `src/assets/bible_versions/`
-- Strong's concordance data in `src/assets/strong/`
-- User data synced with Firestore
+| Data Type | Storage | Location |
+|-----------|---------|----------|
+| Bible versions | SQLite | `documentDirectory/SQLite/` (downloaded) |
+| Strong's concordance | SQLite | `documentDirectory/SQLite/` |
+| User highlights/notes | Redux + Firestore | MMKV persist + cloud sync |
+| Tab state | Jotai + MMKV | Async storage atoms |
+| App settings | Redux | MMKV persist |
 
-### Important Technical Details
+### Firebase Integration
 
-1. **Custom Expo Dev Client**: The app uses a custom development build, not Expo Go.
+- **Authentication**: Email/password, Google, Apple Sign-In
+- **Firestore**: Cloud sync for user data (highlights, notes, studies, tags)
+- **Remote Config**: Feature flags (e.g., `enable_tts_public`)
+- **Analytics**: Screen tracking, user events
+- **Storage**: Bible audio files, study assets
 
-2. **Audio Playback**: Bible audio uses `react-native-track-player` with background playback support.
+## Key Files Reference
 
-3. **Offline Support**: Core Bible functionality works offline using local SQLite databases.
+| File | Purpose |
+|------|---------|
+| `App.tsx` | App entry, font loading, splash screen |
+| `InitApp.tsx` | Provider tree setup (Theme, Redux, Navigation) |
+| `src/state/tabs.ts` | Tab state atoms and Bible tab actions |
+| `src/redux/store.ts` | Redux store configuration with persist |
+| `src/redux/modules/user.ts` | User state slice |
+| `src/navigation/MainStackNavigator.tsx` | All screen routes |
+| `src/helpers/bibleVersions.ts` | Bible version definitions |
+| `src/helpers/databases.ts` | SQLite database helpers |
+| `src/themes/index.ts` | Theme definitions |
 
-4. **Deep Linking**: Configured for Firebase Auth and Google Sign-in redirects.
+## Development Guidelines
 
-5. **Push Notifications**: Implemented using Notifee for local notifications.
+### Component Patterns
 
-6. **Theme System**: Dynamic theming with user-customizable colors stored in Redux.
+```typescript
+// Typical screen component
+import styled from '@emotion/native'
+import { useTheme } from '@emotion/react'
+import { useSelector, useDispatch } from 'react-redux'
 
-## Development Tips
+const MyScreen = () => {
+  const theme = useTheme()
+  const dispatch = useDispatch()
+  const userData = useSelector(state => state.user)
 
-1. **Testing WebView Changes**: Bible and study content is rendered in WebViews. Test changes in both iOS and Android as WebView behavior can differ.
+  return (
+    <Container>
+      {/* content */}
+    </Container>
+  )
+}
 
-2. **Working with Bible Data**: Bible versions are SQLite databases. Use the `getDatabasesRef` helper to access them.
+const Container = styled.View(({ theme }) => ({
+  flex: 1,
+  backgroundColor: theme.colors.lightGrey,
+}))
+```
 
-3. **Adding New Features**: Follow the existing pattern in `src/features/` - create a new directory with components, screens, and any feature-specific logic.
+### State Management Rules
 
-4. **State Updates**: For user-related data that needs persistence, use Redux actions. For UI-only state, prefer Jotai atoms.
+1. **Use Redux for**:
+   - User data that syncs with Firestore
+   - Persistent settings
+   - Data shared across many screens
 
-5. **Performance**: The app uses `@shopify/flash-list` for performant lists and `react-native-mmkv` for fast key-value storage.
+2. **Use Jotai for**:
+   - Tab state and navigation state
+   - Ephemeral UI state
+   - Component-local state that needs to be shared
+
+3. **Firestore Sync**: Redux middleware (`firestoreMiddleware.ts`) automatically syncs user actions to Firestore when logged in.
+
+### Bible Data Access
+
+```typescript
+import { getDatabases } from '~helpers/databases'
+import { getSQLTransaction } from '~helpers/getSQLTransaction'
+
+// Get database reference
+const databases = getDatabases()
+const db = databases.BIBLE
+
+// Execute query
+const transaction = await getSQLTransaction(db)
+const result = await transaction.executeSql('SELECT * FROM verses WHERE book = ?', [1])
+```
+
+### Adding a New Screen
+
+1. Create screen component in appropriate `src/features/` directory
+2. Add route to `src/navigation/MainStackNavigator.tsx`
+3. Add type to `src/navigation/type.ts`
+4. Navigate using: `navigation.navigate('ScreenName', { params })`
+
+### i18n Usage
+
+```typescript
+import { useTranslation } from 'react-i18next'
+
+const MyComponent = () => {
+  const { t } = useTranslation()
+  return <Text>{t('key.path')}</Text>
+}
+```
+
+Translation files: `i18n/locales/{fr,en}/translation.json`
+
+## Testing
+
+- Framework: Jest with `jest-expo`
+- Limited test coverage currently
+- Run: `yarn test`
+
+## Environment Configuration
+
+Three environments configured via `.env.*` files:
+
+- **Development** (`.env.development`): Debug builds, dev Firebase
+- **Staging** (`.env.staging`): Internal testing, staging Firebase
+- **Production** (`.env.production`): App store releases, prod Firebase
+
+Environment variables accessed via `process.env.EXPO_PUBLIC_*`
 
 ## Common Tasks
 
