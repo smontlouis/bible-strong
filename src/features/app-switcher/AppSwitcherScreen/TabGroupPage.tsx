@@ -7,12 +7,9 @@ import { TouchableOpacity, useWindowDimensions, ViewStyle } from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
-  LinearTransition,
   SharedValue,
   useAnimatedRef,
   useAnimatedStyle,
-  ZoomIn,
-  ZoomOut,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -23,7 +20,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { useAddTabToGroup } from '../../../state/tabGroups'
-import { TabGroup, TabItem, getGroupTabsAtomsAtom } from '../../../state/tabs'
+import { getGroupTabsAtomsAtom, TabGroup, TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { useExpandNewTab } from '../utils/useExpandNewTab'
 import useTabConstants from '../utils/useTabConstants'
@@ -230,7 +227,6 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
         keyExtractor={keyExtractorActive}
         renderItem={renderActiveItem}
         ListHeaderComponent={ListHeaderComponentActive}
-        CellRendererComponent={CellRenderer}
         contentContainerStyle={contentContainerStyle}
         showsVerticalScrollIndicator={false}
       />
@@ -241,7 +237,3 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
 TabGroupPage.displayName = 'TabGroupPage'
 
 export default TabGroupPage
-
-const CellRenderer = (props: any) => {
-  return <Animated.View {...props} layout={LinearTransition} entering={ZoomIn} exiting={ZoomOut} />
-}
