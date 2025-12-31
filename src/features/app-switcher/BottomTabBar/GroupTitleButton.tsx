@@ -11,6 +11,8 @@ import GroupActionsPopover from './GroupActionsPopover'
 import EditGroupModal from './EditGroupModal'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { LinearTransition } from 'react-native-reanimated'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { getContrastTextColor } from '~helpers/highlightUtils'
 
 const GroupTitleButton = () => {
   const { t } = useTranslation()
@@ -19,6 +21,11 @@ const GroupTitleButton = () => {
   const updateGroup = useUpdateGroup()
   const editSheetRef = useRef<BottomSheetModal>(null)
   const { groupPager } = useAppSwitcherContext()
+  const { colorScheme } = useCurrentThemeSelector()
+
+  const textColor = activeGroup.color
+    ? getContrastTextColor(activeGroup.color, colorScheme === 'dark')
+    : undefined
 
   const displayName = activeGroup.isDefault
     ? `${tabsCount} ${t('tabs.tab', { count: tabsCount })}`
@@ -56,14 +63,14 @@ const GroupTitleButton = () => {
                 transitionDuration: 300,
               }}
             >
-              <FadingText color="default" fontSize={14} numberOfLines={1}>
+              <FadingText color={textColor || 'default'} fontSize={14} numberOfLines={1}>
                 {displayName}
               </FadingText>
               <AnimatedBox layout={LinearTransition}>
                 <FeatherIcon
                   name="chevron-down"
                   size={16}
-                  color="tertiary"
+                  color={textColor || 'default'}
                   style={{ marginLeft: 4 }}
                 />
               </AnimatedBox>

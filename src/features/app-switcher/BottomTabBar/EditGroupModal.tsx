@@ -115,14 +115,14 @@ const EditGroupModal = ({
           <Text color="tertiary" fontSize={13}>
             {t('Couleur')}
           </Text>
-          <HStack gap={12}>
+          <HStack gap={12} alignItems="center" justifyContent="space-between">
             {GROUP_COLORS.map(color => (
               <TouchableBox
                 key={color}
                 onPress={() => setSelectedColor(color)}
-                width={28}
-                height={28}
-                borderRadius={14}
+                width={20}
+                height={20}
+                borderRadius={10}
                 center
                 style={{ backgroundColor: color }}
               >

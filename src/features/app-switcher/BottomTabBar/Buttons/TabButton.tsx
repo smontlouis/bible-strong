@@ -3,9 +3,13 @@ import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '../../utils/constants'
 import useTabButtonPress from './useTabButtonPress'
+import { getContrastTextColor } from '~helpers/highlightUtils'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 const TabButton = () => {
   const { onPress, tabsCount, iconStyle, groupColor } = useTabButtonPress()
+  const { colorScheme } = useCurrentThemeSelector()
+
   return (
     <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
       <AnimatedBox
@@ -17,7 +21,11 @@ const TabButton = () => {
         center
         style={iconStyle}
       >
-        <Text fontSize={12} color={groupColor ? 'black' : 'tertiary'} lineHeight={15}>
+        <Text
+          fontSize={12}
+          color={groupColor ? getContrastTextColor(groupColor, colorScheme === 'dark') : 'tertiary'}
+          lineHeight={15}
+        >
           {tabsCount > 100 ? ':)' : tabsCount}
         </Text>
       </AnimatedBox>

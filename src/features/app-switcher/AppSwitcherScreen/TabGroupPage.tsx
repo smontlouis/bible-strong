@@ -19,6 +19,7 @@ import Box, { AnimatedBox, FadingBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
+import { getContrastTextColor } from '~helpers/highlightUtils'
 import { useAddTabToGroup } from '../../../state/tabGroups'
 import { getGroupTabsAtomsAtom, TabGroup, TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -64,7 +65,11 @@ const GroupHeader = ({
       alignItems="center"
       gap={12}
     >
-      <Box bg={group.color} width={16} height={16} borderRadius={8} />
+      <Box bg={group.color} width={24} height={24} borderRadius={6} center>
+        <Text fontSize={12} style={{ color: getContrastTextColor(group.color) }} bold>
+          {group.tabs?.length ?? 0}
+        </Text>
+      </Box>
       <Text
         fontSize={30}
         color="default"

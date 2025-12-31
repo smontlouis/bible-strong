@@ -22,7 +22,13 @@ export const useTabAnimations = () => {
   const { activeTabPreview, activeTabScreen, tabPreviewCarousel } = useAppSwitcherContext()
 
   const setAtomId = (index: number) => {
-    const atomId = getDefaultStore().get(tabsAtomsAtom)[index].toString()
+    const tabsAtoms = getDefaultStore().get(tabsAtomsAtom)
+
+    // Bounds check to prevent crash when switching groups
+    if (tabsAtoms.length === 0) return
+    const safeIndex = Math.max(0, Math.min(index, tabsAtoms.length - 1))
+
+    const atomId = tabsAtoms[safeIndex].toString()
     activeTabScreen.atomId.set(atomId)
   }
 

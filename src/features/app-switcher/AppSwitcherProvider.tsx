@@ -158,6 +158,9 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
       if (newGroupId !== currentActiveId) {
         store.set(cachedTabIdsAtom, [])
         store.set(activeGroupIdAtom, newGroupId)
+
+        // Reset activeTabPreview.index to 0 when switching groups
+        activeTabPreview.index.set(0)
       }
     }
   }
