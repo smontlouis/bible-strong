@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="./README.en.md">🇬🇧 English version</a>
+</p>
+
 <h1 align="center">
   <img width="120" height="120" src="https://raw.githubusercontent.com/smontlouis/bible-strong/master/assets/images/icon.png"><br>
   <a href="https://bible-strong.app"><span>Bible Strong</span></a><br>
@@ -379,4 +383,6 @@ A condition de :
   <strong>Fait avec ❤️ pour la communaute chretienne francophone</strong>
   <br/><br/>
   <a href="https://github.com/smontlouis/bible-strong/stargazers">⭐ Star ce projet si vous l'appreciez !</a>
+  <br/><br/>
+  Créé par <a href="https://github.com/smontlouis">smontlouis</a>
 </p>
