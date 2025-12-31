@@ -94,6 +94,23 @@ export const renameGroupAtom = atom(
 )
 
 /**
+ * Update a tab group (name and/or color)
+ */
+export const updateGroupAtom = atom(
+  null,
+  (get, set, { groupId, name, color }: { groupId: string; name: string; color?: string }) => {
+    const groups = get(tabGroupsAtom)
+
+    set(
+      tabGroupsAtom,
+      groups.map(g =>
+        g.id === groupId ? { ...g, name, ...(color && { color }) } : g
+      )
+    )
+  }
+)
+
+/**
  * Delete a tab group
  * Cannot delete the default group
  * If deleting the active group, switches to the default group
@@ -274,6 +291,9 @@ export const useSwitchGroup = () => useSetAtom(switchGroupAtom)
 /** Rename a group */
 export const useRenameGroup = () => useSetAtom(renameGroupAtom)
 
+/** Update a group (name and/or color) */
+export const useUpdateGroup = () => useSetAtom(updateGroupAtom)
+
 /** Delete a group */
 export const useDeleteGroup = () => useSetAtom(deleteGroupAtom)
 
@@ -293,6 +313,7 @@ export const useTabGroupActions = () => {
   const createGroup = useSetAtom(createGroupAtom)
   const switchGroup = useSetAtom(switchGroupAtom)
   const renameGroup = useSetAtom(renameGroupAtom)
+  const updateGroup = useSetAtom(updateGroupAtom)
   const deleteGroup = useSetAtom(deleteGroupAtom)
   const addTabToGroup = useSetAtom(addTabToGroupAtom)
   const moveTabToGroup = useSetAtom(moveTabToGroupAtom)
@@ -302,6 +323,7 @@ export const useTabGroupActions = () => {
     createGroup,
     switchGroup,
     renameGroup,
+    updateGroup,
     deleteGroup,
     addTabToGroup,
     moveTabToGroup,

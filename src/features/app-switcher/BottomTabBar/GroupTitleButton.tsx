@@ -4,11 +4,11 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import Box, { AnimatedBox, FadingText } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import PopOverMenu from '~common/PopOverMenu'
-import { useActiveGroup, useRenameGroup, getTabGroups } from '../../../state/tabGroups'
+import { useActiveGroup, useUpdateGroup, getTabGroups } from '../../../state/tabGroups'
 import { tabsCountAtom } from '../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
 import GroupActionsPopover from './GroupActionsPopover'
-import RenameModal from '~common/RenameModal'
+import EditGroupModal from './EditGroupModal'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { LinearTransition } from 'react-native-reanimated'
 
@@ -16,8 +16,8 @@ const GroupTitleButton = () => {
   const { t } = useTranslation()
   const activeGroup = useActiveGroup()
   const tabsCount = useAtomValue(tabsCountAtom)
-  const renameGroup = useRenameGroup()
-  const renameSheetRef = useRef<BottomSheetModal>(null)
+  const updateGroup = useUpdateGroup()
+  const editSheetRef = useRef<BottomSheetModal>(null)
   const { groupPager } = useAppSwitcherContext()
 
   const displayName = activeGroup.isDefault
@@ -31,12 +31,12 @@ const GroupTitleButton = () => {
     groupPager.navigateToPage(groupsLength, groupsLength)
   }
 
-  const handleOpenRename = () => {
-    renameSheetRef.current?.present()
+  const handleOpenEdit = () => {
+    editSheetRef.current?.present()
   }
 
-  const handleRename = (newName: string) => {
-    renameGroup({ groupId: activeGroup.id, newName })
+  const handleEdit = ({ name, color }: { name: string; color: string }) => {
+    updateGroup({ groupId: activeGroup.id, name, color })
   }
 
   return (
@@ -74,17 +74,16 @@ const GroupTitleButton = () => {
           <GroupActionsPopover
             group={activeGroup}
             onCreateGroup={handleOpenCreateGroup}
-            onRenameGroup={handleOpenRename}
+            onEditGroup={handleOpenEdit}
           />
         }
       />
       {!activeGroup.isDefault && (
-        <RenameModal
-          bottomSheetRef={renameSheetRef}
-          title={t('tabs.renameGroup')}
-          placeholder={t('tabs.groupNamePlaceholder')}
-          initialValue={activeGroup.name}
-          onSave={handleRename}
+        <EditGroupModal
+          bottomSheetRef={editSheetRef}
+          initialName={activeGroup.name}
+          initialColor={activeGroup.color}
+          onSave={handleEdit}
         />
       )}
     </Box>

@@ -38,6 +38,7 @@
     "@gorhom/bottom-sheet": "5.2.6",
     "@gorhom/portal": "^1.0.14",
     "@invertase/react-native-apple-authentication": "^2.3.0",
+    "@legendapp/list": "^2.0.19",
     "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.14.0",

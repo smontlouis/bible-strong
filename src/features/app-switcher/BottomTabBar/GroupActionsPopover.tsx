@@ -38,11 +38,11 @@ PopoverItem.displayName = 'PopoverItem'
 interface GroupActionsPopoverProps {
   group: TabGroup
   onCreateGroup: () => void
-  onRenameGroup: () => void
+  onEditGroup: () => void
 }
 
 const GroupActionsPopover = memo(
-  ({ group, onCreateGroup, onRenameGroup }: GroupActionsPopoverProps) => {
+  ({ group, onCreateGroup, onEditGroup }: GroupActionsPopoverProps) => {
     const { t } = useTranslation()
     const { onClose } = usePopOver()
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
@@ -55,11 +55,11 @@ const GroupActionsPopover = memo(
       onClose()
     }
 
-    const handleRename = () => {
+    const handleEdit = () => {
       onClose()
       // Small delay to let the popover close before opening the bottom sheet
       setTimeout(() => {
-        onRenameGroup()
+        onEditGroup()
       }, 100)
     }
 
@@ -98,7 +98,7 @@ const GroupActionsPopover = memo(
         <PopoverItem icon="x-circle" label={t('tabs.closeAll')} onPress={handleCloseAllTabs} />
         {!group.isDefault && (
           <>
-            <PopoverItem icon="edit-2" label={t('tabs.renameGroup')} onPress={handleRename} />
+            <PopoverItem icon="edit-2" label={t('tabs.editGroup')} onPress={handleEdit} />
             <PopoverItem
               icon="trash-2"
               label={t('tabs.deleteGroup')}

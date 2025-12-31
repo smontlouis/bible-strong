@@ -4,7 +4,6 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { StyleSheet } from 'react-native'
-import { LinearTransition, ZoomOut } from 'react-native-reanimated'
 
 import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -63,8 +62,6 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
 
   return (
     <AnimatedBox
-      layout={LinearTransition}
-      exiting={ZoomOut}
       marginBottom={GAP}
       overflow="visible"
       style={boxStyles}

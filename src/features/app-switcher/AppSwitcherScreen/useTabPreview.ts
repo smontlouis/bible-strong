@@ -1,6 +1,7 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useMemo, useRef } from 'react'
+import { View } from 'react-native'
 import {
   Extrapolation,
   interpolate,
@@ -9,19 +10,18 @@ import {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated'
+import { runOnUI } from 'react-native-worklets'
 import wait from '~helpers/wait'
 import {
-  TabItem,
-  tabsCountAtom,
   activeGroupIdAtom,
   getGroupTabsAtomsAtom,
+  TabItem,
+  tabsCountAtom,
 } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import { useTabAnimations } from '../utils/useTabAnimations'
 import useTabConstants from '../utils/useTabConstants'
-import { runOnUI } from 'react-native-worklets'
-import { View } from 'react-native'
 
 const useTabPreview = ({
   index,
@@ -108,6 +108,8 @@ const useTabPreview = ({
   }
 
   const onClose = () => {
+    flashListRefs.getActiveRef()?.current?.prepareForLayoutAnimationRender()
+
     activeTabPreview.zIndex.set(1)
     onDelete()
     const tabsCount = getDefaultStore().get(tabsCountAtom)
@@ -127,7 +129,7 @@ const useTabPreview = ({
     }
     return {
       position: 'relative',
-      zIndex: 2,
+      zIndex: 1,
     }
   })
 

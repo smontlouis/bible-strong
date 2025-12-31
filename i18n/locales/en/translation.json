@@ -574,6 +574,7 @@
   "tabs.groupNamePlaceholder": "Group name",
   "tabs.closeAll": "Close all tabs",
   "tabs.renameGroup": "Rename",
+  "tabs.editGroup": "Edit group",
   "tabs.deleteGroup": "Delete group",
   "tabs.deleteGroupTitle": "Delete group?",
   "tabs.deleteGroupMessage": "All tabs in this group will be closed.",

@@ -574,6 +574,7 @@
   "tabs.groupNamePlaceholder": "Nom du groupe",
   "tabs.closeAll": "Fermer tous les onglets",
   "tabs.renameGroup": "Renommer",
+  "tabs.editGroup": "Modifier le groupe",
   "tabs.deleteGroup": "Supprimer le groupe",
   "tabs.deleteGroupTitle": "Supprimer le groupe ?",
   "tabs.deleteGroupMessage": "Tous les onglets de ce groupe seront fermés.",

@@ -7,9 +7,12 @@ import { TouchableOpacity, useWindowDimensions, ViewStyle } from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
+  LinearTransition,
   SharedValue,
   useAnimatedRef,
   useAnimatedStyle,
+  ZoomIn,
+  ZoomOut,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -159,7 +162,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
     <StaticTabPreview tab={tab} index={i} marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0} />
   )
 
-  const keyExtractorActive = (item: PrimitiveAtom<TabItem>) => `${item}`
+  const keyExtractorActive = (item: PrimitiveAtom<TabItem>) => item.toString()
 
   const keyExtractorStatic = (item: TabItem) => item.id
 
@@ -220,13 +223,14 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   // Pour les groupes bufferises: rendu avec atoms (actif + adjacents)
   return (
     <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey">
-      <AnimatedFlashList
+      <FlashList
         ref={flashListRef}
         data={tabsAtoms}
         numColumns={TABS_PER_ROW}
         keyExtractor={keyExtractorActive}
         renderItem={renderActiveItem}
         ListHeaderComponent={ListHeaderComponentActive}
+        CellRendererComponent={CellRenderer}
         contentContainerStyle={contentContainerStyle}
         showsVerticalScrollIndicator={false}
       />
@@ -237,3 +241,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
 TabGroupPage.displayName = 'TabGroupPage'
 
 export default TabGroupPage
+
+const CellRenderer = (props: any) => {
+  return <Animated.View {...props} layout={LinearTransition} entering={ZoomIn} exiting={ZoomOut} />
+}
