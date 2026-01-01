@@ -1,3 +1,4 @@
+import wait from '~helpers/wait'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useScrollToTab from './useScrollToTab'
 
@@ -11,6 +12,7 @@ const useScrollToActiveTab = () => {
 
   const scrollToActiveTab = async () => {
     const index = activeTabPreview.index.get()
+    await wait(800)
     await scrollToTab(index)
   }
 

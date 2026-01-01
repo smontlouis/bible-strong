@@ -93,7 +93,7 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
   const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
-  const scrollToActiveTabIndex = useScrollToActiveTab()
+  const scrollToActiveTab = useScrollToActiveTab()
 
   const tabId = tab.id
 
@@ -104,7 +104,7 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
     () => activeTabScreen.tabId.get() === tabId,
     (isActive, wasActive) => {
       if (isActive && !wasActive) {
-        runOnJS(scrollToActiveTabIndex)()
+        runOnJS(scrollToActiveTab)()
       }
     }
   )
