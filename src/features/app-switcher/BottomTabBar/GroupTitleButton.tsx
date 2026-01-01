@@ -13,6 +13,7 @@ import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { LinearTransition } from 'react-native-reanimated'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { getContrastTextColor } from '~helpers/highlightUtils'
+import { wp } from '~helpers/utils'
 
 const GroupTitleButton = () => {
   const { t } = useTranslation()
@@ -63,7 +64,14 @@ const GroupTitleButton = () => {
                 transitionDuration: 300,
               }}
             >
-              <FadingText color={textColor || 'default'} fontSize={14} numberOfLines={1}>
+              <FadingText
+                color={textColor || 'default'}
+                fontSize={14}
+                numberOfLines={1}
+                style={{
+                  maxWidth: wp(50),
+                }}
+              >
                 {displayName}
               </FadingText>
               <AnimatedBox layout={LinearTransition}>

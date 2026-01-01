@@ -23,6 +23,8 @@ import useTabConstants from '../utils/useTabConstants'
 import StaticTabPreview from './StaticTabPreview'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
+import { useAutoFontSize } from '~helpers/useAutoFontSize'
+import { wp } from '~helpers/utils'
 
 interface TabGroupPageProps {
   group: TabGroup
@@ -45,6 +47,7 @@ const GroupHeader = ({
   const insets = useSafeAreaInsets()
   const { SCREEN_MARGIN } = useTabConstants()
   const { colorScheme } = useCurrentThemeSelector()
+  const { fontSize, onTextLayout } = useAutoFontSize(30, wp(70), 20)
 
   if (group.isDefault) return null
 
@@ -70,12 +73,11 @@ const GroupHeader = ({
         </Text>
       </Box>
       <Text
-        fontSize={30}
+        fontSize={fontSize}
         color="default"
         numberOfLines={1}
         flex={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.7}
+        onTextLayout={onTextLayout}
       >
         {group.name}
       </Text>

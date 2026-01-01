@@ -578,7 +578,12 @@ const VersesRenderer = ({
 
   return (
     <DispatchProvider dispatch={dispatch}>
-      <Container rtl={isHebreu} settings={settings} isParallelVerse={isParallelVerse}>
+      <Container
+        rtl={isHebreu}
+        settings={settings}
+        isParallelVerse={isParallelVerse}
+        data-swipe-threshold="100"
+      >
         {isParallelVerse && (
           <VersionsContainer settings={settings}>
             {parallelVersionTitles?.map((p, i) => (
