@@ -14,6 +14,7 @@ import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
+import useScrollToTab from '../utils/useScrollToTab'
 import { useTabAnimations } from '../utils/useTabAnimations'
 
 type Animation = {
@@ -30,11 +31,13 @@ const fromTo = (animations: Animation[]) => {
   animations.forEach(animation => {
     const { animatedValue } = animation
     animatedValue.set(animation.fromValue)
-    animatedValue.set(withTiming(animation.toValue, animation.options, () => {
-      if (animation.onFinishValue !== undefined) {
-        animatedValue.set(animation.onFinishValue)
-      }
-    }))
+    animatedValue.set(
+      withTiming(animation.toValue, animation.options, () => {
+        if (animation.onFinishValue !== undefined) {
+          animatedValue.set(animation.onFinishValue)
+        }
+      })
+    )
   })
 }
 
@@ -44,7 +47,8 @@ const useBottomTabBar = () => {
 
   const { expandTab } = useTabAnimations()
   const { activeTabPreview } = useAppSwitcherContext()
-  const measureTabPreview = useMeasureTabPreview()
+  const { measureTabPreview, isTabVisible } = useMeasureTabPreview()
+  const scrollToTab = useScrollToTab()
 
   const HIDDEN_HEIGHT = TAB_ICON_SIZE + useSafeAreaInsets().bottom
   const bottomBarViewY = useSharedValue(0)
@@ -55,6 +59,12 @@ const useBottomTabBar = () => {
 
   const onPress = async () => {
     const index = activeTabPreview.index.get()
+
+    // Scroller seulement si le tab n'est pas visible dans le viewport
+    if (!isTabVisible(index)) {
+      await scrollToTab(index)
+    }
+
     const { pageX, pageY } = await measureTabPreview(index)
     expandTab({
       index,

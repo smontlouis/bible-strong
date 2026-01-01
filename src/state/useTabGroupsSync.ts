@@ -118,6 +118,7 @@ export const useTabGroupsSync = () => {
             await syncTabGroupToFirestore(userId, newGroup)
           }
         }
+        console.log(`[TabGroupsSync] Synced groups to Firestore`)
       } catch (error) {
         console.error('[TabGroupsSync] Error syncing to Firestore:', error)
         Sentry.captureException(error, {

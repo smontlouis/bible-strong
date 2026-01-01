@@ -68,7 +68,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
       width={TAB_PREVIEW_WIDTH}
       height={TAB_PREVIEW_HEIGHT}
       layout={LinearTransition}
-      entering={ZoomIn}
+      // entering={ZoomIn}
       exiting={ZoomOut}
     >
       <AnimatedTouchableBox

@@ -1,17 +1,14 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import { View } from 'react-native'
 import {
   Extrapolation,
   interpolate,
-  scrollTo,
   useAnimatedRef,
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated'
-import { runOnUI } from 'react-native-worklets'
-import wait from '~helpers/wait'
 import {
   activeGroupIdAtom,
   getGroupTabsAtomsAtom,
@@ -33,8 +30,7 @@ const useTabPreview = ({
   groupId: string
 }) => {
   const { activeTabPreview, tabPreviews, scrollView, flashListRefs } = useAppSwitcherContext()
-  const isInitialMount = useRef(true)
-  const measureTabPreview = useMeasureTabPreview()
+  const { measureTabPreview } = useMeasureTabPreview()
   // Utiliser l'atom per-group au lieu de l'atom global
   const groupTabsAtomsAtom = useMemo(() => getGroupTabsAtomsAtom(groupId), [groupId])
   const dispatchTabs = useSetAtom(groupTabsAtomsAtom)
@@ -54,40 +50,8 @@ const useTabPreview = ({
     }
   }, [isActiveGroup, index, tabPreviews, ref])
 
-  const {
-    TAB_PREVIEW_WIDTH,
-    TAB_PREVIEW_HEIGHT,
-    TAB_BORDER_RADIUS,
-    WIDTH,
-    HEIGHT,
-    STATUS_BAR_HEIGHT,
-    SCREEN_MARGIN,
-    GAP,
-  } = useTabConstants()
-
-  // On mount, measure the initial tab preview
-  // Only scroll on initial app mount, not when switching groups
-  // Only run for the active group to avoid conflicts with buffered groups
-  useEffect(() => {
-    if (isActiveGroup && index === activeTabPreview.index.get() && isInitialMount.current) {
-      ;(async () => {
-        await wait(300)
-        const { pageX, pageY } = await measureTabPreview(index)
-        activeTabPreview.top.set(pageY)
-        activeTabPreview.left.set(pageX)
-        activeTabPreview.zIndex.set(3)
-
-        const activeFlashListRef = flashListRefs.getActiveRef()
-        if (activeFlashListRef) {
-          const scrollToTop = pageY - STATUS_BAR_HEIGHT - SCREEN_MARGIN
-          runOnUI(scrollTo)(activeFlashListRef, 0, scrollToTop, false)
-        }
-
-        // Mark initial mount as complete to prevent scroll on group switches
-        isInitialMount.current = false
-      })()
-    }
-  }, [isActiveGroup])
+  const { TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT, TAB_BORDER_RADIUS, WIDTH, HEIGHT, GAP } =
+    useTabConstants()
 
   const onOpen = async () => {
     const { pageX, pageY } = await measureTabPreview(index)

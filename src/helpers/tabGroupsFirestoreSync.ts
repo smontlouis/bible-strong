@@ -105,7 +105,6 @@ export function hydrateTabGroup(
 export async function syncTabGroupToFirestore(userId: string, group: TabGroup): Promise<void> {
   const data = prepareTabGroupForSync(group)
   await writeToSubcollection(userId, 'tabGroups', group.id, data)
-  console.log(`[TabGroupsSync] Synced group ${group.id} to Firestore`)
 }
 
 /**

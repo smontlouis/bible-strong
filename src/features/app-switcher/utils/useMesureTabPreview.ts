@@ -3,6 +3,11 @@ import { useAppSwitcherContext } from '../AppSwitcherProvider'
 const useMeasureTabPreview = () => {
   const { tabPreviews } = useAppSwitcherContext()
 
+  // Vérifie si un tab est visible dans le viewport (via onViewableItemsChanged)
+  const isTabVisible = (index: number): boolean => {
+    return tabPreviews.visibleIndices.current.has(index)
+  }
+
   const measureTabPreview = async (
     index: number
   ): Promise<{
@@ -19,7 +24,7 @@ const useMeasureTabPreview = () => {
       )
     })
 
-  return measureTabPreview
+  return { measureTabPreview, isTabVisible }
 }
 
 export default useMeasureTabPreview

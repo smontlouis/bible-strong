@@ -1,16 +1,10 @@
-import { FlashList, FlashListRef, ListRenderItemInfo } from '@shopify/flash-list'
+import { FlashList, FlashListRef, ListRenderItemInfo, ViewToken } from '@shopify/flash-list'
 import { useAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity, useWindowDimensions, ViewStyle } from 'react-native'
-import Animated, {
-  Extrapolation,
-  interpolate,
-  SharedValue,
-  useAnimatedRef,
-  useAnimatedStyle,
-} from 'react-native-reanimated'
+import { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme } from '@emotion/react'
@@ -29,8 +23,6 @@ import useTabConstants from '../utils/useTabConstants'
 import StaticTabPreview from './StaticTabPreview'
 import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
-
-const AnimatedFlashList = Animated.createAnimatedComponent(FlashList<PrimitiveAtom<TabItem>>)
 
 interface TabGroupPageProps {
   group: TabGroup
@@ -102,12 +94,21 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   const { triggerExpandNewTab } = useExpandNewTab()
   const { TABS_PER_ROW, GAP, SCREEN_MARGIN } = useTabConstants()
   const { PADDING_HORIZONTAL } = useAppSwitcher()
-  const { flashListRefs } = useAppSwitcherContext()
+  const { flashListRefs, tabPreviews } = useAppSwitcherContext()
   const insets = useSafeAreaInsets()
   const theme = useTheme()
 
+  // Track visible indices for virtualization detection
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken<PrimitiveAtom<TabItem>>[] }) => {
+      const indices = viewableItems.map(item => item.index).filter((i): i is number => i !== null)
+      tabPreviews.setVisibleIndices(indices)
+    },
+    [tabPreviews]
+  )
+
   // Create and register FlashList ref for this group
-  const flashListRef = useAnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>()
+  const flashListRef = useRef<FlashListRef<PrimitiveAtom<TabItem>>>(null)
   useEffect(() => {
     if (isBuffered) {
       flashListRefs.registerRef(group.id, flashListRef)
@@ -242,6 +243,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
         ListHeaderComponent={ListHeaderComponentActive}
         contentContainerStyle={contentContainerStyle}
         showsVerticalScrollIndicator={false}
+        onViewableItemsChanged={onViewableItemsChanged}
       />
     </AnimatedBox>
   )

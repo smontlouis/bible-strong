@@ -31,8 +31,11 @@ type AppSwitcherContextValues = {
     tabId: SharedValue<string | null>
   }
   flashListRefs: {
-    registerRef: (groupId: string, ref: AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>) => void
-    getActiveRef: () => AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>> | undefined
+    registerRef: (
+      groupId: string,
+      ref: React.RefObject<FlashListRef<PrimitiveAtom<TabItem>> | null>
+    ) => void
+    getActiveRef: () => React.RefObject<FlashListRef<PrimitiveAtom<TabItem>> | null>
   }
   scrollView: {
     y: SharedValue<number>
@@ -41,6 +44,8 @@ type AppSwitcherContextValues = {
   tabPreviews: {
     refs: React.RefObject<React.RefObject<View>[]>
     registerRef: (index: number, ref: AnimatedRef<View>) => void
+    visibleIndices: React.RefObject<Set<number>>
+    setVisibleIndices: (indices: number[]) => void
   }
   tabPreviewCarousel: {
     translateY: SharedValue<number>
@@ -73,6 +78,7 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const { width } = useWindowDimensions()
 
   const tabPreviewRefs = useRef(new Array(100))
+  const visibleIndicesRef = useRef(new Set<number>())
 
   const isBottomTabBarVisible = useSharedValue(1)
 
@@ -88,31 +94,37 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     [tabPreviewRefs]
   )
 
+  const setVisibleIndices = useCallback((indices: number[]) => {
+    visibleIndicesRef.current = new Set(indices)
+  }, [])
+
   const tabPreviews = {
     refs: tabPreviewRefs,
     registerRef: registerTabPreviewRef,
+    visibleIndices: visibleIndicesRef,
+    setVisibleIndices,
   }
 
   // FlashList refs per group - allows scrolling in the active group's list
   const flashListRefsMap = useRef(
-    new Map<string, AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>>()
+    new Map<string, React.RefObject<FlashListRef<PrimitiveAtom<TabItem>> | null>>()
   )
 
   const registerFlashListRef = useCallback(
-    (groupId: string, ref: AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>) => {
+    (groupId: string, ref: React.RefObject<FlashListRef<PrimitiveAtom<TabItem>> | null>) => {
       flashListRefsMap.current.set(groupId, ref)
     },
     []
   )
 
-  const getActiveFlashListRef = useCallback(() => {
+  const getFlashListRef = useCallback(() => {
     const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
-    return flashListRefsMap.current.get(activeGroupId)
+    return flashListRefsMap.current.get(activeGroupId)!
   }, [])
 
   const flashListRefs = {
     registerRef: registerFlashListRef,
-    getActiveRef: getActiveFlashListRef,
+    getActiveRef: getFlashListRef,
   }
 
   const activeTabPreview = {
@@ -186,6 +198,10 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     const store = getDefaultStore()
     const groups = store.get(tabGroupsAtom)
 
+    // Capturer le groupId précédent AVANT les changements
+    const prevGroupId = store.get(activeGroupIdAtom)
+    const prevFlashListRef = flashListRefsMap.current.get(prevGroupId)
+
     // Animation du pager
     const targetX = -pageIndex * width
     pagerTranslateX.set(withSpring(targetX))
@@ -199,13 +215,15 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     // Set activeGroupId (si c'est une page de groupe, pas la page de création)
     if (pageIndex < groups.length) {
       const newGroupId = groups[pageIndex].id
-      const currentActiveId = store.get(activeGroupIdAtom)
-      if (newGroupId !== currentActiveId) {
+      if (newGroupId !== prevGroupId) {
         store.set(cachedTabIdsAtom, [])
         store.set(activeGroupIdAtom, newGroupId)
 
         // Reset activeTabPreview.index to 0 when switching groups
         activeTabPreview.index.set(0)
+
+        // Scroll la FlashList précédente vers le top
+        prevFlashListRef?.current?.scrollToOffset({ offset: 0, animated: true })
       }
     }
   }

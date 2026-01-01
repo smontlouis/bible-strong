@@ -1,5 +1,7 @@
 import { useSetAtom } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { withDelay, withTiming } from 'react-native-reanimated'
+import { runOnJS } from 'react-native-worklets'
 import {
   activeTabIndexAtom,
   appSwitcherModeAtom,
@@ -10,8 +12,6 @@ import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { tabTimingConfig } from './constants'
 import useTabConstants from './useTabConstants'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
-import { getDefaultStore } from 'jotai/vanilla'
-import { runOnJS } from 'react-native-worklets'
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)

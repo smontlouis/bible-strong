@@ -1,6 +1,5 @@
 import { useAtomValue } from 'jotai/react'
-import { useState, useEffect } from 'react'
-import { runOnUI, scrollTo } from 'react-native-reanimated'
+import { useEffect, useState } from 'react'
 import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'
 import { tabsCountAtom } from '../../../state/tabs'
@@ -12,7 +11,7 @@ export const useExpandNewTab = () => {
   const tabsCount = useAtomValue(tabsCountAtom)
   const prevTabsCount = usePrevious(tabsCount)
   const { expandTab } = useTabAnimations()
-  const measureTabPreview = useMeasureTabPreview()
+  const { measureTabPreview } = useMeasureTabPreview()
   const { flashListRefs } = useAppSwitcherContext()
 
   const [tabId, setTabId] = useState<string | null>(null)
@@ -24,10 +23,8 @@ export const useExpandNewTab = () => {
         const index = tabsCount - 1
 
         // Scroll to end to ensure new tab is rendered (fixes virtualization issue)
-        const activeFlashListRef = flashListRefs.getActiveRef()
-        if (activeFlashListRef) {
-          runOnUI(scrollTo)(activeFlashListRef, 0, 99999, false)
-        }
+        const flashListRef = flashListRefs.getActiveRef()
+        flashListRef.current?.scrollToOffset({ offset: 99999, animated: false })
 
         // Wait for scroll + render
         await wait(300)

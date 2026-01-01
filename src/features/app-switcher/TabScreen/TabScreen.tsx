@@ -2,7 +2,8 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
 import React, { memo, Ref } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { useAnimatedStyle } from 'react-native-reanimated'
+import { useAnimatedReaction, useAnimatedStyle } from 'react-native-reanimated'
+import { runOnJS } from 'react-native-worklets'
 
 import { StackNavigationProp } from '@react-navigation/stack'
 import Box from '~common/ui/Box'
@@ -19,6 +20,7 @@ import StudiesTabScreen from '~features/studies/StudiesTabScreen'
 import { TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import NewTabScreen from './NewTab/NewTabScreen'
+import useScrollToActiveTab from '../utils/useScrollToActiveTab'
 
 import TabScreenWrapper from './TabScreenWrapper'
 import { useSafeAreaFrame } from 'react-native-safe-area-context'
@@ -91,10 +93,21 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
   const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
+  const scrollToActiveTabIndex = useScrollToActiveTab()
 
   const tabId = tab.id
 
   const { component: Component, atomName } = getComponentTab(tab) || {}
+
+  // Scroll to active tab in background when this tab becomes visible
+  useAnimatedReaction(
+    () => activeTabScreen.tabId.get() === tabId,
+    (isActive, wasActive) => {
+      if (isActive && !wasActive) {
+        runOnJS(scrollToActiveTabIndex)()
+      }
+    }
+  )
 
   const imageStyles = useAnimatedStyle(() => {
     return {
