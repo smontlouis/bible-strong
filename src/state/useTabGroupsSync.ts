@@ -4,7 +4,14 @@ import { getDefaultStore } from 'jotai/vanilla'
 import debounce from 'debounce'
 import * as Sentry from '@sentry/react-native'
 
-import { tabGroupsAtom, TabGroup, activeGroupIdAtom, DEFAULT_GROUP_ID } from './tabs'
+import {
+  tabGroupsAtom,
+  TabGroup,
+  activeGroupIdAtom,
+  DEFAULT_GROUP_ID,
+  appSwitcherModeAtom,
+} from './tabs'
+import { resetTabAnimationTriggerAtom } from './app'
 import {
   syncTabGroupToFirestore,
   deleteTabGroupFromFirestore,
@@ -18,11 +25,31 @@ import {
   FirestoreTabGroup,
 } from '~helpers/tabGroupsFirestoreSync'
 import { batchWriteSubcollection } from '~helpers/firestoreSubcollections'
+import { registerCleanup } from '~helpers/cleanupRegistry'
 import useLogin from '~helpers/useLogin'
 import { usePrevious } from '~helpers/usePrevious'
 import { isMigrationInProgress } from './migration'
 
 const SYNC_DEBOUNCE_MS = 1000
+
+// Store unsubscribe function at module level for cleanup before logout
+let currentTabGroupsUnsubscribe: (() => void) | null = null
+
+/**
+ * Cleanup tabGroups Firestore subscription.
+ * Call this BEFORE signOut() to avoid permission-denied errors.
+ */
+export const cleanupTabGroupsSubscription = () => {
+  if (currentTabGroupsUnsubscribe) {
+    console.log('[TabGroupsSync] Cleaning up subscription before logout...')
+    currentTabGroupsUnsubscribe()
+    currentTabGroupsUnsubscribe = null
+    console.log('[TabGroupsSync] Subscription cleaned up')
+  }
+}
+
+// Register cleanup function with the registry (breaks require cycle with FireAuth)
+registerCleanup('tabGroupsSubscription', cleanupTabGroupsSubscription)
 
 /**
  * Hook that syncs tab groups between Jotai state and Firestore
@@ -41,9 +68,12 @@ export const useTabGroupsSync = () => {
   const setActiveGroupId = useSetAtom(activeGroupIdAtom)
 
   const previousGroupsRef = useRef<TabGroup[]>([])
-  const isRemoteUpdateRef = useRef(false)
+  const lastRemoteUpdateRef = useRef<number>(0)
   const isSyncingRef = useRef(false)
   const unsubscribeRef = useRef<(() => void) | null>(null)
+
+  // Cooldown period: sync debounce + small buffer
+  const REMOTE_UPDATE_COOLDOWN = SYNC_DEBOUNCE_MS + 100
 
   const isNewlyLogged = isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
 
@@ -52,8 +82,8 @@ export const useTabGroupsSync = () => {
    */
   const syncChangesToFirestore = useCallback(
     async (userId: string, newGroups: TabGroup[], oldGroups: TabGroup[]) => {
-      if (isRemoteUpdateRef.current || isSyncingRef.current) {
-        isRemoteUpdateRef.current = false
+      // Skip if we're currently syncing
+      if (isSyncingRef.current) {
         return
       }
 
@@ -138,7 +168,7 @@ export const useTabGroupsSync = () => {
           // Merge remote with local, preserving local base64Previews
           const merged = mergeTabGroups(localGroups, remoteGroups)
 
-          isRemoteUpdateRef.current = true
+          lastRemoteUpdateRef.current = Date.now()
           setGroups(merged)
 
           // Ensure active group exists
@@ -146,6 +176,11 @@ export const useTabGroupsSync = () => {
           if (!merged.find(g => g.id === activeGroupId)) {
             setActiveGroupId(merged[0]?.id || DEFAULT_GROUP_ID)
           }
+
+          // Reset to view mode (first tab expanded) and trigger animation reset
+          const store = getDefaultStore()
+          store.set(appSwitcherModeAtom, 'view')
+          store.set(resetTabAnimationTriggerAtom, prev => prev + 1)
 
           console.log('[TabGroupsSync] Loaded and merged groups from Firestore')
         }
@@ -198,7 +233,7 @@ export const useTabGroupsSync = () => {
         // Merge with local (preserving local base64Previews and local-only groups)
         const merged = mergeTabGroups(localGroups, remoteGroups)
 
-        isRemoteUpdateRef.current = true
+        lastRemoteUpdateRef.current = Date.now()
         setGroups(merged)
       })
     },
@@ -216,13 +251,17 @@ export const useTabGroupsSync = () => {
   // Effect: Setup Firestore subscription when logged in
   useEffect(() => {
     if (isLogged && user.id) {
-      unsubscribeRef.current = setupFirestoreSubscription(user.id)
+      const unsubscribe = setupFirestoreSubscription(user.id)
+      unsubscribeRef.current = unsubscribe
+      // Also store at module level for cleanup before logout
+      currentTabGroupsUnsubscribe = unsubscribe
     }
 
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current()
         unsubscribeRef.current = null
+        currentTabGroupsUnsubscribe = null
       }
     }
   }, [isLogged, user.id, setupFirestoreSubscription])
@@ -234,14 +273,16 @@ export const useTabGroupsSync = () => {
       return
     }
 
-    // Don't sync on first render or when coming from remote update
-    if (previousGroupsRef.current.length > 0 && !isRemoteUpdateRef.current) {
+    // Don't sync on first render or when within cooldown period after remote update
+    const timeSinceRemote = Date.now() - lastRemoteUpdateRef.current
+    const isWithinCooldown = timeSinceRemote < REMOTE_UPDATE_COOLDOWN
+
+    if (previousGroupsRef.current.length > 0 && !isWithinCooldown) {
       debouncedSync(user.id, groups, previousGroupsRef.current)
     }
 
     previousGroupsRef.current = groups
-    isRemoteUpdateRef.current = false
-  }, [groups, isLogged, user.id, debouncedSync])
+  }, [groups, isLogged, user.id, debouncedSync, REMOTE_UPDATE_COOLDOWN])
 
   // Cleanup debounce on unmount
   useEffect(() => {

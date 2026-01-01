@@ -1,4 +1,4 @@
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 import * as Sentry from '@sentry/react-native'
 
@@ -82,6 +82,7 @@ const useLoadSound = ({
   goToChapter,
   bibleAtom,
 }: UseLoadSoundProps) => {
+  const bibleTab = useAtomValue(bibleAtom)
   const [isExpanded, setExpandedMode] = useState(false)
   const [playerState, setPlayerState] = useState<State>(State.None)
   const [error, setError] = useState(false)
@@ -90,7 +91,8 @@ const useLoadSound = ({
   const [audioSleepTime, setAudioSleepTime] = useAtom(audioSleepTimeAtom)
   const setAudioSleepMinutes = useSetAtom(audioSleepMinutesAtom)
   const [playingBibleTabId, setPlayingBibleTabId] = useAtom(playingBibleTabIdAtom)
-  const isCurrentTabPlaying = playingBibleTabId === bibleAtom.toString()
+  // Use stable tab.id instead of atom.toString()
+  const isCurrentTabPlaying = playingBibleTabId === bibleTab.id
 
   useTrackPlayerEvents(events, async event => {
     if (!isSetup) {
@@ -129,7 +131,8 @@ const useLoadSound = ({
     playerState === State.Buffering || playerState === State.Loading || playerState === State.None
 
   const onPlay = async () => {
-    setPlayingBibleTabId(bibleAtom.toString())
+    // Use stable tab.id instead of atom.toString()
+    setPlayingBibleTabId(bibleTab.id)
     setExpandedMode(true)
 
     if (!isPlaying) {

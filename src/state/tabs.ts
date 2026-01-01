@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { atom, PrimitiveAtom } from 'jotai/vanilla'
+import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -328,24 +328,12 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
 
 // Migration function for tab groups
 const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
-  // If valid tab groups structure exists (even if empty), just apply tab migrations
+  // If valid tab groups structure exists, apply tab migrations and return
   if (groups.length > 0 && groups[0].tabs !== undefined) {
-    // Check if this is just the default initial data (single group with single default bible tab)
-    const firstTab = groups[0].tabs[0]
-    const isDefaultInitialData =
-      groups.length === 1 &&
-      groups[0].id === DEFAULT_GROUP_ID &&
-      groups[0].tabs.length === 1 &&
-      firstTab?.type === 'bible' &&
-      firstTab?.id?.startsWith('bible-')
-
-    // If not default initial data, keep the existing groups (even if empty)
-    if (!isDefaultInitialData) {
-      return groups.map(group => ({
-        ...group,
-        tabs: migrateTabsToRemovable(group.tabs),
-      }))
-    }
+    return groups.map(group => ({
+      ...group,
+      tabs: migrateTabsToRemovable(group.tabs),
+    }))
   }
 
   // Try to migrate from old tabsAtom storage key
@@ -548,23 +536,24 @@ export const activeTabIndexAtom = atom(
       groups.map(g => (g.id === activeId ? { ...g, activeTabIndex: value } : g))
     )
 
-    // Update cache (existing logic)
+    // Update cache (existing logic) - uses stable tab.id instead of atom.toString()
     if (value !== -1) {
       const tabsAtoms = get(tabsAtomsAtom)
       if (value >= 0 && value < tabsAtoms.length) {
-        const atomId = tabsAtoms[value].toString()
+        const tab = get(tabsAtoms[value])
+        const tabId = tab.id
 
         const cachedTabIds = get(cachedTabIdsAtom)
-        if (!cachedTabIds.includes(atomId)) {
-          set(cachedTabIdsAtom, [atomId, ...cachedTabIds].slice(0, maxCachedTabs))
+        if (!cachedTabIds.includes(tabId)) {
+          set(cachedTabIdsAtom, [tabId, ...cachedTabIds].slice(0, maxCachedTabs))
         }
       }
     }
   }
 )
 
-// Active atom ID (derived)
-export const activeAtomIdAtom = atom(get => {
+// Active tab ID (derived) - uses stable tab.id instead of atom.toString()
+export const activeTabIdAtom = atom(get => {
   const tabsAtoms = get(tabsAtomsAtom)
   const activeTabIndex = get(activeTabIndexAtom)
 
@@ -572,11 +561,15 @@ export const activeAtomIdAtom = atom(get => {
     return ''
   }
 
-  const atomId = tabsAtoms[activeTabIndex].toString()
-  return atomId
+  const tab = get(tabsAtoms[activeTabIndex])
+  return tab.id
 })
 
+// @deprecated Use activeTabIdAtom instead
+export const activeAtomIdAtom = activeTabIdAtom
+
 // Cached tab IDs (global cache shared across all groups)
+// Uses stable tab.id instead of atom.toString()
 export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
   const activeTabIndex = get(activeTabIndexAtom)
 
@@ -592,11 +585,16 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
 
   if (activeTabIndex >= tabsAtoms.length) {
     // Fallback to first tab if index is out of bounds
-    return tabsAtoms.length > 0 ? [tabsAtoms[0].toString()] : []
+    if (tabsAtoms.length > 0) {
+      const tab = get(tabsAtoms[0])
+      return [tab.id]
+    }
+    return []
   }
 
-  // Cache only the active tab (no special treatment for first tab)
-  return [tabsAtoms[activeTabIndex].toString()]
+  // Cache only the active tab (using stable tab.id)
+  const tab = get(tabsAtoms[activeTabIndex])
+  return [tab.id]
 })
 
 // ============================================================================
@@ -604,17 +602,21 @@ export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
 // ============================================================================
 
 export const useIsCurrentTab = () => {
-  const activeAtomId = useAtomValue(activeAtomIdAtom)
+  const activeTabId = useAtomValue(activeTabIdAtom)
 
-  return <T>(at: PrimitiveAtom<T>) => {
-    return activeAtomId === at.toString()
+  return (tabAtom: PrimitiveAtom<TabItem>) => {
+    const tab = getDefaultStore().get(tabAtom)
+    return activeTabId === tab.id
   }
 }
 
-export const useFindTabIndex = (atomId: string) => {
+export const useFindTabIndex = (tabId: string) => {
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
-  return tabsAtoms.findIndex(tab => tab.toString() === atomId)
+  return tabsAtoms.findIndex(tabAtom => {
+    const tab = getDefaultStore().get(tabAtom)
+    return tab.id === tabId
+  })
 }
 
 export const checkTabType = <Type extends TabItem>(

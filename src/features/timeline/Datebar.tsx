@@ -44,7 +44,7 @@ const Datebar = ({
       bg="reverse"
       lightShadow
       style={useAnimatedStyle(() => ({
-        transform: [{ translateX: x.value }],
+        transform: [{ translateX: x.get() }],
         elevation: 0,
       }))}
     >

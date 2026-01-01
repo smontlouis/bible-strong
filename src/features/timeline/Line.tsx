@@ -15,7 +15,7 @@ const Line = ({ lineX, color }: { lineX: SharedValue<number>; color: string }) =
       bg={color}
       opacity={0.3}
       style={useAnimatedStyle(() => ({
-        transform: [{ translateX: lineX.value }],
+        transform: [{ translateX: lineX.get() }],
       }))}
     />
   )

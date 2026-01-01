@@ -14,6 +14,7 @@ import {
 } from '~redux/modules/user'
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import { firebaseDb, doc, collection, query, where, onSnapshot } from './firebase'
+import { registerCleanup } from './cleanupRegistry'
 import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
 import { subscribeToSubcollection, SUBCOLLECTION_NAMES } from './firestoreSubcollections'
@@ -23,6 +24,31 @@ import { store } from '~redux/store'
 import { isMigrationInProgress } from 'src/state/migration'
 
 let isFirstSnapshotListener = true
+
+// Store unsubscribe functions at module level for cleanup before logout
+let currentUnsubscribeUsers: (() => void) | undefined
+let currentUnsubscribeStudies: (() => void) | undefined
+let currentSubcollectionUnsubscribes: (() => void)[] = []
+
+/**
+ * Cleanup all Firestore subscriptions.
+ * Call this BEFORE signOut() to avoid permission-denied errors.
+ */
+export const cleanupFirestoreSubscriptions = () => {
+  console.log('[LiveUpdates] Cleaning up Firestore subscriptions before logout...')
+  isFirstSnapshotListener = true
+  currentUnsubscribeUsers?.()
+  currentUnsubscribeStudies?.()
+  currentSubcollectionUnsubscribes.forEach(unsubscribe => unsubscribe())
+  // Clear references
+  currentUnsubscribeUsers = undefined
+  currentUnsubscribeStudies = undefined
+  currentSubcollectionUnsubscribes = []
+  console.log('[LiveUpdates] Subscriptions cleaned up')
+}
+
+// Register cleanup function with the registry (breaks require cycle with FireAuth)
+registerCleanup('firestoreSubscriptions', cleanupFirestoreSubscriptions)
 
 const useLiveUpdates = () => {
   const { isLogged, user } = useLogin()
@@ -39,9 +65,10 @@ const useLiveUpdates = () => {
   )
 
   useEffect(() => {
-    let unsuscribeUsers: (() => void) | undefined
-    let unsuscribeStudies: (() => void) | undefined
-    const subcollectionUnsubscribes: (() => void)[] = []
+    // Use module-level variables for cleanup access before logout
+    currentUnsubscribeUsers = undefined
+    currentUnsubscribeStudies = undefined
+    currentSubcollectionUnsubscribes = []
 
     const setupListeners = async () => {
       if (!isLogged || isLoading !== false || !user.id) {
@@ -85,7 +112,7 @@ const useLiveUpdates = () => {
       }
 
       // Subscribe to user document (settings, subscription, etc.)
-      unsuscribeUsers = onSnapshot(doc(firebaseDb, 'users', user.id), docSnapshot => {
+      currentUnsubscribeUsers = onSnapshot(doc(firebaseDb, 'users', user.id), docSnapshot => {
         const source = docSnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
         if (source === 'Local' || !docSnapshot) return
 
@@ -142,11 +169,11 @@ const useLiveUpdates = () => {
             })
           )
         })
-        subcollectionUnsubscribes.push(unsubscribe)
+        currentSubcollectionUnsubscribes.push(unsubscribe)
       }
 
       // Subscribe to studies collection
-      unsuscribeStudies = onSnapshot(
+      currentUnsubscribeStudies = onSnapshot(
         query(collection(firebaseDb, 'studies'), where('user.id', '==', user.id)),
         querySnapshot => {
           const source = querySnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
@@ -198,16 +225,13 @@ const useLiveUpdates = () => {
     if (isLogged && isLoading === false) {
       setupListeners()
     } else {
-      isFirstSnapshotListener = true
-      unsuscribeUsers?.()
-      unsuscribeStudies?.()
-      subcollectionUnsubscribes.forEach(unsubscribe => unsubscribe())
+      // Cleanup when user logs out (detected via isLogged change)
+      cleanupFirestoreSubscriptions()
     }
 
     return () => {
-      unsuscribeUsers?.()
-      unsuscribeStudies?.()
-      subcollectionUnsubscribes.forEach(unsubscribe => unsubscribe())
+      // Cleanup on unmount
+      cleanupFirestoreSubscriptions()
     }
   }, [isLogged, isLoading])
 }

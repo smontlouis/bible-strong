@@ -1,16 +1,20 @@
-import React, { createContext, useCallback, useContext, useRef } from 'react'
-import { ScrollView, useWindowDimensions, View } from 'react-native'
+import { FlashListRef } from '@shopify/flash-list'
+import { PrimitiveAtom, getDefaultStore } from 'jotai'
+import { useAtomValue } from 'jotai/react'
+import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
+import { ScrollView, View, useWindowDimensions } from 'react-native'
+import { AnimatedRef, SharedValue, useSharedValue, withSpring } from 'react-native-reanimated'
+import { resetTabAnimationTriggerAtom } from '~state/app'
 import {
-  AnimatedRef,
-  SharedValue,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated'
+  TabItem,
+  activeGroupIdAtom,
+  activeTabIndexAtom,
+  cachedTabIdsAtom,
+  tabGroupsAtom,
+  tabsAtomsAtom,
+} from '~state/tabs'
 import { useOnceAtoms } from './utils/useOnceAtoms'
 import useTabConstants from './utils/useTabConstants'
-import { FlashListRef } from '@shopify/flash-list'
-import { TabItem, activeGroupIdAtom, tabGroupsAtom, cachedTabIdsAtom } from '~state/tabs'
-import { PrimitiveAtom, getDefaultStore } from 'jotai'
 
 type AppSwitcherContextValues = {
   isBottomTabBarVisible: SharedValue<number>
@@ -24,7 +28,7 @@ type AppSwitcherContextValues = {
   }
   activeTabScreen: {
     opacity: SharedValue<number>
-    atomId: SharedValue<string | null>
+    tabId: SharedValue<string | null>
   }
   flashListRefs: {
     registerRef: (groupId: string, ref: AnimatedRef<FlashListRef<PrimitiveAtom<TabItem>>>) => void
@@ -64,7 +68,7 @@ interface AppSwitcherProviderProps {
 
 export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const groupPagerRef = useRef<ScrollView>(null)
-  const { initialAtomId, initialTabIndex } = useOnceAtoms()
+  const { initialTabId, initialTabIndex } = useOnceAtoms()
   const { HEIGHT } = useTabConstants()
   const { width } = useWindowDimensions()
 
@@ -112,17 +116,18 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   }
 
   const activeTabPreview = {
-    index: useSharedValue(initialTabIndex === -1 ? 0 : initialTabIndex),
+    index: useSharedValue(initialTabIndex),
     top: useSharedValue(0),
     left: useSharedValue(0),
     opacity: useSharedValue(0),
-    animationProgress: useSharedValue(initialTabIndex === -1 ? 0 : 1),
-    zIndex: useSharedValue(2),
+    animationProgress: useSharedValue(1),
+    zIndex: useSharedValue(3),
   }
 
+  // Uses stable tab.id instead of atom.toString()
   const activeTabScreen = {
-    opacity: useSharedValue(initialAtomId ? 1 : 0),
-    atomId: useSharedValue(initialAtomId) as SharedValue<string | null>,
+    opacity: useSharedValue(initialTabId ? 1 : 0),
+    tabId: useSharedValue(initialTabId ?? null) as SharedValue<string | null>,
   }
 
   const tabPreviewCarousel = {
@@ -136,6 +141,46 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const pagerTranslateX = useSharedValue(0)
   const pagerScrollX = useSharedValue(0)
   const createGroupPageIsFullyVisible = useSharedValue(false)
+
+  // Listen to reset trigger (login/logout) and reset to first tab expanded
+  const resetTrigger = useAtomValue(resetTabAnimationTriggerAtom)
+
+  useEffect(() => {
+    if (resetTrigger > 0) {
+      console.log('[AppSwitcherProvider] RESET TRIGGER', resetTrigger)
+      const store = getDefaultStore()
+      const tabsAtoms = store.get(tabsAtomsAtom)
+
+      // Reset to first tab expanded
+      activeTabPreview.index.set(0)
+      activeTabPreview.animationProgress.set(1) // Expanded state
+      activeTabPreview.zIndex.set(3) // On top
+      activeTabPreview.opacity.set(0)
+      activeTabPreview.top.set(0)
+      activeTabPreview.left.set(0)
+
+      // Update activeTabIndex Jotai atom (critical for tab content to show!)
+      store.set(activeTabIndexAtom, 0)
+
+      // Set the first tab as active (using stable tab.id)
+      if (tabsAtoms.length > 0) {
+        const tab = store.get(tabsAtoms[0])
+        activeTabScreen.tabId.set(tab.id)
+        activeTabScreen.opacity.set(1)
+
+        // Update cached tabs
+        store.set(cachedTabIdsAtom, [tab.id])
+      } else {
+        activeTabScreen.tabId.set(null)
+        activeTabScreen.opacity.set(0)
+      }
+
+      // Reset group pager to first group
+      activeGroupIndex.set(0)
+      pagerTranslateX.set(0)
+      pagerScrollX.set(0)
+    }
+  }, [resetTrigger])
 
   const navigateToPage = (pageIndex: number, groupsLength: number) => {
     const store = getDefaultStore()

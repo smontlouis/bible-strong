@@ -1,7 +1,7 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
 import React, { memo, Ref } from 'react'
-import { StyleSheet, useWindowDimensions, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { useAnimatedStyle } from 'react-native-reanimated'
 
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -91,7 +91,10 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
   const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
-  const tabAtomId = tabAtom.toString()
+
+  const tabId = tab.id
+
+  const { component: Component, atomName } = getComponentTab(tab) || {}
 
   const imageStyles = useAnimatedStyle(() => {
     return {
@@ -103,13 +106,11 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
       opacity: activeTabScreen.opacity.get(),
       transform: [
         {
-          translateY: activeTabScreen.atomId.get() === tabAtomId ? 0 : HEIGHT,
+          translateY: activeTabScreen.tabId.get() === tabId ? 0 : HEIGHT,
         },
       ],
     }
   })
-
-  const { component: Component, atomName } = getComponentTab(tab) || {}
 
   if (Component && atomName) {
     return (

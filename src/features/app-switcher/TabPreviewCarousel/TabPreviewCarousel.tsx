@@ -15,16 +15,16 @@ const TabPreviewCarousel = () => {
   const { WIDTH, GAP } = useTabConstants()
   const styles = useAnimatedStyle(() => {
     return {
-      opacity: tabPreviewCarousel.opacity.value,
+      opacity: tabPreviewCarousel.opacity.get(),
       transform: [
         {
           scale: 1,
         },
         {
-          translateX: -activeTabPreview.index.value * (WIDTH + GAP),
+          translateX: -activeTabPreview.index.get() * (WIDTH + GAP),
         },
         {
-          translateY: tabPreviewCarousel.translateY.value,
+          translateY: tabPreviewCarousel.translateY.get(),
         },
       ],
     }

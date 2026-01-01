@@ -8,6 +8,7 @@ import {
   cachedTabIdsAtom,
   createDefaultGroup,
   DEFAULT_GROUP_ID,
+  appSwitcherModeAtom,
 } from './tabs'
 import { makeMutable } from 'react-native-reanimated'
 
@@ -31,11 +32,20 @@ type MultipleTagsModalProps =
 
 export const multipleTagsModalAtom = atom<MultipleTagsModalProps>(false)
 
+// Atom to trigger animation state reset in AppSwitcherProvider
+export const resetTabAnimationTriggerAtom = atom(0)
+
 export const resetUserAtomsAtom = atom(null, (get, set) => {
   // Reset to a single default group with one Bible tab
   set(tabGroupsAtom, [createDefaultGroup()])
   set(activeGroupIdAtom, DEFAULT_GROUP_ID)
   set(cachedTabIdsAtom, [])
+
+  // Reset app switcher mode to view (first tab expanded)
+  set(appSwitcherModeAtom, 'view')
+
+  // Trigger animation reset in AppSwitcherProvider
+  set(resetTabAnimationTriggerAtom, get(resetTabAnimationTriggerAtom) + 1)
 })
 
 type BaseHistoryItem = {

@@ -1,17 +1,23 @@
 import { getDefaultStore } from 'jotai/vanilla'
 import { useRef } from 'react'
-import { activeTabIndexAtom, TabItem, tabsAtomsAtom } from '../../../state/tabs'
+import { activeTabIndexAtom, tabsAtomsAtom } from '../../../state/tabs'
 
 export const useOnceAtoms = () => {
-  const initialTabIndex = useRef(getDefaultStore().get(activeTabIndexAtom))
-  const initialAtomId = useRef(
-    (
-      getDefaultStore().get(tabsAtomsAtom)[initialTabIndex.current] as unknown as TabItem
-    )?.toString()
-  )
+  const store = getDefaultStore()
+  const initialTabIndex = useRef(store.get(activeTabIndexAtom))
+
+  // Use stable tab.id instead of atom.toString()
+  const initialTabId = useRef(() => {
+    const tabsAtoms = store.get(tabsAtomsAtom)
+    if (tabsAtoms.length > 0 && initialTabIndex.current < tabsAtoms.length) {
+      const tab = store.get(tabsAtoms[initialTabIndex.current])
+      return tab?.id
+    }
+    return undefined
+  })
 
   return {
-    initialAtomId: initialAtomId.current,
+    initialTabId: initialTabId.current(),
     initialTabIndex: initialTabIndex.current,
   }
 }

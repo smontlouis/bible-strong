@@ -21,15 +21,17 @@ export const useTabAnimations = () => {
 
   const { activeTabPreview, activeTabScreen, tabPreviewCarousel } = useAppSwitcherContext()
 
-  const setAtomId = (index: number) => {
-    const tabsAtoms = getDefaultStore().get(tabsAtomsAtom)
+  // Uses stable tab.id instead of atom.toString()
+  const setTabId = (index: number) => {
+    const store = getDefaultStore()
+    const tabsAtoms = store.get(tabsAtomsAtom)
 
     // Bounds check to prevent crash when switching groups
     if (tabsAtoms.length === 0) return
     const safeIndex = Math.max(0, Math.min(index, tabsAtoms.length - 1))
 
-    const atomId = tabsAtoms[safeIndex].toString()
-    activeTabScreen.atomId.set(atomId)
+    const tab = store.get(tabsAtoms[safeIndex])
+    activeTabScreen.tabId.set(tab.id)
   }
 
   const setActiveTabOpacity = () => {
@@ -38,7 +40,7 @@ export const useTabAnimations = () => {
         withTiming(1, undefined, () => {
           runOnJS(takeActiveTabSnapshot)(
             activeTabPreview.index.get(),
-            activeTabScreen.atomId.get() || ''
+            activeTabScreen.tabId.get() || ''
           )
         })
       )
@@ -54,7 +56,7 @@ export const useTabAnimations = () => {
       })
     )
     runOnJS(setAppSwitcherMode)('list')
-    activeTabScreen.atomId.set(null)
+    activeTabScreen.tabId.set(null)
   }
 
   const expandTab = ({ index, left, top }: { index: number; left: number; top: number }) => {
@@ -69,7 +71,7 @@ export const useTabAnimations = () => {
     activeTabPreview.animationProgress.set(
       withTiming(1, tabTimingConfig, () => {
         runOnJS(setActiveTabIndex)(index)
-        runOnJS(setAtomId)(index)
+        runOnJS(setTabId)(index)
         runOnJS(setActiveTabOpacity)()
       })
     )
@@ -84,7 +86,7 @@ export const useTabAnimations = () => {
       // Si on est en mode 'view' et il y a des tabs, on doit quand même afficher l'écran
       if (currentMode === 'view' && tabsCount > 0) {
         runOnJS(setActiveTabIndex)(index)
-        runOnJS(setAtomId)(index)
+        runOnJS(setTabId)(index)
         runOnJS(setActiveTabOpacity)()
       }
       return
@@ -92,14 +94,14 @@ export const useTabAnimations = () => {
 
     tabPreviewCarousel.opacity.set(1)
     tabPreviewCarousel.translateY.set(0)
-    activeTabScreen.atomId.set(null)
+    activeTabScreen.tabId.set(null)
     runOnJS(setActiveTabIndex)(index)
 
     activeTabPreview.index.set(
       withTiming(index, { duration: 400 }, finished => {
         if (!finished) return
 
-        runOnJS(setAtomId)(index)
+        runOnJS(setTabId)(index)
         tabPreviewCarousel.opacity.set(
           withDelay(
             200,
@@ -112,7 +114,7 @@ export const useTabAnimations = () => {
               activeTabPreview.zIndex.set(3)
               runOnJS(takeActiveTabSnapshot)(
                 activeTabPreview.index.get(),
-                activeTabScreen.atomId.get() || ''
+                activeTabScreen.tabId.get() || ''
               )
             })
           )

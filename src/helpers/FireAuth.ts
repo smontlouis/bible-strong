@@ -16,6 +16,7 @@ import * as Sentry from '@sentry/react-native'
 import { toast } from 'sonner-native'
 import { firebaseDb, doc, setDoc } from '~helpers/firebase'
 import { tokenManager } from '~helpers/TokenManager'
+import { runAllCleanups } from '~helpers/cleanupRegistry'
 import i18n from '~i18n'
 
 export type FireAuthProfile = {
@@ -301,6 +302,12 @@ const FireAuth = class {
     })
 
   logout = async () => {
+    // Cleanup Firestore subscriptions BEFORE signOut to avoid permission-denied errors
+    runAllCleanups()
+
+    // Small delay to let async cleanup operations complete
+    await new Promise(resolve => setTimeout(resolve, 50))
+
     await signOut(getAuth())
 
     // Sign-out successful.

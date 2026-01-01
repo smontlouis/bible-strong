@@ -1,11 +1,11 @@
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtomValue } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import React, { memo } from 'react'
 import { View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import useDynamicRefs from '~helpers/useDynamicRefs'
 import { cachedTabIdsAtom, tabsAtomsAtom } from '../../state/tabs'
 import TabScreen, { TabScreenProps } from './TabScreen/TabScreen'
-import useOnce from './utils/useOnce'
 import { MainStackProps } from '~navigation/type'
 import { RouteProp } from '@react-navigation/native'
 
@@ -15,33 +15,36 @@ export interface ChachedTabScreensProps {
 }
 
 const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
-  const [cachedTabIds, setCachedTabIds] = useAtom(cachedTabIdsAtom)
+  const cachedTabIds = useAtomValue(cachedTabIdsAtom)
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
-  // Little hack to have atomWithDefault but override default value
-  useOnce(() => {
-    setCachedTabIds(cachedTabIds)
+  // Filter tabs using stable tab.id instead of atom.toString()
+  const filteredTabsAtoms = tabsAtoms.filter(tabAtom => {
+    const tab = getDefaultStore().get(tabAtom)
+    return cachedTabIds.includes(tab.id)
   })
 
   return (
     <>
-      {tabsAtoms
-        .filter(tabAtom => cachedTabIds.includes(tabAtom.toString()))
-        .map(tabAtom => (
+      {filteredTabsAtoms.map(tabAtom => {
+        const tab = getDefaultStore().get(tabAtom)
+        return (
           <TabScreenRefMemoize
-            key={tabAtom.toString()}
+            key={tab.id}
             tabAtom={tabAtom}
             navigation={navigation}
             route={route}
           />
-        ))}
+        )
+      })}
     </>
   )
 }
 
 const TabScreenRefMemoize = memo((props: TabScreenProps) => {
   const [, setRef] = useDynamicRefs<View>()
-  const ref = setRef(props.tabAtom.toString())
+  const tab = getDefaultStore().get(props.tabAtom)
+  const ref = setRef(tab.id)
 
   return <TabScreen {...props} ref={ref} />
 })

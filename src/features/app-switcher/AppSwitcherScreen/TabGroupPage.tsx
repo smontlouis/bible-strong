@@ -1,6 +1,6 @@
 import { FlashList, FlashListRef, ListRenderItemInfo } from '@shopify/flash-list'
 import { useAtom } from 'jotai/react'
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity, useWindowDimensions, ViewStyle } from 'react-native'
@@ -171,7 +171,8 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
     <StaticTabPreview tab={tab} index={i} marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0} />
   )
 
-  const keyExtractorActive = (item: PrimitiveAtom<TabItem>) => item.toString()
+  // Use stable tab.id instead of atom.toString()
+  const keyExtractorActive = (item: PrimitiveAtom<TabItem>) => getDefaultStore().get(item).id
 
   const keyExtractorStatic = (item: TabItem) => item.id
 

@@ -43,7 +43,7 @@ const CurrentYear = ({
   const r = useMediaQueriesArray()
   const progressInSection = useDerivedValue(() => {
     const progress = interpolate(
-      x.value * -1,
+      x.get() * -1,
       [0, width - wpUI(100)],
       [0, 100],
       Extrapolation.CLAMP
@@ -54,7 +54,7 @@ const CurrentYear = ({
   return (
     <AnimatedBox
       style={useAnimatedStyle(() => ({
-        transform: [{ translateX: lineX.value }],
+        transform: [{ translateX: lineX.get() }],
       }))}
       pos="absolute"
       bottom={useSafeAreaInsets().bottom}

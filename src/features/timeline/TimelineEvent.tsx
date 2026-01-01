@@ -60,7 +60,7 @@ const TimelineEvent = ({
 
   const posX = useDerivedValue(() => {
     return interpolate(
-      x.value * -1,
+      x.get() * -1,
       [left + offset, left + width + offset - descSize - imageSize],
       [0, width - descSize - imageSize],
       Extrapolation.CLAMP
@@ -68,7 +68,7 @@ const TimelineEvent = ({
   })
 
   const styles = useAnimatedStyle(() => ({
-    transform: [{ translateX: posX.value }],
+    transform: [{ translateX: posX.get() }],
   }))
 
   if (type === 'minor') {
