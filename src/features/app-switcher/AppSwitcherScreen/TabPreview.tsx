@@ -1,9 +1,8 @@
 import Color from 'color'
-import { Image } from 'expo-image'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
-import { StyleSheet } from 'react-native'
+import { Image, StyleSheet } from 'react-native'
 
 import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -100,8 +99,6 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
               <Image
                 style={styles.previewImage}
                 source={{ uri: `data:image/png;base64,${base64Preview}` }}
-                cachePolicy="memory-disk"
-                priority="low"
               />
             )}
             <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">

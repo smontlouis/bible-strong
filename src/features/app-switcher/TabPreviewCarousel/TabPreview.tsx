@@ -1,8 +1,7 @@
-import { Image } from 'expo-image'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useDeferredValue } from 'react'
-import { StyleSheet } from 'react-native'
+import { Image, StyleSheet } from 'react-native'
 
 import { selectAtom } from 'jotai/vanilla/utils'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
@@ -58,8 +57,6 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
         <Image
           style={styles.previewImage}
           source={{ uri: `data:image/png;base64,${deferredBase64}` }}
-          cachePolicy="memory-disk"
-          priority="low"
         />
       )}
       <Box center>
