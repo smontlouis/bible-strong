@@ -25,6 +25,7 @@ export type SubcollectionName =
   | 'strongsGrec'
   | 'words'
   | 'naves'
+  | 'tabGroups'
 
 export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
   'bookmarks',
@@ -36,6 +37,7 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
   'strongsGrec',
   'words',
   'naves',
+  'tabGroups',
 ]
 
 /**

@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
+import useTabGroupsSync from '~state/useTabGroupsSync'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
 import MigrationModal from '~common/MigrationModal'
@@ -50,6 +51,7 @@ const InitHooks = ({}: InitHooksProps) => {
   }, [dispatch, t])
 
   useLiveUpdates()
+  useTabGroupsSync()
 
   return <MigrationModal />
 }

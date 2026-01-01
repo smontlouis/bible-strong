@@ -41,6 +41,7 @@ export const createGroupAtom = atom(
       return null
     }
 
+    const now = Date.now()
     const newGroup: TabGroup = {
       id: generateGroupId(),
       name,
@@ -48,7 +49,8 @@ export const createGroupAtom = atom(
       isDefault: false,
       tabs: [getDefaultBibleTab()],
       activeTabIndex: 0,
-      createdAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     }
 
     set(tabGroupsAtom, [...groups, newGroup])
@@ -379,6 +381,7 @@ export const createGroupFromOutsideReact = (
     return null
   }
 
+  const now = Date.now()
   const newGroup: TabGroup = {
     id: generateGroupId(),
     name,
@@ -386,7 +389,8 @@ export const createGroupFromOutsideReact = (
     isDefault: false,
     tabs: [getDefaultBibleTab()],
     activeTabIndex: 0,
-    createdAt: Date.now(),
+    createdAt: now,
+    updatedAt: now,
   }
 
   store.set(tabGroupsAtom, [...groups, newGroup])

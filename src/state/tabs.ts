@@ -161,6 +161,7 @@ export interface TabGroup {
   tabs: TabItem[]
   activeTabIndex: number
   createdAt: number
+  updatedAt: number
 }
 
 export const MAX_TAB_GROUPS = 8
@@ -201,6 +202,7 @@ export const createDefaultGroup = (version?: VersionCode): TabGroup => ({
   tabs: [getDefaultBibleTab(version)],
   activeTabIndex: 0,
   createdAt: 0,
+  updatedAt: 0,
 })
 
 export const getDefaultData = <T extends TabItem>(
@@ -370,6 +372,7 @@ const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
             tabs: migrateTabsToRemovable(oldTabs),
             activeTabIndex: Math.min(activeIndex, oldTabs.length - 1),
             createdAt: 0,
+            updatedAt: 0,
           },
         ]
       }

@@ -20,6 +20,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { getContrastTextColor } from '~helpers/highlightUtils'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useAddTabToGroup } from '../../../state/tabGroups'
 import { getGroupTabsAtomsAtom, TabGroup, TabItem } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
@@ -51,8 +52,14 @@ const GroupHeader = ({
 }) => {
   const insets = useSafeAreaInsets()
   const { SCREEN_MARGIN } = useTabConstants()
+  const { colorScheme } = useCurrentThemeSelector()
 
   if (group.isDefault) return null
+
+  const textColor = group.color
+    ? getContrastTextColor(group.color, colorScheme === 'dark')
+    : undefined
+
   return (
     <FadingBox
       keyProp={group.id}
@@ -66,7 +73,7 @@ const GroupHeader = ({
       gap={12}
     >
       <Box bg={group.color} width={24} height={24} borderRadius={6} center>
-        <Text fontSize={12} style={{ color: getContrastTextColor(group.color) }} bold>
+        <Text fontSize={12} style={{ color: textColor }} bold>
           {group.tabs?.length ?? 0}
         </Text>
       </Box>
