@@ -13,7 +13,6 @@ export const useUpdates = () => {
         const update = await Updates.checkForUpdateAsync()
 
         if (update.isAvailable) {
-          toast(t('app.updateAvailable'))
           await Updates.fetchUpdateAsync()
           toast(t('app.updateReady'))
         }
