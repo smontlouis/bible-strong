@@ -1,9 +1,8 @@
 import { motify, MotiTransitionProp, StyleValueWithReplacedTransforms } from '@alloc/moti'
 import styled from '@emotion/native'
 import { ImageStyle } from 'expo-image'
-import { PressableOpacity } from 'pressto'
 import React, { Ref } from 'react'
-import { TextStyle, View, ViewStyle } from 'react-native'
+import { TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 
 import * as Animatable from 'react-native-animatable'
 import Animated, {
@@ -298,7 +297,7 @@ export const AnimatedSafeAreaBox = ({
   const insets = useSafeAreaInsets()
   return <AnimatedBox ref={ref} paddingTop={insets.top} paddingBottom={insets.bottom} {...props} />
 }
-const BasicTouchableBox = Box.withComponent(PressableOpacity)
+const BasicTouchableBox = Box.withComponent(TouchableOpacity)
 export const TouchableBox = BasicTouchableBox
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)

@@ -101,7 +101,7 @@ const InitApp = ({ persistor }: Props) => {
                         <Toaster
                           duration={3000}
                           theme={colorScheme}
-                          position="bottom-center"
+                          position="top-center"
                           icons={{
                             info: <></>,
                           }}

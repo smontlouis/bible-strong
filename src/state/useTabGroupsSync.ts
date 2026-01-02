@@ -215,30 +215,64 @@ export const useTabGroupsSync = () => {
         console.log(
           '[TabGroupsSync] Firestore update received:',
           Object.keys(data).length,
-          'groups'
+          'groups,',
+          changes.removed.length,
+          'removed'
         )
 
         const localGroups = getDefaultStore().get(tabGroupsAtom)
+        const removedIds = new Set(changes.removed)
+
+        // Filter out deleted groups from local state
+        const localWithoutDeleted = localGroups.filter(g => !removedIds.has(g.id))
 
         // Convert Firestore data to TabGroup array
         const remoteGroups: TabGroup[] = Object.values(data).map(g =>
           hydrateTabGroup(
             g as FirestoreTabGroup,
-            localGroups.find(lg => lg.id === (g as any).id)
+            localWithoutDeleted.find(lg => lg.id === (g as any).id)
           )
         )
 
         // Sort by createdAt
         remoteGroups.sort((a, b) => a.createdAt - b.createdAt)
 
-        // Merge with local (preserving local base64Previews and local-only groups)
-        const merged = mergeTabGroups(localGroups, remoteGroups)
+        // For real-time updates, use remote as source of truth
+        // Only preserve local groups that don't exist in remote AND weren't deleted
+        const remoteIds = new Set(remoteGroups.map(g => g.id))
+        const localOnlyGroups = localWithoutDeleted.filter(g => !remoteIds.has(g.id))
+
+        // Combine: remote groups + local-only groups (not yet synced)
+        const finalGroups = [...remoteGroups]
+
+        // Only add local-only groups if they're very recent (created in last 5 seconds)
+        // This prevents re-adding deleted groups while allowing new local groups
+        const RECENT_THRESHOLD = 5000
+        const now = Date.now()
+        for (const localOnly of localOnlyGroups) {
+          if (now - localOnly.createdAt < RECENT_THRESHOLD) {
+            finalGroups.push(localOnly)
+          }
+        }
+
+        // Re-sort after adding local groups
+        finalGroups.sort((a, b) => a.createdAt - b.createdAt)
+
+        // Check if active group was deleted
+        const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
+        if (removedIds.has(activeGroupId) || !finalGroups.find(g => g.id === activeGroupId)) {
+          setActiveGroupId(finalGroups[0]?.id || DEFAULT_GROUP_ID)
+          // Reset to view mode after group deletion
+          const store = getDefaultStore()
+          store.set(appSwitcherModeAtom, 'view')
+          store.set(resetTabAnimationTriggerAtom, prev => prev + 1)
+        }
 
         lastRemoteUpdateRef.current = Date.now()
-        setGroups(merged)
+        setGroups(finalGroups)
       })
     },
-    [setGroups]
+    [setGroups, setActiveGroupId]
   )
 
   // Effect: Handle login/logout transitions

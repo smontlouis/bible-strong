@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -97,6 +97,7 @@ const BookmarkModal = ({
 
   // Mode: 'select' (choose existing to move), 'create' (new bookmark), 'edit' (modify existing)
   const [mode, setMode] = useState<'select' | 'create' | 'edit'>('select')
+  const isInitializedRef = useRef(false)
   const [name, setName] = useState('')
   const [selectedColor, setSelectedColor] = useState(DEFAULT_BOOKMARK_COLOR)
 
@@ -132,12 +133,19 @@ const BookmarkModal = ({
     }
   }, [existingBookmark, existingBookmarks.length])
 
-  // Handle sheet index change - reset state when modal opens
+  // Handle sheet index change - reset state only when modal first opens
   const handleSheetChange = useCallback(
     (index: number) => {
-      // index = -1 means closed, >= 0 means open
-      if (index >= 0) {
-        // Modal is opening - reset state based on existingBookmark
+      if (index === -1) {
+        // Modal closed - reset the flag for next opening
+        isInitializedRef.current = false
+        return
+      }
+
+      // Only reset state on first opening, not on keyboard resize
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true
+
         if (existingBookmark) {
           setMode('edit')
           setName(existingBookmark.name)

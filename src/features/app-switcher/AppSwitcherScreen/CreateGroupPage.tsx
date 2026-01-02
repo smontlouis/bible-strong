@@ -78,6 +78,8 @@ const CreateGroupPage = memo(
       return {
         opacity: progress,
         transform: [{ translateX }, { scale }],
+        // Désactiver les touches quand la page n'est pas visible
+        pointerEvents: createGroupPage.isFullyVisible.get() ? 'auto' : 'none',
       }
     })
 
