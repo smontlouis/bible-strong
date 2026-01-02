@@ -303,10 +303,10 @@ This project uses **React Native Reanimated 4.x**. Follow these best practices:
 
 ### Prefer CSS Transitions
 
-Before using `useSharedValue` and `useAnimatedStyle`, prefer Reanimated's native CSS transitions:
+Before using `useSharedValue` and `useAnimatedStyle`, prefer Reanimated's CSS transitions API:
 
 ```typescript
-// ❌ Avoid for simple animations
+// ❌ Avoid for simple state-driven animations
 const opacity = useSharedValue(1)
 const animatedStyle = useAnimatedStyle(() => ({
   opacity: opacity.get()
@@ -318,18 +318,42 @@ useEffect(() => {
 
 <Animated.View style={animatedStyle} />
 
-// ✅ Prefer CSS transitions for simple animations
+// ✅ Use CSS transitions instead
 <Animated.View
   style={{
     opacity: isVisible ? 1 : 0,
-    transition: { opacity: { duration: 300 } }
+    transitionProperty: 'opacity',
+    transitionDuration: 300,
+  }}
+/>
+```
+
+**CSS Transition Properties:**
+
+| Property | Description | Example |
+|----------|-------------|---------|
+| `transitionProperty` | Properties to animate | `'opacity'` or `['opacity', 'transform']` |
+| `transitionDuration` | Duration in ms or string | `300`, `'300ms'`, `'0.3s'` |
+| `transitionTimingFunction` | Easing function | `'ease-in-out'`, `'linear'`, `'ease'` |
+| `transitionDelay` | Delay before starting | `100`, `'100ms'` |
+
+**Multiple properties example:**
+
+```typescript
+<Animated.View
+  style={{
+    width: isExpanded ? 240 : 120,
+    backgroundColor: isExpanded ? '#fa7f7c' : '#87cce8',
+    transitionProperty: ['width', 'backgroundColor'],
+    transitionDuration: 500,
+    transitionTimingFunction: 'ease-out',
   }}
 />
 ```
 
 **When to use CSS transitions:**
 - Animations triggered by state changes
-- Simple transitions (opacity, transform, backgroundColor)
+- Simple transitions (opacity, transform, backgroundColor, width, height)
 - Enter/exit animations
 
 **When to use useSharedValue:**
@@ -357,12 +381,10 @@ console.log(sv.get())
 ### useAnimatedStyle
 
 ```typescript
-const animatedStyle = useAnimatedStyle(() => {
-  return {
-    opacity: interpolate(scrollX.get(), [0, 100], [0, 1], Extrapolation.CLAMP),
-    transform: [{ translateX: scrollX.get() }],
-  }
-})
+const animatedStyle = useAnimatedStyle(() => ({
+  opacity: interpolate(scrollX.get(), [0, 100], [0, 1], Extrapolation.CLAMP),
+  transform: [{ translateX: scrollX.get() }],
+}))
 ```
 
 ### Important Rules
