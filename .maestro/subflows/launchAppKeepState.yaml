@@ -1,0 +1,10 @@
+# Subflow: Launch the app without clearing state
+# Useful for tests that need to maintain user data between runs
+# Usage: - runFlow: subflows/launchAppKeepState.yaml
+
+appId: com.smontlouis.biblestrong
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 5000
