@@ -58,6 +58,8 @@ const GroupTitleButton = () => {
               px={12}
               borderRadius={20}
               layout={LinearTransition}
+              alignItems="center"
+              justifyContent="center"
               style={{
                 backgroundColor: activeGroup.color || 'transparent',
                 transitionProperty: 'backgroundColor',
@@ -74,7 +76,7 @@ const GroupTitleButton = () => {
               >
                 {displayName}
               </FadingText>
-              <AnimatedBox layout={LinearTransition}>
+              <AnimatedBox layout={LinearTransition} center>
                 <FeatherIcon
                   name="chevron-down"
                   size={16}
