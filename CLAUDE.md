@@ -243,24 +243,114 @@ Environment variables accessed via `process.env.EXPO_PUBLIC_*`
 - User theme preferences are stored in Redux under `user.bible.settings.theme`
 - Use the `useTheme` hook to access current theme colors
 
-## Reanimated 4 Best Practices
+## React Compiler
 
-Le projet utilise **React Native Reanimated 4.x**. Voici les bonnes pratiques à suivre :
-
-### Accesseurs SharedValue
-
-Pour compatibilité avec React Compiler, utiliser `.get()` et `.set()` au lieu de `.value` :
+This project uses **React Compiler**. This means memoization is automatic:
 
 ```typescript
-// ❌ Ancienne API (encore supportée mais non recommandée)
+// ❌ Don't use - React Compiler handles this automatically
+const memoizedValue = useMemo(() => expensiveCalculation(a, b), [a, b])
+const memoizedCallback = useCallback(() => handleClick(id), [id])
+const MemoizedComponent = memo(MyComponent)
+
+// ✅ Just write code without manual memoization
+const value = expensiveCalculation(a, b)
+const handleClick = () => { /* ... */ }
+const MyComponent = () => { /* ... */ }
+```
+
+**Rules:**
+- **Don't use `useMemo`** - React Compiler optimizes automatically
+- **Don't use `useCallback`** - React Compiler optimizes automatically
+- **Don't use `memo()`** - React Compiler optimizes automatically
+- Write idiomatic React code, the compiler handles optimizations
+
+## Layout Components (Box, HStack, VStack)
+
+Prefer layout components over StyleSheet for styling:
+
+```typescript
+// ❌ Avoid StyleSheet
+import { StyleSheet } from 'react-native'
+
+const styles = StyleSheet.create({
+  container: { flex: 1, flexDirection: 'row', padding: 16 },
+  item: { marginRight: 8 }
+})
+
+<View style={styles.container}>
+  <View style={styles.item}><Text>Item 1</Text></View>
+  <View style={styles.item}><Text>Item 2</Text></View>
+</View>
+
+// ✅ Use Box, HStack, VStack
+import { Box, HStack, VStack } from '~common/ui'
+
+<HStack flex={1} p={16}>
+  <Box mr={8}><Text>Item 1</Text></Box>
+  <Box mr={8}><Text>Item 2</Text></Box>
+</HStack>
+```
+
+**Available components:**
+- **Box**: Base container with style props (p, m, flex, bg, etc.)
+- **HStack**: Horizontal layout (flexDirection: 'row')
+- **VStack**: Vertical layout (flexDirection: 'column')
+
+## Reanimated 4 Best Practices
+
+This project uses **React Native Reanimated 4.x**. Follow these best practices:
+
+### Prefer CSS Transitions
+
+Before using `useSharedValue` and `useAnimatedStyle`, prefer Reanimated's native CSS transitions:
+
+```typescript
+// ❌ Avoid for simple animations
+const opacity = useSharedValue(1)
+const animatedStyle = useAnimatedStyle(() => ({
+  opacity: opacity.get()
+}))
+
+useEffect(() => {
+  opacity.set(withTiming(isVisible ? 1 : 0))
+}, [isVisible])
+
+<Animated.View style={animatedStyle} />
+
+// ✅ Prefer CSS transitions for simple animations
+<Animated.View
+  style={{
+    opacity: isVisible ? 1 : 0,
+    transition: { opacity: { duration: 300 } }
+  }}
+/>
+```
+
+**When to use CSS transitions:**
+- Animations triggered by state changes
+- Simple transitions (opacity, transform, backgroundColor)
+- Enter/exit animations
+
+**When to use useSharedValue:**
+- Gesture-driven animations
+- Complex animations with multiple interpolations
+- Scroll-based animations
+
+### SharedValue Accessors
+
+For React Compiler compatibility, use `.get()` and `.set()` instead of `.value`:
+
+```typescript
+// ❌ Old API (still supported but not recommended)
 const sv = useSharedValue(0)
 sv.value = 100
 console.log(sv.value)
 
-// ✅ Nouvelle API recommandée (compatible React Compiler)
+// ✅ Recommended new API (React Compiler compatible)
 const sv = useSharedValue(0)
 sv.set(100)
-sv.set(v => v + 50)  // avec callback
+sv.set(v => v + 50)  // with callback
 console.log(sv.get())
 ```
 
@@ -275,13 +365,13 @@ const animatedStyle = useAnimatedStyle(() => {
 })
 ```
 
-### Règles importantes
+### Important Rules
 
-1. **Ne jamais lire/modifier les SharedValues pendant le render** - utiliser callbacks (`useAnimatedStyle`, `useEffect`)
-2. **Éviter les mutations dans `useAnimatedStyle`** - peut causer des boucles infinies
-3. **Les styles animés ont priorité** sur les styles statiques
-4. **Utiliser `interpolate` avec `Extrapolation.CLAMP`** pour limiter les valeurs
-5. **Préférer les propriétés non-layout** (`transform`, `opacity`) aux propriétés layout (`top`, `width`)
+1. **Never read/modify SharedValues during render** - use callbacks (`useAnimatedStyle`, `useEffect`)
+2. **Avoid mutations in `useAnimatedStyle`** - can cause infinite loops
+3. **Animated styles take priority** over static styles
+4. **Use `interpolate` with `Extrapolation.CLAMP`** to limit values
+5. **Prefer non-layout properties** (`transform`, `opacity`) over layout properties (`top`, `width`)
 
 ### Documentation
 
