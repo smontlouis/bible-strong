@@ -141,7 +141,7 @@ const BibleViewer = ({
 
   const isFR = useLanguage()
   const dispatch = useDispatch()
-  const pericope = useRef<Pericope | null>(null)
+  const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
@@ -208,38 +208,8 @@ const BibleViewer = ({
     selectBookmarksInChapter(state, book.Numero, chapter)
   )
 
-  useEffect(() => {
-    // Don't load verses if onboarding is not completed
-    if (!isOnboardingCompleted) {
-      return
-    }
-    loadVerses().catch(e => {
-      console.log('[Bible] Error loading verses:', e)
-      setError(true)
-      setIsLoading(false)
-    })
-    actions.clearSelectedVerses()
-  }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingCompleted])
-
-  useEffect(() => {
-    ;(async () => {
-      if (settings.commentsDisplay && !comments) {
-        const mhyComments = await loadMhyComments(book.Numero, chapter)
-        try {
-          setComments(JSON.parse(mhyComments.commentaires))
-        } catch (e) {
-          Sentry.withScope(scope => {
-            scope.setExtra('Reference', `${book.Numero}-${chapter}`)
-            scope.setExtra('Comments', mhyComments.commentaires)
-            Sentry.captureException('Comments corrupted')
-          })
-        }
-      }
-    })()
-  }, [])
-
   const loadVerses = async () => {
-    pericope.current = await getBiblePericope(version)
+    setPericope(await getBiblePericope(version))
     setIsLoading(true)
 
     const versesToLoad = await loadBibleChapter(book.Numero, chapter, version)
@@ -292,6 +262,36 @@ const BibleViewer = ({
     })
   }
 
+  useEffect(() => {
+    // Don't load verses if onboarding is not completed
+    if (!isOnboardingCompleted) {
+      return
+    }
+    loadVerses().catch(e => {
+      console.log('[Bible] Error loading verses:', e)
+      setError(true)
+      setIsLoading(false)
+    })
+    actions.clearSelectedVerses()
+  }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingCompleted])
+
+  useEffect(() => {
+    ;(async () => {
+      if (settings.commentsDisplay && !comments) {
+        const mhyComments = await loadMhyComments(book.Numero, chapter)
+        try {
+          setComments(JSON.parse(mhyComments.commentaires))
+        } catch {
+          Sentry.withScope(scope => {
+            scope.setExtra('Reference', `${book.Numero}-${chapter}`)
+            scope.setExtra('Comments', mhyComments.commentaires)
+            Sentry.captureException('Comments corrupted')
+          })
+        }
+      }
+    })()
+  }, [])
+
   const addHiglightAndOpenQuickTags = (color: string) => {
     // setTimeout(() => {
     //   setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
@@ -327,8 +327,9 @@ const BibleViewer = ({
       setLinkVerses(linkVersesToLoad)
       linkModal.open()
     } catch (e) {
+      const errorMessage = e instanceof Error ? e.toString() : String(e)
       Sentry.withScope(scope => {
-        scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
+        scope.setExtra('Error', errorMessage)
         scope.setExtra('Link', linkId)
         Sentry.captureMessage('Link corrupted')
       })
@@ -344,8 +345,9 @@ const BibleViewer = ({
       setNoteVerses(noteVersesToLoad)
       noteModal.open()
     } catch (e) {
+      const errorMessage = e instanceof Error ? e.toString() : String(e)
       Sentry.withScope(scope => {
-        scope.setExtra('Error', e instanceof Error ? e.toString() : String(e))
+        scope.setExtra('Error', errorMessage)
         scope.setExtra('Note', noteId)
         Sentry.captureMessage('Note corrumpted')
       })
@@ -510,7 +512,7 @@ const BibleViewer = ({
           linkedVerses={linksByChapter}
           settings={settings}
           verseToScroll={verse}
-          pericopeChapter={getPericopeChapter(pericope.current, book.Numero, chapter)}
+          pericopeChapter={getPericopeChapter(pericope, book.Numero, chapter)}
           openNoteModal={openNoteModal}
           openLinkModal={openLinkModal}
           setSelectedCode={setSelectedCode}
@@ -554,7 +556,7 @@ const BibleViewer = ({
         </MotiBox>
       )}
       <SelectedVersesModal
-        ref={versesModal.ref}
+        ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}
         isSelectedVerseHighlighted={isSelectedVerseHighlighted}
         onChangeResourceType={val => {
@@ -582,26 +584,29 @@ const BibleViewer = ({
         onClosed={() => setQuickTagsModal(false)}
         setMultipleTagsItem={setMultipleTagsItem}
       />
-      <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
-      <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
+      <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
+      <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
       <StrongModal
-        ref={strongModal.ref}
+        ref={strongModal.getRef()}
         version={version}
         selectedCode={selectedCode}
         onClosed={clearSelectedCode}
       />
 
       <ResourcesModal
-        resourceModalRef={resourceModal.ref}
+        resourceModalRef={resourceModal.getRef()}
         bibleAtom={bibleAtom}
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
         isSelectionMode={isSelectionMode}
       />
-      <BibleParamsModal navigation={navigation} modalRef={bibleParamsModal.ref} />
-      <AddToStudyModal bottomSheetRef={addToStudyModal.ref} onSelectStudy={handleSelectStudy} />
+      <BibleParamsModal navigation={navigation} modalRef={bibleParamsModal.getRef()} />
+      <AddToStudyModal
+        bottomSheetRef={addToStudyModal.getRef()}
+        onSelectStudy={handleSelectStudy}
+      />
       <VerseFormatBottomSheet
-        bottomSheetRef={verseFormatModal.ref}
+        bottomSheetRef={verseFormatModal.getRef()}
         onSelectFormat={handleSelectFormat}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />

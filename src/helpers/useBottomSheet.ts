@@ -12,7 +12,7 @@ export const useBottomSheet = () => {
     ref.current?.snapToIndex(0)
   }
 
-  return { ref, open, close }
+  return { ref, open, close, getRef: () => ref }
 }
 
 export const useBottomSheetModal = () => {
@@ -26,5 +26,5 @@ export const useBottomSheetModal = () => {
     ref.current?.present()
   }
 
-  return { ref, open, close }
+  return { ref, open, close, getRef: () => ref }
 }
