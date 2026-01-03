@@ -469,7 +469,10 @@ const groupTabsAtomCache = new Map<string, typeof tabsAtomsAtom>()
 export const getGroupTabsAtomsAtom = (groupId: string) => {
   if (!groupTabsAtomCache.has(groupId)) {
     const groupTabsAtom = createGroupTabsAtom(groupId)
-    groupTabsAtomCache.set(groupId, splitAtom(groupTabsAtom, tab => tab.id))
+    groupTabsAtomCache.set(
+      groupId,
+      splitAtom(groupTabsAtom, tab => tab.id)
+    )
   }
   return groupTabsAtomCache.get(groupId)!
 }
@@ -536,7 +539,7 @@ export const activeTabIndexAtom = atom(
       groups.map(g => (g.id === activeId ? { ...g, activeTabIndex: value } : g))
     )
 
-    // Update cache (existing logic) - uses stable tab.id instead of atom.toString()
+    // Update cache - always persist to storage (LRU behavior: move to front)
     if (value !== -1) {
       const tabsAtoms = get(tabsAtomsAtom)
       if (value >= 0 && value < tabsAtoms.length) {
@@ -544,9 +547,9 @@ export const activeTabIndexAtom = atom(
         const tabId = tab.id
 
         const cachedTabIds = get(cachedTabIdsAtom)
-        if (!cachedTabIds.includes(tabId)) {
-          set(cachedTabIdsAtom, [tabId, ...cachedTabIds].slice(0, maxCachedTabs))
-        }
+        // Always persist: move tab to front, remove duplicates, limit size
+        const newCache = [tabId, ...cachedTabIds.filter(id => id !== tabId)].slice(0, maxCachedTabs)
+        set(cachedTabIdsAtom, newCache)
       }
     }
   }
@@ -570,32 +573,38 @@ export const activeAtomIdAtom = activeTabIdAtom
 
 // Cached tab IDs (global cache shared across all groups)
 // Uses stable tab.id instead of atom.toString()
-export const cachedTabIdsAtom = atomWithDefault<string[]>(get => {
-  const activeTabIndex = get(activeTabIndexAtom)
+// Storage atom - holds the actual cached tab IDs in memory
+const cachedTabIdsStorageAtom = atom<string[]>([])
 
-  if (activeTabIndex === -1) {
-    return []
-  }
+// Public atom - ensures active tab is always in cache
+export const cachedTabIdsAtom = atom(
+  get => {
+    const storedCache = get(cachedTabIdsStorageAtom)
+    const activeTabIndex = get(activeTabIndexAtom)
+    const tabsAtoms = get(tabsAtomsAtom)
 
-  const tabsAtoms = get(tabsAtomsAtom)
-
-  if (tabsAtoms.length === 0) {
-    return []
-  }
-
-  if (activeTabIndex >= tabsAtoms.length) {
-    // Fallback to first tab if index is out of bounds
-    if (tabsAtoms.length > 0) {
-      const tab = get(tabsAtoms[0])
-      return [tab.id]
+    // Return stored cache if no tabs or invalid index
+    if (tabsAtoms.length === 0 || activeTabIndex < 0) {
+      return storedCache
     }
-    return []
-  }
 
-  // Cache only the active tab (using stable tab.id)
-  const tab = get(tabsAtoms[activeTabIndex])
-  return [tab.id]
-})
+    // Get active tab ID (with bounds check)
+    const safeIndex = Math.min(activeTabIndex, tabsAtoms.length - 1)
+    const activeTab = get(tabsAtoms[safeIndex])
+    const activeTabId = activeTab.id
+
+    // If active tab is already in cache, return as-is
+    if (storedCache.includes(activeTabId)) {
+      return storedCache
+    }
+
+    // Add active tab to front of cache (limit to maxCachedTabs)
+    return [activeTabId, ...storedCache].slice(0, maxCachedTabs)
+  },
+  (get, set, value: string[]) => {
+    set(cachedTabIdsStorageAtom, value)
+  }
+)
 
 // ============================================================================
 // UTILITY FUNCTIONS AND HOOKS

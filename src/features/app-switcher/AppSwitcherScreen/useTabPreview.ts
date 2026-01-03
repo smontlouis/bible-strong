@@ -11,6 +11,7 @@ import {
 } from 'react-native-reanimated'
 import {
   activeGroupIdAtom,
+  cachedTabIdsAtom,
   getGroupTabsAtomsAtom,
   TabItem,
   tabsCountAtom,
@@ -63,6 +64,18 @@ const useTabPreview = ({
   }
 
   const onDelete = () => {
+    // Get tab ID before deletion to clean up cache
+    const store = getDefaultStore()
+    const tab = store.get(tabAtom)
+    const tabId = tab.id
+
+    // Remove from cache
+    const cachedIds = store.get(cachedTabIdsAtom)
+    store.set(
+      cachedTabIdsAtom,
+      cachedIds.filter(id => id !== tabId)
+    )
+
     scrollView.padding.set(TAB_PREVIEW_HEIGHT + GAP + 20)
     dispatchTabs({
       type: 'remove',

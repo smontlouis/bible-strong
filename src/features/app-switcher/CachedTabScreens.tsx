@@ -24,6 +24,9 @@ const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
     return cachedTabIds.includes(tab.id)
   })
 
+  // Debug log for cached tabs
+  // console.log('[CachedTabScreens] Cached tabs:', cachedTabIds.length, cachedTabIds)
+
   return (
     <>
       {filteredTabsAtoms.map(tabAtom => {

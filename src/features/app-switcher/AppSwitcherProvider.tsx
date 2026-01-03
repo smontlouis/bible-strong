@@ -175,13 +175,11 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
       store.set(activeTabIndexAtom, 0)
 
       // Set the first tab as active (using stable tab.id)
+      // Note: cache is already updated by activeTabIndexAtom setter above
       if (tabsAtoms.length > 0) {
         const tab = store.get(tabsAtoms[0])
         activeTabScreen.tabId.set(tab.id)
         activeTabScreen.opacity.set(1)
-
-        // Update cached tabs
-        store.set(cachedTabIdsAtom, [tab.id])
       } else {
         activeTabScreen.tabId.set(null)
         activeTabScreen.opacity.set(0)
