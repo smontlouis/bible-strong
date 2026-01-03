@@ -136,8 +136,8 @@ const useLoadSound = ({
 
           Speech.speak(verses[currentVerse.current], {
             voice: selectedVoice !== 'default' ? selectedVoice : undefined,
-            rate,
-            pitch,
+            rate: rate ?? 1,
+            pitch: pitch ?? 1,
             onError: () => {
               setError(true)
             },

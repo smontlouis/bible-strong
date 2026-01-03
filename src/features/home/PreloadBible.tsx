@@ -5,22 +5,22 @@ import Box from '~common/ui/Box'
 import loadBible from '~helpers/loadBible'
 import useAsync from '~helpers/useAsync'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
-import { isOnboardingRequiredAtom } from '~features/onboarding/atom'
+import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 
 const PreloadBible = ({ children }: PropsWithChildren<{}>) => {
-  const isOnboardingRequired = useAtomValue(isOnboardingRequiredAtom)
+  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const version = useDefaultBibleVersion()
 
-  // Wait for onboarding check to complete before attempting to load Bible
+  // Wait for onboarding to complete before attempting to load Bible
   const { status } = useAsync(async () => {
-    if (isOnboardingRequired !== false) {
-      return null // Don't load if onboarding check pending or required
+    if (!isOnboardingCompleted) {
+      return null // Don't load if onboarding not completed
     }
     return loadBible(version)
-  }, [isOnboardingRequired, version])
+  }, [isOnboardingCompleted, version])
 
-  // Show loading if onboarding check is pending/required or Bible is still loading
-  if (isOnboardingRequired !== false || status !== 'Resolved') {
+  // Show loading if onboarding not completed or Bible is still loading
+  if (!isOnboardingCompleted || status !== 'Resolved') {
     return (
       <Box height={50}>
         <Loading />

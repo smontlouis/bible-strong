@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box, { MotiBox, motiTransition } from '~common/ui/Box'
-import { isOnboardingRequiredAtom } from '~features/onboarding/atom'
+import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
@@ -96,7 +96,7 @@ const BibleViewer = ({
   isBibleViewReloadingAtom,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
-  const isOnboardingRequired = useAtomValue(isOnboardingRequiredAtom)
+  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
 
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -209,8 +209,8 @@ const BibleViewer = ({
   )
 
   useEffect(() => {
-    // Don't load verses if onboarding is still in progress
-    if (isOnboardingRequired !== false) {
+    // Don't load verses if onboarding is not completed
+    if (!isOnboardingCompleted) {
       return
     }
     loadVerses().catch(e => {
@@ -219,7 +219,7 @@ const BibleViewer = ({
       setIsLoading(false)
     })
     actions.clearSelectedVerses()
-  }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingRequired])
+  }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingCompleted])
 
   useEffect(() => {
     ;(async () => {
@@ -447,9 +447,9 @@ const BibleViewer = ({
 
   console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
-  // Wait for onboarding check to complete before rendering Bible content
+  // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
-  if (isOnboardingRequired !== false) {
+  if (!isOnboardingCompleted) {
     return (
       <Box flex={1} bg="reverse" center>
         <ActivityIndicator />

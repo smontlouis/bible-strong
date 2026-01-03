@@ -20,7 +20,7 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
-import { isOnboardingRequiredAtom } from '~features/onboarding/atom'
+import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
@@ -103,7 +103,7 @@ const VersionSelectorItem = ({
   const [isLoading, setIsLoading] = React.useState(false)
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
-  const isOnboardingRequired = useAtomValue(isOnboardingRequiredAtom)
+  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
 
   React.useEffect(() => {
     ;(async () => {
@@ -118,7 +118,7 @@ const VersionSelectorItem = ({
       setVersionNeedsDownload(v)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingRequired]) // Re-check when onboarding completes
+  }, [isOnboardingCompleted]) // Re-check when onboarding completes
 
   const calculateProgress: FileSystem.DownloadProgressCallback = ({ totalBytesWritten }) => {
     const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100

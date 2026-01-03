@@ -16,11 +16,11 @@ import { VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { isOnboardingRequiredAtom, selectedResourcesAtom } from './atom'
+import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
 
 const DownloadResources = () => {
   const [selectedResources] = useAtom(selectedResourcesAtom)
-  const setIsOnboardingRequired = useSetAtom(isOnboardingRequiredAtom)
+  const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
   const [downloadingResource, setDownloadingResource] = React.useState('')
   const [fileProgress, setFileProgress] = React.useState(0)
   const [downloadedResources, setDowloadedResources] = React.useState(0)
@@ -68,8 +68,8 @@ const DownloadResources = () => {
         return
       }
 
-      // Mark onboarding as complete - this closes the modal and allows BibleViewer to render
-      setIsOnboardingRequired(false)
+      // Mark onboarding as complete - persisted in MMKV for instant starts
+      setIsOnboardingCompleted(true)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Run only once on mount - download should not restart on dependency changes
