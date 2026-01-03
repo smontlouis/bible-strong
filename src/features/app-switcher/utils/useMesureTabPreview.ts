@@ -19,7 +19,13 @@ const useMeasureTabPreview = () => {
     pageY: number
   }> =>
     new Promise(resolve => {
-      tabPreviews.refs.current[index].current?.measure((x, y, width, height, pageX, pageY) =>
+      const ref = tabPreviews.refs.current[index]
+      if (!ref?.current) {
+        // Return fallback values - animation will still work with default position
+        resolve({ x: 0, y: 0, width: 0, height: 0, pageX: 0, pageY: 0 })
+        return
+      }
+      ref.current.measure((x, y, width, height, pageX, pageY) =>
         resolve({ x, y, width, height, pageX, pageY })
       )
     })

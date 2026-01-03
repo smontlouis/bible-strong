@@ -14,6 +14,11 @@ const useTakeActiveTabSnapshot = () => {
       return
     }
 
+    if (!activeAtomId) {
+      console.log('[useTakeActiveTabSnapshot] No active tab id')
+      return
+    }
+
     const cachedTabScreenRef = getRef(activeAtomId)
 
     if (!cachedTabScreenRef) {

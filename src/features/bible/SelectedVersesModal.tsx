@@ -199,14 +199,14 @@ const VersesModal = ({
           paddingBottom: isFullScreenBible ? BOTTOM_INSET : bottomBarHeight,
         }}
       >
-        {isSelectionMode?.includes('verse') ? (
+        {typeof isSelectionMode === 'string' && isSelectionMode.includes('verse') ? (
           <HStack gap={10} width="100%" alignItems="center" justifyContent="center" py={10}>
             <Text bold fontSize={18} textAlign="center">
               {selectedVersesTitle.toUpperCase()}
             </Text>
             <TouchableIcon name="arrow-right" size={20} onPress={sendVerseData} noFlex />
           </HStack>
-        ) : isSelectionMode?.includes('strong') ? (
+        ) : typeof isSelectionMode === 'string' && isSelectionMode.includes('strong') ? (
           <></>
         ) : (
           <>

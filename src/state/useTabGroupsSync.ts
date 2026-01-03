@@ -10,6 +10,7 @@ import {
   activeGroupIdAtom,
   DEFAULT_GROUP_ID,
   appSwitcherModeAtom,
+  createDefaultGroup,
 } from './tabs'
 import { resetTabAnimationTriggerAtom } from './app'
 import {
@@ -269,7 +270,9 @@ export const useTabGroupsSync = () => {
         }
 
         lastRemoteUpdateRef.current = Date.now()
-        setGroups(finalGroups)
+        // Ensure groups is never empty to prevent race condition crashes
+        const safeGroups = finalGroups.length > 0 ? finalGroups : [createDefaultGroup()]
+        setGroups(safeGroups)
       })
     },
     [setGroups, setActiveGroupId]

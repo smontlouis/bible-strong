@@ -397,7 +397,7 @@ export const activeGroupIdAtom = atomWithAsyncStorage<string>('activeGroupIdAtom
 export const activeGroupAtom = atom(get => {
   const groups = get(tabGroupsAtom)
   const activeId = get(activeGroupIdAtom)
-  return groups.find(g => g.id === activeId) || groups[0]
+  return groups.find(g => g.id === activeId) || groups[0] || createDefaultGroup()
 })
 
 // Number of groups
