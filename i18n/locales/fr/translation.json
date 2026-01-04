@@ -806,5 +806,9 @@
   "settings.help": "Aide",
   "settings.community": "Communauté",
   "settings.legal": "Légal",
-  "settings.theme": "Thème"
+  "settings.theme": "Thème",
+
+  "forgotPassword.title": "Mot de passe oublié",
+  "forgotPassword.description": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+  "forgotPassword.send": "Envoyer le lien"
 }

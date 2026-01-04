@@ -37,6 +37,7 @@ import HighlightScreen from '~features/settings/HighlightsScreen'
 import LoginScreen from '~features/settings/LoginScreen'
 import MoreScreen from '~features/settings/MoreScreen'
 import RegisterScreen from '~features/settings/RegisterScreen'
+import ForgotPasswordScreen from '~features/settings/ForgotPasswordScreen'
 import SupportScreen from '~features/settings/SupportScreen'
 import EditStudyScreen from '~features/studies/EditStudyScreen'
 import StudiesScreen from '~features/studies/StudiesScreen'
@@ -114,6 +115,7 @@ const MainStack = () => {
             <MainStackNavigator.Screen name="Search" component={SearchScreen} />
             <MainStackNavigator.Screen name="LocalSearch" component={LocalSearchScreen} />
             <MainStackNavigator.Screen name="Register" component={RegisterScreen} />
+            <MainStackNavigator.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             <MainStackNavigator.Screen name="Dictionnaire" component={DictionaryScreen} />
             <MainStackNavigator.Screen name="FAQ" component={FAQScreen} />
             <MainStackNavigator.Screen name="Nave" component={NaveScreen} />

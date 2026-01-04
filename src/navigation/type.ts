@@ -187,6 +187,7 @@ export type MainStackProps = {
   Search: undefined
   LocalSearch: undefined
   Register: undefined
+  ForgotPassword: undefined
   Dictionnaire: DictionaryScreenProps
   FAQ: undefined
   Nave: NaveScreenProps

@@ -802,5 +802,9 @@
   "settings.help": "Help",
   "settings.community": "Community",
   "settings.legal": "Legal",
-  "settings.theme": "Theme"
+  "settings.theme": "Theme",
+
+  "forgotPassword.title": "Forgot password",
+  "forgotPassword.description": "Enter your email address and we'll send you a link to reset your password.",
+  "forgotPassword.send": "Send reset link"
 }

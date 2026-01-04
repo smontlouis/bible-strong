@@ -74,15 +74,6 @@ const Login = ({ theme }: any) => {
     setLoading(isStillLoading)
   }
 
-  const resetPassword = async () => {
-    if (!email) {
-      toast.error(t('Veuillez remplir les champs'))
-      return false
-    }
-    setLoading(true)
-    const isStillLoading: any = await FireAuth.resetPassword(email)
-    setLoading(isStillLoading)
-  }
 
   return (
     <Box>
@@ -102,7 +93,7 @@ const Login = ({ theme }: any) => {
           value={password}
         />
         <Box alignItems="flex-end" marginTop={10}>
-          <Link onPress={resetPassword}>
+          <Link route="ForgotPassword">
             {/* @ts-ignore */}
             <Text underline>{t('Mot de passe oublié ?')}</Text>
           </Link>
