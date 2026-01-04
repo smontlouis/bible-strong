@@ -204,6 +204,7 @@ export type MainStackProps = {
   BibleShareOptions: undefined
   ResourceLanguage: undefined
   BibleDefaults: undefined
+  Theme: undefined
 }
 
 declare global {

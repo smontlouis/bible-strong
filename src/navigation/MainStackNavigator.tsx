@@ -51,6 +51,7 @@ import AutomaticBackupsScreen from '../features/settings/AutomaticBackupsScreen'
 import CustomHighlightColorsScreen from '../features/settings/CustomHighlightColorsScreen'
 import ResourceLanguageScreen from '../features/settings/ResourceLanguageScreen'
 import BibleDefaultsScreen from '../features/settings/BibleDefaultsScreen'
+import ThemeScreen from '../features/settings/ThemeScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import BookmarksScreen from '~features/bookmarks/BookmarksScreen'
@@ -96,7 +97,10 @@ const MainStack = () => {
             <MainStackNavigator.Screen name="Login" component={LoginScreen} />
             <MainStackNavigator.Screen name="Profile" component={ProfileScreen} />
             <MainStackNavigator.Screen name="Support" component={SupportScreen} />
-            <MainStackNavigator.Screen name="CustomHighlightColors" component={CustomHighlightColorsScreen} />
+            <MainStackNavigator.Screen
+              name="CustomHighlightColors"
+              component={CustomHighlightColorsScreen}
+            />
             <MainStackNavigator.Screen name="Changelog" component={ChangelogScreen} />
             <MainStackNavigator.Screen name="ImportExport" component={ImportExportScreen} />
             <MainStackNavigator.Screen name="Backup" component={BackupScreen} />
@@ -137,6 +141,7 @@ const MainStack = () => {
             />
             <MainStackNavigator.Screen name="ResourceLanguage" component={ResourceLanguageScreen} />
             <MainStackNavigator.Screen name="BibleDefaults" component={BibleDefaultsScreen} />
+            <MainStackNavigator.Screen name="Theme" component={ThemeScreen} />
           </MainStackNavigator.Navigator>
 
           <ChangelogModal />

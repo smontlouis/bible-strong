@@ -793,5 +793,14 @@
   "profile.uploadError": "Error uploading image",
   "profile.photoEditComingSoon": "Photo editing coming soon",
   "Enregistrer": "Save",
-  "Delete": "Delete"
+  "Delete": "Delete",
+
+  "settings.resources": "Resources",
+  "settings.myContent": "My content",
+  "settings.account": "Account",
+  "settings.settings": "Settings",
+  "settings.help": "Help",
+  "settings.community": "Community",
+  "settings.legal": "Legal",
+  "settings.theme": "Theme"
 }

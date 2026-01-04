@@ -797,5 +797,14 @@
   "profile.uploadError": "Erreur lors de l'envoi de l'image",
   "profile.photoEditComingSoon": "La modification de photo arrive bientôt",
   "Enregistrer": "Enregistrer",
-  "Delete": "Supprimer"
+  "Delete": "Supprimer",
+
+  "settings.resources": "Ressources",
+  "settings.myContent": "Mon contenu",
+  "settings.account": "Compte",
+  "settings.settings": "Paramètres",
+  "settings.help": "Aide",
+  "settings.community": "Communauté",
+  "settings.legal": "Légal",
+  "settings.theme": "Thème"
 }

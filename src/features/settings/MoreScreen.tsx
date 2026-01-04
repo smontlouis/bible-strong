@@ -1,5 +1,4 @@
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import { getAuth } from '@react-native-firebase/auth'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React, { memo, useState } from 'react'
@@ -7,16 +6,15 @@ import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
 import { useSelector } from 'react-redux'
-import DictionnaireIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
-import LexiqueIcon from '~common/LexiqueIcon'
 import Link, { LinkProps } from '~common/Link'
-import NaveIcon from '~common/NaveIcon'
 import { toast } from 'sonner-native'
-import Border from '~common/ui/Border'
 import Box, { SafeAreaBox } from '~common/ui/Box'
+import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import IconCircle from '~common/ui/IconCircle'
 import ScrollView from '~common/ui/ScrollView'
+import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
 import { firebaseDb, doc, updateDoc, deleteDoc, setDoc } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
@@ -27,10 +25,9 @@ import { selectUserAndPlan } from '~redux/selectors/plan'
 import app from '../../../package.json'
 
 import { StackScreenProps } from '@react-navigation/stack'
-import { HelpTip } from '~features/tips/HelpTip'
 import { MainStackProps } from '~navigation/type'
 
-export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
+export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -49,12 +46,6 @@ const Circle = styled.View(({ theme }) => ({
 
 const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
 
-const StyledIcon = styled(Icon.Feather)(({ theme, color }: any) => ({
-  // @ts-ignore
-  color: theme.colors[color] || theme.colors.grey,
-  marginRight: 15,
-}))
-
 const shareMessage = () => {
   const appUrl =
     Platform.OS === 'ios'
@@ -65,7 +56,7 @@ const shareMessage = () => {
 
 const Infos = memo(() => {
   return (
-    <Box row justifyContent="flex-end" px={10}>
+    <Box row justifyContent="flex-end" px={16} py={8}>
       <Text color="grey" fontSize={9}>
         Version: {app.version} {Platform.Version}
       </Text>
@@ -110,16 +101,17 @@ const ManualSync = memo(() => {
   if (!isLogged) return null
 
   return (
-    <LinkItem onPress={isSyncing ? () => {} : sync}>
-      <StyledIcon name="upload-cloud" size={25} />
-      <Text fontSize={15} opacity={isSyncing ? 0.4 : 1}>
+    <CardLinkItem onPress={isSyncing ? () => {} : sync}>
+      <IconCircle bg="lightPrimary">
+        <FeatherIcon name="upload-cloud" size={20} color="primary" />
+      </IconCircle>
+      <Text fontSize={15} flex opacity={isSyncing ? 0.4 : 1}>
         {t('app.sync')}
       </Text>
-    </LinkItem>
+    </CardLinkItem>
   )
 })
 
-// local react props
 type MoreProps = {
   closeMenu: () => void
 }
@@ -171,210 +163,235 @@ export const More = ({ closeMenu }: MoreProps) => {
 
   const appleIsReviewing = getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
 
-  // All the LinkItem should define params if they use route
-  // There should be a way to type params using the route name
   return (
-    <SafeAreaBox borderLeftWidth={1} borderColor="border">
+    <SafeAreaBox borderLeftWidth={1} borderColor="border" bg="lightGrey">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
       <ScrollView
         style={{ flex: 1 }}
+        backgroundColor="lightGrey"
         contentContainerStyle={{
           paddingBottom: 20,
         }}
       >
-        <Box paddingVertical={10}>
-          <LinkItem route="Lexique">
-            <LexiqueIcon style={{ marginRight: 15 }} size={25} />
-            <Text color="primary" bold fontSize={15}>
-              {t('Lexique')}
+        <SectionCard mt={8}>
+          <SectionCardHeader>
+            <FeatherIcon name="user" size={16} color="grey" />
+            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+              {t('settings.account')}
             </Text>
-          </LinkItem>
-          <LinkItem route="Dictionnaire">
-            <DictionnaireIcon style={{ marginRight: 15 }} size={25} />
-            <Text color="secondary" bold fontSize={15}>
-              {t('Dictionnaire')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="Nave">
-            <NaveIcon style={{ marginRight: 15 }} size={25} />
-            <Text color="quint" bold fontSize={15}>
-              {t('Bible Thématique Nave')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="Studies">
-            <FeatherIcon name="feather" style={{ marginRight: 15 }} size={25} />
-            <Text bold fontSize={15}>
-              {t('Études')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="Plans">
-            <MaterialIcon name="playlist-add-check" size={25} style={{ marginRight: 15 }} />
-            <Text bold fontSize={15}>
-              {t('Plans')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="Highlights">
-            <StyledIcon name="edit-3" size={25} />
-            <Text bold fontSize={15}>
-              {t('Surbrillances')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="BibleVerseNotes">
-            <StyledIcon name="file-text" size={25} />
-            <Text bold fontSize={15}>
-              {t('Notes')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="BibleVerseLinks">
-            <StyledIcon name="link" size={25} />
-            <Text bold fontSize={15}>
-              {t('Liens')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="Tags">
-            <StyledIcon name="tag" size={25} />
-            <Text bold fontSize={15}>
-              {t('Étiquettes')}
-            </Text>
-          </LinkItem>
-          <LinkItem route="Bookmarks">
-            <StyledIcon name="bookmark" size={25} />
-            <Text bold fontSize={15}>
-              {t('Marque-pages')}
-            </Text>
-          </LinkItem>
-        </Box>
-        <Border marginHorizontal={20} />
-        <Box paddingVertical={10}>
-          {!isLogged && (
-            <LinkItem route="Login">
-              <StyledIcon color="primary" name="log-in" size={25} />
-              <Text color="primary" fontSize={15} bold>
-                {t('Se connecter')}
-              </Text>
-            </LinkItem>
-          )}
-          {isLogged && (
+          </SectionCardHeader>
+          {isLogged ? (
             <>
-              <LinkItem route="Profile">
-                <StyledIcon name="user" size={25} />
-                <Text fontSize={15}>{t('profile.title')}</Text>
-              </LinkItem>
-              <LinkItem onPress={promptLogout}>
-                <StyledIcon color="quart" name="log-out" size={25} />
-                <Text bold color="quart" fontSize={15}>
+              <CardLinkItem route="Profile">
+                <IconCircle bg="rgba(16, 185, 129, 0.1)">
+                  <FeatherIcon name="user" size={20} color="success" />
+                </IconCircle>
+                <Text flex fontSize={15}>
+                  {t('profile.title')}
+                </Text>
+                <FeatherIcon name="chevron-right" size={20} color="grey" />
+              </CardLinkItem>
+              <CardLinkItem onPress={promptLogout} isLast>
+                <IconCircle bg="rgba(239, 68, 68, 0.1)">
+                  <FeatherIcon name="log-out" size={20} color="quart" />
+                </IconCircle>
+                <Text color="quart" fontSize={15}>
                   {t('Se déconnecter')}
                 </Text>
-              </LinkItem>
+              </CardLinkItem>
             </>
+          ) : (
+            <CardLinkItem route="Login" isLast>
+              <IconCircle bg="lightPrimary">
+                <FeatherIcon name="log-in" size={20} color="primary" />
+              </IconCircle>
+              <Text color="primary" bold fontSize={15}>
+                {t('Se connecter')}
+              </Text>
+            </CardLinkItem>
           )}
-          <LinkItem route="ResourceLanguage">
-            <MaterialIcon name="language" size={25} color="grey" style={{ marginRight: 15 }} />
-            <Text fontSize={15}>{t('Changer la langue')}</Text>
-          </LinkItem>
-          <LinkItem route="BibleDefaults">
-            <StyledIcon name="book-open" size={25} />
-            <Text fontSize={15}>{t('bibleDefaults.title')}</Text>
-          </LinkItem>
-          <LinkItem route="Downloads">
-            <Box>
-              {hasUpdate && (
-                <AnimatedCircle animation="pulse" easing="ease-out" iterationCount="infinite" />
-              )}
-              <StyledIcon name="download" size={25} />
-            </Box>
-            <Text fontSize={15}>{t('Gestion des téléchargements')}</Text>
-          </LinkItem>
-          <LinkItem route="Changelog">
-            <StyledIcon name="terminal" size={25} />
-            <Text fontSize={15}>{t('Changelog')}</Text>
-          </LinkItem>
-          <LinkItem route="FAQ">
-            <StyledIcon name="help-circle" size={25} />
-            <Text fontSize={15}>{t('Foire aux questions')}</Text>
-          </LinkItem>
+        </SectionCard>
 
-          {/* <LinkItem href="https://bible-strong.canny.io/feature-requests">
-                <StyledIcon name="sun" size={25} />
-                <Text fontSize={15}>{t('app.featureIdeas')}</Text>
-              </LinkItem>
-              <LinkItem href="https://bible-strong.canny.io/bugs">
-                <StyledIcon name="alert-circle" size={25} />
-                <Text fontSize={15}>{t('app.bugs')}</Text>
-              </LinkItem> */}
+        <SectionCard>
+          <SectionCardHeader>
+            <FeatherIcon name="settings" size={16} color="grey" />
+            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+              {t('settings.settings')}
+            </Text>
+          </SectionCardHeader>
+          <CardLinkItem route="ResourceLanguage">
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <MaterialIcon name="language" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('Changer la langue')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem route="Theme">
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <FeatherIcon name="sun" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('settings.theme')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem route="BibleDefaults">
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <FeatherIcon name="book-open" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('bibleDefaults.title')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem route="Downloads" isLast>
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <Box>
+                {hasUpdate && (
+                  <AnimatedCircle animation="pulse" easing="ease-out" iterationCount="infinite" />
+                )}
+                <FeatherIcon name="download" size={20} color="grey" />
+              </Box>
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('Gestion des téléchargements')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+        </SectionCard>
 
-          <LinkItem href="https://www.facebook.com/fr.bible.strong">
-            <StyledIcon name="facebook" size={25} />
-            <Text fontSize={15}>{t('Nous suivre sur facebook')}</Text>
-          </LinkItem>
-          <LinkItem
+        <SectionCard>
+          <SectionCardHeader>
+            <FeatherIcon name="help-circle" size={16} color="grey" />
+            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+              {t('settings.help')}
+            </Text>
+          </SectionCardHeader>
+          <CardLinkItem route="Changelog">
+            <IconCircle bg="rgba(147, 51, 234, 0.1)">
+              <FeatherIcon name="terminal" size={20} color="quint" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('Changelog')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem route="FAQ">
+            <IconCircle bg="rgba(147, 51, 234, 0.1)">
+              <FeatherIcon name="help-circle" size={20} color="quint" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('Foire aux questions')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem href="mailto:stephane@lestudio316.com" isLast>
+            <IconCircle bg="rgba(147, 51, 234, 0.1)">
+              <FeatherIcon name="send" size={20} color="quint" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('Contacter le développeur')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+        </SectionCard>
+
+        <SectionCard>
+          <SectionCardHeader>
+            <FeatherIcon name="globe" size={16} color="grey" />
+            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+              {t('settings.community')}
+            </Text>
+          </SectionCardHeader>
+          <CardLinkItem href="https://www.facebook.com/fr.bible.strong">
+            <IconCircle bg="rgba(59, 89, 152, 0.1)">
+              <FeatherIcon name="facebook" size={20} color="primary" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('Nous suivre sur facebook')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem
             href={
               Platform.OS === 'ios'
                 ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
                 : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
             }
           >
-            <StyledIcon name="star" size={25} />
-            <Text fontSize={15}>{t("Noter l'application")}</Text>
-          </LinkItem>
-          <LinkItem share={shareMessage()}>
-            <StyledIcon name="share-2" size={25} />
-            <Text fontSize={15}>{t("Partager l'application")}</Text>
-          </LinkItem>
+            <IconCircle bg="rgba(251, 191, 36, 0.1)">
+              <FeatherIcon name="star" size={20} color="secondary" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t("Noter l'application")}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem share={shareMessage()}>
+            <IconCircle bg="rgba(16, 185, 129, 0.1)">
+              <FeatherIcon name="share-2" size={20} color="success" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t("Partager l'application")}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
           {!appleIsReviewing && (
-            <LinkItem
+            <CardLinkItem
               href={isFR ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'}
             >
-              <StyledIcon name="dollar-sign" size={25} />
-              <Text fontSize={15}>{t('Contribuer')}</Text>
-            </LinkItem>
+              <IconCircle bg="rgba(236, 72, 153, 0.1)">
+                <FeatherIcon name="heart" size={20} color="color2" />
+              </IconCircle>
+              <Text flex fontSize={15}>
+                {t('Contribuer')}
+              </Text>
+              <FeatherIcon name="chevron-right" size={20} color="grey" />
+            </CardLinkItem>
           )}
-          <LinkItem href="https://github.com/smontlouis/bible-strong">
-            <StyledIcon name="github" size={25} />
-            <Text fontSize={15}>Github</Text>
-          </LinkItem>
-          <LinkItem href="mailto:stephane@lestudio316.com">
-            <StyledIcon name="send" size={25} />
-            <Text fontSize={15}>{t('Contacter le développeur')}</Text>
-          </LinkItem>
+          <CardLinkItem href="https://github.com/smontlouis/bible-strong" isLast>
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <FeatherIcon name="github" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              Github
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+        </SectionCard>
 
-          {/* <ManualSync /> */}
-          {/* <LinkItem route="Backup">
-            <StyledIcon name="database" size={25} />
-            <Text fontSize={15}>{t('backup.title')}</Text>
-          </LinkItem> */}
-          {/* <ExportSave /> */}
-        </Box>
-        <Border marginHorizontal={20} />
-        <Box paddingVertical={10}>
+        <Box px={20} py={8}>
           <LinkItem
-            style={{ paddingVertical: 10 }}
+            style={{ paddingVertical: 10, paddingHorizontal: 0 }}
             href={
               isFR
                 ? 'https://bible-strong.app/politique-de-confidentialite'
                 : 'https://bible-strong.app/privacy-policy'
             }
           >
-            <Text fontSize={15} color="grey">
+            <Text fontSize={14} color="grey">
               {t('Politique de confidentialité')}
             </Text>
           </LinkItem>
           <LinkItem
-            style={{ paddingVertical: 10 }}
+            style={{ paddingVertical: 10, paddingHorizontal: 0 }}
             href={isFR ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'}
           >
-            <Text fontSize={15} color="grey">
+            <Text fontSize={14} color="grey">
               {t("Conditions d'utilisation")}
             </Text>
           </LinkItem>
           {isLogged && (
-            <LinkItem style={{ paddingVertical: 10 }} onPress={promptDelete}>
-              <Text fontSize={15} color="grey">
+            <LinkItem style={{ paddingVertical: 10, paddingHorizontal: 0 }} onPress={promptDelete}>
+              <Text fontSize={14} color="grey">
                 {t('app.deleteAccount')}
               </Text>
             </LinkItem>
           )}
         </Box>
+
         <Infos />
       </ScrollView>
     </SafeAreaBox>
