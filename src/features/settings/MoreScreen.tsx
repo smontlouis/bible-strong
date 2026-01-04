@@ -246,6 +246,28 @@ export const More = ({ closeMenu }: MoreProps) => {
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>
+          {!isLogged && (
+            <LinkItem route="Login">
+              <StyledIcon color="primary" name="log-in" size={25} />
+              <Text color="primary" fontSize={15} bold>
+                {t('Se connecter')}
+              </Text>
+            </LinkItem>
+          )}
+          {isLogged && (
+            <>
+              <LinkItem route="Profile">
+                <StyledIcon name="user" size={25} />
+                <Text fontSize={15}>{t('profile.title')}</Text>
+              </LinkItem>
+              <LinkItem onPress={promptLogout}>
+                <StyledIcon color="quart" name="log-out" size={25} />
+                <Text bold color="quart" fontSize={15}>
+                  {t('Se déconnecter')}
+                </Text>
+              </LinkItem>
+            </>
+          )}
           <LinkItem route="ResourceLanguage">
             <MaterialIcon name="language" size={25} color="grey" style={{ marginRight: 15 }} />
             <Text fontSize={15}>{t('Changer la langue')}</Text>
@@ -317,27 +339,11 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
 
           {/* <ManualSync /> */}
-          <LinkItem route="Backup">
+          {/* <LinkItem route="Backup">
             <StyledIcon name="database" size={25} />
             <Text fontSize={15}>{t('backup.title')}</Text>
-          </LinkItem>
+          </LinkItem> */}
           {/* <ExportSave /> */}
-          {!isLogged && (
-            <LinkItem route="Login">
-              <StyledIcon color="primary" name="log-in" size={25} />
-              <Text color="primary" fontSize={15} bold>
-                {t('Se connecter')}
-              </Text>
-            </LinkItem>
-          )}
-          {isLogged && (
-            <LinkItem onPress={promptLogout}>
-              <StyledIcon color="quart" name="log-out" size={25} />
-              <Text bold color="quart" fontSize={15}>
-                {t('Se déconnecter')}
-              </Text>
-            </LinkItem>
-          )}
         </Box>
         <Border marginHorizontal={20} />
         <Box paddingVertical={10}>

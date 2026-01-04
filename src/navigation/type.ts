@@ -155,6 +155,7 @@ export type MainStackProps = {
   AppSwitcher?: AppSwitcherScreenProps
   More: MoreScreenProps
   Home: HomeScreenProps
+  Profile: undefined
   BibleSelect: BibleSelectScreenProps
   VersionSelector: VersionSelectorProps
   BibleVerseDetail: BibleVerseDetailScreenProps

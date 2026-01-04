@@ -207,6 +207,7 @@ export interface UserState {
   provider: string
   subscription?: string
   emailVerified: boolean
+  createdAt: string | null
   isLoading: boolean
   notifications: {
     verseOfTheDay: string
@@ -296,6 +297,7 @@ const getInitialState = (): UserState => ({
   provider: '',
   subscription: undefined,
   emailVerified: false,
+  createdAt: null,
   isLoading: true,
   notifications: {
     verseOfTheDay: '07:00',
@@ -493,9 +495,8 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
 
     /**
-     * 4. Update user profile
+     * 4. Update user profile (login - don't overwrite existing displayName)
      */
-    case USER_UPDATE_PROFILE:
     case USER_LOGIN_SUCCESS: {
       const { id, email, displayName, photoURL, provider, emailVerified } =
         action.profile as FireAuthProfile
@@ -506,8 +507,22 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       draft.photoURL = photoURL
       draft.provider = provider
       draft.emailVerified = emailVerified
+      draft.createdAt = action.profile.createdAt || null
       draft.isLoading = false
 
+      break
+    }
+
+    /**
+     * 4b. Update user profile (explicit update - overwrite displayName)
+     */
+    case USER_UPDATE_PROFILE: {
+      const profile = action.profile || action.payload
+      if (profile) {
+        if (profile.displayName !== undefined) draft.displayName = profile.displayName
+        if (profile.photoURL !== undefined) draft.photoURL = profile.photoURL
+        if (profile.emailVerified !== undefined) draft.emailVerified = profile.emailVerified
+      }
       break
     }
     case USER_LOGOUT: {

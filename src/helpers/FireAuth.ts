@@ -10,11 +10,15 @@ import {
   signOut,
   AppleAuthProvider,
   GoogleAuthProvider,
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from '@react-native-firebase/auth'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
 import { toast } from 'sonner-native'
-import { firebaseDb, doc, setDoc } from '~helpers/firebase'
+import { firebaseDb, doc, setDoc, getDoc } from '~helpers/firebase'
 import { tokenManager } from '~helpers/TokenManager'
 import { runAllCleanups } from '~helpers/cleanupRegistry'
 import i18n from '~i18n'
@@ -26,6 +30,7 @@ export type FireAuthProfile = {
   photoURL: string
   provider: string
   emailVerified: boolean
+  createdAt: string | null
 }
 
 const FireAuth = class {
@@ -44,6 +49,8 @@ const FireAuth = class {
   onLogin = null
 
   onError = null
+
+  previousEmailVerified = false
 
   async init(
     onLogin: any,
@@ -91,12 +98,31 @@ const FireAuth = class {
           photoURL: user.providerData[0]?.photoURL || '',
           provider: user.providerData[0]?.providerId || '',
           emailVerified,
+          createdAt: user.metadata.creationTime || null,
+        }
+
+        /**
+         * 1.b. Fetch Firestore user document to get displayName (source of truth)
+         */
+        try {
+          const userDoc = await getDoc(doc(firebaseDb, 'users', user.uid))
+          if (userDoc.exists()) {
+            const userData = userDoc.data()
+            if (userData?.displayName) {
+              profile.displayName = userData.displayName
+            }
+            if (userData?.photoURL) {
+              profile.photoURL = userData.photoURL
+            }
+          }
+        } catch (e) {
+          console.log('[Auth] Error fetching user document from Firestore:', e)
         }
 
         if (!this.user) {
           if (this.onLogin) {
             /**
-             * 1.b. We call the onLogin callback dispatching onUserLoginSuccess
+             * 1.c. We call the onLogin callback dispatching onUserLoginSuccess
              */
             // @ts-ignore
             this.onLogin({ profile })
@@ -104,6 +130,7 @@ const FireAuth = class {
 
           // @ts-ignore
           this.user = user // Store user
+          this.previousEmailVerified = emailVerified
 
           if (!__DEV__) {
             analyticsSetUserId(getAnalytics(), profile.id)
@@ -111,10 +138,20 @@ const FireAuth = class {
           Sentry.getCurrentScope().setUser(profile)
           return
         }
+
+        // Check if emailVerified status changed (user verified email while app was open)
+        if (!this.previousEmailVerified && emailVerified) {
+          console.log('[Auth] Email verification detected!')
+          // @ts-ignore
+          this.onEmailVerified?.()
+        }
+        this.previousEmailVerified = emailVerified
+        return
       }
 
       console.log('[Auth] No user, do nothing...')
       this.user = null
+      this.previousEmailVerified = false
     })
   }
 
@@ -301,6 +338,73 @@ const FireAuth = class {
       }
     })
 
+  updateDisplayName = async (displayName: string) => {
+    const user = getAuth().currentUser
+    if (!user) {
+      toast.error(i18n.t('profile.notLoggedIn'))
+      return false
+    }
+
+    try {
+      await updateProfile(user, { displayName })
+      await setDoc(doc(firebaseDb, 'users', user.uid), { displayName }, { merge: true })
+      toast.success(i18n.t('profile.nameUpdated'))
+      return true
+    } catch (e) {
+      console.log('[Auth] Error updating display name:', e)
+      toast.error(i18n.t('profile.updateError'))
+      Sentry.captureException(e)
+      return false
+    }
+  }
+
+  updatePhotoURL = async (photoURL: string) => {
+    const user = getAuth().currentUser
+    if (!user) {
+      toast.error(i18n.t('profile.notLoggedIn'))
+      return false
+    }
+
+    try {
+      await updateProfile(user, { photoURL })
+      await setDoc(doc(firebaseDb, 'users', user.uid), { photoURL }, { merge: true })
+      toast.success(i18n.t('profile.photoUpdated'))
+      return true
+    } catch (e) {
+      console.log('[Auth] Error updating photo URL:', e)
+      toast.error(i18n.t('profile.updateError'))
+      Sentry.captureException(e)
+      return false
+    }
+  }
+
+  changePassword = async (currentPassword: string, newPassword: string) => {
+    const user = getAuth().currentUser
+    if (!user || !user.email) {
+      toast.error(i18n.t('profile.notLoggedIn'))
+      return false
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, currentPassword)
+      await reauthenticateWithCredential(user, credential)
+      await updatePassword(user, newPassword)
+      toast.success(i18n.t('profile.passwordUpdated'))
+      return true
+    } catch (e: any) {
+      console.log('[Auth] Error changing password:', e.code)
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        toast.error(i18n.t('profile.wrongPassword'))
+      } else if (e.code === 'auth/weak-password') {
+        toast.error(i18n.t('profile.weakPassword'))
+      } else {
+        toast.error(i18n.t('profile.updateError'))
+      }
+      Sentry.captureException(e)
+      return false
+    }
+  }
+
   logout = async () => {
     // Cleanup Firestore subscriptions BEFORE signOut to avoid permission-denied errors
     runAllCleanups()
@@ -319,6 +423,33 @@ const FireAuth = class {
     tokenManager.reset()
 
     toast(i18n.t('Vous êtes déconnecté.'))
+  }
+
+  /**
+   * Manually check if email has been verified
+   * Call this after user clicks verification link and returns to app
+   */
+  checkEmailVerification = async (): Promise<boolean> => {
+    const user = getAuth().currentUser
+    if (!user) return false
+
+    try {
+      await user.reload()
+      const refreshedUser = getAuth().currentUser
+
+      if (refreshedUser?.emailVerified && !this.previousEmailVerified) {
+        console.log('[Auth] Email verified after manual check!')
+        this.previousEmailVerified = true
+        // @ts-ignore
+        this.onEmailVerified?.()
+        return true
+      }
+
+      return refreshedUser?.emailVerified || false
+    } catch (e) {
+      console.log('[Auth] Error checking email verification:', e)
+      return false
+    }
   }
 }
 

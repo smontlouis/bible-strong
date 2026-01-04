@@ -1,16 +1,15 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native'
+import { ActivityIndicator, StyleSheet } from 'react-native'
 import { useSelector } from 'react-redux'
-import Link from '~common/Link'
+import Link, { LinkBox } from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
+import UserAvatar from '~common/ui/UserAvatar'
 import extractFirstName from '~helpers/extractFirstName'
-import extractInitials from '~helpers/extractInitials'
 import useLogin from '~helpers/useLogin'
 import PreloadBible from './PreloadBible'
 
@@ -22,6 +21,7 @@ import VerseOfTheDay from './VerseOfTheDay'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { MainStackProps } from '~navigation/type'
 import { Theme } from '@emotion/react'
+import { FeatherIcon } from '~common/ui/Icon'
 
 const vodNb = [...Array(6).keys()]
 
@@ -29,15 +29,6 @@ const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
   paddingTop: 20,
   paddingBottom: 0,
-}))
-
-const ProfileImage = styled.Image(({ theme }) => ({
-  width: 60,
-  height: 60,
-  borderRadius: 30,
-  backgroundColor: theme.colors.tertiary,
-  alignItems: 'center',
-  justifyContent: 'center',
 }))
 
 const ProfileContainer = styled.View(({ theme }) => ({
@@ -57,20 +48,6 @@ const ProfileContainer = styled.View(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
 }))
-
-const GenerateImageContainer = ProfileImage.withComponent(Box)
-
-const GenerateImage = ({ name }: { name: string }) => (
-  <GenerateImageContainer>
-    {name ? (
-      <Text color="reverse" bold fontSize={24}>
-        {extractInitials(name)}
-      </Text>
-    ) : (
-      <FeatherIcon name="user" color="reverse" size={30} />
-    )}
-  </GenerateImageContainer>
-)
 
 const Chip = styled(Link)(({ theme, hightlighted }: { theme: Theme; hightlighted?: boolean }) => ({
   borderRadius: 10,
@@ -157,25 +134,43 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
         <OfflineNotice />
 
         <Box alignItems="center" row justifyContent="space-between">
-          <Box overflow="visible" position="relative">
-            <ProfileContainer>
-              {user.photoURL ? (
-                <ProfileImage source={{ uri: user.photoURL }} />
-              ) : (
-                <GenerateImage name={user.displayName} />
-              )}
+          <LinkBox route="Profile" width="100%">
+            <HStack alignItems="flex-start" justifyContent="space-between" gap={10}>
+              <ProfileContainer>
+                <UserAvatar
+                  size={60}
+                  photoURL={user.photoURL}
+                  displayName={user.displayName}
+                  email={user.email}
+                />
 
-              {isLoading && (
-                <Box
-                  backgroundColor="rgba(255,255,255,0.8)"
-                  center
-                  style={StyleSheet.absoluteFillObject}
-                >
-                  <ActivityIndicator color="black" />
-                </Box>
-              )}
-            </ProfileContainer>
-          </Box>
+                {isLoading && (
+                  <Box
+                    backgroundColor="rgba(255,255,255,0.8)"
+                    center
+                    style={StyleSheet.absoluteFillObject}
+                  >
+                    <ActivityIndicator color="black" />
+                  </Box>
+                )}
+              </ProfileContainer>
+              <Box
+                bg="primary"
+                borderRadius={30}
+                center
+                row
+                px={10}
+                py={5}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Text fontSize={12} color="reverse">
+                  {t('profile.title')}
+                </Text>
+                <FeatherIcon name="arrow-right" size={14} color="reverse" />
+              </Box>
+            </HStack>
+          </LinkBox>
         </Box>
         <Spacer />
         <Box row alignItems="center" overflow="visible">

@@ -6238,6 +6238,7 @@ __metadata:
     react-instantsearch-native: "npm:^6.13.0"
     react-native: "npm:0.81.5"
     react-native-animatable: "npm:1.4.0"
+    react-native-boring-avatars: "npm:^1.0.1"
     react-native-edge-to-edge: "npm:^1.4.3"
     react-native-gesture-handler: "npm:~2.28.0"
     react-native-keyboard-aware-scroll-view: "npm:^0.9.4"
@@ -13156,6 +13157,18 @@ __metadata:
   dependencies:
     prop-types: "npm:^15.8.1"
   checksum: 10c0/658f15aa3744c3d6a22a44ab4609afc4335ff06d0a200a1fba513e470ebb4bd561ab709204b3777ee53cad526f695e2b4290e057a50fcd461aca337e407fe2b1
+  languageName: node
+  linkType: hard
+
+"react-native-boring-avatars@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "react-native-boring-avatars@npm:1.0.1"
+  dependencies:
+    react-native-svg: "npm:^12.1.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/da475c2df7d5fc40d2cc7de2ef65e6b824eb5490920f6ef4e6f046b34215f5de2850c502a6cb0e80325e5b363bfc7b36c55da3f7b798dafeda3194f8d681ac3c
   languageName: node
   linkType: hard
 

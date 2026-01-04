@@ -54,6 +54,7 @@ import BibleDefaultsScreen from '../features/settings/BibleDefaultsScreen'
 import TagScreen from '../features/settings/TagScreen'
 import TagsScreen from '../features/settings/TagsScreen'
 import BookmarksScreen from '~features/bookmarks/BookmarksScreen'
+import ProfileScreen from '~features/profile/ProfileScreen'
 import { PortalProvider } from '@gorhom/portal'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 
@@ -93,6 +94,7 @@ const MainStack = () => {
               component={DictionnaryDetailScreen}
             />
             <MainStackNavigator.Screen name="Login" component={LoginScreen} />
+            <MainStackNavigator.Screen name="Profile" component={ProfileScreen} />
             <MainStackNavigator.Screen name="Support" component={SupportScreen} />
             <MainStackNavigator.Screen name="CustomHighlightColors" component={CustomHighlightColorsScreen} />
             <MainStackNavigator.Screen name="Changelog" component={ChangelogScreen} />
