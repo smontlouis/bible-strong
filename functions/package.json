@@ -15,7 +15,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@sparticuz/chromium-min": "^143.0.0",
+    "@sparticuz/chromium-min": "^131.0.0",
     "@types/express": "^5.0.6",
     "@types/express-serve-static-core": "^5.1.0",
     "@types/mime-types": "^3.0.1",

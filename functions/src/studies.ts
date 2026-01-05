@@ -40,7 +40,7 @@ export const exportStudyPDF = functions
             ],
             defaultViewport: { width: 1920, height: 1080 },
             executablePath: await chromium.executablePath(
-              'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar'
+              'https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar'
             ),
             headless: true,
           })
@@ -56,14 +56,19 @@ export const exportStudyPDF = functions
         )
 
         if (result?.status() === 404) {
+          await browser.close()
           res.status(404).send('Not found')
+          return
         }
 
         const buffer = await page.pdf({ format: 'A4' })
         console.log('---end')
 
         await page.close()
-        res.send(buffer)
+        await browser.close()
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Disposition', 'attachment; filename="study.pdf"')
+        res.end(buffer)
       } catch (error) {
         console.log('---failure')
         console.log(error)

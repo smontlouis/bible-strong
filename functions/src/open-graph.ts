@@ -144,13 +144,13 @@ export const fetchOpenGraph = onRequest(
       const provider = detectSocialProvider(url)
 
       if (provider) {
-        const metadata = await fetchOEmbedMetadata(url, provider)
+        const oEmbedData = await fetchOEmbedMetadata(url, provider)
 
-        if (metadata) {
+        if (oEmbedData) {
           res.json({
             success: true,
             data: {
-              ...metadata,
+              ...oEmbedData,
               fetchedAt: Date.now(),
             },
           })
@@ -179,16 +179,16 @@ export const fetchOpenGraph = onRequest(
       }
 
       const html = await response.text()
-      const metadata = await scraper({ html, url })
+      const scrapedData = await scraper({ html, url })
 
       res.json({
         success: true,
         data: {
-          title: metadata.title,
-          description: metadata.description,
-          image: metadata.image,
-          logo: metadata.logo,
-          author: metadata.author,
+          title: scrapedData.title,
+          description: scrapedData.description,
+          image: scrapedData.image,
+          logo: scrapedData.logo,
+          author: scrapedData.author,
           siteName: new URL(url).hostname.replace('www.', ''),
           type: 'website',
           fetchedAt: Date.now(),

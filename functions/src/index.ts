@@ -18,7 +18,7 @@ export { dictionnaire } from './dictionnaire'
 export { count_verses } from './count_verses'
 export { iaphub } from './iaphub'
 export { exportStudyPDF, deleteStudy } from './studies'
-export { createUser } from './users'
+export { createUser, deleteUser } from './users'
 
 // // Quick and dirty fix to get the expo-up functions working
 // export { api } from './expo_updates'
