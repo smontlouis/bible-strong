@@ -161,25 +161,45 @@ export default produce((draft: Draft<UserState>, action) => {
     }
     case SET_DEFAULT_COLOR_NAME: {
       const { colorKey, name } = action.payload
-      if (!draft.bible.settings.defaultColorNames) {
-        draft.bible.settings.defaultColorNames = {}
-      }
       if (name) {
-        draft.bible.settings.defaultColorNames[colorKey as keyof typeof draft.bible.settings.defaultColorNames] = name
-      } else {
-        delete draft.bible.settings.defaultColorNames[colorKey as keyof typeof draft.bible.settings.defaultColorNames]
+        // Créer l'objet seulement si on a une valeur à y mettre
+        if (!draft.bible.settings.defaultColorNames) {
+          draft.bible.settings.defaultColorNames = {}
+        }
+        draft.bible.settings.defaultColorNames[
+          colorKey as keyof typeof draft.bible.settings.defaultColorNames
+        ] = name
+      } else if (draft.bible.settings.defaultColorNames) {
+        // Supprimer la clé seulement si l'objet existe
+        delete draft.bible.settings.defaultColorNames[
+          colorKey as keyof typeof draft.bible.settings.defaultColorNames
+        ]
+        // Supprimer l'objet entier s'il devient vide
+        if (Object.keys(draft.bible.settings.defaultColorNames).length === 0) {
+          delete draft.bible.settings.defaultColorNames
+        }
       }
       break
     }
     case SET_DEFAULT_COLOR_TYPE: {
       const { colorKey, type } = action.payload as { colorKey: string; type?: HighlightType }
-      if (!draft.bible.settings.defaultColorTypes) {
-        draft.bible.settings.defaultColorTypes = {}
-      }
       if (type && type !== 'background') {
-        draft.bible.settings.defaultColorTypes[colorKey as keyof typeof draft.bible.settings.defaultColorTypes] = type
-      } else {
-        delete draft.bible.settings.defaultColorTypes[colorKey as keyof typeof draft.bible.settings.defaultColorTypes]
+        // Créer l'objet seulement si on a une valeur à y mettre
+        if (!draft.bible.settings.defaultColorTypes) {
+          draft.bible.settings.defaultColorTypes = {}
+        }
+        draft.bible.settings.defaultColorTypes[
+          colorKey as keyof typeof draft.bible.settings.defaultColorTypes
+        ] = type
+      } else if (draft.bible.settings.defaultColorTypes) {
+        // Supprimer la clé seulement si l'objet existe
+        delete draft.bible.settings.defaultColorTypes[
+          colorKey as keyof typeof draft.bible.settings.defaultColorTypes
+        ]
+        // Supprimer l'objet entier s'il devient vide
+        if (Object.keys(draft.bible.settings.defaultColorTypes).length === 0) {
+          delete draft.bible.settings.defaultColorTypes
+        }
       }
       break
     }

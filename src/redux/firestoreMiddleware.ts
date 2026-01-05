@@ -86,11 +86,12 @@ import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration
 export const removeUndefinedVariables = (obj: any) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
 /**
- * Nettoie un objet pour Firestore en supprimant les valeurs undefined
+ * Nettoie un objet pour Firestore en supprimant les valeurs undefined/null
  * tout en préservant les sentinels Firestore (comme deleteField())
+ * Retourne null (jamais undefined) pour éviter les erreurs Firestore
  */
 export const cleanForFirestore = (obj: any): any => {
-  if (obj === undefined) return undefined
+  if (obj === undefined) return null
   if (obj === null) return null
   if (typeof obj !== 'object') return obj
 
@@ -99,17 +100,17 @@ export const cleanForFirestore = (obj: any): any => {
   if (obj._methodName || typeof obj.isEqual === 'function') return obj
 
   if (Array.isArray(obj)) {
-    return obj.map(cleanForFirestore).filter(v => v !== undefined)
+    return obj.map(cleanForFirestore).filter(v => v !== undefined && v !== null)
   }
 
   const result: any = {}
   for (const key of Object.keys(obj)) {
     const value = cleanForFirestore(obj[key])
-    if (value !== undefined) {
+    if (value !== undefined && value !== null) {
       result[key] = value
     }
   }
-  return Object.keys(result).length > 0 ? result : undefined
+  return Object.keys(result).length > 0 ? result : null
 }
 
 /**
@@ -261,7 +262,11 @@ export default (store: any) => (next: any) => async (action: any) => {
     case resetPlan.type:
     case markAsRead.type: {
       try {
-        await setDoc(userDocRef, { plan: removeUndefinedVariables(plan.ongoingPlans) }, { merge: true })
+        await setDoc(
+          userDocRef,
+          { plan: removeUndefinedVariables(plan.ongoingPlans) },
+          { merge: true }
+        )
       } catch (error) {
         console.log('[Firestore] Error syncing plan:', error)
         toast.error(i18n.t('app.syncError'))
@@ -298,13 +303,14 @@ export default (store: any) => (next: any) => async (action: any) => {
     case SET_DEFAULT_COLOR_TYPE: {
       if (!diffState?.user?.bible?.settings) break
 
+      const cleanedSettings = cleanForFirestore(diffState.user.bible.settings)
+
+      // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)
+      if (!cleanedSettings) break
+
       await handleSyncWithRetry(
         async () => {
-          await setDoc(
-            userDocRef,
-            { bible: { settings: removeUndefinedVariables(cleanForFirestore(diffState.user.bible.settings)) } },
-            { merge: true }
-          )
+          await setDoc(userDocRef, { bible: { settings: cleanedSettings } }, { merge: true })
         },
         userId,
         'settings_sync',
@@ -642,7 +648,11 @@ export default (store: any) => (next: any) => async (action: any) => {
 
           // 3. Sync plan
           if (importedPlan) {
-            await setDoc(userDocRef, { plan: removeUndefinedVariables(importedPlan) }, { merge: true })
+            await setDoc(
+              userDocRef,
+              { plan: removeUndefinedVariables(importedPlan) },
+              { merge: true }
+            )
           }
         },
         userId,
