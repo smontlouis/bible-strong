@@ -9,7 +9,6 @@ import {
   TabItem,
   activeGroupIdAtom,
   activeTabIndexAtom,
-  cachedTabIdsAtom,
   tabGroupsAtom,
   tabsAtomsAtom,
 } from '~state/tabs'
@@ -214,7 +213,6 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     if (pageIndex < groups.length) {
       const newGroupId = groups[pageIndex].id
       if (newGroupId !== prevGroupId) {
-        store.set(cachedTabIdsAtom, [])
         store.set(activeGroupIdAtom, newGroupId)
 
         // Reset activeTabPreview.index to 0 when switching groups

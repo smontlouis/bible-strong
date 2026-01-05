@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import produce from 'immer'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Appearance } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -33,7 +33,7 @@ interface BibleTabScreenProps {
 const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [reloadKey, setReloadKey] = useState(0)
-  const isBibleViewReloadingAtom = atom(false)
+  const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
 
   const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
