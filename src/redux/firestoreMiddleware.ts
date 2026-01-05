@@ -669,27 +669,6 @@ export default (store: any) => (next: any) => async (action: any) => {
       break
     }
 
-    // ========== SUBSCRIPTION SYNC ==========
-    case USER_UPDATE_PROFILE:
-    case SET_SUBSCRIPTION: {
-      try {
-        await setDoc(
-          userDocRef,
-          { subscription: removeUndefinedVariables(user.subscription) },
-          { merge: true }
-        )
-        console.log('[Firestore] Subscription synced successfully')
-      } catch (subError) {
-        console.error('Subscription sync failed:', subError)
-        Sentry.captureException(subError, {
-          tags: { feature: 'sync', action: 'subscription_update' },
-          extra: { userId },
-        })
-        toast.error(i18n.t('app.syncError'))
-      }
-      break
-    }
-
     default:
   }
 
