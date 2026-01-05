@@ -12,6 +12,7 @@ import { ProgressBar } from '~common/ui/ProgressBar'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Theme } from '~themes'
 import { migrationProgressAtom } from 'src/state/migration'
+import { getCollectionLabel } from '~helpers/firestoreMigration'
 
 const ModalContent = styled.View(({ theme }: { theme: Theme }) => ({
   flex: 1,
@@ -47,9 +48,10 @@ const MigrationModal = () => {
 
   const handleContactSupport = () => {
     const subject = encodeURIComponent('Bible Strong - Migration Issue')
+    const failedLabels = progress.failedCollections.map(c => getCollectionLabel(c)).join(', ')
     const body = encodeURIComponent(
       `Bonjour,\n\nJ'ai rencontré un problème lors de la migration de mes données.\n\nCollections échouées: ${
-        progress.failedCollections.join(', ') || 'N/A'
+        failedLabels || 'N/A'
       }\nErreur: ${progress.error || 'N/A'}\n\nMerci de votre aide.`
     )
     Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`)
@@ -119,7 +121,8 @@ const MigrationModal = () => {
             <ErrorBox>
               <Text fontSize={12} color="grey">
                 {progress.hasPartialFailure
-                  ? t('migration.partialError') + progress.failedCollections.join(', ')
+                  ? t('migration.partialError') +
+                    progress.failedCollections.map(c => getCollectionLabel(c)).join(', ')
                   : progress.error}
               </Text>
             </ErrorBox>

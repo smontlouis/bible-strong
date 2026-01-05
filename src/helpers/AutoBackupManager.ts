@@ -1,6 +1,22 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sentry from '@sentry/react-native'
+import { getDefaultStore } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
+import { tabGroupsAtom, TabGroup } from '~state/tabs'
+
+/**
+ * Nettoie les tab groups pour le backup en supprimant les base64Preview
+ * (comme pour la sync Firestore)
+ */
+const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
+  return groups.map(group => ({
+    ...group,
+    tabs: group.tabs.map(tab => {
+      const { base64Preview, ...rest } = tab as any
+      return rest
+    }),
+  }))
+}
 
 /**
  * AutoBackupManager - Système de backup automatique local
@@ -92,10 +108,15 @@ class AutoBackupManager {
       // Sanitize les données (enlève changelog et studies qui sont dans une autre collection)
       const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
 
+      // Récupérer les tab groups depuis Jotai
+      const store = getDefaultStore()
+      const tabGroups = store.get(tabGroupsAtom)
+
       const newData = {
         bible: sanitizeUserBible(state.user.bible),
         plan: state.plan.ongoingPlans,
         studies: state.user.bible.studies,
+        tabGroups: sanitizeTabGroupsForBackup(tabGroups),
       }
 
       // Restrictions UNIQUEMENT pour auto backups
@@ -248,7 +269,16 @@ class AutoBackupManager {
 
           // Calculer les statistiques en lisant le backup
           let stats:
-            | { notesCount: number; highlightsCount: number; studiesCount: number }
+            | {
+                notesCount: number
+                highlightsCount: number
+                studiesCount: number
+                bookmarksCount: number
+                linksCount: number
+                tagsCount: number
+                tabGroupsCount: number
+                tabsCount: number
+              }
             | undefined
           try {
             const json = await FileSystem.readAsStringAsync(filepath)
@@ -258,6 +288,12 @@ class AutoBackupManager {
               notesCount: Object.keys(backup.data?.bible?.notes || {}).length,
               highlightsCount: Object.keys(backup.data?.bible?.highlights || {}).length,
               studiesCount: Object.keys(backup.data?.studies || {}).length,
+              bookmarksCount: Object.keys(backup.data?.bible?.bookmarks || {}).length,
+              linksCount: Object.keys(backup.data?.bible?.links || {}).length,
+              tagsCount: Object.keys(backup.data?.bible?.tags || {}).length,
+              tabGroupsCount: backup.data?.tabGroups?.length || 0,
+              tabsCount:
+                backup.data?.tabGroups?.reduce((acc, g) => acc + g.tabs.length, 0) || 0,
             }
           } catch (error) {
             console.warn(`[AutoBackup] Failed to read stats for ${file}:`, error)
@@ -347,6 +383,7 @@ export interface BackupData {
     bible: any
     plan: any
     studies: any
+    tabGroups?: TabGroup[] // Optionnel pour rétrocompatibilité avec anciens backups
   }
 }
 
@@ -360,6 +397,11 @@ export interface BackupInfo {
     notesCount: number
     highlightsCount: number
     studiesCount: number
+    bookmarksCount: number
+    linksCount: number
+    tagsCount: number
+    tabGroupsCount: number
+    tabsCount: number
   }
 }
 

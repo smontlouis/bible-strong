@@ -677,7 +677,11 @@
   "backups.size": "Size",
   "backups.studies": "{{count}} studies",
   "backups.notes": "{{count}} notes",
-  "backups.highlights": "{{count}} highlights",
+  "backups.highlights": "{{count}} highlight(s)",
+  "backups.bookmarks": "{{count}} bookmark(s)",
+  "backups.links": "{{count}} link(s)",
+  "backups.tags": "{{count}} tag(s)",
+  "backups.tabs": "{{count}} tab(s)",
 
   "audio.speed": "Speed",
   "audio.pitch": "Pitch",

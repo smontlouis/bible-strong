@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
+import { getDefaultStore } from 'jotai/vanilla'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
@@ -15,6 +16,20 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { importData } from '~redux/modules/user'
 import { selectUserAndPlan } from '~redux/selectors/plan'
+import { tabGroupsAtom, TabGroup } from '~state/tabs'
+
+/**
+ * Nettoie les tab groups pour l'export en supprimant les base64Preview
+ */
+const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
+  return groups.map(group => ({
+    ...group,
+    tabs: group.tabs.map(tab => {
+      const { base64Preview, ...rest } = tab as any
+      return rest
+    }),
+  }))
+}
 
 const ImportExport = () => {
   const { t } = useTranslation()
@@ -104,10 +119,16 @@ const ExportButton = ({
 
     try {
       const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
+
+      // Récupérer les tab groups depuis Jotai
+      const store = getDefaultStore()
+      const tabGroups = store.get(tabGroupsAtom)
+
       const json = JSON.stringify({
         bible: sanitizeUserBible(user.bible),
         plan: plan.ongoingPlans,
         studies: user.bible.studies,
+        tabGroups: sanitizeTabGroupsForBackup(tabGroups),
       })
 
       const fileUri = FileSystem.documentDirectory + 'save.biblestrong'

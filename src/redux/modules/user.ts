@@ -1,4 +1,5 @@
 import produce, { Draft } from 'immer'
+import { getDefaultStore } from 'jotai/vanilla'
 import { Reducer } from 'redux'
 import {
   BookmarksObj,
@@ -14,6 +15,7 @@ import {
 import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
 import { getLangIsFr } from '~i18n'
+import { tabGroupsAtom } from '~state/tabs'
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
@@ -480,7 +482,7 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
     }
 
     case IMPORT_DATA: {
-      const { bible, studies } = action.payload
+      const { bible, studies, tabGroups } = action.payload
       const currentChangelog = draft.bible.changelog
 
       // Merge bible (clean corrupted data before merging)
@@ -490,6 +492,13 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
       // Restore studies and changelog
       draft.bible.studies = studies
       draft.bible.changelog = currentChangelog
+
+      // Restaurer les onglets via Jotai
+      // Le groupe actif sera automatiquement reset sur groups[0] via activeGroupAtom
+      if (tabGroups && Array.isArray(tabGroups) && tabGroups.length > 0) {
+        const store = getDefaultStore()
+        store.set(tabGroupsAtom, tabGroups)
+      }
 
       break
     }

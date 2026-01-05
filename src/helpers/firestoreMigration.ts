@@ -26,6 +26,29 @@ import {
 } from 'src/state/migration'
 
 /**
+ * Mapping des noms de collections vers des labels lisibles en français
+ */
+const COLLECTION_LABELS: Record<SubcollectionName, string> = {
+  bookmarks: 'marque-pages',
+  highlights: 'surlignages',
+  notes: 'notes',
+  links: 'liens',
+  tags: 'tags',
+  strongsHebreu: 'Strong hébreu',
+  strongsGrec: 'Strong grec',
+  words: 'mots',
+  naves: 'thèmes Nave',
+  tabGroups: 'onglets',
+}
+
+/**
+ * Retourne le label lisible pour une collection
+ */
+export const getCollectionLabel = (collection: SubcollectionName): string => {
+  return COLLECTION_LABELS[collection] || collection
+}
+
+/**
  * Progress update sent to the UI during migration
  */
 export interface MigrationProgressUpdate {
@@ -251,12 +274,13 @@ export async function migrateUserDataToSubcollections(
       const itemCount = Object.keys(data).length
 
       const baseProgress = 0.1 + (0.7 * i) / collectionsToMigrate.length
-      reportProgress(`Migration de ${collection} (${itemCount} éléments)...`, baseProgress)
+      const label = getCollectionLabel(collection)
+      reportProgress(`Migration des ${label} (${itemCount} éléments)...`, baseProgress)
 
       await writeAllToSubcollection(userId, collection, data)
 
       const endProgress = 0.1 + (0.7 * (i + 1)) / collectionsToMigrate.length
-      reportProgress(`${collection} migré avec succès`, endProgress)
+      reportProgress(`${label} migrés avec succès`, endProgress)
     }
 
     // 5. Marquer comme migré
@@ -600,13 +624,14 @@ export async function resumableMigrateUserData(
     // 7. Migrer chaque collection individuellement
     for (const { collection, itemCount, chunkCount } of collectionChunks) {
       const data = bible[collection]
+      const label = getCollectionLabel(collection)
 
       // Calculer la progression basée sur les chunks
       const baseProgress = 0.1 + (0.75 * completedChunks) / totalChunks
 
       reportProgress({
         currentCollection: collection,
-        message: `Migration de ${collection} (${itemCount} éléments, ${chunkCount} chunk${chunkCount > 1 ? 's' : ''})...`,
+        message: `Migration des ${label} (${itemCount} éléments, ${chunkCount} chunk${chunkCount > 1 ? 's' : ''})...`,
         overallProgress: baseProgress,
       })
 
@@ -619,7 +644,7 @@ export async function resumableMigrateUserData(
           const currentProgress = 0.1 + (0.75 * (completedChunks + chunkIndex)) / totalChunks
           reportProgress({
             currentCollection: collection,
-            message: `Migration de ${collection} (chunk ${chunkIndex}/${_totalChunks})...`,
+            message: `Migration des ${label} (chunk ${chunkIndex}/${_totalChunks})...`,
             overallProgress: currentProgress,
           })
         }
@@ -637,7 +662,7 @@ export async function resumableMigrateUserData(
         reportProgress({
           currentCollection: collection,
           collectionsCompleted: completedCollections.length,
-          message: `${collection} migré avec succès`,
+          message: `${label} migrés avec succès`,
           overallProgress: endProgress,
         })
       } catch (error: any) {

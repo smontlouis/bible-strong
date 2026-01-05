@@ -190,9 +190,20 @@ const AutoBackupsList = () => {
           </Text>
           {backup.stats && (
             <Text fontSize={11} color="grey" mt={3}>
-              {t('backups.studies', { count: backup.stats.studiesCount })} •{' '}
-              {t('backups.notes', { count: backup.stats.notesCount })} •{' '}
-              {t('backups.highlights', { count: backup.stats.highlightsCount })}
+              {backup.stats.highlightsCount > 0 &&
+                `${t('backups.highlights', { count: backup.stats.highlightsCount })} • `}
+              {backup.stats.notesCount > 0 &&
+                `${t('backups.notes', { count: backup.stats.notesCount })} • `}
+              {backup.stats.bookmarksCount > 0 &&
+                `${t('backups.bookmarks', { count: backup.stats.bookmarksCount })} • `}
+              {backup.stats.linksCount > 0 &&
+                `${t('backups.links', { count: backup.stats.linksCount })} • `}
+              {backup.stats.tagsCount > 0 &&
+                `${t('backups.tags', { count: backup.stats.tagsCount })} • `}
+              {backup.stats.studiesCount > 0 &&
+                `${t('backups.studies', { count: backup.stats.studiesCount })} • `}
+              {backup.stats.tabsCount > 0 &&
+                `${t('backups.tabs', { count: backup.stats.tabsCount })}`}
             </Text>
           )}
           <Box row mt={10}>

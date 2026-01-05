@@ -678,7 +678,11 @@
   "backups.size": "Taille",
   "backups.studies": "{{count}} études",
   "backups.notes": "{{count}} notes",
-  "backups.highlights": "{{count}} highlights",
+  "backups.highlights": "{{count}} surlignage(s)",
+  "backups.bookmarks": "{{count}} marque-page(s)",
+  "backups.links": "{{count}} lien(s)",
+  "backups.tags": "{{count}} tag(s)",
+  "backups.tabs": "{{count}} onglet(s)",
 
   "audio.speed": "Vitesse",
   "audio.pitch": "Tonalité",
