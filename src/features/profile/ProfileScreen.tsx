@@ -34,7 +34,7 @@ const ProfileScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Profile
           <ProfileHeader />
         </Box>
         <ProfileStats />
-        <Box padding={20}>
+        <Box pt={20}>
           <ProfileActions navigation={navigation} />
         </Box>
       </ScrollView>

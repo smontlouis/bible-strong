@@ -1,16 +1,16 @@
-import styled from '@emotion/native'
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import * as Icon from '@expo/vector-icons'
 import { getAuth } from '@react-native-firebase/auth'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
-import Link from '~common/Link'
-import Box, { VStack } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import Border from '~common/ui/Border'
+import CardLinkItem from '~common/ui/CardLinkItem'
+import { FeatherIcon } from '~common/ui/Icon'
+import IconCircle from '~common/ui/IconCircle'
+import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import useLogin from '~helpers/useLogin'
 import { firebaseDb, doc, deleteDoc } from '~helpers/firebase'
 import { MainStackProps } from '~navigation/type'
@@ -60,56 +60,59 @@ const ProfileActions = ({ navigation }: ProfileActionsProps) => {
   }
 
   return (
-    <VStack gap={5}>
-      <Text bold fontSize={16} marginBottom={10}>
-        {t('profile.accountSettings')}
-      </Text>
+    <Box>
+      <SectionCard>
+        <SectionCardHeader>
+          <FeatherIcon name="settings" size={16} color="grey" />
+          <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+            {t('profile.accountSettings')}
+          </Text>
+        </SectionCardHeader>
 
-      {isEmailProvider && (
-        <ActionItem onPress={() => passwordModalRef.current?.present()}>
-          <StyledIcon name="lock" size={22} />
-          <Text fontSize={15}>{t('profile.changePassword')}</Text>
-        </ActionItem>
-      )}
+        {isEmailProvider && (
+          <CardLinkItem onPress={() => passwordModalRef.current?.present()}>
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <FeatherIcon name="lock" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('profile.changePassword')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+        )}
 
-      <ActionItem route="Backup">
-        <StyledIcon name="database" size={22} />
-        <Text fontSize={15}>{t('backup.title')}</Text>
-      </ActionItem>
+        <CardLinkItem route="Backup">
+          <IconCircle bg="rgba(107, 114, 128, 0.1)">
+            <FeatherIcon name="database" size={20} color="grey" />
+          </IconCircle>
+          <Text flex fontSize={15}>
+            {t('backup.title')}
+          </Text>
+          <FeatherIcon name="chevron-right" size={20} color="grey" />
+        </CardLinkItem>
 
-      <Border marginVertical={10} />
+        <CardLinkItem onPress={promptLogout}>
+          <IconCircle bg="rgba(239, 68, 68, 0.1)">
+            <FeatherIcon name="log-out" size={20} color="quart" />
+          </IconCircle>
+          <Text flex fontSize={15} color="quart">
+            {t('Se déconnecter')}
+          </Text>
+        </CardLinkItem>
 
-      <ActionItem onPress={promptLogout}>
-        <StyledIcon name="log-out" size={22} color="quart" />
-        <Text fontSize={15} color="quart" bold>
-          {t('Se déconnecter')}
-        </Text>
-      </ActionItem>
-
-      <ActionItem onPress={promptDelete}>
-        <StyledIcon name="trash-2" size={22} color="quart" />
-        <Text fontSize={15} color="quart">
-          {t('app.deleteAccount')}
-        </Text>
-      </ActionItem>
+        <CardLinkItem onPress={promptDelete} isLast>
+          <IconCircle bg="rgba(239, 68, 68, 0.1)">
+            <FeatherIcon name="trash-2" size={20} color="quart" />
+          </IconCircle>
+          <Text flex fontSize={15} color="quart">
+            {t('app.deleteAccount')}
+          </Text>
+        </CardLinkItem>
+      </SectionCard>
 
       <ChangePasswordModal modalRef={passwordModalRef} />
-    </VStack>
+    </Box>
   )
 }
-
-const ActionItem = styled(Link)(({}: { theme?: any }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingVertical: 12,
-  paddingHorizontal: 5,
-}))
-
-const StyledIcon = styled(Icon.Feather)<{ color?: string }>(
-  ({ theme, color }: { theme: any; color?: string }) => ({
-    color: color ? (theme.colors as any)[color] : theme.colors.grey,
-    marginRight: 15,
-  })
-)
 
 export default ProfileActions

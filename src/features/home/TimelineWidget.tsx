@@ -21,10 +21,9 @@ const TimelineWidget = () => {
         lightShadow
         rounded
         px={20}
-        pl={10}
         height={80}
       >
-        <Box center size={50} bg="lightPrimary" borderRadius={25} ml={10}>
+        <Box center size={50} bg="lightPrimary" borderRadius={10}>
           {/* @ts-ignore */}
           <TimelineIcon color="primary" size={70} style={{ marginTop: 8 }} />
         </Box>

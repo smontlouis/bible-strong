@@ -64,54 +64,6 @@ const Infos = memo(() => {
   )
 })
 
-const ManualSync = memo(() => {
-  const { isLogged } = useLogin()
-  const { t } = useTranslation()
-
-  const [isSyncing, setIsSyncing] = useState(false)
-  const { user, plan } = useSelector(selectUserAndPlan)
-  const userDocRef = doc(firebaseDb, 'users', user.id)
-
-  const sync = async () => {
-    toast(t('app.syncing'))
-    setIsSyncing(true)
-    const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
-    await updateDoc(
-      userDocRef,
-      r({
-        bible: sanitizeUserBible(user.bible),
-        plan: plan.ongoingPlans,
-      })
-    )
-
-    const studies = user.bible.studies
-    if (studies) {
-      await Promise.all(
-        Object.entries(studies).map(async ([studyId, study]) => {
-          const studyDocRef = doc(firebaseDb, 'studies', studyId)
-          await setDoc(studyDocRef, study, { merge: true })
-        })
-      )
-      console.log('[Settings] Studies synced')
-    }
-    toast.success(t('app.synced'))
-    setIsSyncing(false)
-  }
-
-  if (!isLogged) return null
-
-  return (
-    <CardLinkItem onPress={isSyncing ? () => {} : sync}>
-      <IconCircle bg="lightPrimary">
-        <FeatherIcon name="upload-cloud" size={20} color="primary" />
-      </IconCircle>
-      <Text fontSize={15} flex opacity={isSyncing ? 0.4 : 1}>
-        {t('app.sync')}
-      </Text>
-    </CardLinkItem>
-  )
-})
-
 type MoreProps = {
   closeMenu: () => void
 }

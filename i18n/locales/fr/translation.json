@@ -775,6 +775,7 @@
   "profile.noName": "Aucun nom",
   "profile.stats": "Mes statistiques",
   "profile.accountSettings": "Paramètres du compte",
+  "profile.dangerZone": "Zone de danger",
   "profile.changePassword": "Changer le mot de passe",
   "profile.currentPassword": "Mot de passe actuel",
   "profile.newPassword": "Nouveau mot de passe",

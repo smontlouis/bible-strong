@@ -36,7 +36,7 @@ const TheBibleProject = () => {
           route="Plan"
           params={{ plan: { id, title, image, description, author } }}
         >
-          <Box mr={20} center size={50} bg="lightPrimary" borderRadius={25}>
+          <Box mr={20} center size={50} bg="lightPrimary" borderRadius={10}>
             <BibleProjectIcon />
           </Box>
           <Box flex justifyContent="center">

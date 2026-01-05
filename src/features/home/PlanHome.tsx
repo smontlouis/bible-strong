@@ -80,7 +80,7 @@ const PlanHome = () => {
         overflow="hidden"
         alignItems="center"
       >
-        <Box center size={50} bg="lightPrimary" borderRadius={25}>
+        <Box center size={50} bg="lightPrimary" borderRadius={10}>
           <PlanIcon style={{ marginTop: 5 }} color="primary" size={32} />
         </Box>
         <Text flex title fontSize={18} color="default" ml={20}>

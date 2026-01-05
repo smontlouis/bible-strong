@@ -4,7 +4,7 @@ import Box from '~common/ui/Box'
 const SectionCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.colors.reverse,
   borderRadius: 16,
-  marginHorizontal: 16,
+  marginHorizontal: 20,
   marginBottom: 16,
 }))
 
