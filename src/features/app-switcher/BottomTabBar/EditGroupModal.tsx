@@ -101,7 +101,7 @@ const EditGroupModal = ({
           </Text>
           <StyledTextInput
             placeholder={t('tabs.groupNamePlaceholder')}
-            placeholderTextColor={theme.colors.border}
+            placeholderTextColor={theme.colors.grey}
             onChangeText={setName}
             onSubmitEditing={handleSave}
             returnKeyType="send"

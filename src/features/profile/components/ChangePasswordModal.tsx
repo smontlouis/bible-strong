@@ -96,7 +96,7 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
         <Box>
           <StyledInput
             placeholder={t('profile.currentPassword')}
-            placeholderTextColor={theme.colors.border}
+            placeholderTextColor={theme.colors.grey}
             value={currentPassword}
             onChangeText={setCurrentPassword}
             secureTextEntry={!showCurrentPassword}
@@ -110,7 +110,7 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
         <Box>
           <StyledInput
             placeholder={t('profile.newPassword')}
-            placeholderTextColor={theme.colors.border}
+            placeholderTextColor={theme.colors.grey}
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry={!showNewPassword}
@@ -129,7 +129,7 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
 
         <StyledInput
           placeholder={t('profile.confirmPassword')}
-          placeholderTextColor={theme.colors.border}
+          placeholderTextColor={theme.colors.grey}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry={!showNewPassword}

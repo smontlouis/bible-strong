@@ -145,7 +145,7 @@ export const useTabGroupsSync = () => {
       try {
         const localGroups = getDefaultStore().get(tabGroupsAtom)
 
-        // Fetch remote groups
+        // Fetch remote groups (uses cache-first mode internally for instant response)
         const remoteGroups = await fetchTabGroupsFromFirestore(userId)
 
         if (remoteGroups.length === 0) {

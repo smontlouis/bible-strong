@@ -119,7 +119,7 @@ const ColorEditModal = ({
         <Box row alignItems="center">
           <StyledTextInput
             placeholder={t('Nom de la couleur (optionnel)')}
-            placeholderTextColor={theme.colors.tertiary}
+            placeholderTextColor={theme.colors.grey}
             value={chosenName}
             onChangeText={setChosenName}
             maxLength={30}

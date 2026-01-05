@@ -44,7 +44,7 @@ const BottomSheetSearchInput = ({
         <Box flex>
           <BottomSheetTextInput
             placeholder={placeholder}
-            placeholderTextColor={theme.colors.tertiary}
+            placeholderTextColor={theme.colors.grey}
             onChangeText={onChangeText}
             returnKeyType="send"
             value={value}

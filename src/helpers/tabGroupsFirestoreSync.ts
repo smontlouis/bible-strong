@@ -117,6 +117,9 @@ export async function deleteTabGroupFromFirestore(userId: string, groupId: strin
 
 /**
  * Fetch all tab groups from Firestore
+ * Uses cache-first mode (onSnapshot) for instant response without blocking on network.
+ *
+ * @see https://github.com/invertase/react-native-firebase/issues/7610
  */
 export async function fetchTabGroupsFromFirestore(userId: string): Promise<TabGroup[]> {
   const data = await fetchSubcollection(userId, 'tabGroups')

@@ -289,14 +289,14 @@ ${currentNote?.description}
           <>
             <StyledTextInput
               placeholder={t('Titre')}
-              placeholderTextColor={theme.colors.border}
+              placeholderTextColor={theme.colors.grey}
               onChangeText={setTitle}
               value={title}
               style={{ marginTop: 20 }}
             />
             <StyledTextArea
               placeholder={t('Description')}
-              placeholderTextColor={theme.colors.border}
+              placeholderTextColor={theme.colors.grey}
               onChangeText={setDescription}
               value={description}
               multiline

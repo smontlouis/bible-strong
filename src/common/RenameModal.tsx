@@ -94,7 +94,7 @@ const RenameModal = ({
       <Box paddingHorizontal={20} py={20}>
         <StyledTextInput
           placeholder={placeholder}
-          placeholderTextColor={theme.colors.border}
+          placeholderTextColor={theme.colors.grey}
           onChangeText={setValue}
           onSubmitEditing={handleSave}
           returnKeyType="send"

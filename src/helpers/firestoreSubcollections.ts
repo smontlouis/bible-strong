@@ -306,7 +306,9 @@ export async function clearSubcollection(
       return
     }
 
-    const docIds = snapshot.docs.map((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => docSnap.id)
+    const docIds = snapshot.docs.map(
+      (docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => docSnap.id
+    )
 
     await batchWriteSubcollection(
       userId,
@@ -330,32 +332,50 @@ export async function clearSubcollection(
 }
 
 /**
- * Récupère tous les documents d'une sous-collection
- * Transforme en objet avec ID comme clé (format Redux)
+ * Récupère tous les documents d'une sous-collection.
+ * Utilise onSnapshot() qui retourne immédiatement les données du cache local,
+ * sans attendre de réponse réseau (cache-first).
+ *
+ * C'est important pour éviter les blocages UI avec une connexion instable.
+ * getDocs() attend une réponse réseau, ce qui peut bloquer l'UI.
+ *
+ * @see https://github.com/invertase/react-native-firebase/issues/7610
  */
-export async function fetchSubcollection(
+export function fetchSubcollection(
   userId: string,
   collectionName: SubcollectionName
 ): Promise<{ [id: string]: any }> {
-  try {
+  return new Promise((resolve, reject) => {
     const collectionRef = getSubcollectionRef(userId, collectionName)
-    const snapshot = await getDocs(collectionRef)
 
-    const result: { [id: string]: any } = {}
-    snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
-      result[decodeDocumentId(docSnap.id)] = docSnap.data()
-    })
+    // onSnapshot retourne immédiatement les données du cache
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      snapshot => {
+        const result: { [id: string]: any } = {}
+        snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+          result[decodeDocumentId(docSnap.id)] = docSnap.data()
+        })
 
-    console.log(`[Subcollections] Fetched ${collectionName}: ${Object.keys(result).length} docs`)
-    return result
-  } catch (error) {
-    console.error(`[Subcollections] Failed to fetch ${collectionName}:`, error)
-    Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'fetch', collection: collectionName },
-      extra: { userId },
-    })
-    throw error
-  }
+        // Se désabonner après la première réponse (cache)
+        unsubscribe()
+
+        console.log(
+          `[Subcollections] Fetched ${collectionName}: ${Object.keys(result).length} docs`
+        )
+        resolve(result)
+      },
+      error => {
+        unsubscribe()
+        console.error(`[Subcollections] Failed to fetch ${collectionName}:`, error)
+        Sentry.captureException(error, {
+          tags: { feature: 'subcollections', action: 'fetch', collection: collectionName },
+          extra: { userId },
+        })
+        reject(error)
+      }
+    )
+  })
 }
 
 /**
@@ -456,7 +476,10 @@ export async function existsInSubcollection(
     const docSnap = await getDoc(docRef)
     return docSnap.exists()
   } catch (error) {
-    console.error(`[Subcollections] Failed to check existence in ${collectionName}/${docId}:`, error)
+    console.error(
+      `[Subcollections] Failed to check existence in ${collectionName}/${docId}:`,
+      error
+    )
     return false
   }
 }

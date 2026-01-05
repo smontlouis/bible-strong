@@ -42,7 +42,7 @@ const SearchInput = ({
         <Box flex>
           <TextInput
             placeholder={placeholder}
-            placeholderTextColor={theme.colors.tertiary}
+            placeholderTextColor={theme.colors.grey}
             onChangeText={onChangeText}
             returnKeyType="send"
             value={value}
