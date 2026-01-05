@@ -1,8 +1,11 @@
-import React, { useState } from 'react'
-import { withTheme } from '@emotion/react'
+import React, { useEffect, useState } from 'react'
+import { useTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
+import { StackScreenProps } from '@react-navigation/stack'
 
+import { MainStackProps } from '~navigation/type'
 import FireAuth from '~helpers/FireAuth'
+import useLogin from '~helpers/useLogin'
 import Button from '~common/ui/Button'
 import ScrollView from '~common/ui/ScrollView'
 import TextInput from '~common/ui/TextInput'
@@ -13,12 +16,20 @@ import Header from '~common/Header'
 import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
 
-const LoginScreen = ({ theme }: any) => {
+const RegisterScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Register'>) => {
+  const theme = useTheme()
+  const { isLogged } = useLogin()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setLoading] = useState(false)
   const { t } = useTranslation()
+
+  useEffect(() => {
+    if (isLogged) {
+      navigation.pop(2)
+    }
+  }, [isLogged, navigation])
 
   const onRegister = async () => {
     if (!username || !email || !password) {
@@ -63,4 +74,4 @@ const LoginScreen = ({ theme }: any) => {
     </Container>
   )
 }
-export default withTheme(LoginScreen)
+export default RegisterScreen

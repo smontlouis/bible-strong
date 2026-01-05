@@ -87,7 +87,7 @@ const ProfileHeader = () => {
           )}
         </HStack>
 
-        <SubscriptionBadge />
+        {/* <SubscriptionBadge /> */}
 
         {memberSince && (
           <Text color="grey" fontSize={12}>

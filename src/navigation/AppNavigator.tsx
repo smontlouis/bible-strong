@@ -1,11 +1,14 @@
 import React from 'react'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
+import { useTheme } from '@emotion/react'
 import {
   NavigationContainer,
   useNavigationContainerRef,
   Route,
   NavigationContainerRefWithCurrent,
+  DefaultTheme,
+  DarkTheme,
 } from '@react-navigation/native'
 import MainStackNavigator from './MainStackNavigator'
 
@@ -52,10 +55,21 @@ const onNavigationStateChange = (navigationRef: NavigationRef, routeRef: RouteRe
 function AppNavigator() {
   const navigationRef = useNavigationContainerRef()
   const routeNameRef = React.useRef<Route<string>>()
+  const theme = useTheme()
+
+  const navigationTheme = {
+    ...(theme.colorScheme === 'dark' ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(theme.colorScheme === 'dark' ? DarkTheme.colors : DefaultTheme.colors),
+      background: theme.colors.lightGrey,
+      card: theme.colors.reverse,
+    },
+  }
 
   return (
     <NavigationContainer
       ref={navigationRef}
+      theme={navigationTheme}
       onReady={() => setCurrentRoute(navigationRef, routeNameRef)}
       onStateChange={() => onNavigationStateChange(navigationRef, routeNameRef)}
     >

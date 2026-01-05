@@ -412,7 +412,7 @@ const FireAuth = class {
     // Small delay to let async cleanup operations complete
     await new Promise(resolve => setTimeout(resolve, 50))
 
-    await signOut(getAuth())
+    signOut(getAuth())
 
     // Sign-out successful.
     this.user = null

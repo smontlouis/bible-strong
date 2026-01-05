@@ -47,7 +47,7 @@ const ProfileActions = ({ navigation }: ProfileActionsProps) => {
               onPress: async () => {
                 await deleteDoc(doc(firebaseDb, 'users', user.id))
                 const authUser = getAuth().currentUser
-                await authUser?.delete()
+                authUser?.delete()
                 logout()
               },
               style: 'destructive',

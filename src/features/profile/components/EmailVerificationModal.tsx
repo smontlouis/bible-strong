@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, AppState } from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
 import Modal from '~common/Modal'
@@ -18,18 +18,14 @@ type EmailVerificationModalProps = {
 const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
   const { t } = useTranslation()
   const [isSending, setIsSending] = useState(false)
-  const appState = useRef(AppState.currentState)
 
-  // Check email verification when app comes to foreground
+  // Poll for email verification every 5 seconds
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        FireAuth.checkEmailVerification()
-      }
-      appState.current = nextAppState
-    })
+    const interval = setInterval(() => {
+      FireAuth.checkEmailVerification()
+    }, 5000)
 
-    return () => subscription.remove()
+    return () => clearInterval(interval)
   }, [])
 
   const handleResend = async () => {
