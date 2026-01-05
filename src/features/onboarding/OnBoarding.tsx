@@ -31,6 +31,7 @@ const useCheckMandatoryVersions = () => {
     // Skip file check if onboarding was already completed (fast path via MMKV)
     if (isOnboardingCompleted) {
       console.log('[Onboarding] Already completed, skipping file check.')
+      setShowOnboarding(false)
       return
     }
 

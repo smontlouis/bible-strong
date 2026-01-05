@@ -47,7 +47,7 @@ export const setMigrationState = (state: MigrationState): void => {
  */
 export const clearMigrationState = (): void => {
   try {
-    storage.delete(MIGRATION_STATE_KEY)
+    storage.remove(MIGRATION_STATE_KEY)
   } catch (error) {
     console.error('[MigrationState] Failed to clear migration state:', error)
   }

@@ -11,7 +11,7 @@ function setItem(key: string, value: string): void {
 }
 
 function removeItem(key: string): void {
-  storage.delete(key)
+  storage.remove(key)
 }
 
 function clearAll(): void {

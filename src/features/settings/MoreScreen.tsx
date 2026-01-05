@@ -1,14 +1,13 @@
 import styled from '@emotion/native'
 import { getAuth } from '@react-native-firebase/auth'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
-import React, { memo, useState } from 'react'
+import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import * as Animatable from 'react-native-animatable'
 import { useSelector } from 'react-redux'
 import Header from '~common/Header'
 import Link, { LinkProps } from '~common/Link'
-import { toast } from 'sonner-native'
 import Box, { SafeAreaBox } from '~common/ui/Box'
 import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
@@ -16,12 +15,9 @@ import IconCircle from '~common/ui/IconCircle'
 import ScrollView from '~common/ui/ScrollView'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
-import { firebaseDb, doc, updateDoc, deleteDoc, setDoc } from '~helpers/firebase'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
-import { removeUndefinedVariables as r } from '~redux/firestoreMiddleware'
 import { RootState } from '~redux/modules/reducer'
-import { selectUserAndPlan } from '~redux/selectors/plan'
 import app from '../../../package.json'
 
 import { StackScreenProps } from '@react-navigation/stack'
@@ -96,12 +92,8 @@ export const More = ({ closeMenu }: MoreProps) => {
             {
               text: t('Delete'),
               onPress: async () => {
-                // @ts-ignore
-                await deleteDoc(doc(firebaseDb, 'users', user.id))
-
                 const authUser = getAuth().currentUser
                 await authUser?.delete()
-
                 logout()
               },
               style: 'destructive',

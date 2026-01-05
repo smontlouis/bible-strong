@@ -72,6 +72,8 @@ export const useTabGroupsSync = () => {
   const lastRemoteUpdateRef = useRef<number>(0)
   const isSyncingRef = useRef(false)
   const unsubscribeRef = useRef<(() => void) | null>(null)
+  // Track pending deletions to prevent subscription from re-adding deleted groups
+  const pendingDeletionsRef = useRef<Set<string>>(new Set())
 
   // Cooldown period: sync debounce + small buffer
   const REMOTE_UPDATE_COOLDOWN = SYNC_DEBOUNCE_MS + 100
@@ -104,6 +106,8 @@ export const useTabGroupsSync = () => {
         for (const oldGroup of oldGroups) {
           if (!newGroupIds.has(oldGroup.id)) {
             await deleteTabGroupFromFirestore(userId, oldGroup.id)
+            // Clear from pending deletions after successful deletion
+            pendingDeletionsRef.current.delete(oldGroup.id)
           }
         }
 
@@ -170,7 +174,10 @@ export const useTabGroupsSync = () => {
           // Merge remote with local, preserving local base64Previews
           const merged = mergeTabGroups(localGroups, remoteGroups)
 
-          lastRemoteUpdateRef.current = Date.now()
+          // NOTE: We intentionally do NOT set lastRemoteUpdateRef here.
+          // The cooldown is only meant to prevent sync loops from real-time subscription
+          // updates, not from initial data loading. Setting it here would block
+          // legitimate user actions (like deletions) for 1100ms after login.
           setGroups(merged)
 
           // Ensure active group exists
@@ -228,12 +235,23 @@ export const useTabGroupsSync = () => {
         const localWithoutDeleted = localGroups.filter(g => !removedIds.has(g.id))
 
         // Convert Firestore data to TabGroup array
-        const remoteGroups: TabGroup[] = Object.values(data).map(g =>
-          hydrateTabGroup(
-            g as FirestoreTabGroup,
-            localWithoutDeleted.find(lg => lg.id === (g as any).id)
+        // Filter out pending deletions to prevent re-adding groups that are being deleted
+        const pendingDeletions = pendingDeletionsRef.current
+        const remoteGroups: TabGroup[] = Object.values(data)
+          .filter(g => {
+            const id = (g as any).id
+            if (pendingDeletions.has(id)) {
+              console.log(`[TabGroupsSync] Filtered out pending deletion: ${id}`)
+              return false
+            }
+            return true
+          })
+          .map(g =>
+            hydrateTabGroup(
+              g as FirestoreTabGroup,
+              localWithoutDeleted.find(lg => lg.id === (g as any).id)
+            )
           )
-        )
 
         // Sort by createdAt
         remoteGroups.sort((a, b) => a.createdAt - b.createdAt)
@@ -311,11 +329,56 @@ export const useTabGroupsSync = () => {
       return
     }
 
-    // Don't sync on first render or when within cooldown period after remote update
+    // Skip if migration is in progress
+    if (isMigrationInProgress()) {
+      previousGroupsRef.current = groups
+      return
+    }
+
+    // Detect deleted groups
+    const currentIds = new Set(groups.map(g => g.id))
+    const deletedGroups: TabGroup[] = []
+    for (const prevGroup of previousGroupsRef.current) {
+      if (!currentIds.has(prevGroup.id)) {
+        pendingDeletionsRef.current.add(prevGroup.id)
+        deletedGroups.push(prevGroup)
+        console.log(`[TabGroupsSync] Marked group ${prevGroup.id} as pending deletion`)
+      }
+    }
+
+    // CRITICAL: Sync deletions IMMEDIATELY - bypass cooldown and debounce
+    // Deletions are user-initiated and must propagate to Firestore right away
+    // to prevent the subscription from re-adding the deleted group
+    if (deletedGroups.length > 0 && !isSyncingRef.current) {
+      console.log(`[TabGroupsSync] Syncing ${deletedGroups.length} deletion(s) immediately`)
+      ;(async () => {
+        isSyncingRef.current = true
+        try {
+          for (const deleted of deletedGroups) {
+            await deleteTabGroupFromFirestore(user.id, deleted.id)
+            pendingDeletionsRef.current.delete(deleted.id)
+          }
+          console.log(`[TabGroupsSync] Immediate deletion sync complete`)
+        } catch (error) {
+          console.error('[TabGroupsSync] Error syncing deletions:', error)
+          Sentry.captureException(error, {
+            tags: { feature: 'tabGroupsSync', action: 'immediateDeletion' },
+          })
+        } finally {
+          isSyncingRef.current = false
+        }
+      })()
+    }
+
+    // For additions/modifications: apply cooldown to prevent sync loops
     const timeSinceRemote = Date.now() - lastRemoteUpdateRef.current
     const isWithinCooldown = timeSinceRemote < REMOTE_UPDATE_COOLDOWN
+    const hasAdditionsOrModifications = groups.some(g => {
+      const oldGroup = previousGroupsRef.current.find(og => og.id === g.id)
+      return !oldGroup || JSON.stringify(g) !== JSON.stringify(oldGroup)
+    })
 
-    if (previousGroupsRef.current.length > 0 && !isWithinCooldown) {
+    if (previousGroupsRef.current.length > 0 && hasAdditionsOrModifications && !isWithinCooldown) {
       debouncedSync(user.id, groups, previousGroupsRef.current)
     }
 

@@ -12,7 +12,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import IconCircle from '~common/ui/IconCircle'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import useLogin from '~helpers/useLogin'
-import { firebaseDb, doc, deleteDoc } from '~helpers/firebase'
 import { MainStackProps } from '~navigation/type'
 import ChangePasswordModal from './ChangePasswordModal'
 
@@ -45,9 +44,8 @@ const ProfileActions = ({ navigation }: ProfileActionsProps) => {
             {
               text: t('Delete'),
               onPress: async () => {
-                await deleteDoc(doc(firebaseDb, 'users', user.id))
                 const authUser = getAuth().currentUser
-                authUser?.delete()
+                await authUser?.delete()
                 logout()
               },
               style: 'destructive',
