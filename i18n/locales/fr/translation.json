@@ -9,6 +9,7 @@
   "app.deleteAccount": "Supprimer mon compte",
   "app.deleteAccountBody": "Je souhaite supprimer mon compte. \n\nJe comprends que cette action est irréversible et que toutes mes données seront définitivement supprimées.",
   "app.deleteAccountBodyConfirm": "Je suis sûr que je souhaite supprimer mon compte. Au revoir !",
+  "app.deleteAccountRequiresRecentLogin": "Cette opération est sensible et nécessite une authentification récente. Veuillez vous déconnecter puis vous reconnecter avant de supprimer votre compte.",
   "app.deletePermanently": "Supprimer définitivement",
   "app.default": "Par défaut",
   "app.error": "Désolé, l'app vient de planter...\nLe développeur en a été informé. Merci de redémarrer l'app.",

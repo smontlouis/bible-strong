@@ -1,5 +1,4 @@
 import styled from '@emotion/native'
-import { getAuth } from '@react-native-firebase/auth'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -65,7 +64,7 @@ type MoreProps = {
 }
 
 export const More = ({ closeMenu }: MoreProps) => {
-  const { isLogged, logout, user } = useLogin()
+  const { isLogged, logout, promptDeleteAccount } = useLogin()
 
   const isFR = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
@@ -78,30 +77,6 @@ export const More = ({ closeMenu }: MoreProps) => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
-    ])
-  }
-
-  const promptDelete = () => {
-    Alert.alert(t('Attention'), t('app.deleteAccountBody'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: async () => {
-          Alert.alert(t('Attention'), t('app.deleteAccountBodyConfirm'), [
-            { text: t('Non'), onPress: () => null, style: 'cancel' },
-            {
-              text: t('Delete'),
-              onPress: async () => {
-                const authUser = getAuth().currentUser
-                await authUser?.delete()
-                logout()
-              },
-              style: 'destructive',
-            },
-          ])
-        },
-        style: 'destructive',
-      },
     ])
   }
 
@@ -328,7 +303,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             </Text>
           </LinkItem>
           {isLogged && (
-            <LinkItem style={{ paddingVertical: 10, paddingHorizontal: 0 }} onPress={promptDelete}>
+            <LinkItem style={{ paddingVertical: 10, paddingHorizontal: 0 }} onPress={promptDeleteAccount}>
               <Text fontSize={14} color="grey">
                 {t('app.deleteAccount')}
               </Text>

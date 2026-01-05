@@ -1,7 +1,6 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { getAuth } from '@react-native-firebase/auth'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
@@ -21,7 +20,7 @@ type ProfileActionsProps = {
 
 const ProfileActions = ({ navigation }: ProfileActionsProps) => {
   const { t } = useTranslation()
-  const { user, logout } = useLogin()
+  const { user, logout, promptDeleteAccount } = useLogin()
   const passwordModalRef = useRef<BottomSheetModal>(null)
 
   const isEmailProvider = user.provider === 'password'
@@ -30,30 +29,6 @@ const ProfileActions = ({ navigation }: ProfileActionsProps) => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
-    ])
-  }
-
-  const promptDelete = () => {
-    Alert.alert(t('Attention'), t('app.deleteAccountBody'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: async () => {
-          Alert.alert(t('Attention'), t('app.deleteAccountBodyConfirm'), [
-            { text: t('Non'), onPress: () => null, style: 'cancel' },
-            {
-              text: t('Delete'),
-              onPress: async () => {
-                const authUser = getAuth().currentUser
-                await authUser?.delete()
-                logout()
-              },
-              style: 'destructive',
-            },
-          ])
-        },
-        style: 'destructive',
-      },
     ])
   }
 
@@ -98,7 +73,7 @@ const ProfileActions = ({ navigation }: ProfileActionsProps) => {
           </Text>
         </CardLinkItem>
 
-        <CardLinkItem onPress={promptDelete} isLast>
+        <CardLinkItem onPress={promptDeleteAccount} isLast>
           <IconCircle bg="rgba(239, 68, 68, 0.1)">
             <FeatherIcon name="trash-2" size={20} color="quart" />
           </IconCircle>
