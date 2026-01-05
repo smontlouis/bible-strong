@@ -261,7 +261,7 @@ export default (store: any) => (next: any) => async (action: any) => {
     case resetPlan.type:
     case markAsRead.type: {
       try {
-        await setDoc(userDocRef, { plan: plan.ongoingPlans }, { merge: true })
+        await setDoc(userDocRef, { plan: removeUndefinedVariables(plan.ongoingPlans) }, { merge: true })
       } catch (error) {
         console.log('[Firestore] Error syncing plan:', error)
         toast.error(i18n.t('app.syncError'))
@@ -302,7 +302,7 @@ export default (store: any) => (next: any) => async (action: any) => {
         async () => {
           await setDoc(
             userDocRef,
-            { bible: { settings: cleanForFirestore(diffState.user.bible.settings) } },
+            { bible: { settings: removeUndefinedVariables(cleanForFirestore(diffState.user.bible.settings)) } },
             { merge: true }
           )
         },
@@ -642,7 +642,7 @@ export default (store: any) => (next: any) => async (action: any) => {
 
           // 3. Sync plan
           if (importedPlan) {
-            await setDoc(userDocRef, { plan: importedPlan }, { merge: true })
+            await setDoc(userDocRef, { plan: removeUndefinedVariables(importedPlan) }, { merge: true })
           }
         },
         userId,
