@@ -17,6 +17,19 @@ Bible Strong is a React Native application for Bible study, primarily targeting 
 
 **Tech Stack**: Expo SDK 54, React Native 0.81, TypeScript, Redux Toolkit, Jotai, Emotion, SQLite
 
+## Documentation Reference
+
+For detailed documentation, see the `docs/` folder:
+
+| Document | Description |
+|----------|-------------|
+| [docs/index.md](docs/index.md) | Main documentation index |
+| [docs/architecture.md](docs/architecture.md) | System architecture, patterns, data flows |
+| [docs/source-tree.md](docs/source-tree.md) | Annotated directory structure |
+| [docs/dev-guide.md](docs/dev-guide.md) | Development scripts, environments, deployment |
+| [docs/data-models.md](docs/data-models.md) | TypeScript interfaces, SQLite/Firestore schemas |
+| [docs/conventions.md](docs/conventions.md) | Coding patterns, best practices, anti-patterns |
+
 ## Essential Commands
 
 ### Development

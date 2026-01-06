@@ -51,10 +51,11 @@ workflow_status:
   phase_1_planning:
     - id: "prd"
       name: "Product Requirements Document"
-      status: "required"
+      status: "_bmad-output/prd.md"
       agent: "pm"
       command: "/bmad:bmm:workflows:create-prd"
       output: "PRD focused on new features/changes"
+      completed: "2026-01-06"
 
     - id: "create-ux-design"
       name: "UX Design"
@@ -67,11 +68,11 @@ workflow_status:
   phase_2_solutioning:
     - id: "create-architecture"
       name: "Architecture"
-      status: "recommended"
+      status: "_bmad-output/architecture.md"
       agent: "architect"
       command: "/bmad:bmm:workflows:create-architecture"
       output: "Integration architecture - solution design"
-      note: "HIGHLY RECOMMENDED: Distills brownfield context into focused solution design"
+      completed: "2026-01-06"
 
     - id: "create-epics-and-stories"
       name: "Epics and Stories"
